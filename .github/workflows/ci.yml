@@ -23,10 +23,16 @@ jobs:
       run: dotnet restore backend/backend.sln
 
     - name: Build Backend
-      run: dotnet build backend/family-tree-3.sln --no-restore
+      run: dotnet build backend/backend.sln --no-restore
 
     - name: Test Backend
-      run: dotnet test backend/backend.sln --no-build --verbosity normal
+      run: dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutput=./tests/coverage/backend/ /p:CoverletOutputFormat=lcov /p:Threshold=80 --no-build --verbosity normal
+
+    - name: Upload backend coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-coverage
+        path: tests/coverage/backend/
 
     - name: Lint Backend
       run: dotnet format backend/ --verify-no-changes --include-generated
