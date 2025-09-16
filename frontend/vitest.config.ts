@@ -21,9 +21,7 @@ export default mergeConfig(
           lines: 80
         }
       },
-      css: {
-        transform: true
-      }
+      setupFiles: ['./vitest.setup.ts']
     },
   }),
 )
