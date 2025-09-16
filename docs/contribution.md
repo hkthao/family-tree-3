@@ -15,7 +15,13 @@
 7. Merge.
 
 ## 3. Code Review Checklist
-- Code có dễ hiểu?
-- Có tuân thủ convention?
-- Có test case đi kèm?
-- Có tối ưu performance?
+- Code có dễ hiểu, dễ đọc không?
+- Có tuân thủ các quy tắc đặt tên và định dạng code không?
+- Logic nghiệp vụ có chính xác không?
+- Có đủ unit tests cho các thay đổi không?
+- Test coverage đạt ngưỡng yêu cầu (>=80%).
+- Code đã pass linting.
+- Có xử lý lỗi đầy đủ không?
+- Có bất kỳ vấn đề bảo mật tiềm ẩn nào không?
+- Hiệu suất có bị ảnh hưởng không?
+- Tài liệu có được cập nhật tương ứng không?
