@@ -23,7 +23,7 @@ jobs:
       run: dotnet restore backend/backend.sln
 
     - name: Build Backend
-      run: dotnet build backend/family-tree-3.sln --no-restore
+      run: dotnet build backend/backend.sln --no-restore
 
     - name: Test Backend
       run: dotnet test backend/backend.sln --no-build --verbosity normal
