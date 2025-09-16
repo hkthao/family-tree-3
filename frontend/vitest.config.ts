@@ -20,6 +20,9 @@ export default mergeConfig(
           functions: 80,
           lines: 80
         }
+      },
+      css: {
+        transform: true
       }
     },
   }),
