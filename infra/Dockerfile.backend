@@ -13,7 +13,7 @@ COPY backend/src/Application/*.csproj ./src/Application/
 COPY backend/src/Domain/*.csproj ./src/Domain/
 COPY backend/src/Infrastructure/*.csproj ./src/Infrastructure/
 
-RUN dotnet restore "*.sln"
+RUN ls -la && dotnet restore backend.sln --verbosity detailed
 
 # Copy everything else and build
 COPY backend/src/ ./src/
