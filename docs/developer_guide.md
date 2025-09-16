@@ -97,3 +97,26 @@ Pipeline được cấu hình tại `.github/workflows/ci.yml`. Các bước ch�
 - Build và Test frontend (với coverage check).
 - Lint code (backend và frontend).
 - Build và Push Docker images lên Docker Hub.
+
+## 10. Logging và Xử lý lỗi (Logging and Error Handling)
+- **Logging**: Hệ thống sử dụng Serilog để ghi log.
+  - **TODO**: Hướng dẫn cấu hình Serilog và các sink (ví dụ: console, file, Elasticsearch).
+- **Global Error Handling**: Middleware xử lý lỗi tập trung.
+  - **TODO**: Mô tả cách CustomExceptionHandler hoạt động và cách mở rộng.
+
+## 11. Quản lý Schema Database (Schema Versioning)
+- **Hướng dẫn**: Hiện tại, việc quản lý thay đổi schema trong MongoDB được thực hiện thủ công. Khi có thay đổi về cấu trúc document, cần cập nhật các entity tương ứng trong code và đảm bảo tính tương thích ngược.
+- **TODO**: Nghiên cứu và đề xuất một giải pháp quản lý schema tự động hoặc bán tự động cho MongoDB trong tương lai (ví dụ: sử dụng các thư viện như `migrate-mongo` hoặc xây dựng cơ chế versioning riêng).
+
+## 12. Chạy Seed Data
+Để populate database với dữ liệu mẫu, bạn có thể chạy script seed data:
+1.  Đảm bảo MongoDB đang chạy (ví dụ: thông qua `docker-compose up -d mongo`).
+2.  Mở terminal tại thư mục `infra/seeds`.
+3.  Cài đặt các dependencies cho seed script:
+    ```bash
+    npm install
+    ```
+4.  Chạy script seed data:
+    ```bash
+    npm run seed
+    ```
