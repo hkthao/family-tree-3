@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import DashboardView from '../views/DashboardView.vue'
+import DashboardView from '@/views/DashboardView.vue'
 import vuetify from '../plugins/vuetify'
 
 describe('DashboardView.vue', () => {
