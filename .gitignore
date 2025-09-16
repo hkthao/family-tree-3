@@ -429,3 +429,6 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 *.tsbuildinfo
+
+# Node.js
+node_modules/
