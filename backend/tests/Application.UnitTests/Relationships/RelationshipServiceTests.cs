@@ -19,6 +19,7 @@ public class RelationshipServiceTests
     public RelationshipServiceTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
+        _contextMock.Setup(x => x.Relationships).Returns(new Mock<IMongoCollection<Relationship>>().Object);
     }
 
     [Fact]

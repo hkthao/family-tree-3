@@ -18,6 +18,7 @@ public class MemberServiceTests
     public MemberServiceTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
+        _contextMock.Setup(x => x.Members).Returns(new Mock<IMongoCollection<Member>>().Object);
     }
 
     [Fact]
