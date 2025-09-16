@@ -25,11 +25,11 @@ jobs:
     - name: Build Backend
       run: dotnet build backend/family-tree-3.sln --no-restore
 
-    - name: Test Backend
-      run: dotnet test backend/backend.sln --no-build --verbosity normal
-
     - name: Lint Backend
       run: dotnet format backend/ --verify-no-changes --include-generated
+
+    - name: Test Backend
+      run: dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutput=./tests/coverage/backend/ /p:CoverletOutputFormat=lcov /p:Threshold=80 --no-build --verbosity normal
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -43,7 +43,7 @@ jobs:
       run: npm run lint --prefix frontend
 
     - name: Test Frontend
-      run: npm run test:unit --prefix frontend
+      run: npm run test:coverage --prefix frontend
 
   docker-build-and-push:
     needs: build-and-test
