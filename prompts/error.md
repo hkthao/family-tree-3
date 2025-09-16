@@ -1,20 +1,35 @@
-Run npm run test:coverage --prefix frontend
-> frontend@0.0.0 test:coverage
-> vitest run --coverage --coverage.threshold.statements=80 --coverage.threshold.branches=80 --coverage.threshold.functions=80 --coverage.threshold.lines=80
-node:internal/modules/esm/resolve:283
-    throw new ERR_MODULE_NOT_FOUND(
-          ^
-Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/home/runner/work/family-tree-3/family-tree-3/frontend/node_modules/vitest/dist/cli.js' imported from /home/runner/work/family-tree-3/family-tree-3/frontend/node_modules/vitest/vitest.mjs
-    at finalizeResolution (node:internal/modules/esm/resolve:283:11)
-    at moduleResolve (node:internal/modules/esm/resolve:952:10)
-    at defaultResolve (node:internal/modules/esm/resolve:1188:11)
-    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:708:12)
-    at #cachedDefaultResolve (node:internal/modules/esm/loader:657:25)
-    at ModuleLoader.resolve (node:internal/modules/esm/loader:640:38)
-    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:264:38)
-    at ModuleJob._link (node:internal/modules/esm/module_job:168:49) {
-  code: 'ERR_MODULE_NOT_FOUND',
-  url: 'file:///home/runner/work/family-tree-3/family-tree-3/frontend/node_modules/vitest/dist/cli.js'
-}
-Node.js v20.19.5
-Error: Process completed with exit code 1.
+ npm run lint --prefix frontend
+
+> frontend@0.0.0 lint
+> eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path ../.gitignore
+
+=============
+
+WARNING: You are currently running a version of TypeScript which is not officially supported by @typescript-eslint/typescript-estree.
+
+You may find that it works just fine, or you may not.
+
+SUPPORTED TYPESCRIPT VERSIONS: >=4.7.4 <5.6.0
+
+YOUR TYPESCRIPT VERSION: 5.8.3
+
+Please only submit bug reports when using the officially supported version.
+
+=============
+
+/Users/kimthaohuynh/Documents/Projects/family-tree-3/frontend/vite.config.ts
+   1:46  error  Missing semicolon  semi
+   3:36  error  Missing semicolon  semi
+   4:37  error  Missing semicolon  semi
+   5:51  error  Missing semicolon  semi
+   6:42  error  Missing semicolon  semi
+  20:3   error  Missing semicolon  semi
+
+/Users/kimthaohuynh/Documents/Projects/family-tree-3/frontend/vitest.config.ts
+   1:41  error  Missing semicolon  semi
+   2:74  error  Missing semicolon  semi
+   3:39  error  Missing semicolon  semi
+  31:2   error  Missing semicolon  semi
+
+✖ 10 problems (10 errors, 0 warnings)
+  10 errors and 0 warnings potentially fixable with the `--fix` option.
