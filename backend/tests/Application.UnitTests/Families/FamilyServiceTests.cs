@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using backend.Domain.Entities;
 using FluentAssertions;
+using MongoDB.Driver;
 
 namespace backend.tests.Application.UnitTests.Families;
 

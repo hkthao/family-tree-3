@@ -8,6 +8,7 @@ using backend.Domain.Entities;
 using FluentAssertions;
 using backend.Application.Common.Exceptions;
 using FluentValidation;
+using MongoDB.Driver;
 
 namespace backend.tests.Application.UnitTests.Members;
 
