@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: family-tree-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.backend
+    container_name: family-tree-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Add other environment variables like connection strings
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ../
+      dockerfile: infra/Dockerfile.frontend
+    container_name: family-tree-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:

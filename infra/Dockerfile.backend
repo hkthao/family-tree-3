@@ -1,0 +1,27 @@
+# infra/Dockerfile.backend
+
+# This is a placeholder Dockerfile.
+# You need to replace .csproj file names after creating the backend project.
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /source
+
+# Copy csproj and restore as distinct layers
+COPY backend/*.sln .
+COPY backend/src/Api/*.csproj ./src/Api/
+COPY backend/src/Application/*.csproj ./src/Application/
+COPY backend/src/Domain/*.csproj ./src/Domain/
+COPY backend/src/Infrastructure/*.csproj ./src/Infrastructure/
+
+RUN dotnet restore "*.sln"
+
+# Copy everything else and build
+COPY backend/src/ ./src/
+WORKDIR /source/src/Api
+RUN dotnet publish -c release -o /app --no-restore
+
+# Final stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app .
+ENTRYPOINT ["dotnet", "Api.dll"] # Replace Api.dll with your actual assembly name

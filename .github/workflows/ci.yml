@@ -1,0 +1,45 @@
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore Backend Dependencies
+      run: dotnet restore backend/family-tree-3.sln
+
+    - name: Build Backend
+      run: dotnet build backend/family-tree-3.sln --no-restore
+
+    - name: Test Backend
+      run: dotnet test backend/family-tree-3.sln --no-build --verbosity normal
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install Frontend Dependencies
+      run: npm install --prefix frontend
+
+    - name: Lint Frontend
+      run: npm run lint --prefix frontend
+
+    - name: Test Frontend
+      run: npm run test:unit --prefix frontend
+
+  # Add job for Docker build and push here
