@@ -1,19 +1,10 @@
 ﻿using System.Reflection;
+using Microsoft.AspNetCore.Routing;
 
 namespace backend.Web.Infrastructure;
 
 public static class WebApplicationExtensions
 {
-    private static RouteGroupBuilder MapGroup(this WebApplication app, EndpointGroupBase group)
-    {
-        var groupName = group.GroupName ?? group.GetType().Name;
-
-        return app
-            .MapGroup($"/api/{groupName}")
-            .WithGroupName(groupName)
-            .WithTags(groupName);
-    }
-
     public static WebApplication MapEndpoints(this WebApplication app)
     {
         var endpointGroupType = typeof(EndpointGroupBase);
@@ -27,7 +18,12 @@ public static class WebApplicationExtensions
         {
             if (Activator.CreateInstance(type) is EndpointGroupBase instance)
             {
-                instance.Map(app.MapGroup(instance));
+                var groupName = instance.GroupName ?? instance.GetType().Name;
+                var group = app.MapGroup($"/api/{groupName}")
+                               .WithGroupName(groupName)
+                               .WithTags(groupName);
+
+                instance.Map(group);
             }
         }
 
