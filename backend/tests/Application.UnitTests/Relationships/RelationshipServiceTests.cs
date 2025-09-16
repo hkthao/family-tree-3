@@ -9,6 +9,7 @@ using FluentAssertions;
 using backend.Domain.Enums;
 using backend.Application.Common.Exceptions;
 using FluentValidation;
+using MongoDB.Driver;
 
 namespace backend.tests.Application.UnitTests.Relationships;
 
