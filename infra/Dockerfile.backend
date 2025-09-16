@@ -12,6 +12,9 @@ COPY backend/src/Web/*.csproj ./src/Web/
 COPY backend/src/Application/*.csproj ./src/Application/
 COPY backend/src/Domain/*.csproj ./src/Domain/
 COPY backend/src/Infrastructure/*.csproj ./src/Infrastructure/
+COPY backend/tests/Application.UnitTests/Application.UnitTests.csproj ./tests/Application.UnitTests/
+COPY backend/tests/Domain.UnitTests/Domain.UnitTests.csproj ./tests/Domain.UnitTests/
+COPY backend/tests/Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj ./tests/Infrastructure.IntegrationTests/
 
 RUN ls -la && dotnet restore backend.sln --verbosity detailed
 
