@@ -16,6 +16,7 @@ public class FamilyServiceTests
     public FamilyServiceTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
+        _contextMock.Setup(x => x.Families).Returns(new Mock<IMongoCollection<Family>>().Object);
     }
 
     [Fact]
