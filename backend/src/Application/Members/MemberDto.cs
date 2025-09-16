@@ -1,10 +1,16 @@
-
+using AutoMapper;
+using backend.Application.Common.Mappings;
+using backend.Domain.Entities;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
-namespace backend.Domain.Entities;
+namespace backend.Application.Members;
 
-public class Member : BaseAuditableEntity
+public class MemberDto : IMapFrom<Member>
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
     public string? FullName { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
@@ -13,7 +19,6 @@ public class Member : BaseAuditableEntity
     public string? Email { get; set; }
     public int Generation { get; set; }
     public int DisplayOrder { get; set; }
-    public ObjectId FamilyId { get; set; }
-    public Family Family { get; set; } = null!;
+    public string? FamilyId { get; set; } // Changed to string for ObjectId
     public string? Description { get; set; }
 }

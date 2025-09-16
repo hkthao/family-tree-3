@@ -20,13 +20,16 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore Backend Dependencies
-      run: dotnet restore backend/family-tree-3.sln
+      run: dotnet restore backend/backend.sln
 
     - name: Build Backend
       run: dotnet build backend/family-tree-3.sln --no-restore
 
     - name: Test Backend
-      run: dotnet test backend/family-tree-3.sln --no-build --verbosity normal
+      run: dotnet test backend/backend.sln --no-build --verbosity normal
+
+    - name: Lint Backend
+      run: dotnet format backend/ --verify-no-changes --include-generated
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
@@ -42,4 +45,33 @@ jobs:
     - name: Test Frontend
       run: npm run test:unit --prefix frontend
 
-  # Add job for Docker build and push here
+  docker-build-and-push:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Build and push backend Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: infra/Dockerfile.backend
+        push: true
+        tags: your-dockerhub-username/family-tree-backend:latest
+
+    - name: Build and push frontend Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: infra/Dockerfile.frontend
+        push: true
+        tags: your-dockerhub-username/family-tree-frontend:latest
