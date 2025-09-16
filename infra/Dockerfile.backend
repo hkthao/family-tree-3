@@ -8,7 +8,7 @@ WORKDIR /source
 
 # Copy csproj and restore as distinct layers
 COPY backend/*.sln .
-COPY backend/src/Api/*.csproj ./src/Api/
+COPY backend/src/Web/*.csproj ./src/Web/
 COPY backend/src/Application/*.csproj ./src/Application/
 COPY backend/src/Domain/*.csproj ./src/Domain/
 COPY backend/src/Infrastructure/*.csproj ./src/Infrastructure/
