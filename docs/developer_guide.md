@@ -17,6 +17,7 @@ Dự án được cấu hình để chạy toàn bộ stack (backend API, fronte
     ```bash
     docker-compose -f infra/docker-compose.yml up --build -d
     ```
+    *Lưu ý về Dockerfile Backend:* Nếu bạn gặp lỗi `lstat /backend/src/Api: no such file or directory` khi build Docker image cho backend, hãy kiểm tra `infra/Dockerfile.backend`. Tệp này đã được cập nhật để sử dụng đường dẫn dự án `Web` thay vì `Api` (ví dụ: `COPY backend/src/Web/*.csproj ./src/Web/`, `WORKDIR /source/src/Web`, `ENTRYPOINT ["dotnet", "Web.dll"]`). Đảm bảo rằng các đường dẫn trong Dockerfile khớp với cấu trúc thư mục dự án thực tế của bạn.
     - `--build`: Buộc Docker Compose build lại các image từ Dockerfile (hữu ích khi có thay đổi code).
     - `-d`: Chạy các dịch vụ ở chế độ nền (detached mode).
 4.  **Truy cập ứng dụng**:
@@ -70,6 +71,7 @@ npm run lint --prefix frontend
 # Tự động định dạng code
 npm run lint:fix --prefix frontend
 ```
+- **Lưu ý về TypeScript:** Dự án sử dụng TypeScript phiên bản `~5.5.0` để đảm bảo tương thích với các công cụ linting. Nếu bạn gặp lỗi liên quan đến phiên bản TypeScript không được hỗ trợ, hãy đảm bảo phiên bản TypeScript của bạn nằm trong khoảng `>=4.7.4 <5.6.0`.
 
 ## 7. Quy trình Pull Request (PR Checklist)
 Khi tạo Pull Request, hãy đảm bảo các điểm sau:

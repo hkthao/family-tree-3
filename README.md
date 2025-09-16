@@ -51,10 +51,26 @@ Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình
    ```bash
    docker-compose up -d
    ```
+   *Lưu ý về Dockerfile Backend:* Nếu bạn gặp lỗi `lstat /backend/src/Api: no such file or directory` khi build Docker image cho backend, hãy kiểm tra `infra/Dockerfile.backend`. Tệp này đã được cập nhật để sử dụng đường dẫn dự án `Web` thay vì `Api` (ví dụ: `COPY backend/src/Web/*.csproj ./src/Web/`, `WORKDIR /source/src/Web`, `ENTRYPOINT ["dotnet", "Web.dll"]`). Đảm bảo rằng các đường dẫn trong Dockerfile khớp với cấu trúc thư mục dự án thực tế của bạn.
 
 4. **Truy cập ứng dụng:**
    - **Frontend:** [http://localhost](http://localhost)
    - **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+
+## 🛠️ Hướng dẫn phát triển (Development Guide)
+
+### Cấu hình Linting Frontend
+
+Để đảm bảo chất lượng mã nguồn frontend, dự án sử dụng ESLint.
+- Lệnh `lint` sẽ kiểm tra lỗi mà không tự động sửa:
+  ```bash
+  npm run lint --prefix frontend
+  ```
+- Lệnh `lint:fix` sẽ tự động sửa các lỗi có thể sửa được:
+  ```bash
+  npm run lint:fix --prefix frontend
+  ```
+- **Lưu ý về TypeScript:** Dự án sử dụng TypeScript phiên bản `~5.5.0` để đảm bảo tương thích với các công cụ linting. Nếu bạn gặp lỗi liên quan đến phiên bản TypeScript không được hỗ trợ, hãy đảm bảo phiên bản TypeScript của bạn nằm trong khoảng `>=4.7.4 <5.6.0`.
 
 ## 🤝 Đóng Góp (Contributing)
 
