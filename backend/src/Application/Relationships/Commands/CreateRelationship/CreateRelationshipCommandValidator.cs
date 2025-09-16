@@ -10,5 +10,8 @@ public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelati
             .NotEmpty();
         RuleFor(v => v.TargetId)
             .NotEmpty();
+        RuleFor(v => v.MemberId)
+            .NotEqual(v => v.TargetId)
+            .WithMessage("MemberId and TargetId cannot be the same.");
     }
 }
