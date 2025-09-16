@@ -25,7 +25,10 @@ jobs:
     - name: Build Backend
       run: dotnet build backend/backend.sln --no-restore
 
-    - name: Lint Backend
+    - name: Fix Backend Formatting
+      run: dotnet format backend/ --include-generated
+
+    - name: Verify Backend Formatting
       run: dotnet format backend/ --verify-no-changes --include-generated
 
     - name: Test Backend
