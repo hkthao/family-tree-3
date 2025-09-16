@@ -1,0 +1,29 @@
+# Sample Product Backlog
+
+user_stories:
+  - story: "Quản lý Dòng họ"
+    role: "Người quản trị"
+    feature: "tạo, xem, sửa, xóa thông tin một dòng họ"
+    benefit: "quản lý tập trung các gia đình khác nhau"
+    acceptance_criteria:
+      - "Given tôi đang ở trang quản lý dòng họ"
+      - "When tôi nhấn nút 'Tạo mới' và nhập đầy đủ thông tin"
+      - "Then một dòng họ mới được tạo ra và hiển thị trong danh sách"
+
+  - story: "Quản lý Thành viên"
+    role: "Người quản trị"
+    feature: "thêm, sửa, xóa một thành viên trong gia đình"
+    benefit: "dữ liệu gia phả luôn được cập nhật"
+    acceptance_criteria:
+      - "Given tôi đang xem chi tiết một dòng họ"
+      - "When tôi thêm một thành viên mới với các thông tin hợp lệ"
+      - "Then thành viên đó được thêm vào gia đình và hiển thị trên cây gia phả"
+
+  - story: "Xem Cây Gia Phả"
+    role: "Thành viên gia đình"
+    feature: "xem cây gia phả trực quan của gia đình mình"
+    benefit: "hiểu rõ các mối quan hệ và thứ bậc"
+    acceptance_criteria:
+      - "Given tôi đã đăng nhập và chọn gia đình của mình"
+      - "When tôi vào trang 'Cây Gia Phả'"
+      - "Then cây gia phả được hiển thị với các thành viên và mối quan hệ"
