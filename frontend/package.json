@@ -14,8 +14,9 @@
     "test:coverage": "vitest run --coverage --coverage.threshold.statements=80 --coverage.threshold.branches=80 --coverage.threshold.functions=80 --coverage.threshold.lines=80",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
-    "lint": "npx eslint --ext .js,.ts,.vue src",
-    "lint:fix": "eslint --fix --ext .js,.ts,.vue src"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path ../.gitignore",
+    "lint:fix": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path ../.gitignore"
+
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -40,7 +41,7 @@
     "jsdom": "^26.1.0",
     "npm-run-all2": "^8.0.4",
     "prettier": "^3.3.3",
-    "typescript": "~5.8.0",
+    "typescript": "~5.5.0",
     "vite": "^7.0.6",
     "vite-plugin-vue-devtools": "^8.0.0",
     "vite-plugin-vuetify": "^2.1.2",
