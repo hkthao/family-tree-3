@@ -1,4 +1,4 @@
-﻿using Azure.Identity;
+﻿
 using backend.Application.Common.Interfaces;
 using backend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -54,14 +54,4 @@ public static class DependencyInjection
         builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>(); // Added this line
     }
 
-    public static void AddKeyVaultIfConfigured(this IHostApplicationBuilder builder)
-    {
-        var keyVaultUri = builder.Configuration["AZURE_KEY_VAULT_ENDPOINT"];
-        if (!string.IsNullOrWhiteSpace(keyVaultUri))
-        {
-            builder.Configuration.AddAzureKeyVault(
-                new Uri(keyVaultUri),
-                new DefaultAzureCredential());
-        }
-    }
 }

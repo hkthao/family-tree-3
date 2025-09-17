@@ -9,6 +9,7 @@ using FluentAssertions;
 using backend.Domain.Enums;
 using backend.Application.Common.Exceptions;
 using FluentValidation;
+using MongoDB.Driver;
 
 namespace backend.tests.Application.UnitTests.Relationships;
 
@@ -19,6 +20,7 @@ public class RelationshipServiceTests
     public RelationshipServiceTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
+        _contextMock.Setup(x => x.Relationships).Returns(new Mock<IMongoCollection<Relationship>>().Object);
     }
 
     [Fact]

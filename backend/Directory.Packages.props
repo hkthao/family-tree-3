@@ -29,11 +29,13 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="$(MicrosoftExtensionsVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="$(MicrosoftExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Moq" Version="4.20.70" />
     <PackageVersion Include="xunit" Version="2.5.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="FluentAssertions" Version="7.0.0" />
     <PackageVersion Include="nunit" Version="3.14.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="3.10.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="4.5.0" />
@@ -44,6 +46,8 @@
     <PackageVersion Include="MongoDB.Driver" Version="2.25.0" />
     <PackageVersion Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
     <PackageVersion Include="MongoDB.Bson" Version="2.25.0" />
+    <PackageVersion Include="AWSSDK.SecurityToken" Version="3.7.100.14" />
+    <PackageVersion Include="Testcontainers.MongoDB" Version="3.6.0" />
 
 
     

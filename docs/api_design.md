@@ -1,58 +1,72 @@
-# Thiết Kế API (API Design)
+# Tài liệu Thiết kế API (API Design)
 
-API được thiết kế theo chuẩn RESTful. Chi tiết sẽ được cập nhật qua Swagger/OpenAPI.
+Tài liệu này mô tả các endpoint của Backend API, bao gồm định dạng request, response và các quy ước chung.
 
-## 1. Authentication & Authorization
-- `POST /api/auth/login`: Đăng nhập, trả về JWT Token.
-- Các API khác yêu cầu JWT Token trong header `Authorization: Bearer <token>`.
-- Phân quyền dựa trên vai trò (Admin, Member, Guest).
+## 1. Tổng quan
 
-## 2. API Endpoints
+-   **Base URL:** `/api`
+-   **Authentication:** Sử dụng JWT Bearer Token trong header `Authorization`.
+-   **Định dạng:** JSON
+-   **Swagger UI:** Giao diện tài liệu API tương tác có tại `http://localhost:8080/swagger`.
 
-### 2.1. Quản lý Dòng họ (Families)
-- `GET /api/families`: Lấy danh sách tất cả dòng họ.
-  - Response: `200 OK`, `List<FamilyDto>`
-- `GET /api/families/{id}`: Lấy chi tiết một dòng họ theo ID.
-  - Response: `200 OK`, `FamilyDto` hoặc `404 Not Found`
-- `POST /api/families`: Tạo dòng họ mới.
-  - Request: `CreateFamilyCommand`
-  - Response: `201 Created`, `string` (ID của dòng họ mới)
-- `PUT /api/families/{id}`: Cập nhật thông tin dòng họ.
-  - Request: `UpdateFamilyCommand`
-  - Response: `204 No Content` hoặc `404 Not Found`
-- `DELETE /api/families/{id}`: Xóa một dòng họ.
-  - Response: `204 No Content` hoặc `404 Not Found`
+## 2. Các Endpoint chính
 
-### 2.2. Quản lý Thành viên (Members)
-- `GET /api/members`: Lấy danh sách tất cả thành viên (có thể hỗ trợ filter, search).
-  - Response: `200 OK`, `List<MemberDto>`
-- `GET /api/members/{id}`: Lấy chi tiết một thành viên theo ID.
-  - Response: `200 OK`, `MemberDto` hoặc `404 Not Found`
-- `POST /api/members`: Thêm thành viên mới.
-  - Request: `CreateMemberCommand`
-  - Response: `201 Created`, `string` (ID của thành viên mới)
-- `PUT /api/members/{id}`: Cập nhật thông tin thành viên.
-  - Request: `UpdateMemberCommand`
-  - Response: `204 No Content` hoặc `404 Not Found`
-- `DELETE /api/members/{id}`: Xóa một thành viên.
-  - Response: `204 No Content` hoặc `404 Not Found`
+### a. Quản lý Dòng họ (`/api/families`)
 
-### 2.3. Quản lý Quan hệ (Relationships)
-- `POST /api/relationships`: Tạo quan hệ mới.
-  - Request: `CreateRelationshipCommand`
-  - Response: `201 Created`, `string` (ID của quan hệ mới)
-- `DELETE /api/relationships/{id}`: Xóa một quan hệ.
-  - Response: `204 No Content` hoặc `404 Not Found`
+-   `GET /`: Lấy danh sách tất cả dòng họ.
+-   `GET /{id}`: Lấy thông tin chi tiết một dòng họ.
+-   `POST /`: Tạo một dòng họ mới.
+-   `PUT /{id}`: Cập nhật thông tin một dòng họ.
+-   `DELETE /{id}`: Xóa một dòng họ.
 
-### 2.4. Cây Gia Phả (Family Tree)
-- `GET /api/familytree/{familyId}`: Lấy dữ liệu cây gia phả dạng JSON.
-  - Response: `200 OK`, `FamilyTreeDto`
-- `GET /api/familytree/{familyId}/pdf`: Xuất cây gia phả dạng PDF.
-  - Response: `200 OK`, `application/pdf` (file PDF)
-  - **TODO**: Server-side PDF generation. Hiện tại trả về dummy content. Cần tích hợp thư viện như QuestPDF hoặc iTextSharp.
+### b. Quản lý Thành viên (`/api/members`)
 
-## 3. OpenAPI/Swagger UI
-Truy cập Swagger UI tại: `http://localhost:8080/swagger`
+-   `GET /`: Lấy danh sách thành viên (hỗ trợ phân trang, lọc theo `familyId`).
+-   `GET /{id}`: Lấy thông tin chi tiết một thành viên.
+-   `POST /`: Tạo một thành viên mới.
+-   `PUT /{id}`: Cập nhật thông tin một thành viên.
+-   `DELETE /{id}`: Xóa một thành viên.
 
-## 4. Postman/Insomnia Collection
-**TODO**: Tạo và cung cấp file Postman/Insomnia collection mẫu để dễ dàng kiểm thử các API.
+### c. Quản lý Quan hệ (`/api/relationships`)
+
+-   `POST /`: Tạo một mối quan hệ mới giữa hai thành viên.
+-   `DELETE /{id}`: Xóa một mối quan hệ.
+
+### d. Cây Gia Phả (`/api/family-trees`)
+
+-   `GET /{familyId}`: Lấy dữ liệu cây gia phả của một dòng họ dưới dạng JSON để frontend vẽ.
+
+## 3. Ví dụ chi tiết
+
+### Tạo thành viên mới
+
+**Request:** `POST /api/members`
+
+```json
+{
+  "familyId": "60c72b2f9b1d8c001f8e4a3c",
+  "fullName": "Nguyễn Văn A",
+  "gender": "Male",
+  "dateOfBirth": "1990-01-15T00:00:00Z",
+  "placeOfBirth": "Hà Nội",
+  "biography": "Tiểu sử về cuộc đời và sự nghiệp..."
+}
+```
+
+**Response:** `201 Created`
+
+```json
+{
+  "id": "60c72b3a9b1d8c001f8e4a3d",
+  "familyId": "60c72b2f9b1d8c001f8e4a3c",
+  "fullName": "Nguyễn Văn A",
+  "gender": "Male",
+  "dateOfBirth": "1990-01-15T00:00:00Z",
+  "placeOfBirth": "Hà Nội",
+  "biography": "Tiểu sử về cuộc đời và sự nghiệp..."
+}
+```
+
+---
+
+*Lưu ý: Đây là thiết kế ban đầu, các DTOs và endpoint có thể được điều chỉnh trong quá trình phát triển.*

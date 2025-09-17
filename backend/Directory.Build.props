@@ -7,6 +7,16 @@
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutput>$(ArtifactsPath)/coverage/</CoverletOutput>
+    <CoverletOutputFormat>json</CoverletOutputFormat>
+    <Threshold>80</Threshold>
+    <ThresholdType>line</ThresholdType>
+    <ThresholdStat>total</ThresholdStat>
+    <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure;backend.Web</CoverletInclude>
+    <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure;backend.Web</CoverletInclude>
   </PropertyGroup>
   <!-- To use dotnet ef without 'msbuildprojectextensionspath' - fixed in .NET 10 -->
   <Import Condition="Exists('$(MSBuildProjectDirectory)\obj\$(MSBuildProjectFile).EntityFrameworkCore.targets')"
