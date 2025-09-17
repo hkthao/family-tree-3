@@ -1,4 +1,4 @@
-﻿namespace FamilyTree.Application.Families.Commands.CreateFamily;
+﻿namespace backend.Application.Families.Commands.CreateFamily;
 
 public record CreateFamilyCommand : IRequest<string>
 {
@@ -6,5 +6,5 @@ public record CreateFamilyCommand : IRequest<string>
 
     public string? Description { get; init; }
 
-    public string? Address { get; init; }
+    public string? AvatarUrl { get; init; }
 }

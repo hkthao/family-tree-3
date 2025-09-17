@@ -39,13 +39,14 @@ public class MemberDtoTests : IDisposable
             FullName = "John Doe",
             DateOfBirth = new DateTime(1990, 1, 1),
             DateOfDeath = null,
-            Status = "Active",
+            PlaceOfBirth = "New York",
+            Gender = "Male",
+            AvatarUrl = "http://example.com/avatar.jpg",
             Phone = "123-456-7890",
             Email = "john.doe@example.com",
             Generation = 1,
-            DisplayOrder = 1,
-            FamilyId = ObjectId.GenerateNewId(), // Assuming ObjectId for FamilyId
-            Description = "Some description"
+            Biography = "Some biography",
+            Metadata = new { Key = "Value" }
         };
 
         var memberDto = _mapper.Map<MemberDto>(member);
@@ -55,13 +56,13 @@ public class MemberDtoTests : IDisposable
         memberDto.FullName.Should().Be(member.FullName);
         memberDto.DateOfBirth.Should().Be(member.DateOfBirth);
         memberDto.DateOfDeath.Should().Be(member.DateOfDeath);
-        memberDto.Status.Should().Be(member.Status);
+        memberDto.Gender.Should().Be(member.Gender);
         memberDto.Phone.Should().Be(member.Phone);
-        memberDto.Email.Should().Be(member.Email);
+        memberDto.PlaceOfBirth.Should().Be(member.PlaceOfBirth);
         memberDto.Generation.Should().Be(member.Generation);
-        memberDto.DisplayOrder.Should().Be(member.DisplayOrder);
-        memberDto.FamilyId.Should().Be(member.FamilyId.ToString());
-        memberDto.Description.Should().Be(member.Description);
+        memberDto.AvatarUrl.Should().Be(member.AvatarUrl);
+        memberDto.Biography.Should().Be(member.Biography);
+        memberDto.Metadata.Should().BeEquivalentTo(member.Metadata);
     }
 
     public void Dispose()

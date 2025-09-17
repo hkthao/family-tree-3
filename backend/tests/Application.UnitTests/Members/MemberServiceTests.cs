@@ -26,7 +26,7 @@ public class MemberServiceTests
     public async Task CreateMember_ShouldCreateMember_WhenRequestIsValid()
     {
         // Arrange
-        var command = new CreateMemberCommand { FullName = "Test Member", FamilyId = "60d5ec49e04a4a5c8c8b4567" };
+        var command = new CreateMemberCommand { FullName = "Test Member" };
         var handler = new CreateMemberCommandHandler(_contextMock.Object);
 
         // Act
@@ -41,7 +41,7 @@ public class MemberServiceTests
     public async Task CreateMember_ShouldThrowValidationException_WhenNameIsMissing()
     {
         // Arrange
-        var command = new CreateMemberCommand { FamilyId = "60d5ec49e04a4a5c8c8b4567" };
+        var command = new CreateMemberCommand { };
         var validator = new CreateMemberCommandValidator();
 
         // Act

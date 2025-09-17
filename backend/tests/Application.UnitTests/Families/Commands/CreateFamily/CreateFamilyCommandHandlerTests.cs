@@ -28,8 +28,7 @@ public class CreateFamilyCommandHandlerTests
         var command = new CreateFamilyCommand
         {
             Name = "Test Family",
-            Address = "123 Test St",
-            LogoUrl = "logo.png",
+            AvatarUrl = "logo.png",
             Description = "A long time ago..."
         };
 
