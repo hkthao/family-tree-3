@@ -11,24 +11,32 @@ services:
 
   backend:
     build:
-      context: ../
-      dockerfile: infra/Dockerfile.backend
+      context: ../backend
+      dockerfile: ../infra/Dockerfile.backend # Path to Dockerfile relative to the new context
+      args:
+        - MongoDbSettings__ConnectionString=${MongoDbSettings__ConnectionString}
+        - MongoDbSettings__DatabaseName=${MongoDbSettings__DatabaseName}
     container_name: family-tree-backend
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Add other environment variables like connection strings
+    env_file:
+      - ../.env
     depends_on:
       - mongo
 
   frontend:
     build:
-      context: ../
-      dockerfile: infra/Dockerfile.frontend
+      context: ../frontend
+      dockerfile: ../infra/Dockerfile.frontend # Path to Dockerfile relative to the new context
     container_name: family-tree-frontend
     ports:
       - "80:80"
+    volumes:
+      # Mount nginx.conf from infra/ relative to docker-compose.yml
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
 

@@ -1,27 +1,44 @@
-# infra/Dockerfile.backend
-
-# This is a placeholder Dockerfile.
-# You need to replace .csproj file names after creating the backend project.
-
+# Use a specific SDK version for the build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /source
-
-# Copy csproj and restore as distinct layers
-COPY backend/*.sln .
-COPY backend/src/Api/*.csproj ./src/Api/
-COPY backend/src/Application/*.csproj ./src/Application/
-COPY backend/src/Domain/*.csproj ./src/Domain/
-COPY backend/src/Infrastructure/*.csproj ./src/Infrastructure/
-
-RUN dotnet restore "*.sln"
-
-# Copy everything else and build
-COPY backend/src/ ./src/
-WORKDIR /source/src/Api
-RUN dotnet publish -c release -o /app --no-restore
-
-# Final stage
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app .
-ENTRYPOINT ["dotnet", "Api.dll"] # Replace Api.dll with your actual assembly name
+
+ARG MongoDbSettings__ConnectionString
+ARG MongoDbSettings__DatabaseName
+ENV MongoDbSettings__ConnectionString=$MongoDbSettings__ConnectionString
+ENV MongoDbSettings__DatabaseName=$MongoDbSettings__DatabaseName
+
+# Copy only the project files first to leverage Docker cache
+# This layer only changes if .csproj or .sln files change
+COPY *.sln .
+COPY Directory.Packages.props .
+COPY src/Web/*.csproj ./src/Web/
+COPY src/Application/*.csproj ./src/Application/
+COPY src/Domain/*.csproj ./src/Domain/
+COPY src/Infrastructure/*.csproj ./src/Infrastructure/
+COPY tests/Application.UnitTests/*.csproj ./tests/Application.UnitTests/
+COPY tests/Domain.UnitTests/*.csproj ./tests/Domain.UnitTests/
+COPY tests/Infrastructure.IntegrationTests/*.csproj ./tests/Infrastructure.IntegrationTests/
+
+# Restore dependencies - this layer is cached unless project files or dependencies change
+RUN dotnet restore backend.sln --verbosity minimal
+
+# Copy the rest of the source code
+# This layer changes if any source code changes
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Publish the application
+# This creates the deployable output
+WORKDIR /app/src/Web
+RUN dotnet publish -c Release -o /app/publish 
+
+# Final production stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+# Copy only the published output from the build stage
+# This keeps the final image small and clean
+COPY --from=build /app/publish .
+
+# Set the entrypoint for the application
+ENTRYPOINT ["dotnet", "backend.Web.dll"]

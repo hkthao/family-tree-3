@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using backend.Domain.Entities;
 using FluentAssertions;
+using MongoDB.Driver;
 
 namespace backend.tests.Application.UnitTests.Families;
 
@@ -16,6 +17,7 @@ public class FamilyServiceTests
     public FamilyServiceTests()
     {
         _contextMock = new Mock<IApplicationDbContext>();
+        _contextMock.Setup(x => x.Families).Returns(new Mock<IMongoCollection<Family>>().Object);
     }
 
     [Fact]

@@ -1,0 +1,11 @@
+# Exclude build artifacts and temporary files
+bin/
+obj/
+artifacts/
+# Exclude test projects if they are not needed for the main application build
+# Exclude IDE files
+.vs/
+.vscode/
+.idea/
+# Exclude logs
+*.log
