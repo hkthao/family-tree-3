@@ -34,14 +34,16 @@ Các biến môi trường quan trọng được quản lý thông qua file `app
 
 ## 5. Chạy Tests và Coverage
 ### Backend Tests
-Để chạy unit tests và kiểm tra coverage cho backend:
+Để chạy unit tests và kiểm tra coverage cho backend, sử dụng script `run-coverage.sh`:
 ```bash
-# Chạy tests và xem kết quả coverage
-dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutput=./tests/coverage/backend/ /p:CoverletOutputFormat=lcov
-
-# Để kiểm tra coverage với ngưỡng 80% (sẽ fail nếu thấp hơn)
-dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutput=./tests/coverage/backend/ /p:CoverletOutputFormat=lcov /p:Threshold=80
+./run-coverage.sh
 ```
+Script này sẽ tự động:
+- Chạy tất cả các unit tests trong solution `backend/backend.sln`.
+- Thu thập code coverage bằng Coverlet.
+- In ra tổng phần trăm coverage trên console.
+- Kiểm tra ngưỡng coverage 80% (sẽ báo lỗi nếu thấp hơn).
+
 ### Frontend Tests
 Để chạy unit/component tests và kiểm tra coverage cho frontend:
 ```bash
