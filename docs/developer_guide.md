@@ -7,7 +7,6 @@
 - **Node.js 20+**: Cho việc phát triển và build phần frontend.
 
 ## 2. Khởi tạo dự án (Scaffolding)
-Các lệnh đã được sử dụng để khởi tạo và cấu hình dự án này được ghi lại chi tiết tại file [docs/commands_log.md](./commands_log.md).
 
 ## 3. Chạy dự án local với Docker Compose
 Dự án được cấu hình để chạy toàn bộ stack (backend API, frontend, MongoDB) bằng Docker Compose.
