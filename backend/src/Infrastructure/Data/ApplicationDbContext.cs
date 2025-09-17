@@ -15,8 +15,6 @@ public class ApplicationDbContext : IApplicationDbContext
         _database = client.GetDatabase(settings.Value.DatabaseName);
     }
 
-    public IMongoCollection<TodoList> TodoLists => _database.GetCollection<TodoList>("TodoLists");
-    public IMongoCollection<TodoItem> TodoItems => _database.GetCollection<TodoItem>("TodoItems");
     public IMongoCollection<Family> Families => _database.GetCollection<Family>("Families");
     public IMongoCollection<Member> Members => _database.GetCollection<Member>("Members");
     public IMongoCollection<Relationship> Relationships => _database.GetCollection<Relationship>("Relationships");

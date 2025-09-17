@@ -19,6 +19,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       # Add other environment variables like connection strings
+    env_file:
+      - ../.env
     depends_on:
       - mongo
 
