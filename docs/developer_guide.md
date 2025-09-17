@@ -44,6 +44,9 @@ Script này sẽ tự động:
 - In ra tổng phần trăm coverage trên console.
 - Kiểm tra ngưỡng coverage 80% (sẽ báo lỗi nếu thấp hơn).
 
+#### Unit Tests Cụ Thể
+- **`ColourTests`**: Kiểm tra tính đúng đắn của Value Object `Colour`, bao gồm các phương thức khởi tạo, chuyển đổi, và so sánh. Đảm bảo rằng các giá trị màu sắc được xử lý nhất quán và chính xác.
+
 ### Frontend Tests
 Để chạy unit/component tests và kiểm tra coverage cho frontend:
 ```bash
