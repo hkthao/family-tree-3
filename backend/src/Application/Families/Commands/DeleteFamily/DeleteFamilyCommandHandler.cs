@@ -1,7 +1,6 @@
-using backend.Application.Common.Exceptions;
+﻿using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -18,12 +17,9 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand>
 
     public async Task Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Family>.Filter.Eq("_id", ObjectId.Parse(request.Id));
-        var result = await _context.Families.DeleteOneAsync(filter, cancellationToken: cancellationToken);
+        var result = await _context.Families.DeleteOneAsync(Builders<Family>.Filter.Eq(f => f.Id, request.Id), cancellationToken);
 
         if (result.DeletedCount == 0)
-        {
             throw new NotFoundException(nameof(Family), request.Id);
-        }
     }
 }

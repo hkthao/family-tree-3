@@ -127,7 +127,7 @@ Tài liệu này mô tả chi tiết các User Story được lựa chọn cho c
 
 ---
 
-### Issue 4 & 5: [Feature] Thêm & Chỉnh sửa thành viên
+### Issue 2: [Feature] Thêm & Chỉnh sửa thành viên
 
 **User Story:**
 *Là người dùng, tôi muốn thêm thành viên mới và chỉnh sửa thông tin thành viên hiện có.*
@@ -154,7 +154,7 @@ Tài liệu này mô tả chi tiết các User Story được lựa chọn cho c
 
 ---
 
-### Issue 6: [Feature] Xem chi tiết thành viên
+### Issue 3: [Feature] Xem chi tiết thành viên
 
 **User Story:**
 *Là người dùng, tôi muốn xem thông tin chi tiết của từng thành viên để có cái nhìn đầy đủ.*
@@ -179,12 +179,7 @@ Tài liệu này mô tả chi tiết các User Story được lựa chọn cho c
 
 ---
 
-## Sprint 2: Trực quan hóa & Hoàn thiện MVP
-
-*   **Mục tiêu:** Cho phép người dùng thấy được cây gia phả từ dữ liệu đã nhập và hoàn thiện các chức năng cốt lõi của MVP.
-*   **Tổng Story Points:** 13
-
-### Issue 7: [Feature] Quản lý mối quan hệ (cơ bản)
+### Issue 4: [Feature] Quản lý mối quan hệ (cơ bản)
 
 **User Story:**
 *Là người dùng, tôi muốn thiết lập các mối quan hệ (cha-mẹ, vợ-chồng) giữa các thành viên để xây dựng cấu trúc cây gia phả.*
@@ -214,7 +209,12 @@ Tài liệu này mô tả chi tiết các User Story được lựa chọn cho c
 
 ---
 
-### Issue 8: [Feature] Xem cây gia phả (một kiểu hiển thị chuẩn)
+## Sprint 2: Trực quan hóa & Hoàn thiện MVP
+
+*   **Mục tiêu:** Cho phép người dùng thấy được cây gia phả từ dữ liệu đã nhập và hoàn thiện các chức năng cốt lõi của MVP.
+*   **Tổng Story Points:** 8
+
+### Issue 1: [Feature] Xem cây gia phả (một kiểu hiển thị chuẩn)
 
 **User Story:**
 *Là người dùng, tôi muốn xem cây gia phả dưới dạng một biểu đồ trực quan để hiểu rõ cấu trúc gia đình.*

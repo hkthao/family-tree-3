@@ -10,11 +10,10 @@ Tài liệu này phác thảo định hướng phát triển cho dự án Cây G
 
 **Các Epic & Tính năng chính:**
 -   **Nền tảng & Bảo mật:**
-    -   Thiết lập môi trường, CI/CD (Sprint 0).
-    -   Đăng nhập hệ thống & Quản lý tài khoản/vai trò cơ bản (Sprint 1).
+    -   Thiết lập môi trường, CI/CD (Đã hoàn thành trong Sprint 0).
 -   **Quản lý Dữ liệu Cốt lõi:**
-    -   Tạo/Sửa/Xem Dòng họ và Thành viên (Sprint 1).
-    -   Thiết lập các mối quan hệ cơ bản: Cha-Mẹ, Vợ-Chồng (Sprint 2).
+    -   Tạo/Sửa/Xem Dòng họ và Thành viên.
+    -   Thiết lập các mối quan hệ cơ bản: Cha-Mẹ, Vợ-Chồng.
 -   **Trực quan hóa:**
     -   Hiển thị cây gia phả với một kiểu xem dọc tiêu chuẩn (Sprint 2).
     -   Tương tác cơ bản: Zoom và Pan.
@@ -29,6 +28,7 @@ Tài liệu này phác thảo định hướng phát triển cho dự án Cây G
 
 **Các Epic & Tính năng chính:**
 -   **Nhập/Xuất Dữ liệu:**
+    -   **[Trọng tâm]** Tích hợp xác thực với **Auth0**.
     -   **[Trọng tâm]** Hỗ trợ Xuất/Nhập dữ liệu theo chuẩn **GEDCOM**.
 -   **Cộng tác & Phân quyền:**
     -   Mời thành viên khác tham gia quản lý cây gia phả.
