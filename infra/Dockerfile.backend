@@ -2,6 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
+ARG MongoDbSettings__ConnectionString
+ARG MongoDbSettings__DatabaseName
+ENV MongoDbSettings__ConnectionString=$MongoDbSettings__ConnectionString
+ENV MongoDbSettings__DatabaseName=$MongoDbSettings__DatabaseName
+
 # Copy only the project files first to leverage Docker cache
 # This layer only changes if .csproj or .sln files change
 COPY *.sln .

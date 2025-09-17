@@ -13,6 +13,9 @@ services:
     build:
       context: ../backend
       dockerfile: ../infra/Dockerfile.backend # Path to Dockerfile relative to the new context
+      args:
+        - MongoDbSettings__ConnectionString=${MongoDbSettings__ConnectionString}
+        - MongoDbSettings__DatabaseName=${MongoDbSettings__DatabaseName}
     container_name: family-tree-backend
     ports:
       - "8080:8080"
