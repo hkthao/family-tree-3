@@ -104,13 +104,15 @@ Pipeline được cấu hình tại `.github/workflows/ci.yml`. Các bước ch�
 
 ## 10. Logging và Xử lý lỗi (Logging and Error Handling)
 - **Logging**: Hệ thống sử dụng Serilog để ghi log.
-  - **TODO**: Hướng dẫn cấu hình Serilog và các sink (ví dụ: console, file, Elasticsearch).
+  - Cấu hình Serilog được thực hiện trong `Program.cs`. Mặc định, log được ghi ra console với định dạng rõ ràng.
+  - Để thêm các sink khác (ví dụ: ghi ra file), bạn có thể cài đặt package `Serilog.Sinks.File` và thêm `.WriteTo.File("logs/log.txt")` vào cấu hình.
 - **Global Error Handling**: Middleware xử lý lỗi tập trung.
-  - **TODO**: Mô tả cách CustomExceptionHandler hoạt động và cách mở rộng.
+  - Một `CustomExceptionHandler` middleware đã được cấu hình để bắt tất cả các exception chưa được xử lý.
+  - Middleware này sẽ ghi lại lỗi và trả về một response JSON chuẩn hóa với mã lỗi 500, giúp frontend xử lý một cách nhất quán.
 
 ## 11. Quản lý Schema Database (Schema Versioning)
 - **Hướng dẫn**: Hiện tại, việc quản lý thay đổi schema trong MongoDB được thực hiện thủ công. Khi có thay đổi về cấu trúc document, cần cập nhật các entity tương ứng trong code và đảm bảo tính tương thích ngược.
-- **TODO**: Nghiên cứu và đề xuất một giải pháp quản lý schema tự động hoặc bán tự động cho MongoDB trong tương lai (ví dụ: sử dụng các thư viện như `migrate-mongo` hoặc xây dựng cơ chế versioning riêng).
+- **Đề xuất tương lai**: Khi dự án phát triển, có thể xem xét sử dụng các công cụ như `migrate-mongo` để tự động hóa việc áp dụng các thay đổi schema. Script cho việc này có thể được tích hợp vào CI/CD pipeline.
 
 ## 12. Chạy Seed Data
 Để populate database với dữ liệu mẫu, bạn có thể chạy script seed data:
