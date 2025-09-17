@@ -1,11 +1,12 @@
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Domain.Entities;
 
 public class Family : BaseAuditableEntity
 {
-    public string? Name { get; set; }
+    public string Name { get; set; } = null!;
     public string? Address { get; set; }
-    public string? Logo { get; set; }
-    public string? History { get; set; }
-    public IList<Member> Members { get; private set; } = new List<Member>();
+    public string? LogoUrl { get; set; }
+    public string? Description { get; set; }
 }

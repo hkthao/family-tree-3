@@ -1,8 +1,5 @@
-using AutoMapper;
-using backend.Application.Common.Interfaces;
-using backend.Application.Families;
+﻿using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
 using MongoDB.Driver;
 
 namespace backend.Application.Families.Queries.GetFamilies;

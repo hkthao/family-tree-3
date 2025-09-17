@@ -21,8 +21,6 @@ Tài liệu này tập trung vào ba nhóm đầu để định hướng phát t
 
 Đây là những tính năng cốt lõi nhất để tạo ra một Sản phẩm Khả thi Tối thiểu (MVP). Nếu thiếu bất kỳ tính năng nào trong nhóm này, sản phẩm sẽ không thể ra mắt.
 
--   **Đăng nhập hệ thống:** Cho phép người dùng truy cập và bảo mật dữ liệu.
--   **Quản lý tài khoản và vai trò (cơ bản):** Cung cấp các vai trò cơ bản (ví dụ: người dùng, quản trị viên) để phân quyền.
 -   **Tạo Dòng họ/Gia đình:** Chức năng khởi tạo không gian làm việc đầu tiên cho người dùng.
 -   **Thêm thành viên:** Chức năng cốt lõi để bắt đầu xây dựng cây gia phả.
 -   **Chỉnh sửa thành viên:** Cần thiết để người dùng sửa lỗi và cập nhật thông tin.
@@ -35,6 +33,7 @@ Tài liệu này tập trung vào ba nhóm đầu để định hướng phát t
 
 Đây là những tính năng quan trọng, giúp tăng cường đáng kể giá trị của sản phẩm và nâng cao trải nghiệm người dùng. Chúng nên được phát triển ngay sau khi MVP được phát hành và ổn định.
 
+-   **Tích hợp xác thực Auth0 (Đăng nhập, Đăng ký):** Thay thế cho chức năng đăng nhập tự xây dựng, cho phép người dùng truy cập và bảo mật dữ liệu.
 -   **Tìm kiếm thành viên:** Nhanh chóng tìm người trong cây gia phả.
 -   **Xuất/Nhập cây gia phả (GEDCOM):** Thu hút người dùng từ các nền tảng khác và cho phép họ lưu trữ dữ liệu.
 -   **Mời thành viên:** Bắt đầu cho phép tính năng cộng tác.

@@ -1,6 +1,4 @@
-using FluentValidation;
-
-namespace backend.Application.Families.Commands.UpdateFamily;
+﻿namespace backend.Application.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyCommand>
 {
