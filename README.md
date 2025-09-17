@@ -25,9 +25,9 @@ Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình
 
 ### Yêu cầu
 
-- Docker & Docker Compose
-- .NET 8 SDK (cho phát triển backend)
-- Node.js 20+ (cho phát triển frontend)
+- Docker & Docker Compose (để chạy ứng dụng)
+- .NET 8 SDK (chỉ cần cho phát triển backend)
+- Node.js 20+ (chỉ cần cho phát triển frontend)
 
 ### Cài đặt và Chạy
 
@@ -37,23 +37,21 @@ Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình
    cd family-tree-3
    ```
 
-2. **Tạo project Backend (nếu chưa có):**
-   *Lưu ý: Bước này chỉ cần làm một lần duy nhất.*
-   ```bash
-   # Cài đặt template
-   dotnet new --install JasonTaylor.CleanArchitecture
-   # Tạo project
-   dotnet new ca-sln -o backend --use-program-main
-   ```
-
 3. **Chạy ứng dụng với Docker Compose:**
-   Lệnh này sẽ build và chạy backend, frontend, và database.
+   Lệnh này sẽ build (nếu cần) và chạy backend, frontend, và database.
    ```bash
-   docker-compose up -d
+   docker-compose -f infra/docker-compose.yml up --build
    ```
-   *Lưu ý về Dockerfile Backend:* Nếu bạn gặp lỗi `lstat /backend/src/Api: no such file or directory` khi build Docker image cho backend, hãy kiểm tra `infra/Dockerfile.backend`. Tệp này đã được cập nhật để sử dụng đường dẫn dự án `Web` thay vì `Api` (ví dụ: `COPY backend/src/Web/*.csproj ./src/Web/`, `WORKDIR /source/src/Web`, `ENTRYPOINT ["dotnet", "Web.dll"]`). Đảm bảo rằng các đường dẫn trong Dockerfile khớp với cấu trúc thư mục dự án thực tế của bạn.
 
-4. **Truy cập ứng dụng:**
+### Tối ưu hóa Docker Build (Docker Build Optimization)
+
+Để tăng tốc độ build Docker, đặc biệt trên macOS, chúng tôi đã thực hiện các tối ưu hóa sau:
+
+- **Build Context Tối thiểu:** Mỗi dịch vụ (backend và frontend) giờ đây chỉ gửi thư mục mã nguồn của riêng nó làm build context cho Docker daemon. Điều này giảm đáng kể lượng dữ liệu cần truyền tải, giúp build nhanh hơn.
+- **Tệp `.dockerignore` chuyên biệt:** Mỗi thư mục `backend/` và `frontend/` hiện có một tệp `.dockerignore` riêng. Các tệp này đảm bảo rằng chỉ những tệp cần thiết mới được đưa vào build context, loại bỏ các tệp tạm thời, thư mục `node_modules`, `bin/obj`, và các tệp không liên quan khác.
+- **Tận dụng Cache hiệu quả:** Các Dockerfile được cấu trúc để tận dụng tối đa Docker cache. Các bước cài đặt dependency (`npm install`, `dotnet restore`) được đặt ở các layer riêng biệt, chỉ chạy lại khi các tệp cấu hình dependency (ví dụ: `package.json`, `*.csproj`) thay đổi. Điều này giúp tiết kiệm thời gian đáng kể cho các lần build tiếp theo.
+
+### Truy cập ứng dụng:**
    - **Frontend:** [http://localhost](http://localhost)
    - **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 

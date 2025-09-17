@@ -15,11 +15,9 @@ Dự án được cấu hình để chạy toàn bộ stack (backend API, fronte
 2.  Mở terminal tại thư mục gốc của dự án (`family-tree-3`).
 3.  Chạy lệnh sau để build và khởi động tất cả các dịch vụ:
     ```bash
-    docker-compose -f infra/docker-compose.yml up --build -d
+    docker-compose -f infra/docker-compose.yml up --build
     ```
-    *Lưu ý về Dockerfile Backend:* Nếu bạn gặp lỗi `lstat /backend/src/Api: no such file or directory` khi build Docker image cho backend, hãy kiểm tra `infra/Dockerfile.backend`. Tệp này đã được cập nhật để sử dụng đường dẫn dự án `Web` thay vì `Api` (ví dụ: `COPY backend/src/Web/*.csproj ./src/Web/`, `WORKDIR /source/src/Web`, `ENTRYPOINT ["dotnet", "Web.dll"]`). Đảm bảo rằng các đường dẫn trong Dockerfile khớp với cấu trúc thư mục dự án thực tế của bạn.
     - `--build`: Buộc Docker Compose build lại các image từ Dockerfile (hữu ích khi có thay đổi code).
-    - `-d`: Chạy các dịch vụ ở chế độ nền (detached mode).
 4.  **Truy cập ứng dụng**:
     - **Frontend**: `http://localhost`
     - **Backend API (Swagger UI)**: `http://localhost:8080/swagger`
