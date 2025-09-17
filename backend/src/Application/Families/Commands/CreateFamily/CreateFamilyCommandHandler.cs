@@ -1,9 +1,4 @@
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
-using MediatR;
-using MongoDB.Bson;
-
-namespace backend.Application.Families.Commands.CreateFamily;
+﻿namespace FamilyTree.Application.Families.Commands.CreateFamily;
 
 public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, string>
 {
@@ -18,14 +13,18 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, s
     {
         var entity = new Family
         {
-            Name = request.Name!,
-            Address = request.Address,
-            LogoUrl = request.LogoUrl,
-            Description = request.Description
+            Name = request.Name,
+            Description = request.Description,
+            Address = request.Address
         };
 
-        await _context.Families.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        // TODO: Add domain event if needed
+        // entity.AddDomainEvent(new FamilyCreatedEvent(entity));
 
-        return entity.Id.ToString();
+        _context.Families.Add(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return entity.Id;
     }
 }
