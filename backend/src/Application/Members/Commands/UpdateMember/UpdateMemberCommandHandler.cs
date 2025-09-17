@@ -35,7 +35,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 
         if (result.MatchedCount == 0)
         {
-            throw new NotFoundException(nameof(Member), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
         }
     }
 }

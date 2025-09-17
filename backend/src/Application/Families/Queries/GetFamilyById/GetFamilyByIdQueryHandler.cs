@@ -20,7 +20,7 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Fam
     public async Task<FamilyDto> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
     {
         var entity = await _context.Families.Find(Builders<Family>.Filter.Eq(f => f.Id, request.Id)).FirstOrDefaultAsync(cancellationToken)
-                     ?? throw new NotFoundException(nameof(Family), request.Id);
+                     ?? throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
 
         return _mapper.Map<FamilyDto>(entity);
     }

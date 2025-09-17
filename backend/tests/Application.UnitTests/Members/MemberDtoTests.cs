@@ -1,35 +1,41 @@
 using AutoMapper;
 using backend.Application.Members;
 using backend.Domain.Entities;
-using NUnit.Framework;
-using Shouldly;
+using Xunit;
+using FluentAssertions;
 using System;
-using System.Reflection; // Added for Assembly
+using backend.Application.Common.Mappings; 
+using MongoDB.Bson;
 
 namespace backend.Application.UnitTests.Members;
 
-public class MemberDtoTests
+public class MemberDtoTests : IDisposable
 {
-    private IMapper _mapper;
+    private readonly IMapper _mapper;
+    private readonly MapperConfiguration _configuration;
 
-    [SetUp]
-    public void Setup()
+    public MemberDtoTests()
     {
-        var configurationProvider = new MapperConfiguration(cfg =>
+        _configuration = new MapperConfiguration(cfg =>
         {
-            // Scan for IMapFrom profiles in the Application assembly
-            cfg.CreateMap<Member, MemberDto>();
+            cfg.AddMaps(typeof(backend.Application.Common.Mappings.IMapFrom<>).Assembly); // Scan the assembly for profiles
         });
 
-        _mapper = configurationProvider.CreateMapper();
+        _mapper = _configuration.CreateMapper();
     }
 
-    [Test]
-    public void Properties_ShouldBeSettableAndGettable()
+    [Fact]
+    public void ShouldHaveValidConfiguration()
     {
-        var dto = new MemberDto
+        _configuration.AssertConfigurationIsValid();
+    }
+
+    [Fact]
+    public void ShouldMapMemberToMemberDto()
+    {
+        var member = new Member
         {
-            Id = "60c72b2f9b1e8c001c8e4d0a",
+            // Update with new Member properties
             FullName = "John Doe",
             DateOfBirth = new DateTime(1990, 1, 1),
             DateOfDeath = null,
@@ -37,52 +43,29 @@ public class MemberDtoTests
             Phone = "123-456-7890",
             Email = "john.doe@example.com",
             Generation = 1,
-            DisplayOrder = 10,
-            FamilyId = "60c72b2f9b1e8c001c8e4d0b",
-            Description = "Test description"
-        };
-
-        dto.Id.ShouldBe("60c72b2f9b1e8c001c8e4d0a");
-        dto.FullName.ShouldBe("John Doe");
-        dto.DateOfBirth.ShouldBe(new DateTime(1990, 1, 1));
-        dto.DateOfDeath.ShouldBeNull();
-        dto.Status.ShouldBe("Active");
-        dto.Phone.ShouldBe("123-456-7890");
-        dto.Email.ShouldBe("john.doe@example.com");
-        dto.Generation.ShouldBe(1);
-        dto.DisplayOrder.ShouldBe(10);
-        dto.FamilyId.ShouldBe("60c72b2f9b1e8c001c8e4d0b");
-        dto.Description.ShouldBe("Test description");
-    }
-
-    [Test]
-    public void Mapping_ShouldMapMemberToMemberDto()
-    {
-        var member = new Member
-        {
-            FullName = "Jane Doe",
-            DateOfBirth = new DateTime(1992, 5, 10),
-            DateOfDeath = null,
-            Status = "Inactive",
-            Phone = "098-765-4321",
-            Email = "jane.doe@example.com",
-            Generation = 2,
-            DisplayOrder = 20,
-            FamilyId = MongoDB.Bson.ObjectId.GenerateNewId(),
-            Description = "Another test description"
+            DisplayOrder = 1,
+            FamilyId = ObjectId.GenerateNewId(), // Assuming ObjectId for FamilyId
+            Description = "Some description"
         };
 
         var memberDto = _mapper.Map<MemberDto>(member);
 
-        memberDto.FullName.ShouldBe(member.FullName);
-        memberDto.DateOfBirth.ShouldBe(member.DateOfBirth);
-        memberDto.DateOfDeath.ShouldBe(member.DateOfDeath);
-        memberDto.Status.ShouldBe(member.Status);
-        memberDto.Phone.ShouldBe(member.Phone);
-        memberDto.Email.ShouldBe(member.Email);
-        memberDto.Generation.ShouldBe(member.Generation);
-        memberDto.DisplayOrder.ShouldBe(member.DisplayOrder);
-        memberDto.FamilyId.ShouldBe(member.FamilyId.ToString());
-        memberDto.Description.ShouldBe(member.Description);
+        memberDto.Should().NotBeNull();
+        memberDto.Id.Should().Be(member.Id);
+        memberDto.FullName.Should().Be(member.FullName);
+        memberDto.DateOfBirth.Should().Be(member.DateOfBirth);
+        memberDto.DateOfDeath.Should().Be(member.DateOfDeath);
+        memberDto.Status.Should().Be(member.Status);
+        memberDto.Phone.Should().Be(member.Phone);
+        memberDto.Email.Should().Be(member.Email);
+        memberDto.Generation.Should().Be(member.Generation);
+        memberDto.DisplayOrder.Should().Be(member.DisplayOrder);
+        memberDto.FamilyId.Should().Be(member.FamilyId.ToString());
+        memberDto.Description.Should().Be(member.Description);
+    }
+
+    public void Dispose()
+    {
+        // Clean up resources if needed
     }
 }

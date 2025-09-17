@@ -20,6 +20,6 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand>
         var result = await _context.Families.DeleteOneAsync(Builders<Family>.Filter.Eq(f => f.Id, request.Id), cancellationToken);
 
         if (result.DeletedCount == 0)
-            throw new NotFoundException(nameof(Family), request.Id);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
     }
 }

@@ -1,49 +1,50 @@
-﻿using backend.Domain.Exceptions;
+using backend.Domain.Exceptions;
 using backend.Domain.ValueObjects;
-using NUnit.Framework;
-using Shouldly;
+using Xunit;
+using FluentAssertions;
 
 namespace backend.Domain.UnitTests.ValueObjects;
 
 public class ColourTests
 {
-    [Test]
+    [Fact]
     public void ShouldReturnCorrectColourCode()
     {
         var code = "#FFFFFF";
 
         var colour = Colour.From(code);
 
-        colour.Code.ShouldBe(code);
+        colour.Code.Should().Be(code);
     }
 
-    [Test]
+    [Fact]
     public void ToStringReturnsCode()
     {
         var colour = Colour.White;
 
-        colour.ToString().ShouldBe(colour.Code);
+        colour.ToString().Should().Be(colour.Code);
     }
 
-    [Test]
+    [Fact]
     public void ShouldPerformImplicitConversionToColourCodeString()
     {
         string code = Colour.White;
 
-        code.ShouldBe("#FFFFFF");
+        code.Should().Be("#FFFFFF");
     }
 
-    [Test]
+    [Fact]
     public void ShouldPerformExplicitConversionGivenSupportedColourCode()
     {
         var colour = (Colour)"#FFFFFF";
 
-        colour.ShouldBe(Colour.White);
+        colour.Should().Be(Colour.White);
     }
 
-    [Test]
+    [Fact]
     public void ShouldThrowUnsupportedColourExceptionGivenNotSupportedColourCode()
     {
-        Should.Throw<UnsupportedColourException>(() => Colour.From("##FF33CC"));
+        FluentActions.Invoking(() => Colour.From("##FF33CC"))
+            .Should().Throw<UnsupportedColourException>();
     }
 }
