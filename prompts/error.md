@@ -1,61 +1,18 @@
-The job failed because a MongoDB connection string was missing or set to null when calling AddMongoDbStores in your ASP.NET Core project's startup/configuration. The error is:
+You are a senior .NET DevOps engineer. 
 
-```
-System.ArgumentNullException: Value cannot be null. (Parameter 'connectionString')
-at Microsoft.Extensions.DependencyInjection.MongoDbIdentityBuilderExtensions.AddMongoDbStores[TUser,TRole,TKey](IdentityBuilder builder, String connectionString, String databaseName)
-```
+I have a .NET 8 ASP.NET Core project using NSwag to generate OpenAPI specs during CI builds. 
+Currently, the NSwag build fails with:
 
-## Solution
+  System.ArgumentNullException: Value cannot be null. (Parameter 'connectionString')
+  at AddMongoDbStores in DependencyInjection.cs
 
-### 1. Set the MongoDB Connection String
+The issue is that NSwag runs the app host to generate the Swagger document, but in CI, the MongoDB connection string is not set, causing the app to crash.
 
-Ensure the connection string for MongoDB is provided correctly in your configuration (commonly in `appsettings.json`, environment variables, or CI secrets).
+Please generate a **step-by-step fix** for this problem that:
 
-Example for `appsettings.json`:
-```json
-{
-  "MongoDb": {
-    "ConnectionString": "mongodb://youruser:yourpassword@yourhost:27017/yourdb",
-    "DatabaseName": "yourdb"
-  }
-}
-```
+1. Makes NSwag generation work in CI without requiring a real MongoDB instance.
+2. Keeps the production app configuration unchanged.
+3. Provides sample code for DependencyInjection.cs to safely handle missing connection strings during NSwag execution.
+4. Suggests CI environment variable setup or appsettings override for NSwag builds.
 
-### 2. Pass the Connection String to AddMongoDbStores
-
-In your startup/configuration code (e.g., `Startup.cs` or wherever Identity is configured):
-
-```csharp
-var connectionString = Configuration.GetSection("MongoDb:ConnectionString").Value;
-var databaseName = Configuration.GetSection("MongoDb:DatabaseName").Value;
-
-services.AddIdentity<ApplicationUser, ApplicationRole>()
-    .AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(connectionString, databaseName);
-```
-
-### 3. For CI/CD (GitHub Actions)
-
-If you use environment variables or secrets in your workflow, ensure they are set and mapped in your workflow YAML (e.g., `.github/workflows/ci.yml`):
-
-```yaml
-env:
-  MONGODB_CONNECTIONSTRING: ${{ secrets.MONGODB_CONNECTIONSTRING }}
-  MONGODB_DATABASENAME: ${{ secrets.MONGODB_DATABASENAME }}
-```
-And in code:
-```csharp
-var connectionString = Environment.GetEnvironmentVariable("MONGODB_CONNECTIONSTRING");
-var databaseName = Environment.GetEnvironmentVariable("MONGODB_DATABASENAME");
-```
-
-## Code Suggestion
-
-- Add a null check and log error if connection string is not set.
-- Ensure your config file or CI secrets include the MongoDB connection string.
-
-## Next Steps
-
-- Update your configuration and restart the build.
-- If you need help identifying where to set the connection string in your repo, let me know and I can point to the relevant file.
-
-[See failing code in context](https://github.com/hkthao/family-tree-3/blob/2f2fa4a950be9113eec052da473d1899161fa291/backend/src/Web/Web.csproj)
+Provide the answer in a clear, actionable way, suitable for a developer to copy-paste.
