@@ -23,7 +23,7 @@ public class DeleteRelationshipCommandHandler : IRequestHandler<DeleteRelationsh
 
         if (result.DeletedCount == 0)
         {
-            throw new NotFoundException(nameof(Relationship), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Relationship), request.Id!);
         }
     }
 }

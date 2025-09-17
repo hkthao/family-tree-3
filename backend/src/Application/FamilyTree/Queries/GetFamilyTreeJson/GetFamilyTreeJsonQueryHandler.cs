@@ -28,7 +28,7 @@ public class GetFamilyTreeJsonQueryHandler : IRequestHandler<GetFamilyTreeJsonQu
 
         if (family == null)
         {
-            throw new NotFoundException(nameof(Family), request.FamilyId);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.FamilyId);
         }
 
         var members = await _context.Members.Find(m => m.FamilyId == familyObjectId).ToListAsync(cancellationToken);

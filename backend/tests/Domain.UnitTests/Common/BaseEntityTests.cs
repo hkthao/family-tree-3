@@ -1,6 +1,7 @@
 using backend.Domain.Common;
-using NUnit.Framework;
-using Shouldly;
+using Xunit;
+using FluentAssertions;
+using MongoDB.Bson;
 
 namespace backend.Domain.UnitTests.Common;
 
@@ -13,7 +14,7 @@ public class BaseEntityTests
         public string? Name { get; set; }
     }
 
-    [Test]
+    [Fact]
     public void AddDomainEvent_ShouldAddEventToList()
     {
         var entity = new TestEntity();
@@ -21,10 +22,10 @@ public class BaseEntityTests
 
         entity.AddDomainEvent(domainEvent);
 
-        entity.DomainEvents.ShouldContain(domainEvent);
+        entity.DomainEvents.Should().Contain(domainEvent);
     }
 
-    [Test]
+    [Fact]
     public void RemoveDomainEvent_ShouldRemoveEventFromList()
     {
         var entity = new TestEntity();
@@ -33,10 +34,10 @@ public class BaseEntityTests
 
         entity.RemoveDomainEvent(domainEvent);
 
-        entity.DomainEvents.ShouldNotContain(domainEvent);
+        entity.DomainEvents.Should().NotContain(domainEvent);
     }
 
-    [Test]
+    [Fact]
     public void ClearDomainEvents_ShouldClearAllEvents()
     {
         var entity = new TestEntity();
@@ -45,13 +46,13 @@ public class BaseEntityTests
 
         entity.ClearDomainEvents();
 
-        entity.DomainEvents.ShouldBeEmpty();
+        entity.DomainEvents.Should().BeEmpty();
     }
 
-    [Test]
+    [Fact]
     public void Id_ShouldBeSetOnCreation()
     {
         var entity = new TestEntity();
-        entity.Id.ToString().ShouldNotBe(MongoDB.Bson.ObjectId.Empty.ToString());
+        entity.Id.Should().NotBe(ObjectId.Empty.ToString());
     }
 }

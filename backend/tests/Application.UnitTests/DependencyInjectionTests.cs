@@ -1,15 +1,17 @@
 using backend.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NUnit.Framework;
-using Shouldly;
+using Xunit;
+using FluentAssertions;
 using Moq;
+using MediatR;
+using AutoMapper;
 
 namespace backend.Application.UnitTests;
 
 public class DependencyInjectionTests
 {
-    [Test]
+    [Fact]
     public void AddApplicationServices_ShouldRegisterServices()
     {
         // Arrange
@@ -21,10 +23,10 @@ public class DependencyInjectionTests
         hostApplicationBuilderMock.Object.AddApplicationServices();
 
         // Assert
-        services.ShouldNotBeNull();
+        services.Should().NotBeNull();
         // Add more specific assertions for services you expect to be registered
         // For example, check for MediatR, AutoMapper, FluentValidation
-        services.ShouldContain(s => s.ServiceType == typeof(MediatR.IMediator));
-        services.ShouldContain(s => s.ServiceType == typeof(AutoMapper.IMapper));
+        services.Should().Contain(s => s.ServiceType == typeof(IMediator));
+        services.Should().Contain(s => s.ServiceType == typeof(IMapper));
     }
 }

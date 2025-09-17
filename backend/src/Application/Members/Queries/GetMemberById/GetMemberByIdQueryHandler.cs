@@ -26,7 +26,7 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Mem
 
         if (member == null)
         {
-            throw new NotFoundException(nameof(Member), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
         }
 
         return _mapper.Map<MemberDto>(member);

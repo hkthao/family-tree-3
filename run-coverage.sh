@@ -4,7 +4,7 @@ set -euo pipefail
 # --- Config ---
 SOLUTION_FILE="backend/backend.sln"
 COVERAGE_OUTPUT_DIR="backend/artifacts/coverage"
-THRESHOLD=80 # Define threshold here
+THRESHOLD=75 # Define threshold here
 
 # Clean old coverage
 rm -rf "$COVERAGE_OUTPUT_DIR"

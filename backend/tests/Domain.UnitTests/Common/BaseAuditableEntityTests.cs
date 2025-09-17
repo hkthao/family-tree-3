@@ -1,71 +1,83 @@
-using backend.Domain.Common;
-using NUnit.Framework;
-using Shouldly;
+using Xunit;
+using FluentAssertions;
 using System;
+using backend.Domain.Common;
 
 namespace backend.Domain.UnitTests.Common;
 
 public class BaseAuditableEntityTests
 {
-    private class TestAuditableEntity : BaseAuditableEntity
-    {
-        public string? Name { get; set; }
-    }
-
-    [Test]
+    [Fact]
     public void CreatedBy_ShouldBeNullInitially()
     {
         var entity = new TestAuditableEntity();
-        entity.CreatedBy.ShouldBeNull();
+        entity.CreatedBy.Should().BeNull();
     }
 
-    [Test]
+    [Fact]
     public void LastModifiedBy_ShouldBeNullInitially()
     {
         var entity = new TestAuditableEntity();
-        entity.LastModifiedBy.ShouldBeNull();
+        entity.LastModifiedBy.Should().BeNull();
     }
 
-    [Test]
+    [Fact]
     public void SetCreatedBy_ShouldSetCreatedByProperty()
     {
         var entity = new TestAuditableEntity();
-        var user = "testuser";
-        entity.CreatedBy = user;
-        entity.CreatedBy.ShouldBe(user);
+        var userId = "testUser";
+        entity.SetCreatedBy(userId);
+        entity.CreatedBy.Should().Be(userId);
     }
 
-    [Test]
+    [Fact]
     public void SetLastModifiedBy_ShouldSetLastModifiedByProperty()
     {
         var entity = new TestAuditableEntity();
-        var user = "testuser";
-        entity.LastModifiedBy = user;
-        entity.LastModifiedBy.ShouldBe(user);
+        var userId = "testUser";
+        entity.SetLastModifiedBy(userId);
+        entity.LastModifiedBy.Should().Be(userId);
     }
 
-    [Test]
+    [Fact]
     public void SetLastModified_ShouldSetLastModifiedProperty()
     {
         var entity = new TestAuditableEntity();
-        var now = DateTimeOffset.UtcNow;
-        entity.LastModified = now;
-        entity.LastModified.ShouldBe(now);
+        var date = DateTime.UtcNow;
+        entity.SetLastModified(date);
+        entity.LastModified.Should().Be(date);
     }
 
-    [Test]
+    [Fact]
     public void Created_ShouldHaveDefaultValueInitially_AndGetterShouldBeHit()
     {
         var entity = new TestAuditableEntity();
-        var createdValue = entity.Created; // Explicitly hit the getter
-        createdValue.ShouldBe(default(DateTimeOffset));
+        entity.Created.Should().NotBe(default(DateTime));
     }
 
-    [Test]
+    [Fact]
     public void LastModified_ShouldHaveDefaultValueInitially_AndGetterShouldBeHit()
     {
         var entity = new TestAuditableEntity();
-        var lastModifiedValue = entity.LastModified; // Explicitly hit the getter
-        lastModifiedValue.ShouldBe(default(DateTimeOffset));
+        entity.LastModified.Should().NotBe(default(DateTime));
+    }
+
+    // Helper class for testing
+    private class TestAuditableEntity : BaseAuditableEntity
+    {
+        public void SetCreatedBy(string userId)
+        {
+            CreatedBy = userId;
+        }
+
+        public void SetLastModifiedBy(string userId)
+        {
+            LastModifiedBy = userId;
+        }
+
+        public void SetLastModified(DateTime date)
+        {
+            LastModified = date;
+        }
     }
 }

@@ -19,7 +19,7 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand>
     {
         var filter = Builders<Family>.Filter.Eq(f => f.Id, request.Id);
         var entity = await _context.Families.Find(filter).FirstOrDefaultAsync(cancellationToken) 
-                     ?? throw new NotFoundException(nameof(Family), request.Id);
+                     ?? throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
 
         entity.Name = request.Name;
         entity.Description = request.Description;

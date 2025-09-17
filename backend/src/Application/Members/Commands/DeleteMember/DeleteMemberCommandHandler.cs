@@ -23,7 +23,7 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand>
 
         if (result.DeletedCount == 0)
         {
-            throw new NotFoundException(nameof(Member), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
         }
     }
 }

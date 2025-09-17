@@ -23,7 +23,7 @@ public class GetFamilyTreePdfQueryHandler : IRequestHandler<GetFamilyTreePdfQuer
 
         if (family == null)
         {
-            throw new NotFoundException(nameof(Family), request.FamilyId);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.FamilyId);
         }
 
         // This is a placeholder. Actual PDF generation would involve a library like QuestPDF or iTextSharp.

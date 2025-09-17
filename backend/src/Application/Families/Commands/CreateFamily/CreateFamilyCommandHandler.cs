@@ -18,10 +18,10 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, s
     {
         var entity = new Family
         {
-            Name = request.Name,
+            Name = request.Name!,
             Address = request.Address,
-            Logo = request.Logo,
-            History = request.History
+            LogoUrl = request.LogoUrl,
+            Description = request.Description
         };
 
         await _context.Families.InsertOneAsync(entity, cancellationToken: cancellationToken);
