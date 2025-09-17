@@ -45,6 +45,7 @@
     <PackageVersion Include="MongoDB.Driver" Version="2.25.0" />
     <PackageVersion Include="AspNetCore.Identity.MongoDbCore" Version="3.1.2" />
     <PackageVersion Include="MongoDB.Bson" Version="2.25.0" />
+    <PackageVersion Include="AWSSDK.SecurityToken" Version="3.7.100.14" />
 
 
     
