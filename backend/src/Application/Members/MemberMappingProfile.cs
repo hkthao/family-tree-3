@@ -9,7 +9,10 @@ public class MemberMappingProfile : Profile
     {
         CreateMap<Member, MemberDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-            .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-            .ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src.FamilyId.ToString()));
+            .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
+            .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(src => src.AvatarUrl))
+            .ForMember(dest => dest.PlaceOfBirth, opt => opt.MapFrom(src => src.PlaceOfBirth))
+            .ForMember(dest => dest.Biography, opt => opt.MapFrom(src => src.Biography))
+            .ForMember(dest => dest.Metadata, opt => opt.MapFrom(src => src.Metadata));
     }
 }

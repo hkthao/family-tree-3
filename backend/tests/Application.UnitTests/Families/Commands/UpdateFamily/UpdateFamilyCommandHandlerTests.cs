@@ -32,8 +32,7 @@ public class UpdateFamilyCommandHandlerTests
         {
             Id = "1",
             Name = "New Name",
-            Description = "New Desc",
-            Address = "New Address"
+            Description = "New Desc"
         };
 
         var cursor = new Mock<IAsyncCursor<Family>>();

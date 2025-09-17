@@ -13,6 +13,7 @@ public class IntegrationTestFixture : IAsyncLifetime
 {
     // private MongoDBContainer _mongoDbContainer = null!; // Commented out
     public ApplicationDbContext DbContext { get; private set; } = null!;
+    private IMongoClient _mongoClient = null!;
 
     public async Task InitializeAsync()
     {
@@ -26,6 +27,7 @@ public class IntegrationTestFixture : IAsyncLifetime
             DatabaseName = "testdb"
         });
 
+        _mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
         DbContext = new ApplicationDbContext(mongoDbSettings);
         await Task.CompletedTask; // Simulate async operation
     }
@@ -34,6 +36,16 @@ public class IntegrationTestFixture : IAsyncLifetime
     {
         // await _mongoDbContainer.DisposeAsync(); // Commented out
         await Task.CompletedTask; // Simulate async operation
+    }
+
+    public async Task ResetState()
+    {
+        var mongoDbSettings = Options.Create(new AppMongoDbSettings
+        {
+            ConnectionString = "mongodb://localhost:27017", // Dummy connection string
+            DatabaseName = "testdb"
+        });
+        await _mongoClient.DropDatabaseAsync(mongoDbSettings.Value.DatabaseName);
     }
 }
 
@@ -48,9 +60,12 @@ public class IntegrationTestCollection : ICollectionFixture<IntegrationTestFixtu
 public abstract class IntegrationTestBase : IClassFixture<IntegrationTestFixture>
 {
     protected readonly ApplicationDbContext _dbContext;
+    private readonly IntegrationTestFixture _fixture;
 
     protected IntegrationTestBase(IntegrationTestFixture fixture)
     {
+        _fixture = fixture;
         _dbContext = fixture.DbContext;
+        _fixture.ResetState().GetAwaiter().GetResult(); // Reset state before each test
     }
 }

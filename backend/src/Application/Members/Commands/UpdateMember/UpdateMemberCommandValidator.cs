@@ -9,7 +9,6 @@ public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberComman
         RuleFor(v => v.FullName)
             .MaximumLength(200)
             .NotEmpty();
-        RuleFor(v => v.FamilyId)
-            .NotEmpty();
+
     }
 }

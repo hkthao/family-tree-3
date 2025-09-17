@@ -23,13 +23,14 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
             .Set(m => m.FullName, request.FullName)
             .Set(m => m.DateOfBirth, request.DateOfBirth)
             .Set(m => m.DateOfDeath, request.DateOfDeath)
-            .Set(m => m.Status, request.Status)
+            .Set(m => m.Gender, request.Gender)
+            .Set(m => m.AvatarUrl, request.AvatarUrl)
+            .Set(m => m.PlaceOfBirth, request.PlaceOfBirth)
             .Set(m => m.Phone, request.Phone)
             .Set(m => m.Email, request.Email)
             .Set(m => m.Generation, request.Generation)
-            .Set(m => m.DisplayOrder, request.DisplayOrder)
-            .Set(m => m.FamilyId, ObjectId.Parse(request.FamilyId!))
-            .Set(m => m.Description, request.Description);
+            .Set(m => m.Biography, request.Biography)
+            .Set(m => m.Metadata, request.Metadata);
 
         var result = await _context.Members.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
 

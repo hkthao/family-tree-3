@@ -22,13 +22,14 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, s
             FullName = request.FullName,
             DateOfBirth = request.DateOfBirth,
             DateOfDeath = request.DateOfDeath,
-            Status = request.Status,
+            Gender = request.Gender,
+            AvatarUrl = request.AvatarUrl,
+            PlaceOfBirth = request.PlaceOfBirth,
             Phone = request.Phone,
             Email = request.Email,
             Generation = request.Generation,
-            DisplayOrder = request.DisplayOrder,
-            FamilyId = ObjectId.Parse(request.FamilyId!),
-            Description = request.Description
+            Biography = request.Biography,
+            Metadata = request.Metadata
         };
 
         await _context.Members.InsertOneAsync(entity, cancellationToken: cancellationToken);

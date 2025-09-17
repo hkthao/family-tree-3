@@ -27,7 +27,7 @@ public class RelationshipServiceTests
     public async Task CreateRelationship_ShouldCreateRelationship_WhenRequestIsValid()
     {
         // Arrange
-        var command = new CreateRelationshipCommand { MemberId = "60d5ec49e04a4a5c8c8b4567", TargetId = "60d5ec49e04a4a5c8c8b4568", Type = RelationshipType.Parent };
+        var command = new CreateRelationshipCommand { MemberId = "60d5ec49e04a4a5c8c8b4567", TargetId = "60d5ec49e04a4a5c8c8b4568", Type = RelationshipType.Parent, FamilyId = "60d5ec49e04a4a5c8c8b4569", StartDate = DateTime.Now, EndDate = DateTime.Now };
         var handler = new CreateRelationshipCommandHandler(_contextMock.Object);
 
         // Act
@@ -42,7 +42,7 @@ public class RelationshipServiceTests
     public async Task CreateRelationship_ShouldThrowValidationException_WhenMemberIdAndTargetIdAreSame()
     {
         // Arrange
-        var command = new CreateRelationshipCommand { MemberId = "60d5ec49e04a4a5c8c8b4567", TargetId = "60d5ec49e04a4a5c8c8b4567", Type = RelationshipType.Parent };
+        var command = new CreateRelationshipCommand { MemberId = "60d5ec49e04a4a5c8c8b4567", TargetId = "60d5ec49e04a4a5c8c8b4567", Type = RelationshipType.Parent, FamilyId = "60d5ec49e04a4a5c8c8b4569", StartDate = DateTime.Now, EndDate = DateTime.Now };
         var validator = new CreateRelationshipCommandValidator();
 
         // Act

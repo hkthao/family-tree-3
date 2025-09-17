@@ -19,9 +19,12 @@ public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationsh
     {
         var entity = new Relationship
         {
-            MemberId = ObjectId.Parse(request.MemberId!),
+            SourceMemberId = ObjectId.Parse(request.MemberId!),
             Type = request.Type,
-            TargetId = ObjectId.Parse(request.TargetId!)
+            TargetMemberId = ObjectId.Parse(request.TargetId!),
+            FamilyId = ObjectId.Parse(request.FamilyId!),
+            StartDate = request.StartDate,
+            EndDate = request.EndDate
         };
 
         await _context.Relationships.InsertOneAsync(entity, cancellationToken: cancellationToken);

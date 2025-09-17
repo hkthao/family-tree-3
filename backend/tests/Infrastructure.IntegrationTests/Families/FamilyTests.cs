@@ -16,7 +16,7 @@ public class FamilyTests : IntegrationTestBase
     [Fact]
     public async Task ShouldCreateFamily()
     {
-        var family = new Family { Name = "Test Family", Address = "123 Test St" };
+        var family = new Family { Name = "Test Family" };
 
         await _dbContext.Families.InsertOneAsync(family);
 
@@ -28,7 +28,7 @@ public class FamilyTests : IntegrationTestBase
     [Fact]
     public async Task ShouldGetFamilyById()
     {
-        var family = new Family { Name = "Family to Get", Address = "456 Get Ave" };
+        var family = new Family { Name = "Family to Get" };
         await _dbContext.Families.InsertOneAsync(family);
 
         var retrievedFamily = await _dbContext.Families.Find(f => f.Id == family.Id).FirstOrDefaultAsync();
@@ -39,7 +39,7 @@ public class FamilyTests : IntegrationTestBase
     [Fact]
     public async Task ShouldUpdateFamily()
     {
-        var family = new Family { Name = "Family to Update", Address = "789 Update Blvd" };
+        var family = new Family { Name = "Family to Update" };
         await _dbContext.Families.InsertOneAsync(family);
 
         family.Name = "Updated Family Name";
@@ -56,7 +56,7 @@ public class FamilyTests : IntegrationTestBase
     [Fact]
     public async Task ShouldDeleteFamily()
     {
-        var family = new Family { Name = "Family to Delete", Address = "101 Delete Rd" };
+        var family = new Family { Name = "Family to Delete" };
         await _dbContext.Families.InsertOneAsync(family);
 
         var result = await _dbContext.Families.DeleteOneAsync(f => f.Id == family.Id);

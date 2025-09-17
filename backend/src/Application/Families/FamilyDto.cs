@@ -12,5 +12,5 @@ public class FamilyDto : IMapFrom<Family> // IMapFrom will create a map from Fam
     public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
-    public string? Address { get; set; }
+    public string? AvatarUrl { get; set; }
 }
