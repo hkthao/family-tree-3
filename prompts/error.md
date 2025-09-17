@@ -1,18 +1,13 @@
-You are a senior .NET DevOps engineer. 
+Bạn là một senior .NET developer. Tôi đang build project ASP.NET Core với MongoDB và NSwag để generate Swagger/OpenAPI. Trên local build chạy bình thường nhưng trên GitHub Actions thì NSwag fail vì lỗi `ArgumentNullException: Value cannot be null. (Parameter 'connectionString')`.  
 
-I have a .NET 8 ASP.NET Core project using NSwag to generate OpenAPI specs during CI builds. 
-Currently, the NSwag build fails with:
+Yêu cầu:
+1. Viết hướng dẫn chi tiết để NSwag chạy trên CI mà không cần database thật.
+2. Bao gồm cách:
+   - Thêm biến môi trường fake cho connection string.
+   - Cập nhật Program/DI để skip init MongoDB khi chạy CI.
+   - Cấu hình NSwag.MSBuild hoặc GitHub Actions.
+3. Đưa ví dụ YAML GitHub Actions, code C# Program/DI đầy đủ.
+4. Giải thích lý do tại sao trên local không lỗi nhưng trên CI thì lỗi.
+5. Tóm tắt các cách fix khác nếu có.
 
-  System.ArgumentNullException: Value cannot be null. (Parameter 'connectionString')
-  at AddMongoDbStores in DependencyInjection.cs
-
-The issue is that NSwag runs the app host to generate the Swagger document, but in CI, the MongoDB connection string is not set, causing the app to crash.
-
-Please generate a **step-by-step fix** for this problem that:
-
-1. Makes NSwag generation work in CI without requiring a real MongoDB instance.
-2. Keeps the production app configuration unchanged.
-3. Provides sample code for DependencyInjection.cs to safely handle missing connection strings during NSwag execution.
-4. Suggests CI environment variable setup or appsettings override for NSwag builds.
-
-Provide the answer in a clear, actionable way, suitable for a developer to copy-paste.
+Trả lời theo dạng chi tiết step-by-step, dễ copy-paste, không bỏ sót bước nào.
