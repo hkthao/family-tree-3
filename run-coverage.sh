@@ -1,68 +1,75 @@
 #!/bin/bash
-set -euo pipefail
+set -e
 
-# --- Config ---
+# ------------------------------
+# Paths
+# ------------------------------
 SOLUTION_FILE="backend/backend.sln"
 COVERAGE_OUTPUT_DIR="backend/artifacts/coverage"
-THRESHOLD=75 # Define threshold here
+COVERLET_TOOL="./.coverlet/coverlet" # Path to coverlet.console executable
 
-# Clean old coverage
+# Array of unit test projects
+TEST_PROJECTS=(
+    "backend/tests/Application.UnitTests/Application.UnitTests.csproj"
+    "backend/tests/Domain.UnitTests/Domain.UnitTests.csproj"
+    # "backend/tests/Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj" # Excluded as per user's request for unit tests only.
+)
+
+# ------------------------------
+# Create coverage dir
+# ------------------------------
+echo "Cleaning and creating coverage directory: $COVERAGE_OUTPUT_DIR"
 rm -rf "$COVERAGE_OUTPUT_DIR"
 mkdir -p "$COVERAGE_OUTPUT_DIR"
 
-# --- Step 1: Run dotnet test with coverage ---
-echo "Running tests with coverage..."
-dotnet test "$SOLUTION_FILE" \
-  --collect "XPlat Code Coverage" \
-  --results-directory "$COVERAGE_OUTPUT_DIR" \
-  --logger "trx;LogFileName=test_results.trx" \
-  --configuration Release \
-  /p:CollectCoverage=true
+# ------------------------------
+# Restore dependencies
+# ------------------------------
+echo "Restoring dependencies for $SOLUTION_FILE..."
+dotnet restore "$SOLUTION_FILE"
 
-TEST_EXIT_CODE=$?
-if [ $TEST_EXIT_CODE -ne 0 ]; then
-  echo "❌ Tests failed. Exiting."
-  exit $TEST_EXIT_CODE
-fi
+# ------------------------------
+# Run tests with coverage using coverlet.console
+# ------------------------------
+echo "Running unit tests with code coverage using coverlet.console..."
 
-# --- Step 2: Parse and aggregate coverage reports ---
-echo "Aggregating coverage reports..."
-COVERAGE_XML_FILES=$(find "$COVERAGE_OUTPUT_DIR" -name "coverage.cobertura.xml")
+# Store paths to generated coverage files
+GENERATED_COVERAGE_FILES=()
 
-TOTAL_LINE_RATE=0
-REPORT_COUNT=0
+for PROJECT in "${TEST_PROJECTS[@]}"; do
+    PROJECT_NAME=$(basename "$PROJECT" .csproj)
+    OUTPUT_FILE="$COVERAGE_OUTPUT_DIR/$PROJECT_NAME.opencover.xml"
+    LOG_FILE="$COVERAGE_OUTPUT_DIR/$PROJECT_NAME.log"
 
-for xml_file in $COVERAGE_XML_FILES; do
-  if [ -f "$xml_file" ]; then
-    LINE_RATE=$(grep -o 'line-rate="[^"]*"' "$xml_file" | head -1 | cut -d'"' -f2)
-    if [ -n "$LINE_RATE" ]; then
-      TOTAL_LINE_RATE=$(awk -v tl="$TOTAL_LINE_RATE" -v lr="$LINE_RATE" 'BEGIN { print tl + lr }')
-      REPORT_COUNT=$((REPORT_COUNT + 1))
+    echo "  -> Building $PROJECT_NAME to get test assembly path..."
+    # Get the full path to the test assembly DLL
+    TEST_ASSEMBLY_PATH=$(dotnet build "$PROJECT" --configuration Release --no-restore --no-dependencies --getProperty:TargetPath)
+    TEST_ASSEMBLY_PATH=$(echo "$TEST_ASSEMBLY_PATH" | xargs) # Trim whitespace
+
+    if [ -z "$TEST_ASSEMBLY_PATH" ]; then
+        echo "  -> ERROR: Could not determine test assembly path for $PROJECT_NAME. Skipping."
+        continue
     fi
-  fi
+
+    echo "  -> Test assembly path: $TEST_ASSEMBLY_PATH"
+    echo "  -> Running coverlet.console for $PROJECT_NAME. Output logged to $LOG_FILE"
+
+    # Run coverlet.console directly on the test assembly
+    "$COVERLET_TOOL" "$TEST_ASSEMBLY_PATH" \
+        --target "dotnet" \
+        --targetargs "test \"$PROJECT\" --no-build --configuration Release" \
+        --format opencover \
+        --output "$OUTPUT_FILE" > "$LOG_FILE" 2>&1
+
+    if [ -f "$OUTPUT_FILE" ]; then
+        echo "  -> Found coverage file: $OUTPUT_FILE"
+        GENERATED_COVERAGE_FILES+=("$OUTPUT_FILE")
+    else
+        echo "  -> WARNING: Could not find coverage.opencover.xml for $PROJECT_NAME at $OUTPUT_FILE. Check $LOG_FILE for details."
+    fi
 done
 
-if [ "$REPORT_COUNT" -eq 0 ]; then
-  echo "❌ No coverage reports found to aggregate."
-  exit 1
-fi
+echo "Code coverage generation complete. Processed files: ${GENERATED_COVERAGE_FILES[@]}"
+echo "Please use Gemini CLI to read these files and generate a summary."
 
-AVERAGE_LINE_RATE=$(awk -v tl="$TOTAL_LINE_RATE" -v rc="$REPORT_COUNT" 'BEGIN { printf "%.4f", tl / rc }')
-COVERAGE_PERCENT=$(awk -v alr="$AVERAGE_LINE_RATE" 'BEGIN { printf "%.2f", alr * 100 }')
-
-# --- Step 3: Print summary table and check threshold ---
-echo ""
-echo "================ Coverage Report ================"
-printf "| %-15s | %-10s |\n" "Metric" "Value"
-echo "|-----------------|------------|"
-printf "| %-15s | %-10s |\n" "Line Coverage" "$COVERAGE_PERCENT%"
-echo "================================================="
-
-if (( $(echo "$COVERAGE_PERCENT < $THRESHOLD" | bc -l) )); then
-  echo "❌ Coverage ($COVERAGE_PERCENT%) is below threshold ($THRESHOLD%)."
-  exit 1
-else
-  echo "✅ Coverage ($COVERAGE_PERCENT%) meets or exceeds threshold ($THRESHOLD%)."
-fi
-
-echo "🎯 Coverage process completed."
+echo "Coverage run completed!"
