@@ -15,35 +15,35 @@ public class CreateRelationshipCommandValidatorTests
     }
 
     [Fact]
-    public void Should_Have_Error_When_MemberId_Is_Empty()
+    public void Should_Have_Error_When_SourceMemberId_Is_Empty()
     {
-        var command = new CreateRelationshipCommand { MemberId = Guid.Empty, TargetId = Guid.NewGuid(), FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
+        var command = new CreateRelationshipCommand { SourceMemberId = Guid.Empty, TargetMemberId = Guid.NewGuid(), FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.MemberId);
+        result.ShouldHaveValidationErrorFor(x => x.SourceMemberId);
     }
 
     [Fact]
-    public void Should_Have_Error_When_TargetId_Is_Empty()
+    public void Should_Have_Error_When_TargetMemberId_Is_Empty()
     {
-        var command = new CreateRelationshipCommand { MemberId = Guid.NewGuid(), TargetId = Guid.Empty, FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
+        var command = new CreateRelationshipCommand { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.Empty, FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.TargetId);
+        result.ShouldHaveValidationErrorFor(x => x.TargetMemberId);
     }
 
     [Fact]
-    public void Should_Have_Error_When_MemberId_And_TargetId_Are_Same()
+    public void Should_Have_Error_When_SourceMemberId_And_TargetMemberId_Are_Same()
     {
-        var memberId = Guid.NewGuid();
-        var command = new CreateRelationshipCommand { MemberId = memberId, TargetId = memberId, FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
+        var SourceMemberId = Guid.NewGuid();
+        var command = new CreateRelationshipCommand { SourceMemberId = SourceMemberId, TargetMemberId = SourceMemberId, FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.MemberId)
-              .WithErrorMessage("MemberId and TargetId cannot be the same.");
+        result.ShouldHaveValidationErrorFor(x => x.SourceMemberId)
+              .WithErrorMessage("SourceMemberId and TargetMemberId cannot be the same.");
     }
 
     [Fact]
     public void Should_Not_Have_Error_When_Command_Is_Valid()
     {
-        var command = new CreateRelationshipCommand { MemberId = Guid.NewGuid(), TargetId = Guid.NewGuid(), FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
+        var command = new CreateRelationshipCommand { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), FamilyId = Guid.NewGuid(), StartDate = DateTime.Now, EndDate = DateTime.Now };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
     }

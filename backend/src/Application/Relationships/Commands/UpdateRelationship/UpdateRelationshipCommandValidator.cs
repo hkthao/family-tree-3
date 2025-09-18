@@ -5,13 +5,13 @@ public class UpdateRelationshipCommandValidator : AbstractValidator<UpdateRelati
     public UpdateRelationshipCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty();
+            .NotEqual(Guid.Empty).WithMessage("Id must not be empty.");
         RuleFor(v => v.SourceMemberId)
-            .NotEmpty();
+            .NotEqual(Guid.Empty).WithMessage("SourceMemberId must not be empty.");
         RuleFor(v => v.TargetMemberId)
-            .NotEmpty();
+            .NotEqual(Guid.Empty).WithMessage("TargetMemberId must not be empty.");
         RuleFor(v => v.FamilyId)
-            .NotEmpty();
+            .NotEqual(Guid.Empty).WithMessage("FamilyId must not be empty.");
         RuleFor(v => v.Type)
             .IsInEnum();
         RuleFor(v => v.StartDate)

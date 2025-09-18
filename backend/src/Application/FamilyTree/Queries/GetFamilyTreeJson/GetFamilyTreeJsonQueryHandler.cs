@@ -2,6 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using backend.Application.Families;
 using backend.Application.Members;
+using backend.Application.Relationships;
 
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreeJson;
 
