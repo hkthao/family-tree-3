@@ -790,34 +790,6 @@
           }
         ]
       }
-    },
-    "/api/WeatherForecasts": {
-      "get": {
-        "tags": [
-          "WeatherForecasts"
-        ],
-        "operationId": "GetWeatherForecasts",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/WeatherForecast"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      }
     }
   },
   "components": {
@@ -1354,27 +1326,6 @@
           "OldPassword": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "WeatherForecast": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Date": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "TemperatureC": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "TemperatureF": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Summary": {
-            "type": "string"
           }
         }
       }
