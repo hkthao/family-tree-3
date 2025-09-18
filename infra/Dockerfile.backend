@@ -1,41 +1,27 @@
-# Use a specific SDK version for the build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-ARG ConnectionStrings__DefaultConnection
-ENV ConnectionStrings__DefaultConnection=$ConnectionStrings__DefaultConnection
+# Copy the entire backend directory into the container
+COPY backend/ ./backend/
 
-# Copy only the project files first to leverage Docker cache
-# This layer only changes if .csproj or .sln files change
-COPY *.sln .
-COPY Directory.Packages.props .
-COPY src/Web/*.csproj ./src/Web/
-COPY src/Application/*.csproj ./src/Application/
-COPY src/Domain/*.csproj ./src/Domain/
-COPY src/Infrastructure/*.csproj ./src/Infrastructure/
-COPY tests/Application.UnitTests/*.csproj ./tests/Application.UnitTests/
-COPY tests/Domain.UnitTests/*.csproj ./tests/Domain.UnitTests/
-COPY tests/Infrastructure.IntegrationTests/*.csproj ./tests/Infrastructure.IntegrationTests/
+# Set the working directory to the backend solution
+WORKDIR /src/backend
 
-# Restore dependencies - this layer is cached unless project files or dependencies change
+# Restore dependencies
 RUN dotnet restore backend.sln --verbosity minimal
 
-# Copy the rest of the source code
-# This layer changes if any source code changes
-COPY src/ ./src/
-COPY tests/ ./tests/
+# Build the application
+RUN dotnet build backend.sln -c Release --no-restore
 
 # Publish the application
-# This creates the deployable output
-WORKDIR /app/src/Web
-RUN dotnet publish -c Release -o /app/publish 
+WORKDIR /src/backend/src/Web
+RUN dotnet publish -c Release -o /app/publish
 
 # Final production stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 # Copy only the published output from the build stage
-# This keeps the final image small and clean
 COPY --from=build /app/publish .
 
 # Set the entrypoint for the application
