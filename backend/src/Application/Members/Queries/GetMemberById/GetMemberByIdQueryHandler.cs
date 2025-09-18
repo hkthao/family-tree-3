@@ -3,8 +3,7 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
@@ -21,12 +20,11 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Mem
 
     public async Task<MemberDto> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Member>.Filter.Eq("_id", ObjectId.Parse(request.Id!));
-        var member = await _context.Members.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        var member = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
 
         if (member == null)
         {
-            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id);
         }
 
         return _mapper.Map<MemberDto>(member);

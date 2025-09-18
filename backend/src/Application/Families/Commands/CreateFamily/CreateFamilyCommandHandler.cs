@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using MediatR;
 using backend.Domain.Entities;
-using MongoDB.Driver;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
@@ -23,7 +22,9 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, s
             AvatarUrl = request.AvatarUrl
         };
 
-        await _context.Families.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        _context.Families.Add(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return entity.Id.ToString();
     }

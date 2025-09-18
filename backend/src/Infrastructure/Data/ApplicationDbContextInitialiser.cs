@@ -1,21 +1,22 @@
-﻿using backend.Domain.Constants;
+using backend.Domain.Constants;
 using backend.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
-using AspNetCore.Identity.MongoDbCore.Models;
 
 namespace backend.Infrastructure.Data;
 
 public class ApplicationDbContextInitialiser
 {
     private readonly ILogger<ApplicationDbContextInitialiser> _logger;
+    private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly RoleManager<MongoIdentityRole<ObjectId>> _roleManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
 
-    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, UserManager<ApplicationUser> userManager, RoleManager<MongoIdentityRole<ObjectId>> roleManager)
+    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         _logger = logger;
+        _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
     }
@@ -24,8 +25,7 @@ public class ApplicationDbContextInitialiser
     {
         try
         {
-            // No database initialisation needed for MongoDB in this way
-            await Task.CompletedTask;
+            await _context.Database.MigrateAsync();
         }
         catch (Exception ex)
         {
@@ -50,7 +50,7 @@ public class ApplicationDbContextInitialiser
     public async Task TrySeedAsync()
     {
         // Default roles
-        var administratorRole = new MongoIdentityRole<ObjectId>(Roles.Administrator);
+        var administratorRole = new IdentityRole(Roles.Administrator);
 
         if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
         {
@@ -67,6 +67,14 @@ public class ApplicationDbContextInitialiser
             {
                 await _userManager.AddToRolesAsync(administrator, new [] { administratorRole.Name });
             }
+        }
+
+        // Default data
+        // Seed, if necessary
+        if (!_context.Families.Any())
+        {
+            // Example: _context.Families.Add(new Family { Name = "Test Family" });
+            await _context.SaveChangesAsync();
         }
     }
 }

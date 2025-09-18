@@ -1,8 +1,7 @@
-﻿using AspNetCore.Identity.MongoDbCore.Models;
-using MongoDB.Bson;
+using Microsoft.AspNetCore.Identity;
 
 namespace backend.Infrastructure.Identity;
 
-public class ApplicationUser : MongoIdentityUser<ObjectId>
+public class ApplicationUser : IdentityUser
 {
 }

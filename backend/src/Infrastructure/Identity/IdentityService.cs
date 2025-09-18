@@ -2,7 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using MongoDB.Bson;
 
 namespace backend.Infrastructure.Identity;
 
@@ -22,14 +21,14 @@ public class IdentityService : IIdentityService
         _authorizationService = authorizationService;
     }
 
-    public async Task<string?> GetUserNameAsync(ObjectId userId)
+    public async Task<string?> GetUserNameAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userManager.FindByIdAsync(userId);
 
         return user?.UserName;
     }
 
-    public async Task<(Result Result, ObjectId UserId)> CreateUserAsync(string userName, string password)
+    public async Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password)
     {
         var user = new ApplicationUser
         {
@@ -42,16 +41,16 @@ public class IdentityService : IIdentityService
         return (result.ToApplicationResult(), user.Id);
     }
 
-    public async Task<bool> IsInRoleAsync(ObjectId userId, string role)
+    public async Task<bool> IsInRoleAsync(string userId, string role)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userManager.FindByIdAsync(userId);
 
         return user != null && await _userManager.IsInRoleAsync(user, role);
     }
 
-    public async Task<bool> AuthorizeAsync(ObjectId userId, string policyName)
+    public async Task<bool> AuthorizeAsync(string userId, string policyName)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userManager.FindByIdAsync(userId);
 
         if (user == null)
         {
@@ -65,9 +64,9 @@ public class IdentityService : IIdentityService
         return result.Succeeded;
     }
 
-    public async Task<Result> DeleteUserAsync(ObjectId userId)
+    public async Task<Result> DeleteUserAsync(string userId)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userManager.FindByIdAsync(userId);
 
         return user != null ? await DeleteUserAsync(user) : Result.Success();
     }

@@ -3,25 +3,30 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Domain.Entities;
 using FluentAssertions;
-using MongoDB.Driver;
-using Moq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Relationships.Commands.DeleteRelationship;
 
 public class DeleteRelationshipCommandHandlerTests
 {
-    private readonly Mock<IApplicationDbContext> _mockContext;
-    private readonly Mock<IMongoCollection<Relationship>> _mockCollection;
+    private readonly DeleteRelationshipCommandHandler _handler;
+    private readonly ApplicationDbContext _context;
 
     public DeleteRelationshipCommandHandlerTests()
     {
-        _mockContext = new Mock<IApplicationDbContext>();
-        _mockCollection = new Mock<IMongoCollection<Relationship>>();
+        // Setup in-memory database
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
 
-        _mockContext.Setup(c => c.Relationships).Returns(_mockCollection.Object);
+        _context = new ApplicationDbContext(options);
+        _handler = new DeleteRelationshipCommandHandler(_context);
     }
 
     [Fact]
@@ -29,40 +34,29 @@ public class DeleteRelationshipCommandHandlerTests
     {
         // Arrange
         var relationshipId = "65e6f8a2b3c4d5e6f7a8b9c0";
+        var relationship = new Relationship { Id = relationshipId };
+        _context.Relationships.Add(relationship);
+        await _context.SaveChangesAsync();
+
         var command = new DeleteRelationshipCommand(relationshipId);
 
-        _mockCollection.Setup(c => c.DeleteOneAsync(
-            It.IsAny<FilterDefinition<Relationship>>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DeleteResult.Acknowledged(1));
-
-        var handler = new DeleteRelationshipCommandHandler(_mockContext.Object);
-
         // Act
-        await handler.Handle(command, CancellationToken.None);
+        await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockCollection.Verify(c => c.DeleteOneAsync(
-            It.IsAny<FilterDefinition<Relationship>>(),
-            It.IsAny<CancellationToken>()),
-            Times.Once);
+        _context.Relationships.Should().NotContain(r => r.Id == relationshipId);
     }
 
     [Fact]
     public async Task Handle_ShouldThrowNotFoundException_WhenRelationshipDoesNotExist()
     {
         // Arrange
-        var relationshipId = "000000000000000000000000"; // Valid format, but non-existent
-        var command = new DeleteRelationshipCommand(relationshipId);
+        var command = new DeleteRelationshipCommand("000000000000000000000000"); // Valid format, but non-existent
 
-        _mockCollection.Setup(c => c.DeleteOneAsync(
-            It.IsAny<FilterDefinition<Relationship>>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DeleteResult.Acknowledged(0));
+        // Act
+        var act = () => _handler.Handle(command, CancellationToken.None);
 
-        var handler = new DeleteRelationshipCommandHandler(_mockContext.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => handler.Handle(command, CancellationToken.None));
+        // Assert
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 }

@@ -1,5 +1,4 @@
 using MediatR;
-using MongoDB.Bson;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 

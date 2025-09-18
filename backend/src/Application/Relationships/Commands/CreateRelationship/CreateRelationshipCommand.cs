@@ -1,6 +1,5 @@
 using backend.Domain.Enums;
 using MediatR;
-using MongoDB.Bson;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 

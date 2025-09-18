@@ -1,8 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -19,7 +17,6 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, s
     {
         var entity = new Member
         {
-            FullName = request.FullName,
             DateOfBirth = request.DateOfBirth,
             DateOfDeath = request.DateOfDeath,
             Gender = request.Gender,
@@ -32,7 +29,14 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, s
             Metadata = request.Metadata
         };
 
-        await _context.Members.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        if (request.FullName != null)
+        {
+            entity.FullName = request.FullName;
+        }
+
+        _context.Members.Add(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return entity.Id.ToString();
     }

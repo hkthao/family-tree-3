@@ -9,17 +9,16 @@ namespace backend.Application.FamilyTree.Queries.GetFamilyTreePdf;
 
 public class GetFamilyTreePdfQueryHandler : IRequestHandler<GetFamilyTreePdfQuery, byte[]>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMongoDbService _mongoDbService;
 
-    public GetFamilyTreePdfQueryHandler(IApplicationDbContext context)
+    public GetFamilyTreePdfQueryHandler(IMongoDbService mongoDbService)
     {
-        _context = context;
+        _mongoDbService = mongoDbService;
     }
 
     public async Task<byte[]> Handle(GetFamilyTreePdfQuery request, CancellationToken cancellationToken)
     {
-        var familyObjectId = ObjectId.Parse(request.FamilyId);
-        var family = await _context.Families.Find(Builders<Family>.Filter.Eq("_id", familyObjectId)).FirstOrDefaultAsync(cancellationToken);
+        var family = await _mongoDbService.FindFamilyByIdAsync(request.FamilyId, cancellationToken);
 
         if (family == null)
         {

@@ -17,7 +17,7 @@ Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình
 
 - **Backend:** ASP.NET 8, Clean Architecture, JWT Authentication
 - **Frontend:** Vue.js 3, Vuetify 3, Pinia, Vue Router, Vite
-- **Database:** MongoDB
+Database: MySQL (via Entity Framework Core)
 - **Deployment:** Docker, Nginx
 - **CI/CD:** GitHub Actions
 
@@ -42,6 +42,24 @@ Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình
    ```bash
    docker-compose -f infra/docker-compose.yml up --build
    ```
+
+### Cấu hình MySQL
+
+Để chạy ứng dụng với MySQL, bạn cần đảm bảo rằng chuỗi kết nối trong `appsettings.json` của backend được cấu hình đúng. Ví dụ:
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Port=3306;Database=familytree_db;Uid=root;Pwd=password;"
+}
+```
+
+Bạn cần thay thế `localhost`, `3306`, `familytree_db`, `root`, và `password` bằng thông tin chi tiết máy chủ MySQL thực tế của bạn.
+
+Sau khi cấu hình, bạn có thể chạy các migrations để tạo schema database:
+
+```bash
+dotnet ef database update --project backend/src/Infrastructure --startup-project backend/src/Web
+```
 
 ### Tối ưu hóa Docker Build (Docker Build Optimization)
 
