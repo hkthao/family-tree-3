@@ -1,11 +1,7 @@
-﻿﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
-namespace backend.Domain.Common;
+﻿﻿namespace backend.Domain.Common;
 
 public abstract class BaseAuditableEntity : BaseEntity
 {
-    [BsonElement("Created")]
     public DateTime Created { get; set; } = DateTime.UtcNow;
 
     public string? CreatedBy { get; set; }

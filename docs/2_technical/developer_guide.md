@@ -9,7 +9,7 @@
 ## 2. Khởi tạo dự án (Scaffolding)
 
 ## 3. Chạy dự án local với Docker Compose
-Dự án được cấu hình để chạy toàn bộ stack (backend API, frontend, MongoDB) bằng Docker Compose.
+MySQL
 1.  Đảm bảo Docker Desktop đang chạy trên máy của bạn.
 2.  Mở terminal tại thư mục gốc của dự án (`family-tree-3`).
 3.  Chạy lệnh sau để build và khởi động tất cả các dịch vụ:
@@ -23,11 +23,10 @@ Dự án được cấu hình để chạy toàn bộ stack (backend API, fronte
 
 ## 4. Biến môi trường (Environment Variables)
 Các biến môi trường quan trọng được quản lý thông qua file `appsettings.json` (cho backend) và `.env` files (cho frontend).
-- **Backend**: `backend/src/Web/appsettings.json` chứa cấu hình kết nối MongoDB.
+- **Backend**: `backend/src/Web/appsettings.json` chứa cấu hình kết nối MySQL.
   ```json
-  "MongoDbSettings": {
-    "ConnectionString": "mongodb://localhost:27017",
-    "DatabaseName": "family-tree"
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Port=3306;Database=familytree_db;Uid=root;Pwd=password;"
   }
   ```
 - **Frontend**: Cấu hình API endpoint có thể được quản lý qua biến môi trường trong `.env` file.
@@ -111,12 +110,28 @@ Pipeline được cấu hình tại `.github/workflows/ci.yml`. Các bước ch�
   - Middleware này sẽ ghi lại lỗi và trả về một response JSON chuẩn hóa với mã lỗi 500, giúp frontend xử lý một cách nhất quán.
 
 ## 11. Quản lý Schema Database (Schema Versioning)
-- **Hướng dẫn**: Hiện tại, việc quản lý thay đổi schema trong MongoDB được thực hiện thủ công. Khi có thay đổi về cấu trúc document, cần cập nhật các entity tương ứng trong code và đảm bảo tính tương thích ngược.
-- **Đề xuất tương lai**: Khi dự án phát triển, có thể xem xét sử dụng các công cụ như `migrate-mongo` để tự động hóa việc áp dụng các thay đổi schema. Script cho việc này có thể được tích hợp vào CI/CD pipeline.
+Dự án sử dụng Entity Framework Core Migrations để quản lý thay đổi schema database cho MySQL.
+
+- **Tạo Migration mới**: Khi có thay đổi trong các Entity hoặc DbContext, bạn có thể tạo một migration mới bằng lệnh sau (chạy từ thư mục `backend/`):
+  ```bash
+  dotnet ef migrations add [MigrationName] --project src/Infrastructure --startup-project src/Web
+  ```
+  Thay thế `[MigrationName]` bằng tên mô tả cho migration của bạn (ví dụ: `InitialCreate`, `AddMembersTable`).
+
+- **Cập nhật Database**: Để áp dụng các migration vào database, sử dụng lệnh sau (chạy từ thư mục `backend/`):
+  ```bash
+  dotnet ef database update --project src/Infrastructure --startup-project src/Web
+  ```
+  Lệnh này sẽ tạo hoặc cập nhật schema database MySQL dựa trên các migration đã định nghĩa.
+
+- **Xóa Migration cuối cùng**: Nếu bạn cần hoàn tác migration cuối cùng (chỉ nên làm trong quá trình phát triển), sử dụng:
+  ```bash
+  dotnet ef migrations remove --project src/Infrastructure --startup-project src/Web
+  ```
 
 ## 12. Chạy Seed Data
 Để populate database với dữ liệu mẫu, bạn có thể chạy script seed data:
-1.  Đảm bảo MongoDB đang chạy (ví dụ: thông qua `docker-compose up -d mongo`).
+1.  Đảm bảo MySQL đang chạy (ví dụ: thông qua `docker-compose up -d mongo`).
 2.  Mở terminal tại thư mục `infra/seeds`.
 3.  Cài đặt các dependencies cho seed script:
     ```bash

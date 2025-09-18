@@ -2,8 +2,7 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
@@ -18,25 +17,21 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 
     public async Task Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Member>.Filter.Eq("_id", ObjectId.Parse(request.Id!));
-        var update = Builders<Member>.Update
-            .Set(m => m.FullName, request.FullName)
-            .Set(m => m.DateOfBirth, request.DateOfBirth)
-            .Set(m => m.DateOfDeath, request.DateOfDeath)
-            .Set(m => m.Gender, request.Gender)
-            .Set(m => m.AvatarUrl, request.AvatarUrl)
-            .Set(m => m.PlaceOfBirth, request.PlaceOfBirth)
-            .Set(m => m.Phone, request.Phone)
-            .Set(m => m.Email, request.Email)
-            .Set(m => m.Generation, request.Generation)
-            .Set(m => m.Biography, request.Biography)
-            .Set(m => m.Metadata, request.Metadata);
+        Member? entity = await _context.Members.FindAsync([request.Id?? string.Empty], cancellationToken);
+        if (entity == null)
+            throw new Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
+        entity.FullName = request.FullName?? string.Empty;
+        entity.DateOfBirth = request.DateOfBirth;
+        entity.DateOfDeath = request.DateOfDeath;
+        entity.Gender = request.Gender;
+        entity.AvatarUrl = request.AvatarUrl;
+        entity.PlaceOfBirth = request.PlaceOfBirth;
+        entity.Phone = request.Phone;
+        entity.Email = request.Email;
+        entity.Generation = request.Generation;
+        entity.Biography = request.Biography;
+        entity.Metadata = request.Metadata;
 
-        var result = await _context.Members.UpdateOneAsync(filter, update, cancellationToken: cancellationToken);
-
-        if (result.MatchedCount == 0)
-        {
-            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
-        }
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -16,8 +16,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MongoDB.Driver" />
-    <PackageReference Include="AspNetCore.Identity.MongoDbCore" />
+    <PackageReference Include="MySql.EntityFrameworkCore" />
     <PackageReference Include="AWSSDK.SecurityToken" />
 
   </ItemGroup>

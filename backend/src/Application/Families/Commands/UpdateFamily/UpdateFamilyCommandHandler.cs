@@ -1,8 +1,7 @@
 ﻿using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -17,14 +16,19 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand>
 
     public async Task Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Family>.Filter.Eq(f => f.Id, request.Id);
-        var entity = await _context.Families.Find(filter).FirstOrDefaultAsync(cancellationToken) 
-                     ?? throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
+        var entity = await _context.Families.FindAsync(new object[] { request.Id }, cancellationToken);
+
+        if (entity == null)
+        {
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
+        }
 
         entity.Name = request.Name;
         entity.Description = request.Description;
         entity.AvatarUrl = request.AvatarUrl;
 
-        await _context.Families.ReplaceOneAsync(filter, entity, cancellationToken: cancellationToken);
+        _context.Families.Update(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

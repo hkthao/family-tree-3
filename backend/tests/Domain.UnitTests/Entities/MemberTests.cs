@@ -1,5 +1,6 @@
 using backend.Domain.Entities;
 using FluentAssertions;
+using System;
 using Xunit;
 
 namespace backend.Domain.UnitTests.Entities;
@@ -20,7 +21,7 @@ public class MemberTests
             Phone = "1234567890",
             Email = "test@test.com",
             Generation = 1,
-            FamilyId = MongoDB.Bson.ObjectId.GenerateNewId(),
+            FamilyId = "test-family-id",
             Biography = "Test Biography",
             Metadata = "Test Metadata"
         };
@@ -34,7 +35,7 @@ public class MemberTests
         member.Phone.Should().Be("1234567890");
         member.Email.Should().Be("test@test.com");
         member.Generation.Should().Be(1);
-        member.FamilyId.Should().NotBe(MongoDB.Bson.ObjectId.Empty);
+        member.FamilyId.Should().Be("test-family-id");
         member.Biography.Should().Be("Test Biography");
         member.Metadata.Should().Be("Test Metadata");
     }

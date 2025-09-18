@@ -1,14 +1,10 @@
 ﻿﻿using System.ComponentModel.DataAnnotations.Schema;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Domain.Common;
 
 public abstract class BaseEntity
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     private readonly List<BaseEvent> _domainEvents = new();
 

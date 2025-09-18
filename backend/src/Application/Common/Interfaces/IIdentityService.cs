@@ -1,17 +1,16 @@
 ﻿using backend.Application.Common.Models;
-using MongoDB.Bson;
 
 namespace backend.Application.Common.Interfaces;
 
 public interface IIdentityService
 {
-    Task<string?> GetUserNameAsync(ObjectId userId);
+    Task<string?> GetUserNameAsync(string userId);
 
-    Task<bool> IsInRoleAsync(ObjectId userId, string role);
+    Task<(Result Result, string UserId)> CreateUserAsync(string userName, string password);
 
-    Task<bool> AuthorizeAsync(ObjectId userId, string policyName);
+    Task<bool> IsInRoleAsync(string userId, string role);
 
-    Task<(Result Result, ObjectId UserId)> CreateUserAsync(string userName, string password);
+    Task<bool> AuthorizeAsync(string userId, string policyName);
 
-    Task<Result> DeleteUserAsync(ObjectId userId);
+    Task<Result> DeleteUserAsync(string userId);
 }

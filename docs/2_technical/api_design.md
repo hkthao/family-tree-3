@@ -75,7 +75,7 @@ Tài liệu này mô tả các endpoint của Backend API, bao gồm định d�
 
 ```json
 {
-  "familyId": "60c72b2f9b1d8c001f8e4a3c",
+  "familyId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
   "fullName": "Nguyễn Văn A",
   "nicknames": ["Tí"],
   "gender": "Male",

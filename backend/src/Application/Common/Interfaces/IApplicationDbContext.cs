@@ -1,11 +1,13 @@
-﻿using backend.Domain.Entities;
-using MongoDB.Driver;
+using backend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
-    IMongoCollection<Family> Families { get; }
-    IMongoCollection<Member> Members { get; }
-    IMongoCollection<Relationship> Relationships { get; }
+    DbSet<Family> Families { get; }
+    DbSet<Member> Members { get; }
+    DbSet<Relationship> Relationships { get; }
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

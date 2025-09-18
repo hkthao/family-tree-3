@@ -12,7 +12,6 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="MongoDB.Driver" />
   </ItemGroup>
 
   <ItemGroup>

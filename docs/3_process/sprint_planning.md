@@ -187,7 +187,7 @@ Tài liệu này mô tả chi tiết các User Story được lựa chọn cho c
 **Tiêu chí chấp nhận (Acceptance Criteria):**
 - Giao diện cho phép chọn một thành viên và thêm mối quan hệ mới (ví dụ: thêm cha/mẹ, thêm vợ/chồng).
 - Khi thêm cha/mẹ hoặc vợ/chồng, người dùng có thể tìm kiếm và chọn một thành viên khác đã tồn tại trong gia phả.
-- Mối quan hệ phải được lưu chính xác vào collection `relationships` trong database.
+- Mối quan hệ phải được lưu chính xác vào bảng `relationships` trong database.
 - Hệ thống phải có validation để ngăn các mối quan hệ không hợp lệ (ví dụ: một người tự làm cha/mẹ của chính mình, một người có nhiều hơn 2 cha/mẹ ruột).
 - Các mối quan hệ đã có của thành viên được hiển thị rõ ràng trên trang chi tiết.
 
@@ -241,4 +241,4 @@ Tài liệu này mô tả chi tiết các User Story được lựa chọn cho c
 
 **Thông tin:**
 - **Epic:** `visualization`
-- **Story Points:** 8
+- **Story Points:** 8 8

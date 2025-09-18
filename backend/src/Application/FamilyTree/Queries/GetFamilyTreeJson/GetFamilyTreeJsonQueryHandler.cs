@@ -3,10 +3,9 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using backend.Application.Families;
 using backend.Application.Members;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreeJson;
 
@@ -23,16 +22,15 @@ public class GetFamilyTreeJsonQueryHandler : IRequestHandler<GetFamilyTreeJsonQu
 
     public async Task<FamilyTreeDto> Handle(GetFamilyTreeJsonQuery request, CancellationToken cancellationToken)
     {
-        var familyObjectId = ObjectId.Parse(request.FamilyId);
-        var family = await _context.Families.Find(Builders<Family>.Filter.Eq("_id", familyObjectId)).FirstOrDefaultAsync(cancellationToken);
+        var family = await _context.Families.FindAsync(new object[] { request.FamilyId }, cancellationToken);
 
         if (family == null)
         {
             throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.FamilyId);
         }
 
-        var members = await _context.Members.Find(m => m.FamilyId == familyObjectId).ToListAsync(cancellationToken);
-        var relationships = await _context.Relationships.Find(_ => true).ToListAsync(cancellationToken);
+        var members = await _context.Members.Where(m => m.FamilyId == request.FamilyId).ToListAsync(cancellationToken);
+        var relationships = await _context.Relationships.ToListAsync(cancellationToken);
 
         var familyTreeDto = new FamilyTreeDto
         {

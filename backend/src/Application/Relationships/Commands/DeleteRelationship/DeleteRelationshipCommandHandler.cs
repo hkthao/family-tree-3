@@ -2,8 +2,7 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
@@ -18,12 +17,15 @@ public class DeleteRelationshipCommandHandler : IRequestHandler<DeleteRelationsh
 
     public async Task Handle(DeleteRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Relationship>.Filter.Eq("_id", ObjectId.Parse(request.Id!));
-        var result = await _context.Relationships.DeleteOneAsync(filter, cancellationToken: cancellationToken);
+        var entity = await _context.Relationships.FindAsync(new object[] { request.Id }, cancellationToken);
 
-        if (result.DeletedCount == 0)
+        if (entity == null)
         {
-            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Relationship), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Relationship), request.Id);
         }
+
+        _context.Relationships.Remove(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

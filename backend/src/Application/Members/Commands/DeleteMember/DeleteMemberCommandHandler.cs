@@ -2,8 +2,7 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
@@ -18,12 +17,15 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand>
 
     public async Task Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Member>.Filter.Eq("_id", ObjectId.Parse(request.Id!));
-        var result = await _context.Members.DeleteOneAsync(filter, cancellationToken: cancellationToken);
+        var entity = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
 
-        if (result.DeletedCount == 0)
+        if (entity == null)
         {
-            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id);
         }
+
+        _context.Members.Remove(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -4,7 +4,7 @@
 Hệ thống Cây Gia Phả được thiết kế theo kiến trúc Clean Architecture, phân tách rõ ràng các lớp trách nhiệm:
 - **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
 - **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), và các giao diện (Interfaces) cho các dịch vụ bên ngoài.
-- **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MongoDB), dịch vụ Identity, và các dịch vụ bên ngoài khác.
+- **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
 - **Web Layer (API)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các lệnh/truy vấn trong Application Layer, và trả về phản hồi.
 
 ## 2. Sơ đồ kiến trúc (PlantUML)
@@ -16,87 +16,88 @@ Person(user, "End User", "Người dùng cuối")
 System_Boundary(c1, "Hệ thống Cây Gia Phả") {
     Container(spa, "Single-Page App", "Vue.js + Vuetify", "Giao diện người dùng")
     Container(api, "Web API", "ASP.NET Core", "Xử lý logic nghiệp vụ")
-    ContainerDb(db, "Database", "MongoDB", "Lưu trữ dữ liệu gia phả")
+    ContainerDb(db, "Database", "MySQL", "Lưu trữ dữ liệu gia phả")
 }
 
 Rel(user, spa, "Sử dụng", "HTTPS")
 Rel(spa, api, "Gọi API", "HTTPS/JSON")
-Rel(api, db, "Đọc/Ghi dữ liệu", "MongoDB Driver")
+Rel(api, db, "Đọc/Ghi dữ liệu", "ADO.NET / EF Core")
 
 @enduml
 ```
 
-## 3. Sơ đồ Database (MongoDB Schema)
-Dữ liệu được lưu trữ trong MongoDB, một cơ sở dữ liệu NoSQL linh hoạt. Dưới đây là thiết kế schema cơ bản cho các collection chính:
+## 3. Sơ đồ Database (MySQL Schema)
+Dữ liệu được lưu trữ trong MySQL, một cơ sở dữ liệu quan hệ. Dưới đây là thiết kế schema cơ bản cho các bảng chính, được quản lý bởi Entity Framework Core.
 
-### `families` Collection
+### `Families` Table
 Lưu trữ thông tin về các dòng họ hoặc gia đình.
-```json
-{
-  "_id": "ObjectId",        // ID duy nhất của dòng họ/gia đình
-  "name": "string",         // Tên dòng họ/gia đình (ví dụ: "Nguyễn Gia Tộc")
-  "address": "string",      // Địa chỉ hoặc quê quán
-  "logoUrl": "string",      // URL đến logo hoặc hình đại diện của dòng họ
-  "description": "string",  // Mô tả lịch sử hoặc thông tin khác
-  "createdAt": "Date",      // Thời gian tạo bản ghi
-  "updatedAt": "Date"       // Thời gian cập nhật gần nhất
-}
+```sql
+CREATE TABLE `Families` (
+    `Id` VARCHAR(36) NOT NULL PRIMARY KEY, -- Sử dụng GUID làm khóa chính
+    `Name` VARCHAR(255) NOT NULL,
+    `Address` VARCHAR(255),
+    `LogoUrl` VARCHAR(255),
+    `Description` TEXT,
+    `CreatedAt` DATETIME(6) NOT NULL,
+    `UpdatedAt` DATETIME(6) NOT NULL
+);
 ```
 **Indexes:**
-- `name`: text index for search
-- `address`: text index for search
+- `IX_Families_Name`: B-tree index on `Name` for search.
 
-### `members` Collection
+### `Members` Table
 Lưu trữ thông tin chi tiết của từng thành viên.
-```json
-{
-  "_id": "ObjectId",        // ID duy nhất của thành viên
-  "familyId": "ObjectId",   // ID của dòng họ/gia đình mà thành viên thuộc về
-  "fullName": "string",     // Họ và tên đầy đủ
-  "givenName": "string",    // Tên gọi (nếu có)
-  ""dob": "Date",           // Ngày sinh
-  "dod": "Date",            // Ngày mất (nếu đã mất)
-  "status": "string",       // Trạng thái (ví dụ: "alive", "deceased")
-  "avatarUrl": "string",    // URL đến ảnh đại diện
-  "contact": {              // Thông tin liên lạc
-    "email": "string",
-    "phone": "string"
-  },
-  "generation": "number",   // Thế hệ thứ mấy trong dòng họ
-  "orderInFamily": "number",// Thứ tự con trong gia đình (ví dụ: con thứ 1, thứ 2)
-  "description": "string",  // Mô tả về cuộc đời, sự nghiệp (có thể là rich-text)
-  "metadata": "object",     // Các trường dữ liệu mở rộng khác
-  "createdAt": "Date",      // Thời gian tạo bản ghi
-  "updatedAt": "Date"       // Thời gian cập nhật gần nhất
-}
+```sql
+CREATE TABLE `Members` (
+    `Id` VARCHAR(36) NOT NULL PRIMARY KEY, -- Sử dụng GUID làm khóa chính
+    `FamilyId` VARCHAR(36) NOT NULL,
+    `FullName` VARCHAR(255) NOT NULL,
+    `GivenName` VARCHAR(255),
+    `Dob` DATETIME(6),
+    `Dod` DATETIME(6),
+    `Status` VARCHAR(50),
+    `AvatarUrl` VARCHAR(255),
+    `ContactEmail` VARCHAR(255),
+    `ContactPhone` VARCHAR(50),
+    `Generation` INT NOT NULL,
+    `OrderInFamily` INT,
+    `Description` TEXT,
+    `Metadata` JSON, -- Lưu trữ dữ liệu mở rộng dưới dạng JSON
+    `CreatedAt` DATETIME(6) NOT NULL,
+    `UpdatedAt` DATETIME(6) NOT NULL,
+    CONSTRAINT `FK_Members_Families_FamilyId` FOREIGN KEY (`FamilyId`) REFERENCES `Families` (`Id`) ON DELETE CASCADE
+);
 ```
 **Indexes:**
-- `fullName`: text index for search
-- `familyId`: ascending index for filtering members by family
-- `generation`: ascending index for filtering members by generation
-- `contact.email`: ascending index for searching by email
+- `IX_Members_FullName`: B-tree index on `FullName` for search.
+- `IX_Members_FamilyId`: B-tree index on `FamilyId` for filtering.
+- `IX_Members_Generation`: B-tree index on `Generation` for filtering.
+- `IX_Members_ContactEmail`: B-tree index on `ContactEmail` for search.
 
-### `relationships` Collection
+### `Relationships` Table
 Lưu trữ các mối quan hệ giữa các thành viên.
-```json
-{
-  "_id": "ObjectId",        // ID duy nhất của mối quan hệ
-  "familyId": "ObjectId",   // ID của dòng họ/gia đình mà mối quan hệ thuộc về
-  "memberId": "ObjectId",   // ID của thành viên gốc
-  "relationType": "string", // Loại quan hệ (ví dụ: "parent", "spouse", "child")
-  "targetMemberId": "ObjectId", // ID của thành viên có quan hệ với memberId
-  "startDate": "Date",      // Ngày bắt đầu mối quan hệ (ví dụ: ngày kết hôn)
-  "endDate": "Date",        // Ngày kết thúc mối quan hệ (ví dụ: ngày ly hôn, ngày mất của vợ/chồng)
-  "metadata": "object",     // Các trường dữ liệu mở rộng khác
-  "createdAt": "Date",      // Thời gian tạo bản ghi
-  "updatedAt": "Date"       // Thời gian cập nhật gần nhất
-}
+```sql
+CREATE TABLE `Relationships` (
+    `Id` VARCHAR(36) NOT NULL PRIMARY KEY, -- Sử dụng GUID làm khóa chính
+    `FamilyId` VARCHAR(36) NOT NULL,
+    `MemberId` VARCHAR(36) NOT NULL,
+    `RelationType` VARCHAR(50) NOT NULL,
+    `TargetMemberId` VARCHAR(36) NOT NULL,
+    `StartDate` DATETIME(6),
+    `EndDate` DATETIME(6),
+    `Metadata` JSON, -- Lưu trữ dữ liệu mở rộng dưới dạng JSON
+    `CreatedAt` DATETIME(6) NOT NULL,
+    `UpdatedAt` DATETIME(6) NOT NULL,
+    CONSTRAINT `FK_Relationships_Families_FamilyId` FOREIGN KEY (`FamilyId`) REFERENCES `Families` (`Id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_Relationships_Members_MemberId` FOREIGN KEY (`MemberId`) REFERENCES `Members` (`Id`) ON DELETE CASCADE,
+    CONSTRAINT `FK_Relationships_Members_TargetMemberId` FOREIGN KEY (`TargetMemberId`) REFERENCES `Members` (`Id`) ON DELETE CASCADE
+);
 ```
 **Indexes:**
-- `familyId`: ascending index for filtering relationships by family
-- `memberId`: ascending index for filtering relationships by member
-- `targetMemberId`: ascending index for filtering relationships by target member
-- `relationType`: ascending index for filtering relationships by type
+- `IX_Relationships_FamilyId`: B-tree index on `FamilyId` for filtering.
+- `IX_Relationships_MemberId`: B-tree index on `MemberId` for filtering.
+- `IX_Relationships_TargetMemberId`: B-tree index on `TargetMemberId` for filtering.
+- `IX_Relationships_RelationType`: B-tree index on `RelationType` for filtering.
 
 ## 4. Sơ đồ Sequence (Ví dụ: Tạo thành viên mới)
 ```plantuml
@@ -106,13 +107,13 @@ participant "Frontend (SPA)" as Frontend
 participant "Web API (ASP.NET Core)" as API
 participant "Application Layer" as Application
 participant "Infrastructure Layer" as Infrastructure
-database "MongoDB" as DB
+database "MySQL" as DB
 
 User -> Frontend: Nhập thông tin thành viên mới
 Frontend -> API: POST /api/members (CreateMemberCommand)
 API -> Application: Gửi CreateMemberCommand
 Application -> Infrastructure: Gọi IApplicationDbContext.Members.InsertOneAsync()
-Infrastructure -> DB: Lưu document thành viên mới
+Infrastructure -> DB: Lưu bản ghi thành viên mới
 DB --> Infrastructure: Trả về ID thành viên
 Infrastructure --> Application: Trả về ID thành viên
 Application --> API: Trả về ID thành viên
@@ -133,7 +134,7 @@ Person(user, "Người dùng cuối", "Người dùng tương tác với hệ th
 System_Boundary(family_tree_system, "Hệ thống Cây Gia Phả") {
     Container(spa, "Single-Page App", "Vue.js + Vuetify", "Cung cấp giao diện người dùng.")
     Container(api, "Web API", "ASP.NET Core", "Cung cấp API cho SPA và các client khác.")
-    ContainerDb(db, "Database", "MongoDB", "Lưu trữ dữ liệu gia phả và người dùng.")
+    ContainerDb(db, "Database", "MySQL", "Lưu trữ dữ liệu gia phả và người dùng.")
 
     Boundary(web_layer, "Web Layer") {
         Component(controllers, "Controllers", "ASP.NET Core MVC", "Xử lý HTTP requests, xác thực và điều hướng.")
@@ -144,7 +145,7 @@ System_Boundary(family_tree_system, "Hệ thống Cây Gia Phả") {
         Component(interfaces, "Repository Interfaces", "C# Interfaces", "Định nghĩa hợp đồng cho Infrastructure.")
     }
     Boundary(infra_layer, "Infrastructure Layer") {
-        Component(mongodb_repo, "MongoDB Repository", "C# Classes", "Triển khai truy cập dữ liệu MongoDB.")
+        Component(efcore_repo, "EF Core Repository", "C# Classes", "Triển khai truy cập dữ liệu MySQL với EF Core.")
         Component(identity_service, "Identity Service", "C# Classes", "Triển khai quản lý người dùng và JWT.")
     }
 }
@@ -183,7 +184,7 @@ actor "Người dùng" as user
 user --> "SPA"
 "SPA" --> "Nginx"
 "Nginx" --> "Backend API"
-"Backend API" --> "MongoDB"
+"Backend API" --> "MySQL"
 @enduml
 
 ```

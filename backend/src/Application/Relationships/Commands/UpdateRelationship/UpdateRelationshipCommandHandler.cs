@@ -2,10 +2,7 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
@@ -20,17 +17,20 @@ public class UpdateRelationshipCommandHandler : IRequestHandler<UpdateRelationsh
 
     public async Task Handle(UpdateRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var filter = Builders<Relationship>.Filter.Eq(r => r.Id, request.Id!);
-        var entity = await _context.Relationships.Find(filter).FirstOrDefaultAsync(cancellationToken)
-                     ?? throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Relationship), request.Id!);
+        var entity = await _context.Relationships.FindAsync(new object[] { request.Id }, cancellationToken);
 
-        entity.SourceMemberId = ObjectId.Parse(request.SourceMemberId!);
-        entity.TargetMemberId = ObjectId.Parse(request.TargetMemberId!);
+        if (entity == null)
+        {
+            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Relationship), request.Id);
+        }
+
+        entity.SourceMemberId = request.SourceMemberId!;
+        entity.TargetMemberId = request.TargetMemberId!;
         entity.Type = request.Type;
-        entity.FamilyId = ObjectId.Parse(request.FamilyId!);
+        entity.FamilyId = request.FamilyId!;
         entity.StartDate = request.StartDate;
         entity.EndDate = request.EndDate;
 
-        await _context.Relationships.ReplaceOneAsync(filter, entity, cancellationToken: cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

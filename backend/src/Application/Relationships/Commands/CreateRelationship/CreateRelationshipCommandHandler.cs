@@ -1,8 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
@@ -19,15 +17,17 @@ public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationsh
     {
         var entity = new Relationship
         {
-            SourceMemberId = ObjectId.Parse(request.MemberId!),
+            SourceMemberId = request.MemberId!,
             Type = request.Type,
-            TargetMemberId = ObjectId.Parse(request.TargetId!),
-            FamilyId = ObjectId.Parse(request.FamilyId!),
+            TargetMemberId = request.TargetId!,
+            FamilyId = request.FamilyId!,
             StartDate = request.StartDate,
             EndDate = request.EndDate
         };
 
-        await _context.Relationships.InsertOneAsync(entity, cancellationToken: cancellationToken);
+        _context.Relationships.Add(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return entity.Id.ToString();
     }

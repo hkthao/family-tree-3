@@ -3,7 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Members;
 using backend.Domain.Entities;
 using MediatR;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
@@ -20,7 +20,7 @@ public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, List<Memb
 
     public async Task<List<MemberDto>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        var members = await _context.Members.Find(_ => true).ToListAsync(cancellationToken);
+        var members = await _context.Members.ToListAsync(cancellationToken);
         return _mapper.Map<List<MemberDto>>(members);
     }
 }

@@ -3,68 +3,56 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Domain.Entities;
 using FluentAssertions;
-using MongoDB.Driver;
-using Moq;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandHandlerTests
 {
-    private readonly Mock<IApplicationDbContext> _contextMock;
     private readonly UpdateFamilyCommandHandler _handler;
+    private readonly ApplicationDbContext _context;
 
     public UpdateFamilyCommandHandlerTests()
     {
-        _contextMock = new Mock<IApplicationDbContext>();
-        _handler = new UpdateFamilyCommandHandler(_contextMock.Object);
+        // Setup in-memory database
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .Options;
+
+        _context = new ApplicationDbContext(options);
+        _handler = new UpdateFamilyCommandHandler(_context);
     }
 
     [Fact]
     public async Task Handle_Should_Update_Family()
     {
         // Arrange
-        var family = new Family { Name = "Old Name" };
+        var familyId = "60c72b2f9b1e8b001c8e4e1a";
+        var family = new Family { Id = familyId, Name = "Old Name" };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
         var command = new UpdateFamilyCommand
         {
-            Id = "1",
+            Id = familyId,
             Name = "New Name",
             Description = "New Desc"
         };
-
-        var cursor = new Mock<IAsyncCursor<Family>>();
-        cursor.Setup(_ => _.Current).Returns(new List<Family> { family });
-        cursor
-            .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
-            .Returns(true)
-            .Returns(false);
-        cursor
-            .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true))
-            .Returns(Task.FromResult(false));
-
-        var collectionMock = new Mock<IMongoCollection<Family>>();
-        collectionMock.Setup(x => x.FindAsync(
-            It.IsAny<FilterDefinition<Family>>(),
-            It.IsAny<FindOptions<Family, Family>>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(cursor.Object);
-
-        _contextMock.Setup(x => x.Families).Returns(collectionMock.Object);
 
         // Act
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        collectionMock.Verify(x => x.ReplaceOneAsync(
-            It.IsAny<FilterDefinition<Family>>(),
-            It.Is<Family>(f => f.Name == command.Name),
-            It.IsAny<ReplaceOptions>(),
-            It.IsAny<CancellationToken>()),
-            Times.Once);
+        var updatedFamily = await _context.Families.FindAsync(familyId);
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.Name.Should().Be(command.Name);
+        updatedFamily.Description.Should().Be(command.Description);
     }
 
     [Fact]
@@ -72,24 +60,6 @@ public class UpdateFamilyCommandHandlerTests
     {
         // Arrange
         var command = new UpdateFamilyCommand { Id = "1" };
-
-        var cursor = new Mock<IAsyncCursor<Family>>();
-        cursor.Setup(_ => _.Current).Returns(new List<Family>());
-        cursor
-            .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
-            .Returns(false);
-        cursor
-            .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(false));
-
-        var collectionMock = new Mock<IMongoCollection<Family>>();
-        collectionMock.Setup(x => x.FindAsync(
-            It.IsAny<FilterDefinition<Family>>(),
-            It.IsAny<FindOptions<Family, Family>>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(cursor.Object);
-
-        _contextMock.Setup(x => x.Families).Returns(collectionMock.Object);
 
         // Act
         var act = () => _handler.Handle(command, CancellationToken.None);

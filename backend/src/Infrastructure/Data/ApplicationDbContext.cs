@@ -1,23 +1,24 @@
-﻿using backend.Application.Common.Interfaces;
+using System.Reflection;
+using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+using backend.Infrastructure.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Data;
 
-public class ApplicationDbContext : IApplicationDbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplicationDbContext
 {
-    private readonly IMongoDatabase _database;
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-    public ApplicationDbContext(IOptions<AppMongoDbSettings> settings)
+    public DbSet<Family> Families => Set<Family>();
+    public DbSet<Member> Members => Set<Member>();
+    public DbSet<Relationship> Relationships => Set<Relationship>();
+
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        var client = new MongoClient(settings.Value.ConnectionString);
-        _database = client.GetDatabase(settings.Value.DatabaseName);
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        base.OnModelCreating(builder);
     }
-
-    public IMongoCollection<Family> Families => _database.GetCollection<Family>("Families");
-    public IMongoCollection<Member> Members => _database.GetCollection<Member>("Members");
-    public IMongoCollection<Relationship> Relationships => _database.GetCollection<Relationship>("Relationships");
 }
-
-

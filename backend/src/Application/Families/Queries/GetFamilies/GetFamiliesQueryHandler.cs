@@ -1,6 +1,6 @@
 ﻿using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.GetFamilies;
 
@@ -17,7 +17,7 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, List<Fa
 
     public async Task<List<FamilyDto>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var families = await _context.Families.Find(_ => true).ToListAsync(cancellationToken);
+        var families = await _context.Families.ToListAsync(cancellationToken);
         return _mapper.Map<List<FamilyDto>>(families);
     }
 }
