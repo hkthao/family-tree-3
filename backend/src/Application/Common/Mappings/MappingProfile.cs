@@ -1,12 +1,9 @@
-using AutoMapper;
-
 namespace backend.Application.Common.Mappings;
 
 public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<MongoDB.Bson.ObjectId, string>().ConvertUsing(id => id.ToString());
         ApplyMappingsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
     }
 

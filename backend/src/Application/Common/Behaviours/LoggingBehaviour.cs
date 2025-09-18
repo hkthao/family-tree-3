@@ -1,7 +1,6 @@
 ﻿using backend.Application.Common.Interfaces;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 
 namespace backend.Application.Common.Behaviours;
 
@@ -22,15 +21,15 @@ public class LoggingBehaviour<TRequest> : IRequestPreProcessor<TRequest>
     public async Task Process(TRequest request, CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        var userId = _user.Id; // This is ObjectId?
-        string? userName = string.Empty;
+        var userId = _user.Id;
+        string? userName = null;
 
-        if (userId.HasValue) // Check if ObjectId has a value
+        if (!string.IsNullOrEmpty(userId))
         {
-            userName = await _identityService.GetUserNameAsync(userId.Value); // Pass ObjectId.Value
+            userName = await _identityService.GetUserNameAsync(userId);
         }
 
         _logger.LogInformation("backend Request: {Name} {@UserId} {@UserName} {@Request}",
-            requestName, userId?.ToString(), userName, request); // Convert ObjectId? to string for logging
+            requestName, userId?.ToString(), userName, request);
     }
 }
