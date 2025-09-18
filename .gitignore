@@ -421,6 +421,7 @@ $RECYCLE.BIN/
 *.swp
 .azure
 
+backend/coverage-report/
 # Frontend specific
 dist
 dist-ssr
