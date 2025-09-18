@@ -5,9 +5,18 @@ Tài liệu này mô tả các endpoint của Backend API, bao gồm định d�
 ## 1. Tổng quan
 
 -   **Base URL:** `/api`
--   **Authentication:** Sử dụng JWT Bearer Token trong header `Authorization`.
+-   **Authentication:** Sử dụng JWT Bearer Token (Auth0) trong header `Authorization`.
 -   **Định dạng:** JSON
 -   **Swagger UI:** Giao diện tài liệu API tương tác có tại `http://localhost:8080/swagger`.
+
+### 1.a. Authentication with Auth0
+
+Hệ thống sử dụng Auth0 làm nhà cung cấp danh tính (Identity Provider - IdP) để quản lý xác thực và ủy quyền.
+
+-   **Luồng xác thực:** Người dùng sẽ được xác thực thông qua Auth0 (ví dụ: sử dụng Universal Login của Auth0). Sau khi xác thực thành công, Auth0 sẽ cấp phát một JWT Access Token.
+-   **Sử dụng Access Token:** Access Token này sẽ được gửi trong header `Authorization` dưới dạng `Bearer <token>` cho tất cả các request đến Backend API.
+-   **Xác thực Token tại Backend:** Backend API sẽ xác thực Access Token bằng cách kiểm tra chữ ký, thời hạn, và các claims (ví dụ: `aud` - audience, `iss` - issuer) với thông tin cấu hình Auth0.
+-   **Scopes và Permissions:** Các quyền truy cập (permissions) sẽ được định nghĩa trong Auth0 API và được bao gồm trong Access Token dưới dạng `scope` hoặc custom claims. Backend sẽ sử dụng các thông tin này để thực hiện ủy quyền (authorization).
 
 ## 2. Các Endpoint chính
 
