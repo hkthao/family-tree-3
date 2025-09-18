@@ -8,6 +8,7 @@ Tài liệu này phân loại các user story trong backlog thành các **Epic**
 
 **Mô tả:** Bao gồm các chức năng cơ bản nhất để tạo và duy trì dữ liệu của cây gia phả.
 
+-   Là người dùng, tôi muốn tra cứu thông tin gia đình/ dòng họ.
 -   Là người dùng, tôi muốn thêm thành viên mới vào cây gia phả để mở rộng lịch sử gia đình.
 -   Là người dùng, tôi muốn chỉnh sửa thông tin thành viên hiện có để cập nhật hoặc sửa lỗi.
 -   Là người dùng, tôi muốn xem thông tin chi tiết của từng thành viên (ảnh, tiểu sử, sự kiện) để có cái nhìn đầy đủ.
