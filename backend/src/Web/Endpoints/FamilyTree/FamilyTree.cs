@@ -18,13 +18,13 @@ public class FamilyTree : EndpointGroupBase
         group.MapGet("/{familyId}/pdf", GetFamilyTreePdf);
     }
 
-    public async Task<Ok<FamilyTreeDto>> GetFamilyTreeJson(ISender sender, string familyId)
+    public async Task<Ok<FamilyTreeDto>> GetFamilyTreeJson(ISender sender, Guid familyId)
     {
         var result = await sender.Send(new GetFamilyTreeJsonQuery(familyId));
         return TypedResults.Ok(result);
     }
 
-    public async Task<FileContentHttpResult> GetFamilyTreePdf(ISender sender, string familyId)
+    public async Task<FileContentHttpResult> GetFamilyTreePdf(ISender sender, Guid familyId)
     {
         var result = await sender.Send(new GetFamilyTreePdfQuery(familyId));
         return TypedResults.File(result, "application/pdf", $"family-tree-{familyId}.pdf");

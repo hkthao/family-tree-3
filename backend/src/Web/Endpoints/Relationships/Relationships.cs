@@ -17,13 +17,13 @@ public class Relationships : EndpointGroupBase
         group.MapDelete("/{id}", DeleteRelationship);
     }
 
-    public async Task<Created<string>> CreateRelationship(ISender sender, CreateRelationshipCommand command)
+    public async Task<Created<Guid>> CreateRelationship(ISender sender, CreateRelationshipCommand command)
     {
         var id = await sender.Send(command);
         return TypedResults.Created($"/api/relationships/{id}", id);
     }
 
-    public async Task<Results<NoContent, NotFound>> DeleteRelationship(ISender sender, string id)
+    public async Task<Results<NoContent, NotFound>> DeleteRelationship(ISender sender, Guid id)
     {
         await sender.Send(new DeleteRelationshipCommand(id));
         return TypedResults.NoContent();

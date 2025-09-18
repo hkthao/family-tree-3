@@ -30,19 +30,19 @@ public class Members : EndpointGroupBase
         return TypedResults.Ok(result);
     }
 
-    public async Task<Ok<MemberDto>> GetMemberById(ISender sender, string id)
+    public async Task<Ok<MemberDto>> GetMemberById(ISender sender, Guid id)
     {
         var result = await sender.Send(new GetMemberByIdQuery(id));
         return TypedResults.Ok(result);
     }
 
-    public async Task<Created<string>> CreateMember(ISender sender, CreateMemberCommand command)
+    public async Task<Created<Guid>> CreateMember(ISender sender, CreateMemberCommand command)
     {
         var id = await sender.Send(command);
         return TypedResults.Created($"/api/members/{id}", id);
     }
 
-    public async Task<Results<NoContent, NotFound>> UpdateMember(ISender sender, string id, UpdateMemberCommand command)
+    public async Task<Results<NoContent, NotFound>> UpdateMember(ISender sender, Guid id, UpdateMemberCommand command)
     {
         if (id != command.Id)
         {
@@ -52,7 +52,7 @@ public class Members : EndpointGroupBase
         return TypedResults.NoContent();
     }
 
-    public async Task<Results<NoContent, NotFound>> DeleteMember(ISender sender, string id)
+    public async Task<Results<NoContent, NotFound>> DeleteMember(ISender sender, Guid id)
     {
         await sender.Send(new DeleteMemberCommand(id));
         return TypedResults.NoContent();

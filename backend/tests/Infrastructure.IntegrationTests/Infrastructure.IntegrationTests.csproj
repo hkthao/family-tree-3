@@ -21,6 +21,7 @@
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="Moq" />
         <PackageReference Include="Microsoft.AspNetCore.Authorization" />
+        <PackageReference Include="Testcontainers.MySql" />
     </ItemGroup>
 
     <ItemGroup>

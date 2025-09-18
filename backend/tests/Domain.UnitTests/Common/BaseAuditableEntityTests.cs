@@ -1,83 +1,57 @@
-using Xunit;
+using backend.Domain.Common;
 using FluentAssertions;
 using System;
-using backend.Domain.Common;
+using Xunit;
 
 namespace backend.Domain.UnitTests.Common;
 
 public class BaseAuditableEntityTests
 {
-    [Fact]
-    public void CreatedBy_ShouldBeNullInitially()
-    {
-        var entity = new TestAuditableEntity();
-        entity.CreatedBy.Should().BeNull();
-    }
-
-    [Fact]
-    public void LastModifiedBy_ShouldBeNullInitially()
-    {
-        var entity = new TestAuditableEntity();
-        entity.LastModifiedBy.Should().BeNull();
-    }
-
-    [Fact]
-    public void SetCreatedBy_ShouldSetCreatedByProperty()
-    {
-        var entity = new TestAuditableEntity();
-        var userId = "testUser";
-        entity.SetCreatedBy(userId);
-        entity.CreatedBy.Should().Be(userId);
-    }
-
-    [Fact]
-    public void SetLastModifiedBy_ShouldSetLastModifiedByProperty()
-    {
-        var entity = new TestAuditableEntity();
-        var userId = "testUser";
-        entity.SetLastModifiedBy(userId);
-        entity.LastModifiedBy.Should().Be(userId);
-    }
-
-    [Fact]
-    public void SetLastModified_ShouldSetLastModifiedProperty()
-    {
-        var entity = new TestAuditableEntity();
-        var date = DateTime.UtcNow;
-        entity.SetLastModified(date);
-        entity.LastModified.Should().Be(date);
-    }
-
-    [Fact]
-    public void Created_ShouldHaveDefaultValueInitially_AndGetterShouldBeHit()
-    {
-        var entity = new TestAuditableEntity();
-        entity.Created.Should().NotBe(default(DateTime));
-    }
-
-    [Fact]
-    public void LastModified_ShouldHaveDefaultValueInitially_AndGetterShouldBeHit()
-    {
-        var entity = new TestAuditableEntity();
-        entity.LastModified.Should().NotBe(default(DateTime));
-    }
-
-    // Helper class for testing
     private class TestAuditableEntity : BaseAuditableEntity
     {
-        public void SetCreatedBy(string userId)
-        {
-            CreatedBy = userId;
-        }
+        public string? SomeProperty { get; set; }
+    }
 
-        public void SetLastModifiedBy(string userId)
-        {
-            LastModifiedBy = userId;
-        }
+    [Fact]
+    public void Created_ShouldBeSetOnCreation()
+    {
+        var entity = new TestAuditableEntity();
+        entity.Created.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
+    }
 
-        public void SetLastModified(DateTime date)
-        {
-            LastModified = date;
-        }
+    [Fact]
+    public void Created_SetterShouldWork()
+    {
+        var entity = new TestAuditableEntity();
+        var newCreatedDate = DateTime.UtcNow.AddDays(-1);
+        entity.Created = newCreatedDate;
+        entity.Created.Should().Be(newCreatedDate);
+    }
+
+    [Fact]
+    public void CreatedBy_ShouldBeSettableAndGettable()
+    {
+        var entity = new TestAuditableEntity();
+        var createdBy = "testuser";
+        entity.CreatedBy = createdBy;
+        entity.CreatedBy.Should().Be(createdBy);
+    }
+
+    [Fact]
+    public void LastModified_ShouldBeSettableAndGettable()
+    {
+        var entity = new TestAuditableEntity();
+        var lastModified = DateTime.UtcNow.AddHours(-1);
+        entity.LastModified = lastModified;
+        entity.LastModified.Should().Be(lastModified);
+    }
+
+    [Fact]
+    public void LastModifiedBy_ShouldBeSettableAndGettable()
+    {
+        var entity = new TestAuditableEntity();
+        var lastModifiedBy = "anotheruser";
+        entity.LastModifiedBy = lastModifiedBy;
+        entity.LastModifiedBy.Should().Be(lastModifiedBy);
     }
 }

@@ -1,54 +1,42 @@
 
-// TODO: Fix test to use MySQL instead of MongoDB
-/*
 using Xunit;
-// using Testcontainers.MongoDb; // Commented out
-using backend.Infrastructure.Data;
+using Testcontainers.MySql;
+using Microsoft.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using System.Threading.Tasks;
 using System;
+using backend.Infrastructure.Data;
 
 namespace backend.Infrastructure.IntegrationTests;
 
 public class IntegrationTestFixture : IAsyncLifetime
 {
-    // private MongoDBContainer _mongoDbContainer = null!; // Commented out
+    private MySqlContainer _mySqlContainer = null!;
     public ApplicationDbContext DbContext { get; private set; } = null!;
-    private IMongoClient _mongoClient = null!;
 
     public async Task InitializeAsync()
     {
-        // _mongoDbContainer = new MongoDBBuilder().Build(); // Commented out
-        // await _mongoDbContainer.StartAsync(); // Commented out
+        _mySqlContainer = new MySqlBuilder().Build();
+        await _mySqlContainer.StartAsync();
 
-        // Dummy MongoDB settings for compilation
-        var mongoDbSettings = Options.Create(new AppMongoDbSettings
-        {
-            ConnectionString = "mongodb://localhost:27017", // Dummy connection string
-            DatabaseName = "testdb"
-        });
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseMySql(_mySqlContainer.GetConnectionString(), ServerVersion.AutoDetect(_mySqlContainer.GetConnectionString()));
 
-        _mongoClient = new MongoClient(mongoDbSettings.Value.ConnectionString);
-        DbContext = new ApplicationDbContext(mongoDbSettings);
-        await Task.CompletedTask; // Simulate async operation
+        DbContext = new ApplicationDbContext(optionsBuilder.Options);
+        await DbContext.Database.MigrateAsync();
     }
 
     public async Task DisposeAsync()
     {
-        // await _mongoDbContainer.DisposeAsync(); // Commented out
-        await Task.CompletedTask; // Simulate async operation
+        await DbContext.DisposeAsync();
+        await _mySqlContainer.DisposeAsync();
     }
 
     public async Task ResetState()
     {
-        var mongoDbSettings = Options.Create(new AppMongoDbSettings
-        {
-            ConnectionString = "mongodb://localhost:27017", // Dummy connection string
-            DatabaseName = "testdb"
-        });
-        await _mongoClient.DropDatabaseAsync(mongoDbSettings.Value.DatabaseName);
+        await DbContext.Database.EnsureDeletedAsync();
+        await DbContext.Database.MigrateAsync();
     }
 }
 
@@ -72,4 +60,3 @@ public abstract class IntegrationTestBase : IClassFixture<IntegrationTestFixture
         _fixture.ResetState().GetAwaiter().GetResult(); // Reset state before each test
     }
 }
-*/

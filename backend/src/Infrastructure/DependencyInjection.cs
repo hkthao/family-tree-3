@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql;
 
 namespace backend.Infrastructure;
 
@@ -21,7 +22,7 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseMySQL(connectionString));
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
