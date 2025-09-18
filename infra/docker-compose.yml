@@ -1,31 +1,33 @@
 version: '3.8'
 
 services:
-  mongo:
-    image: mongo:latest
-    container_name: family-tree-mongo
+  mysql:
+    image: mysql:8.0
+    container_name: family-tree-mysql
     ports:
-      - "27017:27017"
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password # You should change this in a production environment
+      MYSQL_DATABASE: familytree_db
     volumes:
-      - mongo-data:/data/db
+      - mysql-data:/var/lib/mysql
 
   backend:
     build:
       context: ../backend
       dockerfile: ../infra/Dockerfile.backend # Path to Dockerfile relative to the new context
       args:
-        - MongoDbSettings__ConnectionString=${MongoDbSettings__ConnectionString}
-        - MongoDbSettings__DatabaseName=${MongoDbSettings__DatabaseName}
+        - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;
     container_name: family-tree-backend
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # Add other environment variables like connection strings
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;
     env_file:
       - ../.env
     depends_on:
-      - mongo
+      - mysql
 
   frontend:
     build:
@@ -41,4 +43,4 @@ services:
       - backend
 
 volumes:
-  mongo-data:
+  mysql-data:

@@ -24,24 +24,24 @@ public class Families : EndpointGroupBase
         return await sender.Send(new GetFamiliesQuery());
     }
 
-    public async Task<FamilyDto> GetFamilyById(ISender sender, string id)
+    public async Task<FamilyDto> GetFamilyById(ISender sender, Guid id)
     {
         return await sender.Send(new GetFamilyByIdQuery(id));
     }
 
-    public async Task<string> CreateFamily(ISender sender, CreateFamilyCommand command)
+    public async Task<Guid> CreateFamily(ISender sender, CreateFamilyCommand command)
     {
         return await sender.Send(command);
     }
 
-    public async Task<IResult> UpdateFamily(ISender sender, string id, UpdateFamilyCommand command)
+    public async Task<IResult> UpdateFamily(ISender sender, Guid id, UpdateFamilyCommand command)
     {
         if (id != command.Id) return Results.BadRequest();
         await sender.Send(command);
         return Results.NoContent();
     }
 
-    public async Task<IResult> DeleteFamily(ISender sender, string id)
+    public async Task<IResult> DeleteFamily(ISender sender, Guid id)
     {
         await sender.Send(new DeleteFamilyCommand(id));
         return Results.NoContent();

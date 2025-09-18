@@ -1,12 +1,10 @@
 using backend.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using Moq;
 using Xunit;
 using FluentAssertions;
 using System.Threading.Tasks;
-using AspNetCore.Identity.MongoDbCore.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System;
@@ -16,7 +14,7 @@ namespace backend.Infrastructure.IntegrationTests;
 public class IdentityServiceTests
 {
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
-    private readonly Mock<RoleManager<MongoIdentityRole<ObjectId>>> _roleManagerMock;
+    private readonly Mock<RoleManager<IdentityRole>> _roleManagerMock;
         private readonly Mock<IUserClaimsPrincipalFactory<ApplicationUser>> _userClaimsPrincipalFactoryMock;
         private readonly Mock<IAuthorizationService> _authorizationServiceMock;
         private readonly IdentityService _identityService;
@@ -38,13 +36,13 @@ public class IdentityServiceTests
             );
 
             // Mock RoleManager (not directly used by IdentityService, but needed for constructor of ApplicationDbContextInitialiserTests)
-            var roleStoreMock = new Mock<IRoleStore<MongoIdentityRole<ObjectId>>>();
-            _roleManagerMock = new Mock<RoleManager<MongoIdentityRole<ObjectId>>>(
+            var roleStoreMock = new Mock<IRoleStore<IdentityRole>>();
+            _roleManagerMock = new Mock<RoleManager<IdentityRole>>(
                 roleStoreMock.Object,
-                new List<IRoleValidator<MongoIdentityRole<ObjectId>>>().AsEnumerable(),
+                new List<IRoleValidator<IdentityRole>>().AsEnumerable(),
                 new Mock<ILookupNormalizer>().Object,
                 new Mock<IdentityErrorDescriber>().Object,
-                new Mock<ILogger<RoleManager<MongoIdentityRole<ObjectId>>>>().Object
+                new Mock<ILogger<RoleManager<IdentityRole>>>().Object
             );
 
             _userClaimsPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
@@ -61,12 +59,12 @@ public class IdentityServiceTests
     public async Task GetUserNameAsync_ShouldReturnUserName_WhenUserExists()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
-        _userManagerMock.Setup(u => u.FindByIdAsync(ObjectId.Parse(userId).ToString())).ReturnsAsync(user);
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
+        _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
 
         // Act
-        var result = await _identityService.GetUserNameAsync(ObjectId.Parse(userId));
+        var result = await _identityService.GetUserNameAsync(userId);
 
         // Assert
         result.Should().Be(user.UserName);
@@ -76,11 +74,11 @@ public class IdentityServiceTests
     public async Task GetUserNameAsync_ShouldReturnNull_WhenUserDoesNotExist()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync((ApplicationUser)null!);
 
         // Act
-        var result = await _identityService.GetUserNameAsync(ObjectId.Parse(userId));
+        var result = await _identityService.GetUserNameAsync(userId);
 
         // Assert
         result.Should().BeNull();
@@ -127,14 +125,14 @@ public class IdentityServiceTests
     public async Task IsInRoleAsync_ShouldReturnTrue_WhenUserIsInRole()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         var roleName = "Administrator";
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _userManagerMock.Setup(u => u.IsInRoleAsync(user, roleName)).ReturnsAsync(true);
 
         // Act
-        var result = await _identityService.IsInRoleAsync(ObjectId.Parse(userId), roleName);
+        var result = await _identityService.IsInRoleAsync(userId, roleName);
         // Assert
         result.Should().Be(true);
     }
@@ -143,14 +141,14 @@ public class IdentityServiceTests
     public async Task IsInRoleAsync_ShouldReturnFalse_WhenUserIsNotInRole()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         var roleName = "Administrator";
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _userManagerMock.Setup(u => u.IsInRoleAsync(user, roleName)).ReturnsAsync(false);
 
         // Act
-        var result = await _identityService.IsInRoleAsync(ObjectId.Parse(userId), roleName);
+        var result = await _identityService.IsInRoleAsync(userId, roleName);
 
         // Assert
         result.Should().BeFalse();
@@ -160,12 +158,12 @@ public class IdentityServiceTests
     public async Task IsInRoleAsync_ShouldReturnFalse_WhenUserDoesNotExist()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         var roleName = "Administrator";
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync((ApplicationUser)null!);
 
         // Act
-        var result = await _identityService.IsInRoleAsync(ObjectId.Parse(userId), roleName);
+        var result = await _identityService.IsInRoleAsync(userId, roleName);
 
         // Assert
         result.Should().BeFalse();
@@ -177,13 +175,13 @@ public class IdentityServiceTests
     public async Task DeleteUserAsync_ShouldReturnFailure_WhenDeletionFails()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _userManagerMock.Setup(u => u.DeleteAsync(user)).ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Error" }));
 
         // Act
-        var result = await _identityService.DeleteUserAsync(ObjectId.Parse(userId));
+        var result = await _identityService.DeleteUserAsync(userId);
 
         // Assert
         result.Succeeded.Should().Be(false);
@@ -193,11 +191,11 @@ public class IdentityServiceTests
     public async Task DeleteUserAsync_ShouldReturnTrue_WhenUserDoesNotExist()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync((ApplicationUser)null!);
 
         // Act
-        var result = await _identityService.DeleteUserAsync(ObjectId.Parse(userId));
+        var result = await _identityService.DeleteUserAsync(userId);
 
         // Assert
         result.Succeeded.Should().Be(true); // Returns true if user doesn't exist, as the goal (deletion) is achieved.
@@ -207,14 +205,14 @@ public class IdentityServiceTests
     public async Task AuthorizeAsync_ShouldReturnTrue_WhenAuthorizationSucceeds()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _authorizationServiceMock.Setup(a => a.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>()))
             .ReturnsAsync(AuthorizationResult.Success());
 
         // Act
-        var result = await _identityService.AuthorizeAsync(ObjectId.Parse(userId), "CanPurge");
+        var result = await _identityService.AuthorizeAsync(userId, "CanPurge");
 
         // Assert
         result.Should().Be(true);
@@ -224,14 +222,14 @@ public class IdentityServiceTests
     public async Task AuthorizeAsync_ShouldReturnFalse_WhenAuthorizationFails()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _authorizationServiceMock.Setup(a => a.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>()))
             .ReturnsAsync(AuthorizationResult.Failed());
 
         // Act
-        var result = await _identityService.AuthorizeAsync(ObjectId.Parse(userId), "CanPurge");
+        var result = await _identityService.AuthorizeAsync(userId, "CanPurge");
 
         // Assert
         result.Should().Be(false);
@@ -241,11 +239,11 @@ public class IdentityServiceTests
     public async Task AuthorizeAsync_ShouldReturnFalse_WhenUserNotFound()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync((ApplicationUser)null!);
 
         // Act
-        var result = await _identityService.AuthorizeAsync(ObjectId.Parse(userId), "CanPurge");
+        var result = await _identityService.AuthorizeAsync(userId, "CanPurge");
 
         // Assert
         result.Should().Be(false);
@@ -255,11 +253,11 @@ public class IdentityServiceTests
     public async Task GetUserNameAsync_ShouldThrowException_WhenFindByIdAsyncThrowsException()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         _userManagerMock.Setup(u => u.FindByIdAsync(It.IsAny<string>())).ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.GetUserNameAsync(ObjectId.Parse(userId));
+        Func<Task> act = async () => await _identityService.GetUserNameAsync(userId);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -269,12 +267,12 @@ public class IdentityServiceTests
     public async Task IsInRoleAsync_ShouldThrowException_WhenFindByIdAsyncThrowsException()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         var roleName = "Administrator";
         _userManagerMock.Setup(u => u.FindByIdAsync(It.IsAny<string>())).ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.IsInRoleAsync(ObjectId.Parse(userId), roleName);
+        Func<Task> act = async () => await _identityService.IsInRoleAsync(userId, roleName);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -284,13 +282,13 @@ public class IdentityServiceTests
     public async Task AuthorizeAsync_ShouldThrowException_WhenCreateClaimsPrincipalFails()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _userClaimsPrincipalFactoryMock.Setup(f => f.CreateAsync(user)).ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.AuthorizeAsync(ObjectId.Parse(userId), "CanPurge");
+        Func<Task> act = async () => await _identityService.AuthorizeAsync(userId, "CanPurge");
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -300,14 +298,14 @@ public class IdentityServiceTests
     public async Task IsInRoleAsync_ShouldThrowException_WhenUserManagerIsInRoleAsyncThrowsException()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         var roleName = "Administrator";
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _userManagerMock.Setup(u => u.IsInRoleAsync(user, roleName)).ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.IsInRoleAsync(ObjectId.Parse(userId), roleName);
+        Func<Task> act = async () => await _identityService.IsInRoleAsync(userId, roleName);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -317,14 +315,14 @@ public class IdentityServiceTests
     public async Task AuthorizeAsync_ShouldThrowException_WhenAuthorizationServiceThrowsException()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _authorizationServiceMock.Setup(a => a.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), It.IsAny<string>()))
             .ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.AuthorizeAsync(ObjectId.Parse(userId), "CanPurge");
+        Func<Task> act = async () => await _identityService.AuthorizeAsync(userId, "CanPurge");
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -349,11 +347,11 @@ public class IdentityServiceTests
     public async Task DeleteUserAsync_ShouldThrowException_WhenFindByIdAsyncThrowsException()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
+        var userId = Guid.NewGuid().ToString();
         _userManagerMock.Setup(u => u.FindByIdAsync(It.IsAny<string>())).ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.DeleteUserAsync(ObjectId.Parse(userId));
+        Func<Task> act = async () => await _identityService.DeleteUserAsync(userId);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();
@@ -363,13 +361,13 @@ public class IdentityServiceTests
     public async Task DeleteUserAsync_ShouldThrowException_WhenDeleteAsyncThrowsException()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId().ToString();
-        var user = new ApplicationUser { Id = ObjectId.Parse(userId), UserName = "testuser" };
+        var userId = Guid.NewGuid().ToString();
+        var user = new ApplicationUser { Id = userId, UserName = "testuser" };
         _userManagerMock.Setup(u => u.FindByIdAsync(userId)).ReturnsAsync(user);
         _userManagerMock.Setup(u => u.DeleteAsync(user)).ThrowsAsync(new Exception());
 
         // Act
-        Func<Task> act = async () => await _identityService.DeleteUserAsync(ObjectId.Parse(userId));
+        Func<Task> act = async () => await _identityService.DeleteUserAsync(userId);
 
         // Assert
         await act.Should().ThrowAsync<Exception>();

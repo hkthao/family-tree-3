@@ -52,7 +52,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "guid"
                 }
               }
             }
@@ -72,7 +73,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -101,7 +103,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -135,7 +138,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -159,7 +163,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -190,7 +195,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -247,7 +253,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "guid"
                 }
               }
             }
@@ -267,7 +274,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -296,7 +304,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -333,7 +342,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -372,7 +382,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "format": "guid"
                 }
               }
             }
@@ -392,7 +403,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -799,7 +811,8 @@
         "additionalProperties": false,
         "properties": {
           "Id": {
-            "type": "string"
+            "type": "string",
+            "format": "guid"
           },
           "Name": {
             "type": "string"
@@ -836,7 +849,8 @@
         "additionalProperties": false,
         "properties": {
           "Id": {
-            "type": "string"
+            "type": "string",
+            "format": "guid"
           },
           "Name": {
             "type": "string"
@@ -883,7 +897,7 @@
         "properties": {
           "Id": {
             "type": "string",
-            "nullable": true
+            "format": "guid"
           },
           "FullName": {
             "type": "string",
@@ -938,17 +952,35 @@
         "properties": {
           "Id": {
             "type": "string",
+            "format": "guid",
             "nullable": true
           },
-          "MemberId": {
+          "FamilyId": {
             "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "SourceMemberId": {
+            "type": "string",
+            "format": "guid",
             "nullable": true
           },
           "Type": {
             "$ref": "#/components/schemas/RelationshipType"
           },
-          "TargetId": {
+          "TargetMemberId": {
             "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }
@@ -1014,6 +1046,12 @@
             "nullable": true
           },
           "Metadata": {
+            "type": "string",
+            "nullable": true
+          },
+          "FamilyId": {
+            "type": "string",
+            "format": "guid",
             "nullable": true
           }
         }
@@ -1024,7 +1062,7 @@
         "properties": {
           "Id": {
             "type": "string",
-            "nullable": true
+            "format": "guid"
           },
           "FullName": {
             "type": "string",
@@ -1069,6 +1107,7 @@
             "nullable": true
           },
           "Metadata": {
+            "type": "string",
             "nullable": true
           }
         }
@@ -1077,19 +1116,22 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "MemberId": {
+          "SourceMemberId": {
             "type": "string",
+            "format": "guid",
             "nullable": true
           },
           "Type": {
             "$ref": "#/components/schemas/RelationshipType"
           },
-          "TargetId": {
+          "TargetMemberId": {
             "type": "string",
+            "format": "guid",
             "nullable": true
           },
           "FamilyId": {
             "type": "string",
+            "format": "guid",
             "nullable": true
           },
           "StartDate": {

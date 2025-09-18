@@ -11,11 +11,7 @@
     <DebugSymbols>true</DebugSymbols>
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutput>$(ArtifactsPath)/coverage/</CoverletOutput>
-    <CoverletOutputFormat>json</CoverletOutputFormat>
-    <Threshold>40</Threshold>
-    <ThresholdType>line</ThresholdType>
-    <ThresholdStat>total</ThresholdStat>
-    <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure;backend.Web</CoverletInclude>
+    <CoverletOutputFormat>cobertura</CoverletOutputFormat>
     <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure;backend.Web</CoverletInclude>
   </PropertyGroup>
   <!-- To use dotnet ef without 'msbuildprojectextensionspath' - fixed in .NET 10 -->

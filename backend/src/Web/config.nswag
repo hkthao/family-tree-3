@@ -48,7 +48,7 @@
       "documentName": "v1",
       "aspNetCoreEnvironment": null,
       "createWebHostBuilderMethod": null,
-      "startupType": null,
+      "startupType": "backend.Web.Startup",
       "allowNullableBodyParameters": true,
       "useHttpAttributeNameAsOperationId": false,
       "output": "wwwroot/api/specification.json",

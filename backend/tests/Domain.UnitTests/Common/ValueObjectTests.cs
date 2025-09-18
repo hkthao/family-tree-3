@@ -67,11 +67,20 @@ public class ValueObjectTests
     }
 
     [Fact]
-    public void NotEqualOperator_ShouldReturnFalse_WhenBothEqual()
+    public void NotEqualOperator_ShouldReturnFalse_WhenBothNull()
     {
-        var left = new TestValueObject("a", 1);
-        var right = new TestValueObject("a", 1);
+        TestValueObject? left = null;
+        TestValueObject? right = null;
         (left != right).Should().BeFalse();
+    }
+
+    [Fact]
+    public void NotEqualOperator_ShouldReturnTrue_WhenOneNullAndOtherNotNull()
+    {
+        TestValueObject? left = null;
+        TestValueObject right = new TestValueObject("a", 1);
+        (left != right).Should().BeTrue();
+        (right != left).Should().BeTrue();
     }
 
     [Fact]
