@@ -1,6 +1,6 @@
+using System;
 using backend.Application.Members.Commands.UpdateMember;
 using FluentValidation.TestHelper;
-using System;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;

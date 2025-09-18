@@ -4,7 +4,7 @@ namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
 public record UpdateRelationshipCommand : IRequest
 {
-    public Guid Id { get; init; } 
+    public Guid Id { get; init; }
     public Guid? SourceMemberId { get; init; }
     public Guid? TargetMemberId { get; init; }
     public RelationshipType Type { get; init; }

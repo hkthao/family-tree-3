@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
@@ -6,10 +10,6 @@ using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries;

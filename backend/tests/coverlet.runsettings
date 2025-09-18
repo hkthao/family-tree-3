@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage" uri="datacollector://Microsoft/CodeCoverage/2.0" assemblyQualifiedName="Coverlet.Collector.DataCollection.CoverageCollector, coverlet.collector, Version=6.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Include>
+            [backend.Infrastructure]*
+            [backend.Application]*
+            [backend.Domain]*
+          </Include>
+          <Exclude>
+            [backend.Application.UnitTests]*
+            [backend.Domain.UnitTests]*
+            [backend.Infrastructure.IntegrationTests]*
+          </Exclude>
+          <ExcludeByFile>
+            *Migrations*
+            *Program.cs
+            *Startup.cs
+            *Extensions*
+            *IApplicationDbContext.cs
+            *DependencyInjection.cs
+            *GlobalUsings.cs
+          </ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

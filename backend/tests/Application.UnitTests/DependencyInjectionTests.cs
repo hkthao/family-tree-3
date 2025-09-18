@@ -1,11 +1,11 @@
+using AutoMapper;
 using backend.Application;
+using FluentAssertions;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Xunit;
-using FluentAssertions;
 using Moq;
-using MediatR;
-using AutoMapper;
+using Xunit;
 
 namespace backend.Application.UnitTests;
 

@@ -1,6 +1,6 @@
+using System;
 using backend.Application.Common.Models;
 using FluentAssertions;
-using System;
 using Xunit;
 
 namespace backend.Application.UnitTests.Common.Models;

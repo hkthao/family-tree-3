@@ -1,4 +1,4 @@
-﻿﻿using System.Diagnostics;
+﻿using System.Diagnostics;
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +34,7 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
             var userId = _user.Id;
             var userName = string.Empty;
 
-            if (! string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userId))
             {
                 userName = await _identityService.GetUserNameAsync(userId);
             }

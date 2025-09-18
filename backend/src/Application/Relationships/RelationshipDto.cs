@@ -1,7 +1,7 @@
+using AutoMapper;
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using AutoMapper;
 
 namespace backend.Application.Relationships;
 

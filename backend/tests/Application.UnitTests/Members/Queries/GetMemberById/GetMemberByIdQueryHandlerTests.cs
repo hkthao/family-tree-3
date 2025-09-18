@@ -1,17 +1,17 @@
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Members;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Domain.Entities;
+using backend.Infrastructure.Data;
 using FluentAssertions;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using backend.Infrastructure.Data;
-using backend.Application.Common.Mappings;
+using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 

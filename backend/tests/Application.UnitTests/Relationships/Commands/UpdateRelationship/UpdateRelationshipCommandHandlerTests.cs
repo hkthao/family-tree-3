@@ -1,15 +1,15 @@
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using backend.Application.Common.Exceptions;
 using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
-using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Relationships.Commands.UpdateRelationship;
 

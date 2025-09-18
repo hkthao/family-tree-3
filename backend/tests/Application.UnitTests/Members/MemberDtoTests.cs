@@ -1,10 +1,10 @@
 
+using System;
 using AutoMapper;
 using backend.Application.Common.Mappings;
 using backend.Application.Members;
 using backend.Domain.Entities;
 using FluentAssertions;
-using System;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members;

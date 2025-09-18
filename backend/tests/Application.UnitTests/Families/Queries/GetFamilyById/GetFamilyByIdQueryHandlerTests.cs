@@ -1,19 +1,19 @@
 
-using backend.Application.Families;
-using AutoMapper;
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
-using backend.Application.Families.Queries.GetFamilyById;
-using backend.Domain.Entities;
-using FluentAssertions;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
+using AutoMapper;
+using backend.Application.Common.Exceptions;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
+using backend.Application.Families;
+using backend.Application.Families.Queries.GetFamilyById;
+using backend.Domain.Entities;
+using backend.Infrastructure.Data;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using backend.Infrastructure.Data;
-using backend.Application.Common.Mappings;
+using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 

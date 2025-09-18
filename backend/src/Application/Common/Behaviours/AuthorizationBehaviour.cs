@@ -5,7 +5,7 @@ using backend.Application.Common.Security;
 
 namespace backend.Application.Common.Behaviours;
 
-public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> 
+public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     private readonly IUser _user;
@@ -39,7 +39,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
                 // Must be a member of at least one role in roles
                 var requiredRoles = authorizeAttributesWithRoles.SelectMany(a => a.Roles.Split(',')).Distinct();
                 var authorized = requiredRoles.Any(role => _user.Roles?.Contains(role.Trim()) ?? false);
-                
+
                 if (!authorized)
                     throw new ForbiddenAccessException();
             }

@@ -1,13 +1,13 @@
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
