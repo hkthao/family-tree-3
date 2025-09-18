@@ -2,7 +2,6 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Security;
-using MongoDB.Bson;
 
 namespace backend.Application.Common.Behaviours;
 
@@ -27,7 +26,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
         if (authorizeAttributes.Any())
         {
             // Must be authenticated user
-            if (_user.Id == null)
+            if (_user.Id == default)
             {
                 throw new UnauthorizedAccessException();
             }
@@ -37,26 +36,12 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
 
             if (authorizeAttributesWithRoles.Any())
             {
-                var authorized = false;
-
-                foreach (var roles in authorizeAttributesWithRoles.Select(a => a.Roles.Split(',')))
-                {
-                    foreach (var role in roles)
-                    {
-                        var isInRole = _user.Roles?.Any(x => role == x)??false;
-                        if (isInRole)
-                        {
-                            authorized = true;
-                            break;
-                        }
-                    }
-                }
-
                 // Must be a member of at least one role in roles
+                var requiredRoles = authorizeAttributesWithRoles.SelectMany(a => a.Roles.Split(',')).Distinct();
+                var authorized = requiredRoles.Any(role => _user.Roles?.Contains(role.Trim()) ?? false);
+                
                 if (!authorized)
-                {
                     throw new ForbiddenAccessException();
-                }
             }
 
             // Policy-based authorization
@@ -65,7 +50,7 @@ public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRe
             {
                 foreach (var policy in authorizeAttributesWithPolicies.Select(a => a.Policy))
                 {
-                    var authorized = await _identityService.AuthorizeAsync(_user.Id.Value, policy); // Pass ObjectId.Value
+                    var authorized = await _identityService.AuthorizeAsync(_user.Id, policy);
 
                     if (!authorized)
                     {

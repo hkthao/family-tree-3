@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
 
 namespace backend.Application.Members.Commands.CreateMember;
 

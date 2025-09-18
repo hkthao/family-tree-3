@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace backend.Application.Members.Commands.UpdateMember;
 
 public record UpdateMemberCommand : IRequest

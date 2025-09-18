@@ -1,8 +1,6 @@
 using backend.Application.Families;
 using backend.Application.Members;
 using backend.Domain.Enums;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Application.FamilyTree;
 
@@ -15,8 +13,6 @@ public class FamilyTreeDto
 
 public class RelationshipDto
 {
-    [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
     public string? Id { get; set; }
     public string? MemberId { get; set; }
     public RelationshipType Type { get; set; }

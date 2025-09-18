@@ -1,24 +1,16 @@
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreePdf;
 
 public class GetFamilyTreePdfQueryHandler : IRequestHandler<GetFamilyTreePdfQuery, byte[]>
 {
-    private readonly IMongoDbService _mongoDbService;
-
-    public GetFamilyTreePdfQueryHandler(IMongoDbService mongoDbService)
+    public GetFamilyTreePdfQueryHandler()
     {
-        _mongoDbService = mongoDbService;
     }
 
     public async Task<byte[]> Handle(GetFamilyTreePdfQuery request, CancellationToken cancellationToken)
     {
-        var family = await _mongoDbService.FindFamilyByIdAsync(request.FamilyId, cancellationToken);
+        Family? family = null;
 
         if (family == null)
         {
