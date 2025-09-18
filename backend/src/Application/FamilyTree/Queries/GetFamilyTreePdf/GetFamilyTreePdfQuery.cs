@@ -1,3 +1,3 @@
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreePdf;
 
-public record GetFamilyTreePdfQuery(string FamilyId) : IRequest<byte[]>;
+public record GetFamilyTreePdfQuery(Guid FamilyId) : IRequest<byte[]>;

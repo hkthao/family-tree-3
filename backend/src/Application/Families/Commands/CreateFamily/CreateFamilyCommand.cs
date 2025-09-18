@@ -1,6 +1,6 @@
-﻿namespace backend.Application.Families.Commands.CreateFamily;
+namespace backend.Application.Families.Commands.CreateFamily;
 
-public record CreateFamilyCommand : IRequest<string>
+public record CreateFamilyCommand : IRequest<Guid>
 {
     public string Name { get; init; } = null!;
 

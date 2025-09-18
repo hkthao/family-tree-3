@@ -2,7 +2,7 @@ namespace backend.Application.Members.Commands.UpdateMember;
 
 public record UpdateMemberCommand : IRequest
 {
-    public string? Id { get; init; }
+    public Guid Id { get; init; }
     public string? FullName { get; init; }
     public DateTime? DateOfBirth { get; init; }
     public DateTime? DateOfDeath { get; init; }
@@ -13,5 +13,5 @@ public record UpdateMemberCommand : IRequest
     public string? Email { get; init; }
     public int Generation { get; init; }
     public string? Biography { get; init; }
-    public object? Metadata { get; init; }
+    public string? Metadata { get; init; }
 }

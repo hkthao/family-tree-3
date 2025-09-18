@@ -1,32 +1,61 @@
-using backend.Application.Common.Interfaces;
+
+using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Domain.Entities;
+using backend.Infrastructure.Data;
 using FluentAssertions;
-using Moq;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using MongoDB.Driver;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 
 public class DeleteFamilyCommandTests
 {
-    [Fact]
-    public async Task ShouldDeleteFamily()
+    private readonly ApplicationDbContext _context;
+
+    public DeleteFamilyCommandTests()
     {
-        var familyId = MongoDB.Bson.ObjectId.GenerateNewId();
-        var command = new DeleteFamilyCommand(familyId.ToString());
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        _context = new ApplicationDbContext(options);
+    }
 
-        var mockFamilyCollection = new Mock<IMongoCollection<Family>>();
-        mockFamilyCollection.Setup(c => c.DeleteOneAsync(It.IsAny<FilterDefinition<Family>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new DeleteResult.Acknowledged(1));
+    [Fact]
+    public async Task Handle_GivenValidId_ShouldDeleteFamily()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family" };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
-        var mockContext = new Mock<IApplicationDbContext>();
-        mockContext.Setup(c => c.Families).Returns(mockFamilyCollection.Object);
+        var command = new DeleteFamilyCommand(familyId);
+        var handler = new DeleteFamilyCommandHandler(_context);
 
-        var handler = new DeleteFamilyCommandHandler(mockContext.Object);
-
+        // Act
         await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        var deletedFamily = await _context.Families.FindAsync(familyId);
+        deletedFamily.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Handle_GivenInvalidId_ShouldThrowNotFoundException()
+    {
+        // Arrange
+        var invalidId = Guid.NewGuid();
+        var command = new DeleteFamilyCommand(invalidId);
+        var handler = new DeleteFamilyCommandHandler(_context);
+
+        // Act
+        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 }

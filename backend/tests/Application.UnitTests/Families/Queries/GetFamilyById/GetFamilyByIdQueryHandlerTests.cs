@@ -1,3 +1,4 @@
+
 using backend.Application.Families;
 using AutoMapper;
 using backend.Application.Common.Exceptions;
@@ -5,12 +6,14 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Domain.Entities;
 using FluentAssertions;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using backend.Infrastructure.Data;
+using backend.Application.Common.Mappings;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
@@ -44,7 +47,7 @@ public class GetFamilyByIdQueryHandlerTests
     public async Task Handle_Should_Return_Family_When_Found()
     {
         // Arrange
-        var familyId = "60c72b2f9b1e8b001c8e4e1a";
+        var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Family 1" };
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
@@ -62,7 +65,7 @@ public class GetFamilyByIdQueryHandlerTests
     public async Task Handle_Should_Throw_NotFoundException_When_Not_Found()
     {
         // Arrange
-        var command = new GetFamilyByIdQuery("1");
+        var command = new GetFamilyByIdQuery(Guid.NewGuid());
 
         // Act
         var act = () => _handler.Handle(command, CancellationToken.None);

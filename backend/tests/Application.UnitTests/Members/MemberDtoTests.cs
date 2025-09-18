@@ -1,11 +1,11 @@
+
 using AutoMapper;
+using backend.Application.Common.Mappings;
 using backend.Application.Members;
 using backend.Domain.Entities;
-using Xunit;
 using FluentAssertions;
 using System;
-using backend.Application.Common.Mappings; 
-using MongoDB.Bson;
+using Xunit;
 
 namespace backend.Application.UnitTests.Members;
 
@@ -18,7 +18,7 @@ public class MemberDtoTests : IDisposable
     {
         _configuration = new MapperConfiguration(cfg =>
         {
-            cfg.AddMaps(typeof(backend.Application.Common.Mappings.IMapFrom<>).Assembly); // Scan the assembly for profiles
+            cfg.AddProfile<MappingProfile>();
         });
 
         _mapper = _configuration.CreateMapper();
@@ -35,7 +35,6 @@ public class MemberDtoTests : IDisposable
     {
         var member = new Member
         {
-            // Update with new Member properties
             FullName = "John Doe",
             DateOfBirth = new DateTime(1990, 1, 1),
             DateOfDeath = null,
@@ -46,7 +45,8 @@ public class MemberDtoTests : IDisposable
             Email = "john.doe@example.com",
             Generation = 1,
             Biography = "Some biography",
-            Metadata = new { Key = "Value" }
+            Metadata = new { Key = "Value" },
+            FamilyId = Guid.NewGuid()
         };
 
         var memberDto = _mapper.Map<MemberDto>(member);

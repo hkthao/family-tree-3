@@ -1,17 +1,12 @@
 using AutoMapper;
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
-using backend.Application.Families;
 using backend.Application.FamilyTree.Queries.GetFamilyTreeJson;
-using backend.Application.Members;
-using backend.Application.Relationships;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using backend.Infrastructure.Data;
-using System.Threading;
-using System.Threading.Tasks;
+using backend.Application.Common.Mappings;
 using Xunit;
 
 namespace backend.Application.UnitTests.FamilyTree.Queries.GetFamilyTreeJson;
@@ -46,10 +41,10 @@ public class GetFamilyTreeJsonQueryHandlerTests
     public async Task Handle_ShouldReturnFamilyTreeDto_WhenFamilyExists()
     {
         // Arrange
-        var familyId = "60c72b2f9b1e8b001c8e4e1a";
+        var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family" };
-        var member = new Member { Id = "member1", FamilyId = familyId, FullName = "Test Member" };
-        var relationship = new Relationship { Id = "rel1", FamilyId = familyId, SourceMemberId = "member1", TargetMemberId = "member1", Type = Domain.Enums.RelationshipType.Parent };
+        var member = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FullName = "Test Member" };
+        var relationship = new Relationship { Id = Guid.NewGuid() , FamilyId = familyId, SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = Domain.Enums.RelationshipType.Parent };
 
         _context.Families.Add(family);
         _context.Members.Add(member);
@@ -73,7 +68,7 @@ public class GetFamilyTreeJsonQueryHandlerTests
     public async Task Handle_ShouldThrowNotFoundException_WhenFamilyDoesNotExist()
     {
         // Arrange
-        var query = new GetFamilyTreeJsonQuery("nonexistent-id");
+        var query = new GetFamilyTreeJsonQuery(Guid.NewGuid());
 
         // Act
         Func<Task> act = async () => await _handler.Handle(query, CancellationToken.None);

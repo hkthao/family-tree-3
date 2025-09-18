@@ -1,10 +1,11 @@
 using backend.Application.Common.Behaviours;
 using backend.Application.Common.Interfaces;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System;
+using System.Threading.Tasks;
 using Xunit;
-using MongoDB.Bson;
-using MediatR;
 
 namespace Application.UnitTests.Common.Behaviours;
 
@@ -27,7 +28,7 @@ public class LoggingBehaviourTests
     public async Task Process_ShouldLogInformation_WhenUserIdHasValue()
     {
         // Arrange
-        var userId = ObjectId.GenerateNewId();
+        var userId = Guid.NewGuid().ToString();
         var userName = "testuser";
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockIdentityService.Setup(i => i.GetUserNameAsync(userId)).ReturnsAsync(userName);
@@ -51,7 +52,7 @@ public class LoggingBehaviourTests
     public async Task Process_ShouldLogInformation_WhenUserIdIsNull()
     {
         // Arrange
-        ObjectId? userId = null;
+        string? userId = null;
         _mockUser.Setup(u => u.Id).Returns(userId);
         var request = new TestRequest();
 
@@ -67,7 +68,7 @@ public class LoggingBehaviourTests
                 It.IsAny<Exception?>(),
                 It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
             Times.Once);
-        _mockIdentityService.Verify(i => i.GetUserNameAsync(It.IsAny<ObjectId>()), Times.Never);
+        _mockIdentityService.Verify(i => i.GetUserNameAsync(It.IsAny<string>()), Times.Never);
     }
 
     // Dummy request class for testing

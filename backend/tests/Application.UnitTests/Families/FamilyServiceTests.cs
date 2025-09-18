@@ -1,23 +1,25 @@
-using Xunit;
-using Moq;
-using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.CreateFamily;
+using backend.Domain.Entities;
+using backend.Infrastructure.Data;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using backend.Domain.Entities;
-using FluentAssertions;
-using MongoDB.Driver;
+using Xunit;
 
-namespace backend.tests.Application.UnitTests.Families;
+namespace backend.Application.UnitTests.Families;
 
 public class FamilyServiceTests
 {
-    private readonly Mock<IApplicationDbContext> _contextMock;
+    private readonly ApplicationDbContext _context;
 
     public FamilyServiceTests()
     {
-        _contextMock = new Mock<IApplicationDbContext>();
-        _contextMock.Setup(x => x.Families).Returns(new Mock<IMongoCollection<Family>>().Object);
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        _context = new ApplicationDbContext(options);
     }
 
     [Fact]
@@ -25,13 +27,14 @@ public class FamilyServiceTests
     {
         // Arrange
         var command = new CreateFamilyCommand { Name = "Test Family" };
-        var handler = new CreateFamilyCommandHandler(_contextMock.Object);
+        var handler = new CreateFamilyCommandHandler(_context);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _contextMock.Verify(x => x.Families.InsertOneAsync(It.IsAny<Family>(), null, CancellationToken.None), Times.Once);
-        result.Should().NotBeNullOrEmpty();
+        var createdFamily = await _context.Families.FindAsync(result);
+        createdFamily.Should().NotBeNull();
+        createdFamily!.Name.Should().Be("Test Family");
     }
 }

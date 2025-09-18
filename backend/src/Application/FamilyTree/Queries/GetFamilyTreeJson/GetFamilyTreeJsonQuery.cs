@@ -1,3 +1,3 @@
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreeJson;
 
-public record GetFamilyTreeJsonQuery(string FamilyId) : IRequest<FamilyTreeDto>;
+public record GetFamilyTreeJsonQuery(Guid FamilyId) : IRequest<FamilyTreeDto>;

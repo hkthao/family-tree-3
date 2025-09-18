@@ -10,6 +10,7 @@ public class MemberTests
     [Fact]
     public void ShouldCreateMember()
     {
+        var familyId = Guid.NewGuid();
         var member = new Member
         {
             FullName = "Test Member",
@@ -21,7 +22,7 @@ public class MemberTests
             Phone = "1234567890",
             Email = "test@test.com",
             Generation = 1,
-            FamilyId = "test-family-id",
+            FamilyId = familyId,
             Biography = "Test Biography",
             Metadata = "Test Metadata"
         };
@@ -35,7 +36,7 @@ public class MemberTests
         member.Phone.Should().Be("1234567890");
         member.Email.Should().Be("test@test.com");
         member.Generation.Should().Be(1);
-        member.FamilyId.Should().Be("test-family-id");
+        member.FamilyId.Should().Be(familyId);
         member.Biography.Should().Be("Test Biography");
         member.Metadata.Should().Be("Test Metadata");
     }

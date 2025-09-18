@@ -1,5 +1,3 @@
-﻿using MediatR;
+﻿namespace backend.Application.Families.Commands.DeleteFamily;
 
-namespace backend.Application.Families.Commands.DeleteFamily;
-
-public record DeleteFamilyCommand(string Id) : IRequest;
+public record DeleteFamilyCommand(Guid Id) : IRequest;

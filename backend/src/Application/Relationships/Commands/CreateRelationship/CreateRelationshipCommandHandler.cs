@@ -3,7 +3,7 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
-public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationshipCommand, string>
+public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationshipCommand, Guid>
 {
     private readonly IApplicationDbContext _context;
 
@@ -12,13 +12,13 @@ public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationsh
         _context = context;
     }
 
-    public async Task<string> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
     {
         var entity = new Relationship
         {
-            SourceMemberId = request.MemberId!,
+            SourceMemberId = request.MemberId,
             Type = request.Type,
-            TargetMemberId = request.TargetId!,
+            TargetMemberId = request.TargetId,
             FamilyId = request.FamilyId!,
             StartDate = request.StartDate,
             EndDate = request.EndDate
@@ -28,6 +28,6 @@ public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationsh
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return entity.Id.ToString();
+        return entity.Id;
     }
 }

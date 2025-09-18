@@ -3,6 +3,7 @@ using backend.Application.Common.Mappings;
 using backend.Application.Families;
 using backend.Domain.Entities;
 using FluentAssertions;
+using System;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families;
@@ -25,7 +26,7 @@ public class FamilyDtoTests
     public void Constructor_ShouldInitializePropertiesCorrectly()
     {
         // Arrange
-        var id = "60c72b2f9b1e8b001c8e4e1a";
+        var id = Guid.NewGuid();
         var name = "Test Family";
         var description = "A test family description";
         var avatarUrl = "http://example.com/avatar.jpg";
@@ -52,7 +53,7 @@ public class FamilyDtoTests
         // Arrange
         var family = new Family
         {
-            Id = "60c72b2f9b1e8b001c8e4e1a",
+            Id = Guid.NewGuid(),
             Name = "Mapped Family",
             Description = "Mapped description",
             AvatarUrl = "http://example.com/mapped_avatar.png"

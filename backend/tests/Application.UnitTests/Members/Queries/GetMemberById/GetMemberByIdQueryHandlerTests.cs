@@ -11,6 +11,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using backend.Infrastructure.Data;
+using backend.Application.Common.Mappings;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 
@@ -44,7 +45,7 @@ public class GetMemberByIdQueryHandlerTests
     public async Task Handle_Should_Return_Member_When_Found()
     {
         // Arrange
-        var memberId = "65e6f8a2b3c4d5e6f7a8b9c0";
+        var memberId = Guid.NewGuid();
         var member = new Member { Id = memberId, FullName = "Test Member" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
@@ -62,7 +63,7 @@ public class GetMemberByIdQueryHandlerTests
     public async Task Handle_Should_Throw_NotFoundException_When_Not_Found()
     {
         // Arrange
-        var command = new GetMemberByIdQuery("000000000000000000000000"); // Valid format, but non-existent
+        var command = new GetMemberByIdQuery(Guid.Empty); // Valid format, but non-existent
 
         // Act
         var act = () => _handler.Handle(command, CancellationToken.None);

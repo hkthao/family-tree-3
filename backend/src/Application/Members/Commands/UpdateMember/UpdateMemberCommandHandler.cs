@@ -1,8 +1,5 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
@@ -17,7 +14,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 
     public async Task Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        Member? entity = await _context.Members.FindAsync([request.Id?? string.Empty], cancellationToken);
+        Member? entity = await _context.Members.FindAsync([request.Id], cancellationToken);
         if (entity == null)
             throw new Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
         entity.FullName = request.FullName?? string.Empty;

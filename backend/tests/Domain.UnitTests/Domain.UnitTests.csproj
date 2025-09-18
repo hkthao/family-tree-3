@@ -4,6 +4,8 @@
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>backend.Domain.UnitTests</RootNamespace>
         <AssemblyName>backend.Domain.UnitTests</AssemblyName>
+        <DebugType>portable</DebugType>
+        <DebugSymbols>true</DebugSymbols>
     </PropertyGroup>
 
     <ItemGroup>

@@ -43,7 +43,7 @@ public class CreateFamilyCommandHandlerTests
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNullOrEmpty();
+        result.Should().NotBeEmpty();
         _context.Families.Should().ContainSingle(f => f.Name == command.Name);
     }
 }

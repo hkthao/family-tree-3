@@ -1,30 +1,26 @@
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Domain.Entities;
+using backend.Infrastructure.Data;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Relationships.Commands.DeleteRelationship;
 
 public class DeleteRelationshipCommandHandlerTests
 {
-    private readonly DeleteRelationshipCommandHandler _handler;
     private readonly ApplicationDbContext _context;
+    private readonly DeleteRelationshipCommandHandler _handler;
 
     public DeleteRelationshipCommandHandlerTests()
     {
-        // Setup in-memory database
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-
         _context = new ApplicationDbContext(options);
         _handler = new DeleteRelationshipCommandHandler(_context);
     }
@@ -33,7 +29,7 @@ public class DeleteRelationshipCommandHandlerTests
     public async Task Handle_ShouldDeleteRelationship_WhenRelationshipExists()
     {
         // Arrange
-        var relationshipId = "65e6f8a2b3c4d5e6f7a8b9c0";
+        var relationshipId = Guid.NewGuid();
         var relationship = new Relationship { Id = relationshipId };
         _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
@@ -51,10 +47,10 @@ public class DeleteRelationshipCommandHandlerTests
     public async Task Handle_ShouldThrowNotFoundException_WhenRelationshipDoesNotExist()
     {
         // Arrange
-        var command = new DeleteRelationshipCommand("000000000000000000000000"); // Valid format, but non-existent
+        var command = new DeleteRelationshipCommand(Guid.Empty);
 
         // Act
-        var act = () => _handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();

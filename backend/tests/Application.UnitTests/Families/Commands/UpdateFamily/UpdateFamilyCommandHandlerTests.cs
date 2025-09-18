@@ -1,13 +1,13 @@
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
@@ -33,7 +33,7 @@ public class UpdateFamilyCommandHandlerTests
     public async Task Handle_Should_Update_Family()
     {
         // Arrange
-        var familyId = "60c72b2f9b1e8b001c8e4e1a";
+        var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Old Name" };
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
@@ -59,7 +59,7 @@ public class UpdateFamilyCommandHandlerTests
     public async Task Handle_Should_Throw_NotFoundException_When_Family_Does_Not_Exist()
     {
         // Arrange
-        var command = new UpdateFamilyCommand { Id = "1" };
+        var command = new UpdateFamilyCommand { Id = Guid.NewGuid() };
 
         // Act
         var act = () => _handler.Handle(command, CancellationToken.None);

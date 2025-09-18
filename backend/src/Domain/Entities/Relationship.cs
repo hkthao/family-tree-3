@@ -6,9 +6,9 @@ namespace backend.Domain.Entities;
 
 public class Relationship : BaseAuditableEntity
 {
-    public string FamilyId { get; set; } = null!;
-    public string SourceMemberId { get; set; } = null!;
-    public string TargetMemberId { get; set; } = null!;
+    public Guid? FamilyId { get; set; } 
+    public Guid? SourceMemberId { get; set; } 
+    public Guid? TargetMemberId { get; set; } 
     public RelationshipType Type { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }

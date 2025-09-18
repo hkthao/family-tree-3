@@ -1,7 +1,4 @@
 ﻿using ValidationException = backend.Application.Common.Exceptions.ValidationException;
-using FluentValidation;
-using MediatR;
-using MediatR.Pipeline;
 
 namespace backend.Application.Common.Behaviours;
 

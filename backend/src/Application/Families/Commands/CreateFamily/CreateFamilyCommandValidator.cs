@@ -1,7 +1,4 @@
-﻿using FluentValidation;
-using backend.Application.Families.Commands.CreateFamily;
-
-namespace backend.Application.Families.Commands.CreateFamily;
+﻿namespace backend.Application.Families.Commands.CreateFamily;
 
 public class CreateFamilyCommandValidator : AbstractValidator<CreateFamilyCommand>
 {

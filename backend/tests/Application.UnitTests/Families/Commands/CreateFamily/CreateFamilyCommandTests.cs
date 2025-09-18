@@ -6,6 +6,8 @@ using Moq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 
@@ -22,14 +24,14 @@ public class CreateFamilyCommandTests
         };
 
         var mockContext = new Mock<IApplicationDbContext>();
-        mockContext.Setup(c => c.Families.InsertOneAsync(It.IsAny<Family>(), null, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        mockContext.Setup(c => c.Families.Add(It.IsAny<Family>()));
+        mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
 
         var handler = new CreateFamilyCommandHandler(mockContext.Object);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
-        result.Should().NotBeNull();
-        result.Should().BeOfType<string>();
+        result.Should().NotBe(Guid.Empty);
     }
 }
