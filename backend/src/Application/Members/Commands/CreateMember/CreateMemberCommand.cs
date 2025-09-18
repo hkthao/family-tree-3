@@ -1,8 +1,6 @@
-using MediatR;
-
 namespace backend.Application.Members.Commands.CreateMember;
 
-public record CreateMemberCommand : IRequest<string>
+public record CreateMemberCommand : IRequest<Guid>
 {
     public string? FullName { get; init; }
     public DateTime? DateOfBirth { get; init; }
@@ -14,5 +12,6 @@ public record CreateMemberCommand : IRequest<string>
     public string? Email { get; init; }
     public int Generation { get; init; }
     public string? Biography { get; init; }
-    public object? Metadata { get; init; }
+    public string? Metadata { get; init; }
+    public Guid? FamilyId { get; init; }
 }

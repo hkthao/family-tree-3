@@ -1,9 +1,10 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
+using System;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, string>
+public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, Guid>
 {
     private readonly IApplicationDbContext _context;
 
@@ -12,8 +13,13 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, s
         _context = context;
     }
 
-    public async Task<string> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
+        if (!request.FamilyId.HasValue)
+        {
+            throw new ArgumentNullException(nameof(request.FamilyId), "FamilyId cannot be null.");
+        }
+
         var entity = new Member
         {
             DateOfBirth = request.DateOfBirth,
@@ -25,7 +31,8 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, s
             Email = request.Email,
             Generation = request.Generation,
             Biography = request.Biography,
-            Metadata = request.Metadata
+            Metadata = request.Metadata,
+            FamilyId = request.FamilyId.Value
         };
 
         if (request.FullName != null)
@@ -37,6 +44,6 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, s
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return entity.Id.ToString();
+        return entity.Id;
     }
 }

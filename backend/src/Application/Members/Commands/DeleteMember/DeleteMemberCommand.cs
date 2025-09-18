@@ -1,5 +1,3 @@
-using MediatR;
-
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public record DeleteMemberCommand(string Id) : IRequest;
+public record DeleteMemberCommand(Guid Id) : IRequest;

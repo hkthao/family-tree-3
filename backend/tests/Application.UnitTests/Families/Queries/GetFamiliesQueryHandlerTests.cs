@@ -1,11 +1,12 @@
-using backend.Application.Families;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;
+using backend.Infrastructure.Data;
 using FluentAssertions;
-using MongoDB.Driver;
-using Moq;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,15 +16,21 @@ namespace backend.Application.UnitTests.Families.Queries;
 
 public class GetFamiliesQueryHandlerTests
 {
-    private readonly Mock<IApplicationDbContext> _contextMock;
-    private readonly Mock<IMapper> _mapperMock;
-    private readonly GetFamiliesQueryHandler _handler;
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public GetFamiliesQueryHandlerTests()
     {
-        _contextMock = new Mock<IApplicationDbContext>();
-        _mapperMock = new Mock<IMapper>();
-        _handler = new GetFamiliesQueryHandler(_contextMock.Object, _mapperMock.Object);
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        _context = new ApplicationDbContext(options);
+
+        var configurationProvider = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+        });
+        _mapper = configurationProvider.CreateMapper();
     }
 
     [Fact]
@@ -32,40 +39,20 @@ public class GetFamiliesQueryHandlerTests
         // Arrange
         var families = new List<Family>
         {
-            new Family { Name = "Family 1" },
-            new Family { Name = "Family 2" }
+            new Family { Id = Guid.NewGuid(), Name = "Family 1" },
+            new Family { Id = Guid.NewGuid(), Name = "Family 2" }
         };
-        var familyDtos = new List<FamilyDto>
-        {
-            new FamilyDto { Name = "Family 1" },
-            new FamilyDto { Name = "Family 2" }
-        };
+        _context.Families.AddRange(families);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
-        var cursor = new Mock<IAsyncCursor<Family>>();
-        cursor.Setup(_ => _.Current).Returns(families);
-        cursor
-            .SetupSequence(_ => _.MoveNext(It.IsAny<CancellationToken>()))
-            .Returns(true)
-            .Returns(false);
-        cursor
-            .SetupSequence(_ => _.MoveNextAsync(It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult(true))
-            .Returns(Task.FromResult(false));
-
-        var collectionMock = new Mock<IMongoCollection<Family>>();
-        collectionMock.Setup(x => x.FindAsync(
-            It.IsAny<FilterDefinition<Family>>(),
-            It.IsAny<FindOptions<Family, Family>>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(cursor.Object);
-
-        _contextMock.Setup(x => x.Families).Returns(collectionMock.Object);
-        _mapperMock.Setup(m => m.Map<List<FamilyDto>>(It.IsAny<List<Family>>())).Returns(familyDtos);
+        var handler = new GetFamiliesQueryHandler(_context, _mapper);
 
         // Act
-        var result = await _handler.Handle(new GetFamiliesQuery(), CancellationToken.None);
+        var result = await handler.Handle(new GetFamiliesQuery(), CancellationToken.None);
 
         // Assert
-        result.Should().BeEquivalentTo(familyDtos);
+        result.Should().HaveCount(2);
+        result.Should().ContainEquivalentOf(new { Name = "Family 1" });
+        result.Should().ContainEquivalentOf(new { Name = "Family 2" });
     }
 }

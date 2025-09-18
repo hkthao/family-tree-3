@@ -5,7 +5,7 @@ namespace backend.Application.Members;
 
 public class MemberDto : IMapFrom<Member>
 {
-    public string? Id { get; set; }
+    public Guid Id { get; set; }
     public string? FullName { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }

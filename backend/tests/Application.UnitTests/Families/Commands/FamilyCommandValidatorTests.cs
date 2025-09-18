@@ -1,6 +1,7 @@
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.UpdateFamily;
 using FluentValidation.TestHelper;
+using System;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands;
@@ -45,7 +46,7 @@ public class FamilyCommandValidatorTests
     [Fact]
     public void UpdateFamily_Should_Have_Error_When_Name_Is_Empty()
     {
-        var command = new UpdateFamilyCommand { Id = "1", Name = string.Empty };
+        var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = string.Empty };
         var result = _updateValidator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Name);
     }
@@ -53,7 +54,7 @@ public class FamilyCommandValidatorTests
     [Fact]
     public void UpdateFamily_Should_Have_Error_When_Name_Is_Too_Long()
     {
-        var command = new UpdateFamilyCommand { Id = "1", Name = new string('a', 201) };
+        var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = new string('a', 201) };
         var result = _updateValidator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Name);
     }
@@ -61,7 +62,7 @@ public class FamilyCommandValidatorTests
     [Fact]
     public void UpdateFamily_Should_Not_Have_Error_When_Name_Is_Valid()
     {
-        var command = new UpdateFamilyCommand { Id = "1", Name = "Valid Name" };
+        var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name" };
         var result = _updateValidator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
     }

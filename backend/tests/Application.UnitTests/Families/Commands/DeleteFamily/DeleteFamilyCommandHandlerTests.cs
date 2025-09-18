@@ -33,7 +33,7 @@ public class DeleteFamilyCommandHandlerTests
     public async Task Handle_Should_Delete_Family()
     {
         // Arrange
-        var familyId = "60c72b2f9b1e8b001c8e4e1a";
+        var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family" };
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
@@ -51,7 +51,7 @@ public class DeleteFamilyCommandHandlerTests
     public async Task Handle_Should_Throw_NotFoundException_When_Family_Does_Not_Exist()
     {
         // Arrange
-        var command = new DeleteFamilyCommand("1");
+        var command = new DeleteFamilyCommand(Guid.NewGuid());
 
         // Act
         var act = () => _handler.Handle(command, CancellationToken.None);

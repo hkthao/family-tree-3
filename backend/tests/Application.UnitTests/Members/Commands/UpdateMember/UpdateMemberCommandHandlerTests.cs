@@ -1,82 +1,65 @@
+
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Domain.Entities;
-using MediatR;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using Moq;
-using Xunit;
+using backend.Infrastructure.Data;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandlerTests
 {
-    private readonly Mock<IApplicationDbContext> _mockContext;
-    private readonly Mock<IMongoCollection<Member>> _mockCollection;
+    private readonly ApplicationDbContext _context;
 
     public UpdateMemberCommandHandlerTests()
     {
-        _mockContext = new Mock<IApplicationDbContext>();
-        _mockCollection = new Mock<IMongoCollection<Member>>();
-
-        _mockContext.Setup(c => c.Members).Returns(_mockCollection.Object);
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        _context = new ApplicationDbContext(options);
     }
 
     [Fact]
-    public async Task Handle_ShouldUpdateMember_WhenMemberExists()
+    public async Task Handle_GivenValidId_ShouldUpdateMember()
     {
-        var memberId = "65e6f8a2b3c4d5e6f7a8b9c0";
+        // Arrange
+        var memberId = Guid.NewGuid();
+        var member = new Member { Id = memberId, FullName = "Test Member", FamilyId = Guid.NewGuid() };
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
         var command = new UpdateMemberCommand
         {
             Id = memberId,
             FullName = "Updated Name",
             Gender = "Female"
         };
-
-        _mockCollection.Setup(c => c.UpdateOneAsync(
-            It.IsAny<FilterDefinition<Member>>(),
-            It.IsAny<UpdateDefinition<Member>>(),
-            It.IsAny<UpdateOptions>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new UpdateResult.Acknowledged(1, 1, new BsonInt64(1)));
-
-        var handler = new UpdateMemberCommandHandler(_mockContext.Object);
+        var handler = new UpdateMemberCommandHandler(_context);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockCollection.Verify(c => c.UpdateOneAsync(
-            It.IsAny<FilterDefinition<Member>>(),
-            It.IsAny<UpdateDefinition<Member>>(),            It.IsAny<UpdateOptions>(),
-            It.IsAny<CancellationToken>()),
-            Times.Once);
+        var updatedMember = await _context.Members.FindAsync(memberId);
+        updatedMember.Should().NotBeNull();
+        updatedMember?.FullName.Should().Be("Updated Name");
+        updatedMember?.Gender.Should().Be("Female");
     }
 
     [Fact]
-    public async Task Handle_ShouldThrowNotFoundException_WhenMemberDoesNotExist()
+    public async Task Handle_GivenInvalidId_ShouldThrowNotFoundException()
     {
         // Arrange
-        var memberId = "000000000000000000000000"; // Valid format, but non-existent
-        var command = new UpdateMemberCommand
-        {
-            Id = memberId,
-            FullName = "Updated Name",
-            Gender = "Female"
-        };
+        var invalidId = Guid.NewGuid();
+        var command = new UpdateMemberCommand { Id = invalidId };
+        var handler = new UpdateMemberCommandHandler(_context);
 
-        _mockCollection.Setup(c => c.UpdateOneAsync(
-            It.IsAny<FilterDefinition<Member>>(),
-            It.IsAny<UpdateDefinition<Member>>(),
-            It.IsAny<UpdateOptions>(),
-            It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new UpdateResult.Acknowledged(0, 0, null));
+        // Act
+        Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);
 
-        var handler = new UpdateMemberCommandHandler(_mockContext.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => handler.Handle(command, CancellationToken.None));
+        // Assert
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 }

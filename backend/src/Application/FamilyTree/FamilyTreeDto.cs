@@ -13,8 +13,9 @@ public class FamilyTreeDto
 
 public class RelationshipDto
 {
-    public string? Id { get; set; }
-    public string? MemberId { get; set; }
+    public Guid? Id { get; set; }
+    public Guid? MemberId { get; set; }
     public RelationshipType Type { get; set; }
-    public string? TargetId { get; set; }
+    public Guid? SourceMemberId { get; set; }
+    public Guid? TargetMemberId { get; set; }
 }

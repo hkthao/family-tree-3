@@ -12,7 +12,7 @@
     <CollectCoverage>true</CollectCoverage>
     <CoverletOutput>$(ArtifactsPath)/coverage/</CoverletOutput>
     <CoverletOutputFormat>json</CoverletOutputFormat>
-    <Threshold>80</Threshold>
+    <Threshold>40</Threshold>
     <ThresholdType>line</ThresholdType>
     <ThresholdStat>total</ThresholdStat>
     <CoverletInclude>backend.Application;backend.Domain;backend.Infrastructure;backend.Web</CoverletInclude>

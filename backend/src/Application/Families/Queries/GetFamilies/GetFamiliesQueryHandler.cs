@@ -1,6 +1,4 @@
 ﻿using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Queries.GetFamilies;
 

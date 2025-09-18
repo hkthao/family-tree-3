@@ -1,6 +1,5 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using backend.Application.Common.Interfaces;
-using MongoDB.Bson;
 
 namespace backend.Web.Services;
 
@@ -13,12 +12,11 @@ public class CurrentUser : IUser
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public ObjectId? Id
+    public string? Id
     {
         get
         {
-            var idString = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            return idString != null ? ObjectId.Parse(idString) : (ObjectId?)null;
+            return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
     public List<string>? Roles => _httpContextAccessor.HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();

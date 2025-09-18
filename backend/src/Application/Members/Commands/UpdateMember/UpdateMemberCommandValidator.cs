@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberCommand>

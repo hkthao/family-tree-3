@@ -1,9 +1,11 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Members;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Domain.Entities;
 using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -47,8 +49,8 @@ public class GetMembersQueryHandlerTests
         // Arrange
         var members = new List<Member>
         {
-            new Member { Id = "1", FullName = "Member 1" },
-            new Member { Id = "2", FullName = "Member 2" }
+            new Member { Id = Guid.NewGuid(), FullName = "Member 1", FamilyId = Guid.NewGuid() },
+            new Member { Id = Guid.NewGuid(), FullName = "Member 2", FamilyId = Guid.NewGuid() }
         };
         _context.Members.AddRange(members);
         await _context.SaveChangesAsync();
@@ -58,8 +60,8 @@ public class GetMembersQueryHandlerTests
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().ContainEquivalentOf(new MemberDto { Id = "1", FullName = "Member 1" });
-        result.Should().ContainEquivalentOf(new MemberDto { Id = "2", FullName = "Member 2" });
+        result.Should().ContainEquivalentOf(new MemberDto { Id = members[0].Id, FullName = "Member 1" });
+        result.Should().ContainEquivalentOf(new MemberDto { Id = members[1].Id, FullName = "Member 2" });
     }
 
     [Fact]

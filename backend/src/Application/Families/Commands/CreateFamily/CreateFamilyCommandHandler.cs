@@ -1,10 +1,9 @@
 using backend.Application.Common.Interfaces;
-using MediatR;
 using backend.Domain.Entities;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
-public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, string>
+public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Guid>
 {
     private readonly IApplicationDbContext _context;
 
@@ -13,7 +12,7 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, s
         _context = context;
     }
 
-    public async Task<string> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
         var entity = new Family
         {
@@ -26,6 +25,6 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, s
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return entity.Id.ToString();
+        return entity.Id;
     }
 }

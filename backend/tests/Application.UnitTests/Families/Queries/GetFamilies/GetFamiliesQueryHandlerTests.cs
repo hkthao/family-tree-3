@@ -1,9 +1,11 @@
-using backend.Application.Families;
+
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;
 using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -13,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using backend.Infrastructure.Data;
 
-namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
+namespace backend.Application.UnitTests.Families.Queries;
 
 public class GetFamiliesQueryHandlerTests
 {
@@ -47,8 +49,8 @@ public class GetFamiliesQueryHandlerTests
         // Arrange
         var families = new List<Family>
         {
-            new Family { Id = "1", Name = "Family 1" },
-            new Family { Id = "2", Name = "Family 2" }
+            new Family { Id = Guid.NewGuid(), Name = "Family 1" },
+            new Family { Id = Guid.NewGuid(), Name = "Family 2" }
         };
         _context.Families.AddRange(families);
         await _context.SaveChangesAsync();
@@ -58,8 +60,8 @@ public class GetFamiliesQueryHandlerTests
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().ContainEquivalentOf(new FamilyDto { Id = "1", Name = "Family 1" });
-        result.Should().ContainEquivalentOf(new FamilyDto { Id = "2", Name = "Family 2" });
+        result.Should().ContainEquivalentOf(new { Id = families[0].Id, Name = "Family 1" });
+        result.Should().ContainEquivalentOf(new { Id = families[1].Id, Name = "Family 2" });
     }
 
     [Fact]
