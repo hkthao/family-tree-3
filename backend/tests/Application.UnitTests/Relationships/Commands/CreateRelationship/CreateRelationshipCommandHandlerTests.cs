@@ -1,10 +1,10 @@
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Domain.Enums;
+using backend.Infrastructure.Data;
 using FluentAssertions;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using backend.Infrastructure.Data;
+using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.CreateRelationship;
 

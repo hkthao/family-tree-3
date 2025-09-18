@@ -1,11 +1,11 @@
+using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Endpoints;
 

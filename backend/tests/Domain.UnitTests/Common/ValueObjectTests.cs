@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using backend.Domain.Common;
 using FluentAssertions;
-using System.Collections.Generic;
 using Xunit;
 
 namespace backend.Domain.UnitTests.Common;

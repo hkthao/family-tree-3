@@ -1,16 +1,23 @@
+using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreePdf;
 
 public class GetFamilyTreePdfQueryHandler : IRequestHandler<GetFamilyTreePdfQuery, byte[]>
 {
-    public GetFamilyTreePdfQueryHandler()
+    private readonly IApplicationDbContext _context;
+
+    public GetFamilyTreePdfQueryHandler(IApplicationDbContext context)
     {
+        _context = context;
     }
 
     public async Task<byte[]> Handle(GetFamilyTreePdfQuery request, CancellationToken cancellationToken)
     {
-        Family? family = null;
+        var family = await _context.Families
+            .Where(f => f.Id == request.FamilyId)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (family == null)
         {

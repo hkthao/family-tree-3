@@ -17,7 +17,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
         Member? entity = await _context.Members.FindAsync([request.Id], cancellationToken);
         if (entity == null)
             throw new Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
-        entity.FullName = request.FullName?? string.Empty;
+        entity.FullName = request.FullName ?? string.Empty;
         entity.DateOfBirth = request.DateOfBirth;
         entity.DateOfDeath = request.DateOfDeath;
         entity.Gender = request.Gender;

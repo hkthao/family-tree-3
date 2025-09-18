@@ -1,6 +1,6 @@
 using backend.Domain.Common;
-using Xunit;
 using FluentAssertions;
+using Xunit;
 
 namespace backend.Domain.UnitTests.Common;
 

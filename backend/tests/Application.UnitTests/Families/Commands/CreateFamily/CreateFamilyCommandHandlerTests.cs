@@ -1,13 +1,13 @@
+using System.Threading;
+using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Domain.Entities;
+using backend.Infrastructure.Data;
 using FluentAssertions;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using backend.Infrastructure.Data;
+using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 

@@ -1,15 +1,15 @@
+using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
+using backend.Application.Members;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.Members.Commands.UpdateMember;
-using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMemberById;
-using backend.Application.Members;
+using backend.Application.Members.Queries.GetMembers;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Endpoints;
 

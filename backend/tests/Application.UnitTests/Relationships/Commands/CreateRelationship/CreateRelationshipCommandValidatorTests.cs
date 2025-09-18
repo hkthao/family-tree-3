@@ -1,6 +1,6 @@
+using System;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using FluentValidation.TestHelper;
-using System;
 using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.CreateRelationship;

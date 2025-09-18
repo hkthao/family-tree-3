@@ -3,9 +3,9 @@ using backend.Domain.Constants;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql;
 
 namespace backend.Infrastructure;
