@@ -1,18 +1,7 @@
 <template>
   <v-app>
-    <v-navigation-drawer app>
-      <v-list-item title="Family Tree" subtitle="Menu"></v-list-item>
-      <v-divider></v-divider>
-      <v-list-item link to="/" title="Dashboard"></v-list-item>
-      <v-list-item link to="/families" title="Quản lý Gia đình"></v-list-item>
-      <v-list-item link to="/members" title="Quản lý Thành viên"></v-list-item>
-      <v-list-item link to="/relationships" title="Quan hệ"></v-list-item>
-      <v-list-item link to="/tree" title="Cây Gia phả"></v-list-item>
-    </v-navigation-drawer>
-
-    <v-app-bar app>
-      <v-app-bar-title>Family Tree Project</v-app-bar-title>
-    </v-app-bar>
+    <AppSidebar v-model="drawer" />
+    <TopBar @toggle-drawer="drawer = !drawer" />
 
     <v-main>
       <v-container fluid>
@@ -23,5 +12,9 @@
 </template>
 
 <script setup lang="ts">
-//
+import { ref } from 'vue';
+import AppSidebar from './components/layout/AppSidebar.vue';
+import TopBar from './components/layout/TopBar.vue';
+
+const drawer = ref(true);
 </script>

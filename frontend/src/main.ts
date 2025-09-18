@@ -3,6 +3,8 @@ import { createPinia } from 'pinia';
 
 import App from './App.vue';
 import router from './router';
+import './styles/variables.scss'; // Custom SASS variables
+import 'vuetify/styles';
 import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
 

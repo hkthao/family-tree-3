@@ -1,25 +1,15 @@
-You are an expert .NET Core and EF Core developer. 
-I have a GitHub repo that currently uses MongoDB with the MongoDB C# Driver. 
-I want to migrate this project to use MySQL instead, through Entity Framework Core. 
+gemini task create "Generate UI for family member search (list view)" --description "
+Story: Là người dùng, tôi muốn tìm kiếm thành viên trong gia đình bằng danh sách.
 
-Repo details:
-- Language: .NET 8, C#
-- Architecture: Clean Architecture (Application, Domain, Infrastructure, API, UnitTests)
-- Persistence: MongoDB (IMongoCollection<T>, ObjectId, etc.)
-- Unit tests: xUnit + Moq, currently mocking Mongo collections
-
-Your task:
-1. Replace MongoDB persistence with MySQL using EF Core.
-2. Create a proper DbContext with DbSet<TEntity> for all entities (Family, Member, Relationship, etc.).
-3. Update the Domain entities: replace ObjectId with string or Guid as primary keys.
-4. Implement EF Core configuration (OnModelCreating, Fluent API) to match existing schema needs.
-5. Update Infrastructure layer: replace MongoContext with AppDbContext (MySQL).
-6. Update Dependency Injection in API Startup/Program.cs to register MySQL DbContext.
-7. Update Repository/Service classes to use EF Core (LINQ, async methods) instead of Mongo queries.
-8. Update Unit Tests:
-   - Use EF Core InMemoryDatabase for unit testing.
-   - Replace Moq of IMongoCollection with direct use of InMemory EF DbContext.
-9. Generate EF Core migrations for MySQL and provide example connection string.
-10. Ensure all existing Application layer queries/commands still work.
-
-Final goal: I can run the repo with MySQL instead of MongoDB, and all unit tests should pass.
+Requirements:
+- Tạo màn hình với ô tìm kiếm (search bar) để nhập tên hoặc ID thành viên.
+- Hiển thị kết quả dưới dạng danh sách (list view), mỗi item có:
+  - Họ tên
+  - Năm sinh (hoặc tuổi)
+  - Quan hệ trong gia đình (ví dụ: con, cha, mẹ, anh chị em)
+- Khi bấm vào 1 item trong danh sách, mở trang chi tiết thành viên.
+- Trang chi tiết hiển thị thông tin đầy đủ: họ tên, ngày sinh, quan hệ, và có nút xem cây gia phả (family tree view).
+- Giao diện đơn giản, hiện đại, responsive (desktop/mobile).
+- có mock data để demo.
+- tham khảo frontend, readme 
+" --output ui/family-search-list

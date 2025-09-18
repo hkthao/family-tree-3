@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import DashboardView from '../views/DashboardView.vue';
+import Dashboard from '../views/Dashboard.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'dashboard',
-      component: DashboardView,
+      component: Dashboard,
     },
     {
       path: '/families',
@@ -28,6 +28,17 @@ const router = createRouter({
       path: '/tree',
       name: 'tree',
       component: () => import('../views/FamilyTreeView.vue'),
+    },
+    {
+      path: '/family-management',
+      name: 'FamilyManagement',
+      component: () => import('../views/FamilyManagement.vue'),
+    },
+    {
+      path: '/member-detail/:id',
+      name: 'MemberDetail',
+      component: () => import('@/components/MemberDetail.vue'),
+      props: true,
     },
   ],
 });
