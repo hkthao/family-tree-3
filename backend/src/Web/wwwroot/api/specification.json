@@ -47,7 +47,7 @@
           "x-position": 1
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "",
             "content": {
               "application/json": {
@@ -119,10 +119,7 @@
           "x-position": 2
         },
         "responses": {
-          "204": {
-            "description": ""
-          },
-          "404": {
+          "200": {
             "description": ""
           }
         }
@@ -144,10 +141,7 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": ""
-          },
-          "404": {
+          "200": {
             "description": ""
           }
         }
@@ -833,22 +827,16 @@
         "additionalProperties": false,
         "properties": {
           "Id": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "Name": {
+            "type": "string"
+          },
+          "Description": {
             "type": "string",
             "nullable": true
           },
-          "Address": {
-            "type": "string",
-            "nullable": true
-          },
-          "Logo": {
-            "type": "string",
-            "nullable": true
-          },
-          "History": {
+          "AvatarUrl": {
             "type": "string",
             "nullable": true
           }
@@ -859,18 +847,13 @@
         "additionalProperties": false,
         "properties": {
           "Name": {
+            "type": "string"
+          },
+          "Description": {
             "type": "string",
             "nullable": true
           },
-          "Address": {
-            "type": "string",
-            "nullable": true
-          },
-          "Logo": {
-            "type": "string",
-            "nullable": true
-          },
-          "History": {
+          "AvatarUrl": {
             "type": "string",
             "nullable": true
           }
@@ -881,22 +864,16 @@
         "additionalProperties": false,
         "properties": {
           "Id": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "Name": {
+            "type": "string"
+          },
+          "Description": {
             "type": "string",
             "nullable": true
           },
-          "Address": {
-            "type": "string",
-            "nullable": true
-          },
-          "Logo": {
-            "type": "string",
-            "nullable": true
-          },
-          "History": {
+          "AvatarUrl": {
             "type": "string",
             "nullable": true
           }
@@ -950,7 +927,15 @@
             "format": "date-time",
             "nullable": true
           },
-          "Status": {
+          "PlaceOfBirth": {
+            "type": "string",
+            "nullable": true
+          },
+          "Gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "AvatarUrl": {
             "type": "string",
             "nullable": true
           },
@@ -966,16 +951,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "DisplayOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "FamilyId": {
+          "Biography": {
             "type": "string",
             "nullable": true
           },
-          "Description": {
-            "type": "string",
+          "Metadata": {
             "nullable": true
           }
         }
@@ -1033,7 +1013,15 @@
             "format": "date-time",
             "nullable": true
           },
-          "Status": {
+          "Gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "AvatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "PlaceOfBirth": {
             "type": "string",
             "nullable": true
           },
@@ -1049,16 +1037,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "DisplayOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "FamilyId": {
+          "Biography": {
             "type": "string",
             "nullable": true
           },
-          "Description": {
-            "type": "string",
+          "Metadata": {
             "nullable": true
           }
         }
@@ -1085,7 +1068,15 @@
             "format": "date-time",
             "nullable": true
           },
-          "Status": {
+          "Gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "AvatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "PlaceOfBirth": {
             "type": "string",
             "nullable": true
           },
@@ -1101,16 +1092,11 @@
             "type": "integer",
             "format": "int32"
           },
-          "DisplayOrder": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "FamilyId": {
+          "Biography": {
             "type": "string",
             "nullable": true
           },
-          "Description": {
-            "type": "string",
+          "Metadata": {
             "nullable": true
           }
         }
@@ -1128,6 +1114,20 @@
           },
           "TargetId": {
             "type": "string",
+            "nullable": true
+          },
+          "FamilyId": {
+            "type": "string",
+            "nullable": true
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }

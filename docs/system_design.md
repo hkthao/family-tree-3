@@ -10,6 +10,10 @@ Hệ thống được xây dựng dựa trên kiến trúc **Clean Architecture*
 -   **Backend:** Là một API service được xây dựng bằng ASP.NET Core, cung cấp dữ liệu và xử lý logic nghiệp vụ.
 -   **Database:** Sử dụng MongoDB, một cơ sở dữ liệu NoSQL linh hoạt, phù hợp với việc lưu trữ dữ liệu gia phả có cấu trúc đa dạng.
 
+### 1.a. Authentication & Authorization (Auth0)
+
+Auth0 đóng vai trò là nhà cung cấp danh tính (Identity Provider - IdP) chính của hệ thống. Mọi quá trình xác thực người dùng (đăng nhập, đăng ký) đều được ủy quyền cho Auth0. Backend API sẽ xác thực các JWT Access Token do Auth0 cấp phát để đảm bảo tính hợp lệ của các yêu cầu.
+
 ### Sơ đồ Kiến trúc Tổng thể (Component Diagram)
 
 ```plantuml
@@ -25,10 +29,14 @@ Container_Boundary(c1, "Hệ thống Quản lý Gia Phả") {
 }
 
 System_Ext(user, "Người dùng", "Người quản lý gia phả, thành viên")
+System_Ext(auth0, "Auth0", "Identity Provider", "Xác thực và cấp phát token")
 
 Rel(user, frontend, "Sử dụng", "HTTPS")
-Rel(frontend, backend, "Gọi API", "HTTPS/JSON")
+Rel(user, auth0, "Xác thực", "HTTPS")
+Rel(frontend, auth0, "Yêu cầu Token", "HTTPS")
+Rel(frontend, backend, "Gọi API (kèm Token)", "HTTPS/JSON")
 Rel(backend, database, "Đọc/Ghi dữ liệu")
+Rel(backend, auth0, "Xác thực Token", "HTTPS")
 
 @enduml
 ```

@@ -16,6 +16,10 @@
         </PackageReference>
         <PackageReference Include="Testcontainers.MongoDb" />
         <PackageReference Include="FluentAssertions" />
+        <PackageReference Include="Moq" />
+        <PackageReference Include="AspNetCore.Identity.MongoDbCore" />
+        <PackageReference Include="Microsoft.AspNetCore.Authorization" />
+        <PackageReference Include="MongoDB.Bson" />
         <PackageReference Include="MongoDB.Driver" />
     </ItemGroup>
 

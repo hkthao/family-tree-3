@@ -17,11 +17,13 @@
         <PackageReference Include="Moq" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="FluentValidation" />
+        <PackageReference Include="Testcontainers.MongoDb" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Application\Application.csproj" />
         <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
+        <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
     </ItemGroup>
 
 </Project>

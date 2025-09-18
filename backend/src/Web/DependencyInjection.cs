@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using backend.Infrastructure.Identity; // Added this using
 
 using NSwag;
@@ -46,12 +47,20 @@ public static class DependencyInjection
         });
 
         // Add Authentication and Authorization
-        builder.Services.AddAuthentication()
-            .AddBearerToken(IdentityConstants.BearerScheme);
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+            .AddJwtBearer(options =>
+            {
+                options.Authority = builder.Configuration["Auth0:Domain"];
+                options.Audience = builder.Configuration["Auth0:Audience"];
+            });
 
         builder.Services.AddAuthorizationBuilder();
 
-        builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>(); // Added this line
+        builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
     }
 
 }

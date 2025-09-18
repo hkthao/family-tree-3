@@ -1,4 +1,5 @@
-﻿using backend.Application.Families.Commands.CreateFamily;
+﻿using backend.Application.Families;
+using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Queries.GetFamilies;
@@ -8,15 +9,14 @@ namespace backend.Web.Endpoints;
 
 public class Families : EndpointGroupBase
 {
-    public override void Map(WebApplication app)
+    public override void Map(RouteGroupBuilder group)
     {
-        app.MapGroup(this)
-            //.RequireAuthorization() // Uncomment this line to secure the endpoints
-            .MapGet(GetFamilies)
-            .MapGet(GetFamilyById, "{id}")
-            .MapPost(CreateFamily)
-            .MapPut(UpdateFamily, "{id}")
-            .MapDelete(DeleteFamily, "{id}");
+        group.MapGet("/", GetFamilies);
+        group.MapGet("{id}", GetFamilyById);
+        group.MapPost("/", CreateFamily);
+        group.MapPut("{id}", UpdateFamily);
+        group.MapDelete("{id}", DeleteFamily);
+        //.RequireAuthorization(); // Uncomment this line to secure the endpoints
     }
 
     public async Task<List<FamilyDto>> GetFamilies(ISender sender)

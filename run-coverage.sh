@@ -25,17 +25,30 @@ if [ $TEST_EXIT_CODE -ne 0 ]; then
   exit $TEST_EXIT_CODE
 fi
 
-# --- Step 2: Parse coverage report ---
-COVERAGE_XML=$(find "$COVERAGE_OUTPUT_DIR" -name "coverage.cobertura.xml" | head -1)
+# --- Step 2: Parse and aggregate coverage reports ---
+echo "Aggregating coverage reports..."
+COVERAGE_XML_FILES=$(find "$COVERAGE_OUTPUT_DIR" -name "coverage.cobertura.xml")
 
-if [ ! -f "$COVERAGE_XML" ]; then
-  echo "❌ Coverage report not found: $COVERAGE_XML"
+TOTAL_LINE_RATE=0
+REPORT_COUNT=0
+
+for xml_file in $COVERAGE_XML_FILES; do
+  if [ -f "$xml_file" ]; then
+    LINE_RATE=$(grep -o 'line-rate="[^"]*"' "$xml_file" | head -1 | cut -d'"' -f2)
+    if [ -n "$LINE_RATE" ]; then
+      TOTAL_LINE_RATE=$(awk -v tl="$TOTAL_LINE_RATE" -v lr="$LINE_RATE" 'BEGIN { print tl + lr }')
+      REPORT_COUNT=$((REPORT_COUNT + 1))
+    fi
+  fi
+done
+
+if [ "$REPORT_COUNT" -eq 0 ]; then
+  echo "❌ No coverage reports found to aggregate."
   exit 1
 fi
 
-# Extract line-rate from cobertura XML using portable grep/cut
-LINE_RATE=$(grep -o 'line-rate="[^"]*"' "$COVERAGE_XML" | head -1 | cut -d'"' -f2)
-COVERAGE_PERCENT=$(awk -v lr="$LINE_RATE" 'BEGIN { printf "%.2f", lr * 100 }')
+AVERAGE_LINE_RATE=$(awk -v tl="$TOTAL_LINE_RATE" -v rc="$REPORT_COUNT" 'BEGIN { printf "%.4f", tl / rc }')
+COVERAGE_PERCENT=$(awk -v alr="$AVERAGE_LINE_RATE" 'BEGIN { printf "%.2f", alr * 100 }')
 
 # --- Step 3: Print summary table and check threshold ---
 echo ""
