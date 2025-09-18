@@ -16,9 +16,9 @@ public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationsh
     {
         var entity = new Relationship
         {
-            SourceMemberId = request.MemberId,
+            SourceMemberId = request.SourceMemberId,
             Type = request.Type,
-            TargetMemberId = request.TargetId,
+            TargetMemberId = request.TargetMemberId,
             FamilyId = request.FamilyId!,
             StartDate = request.StartDate,
             EndDate = request.EndDate

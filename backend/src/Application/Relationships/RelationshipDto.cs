@@ -1,6 +1,7 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using AutoMapper;
 
 namespace backend.Application.Relationships;
 
@@ -13,4 +14,9 @@ public class RelationshipDto : IMapFrom<Relationship>
     public Guid? TargetMemberId { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<Relationship, RelationshipDto>();
+    }
 }

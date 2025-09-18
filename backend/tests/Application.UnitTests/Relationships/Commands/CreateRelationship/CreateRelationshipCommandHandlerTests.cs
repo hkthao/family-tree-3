@@ -31,9 +31,9 @@ public class CreateRelationshipCommandHandlerTests
         // Arrange
         var command = new CreateRelationshipCommand
         {
-            MemberId = Guid.NewGuid(),
+            SourceMemberId = Guid.NewGuid(),
             Type = RelationshipType.Parent,
-            TargetId = Guid.NewGuid(),
+            TargetMemberId = Guid.NewGuid(),
             FamilyId = Guid.NewGuid(),
             StartDate = new DateTime(2000, 1, 1)
         };

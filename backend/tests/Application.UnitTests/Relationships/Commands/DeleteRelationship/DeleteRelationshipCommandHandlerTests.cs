@@ -30,7 +30,7 @@ public class DeleteRelationshipCommandHandlerTests
     {
         // Arrange
         var relationshipId = Guid.NewGuid();
-        var relationship = new Relationship { Id = relationshipId };
+        var relationship = new Relationship { Id = relationshipId, FamilyId = Guid.NewGuid(), SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid() };
         _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 

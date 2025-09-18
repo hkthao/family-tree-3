@@ -45,7 +45,7 @@ public class MemberDtoTests : IDisposable
             Email = "john.doe@example.com",
             Generation = 1,
             Biography = "Some biography",
-            Metadata = new { Key = "Value" },
+            Metadata = "Some metadata",
             FamilyId = Guid.NewGuid()
         };
 

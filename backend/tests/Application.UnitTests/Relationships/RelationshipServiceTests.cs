@@ -29,8 +29,8 @@ public class RelationshipServiceTests
         // Arrange
         var command = new CreateRelationshipCommand
         {
-            MemberId = Guid.NewGuid(),
-            TargetId = Guid.NewGuid(),
+            SourceMemberId = Guid.NewGuid(),
+            TargetMemberId = Guid.NewGuid(),
             Type = RelationshipType.Parent,
             FamilyId = Guid.NewGuid(),
             StartDate = DateTime.Now,
@@ -44,8 +44,8 @@ public class RelationshipServiceTests
         // Assert
         var createdRelationship = await _context.Relationships.FindAsync(result);
         createdRelationship.Should().NotBeNull();
-        createdRelationship?.SourceMemberId.Should().Be(command.MemberId);
-        createdRelationship?.TargetMemberId.Should().Be(command.TargetId);
+        createdRelationship?.SourceMemberId.Should().Be(command.SourceMemberId);
+        createdRelationship?.TargetMemberId.Should().Be(command.TargetMemberId);
     }
 
     [Fact]
@@ -55,8 +55,8 @@ public class RelationshipServiceTests
         var memberId = Guid.NewGuid();
         var command = new CreateRelationshipCommand
         {
-            MemberId = memberId,
-            TargetId = memberId,
+            SourceMemberId = memberId,
+            TargetMemberId = memberId,
             Type = RelationshipType.Parent,
             FamilyId = Guid.NewGuid(),
             StartDate = DateTime.Now,

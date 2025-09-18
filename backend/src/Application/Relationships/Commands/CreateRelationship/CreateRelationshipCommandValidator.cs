@@ -4,12 +4,12 @@ public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelati
 {
     public CreateRelationshipCommandValidator()
     {
-        RuleFor(v => v.MemberId)
-            .NotEmpty();
-        RuleFor(v => v.TargetId)
-            .NotEmpty();
-        RuleFor(v => v.MemberId)
-            .NotEqual(v => v.TargetId)
-            .WithMessage("MemberId and TargetId cannot be the same.");
+        RuleFor(v => v.SourceMemberId)
+            .NotEqual(Guid.Empty).WithMessage("SourceMemberId must not be empty.");
+        RuleFor(v => v.TargetMemberId)
+            .NotEqual(Guid.Empty).WithMessage("TargetMemberId must not be empty.");
+        RuleFor(v => v.SourceMemberId)
+            .NotEqual(v => v.TargetMemberId)
+            .WithMessage("SourceMemberId and TargetMemberId cannot be the same.");
     }
 }
