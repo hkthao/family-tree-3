@@ -1,4 +1,7 @@
-$list-item-icon-margin-end: 8px; // Reduced margin example
+@use 'vuetify/settings';
 .v-list-item__spacer {
     width: 12px !important;   
   }
+.v-list-item--nav .v-list-item-title{
+  font-size: 0.9rem;
+}

@@ -9,16 +9,15 @@
 
     <v-divider></v-divider>
 
-    <v-list density="comfortable" nav>
+    <v-list nav>
       <template v-for="(section, i) in filteredMenu" :key="i">
-        <v-list-subheader>{{ section.title }}</v-list-subheader>
+        <v-list-header class="font-weight-bold">{{ section.title }}</v-list-header>
         <v-list-item
           v-for="(item, j) in section.items"
           :key="j"
           :to="item.to"
           :prepend-icon="item.icon"
           :title="$t(item.titleKey)"
-          class="text-subtitle-1"
           active-class="active-item"
         ></v-list-item>
       </template>
@@ -29,7 +28,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import menu, { MenuSection } from '@/data/menuItems';
+import menu from '@/data/menuItems';
 import { canAccessMenu } from '@/utils/menu-permissions';
 
 const props = defineProps({
@@ -58,6 +57,7 @@ const filteredMenu = computed(() => {
   color: rgb(var(--v-theme-primary));
   border-radius: 8px;
 }
+
 
 .active-item .v-list-item-title {
   font-weight: bold;

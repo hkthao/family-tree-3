@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "apexcharts": "^5.3.5",
-    "vue3-apexcharts": "^1.8.0"
-  }
-}
