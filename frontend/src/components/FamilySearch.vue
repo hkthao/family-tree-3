@@ -37,7 +37,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { mockFamilyMembers, FamilyMember } from '@/data/mockFamilyData';
+import { mockFamilyMembers } from '@/data/mockFamilyData';
+import type { FamilyMember } from '@/data/mockFamilyData';
 
 const searchQuery = ref('');
 const router = useRouter();

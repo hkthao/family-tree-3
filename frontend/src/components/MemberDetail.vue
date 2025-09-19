@@ -82,7 +82,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { mockFamilyMembers, FamilyMember } from '@/data/mockFamilyData';
+import { mockFamilyMembers } from '@/data/mockFamilyData';
+import type { FamilyMember } from '@/data/mockFamilyData';
 
 const route = useRoute();
 const router = useRouter();
