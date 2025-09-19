@@ -8,3 +8,4 @@ export { default as RelationshipsView } from './RelationshipsView.vue';
 export { default as TimelineView } from './TimelineView.vue';
 export { default as UserManagementView } from './admin/UserManagementView.vue';
 export { default as RoleManagementView } from './admin/RoleManagementView.vue';
+export { default as FamilySearchView } from './FamilySearchView.vue';

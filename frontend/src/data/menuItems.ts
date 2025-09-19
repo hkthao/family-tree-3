@@ -49,6 +49,12 @@ const menu: MenuSection[] = [
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
       {
+        titleKey: 'family.manageFamilies',
+        icon: 'mdi-home-group',
+        to: '/family-search',
+        roles: ['Admin', 'FamilyManager'],
+      },
+      {
         titleKey: 'family.timeline',
         icon: 'mdi-timeline-text',
         to: '/family/timeline',
