@@ -1,15 +1,17 @@
 <template>
-  <v-container >
-    <v-card >
+  <v-container>
+    <v-card>
+      <!-- Title + Add button -->
       <v-card-title class="d-flex align-center">
         {{ $t('family.management.title') }}
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="openAddForm">
-          <v-icon>mdi-plus</v-icon>
+        <v-spacer />
+        <v-btn color="primary" @click="openAddForm" prepend-icon="mdi-plus" class="text-none">
+          {{ $t('family.management.addButton') }}
         </v-btn>
       </v-card-title>
 
       <v-card-text>
+        <!-- Search + Filter -->
         <v-row>
           <v-col cols="12" md="6">
             <v-text-field
@@ -19,19 +21,20 @@
               prepend-inner-icon="mdi-magnify"
               variant="outlined"
               density="compact"
-            ></v-text-field>
+            />
           </v-col>
           <v-col cols="12" md="6">
             <v-select
-              v-model="filterVisibility"
+              v-model="filtervisibility"
               :items="visibilityItems"
               :label="$t('family.management.filterLabel')"
               variant="outlined"
               density="compact"
-            ></v-select>
+            />
           </v-col>
         </v-row>
 
+        <!-- Data Table -->
         <v-data-table-server
           v-model:items-per-page="itemsPerPage"
           :headers="headers"
@@ -42,22 +45,38 @@
           @update:options="loadFamilies"
           elevation="0"
         >
-          <template #item.AvatarUrl="{ item }">
+          <!-- Avatar column -->
+          <template #item.avatarUrl="{ item }">
             <div class="d-flex justify-center">
               <v-avatar size="36" class="my-2">
-                <v-img v-if="item.AvatarUrl" :src="item.AvatarUrl" :alt="item.Name"></v-img>
+                <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="item.name" />
                 <v-icon v-else>mdi-account-group</v-icon>
               </v-avatar>
             </div>
           </template>
-          <template #item.Name="{ item }">
+
+          <!-- name column -->
+          <template #item.name="{ item }">
             <div class="text-left">
-              <v-btn variant="text" color="primary" @click.prevent="viewFamily(item)" class="text-none">{{ item.Name }}</v-btn>
+              <v-btn variant="text" color="primary" @click.prevent="viewFamily(item)" class="text-none">
+                {{ item.name }}
+              </v-btn>
             </div>
           </template>
-          <template #item.Visibility="{ item }">
-            <v-chip :color="item.Visibility === 'Public' ? 'success' : 'error'" label>{{ $t(`family.management.visibility.${item.Visibility.toLowerCase()}`) }}</v-chip>
+
+          <!-- visibility column -->
+          <template #item.visibility="{ item }">
+            <v-chip
+              :color="item.visibility === 'Public' ? 'success' : 'error'"
+              label
+              size="small"
+              class="text-capitalize"
+            >
+              {{ $t(`family.management.visibility.${item.visibility.toLowerCase()}`) }}
+            </v-chip>
           </template>
+
+          <!-- Actions column -->
           <template #item.actions="{ item }">
             <v-btn icon size="small" variant="text" @click="editFamily(item)">
               <v-icon>mdi-pencil</v-icon>
@@ -66,8 +85,10 @@
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </template>
+
+          <!-- Loading state -->
           <template #loading>
-            <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
+            <v-skeleton-loader type="table-row@5" />
           </template>
         </v-data-table-server>
       </v-card-text>
@@ -97,10 +118,11 @@
       />
     </v-dialog>
 
+    <!-- Snackbar -->
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
       {{ snackbar.message }}
     </v-snackbar>
-    </v-container>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -119,7 +141,7 @@ const families = ref<Family[]>([]);
 const totalFamilies = ref(0);
 const loading = ref(true);
 const searchQuery = ref('');
-const filterVisibility = ref<'All' | 'Private' | 'Public'>('All');
+const filtervisibility = ref<'All' | 'Private' | 'Public'>('All');
 const itemsPerPage = ref(5);
 
 const formDialog = ref(false);
@@ -135,9 +157,9 @@ const snackbar = ref({
 });
 
 const headers = computed(() => [
-  { title: t('family.management.headers.avatar'), key: 'AvatarUrl', sortable: false, width: '120px', align: 'center' },
-  { title: t('family.management.headers.name'), key: 'Name', width: 'auto', align: 'center' },
-  { title: t('family.management.headers.visibility'), key: 'Visibility', width: '120px', align: 'center' },
+  { title: t('family.management.headers.avatar'), key: 'avatarUrl', sortable: false, width: '120px', align: 'center' },
+  { title: t('family.management.headers.name'), key: 'name', width: 'auto', align: 'start' },
+  { title: t('family.management.headers.visibility'), key: 'visibility', width: '120px', align: 'center' },
   { title: t('family.management.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
@@ -151,7 +173,7 @@ const loadFamilies = async ({ page, itemsPerPage: perPage }: { page: number; ite
   loading.value = true;
   const { families: fetchedFamilies, total } = await getFamilies(
     searchQuery.value,
-    filterVisibility.value,
+    filtervisibility.value,
     page,
     perPage
   );
@@ -229,7 +251,7 @@ const handleDeleteCancel = () => {
   familyToDelete.value = undefined;
 };
 
-watch([searchQuery, filterVisibility], () => {
+watch([searchQuery, filtervisibility], () => {
   loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
 });
 

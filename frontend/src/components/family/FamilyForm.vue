@@ -4,21 +4,21 @@
     <v-card-text>
       <v-form ref="form" v-model="isValid">
         <v-text-field
-          v-model="familyForm.Name"
+          v-model="familyForm.name"
           :label="$t('family.form.nameLabel')"
           :rules="[rules.required]"
           required
         ></v-text-field>
         <v-textarea
-          v-model="familyForm.Description"
+          v-model="familyForm.description"
           :label="$t('family.form.descriptionLabel')"
         ></v-textarea>
         <v-text-field
-          v-model="familyForm.AvatarUrl"
+          v-model="familyForm.avatarUrl"
           :label="$t('family.form.avatarUrlLabel')"
         ></v-text-field>
         <v-select
-          v-model="familyForm.Visibility"
+          v-model="familyForm.visibility"
           :items="visibilityItems"
           :label="$t('family.form.visibilityLabel')"
           required
@@ -51,10 +51,10 @@ const form = ref<HTMLFormElement | null>(null);
 const isValid = ref(false);
 
 const familyForm = ref<Omit<Family, 'id'> & { id?: number }>({
-  Name: '',
-  Description: '',
-  AvatarUrl: '',
-  Visibility: 'Private',
+  name: '',
+  description: '',
+  avatarUrl: '',
+  visibility: 'Private',
 });
 
 const isEditMode = computed(() => !!props.family);
@@ -71,10 +71,10 @@ watch(
       familyForm.value = { ...newFamily };
     } else {
       familyForm.value = {
-        Name: '',
-        Description: '',
-        AvatarUrl: '',
-        Visibility: 'Private',
+        name: '',
+        description: '',
+        avatarUrl: '',
+        visibility: 'Private',
       };
     }
   },
