@@ -14,8 +14,8 @@ services:
 
   backend:
     build:
-      context: ../backend
-      dockerfile: ../infra/Dockerfile.backend # Path to Dockerfile relative to the new context
+      context: ..
+      dockerfile: infra/Dockerfile.backend # Path to Dockerfile relative to the new context
       args:
         - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;
     container_name: family-tree-backend
@@ -31,8 +31,8 @@ services:
 
   frontend:
     build:
-      context: ../frontend
-      dockerfile: ../infra/Dockerfile.frontend # Path to Dockerfile relative to the new context
+      context: ..
+      dockerfile: infra/Dockerfile.frontend # Path to Dockerfile relative to the new context
     container_name: family-tree-frontend
     ports:
       - "80:80"
