@@ -1,12 +1,12 @@
 <template>
   <v-container >
-    <v-card class="pa-4">
+    <v-card class="pa-4" elevation="0">
       <v-card-title class="d-flex align-center">
-        Family Management
+        {{ $t('family.management.title') }}
         <v-spacer></v-spacer>
         <v-btn color="primary" @click="openAddForm">
           <v-icon left>mdi-plus</v-icon>
-          Thêm mới Family
+          {{ $t('family.management.add') }}
         </v-btn>
       </v-card-title>
 
@@ -15,7 +15,7 @@
           <v-col cols="12" md="6">
             <v-text-field
               v-model="searchQuery"
-              label="Tìm kiếm theo Name"
+              :label="$t('family.management.searchLabel')"
               clearable
               prepend-inner-icon="mdi-magnify"
               variant="outlined"
@@ -25,8 +25,8 @@
           <v-col cols="12" md="6">
             <v-select
               v-model="filterVisibility"
-              :items="['All', 'Private', 'Public']"
-              label="Lọc theo Visibility"
+              :items="visibilityItems"
+              :label="$t('family.management.filterLabel')"
               variant="outlined"
               density="compact"
             ></v-select>
@@ -98,13 +98,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useFamilies } from '@/data/families';
 import type { Family } from '@/data/families';
 import FamilyForm from './FamilyForm.vue';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog.vue';
 import FamilyDetail from './FamilyDetail.vue';
 
+const { t } = useI18n();
 const { getFamilies, addFamily, updateFamily, deleteFamily } = useFamilies();
 
 const families = ref<Family[]>([]);
@@ -126,12 +128,18 @@ const snackbar = ref({
   color: '',
 });
 
-const headers = [
-  { title: 'Avatar', key: 'AvatarUrl', sortable: false },
-  { title: 'Name', key: 'Name' },
-  { title: 'Visibility', key: 'Visibility' },
-  { title: 'Actions', key: 'actions', sortable: false },
-];
+const headers = computed(() => [
+  { title: t('family.management.headers.avatar'), key: 'AvatarUrl', sortable: false },
+  { title: t('family.management.headers.name'), key: 'Name' },
+  { title: t('family.management.headers.visibility'), key: 'Visibility' },
+  { title: t('family.management.headers.actions'), key: 'actions', sortable: false },
+]);
+
+const visibilityItems = computed(() => [
+  { title: t('family.management.visibility.all'), value: 'All' },
+  { title: t('family.management.visibility.private'), value: 'Private' },
+  { title: t('family.management.visibility.public'), value: 'Public' },
+]);
 
 const loadFamilies = async ({ page, itemsPerPage: perPage }: { page: number; itemsPerPage: number }) => {
   loading.value = true;
@@ -175,18 +183,16 @@ const handleSaveFamily = async (familyData: Omit<Family, 'id'> & { id?: number }
   loading.value = true;
   try {
     if (familyData.id) {
-      // Update existing family
       await updateFamily(familyData as Family);
-      snackbar.value = { show: true, message: 'Family updated successfully!', color: 'success' };
+      snackbar.value = { show: true, message: t('family.management.messages.updateSuccess'), color: 'success' };
     } else {
-      // Add new family
       await addFamily(familyData);
-      snackbar.value = { show: true, message: 'Family added successfully!', color: 'success' };
+      snackbar.value = { show: true, message: t('family.management.messages.addSuccess'), color: 'success' };
     }
     closeForm();
-    await loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value }); // Reload data
+    await loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
   } catch (error) {
-    snackbar.value = { show: true, message: 'Error saving family.', color: 'error' };
+    snackbar.value = { show: true, message: t('family.management.messages.saveError'), color: 'error' };
   }
   loading.value = false;
 };
@@ -201,10 +207,10 @@ const handleDeleteConfirm = async () => {
     loading.value = true;
     try {
       await deleteFamily(familyToDelete.value.id);
-      snackbar.value = { show: true, message: 'Family deleted successfully!', color: 'success' };
-      await loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value }); // Reload data
+      snackbar.value = { show: true, message: t('family.management.messages.deleteSuccess'), color: 'success' };
+      await loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
     } catch (error) {
-      snackbar.value = { show: true, message: 'Error deleting family.', color: 'error' };
+      snackbar.value = { show: true, message: t('family.management.messages.deleteError'), color: 'error' };
     }
     loading.value = false;
   }
