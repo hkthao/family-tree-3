@@ -8,7 +8,7 @@ import 'vuetify/styles';
 import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
 
-import VueApexCharts from "vue3-apexcharts";
+import VueApexCharts from 'vue3-apexcharts';
 
 const app = createApp(App);
 

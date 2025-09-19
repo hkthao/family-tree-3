@@ -84,11 +84,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { User, UserMenuItem } from './UserMenu.types';
+import type { User } from './UserMenu.types';
 import { userMenuItems } from '@/data/userMenuItems';
-
+import { ref, computed, watch } from 'vue';
 const menuItems = userMenuItems;
 
 const props = defineProps({
@@ -104,7 +102,6 @@ const props = defineProps({
 
 const emit = defineEmits(['navigate', 'logout', 'openSettings']);
 
-const { t } = useI18n();
 const menuOpen = ref(false);
 const confirmLogoutDialog = ref(false);
 
@@ -145,19 +142,6 @@ watch(menuOpen, (newVal) => {
   }
 });
 
-// Keyboard navigation (basic placeholder)
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (menuOpen.value) {
-    switch (event.key) {
-      case 'Escape':
-        menuOpen.value = false;
-        event.preventDefault();
-        break;
-      // Add more cases for Up/Down/Enter if needed
-    }
-  }
-};
-
 // Global shortcut Ctrl/Cmd+U to open UserMenu (placeholder)
 const handleGlobalKeyDown = (event: KeyboardEvent) => {
   if ((event.metaKey || event.ctrlKey) && event.key === 'u') {
@@ -173,9 +157,7 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleGlobalKeyDown);
-});
-
-</script>
+});</script>
 
 <style scoped>
 

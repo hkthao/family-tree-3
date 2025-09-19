@@ -27,7 +27,6 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
 import menu from '@/data/menuItems';
 import { canAccessMenu } from '@/utils/menu-permissions';
 
@@ -37,8 +36,6 @@ const props = defineProps({
     default: () => ({ id: 'u1', name: 'John', roles: ['FamilyManager'] })
   }
 });
-
-const { t } = useI18n();
 
 const filteredMenu = computed(() => {
   const userRoles = props.currentUser.roles;

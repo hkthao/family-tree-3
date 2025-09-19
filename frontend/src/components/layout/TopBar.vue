@@ -30,13 +30,14 @@
       </v-badge>
     </v-btn>
 
-    <div class="mr-2">
+    <div class="mx-2">
             <UserMenu
               :current-user="currentUser"
               @navigate="handleNavigation"
               @logout="handleLogout"
               @open-settings="handleOpenSettings"
-            />      </div>
+            />      
+    </div>
 
   </v-app-bar>
 </template>
@@ -45,14 +46,12 @@
 import { ref } from 'vue';
 import { useTheme } from 'vuetify';
 import UserMenu from './UserMenu.vue';
-import { mockUser } from '@/data/userMock';
 import { useRouter } from 'vue-router';
+import type { VTextField } from 'vuetify/components';
 
 const theme = useTheme();
-const searchField = ref(null);
+const searchField = ref<VTextField | null>(null);
 const router = useRouter();
-
-const currentUser = ref(mockUser);
 
 defineProps({
   currentUser: {
@@ -70,7 +69,7 @@ function toggleTheme() {
 
 function focusSearch() {
   if (searchField.value) {
-    (searchField.value as any).focus();
+    searchField.value.focus();
   }
 }
 
@@ -79,8 +78,8 @@ const handleNavigation = (route: string) => {
 };
 
 const handleLogout = () => {
-  // Implement your logout logic here
-  console.log('User logged out!');
+  // Implement logout logic
+  console.log('Logging out...');
 };
 
 const handleOpenSettings = () => {
