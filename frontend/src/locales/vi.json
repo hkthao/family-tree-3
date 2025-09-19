@@ -29,5 +29,21 @@
   "settings.system": "Cài đặt hệ thống",
   "settings.account": "Cài đặt tài khoản",
   "settings.importExport": "Xuất/Nhập dữ liệu",
-  "reports.statistics": "Báo cáo & Thống kê"
+  "reports.statistics": "Báo cáo & Thống kê",
+  "family.management.title": "Quản lý Gia đình",
+  "family.management.add": "Thêm mới Gia đình",
+  "family.management.searchLabel": "Tìm kiếm theo Tên",
+  "family.management.filterLabel": "Lọc theo Chế độ",
+  "family.management.visibility.all": "Tất cả",
+  "family.management.visibility.private": "Riêng tư",
+  "family.management.visibility.public": "Công khai",
+  "family.management.headers.avatar": "Ảnh đại diện",
+  "family.management.headers.name": "Tên",
+  "family.management.headers.visibility": "Chế độ",
+  "family.management.headers.actions": "Hành động",
+  "family.management.messages.updateSuccess": "Cập nhật gia đình thành công!",
+  "family.management.messages.addSuccess": "Thêm gia đình thành công!",
+  "family.management.messages.saveError": "Lỗi khi lưu gia đình.",
+  "family.management.messages.deleteSuccess": "Xóa gia đình thành công!",
+  "family.management.messages.deleteError": "Lỗi khi xóa gia đình."
 }
