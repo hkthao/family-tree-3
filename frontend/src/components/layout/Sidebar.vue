@@ -11,7 +11,7 @@
 
     <v-list nav>
       <template v-for="(section, i) in filteredMenu" :key="i">
-        <v-list-header class="font-weight-bold">{{ section.title }}</v-list-header>
+        <v-list-subheader>{{ section.title }}</v-list-subheader>
         <v-list-item
           v-for="(item, j) in section.items"
           :key="j"
