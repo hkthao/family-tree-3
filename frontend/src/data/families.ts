@@ -1,84 +1,83 @@
-
 import { ref } from 'vue';
 
 export interface Family {
   id: number;
-  Name: string;
-  Description?: string;
-  AvatarUrl?: string;
-  Visibility: 'Private' | 'Public';
+  name: string;
+  description?: string;
+  avatarUrl?: string;
+  visibility: 'Private' | 'Public';
 }
 
 const families = ref<Family[]>([
   {
     id: 1,
-    Name: 'Huynh Family',
-    Description: 'A large and loving family.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/halcyon.png',
-    Visibility: 'Public',
+    name: 'Huynh Family',
+    description: 'A large and loving family.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/halcyon.png',
+    visibility: 'Public',
   },
   {
     id: 2,
-    Name: 'Nguyen Family',
-    Description: 'Close-knit family with strong traditions.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/sunshine.jpg',
-    Visibility: 'Private',
+    name: 'Nguyen Family',
+    description: 'Close-knit family with strong traditions.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/sunshine.jpg',
+    visibility: 'Private',
   },
   {
     id: 3,
-    Name: 'Tran Family',
-    Description: 'Modern family with diverse interests.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/docks.jpg',
-    Visibility: 'Public',
+    name: 'Tran Family',
+    description: 'Modern family with diverse interests.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/docks.jpg',
+    visibility: 'Public',
   },
   {
     id: 4,
-    Name: 'Le Family',
-    Description: 'Small family, big dreams.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-    Visibility: 'Private',
+    name: 'Le Family',
+    description: 'Small family, big dreams.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/road.jpg',
+    visibility: 'Private',
   },
   {
     id: 5,
-    Name: 'Pham Family',
-    Description: 'Family of adventurers.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/forest.jpg',
-    Visibility: 'Public',
+    name: 'Pham Family',
+    description: 'Family of adventurers.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/forest.jpg',
+    visibility: 'Public',
   },
   {
     id: 6,
-    Name: 'Vo Family',
-    Description: 'Artistic and creative family.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg',
-    Visibility: 'Private',
+    name: 'Vo Family',
+    description: 'Artistic and creative family.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg',
+    visibility: 'Private',
   },
   {
     id: 7,
-    Name: 'Hoang Family',
-    Description: 'Family of scholars.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/house.jpg',
-    Visibility: 'Public',
+    name: 'Hoang Family',
+    description: 'Family of scholars.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/house.jpg',
+    visibility: 'Public',
   },
   {
     id: 8,
-    Name: 'Dang Family',
-    Description: 'Musical family.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/server-room.jpg',
-    Visibility: 'Private',
+    name: 'Dang Family',
+    description: 'Musical family.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/server-room.jpg',
+    visibility: 'Private',
   },
   {
     id: 9,
-    Name: 'Bui Family',
-    Description: 'Family of food lovers.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/cooking.png',
-    Visibility: 'Public',
+    name: 'Bui Family',
+    description: 'Family of food lovers.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/cooking.png',
+    visibility: 'Public',
   },
   {
     id: 10,
-    Name: 'Do Family',
-    Description: 'Sporty family.',
-    AvatarUrl: 'https://cdn.vuetifyjs.com/images/cards/athlete.jpg',
-    Visibility: 'Private',
+    name: 'Do Family',
+    description: 'Sporty family.',
+    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/athlete.jpg',
+    visibility: 'Private',
   },
 ]);
 
@@ -95,13 +94,13 @@ export const useFamilies = () => {
 
         if (search) {
           filteredFamilies = filteredFamilies.filter((f) =>
-            f.Name.toLowerCase().includes(search.toLowerCase())
+            f.name.toLowerCase().includes(search.toLowerCase())
           );
         }
 
         if (visibility !== 'All') {
           filteredFamilies = filteredFamilies.filter(
-            (f) => f.Visibility === visibility
+            (f) => f.visibility === visibility
           );
         }
 

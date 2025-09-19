@@ -21,5 +21,6 @@ module.exports = {
     'no-unused-vars': 'warn',
     'vue/no-unused-components': 'warn',
     'vue/multi-word-component-names': 'off',
+    'vue/valid-v-slot': 'off',
   },
 };

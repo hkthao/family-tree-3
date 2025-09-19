@@ -12,7 +12,7 @@ export interface FamilyMember {
   email?: string;
   generation?: number;
   biography?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   relationships: {
     type: 'parent' | 'child' | 'spouse' | 'sibling';
     memberId: string;
