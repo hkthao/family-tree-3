@@ -1,12 +1,11 @@
 <template>
   <v-container >
-    <v-card class="pa-4" elevation="0">
+    <v-card >
       <v-card-title class="d-flex align-center">
         {{ $t('family.management.title') }}
         <v-spacer></v-spacer>
         <v-btn color="primary" @click="openAddForm">
-          <v-icon left>mdi-plus</v-icon>
-          {{ $t('family.management.add') }}
+          <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-card-title>
 
@@ -44,15 +43,22 @@
           elevation="0"
         >
           <template v-slot:item.AvatarUrl="{ item }">
-            <v-avatar size="36" class="my-2">
-              <v-img v-if="item.AvatarUrl" :src="item.AvatarUrl" :alt="item.Name"></v-img>
-              <v-icon v-else>mdi-account-group</v-icon>
-            </v-avatar>
+            <div class="d-flex justify-center">
+              <v-avatar size="36" class="my-2">
+                <v-img v-if="item.AvatarUrl" :src="item.AvatarUrl" :alt="item.Name"></v-img>
+                <v-icon v-else>mdi-account-group</v-icon>
+              </v-avatar>
+            </div>
+          </template>
+          <template v-slot:item.Name="{ item }">
+            <div class="text-left">
+              <v-btn variant="text" color="primary" @click.prevent="viewFamily(item)" class="text-none">{{ item.Name }}</v-btn>
+            </div>
+          </template>
+          <template v-slot:item.Visibility="{ item }">
+            <v-chip :color="item.Visibility === 'Public' ? 'success' : 'error'" label>{{ $t(`family.management.visibility.${item.Visibility.toLowerCase()}`) }}</v-chip>
           </template>
           <template v-slot:item.actions="{ item }">
-            <v-btn icon size="small" variant="text" @click="viewFamily(item)">
-              <v-icon>mdi-eye</v-icon>
-            </v-btn>
             <v-btn icon size="small" variant="text" @click="editFamily(item)">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
@@ -129,10 +135,10 @@ const snackbar = ref({
 });
 
 const headers = computed(() => [
-  { title: t('family.management.headers.avatar'), key: 'AvatarUrl', sortable: false },
-  { title: t('family.management.headers.name'), key: 'Name' },
-  { title: t('family.management.headers.visibility'), key: 'Visibility' },
-  { title: t('family.management.headers.actions'), key: 'actions', sortable: false },
+  { title: t('family.management.headers.avatar'), key: 'AvatarUrl', sortable: false, width: '120px', align: 'center' },
+  { title: t('family.management.headers.name'), key: 'Name', width: 'auto', align: 'center' },
+  { title: t('family.management.headers.visibility'), key: 'Visibility', width: '120px', align: 'center' },
+  { title: t('family.management.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
 const visibilityItems = computed(() => [
