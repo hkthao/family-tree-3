@@ -1,4 +1,5 @@
 <template>
+  <v-container >
     <v-card class="pa-4">
       <v-card-title class="d-flex align-center">
         Family Management
@@ -40,7 +41,7 @@
           :loading="loading"
           item-value="id"
           @update:options="loadFamilies"
-          class="elevation-1"
+          elevation="0"
         >
           <template v-slot:item.AvatarUrl="{ item }">
             <v-avatar size="36" class="my-2">
@@ -93,6 +94,7 @@
     <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
       {{ snackbar.message }}
     </v-snackbar>
+    </v-container>
 </template>
 
 <script setup lang="ts">
