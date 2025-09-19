@@ -5,8 +5,8 @@
       <v-card-title class="d-flex align-center">
         {{ $t('family.management.title') }}
         <v-spacer />
-        <v-btn color="primary" @click="openAddForm" prepend-icon="mdi-plus" class="text-none">
-          {{ $t('family.management.addButton') }}
+        <v-btn color="primary" @click="openAddForm">
+          <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-card-title>
 
@@ -133,6 +133,8 @@ import type { Family } from '@/data/families';
 import FamilyForm from './FamilyForm.vue';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog.vue';
 import FamilyDetail from './FamilyDetail.vue';
+import type { DataTableHeader } from 'vuetify';
+
 
 const { t } = useI18n();
 const { getFamilies, addFamily, updateFamily, deleteFamily } = useFamilies();
@@ -156,7 +158,7 @@ const snackbar = ref({
   color: '',
 });
 
-const headers = computed(() => [
+const headers = computed<DataTableHeader[]>(() => [
   { title: t('family.management.headers.avatar'), key: 'avatarUrl', sortable: false, width: '120px', align: 'center' },
   { title: t('family.management.headers.name'), key: 'name', width: 'auto', align: 'start' },
   { title: t('family.management.headers.visibility'), key: 'visibility', width: '120px', align: 'center' },

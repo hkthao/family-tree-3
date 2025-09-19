@@ -10,7 +10,7 @@
       <v-row>
         <v-col cols="12" class="d-flex justify-center">
           <v-avatar size="100" v-if="family.avatarUrl">
-            <v-img :src="family.avatarUrl" :alt="family.Name"></v-img>
+            <v-img :src="family.avatarUrl" :alt="family.name"></v-img>
           </v-avatar>
           <v-avatar size="100" color="primary" v-else>
             <span class="text-h5">{{ family.name.charAt(0) }}</span>
