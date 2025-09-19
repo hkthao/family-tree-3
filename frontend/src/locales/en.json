@@ -56,5 +56,14 @@
   "family.form.visibility.public": "Public",
   "common.cancel": "Cancel",
   "common.save": "Save",
-  "family.form.rules.nameRequired": "Name is required."
+  "family.form.rules.nameRequired": "Name is required.",
+  "family.detail.title": "Family Details",
+  "family.detail.name": "Name:",
+  "family.detail.description": "Description:",
+  "family.detail.visibility": "Visibility:",
+  "common.na": "N/A",
+  "family.detail.noFamilySelected": "No family selected.",
+  "confirmDelete.title": "Confirm Deletion",
+  "confirmDelete.message": "Are you sure you want to delete this Family?",
+  "common.delete": "Delete"
 }
