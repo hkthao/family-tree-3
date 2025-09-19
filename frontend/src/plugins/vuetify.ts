@@ -33,4 +33,18 @@ export default createVuetify({
       },
     },
   },
+  defaults: {
+    VTextField: {
+      variant: 'outlined',
+    },
+    VSelect: {
+      variant: 'outlined',
+    },
+    VTextarea: {
+      variant: 'outlined',
+    },
+    VBtn: {
+      variant: 'outlined',
+    },
+  },
 });
