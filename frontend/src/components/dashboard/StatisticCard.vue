@@ -7,7 +7,7 @@
           <h4 class="text-h5 font-weight-bold">{{ value }}</h4>
           <span :class="change.startsWith('+') ? 'text-success' : 'text-error'" class="text-caption">{{ change }}</span>
         </div>
-        <v-avatar :color="color" rounded size="42">
+        <v-avatar :color="color" rounded="lg" size="42">
           <v-icon :icon="icon" color="white"></v-icon>
         </v-avatar>
       </div>

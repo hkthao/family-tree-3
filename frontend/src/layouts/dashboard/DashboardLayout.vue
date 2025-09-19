@@ -10,8 +10,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import Sidebar from './Sidebar.vue';
-import TopBar from './TopBar.vue';
+import { Sidebar, TopBar } from '@/components/layout';
 
 const drawer = ref(true);
 </script>
