@@ -65,5 +65,15 @@
   "family.detail.noFamilySelected": "No family selected.",
   "confirmDelete.title": "Confirm Deletion",
   "confirmDelete.message": "Are you sure you want to delete this Family?",
-  "common.delete": "Delete"
+  "common.delete": "Delete",
+  "userMenu.profile": "Profile",
+  "userMenu.settings": "Settings",
+  "userMenu.pricing": "Pricing",
+  "userMenu.faq": "FAQ",
+  "userMenu.logout": "Logout",
+  "userMenu.confirmLogout": "Are you sure you want to log out?",
+  "userMenu.cancel": "Cancel",
+  "userMenu.ariaLabel": "User menu",
+  "userMenu.role": "Role",
+  "userMenu.uploadPhoto": "Upload Photo"
 }

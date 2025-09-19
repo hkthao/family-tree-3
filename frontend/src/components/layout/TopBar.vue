@@ -30,34 +30,29 @@
       </v-badge>
     </v-btn>
 
-    <v-menu offset-y>
-      <template v-slot:activator="{ props }">
-        <v-avatar class="ml-4" size="36" v-bind="props">
-          <v-img :src="currentUser.avatar || 'https://randomuser.me/api/portraits/men/85.jpg'"></v-img>
-        </v-avatar>
-      </template>
-      <v-list>
-        <v-list-item :to="{ name: 'UserProfile' }">
-          <v-list-item-title>Profile</v-list-item-title>
-        </v-list-item>
-        <v-list-item :to="{ name: 'Settings' }">
-          <v-list-item-title>Settings</v-list-item-title>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item @click="logout">
-          <v-list-item-title>Logout</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
+    <div class="mr-2">
+            <UserMenu
+              :current-user="currentUser"
+              @navigate="handleNavigation"
+              @logout="handleLogout"
+              @open-settings="handleOpenSettings"
+            />      </div>
+
   </v-app-bar>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useTheme } from 'vuetify';
+import UserMenu from './UserMenu.vue';
+import { mockUser } from '@/data/userMock';
+import { useRouter } from 'vue-router';
 
 const theme = useTheme();
 const searchField = ref(null);
+const router = useRouter();
+
+const currentUser = ref(mockUser);
 
 defineProps({
   currentUser: {
@@ -79,8 +74,19 @@ function focusSearch() {
   }
 }
 
-function logout() {
-  // Implement logout logic
-  console.log('Logging out...');
-}
+const handleNavigation = (route: string) => {
+  router.push(route);
+};
+
+const handleLogout = () => {
+  // Implement your logout logic here
+  console.log('User logged out!');
+};
+
+const handleOpenSettings = () => {
+  // Implement logic to open settings, e.g., navigate to settings page
+  console.log('Opening settings...');
+  router.push('/settings');
+};
+
 </script>

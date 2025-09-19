@@ -64,6 +64,16 @@
   "confirmDelete.title": "Xác nhận Xóa",
   "confirmDelete.message": "Bạn có chắc muốn xoá Family này không?",
   "common.delete": "Xóa",
+  "userMenu.profile": "Hồ sơ",
+  "userMenu.settings": "Cài đặt",
+  "userMenu.pricing": "Giá cả",
+  "userMenu.faq": "Câu hỏi thường gặp",
+  "userMenu.logout": "Đăng xuất",
+  "userMenu.confirmLogout": "Bạn có chắc muốn đăng xuất?",
+  "userMenu.cancel": "Hủy",
+  "userMenu.ariaLabel": "Menu người dùng",
+  "userMenu.role": "Vai trò",
+  "userMenu.uploadPhoto": "Tải ảnh lên",
   "common.cancel": "Hủy",
   "common.save": "Lưu"
 }
