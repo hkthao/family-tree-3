@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 
 interface Props {
   modelValue: boolean;
@@ -24,5 +23,4 @@ interface Props {
 defineProps<Props>();
 defineEmits(['confirm', 'cancel']);
 
-const { t } = useI18n();
 </script>

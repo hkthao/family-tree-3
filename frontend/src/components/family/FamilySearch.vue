@@ -42,7 +42,7 @@
           @update:options="loadFamilies"
           elevation="0"
         >
-          <template v-slot:item.AvatarUrl="{ item }">
+          <template #item.AvatarUrl="{ item }">
             <div class="d-flex justify-center">
               <v-avatar size="36" class="my-2">
                 <v-img v-if="item.AvatarUrl" :src="item.AvatarUrl" :alt="item.Name"></v-img>
@@ -50,15 +50,15 @@
               </v-avatar>
             </div>
           </template>
-          <template v-slot:item.Name="{ item }">
+          <template #item.Name="{ item }">
             <div class="text-left">
               <v-btn variant="text" color="primary" @click.prevent="viewFamily(item)" class="text-none">{{ item.Name }}</v-btn>
             </div>
           </template>
-          <template v-slot:item.Visibility="{ item }">
+          <template #item.Visibility="{ item }">
             <v-chip :color="item.Visibility === 'Public' ? 'success' : 'error'" label>{{ $t(`family.management.visibility.${item.Visibility.toLowerCase()}`) }}</v-chip>
           </template>
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <v-btn icon size="small" variant="text" @click="editFamily(item)">
               <v-icon>mdi-pencil</v-icon>
             </v-btn>
@@ -66,7 +66,7 @@
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </template>
-          <template v-slot:loading>
+          <template #loading>
             <v-skeleton-loader type="table-row@5"></v-skeleton-loader>
           </template>
         </v-data-table-server>

@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils';
 import { createVuetify } from 'vuetify';
 import { createI18n } from 'vue-i18n';
 import Sidebar from '@/components/layout/Sidebar.vue';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import en from '@/locales/en.json';
 import vi from '@/locales/vi.json';
 

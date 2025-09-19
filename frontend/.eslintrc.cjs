@@ -20,5 +20,6 @@ module.exports = {
     'semi': ['error', 'always'],
     'no-unused-vars': 'warn',
     'vue/no-unused-components': 'warn',
+    'vue/multi-word-component-names': 'off',
   },
 };

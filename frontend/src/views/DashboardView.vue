@@ -74,11 +74,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { StatisticCard, ChartCard } from '@/components/dashboard';
 import VueApexCharts from 'vue3-apexcharts';
 
-const { t } = useI18n();
+defineOptions({ name: 'DashboardView' });
 
 // Growth Chart (RadialBar)
 const growthChartOptions = ref({
@@ -161,8 +160,8 @@ const revenueChartOptions = ref({
   },
   tooltip: {
     y: {
-      formatter: function (val) {
-        return "$ " + val + " thousands"
+      formatter: function (val: number) {
+        return '$ ' + val + ' thousands';
       }
     }
   },
