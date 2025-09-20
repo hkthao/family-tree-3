@@ -87,7 +87,7 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete']);
+const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
 
 const { t } = useI18n();
 

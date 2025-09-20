@@ -95,6 +95,7 @@
   "notFound.title": "Không tìm thấy trang",
   "notFound.subtitle": "Chúng tôi không thể tìm thấy trang bạn đang tìm kiếm.",
   "notFound.backToHome": "QUAY LẠI TRANG CHỦ",
+  "member.list.title": "Danh sách Thành viên",
   "member.management.title": "Quản lý Thành viên",
   "member.management.addMember": "Thêm Thành viên Mới",
   "member.list.headers.avatar": "Ảnh đại diện",
@@ -145,5 +146,7 @@
   "member.detail.children": "Con cái",
   "member.detail.biography": "Tiểu sử",
   "common.edit": "Chỉnh sửa",
-  "common.unknown": "Không rõ"
+  "common.unknown": "Không rõ",
+  "member.form.title": "Biểu mẫu Thành viên",
+  "common.close": "Đóng"
 }

@@ -7,12 +7,20 @@
       :total-members="totalMembers"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
-      @view="navigateToDetailView"
+      @view="openViewDialog"
       @edit="navigateToEditMember"
       @delete="confirmDelete"
+      @create="navigateToCreateView"
     />
 
-
+    <v-dialog v-model="viewDialog" max-width="800px">
+      <MemberForm
+        v-if="selectedMemberForView"
+        :initial-member-data="selectedMemberForView"
+        :read-only="true"
+        @close="closeViewDialog"
+      />
+    </v-dialog>
 
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
@@ -38,6 +46,7 @@ import type { Member, MemberFilter } from '@/types/member';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/family/ConfirmDeleteDialog.vue';
+import MemberForm from '@/components/members/MemberForm.vue';
 
 const { t } = useI18n();
 const { getMembers, deleteMember } = useMembers();
@@ -55,6 +64,8 @@ const router = useRouter();
 
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
+const viewDialog = ref(false);
+const selectedMemberForView = ref<Member | null>(null);
 
 import { useNotificationStore } from '@/stores/notification';
 
@@ -73,8 +84,18 @@ const loadMembers = async () => {
   loading.value = false;
 };
 
-const navigateToDetailView = (member: Member) => {
-  router.push(`/members/${member.id}`);
+const openViewDialog = (member: Member) => {
+  selectedMemberForView.value = member;
+  viewDialog.value = true;
+};
+
+const closeViewDialog = () => {
+  viewDialog.value = false;
+  selectedMemberForView.value = null;
+};
+
+const navigateToCreateView = () => {
+  router.push('/members/add');
 };
 
 const navigateToEditMember = (member: Member) => {

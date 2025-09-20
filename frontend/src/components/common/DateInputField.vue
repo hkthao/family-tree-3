@@ -5,6 +5,7 @@
     transition="scale-transition"
     offset-y
     min-width="auto"
+    :disabled="props.readonly"
   >
     <template v-slot:activator="{ props: activatorProps }">
       <v-text-field
@@ -12,7 +13,7 @@
         @click="menu = true"
         :label="label"
         append-inner-icon="mdi-calendar"
-        readonly
+        :readonly="props.readonly"
         v-bind="activatorProps"
         :rules="rules"
       ></v-text-field>
@@ -41,6 +42,10 @@ const props = defineProps({
     default: () => [],
   },
   optional: {
+    type: Boolean,
+    default: false,
+  },
+  readonly: {
     type: Boolean,
     default: false,
   },
