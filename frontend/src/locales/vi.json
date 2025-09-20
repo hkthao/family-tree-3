@@ -150,5 +150,7 @@
   "common.edit": "Chỉnh sửa",
   "common.unknown": "Không rõ",
   "member.form.title": "Biểu mẫu Thành viên",
+  "member.form.tab.general": "Thông Tin Chung",
+  "member.form.tab.timeline": "Dòng Thời Gian",
   "common.close": "Đóng"
 }
