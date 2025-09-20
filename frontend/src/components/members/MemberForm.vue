@@ -6,6 +6,7 @@
     <v-card-text>
       <v-tabs v-model="tab" >
         <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
+        <v-tab value="relationships">{{ t('member.form.tab.relationships') }}</v-tab>
         <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
       </v-tabs>
 
@@ -93,13 +94,6 @@
               </v-col>
             </v-row>
 
-            <!-- Thông tin gia đình -->
-            <v-row>
-              <v-col cols="12">
-                <!-- Family information will be handled by parent components -->
-              </v-col>
-            </v-row>
-
             <!-- Thông tin khác -->
             <v-row>
               <v-col cols="12">
@@ -111,6 +105,93 @@
               </v-col>
             </v-row>
           </v-form>
+        </v-window-item>
+
+        <v-window-item value="relationships">
+          <!-- Thông tin gia đình -->
+          <v-row>
+            <v-col cols="12">
+              <h3 class="text-h6">{{ t('member.form.parents') }}</h3>
+              <v-data-table
+                :headers="parentHeaders"
+                :items="memberForm.parents"
+                hide-default-footer
+              >
+                <template #top>
+                  <v-toolbar flat density="compact">
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" icon @click="addRelationship('parent')" :disabled="props.readOnly">
+                      <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                </template>
+                <template #item.actions="{ item }">
+                  <v-btn icon size="small" variant="text" @click="editRelationship(item, 'parent')" :disabled="props.readOnly">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn icon size="small" variant="text" @click="removeRelationship(item, 'parent')" :disabled="props.readOnly">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <h3 class="text-h6">{{ t('member.form.spouses') }}</h3>
+              <v-data-table
+                :headers="spouseHeaders"
+                :items="memberForm.spouses"
+                hide-default-footer
+              >
+                <template #top>
+                  <v-toolbar flat density="compact">
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" icon @click="addRelationship('spouse')" :disabled="props.readOnly">
+                      <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                </template>
+                <template #item.actions="{ item }">
+                  <v-btn icon size="small" variant="text" @click="editRelationship(item, 'spouse')" :disabled="props.readOnly">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn icon size="small" variant="text" @click="removeRelationship(item, 'spouse')" :disabled="props.readOnly">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12">
+              <h3 class="text-h6">{{ t('member.form.children') }}</h3>
+              <v-data-table
+                :headers="childrenHeaders"
+                :items="memberForm.children"
+                hide-default-footer
+              >
+                <template #top>
+                  <v-toolbar flat density="compact">
+                    <v-spacer></v-spacer>
+                    <v-btn color="primary" icon @click="addRelationship('child')" :disabled="props.readOnly">
+                      <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                </template>
+                <template #item.actions="{ item }">
+                  <v-btn icon size="small" variant="text" @click="editRelationship(item, 'child')" :disabled="props.readOnly">
+                    <v-icon>mdi-pencil</v-icon>
+                  </v-btn>
+                  <v-btn icon size="small" variant="text" @click="removeRelationship(item, 'child')" :disabled="props.readOnly">
+                    <v-icon>mdi-delete</v-icon>
+                  </v-btn>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -179,6 +260,36 @@ const genderOptions = [
 
 const rules = {
   required: (value: string) => !!value || t('validation.required'),
+};
+
+const parentHeaders = [
+  { title: t('member.form.fullName'), key: 'fullName' },
+  { title: t('member.form.relationshipType'), key: 'relationshipType' },
+  { title: t('common.actions'), key: 'actions', sortable: false },
+];
+
+const spouseHeaders = [
+  { title: t('member.form.fullName'), key: 'fullName' },
+  { title: t('member.form.relationshipType'), key: 'relationshipType' },
+  { title: t('common.actions'), key: 'actions', sortable: false },
+];
+
+const childrenHeaders = [
+  { title: t('member.form.fullName'), key: 'fullName' },
+  { title: t('member.form.relationshipType'), key: 'relationshipType' },
+  { title: t('common.actions'), key: 'actions', sortable: false },
+];
+
+const addRelationship = (type: 'parent' | 'spouse' | 'child') => {
+  console.log(`Add ${type}`);
+};
+
+const editRelationship = (item: any, type: 'parent' | 'spouse' | 'child') => {
+  console.log(`Edit ${type}:`, item);
+};
+
+const removeRelationship = (item: any, type: 'parent' | 'spouse' | 'child') => {
+  console.log(`Remove ${type}:`, item);
 };
 
 const submitForm = async () => {
