@@ -167,6 +167,8 @@ const timelineEvents = ref([
   { year: '2014', title: 'Graduated University', description: 'Graduated from University of Engineering and Technology.', color: 'purple' },
   { year: '2018', title: 'Married', description: 'Married to [Spouse Name].', color: 'red' },
   { year: '2020', title: 'First Child Born', description: 'First child, [Child Name], was born.', color: 'orange' },
+  { year: '2022', title: 'Started New Job', description: 'Started a new job as a Software Engineer.', color: 'indigo' },
+  { year: '2023', title: 'Moved to a New City', description: 'Moved to Da Nang, Vietnam.', color: 'teal' },
 ]);
 
 const genderOptions = [

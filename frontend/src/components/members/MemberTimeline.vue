@@ -1,16 +1,15 @@
 <template>
   <v-card flat>
+    <v-card-title class="d-flex align-center">
+      <v-spacer></v-spacer>
+      <v-btn color="primary" @click="openAddEventForm" :disabled="readOnly">
+        {{ t('timeline.addEvent') }}
+      </v-btn>
+    </v-card-title>
     <v-card-text>
-      <v-toolbar flat density="compact">
-        <v-toolbar-title>{{ $t('member.timeline.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon size="small" variant="text" @click="openAddEventForm" :disabled="readOnly">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-toolbar>
       <v-timeline side="end">
         <v-timeline-item
-          v-for="(event, index) in timelineEvents"
+          v-for="(event, index) in paginatedEvents"
           :key="index"
           :dot-color="event.color"
           size="small"
@@ -40,6 +39,11 @@
           </v-card>
         </v-timeline-item>
       </v-timeline>
+      <v-pagination
+        v-if="timelineEvents.length > 5"
+        v-model="page"
+        :length="Math.ceil(timelineEvents.length / 5)"
+      ></v-pagination>
     </v-card-text>
 
     <v-dialog v-model="eventFormDialog" max-width="600px" persistent>
@@ -54,7 +58,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import TimelineEventForm from './TimelineEventForm.vue';
 
@@ -70,6 +74,14 @@ const { t } = useI18n();
 const eventFormDialog = ref(false);
 const selectedEvent = ref<any>(null); // Define a more specific type later
 const isEditEventMode = ref(false);
+const page = ref(1);
+
+const paginatedEvents = computed(() => {
+  const itemsPerPage = 5;
+  const startIndex = (page.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  return props.timelineEvents.slice(startIndex, endIndex);
+});
 
 const openAddEventForm = () => {
   selectedEvent.value = null;

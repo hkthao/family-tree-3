@@ -160,5 +160,6 @@
   "timeline.form.color": "Color",
   "timeline.form.editTitle": "Edit Timeline Event",
   "timeline.form.addTitle": "Add Timeline Event",
+  "timeline.addEvent": "Add New Event",
   "common.close": "Close"
 }
