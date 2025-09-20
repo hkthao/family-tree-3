@@ -7,21 +7,12 @@
       :total-members="totalMembers"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
-      @view="openDetailDialog"
+      @view="navigateToDetailView"
       @edit="navigateToEditMember"
       @delete="confirmDelete"
     />
 
-    <!-- Member Detail Dialog -->
-    <v-dialog v-model="detailDialog" max-width="800px">
-      <MemberDetail
-        v-if="selectedMember"
-        :member="selectedMember"
-        @close="closeDetailDialog"
-        @edit="navigateToEditMember"
-        @delete="confirmDelete"
-      />
-    </v-dialog>
+
 
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
@@ -46,7 +37,6 @@ import { useMembers } from '@/data/members';
 import type { Member, MemberFilter } from '@/types/member';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
-import MemberDetail from '@/components/members/MemberDetail.vue';
 import ConfirmDeleteDialog from '@/components/family/ConfirmDeleteDialog.vue';
 
 const { t } = useI18n();
@@ -63,9 +53,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const detailDialog = ref(false);
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
-const selectedMember = ref<Member | undefined>(undefined); // Re-add selectedMember
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 
 import { useNotificationStore } from '@/stores/notification';
@@ -85,19 +73,12 @@ const loadMembers = async () => {
   loading.value = false;
 };
 
+const navigateToDetailView = (member: Member) => {
+  router.push(`/members/${member.id}`);
+};
 
 const navigateToEditMember = (member: Member) => {
   router.push(`/members/edit/${member.id}`);
-};
-
-const openDetailDialog = (member: Member) => {
-  selectedMember.value = member;
-  detailDialog.value = true;
-};
-
-const closeDetailDialog = () => {
-  detailDialog.value = false;
-  selectedMember.value = undefined;
 };
 
 const handleFilterUpdate = (filters: MemberFilter) => {
