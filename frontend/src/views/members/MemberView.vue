@@ -26,6 +26,8 @@
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
       :model-value="deleteConfirmDialog"
+      :title="t('confirmDelete.title')"
+      :message="t('member.list.confirmDelete', { fullName: memberToDelete?.fullName || '' })"
       @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel"
     />
@@ -46,7 +48,7 @@ import { useMembers } from '@/data/members';
 import type { Member, MemberFilter } from '@/types/member';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
-import ConfirmDeleteDialog from '@/components/family/ConfirmDeleteDialog.vue';
+import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import MemberForm from '@/components/members/MemberForm.vue';
 
 const { t } = useI18n();

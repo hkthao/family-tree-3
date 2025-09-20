@@ -104,6 +104,8 @@
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
       :model-value="deleteConfirmDialog"
+      :title="t('confirmDelete.title')"
+      :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })"
       @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel"
     />
@@ -129,7 +131,7 @@ import { useI18n } from 'vue-i18n';
 import { useFamilies } from '@/data/families';
 import type { Family } from '@/data/families';
 import FamilyForm from './FamilyForm.vue';
-import ConfirmDeleteDialog from './ConfirmDeleteDialog.vue';
+import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import FamilyDetail from './FamilyDetail.vue';
 import type { DataTableHeader } from 'vuetify';
 

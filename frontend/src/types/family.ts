@@ -12,4 +12,6 @@ export interface Props {
 
 export interface ConfirmDeleteDialogProps {
   modelValue: boolean;
+  title?: string;
+  message?: string;
 }
