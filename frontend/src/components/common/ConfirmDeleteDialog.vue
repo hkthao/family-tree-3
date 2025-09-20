@@ -1,9 +1,9 @@
 <template>
   <v-dialog :model-value="modelValue" persistent max-width="400">
     <v-card>
-      <v-card-title class="headline">{{ $t('confirmDelete.title') }}</v-card-title>
+      <v-card-title class="headline">{{ title || $t('confirmDelete.title') }}</v-card-title>
       <v-card-text>
-        {{ $t('confirmDelete.message') }}
+        {{ message || $t('confirmDelete.message') }}
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
