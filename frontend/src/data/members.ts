@@ -11,8 +11,8 @@ const mockMembers = ref<Member[]>([
     placeOfBirth: 'Hanoi',
     occupation: 'Engineer',
     parents: [],
-    spouses: ['2'],
-    children: ['3', '4'],
+    spouses: [{ relatedMemberId: '2', relationshipType: 'married' }],
+    children: [{ relatedMemberId: '3', relationshipType: 'blood' }, { relatedMemberId: '4', relationshipType: 'blood' }],
   },
   {
     id: '2',
@@ -22,8 +22,8 @@ const mockMembers = ref<Member[]>([
     placeOfBirth: 'Hanoi',
     occupation: 'Teacher',
     parents: [],
-    spouses: ['1'],
-    children: ['3', '4'],
+    spouses: [{ relatedMemberId: '1', relationshipType: 'married' }],
+    children: [{ relatedMemberId: '3', relationshipType: 'blood' }, { relatedMemberId: '4', relationshipType: 'blood' }],
   },
   {
     id: '3',
@@ -32,9 +32,9 @@ const mockMembers = ref<Member[]>([
     gender: 'Male',
     placeOfBirth: 'Hanoi',
     occupation: 'Doctor',
-    parents: ['1', '2'],
-    spouses: ['5'],
-    children: ['6'],
+    parents: [{ relatedMemberId: '1', relationshipType: 'blood' }, { relatedMemberId: '2', relationshipType: 'blood' }],
+    spouses: [{ relatedMemberId: '5', relationshipType: 'married' }],
+    children: [{ relatedMemberId: '6', relationshipType: 'blood' }],
   },
   {
     id: '4',
@@ -43,7 +43,7 @@ const mockMembers = ref<Member[]>([
     gender: 'Female',
     placeOfBirth: 'Hanoi',
     occupation: 'Artist',
-    parents: ['1', '2'],
+    parents: [{ relatedMemberId: '1', relationshipType: 'blood' }, { relatedMemberId: '2', relationshipType: 'blood' }],
     spouses: [],
     children: [],
   },
@@ -55,8 +55,8 @@ const mockMembers = ref<Member[]>([
     placeOfBirth: 'Ho Chi Minh City',
     occupation: 'Designer',
     parents: [],
-    spouses: ['3'],
-    children: ['6'],
+    spouses: [{ relatedMemberId: '3', relationshipType: 'married' }],
+    children: [{ relatedMemberId: '6', relationshipType: 'blood' }],
   },
   {
     id: '6',
@@ -64,7 +64,7 @@ const mockMembers = ref<Member[]>([
     dateOfBirth: '2010-09-05',
     gender: 'Male',
     placeOfBirth: 'Hanoi',
-    parents: ['3', '5'],
+    parents: [{ relatedMemberId: '3', relationshipType: 'blood' }, { relatedMemberId: '5', relationshipType: 'blood' }],
     spouses: [],
     children: [],
   },
@@ -95,7 +95,7 @@ export function useMembers() {
   };
 
   const getMemberById = (id: string) => {
-    return members.value.find(member => member.id === id);
+    return mockMembers.value.find(member => member.id === id);
   };
 
   const addMember = (newMember: Omit<Member, 'id'>) => {

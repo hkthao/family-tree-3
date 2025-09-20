@@ -108,90 +108,13 @@
         </v-window-item>
 
         <v-window-item value="relationships">
-          <!-- Thông tin gia đình -->
-          <v-row>
-            <v-col cols="12">
-              <h3 class="text-h6">{{ t('member.form.parents') }}</h3>
-              <v-data-table
-                :headers="parentHeaders"
-                :items="memberForm.parents"
-                hide-default-footer
-              >
-                <template #top>
-                  <v-toolbar flat density="compact">
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" icon @click="addRelationship('parent')" :disabled="props.readOnly">
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </v-toolbar>
-                </template>
-                <template #item.actions="{ item }">
-                  <v-btn icon size="small" variant="text" @click="editRelationship(item, 'parent')" :disabled="props.readOnly">
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn icon size="small" variant="text" @click="removeRelationship(item, 'parent')" :disabled="props.readOnly">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-              </v-data-table>
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <h3 class="text-h6">{{ t('member.form.spouses') }}</h3>
-              <v-data-table
-                :headers="spouseHeaders"
-                :items="memberForm.spouses"
-                hide-default-footer
-              >
-                <template #top>
-                  <v-toolbar flat density="compact">
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" icon @click="addRelationship('spouse')" :disabled="props.readOnly">
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </v-toolbar>
-                </template>
-                <template #item.actions="{ item }">
-                  <v-btn icon size="small" variant="text" @click="editRelationship(item, 'spouse')" :disabled="props.readOnly">
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn icon size="small" variant="text" @click="removeRelationship(item, 'spouse')" :disabled="props.readOnly">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-              </v-data-table>
-            </v-col>
-          </v-row>
-
-          <v-row>
-            <v-col cols="12">
-              <h3 class="text-h6">{{ t('member.form.children') }}</h3>
-              <v-data-table
-                :headers="childrenHeaders"
-                :items="memberForm.children"
-                hide-default-footer
-              >
-                <template #top>
-                  <v-toolbar flat density="compact">
-                    <v-spacer></v-spacer>
-                    <v-btn color="primary" icon @click="addRelationship('child')" :disabled="props.readOnly">
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </v-toolbar>
-                </template>
-                <template #item.actions="{ item }">
-                  <v-btn icon size="small" variant="text" @click="editRelationship(item, 'child')" :disabled="props.readOnly">
-                    <v-icon>mdi-pencil</v-icon>
-                  </v-btn>
-                  <v-btn icon size="small" variant="text" @click="removeRelationship(item, 'child')" :disabled="props.readOnly">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </template>
-              </v-data-table>
-            </v-col>
-          </v-row>
+          <MemberRelationships
+            :member-form="memberForm"
+            :read-only="props.readOnly"
+            @add-relationship="addRelationship"
+            @edit-relationship="editRelationship"
+            @remove-relationship="removeRelationship"
+          />
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -219,6 +142,7 @@ import type { Member } from '@/types/member';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';
+import MemberRelationships from '@/components/members/MemberRelationships.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -237,9 +161,17 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData || {
   fullName: '',
   dateOfBirth: null,
   gender: 'Male',
-  parents: [],
-  spouses: [],
-  children: [],
+  parents: [
+    { fullName: 'Nguyễn Văn A', relationshipType: 'Ruột thịt' },
+    { fullName: 'Trần Thị B', relationshipType: 'Ruột thịt' },
+  ],
+  spouses: [
+    { fullName: 'Lê Thị C', relationshipType: 'Đã kết hôn' },
+  ],
+  children: [
+    { fullName: 'Phạm Văn D', relationshipType: 'Ruột thịt' },
+    { fullName: 'Phạm Thị E', relationshipType: 'Con nuôi' },
+  ],
 });
 
 const timelineEvents = ref([
@@ -262,34 +194,56 @@ const rules = {
   required: (value: string) => !!value || t('validation.required'),
 };
 
-const parentHeaders = [
-  { title: t('member.form.fullName'), key: 'fullName' },
-  { title: t('member.form.relationshipType'), key: 'relationshipType' },
-  { title: t('common.actions'), key: 'actions', sortable: false },
-];
 
-const spouseHeaders = [
-  { title: t('member.form.fullName'), key: 'fullName' },
-  { title: t('member.form.relationshipType'), key: 'relationshipType' },
-  { title: t('common.actions'), key: 'actions', sortable: false },
-];
 
-const childrenHeaders = [
-  { title: t('member.form.fullName'), key: 'fullName' },
-  { title: t('member.form.relationshipType'), key: 'relationshipType' },
-  { title: t('common.actions'), key: 'actions', sortable: false },
-];
 
-const addRelationship = (type: 'parent' | 'spouse' | 'child') => {
-  console.log(`Add ${type}`);
+
+const addRelationship = (newRelationshipData: any) => {
+  if (newRelationshipData.type === 'parent') {
+    memberForm.value.parents.push(newRelationshipData);
+  } else if (newRelationshipData.type === 'spouse') {
+    memberForm.value.spouses.push(newRelationshipData);
+  } else if (newRelationshipData.type === 'child') {
+    memberForm.value.children.push(newRelationshipData);
+  }
 };
 
-const editRelationship = (item: any, type: 'parent' | 'spouse' | 'child') => {
-  console.log(`Edit ${type}:`, item);
+const editRelationship = (updatedRelationshipData: any, originalType: 'parent' | 'spouse' | 'child') => {
+  const { type: newType, ...rest } = updatedRelationshipData;
+
+  // Remove from original array
+  if (originalType === 'parent') {
+    const index = memberForm.value.parents.findIndex(r => r === updatedRelationshipData);
+    if (index !== -1) memberForm.value.parents.splice(index, 1);
+  } else if (originalType === 'spouse') {
+    const index = memberForm.value.spouses.findIndex(r => r === updatedRelationshipData);
+    if (index !== -1) memberForm.value.spouses.splice(index, 1);
+  } else if (originalType === 'child') {
+    const index = memberForm.value.children.findIndex(r => r === updatedRelationshipData);
+    if (index !== -1) memberForm.value.children.splice(index, 1);
+  }
+
+  // Add to new array
+  if (newType === 'parent') {
+    memberForm.value.parents.push(rest);
+  } else if (newType === 'spouse') {
+    memberForm.value.spouses.push(rest);
+  } else if (newType === 'child') {
+    memberForm.value.children.push(rest);
+  }
 };
 
 const removeRelationship = (item: any, type: 'parent' | 'spouse' | 'child') => {
-  console.log(`Remove ${type}:`, item);
+  if (type === 'parent') {
+    const index = memberForm.value.parents.indexOf(item);
+    if (index !== -1) memberForm.value.parents.splice(index, 1);
+  } else if (type === 'spouse') {
+    const index = memberForm.value.spouses.indexOf(item);
+    if (index !== -1) memberForm.value.spouses.splice(index, 1);
+  } else if (type === 'child') {
+    const index = memberForm.value.children.indexOf(item);
+    if (index !== -1) memberForm.value.children.splice(index, 1);
+  }
 };
 
 const submitForm = async () => {
