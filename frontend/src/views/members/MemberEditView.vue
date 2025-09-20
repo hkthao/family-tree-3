@@ -1,12 +1,10 @@
 <template>
   <v-card>
-    <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('member.form.editTitle') }}</span>
-    </v-card-title>
     <v-card-text>
       <MemberForm
         v-if="initialMemberData"
         :initial-member-data="initialMemberData"
+        :title="t('member.form.editTitle')"
         @close="closeForm"
         @submit="handleUpdateMember"
       />

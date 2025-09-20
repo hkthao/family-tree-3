@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('member.form.title') }}</span>
+      <span class="text-h5 text-uppercase">{{ title }}</span>
     </v-card-title>
     <v-card-text>
       <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
@@ -122,6 +122,7 @@ import DateInputField from '@/components/common/DateInputField.vue';
 const props = defineProps<{
   readOnly?: boolean;
   initialMemberData?: Member;
+  title: string;
 }>();
 
 const emit = defineEmits(['close', 'submit']);
