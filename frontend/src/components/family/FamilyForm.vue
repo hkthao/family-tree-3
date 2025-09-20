@@ -25,6 +25,11 @@
           required
           variant="outlined"
         ></v-text-field>
+        <v-text-field
+          v-model="familyForm.address"
+          :label="$t('family.form.addressLabel')"
+          variant="outlined"
+        ></v-text-field>
         <v-select
           v-model="familyForm.visibility"
           :items="visibilityItems"
@@ -32,6 +37,11 @@
           required
           variant="outlined"
         ></v-select>
+        <v-textarea
+          v-model="familyForm.description"
+          :label="$t('family.form.descriptionLabel')"
+          variant="outlined"
+        ></v-textarea>
       </v-form>
     </v-card-text>
     <v-card-actions>
@@ -61,6 +71,7 @@ const form = ref<HTMLFormElement | null>(null);
 const familyForm = ref<Omit<Family, 'id'> & { id?: number }>(props.initialFamilyData || {
   name: '',
   description: '',
+  address: '',
   avatarUrl: '',
   visibility: 'Private',
 });
