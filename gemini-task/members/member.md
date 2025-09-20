@@ -6,13 +6,13 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 - Màn hình riêng `MemberForm.vue` (được dùng chung cho cả thêm mới và chỉnh sửa) để nhập thông tin:
   - Trường: Họ tên, Ngày sinh, Ngày mất (optional), Giới tính (select), Cha mẹ (autocomplete), Vợ/Chồng (autocomplete), Con cái (autocomplete).
   - Validation: Họ tên, Ngày sinh, Giới tính là bắt buộc.
-- Nút 'Thêm thành viên' trên trang quản lý sẽ điều hướng đến màn hình thêm mới.
+- Nút 'Thêm thành viên' trên trang quản lý sẽ điều hướng đến màn hình thêm mới (`/members/add`).
 - Submit → thêm vào store/mock data và điều hướng về trang danh sách.
 - UI: dùng `v-form`, `v-text-field`, `v-select`, `v-autocomplete`, `DateInputField`.
 
 ### 2. Chỉnh sửa thành viên
 - Màn hình riêng `MemberForm.vue` (chế độ chỉnh sửa).
-- Khi chọn 'Chỉnh sửa' từ bảng danh sách hoặc nút actions → điều hướng đến màn hình chỉnh sửa với dữ liệu prefilled.
+- Khi chọn 'Chỉnh sửa' từ bảng danh sách hoặc nút actions → điều hướng đến màn hình chỉnh sửa với dữ liệu prefilled (`/members/edit/:id`).
 - Cho phép cập nhật tất cả trường, validate như khi thêm mới.
 - Sau khi lưu → dữ liệu cập nhật trong store và điều hướng về trang danh sách.
 
@@ -27,24 +27,23 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 - Thêm navigation giữa các kết quả (next/prev).
 
 ### 4. Xem chi tiết thành viên
-- Component `MemberDetail.vue` (Dialog).
+- Dialog `MemberForm.vue` (chế độ chỉ đọc).
 - Hiển thị thông tin đầy đủ:
   - Ảnh đại diện (có nút upload/change).
   - Họ tên, ngày sinh, ngày mất.
   - Nơi sinh, nơi mất, giới tính, nghề nghiệp.
   - Tiểu sử (textarea rich text).
-- Action: nút 'Chỉnh sửa', 'Xóa', 'Đóng'.
+- Action: nút 'Đóng'.
 - Layout card style hiện đại, giống sản phẩm Google/IBM.
 
 ### Kỹ thuật chung
 - Vue 3 + Composition API.
 - Vuetify 3: `v-app`, `v-dialog`, `v-data-table`, `v-form`, `v-text-field`, `v-select`, `v-avatar`, `v-card`, `DateInputField`.
-- Routing: `/members` (danh sách & tìm kiếm), `/members/add` (thêm mới), `/members/edit/:id` (chỉnh sửa), `/members/:id` (chi tiết - nếu là route riêng).
+- Routing: `/members` (danh sách & tìm kiếm), `/members/add` (thêm mới), `/members/edit/:id` (chỉnh sửa). Xem chi tiết thành viên được hiển thị trong dialog trên trang `/members`.
 - Mock data mẫu trong `src/data/members.ts` (JSON array).
 - Code chia component:
   - `MemberForm.vue`
   - `MemberSearch.vue`
-  - `MemberDetail.vue`
   - `MemberList.vue`
 
 ### Yêu cầu UI/UX
