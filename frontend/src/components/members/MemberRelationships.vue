@@ -1,104 +1,101 @@
 <template>
-  <v-card flat>
-    <v-card-text>
-      <v-toolbar flat density="compact">
-        <v-toolbar-title>{{ $t('member.form.tab.relationships') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon size="small" variant="text" @click="openAddRelationshipForm" :disabled="readOnly">
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-toolbar>
+  <v-row>
+    <v-col cols="12">
+
       <v-data-table
-        :headers="headers"
-        :items="relationships"
+        :headers="relationshipHeaders"
+        :items="allRelationships"
         hide-default-footer
       >
-        <template #item.relatedMemberName="{ item }">
-          {{ getMemberName(item.relatedMemberId) }}
+        <template #top>
+          <v-toolbar flat density="compact">
+            <v-spacer></v-spacer>
+            <v-btn color="primary" icon @click="addRelationship" :disabled="readOnly">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </v-toolbar>
         </template>
-        <template #item.relationshipType="{ item }">
-          {{ getRelationshipTypeName(item.relationshipType) }}
+        <template #item.type="{ item }">
+          {{ t(`relationship.type.${item.type}`) }}
         </template>
         <template #item.actions="{ item }">
-          <v-btn v-if="!readOnly" icon size="small" variant="text" @click="openEditRelationshipForm(item)" :disabled="readOnly">
+          <v-btn icon size="small" variant="text" @click="editRelationship(item)" :disabled="readOnly">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-          <v-btn v-if="!readOnly" icon size="small" variant="text" @click="$emit('delete', item)" :disabled="readOnly">
+          <v-btn icon size="small" variant="text" @click="removeRelationship(item)" :disabled="readOnly">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
       </v-data-table>
-    </v-card-text>
+    </v-col>
+  </v-row>
 
-    <v-dialog v-model="relationshipFormDialog" max-width="600px" persistent>
-      <RelationshipForm
-        :initial-relationship-data="selectedRelationship"
-        :title="isEditRelationshipMode ? t('relationship.form.editTitle') : t('relationship.form.addTitle')"
-        @submit="handleSaveRelationship"
-        @cancel="handleCancelRelationship"
-      />
-    </v-dialog>
-  </v-card>
+  <RelationshipForm
+    v-model="relationshipFormDialog"
+    :initial-relationship-data="currentRelationship"
+    @save="handleSaveRelationship"
+    @cancel="handleCancelRelationship"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import type { Member } from '@/types/member';
 import { useI18n } from 'vue-i18n';
-import { useMembers } from '@/data/members'; // To get member names
-import RelationshipForm from './RelationshipForm.vue';
+import RelationshipForm from './RelationshipForm.vue'; // Import the new component
 
 const props = defineProps<{
-  relationships: Array<any>; // Define a more specific type later
+  memberForm: Omit<Member, 'id'> | Member;
   readOnly?: boolean;
 }>();
 
-const emit = defineEmits(['add', 'edit', 'delete']);
+const emit = defineEmits(['addRelationship', 'editRelationship', 'removeRelationship']);
 
 const { t } = useI18n();
-const { getMemberById, members: allMembers } = useMembers();
 
 const relationshipFormDialog = ref(false);
-const selectedRelationship = ref<any>(null); // Define a more specific type later
-const isEditRelationshipMode = ref(false);
+const currentRelationship = ref<any>(null); // To hold data for editing
 
-const headers = computed(() => [
-  { title: t('member.form.fullName'), key: 'relatedMemberName' },
+const relationshipHeaders = [
+  { title: t('member.form.fullName'), key: 'fullName' },
   { title: t('member.form.relationshipType'), key: 'relationshipType' },
+  { title: t('member.form.type'), key: 'type' }, // New column to show relationship type (parent, spouse, child)
   { title: t('common.actions'), key: 'actions', sortable: false },
-]);
+];
 
-const getMemberName = (id: string) => {
-  const member = getMemberById(id);
-  return member ? member.fullName : t('common.unknown');
-};
+const allRelationships = computed(() => {
+  const parents = props.memberForm.parents.map(p => ({ ...p, type: 'parent' }));
+  const spouses = props.memberForm.spouses.map(s => ({ ...s, type: 'spouse' }));
+  const children = props.memberForm.children.map(c => ({ ...c, type: 'child' }));
+  return [...parents, ...spouses, ...children];
+});
 
-const getRelationshipTypeName = (type: string) => {
-  // This will be replaced by a proper i18n mapping for relationship types
-  return type;
-};
-
-const openAddRelationshipForm = () => {
-  selectedRelationship.value = null;
-  isEditRelationshipMode.value = false;
+const addRelationship = () => {
+  currentRelationship.value = null; // Clear for new relationship
   relationshipFormDialog.value = true;
 };
 
-const openEditRelationshipForm = (relationship: any) => {
-  selectedRelationship.value = { ...relationship };
-  isEditRelationshipMode.value = true;
+const editRelationship = (item: any) => {
+  currentRelationship.value = { ...item }; // Set data for editing
   relationshipFormDialog.value = true;
 };
 
-const handleSaveRelationship = (relationshipData: any) => {
-  // This event will be handled by MemberForm.vue
-  // For now, just close the dialog
-  console.log('Saving relationship:', relationshipData);
+const removeRelationship = (item: any) => {
+  emit('removeRelationship', item, item.type);
+};
+
+const handleSaveRelationship = (newRelationshipData: any) => {
+  if (currentRelationship.value) {
+    // Editing existing relationship
+    emit('editRelationship', newRelationshipData, newRelationshipData.type);
+  } else {
+    // Adding new relationship
+    emit('addRelationship', newRelationshipData);
+  }
   relationshipFormDialog.value = false;
-  selectedRelationship.value = null;
 };
 
 const handleCancelRelationship = () => {
   relationshipFormDialog.value = false;
-  selectedRelationship.value = null;
 };
 </script>

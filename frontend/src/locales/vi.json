@@ -164,5 +164,24 @@
   "timeline.form.editTitle": "Chỉnh sửa Sự kiện Dòng Thời Gian",
   "timeline.form.addTitle": "Thêm Sự kiện Dòng Thời Gian",
   "timeline.addEvent": "Thêm Sự kiện Mới",
-  "common.close": "Đóng"
+  "common.close": "Đóng",
+  "relationship": {
+    "form": {
+      "editTitle": "Chỉnh sửa mối quan hệ",
+      "addTitle": "Thêm mối quan hệ",
+      "type": "Loại mối quan hệ",
+      "fullName": "Họ và tên",
+      "relationshipType": "Kiểu quan hệ"
+    },
+    "type": {
+      "parent": "Cha mẹ",
+      "spouse": "Vợ/Chồng",
+      "child": "Con cái"
+    }
+  },
+  "member": {
+    "form": {
+      "type": "Loại"
+    }
+  }
 }

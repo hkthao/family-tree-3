@@ -1,3 +1,9 @@
+export interface Relationship {
+  relatedMemberId: string;
+  relationshipType: 'parent' | 'child' | 'spouse' | 'other'; // Or a more granular enum
+  // Add other properties if needed, e.g., startDate, endDate, notes
+}
+
 export interface Member {
   id: string;
   fullName: string;
@@ -9,9 +15,9 @@ export interface Member {
   occupation?: string;
   biography?: string;
   avatarUrl?: string;
-  parents: string[]; // Array of member IDs
-  spouses: string[]; // Array of member IDs
-  children: string[]; // Array of member IDs
+  parents: Relationship[];
+  spouses: Relationship[];
+  children: Relationship[];
 }
 
 export interface MemberFilter {

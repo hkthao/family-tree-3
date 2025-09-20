@@ -164,5 +164,24 @@
   "timeline.form.editTitle": "Edit Timeline Event",
   "timeline.form.addTitle": "Add Timeline Event",
   "timeline.addEvent": "Add New Event",
-  "common.close": "Close"
+  "common.close": "Close",
+  "relationship": {
+    "form": {
+      "editTitle": "Edit Relationship",
+      "addTitle": "Add Relationship",
+      "type": "Relationship Type",
+      "fullName": "Full Name",
+      "relationshipType": "Relation Type"
+    },
+    "type": {
+      "parent": "Parent",
+      "spouse": "Spouse",
+      "child": "Child"
+    }
+  },
+  "member": {
+    "form": {
+      "type": "Type"
+    }
+  }
 }
