@@ -95,6 +95,7 @@
   "notFound.title": "Page Not Found",
   "notFound.subtitle": "We couldn't find the page you are looking for.",
   "notFound.backToHome": "BACK TO HOME",
+  "member.list.title": "Member List",
   "member.management.title": "Member Management",
   "member.management.addMember": "Add New Member",
   "member.list.headers.avatar": "Avatar",
@@ -145,5 +146,7 @@
   "member.detail.children": "Children",
   "member.detail.biography": "Biography",
   "common.edit": "Edit",
-  "common.unknown": "Unknown"
+  "common.unknown": "Unknown",
+  "member.form.title": "Member Form",
+  "common.close": "Close"
 }

@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router';
-import { DashboardView, FamilyTreeView, AddMemberView, MembersView, TimelineView, ProfileView, UserManagementView, RoleManagementView, FamilyManagementView } from '@/views';
+import { DashboardView, FamilyTreeView, AddMemberView, MemberView, TimelineView, ProfileView, UserManagementView, RoleManagementView, FamilyManagementView } from '@/views';
 
 export const sidebarRoutes: RouteRecordRaw[] = [
   {
@@ -13,18 +13,6 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     name: 'FamilyTree',
     component: FamilyTreeView,
     meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
-  },
-  {
-    path: '/family/add',
-    name: 'AddMember',
-    component: AddMemberView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor'] },
-  },
-  {
-    path: '/family/members',
-    name: 'ManageMembers',
-    component: MembersView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor'] },
   },
   {
     path: '/family/timeline',
@@ -55,12 +43,6 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     name: 'FamilyManagement',
     component: FamilyManagementView,
     meta: { roles: ['Admin', 'FamilyManager'] },
-  },
-  {
-    path: '/members',
-    name: 'MemberManagement',
-    component: MembersView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor'] },
   },
   // Add other routes here...
 ];
