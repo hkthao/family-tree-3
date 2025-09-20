@@ -47,7 +47,7 @@ const showPassword = ref(false);
 const router = useRouter();
 
 const rules = {
-  required: (value: any) => !!value || 'Required.',
+  required: (value: string | null | undefined) => !!value || 'Required.',
   email: (value: string) => /.+@.+\..+/.test(value) || 'E-mail must be valid.',
 };
 
