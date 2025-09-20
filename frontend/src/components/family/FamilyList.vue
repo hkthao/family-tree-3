@@ -31,15 +31,18 @@
           </div>
         </template>
 
-        <!-- name column -->
-        <template #item.name="{ item }">
-          <div class="text-left">
-            <v-btn variant="text" color="primary" @click.prevent="$emit('view', item)" class="text-none">
-              {{ item.name }}
-            </v-btn>
-          </div>
-        </template>
-
+                  <!-- name column -->
+                  <template #item.name="{ item }">
+                    <div class="text-left">
+                      <div
+                        class="text-primary text-none"
+                        style="cursor: pointer;"
+                        @click="$emit('view', item)"
+                      >
+                        {{ item.name }}
+                      </div>
+                    </div>
+                  </template>
         <!-- visibility column -->
         <template #item.visibility="{ item }">
           <v-chip
@@ -84,7 +87,7 @@ const props = defineProps<{
   itemsPerPage: number;
 }>();
 
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'update:itemsPerPage']);
+const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'update:itemsPerPage', 'create']);
 
 const { t } = useI18n();
 

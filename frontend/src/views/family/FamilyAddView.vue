@@ -34,6 +34,6 @@ const handleAddFamily = async (familyData: Omit<Family, 'id'>) => {
 };
 
 const closeForm = () => {
-  router.push('/family-management');
+  router.push('/family');
 };
 </script>

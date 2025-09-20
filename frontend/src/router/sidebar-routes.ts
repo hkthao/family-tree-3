@@ -39,7 +39,7 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     meta: { roles: ['Admin'] },
   },
   {
-    path: '/family-management',
+    path: '/family',
     name: 'FamilyManagement',
     component: FamilyListView,
     meta: { roles: ['Admin', 'FamilyManager'] },

@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <FamilySearch @update:filters="handleFilterUpdate" @create="navigateToAddFamily" />
+    <FamilySearch @update:filters="handleFilterUpdate" />
 
     <FamilyList
       :families="families"
@@ -12,6 +12,7 @@
       @view="navigateToViewFamily"
       @edit="navigateToEditFamily"
       @delete="confirmDelete"
+      @create="navigateToAddFamily"
     />
 
     <!-- Confirm Delete Dialog -->
@@ -25,11 +26,11 @@
 
     <!-- Family Detail Dialog -->
     <v-dialog v-model="detailDialog" max-width="600px" persistent>
-      <FamilyDetail
+      <FamilyForm
         :initial-family-data="selectedFamily"
         :title="t('family.detail.title')"
         :read-only="true"
-        @close="closeDetail"
+        @cancel="closeDetail"
       />
     </v-dialog>
 
@@ -48,7 +49,7 @@ import { useFamilies } from '@/data/families';
 import type { Family, FamilyFilter } from '@/types/family';
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
-import FamilyDetail from '@/components/family/FamilyDetail.vue';
+import FamilyForm from '@/components/family/FamilyForm.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import { useNotificationStore } from '@/stores/notification';
 
@@ -95,11 +96,11 @@ const handleListOptionsUpdate = (options: { page: number; itemsPerPage: number }
 };
 
 const navigateToAddFamily = () => {
-  router.push('/family-management/add');
+  router.push('/family/add');
 };
 
 const navigateToEditFamily = (family: Family) => {
-  router.push(`/family-management/edit/${family.id}`);
+  router.push(`/family/edit/${family.id}`);
 };
 
 const navigateToViewFamily = (family: Family) => {
