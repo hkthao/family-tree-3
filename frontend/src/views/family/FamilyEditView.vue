@@ -41,11 +41,10 @@ onMounted(() => {
     if (family) {
       initialFamilyData.value = { ...family };
     } else {
-      notificationStore.showSnackbar(t('family.management.messages.notFound'), 'error');
-      router.push('/family-management');
+      router.push('/family');
     }
   } else {
-    router.push('/family-management');
+    router.push('/family');
   }
 });
 
@@ -60,6 +59,6 @@ const handleUpdateFamily = async (familyData: Family) => {
 };
 
 const closeForm = () => {
-  router.push('/family-management');
+  router.push('/family');
 };
 </script>

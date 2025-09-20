@@ -42,17 +42,17 @@ const router = createRouter({
           component: () => import('@/views/members/MemberAddView.vue'),
         },
         {
-          path: 'family-management',
+          path: 'family',
           name: 'FamilyManagement',
           component: () => import('@/views/family/FamilyListView.vue'),
         },
         {
-          path: 'family-management/add',
+          path: 'family/add',
           name: 'AddFamily',
           component: () => import('@/views/family/FamilyAddView.vue'),
         },
         {
-          path: 'family-management/edit/:id',
+          path: 'family/edit/:id',
           name: 'EditFamily',
           component: () => import('@/views/family/FamilyEditView.vue'),
         },

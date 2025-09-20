@@ -51,7 +51,7 @@ const menu: MenuSection[] = [
       {
         titleKey: 'family.manageFamilies',
         icon: 'mdi-home-group',
-        to: '/family-management',
+        to: '/family',
         roles: ['Admin', 'FamilyManager'],
       },
       {

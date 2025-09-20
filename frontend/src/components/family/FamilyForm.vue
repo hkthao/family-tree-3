@@ -5,21 +5,24 @@
     </v-card-title>
     <v-card-text>
       <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
+        <v-col cols="12">
+          <div class="d-flex justify-center mb-4">
+            <v-avatar size="96">
+              <v-img v-if="familyForm.avatarUrl" :src="familyForm.avatarUrl"></v-img>
+              <v-icon v-else size="96">mdi-account-group</v-icon>
+            </v-avatar>
+          </div>
+        </v-col>
+        <v-text-field
+          v-model="familyForm.avatarUrl"
+          :label="$t('family.form.avatarUrlLabel')"
+          variant="outlined"
+        ></v-text-field>
         <v-text-field
           v-model="familyForm.name"
           :label="$t('family.form.nameLabel')"
           :rules="[rules.required]"
           required
-          variant="outlined"
-        ></v-text-field>
-        <v-textarea
-          v-model="familyForm.description"
-          :label="$t('family.form.descriptionLabel')"
-          variant="outlined"
-        ></v-textarea>
-        <v-text-field
-          v-model="familyForm.avatarUrl"
-          :label="$t('family.form.avatarUrlLabel')"
           variant="outlined"
         ></v-text-field>
         <v-select
