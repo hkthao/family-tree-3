@@ -56,5 +56,11 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     component: FamilyManagementView,
     meta: { roles: ['Admin', 'FamilyManager'] },
   },
+  {
+    path: '/members',
+    name: 'MemberManagement',
+    component: MembersView,
+    meta: { roles: ['Admin', 'FamilyManager', 'Editor'] },
+  },
   // Add other routes here...
 ];

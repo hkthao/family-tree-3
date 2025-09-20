@@ -35,32 +35,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import RegisterForm from '@/components/auth/RegisterForm.vue';
 import SocialLogin from '@/components/auth/SocialLogin.vue';
 
 const { t } = useI18n();
-
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: '',
-});
-
-const onRegisterSuccess = () => {
-  snackbar.value = {
-    show: true,
-    message: t('register.success'),
-    color: 'success',
-  };
-};
-
-const onRegisterFail = (message: string) => {
-  snackbar.value = {
-    show: true,
-    message: message,
-    color: 'error',
-  };
-};
 </script>

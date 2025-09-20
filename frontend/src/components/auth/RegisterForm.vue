@@ -51,14 +51,19 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || 'E-mail must be valid.',
 };
 
-const emit = defineEmits(['register-success', 'register-fail']);
+import { useNotificationStore } from '@/stores/notification'; // Add import
+import { useI18n } from 'vue-i18n'; // Add useI18n import
+
+const { t } = useI18n(); // Initialize t
+
+const notificationStore = useNotificationStore(); // Initialize store
 
 const handleRegister = () => {
   if (username.value && email.value && password.value && agreeToTerms.value) {
-    emit('register-success');
+    notificationStore.showSnackbar(t('register.success'), 'success');
     router.push('/dashboard');
   } else {
-    emit('register-fail', 'Please fill in all fields');
+    notificationStore.showSnackbar(t('register.fillAllFields'), 'error'); // Assuming 'register.fillAllFields' key exists
   }
 };
 </script>
