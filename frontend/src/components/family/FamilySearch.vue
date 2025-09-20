@@ -1,169 +1,58 @@
 <template>
-  <v-container fluid>
-    <v-card>
-      <!-- Title + Add button -->
-      <v-card-title class="d-flex align-center text-uppercase">
-        {{ $t('family.management.title') }}
-        <v-spacer />
-        <v-btn color="primary" @click="openAddForm" >
-          <v-icon>mdi-plus</v-icon>
-        </v-btn>
-      </v-card-title>
-
-      <v-card-text>
-        <!-- Search + Filter -->
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model="searchQuery"
-              :label="$t('family.management.searchLabel')"
-              clearable
-              prepend-inner-icon="mdi-magnify"
-            />
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-select
-              v-model="filtervisibility"
-              :items="visibilityItems"
-              :label="$t('family.management.filterLabel')"
-              variant="outlined"
-              density="compact"
-            />
-          </v-col>
-        </v-row>
-
-        <!-- Data Table -->
-        <v-data-table-server
-          v-model:items-per-page="itemsPerPage"
-          :headers="headers"
-          :items="families"
-          :items-length="totalFamilies"
-          :loading="loading"
-          item-value="id"
-          @update:options="loadFamilies"
-          elevation="0"
-        >
-          <!-- Avatar column -->
-          <template #item.avatarUrl="{ item }">
-            <div class="d-flex justify-center">
-              <v-avatar size="36" class="my-2">
-                <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="item.name" />
-                <v-icon v-else>mdi-account-group</v-icon>
-              </v-avatar>
-            </div>
-          </template>
-
-          <!-- name column -->
-          <template #item.name="{ item }">
-            <div class="text-left">
-              <v-btn variant="text" color="primary" @click.prevent="viewFamily(item)" class="text-none">
-                {{ item.name }}
-              </v-btn>
-            </div>
-          </template>
-
-          <!-- visibility column -->
-          <template #item.visibility="{ item }">
-            <v-chip
-              :color="item.visibility === 'Public' ? 'success' : 'error'"
-              label
-              size="small"
-              class="text-capitalize"
-            >
-              {{ $t(`family.management.visibility.${item.visibility.toLowerCase()}`) }}
-            </v-chip>
-          </template>
-
-          <!-- Actions column -->
-          <template #item.actions="{ item }">
-            <v-btn icon size="small" variant="text" @click="editFamily(item)">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-            <v-btn icon size="small" variant="text" @click="confirmDelete(item)">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </template>
-
-          <!-- Loading state -->
-          <template #loading>
-            <v-skeleton-loader type="table-row@5" />
-          </template>
-        </v-data-table-server>
-      </v-card-text>
-    </v-card>
-
-    <!-- Family Form Dialog -->
-    <v-dialog v-model="formDialog" max-width="600px" persistent>
-      <FamilyForm
-        :family="selectedFamily"
-        @save="handleSaveFamily"
-        @cancel="closeForm"
-      />
-    </v-dialog>
-
-    <!-- Confirm Delete Dialog -->
-    <ConfirmDeleteDialog
-      :model-value="deleteConfirmDialog"
-      :title="t('confirmDelete.title')"
-      :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })"
-      @confirm="handleDeleteConfirm"
-      @cancel="handleDeleteCancel"
-    />
-
-    <!-- Family Detail Dialog -->
-    <v-dialog v-model="detailDialog" max-width="600px" persistent>
-      <FamilyDetail
-        :family="selectedFamily"
-        @back="closeDetail"
-      />
-    </v-dialog>
-
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-      {{ snackbar.message }}
-    </v-snackbar>
-  </v-container>
+  <v-card class="mb-4">
+    <v-card-title class="text-h6 d-flex align-center">
+      {{ $t('family.management.title') }}
+      <v-spacer></v-spacer>
+      <v-btn icon size="small" variant="text" @click="expanded = !expanded">
+        <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+      </v-btn>
+    </v-card-title>
+    <v-expand-transition>
+      <div v-show="expanded">
+        <v-card-text>
+          <!-- Search + Filter -->
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                v-model="searchQuery"
+                :label="$t('family.management.searchLabel')"
+                clearable
+                prepend-inner-icon="mdi-magnify"
+              />
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                v-model="filtervisibility"
+                :items="visibilityItems"
+                :label="$t('family.management.filterLabel')"
+                density="compact"
+              />
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" @click="applyFilters">{{ $t('member.search.apply') }}</v-btn>
+          <v-btn @click="resetFilters">{{ $t('member.search.reset') }}</v-btn>
+        </v-card-actions>
+      </div>
+    </v-expand-transition>
+  </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useFamilies } from '@/data/families';
-import type { Family } from '@/data/families';
-import FamilyForm from './FamilyForm.vue';
-import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
-import FamilyDetail from './FamilyDetail.vue';
-import type { DataTableHeader } from 'vuetify';
+import type { FamilyFilter } from '@/types/family';
 
+const emit = defineEmits(['update:filters', 'create']);
 
 const { t } = useI18n();
-const { getFamilies, addFamily, updateFamily, deleteFamily } = useFamilies();
 
-const families = ref<Family[]>([]);
-const totalFamilies = ref(0);
-const loading = ref(true);
+const expanded = ref(false); // Default to collapsed
+
 const searchQuery = ref('');
 const filtervisibility = ref<'All' | 'Private' | 'Public'>('All');
-const itemsPerPage = ref(5);
-
-const formDialog = ref(false);
-const deleteConfirmDialog = ref(false);
-const detailDialog = ref(false);
-const selectedFamily = ref<Family | undefined>(undefined);
-const familyToDelete = ref<Family | undefined>(undefined);
-
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: '',
-});
-
-const headers = computed<DataTableHeader[]>(() => [
-  { title: t('family.management.headers.avatar'), key: 'avatarUrl', sortable: false, width: '120px', align: 'center' },
-  { title: t('family.management.headers.name'), key: 'name', width: 'auto', align: 'start' },
-  { title: t('family.management.headers.visibility'), key: 'visibility', width: '120px', align: 'center' },
-  { title: t('family.management.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
-]);
 
 const visibilityItems = computed(() => [
   { title: t('family.management.visibility.all'), value: 'All' },
@@ -171,93 +60,23 @@ const visibilityItems = computed(() => [
   { title: t('family.management.visibility.public'), value: 'Public' },
 ]);
 
-const loadFamilies = async ({ page, itemsPerPage: perPage }: { page: number; itemsPerPage: number }) => {
-  loading.value = true;
-  const { families: fetchedFamilies, total } = await getFamilies(
-    searchQuery.value,
-    filtervisibility.value,
-    page,
-    perPage
-  );
-  families.value = fetchedFamilies;
-  totalFamilies.value = total;
-  loading.value = false;
+const applyFilters = () => {
+  emit('update:filters', {
+    fullName: searchQuery.value,
+    visibility: filtervisibility.value === 'All' ? undefined : filtervisibility.value,
+  } as FamilyFilter);
 };
 
-const openAddForm = () => {
-  selectedFamily.value = undefined;
-  formDialog.value = true;
-};
-
-const editFamily = (family: Family) => {
-  selectedFamily.value = { ...family };
-  formDialog.value = true;
-};
-
-const viewFamily = (family: Family) => {
-  selectedFamily.value = { ...family };
-  detailDialog.value = true;
-};
-
-const closeForm = () => {
-  formDialog.value = false;
-  selectedFamily.value = undefined;
-};
-
-const closeDetail = () => {
-  detailDialog.value = false;
-  selectedFamily.value = undefined;
-};
-
-const handleSaveFamily = async (familyData: Omit<Family, 'id'> & { id?: number }) => {
-  loading.value = true;
-  try {
-    if (familyData.id) {
-      await updateFamily(familyData as Family);
-      snackbar.value = { show: true, message: t('family.management.messages.updateSuccess'), color: 'success' };
-    } else {
-      await addFamily(familyData);
-      snackbar.value = { show: true, message: t('family.management.messages.addSuccess'), color: 'success' };
-    }
-    closeForm();
-    await loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
-  } catch (error) {
-    snackbar.value = { show: true, message: t('family.management.messages.saveError'), color: 'error' };
-  }
-  loading.value = false;
-};
-
-const confirmDelete = (family: Family) => {
-  familyToDelete.value = family;
-  deleteConfirmDialog.value = true;
-};
-
-const handleDeleteConfirm = async () => {
-  if (familyToDelete.value) {
-    loading.value = true;
-    try {
-      await deleteFamily(familyToDelete.value.id);
-      snackbar.value = { show: true, message: t('family.management.messages.deleteSuccess'), color: 'success' };
-      await loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
-    } catch (error) {
-      snackbar.value = { show: true, message: t('family.management.messages.deleteError'), color: 'error' };
-    }
-    loading.value = false;
-  }
-  deleteConfirmDialog.value = false;
-  familyToDelete.value = undefined;
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  familyToDelete.value = undefined;
+const resetFilters = () => {
+  searchQuery.value = '';
+  filtervisibility.value = 'All';
+  applyFilters();
 };
 
 watch([searchQuery, filtervisibility], () => {
-  loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
+  // No immediate apply, wait for button click
 });
 
-onMounted(() => {
-  loadFamilies({ page: 1, itemsPerPage: itemsPerPage.value });
-});
+// Initial apply of filters on component mount
+applyFilters();
 </script>

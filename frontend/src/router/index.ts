@@ -34,7 +34,7 @@ const router = createRouter({
         {
           path: 'members',
           name: 'Members',
-          component: () => import('@/views/members/MemberView.vue'),
+          component: () => import('@/views/members/MemberListView.vue'),
         },
         {
           path: 'members/add',
@@ -42,9 +42,19 @@ const router = createRouter({
           component: () => import('@/views/members/MemberAddView.vue'),
         },
         {
-          path: 'members/edit/:id',
-          name: 'EditMember',
-          component: () => import('@/views/members/MemberEditView.vue'),
+          path: 'family-management',
+          name: 'FamilyManagement',
+          component: () => import('@/views/family/FamilyListView.vue'),
+        },
+        {
+          path: 'family-management/add',
+          name: 'AddFamily',
+          component: () => import('@/views/family/FamilyAddView.vue'),
+        },
+        {
+          path: 'family-management/edit/:id',
+          name: 'EditFamily',
+          component: () => import('@/views/family/FamilyEditView.vue'),
         },
         ...sidebarRoutes,
       ],
