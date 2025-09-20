@@ -45,6 +45,7 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
   - `MemberForm.vue`
   - `MemberSearch.vue`
   - `MemberList.vue`
+  - `MemberListView.vue`
 
 ### Yêu cầu UI/UX
 - Phong cách hiện đại, spacing thoáng, giống Google/IBM.
