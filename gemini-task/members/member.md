@@ -1,6 +1,6 @@
 gemini generate ui --framework vue --library vuetify --task "
 Thiết kế và triển khai các màn hình/quy trình quản lý thành viên trong phần mềm FamilyTree.  
-Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm kiếm thành viên (mở rộng), Xem chi tiết thành viên**.  
+Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm kiếm thành viên (mở rộng), Xem chi tiết thành viên, Dòng thời gian**.  
 
 ### 1. Thêm thành viên
 - Màn hình riêng `MemberForm.vue` (được dùng chung cho cả thêm mới và chỉnh sửa) để nhập thông tin:
@@ -28,17 +28,22 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 
 ### 4. Xem chi tiết thành viên
 - Dialog `MemberForm.vue` (chế độ chỉ đọc).
-- Hiển thị thông tin đầy đủ:
+- Hiển thị thông tin đầy đủ qua 2 tab: "Thông Tin Chung" và "Dòng Thời Gian".
+- **Tab "Thông Tin Chung"**:
   - Ảnh đại diện (có nút upload/change).
   - Họ tên, ngày sinh, ngày mất.
   - Nơi sinh, nơi mất, giới tính, nghề nghiệp.
   - Tiểu sử (textarea rich text).
+- **Tab "Dòng Thời Gian"**:
+  - Hiển thị các sự kiện trong cuộc đời của thành viên dưới dạng timeline.
+  - Có phân trang nếu có nhiều hơn 5 sự kiện.
+  - Có các nút thêm, sửa, xóa sự kiện.
 - Action: nút 'Đóng'.
 - Layout card style hiện đại, giống sản phẩm Google/IBM.
 
 ### Kỹ thuật chung
 - Vue 3 + Composition API.
-- Vuetify 3: `v-app`, `v-dialog`, `v-data-table`, `v-form`, `v-text-field`, `v-select`, `v-avatar`, `v-card`, `DateInputField`.
+- Vuetify 3: `v-app`, `v-dialog`, `v-data-table`, `v-form`, `v-text-field`, `v-select`, `v-avatar`, `v-card`, `DateInputField`, `v-tabs`, `v-timeline`, `v-timeline-item`, `v-pagination`.
 - Routing: `/members` (danh sách & tìm kiếm), `/members/add` (thêm mới), `/members/edit/:id` (chỉnh sửa). Xem chi tiết thành viên được hiển thị trong dialog trên trang `/members`.
 - Mock data mẫu trong `src/data/members.ts` (JSON array).
 - Code chia component:
@@ -46,6 +51,8 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
   - `MemberSearch.vue`
   - `MemberList.vue`
   - `MemberListView.vue`
+  - `MemberTimeline.vue`
+  - `TimelineEventForm.vue`
 
 ### Yêu cầu UI/UX
 - Phong cách hiện đại, spacing thoáng, giống Google/IBM.
