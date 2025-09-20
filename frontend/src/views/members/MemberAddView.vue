@@ -1,10 +1,8 @@
 <template>
   <v-card>
-    <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('member.form.addTitle') }}</span>
-    </v-card-title>
     <v-card-text>
       <MemberForm
+        :title="t('member.form.addTitle')"
         @close="closeForm"
         @submit="handleAddMember"
       />
