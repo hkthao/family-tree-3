@@ -81,6 +81,7 @@
   "common.or": "hoặc",
   "validation.required": "Bắt buộc.",
   "validation.email": "Email không hợp lệ.",
+  "validation.number": "Phải là số.",
   "login.email": "Email",
   "login.emailPlaceholder": "johndoe@email.com",
   "login.password": "Mật khẩu",
@@ -152,5 +153,12 @@
   "member.form.title": "Biểu mẫu Thành viên",
   "member.form.tab.general": "Thông Tin Chung",
   "member.form.tab.timeline": "Dòng Thời Gian",
+  "member.timeline.title": "Dòng Thời Gian",
+  "timeline.form.year": "Năm",
+  "timeline.form.title": "Tiêu đề Sự kiện",
+  "timeline.form.description": "Mô tả",
+  "timeline.form.color": "Màu sắc",
+  "timeline.form.editTitle": "Chỉnh sửa Sự kiện Dòng Thời Gian",
+  "timeline.form.addTitle": "Thêm Sự kiện Dòng Thời Gian",
   "common.close": "Đóng"
 }

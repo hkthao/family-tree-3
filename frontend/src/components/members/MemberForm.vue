@@ -4,7 +4,7 @@
       <span class="text-h5 text-uppercase">{{ title }}</span>
     </v-card-title>
     <v-card-text>
-      <v-tabs v-model="tab" align-tabs="title">
+      <v-tabs v-model="tab" >
         <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
         <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
       </v-tabs>
@@ -114,33 +114,13 @@
         </v-window-item>
 
         <v-window-item value="timeline">
-          <v-card flat>
-            <v-card-text>
-              <v-timeline side="end">
-                <v-timeline-item
-                  v-for="(event, index) in timelineEvents"
-                  :key="index"
-                  :dot-color="event.color"
-                  size="small"
-                >
-                  <template v-slot:opposite>
-                    <div
-                      :class="`pt-1 headline font-weight-bold text-${event.color}`"
-                      v-text="event.year"
-                    ></div>
-                  </template>
-                  <v-card>
-                    <v-card-title :class="`text-h6 text-${event.color}`">
-                      {{ event.title }}
-                    </v-card-title>
-                    <v-card-text>
-                      {{ event.description }}
-                    </v-card-text>
-                  </v-card>
-                </v-timeline-item>
-              </v-timeline>
-            </v-card-text>
-          </v-card>
+          <MemberTimeline
+            :timeline-events="timelineEvents"
+            :read-only="props.readOnly"
+            @add="handleAddTimelineEvent"
+            @edit="handleEditTimelineEvent"
+            @delete="handleDeleteTimelineEvent"
+          />
         </v-window-item>
       </v-window>
     </v-card-text>
@@ -157,6 +137,7 @@ import { ref, computed } from 'vue';
 import type { Member } from '@/types/member';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
+import MemberTimeline from '@/components/members/MemberTimeline.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -209,5 +190,18 @@ const submitForm = async () => {
 
 const closeForm = () => {
   emit('close');
+};
+
+// Placeholder functions for timeline events
+const handleAddTimelineEvent = () => {
+  console.log('Add timeline event');
+};
+
+const handleEditTimelineEvent = (event: any) => {
+  console.log('Edit timeline event:', event);
+};
+
+const handleDeleteTimelineEvent = (event: any) => {
+  console.log('Delete timeline event:', event);
 };
 </script>
