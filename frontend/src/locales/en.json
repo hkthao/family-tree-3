@@ -81,6 +81,7 @@
   "common.or": "or",
   "validation.required": "Required.",
   "validation.email": "E-mail must be valid.",
+  "validation.number": "Must be a number.",
   "login.email": "Email",
   "login.emailPlaceholder": "johndoe@email.com",
   "login.password": "Password",
@@ -152,5 +153,12 @@
   "member.form.title": "Member Form",
   "member.form.tab.general": "General Information",
   "member.form.tab.timeline": "Timeline",
+  "member.timeline.title": "Timeline",
+  "timeline.form.year": "Year",
+  "timeline.form.title": "Event Title",
+  "timeline.form.description": "Description",
+  "timeline.form.color": "Color",
+  "timeline.form.editTitle": "Edit Timeline Event",
+  "timeline.form.addTitle": "Add Timeline Event",
   "common.close": "Close"
 }
