@@ -15,3 +15,8 @@ export interface ConfirmDeleteDialogProps {
   title?: string;
   message?: string;
 }
+
+export interface FamilyFilter {
+  fullName?: string;
+  visibility?: 'All' | 'Private' | 'Public';
+}
