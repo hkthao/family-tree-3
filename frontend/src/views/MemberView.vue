@@ -1,16 +1,5 @@
 <template>
   <v-container fluid>
-    <v-card class="mb-4">
-      <v-card-title class="d-flex align-center">
-        <span class="text-h5">{{ t('member.management.title') }}</span>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="navigateToAddMember">
-          {{ t('member.management.addMember') }}
-          <v-icon right>mdi-plus</v-icon>
-        </v-btn>
-      </v-card-title>
-    </v-card>
-
     <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList
@@ -45,6 +34,8 @@
     <v-snackbar v-if="notificationStore.snackbar" v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
       {{ notificationStore.snackbar.message }}
     </v-snackbar>
+
+  
   </v-container>
 </template>
 
@@ -56,7 +47,7 @@ import type { Member, MemberFilter } from '@/types/member';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import MemberDetail from '@/components/members/MemberDetail.vue';
-import ConfirmDeleteDialog from '@/components/family/ConfirmDeleteDialog.vue'; // Reusing from family module
+import ConfirmDeleteDialog from '@/components/family/ConfirmDeleteDialog.vue';
 
 const { t } = useI18n();
 const { getMembers, deleteMember } = useMembers();
@@ -94,9 +85,6 @@ const loadMembers = async () => {
   loading.value = false;
 };
 
-const navigateToAddMember = () => {
-  router.push('/members/add');
-};
 
 const navigateToEditMember = (member: Member) => {
   router.push(`/members/edit/${member.id}`);

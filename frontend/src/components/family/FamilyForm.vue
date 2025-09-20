@@ -36,11 +36,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/data/families';
-
-interface Props {
-  family?: Family;
-}
+import type { Family, Props } from '@/types/family';
 
 const props = defineProps<Props>();
 const emit = defineEmits(['save', 'cancel']);

@@ -1,72 +1,60 @@
 <template>
   <v-card>
-    <v-card-title>
-      <span class="text-h5">{{ isEditMode ? t('member.form.editTitle') : t('member.form.addTitle') }}</span>
+    <v-card-title class="text-center">
+      <span class="text-h5 text-uppercase">{{ isEditMode ? t('member.form.editTitle') : t('member.form.addTitle') }}</span>
     </v-card-title>
     <v-card-text>
       <v-form ref="form" @submit.prevent="saveMember">
+        <!-- Thông tin cơ bản -->
         <v-row>
-          <v-col cols="12" md="4">
+          <v-col cols="12">
+            <div class="d-flex justify-center mb-4">
+              <v-avatar size="96">
+                <v-img v-if="memberForm.avatarUrl" :src="memberForm.avatarUrl"></v-img>
+                <v-icon v-else size="96">mdi-account-circle</v-icon>
+              </v-avatar>
+            </div>
+            <v-text-field
+              v-model="memberForm.avatarUrl"
+              :label="t('member.form.avatarUrl')"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
             <v-text-field
               v-model="memberForm.fullName"
               :label="t('member.form.fullName')"
               :rules="[rules.required]"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="4">
-            <v-menu
-              v-model="dateOfBirthMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  v-model="memberForm.dateOfBirth"
-                  @click="dateOfBirthMenu = true"
-                  :label="t('member.form.dateOfBirth')"
-                  append-inner-icon="mdi-calendar"
-                  readonly
-                  v-bind="props"
-                  :rules="[rules.required]"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="memberForm.dateOfBirth"
-                @update:model-value="dateOfBirthMenu = false"
-              ></v-date-picker>
-            </v-menu>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="6">
+            <DateInputField
+              v-model="memberForm.dateOfBirth"
+              :label="t('member.form.dateOfBirth')"
+              :rules="[rules.required]"
+            />
           </v-col>
-          <v-col cols="12" md="4">
-            <v-menu
-              v-model="dateOfDeathMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-              min-width="auto"
-            >
-              <template v-slot:activator="{ props }">
-                <v-text-field
-                  v-model="memberForm.dateOfDeath"
-                  :label="t('member.form.dateOfDeath')"
-                  append-inner-icon="mdi-calendar"
-                  readonly
-                  v-bind="props"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                :model-value="memberForm.dateOfDeath ? new Date(memberForm.dateOfDeath) : null"
-                @update:model-value="memberForm.dateOfDeath = $event; dateOfDeathMenu = false"
-              ></v-date-picker>
-            </v-menu>
+          <v-col cols="12" md="6">
+            <DateInputField
+              v-model="memberForm.dateOfDeath"
+              :label="t('member.form.dateOfDeath')"
+              optional
+            />
           </v-col>
+        </v-row>
+
+        <!-- Thông tin cá nhân -->
+        <v-row>
           <v-col cols="12" md="4">
-            <v-radio-group v-model="memberForm.gender" :label="t('member.form.gender')" :rules="[rules.required]" inline>
-              <v-radio :label="t('member.gender.male')" value="Male"></v-radio>
-              <v-radio :label="t('member.gender.female')" value="Female"></v-radio>
-              <v-radio :label="t('member.gender.other')" value="Other"></v-radio>
-            </v-radio-group>
+            <v-select
+              v-model="memberForm.gender"
+              :label="t('member.form.gender')"
+              :items="genderOptions"
+              :rules="[rules.required]"
+            ></v-select>
           </v-col>
           <v-col cols="12" md="4">
             <v-text-field
@@ -80,26 +68,18 @@
               :label="t('member.form.placeOfDeath')"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="4">
+        </v-row>
+        <v-row>
+          <v-col cols="12">
             <v-text-field
               v-model="memberForm.occupation"
               :label="t('member.form.occupation')"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" md="12">
-            <v-textarea
-              v-model="memberForm.biography"
-              :label="t('member.form.biography')"
-            ></v-textarea>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field
-              v-model="memberForm.avatarUrl"
-              :label="t('member.form.avatarUrl')"
-            ></v-text-field>
-          </v-col>
+        </v-row>
 
-          <!-- Autocomplete for relationships -->
+        <!-- Thông tin gia đình -->
+        <v-row>
           <v-col cols="12" md="4">
             <v-autocomplete
               v-model="memberForm.parents"
@@ -137,6 +117,16 @@
             ></v-autocomplete>
           </v-col>
         </v-row>
+
+        <!-- Thông tin khác -->
+        <v-row>
+          <v-col cols="12">
+            <v-textarea
+              v-model="memberForm.biography"
+              :label="t('member.form.biography')"
+            ></v-textarea>
+          </v-col>
+        </v-row>
       </v-form>
     </v-card-text>
     <v-card-actions>
@@ -153,6 +143,7 @@ import type { Member } from '@/types/member';
 import { useMembers } from '@/data/members';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
+import DateInputField from '@/components/common/DateInputField.vue'; // Add import
 import { useNotificationStore } from '@/stores/notification';
 
 const notificationStore = useNotificationStore();
@@ -163,7 +154,6 @@ const { members: allMembers, getMemberById, addMember, updateMember } = useMembe
 
 const form = ref<HTMLFormElement | null>(null);
 const dateOfBirthMenu = ref(false);
-const dateOfDeathMenu = ref(false);
 const memberForm = ref<Omit<Member, 'id'> | Member>({ // Allow Member type for edit mode
   fullName: '',
   dateOfBirth: null, // Initialize as null
@@ -174,6 +164,12 @@ const memberForm = ref<Omit<Member, 'id'> | Member>({ // Allow Member type for e
 });
 
 const isEditMode = computed(() => !!route.params.id);
+
+const genderOptions = [
+  { title: t('member.gender.male'), value: 'Male' },
+  { title: t('member.gender.female'), value: 'Female' },
+  { title: t('member.gender.other'), value: 'Other' },
+];
 
 const rules = {
   required: (value: string) => !!value || t('validation.required'),

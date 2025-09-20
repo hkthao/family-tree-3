@@ -9,6 +9,15 @@
     @update:options="loadMembers"
     elevation="0"
   >
+    <template #top>
+      <v-toolbar flat>
+        <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" icon @click="$emit('create')">
+          <v-icon>mdi-plus</v-icon>
+        </v-btn>
+      </v-toolbar>
+    </template>
     <!-- Avatar column -->
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
@@ -26,6 +35,11 @@
           {{ item.fullName }}
         </v-btn>
       </div>
+    </template>
+
+    <!-- Date of Birth column -->
+    <template #item.dateOfBirth="{ item }">
+      {{ formatDate(item.dateOfBirth) }}
     </template>
 
     <!-- Gender column -->
@@ -84,8 +98,10 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('member.list.headers.fullName'), key: 'fullName', width: 'auto', align: 'start' },
   { title: t('member.list.headers.dateOfBirth'), key: 'dateOfBirth', width: '120px', align: 'center' },
   { title: t('member.list.headers.gender'), key: 'gender', width: '100px', align: 'center' },
-  { title: t('member.list.headers.actions'), key: 'actions', sortable: false, width: '100px', align: 'center' },
+  { title: t('member.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
+
+import { formatDate } from '@/utils/dateUtils';
 
 const loadMembers = (options: { page: number; itemsPerPage: number; sortBy: string | string[] | null }) => {
   emit('update:options', options);
