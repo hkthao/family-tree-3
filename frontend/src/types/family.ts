@@ -2,6 +2,7 @@ export interface Family {
   id: number;
   name: string;
   description?: string;
+  address?: string;
   avatarUrl?: string;
   visibility: 'Private' | 'Public';
 }

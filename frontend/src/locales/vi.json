@@ -50,6 +50,7 @@
   "family.form.addTitle": "Thêm mới Gia đình",
   "family.form.nameLabel": "Tên",
   "family.form.descriptionLabel": "Mô tả",
+  "family.form.addressLabel": "Địa chỉ",
   "family.form.avatarUrlLabel": "URL ảnh đại diện",
   "family.form.visibilityLabel": "Chế độ",
   "family.form.visibility.private": "Riêng tư",

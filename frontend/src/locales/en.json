@@ -50,6 +50,7 @@
   "family.form.addTitle": "Add New Family",
   "family.form.nameLabel": "Name",
   "family.form.descriptionLabel": "Description",
+  "family.form.addressLabel": "Address",
   "family.form.avatarUrlLabel": "Avatar URL",
   "family.form.visibilityLabel": "Visibility",
   "family.form.visibility.private": "Private",
