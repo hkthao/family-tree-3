@@ -41,6 +41,10 @@ export default createVuetify({
       variant: 'outlined',
       density: 'compact',
     },
+    VAutocomplete: {
+      variant: 'outlined',
+      density: 'compact',
+    },
     VSelect: {
       variant: 'outlined',
       density: 'compact',

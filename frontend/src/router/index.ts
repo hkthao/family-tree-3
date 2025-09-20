@@ -31,6 +31,21 @@ const router = createRouter({
           name: 'Dashboard',
           component: () => import('@/views/DashboardView.vue'),
         },
+        {
+          path: 'members',
+          name: 'Members',
+          component: () => import('@/views/MemberView.vue'),
+        },
+        {
+          path: 'members/add',
+          name: 'AddMember',
+          component: () => import('@/views/MemberAddView.vue'),
+        },
+        {
+          path: 'members/edit/:id',
+          name: 'EditMember',
+          component: () => import('@/views/MemberEditView.vue'),
+        },
         ...sidebarRoutes,
       ],
     },

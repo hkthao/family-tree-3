@@ -34,29 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import LoginForm from '@/components/auth/LoginForm.vue';
 import SocialLogin from '@/components/auth/SocialLogin.vue';
-
-const snackbar = ref({
-  show: false,
-  message: '',
-  color: '',
-});
-
-const onLoginSuccess = () => {
-  snackbar.value = {
-    show: true,
-    message: 'Login successful!',
-    color: 'success',
-  };
-};
-
-const onLoginFail = (message: string) => {
-  snackbar.value = {
-    show: true,
-    message: message,
-    color: 'error',
-  };
-};
 </script>

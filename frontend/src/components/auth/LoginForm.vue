@@ -45,15 +45,17 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || t('validation.email'),
 };
 
-const emit = defineEmits(['login-success', 'login-fail']);
+import { useNotificationStore } from '@/stores/notification';
+
+const notificationStore = useNotificationStore();
 
 const handleLogin = () => {
   // Mock login logic
   if (email.value === 'admin@demo.com' && password.value === 'password') {
-    emit('login-success');
+    notificationStore.showSnackbar(t('login.success'), 'success'); // Assuming 'login.success' key exists
     router.push('/dashboard');
   } else {
-    emit('login-fail', t('login.invalidCredentials'));
+    notificationStore.showSnackbar(t('login.invalidCredentials'), 'error');
   }
 };
 </script>
