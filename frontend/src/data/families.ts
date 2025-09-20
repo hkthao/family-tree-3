@@ -1,12 +1,6 @@
 import { ref } from 'vue';
 
-export interface Family {
-  id: number;
-  name: string;
-  description?: string;
-  avatarUrl?: string;
-  visibility: 'Private' | 'Public';
-}
+import type { Family } from '@/types/family';
 
 const families = ref<Family[]>([
   {

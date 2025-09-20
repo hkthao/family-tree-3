@@ -16,11 +16,9 @@
 
 <script setup lang="ts">
 
-interface Props {
-  modelValue: boolean;
-}
+import type { ConfirmDeleteDialogProps } from '@/types/family';
 
-defineProps<Props>();
+defineProps<ConfirmDeleteDialogProps>();
 defineEmits(['confirm', 'cancel']);
 
 </script>

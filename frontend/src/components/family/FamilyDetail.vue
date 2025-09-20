@@ -43,11 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Family } from '@/data/families';
+import type { Props } from '@/types/family';
 
-interface Props {
-  family?: Family;
-}
 defineProps<Props>();
 defineEmits(['back']);
 </script>
