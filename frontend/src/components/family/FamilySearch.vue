@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-card>
       <!-- Title + Add button -->
       <v-card-title class="d-flex align-center">

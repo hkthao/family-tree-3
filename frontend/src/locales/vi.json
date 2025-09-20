@@ -75,5 +75,6 @@
   "userMenu.role": "Vai trò",
   "userMenu.uploadPhoto": "Tải ảnh lên",
   "common.cancel": "Hủy",
-  "common.save": "Lưu"
+  "common.save": "Lưu",
+  "topbar.search": "Tìm kiếm..."
 }

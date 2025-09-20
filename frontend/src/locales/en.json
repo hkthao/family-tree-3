@@ -75,5 +75,6 @@
   "userMenu.cancel": "Cancel",
   "userMenu.ariaLabel": "User menu",
   "userMenu.role": "Role",
-  "userMenu.uploadPhoto": "Upload Photo"
+  "userMenu.uploadPhoto": "Upload Photo",
+  "topbar.search": "Search..."
 }

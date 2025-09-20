@@ -16,3 +16,9 @@ import { mockUser } from '@/data/userMock';
 const drawer = ref(true);
 const currentUser = ref(mockUser);
 </script>
+
+<style scoped>
+.v-application {
+  background: #F5F5F9 !important;
+}
+</style>
