@@ -10,6 +10,7 @@ import { createVuetify } from 'vuetify';
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
   theme: {
+    defaultTheme: 'dark',
     themes: {
       light: {
         dark: false,
@@ -34,11 +35,15 @@ export default createVuetify({
     },
   },
   defaults: {
+    global: {
+    },
     VTextField: {
       variant: 'outlined',
+      density: 'compact',
     },
     VSelect: {
       variant: 'outlined',
+      density: 'compact',
     },
     VTextarea: {
       variant: 'outlined',
