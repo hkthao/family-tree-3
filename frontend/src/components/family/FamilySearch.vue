@@ -2,10 +2,10 @@
   <v-container fluid>
     <v-card>
       <!-- Title + Add button -->
-      <v-card-title class="d-flex align-center">
+      <v-card-title class="d-flex align-center text-uppercase">
         {{ $t('family.management.title') }}
         <v-spacer />
-        <v-btn color="primary" @click="openAddForm">
+        <v-btn color="primary" @click="openAddForm" >
           <v-icon>mdi-plus</v-icon>
         </v-btn>
       </v-card-title>
@@ -19,8 +19,6 @@
               :label="$t('family.management.searchLabel')"
               clearable
               prepend-inner-icon="mdi-magnify"
-              variant="outlined"
-              density="compact"
             />
           </v-col>
           <v-col cols="12" md="6">
