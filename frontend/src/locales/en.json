@@ -150,5 +150,7 @@
   "common.edit": "Edit",
   "common.unknown": "Unknown",
   "member.form.title": "Member Form",
+  "member.form.tab.general": "General Information",
+  "member.form.tab.timeline": "Timeline",
   "common.close": "Close"
 }
