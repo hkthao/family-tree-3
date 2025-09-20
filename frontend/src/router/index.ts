@@ -14,12 +14,12 @@ const router = createRouter({
     {
       path: '/login',
       name: 'Login',
-      component: () => import('@/views/LoginView.vue'),
+      component: () => import('@/views/auth/LoginView.vue'),
     },
     {
       path: '/register',
       name: 'Register',
-      component: () => import('@/views/RegisterView.vue'),
+      component: () => import('@/views/auth/RegisterView.vue'),
     },
     {
       path: '/',
@@ -29,22 +29,22 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: () => import('@/views/DashboardView.vue'),
+          component: () => import('@/views/dashboard/DashboardView.vue'),
         },
         {
           path: 'members',
           name: 'Members',
-          component: () => import('@/views/MemberView.vue'),
+          component: () => import('@/views/members/MemberView.vue'),
         },
         {
           path: 'members/add',
           name: 'AddMember',
-          component: () => import('@/views/MemberAddView.vue'),
+          component: () => import('@/views/members/MemberAddView.vue'),
         },
         {
           path: 'members/edit/:id',
           name: 'EditMember',
-          component: () => import('@/views/MemberEditView.vue'),
+          component: () => import('@/views/members/MemberEditView.vue'),
         },
         ...sidebarRoutes,
       ],
@@ -52,7 +52,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      component: () => import('@/views/NotFoundView.vue'),
+      component: () => import('@/views/misc/NotFoundView.vue'),
     },
   ],
 });
