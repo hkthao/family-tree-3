@@ -33,8 +33,8 @@
           :type="calendarType"
           event-overlap-mode="stack"
           @click:event="showEventDetails"
-          :locale="locale.value"
-          :key="locale.value"
+          :locale="locale"
+          :key="locale"
           :weekdays="weekdays"
         >
           <template #event="{ event }">
@@ -65,6 +65,8 @@ const { t, locale } = useI18n();
 const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
 const selectedDate = ref(new Date());
+// Removed invalid import of VCalendar
+
 const calendarRef = ref<VCalendar | null>(null);
 const calendarType = ref('month');
 const calendarTypes = computed(() => [
