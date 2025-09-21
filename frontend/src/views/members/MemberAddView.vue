@@ -16,7 +16,7 @@ import { useRouter } from 'vue-router';
 import { useMembersStore } from '@/stores/members';
 import { useNotificationStore } from '@/stores/notification';
 import MemberForm from '@/components/members/MemberForm.vue';
-import type { Member } from '@/types/member';
+import type { Member } from '@/services/member.service';
 
 const { t } = useI18n();
 const router = useRouter();

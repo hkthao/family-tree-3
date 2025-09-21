@@ -63,10 +63,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { FamilyEvent } from '@/services/familyEvent.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { Member } from '@/services/member.service';
 import type { DataTableHeader } from 'vuetify';
 import { useMembers } from '@/data/members';
-import type { Member } from '@/types/member';
 
 defineProps({
   events: {

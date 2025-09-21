@@ -15,8 +15,8 @@ export const useMembersStore = defineStore('members', (memberService: MemberServ
       const response = await memberService.fetchMembers(search, familyId, page, perPage);
       members.value = response.items;
       total.value = response.total;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch members';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch members';
       console.error(err);
     } finally {
       loading.value = false;
@@ -29,8 +29,8 @@ export const useMembersStore = defineStore('members', (memberService: MemberServ
     try {
       const member = await memberService.fetchMemberById(id);
       return member;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch member';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch member';
       console.error(err);
       return undefined;
     } finally {
@@ -45,10 +45,10 @@ export const useMembersStore = defineStore('members', (memberService: MemberServ
       const newMember = await memberService.addMember(member);
       members.value.push(newMember);
       total.value++;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to add member';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to add member';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }
@@ -63,10 +63,10 @@ export const useMembersStore = defineStore('members', (memberService: MemberServ
       if (index !== -1) {
         members.value[index] = { ...members.value[index], ...member, updatedAt: new Date().toISOString() };
       }
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update member';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to update member';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }
@@ -79,10 +79,10 @@ export const useMembersStore = defineStore('members', (memberService: MemberServ
       await memberService.removeMember(id);
       members.value = members.value.filter(m => m.id !== id);
       total.value--;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to delete member';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to delete member';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }

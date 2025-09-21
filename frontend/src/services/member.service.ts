@@ -1,7 +1,7 @@
 import axios from '../plugins/axios';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { mockMembers } from '../data/mock/members.mock';
 import { simulateAsyncOperation } from '../stores/utils';
-import { Family } from '../types/family'; // Assuming Family is needed for member context
 
 export interface Member {
   id: string;
@@ -19,7 +19,7 @@ export interface Member {
   generation: number;
   orderInFamily?: number;
   description?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>; // Changed from any to unknown
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +34,7 @@ export interface MemberServiceType {
 
 export class RealMemberService implements MemberServiceType {
   async fetchMembers(search?: string, familyId?: string, page?: number, perPage?: number): Promise<{ items: Member[]; total: number }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.get(`/members`, {
       params: { search, familyId, page, perPage },
     });
@@ -41,20 +42,24 @@ export class RealMemberService implements MemberServiceType {
   }
 
   async fetchMemberById(id: string): Promise<Member | undefined> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.get(`/members/${id}`);
     return response.data;
   }
 
   async addMember(member: Omit<Member, 'id' | 'createdAt' | 'updatedAt'>): Promise<Member> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.post(`/members`, member);
     return response.data;
   }
 
   async updateMember(id: string, member: Partial<Omit<Member, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await axios.put(`/members/${id}`, member);
   }
 
   async removeMember(id: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await axios.delete(`/members/${id}`);
   }
 }

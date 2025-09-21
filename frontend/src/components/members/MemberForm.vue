@@ -177,7 +177,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import type { Member } from '@/types/member';
+import type { Member } from '@/services/member.service';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';

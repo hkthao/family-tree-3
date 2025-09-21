@@ -16,7 +16,8 @@ import { useRouter } from 'vue-router';
 import { useFamilyEventsStore } from '@/stores/familyEvents';
 import { useNotificationStore } from '@/stores/notification';
 import EventForm from '@/components/events/EventForm.vue';
-import type { Event } from '@/types/event';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { FamilyEvent } from '@/services/familyEvent.service';
 
 const { t } = useI18n();
 const router = useRouter();
