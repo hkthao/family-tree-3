@@ -21,6 +21,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { VCalendar } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types/event';
 
