@@ -17,7 +17,8 @@ export const useMembersStore = defineStore('members', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        const { membersMock } = await import('../data/mock/members.mock');
+        const { generateMembersMock } = await import('../data/mock/members.mock');
+        const membersMock = generateMembersMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         items.value = membersMock.slice((page - 1) * perPage, page * perPage);
         total.value = membersMock.length;
@@ -38,12 +39,14 @@ export const useMembersStore = defineStore('members', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        const { membersMock } = await import('../data/mock/members.mock');
+        const { generateMembersMock } = await import('../data/mock/members.mock');
+        const membersMock = generateMembersMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         const newMember = { ...entity, id: (membersMock.length + 1).toString() };
         membersMock.push(newMember);
-        items.value.push(newMember);
-        total.value++;
+        // Re-fetch all members to update the displayed list
+        items.value = generateMembersMock(); // Get the updated full list
+        total.value = items.value.length;
       } else {
         const response = await apiClient.post('/api/members', entity);
         items.value.push(response.data);
@@ -61,15 +64,15 @@ export const useMembersStore = defineStore('members', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        const { membersMock } = await import('../data/mock/members.mock');
+        const { generateMembersMock } = await import('../data/mock/members.mock');
+        const membersMock = generateMembersMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         const index = membersMock.findIndex(m => m.id === entity.id);
         if (index !== -1) {
           membersMock[index] = entity;
-          const itemIndex = items.value.findIndex(m => m.id === entity.id);
-          if (itemIndex !== -1) {
-            items.value[itemIndex] = entity;
-          }
+          // Re-fetch all members to update the displayed list
+          items.value = generateMembersMock(); // Get the updated full list
+          total.value = items.value.length;
         }
       } else {
         const response = await apiClient.put(`/api/members/${entity.id}`, entity);
@@ -90,9 +93,15 @@ export const useMembersStore = defineStore('members', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        let { membersMock } = await import('../data/mock/members.mock');
+        const { generateMembersMock } = await import('../data/mock/members.mock');
+        let membersMock = generateMembersMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         membersMock = membersMock.filter(m => m.id !== id);
+        // Re-fetch all members to update the displayed list
+        items.value = generateMembersMock(); // Get the updated full list
+        total.value = items.value.length;
+      } else {
+        await apiClient.delete(`/api/members/${id}`);
         items.value = items.value.filter(m => m.id !== id);
         total.value--;
       }
