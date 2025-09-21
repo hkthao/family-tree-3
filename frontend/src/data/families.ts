@@ -1,89 +1,26 @@
 import { ref } from 'vue';
 
 import type { Family } from '@/types/family';
+import { faker } from '@faker-js/faker';
 
-const families = ref<Family[]>([
-  {
-    id: 1,
-    name: 'Huynh Family',
-    description: 'A large and loving family.',
-    address: '123 Main St, Anytown, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/halcyon.png',
-    visibility: 'Public',
-  },
-  {
-    id: 2,
-    name: 'Nguyen Family',
-    description: 'Close-knit family with strong traditions.',
-    address: '456 Oak Ave, Someville, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/sunshine.jpg',
-    visibility: 'Private',
-  },
-  {
-    id: 3,
-    name: 'Tran Family',
-    description: 'Modern family with diverse interests.',
-    address: '789 Pine Ln, Othertown, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/docks.jpg',
-    visibility: 'Public',
-  },
-  {
-    id: 4,
-    name: 'Le Family',
-    description: 'Small family, big dreams.',
-    address: '101 Maple Dr, Anycity, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/road.jpg',
-    visibility: 'Private',
-  },
-  {
-    id: 5,
-    name: 'Pham Family',
-    description: 'Family of adventurers.',
-    address: '212 Birch Rd, Somecity, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/forest.jpg',
-    visibility: 'Public',
-  },
-  {
-    id: 6,
-    name: 'Vo Family',
-    description: 'Artistic and creative family.',
-    address: '333 Cedar Ct, Othercity, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg',
-    visibility: 'Private',
-  },
-  {
-    id: 7,
-    name: 'Hoang Family',
-    description: 'Family of scholars.',
-    address: '444 Elm St, Anytown, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/house.jpg',
-    visibility: 'Public',
-  },
-  {
-    id: 8,
-    name: 'Dang Family',
-    description: 'Musical family.',
-    address: '555 Spruce Ave, Someville, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/server-room.jpg',
-    visibility: 'Private',
-  },
-  {
-    id: 9,
-    name: 'Bui Family',
-    description: 'Family of food lovers.',
-    address: '666 Willow Ln, Othertown, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/cooking.png',
-    visibility: 'Public',
-  },
-  {
-    id: 10,
-    name: 'Do Family',
-    description: 'Sporty family.',
-    address: '777 Aspen Dr, Anycity, USA',
-    avatarUrl: 'https://cdn.vuetifyjs.com/images/cards/athlete.jpg',
-    visibility: 'Private',
-  },
-]);
+const generateMockFamilies = (count: number): Family[] => {
+  const families: Family[] = [];
+  const visibilityOptions = ['Private', 'Public'];
+
+  for (let i = 0; i < count; i++) {
+    families.push({
+      id: i + 1,
+      name: faker.person.lastName() + ' Family',
+      description: faker.lorem.sentence(),
+      address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
+      avatarUrl: faker.image.avatar(),
+      visibility: faker.helpers.arrayElement(visibilityOptions) as Family['visibility'],
+    });
+  }
+  return families;
+};
+
+const families = ref<Family[]>(generateMockFamilies(10));
 
 export const useFamilies = () => {
   const getFamilies = (
