@@ -39,6 +39,7 @@
   "family.management.visibility.public": "Public",
   "family.management.headers.avatar": "Avatar",
   "family.management.headers.name": "Name",
+  "family.management.headers.totalMembers": "Total Members",
   "family.management.headers.visibility": "Visibility",
   "family.management.headers.actions": "Actions",
   "family.management.messages.updateSuccess": "Family updated successfully!",
