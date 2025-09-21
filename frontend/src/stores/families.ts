@@ -1,90 +1,73 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import apiClient from '../plugins/axios';
-import type { Family } from '../types/family';
+import type { Family, FamilyServiceType } from '../services/family.service';
 
-export const useFamiliesStore = defineStore('families', () => {
-
-
-  const items = ref<Family[]>([]);
+export const useFamiliesStore = defineStore('families', (familyService: FamilyServiceType) => {
+  const families = ref<Family[]>([]);
   const loading = ref(false);
-  const total = ref(0);
   const error = ref<string | null>(null);
+  const total = ref(0);
 
-  const VITE_USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
-
-  async function fetchAll(search?: string, page: number = 1, perPage: number = 10) {
+  async function fetchAll(search = '', page = 1, perPage = 10) {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { generateFamiliesMock } = await import('../data/mock/families.mock');
-        const familiesMock = generateFamiliesMock();
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        items.value = familiesMock.slice((page - 1) * perPage, page * perPage);
-        total.value = familiesMock.length;
-      } else {
-        const response = await apiClient.get('/api/families', { params: { search, page, perPage } });
-        items.value = response.data.items;
-        total.value = response.data.total;
-      }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch families';
+      const response = await familyService.fetchFamilies(search, page, perPage);
+      families.value = response.items;
+      total.value = response.total;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch families';
+      console.error(err);
     } finally {
       loading.value = false;
     }
   }
 
-  async function add(entity: Family) {
+  async function fetchOne(id: string): Promise<Family | undefined> {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { generateFamiliesMock } = await import('../data/mock/families.mock');
-        const familiesMock = generateFamiliesMock();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const newFamily = { ...entity, id: (familiesMock.length + 1).toString() };
-        familiesMock.push(newFamily);
-        items.value.push(newFamily);
-        total.value++;
-      } else {
-        const response = await apiClient.post('/api/families', entity);
-        items.value.push(response.data);
-        total.value++;
-      }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to add family';
+      const family = await familyService.fetchFamilyById(id);
+      return family;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch family';
+      console.error(err);
+      return undefined;
     } finally {
       loading.value = false;
     }
   }
 
-  async function update(entity: Family) {
+  async function add(family: Omit<Family, 'id' | 'createdAt' | 'updatedAt'>) {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { generateFamiliesMock } = await import('../data/mock/families.mock');
-        const familiesMock = generateFamiliesMock();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const index = familiesMock.findIndex(f => f.id === entity.id);
-        if (index !== -1) {
-          familiesMock[index] = entity;
-          const itemIndex = items.value.findIndex(f => f.id === entity.id);
-          if (itemIndex !== -1) {
-            items.value[itemIndex] = entity;
-          }
-        }
-      } else {
-        const response = await apiClient.put(`/api/families/${entity.id}`, entity);
-        const itemIndex = items.value.findIndex(f => f.id === entity.id);
-        if (itemIndex !== -1) {
-          items.value[itemIndex] = response.data;
-        }
+      const newFamily = await familyService.addFamily(family);
+      families.value.push(newFamily);
+      total.value++;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to add family';
+      console.error(err);
+      throw err; // Re-throw to allow component to handle
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function update(id: string, family: Partial<Omit<Family, 'id' | 'createdAt' | 'updatedAt'>>) {
+    loading.value = true;
+    error.value = null;
+    try {
+      await familyService.updateFamily(id, family);
+      // Update the item in the store's array
+      const index = families.value.findIndex(f => f.id === id);
+      if (index !== -1) {
+        families.value[index] = { ...families.value[index], ...family, updatedAt: new Date().toISOString() };
       }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to update family';
+    } catch (err: any) {
+      error.value = err.message || 'Failed to update family';
+      console.error(err);
+      throw err;
     } finally {
       loading.value = false;
     }
@@ -94,27 +77,25 @@ export const useFamiliesStore = defineStore('families', () => {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { generateFamiliesMock } = await import('../data/mock/families.mock');
-        let familiesMock = generateFamiliesMock();
-        await new Promise(resolve => setTimeout(resolve, 500));
-        familiesMock = familiesMock.filter(f => f.id !== id);
-        items.value = items.value.filter(f => f.id !== id);
-        total.value--;
-      }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to delete family';
+      await familyService.removeFamily(id);
+      families.value = families.value.filter(f => f.id !== id);
+      total.value--;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to delete family';
+      console.error(err);
+      throw err;
     } finally {
       loading.value = false;
     }
   }
 
   return {
-    items,
+    families,
     loading,
-    total,
     error,
+    total,
     fetchAll,
+    fetchOne,
     add,
     update,
     remove,
