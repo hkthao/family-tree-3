@@ -34,6 +34,15 @@
       </v-window-item>
     </v-window>
 
+    <v-alert
+      v-if="(selectedTab === 'timeline' || selectedTab === 'calendar') && !currentFilters.familyId && !loading"
+      type="info"
+      class="mt-4"
+      variant="tonal"
+    >
+      {{ t('event.messages.selectFamily') }}
+    </v-alert>
+
     <v-dialog v-model="viewDialog" max-width="800px">
       <EventForm
         v-if="selectedEventForView"
@@ -96,6 +105,13 @@ const viewDialog = ref(false);
 const selectedEventForView = ref<Event | null>(null);
 
 const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
+  if ((selectedTab.value === 'timeline' || selectedTab.value === 'calendar') && !currentFilters.value.familyId) {
+    events.value = [];
+    totalEvents.value = 0;
+    loading.value = false;
+    return;
+  }
+
   loading.value = true;
   const { events: fetchedEvents, total } = await getEvents(
     currentFilters.value,

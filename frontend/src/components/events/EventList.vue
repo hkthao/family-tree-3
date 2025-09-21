@@ -24,6 +24,13 @@
       {{ formatDate(item.startDate) }}
     </template>
 
+    <!-- Event Name column -->
+    <template #item.name="{ item }">
+      <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+        {{ item.name }}
+      </a>
+    </template>
+
     <!-- Related Members column -->
     <template #item.relatedMembers="{ item }">
       <v-chip-group>

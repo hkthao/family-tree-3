@@ -7,7 +7,25 @@ const generateMockFamilies = (count: number): Family[] => {
   const families: Family[] = [];
   const visibilityOptions = ['Private', 'Public'];
 
-  for (let i = 0; i < count; i++) {
+  // Fixed families for testing events
+  families.push({
+    id: 1,
+    name: 'Smith Family',
+    description: faker.lorem.sentence(),
+    address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
+    avatarUrl: faker.image.avatar(),
+    visibility: 'Public',
+  });
+  families.push({
+    id: 2,
+    name: 'Johnson Family',
+    description: faker.lorem.sentence(),
+    address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
+    avatarUrl: faker.image.avatar(),
+    visibility: 'Private',
+  });
+
+  for (let i = 2; i < count; i++) {
     families.push({
       id: i + 1,
       name: faker.person.lastName() + ' Family',
