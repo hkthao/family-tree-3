@@ -34,12 +34,11 @@
               />
             </v-col>
             <v-col cols="12" md="4">
-              <v-select
+              <GenderSelect
                 v-model="filters.gender"
-                :items="genderOptions"
                 :label="t('member.search.gender')"
                 clearable
-              ></v-select>
+              />
             </v-col>
             <v-col cols="12" md="4">
               <v-text-field
@@ -63,19 +62,11 @@
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
-              <v-autocomplete
+              <FamilyAutocomplete
                 v-model="filters.familyId"
-                :items="props.families"
-                item-title="name"
-                item-value="id"
                 :label="t('member.search.family')"
                 clearable
-                :custom-filter="familyFilter"
-              >
-                <template #item="{ props, item }">
-                  <v-list-item v-bind="props" :subtitle="item.raw.address"></v-list-item>
-                </template>
-              </v-autocomplete>
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -93,14 +84,11 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types/member';
-import type { Family } from '@/types/family';
 import DateInputField from '@/components/common/DateInputField.vue';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import GenderSelect from '@/components/common/GenderSelect.vue';
 
 const emit = defineEmits(['update:filters']);
-
-const props = defineProps<{
-  families: Family[];
-}>();
 
 const { t } = useI18n();
 
@@ -116,28 +104,6 @@ const filters = ref<MemberFilter>({
   occupation: '',
   familyId: undefined,
 });
-
-const familyFilter = (_value: number, query: string, item: VuetifyInternalItem) => {
-  if (!item || !item.raw) return false;
-
-  const rawItem = item.raw;
-
-  const name = rawItem.name ? String(rawItem.name).toLowerCase() : '';
-  const address = rawItem.address ? String(rawItem.address).toLowerCase() : '';
-  const searchText = query ? String(query).toLowerCase() : '';
-
-  return name.includes(searchText) || address.includes(searchText);
-};
-
-interface VuetifyInternalItem {
-  raw: Family;
-}
-
-const genderOptions = [
-  { title: t('member.gender.male'), value: 'Male' },
-  { title: t('member.gender.female'), value: 'Female' },
-  { title: t('member.gender.other'), value: 'Other' },
-];
 
 watch(filters.value, () => {
   // Debounce or apply immediately based on preference

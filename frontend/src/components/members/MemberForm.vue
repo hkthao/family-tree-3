@@ -68,13 +68,12 @@
             <!-- Thông tin cá nhân -->
             <v-row>
               <v-col cols="12" md="4">
-                <v-select
+                <GenderSelect
                   v-model="memberForm.gender"
                   :label="t('member.form.gender')"
-                  :items="genderOptions"
                   :rules="[rules.required]"
-                  :readonly="props.readOnly"
-                ></v-select>
+                  :read-only="props.readOnly"
+                />
               </v-col>
               <v-col cols="12" md="4">
                 <v-text-field
@@ -103,20 +102,12 @@
 
             <v-row>
               <v-col cols="12">
-                <v-autocomplete
+                <FamilyAutocomplete
                   v-model="memberForm.familyId"
-                  :items="props.families"
-                  item-title="name"
-                  item-value="id"
                   :label="t('member.form.familyId')"
                   :rules="[rules.required]"
-                  :readonly="props.readOnly"
-                  :custom-filter="familyFilter"
-                >
-                  <template #item="{ props, item }">
-                    <v-list-item v-bind="props" :subtitle="item.raw.address"></v-list-item>
-                  </template>
-                </v-autocomplete>
+                  :read-only="props.readOnly"
+                />
               </v-col>
             </v-row>
             <v-row>
@@ -203,10 +194,8 @@ import type { Family } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';
-
-interface VuetifyInternalItem {
-  raw: Family;
-}
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import GenderSelect from '@/components/common/GenderSelect.vue';
 
 interface TimelineEvent {
   year: string;
@@ -220,7 +209,6 @@ const props = defineProps<{
   initialMemberData?: Member;
   title: string;
   members: Member[];
-  families: Family[];
 }>();
 
 const emit = defineEmits(['close', 'submit']);
@@ -249,24 +237,6 @@ const timelineEvents = ref([
 
 const fathers = computed(() => props.members.filter(m => m.gender === 'Male'));
 const mothers = computed(() => props.members.filter(m => m.gender === 'Female'));
-
-const familyFilter = (_value: number, query: string, item: VuetifyInternalItem) => {
-  if (!item || !item.raw) return false;
-
-  const rawItem = item.raw;
-
-  const name = rawItem.name ? String(rawItem.name).toLowerCase() : '';
-  const address = rawItem.address ? String(rawItem.address).toLowerCase() : '';
-  const searchText = query ? String(query).toLowerCase() : '';
-
-  return name.includes(searchText) || address.includes(searchText);
-};
-
-const genderOptions = [
-  { title: t('member.gender.male'), value: 'Male' },
-  { title: t('member.gender.female'), value: 'Female' },
-  { title: t('member.gender.other'), value: 'Other' },
-];
 
 const rules = {
   required: (value: string) => !!value || t('validation.required'),
