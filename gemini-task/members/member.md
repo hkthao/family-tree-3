@@ -4,11 +4,11 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 
 ### 1. Thêm thành viên
 - Màn hình riêng `MemberForm.vue` (được dùng chung cho cả thêm mới và chỉnh sửa) để nhập thông tin:
-  - Trường: Họ tên, Ngày sinh, Ngày mất (optional), Giới tính (select), Cha mẹ (autocomplete), Vợ/Chồng (autocomplete), Con cái (autocomplete).
-  - Validation: Họ tên, Ngày sinh, Giới tính là bắt buộc.
+  - Trường: Họ tên, Biệt danh (optional), Ngày sinh, Ngày mất (optional), Giới tính (select), Gia đình/Dòng họ (autocomplete), Cha (autocomplete), Mẹ (autocomplete), Vợ/Chồng (autocomplete).
+  - Validation: Họ tên, Ngày sinh, Giới tính, Gia đình/Dòng họ là bắt buộc. Ngày mất (nếu có) phải sau Ngày sinh.
 - Nút 'Thêm thành viên' trên trang quản lý sẽ điều hướng đến màn hình thêm mới (`/members/add`).
 - Submit → thêm vào store/mock data và điều hướng về trang danh sách.
-- UI: dùng `v-form`, `v-text-field`, `v-select`, `v-autocomplete`, `DateInputField`.
+- UI: dùng `v-form`, `v-text-field`, `GenderSelect`, `FamilyAutocomplete`, `v-autocomplete`, `DateInputField`.
 
 ### 2. Chỉnh sửa thành viên
 - Màn hình riêng `MemberForm.vue` (chế độ chỉnh sửa).
@@ -19,11 +19,12 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 ### 3. Tìm kiếm thành viên (Mở rộng)
 - Màn hình `MemberSearch.vue`.
 - Thanh tìm kiếm nâng cao (Advanced Search):
-  - Các trường filter: Họ tên, Ngày sinh, Ngày mất, Nơi sinh, Nơi mất, Giới tính, Nghề nghiệp, Quan hệ.
+  - Các trường filter: Họ tên, Ngày sinh, Ngày mất, Nơi sinh, Nơi mất, Giới tính, Nghề nghiệp, Gia đình/Dòng họ.
   - Cho phép kết hợp nhiều filter cùng lúc.
+  - Các dropdown (Giới tính, Gia đình/Dòng họ) có chức năng tìm kiếm.
 - Kết quả:
   - Hiển thị dưới dạng bảng (`v-data-table`) + phân trang.
-  - Hoặc highlight trên cây gia phả (mock UI → highlight icon/avatar).
+  - Có cột 'Gia đình/Dòng họ' hiển thị tên gia đình của thành viên.
 - Thêm navigation giữa các kết quả (next/prev).
 
 ### 4. Xem chi tiết thành viên
@@ -31,8 +32,9 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 - Hiển thị thông tin đầy đủ qua 2 tab: "Thông Tin Chung" và "Dòng Thời Gian".
 - **Tab "Thông Tin Chung"**:
   - Ảnh đại diện (có nút upload/change).
-  - Họ tên, ngày sinh, ngày mất.
+  - Họ tên, biệt danh, ngày sinh, ngày mất.
   - Nơi sinh, nơi mất, giới tính, nghề nghiệp.
+  - Gia đình/Dòng họ, Cha, Mẹ, Vợ/Chồng.
   - Tiểu sử (textarea rich text).
 - **Tab "Dòng Thời Gian"**:
   - Hiển thị các sự kiện trong cuộc đời của thành viên dưới dạng timeline.
@@ -43,7 +45,7 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 
 ### Kỹ thuật chung
 - Vue 3 + Composition API.
-- Vuetify 3: `v-app`, `v-dialog`, `v-data-table`, `v-form`, `v-text-field`, `v-select`, `v-avatar`, `v-card`, `DateInputField`, `v-tabs`, `v-timeline`, `v-timeline-item`, `v-pagination`.
+- Vuetify 3: `v-app`, `v-dialog`, `v-data-table`, `v-form`, `v-text-field`, `v-autocomplete`, `DateInputField`, `v-avatar`, `v-card`, `GenderSelect`, `FamilyAutocomplete`, `v-tabs`, `v-timeline`, `v-timeline-item`, `v-pagination`.
 - Routing: `/members` (danh sách & tìm kiếm), `/members/add` (thêm mới), `/members/edit/:id` (chỉnh sửa). Xem chi tiết thành viên được hiển thị trong dialog trên trang `/members`.
 - Mock data mẫu trong `src/data/members.ts` (JSON array).
 - Code chia component:
@@ -53,6 +55,8 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
   - `MemberListView.vue`
   - `MemberTimeline.vue`
   - `TimelineEventForm.vue`
+  - `FamilyAutocomplete.vue`
+  - `GenderSelect.vue`
 
 ### Yêu cầu UI/UX
 - Phong cách hiện đại, spacing thoáng, giống Google/IBM.
@@ -60,8 +64,11 @@ Yêu cầu theo backlog: **Thêm thành viên, Chỉnh sửa thành viên, Tìm 
 - Loading state (skeleton loader) khi fetch dữ liệu.
 - Snackbar hiển thị thông báo khi thêm/sửa/xóa thành công/thất bại.
 - Responsive: tối ưu cho cả desktop & mobile.
+- Các dropdown cho Cha, Mẹ, Vợ/Chồng hiển thị thêm biệt danh, năm sinh, năm mất để dễ phân biệt.
+- Dropdown Gia đình/Dòng họ hiển thị thêm địa chỉ để dễ phân biệt.
 
 ### Kết quả mong muốn
 - Source code Vue + Vuetify.
 - Chạy được bằng `npm run dev`.
-- Có mock data và đầy đủ flow thêm, chỉnh sửa, tìm kiếm, xem chi tiết thành viên."
+- Có mock data và đầy đủ flow thêm, chỉnh sửa, tìm kiếm, xem chi tiết thành viên.
+- Đã cấu hình i18n cho các component của Vuetify."
