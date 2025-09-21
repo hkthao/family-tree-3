@@ -1,46 +1,49 @@
-gemini generate ui --framework vue --library vuetify --task "
-Refactor frontend để tách data layer với Pinia, hỗ trợ mock data khi dev và API thật khi deploy.
+Refactor the existing Pinia store in `families.ts` and generate a complete unit test file, using Dependency Injection for services.
 
-### Yêu cầu
-1. **Pinia Stores**
-   - Tạo store cho từng domain chính:
-     - `useFamiliesStore`: quản lý gia đình (families).
-     - `useMembersStore`: quản lý thành viên (members).
-     - `useFamilyEventsStore`: quản lý sự kiện gia đình (family events).
-   - Mỗi store có state:
-     - `items`: danh sách entity
-     - `loading`: boolean
-     - `total`: number
-     - `error`: string | null
-   - Actions chuẩn hóa:
-     - `fetchAll(search, page, perPage)`
-     - `add(entity)`
-     - `update(entity)`
-     - `delete(id)`
-   - **Switch logic**:
-     - Nếu `VITE_USE_MOCK=true` → trả mock data (JSON hoặc object cứng trong `data/mock/`).
-     - Nếu `VITE_USE_MOCK=false` → gọi API thật (axios/fetch).
+Current store:
+- Pinia setup-style store: defineStore('families', ...)
+- Manages Family entities with:
+  - state: families[], loading, error, total
+  - actions: fetchAll, fetchOne, add, update, remove
+- Uses axios for real API requests
+- Previously supported mock data mode via useMockData (should be removed)
 
-2. **Mock Data**
-   - Tạo file trong `data/mock/`:
-     - `families.mock.ts`
-     - `members.mock.ts`
-     - `familyEvents.mock.ts`
-   - Dữ liệu mẫu có đầy đủ field cần thiết để test UI.
+Refactor requirements:
 
-3. **API Integration**
-   - Gọi API thật khi production:
-     - GET `/api/families`, `/api/members`, `/api/family-events`
-     - POST, PUT, DELETE theo chuẩn REST.
-   - Axios config riêng trong `plugins/axios.ts`.
+1. Create a new service file `family.service.ts`:
+   - Move all axios calls (fetchFamilies, fetchFamilyById, addFamily, updateFamily, removeFamily) into this service.
+   - Export an interface `FamilyServiceType` describing these functions.
+   - Service functions should only return data (no state mutation).
+   - There should be **two implementations**:
+       a) RealFamilyService (uses axios)
+       b) MockFamilyService (uses mockFamilies + simulateAsyncOperation)
+   - Production code can inject the real service, test/UI can inject the mock service.
 
-4. **Env Config**
-   - `.env.development`: `VITE_USE_MOCK=true`
-   - `.env.production`: `VITE_USE_MOCK=false`
+2. Update `families.ts` store:
+   - Keep the store name and file unchanged.
+   - Store only manages reactive state: families, loading, error, total.
+   - Store actions receive a **service instance via dependency injection**.
+   - Actions call service functions and update state accordingly.
+   - Preserve setup-style store and TypeScript types.
+   - Remove `useMockData` flag entirely.
 
-### Output mong muốn
-- Source code Vue 3 + Vuetify + Pinia refactor xong.
-- Có thể chạy dev với mock data.
-- Khi build production sẽ tự động kết nối API thật.
-- Code clean, dễ mở rộng, chuẩn enterprise.
-"
+3. TypeScript:
+   - Keep existing Family interface.
+   - Ensure all functions and state are properly typed.
+   - Define service interface (`FamilyServiceType`) for injection.
+
+4. Generate a complete Vitest unit test file `families.spec.ts`:
+   - Mock the service using MockFamilyService or spies.
+   - Test all store actions: fetchAll, fetchOne, add, update, remove.
+   - Include both success and error cases for each action.
+   - Test state updates: families, loading, error, total.
+   - Use setup-style Pinia store.
+   - Keep tests concise, readable, and easy to maintain.
+
+Output:
+- Refactored `families.ts` store file with dependency injection of service.
+- New `family.service.ts` file containing:
+    - FamilyServiceType interface
+    - RealFamilyService (axios implementation)
+    - MockFamilyService (mock data implementation)
+- Vitest test file `families.spec.ts` covering all actions and error handling using dependency injection.

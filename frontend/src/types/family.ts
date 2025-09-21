@@ -5,6 +5,8 @@ export interface Family {
   address?: string;
   avatarUrl?: string;
   visibility: 'Private' | 'Public';
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Props {
