@@ -3,9 +3,9 @@
     <FamilySearch @update:filters="handleFilterUpdate" />
 
     <FamilyList
-      :families="families"
-      :total-families="totalFamilies"
-      :loading="loading"
+      :families="familiesStore.items"
+      :total-families="familiesStore.total"
+      :loading="familiesStore.loading"
       :items-per-page="itemsPerPage"
       :family-member-counts="familyMemberCounts"
       @update:options="handleListOptionsUpdate"
@@ -46,8 +46,8 @@
 import { ref, watch, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useFamilies } from '@/data/families';
-import { useMembers } from '@/data/members';
+import { useFamiliesStore } from '@/stores/families';
+import { useMembersStore } from '@/stores/members';
 import type { Family, FamilyFilter } from '@/types/family';
 import type { Member } from '@/types/member';
 import FamilySearch from '@/components/family/FamilySearch.vue';
@@ -58,14 +58,11 @@ import { useNotificationStore } from '@/stores/notification';
 
 const { t } = useI18n();
 const router = useRouter();
-const { getFamilies, deleteFamily } = useFamilies();
-const { getMembers } = useMembers();
+const familiesStore = useFamiliesStore();
+const membersStore = useMembersStore();
 const notificationStore = useNotificationStore();
 
-const families = ref<Family[]>([]);
 const allMembers = ref<Member[]>([]);
-const totalFamilies = ref(0);
-const loading = ref(true);
 const currentFilters = ref<FamilyFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -86,21 +83,16 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  loading.value = true;
-  const { families: fetchedFamilies, total } = await getFamilies(
+  await familiesStore.fetchAll(
     currentFilters.value.fullName,
-    currentFilters.value.visibility,
     currentPage.value,
     itemsPerPage.value
   );
-  families.value = fetchedFamilies;
-  totalFamilies.value = total;
-  loading.value = false;
 };
 
 const loadAllMembers = async () => {
-  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
-  allMembers.value = fetchedMembers;
+  await membersStore.fetchAll({}, 1, -1); // Fetch all members
+  allMembers.value = membersStore.items;
 };
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
@@ -140,15 +132,13 @@ const confirmDelete = (family: Family) => {
 
 const handleDeleteConfirm = async () => {
   if (familyToDelete.value) {
-    loading.value = true;
     try {
-      await deleteFamily(familyToDelete.value.id);
+      await familiesStore.remove(familyToDelete.value.id);
       notificationStore.showSnackbar(t('family.management.messages.deleteSuccess'), 'success');
-      await loadFamilies();
+      await familiesStore.fetchAll(); // Reload families after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('family.management.messages.deleteError'), 'error');
     }
-    loading.value = false;
   }
   deleteConfirmDialog.value = false;
   familyToDelete.value = undefined;

@@ -13,19 +13,19 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useEvents } from '@/data/events';
+import { useFamilyEventsStore } from '@/stores/familyEvents';
 import { useNotificationStore } from '@/stores/notification';
 import EventForm from '@/components/events/EventForm.vue';
 import type { Event } from '@/types/event';
 
 const { t } = useI18n();
 const router = useRouter();
-const { addEvent } = useEvents();
+const familyEventsStore = useFamilyEventsStore();
 const notificationStore = useNotificationStore();
 
 const handleAddEvent = async (eventData: Omit<Event, 'id'>) => {
   try {
-    await addEvent(eventData);
+    await familyEventsStore.add(eventData);
     notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
     closeForm();
   } catch (error) {

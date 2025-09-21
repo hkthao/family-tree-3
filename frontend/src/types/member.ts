@@ -1,4 +1,4 @@
-export interface Member {
+export interface Member { // Added comment to force re-transpilation
   id: string;
   fullName: string;
   nickname?: string;

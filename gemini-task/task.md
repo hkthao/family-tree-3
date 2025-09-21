@@ -1,117 +1,46 @@
-<template>
-  <div>
-    <v-sheet class="d-flex" tile>
-      <v-btn
-        class="ma-2"
-        variant="text"
-        icon
-        @click="$refs.calendar.prev()"
-      >
-        <v-icon>mdi-chevron-left</v-icon>
-      </v-btn>
-      <v-select
-        v-model="type"
-        :items="types"
-        class="ma-2"
-        density="comfortable"
-        label="type"
-        variant="outlined"
-        hide-details
-      ></v-select>
-      <v-select
-        v-model="mode"
-        :items="modes"
-        class="ma-2"
-        density="comfortable"
-        label="event-overlap-mode"
-        variant="outlined"
-        hide-details
-      ></v-select>
-      <v-select
-        v-model="weekday"
-        :items="weekdays"
-        class="ma-2"
-        density="comfortable"
-        label="weekdays"
-        variant="outlined"
-        hide-details
-      ></v-select>
-      <v-spacer></v-spacer>
-      <v-btn
-        class="ma-2"
-        variant="text"
-        icon
-        @click="calendar.next()"
-      >
-        <v-icon>mdi-chevron-right</v-icon>
-      </v-btn>
-    </v-sheet>
-    <v-sheet height="600">
-      <v-calendar
-        ref="calendar"
-        v-model="value"
-        :event-color="getEventColor"
-        :event-overlap-mode="mode"
-        :event-overlap-threshold="30"
-        :events="events"
-        :type="type"
-        :weekdays="weekday"
-        @change="getEvents"
-      ></v-calendar>
-    </v-sheet>
-  </div>
-</template>
-<script setup>
-  import { ref } from 'vue'
+gemini generate ui --framework vue --library vuetify --task "
+Refactor frontend để tách data layer với Pinia, hỗ trợ mock data khi dev và API thật khi deploy.
 
-  const type = ref('month')
-  const types = ['month', 'week', 'day', '4day']
-  const mode = ref('stack')
-  const modes = ['stack', 'column']
-  const weekday = ref([0, 1, 2, 3, 4, 5, 6])
-  const weekdays = [
-    { title: 'Sun - Sat', value: [0, 1, 2, 3, 4, 5, 6] },
-    { title: 'Mon - Sun', value: [1, 2, 3, 4, 5, 6, 0] },
-    { title: 'Mon - Fri', value: [1, 2, 3, 4, 5] },
-    { title: 'Mon, Wed, Fri', value: [1, 3, 5] },
-  ]
-  const value = ref('')
-  const events = ref([])
-  const colors = ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey-darken-1']
-  const names = ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party']
+### Yêu cầu
+1. **Pinia Stores**
+   - Tạo store cho từng domain chính:
+     - `useFamiliesStore`: quản lý gia đình (families).
+     - `useMembersStore`: quản lý thành viên (members).
+     - `useFamilyEventsStore`: quản lý sự kiện gia đình (family events).
+   - Mỗi store có state:
+     - `items`: danh sách entity
+     - `loading`: boolean
+     - `total`: number
+     - `error`: string | null
+   - Actions chuẩn hóa:
+     - `fetchAll(search, page, perPage)`
+     - `add(entity)`
+     - `update(entity)`
+     - `delete(id)`
+   - **Switch logic**:
+     - Nếu `VITE_USE_MOCK=true` → trả mock data (JSON hoặc object cứng trong `data/mock/`).
+     - Nếu `VITE_USE_MOCK=false` → gọi API thật (axios/fetch).
 
-  function rnd (a, b) {
-    return Math.floor((b - a + 1) * Math.random()) + a
-  }
+2. **Mock Data**
+   - Tạo file trong `data/mock/`:
+     - `families.mock.ts`
+     - `members.mock.ts`
+     - `familyEvents.mock.ts`
+   - Dữ liệu mẫu có đầy đủ field cần thiết để test UI.
 
-  function getEvents ({ start, end }) {
-    const evts = []
+3. **API Integration**
+   - Gọi API thật khi production:
+     - GET `/api/families`, `/api/members`, `/api/family-events`
+     - POST, PUT, DELETE theo chuẩn REST.
+   - Axios config riêng trong `plugins/axios.ts`.
 
-    const min = new Date(`${start.date}T00:00:00`)
-    const max = new Date(`${end.date}T23:59:59`)
-    const days = (max.getTime() - min.getTime()) / 86400000
-    const eventCount = rnd(days, days + 20)
+4. **Env Config**
+   - `.env.development`: `VITE_USE_MOCK=true`
+   - `.env.production`: `VITE_USE_MOCK=false`
 
-    for (let i = 0; i < eventCount; i++) {
-      const allDay = rnd(0, 3) === 0
-      const firstTimestamp = rnd(min.getTime(), max.getTime())
-      const first = new Date(firstTimestamp - (firstTimestamp % 900000))
-      const secondTimestamp = rnd(2, allDay ? 288 : 8) * 900000
-      const second = new Date(first.getTime() + secondTimestamp)
-
-      evts.push({
-        name: names[rnd(0, names.length - 1)],
-        start: first,
-        end: second,
-        color: colors[rnd(0, colors.length - 1)],
-        timed: !allDay,
-      })
-    }
-
-    events.value = evts
-  }
-
-  function getEventColor (event) {
-    return event.color
-  }
-</script>
+### Output mong muốn
+- Source code Vue 3 + Vuetify + Pinia refactor xong.
+- Có thể chạy dev với mock data.
+- Khi build production sẽ tự động kết nối API thật.
+- Code clean, dễ mở rộng, chuẩn enterprise.
+"
