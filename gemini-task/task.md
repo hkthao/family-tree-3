@@ -1,6 +1,6 @@
 update family-event.md các cấu trúc giống file member.md theo mô tả dưới đây, tham khảo thêm backlog.md 
 Danh sách sự kiện (Event List View)
-Hiển thị dạng bảng (v-data-table) hoặc timeline (dòng thời gian).
+Hiển thị dạng bảng (v-data-table), dòng thời gian (Timeline View) hoặc chế độ xem theo lịch (Calendar View).
 Các cột chính:
 🗓️ Ngày
 📌 Tên sự kiện (đám cưới, sinh nhật, lễ giỗ, di cư, v.v.)
@@ -8,7 +8,7 @@ Các cột chính:
 🏠 Địa điểm
 ✏️ Actions (Xem, Sửa, Xóa).
 Có phân trang, tìm kiếm, lọc theo loại sự kiện.
-👉 Trường hợp nhiều sự kiện, người dùng có thể switch view: Table <-> Timeline.
+👉 Trường hợp nhiều sự kiện, người dùng có thể switch view: Table <-> Timeline <-> Calendar.
 
 
 Form thêm/chỉnh sửa sự kiện
