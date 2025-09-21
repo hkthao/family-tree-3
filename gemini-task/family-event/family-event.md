@@ -2,15 +2,8 @@ gemini generate ui --framework vue --library vuetify --task "
 Thiết kế và triển khai các màn hình/quy trình quản lý sự kiện trong phần mềm FamilyTree.  
 
 ### 1. Danh sách sự kiện (Event List View)
-- Hiển thị dạng bảng (`v-data-table-server`) hoặc timeline (dòng thời gian) hoặc chế độ xem theo lịch (Calendar View).
-- Các cột chính:
-  - 🗓️ Ngày
-  - 📌 Tên sự kiện (đám cưới, sinh nhật, lễ giỗ, di cư, v.v.)
-  - 👥 Thành viên liên quan (có avatar + tên, multi-chip)
-  - 🏠 Địa điểm
-  - ✏️ Actions (Xem, Sửa, Xóa).
-- Có phân trang, tìm kiếm, lọc theo loại sự kiện.
-- 👉 Trường hợp nhiều sự kiện, người dùng có thể switch view: Table <-> Timeline <-> Calendar.
+- Hiển thị dạng bảng (`v-data-table-server`), dòng thời gian (Timeline View) hoặc chế độ xem theo lịch (Calendar View).
+- Người dùng có thể chuyển đổi giữa các chế độ xem này (Table <-> Timeline <-> Calendar) thông qua các tab.
 
 ### 2. Form thêm/chỉnh sửa sự kiện
 - Biểu mẫu cần đơn giản nhưng đầy đủ:
@@ -37,6 +30,7 @@ Thiết kế và triển khai các màn hình/quy trình quản lý sự kiện 
   - `EventForm.vue`
   - `EventSearch.vue`
   - `EventTimeline.vue`
+  - `EventCalendar.vue`
 
 ### Yêu cầu UI/UX
 - Phong cách hiện đại, spacing thoáng, giống Google/IBM.
