@@ -40,11 +40,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+interface TimelineEvent {
+  year: string;
+  title: string;
+  description: string;
+  color: string;
+}
+
 const props = defineProps<{
-  initialEventData?: any; // Define a more specific type later
+  initialEventData?: TimelineEvent; // Define a more specific type later
   readOnly?: boolean;
   title: string;
 }>();
@@ -55,7 +62,7 @@ const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);
 
-const eventForm = ref(props.initialEventData || {
+const eventForm = ref<TimelineEvent>(props.initialEventData || {
   year: '',
   title: '',
   description: '',

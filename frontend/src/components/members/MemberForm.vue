@@ -204,6 +204,10 @@ import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';
 
+interface VuetifyInternalItem {
+  raw: Family;
+}
+
 interface TimelineEvent {
   year: string;
   title: string;
@@ -246,7 +250,7 @@ const timelineEvents = ref([
 const fathers = computed(() => props.members.filter(m => m.gender === 'Male'));
 const mothers = computed(() => props.members.filter(m => m.gender === 'Female'));
 
-const familyFilter = (value, query, item) => {
+const familyFilter = (_value: number, query: string, item: VuetifyInternalItem) => {
   if (!item || !item.raw) return false;
 
   const rawItem = item.raw;
@@ -268,7 +272,7 @@ const rules = {
   required: (value: string) => !!value || t('validation.required'),
 };
 
-const dateOfDeathRule = (value) => {
+const dateOfDeathRule = (value: Date | null) => {
   if (!value) return true; // Optional field
   if (!memberForm.value.dateOfBirth) return true; // Cannot compare if dateOfBirth is not set
 
