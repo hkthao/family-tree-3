@@ -4,19 +4,48 @@
       {{ t('event.calendar.title') }}
     </v-card-title>
     <v-card-text>
+      <v-toolbar flat>
+        <v-btn class="ma-2" @click="setToday">{{ t('common.today') }}</v-btn>
+        <v-btn icon class="ma-2" @click="prev">
+          <v-icon>mdi-chevron-left</v-icon>
+        </v-btn>
+        <v-toolbar-title class="text-center">{{ calendarTitle }}</v-toolbar-title>
+        <v-btn icon class="ma-2" @click="next">
+          <v-icon>mdi-chevron-right</v-icon>
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-select
+          v-model="calendarType"
+          :items="calendarTypes"
+          class="ma-2"
+          density="comfortable"
+          :label="t('event.calendar.viewMode')"
+          variant="outlined"
+          hide-details
+        ></v-select>
+      </v-toolbar>
       <v-sheet>
         <v-calendar
-          ref="calendar"
+          ref="calendarRef"
           v-model="selectedDate"
           :events="formattedEvents"
           :event-color="getEventColor"
-          type="month"
+          :type="calendarType"
           event-overlap-mode="stack"
           @click:event="showEventDetails"
           :locale="locale.value"
           :key="locale.value"
           :weekdays="weekdays"
-        ></v-calendar>
+        >
+          <template #event="{ event }">
+            <div class="v-event-summary">
+              {{ event.title }}
+            </div>
+            <div class="v-event-description">
+              {{ event.eventObject.description }}
+            </div>
+          </template>
+        </v-calendar>
       </v-sheet>
     </v-card-text>
   </v-card>
@@ -36,6 +65,34 @@ const { t, locale } = useI18n();
 const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
 const selectedDate = ref(new Date());
+const calendarRef = ref<any>(null);
+const calendarType = ref('month');
+const calendarTypes = ['month', 'week', 'day', '4day'];
+
+const calendarTitle = computed(() => {
+  if (calendarRef.value) {
+    return calendarRef.value.title;
+  }
+  return '';
+});
+
+const prev = () => {
+  if (calendarRef.value) {
+    calendarRef.value.prev();
+  }
+};
+
+const next = () => {
+  if (calendarRef.value) {
+    calendarRef.value.next();
+  }
+};
+
+const setToday = () => {
+  if (calendarRef.value) {
+    calendarRef.value.value = new Date();
+  }
+};
 
 const formattedEvents = computed(() => {
   const events = props.events
@@ -55,11 +112,11 @@ const getEventColor = (event: any) => {
   return event.color;
 };
 
-const showEventDetails = (event: any) => {
-  console.log('Raw event object clicked:', event);
-  // Emit an event or use a global store to show event details in a dialog
-  console.log('Event clicked:', event.eventObject);
-  // For now, just logging. In a real app, you'd open a dialog with event.event.eventObject
+const emit = defineEmits(['viewEvent']);
+
+const showEventDetails = (nativeEvent: PointerEvent, { event }: { event: any }) => {
+  console.log('Raw event object clicked:', { nativeEvent, event });
+  emit('viewEvent', event.eventObject);
 };
 </script>
 
