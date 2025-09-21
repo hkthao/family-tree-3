@@ -29,6 +29,7 @@
       <v-window-item value="calendar">
         <EventCalendar
           :events="events"
+          @viewEvent="openViewDialog"
         />
       </v-window-item>
     </v-window>

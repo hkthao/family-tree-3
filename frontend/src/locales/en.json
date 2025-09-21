@@ -215,6 +215,8 @@
   "timeline.form.addTitle": "Add Timeline Event",
   "timeline.addEvent": "Add New Event",
   "common.close": "Close",
+  "common.today": "Today",
+  "event.calendar.viewMode": "View Mode",
   "relationship": {
     "form": {
       "editTitle": "Edit Relationship",

@@ -205,6 +205,7 @@
   "event.view.table": "Chế độ xem Bảng",
   "event.view.timeline": "Chế độ xem Dòng thời gian",
   "event.view.calendar": "Chế độ xem Lịch",
+  "event.calendar.title": "Lịch Sự kiện",
   "event.timeline.title": "Dòng thời gian Sự kiện",
   "member.timeline.title": "Dòng Thời Gian",
   "timeline.form.year": "Năm",
@@ -215,6 +216,8 @@
   "timeline.form.addTitle": "Thêm Sự kiện Dòng Thời Gian",
   "timeline.addEvent": "Thêm Sự kiện Mới",
   "common.close": "Đóng",
+  "common.today": "Hôm nay",
+  "event.calendar.viewMode": "Chế độ xem",
   "relationship": {
     "form": {
       "editTitle": "Chỉnh sửa mối quan hệ",
