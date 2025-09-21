@@ -2,7 +2,7 @@
   <v-card flat>
     <v-card-title class="d-flex align-center">
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="openAddEventForm" :disabled="readOnly">
+      <v-btn v-if="!readOnly" color="primary" @click="openAddEventForm" :disabled="readOnly">
         {{ t('timeline.addEvent') }}
       </v-btn>
     </v-card-title>
