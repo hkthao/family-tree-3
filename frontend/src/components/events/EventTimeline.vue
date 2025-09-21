@@ -6,7 +6,7 @@
     <v-card-text>
       <v-timeline density="compact" side="end" truncate-line="both">
         <v-timeline-item
-          v-for="(event, i) in events"
+          v-for="event in events"
           :key="event.id"
           :dot-color="event.color || 'primary'"
           size="small"
@@ -41,7 +41,7 @@ import { formatDate } from '@/utils/dateUtils';
 import { useMembers } from '@/data/members';
 import type { Member } from '@/types/member';
 
-const props = defineProps<{
+const { events } = defineProps<{
   events: Event[];
 }>();
 

@@ -219,6 +219,10 @@
   "common.close": "Đóng",
   "common.today": "Hôm nay",
   "event.calendar.viewMode": "Chế độ xem",
+  "event.calendar.viewMode.month": "Tháng",
+  "event.calendar.viewMode.week": "Tuần",
+  "event.calendar.viewMode.day": "Ngày",
+  "event.calendar.viewMode.4day": "4 Ngày",
   "relationship": {
     "form": {
       "editTitle": "Chỉnh sửa mối quan hệ",
