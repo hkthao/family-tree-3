@@ -4,7 +4,44 @@ import { faker } from '@faker-js/faker';
 import { mockMembers } from './members';
 
 const generateMockEvents = (count: number): Event[] => {
-  const events: Event[] = [];
+  const events: Event[] = [
+    {
+      id: faker.string.uuid(),
+      name: 'Family Reunion',
+      type: 'Other',
+      familyId: '1',
+      startDate: new Date('2025-09-15T10:00:00'),
+      endDate: new Date('2025-09-15T18:00:00'),
+      location: "Grandma's House",
+      description: 'Annual family gathering.',
+      color: '#FF5722',
+      relatedMembers: [],
+    },
+    {
+      id: faker.string.uuid(),
+      name: "Uncle Bob's Birthday",
+      type: 'Birth',
+      familyId: '1',
+      startDate: new Date('2025-09-20T00:00:00'),
+      endDate: new Date('2025-09-20T23:59:59'),
+      location: 'Local Restaurant',
+      description: "Celebrating Uncle Bob's birthday.",
+      color: '#4CAF50',
+      relatedMembers: [],
+    },
+    {
+      id: faker.string.uuid(),
+      name: 'Wedding Anniversary',
+      type: 'Marriage',
+      familyId: '2',
+      startDate: new Date('2025-09-05T00:00:00'),
+      endDate: new Date('2025-09-05T23:59:59'),
+      location: 'City Hall',
+      description: "John and Jane's wedding anniversary.",
+      color: '#2196F3',
+      relatedMembers: [],
+    },
+  ];
   const eventTypes = ['Birth', 'Marriage', 'Death', 'Migration', 'Other'];
   const colors = ['#FFC107', '#4CAF50', '#2196F3', '#FF5722', '#9C27B0', '#673AB7', '#3F51B5', '#03A9F4', '#00BCD4', '#009688'];
 

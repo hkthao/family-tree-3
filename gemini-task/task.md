@@ -1,25 +1,117 @@
-update family-event.md các cấu trúc giống file member.md theo mô tả dưới đây, tham khảo thêm backlog.md 
-Danh sách sự kiện (Event List View)
-Hiển thị dạng bảng (v-data-table), dòng thời gian (Timeline View) hoặc chế độ xem theo lịch (Calendar View).
-Các cột chính:
-🗓️ Ngày
-📌 Tên sự kiện (đám cưới, sinh nhật, lễ giỗ, di cư, v.v.)
-👥 Thành viên liên quan (có avatar + tên, multi-chip)
-🏠 Địa điểm
-✏️ Actions (Xem, Sửa, Xóa).
-Có phân trang, tìm kiếm, lọc theo loại sự kiện.
-👉 Trường hợp nhiều sự kiện, người dùng có thể switch view: Table <-> Timeline <-> Calendar.
+<template>
+  <div>
+    <v-sheet class="d-flex" tile>
+      <v-btn
+        class="ma-2"
+        variant="text"
+        icon
+        @click="$refs.calendar.prev()"
+      >
+        <v-icon>mdi-chevron-left</v-icon>
+      </v-btn>
+      <v-select
+        v-model="type"
+        :items="types"
+        class="ma-2"
+        density="comfortable"
+        label="type"
+        variant="outlined"
+        hide-details
+      ></v-select>
+      <v-select
+        v-model="mode"
+        :items="modes"
+        class="ma-2"
+        density="comfortable"
+        label="event-overlap-mode"
+        variant="outlined"
+        hide-details
+      ></v-select>
+      <v-select
+        v-model="weekday"
+        :items="weekdays"
+        class="ma-2"
+        density="comfortable"
+        label="weekdays"
+        variant="outlined"
+        hide-details
+      ></v-select>
+      <v-spacer></v-spacer>
+      <v-btn
+        class="ma-2"
+        variant="text"
+        icon
+        @click="calendar.next()"
+      >
+        <v-icon>mdi-chevron-right</v-icon>
+      </v-btn>
+    </v-sheet>
+    <v-sheet height="600">
+      <v-calendar
+        ref="calendar"
+        v-model="value"
+        :event-color="getEventColor"
+        :event-overlap-mode="mode"
+        :event-overlap-threshold="30"
+        :events="events"
+        :type="type"
+        :weekdays="weekday"
+        @change="getEvents"
+      ></v-calendar>
+    </v-sheet>
+  </div>
+</template>
+<script setup>
+  import { ref } from 'vue'
 
+  const type = ref('month')
+  const types = ['month', 'week', 'day', '4day']
+  const mode = ref('stack')
+  const modes = ['stack', 'column']
+  const weekday = ref([0, 1, 2, 3, 4, 5, 6])
+  const weekdays = [
+    { title: 'Sun - Sat', value: [0, 1, 2, 3, 4, 5, 6] },
+    { title: 'Mon - Sun', value: [1, 2, 3, 4, 5, 6, 0] },
+    { title: 'Mon - Fri', value: [1, 2, 3, 4, 5] },
+    { title: 'Mon, Wed, Fri', value: [1, 3, 5] },
+  ]
+  const value = ref('')
+  const events = ref([])
+  const colors = ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey-darken-1']
+  const names = ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party']
 
-Form thêm/chỉnh sửa sự kiện
-Biểu mẫu cần đơn giản nhưng đầy đủ:
-Tên sự kiện (Text field).
-Loại sự kiện (Select: Sinh, Cưới, Mất, Di cư, Khác...).
-Ngày bắt đầu – Ngày kết thúc (date picker, có option chỉ chọn năm nếu không rõ).
-Địa điểm (text hoặc Google Maps autocomplete).
-Mô tả/ghi chú (textarea).
-Thành viên liên quan (multi-select từ danh sách thành viên → hiển thị chip avatar).
-📌 UX chuyên nghiệp:
-Các field bắt buộc có dấu *.
-Group form theo 2 cột trên desktop, 1 cột trên mobile.
-Dùng stepper nếu sự kiện phức tạp (ví dụ nhập nhiều người liên quan + upload ảnh).
+  function rnd (a, b) {
+    return Math.floor((b - a + 1) * Math.random()) + a
+  }
+
+  function getEvents ({ start, end }) {
+    const evts = []
+
+    const min = new Date(`${start.date}T00:00:00`)
+    const max = new Date(`${end.date}T23:59:59`)
+    const days = (max.getTime() - min.getTime()) / 86400000
+    const eventCount = rnd(days, days + 20)
+
+    for (let i = 0; i < eventCount; i++) {
+      const allDay = rnd(0, 3) === 0
+      const firstTimestamp = rnd(min.getTime(), max.getTime())
+      const first = new Date(firstTimestamp - (firstTimestamp % 900000))
+      const secondTimestamp = rnd(2, allDay ? 288 : 8) * 900000
+      const second = new Date(first.getTime() + secondTimestamp)
+
+      evts.push({
+        name: names[rnd(0, names.length - 1)],
+        start: first,
+        end: second,
+        color: colors[rnd(0, colors.length - 1)],
+        timed: !allDay,
+      })
+    }
+
+    events.value = evts
+  }
+
+  function getEventColor (event) {
+    return event.color
+  }
+</script>
