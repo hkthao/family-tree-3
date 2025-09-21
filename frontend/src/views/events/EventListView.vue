@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEvents } from '@/data/events';
@@ -94,18 +94,25 @@ const eventToDelete = ref<Event | undefined>(undefined);
 const viewDialog = ref(false);
 const selectedEventForView = ref<Event | null>(null);
 
-const loadEvents = async () => {
+const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
   loading.value = true;
   const { events: fetchedEvents, total } = await getEvents(
     currentFilters.value,
     currentPage.value,
-    itemsPerPage.value
+    fetchItemsPerPage
   );
   events.value = fetchedEvents;
   totalEvents.value = total;
   loading.value = false;
 };
 
+watch(selectedTab, (newTab) => {
+  if (newTab === 'calendar') {
+    loadEvents(-1); // Fetch all events for calendar view
+  } else {
+    loadEvents(); // Use current itemsPerPage for other views
+  }
+});
 const openViewDialog = (event: Event) => {
   selectedEventForView.value = event;
   viewDialog.value = true;

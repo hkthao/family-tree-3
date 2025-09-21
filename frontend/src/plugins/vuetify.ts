@@ -4,8 +4,10 @@
 import 'vuetify/styles';
 import '@mdi/font/css/materialdesignicons.css';
 
-// Composables
 import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as labsComponents from 'vuetify/labs/components';
+import { Ripple } from 'vuetify/directives';
 
 // i18n
 import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n';
@@ -14,6 +16,13 @@ import i18n from './i18n';
 
 // https://vuetifyjs.com/en/introduction/why-vuetify/#feature-guides
 export default createVuetify({
+  components: {
+    ...components,
+    ...labsComponents,
+  },
+  directives: {
+    Ripple,
+  },
   locale: {
     adapter: createVueI18nAdapter({ i18n, useI18n }),
   },
