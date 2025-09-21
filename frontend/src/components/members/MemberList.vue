@@ -78,7 +78,7 @@ import type { Member } from '@/types/member';
 import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 
-defineProps({
+const props = defineProps({
   members: {
     type: Array as () => Member[],
     required: true,
@@ -96,6 +96,11 @@ defineProps({
     required: true,
   },
 });
+
+console.log('MemberList received members:', props.members);
+console.log('MemberList received totalMembers:', props.totalMembers);
+console.log('MemberList received loading:', props.loading);
+console.log('MemberList received families:', props.families);
 
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
 
@@ -115,7 +120,7 @@ const headers = computed<DataTableHeader[]>(() => [
 import { formatDate } from '@/utils/dateUtils';
 
 const getFamilyName = (familyId: string, families: Family[]) => {
-  const family = families.find(f => f.id === parseInt(familyId));
+  const family = families.find(f => f.id === familyId);
   return family ? family.name : 'N/A';
 };
 

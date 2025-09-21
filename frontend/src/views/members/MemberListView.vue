@@ -1,12 +1,12 @@
 <template>
   <v-container fluid>
-    <MemberSearch @update:filters="handleFilterUpdate" :families="familiesStore.items" />
+    <MemberSearch @update:filters="handleFilterUpdate" :families="families" />
 
     <MemberList
-      :members="membersStore.items"
-      :total-members="membersStore.total"
-      :loading="membersStore.loading"
-      :families="familiesStore.items"
+      :members="members"
+      :total-members="totalMembers"
+      :loading="loading"
+      :families="families"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
       @edit="navigateToEditMember"
@@ -20,8 +20,8 @@
               :initial-member-data="selectedMemberForView"
               :read-only="true"
               :title="t('member.form.title')"
-              :members="membersStore.items"
-              :families="familiesStore.items"
+              :members="members"
+              :families="families"
               @close="closeViewDialog"
             />    </v-dialog>
 
@@ -44,7 +44,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMembersStore } from '@/stores/members';
 import { useFamiliesStore } from '@/stores/families';
@@ -57,9 +58,11 @@ import MemberForm from '@/components/members/MemberForm.vue';
 
 const { t } = useI18n();
 const membersStore = useMembersStore();
+const { items: members, total: totalMembers, loading } = storeToRefs(membersStore);
 const familiesStore = useFamiliesStore();
+const { items: families } = storeToRefs(familiesStore);
 
-const allMembers = ref<Member[]>([]);
+const allMembers = computed(() => membersStore.items);
 const currentFilters = ref<MemberFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -88,7 +91,6 @@ const loadMembers = async () => {
 
 const loadAllMembers = async () => {
   await membersStore.fetchAll({}, 1, -1); // Fetch all members
-  allMembers.value = membersStore.items;
 };
 
 const loadFamilies = async () => {
@@ -149,9 +151,12 @@ const handleDeleteCancel = () => {
   memberToDelete.value = undefined;
 };
 
-onMounted(() => {
-  loadMembers();
-  loadAllMembers();
-  loadFamilies();
+onMounted(async () => {
+  await loadMembers();
+  await loadAllMembers();
+  await loadFamilies();
+});
+
+watch(members, (newItems) => {
 });
 </script>

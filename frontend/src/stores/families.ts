@@ -18,7 +18,8 @@ export const useFamiliesStore = defineStore('families', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        const { familiesMock } = await import('../data/mock/families.mock');
+        const { generateFamiliesMock } = await import('../data/mock/families.mock');
+        const familiesMock = generateFamiliesMock();
         // Simulate API call delay
         await new Promise(resolve => setTimeout(resolve, 500));
         items.value = familiesMock.slice((page - 1) * perPage, page * perPage);
@@ -40,7 +41,8 @@ export const useFamiliesStore = defineStore('families', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        const { familiesMock } = await import('../data/mock/families.mock');
+        const { generateFamiliesMock } = await import('../data/mock/families.mock');
+        const familiesMock = generateFamiliesMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         const newFamily = { ...entity, id: (familiesMock.length + 1).toString() };
         familiesMock.push(newFamily);
@@ -63,7 +65,8 @@ export const useFamiliesStore = defineStore('families', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        const { familiesMock } = await import('../data/mock/families.mock');
+        const { generateFamiliesMock } = await import('../data/mock/families.mock');
+        const familiesMock = generateFamiliesMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         const index = familiesMock.findIndex(f => f.id === entity.id);
         if (index !== -1) {
@@ -92,13 +95,10 @@ export const useFamiliesStore = defineStore('families', () => {
     error.value = null;
     try {
       if (VITE_USE_MOCK) {
-        let { familiesMock } = await import('../data/mock/families.mock');
+        const { generateFamiliesMock } = await import('../data/mock/families.mock');
+        let familiesMock = generateFamiliesMock();
         await new Promise(resolve => setTimeout(resolve, 500));
         familiesMock = familiesMock.filter(f => f.id !== id);
-        items.value = items.value.filter(f => f.id !== id);
-        total.value--;
-      } else {
-        await apiClient.delete(`/api/families/${id}`);
         items.value = items.value.filter(f => f.id !== id);
         total.value--;
       }
