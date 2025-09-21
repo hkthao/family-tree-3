@@ -2,7 +2,7 @@ export interface Event {
   id: string;
   name: string;
   type: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
-  familyId: string;
+  familyId: number;
   startDate?: Date | null;
   endDate?: Date | null;
   location?: string;
@@ -14,7 +14,7 @@ export interface Event {
 export interface EventFilter {
   name?: string;
   type?: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
-  familyId?: string;
+  familyId?: number;
   startDate?: Date | null;
   endDate?: Date | null;
   location?: string;
