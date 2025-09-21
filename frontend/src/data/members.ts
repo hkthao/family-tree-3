@@ -1,10 +1,13 @@
 import { ref, computed } from 'vue';
 import type { Member, MemberFilter } from '@/types/member';
 import { faker } from '@faker-js/faker';
+import { useFamilies } from './families';
+import type { Family } from '@/types/family';
 
-const generateMockMembers = (count: number): Member[] => {
+const generateMockMembers = (count: number, families: Family[]): Member[] => {
   const members: Member[] = [];
   const genders = ['Male', 'Female', 'Other'];
+  const familyIds = families.map(f => f.id);
 
   for (let i = 0; i < count; i++) {
     const gender = faker.helpers.arrayElement(genders) as Member['gender'];
@@ -26,7 +29,7 @@ const generateMockMembers = (count: number): Member[] => {
       occupation: faker.person.jobTitle(),
       biography: faker.lorem.paragraph(),
       avatarUrl: faker.image.avatar(),
-      familyId: faker.helpers.arrayElement(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']),
+      familyId: faker.helpers.arrayElement(familyIds),
       fatherId: faker.datatype.boolean() ? faker.string.uuid() : undefined,
       motherId: faker.datatype.boolean() ? faker.string.uuid() : undefined,
       spouseId: faker.datatype.boolean() ? faker.string.uuid() : undefined,
@@ -35,7 +38,12 @@ const generateMockMembers = (count: number): Member[] => {
   return members;
 };
 
-export const mockMembers = ref<Member[]>(generateMockMembers(50));
+export const mockMembers = ref<Member[]>([]);
+
+const { getFamilies } = useFamilies();
+getFamilies('', 'All', 1, -1).then(data => {
+  mockMembers.value = generateMockMembers(50, data.families);
+});
 
 export function useMembers() {
   const members = ref<Member[]>(mockMembers.value);
@@ -69,7 +77,7 @@ export function useMembers() {
   };
 
   const addMember = (newMember: Omit<Member, 'id'>) => {
-    const memberWithId = { ...newMember, id: Date.now().toString() };
+    const memberWithId = { ...newMember, id: faker.string.uuid() };
     members.value.push(memberWithId);
     return memberWithId;
   };

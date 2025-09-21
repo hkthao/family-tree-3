@@ -115,13 +115,22 @@ const formattedEvents = computed(() => {
   return events;
 });
 
-const getEventColor = (event: any) => {
+interface FormattedEvent {
+  title: string;
+  start: Date;
+  end: Date;
+  color: string;
+  timed: boolean;
+  eventObject: Event;
+}
+
+const getEventColor = (event: FormattedEvent) => {
   return event.color;
 };
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (_: any, eventSlotScope: any) => {
+const showEventDetails = (_: Event, eventSlotScope: { event: { eventObject: Event } }) => {
   emit('viewEvent', eventSlotScope);
 };
 </script>

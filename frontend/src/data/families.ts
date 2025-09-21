@@ -9,7 +9,7 @@ const generateMockFamilies = (count: number): Family[] => {
 
   // Fixed families for testing events
   families.push({
-    id: 1,
+    id: faker.string.uuid(),
     name: 'Smith Family',
     description: faker.lorem.sentence(),
     address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
@@ -17,7 +17,7 @@ const generateMockFamilies = (count: number): Family[] => {
     visibility: 'Public',
   });
   families.push({
-    id: 2,
+    id: faker.string.uuid(),
     name: 'Johnson Family',
     description: faker.lorem.sentence(),
     address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
@@ -27,7 +27,7 @@ const generateMockFamilies = (count: number): Family[] => {
 
   for (let i = 2; i < count; i++) {
     families.push({
-      id: i + 1,
+      id: faker.string.uuid(),
       name: faker.person.lastName() + ' Family',
       description: faker.lorem.sentence(),
       address: faker.location.streetAddress() + ', ' + faker.location.city() + ', ' + faker.location.country(),
@@ -72,7 +72,7 @@ export const useFamilies = () => {
     });
   };
 
-  const getFamilyById = (id: number) => {
+  const getFamilyById = (id: string) => {
     return new Promise<Family | undefined>((resolve) => {
       setTimeout(() => {
         resolve(families.value.find((f) => f.id === id));
@@ -83,7 +83,7 @@ export const useFamilies = () => {
   const addFamily = (newFamily: Omit<Family, 'id'>) => {
     return new Promise<Family>((resolve) => {
       setTimeout(() => {
-        const id = Math.max(...families.value.map((f) => f.id)) + 1;
+        const id = faker.string.uuid();
         const familyWithId = { ...newFamily, id };
         families.value.push(familyWithId);
         resolve(familyWithId);
@@ -105,7 +105,7 @@ export const useFamilies = () => {
     });
   };
 
-  const deleteFamily = (id: number) => {
+  const deleteFamily = (id: string) => {
     return new Promise<boolean>((resolve) => {
       setTimeout(() => {
         const initialLength = families.value.length;

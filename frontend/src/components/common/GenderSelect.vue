@@ -16,6 +16,7 @@ import { useI18n } from 'vue-i18n';
 const { modelValue, label, rules, readOnly, clearable } = defineProps<{
   modelValue: string | null | undefined;
   label?: string;
+  // eslint-disable-next-line no-unused-vars
   rules?: Array<(value: unknown) => boolean | string>;
   readOnly?: boolean;
   clearable?: boolean;
