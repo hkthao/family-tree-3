@@ -1,81 +1,72 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import type { FamilyEvent, FamilyEventServiceType } from '../services/familyEvent.service';
 
-import type { FamilyEvent } from '../types/event';
-
-export const useFamilyEventsStore = defineStore('familyEvents', () => {
-  const items = ref<FamilyEvent[]>([]);
+export const useFamilyEventsStore = defineStore('familyEvents', (familyEventService: FamilyEventServiceType) => {
+  const familyEvents = ref<FamilyEvent[]>([]);
   const loading = ref(false);
-  const total = ref(0);
   const error = ref<string | null>(null);
+  const total = ref(0);
 
-  const VITE_USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
-
-  async function fetchAll(search?: string, page: number = 1, perPage: number = 10) {
+  async function fetchAll(search = '', familyId?: string, page = 1, perPage = 10) {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { familyEventsMock } = await import('../data/mock/familyEvents.mock');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        items.value = familyEventsMock.slice((page - 1) * perPage, page * perPage);
-        total.value = familyEventsMock.length;
-      } else {
-        // TODO: Implement real API call using axios
-        console.warn('Real API call for family events not yet implemented.');
-        items.value = [];
-        total.value = 0;
-      }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to fetch family events';
+      const response = await familyEventService.fetchFamilyEvents(search, familyId, page, perPage);
+      familyEvents.value = response.items;
+      total.value = response.total;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch family events';
+      console.error(err);
     } finally {
       loading.value = false;
     }
   }
 
-  async function add(entity: FamilyEvent) {
+  async function fetchOne(id: string): Promise<FamilyEvent | undefined> {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { familyEventsMock } = await import('../data/mock/familyEvents.mock');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const newEvent = { ...entity, id: (familyEventsMock.length + 1).toString() };
-        familyEventsMock.push(newEvent);
-        items.value.push(newEvent);
-        total.value++;
-      } else {
-        // TODO: Implement real API call
-        console.warn('Real API call for adding family event not yet implemented.');
-      }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to add family event';
+      const event = await familyEventService.fetchFamilyEventById(id);
+      return event;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to fetch family event';
+      console.error(err);
+      return undefined;
     } finally {
       loading.value = false;
     }
   }
 
-  async function update(entity: FamilyEvent) {
+  async function add(event: Omit<FamilyEvent, 'id' | 'createdAt' | 'updatedAt'>) {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        const { familyEventsMock } = await import('../data/mock/familyEvents.mock');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const index = familyEventsMock.findIndex(e => e.id === entity.id);
-        if (index !== -1) {
-          familyEventsMock[index] = entity;
-          const itemIndex = items.value.findIndex(e => e.id === entity.id);
-          if (itemIndex !== -1) {
-            items.value[itemIndex] = entity;
-          }
-        }
-      } else {
-        // TODO: Implement real API call
-        console.warn('Real API call for updating family event not yet implemented.');
+      const newEvent = await familyEventService.addFamilyEvent(event);
+      familyEvents.value.push(newEvent);
+      total.value++;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to add family event';
+      console.error(err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function update(id: string, event: Partial<Omit<FamilyEvent, 'id' | 'createdAt' | 'updatedAt'>>) {
+    loading.value = true;
+    error.value = null;
+    try {
+      await familyEventService.updateFamilyEvent(id, event);
+      const index = familyEvents.value.findIndex(e => e.id === id);
+      if (index !== -1) {
+        familyEvents.value[index] = { ...familyEvents.value[index], ...event, updatedAt: new Date().toISOString() };
       }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to update family event';
+    } catch (err: any) {
+      error.value = err.message || 'Failed to update family event';
+      console.error(err);
+      throw err;
     } finally {
       loading.value = false;
     }
@@ -85,26 +76,25 @@ export const useFamilyEventsStore = defineStore('familyEvents', () => {
     loading.value = true;
     error.value = null;
     try {
-      if (VITE_USE_MOCK) {
-        let { familyEventsMock } = await import('../data/mock/familyEvents.mock');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        familyEventsMock = familyEventsMock.filter(e => e.id !== id);
-        items.value = items.value.filter(e => e.id !== id);
-        total.value--;
-      }
-    } catch (e: any) {
-      error.value = e.message || 'Failed to delete family event';
+      await familyEventService.removeFamilyEvent(id);
+      familyEvents.value = familyEvents.value.filter(e => e.id !== id);
+      total.value--;
+    } catch (err: any) {
+      error.value = err.message || 'Failed to delete family event';
+      console.error(err);
+      throw err;
     } finally {
       loading.value = false;
     }
   }
 
   return {
-    items,
+    familyEvents,
     loading,
-    total,
     error,
+    total,
     fetchAll,
+    fetchOne,
     add,
     update,
     remove,
