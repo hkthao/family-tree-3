@@ -218,6 +218,10 @@
   "common.close": "Close",
   "common.today": "Today",
   "event.calendar.viewMode": "View Mode",
+  "event.calendar.viewMode.month": "Month",
+  "event.calendar.viewMode.week": "Week",
+  "event.calendar.viewMode.day": "Day",
+  "event.calendar.viewMode.4day": "4 Day",
   "relationship": {
     "form": {
       "editTitle": "Edit Relationship",

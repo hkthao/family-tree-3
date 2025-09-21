@@ -1,7 +1,7 @@
 <template>
   <v-select
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="updateModelValue('update:modelValue', $event)"
     :items="genderOptions"
     :label="label"
     :rules="rules"
@@ -13,15 +13,15 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-const props = defineProps<{
-  modelValue: any;
+const { modelValue, label, rules, readOnly, clearable } = defineProps<{
+  modelValue: string | null | undefined;
   label?: string;
-  rules?: Array<any>;
+  rules?: Array<(value: unknown) => boolean | string>;
   readOnly?: boolean;
   clearable?: boolean;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const updateModelValue = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
 

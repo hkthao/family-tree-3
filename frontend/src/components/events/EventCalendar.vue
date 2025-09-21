@@ -65,9 +65,14 @@ const { t, locale } = useI18n();
 const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
 const selectedDate = ref(new Date());
-const calendarRef = ref<any>(null);
+const calendarRef = ref<VCalendar | null>(null);
 const calendarType = ref('month');
-const calendarTypes = ['month', 'week', 'day', '4day'];
+const calendarTypes = computed(() => [
+  { title: t('event.calendar.viewMode.month'), value: 'month' },
+  { title: t('event.calendar.viewMode.week'), value: 'week' },
+  { title: t('event.calendar.viewMode.day'), value: 'day' },
+  { title: t('event.calendar.viewMode.4day'), value: '4day' },
+]);
 
 const calendarTitle = computed(() => {
   if (calendarRef.value) {
@@ -108,13 +113,13 @@ const formattedEvents = computed(() => {
   return events;
 });
 
-const getEventColor = (event: any) => {
+const getEventColor = (event: Event) => {
   return event.color;
 };
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (nativeEvent: PointerEvent, { event }: { event: any }) => {
+const showEventDetails = (nativeEvent: PointerEvent, { event }: { event: Event }) => {
   console.log('Raw event object clicked:', { nativeEvent, event });
   emit('viewEvent', event.eventObject);
 };

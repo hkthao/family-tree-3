@@ -1,7 +1,7 @@
 <template>
   <v-autocomplete
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="updateModelValue('update:modelValue', $event)"
     :items="families"
     item-title="name"
     item-value="id"
@@ -11,8 +11,8 @@
     :clearable="clearable"
     :custom-filter="familyFilter"
   >
-    <template #item="{ props, item }">
-      <v-list-item v-bind="props" :subtitle="item.raw.address"></v-list-item>
+    <template #item="{ item }">
+      <v-list-item :subtitle="item.raw.address"></v-list-item>
     </template>
   </v-autocomplete>
 </template>
@@ -21,17 +21,16 @@
 import { ref, onMounted } from 'vue';
 import { useFamilies } from '@/data/families';
 import type { Family } from '@/types/family';
-import type { InternalItem } from 'vuetify/lib/components/VAutocomplete';
 
-const props = defineProps<{
-  modelValue: any; // The selected family ID
+const { modelValue, label, rules, readOnly, clearable } = defineProps<{
+  modelValue: string | number | null | undefined; // The selected family ID
   label?: string;
-  rules?: Array<any>;
+  rules?: Array<(value: unknown) => boolean | string>;
   readOnly?: boolean;
   clearable?: boolean;
 }>();
 
-const emit = defineEmits(['update:modelValue']);
+const updateModelValue = defineEmits(['update:modelValue']);
 
 const { getFamilies } = useFamilies();
 const families = ref<Family[]>([]);
