@@ -5,7 +5,7 @@ export { default as MemberListView } from './members/MemberListView.vue';
 export { default as FamilyTreeView } from './family/FamilyTreeView.vue';
 
 export { default as ProfileView } from './profile/ProfileView.vue';
-export { default as RelationshipsView } from './relationships/RelationshipsView.vue';
+
 export { default as TimelineView } from './timeline/TimelineView.vue';
 export { default as UserManagementView } from './admin/UserManagementView.vue';
 export { default as RoleManagementView } from './admin/RoleManagementView.vue';

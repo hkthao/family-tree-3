@@ -19,6 +19,8 @@
         :initial-member-data="selectedMemberForView"
         :read-only="true"
         :title="t('member.form.title')"
+        :members="allMembers"
+        :families="families"
         @close="closeViewDialog"
       />
     </v-dialog>
@@ -45,7 +47,9 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMembers } from '@/data/members';
+import { useFamilies } from '@/data/families';
 import type { Member, MemberFilter } from '@/types/member';
+import type { Family } from '@/types/family';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
@@ -53,8 +57,11 @@ import MemberForm from '@/components/members/MemberForm.vue';
 
 const { t } = useI18n();
 const { getMembers, deleteMember } = useMembers();
+const { getFamilies } = useFamilies();
 
 const members = ref<Member[]>([]);
+const allMembers = ref<Member[]>([]);
+const families = ref<Family[]>([]);
 const totalMembers = ref(0);
 const loading = ref(true);
 const currentFilters = ref<MemberFilter>({});
@@ -85,6 +92,16 @@ const loadMembers = async () => {
   members.value = fetchedMembers;
   totalMembers.value = total;
   loading.value = false;
+};
+
+const loadAllMembers = async () => {
+  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
+  allMembers.value = fetchedMembers;
+};
+
+const loadFamilies = async () => {
+  const { families: fetchedFamilies } = await getFamilies('', 'All', 1, -1);
+  families.value = fetchedFamilies;
 };
 
 const openViewDialog = (member: Member) => {
@@ -145,5 +162,7 @@ const handleDeleteCancel = () => {
 
 onMounted(() => {
   loadMembers();
+  loadAllMembers();
+  loadFamilies();
 });
 </script>
