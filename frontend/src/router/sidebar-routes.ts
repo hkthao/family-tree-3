@@ -1,5 +1,4 @@
-import type { RouteRecordRaw } from 'vue-router';
-import { DashboardView, FamilyTreeView, TimelineView, ProfileView, UserManagementView, RoleManagementView, FamilyListView } from '@/views';
+import { DashboardView, FamilyTreeView, ProfileView, UserManagementView, RoleManagementView, FamilyListView, EventListView } from '@/views';
 
 export const sidebarRoutes: RouteRecordRaw[] = [
   {
@@ -15,9 +14,9 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
   },
   {
-    path: '/family/timeline',
-    name: 'FamilyTimeline',
-    component: TimelineView,
+    path: '/events',
+    name: 'Events',
+    component: EventListView,
     meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
   },
   {

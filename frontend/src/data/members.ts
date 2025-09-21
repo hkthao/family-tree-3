@@ -1,74 +1,41 @@
 import { ref, computed } from 'vue';
 import type { Member, MemberFilter } from '@/types/member';
+import { faker } from '@faker-js/faker';
 
-const mockMembers = ref<Member[]>([
-  {
-    id: '1',
-    fullName: 'Nguyen Van A',
-    nickname: 'A',
-    dateOfBirth: '1950-01-15',
-    dateOfDeath: '2020-03-10',
-    gender: 'Male',
-    placeOfBirth: 'Hanoi',
-    occupation: 'Engineer',
-    familyId: '1',
-  },
-  {
-    id: '2',
-    fullName: 'Tran Thi B',
-    nickname: 'B',
-    dateOfBirth: '1955-05-20',
-    gender: 'Female',
-    placeOfBirth: 'Hanoi',
-    occupation: 'Teacher',
-    familyId: '1',
-  },
-  {
-    id: '3',
-    fullName: 'Nguyen Van C',
-    nickname: 'C',
-    dateOfBirth: '1980-11-01',
-    gender: 'Male',
-    placeOfBirth: 'Hanoi',
-    occupation: 'Doctor',
-    familyId: '1',
-    fatherId: '1',
-    motherId: '2',
-  },
-  {
-    id: '4',
-    fullName: 'Nguyen Thi D',
-    nickname: 'D',
-    dateOfBirth: '1982-07-22',
-    gender: 'Female',
-    placeOfBirth: 'Hanoi',
-    occupation: 'Artist',
-    familyId: '1',
-    fatherId: '1',
-    motherId: '2',
-  },
-  {
-    id: '5',
-    fullName: 'Le Thi E',
-    nickname: 'E',
-    dateOfBirth: '1985-02-10',
-    gender: 'Female',
-    placeOfBirth: 'Ho Chi Minh City',
-    occupation: 'Designer',
-    familyId: '2',
-  },
-  {
-    id: '6',
-    fullName: 'Nguyen Van F',
-    nickname: 'F',
-    dateOfBirth: '2010-09-05',
-    gender: 'Male',
-    placeOfBirth: 'Hanoi',
-    familyId: '1',
-    fatherId: '3',
-    motherId: '5',
-  },
-]);
+const generateMockMembers = (count: number): Member[] => {
+  const members: Member[] = [];
+  const genders = ['Male', 'Female', 'Other'];
+
+  for (let i = 0; i < count; i++) {
+    const gender = faker.helpers.arrayElement(genders) as Member['gender'];
+    const firstName = faker.person.firstName(gender.toLowerCase() as 'male' | 'female');
+    const lastName = faker.person.lastName();
+    const fullName = `${firstName} ${lastName}`;
+    const dateOfBirth = faker.date.past({ years: 80 });
+    const dateOfDeath = faker.datatype.boolean() ? faker.date.soon({ refDate: dateOfBirth }) : undefined;
+
+    members.push({
+      id: faker.string.uuid(),
+      fullName: fullName,
+      nickname: faker.person.firstName(),
+      dateOfBirth: dateOfBirth,
+      dateOfDeath: dateOfDeath,
+      gender: gender,
+      placeOfBirth: faker.location.city() + ', ' + faker.location.country(),
+      placeOfDeath: faker.datatype.boolean() ? faker.location.city() + ', ' + faker.location.country() : undefined,
+      occupation: faker.person.jobTitle(),
+      biography: faker.lorem.paragraph(),
+      avatarUrl: faker.image.avatar(),
+      familyId: faker.helpers.arrayElement(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']),
+      fatherId: faker.datatype.boolean() ? faker.string.uuid() : undefined,
+      motherId: faker.datatype.boolean() ? faker.string.uuid() : undefined,
+      spouseId: faker.datatype.boolean() ? faker.string.uuid() : undefined,
+    });
+  }
+  return members;
+};
+
+export const mockMembers = ref<Member[]>(generateMockMembers(50));
 
 export function useMembers() {
   const members = ref<Member[]>(mockMembers.value);

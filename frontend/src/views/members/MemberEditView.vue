@@ -5,7 +5,6 @@
         v-if="member"
         :title="t('member.form.editTitle')"
         :initial-member-data="member"
-        :members="members"
         @close="closeForm"
         @submit="handleUpdateMember"
       />
@@ -25,18 +24,14 @@ import type { Member } from '@/types/member';
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
-const { getMemberById, updateMember, getMembers } = useMembers();
+const { getMemberById, updateMember } = useMembers();
 const notificationStore = useNotificationStore();
 
 const member = ref<Member | undefined>(undefined);
-const members = ref<Member[]>([]);
 
-onMounted(async () => {
+onMounted(() => {
   const memberId = route.params.id as string;
   member.value = getMemberById(memberId);
-
-  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
-  members.value = fetchedMembers;
 });
 
 const handleUpdateMember = async (memberData: Member) => {

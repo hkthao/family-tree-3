@@ -55,9 +55,9 @@ const menu: MenuSection[] = [
         roles: ['Admin', 'FamilyManager'],
       },
       {
-        titleKey: 'family.timeline',
-        icon: 'mdi-timeline-text',
-        to: '/family/timeline',
+        titleKey: 'event.list.title',
+        icon: 'mdi-calendar-month',
+        to: '/events',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
       {

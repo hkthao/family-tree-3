@@ -114,44 +114,32 @@
               <v-col cols="12" md="4">
                 <v-autocomplete
                   v-model="memberForm.fatherId"
-                  :items="fathers"
+                  :label="t('member.form.father')"
+                  :items="[]"
                   item-title="fullName"
                   item-value="id"
-                  :label="t('member.form.father')"
                   :readonly="props.readOnly"
-                >
-                  <template #item="{ props, item }">
-                    <v-list-item v-bind="props" :subtitle="item.raw.nickname + ' (' + (item.raw.dateOfBirth ? new Date(item.raw.dateOfBirth).getFullYear() : '') + ' - ' + (item.raw.dateOfDeath ? new Date(item.raw.dateOfDeath).getFullYear() : '') + ')'"></v-list-item>
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
                   v-model="memberForm.motherId"
-                  :items="mothers"
+                  :label="t('member.form.mother')"
+                  :items="[]"
                   item-title="fullName"
                   item-value="id"
-                  :label="t('member.form.mother')"
                   :readonly="props.readOnly"
-                >
-                  <template #item="{ props, item }">
-                    <v-list-item v-bind="props" :subtitle="item.raw.nickname + ' (' + (item.raw.dateOfBirth ? new Date(item.raw.dateOfBirth).getFullYear() : '') + ' - ' + (item.raw.dateOfDeath ? new Date(item.raw.dateOfDeath).getFullYear() : '') + ')'"></v-list-item>
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
                   v-model="memberForm.spouseId"
-                  :items="props.members"
+                  :label="t('member.form.spouse')"
+                  :items="[]"
                   item-title="fullName"
                   item-value="id"
-                  :label="t('member.form.spouse')"
                   :readonly="props.readOnly"
-                >
-                  <template #item="{ props, item }">
-                    <v-list-item v-bind="props" :subtitle="item.raw.nickname + ' (' + (item.raw.dateOfBirth ? new Date(item.raw.dateOfBirth).getFullYear() : '') + ' - ' + (item.raw.dateOfDeath ? new Date(item.raw.dateOfDeath).getFullYear() : '') + ')'"></v-list-item>
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
             </v-row>
 
@@ -208,7 +196,6 @@ const props = defineProps<{
   readOnly?: boolean;
   initialMemberData?: Member;
   title: string;
-  members: Member[];
 }>();
 
 const emit = defineEmits(['close', 'submit']);
@@ -224,19 +211,6 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData || {
   gender: 'Male',
   familyId: '', // Add familyId
 });
-
-const timelineEvents = ref([
-  { year: '1990', title: 'Born', description: 'Born in Hanoi, Vietnam.', color: 'blue' },
-  { year: '2010', title: 'Graduated High School', description: 'Graduated from High School for Gifted Students.', color: 'green' },
-  { year: '2014', title: 'Graduated University', description: 'Graduated from University of Engineering and Technology.', color: 'purple' },
-  { year: '2018', title: 'Married', description: 'Married to [Spouse Name].', color: 'red' },
-  { year: '2020', title: 'First Child Born', description: 'First child, [Child Name], was born.', color: 'orange' },
-  { year: '2022', title: 'Started New Job', description: 'Started a new job as a Software Engineer.', color: 'indigo' },
-  { year: '2023', title: 'Moved to a New City', description: 'Moved to Da Nang, Vietnam.', color: 'teal' },
-]);
-
-const fathers = computed(() => props.members.filter(m => m.gender === 'Male'));
-const mothers = computed(() => props.members.filter(m => m.gender === 'Female'));
 
 const rules = {
   required: (value: string) => !!value || t('validation.required'),

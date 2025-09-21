@@ -61,6 +61,21 @@ const router = createRouter({
           name: 'EditFamily',
           component: () => import('@/views/family/FamilyEditView.vue'),
         },
+        {
+          path: 'events',
+          name: 'Events',
+          component: () => import('@/views/events/EventListView.vue'),
+        },
+        {
+          path: 'events/add',
+          name: 'AddEvent',
+          component: () => import('@/views/events/EventAddView.vue'),
+        },
+        {
+          path: 'events/edit/:id',
+          name: 'EditEvent',
+          component: () => import('@/views/events/EventEditView.vue'),
+        },
         ...sidebarRoutes,
       ],
     },
