@@ -11,9 +11,9 @@
     <v-window v-model="selectedTab">
       <v-window-item value="table">
         <EventList
-          :events="events"
-          :total-events="totalEvents"
-          :loading="loading"
+          :events="familyEventsStore.items"
+          :total-events="familyEventsStore.total"
+          :loading="familyEventsStore.loading"
           @update:options="handleListOptionsUpdate"
           @view="openViewDialog"
           @edit="navigateToEditEvent"
@@ -23,12 +23,12 @@
       </v-window-item>
       <v-window-item value="timeline">
         <EventTimeline
-          :events="events"
+          :events="familyEventsStore.items"
         />
       </v-window-item>
       <v-window-item value="calendar">
         <EventCalendar
-          :events="events"
+          :events="familyEventsStore.items"
           @viewEvent="openViewDialog"
         />
       </v-window-item>
@@ -75,7 +75,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useEvents } from '@/data/events';
+import { useFamilyEventsStore } from '@/stores/familyEvents';
 import type { Event, EventFilter } from '@/types/event';
 import EventSearch from '@/components/events/EventSearch.vue';
 import EventList from '@/components/events/EventList.vue';
@@ -86,12 +86,10 @@ import EventCalendar from '@/components/events/EventCalendar.vue';
 import { useNotificationStore } from '@/stores/notification';
 
 const { t } = useI18n();
-const { getEvents, deleteEvent } = useEvents();
+const familyEventsStore = useFamilyEventsStore();
 const notificationStore = useNotificationStore();
 
-const events = ref<Event[]>([]);
-const totalEvents = ref(0);
-const loading = ref(true);
+
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -106,21 +104,18 @@ const selectedEventForView = ref<Event | null>(null);
 
 const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
   if ((selectedTab.value === 'timeline' || selectedTab.value === 'calendar') && !currentFilters.value.familyId) {
-    events.value = [];
-    totalEvents.value = 0;
-    loading.value = false;
+    familyEventsStore.items = [];
+    familyEventsStore.total = 0;
+    familyEventsStore.loading = false;
     return;
   }
 
-  loading.value = true;
-  const { events: fetchedEvents, total } = await getEvents(
-    currentFilters.value,
+  familyEventsStore.loading = true;
+  await familyEventsStore.fetchAll(
+    currentFilters.value.title,
     currentPage.value,
     fetchItemsPerPage
   );
-  events.value = fetchedEvents;
-  totalEvents.value = total;
-  loading.value = false;
 };
 
 watch(selectedTab, (newTab) => {
@@ -167,18 +162,15 @@ const confirmDelete = (event: Event) => {
 
 const handleDeleteConfirm = async () => {
   if (eventToDelete.value) {
-    loading.value = true;
     try {
-      await deleteEvent(eventToDelete.value.id);
+      await familyEventsStore.remove(eventToDelete.value.id);
       notificationStore.showSnackbar(t('event.messages.deleteSuccess'), 'success');
-      await loadEvents();
-    } catch (error) {
-      notificationStore.showSnackbar(t('event.messages.deleteError'), 'error');
+      await familyEventsStore.fetchAll(); // Reload events after deletion
+    } finally { // Added finally block for consistent dialog closing
+      deleteConfirmDialog.value = false;
+      eventToDelete.value = undefined;
     }
-    loading.value = false;
   }
-  deleteConfirmDialog.value = false;
-  eventToDelete.value = undefined;
 };
 
 const handleDeleteCancel = () => {

@@ -1,12 +1,12 @@
 <template>
   <v-container fluid>
-    <MemberSearch @update:filters="handleFilterUpdate" :families="families" />
+    <MemberSearch @update:filters="handleFilterUpdate" :families="familiesStore.items" />
 
     <MemberList
-      :members="members"
-      :total-members="totalMembers"
-      :loading="loading"
-      :families="families"
+      :members="membersStore.items"
+      :total-members="membersStore.total"
+      :loading="membersStore.loading"
+      :families="familiesStore.items"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
       @edit="navigateToEditMember"
@@ -15,16 +15,15 @@
     />
 
     <v-dialog v-model="viewDialog" max-width="800px">
-      <MemberForm
-        v-if="selectedMemberForView"
-        :initial-member-data="selectedMemberForView"
-        :read-only="true"
-        :title="t('member.form.title')"
-        :members="allMembers"
-        :families="families"
-        @close="closeViewDialog"
-      />
-    </v-dialog>
+            <MemberForm
+              v-if="selectedMemberForView"
+              :initial-member-data="selectedMemberForView"
+              :read-only="true"
+              :title="t('member.form.title')"
+              :members="membersStore.items"
+              :families="familiesStore.items"
+              @close="closeViewDialog"
+            />    </v-dialog>
 
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
@@ -47,8 +46,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMembers } from '@/data/members';
-import { useFamilies } from '@/data/families';
+import { useMembersStore } from '@/stores/members';
+import { useFamiliesStore } from '@/stores/families';
 import type { Member, MemberFilter } from '@/types/member';
 import type { Family } from '@/types/family';
 import MemberSearch from '@/components/members/MemberSearch.vue';
@@ -57,14 +56,10 @@ import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import MemberForm from '@/components/members/MemberForm.vue';
 
 const { t } = useI18n();
-const { getMembers, deleteMember } = useMembers();
-const { getFamilies } = useFamilies();
+const membersStore = useMembersStore();
+const familiesStore = useFamiliesStore();
 
-const members = ref<Member[]>([]);
 const allMembers = ref<Member[]>([]);
-const families = ref<Family[]>([]);
-const totalMembers = ref(0);
-const loading = ref(true);
 const currentFilters = ref<MemberFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -84,25 +79,20 @@ const notificationStore = useNotificationStore();
 
 // Function Declarations (moved to top)
 const loadMembers = async () => {
-  loading.value = true;
-  const { members: fetchedMembers, total } = await getMembers(
-    currentFilters.value,
+  await membersStore.fetchAll(
+    currentFilters.value.fullName,
     currentPage.value,
     itemsPerPage.value
   );
-  members.value = fetchedMembers;
-  totalMembers.value = total;
-  loading.value = false;
 };
 
 const loadAllMembers = async () => {
-  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
-  allMembers.value = fetchedMembers;
+  await membersStore.fetchAll({}, 1, -1); // Fetch all members
+  allMembers.value = membersStore.items;
 };
 
 const loadFamilies = async () => {
-  const { families: fetchedFamilies } = await getFamilies('', 'All', 1, -1);
-  families.value = fetchedFamilies;
+  await familiesStore.fetchAll('', 1, -1);
 };
 
 const openViewDialog = (member: Member) => {
@@ -142,15 +132,13 @@ const confirmDelete = (member: Member) => {
 
 const handleDeleteConfirm = async () => {
   if (memberToDelete.value) {
-    loading.value = true;
     try {
-      await deleteMember(memberToDelete.value.id);
+      await membersStore.remove(memberToDelete.value.id);
       notificationStore.showSnackbar(t('member.messages.deleteSuccess'), 'success');
-      await loadMembers();
+      await membersStore.fetchAll(); // Reload members after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
     }
-    loading.value = false;
   }
   deleteConfirmDialog.value = false;
   memberToDelete.value = undefined;

@@ -16,7 +16,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
-import { useMembers } from '@/data/members';
+import { useMembersStore } from '@/stores/members';
 import { useNotificationStore } from '@/stores/notification';
 import MemberForm from '@/components/members/MemberForm.vue';
 import type { Member } from '@/types/member';
@@ -24,19 +24,19 @@ import type { Member } from '@/types/member';
 const { t } = useI18n();
 const router = useRouter();
 const route = useRoute();
-const { getMemberById, updateMember } = useMembers();
+const membersStore = useMembersStore();
 const notificationStore = useNotificationStore();
 
 const member = ref<Member | undefined>(undefined);
 
 onMounted(() => {
   const memberId = route.params.id as string;
-  member.value = getMemberById(memberId);
+  member.value = membersStore.items.find(m => m.id === memberId);
 });
 
 const handleUpdateMember = async (memberData: Member) => {
   try {
-    await updateMember(memberData);
+    await membersStore.update(memberData);
     notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
     closeForm();
   } catch (error) {
