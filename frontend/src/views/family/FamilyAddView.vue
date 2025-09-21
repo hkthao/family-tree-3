@@ -16,7 +16,7 @@ import { useRouter } from 'vue-router';
 import { useFamiliesStore } from '@/stores/families';
 import { useNotificationStore } from '@/stores/notification';
 import FamilyForm from '@/components/family/FamilyForm.vue';
-import type { Family } from '@/types/family';
+import type { Family } from '@/services/family.service';
 
 const { t } = useI18n();
 const router = useRouter();

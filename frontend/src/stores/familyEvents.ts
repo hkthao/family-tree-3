@@ -15,8 +15,8 @@ export const useFamilyEventsStore = defineStore('familyEvents', (familyEventServ
       const response = await familyEventService.fetchFamilyEvents(search, familyId, page, perPage);
       familyEvents.value = response.items;
       total.value = response.total;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch family events';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch family events';
       console.error(err);
     } finally {
       loading.value = false;
@@ -29,8 +29,8 @@ export const useFamilyEventsStore = defineStore('familyEvents', (familyEventServ
     try {
       const event = await familyEventService.fetchFamilyEventById(id);
       return event;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch family event';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch family event';
       console.error(err);
       return undefined;
     } finally {
@@ -45,10 +45,10 @@ export const useFamilyEventsStore = defineStore('familyEvents', (familyEventServ
       const newEvent = await familyEventService.addFamilyEvent(event);
       familyEvents.value.push(newEvent);
       total.value++;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to add family event';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to add family event';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }
@@ -63,10 +63,10 @@ export const useFamilyEventsStore = defineStore('familyEvents', (familyEventServ
       if (index !== -1) {
         familyEvents.value[index] = { ...familyEvents.value[index], ...event, updatedAt: new Date().toISOString() };
       }
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update family event';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to update family event';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }
@@ -79,10 +79,10 @@ export const useFamilyEventsStore = defineStore('familyEvents', (familyEventServ
       await familyEventService.removeFamilyEvent(id);
       familyEvents.value = familyEvents.value.filter(e => e.id !== id);
       total.value--;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to delete family event';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to delete family event';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }

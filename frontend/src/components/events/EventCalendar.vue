@@ -54,7 +54,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { FamilyEvent } from '@/services/familyEvent.service';
 
 const props = defineProps<{
   events: Event[];

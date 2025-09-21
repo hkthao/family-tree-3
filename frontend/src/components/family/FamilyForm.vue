@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/types/family';
+import type { Family } from '@/services/family.service';
 
 const props = defineProps<{
   initialFamilyData?: Family;

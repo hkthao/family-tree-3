@@ -80,10 +80,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/types/family';
+import type { Family } from '@/services/family.service';
 import type { DataTableHeader } from 'vuetify';
 
-const props = defineProps<{
+const { families, totalFamilies, loading, itemsPerPage, familyMemberCounts } = defineProps<{
   families: Family[];
   totalFamilies: number;
   loading: boolean;

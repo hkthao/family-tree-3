@@ -74,8 +74,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Member } from '@/types/member';
-import type { Family } from '@/types/family';
+import type { Member } from '@/services/member.service';
+import type { Family } from '@/services/family.service';
 import type { DataTableHeader } from 'vuetify';
 
 const props = defineProps({

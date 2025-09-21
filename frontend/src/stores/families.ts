@@ -15,8 +15,8 @@ export const useFamiliesStore = defineStore('families', (familyService: FamilySe
       const response = await familyService.fetchFamilies(search, page, perPage);
       families.value = response.items;
       total.value = response.total;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch families';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch families';
       console.error(err);
     } finally {
       loading.value = false;
@@ -29,8 +29,8 @@ export const useFamiliesStore = defineStore('families', (familyService: FamilySe
     try {
       const family = await familyService.fetchFamilyById(id);
       return family;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to fetch family';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to fetch family';
       console.error(err);
       return undefined;
     } finally {
@@ -45,10 +45,10 @@ export const useFamiliesStore = defineStore('families', (familyService: FamilySe
       const newFamily = await familyService.addFamily(family);
       families.value.push(newFamily);
       total.value++;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to add family';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to add family';
       console.error(err);
-      throw err; // Re-throw to allow component to handle
+      throw err as Error; // Re-throw to allow component to handle
     } finally {
       loading.value = false;
     }
@@ -64,10 +64,10 @@ export const useFamiliesStore = defineStore('families', (familyService: FamilySe
       if (index !== -1) {
         families.value[index] = { ...families.value[index], ...family, updatedAt: new Date().toISOString() };
       }
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update family';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to update family';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }
@@ -80,10 +80,10 @@ export const useFamiliesStore = defineStore('families', (familyService: FamilySe
       await familyService.removeFamily(id);
       families.value = families.value.filter(f => f.id !== id);
       total.value--;
-    } catch (err: any) {
-      error.value = err.message || 'Failed to delete family';
+    } catch (err: unknown) {
+      error.value = (err as Error).message || 'Failed to delete family';
       console.error(err);
-      throw err;
+      throw err as Error;
     } finally {
       loading.value = false;
     }

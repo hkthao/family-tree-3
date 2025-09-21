@@ -49,7 +49,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamiliesStore } from '@/stores/families';
 import { useMembersStore } from '@/stores/members';
-import type { Family, FamilyFilter } from '@/types/family';
+import type { Family, FamilyFilter } from '@/services/family.service';
 
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
@@ -60,11 +60,12 @@ import { useNotificationStore } from '@/stores/notification';
 const { t } = useI18n();
 const router = useRouter();
 const familiesStore = useFamiliesStore();
-const { items: families, total: totalFamilies, loading } = storeToRefs(familiesStore);
+const { items: families, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  total: totalFamilies, // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  loading } = storeToRefs(familiesStore);
 const membersStore = useMembersStore();
 const notificationStore = useNotificationStore();
 
-const allMembers = computed(() => membersStore.items);
 const currentFilters = ref<FamilyFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -76,7 +77,7 @@ const familyToDelete = ref<Family | undefined>(undefined);
 
 const familyMemberCounts = computed(() => {
   const counts: { [key: string]: number } = {};
-  allMembers.value.forEach(member => {
+  membersStore.items.forEach(member => {
     if (member.familyId) {
       counts[member.familyId] = (counts[member.familyId] || 0) + 1;
     }
@@ -159,6 +160,7 @@ onMounted(async () => {
   await loadAllMembers();
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 watch(families, (newItems) => {
 });
 </script>

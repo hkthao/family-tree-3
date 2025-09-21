@@ -1,4 +1,5 @@
 import axios from '../plugins/axios';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { mockFamilyEvents } from '../data/mock/familyEvents.mock';
 import { simulateAsyncOperation } from '../stores/utils';
 
@@ -27,6 +28,7 @@ export interface FamilyEventServiceType {
 
 export class RealFamilyEventService implements FamilyEventServiceType {
   async fetchFamilyEvents(search?: string, familyId?: string, page?: number, perPage?: number): Promise<{ items: FamilyEvent[]; total: number }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.get(`/family-events`, {
       params: { search, familyId, page, perPage },
     });
@@ -34,20 +36,24 @@ export class RealFamilyEventService implements FamilyEventServiceType {
   }
 
   async fetchFamilyEventById(id: string): Promise<FamilyEvent | undefined> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.get(`/family-events/${id}`);
     return response.data;
   }
 
   async addFamilyEvent(event: Omit<FamilyEvent, 'id' | 'createdAt' | 'updatedAt'>): Promise<FamilyEvent> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.post(`/family-events`, event);
     return response.data;
   }
 
   async updateFamilyEvent(id: string, event: Partial<Omit<FamilyEvent, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await axios.put(`/family-events/${id}`, event);
   }
 
   async removeFamilyEvent(id: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await axios.delete(`/family-events/${id}`);
   }
 }

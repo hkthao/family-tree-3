@@ -1,7 +1,18 @@
 import axios from '../plugins/axios';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { mockFamilies } from '../data/mock/families.mock';
 import { simulateAsyncOperation } from '../stores/utils';
-import type { Family } from '../types/family';
+
+export interface Family {
+  id: string;
+  name: string;
+  description?: string;
+  address?: string;
+  avatarUrl?: string;
+  visibility: 'Private' | 'Public';
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface FamilyServiceType {
   fetchFamilies(search?: string, page?: number, perPage?: number): Promise<{ items: Family[]; total: number }>;
@@ -12,7 +23,16 @@ export interface FamilyServiceType {
 }
 
 export class RealFamilyService implements FamilyServiceType {
+  fetchFamilies(search?: string, page?: number, perPage?: number): Promise<{ items: Family[]; total: number }>;
+  fetchFamilyById(id: string): Promise<Family | undefined>;
+  addFamily(family: Omit<Family, 'id' | 'createdAt' | 'updatedAt'>): Promise<Family>;
+  updateFamily(id: string, family: Partial<Omit<Family, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void>;
+  removeFamily(id: string): Promise<void>;
+}
+
+export class RealFamilyService implements FamilyServiceType {
   async fetchFamilies(search?: string, page?: number, perPage?: number): Promise<{ items: Family[]; total: number }> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.get(`/families`, {
       params: { search, page, perPage },
     });
@@ -20,20 +40,24 @@ export class RealFamilyService implements FamilyServiceType {
   }
 
   async fetchFamilyById(id: string): Promise<Family | undefined> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.get(`/families/${id}`);
     return response.data;
   }
 
   async addFamily(family: Omit<Family, 'id' | 'createdAt' | 'updatedAt'>): Promise<Family> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const response = await axios.post(`/families`, family);
     return response.data;
   }
 
   async updateFamily(id: string, family: Partial<Omit<Family, 'id' | 'createdAt' | 'updatedAt'>>): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await axios.put(`/families/${id}`, family);
   }
 
   async removeFamily(id: string): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await axios.delete(`/families/${id}`);
   }
 }

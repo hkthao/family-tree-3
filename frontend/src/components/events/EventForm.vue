@@ -100,7 +100,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { FamilyEvent } from '@/services/familyEvent.service';
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 

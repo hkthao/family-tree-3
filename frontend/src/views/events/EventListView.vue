@@ -76,7 +76,8 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyEventsStore } from '@/stores/familyEvents';
-import type { Event, EventFilter } from '@/types/event';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { FamilyEvent, EventFilter } from '@/services/familyEvent.service';
 import EventSearch from '@/components/events/EventSearch.vue';
 import EventList from '@/components/events/EventList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';

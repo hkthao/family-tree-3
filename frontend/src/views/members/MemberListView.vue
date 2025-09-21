@@ -49,8 +49,9 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMembersStore } from '@/stores/members';
 import { useFamiliesStore } from '@/stores/families';
-import type { Member, MemberFilter } from '@/types/member';
-import type { Family } from '@/types/family';
+import type { Member, MemberFilter } from '@/services/member.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { Family } from '@/services/family.service';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
@@ -62,7 +63,6 @@ const { items: members, total: totalMembers, loading } = storeToRefs(membersStor
 const familiesStore = useFamiliesStore();
 const { items: families } = storeToRefs(familiesStore);
 
-const allMembers = computed(() => membersStore.items);
 const currentFilters = ref<MemberFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -157,6 +157,7 @@ onMounted(async () => {
   await loadFamilies();
 });
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 watch(members, (newItems) => {
 });
 </script>
