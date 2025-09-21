@@ -62,6 +62,21 @@
                 clearable
               ></v-text-field>
             </v-col>
+            <v-col cols="12" md="4">
+              <v-autocomplete
+                v-model="filters.familyId"
+                :items="props.families"
+                item-title="name"
+                item-value="id"
+                :label="t('member.search.family')"
+                clearable
+                :custom-filter="familyFilter"
+              >
+                <template #item="{ props, item }">
+                  <v-list-item v-bind="props" :subtitle="item.raw.address"></v-list-item>
+                </template>
+              </v-autocomplete>
+            </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
@@ -78,9 +93,14 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types/member';
+import type { Family } from '@/types/family';
 import DateInputField from '@/components/common/DateInputField.vue';
 
 const emit = defineEmits(['update:filters']);
+
+const props = defineProps<{
+  families: Family[];
+}>();
 
 const { t } = useI18n();
 
@@ -94,7 +114,24 @@ const filters = ref<MemberFilter>({
   placeOfBirth: '',
   placeOfDeath: '',
   occupation: '',
+  familyId: undefined,
 });
+
+const familyFilter = (_value: number, query: string, item: VuetifyInternalItem) => {
+  if (!item || !item.raw) return false;
+
+  const rawItem = item.raw;
+
+  const name = rawItem.name ? String(rawItem.name).toLowerCase() : '';
+  const address = rawItem.address ? String(rawItem.address).toLowerCase() : '';
+  const searchText = query ? String(query).toLowerCase() : '';
+
+  return name.includes(searchText) || address.includes(searchText);
+};
+
+interface VuetifyInternalItem {
+  raw: Family;
+}
 
 const genderOptions = [
   { title: t('member.gender.male'), value: 'Male' },
@@ -120,6 +157,7 @@ const resetFilters = () => {
     placeOfBirth: '',
     placeOfDeath: '',
     occupation: '',
+    familyId: undefined,
   };
   emit('update:filters', filters.value);
 };

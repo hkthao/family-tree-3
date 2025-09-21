@@ -24,4 +24,5 @@ export interface MemberFilter {
   placeOfBirth?: string;
   placeOfDeath?: string;
   occupation?: string;
+  familyId?: string;
 }

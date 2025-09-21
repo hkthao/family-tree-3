@@ -37,6 +37,11 @@
       </div>
     </template>
 
+    <!-- Family column -->
+    <template #item.family="{ item }">
+      {{ getFamilyName(item.familyId, families) }}
+    </template>
+
     <!-- Date of Birth column -->
     <template #item.dateOfBirth="{ item }">
       {{ formatDate(item.dateOfBirth) }}
@@ -70,6 +75,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types/member';
+import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 
 defineProps({
@@ -85,6 +91,10 @@ defineProps({
     type: Boolean,
     required: true,
   },
+  families: {
+    type: Array as () => Family[],
+    required: true,
+  },
 });
 
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
@@ -96,12 +106,18 @@ const itemsPerPage = ref(10);
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('member.list.headers.avatar'), key: 'avatarUrl', sortable: false, width: '80px', align: 'center' },
   { title: t('member.list.headers.fullName'), key: 'fullName', width: 'auto', align: 'start' },
+  { title: t('member.list.headers.family'), key: 'family', width: 'auto', align: 'start' },
   { title: t('member.list.headers.dateOfBirth'), key: 'dateOfBirth', width: '120px', align: 'center' },
   { title: t('member.list.headers.gender'), key: 'gender', width: '100px', align: 'center' },
   { title: t('member.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
 import { formatDate } from '@/utils/dateUtils';
+
+const getFamilyName = (familyId: string, families: Family[]) => {
+  const family = families.find(f => f.id === parseInt(familyId));
+  return family ? family.name : 'N/A';
+};
 
 const loadMembers = (options: { page: number; itemsPerPage: number; sortBy: string | string[] | null }) => {
   emit('update:options', options);

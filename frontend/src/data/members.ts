@@ -84,6 +84,9 @@ export function useMembers() {
     if (filter.gender) {
       filtered = filtered.filter(member => member.gender === filter.gender);
     }
+    if (filter.familyId) {
+      filtered = filtered.filter(member => member.familyId === filter.familyId);
+    }
     // Add more filters as needed
 
     const total = filtered.length;

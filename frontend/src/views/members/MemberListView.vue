@@ -1,11 +1,12 @@
 <template>
   <v-container fluid>
-    <MemberSearch @update:filters="handleFilterUpdate" />
+    <MemberSearch @update:filters="handleFilterUpdate" :families="families" />
 
     <MemberList
       :members="members"
       :total-members="totalMembers"
       :loading="loading"
+      :families="families"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
       @edit="navigateToEditMember"
