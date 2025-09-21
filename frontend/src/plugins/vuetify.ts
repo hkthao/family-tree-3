@@ -6,7 +6,6 @@ import '@mdi/font/css/materialdesignicons.css';
 
 // Composables
 import { createVuetify } from 'vuetify';
-import { VFab } from 'vuetify/components';
 
 // i18n
 import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n';

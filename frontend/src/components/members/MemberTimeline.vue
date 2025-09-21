@@ -62,17 +62,24 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import TimelineEventForm from './TimelineEventForm.vue';
 
+interface TimelineEvent {
+  year: string;
+  title: string;
+  description: string;
+  color: string;
+}
+
 const props = defineProps<{
-  timelineEvents: Array<any>; // Define a more specific type later
+  timelineEvents: Array<TimelineEvent>;
   readOnly?: boolean;
 }>();
 
-const emit = defineEmits(['add', 'edit', 'delete']);
+defineEmits(['add', 'edit', 'delete']);
 
 const { t } = useI18n();
 
 const eventFormDialog = ref(false);
-const selectedEvent = ref<any>(null); // Define a more specific type later
+const selectedEvent = ref<TimelineEvent | null>(null); // Define a more specific type later
 const isEditEventMode = ref(false);
 const page = ref(1);
 
@@ -89,13 +96,13 @@ const openAddEventForm = () => {
   eventFormDialog.value = true;
 };
 
-const openEditEventForm = (event: any) => {
+const openEditEventForm = (event: TimelineEvent) => {
   selectedEvent.value = { ...event };
   isEditEventMode.value = true;
   eventFormDialog.value = true;
 };
 
-const handleSaveTimelineEvent = (eventData: any) => {
+const handleSaveTimelineEvent = (eventData: TimelineEvent) => {
   // This event will be handled by MemberForm.vue
   // For now, just close the dialog
   console.log('Saving timeline event:', eventData);

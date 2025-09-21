@@ -80,14 +80,14 @@ import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 
-const props = defineProps<{
+defineProps<{
   families: Family[];
   totalFamilies: number;
   loading: boolean;
   itemsPerPage: number;
 }>();
 
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'update:itemsPerPage', 'create']);
+defineEmits(['update:options', 'view', 'edit', 'delete', 'update:itemsPerPage', 'create']);
 
 const { t } = useI18n();
 
