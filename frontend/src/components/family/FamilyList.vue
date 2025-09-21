@@ -83,7 +83,7 @@ import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 
-defineProps<{
+const props = defineProps<{
   families: Family[];
   totalFamilies: number;
   loading: boolean;

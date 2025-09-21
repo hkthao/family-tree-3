@@ -44,12 +44,13 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamiliesStore } from '@/stores/families';
 import { useMembersStore } from '@/stores/members';
 import type { Family, FamilyFilter } from '@/types/family';
-import type { Member } from '@/types/member';
+
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
 import FamilyForm from '@/components/family/FamilyForm.vue';
@@ -59,10 +60,11 @@ import { useNotificationStore } from '@/stores/notification';
 const { t } = useI18n();
 const router = useRouter();
 const familiesStore = useFamiliesStore();
+const { items: families, total: totalFamilies, loading } = storeToRefs(familiesStore);
 const membersStore = useMembersStore();
 const notificationStore = useNotificationStore();
 
-const allMembers = ref<Member[]>([]);
+const allMembers = computed(() => membersStore.items);
 const currentFilters = ref<FamilyFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -92,7 +94,6 @@ const loadFamilies = async () => {
 
 const loadAllMembers = async () => {
   await membersStore.fetchAll({}, 1, -1); // Fetch all members
-  allMembers.value = membersStore.items;
 };
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
@@ -153,8 +154,11 @@ watch([currentFilters, currentPage, itemsPerPage], () => {
   loadFamilies();
 });
 
-onMounted(() => {
-  loadFamilies();
-  loadAllMembers();
+onMounted(async () => {
+  await loadFamilies();
+  await loadAllMembers();
+});
+
+watch(families, (newItems) => {
 });
 </script>
