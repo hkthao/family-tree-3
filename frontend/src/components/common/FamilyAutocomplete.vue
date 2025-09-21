@@ -12,7 +12,7 @@
     :custom-filter="familyFilter"
   >
     <template #item="{ item }">
-      <v-list-item :subtitle="item.raw.address"></v-list-item>
+      <v-list-item :title="item.raw.name" :subtitle="item.raw.address"></v-list-item>
     </template>
   </v-autocomplete>
 </template>
@@ -44,15 +44,16 @@ onMounted(async () => {
   families.value = fetchedFamilies;
 });
 
-const familyFilter = (_value: number, query: string, item: VuetifyInternalItem) => {
+const familyFilter = (_value: string, query: string, item: VuetifyInternalItem | undefined) => {
   if (!item || !item.raw) return false;
 
   const rawItem = item.raw;
 
   const name = rawItem.name ? String(rawItem.name).toLowerCase() : '';
   const address = rawItem.address ? String(rawItem.address).toLowerCase() : '';
+  const id = String(rawItem.id);
   const searchText = query ? String(query).toLowerCase() : '';
 
-  return name.includes(searchText) || address.includes(searchText);
+  return name.includes(searchText) || address.includes(searchText) || id.includes(searchText);
 };
 </script>
