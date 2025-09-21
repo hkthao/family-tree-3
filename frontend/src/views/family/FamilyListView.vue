@@ -7,6 +7,7 @@
       :total-families="totalFamilies"
       :loading="loading"
       :items-per-page="itemsPerPage"
+      :family-member-counts="familyMemberCounts"
       @update:options="handleListOptionsUpdate"
       @update:itemsPerPage="itemsPerPage = $event"
       @view="navigateToViewFamily"
@@ -42,11 +43,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilies } from '@/data/families';
+import { useMembers } from '@/data/members';
 import type { Family, FamilyFilter } from '@/types/family';
+import type { Member } from '@/types/member';
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
 import FamilyForm from '@/components/family/FamilyForm.vue';
@@ -56,9 +59,11 @@ import { useNotificationStore } from '@/stores/notification';
 const { t } = useI18n();
 const router = useRouter();
 const { getFamilies, deleteFamily } = useFamilies();
+const { getMembers } = useMembers();
 const notificationStore = useNotificationStore();
 
 const families = ref<Family[]>([]);
+const allMembers = ref<Member[]>([]);
 const totalFamilies = ref(0);
 const loading = ref(true);
 const currentFilters = ref<FamilyFilter>({});
@@ -69,6 +74,16 @@ const detailDialog = ref(false);
 const selectedFamily = ref<Family | undefined>(undefined);
 const deleteConfirmDialog = ref(false);
 const familyToDelete = ref<Family | undefined>(undefined);
+
+const familyMemberCounts = computed(() => {
+  const counts: { [key: string]: number } = {};
+  allMembers.value.forEach(member => {
+    if (member.familyId) {
+      counts[member.familyId] = (counts[member.familyId] || 0) + 1;
+    }
+  });
+  return counts;
+});
 
 const loadFamilies = async () => {
   loading.value = true;
@@ -81,6 +96,11 @@ const loadFamilies = async () => {
   families.value = fetchedFamilies;
   totalFamilies.value = total;
   loading.value = false;
+};
+
+const loadAllMembers = async () => {
+  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
+  allMembers.value = fetchedMembers;
 };
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
@@ -145,5 +165,6 @@ watch([currentFilters, currentPage, itemsPerPage], () => {
 
 onMounted(() => {
   loadFamilies();
+  loadAllMembers();
 });
 </script>

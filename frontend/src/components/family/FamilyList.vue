@@ -44,6 +44,9 @@
                     </div>
                   </template>
         <!-- visibility column -->
+        <template #item.totalMembers="{ item }">
+          {{ familyMemberCounts[item.id] || 0 }}
+        </template>
         <template #item.visibility="{ item }">
           <v-chip
             :color="item.visibility === 'Public' ? 'success' : 'error'"
@@ -85,6 +88,7 @@ defineProps<{
   totalFamilies: number;
   loading: boolean;
   itemsPerPage: number;
+  familyMemberCounts: { [key: string]: number };
 }>();
 
 defineEmits(['update:options', 'view', 'edit', 'delete', 'update:itemsPerPage', 'create']);
@@ -94,6 +98,7 @@ const { t } = useI18n();
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('family.management.headers.avatar'), key: 'avatarUrl', sortable: false, width: '120px', align: 'center' },
   { title: t('family.management.headers.name'), key: 'name', width: 'auto', align: 'start' },
+  { title: t('family.management.headers.totalMembers'), key: 'totalMembers', width: '120px', align: 'center' },
   { title: t('family.management.headers.visibility'), key: 'visibility', width: '120px', align: 'center' },
   { title: t('family.management.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
