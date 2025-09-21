@@ -19,53 +19,60 @@ export interface FamilyMember {
   }[];
 }
 
+const member1Id = 'a1b2c3d4-e5f6-7890-1234-567890abcdef';
+const member2Id = 'b2c3d4e5-f6a7-8901-2345-67890abcdef1';
+const member3Id = 'c3d4e5f6-a7b8-9012-3456-7890abcdef12';
+const member4Id = 'd4e5f6a7-b8c9-0123-4567-890abcdef123';
+const member5Id = 'e5f6a7b8-c9d0-1234-5678-90abcdef1234';
+const member6Id = 'f6a7b8c9-d0e1-2345-6789-0abcdef12345';
+
 export const mockFamilyMembers = ref<FamilyMember[]>([
   {
-    id: '1',
+    id: member1Id,
     fullName: 'Nguyễn Văn A',
     dateOfBirth: '1950-01-15',
     gender: 'Male',
     relationships: [],
   },
   {
-    id: '2',
+    id: member2Id,
     fullName: 'Trần Thị B',
     dateOfBirth: '1955-03-20',
     gender: 'Female',
-    relationships: [{ type: 'spouse', memberId: '1' }],
+    relationships: [{ type: 'spouse', memberId: member1Id }],
   },
   {
-    id: '3',
+    id: member3Id,
     fullName: 'Nguyễn Văn C',
     dateOfBirth: '1980-07-10',
     gender: 'Male',
     relationships: [
-      { type: 'child', memberId: '1' },
-      { type: 'child', memberId: '2' },
+      { type: 'child', memberId: member1Id },
+      { type: 'child', memberId: member2Id },
     ],
   },
   {
-    id: '4',
+    id: member4Id,
     fullName: 'Lê Thị D',
     dateOfBirth: '1982-09-25',
     gender: 'Female',
-    relationships: [{ type: 'spouse', memberId: '3' }],
+    relationships: [{ type: 'spouse', memberId: member3Id }],
   },
   {
-    id: '5',
+    id: member5Id,
     fullName: 'Nguyễn Thị E',
     dateOfBirth: '2005-02-28',
     gender: 'Female',
     relationships: [
-      { type: 'child', memberId: '3' },
-      { type: 'child', memberId: '4' },
+      { type: 'child', memberId: member3Id },
+      { type: 'child', memberId: member4Id },
     ],
   },
   {
-    id: '6',
+    id: member6Id,
     fullName: 'Phạm Văn F',
     dateOfBirth: '1978-11-01',
     gender: 'Male',
-    relationships: [{ type: 'sibling', memberId: '3' }],
+    relationships: [{ type: 'sibling', memberId: member3Id }],
   },
 ]);

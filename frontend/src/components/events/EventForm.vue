@@ -119,7 +119,7 @@ const form = ref<HTMLFormElement | null>(null);
 const eventForm = ref<Omit<Event, 'id'> | Event>(props.initialEventData || {
   name: '',
   type: 'Other',
-  familyId: '',
+  familyId: null,
   startDate: null,
   endDate: null,
   location: '',

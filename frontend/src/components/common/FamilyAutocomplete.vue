@@ -23,8 +23,9 @@ import { useFamilies } from '@/data/families';
 import type { Family } from '@/types/family';
 
  defineProps<{
-  modelValue: any; // The selected family ID
+  modelValue: string | null; // The selected family ID
   label?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rules?: Array<any>;
   readOnly?: boolean;
   clearable?: boolean;

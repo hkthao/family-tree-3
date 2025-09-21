@@ -1,51 +1,18 @@
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { Event, EventFilter } from '@/types/event';
 import { faker } from '@faker-js/faker';
 import { mockMembers } from './members';
+import { useFamilies } from './families';
+import type { Family } from '@/types/family';
+import type { Member } from '@/types/member';
 
-const generateMockEvents = (count: number): Event[] => {
-  const events: Event[] = [
-    {
-      id: faker.string.uuid(),
-      name: 'Family Reunion',
-      type: 'Other',
-      familyId: 1,
-      startDate: new Date('2025-09-15T10:00:00'),
-      endDate: new Date('2025-09-15T18:00:00'),
-      location: "Grandma's House",
-      description: 'Annual family gathering.',
-      color: '#FF5722',
-      relatedMembers: [],
-    },
-    {
-      id: faker.string.uuid(),
-      name: "Uncle Bob's Birthday",
-      type: 'Birth',
-      familyId: 1,
-      startDate: new Date('2025-09-20T00:00:00'),
-      endDate: new Date('2025-09-20T23:59:59'),
-      location: 'Local Restaurant',
-      description: "Celebrating Uncle Bob's birthday.",
-      color: '#4CAF50',
-      relatedMembers: [],
-    },
-    {
-      id: faker.string.uuid(),
-      name: 'Wedding Anniversary',
-      type: 'Marriage',
-      familyId: 2,
-      startDate: new Date('2025-09-05T00:00:00'),
-      endDate: new Date('2025-09-05T23:59:59'),
-      location: 'City Hall',
-      description: "John and Jane's wedding anniversary.",
-      color: '#2196F3',
-      relatedMembers: [],
-    },
-  ];
+const generateMockEvents = (count: number, families: Family[], members: Member[]): Event[] => {
+  const events: Event[] = [];
   const eventTypes = ['Birth', 'Marriage', 'Death', 'Migration', 'Other'];
   const colors = ['#FFC107', '#4CAF50', '#2196F3', '#FF5722', '#9C27B0', '#673AB7', '#3F51B5', '#03A9F4', '#00BCD4', '#009688'];
 
-  const memberIds = mockMembers.value.map(m => m.id);
+  const memberIds = members.map(m => m.id);
+  const familyIds = families.map(f => f.id);
 
   for (let i = 0; i < count; i++) {
     const startDate = faker.date.past({ years: 20 });
@@ -56,7 +23,7 @@ const generateMockEvents = (count: number): Event[] => {
       id: faker.string.uuid(),
       name: faker.lorem.words(3),
       type: type,
-      familyId: faker.helpers.arrayElement([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+      familyId: faker.helpers.arrayElement(familyIds),
       startDate: startDate,
       endDate: endDate,
       location: faker.location.city() + ', ' + faker.location.country(),
@@ -68,7 +35,16 @@ const generateMockEvents = (count: number): Event[] => {
   return events;
 };
 
-const mockEvents = ref<Event[]>(generateMockEvents(20));
+export const mockEvents = ref<Event[]>([]);
+
+const { getFamilies } = useFamilies();
+watch(mockMembers, (newMembers) => {
+  if (newMembers.length > 0) {
+    getFamilies('', 'All', 1, -1).then(data => {
+      mockEvents.value = generateMockEvents(20, data.families, newMembers);
+    });
+  }
+});
 
 export function useEvents() {
   const events = ref<Event[]>(mockEvents.value);
@@ -107,7 +83,7 @@ export function useEvents() {
   };
 
   const addEvent = (newEvent: Omit<Event, 'id'>) => {
-    const eventWithId = { ...newEvent, id: Date.now().toString() };
+    const eventWithId = { ...newEvent, id: faker.string.uuid() };
     events.value.push(eventWithId);
     return eventWithId;
   };
