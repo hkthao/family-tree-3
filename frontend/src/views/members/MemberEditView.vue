@@ -2,17 +2,14 @@
   <v-card>
     <v-card-text>
       <MemberForm
-        v-if="initialMemberData"
-        :initial-member-data="initialMemberData"
+        v-if="member"
         :title="t('member.form.editTitle')"
+        :initial-member-data="member"
+        :members="members"
+        :families="families"
         @close="closeForm"
         @submit="handleUpdateMember"
       />
-      <v-progress-circular
-        v-else
-        indeterminate
-        color="primary"
-      ></v-progress-circular>
     </v-card-text>
   </v-card>
 </template>
@@ -20,40 +17,34 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useMembers } from '@/data/members';
+import { useFamilies } from '@/data/families';
 import { useNotificationStore } from '@/stores/notification';
 import MemberForm from '@/components/members/MemberForm.vue';
 import type { Member } from '@/types/member';
+import type { Family } from '@/types/family';
 
 const { t } = useI18n();
-const route = useRoute();
 const router = useRouter();
-const { getMemberById, updateMember } = useMembers();
+const route = useRoute();
+const { getMemberById, updateMember, getMembers } = useMembers();
+const { getFamilies } = useFamilies();
 const notificationStore = useNotificationStore();
 
-const initialMemberData = ref<Member | null>(null);
+const member = ref<Member | undefined>(undefined);
+const members = ref<Member[]>([]);
+const families = ref<Family[]>([]);
 
-onMounted(() => {
+onMounted(async () => {
   const memberId = route.params.id as string;
-  if (memberId) {
-    const member = getMemberById(memberId);
-    if (member) {
-      initialMemberData.value = {
-        ...member,
-        dateOfBirth: member.dateOfBirth ? new Date(member.dateOfBirth) : null,
-        dateOfDeath: member.dateOfDeath ? new Date(member.dateOfDeath) : null,
-        parents: [...member.parents],
-        spouses: [...member.spouses],
-        children: [...member.children]
-      };
-    } else {
-      notificationStore.showSnackbar(t('member.messages.notFound'), 'error');
-      router.push('/members');
-    }
-  } else {
-    router.push('/members');
-  }
+  member.value = getMemberById(memberId);
+
+  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
+  members.value = fetchedMembers;
+
+  const { families: fetchedFamilies } = await getFamilies('', 'All', 1, -1); // Fetch all families
+  families.value = fetchedFamilies;
 });
 
 const handleUpdateMember = async (memberData: Member) => {

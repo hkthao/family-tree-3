@@ -6,7 +6,6 @@
     <v-card-text>
       <v-tabs v-model="tab" >
         <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
-        <v-tab value="relationships">{{ t('member.form.tab.relationships') }}</v-tab>
         <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
       </v-tabs>
 
@@ -30,11 +29,18 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="memberForm.fullName"
                   :label="t('member.form.fullName')"
                   :rules="[rules.required]"
+                  :readonly="props.readOnly"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="memberForm.nickname"
+                  :label="t('member.form.nickname')"
                   :readonly="props.readOnly"
                 ></v-text-field>
               </v-col>
@@ -54,6 +60,7 @@
                   :label="t('member.form.dateOfDeath')"
                   optional
                   :readonly="props.readOnly"
+                  :rules="[dateOfDeathRule]"
                 />
               </v-col>
             </v-row>
@@ -94,6 +101,69 @@
               </v-col>
             </v-row>
 
+            <v-row>
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="memberForm.familyId"
+                  :items="props.families"
+                  item-title="name"
+                  item-value="id"
+                  :label="t('member.form.familyId')"
+                  :rules="[rules.required]"
+                  :readonly="props.readOnly"
+                  :custom-filter="familyFilter"
+                >
+                  <template #item="{ props, item }">
+                    <v-list-item v-bind="props" :subtitle="item.raw.address"></v-list-item>
+                  </template>
+                </v-autocomplete>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" md="4">
+                <v-autocomplete
+                  v-model="memberForm.fatherId"
+                  :items="fathers"
+                  item-title="fullName"
+                  item-value="id"
+                  :label="t('member.form.father')"
+                  :readonly="props.readOnly"
+                >
+                  <template #item="{ props, item }">
+                    <v-list-item v-bind="props" :subtitle="item.raw.nickname + ' (' + (item.raw.dateOfBirth ? new Date(item.raw.dateOfBirth).getFullYear() : '') + ' - ' + (item.raw.dateOfDeath ? new Date(item.raw.dateOfDeath).getFullYear() : '') + ')'"></v-list-item>
+                  </template>
+                </v-autocomplete>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-autocomplete
+                  v-model="memberForm.motherId"
+                  :items="mothers"
+                  item-title="fullName"
+                  item-value="id"
+                  :label="t('member.form.mother')"
+                  :readonly="props.readOnly"
+                >
+                  <template #item="{ props, item }">
+                    <v-list-item v-bind="props" :subtitle="item.raw.nickname + ' (' + (item.raw.dateOfBirth ? new Date(item.raw.dateOfBirth).getFullYear() : '') + ' - ' + (item.raw.dateOfDeath ? new Date(item.raw.dateOfDeath).getFullYear() : '') + ')'"></v-list-item>
+                  </template>
+                </v-autocomplete>
+              </v-col>
+              <v-col cols="12" md="4">
+                <v-autocomplete
+                  v-model="memberForm.spouseId"
+                  :items="props.members"
+                  item-title="fullName"
+                  item-value="id"
+                  :label="t('member.form.spouse')"
+                  :readonly="props.readOnly"
+                >
+                  <template #item="{ props, item }">
+                    <v-list-item v-bind="props" :subtitle="item.raw.nickname + ' (' + (item.raw.dateOfBirth ? new Date(item.raw.dateOfBirth).getFullYear() : '') + ' - ' + (item.raw.dateOfDeath ? new Date(item.raw.dateOfDeath).getFullYear() : '') + ')'"></v-list-item>
+                  </template>
+                </v-autocomplete>
+              </v-col>
+            </v-row>
+
             <!-- Thông tin khác -->
             <v-row>
               <v-col cols="12">
@@ -105,16 +175,6 @@
               </v-col>
             </v-row>
           </v-form>
-        </v-window-item>
-
-        <v-window-item value="relationships">
-          <MemberRelationships
-            :member-form="memberForm"
-            :read-only="props.readOnly"
-            @add-relationship="addRelationship"
-            @edit-relationship="editRelationship"
-            @remove-relationship="removeRelationship"
-          />
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -139,15 +199,24 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { Member } from '@/types/member';
+import type { Family } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';
-import MemberRelationships from '@/components/members/MemberRelationships.vue';
+
+interface TimelineEvent {
+  year: string;
+  title: string;
+  description: string;
+  color: string;
+}
 
 const props = defineProps<{
   readOnly?: boolean;
   initialMemberData?: Member;
   title: string;
+  members: Member[];
+  families: Family[];
 }>();
 
 const emit = defineEmits(['close', 'submit']);
@@ -161,17 +230,7 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData || {
   fullName: '',
   dateOfBirth: null,
   gender: 'Male',
-  parents: [
-    { fullName: 'Nguyễn Văn A', relationshipType: 'Ruột thịt' },
-    { fullName: 'Trần Thị B', relationshipType: 'Ruột thịt' },
-  ],
-  spouses: [
-    { fullName: 'Lê Thị C', relationshipType: 'Đã kết hôn' },
-  ],
-  children: [
-    { fullName: 'Phạm Văn D', relationshipType: 'Ruột thịt' },
-    { fullName: 'Phạm Thị E', relationshipType: 'Con nuôi' },
-  ],
+  familyId: '', // Add familyId
 });
 
 const timelineEvents = ref([
@@ -184,6 +243,21 @@ const timelineEvents = ref([
   { year: '2023', title: 'Moved to a New City', description: 'Moved to Da Nang, Vietnam.', color: 'teal' },
 ]);
 
+const fathers = computed(() => props.members.filter(m => m.gender === 'Male'));
+const mothers = computed(() => props.members.filter(m => m.gender === 'Female'));
+
+const familyFilter = (value, query, item) => {
+  if (!item || !item.raw) return false;
+
+  const rawItem = item.raw;
+
+  const name = rawItem.name ? String(rawItem.name).toLowerCase() : '';
+  const address = rawItem.address ? String(rawItem.address).toLowerCase() : '';
+  const searchText = query ? String(query).toLowerCase() : '';
+
+  return name.includes(searchText) || address.includes(searchText);
+};
+
 const genderOptions = [
   { title: t('member.gender.male'), value: 'Male' },
   { title: t('member.gender.female'), value: 'Female' },
@@ -194,57 +268,21 @@ const rules = {
   required: (value: string) => !!value || t('validation.required'),
 };
 
+const dateOfDeathRule = (value) => {
+  if (!value) return true; // Optional field
+  if (!memberForm.value.dateOfBirth) return true; // Cannot compare if dateOfBirth is not set
 
+  const dateOfDeath = new Date(value);
+  const dateOfBirth = new Date(memberForm.value.dateOfBirth);
 
-
-
-const addRelationship = (newRelationshipData: any) => {
-  if (newRelationshipData.type === 'parent') {
-    memberForm.value.parents.push(newRelationshipData);
-  } else if (newRelationshipData.type === 'spouse') {
-    memberForm.value.spouses.push(newRelationshipData);
-  } else if (newRelationshipData.type === 'child') {
-    memberForm.value.children.push(newRelationshipData);
-  }
+  return dateOfDeath > dateOfBirth || t('validation.dateOfDeathAfterBirth');
 };
 
-const editRelationship = (updatedRelationshipData: any, originalType: 'parent' | 'spouse' | 'child') => {
-  const { type: newType, ...rest } = updatedRelationshipData;
 
-  // Remove from original array
-  if (originalType === 'parent') {
-    const index = memberForm.value.parents.findIndex(r => r === updatedRelationshipData);
-    if (index !== -1) memberForm.value.parents.splice(index, 1);
-  } else if (originalType === 'spouse') {
-    const index = memberForm.value.spouses.findIndex(r => r === updatedRelationshipData);
-    if (index !== -1) memberForm.value.spouses.splice(index, 1);
-  } else if (originalType === 'child') {
-    const index = memberForm.value.children.findIndex(r => r === updatedRelationshipData);
-    if (index !== -1) memberForm.value.children.splice(index, 1);
-  }
 
-  // Add to new array
-  if (newType === 'parent') {
-    memberForm.value.parents.push(rest);
-  } else if (newType === 'spouse') {
-    memberForm.value.spouses.push(rest);
-  } else if (newType === 'child') {
-    memberForm.value.children.push(rest);
-  }
-};
 
-const removeRelationship = (item: any, type: 'parent' | 'spouse' | 'child') => {
-  if (type === 'parent') {
-    const index = memberForm.value.parents.indexOf(item);
-    if (index !== -1) memberForm.value.parents.splice(index, 1);
-  } else if (type === 'spouse') {
-    const index = memberForm.value.spouses.indexOf(item);
-    if (index !== -1) memberForm.value.spouses.splice(index, 1);
-  } else if (type === 'child') {
-    const index = memberForm.value.children.indexOf(item);
-    if (index !== -1) memberForm.value.children.splice(index, 1);
-  }
-};
+
+
 
 const submitForm = async () => {
   if (form.value) {
@@ -264,11 +302,11 @@ const handleAddTimelineEvent = () => {
   console.log('Add timeline event');
 };
 
-const handleEditTimelineEvent = (event: any) => {
+const handleEditTimelineEvent = (event: TimelineEvent) => {
   console.log('Edit timeline event:', event);
 };
 
-const handleDeleteTimelineEvent = (event: any) => {
+const handleDeleteTimelineEvent = (event: TimelineEvent) => {
   console.log('Delete timeline event:', event);
 };
 </script>

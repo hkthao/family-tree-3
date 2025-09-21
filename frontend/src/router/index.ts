@@ -42,6 +42,11 @@ const router = createRouter({
           component: () => import('@/views/members/MemberAddView.vue'),
         },
         {
+          path: 'members/edit/:id',
+          name: 'EditMember',
+          component: () => import('@/views/members/MemberEditView.vue'),
+        },
+        {
           path: 'family',
           name: 'FamilyManagement',
           component: () => import('@/views/family/FamilyListView.vue'),
