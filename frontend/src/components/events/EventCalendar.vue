@@ -67,8 +67,8 @@ const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 const selectedDate = ref(new Date());
 // Removed invalid import of VCalendar
 
-const calendarRef = ref<VCalendar | null>(null);
-const calendarType = ref('month');
+const calendarRef = ref<{ title: string; prev: () => void; next: () => void; value: Date } | null>(null);
+const calendarType = ref<'month' | 'week' | 'day' | '4day' | 'category' | 'custom-daily' | 'custom-weekly'>('month');
 const calendarTypes = computed(() => [
   { title: t('event.calendar.viewMode.month'), value: 'month' },
   { title: t('event.calendar.viewMode.week'), value: 'week' },
@@ -115,18 +115,13 @@ const formattedEvents = computed(() => {
   return events;
 });
 
-const getEventColor = (event: Event) => {
+const getEventColor = (event: any) => {
   return event.color;
 };
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (nativeEvent: PointerEvent, { event }: { event: Event }) => {
-  console.log('Raw event object clicked:', { nativeEvent, event });
-  emit('viewEvent', event.eventObject);
+const showEventDetails = (_: any, eventSlotScope: any) => {
+  emit('viewEvent', eventSlotScope);
 };
 </script>
-
-<style scoped>
-/* Add any specific styles for the calendar here */
-</style>
