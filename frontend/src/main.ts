@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import { VResizeDirective } from 'vuetify/directives';
 
 import App from './App.vue';
 import router from './router';
@@ -17,5 +18,6 @@ app.use(router);
 app.use(vuetify);
 app.use(i18n);
 app.use(VueApexCharts);
+app.directive('resize', VResizeDirective);
 
 app.mount('#app');
