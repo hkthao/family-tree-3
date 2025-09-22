@@ -6,6 +6,9 @@ import { generateMockFamilies, generateMockFamily } from '@/data/mock/family.moc
 import type { Paginated } from '@/types/pagination'; // Import generic Paginated interface
 import { useFamilyStore } from '@/stores/family.store';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
+import { createServices } from '@/services/service.factory';
+import type { IMemberService } from '@/services/member/member.service.interface';
+import type { Member } from '@/types/member';
 
 // Create a mock service for testing
 class MockFamilyServiceForTest implements IFamilyService {
@@ -82,21 +85,45 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 }
 
+class MockMemberServiceForTest implements IMemberService {
+  async fetch(): Promise<Member[]> {
+    return [];
+  }
+  async getById(id: string): Promise<Member | undefined> {
+    return undefined;
+  }
+  async add(newItem: Omit<Member, 'id'>): Promise<Member> {
+    throw new Error('Method not implemented.');
+  }
+  async update(updatedItem: Member): Promise<Member> {
+    throw new Error('Method not implemented.');
+  }
+  async delete(id: string): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  async searchMembers(
+    searchQuery: string,
+    page: number,
+    itemsPerPage: number
+  ): Promise<Paginated<Member>> {
+    return { items: [], totalItems: 0, totalPages: 0 };
+  }
+}
+
 describe('Family Store', () => {
   let mockFamilyService: MockFamilyServiceForTest;
+  let mockMemberService: MockMemberServiceForTest; // Declare mockMemberService
 
   beforeEach(async () => {
     mockFamilyService = new MockFamilyServiceForTest();
+    mockMemberService = new MockMemberServiceForTest(); // Instantiate mockMemberService
     const pinia = createPinia();
     setActivePinia(pinia);
     const store = useFamilyStore(); // Get the store instance
 
     store.$reset(); // Reset store state before each test
-    // Directly assign the mock service to the store's services property
-    // This bypasses the plugin system for testing, ensuring direct injection.
-    store.services = {
-      family: mockFamilyService,
-    };
+    // Pass mockMemberService to createServices
+    store.services = createServices('test', mockFamilyService, mockMemberService);
 
     await store._loadFamilies(); // Ensure store is populated before tests run
   });

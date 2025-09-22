@@ -1,7 +1,6 @@
 import type { Member } from '@/types/member';
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import axios from 'axios';
-import type { ICrudService } from '../common/crud.service.interface'; // Import ICrudService
 
 // Base URL for your API - configure this based on your environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -13,17 +12,6 @@ function transformMemberDates(member: any): Member {
   }
   if (member.dateOfDeath && typeof member.dateOfDeath === 'string') {
     member.dateOfDeath = new Date(member.dateOfDeath);
-  }
-  return member;
-}
-
-// Helper function to transform API response to Member object (fullName to lastName/firstName)
-function transformMemberNames(apiMember: any): Member {
-  const member: Member = { ...apiMember };
-  if (apiMember.fullName) {
-    const parts = apiMember.fullName.split(' ');
-    member.lastName = parts.length > 1 ? parts[0] : '';
-    member.firstName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0] || '';
   }
   return member;
 }
@@ -49,29 +37,29 @@ export class ApiMemberService implements IMemberService {
 
   async fetch(): Promise<Member[]> { // Renamed from fetchMembers
     const response = await axios.get<Member[]>(this.apiUrl);
-    return response.data.map(m => transformMemberDates(transformMemberNames(m)));
+    return response.data.map(m => transformMemberDates(m));
   }
 
   async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
     const response = await axios.get<Member[]>(`${this.apiUrl}?familyId=${familyId}`);
-    return response.data.map(m => transformMemberDates(transformMemberNames(m)));
+    return response.data.map(m => transformMemberDates(m));
   }
 
   async getById(id: string): Promise<Member | undefined> { // Renamed from getMemberById
     const response = await axios.get<Member>(`${this.apiUrl}/${id}`);
-    return response.data ? transformMemberDates(transformMemberNames(response.data)) : undefined;
+    return response.data ? transformMemberDates(response.data) : undefined;
   }
 
   async add(newItem: Omit<Member, 'id'>): Promise<Member> { // Renamed from addMember
     const apiMember = prepareMemberForApi(newItem);
     const response = await axios.post<Member>(this.apiUrl, apiMember);
-    return transformMemberDates(transformMemberNames(response.data));
+    return transformMemberDates(response.data);
   }
 
   async update(updatedItem: Member): Promise<Member> { // Renamed from updateMember
     const apiMember = prepareMemberForApi(updatedItem);
     const response = await axios.put<Member>(`${this.apiUrl}/${updatedItem.id}`, apiMember);
-    return transformMemberDates(transformMemberNames(response.data));
+    return transformMemberDates(response.data);
   }
 
   async delete(id: string): Promise<void> { // Renamed from deleteMember
