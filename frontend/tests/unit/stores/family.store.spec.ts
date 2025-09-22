@@ -4,7 +4,6 @@ import { useFamilyStore } from '@/stores/family.store'; // Updated import path
 import type { Family } from '@/types/family';
 import type { IFamilyService } from '@/services';
 import { generateMockFamilies, generateMockFamily } from '@/data/mock/family.mock';
-import { ServicesPlugin } from '@/plugins/services.plugin'; // Import the plugin
 
 // Create a mock service for testing
 class MockFamilyServiceForTest implements IFamilyService {
