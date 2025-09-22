@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia';
 import type { Member } from '@/types/member';
 import type { MemberFilter } from '@/services/member';
+import { createServices, type ServiceMode } from '@/services/service.factory';
+
+const isMockApi = import.meta.env.VITE_USE_MOCK === 'true';
+const mode: ServiceMode = isMockApi ? 'mock' : 'real';
+const services = createServices(mode);
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -70,9 +75,9 @@ export const useMemberStore = defineStore('member', {
       this.loading = true;
       this.error = null;
       try {
-       // this.members = familyId
-      //    ? (await this.services.member.fetchMembersByFamilyId(familyId)).map(m => ({ ...m, fullName: `${m.firstName} ${m.lastName}`.trim() }))
-       //   : (await this.services.member.fetch()).map(m => ({ ...m, fullName: `${m.firstName} ${m.lastName}`.trim() })); // Renamed to fetch and added fullName
+       this.members = familyId
+         ? (await services.member.fetchMembersByFamilyId(familyId)).map(m => ({ ...m, fullName: `${m.firstName} ${m.lastName}`.trim() }))
+         : (await services.member.fetch()).map(m => ({ ...m, fullName: `${m.firstName} ${m.lastName}`.trim() })); // Renamed to fetch and added fullName
         this.currentPage = 1;
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Không thể tải danh sách thành viên.';
@@ -107,7 +112,7 @@ export const useMemberStore = defineStore('member', {
           return; // Return early
         }
         
-        const added = await this.services.member.add(newMember); // Renamed to add
+        const added = await services.member.add(newMember); // Renamed to add
         this.members.push(added);
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Không thể thêm thành viên.';
@@ -141,7 +146,7 @@ export const useMemberStore = defineStore('member', {
           this.loading = false;
           return; // Return early
         }
-        const updated = await this.services.member.update(updatedMember); // Renamed to update
+        const updated = await services.member.update(updatedMember); // Renamed to update
         const idx = this.members.findIndex((m) => m.id === updated.id);
         if (idx !== -1) this.members[idx] = updated;
       } catch (e) {
@@ -156,7 +161,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = true;
       this.error = null;
       try {
-        await this.services.member.delete(id); // Renamed to delete
+        await services.member.delete(id); // Renamed to delete
         this.members = this.members.filter((m) => m.id !== id);
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
