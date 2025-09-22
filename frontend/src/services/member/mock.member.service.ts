@@ -70,7 +70,11 @@ export class MockMemberService implements IMemberService {
 
     if (filters.fullName) {
       const lowerCaseFullName = filters.fullName.toLowerCase();
-      filteredMembers = filteredMembers.filter(m => m.fullName.toLowerCase().includes(lowerCaseFullName));
+      filteredMembers = filteredMembers.filter(m =>
+        m.lastName.toLowerCase().includes(lowerCaseFullName) ||
+        m.firstName.toLowerCase().includes(lowerCaseFullName) ||
+        `${m.lastName} ${m.firstName}`.toLowerCase().includes(lowerCaseFullName)
+      );
     }
     if (filters.dateOfBirth) {
       // Compare Date objects

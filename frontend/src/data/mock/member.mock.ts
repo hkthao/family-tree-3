@@ -9,7 +9,8 @@ export function generateMockMember(familyId?: string, overrides?: Partial<Member
   const selectedFamilyId = familyId || faker.helpers.arrayElement(mockFamilies).id;
   return {
     id: faker.string.uuid(),
-    fullName: faker.person.fullName(),
+    lastName: faker.person.lastName(), // Generate last name
+    firstName: faker.person.firstName(), // Generate first name
     familyId: selectedFamilyId,
     gender: faker.helpers.arrayElement(['male', 'female', 'other']),
     dateOfBirth: faker.date.past({ years: 50 }),

@@ -1,6 +1,7 @@
 export interface Member {
   id: string;
-  fullName: string; // Renamed from 'name'
+  lastName: string; // Last name
+  firstName: string; // First name
   familyId: string;
   gender?: 'male' | 'female' | 'other';
   dateOfBirth?: Date; // Renamed from 'birthDate'

@@ -27,7 +27,14 @@ export const useMemberStore = defineStore('member', {
     filteredMembers: (state): Member[] => {
       const f = state.filters;
       return state.members.filter((m: Member) => {
-        if (f.fullName && !m.fullName.toLowerCase().includes(f.fullName.toLowerCase())) return false;
+        if (f.fullName) {
+          const lowerCaseFullName = f.fullName.toLowerCase();
+          if (!(m.lastName.toLowerCase().includes(lowerCaseFullName) ||
+              m.firstName.toLowerCase().includes(lowerCaseFullName) ||
+              `${m.lastName} ${m.firstName}`.toLowerCase().includes(lowerCaseFullName))) {
+            return false;
+          }
+        }
         // Compare Date objects
         if (f.dateOfBirth && m.dateOfBirth && m.dateOfBirth.toISOString().split('T')[0] !== f.dateOfBirth.toISOString().split('T')[0]) return false;
         if (f.dateOfDeath && m.dateOfDeath && m.dateOfDeath.toISOString().split('T')[0] !== f.dateOfDeath.toISOString().split('T')[0]) return false;
@@ -80,8 +87,8 @@ export const useMemberStore = defineStore('member', {
       this.loading = true;
       this.error = null;
       try {
-        if(newMember.fullName.trim() === '') {
-          throw new Error('Tên đầy đủ không được để trống.');
+        if(newMember.lastName.trim() === '' || newMember.firstName.trim() === '') {
+          throw new Error('Họ và tên không được để trống.');
         }
         if(newMember.dateOfBirth && newMember.dateOfDeath && newMember.dateOfBirth > newMember.dateOfDeath) {
           throw new Error('Ngày sinh không thể sau ngày mất.');
@@ -107,8 +114,8 @@ export const useMemberStore = defineStore('member', {
       this.loading = true;
       this.error = null;
       try {
-        if(updatedMember.fullName.trim() === '') {
-          throw new Error('Tên đầy đủ không được để trống.');
+        if(updatedMember.lastName.trim() === '' || updatedMember.firstName.trim() === '') {
+          throw new Error('Họ và tên không được để trống.');
         }
         if(updatedMember.dateOfBirth && updatedMember.dateOfDeath && updatedMember.dateOfBirth > updatedMember.dateOfDeath) {
           throw new Error('Ngày sinh không thể sau ngày mất.');

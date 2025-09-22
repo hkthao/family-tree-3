@@ -32,7 +32,7 @@
     <template #item.fullName="{ item }">
       <div class="text-left">
         <v-btn variant="text" color="primary" @click.prevent="viewMember(item)" class="text-none">
-          {{ item.fullName }}
+          {{ item.lastName }} {{ item.firstName }}
         </v-btn>
       </div>
     </template>
