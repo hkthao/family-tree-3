@@ -1,4 +1,5 @@
 import type { Member } from '@/types/member';
+import type { ICrudService } from '../common/crud.service.interface'; // Import ICrudService
 
 export interface MemberFilter {
   fullName?: string;
@@ -11,12 +12,7 @@ export interface MemberFilter {
   familyId?: string | undefined;
 }
 
-export interface IMemberService {
-  fetchMembers(): Promise<Member[]>;
-  fetchMembersByFamilyId(familyId: string): Promise<Member[]>;
-  getMemberById(id: string): Promise<Member | undefined>;
-  addMember(newMember: Omit<Member, 'id'>): Promise<Member>;
-  updateMember(updatedMember: Member): Promise<Member>;
-  deleteMember(id: string): Promise<void>;
-  searchMembers(filters: MemberFilter): Promise<Member[]>; // Added searchMembers
+export interface IMemberService extends ICrudService<Member> { // Extend ICrudService
+  fetchMembersByFamilyId(familyId: string): Promise<Member[]>; // Keep specific method
+  searchMembers(filters: MemberFilter): Promise<Member[]>; // Keep specific method
 }
