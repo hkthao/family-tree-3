@@ -2,35 +2,33 @@ import type { Family } from '@/types/family';
 import type { IFamilyService } from './family.service.interface';
 import { generateMockFamilies, generateMockFamily } from '@/data/mock/family.mock';
 import type { Paginated } from '@/types/pagination'; // Import generic Paginated interface
+import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 
 export class MockFamilyService implements IFamilyService {
   private families: Family[] = generateMockFamilies(10);
 
-  private simulateLatency<T>(data: T): Promise<T> {
-    return new Promise((resolve) => setTimeout(() => resolve(data), 300));
-  }
+  // simulateLatency method removed
 
   async fetch(): Promise<Family[]> { // Renamed from fetchFamilies
-    return this.simulateLatency(this.families);
+    return simulateLatency(this.families);
   }
-
   async getById(id: string): Promise<Family | undefined> { // Renamed from getFamilyById
     const family = this.families.find((f) => f.id === id);
-    return this.simulateLatency(family);
+    return simulateLatency(family);
   }
 
   async add(newItem: Omit<Family, 'id'>): Promise<Family> { // Renamed from addFamily
     const familyToAdd = generateMockFamily(); // Generate a new ID and some default data
     Object.assign(familyToAdd, newItem); // Overlay provided data
     this.families.push(familyToAdd);
-    return this.simulateLatency(familyToAdd);
+    return simulateLatency(familyToAdd);
   }
 
   async update(updatedItem: Family): Promise<Family> { // Renamed from updateFamily
     const index = this.families.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
       this.families[index] = updatedItem;
-      return this.simulateLatency(updatedItem);
+      return simulateLatency(updatedItem);
     }
     throw new Error('Family not found');
   }
@@ -41,7 +39,7 @@ export class MockFamilyService implements IFamilyService {
     if (this.families.length === initialLength) {
       throw new Error('Family not found');
     }
-    return this.simulateLatency(undefined);
+    return simulateLatency(undefined);
   }
 
   async searchFamilies(
@@ -73,7 +71,7 @@ export class MockFamilyService implements IFamilyService {
     const end = start + itemsPerPage;
     const items = filtered.slice(start, end);
 
-    return this.simulateLatency({
+    return simulateLatency({
       items,
       totalItems,
       totalPages,
