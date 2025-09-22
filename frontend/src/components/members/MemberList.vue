@@ -22,7 +22,7 @@
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
         <v-avatar size="36" class="my-2">
-          <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="`${item.firstName} ${item.lastName}`" />
+          <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="memberStore.getMemberFullName(item)" />
           <v-icon v-else>mdi-account-circle</v-icon>
         </v-avatar>
       </div>
@@ -32,7 +32,7 @@
     <template #item.fullName="{ item }">
       <div class="text-left">
         <v-btn variant="text" color="primary" @click.prevent="viewMember(item)" class="text-none">
-          {{ item.lastName }} {{ item.firstName }}
+          {{ memberStore.getMemberFullName(item) }}
         </v-btn>
       </div>
     </template>
@@ -75,8 +75,9 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types/member';
-import type { Family } from '@/services/family.service';
+import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
+import { useMemberStore } from '@/stores/member.store';
 
 const props = defineProps({
   members: {
@@ -105,12 +106,13 @@ console.log('MemberList received families:', props.families);
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
 
 const { t } = useI18n();
+const memberStore = useMemberStore();
 
 const itemsPerPage = ref(10);
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('member.list.headers.avatar'), key: 'avatarUrl', sortable: false, width: '80px', align: 'center' },
-  { title: t('member.list.headers.fullName'), key: 'fullName', width: 'auto', align: 'start' },
+  { title: t('member.list.headers.fullName'), key: 'fullNameDisplay', width: 'auto', align: 'start' },
   { title: t('member.list.headers.family'), key: 'family', width: 'auto', align: 'start' },
   { title: t('member.list.headers.dateOfBirth'), key: 'dateOfBirth', width: '120px', align: 'center' },
   { title: t('member.list.headers.gender'), key: 'gender', width: '100px', align: 'center' },
