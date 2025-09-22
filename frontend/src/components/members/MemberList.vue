@@ -22,7 +22,7 @@
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
         <v-avatar size="36" class="my-2">
-          <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="item.fullName" />
+          <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="`${item.firstName} ${item.lastName}`" />
           <v-icon v-else>mdi-account-circle</v-icon>
         </v-avatar>
       </div>
