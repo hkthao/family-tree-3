@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useFamilyStore } from '@/stores/family.store'; // Updated import path
+import { describe, it, expect, beforeEach } from 'vitest';
 import type { Family } from '@/types/family';
-import type { IFamilyService, PaginatedFamilies } from '@/services/family/family.service.interface';
+import type { IFamilyService } from '@/services/family/family.service.interface'; // Removed PaginatedFamilies
 import { generateMockFamilies, generateMockFamily } from '@/data/mock/family.mock';
+import type { Paginated } from '@/types/pagination'; // Import generic Paginated interface
+import { useFamilyStore } from '@/stores/family.store';
 
 // Create a mock service for testing
 class MockFamilyServiceForTest implements IFamilyService {
@@ -24,26 +25,26 @@ class MockFamilyServiceForTest implements IFamilyService {
     }, 0));
   }
 
-  async fetchFamilies(): Promise<Family[]> {
+  async fetch(): Promise<Family[]> { // Renamed from fetchFamilies
     return this.simulateLatency(this.families);
   }
-  async getFamilyById(id: string): Promise<Family | undefined> {
+  async getById(id: string): Promise<Family | undefined> { // Renamed from getFamilyById
     return this.simulateLatency(this.families.find((f) => f.id === id));
   }
-  async addFamily(newFamily: Omit<Family, 'id'>): Promise<Family> {
-    const familyToAdd = { ...newFamily, id: generateMockFamily().id };
+  async add(newItem: Omit<Family, 'id'>): Promise<Family> { // Renamed from addFamily
+    const familyToAdd = { ...newItem, id: generateMockFamily().id };
     this._families.push(familyToAdd);
     return this.simulateLatency(familyToAdd);
   }
-  async updateFamily(updatedFamily: Family): Promise<Family> {
-    const index = this._families.findIndex((f) => f.id === updatedFamily.id);
+  async update(updatedItem: Family): Promise<Family> { // Renamed from updateFamily
+    const index = this._families.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
-      this._families[index] = updatedFamily;
-      return this.simulateLatency(updatedFamily);
+      this._families[index] = updatedItem;
+      return this.simulateLatency(updatedItem);
     }
     throw new Error('Family not found');
   }
-  async deleteFamily(id: string): Promise<void> {
+  async delete(id: string): Promise<void> { // Renamed from deleteFamily
     const initialLength = this._families.length;
     this._families = this._families.filter((f) => f.id !== id);
     if (this._families.length === initialLength) {
@@ -57,7 +58,7 @@ class MockFamilyServiceForTest implements IFamilyService {
     visibility: 'all' | 'public' | 'private',
     page: number,
     itemsPerPage: number
-  ): Promise<PaginatedFamilies> {
+  ): Promise<Paginated<Family>> { // Use generic Paginated interface
     let filtered = this._families;
 
     // Filter by searchQuery

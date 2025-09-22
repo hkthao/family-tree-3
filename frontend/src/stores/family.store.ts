@@ -51,7 +51,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         // Use the injected service
-        const addedFamily = await this.services.family.addFamily(newFamily);
+        const addedFamily = await this.services.family.add(newFamily); // Renamed to add
         await this._loadFamilies(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể thêm gia đình.';
@@ -66,7 +66,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         // Use the injected service
-        const updated = await this.services.family.updateFamily(updatedFamily);
+        const updated = await this.services.family.update(updatedFamily); // Renamed to update
         const index = this.families.findIndex((f) => f.id === updated.id);
         if (index !== -1) {
           this.families[index] = updated;
@@ -86,7 +86,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       this.error = null;
       try {
-        await this.services.family.deleteFamily(id);
+        await this.services.family.delete(id); // Renamed to delete
         await this._loadFamilies(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể xóa gia đình.';

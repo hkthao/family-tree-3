@@ -15,7 +15,7 @@ export class MockMemberService implements IMemberService {
     }, 0));
   }
 
-  async fetchMembers(): Promise<Member[]> {
+  async fetch(): Promise<Member[]> { // Renamed from fetchMembers
     return this.simulateLatency(this.members);
   }
 
@@ -24,31 +24,29 @@ export class MockMemberService implements IMemberService {
     return this.simulateLatency(filteredMembers);
   }
 
-  async getMemberById(id: string): Promise<Member | undefined> {
+  async getById(id: string): Promise<Member | undefined> { // Renamed from getMemberById
     const member = this.members.find((m) => m.id === id);
     return this.simulateLatency(member);
   }
 
-  async addMember(newMember: Omit<Member, 'id'>): Promise<Member> {
-    // Ensure dateOfBirth and dateOfDeath are Date objects if they exist
+  async add(newItem: Omit<Member, 'id'>): Promise<Member> { // Renamed from addMember
     const memberToAdd: Member = {
-      ...newMember,
+      ...newItem,
       id: generateMockMember().id,
-      dateOfBirth: newMember.dateOfBirth ? new Date(newMember.dateOfBirth) : undefined,
-      dateOfDeath: newMember.dateOfDeath ? new Date(newMember.dateOfDeath) : undefined,
+      dateOfBirth: newItem.dateOfBirth ? new Date(newItem.dateOfBirth) : undefined,
+      dateOfDeath: newItem.dateOfDeath ? new Date(newItem.dateOfDeath) : undefined,
     };
     this.members.push(memberToAdd);
     return this.simulateLatency(memberToAdd);
   }
 
-  async updateMember(updatedMember: Member): Promise<Member> {
-    const index = this.members.findIndex((m) => m.id === updatedMember.id);
+  async update(updatedItem: Member): Promise<Member> { // Renamed from updateMember
+    const index = this.members.findIndex((m) => m.id === updatedItem.id);
     if (index !== -1) {
-      // Ensure dateOfBirth and dateOfDeath are Date objects if they exist
       const memberToUpdate: Member = {
-        ...updatedMember,
-        dateOfBirth: updatedMember.dateOfBirth ? new Date(updatedMember.dateOfBirth) : undefined,
-        dateOfDeath: updatedMember.dateOfDeath ? new Date(updatedMember.dateOfDeath) : undefined,
+        ...updatedItem,
+        dateOfBirth: updatedItem.dateOfBirth ? new Date(updatedItem.dateOfBirth) : undefined,
+        dateOfDeath: updatedItem.dateOfDeath ? new Date(updatedItem.dateOfDeath) : undefined,
       };
       this.members[index] = memberToUpdate;
       return this.simulateLatency(memberToUpdate);
@@ -56,7 +54,7 @@ export class MockMemberService implements IMemberService {
     throw new Error('Member not found');
   }
 
-  async deleteMember(id: string): Promise<void> {
+  async delete(id: string): Promise<void> { // Renamed from deleteMember
     const initialLength = this.members.length;
     this.members = this.members.filter((m) => m.id !== id);
     if (this.members.length === initialLength) {

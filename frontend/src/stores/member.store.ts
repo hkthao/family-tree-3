@@ -73,7 +73,7 @@ export const useMemberStore = defineStore('member', {
       try {
         this.members = familyId
           ? await this.services.member.fetchMembersByFamilyId(familyId)
-          : await this.services.member.fetchMembers();
+          : await this.services.member.fetch(); // Renamed to fetch
         this.currentPage = 1;
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Không thể tải danh sách thành viên.';
@@ -97,19 +97,22 @@ export const useMemberStore = defineStore('member', {
           this.loading = false;
           return; // Return early
         }
-
+        if(newMember.placeOfBirth && newMember.placeOfDeath && newMember.placeOfBirth === newMember.placeOfDeath) {
+          this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
+          this.loading = false;
+          return; // Return early
+        }
         if(newMember.occupation && newMember.occupation.length > 100) {
           this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
           this.loading = false;
           return; // Return early
         }
         
-        const added = await this.services.member.addMember(newMember);
+        const added = await this.services.member.add(newMember); // Renamed to add
         this.members.push(added);
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Không thể thêm thành viên.';
         console.error(e);
-        // No need to re-throw here, as validation errors are handled above
       } finally {
         this.loading = false;
       }
@@ -129,19 +132,22 @@ export const useMemberStore = defineStore('member', {
           this.loading = false;
           return; // Return early
         }
-
+        if(updatedMember.placeOfBirth && updatedMember.placeOfDeath && updatedMember.placeOfBirth === updatedMember.placeOfDeath) {
+          this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
+          this.loading = false;
+          return; // Return early
+        }
         if(updatedMember.occupation && updatedMember.occupation.length > 100) {
           this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
           this.loading = false;
           return; // Return early
         }
-        const updated = await this.services.member.updateMember(updatedMember);
+        const updated = await this.services.member.update(updatedMember); // Renamed to update
         const idx = this.members.findIndex((m) => m.id === updated.id);
         if (idx !== -1) this.members[idx] = updated;
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Không thể cập nhật thành viên.';
         console.error(e);
-        // No need to re-throw here, as validation errors are handled above
       } finally {
         this.loading = false;
       }
@@ -151,7 +157,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = true;
       this.error = null;
       try {
-        await this.services.member.deleteMember(id);
+        await this.services.member.delete(id); // Renamed to delete
         this.members = this.members.filter((m) => m.id !== id);
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
