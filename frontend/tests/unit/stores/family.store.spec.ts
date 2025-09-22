@@ -109,7 +109,7 @@ describe('Family Store', () => {
     await store._loadFamilies(); // Ensure store is populated before tests run
   });
 
-  it('should have correct initial state after loading families', () => {
+  it('should have correct state after initial load', () => {
     const store = useFamilyStore();
     // After beforeEach, store should be populated
     expect(store.families.length).toBe(5); // 5 items per page

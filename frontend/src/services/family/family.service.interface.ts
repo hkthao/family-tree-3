@@ -1,10 +1,5 @@
 import type { Family } from '@/types/family';
-
-export interface PaginatedFamilies {
-  items: Family[];
-  totalItems: number;
-  totalPages: number;
-}
+import type { Paginated } from '@/types/pagination'; // Import generic Paginated interface
 
 export interface IFamilyService {
   fetchFamilies(): Promise<Family[]>;
@@ -17,5 +12,5 @@ export interface IFamilyService {
     visibility: 'all' | 'public' | 'private',
     page: number,
     itemsPerPage: number
-  ): Promise<PaginatedFamilies>;
+  ): Promise<Paginated<Family>>; // Use generic Paginated interface
 }
