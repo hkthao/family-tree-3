@@ -1,6 +1,7 @@
 import type { App } from 'vue';
 import type { PiniaPluginContext } from 'pinia';
-import { MockFamilyService, ApiFamilyService, IFamilyService, MockMemberService, ApiMemberService, IMemberService } from '@/services';
+import { MockFamilyService, ApiFamilyService, MockMemberService, ApiMemberService } from '@/services';
+import type { IFamilyService, IMemberService } from '@/services'; // Use import type for interfaces
 
 declare module 'pinia' {
   export interface PiniaCustomProperties {

@@ -6,6 +6,7 @@ export function generateMockFamily(id?: string): Family {
     id: id || faker.string.uuid(),
     name: faker.person.lastName() + ' Family',
     description: faker.lorem.sentence(),
+    visibility: faker.helpers.arrayElement(['public', 'private']),
   };
 }
 

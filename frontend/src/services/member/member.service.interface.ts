@@ -18,4 +18,5 @@ export interface IMemberService {
   addMember(newMember: Omit<Member, 'id'>): Promise<Member>;
   updateMember(updatedMember: Member): Promise<Member>;
   deleteMember(id: string): Promise<void>;
+  searchMembers(filters: MemberFilter): Promise<Member[]>; // Added searchMembers
 }
