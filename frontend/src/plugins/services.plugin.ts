@@ -1,6 +1,6 @@
 import type { App } from 'vue';
 import type { PiniaPluginContext } from 'pinia';
-import { createServices, type ServiceMode, type AppServices } from '@/services/service.factory'; // Import the factory
+import { createServices, type ServiceMode } from '@/services/service.factory'; // Import the factory
 
 
 export function ServicesPlugin() {

@@ -7,8 +7,6 @@ import type { Paginated } from '@/types/pagination'; // Import generic Paginated
 import { useFamilyStore } from '@/stores/family.store';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 import { createServices } from '@/services/service.factory';
-import type { IMemberService } from '@/services/member/member.service.interface';
-import type { Member } from '@/types/member';
 
 // Create a mock service for testing
 class MockFamilyServiceForTest implements IFamilyService {
@@ -85,38 +83,11 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 }
 
-class MockMemberServiceForTest implements IMemberService {
-  async fetch(): Promise<Member[]> {
-    return [];
-  }
-  async getById(id: string): Promise<Member | undefined> {
-    return undefined;
-  }
-  async add(newItem: Omit<Member, 'id'>): Promise<Member> {
-    throw new Error('Method not implemented.');
-  }
-  async update(updatedItem: Member): Promise<Member> {
-    throw new Error('Method not implemented.');
-  }
-  async delete(id: string): Promise<void> {
-    throw new Error('Method not implemented.');
-  }
-  async searchMembers(
-    searchQuery: string,
-    page: number,
-    itemsPerPage: number
-  ): Promise<Paginated<Member>> {
-    return { items: [], totalItems: 0, totalPages: 0 };
-  }
-}
-
 describe('Family Store', () => {
   let mockFamilyService: MockFamilyServiceForTest;
-  let mockMemberService: MockMemberServiceForTest; // Declare mockMemberService
 
   beforeEach(async () => {
     mockFamilyService = new MockFamilyServiceForTest();
-    mockMemberService = new MockMemberServiceForTest(); // Instantiate mockMemberService
     const pinia = createPinia();
     setActivePinia(pinia);
     const store = useFamilyStore(); // Get the store instance
@@ -125,7 +96,6 @@ describe('Family Store', () => {
     // Pass mockMemberService to createServices
     store.services = createServices('test', {
       family: mockFamilyService,
-      member: mockMemberService,
     });
 
     await store._loadFamilies(); // Ensure store is populated before tests run
