@@ -60,13 +60,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const { members, totalItems: totalMembers, loading } = storeToRefs(memberStore);
-const familyStore = useFamilyStore();
-const { families } = storeToRefs(familyStore);
-
-const currentFilters = ref<MemberFilter>({});
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const { members, totalItems: totalMembers, loading, currentPage, itemsPerPage } = storeToRefs(memberStore);
 
 import { useRouter } from 'vue-router';
 
@@ -119,9 +113,8 @@ const handleFilterUpdate = (filters: MemberFilter) => {
 };
 
 const handleListOptionsUpdate = (options: { page: number; itemsPerPage: number }) => {
-  currentPage.value = options.page;
-  itemsPerPage.value = options.itemsPerPage;
-  loadMembers();
+  memberStore.setPage(options.page);
+  memberStore.setItemsPerPage(options.itemsPerPage);
 };
 
 const confirmDelete = (member: Member) => {
