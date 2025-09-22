@@ -3,7 +3,7 @@ import type { Family } from '@/types/family';
 import type { Paginated } from '@/types/pagination'; // Correct placement of import
 import { createServices, type ServiceMode } from '@/services/service.factory';
 
-const isMockApi = import.meta.env.VITE_APP_USE_MOCK_API === 'true';
+const isMockApi = import.meta.env.VITE_USE_MOCK === 'true';
 const mode: ServiceMode = isMockApi ? 'mock' : 'real';
 const services = createServices(mode);
 
