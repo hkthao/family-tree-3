@@ -12,7 +12,7 @@ export const mockMembers = Array.from({ length: 50 }, () => {
     id: faker.string.uuid(),
     familyId: faker.string.uuid(), // Placeholder, will be linked in actual app
     fullName: faker.person.fullName({ sex }),
-    givenName: faker.person.firstName({ sex }),
+    givenName: faker.person.firstName(sex),
     nicknames: faker.helpers.arrayElements([faker.person.firstName(), faker.person.lastName()], { min: 0, max: 2 }),
     gender: gender,
     dob: dob.toISOString(),

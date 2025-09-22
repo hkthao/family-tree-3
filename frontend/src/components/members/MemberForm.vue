@@ -121,7 +121,7 @@
             <v-row>
               <v-col cols="12" md="4">
                 <v-autocomplete
-                  v-model="memberForm.fatherId as string | null"
+                  v-model="(memberForm.fatherId as any)"
                   :label="t('member.form.father')"
                   :items="[]"
                   item-title="fullName"
@@ -131,7 +131,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
-                  v-model="memberForm.motherId as string | null"
+                  v-model="(memberForm.motherId as any)"
                   :label="t('member.form.mother')"
                   :items="[]"
                   item-title="fullName"
@@ -141,7 +141,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
-                  v-model="memberForm.spouseId as string | null"
+                  v-model="(memberForm.spouseId as any)"
                   :label="t('member.form.spouse')"
                   :items="[]"
                   item-title="fullName"
@@ -213,7 +213,12 @@ const tab = ref('general'); // Default to general tab
 
 const form = ref<HTMLFormElement | null>(null);
 const timelineEvents = ref<TimelineEvent[]>([]);
-const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData || {
+const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData ? {
+  ...props.initialMemberData,
+  fatherId: props.initialMemberData.fatherId === undefined ? null : props.initialMemberData.fatherId,
+  motherId: props.initialMemberData.motherId === undefined ? null : props.initialMemberData.motherId,
+  spouseId: props.initialMemberData.spouseId === undefined ? null : props.initialMemberData.spouseId,
+} : {
   lastName: '',
   firstName: '',
   fullName: '',
@@ -229,21 +234,18 @@ const rules = {
   required: (value: unknown) => !!value || t('validation.required'),
 };
 
-const dateOfDeathRule = (value: Date | null) => {
+const dateOfDeathRule = (value: string | Date | null) => {
   if (!value) return true; // Optional field
   if (!memberForm.value.dateOfBirth) return true; // Cannot compare if dateOfBirth is not set
 
-  const dateOfDeath = new Date(value);
-  const dateOfBirth = new Date(memberForm.value.dateOfBirth);
+  const dateOfDeath = typeof value === 'string' ? new Date(value) : value;
+  const dateOfBirth = typeof memberForm.value.dateOfBirth === 'string'
+    ? new Date(memberForm.value.dateOfBirth)
+    : memberForm.value.dateOfBirth;
 
+  if (!dateOfDeath || !dateOfBirth) return true;
   return dateOfDeath > dateOfBirth || t('validation.dateOfDeathAfterBirth');
 };
-
-
-
-
-
-
 
 const submitForm = async () => {
   if (form.value) {

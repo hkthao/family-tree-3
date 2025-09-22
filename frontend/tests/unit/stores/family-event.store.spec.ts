@@ -143,6 +143,8 @@ describe('Family Event Store', () => {
     const initialTotalItems = store.totalItems;
     const newEventData: Omit<FamilyEvent, 'id'> = {
       name: 'New Event',
+      description: 'This is a new event',
+      type: 'Birth',
       startDate: new Date(),
       familyId: mockFamilyEventService.familyEvents[0].familyId,
     };
@@ -214,7 +216,7 @@ describe('Family Event Store', () => {
     await store._loadFamilyEvents();
 
     const existingEvent = mockFamilyEventService.familyEvents[0];
-    const searchFamilyId = existingEvent.familyId;
+    const searchFamilyId = existingEvent.familyId || 'non-existent-family';
 
     await store.searchFamilyEvents('', searchFamilyId);
     const expectedFilteredCount = mockFamilyEventService.familyEvents.filter(e => e.familyId === searchFamilyId).length;

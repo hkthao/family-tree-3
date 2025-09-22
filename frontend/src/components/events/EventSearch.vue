@@ -83,7 +83,7 @@ const expanded = ref(false); // Default to collapsed
 const filters = ref<EventFilter>({
   name: '',
   type: undefined,
-  familyId: null,
+  familyId: null, // familyId should be string or null, not undefined
   startDate: undefined,
   endDate: undefined,
   location: '',
@@ -110,7 +110,7 @@ const resetFilters = () => {
   filters.value = {
     name: '',
     type: undefined,
-    familyId: '',
+    familyId: null, // familyId should be string or null, not undefined
     startDate: undefined,
     endDate: undefined,
     location: '',
