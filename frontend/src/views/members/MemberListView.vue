@@ -47,21 +47,21 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { useMembersStore } from '@/stores/members';
-import { useFamiliesStore } from '@/stores/families';
-import type { Member, MemberFilter } from '@/services/member.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Family } from '@/services/family.service';
+import { useMemberStore } from '@/stores/member.store';
+import { useFamilyStore } from '@/stores/family.store';
+import type { Member, MemberFilter } from '@/types/member';
+import type { Family } from '@/types/family';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import MemberForm from '@/components/members/MemberForm.vue';
+import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
-const membersStore = useMembersStore();
-const { items: members, total: totalMembers, loading } = storeToRefs(membersStore);
-const familiesStore = useFamiliesStore();
-const { items: families } = storeToRefs(familiesStore);
+const memberStore = useMemberStore();
+const { members, totalItems: totalMembers, loading } = storeToRefs(memberStore);
+const familyStore = useFamilyStore();
+const { families } = storeToRefs(familyStore);
 
 const currentFilters = ref<MemberFilter>({});
 const currentPage = ref(1);
@@ -76,25 +76,21 @@ const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete
 const viewDialog = ref(false);
 const selectedMemberForView = ref<Member | null>(null);
 
-import { useNotificationStore } from '@/stores/notification';
-
 const notificationStore = useNotificationStore();
 
 // Function Declarations (moved to top)
 const loadMembers = async () => {
-  await membersStore.fetchAll(
-    currentFilters.value.fullName,
-    currentPage.value,
-    itemsPerPage.value
+  await memberStore.searchMembers(
+    currentFilters.value
   );
 };
 
 const loadAllMembers = async () => {
-  await membersStore.fetchAll({}, 1, -1); // Fetch all members
+  await memberStore.fetchMembers(); // Fetch all members
 };
 
 const loadFamilies = async () => {
-  await familiesStore.fetchAll('', 1, -1);
+  await familyStore.searchFamilies('', 'all');
 };
 
 const openViewDialog = (member: Member) => {
@@ -135,9 +131,9 @@ const confirmDelete = (member: Member) => {
 const handleDeleteConfirm = async () => {
   if (memberToDelete.value) {
     try {
-      await membersStore.remove(memberToDelete.value.id);
+      await memberStore.deleteMember(memberToDelete.value.id);
       notificationStore.showSnackbar(t('member.messages.deleteSuccess'), 'success');
-      await membersStore.fetchAll(); // Reload members after deletion
+      await memberStore.fetchMembers(); // Reload members after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
     }
