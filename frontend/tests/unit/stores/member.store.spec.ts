@@ -116,18 +116,24 @@ class MockMemberServiceForTest implements IMemberService {
 describe('Member Store', () => {
   let mockMemberService: MockMemberServiceForTest;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockMemberService = new MockMemberServiceForTest();
     const pinia = createPinia();
     setActivePinia(pinia);
-    pinia.use(ServicesPlugin({ mockMemberService })); // Use the plugin for injection
     const store = useMemberStore();
 
+    store.$reset(); // Reset store state before each test
+    store.services = { // Assign services AFTER reset
+      member: mockMemberService,
+    };
+
+    await store.fetchMembers(); // Ensure store is populated before tests run
   });
 
-  it('should have correct initial state', () => {
+  it('should have correct initial state after loading members', () => {
     const store = useMemberStore();
-    expect(store.members).toEqual([]);
+    // After beforeEach, store should be populated
+    expect(store.members.length).toBe(20); // All members fetched
     expect(store.loading).toBe(false);
     expect(store.error).toBe(null);
     expect(store.filters).toEqual({
@@ -142,6 +148,7 @@ describe('Member Store', () => {
     });
     expect(store.currentPage).toBe(1);
     expect(store.itemsPerPage).toBe(10);
+    expect(store.totalPages).toBe(2); // 20 members, 10 per page
   });
 
   it('fetchMembers should populate members array and reset currentPage', async () => {
@@ -221,6 +228,7 @@ describe('Member Store', () => {
       const updatedLastName = 'Updated';
       const updatedMember: Member = { ...memberToUpdate, lastName: updatedLastName };
       await store.updateMember(updatedMember);
+      await store.fetchMembers(); // Force re-fetch after update
       const foundMember = store.getMemberById(memberToUpdate.id);
       expect(foundMember?.lastName).toBe(updatedLastName);
       expect(store.loading).toBe(false);

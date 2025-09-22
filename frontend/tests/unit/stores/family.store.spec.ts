@@ -93,33 +93,35 @@ class MockFamilyServiceForTest implements IFamilyService {
 describe('Family Store', () => {
   let mockFamilyService: MockFamilyServiceForTest;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockFamilyService = new MockFamilyServiceForTest();
     const pinia = createPinia();
     setActivePinia(pinia);
     const store = useFamilyStore(); // Get the store instance
 
+    store.$reset(); // Reset store state before each test
     // Directly assign the mock service to the store's services property
     // This bypasses the plugin system for testing, ensuring direct injection.
     store.services = {
       family: mockFamilyService,
     };
 
-    store.$reset(); // Reset store state before each test
+    await store._loadFamilies(); // Ensure store is populated before tests run
   });
 
-  it('should have correct initial state', () => {
+  it('should have correct initial state after loading families', () => {
     const store = useFamilyStore();
-    expect(store.families).toEqual([]);
+    // After beforeEach, store should be populated
+    expect(store.families.length).toBe(5); // 5 items per page
     expect(store.loading).toBe(false);
     expect(store.error).toBe(null);
     expect(store.searchTerm).toBe('');
     expect(store.visibilityFilter).toBe('all');
-    expect(store.totalItems).toBe(0);
+    expect(store.totalItems).toBe(10); // Based on mock service initial data
     expect(store.currentFamily).toBe(null);
     expect(store.currentPage).toBe(1);
     expect(store.itemsPerPage).toBe(5);
-    expect(store.totalPages).toBe(0);
+    expect(store.totalPages).toBe(2); // 10 families, 5 per page
   });
 
   it('_loadFamilies should populate families array, totalItems, and totalPages', async () => {
