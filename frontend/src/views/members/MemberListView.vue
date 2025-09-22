@@ -4,7 +4,7 @@
 
     <MemberList
       :members="members"
-      :total-members="totalMembers"
+      :total-members="memberStore.filteredMembers.length"
       :loading="loading"
       :families="families"
       @update:options="handleListOptionsUpdate"
@@ -29,7 +29,7 @@
     <ConfirmDeleteDialog
       :model-value="deleteConfirmDialog"
       :title="t('confirmDelete.title')"
-      :message="t('member.list.confirmDelete', { fullName: memberToDelete?.fullName || '' })"
+      :message="t('member.list.confirmDelete', { fullName: `${memberToDelete?.firstName} ${memberToDelete?.lastName}` || '' })"
       @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel"
     />
@@ -60,7 +60,11 @@ import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const { members, totalItems: totalMembers, loading, currentPage, itemsPerPage } = storeToRefs(memberStore);
+const { members, loading, currentPage, itemsPerPage } = storeToRefs(memberStore);
+const familyStore = useFamilyStore();
+const { families } = storeToRefs(familyStore);
+
+const currentFilters = ref<MemberFilter>({});
 
 import { useRouter } from 'vue-router';
 
@@ -74,8 +78,8 @@ const selectedMemberForView = ref<Member | null>(null);
 const notificationStore = useNotificationStore();
 
 // Function Declarations (moved to top)
-const loadMembers = async () => {
-  await memberStore.searchMembers(
+const loadMembers = () => {
+  memberStore.searchMembers(
     currentFilters.value
   );
 };
