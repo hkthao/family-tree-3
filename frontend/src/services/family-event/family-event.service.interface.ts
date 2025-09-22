@@ -2,6 +2,11 @@ import type { FamilyEvent } from '@/types/family-event';
 import type { Paginated } from '@/types/pagination';
 import type { ICrudService } from '../common/crud.service.interface';
 
+export interface EventFilter {
+  title?: string;
+  familyId?: string;
+}
+
 export interface IFamilyEventService extends ICrudService<FamilyEvent> {
   searchFamilyEvents(
     searchQuery: string,

@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useFamilies } from '@/data/families';
+import { useFamilyStore } from '@/stores/family.store';
 import type { Family } from '@/types/family';
 
  defineProps<{
@@ -31,7 +31,7 @@ import type { Family } from '@/types/family';
   clearable?: boolean;
 }>();
 
-const { getFamilies } = useFamilies();
+const familyStore = useFamilyStore();
 const families = ref<Family[]>([]);
 
 interface VuetifyInternalItem {
@@ -39,8 +39,8 @@ interface VuetifyInternalItem {
 }
 
 onMounted(async () => {
-  const { families: fetchedFamilies } = await getFamilies('', 'All', 1, -1); // Fetch all families
-  families.value = fetchedFamilies;
+  await familyStore.searchFamilies('', 'all');
+  families.value = familyStore.families;
 });
 
 const familyFilter = (_value: string, query: string, item: VuetifyInternalItem | undefined ) => {
