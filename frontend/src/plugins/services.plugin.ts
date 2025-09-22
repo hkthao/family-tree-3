@@ -1,42 +1,23 @@
 import type { App } from 'vue';
 import type { PiniaPluginContext } from 'pinia';
-import { MockFamilyService, ApiFamilyService, MockMemberService, ApiMemberService } from '@/services';
+import { createServices, ServiceMode, AppServices } from '@/services/service.factory'; // Import the factory
 import type { IFamilyService, IMemberService } from '@/services'; // Use import type for interfaces
 
 declare module 'pinia' {
   export interface PiniaCustomProperties {
-    services: {
-      family: IFamilyService;
-      member: IMemberService; // Added member service
-      // Add other services here as they are created
-    };
+    services: AppServices; // Use AppServices from the factory
   }
 }
 
-interface ServicesPluginOptions {
-  mockFamilyService?: IFamilyService;
-  mockMemberService?: IMemberService;
-}
-
-export function ServicesPlugin(options: ServicesPluginOptions = {}) {
+export function ServicesPlugin() {
   return ({ store }: PiniaPluginContext) => {
     const isMockApi = import.meta.env.VITE_APP_USE_MOCK_API === 'true';
-
-    const familyService: IFamilyService = options.mockFamilyService
-      ? options.mockFamilyService
-      : (isMockApi ? new MockFamilyService() : new ApiFamilyService());
-
-    const memberService: IMemberService = options.mockMemberService
-      ? options.mockMemberService
-      : (isMockApi ? new MockMemberService() : new ApiMemberService());
+    const mode: ServiceMode = isMockApi ? 'mock' : 'real';
+    const services = createServices(mode);
 
     // Inject services into the store
     Object.defineProperty(store, 'services', {
-      value: {
-        family: familyService,
-        member: memberService,
-        // Add other services here
-      },
+      value: services,
       writable: false,
       configurable: false,
     });
@@ -49,3 +30,4 @@ export default {
     // No app-level installation needed for Pinia plugins, they are passed directly to Pinia
   },
 };
+
