@@ -1,11 +1,12 @@
 import type { App } from 'vue';
 import type { PiniaPluginContext } from 'pinia';
-import { MockFamilyService, ApiFamilyService, IFamilyService } from '@/services';
+import { MockFamilyService, ApiFamilyService, IFamilyService, MockMemberService, ApiMemberService, IMemberService } from '@/services';
 
 declare module 'pinia' {
   export interface PiniaCustomProperties {
     services: {
       family: IFamilyService;
+      member: IMemberService; // Added member service
       // Add other services here as they are created
     };
   }
@@ -18,10 +19,15 @@ export function ServicesPlugin({ store }: PiniaPluginContext) {
     ? new MockFamilyService()
     : new ApiFamilyService();
 
+  const memberService: IMemberService = isMockApi // Added member service instantiation
+    ? new MockMemberService()
+    : new ApiMemberService();
+
   // Inject services into the store
   Object.defineProperty(store, 'services', {
     value: {
       family: familyService,
+      member: memberService, // Added member service to value
       // Add other services here
     },
     writable: false,
