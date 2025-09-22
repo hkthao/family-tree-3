@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Family } from '@/types/family';
+import type { Paginated } from '@/types/pagination'; // Correct placement of import
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
@@ -28,7 +29,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         // Use the injected service to search with current state parameters
-        const response = await this.services.family.searchFamilies(
+        const response: Paginated<Family> = await this.services.family.searchFamilies(
           this.searchTerm,
           this.visibilityFilter,
           this.currentPage,

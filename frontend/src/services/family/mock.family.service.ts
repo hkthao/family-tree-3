@@ -1,6 +1,7 @@
 import type { Family } from '@/types/family';
 import type { IFamilyService } from './family.service.interface';
 import { generateMockFamilies, generateMockFamily } from '@/data/mock/family.mock';
+import type { Paginated } from '@/types/pagination'; // Import generic Paginated interface
 
 export class MockFamilyService implements IFamilyService {
   private families: Family[] = generateMockFamilies(10);
@@ -48,7 +49,7 @@ export class MockFamilyService implements IFamilyService {
     visibility: 'all' | 'public' | 'private',
     page: number,
     itemsPerPage: number
-  ): Promise<PaginatedFamilies> {
+  ): Promise<Paginated<Family>> { // Use generic Paginated interface
     let filtered = this.families;
 
     if (searchQuery) {
