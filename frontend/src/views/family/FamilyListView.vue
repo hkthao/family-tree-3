@@ -61,7 +61,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 const { t } = useI18n();
 const router = useRouter();
 
-const { families, totalItems: totalFamilies, loading } = storeToRefs(familyStore);
+const { families } = storeToRefs(familyStore);
 const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
