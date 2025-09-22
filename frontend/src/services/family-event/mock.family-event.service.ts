@@ -1,7 +1,7 @@
 import type { IFamilyEventService } from './family-event.service.interface';
 import type { FamilyEvent } from '@/types/family-event';
 import type { Paginated } from '@/types/pagination';
-import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/family-event.mock';
+import { generateMockFamilyEvents } from '@/data/mock/family-event.mock';
 import { simulateLatency } from '@/utils/mockUtils';
 
 export class MockFamilyEventService implements IFamilyEventService {
@@ -20,7 +20,7 @@ export class MockFamilyEventService implements IFamilyEventService {
   }
 
   async add(newItem: Omit<FamilyEvent, 'id'>): Promise<FamilyEvent> {
-    const familyEventToAdd = { ...newItem, id: generateMockFamilyEvent().id };
+    const familyEventToAdd = { ...newItem, id: 'mock-id-' + Math.random().toString(36).substring(7) };
     this._familyEvents.push(familyEventToAdd);
     return simulateLatency(familyEventToAdd);
   }
