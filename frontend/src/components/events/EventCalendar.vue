@@ -54,11 +54,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/services/familyEvent.service';
+import type { FamilyEvent } from '@/types/family-event';
 
 const props = defineProps<{
-  events: Event[];
+  events: FamilyEvent[];
 }>();
 
 const { t, locale } = useI18n();
@@ -122,7 +121,7 @@ interface FormattedEvent {
   end: Date;
   color: string;
   timed: boolean;
-  eventObject: Event;
+  eventObject: FamilyEvent;
 }
 
 const getEventColor = (event: FormattedEvent) => {
@@ -131,7 +130,7 @@ const getEventColor = (event: FormattedEvent) => {
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (_: Event, eventSlotScope: { event: { eventObject: Event } }) => {
+const showEventDetails = (_: Event, eventSlotScope: { event: { eventObject: FamilyEvent } }) => {
   emit('viewEvent', eventSlotScope);
 };
 </script>
