@@ -9,9 +9,13 @@ import 'vuetify/styles';
 import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
 
+import { ServicesPlugin } from './plugins/services.plugin'; // Import ServicesPlugin
+
 const app = createApp(App);
 
-app.use(createPinia());
+const pinia = createPinia(); // Create pinia instance
+pinia.use(ServicesPlugin); // Use the services plugin
+app.use(pinia); // Use pinia with the app
 app.use(router);
 app.use(vuetify);
 app.use(i18n);
