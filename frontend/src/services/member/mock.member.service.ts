@@ -30,8 +30,13 @@ export class MockMemberService implements IMemberService {
   }
 
   async addMember(newMember: Omit<Member, 'id'>): Promise<Member> {
-    // Use generateMockMember to get a proper UUID for the ID
-    const memberToAdd: Member = { ...newMember, id: generateMockMember().id };
+    // Ensure dateOfBirth and dateOfDeath are Date objects if they exist
+    const memberToAdd: Member = {
+      ...newMember,
+      id: generateMockMember().id,
+      dateOfBirth: newMember.dateOfBirth ? new Date(newMember.dateOfBirth) : undefined,
+      dateOfDeath: newMember.dateOfDeath ? new Date(newMember.dateOfDeath) : undefined,
+    };
     this.members.push(memberToAdd);
     return this.simulateLatency(memberToAdd);
   }
@@ -39,8 +44,14 @@ export class MockMemberService implements IMemberService {
   async updateMember(updatedMember: Member): Promise<Member> {
     const index = this.members.findIndex((m) => m.id === updatedMember.id);
     if (index !== -1) {
-      this.members[index] = updatedMember;
-      return this.simulateLatency(updatedMember);
+      // Ensure dateOfBirth and dateOfDeath are Date objects if they exist
+      const memberToUpdate: Member = {
+        ...updatedMember,
+        dateOfBirth: updatedMember.dateOfBirth ? new Date(updatedMember.dateOfBirth) : undefined,
+        dateOfDeath: updatedMember.dateOfDeath ? new Date(updatedMember.dateOfDeath) : undefined,
+      };
+      this.members[index] = memberToUpdate;
+      return this.simulateLatency(memberToUpdate);
     }
     throw new Error('Member not found');
   }
@@ -62,10 +73,12 @@ export class MockMemberService implements IMemberService {
       filteredMembers = filteredMembers.filter(m => m.fullName.toLowerCase().includes(lowerCaseFullName));
     }
     if (filters.dateOfBirth) {
-      filteredMembers = filteredMembers.filter(m => m.dateOfBirth === filters.dateOfBirth);
+      // Compare Date objects
+      filteredMembers = filteredMembers.filter(m => m.dateOfBirth?.toISOString().split('T')[0] === filters.dateOfBirth?.toISOString().split('T')[0]);
     }
     if (filters.dateOfDeath) {
-      filteredMembers = filteredMembers.filter(m => m.dateOfDeath === filters.dateOfDeath);
+      // Compare Date objects
+      filteredMembers = filteredMembers.filter(m => m.dateOfDeath?.toISOString().split('T')[0] === filters.dateOfDeath?.toISOString().split('T')[0]);
     }
     if (filters.gender) {
       filteredMembers = filteredMembers.filter(m => m.gender === filters.gender);
