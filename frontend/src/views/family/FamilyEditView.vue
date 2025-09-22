@@ -22,7 +22,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { useNotificationStore } from '@/stores/notification';
+import { useNotificationStore } from '@/stores/notification.store';
 import FamilyForm from '@/components/family/FamilyForm.vue';
 import type { Family } from '@/types/family';
 
