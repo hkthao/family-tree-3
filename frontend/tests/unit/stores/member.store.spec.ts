@@ -5,6 +5,7 @@ import type { Member } from '@/types/member';
 import type { IMemberService, MemberFilter } from '@/services/member/member.service.interface';
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
+import { createServices } from '@/services/service.factory';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
@@ -111,12 +112,8 @@ describe('Member Store', () => {
     const pinia = createPinia();
     setActivePinia(pinia);
     const store = useMemberStore();
-
     store.$reset(); // Reset store state before each test
-    store.services = { // Assign services AFTER reset
-      member: mockMemberService,
-    };
-
+    store.services = createServices('test', { member: mockMemberService });
     await store.fetchMembers(); // Ensure store is populated before tests run
   });
 
