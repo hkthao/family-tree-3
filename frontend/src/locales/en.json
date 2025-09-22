@@ -235,10 +235,5 @@
       "spouse": "Spouse",
       "child": "Child"
     }
-  },
-  "member": {
-    "form": {
-      "type": "Type"
-    }
   }
 }

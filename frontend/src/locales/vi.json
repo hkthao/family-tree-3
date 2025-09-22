@@ -236,10 +236,5 @@
       "spouse": "Vợ/Chồng",
       "child": "Con cái"
     }
-  },
-  "member": {
-    "form": {
-      "type": "Loại"
-    }
   }
 }
