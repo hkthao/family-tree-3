@@ -17,6 +17,7 @@ export interface AppServices {
 }
 
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
+  console.log(`Creating services in ${mode} mode.`);
   return {
     family:
       mode === 'mock'
