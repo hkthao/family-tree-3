@@ -12,19 +12,19 @@ export interface AppServices {
   member: IMemberService; 
 }
 
-export function createServices(mode: ServiceMode, testFamilyService?: IFamilyService, testMemberService?: IMemberService): AppServices {
+export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
   return {
     family:
       mode === 'mock'
         ? new MockFamilyService()
         : mode === 'real'
         ? new ApiFamilyService()
-        : testFamilyService || new MockFamilyService(), // Use provided test service or a generic mock
+        : testServices?.family || new MockFamilyService(), // Use testServices.family if provided
     member:
       mode === 'mock'
         ? new MockMemberService()
         : mode === 'real'
         ? new ApiMemberService()
-        : testMemberService || new MockMemberService(), // Use provided test service or a generic mock
+        : testServices?.member || new MockMemberService(), // Use testServices.member if provided
   };
 }

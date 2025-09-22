@@ -123,7 +123,10 @@ describe('Family Store', () => {
 
     store.$reset(); // Reset store state before each test
     // Pass mockMemberService to createServices
-    store.services = createServices('test', mockFamilyService, mockMemberService);
+    store.services = createServices('test', {
+      family: mockFamilyService,
+      member: mockMemberService,
+    });
 
     await store._loadFamilies(); // Ensure store is populated before tests run
   });
