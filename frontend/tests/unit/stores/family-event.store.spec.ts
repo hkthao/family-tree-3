@@ -143,7 +143,7 @@ describe('Family Event Store', () => {
     const initialTotalItems = store.totalItems;
     const newEventData: Omit<FamilyEvent, 'id'> = {
       name: 'New Event',
-      date: new Date(),
+      startDate: new Date(),
       familyId: mockFamilyEventService.familyEvents[0].familyId,
     };
     await store.addFamilyEvent(newEventData);

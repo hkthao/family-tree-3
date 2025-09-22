@@ -10,28 +10,27 @@
 
     <v-window v-model="selectedTab">
       <v-window-item value="table">
-        <EventList
-          :events="familyEventsStore.items"
-          :total-events="familyEventsStore.total"
-          :loading="familyEventsStore.loading"
-          @update:options="handleListOptionsUpdate"
-          @view="openViewDialog"
-          @edit="navigateToEditEvent"
-          @delete="confirmDelete"
-          @create="navigateToCreateView"
-        />
-      </v-window-item>
-      <v-window-item value="timeline">
-        <EventTimeline
-          :events="familyEventsStore.items"
-        />
-      </v-window-item>
-      <v-window-item value="calendar">
-        <EventCalendar
-          :events="familyEventsStore.items"
-          @viewEvent="openViewDialog"
-        />
-      </v-window-item>
+    <EventList
+      :events="familyEventStore.familyEvents"
+      :total-events="familyEventStore.totalItems"
+      :loading="familyEventStore.loading"
+      @update:options="handleListOptionsUpdate"
+      @view="openViewDialog"
+      @edit="navigateToEditEvent"
+      @delete="confirmDelete"
+      @create="navigateToCreateView"
+    />
+  </v-window-item>
+  <v-window-item value="timeline">
+    <EventTimeline
+      :events="familyEventStore.familyEvents"
+    />
+  </v-window-item>
+  <v-window-item value="calendar">
+    <EventCalendar
+      :events="familyEventStore.familyEvents"
+      @viewEvent="openViewDialog"
+    />
     </v-window>
 
     <v-alert
