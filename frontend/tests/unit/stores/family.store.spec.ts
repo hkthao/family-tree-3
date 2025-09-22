@@ -14,19 +14,25 @@ class MockFamilyServiceForTest implements IFamilyService {
     return [...this._families]; // Return a shallow copy
   }
 
-  private simulateLatency<T>(data: T): Promise<T> {
-    return new Promise((resolve) => setTimeout(() => resolve(data), 0)); // No actual latency needed for tests
+  private simulateLatency<T>(data: T, error?: string): Promise<T> {
+    return new Promise((resolve) => setTimeout(() => {
+      if (error) {
+        reject(new Error(error));
+      } else {
+        resolve(data);
+      }
+    }, 0));
   }
 
   async fetchFamilies(): Promise<Family[]> {
-    return this.simulateLatency(this.families); // Return copy
+    return this.simulateLatency(this.families);
   }
   async getFamilyById(id: string): Promise<Family | undefined> {
     return this.simulateLatency(this.families.find((f) => f.id === id));
   }
   async addFamily(newFamily: Omit<Family, 'id'>): Promise<Family> {
     const familyToAdd = { ...newFamily, id: generateMockFamily().id };
-    this._families.push(familyToAdd); // Modify private array
+    this._families.push(familyToAdd);
     return this.simulateLatency(familyToAdd);
   }
   async updateFamily(updatedFamily: Family): Promise<Family> {

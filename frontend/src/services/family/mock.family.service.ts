@@ -42,4 +42,40 @@ export class MockFamilyService implements IFamilyService {
     }
     return this.simulateLatency(undefined);
   }
+
+  async searchFamilies(
+    searchQuery: string,
+    visibility: 'all' | 'public' | 'private',
+    page: number,
+    itemsPerPage: number
+  ): Promise<PaginatedFamilies> {
+    let filtered = this.families;
+
+    if (searchQuery) {
+      const lowerCaseSearchQuery = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (family) =>
+          family.name.toLowerCase().includes(lowerCaseSearchQuery) ||
+          (family.description && family.description.toLowerCase().includes(lowerCaseSearchQuery))
+      );
+    }
+
+    // Note: Family mock data does not currently have a 'visibility' property.
+    // This filter will not have an effect unless mock data is updated.
+    if (visibility !== 'all') {
+      filtered = filtered.filter((family) => (family as any).visibility === visibility);
+    }
+
+    const totalItems = filtered.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const items = filtered.slice(start, end);
+
+    return this.simulateLatency({
+      items,
+      totalItems,
+      totalPages,
+    });
+  }
 }
