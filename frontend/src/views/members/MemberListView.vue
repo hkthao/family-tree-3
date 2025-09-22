@@ -4,9 +4,9 @@
 
     <MemberList
       :members="members"
-      :total-members="memberStore.filteredMembers.length"
-      :loading="loading"
-      :families="families"
+      :total-members="memberStore.members.length"
+      :families="familyStore.families"
+      :loading="memberStore.loading"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
       @edit="navigateToEditMember"
