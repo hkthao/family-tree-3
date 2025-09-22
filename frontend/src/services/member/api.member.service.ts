@@ -16,9 +16,24 @@ function transformMemberDates(member: any): Member {
   return member;
 }
 
-// Helper function to transform Date objects to ISO strings for API requests
+// Helper function to transform API response to Member object (fullName to lastName/firstName)
+function transformMemberNames(apiMember: any): Member {
+  const member: Member = { ...apiMember };
+  if (apiMember.fullName) {
+    const parts = apiMember.fullName.split(' ');
+    member.lastName = parts.length > 1 ? parts[0] : '';
+    member.firstName = parts.length > 1 ? parts.slice(1).join(' ') : parts[0] || '';
+  }
+  return member;
+}
+
+// Helper function to transform Member object to API request format (lastName/firstName to fullName)
 function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   const apiMember: any = { ...member };
+  apiMember.fullName = `${member.lastName} ${member.firstName}`.trim(); // Construct fullName
+  delete apiMember.lastName; // Remove lastName
+  delete apiMember.firstName; // Remove firstName
+
   if (apiMember.dateOfBirth instanceof Date) {
     apiMember.dateOfBirth = apiMember.dateOfBirth.toISOString();
   }
@@ -33,29 +48,29 @@ export class ApiMemberService implements IMemberService {
 
   async fetchMembers(): Promise<Member[]> {
     const response = await axios.get<Member[]>(this.apiUrl);
-    return response.data.map(transformMemberDates);
+    return response.data.map(m => transformMemberDates(transformMemberNames(m)));
   }
 
   async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
     const response = await axios.get<Member[]>(`${this.apiUrl}?familyId=${familyId}`);
-    return response.data.map(transformMemberDates);
+    return response.data.map(m => transformMemberDates(transformMemberNames(m)));
   }
 
   async getMemberById(id: string): Promise<Member | undefined> {
     const response = await axios.get<Member>(`${this.apiUrl}/${id}`);
-    return response.data ? transformMemberDates(response.data) : undefined;
+    return response.data ? transformMemberDates(transformMemberNames(response.data)) : undefined;
   }
 
   async addMember(newMember: Omit<Member, 'id'>): Promise<Member> {
     const apiMember = prepareMemberForApi(newMember);
     const response = await axios.post<Member>(this.apiUrl, apiMember);
-    return transformMemberDates(response.data);
+    return transformMemberDates(transformMemberNames(response.data));
   }
 
   async updateMember(updatedMember: Member): Promise<Member> {
     const apiMember = prepareMemberForApi(updatedMember);
     const response = await axios.put<Member>(`${this.apiUrl}/${updatedMember.id}`, apiMember);
-    return transformMemberDates(response.data);
+    return transformMemberDates(transformMemberNames(response.data));
   }
 
   async deleteMember(id: string): Promise<void> {
@@ -65,7 +80,7 @@ export class ApiMemberService implements IMemberService {
   async searchMembers(filters: MemberFilter): Promise<Member[]> {
     const params = new URLSearchParams();
     if (filters.fullName) params.append('fullName', filters.fullName);
-    // dateOfBirth and dateOfDeath in filters are strings, so no transformation needed here
+    // dateOfBirth and dateOfDeath in filters are Date objects, convert to ISO string for API
     if (filters.dateOfBirth) params.append('dateOfBirth', filters.dateOfBirth.toISOString());
     if (filters.dateOfDeath) params.append('dateOfDeath', filters.dateOfDeath.toISOString());
     if (filters.gender) params.append('gender', filters.gender);
@@ -75,6 +90,6 @@ export class ApiMemberService implements IMemberService {
     if (filters.familyId) params.append('familyId', filters.familyId);
 
     const response = await axios.get<Member[]>(`${this.apiUrl}?${params.toString()}`);
-    return response.data.map(transformMemberDates);
+    return response.data.map(m => transformMemberDates(transformMemberNames(m)));
   }
 }

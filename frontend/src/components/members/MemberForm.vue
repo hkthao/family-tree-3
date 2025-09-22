@@ -31,8 +31,16 @@
             <v-row>
               <v-col cols="12" md="6">
                 <v-text-field
-                  v-model="memberForm.fullName"
-                  :label="t('member.form.fullName')"
+                  v-model="memberForm.lastName"
+                  :label="t('member.form.lastName')"
+                  :rules="[rules.required]"
+                  :readonly="props.readOnly"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="memberForm.firstName"
+                  :label="t('member.form.firstName')"
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
                 ></v-text-field>
@@ -205,7 +213,8 @@ const tab = ref('general'); // Default to general tab
 
 const form = ref<HTMLFormElement | null>(null);
 const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData || {
-  fullName: '',
+  lastName: '',
+  firstName: '',
   dateOfBirth: null,
   gender: 'Male',
   familyId: '', // Add familyId
