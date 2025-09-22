@@ -1,13 +1,7 @@
 import type { App } from 'vue';
 import type { PiniaPluginContext } from 'pinia';
-import { createServices, ServiceMode, AppServices } from '@/services/service.factory'; // Import the factory
-import type { IFamilyService, IMemberService } from '@/services'; // Use import type for interfaces
+import { createServices, type ServiceMode, type AppServices } from '@/services/service.factory'; // Import the factory
 
-declare module 'pinia' {
-  export interface PiniaCustomProperties {
-    services: AppServices; // Use AppServices from the factory
-  }
-}
 
 export function ServicesPlugin() {
   return ({ store }: PiniaPluginContext) => {
