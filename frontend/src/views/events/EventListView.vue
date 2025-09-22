@@ -10,31 +10,34 @@
 
     <v-window v-model="selectedTab">
       <v-window-item value="table">
-    <EventList
-      :events="familyEventStore.familyEvents"
-      :total-events="familyEventStore.totalItems"
-      :loading="familyEventStore.loading"
-      @update:options="handleListOptionsUpdate"
-      @view="openViewDialog"
-      @edit="navigateToEditEvent"
-      @delete="confirmDelete"
-      @create="navigateToCreateView"
-    />
-  </v-window-item>
-  <v-window-item value="timeline">
-    <EventTimeline
-      :events="familyEventStore.familyEvents"
-    />
-  </v-window-item>
-  <v-window-item value="calendar">
-    <EventCalendar
-      :events="familyEventStore.familyEvents"
-      @viewEvent="openViewDialog"
-    />
+        <EventList
+          :events="familyEventStore.familyEvents"
+          :total-events="familyEventStore.totalItems"
+          :loading="familyEventStore.loading"
+          @update:options="handleListOptionsUpdate"
+          @view="openViewDialog"
+          @edit="navigateToEditEvent"
+          @delete="confirmDelete"
+          @create="navigateToCreateView"
+        />
+      </v-window-item>
+      <v-window-item value="timeline">
+        <EventTimeline :events="familyEventStore.familyEvents" />
+      </v-window-item>
+      <v-window-item value="calendar">
+        <EventCalendar
+          :events="familyEventStore.familyEvents"
+          @viewEvent="openViewDialog"
+        />
+      </v-window-item>
     </v-window>
 
     <v-alert
-      v-if="(selectedTab === 'timeline' || selectedTab === 'calendar') && !currentFilters.familyId && !familyEventStore.loading"
+      v-if="
+        (selectedTab === 'timeline' || selectedTab === 'calendar') &&
+        !currentFilters.familyId &&
+        !familyEventStore.loading
+      "
       type="info"
       class="mt-4"
       variant="tonal"
@@ -56,17 +59,22 @@
     <ConfirmDeleteDialog
       :model-value="deleteConfirmDialog"
       :title="t('confirmDelete.title')"
-      :message="t('event.list.confirmDelete', { name: eventToDelete?.name || '' })"
+      :message="
+        t('event.list.confirmDelete', { name: eventToDelete?.name || '' })
+      "
       @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel"
     />
 
     <!-- Global Snackbar -->
-    <v-snackbar v-if="notificationStore.snackbar" v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
+    <v-snackbar
+      v-if="notificationStore.snackbar"
+      v-model="notificationStore.snackbar.show"
+      :color="notificationStore.snackbar.color"
+      timeout="3000"
+    >
       {{ notificationStore.snackbar.message }}
     </v-snackbar>
-
-  
   </v-container>
 </template>
 
@@ -89,7 +97,6 @@ const { t } = useI18n();
 const familyEventStore = useFamilyEventStore();
 const notificationStore = useNotificationStore();
 
-
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
@@ -103,7 +110,10 @@ const viewDialog = ref(false);
 const selectedEventForView = ref<FamilyEvent | null>(null);
 
 const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
-  if ((selectedTab.value === 'timeline' || selectedTab.value === 'calendar') && !currentFilters.value.familyId) {
+  if (
+    (selectedTab.value === 'timeline' || selectedTab.value === 'calendar') &&
+    !currentFilters.value.familyId
+  ) {
     familyEventStore.familyEvents = [];
     familyEventStore.totalItems = 0;
     familyEventStore.loading = false;
@@ -112,7 +122,7 @@ const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
 
   await familyEventStore.searchFamilyEvents(
     currentFilters.value.name || '',
-    currentFilters.value.familyId || undefined
+    currentFilters.value.familyId || undefined,
   );
 };
 
@@ -147,7 +157,10 @@ const handleFilterUpdate = (filters: EventFilter) => {
   loadEvents();
 };
 
-const handleListOptionsUpdate = (options: { page: number; itemsPerPage: number }) => {
+const handleListOptionsUpdate = (options: {
+  page: number;
+  itemsPerPage: number;
+}) => {
   familyEventStore.setPage(options.page);
   familyEventStore.setItemsPerPage(options.itemsPerPage);
 };
@@ -161,9 +174,13 @@ const handleDeleteConfirm = async () => {
   if (eventToDelete.value) {
     try {
       await familyEventStore.deleteFamilyEvent(eventToDelete.value.id);
-      notificationStore.showSnackbar(t('event.messages.deleteSuccess'), 'success');
+      notificationStore.showSnackbar(
+        t('event.messages.deleteSuccess'),
+        'success',
+      );
       await loadEvents(); // Reload events after deletion
-    } finally { // Added finally block for consistent dialog closing
+    } finally {
+      // Added finally block for consistent dialog closing
       deleteConfirmDialog.value = false;
       eventToDelete.value = undefined;
     }

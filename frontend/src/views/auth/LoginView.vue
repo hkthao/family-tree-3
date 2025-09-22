@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import LoginForm from '@/components/auth/LoginForm.vue';
 import SocialLogin from '@/components/auth/SocialLogin.vue';
-</script>re';
+import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
 
 const notificationStore = useNotificationStore();

@@ -38,9 +38,8 @@
 import { useI18n } from 'vue-i18n';
 import RegisterForm from '@/components/auth/RegisterForm.vue';
 import SocialLogin from '@/components/auth/SocialLogin.vue';
-
-const { t } = useI18n();
-</script>from 'vue-router';
+import { useNotificationStore } from '@/stores/notification.store';
+import { useRouter } from 'vue-router';
 
 const { t } = useI18n();
 const notificationStore = useNotificationStore();

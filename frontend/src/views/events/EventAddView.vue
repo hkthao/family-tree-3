@@ -17,16 +17,16 @@ import { useFamilyEventStore } from '@/stores/family-event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import EventForm from '@/components/events/EventForm.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/services/family-event';
+import type { FamilyEvent } from '@/types/family-event';
 
 const { t } = useI18n();
 const router = useRouter();
-const familyEventsStore = useFamilyEventsStore();
+const familyEventsStore = useFamilyEventStore();
 const notificationStore = useNotificationStore();
 
-const handleAddEvent = async (eventData: Omit<Event, 'id'>) => {
+const handleAddEvent = async (eventData: Omit<FamilyEvent, 'id'>) => {
   try {
-    await familyEventsStore.add(eventData);
+    await familyEventsStore.addFamilyEvent(eventData);
     notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
     closeForm();
   } catch (error) {
