@@ -13,19 +13,19 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useMembersStore } from '@/stores/members';
-import { useNotificationStore } from '@/stores/notification';
+import { useMemberStore } from '@/stores/member.store';
+import { useNotificationStore } from '@/stores/notification.store';
 import MemberForm from '@/components/members/MemberForm.vue';
-import type { Member } from '@/services/member.service';
+import type { Member } from '@/types/member';
 
 const { t } = useI18n();
 const router = useRouter();
-const membersStore = useMembersStore();
+const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
 const handleAddMember = async (memberData: Omit<Member, 'id'>) => {
   try {
-    await membersStore.add(memberData);
+    await memberStore.addMember(memberData);
     notificationStore.showSnackbar(t('member.messages.addSuccess'), 'success');
     closeForm();
   } catch (error) {
