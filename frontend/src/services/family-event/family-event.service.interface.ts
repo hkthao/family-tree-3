@@ -3,8 +3,12 @@ import type { Paginated } from '@/types/pagination';
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface EventFilter {
-  title?: string;
-  familyId?: string;
+  name?: string;
+  type?: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
+  familyId?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  location?: string;
 }
 
 export interface IFamilyEventService extends ICrudService<FamilyEvent> {

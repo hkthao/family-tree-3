@@ -121,7 +121,7 @@
             <v-row>
               <v-col cols="12" md="4">
                 <v-autocomplete
-                  v-model="memberForm.fatherId"
+                  v-model="memberForm.fatherId as string | null"
                   :label="t('member.form.father')"
                   :items="[]"
                   item-title="fullName"
@@ -131,7 +131,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
-                  v-model="memberForm.motherId"
+                  v-model="memberForm.motherId as string | null"
                   :label="t('member.form.mother')"
                   :items="[]"
                   item-title="fullName"
@@ -141,7 +141,7 @@
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
-                  v-model="memberForm.spouseId"
+                  v-model="memberForm.spouseId as string | null"
                   :label="t('member.form.spouse')"
                   :items="[]"
                   item-title="fullName"
@@ -193,7 +193,7 @@ import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import GenderSelect from '@/components/common/GenderSelect.vue';
 
 interface TimelineEvent {
-  year: string;
+  year: number;
   title: string;
   description: string;
   color: string;
@@ -212,16 +212,21 @@ const { t } = useI18n();
 const tab = ref('general'); // Default to general tab
 
 const form = ref<HTMLFormElement | null>(null);
+const timelineEvents = ref<TimelineEvent[]>([]);
 const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData || {
   lastName: '',
   firstName: '',
-  dateOfBirth: null,
-  gender: 'Male',
-  familyId: '', // Add familyId
+  fullName: '',
+  dateOfBirth: undefined,
+  gender: 'male',
+  familyId: '',
+  fatherId: null,
+  motherId: null,
+  spouseId: null,
 });
 
 const rules = {
-  required: (value: string) => !!value || t('validation.required'),
+  required: (value: unknown) => !!value || t('validation.required'),
 };
 
 const dateOfDeathRule = (value: Date | null) => {

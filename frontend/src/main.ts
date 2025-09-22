@@ -14,7 +14,7 @@ import { ServicesPlugin } from './plugins/services.plugin'; // Import ServicesPl
 const app = createApp(App);
 
 const pinia = createPinia(); // Create pinia instance
-pinia.use(ServicesPlugin); // Use the services plugin
+pinia.use(ServicesPlugin()); // Use the services plugin
 app.use(pinia); // Use pinia with the app
 app.use(router);
 app.use(vuetify);

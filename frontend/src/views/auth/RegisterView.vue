@@ -28,8 +28,8 @@
         </v-row>
       </v-container>
     </v-main>
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-      {{ snackbar.message }}
+    <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
+      {{ notificationStore.snackbar.message }}
     </v-snackbar>
   </v-app>
 </template>
@@ -40,4 +40,18 @@ import RegisterForm from '@/components/auth/RegisterForm.vue';
 import SocialLogin from '@/components/auth/SocialLogin.vue';
 
 const { t } = useI18n();
+</script>from 'vue-router';
+
+const { t } = useI18n();
+const notificationStore = useNotificationStore();
+const router = useRouter();
+
+const onRegisterSuccess = () => {
+  notificationStore.showSnackbar(t('register.success'), 'success');
+  router.push('/login'); // Redirect to login after successful registration
+};
+
+const onRegisterFail = (message: string) => {
+  notificationStore.showSnackbar(message, 'error');
+};
 </script>

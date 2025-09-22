@@ -44,7 +44,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 interface TimelineEvent {
-  year: string;
+  year: number;
   title: string;
   description: string;
   color: string;
@@ -63,7 +63,7 @@ const { t } = useI18n();
 const form = ref<HTMLFormElement | null>(null);
 
 const eventForm = ref<TimelineEvent>(props.initialEventData || {
-  year: '',
+  year: 0,
   title: '',
   description: '',
   color: 'blue',
@@ -79,7 +79,10 @@ const colorOptions = [
 
 const rules = {
   required: (value: string) => !!value || t('validation.required'),
-  number: (value: string) => !isNaN(parseFloat(value)) && isFinite(value) || t('validation.number'),
+  number: (value: string) => {
+    const numValue = parseFloat(value);
+    return (!isNaN(numValue) && isFinite(numValue)) || t('validation.number');
+  },
 };
 
 const submitForm = async () => {

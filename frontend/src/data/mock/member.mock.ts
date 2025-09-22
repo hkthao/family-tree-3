@@ -11,6 +11,7 @@ export function generateMockMember(familyId?: string, overrides?: Partial<Member
     id: faker.string.uuid(),
     lastName: faker.person.lastName(), // Generate last name
     firstName: faker.person.firstName(), // Generate first name
+    fullName: `${faker.person.firstName()} ${faker.person.lastName()}`.trim(), // Generate full name
     familyId: selectedFamilyId,
     gender: faker.helpers.arrayElement(['male', 'female', 'other']),
     dateOfBirth: faker.date.past({ years: 50 }),

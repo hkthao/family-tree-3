@@ -34,7 +34,7 @@
     </v-window>
 
     <v-alert
-      v-if="(selectedTab === 'timeline' || selectedTab === 'calendar') && !currentFilters.familyId && !loading"
+      v-if="(selectedTab === 'timeline' || selectedTab === 'calendar') && !currentFilters.familyId && !familyEventStore.loading"
       type="info"
       class="mt-4"
       variant="tonal"
@@ -111,8 +111,8 @@ const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
   }
 
   await familyEventStore.searchFamilyEvents(
-    currentFilters.value.title || '',
-    currentFilters.value.familyId
+    currentFilters.value.name || '',
+    currentFilters.value.familyId || undefined
   );
 };
 

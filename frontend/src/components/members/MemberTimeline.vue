@@ -63,7 +63,7 @@ import { useI18n } from 'vue-i18n';
 import TimelineEventForm from './TimelineEventForm.vue';
 
 interface TimelineEvent {
-  year: string;
+  year: number;
   title: string;
   description: string;
   color: string;
@@ -79,7 +79,7 @@ defineEmits(['add', 'edit', 'delete']);
 const { t } = useI18n();
 
 const eventFormDialog = ref(false);
-const selectedEvent = ref<TimelineEvent | null>(null); // Define a more specific type later
+const selectedEvent = ref<TimelineEvent | undefined>(undefined);
 const isEditEventMode = ref(false);
 const page = ref(1);
 
@@ -91,7 +91,7 @@ const paginatedEvents = computed(() => {
 });
 
 const openAddEventForm = () => {
-  selectedEvent.value = null;
+  selectedEvent.value = undefined;
   isEditEventMode.value = false;
   eventFormDialog.value = true;
 };
@@ -107,11 +107,11 @@ const handleSaveTimelineEvent = (eventData: TimelineEvent) => {
   // For now, just close the dialog
   console.log('Saving timeline event:', eventData);
   eventFormDialog.value = false;
-  selectedEvent.value = null;
+  selectedEvent.value = undefined;
 };
 
 const handleCancelTimelineEvent = () => {
   eventFormDialog.value = false;
-  selectedEvent.value = null;
+  selectedEvent.value = undefined;
 };
 </script>

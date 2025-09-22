@@ -29,7 +29,7 @@
     <ConfirmDeleteDialog
       :model-value="deleteConfirmDialog"
       :title="t('confirmDelete.title')"
-      :message="t('member.list.confirmDelete', { fullName: `${memberToDelete?.firstName} ${memberToDelete?.lastName}` || '' })"
+      :message="t('member.list.confirmDelete', { fullName: memberToDelete?.fullName || '' })"
       @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel"
     />

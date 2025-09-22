@@ -38,7 +38,7 @@ const props = defineProps({
     required: true,
   },
   rules: {
-    type: Array,
+    type: Array as () => ((value: string | Date | null) => boolean | string)[],
     default: () => [],
   },
   optional: {
@@ -61,7 +61,8 @@ const formattedDate = computed(() => {
   return date.toLocaleDateString('en-GB'); // dd/MM/yyyy
 });
 
-const handleDateUpdate = (date: Date | null) => {
+const handleDateUpdate = (value: string | Date | null) => {
+  const date = value instanceof Date ? value : (value ? new Date(value) : null);
   emit('update:modelValue', date);
   menu.value = false;
 };

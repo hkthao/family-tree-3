@@ -45,7 +45,7 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || t('validation.email'),
 };
 
-import { useNotificationStore } from '@/stores/notification';
+import { useNotificationStore } from '@/stores/notification.store';
 
 const notificationStore = useNotificationStore();
 

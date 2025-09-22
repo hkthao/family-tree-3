@@ -13,11 +13,11 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useFamilyEventsStore } from '@/stores/familyEvents';
-import { useNotificationStore } from '@/stores/notification';
+import { useFamilyEventStore } from '@/stores/family-event.store';
+import { useNotificationStore } from '@/stores/notification.store';
 import EventForm from '@/components/events/EventForm.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/services/familyEvent.service';
+import type { FamilyEvent } from '@/services/family-event';
 
 const { t } = useI18n();
 const router = useRouter();

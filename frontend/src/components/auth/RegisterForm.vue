@@ -51,7 +51,7 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || 'E-mail must be valid.',
 };
 
-import { useNotificationStore } from '@/stores/notification'; // Add import
+import { useNotificationStore } from '@/stores/notification.store'; // Add import
 import { useI18n } from 'vue-i18n'; // Add useI18n import
 
 const { t } = useI18n(); // Initialize t

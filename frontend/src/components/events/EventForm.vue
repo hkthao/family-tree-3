@@ -137,7 +137,7 @@ const eventTypes = [
 ];
 
 const rules = {
-  required: (value: string) => !!value || t('validation.required'),
+  required: (value: unknown) => !!value || t('validation.required'),
 };
 
 onMounted(async () => {

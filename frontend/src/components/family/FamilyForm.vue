@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/services/family.service';
+import type { Family } from '@/types/family';
 
 const props = defineProps<{
   initialFamilyData?: Family;
@@ -68,12 +68,12 @@ const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);
 
-const familyForm = ref<Omit<Family, 'id'> & { id?: number }>(props.initialFamilyData || {
+const familyForm = ref<Family | Omit<Family, 'id'>>(props.initialFamilyData || {
   name: '',
   description: '',
   address: '',
   avatarUrl: '',
-  visibility: 'Private',
+  visibility: 'private',
 });
 
 const visibilityItems = computed(() => [
