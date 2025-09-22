@@ -6,7 +6,7 @@
       :members="members"
       :total-members="memberStore.members.length"
       :families="familyStore.families"
-      :loading="memberStore.loading"
+      :loading="loading"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
       @edit="navigateToEditMember"
@@ -44,14 +44,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted,  watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { useFamilyStore } from '@/stores/family.store';
 import type { Member } from '@/types/member';
 import type { MemberFilter } from '@/services/member/member.service.interface';
-import type { Family } from '@/types/family';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
@@ -60,7 +59,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const { members, loading, currentPage, itemsPerPage } = storeToRefs(memberStore);
+const { members, loading, currentPage } = storeToRefs(memberStore);
 const familyStore = useFamilyStore();
 const { families } = storeToRefs(familyStore);
 
