@@ -1,5 +1,5 @@
 import type { Member } from '@/types/member';
-import type { IMemberService } from './member.service.interface';
+import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import axios from 'axios';
 
 // Base URL for your API - configure this based on your environment
@@ -35,5 +35,20 @@ export class ApiMemberService implements IMemberService {
 
   async deleteMember(id: string): Promise<void> {
     await axios.delete(`${this.apiUrl}/${id}`);
+  }
+
+  async searchMembers(filters: MemberFilter): Promise<Member[]> {
+    const params = new URLSearchParams();
+    if (filters.fullName) params.append('fullName', filters.fullName);
+    if (filters.dateOfBirth) params.append('dateOfBirth', filters.dateOfBirth);
+    if (filters.dateOfDeath) params.append('dateOfDeath', filters.dateOfDeath);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.placeOfBirth) params.append('placeOfBirth', filters.placeOfBirth);
+    if (filters.placeOfDeath) params.append('placeOfDeath', filters.placeOfDeath);
+    if (filters.occupation) params.append('occupation', filters.occupation);
+    if (filters.familyId) params.append('familyId', filters.familyId);
+
+    const response = await axios.get<Member[]>(`${this.apiUrl}?${params.toString()}`);
+    return response.data;
   }
 }
