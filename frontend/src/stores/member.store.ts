@@ -28,8 +28,9 @@ export const useMemberStore = defineStore('member', {
       const f = state.filters;
       return state.members.filter((m: Member) => {
         if (f.fullName && !m.fullName.toLowerCase().includes(f.fullName.toLowerCase())) return false;
-        if (f.dateOfBirth && m.dateOfBirth !== f.dateOfBirth) return false;
-        if (f.dateOfDeath && m.dateOfDeath !== f.dateOfDeath) return false;
+        // Compare Date objects
+        if (f.dateOfBirth && m.dateOfBirth && m.dateOfBirth.toISOString().split('T')[0] !== f.dateOfBirth.toISOString().split('T')[0]) return false;
+        if (f.dateOfDeath && m.dateOfDeath && m.dateOfDeath.toISOString().split('T')[0] !== f.dateOfDeath.toISOString().split('T')[0]) return false;
         if (f.gender && m.gender !== f.gender) return false;
         if (f.placeOfBirth && (!m.placeOfBirth?.toLowerCase().includes(f.placeOfBirth.toLowerCase()))) return false;
         if (f.placeOfDeath && (!m.placeOfDeath?.toLowerCase().includes(f.placeOfDeath.toLowerCase()))) return false;
@@ -68,7 +69,7 @@ export const useMemberStore = defineStore('member', {
           : await this.services.member.fetchMembers();
         this.currentPage = 1;
       } catch (e) {
-        this.error = e instanceof Error ? e.message : 'Failed to fetch members.';
+        this.error = e instanceof Error ? e.message : 'Không thể tải danh sách thành viên.';
         console.error(e);
       } finally {
         this.loading = false;
@@ -80,22 +81,22 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       try {
         if(newMember.fullName.trim() === '') {
-          throw new Error('Full name cannot be empty.');
+          throw new Error('Tên đầy đủ không được để trống.');
         }
-        if(newMember.dateOfBirth && newMember.dateOfDeath && new Date(newMember.dateOfBirth) > new Date(newMember.dateOfDeath)) {
-          throw new Error('Date of birth cannot be later than date of death.');
+        if(newMember.dateOfBirth && newMember.dateOfDeath && newMember.dateOfBirth > newMember.dateOfDeath) {
+          throw new Error('Ngày sinh không thể sau ngày mất.');
         }
         if(newMember.placeOfBirth && newMember.placeOfDeath && newMember.placeOfBirth === newMember.placeOfDeath) {
-          throw new Error('Place of birth and place of death cannot be the same.');
+          throw new Error('Nơi sinh và nơi mất không thể giống nhau.');
         }
         if(newMember.occupation && newMember.occupation.length > 100) {
-          throw new Error('Occupation cannot exceed 100 characters.');
+          throw new Error('Nghề nghiệp không được vượt quá 100 ký tự.');
         }
         
         const added = await this.services.member.addMember(newMember);
         this.members.push(added);
       } catch (e) {
-        this.error = e instanceof Error ? e.message : 'Failed to add member.';
+        this.error = e instanceof Error ? e.message : 'Không thể thêm thành viên.';
         console.error(e);
       } finally {
         this.loading = false;
@@ -107,22 +108,22 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       try {
         if(updatedMember.fullName.trim() === '') {
-          throw new Error('Full name cannot be empty.');
+          throw new Error('Tên đầy đủ không được để trống.');
         }
-        if(updatedMember.dateOfBirth && updatedMember.dateOfDeath && new Date(updatedMember.dateOfBirth) > new Date(updatedMember.dateOfDeath)) {
-          throw new Error('Date of birth cannot be later than date of death.');
+        if(updatedMember.dateOfBirth && updatedMember.dateOfDeath && updatedMember.dateOfBirth > updatedMember.dateOfDeath) {
+          throw new Error('Ngày sinh không thể sau ngày mất.');
         }
         if(updatedMember.placeOfBirth && updatedMember.placeOfDeath && updatedMember.placeOfBirth === updatedMember.placeOfDeath) {
-          throw new Error('Place of birth and place of death cannot be the same.');
+          throw new Error('Nơi sinh và nơi mất không thể giống nhau.');
         }
         if(updatedMember.occupation && updatedMember.occupation.length > 100) {
-          throw new Error('Occupation cannot exceed 100 characters.');
+          throw new Error('Nghề nghiệp không được vượt quá 100 ký tự.');
         }
         const updated = await this.services.member.updateMember(updatedMember);
         const idx = this.members.findIndex((m) => m.id === updated.id);
         if (idx !== -1) this.members[idx] = updated;
       } catch (e) {
-        this.error = e instanceof Error ? e.message : 'Failed to update member.';
+        this.error = e instanceof Error ? e.message : 'Không thể cập nhật thành viên.';
         console.error(e);
       } finally {
         this.loading = false;
@@ -147,7 +148,14 @@ export const useMemberStore = defineStore('member', {
     },
 
     searchMembers(filters: MemberFilter) {
-      this.filters = { ...this.filters, ...filters };
+      const newFilters: MemberFilter = { ...filters };
+      if (typeof newFilters.dateOfBirth === 'string') {
+        newFilters.dateOfBirth = new Date(newFilters.dateOfBirth);
+      }
+      if (typeof newFilters.dateOfDeath === 'string') {
+        newFilters.dateOfDeath = new Date(newFilters.dateOfDeath);
+      }
+      this.filters = { ...this.filters, ...newFilters };
       this.currentPage = 1;
     },
 

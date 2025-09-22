@@ -12,8 +12,8 @@ export function generateMockMember(familyId?: string, overrides?: Partial<Member
     fullName: faker.person.fullName(),
     familyId: selectedFamilyId,
     gender: faker.helpers.arrayElement(['male', 'female', 'other']),
-    dateOfBirth: faker.date.past({ years: 50 }).toISOString().split('T')[0],
-    dateOfDeath: faker.helpers.arrayElement([undefined, faker.date.past({ years: 10 }).toISOString().split('T')[0]]),
+    dateOfBirth: faker.date.past({ years: 50 }),
+    dateOfDeath: faker.helpers.arrayElement([undefined, faker.date.past({ years: 10 })]),
     avatarUrl: faker.image.avatar(),
     nickname: faker.person.firstName(),
     placeOfBirth: faker.location.city(),
@@ -23,7 +23,6 @@ export function generateMockMember(familyId?: string, overrides?: Partial<Member
     motherId: faker.helpers.arrayElement([undefined, faker.string.uuid()]),
     spouseId: faker.helpers.arrayElement([undefined, faker.string.uuid()]),
     biography: faker.lorem.paragraph(),
-    visibility: faker.helpers.arrayElement(['public', 'private', 'shared']),
     ...overrides, // Apply overrides
   };
 }

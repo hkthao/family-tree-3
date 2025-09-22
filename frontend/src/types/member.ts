@@ -3,8 +3,8 @@ export interface Member {
   fullName: string; // Renamed from 'name'
   familyId: string;
   gender?: 'male' | 'female' | 'other';
-  dateOfBirth?: string; // Renamed from 'birthDate'
-  dateOfDeath?: string; // Renamed from 'deathDate'
+  dateOfBirth?: Date; // Renamed from 'birthDate'
+  dateOfDeath?: Date; // Renamed from 'deathDate'
   avatarUrl?: string;
   nickname?: string; // New
   placeOfBirth?: string; // New (replaces address)
@@ -14,5 +14,4 @@ export interface Member {
   motherId?: string; // New
   spouseId?: string; // New
   biography?: string; // New
-  visibility?: 'public' | 'private' | 'shared';
 }

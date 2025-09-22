@@ -2,8 +2,8 @@ import type { Member } from '@/types/member';
 
 export interface MemberFilter {
   fullName?: string;
-  dateOfBirth?: string | null;
-  dateOfDeath?: string | null;
+  dateOfBirth?: Date | null;
+  dateOfDeath?: Date | null;
   gender?: 'male' | 'female' | 'other' | undefined;
   placeOfBirth?: string;
   placeOfDeath?: string;
