@@ -63,7 +63,7 @@
             </v-col>
             <v-col cols="12" md="4">
               <v-autocomplete
-                v-model="filters.familyId"
+                v-model="(filters.familyId as any)"
                 :label="t('member.search.family')"
                 :items="[]"
                 item-title="name"
@@ -125,7 +125,7 @@ const resetFilters = () => {
     placeOfBirth: '',
     placeOfDeath: '',
     occupation: '',
-    familyId: undefined,
+    familyId: null,
   };
   emit('update:filters', filters.value);
 };

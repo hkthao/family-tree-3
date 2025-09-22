@@ -5,7 +5,7 @@ import type { ICrudService } from '../common/crud.service.interface';
 export interface EventFilter {
   name?: string;
   type?: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
-  familyId?: string | null;
+  familyId?: string | null ;
   startDate?: Date | null;
   endDate?: Date | null;
   location?: string;

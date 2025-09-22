@@ -32,13 +32,12 @@
           :event-color="getEventColor"
           :type="calendarType"
           event-overlap-mode="stack"
-          @click:event="showEventDetails"
           :locale="locale"
           :key="locale"
           :weekdays="weekdays"
         >
           <template #event="{ event }">
-            <div class="v-event-summary">
+            <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
               {{ event.title }}
             </div>
             <div class="v-event-description">
@@ -55,7 +54,25 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyEvent } from '@/types/family-event';
-import type { CalendarEvent } from 'vuetify';
+
+interface CalendarEvent {
+  color: string;
+  title: string;
+  start: Date;
+  end: Date;
+  timed: boolean;
+  eventObject: FamilyEvent;
+}
+
+// Define CalendarEventColorFunction type to match v-calendar's expectation
+type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
+
+// Define EventSlotScope type to match v-calendar's event-click slot
+interface EventSlotScope {
+  event: CalendarEvent;
+  nativeEvent: MouseEvent;
+  // Add other properties if needed based on v-calendar's documentation
+}
 
 const props = defineProps<{
   events: FamilyEvent[];
@@ -116,33 +133,14 @@ const formattedEvents = computed(() => {
   return events;
 });
 
-interface FormattedEvent {
-  title: string;
-  start: Date;
-  end: Date;
-  color: string;
-  timed: boolean;
-  eventObject: FamilyEvent;
-}
 
-// Define CalendarEventColorFunction type to match v-calendar's expectation
-type CalendarEventColorFunction = (event: CalendarEvent) => string;
-
-// Define EventSlotScope type to match v-calendar's event-click slot
-interface EventSlotScope {
-  event: FormattedEvent;
-  nativeEvent: MouseEvent;
-  // Add other properties if needed based on v-calendar's documentation
-}
-
-const getEventColor: CalendarEventColorFunction = (event: CalendarEvent) => {
-  // Assuming your formattedEvents already have the color property
-  return (event as FormattedEvent).color;
+const getEventColor: CalendarEventColorFunction = (event: { [key: string]: any }) => {
+  return event.color;
 };
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (_: Event, eventSlotScope: EventSlotScope) => {
-  emit('viewEvent', eventSlotScope.event.eventObject);
+const showEventDetails = (eventSlotScope: CalendarEvent ) => {
+  emit('viewEvent', eventSlotScope.eventObject);
 };
 </script>

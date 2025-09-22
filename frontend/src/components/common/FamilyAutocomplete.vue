@@ -23,7 +23,7 @@ import { useFamilyStore } from '@/stores/family.store';
 import type { Family } from '@/types/family';
 
  defineProps<{
-  modelValue: string | null; // The selected family ID
+  modelValue: string | null | undefined; // The selected family ID
   label?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rules?: Array<any>;

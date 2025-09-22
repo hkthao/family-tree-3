@@ -172,6 +172,7 @@ describe('Member Store', () => {
     const newMemberData: Omit<Member, 'id'> = {
       lastName: 'New',
       firstName: 'Member',
+      fullName: 'New Member', // Add fullName property
       familyId: mockMemberService.members[0].familyId,
       dateOfBirth: new Date('2000-01-01'),
     };
@@ -186,6 +187,7 @@ describe('Member Store', () => {
     const newMemberData: Omit<Member, 'id'> = {
       lastName: '',
       firstName: 'Member',
+      fullName: 'Member', // Add fullName property
       familyId: mockMemberService.members[0].familyId,
     };
     await store.addMember(newMemberData); // Call the action
@@ -198,6 +200,7 @@ describe('Member Store', () => {
     const newMemberData: Omit<Member, 'id'> = {
       lastName: 'Test',
       firstName: 'Member',
+      fullName: 'Test Member', // Add fullName property
       familyId: mockMemberService.members[0].familyId,
       dateOfBirth: new Date('2000-01-01'),
       dateOfDeath: new Date('1990-01-01'),
