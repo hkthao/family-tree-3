@@ -21,15 +21,15 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { useFamiliesStore } from '@/stores/families';
+import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification';
 import FamilyForm from '@/components/family/FamilyForm.vue';
-import type { Family } from '@/services/family.service';
+import type { Family } from '@/types/family';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const familiesStore = useFamiliesStore();
+const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
 const initialFamilyData = ref<Family | null>(null);
@@ -37,7 +37,7 @@ const initialFamilyData = ref<Family | null>(null);
 onMounted(() => {
   const familyId = route.params.id as string;
   if (familyId) {
-    const family = familiesStore.items.find(f => f.id === familyId);
+    const family = familyStore.families.find(f => f.id === familyId);
     if (family) {
       initialFamilyData.value = { ...family };
     } else {
@@ -50,7 +50,7 @@ onMounted(() => {
 
 const handleUpdateFamily = async (familyData: Family) => {
   try {
-    await familiesStore.update(familyData);
+    await familyStore.updateFamily(familyData);
     notificationStore.showSnackbar(t('family.management.messages.updateSuccess'), 'success');
     closeForm();
   } catch (error) {

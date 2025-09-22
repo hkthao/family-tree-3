@@ -3,9 +3,9 @@
     <FamilySearch @update:filters="handleFilterUpdate" />
 
     <FamilyList
-      :families="familiesStore.items"
-      :total-families="familiesStore.total"
-      :loading="familiesStore.loading"
+      :families="familyStore.families"
+      :total-families="familyStore.totalItems"
+      :loading="familyStore.loading"
       :items-per-page="itemsPerPage"
       :family-member-counts="familyMemberCounts"
       @update:options="handleListOptionsUpdate"
@@ -47,23 +47,22 @@ import { ref, watch, onMounted, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useFamiliesStore } from '@/stores/families';
-import { useMembersStore } from '@/stores/members';
-import type { Family, FamilyFilter } from '@/services/family.service';
+import { useFamilyStore } from '@/stores/family.store';
+const familyStore = useFamilyStore();
+import { useMemberStore } from '@/stores/member.store';
+import type { Family, FamilyFilter } from '@/types/family';
 
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
 import FamilyForm from '@/components/family/FamilyForm.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
-import { useNotificationStore } from '@/stores/notification';
+import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
 const router = useRouter();
-const familiesStore = useFamiliesStore();
-const { items: families, // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  total: totalFamilies, // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  loading } = storeToRefs(familiesStore);
-const membersStore = useMembersStore();
+
+const { families, totalItems: totalFamilies, loading } = storeToRefs(familyStore);
+const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
 const currentFilters = ref<FamilyFilter>({});
@@ -77,7 +76,7 @@ const familyToDelete = ref<Family | undefined>(undefined);
 
 const familyMemberCounts = computed(() => {
   const counts: { [key: string]: number } = {};
-  membersStore.items.forEach(member => {
+  membersStore.members.forEach(member => {
     if (member.familyId) {
       counts[member.familyId] = (counts[member.familyId] || 0) + 1;
     }
@@ -86,15 +85,14 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await familiesStore.fetchAll(
-    currentFilters.value.fullName,
-    currentPage.value,
-    itemsPerPage.value
+  await familyStore.searchFamilies(
+    currentFilters.value.fullName || '',
+    currentFilters.value.visibility || 'all'
   );
 };
 
 const loadAllMembers = async () => {
-  await membersStore.fetchAll({}, 1, -1); // Fetch all members
+  await membersStore.fetchMembers(); // Fetch all members
 };
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
@@ -104,9 +102,8 @@ const handleFilterUpdate = (filters: FamilyFilter) => {
 };
 
 const handleListOptionsUpdate = (options: { page: number; itemsPerPage: number }) => {
-  currentPage.value = options.page;
-  itemsPerPage.value = options.itemsPerPage;
-  loadFamilies();
+  familyStore.setPage(options.page);
+  familyStore.setItemsPerPage(options.itemsPerPage);
 };
 
 const navigateToAddFamily = () => {
@@ -135,9 +132,9 @@ const confirmDelete = (family: Family) => {
 const handleDeleteConfirm = async () => {
   if (familyToDelete.value) {
     try {
-      await familiesStore.remove(familyToDelete.value.id);
+      await familyStore.deleteFamily(familyToDelete.value.id);
       notificationStore.showSnackbar(t('family.management.messages.deleteSuccess'), 'success');
-      await familiesStore.fetchAll(); // Reload families after deletion
+      await familyStore._loadFamilies(); // Reload families after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('family.management.messages.deleteError'), 'error');
     }
