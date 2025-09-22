@@ -13,27 +13,34 @@ declare module 'pinia' {
   }
 }
 
-export function ServicesPlugin({ store }: PiniaPluginContext) {
-  const isMockApi = import.meta.env.VITE_APP_USE_MOCK_API === 'true';
+interface ServicesPluginOptions {
+  mockFamilyService?: IFamilyService;
+  mockMemberService?: IMemberService;
+}
 
-  const familyService: IFamilyService = isMockApi
-    ? new MockFamilyService()
-    : new ApiFamilyService();
+export function ServicesPlugin(options: ServicesPluginOptions = {}) {
+  return ({ store }: PiniaPluginContext) => {
+    const isMockApi = import.meta.env.VITE_APP_USE_MOCK_API === 'true';
 
-  const memberService: IMemberService = isMockApi // Added member service instantiation
-    ? new MockMemberService()
-    : new ApiMemberService();
+    const familyService: IFamilyService = options.mockFamilyService
+      ? options.mockFamilyService
+      : (isMockApi ? new MockFamilyService() : new ApiFamilyService());
 
-  // Inject services into the store
-  Object.defineProperty(store, 'services', {
-    value: {
-      family: familyService,
-      member: memberService, // Added member service to value
-      // Add other services here
-    },
-    writable: false,
-    configurable: false,
-  });
+    const memberService: IMemberService = options.mockMemberService
+      ? options.mockMemberService
+      : (isMockApi ? new MockMemberService() : new ApiMemberService());
+
+    // Inject services into the store
+    Object.defineProperty(store, 'services', {
+      value: {
+        family: familyService,
+        member: memberService,
+        // Add other services here
+      },
+      writable: false,
+      configurable: false,
+    });
+  };
 }
 
 // This is for global registration in main.ts
