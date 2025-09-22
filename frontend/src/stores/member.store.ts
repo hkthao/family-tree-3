@@ -64,7 +64,10 @@ export const useMemberStore = defineStore('member', {
     getMemberById: (state) => (id: string) => {
       return state.members.find((m) => m.id === id);
     },
-    getMemberFullName: () => (member: Member) => {
+    getMemberFullName: (state) => (member: Member) => {
+      return `${member.firstName} ${member.lastName}`.trim();
+    },
+    getMemberFullName: (state) => (member: Member) => {
       return `${member.firstName} ${member.lastName}`.trim();
     },
   },
