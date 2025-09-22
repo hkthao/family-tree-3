@@ -63,16 +63,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/services/familyEvent.service';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Member } from '@/services/member.service';
+import type { FamilyEvent } from '@/types/family-event';
+import type { Member } from '@/types/member';
 import type { DataTableHeader } from 'vuetify';
-import { useMembers } from '@/data/members';
+import { useMemberStore } from '@/stores/member.store';
 
 defineProps({
   events: {
-    type: Array as () => Event[],
+    type: Array as () => FamilyEvent[],
     required: true,
   },
   totalEvents: {
@@ -88,7 +86,7 @@ defineProps({
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
 
 const { t } = useI18n();
-const { getMembers } = useMembers();
+const memberStore = useMemberStore();
 
 const allMembers = ref<Member[]>([]);
 
@@ -118,18 +116,17 @@ const loadEvents = (options: { page: number; itemsPerPage: number; sortBy: strin
   emit('update:options', options);
 };
 
-const editEvent = (event: Event) => {
+const editEvent = (event: FamilyEvent) => {
   emit('edit', event);
 };
 
-const confirmDelete = (event: Event) => {
+const confirmDelete = (event: FamilyEvent) => {
   emit('delete', event);
 };
 
 // Fetch all members on component mount
 import { onMounted } from 'vue';
 onMounted(async () => {
-  const { members: fetchedMembers } = await getMembers({}, 1, -1); // Fetch all members
-  allMembers.value = fetchedMembers;
-});
-</script>
+  await memberStore.fetchMembers(); // Fetch all members
+  allMembers.value = memberStore.members;
+});</script>

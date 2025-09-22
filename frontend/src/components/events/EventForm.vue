@@ -100,14 +100,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/services/familyEvent.service';
+import type { FamilyEvent } from '@/types/family-event';
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
-  initialEventData?: Event;
+  initialEventData?: FamilyEvent;
   title: string;
 }>();
 
@@ -117,7 +116,7 @@ const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);
 
-const eventForm = ref<Omit<Event, 'id'> | Event>(props.initialEventData || {
+const eventForm = ref<Omit<FamilyEvent, 'id'> | FamilyEvent>(props.initialEventData || {
   name: '',
   type: 'Other',
   familyId: null,
