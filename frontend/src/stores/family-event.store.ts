@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia';
 import type { FamilyEvent } from '@/types/family-event';
 import type { Paginated } from '@/types/pagination';
+import { createServices, type ServiceMode } from '@/services/service.factory';
+
+const isMockApi = import.meta.env.VITE_APP_USE_MOCK_API === 'true';
+const mode: ServiceMode = isMockApi ? 'mock' : 'real';
+const services = createServices(mode);
 
 export const useFamilyEventStore = defineStore('familyEvent', {
   state: () => ({
@@ -28,7 +33,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const response: Paginated<FamilyEvent> = await this.services.familyEvent.searchFamilyEvents(
+        const response: Paginated<FamilyEvent> = await services.familyEvent.searchFamilyEvents(
           this.searchTerm,
           this.familyIdFilter,
           this.currentPage,
@@ -49,7 +54,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const addedFamilyEvent = await this.services.familyEvent.add(newFamilyEvent);
+        const addedFamilyEvent = await services.familyEvent.add(newFamilyEvent);
         await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể thêm sự kiện gia đình.';
@@ -63,7 +68,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const updated = await this.services.familyEvent.update(updatedFamilyEvent);
+        const updated = await services.familyEvent.update(updatedFamilyEvent);
         const index = this.familyEvents.findIndex((event) => event.id === updated.id);
         if (index !== -1) {
           this.familyEvents[index] = updated;
@@ -83,7 +88,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        await this.services.familyEvent.delete(id);
+        await services.familyEvent.delete(id);
         await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể xóa sự kiện gia đình.';

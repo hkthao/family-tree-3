@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia';
 import type { Family } from '@/types/family';
 import type { Paginated } from '@/types/pagination'; // Correct placement of import
+import { createServices, type ServiceMode } from '@/services/service.factory';
+
+const isMockApi = import.meta.env.VITE_APP_USE_MOCK_API === 'true';
+const mode: ServiceMode = isMockApi ? 'mock' : 'real';
+const services = createServices(mode);
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
@@ -29,7 +34,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         // Use the injected service to search with current state parameters
-        const response: Paginated<Family> = await this.services.family.searchFamilies(
+        const response: Paginated<Family> = await services.family.searchFamilies(
           this.searchTerm,
           this.visibilityFilter,
           this.currentPage,
@@ -51,7 +56,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         // Use the injected service
-        const addedFamily = await this.services.family.add(newFamily); // Renamed to add
+        const addedFamily = await services.family.add(newFamily); // Renamed to add
         await this._loadFamilies(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể thêm gia đình.';
@@ -66,7 +71,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         // Use the injected service
-        const updated = await this.services.family.update(updatedFamily); // Renamed to update
+        const updated = await services.family.update(updatedFamily); // Renamed to update
         const index = this.families.findIndex((f) => f.id === updated.id);
         if (index !== -1) {
           this.families[index] = updated;
@@ -86,7 +91,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       this.error = null;
       try {
-        await this.services.family.delete(id); // Renamed to delete
+        await services.family.delete(id); // Renamed to delete
         await this._loadFamilies(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể xóa gia đình.';
