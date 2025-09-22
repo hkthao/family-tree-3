@@ -9,7 +9,7 @@ export interface MemberFilter {
   placeOfBirth?: string;
   placeOfDeath?: string;
   occupation?: string;
-  familyId?: string | undefined;
+  familyId?: string | null;
 }
 
 export interface IMemberService extends ICrudService<Member> { // Extend ICrudService

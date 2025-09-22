@@ -55,6 +55,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyEvent } from '@/types/family-event';
+import type { CalendarEvent } from 'vuetify';
 
 const props = defineProps<{
   events: FamilyEvent[];
@@ -124,13 +125,24 @@ interface FormattedEvent {
   eventObject: FamilyEvent;
 }
 
-const getEventColor = (event: FormattedEvent) => {
-  return event.color;
+// Define CalendarEventColorFunction type to match v-calendar's expectation
+type CalendarEventColorFunction = (event: CalendarEvent) => string;
+
+// Define EventSlotScope type to match v-calendar's event-click slot
+interface EventSlotScope {
+  event: FormattedEvent;
+  nativeEvent: MouseEvent;
+  // Add other properties if needed based on v-calendar's documentation
+}
+
+const getEventColor: CalendarEventColorFunction = (event: CalendarEvent) => {
+  // Assuming your formattedEvents already have the color property
+  return (event as FormattedEvent).color;
 };
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (_: Event, eventSlotScope: { event: { eventObject: FamilyEvent } }) => {
-  emit('viewEvent', eventSlotScope);
+const showEventDetails = (_: Event, eventSlotScope: EventSlotScope) => {
+  emit('viewEvent', eventSlotScope.event.eventObject);
 };
 </script>

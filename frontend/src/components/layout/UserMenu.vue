@@ -34,7 +34,7 @@
         <div class="d-flex flex-column align-center mt-2">
           <span class="text-h6 font-weight-medium">{{ currentUser.name }}</span>
           <v-chip label size="small" color="primary" variant="tonal" class="mt-1">
-            {{ $t('userMenu.role') }}: {{ currentUser.role }}
+            {{ $t('userMenu.role') }}: {{ currentUser.roles[0] }}
           </v-chip>
         </div>
       </div>

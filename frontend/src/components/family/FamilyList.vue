@@ -49,12 +49,12 @@
         </template>
         <template #item.visibility="{ item }">
           <v-chip
-            :color="item.visibility === 'Public' ? 'success' : 'error'"
+            :color="item.visibility && item.visibility.toLowerCase() === 'public' ? 'success' : 'error'"
             label
             size="small"
             class="text-capitalize"
           >
-            {{ $t(`family.management.visibility.${item.visibility.toLowerCase()}`) }}
+            {{ $t(`family.management.visibility.${item.visibility ? item.visibility.toLowerCase() : 'private'}`) }}
           </v-chip>
         </template>
 
@@ -80,7 +80,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/services/family.service';
+import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 
 const { families, totalFamilies, loading, itemsPerPage, familyMemberCounts } = defineProps<{

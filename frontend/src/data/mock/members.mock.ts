@@ -1,16 +1,18 @@
 import { faker } from '@faker-js/faker';
 
 export const mockMembers = Array.from({ length: 50 }, () => {
-  const gender = faker.helpers.arrayElement(['Male', 'Female', 'Other']);
+  const gender = faker.helpers.arrayElement(['male', 'female', 'other']);
   const status = faker.helpers.arrayElement(['Alive', 'Deceased']);
   const dob = faker.date.past({ years: 100 });
   const dod = status === 'Deceased' ? faker.date.between({ from: dob, to: new Date() }) : undefined;
 
+  const sex = gender === 'male' ? 'male' : (gender === 'female' ? 'female' : undefined);
+
   return {
     id: faker.string.uuid(),
     familyId: faker.string.uuid(), // Placeholder, will be linked in actual app
-    fullName: faker.person.fullName({ sex: gender === 'Male' ? 'male' : 'female' }),
-    givenName: faker.person.firstName({ sex: gender === 'Male' ? 'male' : 'female' }),
+    fullName: faker.person.fullName({ sex }),
+    givenName: faker.person.firstName({ sex }),
     nicknames: faker.helpers.arrayElements([faker.person.firstName(), faker.person.lastName()], { min: 0, max: 2 }),
     gender: gender,
     dob: dob.toISOString(),

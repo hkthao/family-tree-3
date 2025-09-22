@@ -29,9 +29,7 @@ export const useMemberStore = defineStore('member', {
       return state.members.filter((m: Member) => {
         if (f.fullName) {
           const lowerCaseFullName = f.fullName.toLowerCase();
-          if (!(m.lastName.toLowerCase().includes(lowerCaseFullName) ||
-              m.firstName.toLowerCase().includes(lowerCaseFullName) ||
-              `${m.lastName} ${m.firstName}`.toLowerCase().includes(lowerCaseFullName))) {
+          if (!(m.fullName && m.fullName.toLowerCase().includes(lowerCaseFullName))) {
             return false;
           }
         }
@@ -64,12 +62,7 @@ export const useMemberStore = defineStore('member', {
     getMemberById: (state) => (id: string) => {
       return state.members.find((m) => m.id === id);
     },
-    getMemberFullName: (state) => (member: Member) => {
-      return `${member.firstName} ${member.lastName}`.trim();
-    },
-    getMemberFullName: (state) => (member: Member) => {
-      return `${member.firstName} ${member.lastName}`.trim();
-    },
+
   },
 
   actions: {
@@ -78,8 +71,8 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       try {
         this.members = familyId
-          ? await this.services.member.fetchMembersByFamilyId(familyId)
-          : await this.services.member.fetch(); // Renamed to fetch
+          ? (await this.services.member.fetchMembersByFamilyId(familyId)).map(m => ({ ...m, fullName: `${m.firstName} ${m.lastName}`.trim() }))
+          : (await this.services.member.fetch()).map(m => ({ ...m, fullName: `${m.firstName} ${m.lastName}`.trim() })); // Renamed to fetch and added fullName
         this.currentPage = 1;
       } catch (e) {
         this.error = e instanceof Error ? e.message : 'Không thể tải danh sách thành viên.';

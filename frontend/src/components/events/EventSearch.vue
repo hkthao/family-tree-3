@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { EventFilter } from '@/services/familyEvent.service';
+import type { EventFilter } from '@/services/family-event/family-event.service.interface';
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
@@ -83,7 +83,7 @@ const expanded = ref(false); // Default to collapsed
 const filters = ref<EventFilter>({
   name: '',
   type: undefined,
-  familyId: '',
+  familyId: null,
   startDate: undefined,
   endDate: undefined,
   location: '',

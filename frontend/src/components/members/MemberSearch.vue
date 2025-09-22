@@ -86,7 +86,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemberFilter } from '@/services/member.service';
+import type { MemberFilter } from '@/services/member';
 import DateInputField from '@/components/common/DateInputField.vue';
 import GenderSelect from '@/components/common/GenderSelect.vue';
 
@@ -104,7 +104,7 @@ const filters = ref<MemberFilter>({
   placeOfBirth: '',
   placeOfDeath: '',
   occupation: '',
-  familyId: undefined,
+  familyId: null,
 });
 
 watch(filters.value, () => {

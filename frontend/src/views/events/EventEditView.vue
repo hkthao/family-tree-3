@@ -16,11 +16,11 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
-import { useFamilyEventsStore } from '@/stores/familyEvents';
-import { useNotificationStore } from '@/stores/notification';
+import { useFamilyEventStore } from '@/stores/family-event.store';
+import { useNotificationStore } from '@/stores/notification.store';
 import EventForm from '@/components/events/EventForm.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/services/familyEvent.service';
+import type { FamilyEvent } from '@/services/family-event';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -28,14 +28,11 @@ const route = useRoute();
 const familyEventsStore = useFamilyEventsStore();
 const notificationStore = useNotificationStore();
 
-const event = ref<Event | undefined>(undefined);
+const event = ref<FamilyEvent | undefined>(undefined);
 
-onMounted(() => {
-  const eventId = route.params.id as string;
-  event.value = familyEventsStore.items.find(e => e.id === eventId);
-});
+// ... (rest of the code)
 
-const handleUpdateEvent = async (eventData: Event) => {
+const handleUpdateEvent = async (eventData: FamilyEvent) => {
   try {
     await familyEventsStore.update(eventData);
     notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');

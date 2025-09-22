@@ -16,6 +16,7 @@ export function generateMockFamilyEvent(index: number, familyId?: string): Famil
     location: location,
     familyId: familyId || `family-${Math.floor(Math.random() * 5) + 1}`,
     relatedMembers: relatedMembers,
+    type: faker.helpers.arrayElement(['Birth', 'Marriage', 'Death', 'Migration', 'Other']),
   };
 }
 

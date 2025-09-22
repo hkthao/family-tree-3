@@ -19,9 +19,6 @@ function transformMemberDates(member: any): Member {
 // Helper function to transform Member object to API request format (lastName/firstName to fullName)
 function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   const apiMember: any = { ...member };
-  apiMember.fullName = `${member.lastName} ${member.firstName}`.trim(); // Construct fullName
-  delete apiMember.lastName; // Remove lastName
-  delete apiMember.firstName; // Remove firstName
 
   if (apiMember.dateOfBirth instanceof Date) {
     apiMember.dateOfBirth = apiMember.dateOfBirth.toISOString();
