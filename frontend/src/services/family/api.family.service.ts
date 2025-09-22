@@ -9,27 +9,27 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 export class ApiFamilyService implements IFamilyService {
   private apiUrl = `${API_BASE_URL}/families`;
 
-  async fetchFamilies(): Promise<Family[]> {
+  async fetch(): Promise<Family[]> { // Renamed from fetchFamilies
     const response = await axios.get<Family[]>(this.apiUrl);
     return response.data;
   }
 
-  async getFamilyById(id: string): Promise<Family | undefined> {
+  async getById(id: string): Promise<Family | undefined> { // Renamed from getFamilyById
     const response = await axios.get<Family>(`${this.apiUrl}/${id}`);
     return response.data;
   }
 
-  async addFamily(newFamily: Omit<Family, 'id'>): Promise<Family> {
-    const response = await axios.post<Family>(this.apiUrl, newFamily);
+  async add(newItem: Omit<Family, 'id'>): Promise<Family> { // Renamed from addFamily
+    const response = await axios.post<Family>(this.apiUrl, newItem);
     return response.data;
   }
 
-  async updateFamily(updatedFamily: Family): Promise<Family> {
-    const response = await axios.put<Family>(`${this.apiUrl}/${updatedFamily.id}`, updatedFamily);
+  async update(updatedItem: Family): Promise<Family> { // Renamed from updateFamily
+    const response = await axios.put<Family>(`${this.apiUrl}/${updatedItem.id}`, updatedItem);
     return response.data;
   }
 
-  async deleteFamily(id: string): Promise<void> {
+  async delete(id: string): Promise<void> { // Renamed from deleteFamily
     await axios.delete(`${this.apiUrl}/${id}`);
   }
 

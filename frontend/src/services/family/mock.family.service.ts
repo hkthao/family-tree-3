@@ -10,32 +10,32 @@ export class MockFamilyService implements IFamilyService {
     return new Promise((resolve) => setTimeout(() => resolve(data), 300));
   }
 
-  async fetchFamilies(): Promise<Family[]> {
+  async fetch(): Promise<Family[]> { // Renamed from fetchFamilies
     return this.simulateLatency(this.families);
   }
 
-  async getFamilyById(id: string): Promise<Family | undefined> {
+  async getById(id: string): Promise<Family | undefined> { // Renamed from getFamilyById
     const family = this.families.find((f) => f.id === id);
     return this.simulateLatency(family);
   }
 
-  async addFamily(newFamily: Omit<Family, 'id'>): Promise<Family> {
+  async add(newItem: Omit<Family, 'id'>): Promise<Family> { // Renamed from addFamily
     const familyToAdd = generateMockFamily(); // Generate a new ID and some default data
-    Object.assign(familyToAdd, newFamily); // Overlay provided data
+    Object.assign(familyToAdd, newItem); // Overlay provided data
     this.families.push(familyToAdd);
     return this.simulateLatency(familyToAdd);
   }
 
-  async updateFamily(updatedFamily: Family): Promise<Family> {
-    const index = this.families.findIndex((f) => f.id === updatedFamily.id);
+  async update(updatedItem: Family): Promise<Family> { // Renamed from updateFamily
+    const index = this.families.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
-      this.families[index] = updatedFamily;
-      return this.simulateLatency(updatedFamily);
+      this.families[index] = updatedItem;
+      return this.simulateLatency(updatedItem);
     }
     throw new Error('Family not found');
   }
 
-  async deleteFamily(id: string): Promise<void> {
+  async delete(id: string): Promise<void> { // Renamed from deleteFamily
     const initialLength = this.families.length;
     this.families = this.families.filter((f) => f.id !== id);
     if (this.families.length === initialLength) {
