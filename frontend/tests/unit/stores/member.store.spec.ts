@@ -4,6 +4,7 @@ import { useMemberStore } from '@/stores/member.store';
 import type { Member } from '@/types/member';
 import type { IMemberService, MemberFilter } from '@/services/member/member.service.interface';
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
+import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
@@ -14,28 +15,18 @@ class MockMemberServiceForTest implements IMemberService {
     return [...this._members]; // Return a shallow copy
   }
 
-  private simulateLatency<T>(data: T, error?: string): Promise<T> {
-    return new Promise((resolve, reject) => setTimeout(() => {
-      if (error) {
-        reject(new Error(error));
-      } else {
-        resolve(data);
-      }
-    }, 0));
-  }
-
   async fetch(): Promise<Member[]> { // Renamed from fetchMembers
-    return this.simulateLatency(this.members);
+    return simulateLatency(this.members);
   }
 
   async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
     const filteredMembers = this.members.filter(member => member.familyId === familyId);
-    return this.simulateLatency(filteredMembers);
+    return simulateLatency(filteredMembers);
   }
 
   async getById(id: string): Promise<Member | undefined> { // Renamed from getMemberById
     const member = this.members.find((m) => m.id === id);
-    return this.simulateLatency(member);
+    return simulateLatency(member);
   }
 
   async add(newItem: Omit<Member, 'id'>): Promise<Member> { // Renamed from addMember
@@ -46,7 +37,7 @@ class MockMemberServiceForTest implements IMemberService {
       dateOfDeath: newItem.dateOfDeath ? new Date(newItem.dateOfDeath) : undefined,
     };
     this._members.push(memberToAdd);
-    return this.simulateLatency(memberToAdd);
+    return simulateLatency(memberToAdd);
   }
 
   async update(updatedItem: Member): Promise<Member> { // Renamed from updateMember
@@ -58,7 +49,7 @@ class MockMemberServiceForTest implements IMemberService {
         dateOfDeath: updatedItem.dateOfDeath ? new Date(updatedItem.dateOfDeath) : undefined,
       };
       this._members[index] = memberToUpdate;
-      return this.simulateLatency(memberToUpdate);
+      return simulateLatency(memberToUpdate);
     }
     throw new Error('Member not found');
   }
@@ -69,7 +60,7 @@ class MockMemberServiceForTest implements IMemberService {
     if (this.members.length === initialLength) {
       throw new Error('Member not found');
     }
-    return this.simulateLatency(undefined);
+    return simulateLatency(undefined);
   }
 
   async searchMembers(filters: MemberFilter): Promise<Member[]> {
@@ -108,7 +99,7 @@ class MockMemberServiceForTest implements IMemberService {
       filteredMembers = filteredMembers.filter(m => m.familyId === filters.familyId);
     }
 
-    return this.simulateLatency(filteredMembers);
+    return simulateLatency(filteredMembers);
   }
 }
 
