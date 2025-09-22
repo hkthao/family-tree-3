@@ -157,7 +157,5 @@ onMounted(async () => {
   await loadAllMembers();
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-watch(families, (newItems) => {
-});
+
 </script>
