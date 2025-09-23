@@ -14,6 +14,7 @@ export const useFamilyStore = defineStore('family', {
     currentPage: 1,
     itemsPerPage: 5, // Default items per page
     totalPages: 0,
+    familyCache: {} as Record<string, Family>, // Cache for individual families
   }),
   getters: {
     getFamilyById: (state) => (id: string) => {
@@ -24,20 +25,22 @@ export const useFamilyStore = defineStore('family', {
     },
   },
   actions: {
-    async _loadFamilies() { // Renamed from fetchFamilies
+    async _loadFamilies() {
+      // Renamed from fetchFamilies
       this.loading = true;
       this.error = null;
       try {
-       // Use the injected service to search with current state parameters
-          const response: Paginated<Family> = await this.services.family.searchFamilies(
+        // Use the injected service to search with current state parameters
+        const response: Paginated<Family> =
+          await this.services.family.searchFamilies(
             this.searchTerm,
             this.visibilityFilter,
             this.currentPage,
-            this.itemsPerPage
+            this.itemsPerPage,
           );
-          this.families = response.items;
-          this.totalItems = response.totalItems;
-          this.totalPages = response.totalPages;
+        this.families = response.items;
+        this.totalItems = response.totalItems;
+        this.totalPages = response.totalPages;
       } catch (e) {
         this.error = 'Không thể tải danh sách gia đình.';
         console.error(e);
@@ -96,7 +99,10 @@ export const useFamilyStore = defineStore('family', {
       }
     },
 
-    async searchFamilies(term: string, visibility: 'all' | 'public' | 'private') {
+    async searchFamilies(
+      term: string,
+      visibility: 'all' | 'public' | 'private',
+    ) {
       this.searchTerm = term;
       this.visibilityFilter = visibility;
       this.currentPage = 1; // Reset to first page on new search
@@ -120,6 +126,22 @@ export const useFamilyStore = defineStore('family', {
 
     setCurrentFamily(family: Family | null) {
       this.currentFamily = family;
+    },
+
+    async fetchFamilyById(id: string): Promise<Family | undefined> {
+      if (this.familyCache[id]) {
+        return this.familyCache[id];
+      }
+      try {
+        const family = await this.services.family.getById(id);
+        if (family) {
+          this.familyCache[id] = family;
+        }
+        return family;
+      } catch (e) {
+        console.error(`Error fetching family with ID ${id}:`, e);
+        return undefined;
+      }
     },
   },
 });

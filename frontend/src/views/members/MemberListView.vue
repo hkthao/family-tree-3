@@ -1,11 +1,10 @@
 <template>
   <v-container fluid>
-    <MemberSearch @update:filters="handleFilterUpdate" :families="families" />
+    <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList
-      :members="members"
-      :total-members="memberStore.members.length"
-      :families="familyStore.families"
+      :members="paginatedMembers"
+      :total-members="filteredMembers.length"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
@@ -21,7 +20,6 @@
         :read-only="true"
         :title="t('member.form.title')"
         :members="members"
-        :families="families"
         @close="closeViewDialog"
       />
     </v-dialog>
@@ -69,9 +67,8 @@ import { useRouter } from 'vue-router';
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { members, loading, currentPage } = storeToRefs(memberStore);
+const { members, loading, currentPage, paginatedMembers, filteredMembers } = storeToRefs(memberStore);
 const familyStore = useFamilyStore();
-const { families } = storeToRefs(familyStore);
 const currentFilters = ref<MemberFilter>({});
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
@@ -87,12 +84,6 @@ const loadMembers = () => {
 
 const loadAllMembers = async () => {
   await memberStore.fetchMembers(); // Fetch all members
-};
-
-const loadFamilies = async () => {
-  await familyStore._loadFamilies();
-  console.log('Families loaded:', familyStore.families);
-  
 };
 
 const openViewDialog = (member: Member) => {
@@ -155,7 +146,6 @@ const handleDeleteCancel = () => {
 };
 
 onMounted(async () => {
-  await loadFamilies();
   await loadMembers();
   await loadAllMembers();
 });

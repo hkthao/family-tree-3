@@ -99,7 +99,11 @@ const notificationStore = useNotificationStore();
 
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+
+// ... (rest of the file)
+
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const selectedTab = ref('table');
 
 const router = useRouter();

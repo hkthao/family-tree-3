@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import type { Member } from '@/types/member';
 import type { MemberFilter } from '@/services/member';
-import { createServices, type ServiceMode } from '@/services/service.factory';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -20,7 +20,7 @@ export const useMemberStore = defineStore('member', {
       familyId: undefined,
     } as MemberFilter,
     currentPage: 1,
-    itemsPerPage: 10,
+    itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
   }),
 
   getters: {
