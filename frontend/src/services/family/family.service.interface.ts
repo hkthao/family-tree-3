@@ -1,11 +1,10 @@
-import type { Family } from '@/types/family';
-import type { Paginated } from '@/types/pagination'; // Import generic Paginated interface
-import type { ICrudService } from '../common/crud.service.interface'; // Import ICrudService
+import type { Family, FamilySearchFilter } from '@/types/family';
+import type { Paginated } from '@/types/pagination';
+import type { ICrudService } from '../common/crud.service.interface';
 
-export interface IFamilyService extends ICrudService<Family> { // Extend ICrudService
-  searchFamilies(
-    searchQuery: string,
-    visibility: 'all' | 'public' | 'private',
+export interface IFamilyService extends ICrudService<Family> {
+  searchItems(
+    filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number
   ): Promise<Paginated<Family>>; // Keep searchFamilies

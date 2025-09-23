@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Family } from '@/types/family';
+import type { Family, FamilySearchFilter } from '@/types/family';
 import type { Paginated } from '@/types/pagination';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
@@ -9,12 +9,11 @@ export const useFamilyStore = defineStore('family', {
     currentItem: null as Family | null,
     loading: false,
     error: null as string | null,
-    searchTerm: '',
-    visibilityFilter: 'all' as 'all' | 'public' | 'private',
+    filter: {} as FamilySearchFilter, // New filter object
     totalItems: 0,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
-    totalPages: 0,
+    totalPages: 1,
     itemCache: {} as Record<string, Family>, // Cache for individual items
   }),
   getters: {
@@ -34,8 +33,7 @@ export const useFamilyStore = defineStore('family', {
       try {
         const response: Paginated<Family> =
           await this.services.family.searchItems(
-            this.searchTerm,
-            this.visibilityFilter,
+            this.filter,
             this.currentPage,
             this.itemsPerPage,
           );
@@ -44,6 +42,9 @@ export const useFamilyStore = defineStore('family', {
         this.totalPages = response.totalPages;
       } catch (e) {
         this.error = 'Không thể tải danh sách gia đình.';
+        this.items = []; // Clear items on error
+        this.totalItems = 0; // Reset totalItems on error
+        this.totalPages = 1; // Reset totalPages on error
         console.error(e);
       } finally {
         this.loading = false;
@@ -103,11 +104,9 @@ export const useFamilyStore = defineStore('family', {
     },
 
     async searchItems(
-      term: string,
-      visibility: 'all' | 'public' | 'private',
+      filter: FamilySearchFilter,
     ) {
-      this.searchTerm = term;
-      this.visibilityFilter = visibility;
+      this.filter = filter;
       this.currentPage = 1; // Reset to first page on new search
       await this._loadItems(); // Trigger fetch with new search terms
     },
@@ -170,8 +169,8 @@ export const useFamilyStore = defineStore('family', {
       }
     },
 
-    async searchLookup(term: string, page: number, itemsPerPage: number) {
-      this.searchTerm = term;
+    async searchLookup(filter: FamilySearchFilter, page: number, itemsPerPage: number) {
+      this.filter = filter;
       this.currentPage = page;
       this.itemsPerPage = itemsPerPage;
       await this._loadItems();

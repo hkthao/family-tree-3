@@ -5,11 +5,19 @@ export interface Family {
   avatarUrl?: string;
   address?: string;
   visibility?: 'public' | 'private' | 'shared';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-export interface FamilyFilter {
-  fullName?: string;
-  visibility?: 'all' | 'public' | 'private';
+export interface FamilySearchFilter {
+  name?: string;
+  description?: string;
+  address?: string;
+  visibility?: 'all' | 'public' | 'private' | 'shared';
+  createdAtStart?: Date;
+  createdAtEnd?: Date;
+  updatedAtStart?: Date;
+  updatedAtEnd?: Date;
 }
 
 export interface ConfirmDeleteDialogProps {

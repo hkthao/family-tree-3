@@ -63,10 +63,13 @@ export class ApiMemberService implements IMemberService {
     await axios.delete(`${this.apiUrl}/${id}`);
   }
 
-  async searchMembers(filters: MemberFilter): Promise<Member[]> {
+  async searchMembers(
+    filters: MemberFilter,
+    page: number,
+    itemsPerPage: number,
+  ): Promise<Paginated<Member>> {
     const params = new URLSearchParams();
     if (filters.fullName) params.append('fullName', filters.fullName);
-    // dateOfBirth and dateOfDeath in filters are Date objects, convert to ISO string for API
     if (filters.dateOfBirth) params.append('dateOfBirth', filters.dateOfBirth.toISOString());
     if (filters.dateOfDeath) params.append('dateOfDeath', filters.dateOfDeath.toISOString());
     if (filters.gender) params.append('gender', filters.gender);
@@ -75,7 +78,14 @@ export class ApiMemberService implements IMemberService {
     if (filters.occupation) params.append('occupation', filters.occupation);
     if (filters.familyId) params.append('familyId', filters.familyId);
 
-    const response = await axios.get<Member[]>(`${this.apiUrl}?${params.toString()}`);
-    return response.data.map(transformMemberDates);
+    // Add pagination parameters
+    params.append('page', page.toString());
+    params.append('itemsPerPage', itemsPerPage.toString());
+
+    const response = await axios.get<Paginated<Member>>(`${this.apiUrl}?${params.toString()}`);
+    // Assuming the API returns a Paginated object with items, totalItems, totalPages
+    // The items in the response might need date transformation
+    response.data.items = response.data.items.map(transformMemberDates);
+    return response.data;
   }
 }

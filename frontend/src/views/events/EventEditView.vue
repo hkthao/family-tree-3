@@ -34,7 +34,7 @@ const event = ref<FamilyEvent | undefined>(undefined);
 
 const handleUpdateEvent = async (eventData: FamilyEvent) => {
   try {
-    await familyEventsStore.updateFamilyEvent(eventData);
+    await familyEventsStore.updateItem(eventData);
     notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');
     closeForm();
   } catch (error) {
