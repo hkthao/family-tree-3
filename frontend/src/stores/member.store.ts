@@ -5,8 +5,8 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
-    members: [] as Member[],
-    currentMember: null as Member | null,
+    items: [] as Member[],
+    currentItem: null as Member | null,
     loading: false,
     error: null as string | null,
     filters: {
@@ -25,10 +25,10 @@ export const useMemberStore = defineStore('member', {
 
   getters: {
     /** Lọc dữ liệu dựa trên filters */
-    filteredMembers: (state): Member[] => {
+    filteredItems: (state): Member[] => {
       const f = state.filters;
-      return state.members
-        ? state.members.filter((m: Member) => {
+      return state.items
+        ? state.items.filter((m: Member) => {
             if (f.fullName) {
               const lowerCaseFullName = f.fullName.toLowerCase();
               if (
@@ -81,31 +81,31 @@ export const useMemberStore = defineStore('member', {
         : [];
     },
 
-    /** Phân trang dựa trên filteredMembers */
-    paginatedMembers: (state): Member[] => {
+    /** Phân trang dựa trên filteredItems */
+    paginatedItems: (state): Member[] => {
       const start = (state.currentPage - 1) * state.itemsPerPage;
       const end = start + state.itemsPerPage;
-      return (useMemberStore().filteredMembers as Member[]).slice(start, end);
+      return (useMemberStore().filteredItems as Member[]).slice(start, end);
     },
 
     /** Tổng số trang (không cần lưu state) */
     totalPages: (state): number => {
-      const total = (useMemberStore().filteredMembers as Member[]).length;
+      const total = (useMemberStore().filteredItems as Member[]).length;
       return Math.ceil(total / state.itemsPerPage);
     },
 
     /** Lấy 1 member theo id */
-    getMemberById: (state) => (id: string) => {
-      return state.members.find((m) => m.id === id);
+    getItemById: (state) => (id: string) => {
+      return state.items.find((m) => m.id === id);
     },
   },
 
   actions: {
-    async fetchMembers(familyId?: string) {
+    async fetchItems(familyId?: string) {
       this.loading = true;
       this.error = null;
       try {
-        this.members = familyId
+        this.items = familyId
           ? await this.services.member.fetchMembersByFamilyId(familyId)
           : await this.services.member.fetch(); // Renamed to fetch and added fullName
         this.currentPage = 1;
@@ -120,44 +120,44 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    async addMember(newMember: Omit<Member, 'id'>) {
+    async addItem(newItem: Omit<Member, 'id'>) {
       this.loading = true;
       this.error = null;
       try {
         if (
-          newMember.lastName.trim() === '' ||
-          newMember.firstName.trim() === ''
+          newItem.lastName.trim() === '' ||
+          newItem.firstName.trim() === ''
         ) {
           this.error = 'Họ và tên không được để trống.';
           this.loading = false;
           return; // Return early
         }
         if (
-          newMember.dateOfBirth &&
-          newMember.dateOfDeath &&
-          newMember.dateOfBirth > newMember.dateOfDeath
+          newItem.dateOfBirth &&
+          newItem.dateOfDeath &&
+          newItem.dateOfBirth > newItem.dateOfDeath
         ) {
           this.error = 'Ngày sinh không thể sau ngày mất.';
           this.loading = false;
           return; // Return early
         }
         if (
-          newMember.placeOfBirth &&
-          newMember.placeOfDeath &&
-          newMember.placeOfBirth === newMember.placeOfDeath
+          newItem.placeOfBirth &&
+          newItem.placeOfDeath &&
+          newItem.placeOfBirth === newItem.placeOfDeath
         ) {
           this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
           this.loading = false;
           return; // Return early
         }
-        if (newMember.occupation && newMember.occupation.length > 100) {
+        if (newItem.occupation && newItem.occupation.length > 100) {
           this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
           this.loading = false;
           return; // Return early
         }
 
-        const added = await this.services.member.add(newMember); // Renamed to add
-        this.members.push(added);
+        const added = await this.services.member.add(newItem); // Renamed to add
+        this.items.push(added);
       } catch (e) {
         this.error =
           e instanceof Error ? e.message : 'Không thể thêm thành viên.';
@@ -167,44 +167,44 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    async updateMember(updatedMember: Member) {
+    async updateItem(updatedItem: Member) {
       this.loading = true;
       this.error = null;
       try {
         if (
-          updatedMember.lastName.trim() === '' ||
-          updatedMember.firstName.trim() === ''
+          updatedItem.lastName.trim() === '' ||
+          updatedItem.firstName.trim() === ''
         ) {
           this.error = 'Họ và tên không được để trống.';
           this.loading = false;
           return; // Return early
         }
         if (
-          updatedMember.dateOfBirth &&
-          updatedMember.dateOfDeath &&
-          updatedMember.dateOfBirth > updatedMember.dateOfDeath
+          updatedItem.dateOfBirth &&
+          updatedItem.dateOfDeath &&
+          updatedItem.dateOfBirth > updatedItem.dateOfDeath
         ) {
           this.error = 'Ngày sinh không thể sau ngày mất.';
           this.loading = false;
           return; // Return early
         }
         if (
-          updatedMember.placeOfBirth &&
-          updatedMember.placeOfDeath &&
-          updatedMember.placeOfBirth === updatedMember.placeOfDeath
+          updatedItem.placeOfBirth &&
+          updatedItem.placeOfDeath &&
+          updatedItem.placeOfBirth === updatedItem.placeOfDeath
         ) {
           this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
           this.loading = false;
           return; // Return early
         }
-        if (updatedMember.occupation && updatedMember.occupation.length > 100) {
+        if (updatedItem.occupation && updatedItem.occupation.length > 100) {
           this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
           this.loading = false;
           return; // Return early
         }
-        const updated = await this.services.member.update(updatedMember); // Renamed to update
-        const idx = this.members.findIndex((m) => m.id === updated.id);
-        if (idx !== -1) this.members[idx] = updated;
+        const updated = await this.services.member.update(updatedItem); // Renamed to update
+        const idx = this.items.findIndex((m) => m.id === updated.id);
+        if (idx !== -1) this.items[idx] = updated;
       } catch (e) {
         this.error =
           e instanceof Error ? e.message : 'Không thể cập nhật thành viên.';
@@ -214,12 +214,12 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    async deleteMember(id: string) {
+    async deleteItem(id: string) {
       this.loading = true;
       this.error = null;
       try {
         await this.services.member.delete(id); // Renamed to delete
-        this.members = this.members.filter((m) => m.id !== id);
+        this.items = this.items.filter((m) => m.id !== id);
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
         }
@@ -232,7 +232,7 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    searchMembers(filters: MemberFilter) {
+    searchItems(filters: MemberFilter) {
       const newFilters: MemberFilter = { ...filters };
       if (typeof newFilters.dateOfBirth === 'string') {
         newFilters.dateOfBirth = new Date(newFilters.dateOfBirth);
@@ -261,8 +261,8 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    setCurrentMember(member: Member | null) {
-      this.currentMember = member;
+    setCurrentItem(item: Member | null) {
+      this.currentItem = item;
     },
   },
 });

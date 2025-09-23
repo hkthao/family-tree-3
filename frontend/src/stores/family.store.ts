@@ -1,36 +1,35 @@
 import { defineStore } from 'pinia';
 import type { Family } from '@/types/family';
-import type { Paginated } from '@/types/pagination'; // Correct placement of import
+import type { Paginated } from '@/types/pagination';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
-    families: [] as Family[],
-    currentFamily: null as Family | null,
+    items: [] as Family[],
+    currentItem: null as Family | null,
     loading: false,
     error: null as string | null,
     searchTerm: '',
     visibilityFilter: 'all' as 'all' | 'public' | 'private',
     totalItems: 0,
     currentPage: 1,
-    itemsPerPage: 5, // Default items per page
+    itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 0,
-    familyCache: {} as Record<string, Family>, // Cache for individual families
+    itemCache: {} as Record<string, Family>, // Cache for individual items
   }),
   getters: {
-    getFamilyById: (state) => (id: string) => {
-      return state.families.find((family) => family.id === id);
+    getItemById: (state) => (id: string) => {
+      return state.items.find((item) => item.id === id);
     },
-    paginatedFamilies: (state) => {
-      return state.families; // Families are already paginated by the service
+    paginatedItems: (state) => {
+      return state.items; // Items are already paginated by the service
     },
   },
   actions: {
-    async _loadFamilies() {
-      // Renamed from fetchFamilies
+    async _loadItems() {
       this.loading = true;
       this.error = null;
       try {
-        // Use the injected service to search with current state parameters
         const response: Paginated<Family> =
           await this.services.family.searchFamilies(
             this.searchTerm,
@@ -38,7 +37,7 @@ export const useFamilyStore = defineStore('family', {
             this.currentPage,
             this.itemsPerPage,
           );
-        this.families = response.items;
+        this.items = response.items;
         this.totalItems = response.totalItems;
         this.totalPages = response.totalPages;
       } catch (e) {
@@ -49,13 +48,13 @@ export const useFamilyStore = defineStore('family', {
       }
     },
 
-    async addFamily(newFamily: Omit<Family, 'id'>) {
+    async addItem(newItem: Omit<Family, 'id'>) {
       this.loading = true;
       this.error = null;
       try {
-        // Use the injected service
-        const addedFamily = await this.services.family.add(newFamily); // Renamed to add
-        await this._loadFamilies(); // Re-fetch to update pagination and filters
+        const addedItem = await this.services.family.add(newItem);
+        this.items.push(addedItem);
+        await this._loadItems(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể thêm gia đình.';
         console.error(e);
@@ -64,16 +63,15 @@ export const useFamilyStore = defineStore('family', {
       }
     },
 
-    async updateFamily(updatedFamily: Family) {
+    async updateItem(updatedItem: Family) {
       this.loading = true;
       this.error = null;
       try {
-        // Use the injected service
-        const updated = await this.services.family.update(updatedFamily); // Renamed to update
-        const index = this.families.findIndex((f) => f.id === updated.id);
+        const updated = await this.services.family.update(updatedItem);
+        const index = this.items.findIndex((item) => item.id === updated.id);
         if (index !== -1) {
-          this.families[index] = updated;
-          await this._loadFamilies(); // Re-fetch to update pagination and filters
+          this.items[index] = updated;
+          await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
           throw new Error('Không tìm thấy gia đình để cập nhật trong kho.');
         }
@@ -85,12 +83,15 @@ export const useFamilyStore = defineStore('family', {
       }
     },
 
-    async deleteFamily(id: string) {
+    async deleteItem(id: string) {
       this.loading = true;
       this.error = null;
       try {
-        await this.services.family.delete(id); // Renamed to delete
-        await this._loadFamilies(); // Re-fetch to update pagination and filters
+        await this.services.family.delete(id);
+        this.items = this.items.filter((item) => item.id !== id);
+        if (this.currentPage > this.totalPages && this.totalPages > 0) {
+          this.currentPage = this.totalPages;
+        }
       } catch (e) {
         this.error = 'Không thể xóa gia đình.';
         console.error(e);
@@ -99,20 +100,20 @@ export const useFamilyStore = defineStore('family', {
       }
     },
 
-    async searchFamilies(
+    async searchItems(
       term: string,
       visibility: 'all' | 'public' | 'private',
     ) {
       this.searchTerm = term;
       this.visibilityFilter = visibility;
       this.currentPage = 1; // Reset to first page on new search
-      await this._loadFamilies(); // Trigger fetch with new search terms
+      await this._loadItems(); // Trigger fetch with new search terms
     },
 
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
-        await this._loadFamilies(); // Trigger fetch with new page
+        await this._loadItems(); // Trigger fetch with new page
       }
     },
 
@@ -120,35 +121,35 @@ export const useFamilyStore = defineStore('family', {
       if (count > 0) {
         this.itemsPerPage = count;
         this.currentPage = 1; // Reset to first page when items per page changes
-        await this._loadFamilies(); // Trigger fetch with new items per page
+        await this._loadItems(); // Trigger fetch with new items per page
       }
     },
 
-    setCurrentFamily(family: Family | null) {
-      this.currentFamily = family;
+    setCurrentItem(item: Family | null) {
+      this.currentItem = item;
     },
 
-    async fetchFamilyById(id: string): Promise<Family | undefined> {
-      if (this.familyCache[id]) {
-        return this.familyCache[id];
+    async fetchItemById(id: string): Promise<Family | undefined> {
+      if (this.itemCache[id]) {
+        return this.itemCache[id];
       }
       try {
-        const family = await this.services.family.getById(id);
-        if (family) {
-          this.familyCache[id] = family;
+        const item = await this.services.family.getById(id);
+        if (item) {
+          this.itemCache[id] = item;
         }
-        return family;
+        return item;
       } catch (e) {
-        console.error(`Error fetching family with ID ${id}:`, e);
+        console.error(`Error fetching item with ID ${id}:`, e);
         return undefined;
       }
     },
 
-    async fetchAllFamilies() {
+    async fetchAllItems() {
       this.loading = true;
       this.error = null;
       try {
-        // Use a large itemsPerPage to fetch all families
+        // Use a large itemsPerPage to fetch all items
         const response: Paginated<Family> =
           await this.services.family.searchFamilies(
             '',
@@ -156,7 +157,7 @@ export const useFamilyStore = defineStore('family', {
             1,
             1000, // A large number
           );
-        this.families = response.items;
+        this.items = response.items;
         this.totalItems = response.totalItems;
         this.totalPages = 1;
       } catch (e) {
@@ -171,7 +172,7 @@ export const useFamilyStore = defineStore('family', {
       this.searchTerm = term;
       this.currentPage = page;
       this.itemsPerPage = itemsPerPage;
-      await this._loadFamilies();
+      await this._loadItems();
     },
   },
 });

@@ -5,30 +5,27 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 export const useFamilyEventStore = defineStore('familyEvent', {
   state: () => ({
-    familyEvents: [] as FamilyEvent[],
-    currentFamilyEvent: null as FamilyEvent | null,
+    items: [] as FamilyEvent[],
+    currentItem: null as FamilyEvent | null,
     loading: false,
     error: null as string | null,
     searchTerm: '',
     familyIdFilter: undefined as string | undefined,
     totalItems: 0,
     currentPage: 1,
-
-// ... (rest of the file)
-
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 0,
   }),
   getters: {
-    getFamilyEventById: (state) => (id: string) => {
-      return state.familyEvents.find((event) => event.id === id);
+    getItemById: (state) => (id: string) => {
+      return state.items.find((item) => item.id === id);
     },
-    paginatedFamilyEvents: (state) => {
-      return state.familyEvents; // Events are already paginated by the service
+    paginatedItems: (state) => {
+      return state.items; // Events are already paginated by the service
     },
   },
   actions: {
-    async _loadFamilyEvents() {
+    async _loadItems() {
       this.loading = true;
       this.error = null;
       try {
@@ -38,7 +35,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
           this.currentPage,
           this.itemsPerPage
         );
-        this.familyEvents = response.items;
+        this.items = response.items;
         this.totalItems = response.totalItems;
         this.totalPages = response.totalPages;
       } catch (e) {
@@ -49,12 +46,13 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       }
     },
 
-    async addFamilyEvent(newFamilyEvent: Omit<FamilyEvent, 'id'>) {
+    async addItem(newItem: Omit<FamilyEvent, 'id'>) {
       this.loading = true;
       this.error = null;
       try {
-        const addedFamilyEvent = await this.services.familyEvent.add(newFamilyEvent);
-        await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
+        const addedItem = await this.services.familyEvent.add(newItem);
+        this.items.push(addedItem);
+        await this._loadItems(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể thêm sự kiện gia đình.';
         console.error(e);
@@ -63,15 +61,15 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       }
     },
 
-    async updateFamilyEvent(updatedFamilyEvent: FamilyEvent) {
+    async updateItem(updatedItem: FamilyEvent) {
       this.loading = true;
       this.error = null;
       try {
-        const updated = await this.services.familyEvent.update(updatedFamilyEvent);
-        const index = this.familyEvents.findIndex((event) => event.id === updated.id);
+        const updated = await this.services.familyEvent.update(updatedItem);
+        const index = this.items.findIndex((item) => item.id === updated.id);
         if (index !== -1) {
-          this.familyEvents[index] = updated;
-          await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
+          this.items[index] = updated;
+          await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
           throw new Error('Không tìm thấy sự kiện gia đình để cập nhật trong kho.');
         }
@@ -83,12 +81,15 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       }
     },
 
-    async deleteFamilyEvent(id: string) {
+    async deleteItem(id: string) {
       this.loading = true;
       this.error = null;
       try {
         await this.services.familyEvent.delete(id);
-        await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
+        this.items = this.items.filter((item) => item.id !== id);
+        if (this.currentPage > this.totalPages && this.totalPages > 0) {
+          this.currentPage = this.totalPages;
+        }
       } catch (e) {
         this.error = 'Không thể xóa sự kiện gia đình.';
         console.error(e);
@@ -97,17 +98,17 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       }
     },
 
-    async searchFamilyEvents(term: string, familyId?: string) {
+    async searchItems(term: string, familyId?: string) {
       this.searchTerm = term;
       this.familyIdFilter = familyId;
       this.currentPage = 1; // Reset to first page on new search
-      await this._loadFamilyEvents(); // Trigger fetch with new search terms
+      await this._loadItems(); // Trigger fetch with new search terms
     },
 
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
-        await this._loadFamilyEvents(); // Trigger fetch with new page
+        await this._loadItems(); // Trigger fetch with new page
       }
     },
 
@@ -115,12 +116,12 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       if (count > 0) {
         this.itemsPerPage = count;
         this.currentPage = 1; // Reset to first page when items per page changes
-        await this._loadFamilyEvents(); // Trigger fetch with new items per page
+        await this._loadItems(); // Trigger fetch with new items per page
       }
     },
 
-    setCurrentFamilyEvent(event: FamilyEvent | null) {
-      this.currentFamilyEvent = event;
+    setCurrentItem(item: FamilyEvent | null) {
+      this.currentItem = item;
     },
   },
 });
