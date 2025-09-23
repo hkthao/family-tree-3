@@ -83,8 +83,10 @@ const selectedEvent = ref<TimelineEvent | undefined>(undefined);
 const isEditEventMode = ref(false);
 const page = ref(1);
 
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+
 const paginatedEvents = computed(() => {
-  const itemsPerPage = 5;
+  const itemsPerPage = DEFAULT_ITEMS_PER_PAGE;
   const startIndex = (page.value - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   return props.timelineEvents.slice(startIndex, endIndex);

@@ -110,42 +110,45 @@
 
             <v-row>
               <v-col cols="12">
-                <FamilyAutocomplete
+                <Lookup
                   v-model="memberForm.familyId"
+                  :data-source="familyStore"
+                  display-expr="name"
+                  value-expr="id"
                   :label="t('member.form.familyId')"
                   :rules="[rules.required]"
-                  :read-only="props.readOnly"
+                  :readonly="props.readOnly"
                 />
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" md="4">
-                <v-autocomplete
-                  v-model="(memberForm.fatherId as any)"
+                <Lookup
+                  v-model="memberForm.fatherId"
+                  :data-source="memberStore"
+                  display-expr="fullName"
+                  value-expr="id"
                   :label="t('member.form.father')"
-                  :items="[]"
-                  item-title="fullName"
-                  item-value="id"
                   :readonly="props.readOnly"
                 />
               </v-col>
               <v-col cols="12" md="4">
-                <v-autocomplete
-                  v-model="(memberForm.motherId as any)"
+                <Lookup
+                  v-model="memberForm.motherId"
+                  :data-source="memberStore"
+                  display-expr="fullName"
+                  value-expr="id"
                   :label="t('member.form.mother')"
-                  :items="[]"
-                  item-title="fullName"
-                  item-value="id"
                   :readonly="props.readOnly"
                 />
               </v-col>
               <v-col cols="12" md="4">
-                <v-autocomplete
-                  v-model="(memberForm.spouseId as any)"
+                <Lookup
+                  v-model="memberForm.spouseId"
+                  :data-source="memberStore"
+                  display-expr="fullName"
+                  value-expr="id"
                   :label="t('member.form.spouse')"
-                  :items="[]"
-                  item-title="fullName"
-                  item-value="id"
                   :readonly="props.readOnly"
                 />
               </v-col>
@@ -189,7 +192,8 @@ import type { Member } from '@/types/member';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import Lookup from '@/components/common/Lookup.vue';
+import { useFamilyStore } from '@/stores/family.store';
 import GenderSelect from '@/components/common/GenderSelect.vue';
 
 interface TimelineEvent {
@@ -208,6 +212,8 @@ const props = defineProps<{
 const emit = defineEmits(['close', 'submit']);
 
 const { t } = useI18n();
+const familyStore = useFamilyStore();
+const memberStore = useMemberStore();
 
 const tab = ref('general'); // Default to general tab
 
@@ -221,7 +227,6 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData ? {
 } : {
   lastName: '',
   firstName: '',
-  fullName: '',
   dateOfBirth: undefined,
   gender: 'male',
   familyId: '',

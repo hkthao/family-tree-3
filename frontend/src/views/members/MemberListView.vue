@@ -3,8 +3,8 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList
-      :members="paginatedMembers"
-      :total-members="filteredMembers.length"
+      :members="paginatedItems"
+      :total-members="filteredItems.length"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
@@ -67,7 +67,7 @@ import { useRouter } from 'vue-router';
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { members, loading, currentPage, paginatedMembers, filteredMembers } = storeToRefs(memberStore);
+const { items, loading, currentPage, paginatedItems, filteredItems } = storeToRefs(memberStore);
 const familyStore = useFamilyStore();
 const currentFilters = ref<MemberFilter>({});
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
@@ -79,11 +79,11 @@ const notificationStore = useNotificationStore();
 
 // Function Declarations (moved to top)
 const loadMembers = () => {
-  memberStore.searchMembers(currentFilters.value);
+  memberStore.searchItems(currentFilters.value);
 };
 
 const loadAllMembers = async () => {
-  await memberStore.fetchMembers(); // Fetch all members
+  await memberStore.fetchItems(); // Fetch all members
 };
 
 const openViewDialog = (member: Member) => {
@@ -126,12 +126,12 @@ const confirmDelete = (member: Member) => {
 const handleDeleteConfirm = async () => {
   if (memberToDelete.value) {
     try {
-      await memberStore.deleteMember(memberToDelete.value.id);
+      await memberStore.deleteItem(memberToDelete.value.id);
       notificationStore.showSnackbar(
         t('member.messages.deleteSuccess'),
         'success',
       );
-      await memberStore.fetchMembers(); // Reload members after deletion
+      await memberStore.fetchItems(); // Reload members after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
     }

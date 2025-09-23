@@ -11,7 +11,7 @@
     <v-window v-model="selectedTab">
       <v-window-item value="table">
         <EventList
-          :events="familyEventStore.familyEvents"
+          :events="familyEventStore.items"
           :total-events="familyEventStore.totalItems"
           :loading="familyEventStore.loading"
           @update:options="handleListOptionsUpdate"
@@ -22,11 +22,11 @@
         />
       </v-window-item>
       <v-window-item value="timeline">
-        <EventTimeline :events="familyEventStore.familyEvents" />
+        <EventTimeline :events="familyEventStore.items" />
       </v-window-item>
       <v-window-item value="calendar">
         <EventCalendar
-          :events="familyEventStore.familyEvents"
+          :events="familyEventStore.items"
           @viewEvent="openViewDialog"
         />
       </v-window-item>
@@ -118,13 +118,13 @@ const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
     (selectedTab.value === 'timeline' || selectedTab.value === 'calendar') &&
     !currentFilters.value.familyId
   ) {
-    familyEventStore.familyEvents = [];
+    familyEventStore.items = [];
     familyEventStore.totalItems = 0;
     familyEventStore.loading = false;
     return;
   }
 
-  await familyEventStore.searchFamilyEvents(
+  await familyEventStore.searchItems(
     currentFilters.value.name || '',
     currentFilters.value.familyId || undefined,
   );
@@ -177,7 +177,7 @@ const confirmDelete = (event: FamilyEvent) => {
 const handleDeleteConfirm = async () => {
   if (eventToDelete.value) {
     try {
-      await familyEventStore.deleteFamilyEvent(eventToDelete.value.id);
+      await familyEventStore.deleteItem(eventToDelete.value.id);
       notificationStore.showSnackbar(
         t('event.messages.deleteSuccess'),
         'success',
