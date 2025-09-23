@@ -38,8 +38,8 @@ interface VuetifyInternalItem {
 }
 
 onMounted(async () => {
-  await familyStore.fetchAllFamilies();
-  families.value = familyStore.families;
+  await familyStore.fetchAllItems();
+  families.value = familyStore.items;
 });
 
 const familyFilter = (_value: string, query: string, item: VuetifyInternalItem | undefined ) => {

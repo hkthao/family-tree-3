@@ -67,6 +67,7 @@ import type { FamilyEvent } from '@/types/family-event';
 import type { Member } from '@/types/member';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberStore } from '@/stores/member.store';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 defineProps({
   events: {
@@ -89,10 +90,6 @@ const { t } = useI18n();
 const memberStore = useMemberStore();
 
 const allMembers = ref<Member[]>([]);
-
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-
-// ... (rest of the file)
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
@@ -131,6 +128,6 @@ const confirmDelete = (event: FamilyEvent) => {
 // Fetch all members on component mount
 import { onMounted } from 'vue';
 onMounted(async () => {
-  await memberStore.fetchMembers(); // Fetch all members
-  allMembers.value = memberStore.members;
+  await memberStore.fetchItems(); // Fetch all members
+  allMembers.value = memberStore.items;
 });</script>

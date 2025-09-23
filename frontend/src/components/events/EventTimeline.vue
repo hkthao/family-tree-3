@@ -36,9 +36,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { FamilyEvent } from '@/types/family-event';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { Member } from '@/types/member';
 import { formatDate } from '@/utils/dateUtils';
 import { useMemberStore } from '@/stores/member.store';
@@ -63,8 +61,8 @@ const getMemberAvatar = (memberId: string) => {
 };
 
 onMounted(async () => {
-  await memberStore.fetchMembers(); // Fetch all members
-  allMembers.value = memberStore.members;
+  await memberStore.fetchItems(); // Fetch all members
+  allMembers.value = memberStore.items;
 });
 </script>
 
