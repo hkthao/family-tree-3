@@ -5,8 +5,8 @@
         :items-per-page="itemsPerPage"
         @update:itemsPerPage="$emit('update:itemsPerPage', $event)"
         :headers="headers"
-        :items="families"
-        :items-length="totalFamilies"
+        :items="items"
+        :items-length="totalItems"
         :loading="loading"
         item-value="id"
         @update:options="$emit('update:options', $event)"
@@ -83,9 +83,9 @@ import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 
-const { families, totalFamilies, loading, itemsPerPage, familyMemberCounts } = defineProps<{
-  families: Family[];
-  totalFamilies: number;
+const { items, totalItems, loading, itemsPerPage, familyMemberCounts } = defineProps<{
+  items: Family[];
+  totalItems: number;
   loading: boolean;
   itemsPerPage: number;
   familyMemberCounts: { [key: string]: number };

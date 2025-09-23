@@ -35,8 +35,8 @@ watch(
   async (newValue) => {
     if (newValue) {
       loading.value = true;
-      const family = await familyStore.fetchFamilyById(newValue as string);
-      displayValue.value = family ? family.name : 'N/A';
+      const item = await familyStore.fetchItemById(newValue as string);
+      displayValue.value = item ? item[props.displayExpr] : 'N/A';
       loading.value = false;
     } else {
       displayValue.value = null;

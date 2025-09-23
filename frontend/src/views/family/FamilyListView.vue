@@ -3,7 +3,7 @@
     <FamilySearch @update:filters="handleFilterUpdate" />
 
     <FamilyList
-      :families="familyStore.families"
+      :families="familyStore.items"
       :total-families="familyStore.totalItems"
       :loading="familyStore.loading"
       :items-per-page="itemsPerPage"
@@ -61,7 +61,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 const { t } = useI18n();
 const router = useRouter();
 
-const { families } = storeToRefs(familyStore);
+const { items } = storeToRefs(familyStore);
 const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
@@ -80,7 +80,7 @@ const familyToDelete = ref<Family | undefined>(undefined);
 
 const familyMemberCounts = computed(() => {
   const counts: { [key: string]: number } = {};
-  membersStore.members.forEach(member => {
+  membersStore.items.forEach(member => {
     if (member.familyId) {
       counts[member.familyId] = (counts[member.familyId] || 0) + 1;
     }
@@ -89,14 +89,14 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await familyStore.searchFamilies(
+  await familyStore.searchItems(
     currentFilters.value.fullName || '',
     currentFilters.value.visibility || 'all'
   );
 };
 
 const loadAllMembers = async () => {
-  await membersStore.fetchMembers(); // Fetch all members
+  await membersStore.fetchItems(); // Fetch all members
 };
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
@@ -136,9 +136,9 @@ const confirmDelete = (family: Family) => {
 const handleDeleteConfirm = async () => {
   if (familyToDelete.value) {
     try {
-      await familyStore.deleteFamily(familyToDelete.value.id);
+      await familyStore.deleteItem(familyToDelete.value.id);
       notificationStore.showSnackbar(t('family.management.messages.deleteSuccess'), 'success');
-      await familyStore._loadFamilies(); // Reload families after deletion
+      await familyStore._loadItems(); // Reload families after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('family.management.messages.deleteError'), 'error');
     }
