@@ -1,10 +1,5 @@
 <template>
-  <v-chip
-    v-if="displayValue"
-    :color="chipColor"
-    label
-    size="small"
-  >
+  <v-chip v-if="displayValue" :color="chipColor" label size="small">
     {{ displayValue }}
   </v-chip>
   <span v-else-if="loading">Loading...</span>
@@ -12,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 // Define Props
 interface ChipLookupProps {
@@ -35,16 +30,20 @@ const familyStore = useFamilyStore();
 const displayValue = ref<string | null>(null);
 const loading = ref(false);
 
-watch(() => props.value, async (newValue) => {
-  if (newValue) {
-    loading.value = true;
-    const family = await familyStore.fetchFamilyById(newValue as string);
-    displayValue.value = family ? family.name : 'N/A';
-    loading.value = false;
-  } else {
-    displayValue.value = null;
-  }
-}, { immediate: true });
+watch(
+  () => props.value,
+  async (newValue) => {
+    if (newValue) {
+      loading.value = true;
+      const family = await familyStore.fetchFamilyById(newValue as string);
+      displayValue.value = family ? family.name : 'N/A';
+      loading.value = false;
+    } else {
+      displayValue.value = null;
+    }
+  },
+  { immediate: true },
+);
 
 // Computed property for chip color
 const chipColor = computed(() => {

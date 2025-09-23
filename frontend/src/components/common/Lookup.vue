@@ -17,7 +17,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import { useFamilyStore } from '@/stores/family.store'; // Example store import
 
 // Define Props
 interface LookupProps {
@@ -49,7 +48,12 @@ const loading = ref(false);
 
 // Determine if dataSource is a Pinia store
 const isStore = computed(() => {
-  return props.dataSource && typeof props.dataSource === 'object' && 'id' in props.dataSource && 'state' in props.dataSource;
+  return (
+    props.dataSource &&
+    typeof props.dataSource === 'object' &&
+    'id' in props.dataSource &&
+    'state' in props.dataSource
+  );
 });
 
 // Function to fetch data from store
@@ -58,13 +62,15 @@ const fetchDataFromStore = async () => {
 
   const store = props.dataSource;
   // Prioritize getting from state
-  if (store.families && store.families.length > 0) { // Assuming 'families' is the list state
+  if (store.families && store.families.length > 0) {
+    // Assuming 'families' is the list state
     items.value = store.families;
     return;
   }
 
   // If state is empty, call fetch function if available
-  if (typeof store._loadFamilies === 'function') { // Assuming '_loadFamilies' is the fetch function
+  if (typeof store._loadFamilies === 'function') {
+    // Assuming '_loadFamilies' is the fetch function
     loading.value = true;
     try {
       await store._loadFamilies();
@@ -78,13 +84,17 @@ const fetchDataFromStore = async () => {
 };
 
 // Watch for changes in dataSource
-watch(() => props.dataSource, (newDataSource) => {
-  if (Array.isArray(newDataSource)) {
-    items.value = newDataSource;
-  } else if (isStore.value) {
-    fetchDataFromStore();
-  }
-}, { immediate: true, deep: true });
+watch(
+  () => props.dataSource,
+  (newDataSource) => {
+    if (Array.isArray(newDataSource)) {
+      items.value = newDataSource;
+    } else if (isStore.value) {
+      fetchDataFromStore();
+    }
+  },
+  { immediate: true, deep: true },
+);
 
 // Update v-model
 const updateValue = (newValue: string | number | null) => {
