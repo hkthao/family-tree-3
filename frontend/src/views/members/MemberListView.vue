@@ -66,8 +66,8 @@ import { useRouter } from 'vue-router';
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { items, loading, currentPage, paginatedItems, filteredItems } = storeToRefs(memberStore);
-const familyStore = useFamilyStore();
+const { loading, currentPage, paginatedItems, filteredItems } =
+  storeToRefs(memberStore);
 const currentFilters = ref<MemberFilter>({});
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref

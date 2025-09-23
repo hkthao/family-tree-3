@@ -31,12 +31,12 @@ const member = ref<Member | undefined>(undefined);
 
 onMounted(() => {
   const memberId = route.params.id as string;
-  member.value = memberStore.members.find(m => m.id === memberId);
+  member.value = memberStore.items.find(m => m.id === memberId);
 });
 
 const handleUpdateMember = async (memberData: Member) => {
   try {
-    await memberStore.updateMember(memberData);
+    await memberStore.updateItem(memberData);
     notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
     closeForm();
   } catch (error) {
