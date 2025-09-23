@@ -1,11 +1,11 @@
 import type { IFamilyService } from './family.service.interface';
 import type { Family } from '@/types/family';
 import type { Paginated } from '@/types/pagination';
-import { generateMockFamilies } from '@/data/mock/family.mock';
+import { fixedMockFamilies } from '@/data/mock/fixed.family.mock';
 import { simulateLatency } from '@/utils/mockUtils';
 
 export class MockFamilyService implements IFamilyService {
-  private _families: Family[] = generateMockFamilies(10);
+  private _families: Family[] = fixedMockFamilies;
 
   get families(): Family[] {
     return [...this._families];

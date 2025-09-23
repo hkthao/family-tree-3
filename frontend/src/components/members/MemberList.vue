@@ -39,7 +39,12 @@
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      {{ getFamilyName(item.familyId, families) }}
+      <ChipLookup
+        :value="item.familyId"
+        :data-source="familyStore"
+        display-expr="name"
+        value-expr="id"
+      />
     </template>
 
     <!-- Date of Birth column -->
@@ -75,9 +80,13 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types/member';
-import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
+import { useFamilyStore } from '@/stores/family.store';
+import ChipLookup from '@/components/common/ChipLookup.vue';
+
+const familyStore = useFamilyStore();
+
 
 defineProps({
   members: {
@@ -92,15 +101,15 @@ defineProps({
     type: Boolean,
     required: true,
   },
-  families: {
-    type: Array as () => Family[],
-    required: true,
-  },
 });
 
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
 const { t } = useI18n();
-const itemsPerPage = ref(10);
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+
+// ... (rest of the file)
+
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('member.list.headers.avatar'), key: 'avatarUrl', sortable: false, width: '80px', align: 'center' },
@@ -111,11 +120,6 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('member.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
-
-const getFamilyName = (familyId: string, families: Family[]) => {
-  const family = families.find(f => f.id === familyId);
-  return family ? family.name : 'N/A';
-};
 
 const loadMembers = (options: { page: number; itemsPerPage: number; sortBy: string | string[] | null }) => {
   emit('update:options', options);

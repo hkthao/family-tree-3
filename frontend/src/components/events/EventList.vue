@@ -90,7 +90,11 @@ const memberStore = useMemberStore();
 
 const allMembers = ref<Member[]>([]);
 
-const itemsPerPage = ref(10);
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+
+// ... (rest of the file)
+
+const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('event.list.headers.date'), key: 'startDate', width: '120px', align: 'center' },

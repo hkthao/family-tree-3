@@ -1,11 +1,7 @@
 import { defineStore } from 'pinia';
 import type { FamilyEvent } from '@/types/family-event';
 import type { Paginated } from '@/types/pagination';
-import { createServices, type ServiceMode } from '@/services/service.factory';
-
-const isMockApi = import.meta.env.VITE_USE_MOCK === 'true';
-const mode: ServiceMode = isMockApi ? 'mock' : 'real';
-const services = createServices(mode);
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 export const useFamilyEventStore = defineStore('familyEvent', {
   state: () => ({
@@ -17,7 +13,10 @@ export const useFamilyEventStore = defineStore('familyEvent', {
     familyIdFilter: undefined as string | undefined,
     totalItems: 0,
     currentPage: 1,
-    itemsPerPage: 10, // Default items per page
+
+// ... (rest of the file)
+
+    itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 0,
   }),
   getters: {
@@ -33,7 +32,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const response: Paginated<FamilyEvent> = await services.familyEvent.searchFamilyEvents(
+        const response: Paginated<FamilyEvent> = await this.services.familyEvent.searchFamilyEvents(
           this.searchTerm,
           this.familyIdFilter,
           this.currentPage,
@@ -54,7 +53,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const addedFamilyEvent = await services.familyEvent.add(newFamilyEvent);
+        const addedFamilyEvent = await this.services.familyEvent.add(newFamilyEvent);
         await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể thêm sự kiện gia đình.';
@@ -68,7 +67,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const updated = await services.familyEvent.update(updatedFamilyEvent);
+        const updated = await this.services.familyEvent.update(updatedFamilyEvent);
         const index = this.familyEvents.findIndex((event) => event.id === updated.id);
         if (index !== -1) {
           this.familyEvents[index] = updated;
@@ -88,7 +87,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        await services.familyEvent.delete(id);
+        await this.services.familyEvent.delete(id);
         await this._loadFamilyEvents(); // Re-fetch to update pagination and filters
       } catch (e) {
         this.error = 'Không thể xóa sự kiện gia đình.';
