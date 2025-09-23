@@ -61,7 +61,7 @@ import { ref, computed, watch } from 'vue';
 // Define Props
 interface LookupProps {
   dataSource: any[] | any; // Can be an array or a Pinia store
-  modelValue: string | number | null; // v-model:value
+  modelValue: string | number | null | undefined; // v-model:value
   displayExpr?: string;
   valueExpr?: string;
   label?: string;
@@ -114,7 +114,7 @@ watch(() => props.modelValue, async (newValue) => {
 }, { immediate: true });
 
 // Load items for the dialog table
-const loadItems = async ({ page, itemsPerPage, sortBy }) => {
+const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: any[] }) => {
   if (!isStore.value || typeof props.dataSource.searchLookup !== 'function') return;
 
   loading.value = true;
@@ -146,7 +146,7 @@ const closeDialog = () => {
 };
 
 // Item selection
-const selectItem = (event: Event, { item }) => {
+const selectItem = (event: Event, { item }: { item: { raw: any } }) => {
   selectedItem.value = item.raw;
   emit('update:modelValue', item.raw[props.valueExpr]);
   closeDialog();

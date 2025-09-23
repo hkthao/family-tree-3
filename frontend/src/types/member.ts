@@ -2,7 +2,7 @@ export interface Member {
   id: string;
   lastName: string; // Last name
   firstName: string; // First name
-  fullName: string; // Full name
+  fullName?: string; // Full name (optional, often derived)
   familyId: string;
   gender?: 'male' | 'female' | 'other';
   dateOfBirth?: Date; // Renamed from 'birthDate'
