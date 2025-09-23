@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
 import type { Member } from '@/types/member';
-import { generateMockFamilies } from '@/data/mock/family.mock';
+import { mockFamilies as fixedMockFamilies } from '@/data/mock/family.mock';
 
 // Generate some mock families to link members to
-const mockFamilies = generateMockFamilies(5); 
+const mockFamilies = fixedMockFamilies; 
 
 export function generateMockMember(familyId?: string, overrides?: Partial<Member>): Member {
   const selectedFamilyId = familyId || faker.helpers.arrayElement(mockFamilies).id;
