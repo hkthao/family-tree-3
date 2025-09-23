@@ -62,12 +62,9 @@
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
-              <v-autocomplete
-                v-model="(filters.familyId as any)"
+              <FamilyAutocomplete
+                v-model="filters.familyId"
                 :label="t('member.search.family')"
-                :items="[]"
-                item-title="name"
-                item-value="id"
                 clearable
               />
             </v-col>
@@ -89,6 +86,7 @@ import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/services/member';
 import DateInputField from '@/components/common/DateInputField.vue';
 import GenderSelect from '@/components/common/GenderSelect.vue';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const emit = defineEmits(['update:filters']);
 
