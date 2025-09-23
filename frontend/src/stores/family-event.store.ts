@@ -29,7 +29,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.loading = true;
       this.error = null;
       try {
-        const response: Paginated<FamilyEvent> = await this.services.familyEvent.searchFamilyEvents(
+        const response: Paginated<FamilyEvent> = await this.services.familyEvent.searchItems(
           this.searchTerm,
           this.familyIdFilter,
           this.currentPage,
@@ -86,7 +86,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.error = null;
       try {
         await this.services.familyEvent.delete(id);
-        this.items = this.items.filter((item) => item.id !== id);
+        await this._loadItems(); // Re-fetch to update pagination and filters
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
         }
