@@ -19,3 +19,7 @@ export function generateMockFamilies(count: number): Family[] {
   }
   return families;
 }
+
+import { fixedMockFamilies } from './fixed.family.mock';
+
+export const mockFamilies: Family[] = fixedMockFamilies;

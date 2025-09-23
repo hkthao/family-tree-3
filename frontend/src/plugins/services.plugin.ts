@@ -7,14 +7,7 @@ export function ServicesPlugin() {
   return ({ store }: PiniaPluginContext) => {
     const isMockApi = import.meta.env.VITE_USE_MOCK === 'true';
     const mode: ServiceMode = isMockApi ? 'mock' : 'real';
-    const services = createServices(mode);
-
-    // Inject services into the store
-    Object.defineProperty(store, 'services', {
-      value: services,
-      writable: false,
-      configurable: false,
-    });
+    store.services= createServices(mode);
   };
 }
 
