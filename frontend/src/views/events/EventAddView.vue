@@ -26,7 +26,7 @@ const notificationStore = useNotificationStore();
 
 const handleAddEvent = async (eventData: Omit<FamilyEvent, 'id'>) => {
   try {
-    await familyEventsStore.addFamilyEvent(eventData);
+    await familyEventsStore.addItem(eventData);
     notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
     closeForm();
   } catch (error) {
