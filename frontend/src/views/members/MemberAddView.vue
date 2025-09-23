@@ -25,7 +25,7 @@ const notificationStore = useNotificationStore();
 
 const handleAddMember = async (memberData: Omit<Member, 'id'>) => {
   try {
-    await memberStore.addMember(memberData);
+    await memberStore.addItem(memberData);
     notificationStore.showSnackbar(t('member.messages.addSuccess'), 'success');
     closeForm();
   } catch (error) {

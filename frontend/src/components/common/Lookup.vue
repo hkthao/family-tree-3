@@ -119,14 +119,9 @@ const loadItems = async ({ page, itemsPerPage, sortBy }) => {
 
   loading.value = true;
   try {
-    console.log('Loading items with:', { page, itemsPerPage, searchTerm: searchTerm.value });
     await props.dataSource.searchLookup(searchTerm.value, page, itemsPerPage);
-    console.log('familyStore.families after searchLookup:', props.dataSource.families);
-    console.log('familyStore.totalItems after searchLookup:', props.dataSource.totalItems);
     items.value = props.dataSource.families;
     totalItems.value = props.dataSource.totalItems;
-    console.log('Loaded items:', items.value);
-    console.log('Total items:', totalItems.value);
   } catch (error) {
     console.error('Error loading items:', error);
   } finally {

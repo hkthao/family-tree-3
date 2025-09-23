@@ -57,6 +57,7 @@ import FamilyList from '@/components/family/FamilyList.vue';
 import FamilyForm from '@/components/family/FamilyForm.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import { useNotificationStore } from '@/stores/notification.store';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -67,10 +68,6 @@ const notificationStore = useNotificationStore();
 
 const currentFilters = ref<FamilyFilter>({});
 const currentPage = ref(1);
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-
-// ... (rest of the file)
-
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const detailDialog = ref(false);
