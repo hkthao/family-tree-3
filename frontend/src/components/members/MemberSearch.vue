@@ -62,8 +62,11 @@
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
-              <FamilyAutocomplete
-                v-model="filters.familyId"
+              <Lookup
+                v-model="filters.familyId as any"
+                :data-source="familyStore"
+                display-expr="name"
+                value-expr="id"
                 :label="t('member.search.family')"
                 clearable
               />
@@ -72,7 +75,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="applyFilters">{{ t('member.search.apply') }}</v-btn>
+          <v-btn color="primary" @click="applyFilters">{{
+            t('member.search.apply')
+          }}</v-btn>
           <v-btn @click="resetFilters">{{ t('member.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
@@ -86,11 +91,13 @@ import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/services/member';
 import DateInputField from '@/components/common/DateInputField.vue';
 import GenderSelect from '@/components/common/GenderSelect.vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import Lookup from '@/components/common/Lookup.vue';
+import { useFamilyStore } from '@/stores/family.store';
 
 const emit = defineEmits(['update:filters']);
 
 const { t } = useI18n();
+const familyStore = useFamilyStore();
 
 const expanded = ref(false); // Default to collapsed
 
@@ -105,10 +112,14 @@ const filters = ref<MemberFilter>({
   familyId: null,
 });
 
-watch(filters.value, () => {
-  // Debounce or apply immediately based on preference
-  applyFilters();
-}, { deep: true });
+watch(
+  filters.value,
+  () => {
+    // Debounce or apply immediately based on preference
+    applyFilters();
+  },
+  { deep: true },
+);
 
 const applyFilters = () => {
   emit('update:filters', filters.value);
