@@ -16,7 +16,7 @@ const ITEMS_PER_PAGE = DEFAULT_ITEMS_PER_PAGE;
 
 // Create a mock service for testing
 class MockFamilyServiceForTest implements IFamilyService {
-  private _items: Family[] = [];
+  public _items: Family[] = [];
   public shouldThrowError: boolean = false;
 
   constructor() {
