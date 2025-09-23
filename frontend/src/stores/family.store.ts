@@ -166,5 +166,12 @@ export const useFamilyStore = defineStore('family', {
         this.loading = false;
       }
     },
+
+    async searchLookup(term: string, page: number, itemsPerPage: number) {
+      this.searchTerm = term;
+      this.currentPage = page;
+      this.itemsPerPage = itemsPerPage;
+      await this._loadFamilies();
+    },
   },
 });

@@ -1,114 +1,160 @@
 <template>
-  <v-select
-    :model-value="modelValue"
-    @update:model-value="updateValue"
-    :items="items"
-    :item-title="displayExpr"
-    :item-value="valueExpr"
-    :label="label"
-    :loading="loading"
-    :clearable="clearable"
-    :rules="rules"
-    :readonly="readonly"
-    variant="outlined"
-    density="compact"
-  ></v-select>
+  <div>
+    <v-select
+      :model-value="props.modelValue"
+      :items="selectedItem ? [selectedItem] : []"
+      :item-title="displayExpr"
+      :item-value="valueExpr"
+      :label="label"
+      :loading="loading"
+      :clearable="clearable"
+      :rules="rules"
+      readonly
+      variant="outlined"
+      density="compact"
+      @click:append-inner="openDialog"
+    >
+      <template #append-inner>
+        <v-icon @click.stop="openDialog">mdi-magnify</v-icon>
+      </template>
+    </v-select>
+
+    <v-dialog v-model="dialog" max-width="800px">
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">{{ label }}</span>
+        </v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="searchTerm"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            density="compact"
+            clearable
+            @input="searchItems"
+          ></v-text-field>
+          <v-data-table-server
+            :headers="headers"
+            :items="items"
+            :items-length="totalItems"
+            :loading="loading"
+            :search="searchTerm"
+            @update:options="loadItems"
+            @click:row="selectItem"
+          ></v-data-table-server>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue-darken-1" variant="text" @click="closeDialog">
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 // Define Props
 interface LookupProps {
   dataSource: any[] | any; // Can be an array or a Pinia store
-  modelValue: string | number | null; // Current selected ID
-  displayExpr?: string; // Field name to display (e.g., "name")
-  valueExpr?: string; // Field name for the value (e.g., "id")
-  label?: string; // Label for the select component
-  clearable?: boolean; // Whether the select can be cleared
-  rules?: any[]; // Validation rules
-  readonly?: boolean; // Whether the select is read-only
+  modelValue: string | number | null; // v-model:value
+  displayExpr?: string;
+  valueExpr?: string;
+  label?: string;
+  clearable?: boolean;
+  rules?: any[];
 }
 
 const props = withDefaults(defineProps<LookupProps>(), {
   displayExpr: 'name',
   valueExpr: 'id',
-  label: '',
+  label: 'Select an item',
   clearable: false,
-  readonly: false,
   rules: () => [],
 });
 
 // Define Emits
 const emit = defineEmits(['update:modelValue']);
 
-// Internal state for items and loading
-const items = ref<any[]>([]);
+// Internal state
+const dialog = ref(false);
 const loading = ref(false);
+const items = ref<any[]>([]);
+const totalItems = ref(0);
+const searchTerm = ref('');
+const selectedItem = ref<any>(null);
 
-// Determine if dataSource is a Pinia store
+// Headers for the data table
+const headers = computed(() => [
+  { title: props.displayExpr, value: props.displayExpr },
+  // Add more headers if needed
+]);
+
+// Check if dataSource is a Pinia store
 const isStore = computed(() => {
-  return (
-    props.dataSource &&
-    typeof props.dataSource === 'object' &&
-    'id' in props.dataSource &&
-    'state' in props.dataSource
-  );
+  // A more robust check for Pinia store instance
+  return props.dataSource && typeof props.dataSource === 'object' && '_p' in props.dataSource;
 });
 
-// Function to fetch data from store
-const fetchDataFromStore = async () => {
-  if (!isStore.value) return;
-
-  const store = props.dataSource;
-  // Prioritize getting from state
-  if (store.families && store.families.length > 0) {
-    // Assuming 'families' is the list state
-    items.value = store.families;
-    return;
-  }
-
-  // If state is empty, call fetch function if available
-  if (typeof store._loadFamilies === 'function') {
-    // Assuming '_loadFamilies' is the fetch function
-    loading.value = true;
-    try {
-      await store._loadFamilies();
-      items.value = store.families;
-    } catch (error) {
-      console.error('Error fetching data from store:', error);
-    } finally {
+// Preload selected item label
+watch(() => props.modelValue, async (newValue) => {
+  if (newValue && !selectedItem.value) {
+    if (isStore.value && typeof props.dataSource.fetchFamilyById === 'function') {
+      loading.value = true;
+      selectedItem.value = await props.dataSource.fetchFamilyById(newValue);
       loading.value = false;
+    } else if (Array.isArray(props.dataSource)) {
+      selectedItem.value = props.dataSource.find(item => item[props.valueExpr] === newValue);
     }
+  }
+}, { immediate: true });
+
+// Load items for the dialog table
+const loadItems = async ({ page, itemsPerPage, sortBy }) => {
+  if (!isStore.value || typeof props.dataSource.searchLookup !== 'function') return;
+
+  loading.value = true;
+  try {
+    console.log('Loading items with:', { page, itemsPerPage, searchTerm: searchTerm.value });
+    await props.dataSource.searchLookup(searchTerm.value, page, itemsPerPage);
+    console.log('familyStore.families after searchLookup:', props.dataSource.families);
+    console.log('familyStore.totalItems after searchLookup:', props.dataSource.totalItems);
+    items.value = props.dataSource.families;
+    totalItems.value = props.dataSource.totalItems;
+    console.log('Loaded items:', items.value);
+    console.log('Total items:', totalItems.value);
+  } catch (error) {
+    console.error('Error loading items:', error);
+  } finally {
+    loading.value = false;
   }
 };
 
-// Watch for changes in dataSource
-watch(
-  () => props.dataSource,
-  (newDataSource) => {
-    if (Array.isArray(newDataSource)) {
-      items.value = newDataSource;
-    } else if (isStore.value) {
-      fetchDataFromStore();
-    }
-  },
-  { immediate: true, deep: true },
-);
 
-// Update v-model
-const updateValue = (newValue: string | number | null) => {
-  emit('update:modelValue', newValue);
+// Search items
+const searchItems = () => {
+  loadItems({ page: 1, itemsPerPage: 10, sortBy: [] }); // Reset pagination on search
 };
 
-// Initial fetch on mounted if dataSource is a store
-onMounted(() => {
-  if (isStore.value) {
-    fetchDataFromStore();
-  }
-});
+// Dialog control
+const openDialog = () => {
+  dialog.value = true;
+  loadItems({ page: 1, itemsPerPage: 10, sortBy: [] });
+};
+
+const closeDialog = () => {
+  dialog.value = false;
+};
+
+// Item selection
+const selectItem = (event: Event, { item }) => {
+  selectedItem.value = item.raw;
+  emit('update:modelValue', item.raw[props.valueExpr]);
+  closeDialog();
+};
+
 </script>
-
-<style scoped>
-/* Add any specific styles for Lookup.vue here */
-</style>
