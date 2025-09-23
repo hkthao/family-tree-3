@@ -19,7 +19,6 @@
         :initial-member-data="selectedMemberForView"
         :read-only="true"
         :title="t('member.form.title')"
-        :members="members"
         @close="closeViewDialog"
       />
     </v-dialog>

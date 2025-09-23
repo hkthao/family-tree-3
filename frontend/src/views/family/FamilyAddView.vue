@@ -4,7 +4,7 @@
       <FamilyForm
         :title="t('family.form.addTitle')"
         @cancel="closeForm"
-        @submit="handleAddFamily"
+        @submit="handleAddItem"
       />
     </v-card-text>
   </v-card>
@@ -23,9 +23,9 @@ const router = useRouter();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-const handleAddFamily = async (familyData: Omit<Family, 'id'>) => {
+const handleAddItem = async (itemData: Omit<Family, 'id'>) => {
   try {
-    await familyStore.addFamily(familyData);
+    await familyStore.addItem(itemData);
     notificationStore.showSnackbar(t('family.management.messages.addSuccess'), 'success');
     closeForm();
   } catch (error) {

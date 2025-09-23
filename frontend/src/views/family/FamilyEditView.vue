@@ -2,11 +2,11 @@
   <v-card>
     <v-card-text>
       <FamilyForm
-        v-if="initialFamilyData"
-        :initial-family-data="initialFamilyData"
+        v-if="initialItemData"
+        :initial-family-data="initialItemData"
         :title="t('family.form.editTitle')"
         @cancel="closeForm"
-        @submit="handleUpdateFamily"
+        @submit="handleUpdateItem"
       />
       <v-progress-circular
         v-else
@@ -32,14 +32,14 @@ const router = useRouter();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-const initialFamilyData = ref<Family | null>(null);
+const initialItemData = ref<Family | null>(null);
 
 onMounted(() => {
-  const familyId = route.params.id as string;
-  if (familyId) {
-    const family = familyStore.families.find(f => f.id === familyId);
-    if (family) {
-      initialFamilyData.value = { ...family };
+  const itemId = route.params.id as string;
+  if (itemId) {
+    const item = familyStore.items.find(f => f.id === itemId);
+    if (item) {
+      initialItemData.value = { ...item };
     } else {
       router.push('/family');
     }
@@ -48,9 +48,9 @@ onMounted(() => {
   }
 });
 
-const handleUpdateFamily = async (familyData: Family) => {
+const handleUpdateItem = async (itemData: Family) => {
   try {
-    await familyStore.updateFamily(familyData);
+    await familyStore.updateItem(itemData);
     notificationStore.showSnackbar(t('family.management.messages.updateSuccess'), 'success');
     closeForm();
   } catch (error) {

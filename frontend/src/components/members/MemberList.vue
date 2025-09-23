@@ -2,8 +2,8 @@
   <v-data-table-server
     v-model:items-per-page="itemsPerPage"
     :headers="headers"
-    :items="members"
-    :items-length="totalMembers"
+    :items="items"
+    :items-length="totalItems"
     :loading="loading"
     item-value="id"
     @update:options="loadMembers"
@@ -89,11 +89,11 @@ const familyStore = useFamilyStore();
 
 
 defineProps({
-  members: {
+  items: {
     type: Array as () => Member[],
     required: true,
   },
-  totalMembers: {
+  totalItems: {
     type: Number,
     required: true,
   },
