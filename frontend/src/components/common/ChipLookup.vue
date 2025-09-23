@@ -24,9 +24,7 @@ const props = withDefaults(defineProps<ChipLookupProps>(), {
   color: 'primary',
 });
 
-import { useFamilyStore } from '@/stores/family.store'; // Assuming family store is used
 
-const familyStore = useFamilyStore();
 const displayValue = ref<string | null>(null);
 const loading = ref(false);
 
@@ -35,8 +33,18 @@ watch(
   async (newValue) => {
     if (newValue) {
       loading.value = true;
-      const item = await familyStore.fetchItemById(newValue as string);
-      displayValue.value = item ? item[props.displayExpr] : 'N/A';
+      let foundItem: any = null;
+
+      if (Array.isArray(props.dataSource)) {
+        foundItem = props.dataSource.find(item => item[props.valueExpr] === newValue);
+      } else if (props.dataSource && typeof props.dataSource === 'object' && '_p' in props.dataSource) {
+        // Assuming dataSource is a Pinia store
+        if (typeof props.dataSource.fetchItemById === 'function') {
+          foundItem = await props.dataSource.fetchItemById(newValue as string);
+        }
+      }
+
+      displayValue.value = foundItem ? foundItem[props.displayExpr] : 'N/A';
       loading.value = false;
     } else {
       displayValue.value = null;
