@@ -38,7 +38,7 @@ interface VuetifyInternalItem {
 }
 
 onMounted(async () => {
-  await familyStore.searchFamilies('', 'all');
+  await familyStore.fetchAllFamilies();
   families.value = familyStore.families;
 });
 

@@ -143,5 +143,28 @@ export const useFamilyStore = defineStore('family', {
         return undefined;
       }
     },
+
+    async fetchAllFamilies() {
+      this.loading = true;
+      this.error = null;
+      try {
+        // Use a large itemsPerPage to fetch all families
+        const response: Paginated<Family> =
+          await this.services.family.searchFamilies(
+            '',
+            'all',
+            1,
+            1000, // A large number
+          );
+        this.families = response.items;
+        this.totalItems = response.totalItems;
+        this.totalPages = 1;
+      } catch (e) {
+        this.error = 'Không thể tải danh sách gia đình.';
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });
