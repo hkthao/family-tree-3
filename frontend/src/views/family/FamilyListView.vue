@@ -3,8 +3,8 @@
     <FamilySearch @update:filters="handleFilterUpdate" />
 
     <FamilyList
-      :families="familyStore.items"
-      :total-families="familyStore.totalItems"
+      :items="items"
+      :total-items="familyStore.totalItems"
       :loading="familyStore.loading"
       :items-per-page="itemsPerPage"
       :family-member-counts="familyMemberCounts"

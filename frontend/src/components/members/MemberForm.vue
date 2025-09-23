@@ -195,6 +195,7 @@ import MemberTimeline from '@/components/members/MemberTimeline.vue';
 import Lookup from '@/components/common/Lookup.vue';
 import { useFamilyStore } from '@/stores/family.store';
 import GenderSelect from '@/components/common/GenderSelect.vue';
+import { useMemberStore } from '@/stores/member.store';
 
 interface TimelineEvent {
   year: number;

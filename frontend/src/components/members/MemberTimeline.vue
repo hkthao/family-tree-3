@@ -42,7 +42,7 @@
       <v-pagination
         v-if="timelineEvents.length > 5"
         v-model="page"
-        :length="Math.ceil(timelineEvents.length / 5)"
+        :length="Math.max(1, Math.ceil(timelineEvents.length / 5))"
       ></v-pagination>
     </v-card-text>
 
