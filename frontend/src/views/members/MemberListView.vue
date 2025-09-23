@@ -15,36 +15,44 @@
     />
 
     <v-dialog v-model="viewDialog" max-width="800px">
-            <MemberForm
-              v-if="selectedMemberForView"
-              :initial-member-data="selectedMemberForView"
-              :read-only="true"
-              :title="t('member.form.title')"
-              :members="members"
-              :families="families"
-              @close="closeViewDialog"
-            />    </v-dialog>
+      <MemberForm
+        v-if="selectedMemberForView"
+        :initial-member-data="selectedMemberForView"
+        :read-only="true"
+        :title="t('member.form.title')"
+        :members="members"
+        :families="families"
+        @close="closeViewDialog"
+      />
+    </v-dialog>
 
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
       :model-value="deleteConfirmDialog"
       :title="t('confirmDelete.title')"
-      :message="t('member.list.confirmDelete', { fullName: memberToDelete?.fullName || '' })"
+      :message="
+        t('member.list.confirmDelete', {
+          fullName: memberToDelete?.fullName || '',
+        })
+      "
       @confirm="handleDeleteConfirm"
       @cancel="handleDeleteCancel"
     />
 
     <!-- Global Snackbar -->
-    <v-snackbar v-if="notificationStore.snackbar" v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
+    <v-snackbar
+      v-if="notificationStore.snackbar"
+      v-model="notificationStore.snackbar.show"
+      :color="notificationStore.snackbar.color"
+      timeout="3000"
+    >
       {{ notificationStore.snackbar.message }}
     </v-snackbar>
-
-  
   </v-container>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted,  watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
@@ -56,19 +64,15 @@ import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import MemberForm from '@/components/members/MemberForm.vue';
 import { useNotificationStore } from '@/stores/notification.store';
+import { useRouter } from 'vue-router';
 
 const { t } = useI18n();
+const router = useRouter();
 const memberStore = useMemberStore();
 const { members, loading, currentPage } = storeToRefs(memberStore);
 const familyStore = useFamilyStore();
 const { families } = storeToRefs(familyStore);
-
 const currentFilters = ref<MemberFilter>({});
-
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 const viewDialog = ref(false);
@@ -78,9 +82,7 @@ const notificationStore = useNotificationStore();
 
 // Function Declarations (moved to top)
 const loadMembers = () => {
-  memberStore.searchMembers(
-    currentFilters.value
-  );
+  memberStore.searchMembers(currentFilters.value);
 };
 
 const loadAllMembers = async () => {
@@ -88,7 +90,9 @@ const loadAllMembers = async () => {
 };
 
 const loadFamilies = async () => {
-  await familyStore.searchFamilies('', 'all');
+  await familyStore._loadFamilies();
+  console.log('Families loaded:', familyStore.families);
+  
 };
 
 const openViewDialog = (member: Member) => {
@@ -115,7 +119,10 @@ const handleFilterUpdate = (filters: MemberFilter) => {
   loadMembers();
 };
 
-const handleListOptionsUpdate = (options: { page: number; itemsPerPage: number }) => {
+const handleListOptionsUpdate = (options: {
+  page: number;
+  itemsPerPage: number;
+}) => {
   memberStore.setPage(options.page);
   memberStore.setItemsPerPage(options.itemsPerPage);
 };
@@ -129,7 +136,10 @@ const handleDeleteConfirm = async () => {
   if (memberToDelete.value) {
     try {
       await memberStore.deleteMember(memberToDelete.value.id);
-      notificationStore.showSnackbar(t('member.messages.deleteSuccess'), 'success');
+      notificationStore.showSnackbar(
+        t('member.messages.deleteSuccess'),
+        'success',
+      );
       await memberStore.fetchMembers(); // Reload members after deletion
     } catch (error) {
       notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
@@ -145,12 +155,8 @@ const handleDeleteCancel = () => {
 };
 
 onMounted(async () => {
+  await loadFamilies();
   await loadMembers();
   await loadAllMembers();
-  await loadFamilies();
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-watch(members, (newItems) => {
 });
 </script>
