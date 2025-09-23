@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Family } from '@/types/family';
 import type { Paginated } from '@/types/pagination'; // Correct placement of import
-import { mockFamilies } from '@/data/mock/family.mock';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({

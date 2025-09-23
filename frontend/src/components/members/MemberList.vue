@@ -77,9 +77,9 @@ import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types/member';
 import type { Family } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
+import { formatDate } from '@/utils/dateUtils';
 
-
-const props = defineProps({
+defineProps({
   members: {
     type: Array as () => Member[],
     required: true,
@@ -98,13 +98,8 @@ const props = defineProps({
   },
 });
 
-
-
 const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
-
 const { t } = useI18n();
-
-
 const itemsPerPage = ref(10);
 
 const headers = computed<DataTableHeader[]>(() => [
@@ -116,7 +111,6 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('member.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
 
-import { formatDate } from '@/utils/dateUtils';
 
 const getFamilyName = (familyId: string, families: Family[]) => {
   const family = families.find(f => f.id === familyId);
