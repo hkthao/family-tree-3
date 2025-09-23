@@ -22,7 +22,9 @@ export const useFamilyStore = defineStore('family', {
       return state.items.find((item) => item.id === id);
     },
     paginatedItems: (state) => {
-      return state.items; // Items are already paginated by the service
+      const start = (state.currentPage - 1) * state.itemsPerPage;
+      const end = start + state.itemsPerPage;
+      return state.items.slice(start, end);
     },
   },
   actions: {
@@ -31,7 +33,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         const response: Paginated<Family> =
-          await this.services.family.searchFamilies(
+          await this.services.family.searchItems(
             this.searchTerm,
             this.visibilityFilter,
             this.currentPage,
@@ -88,7 +90,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       try {
         await this.services.family.delete(id);
-        this.items = this.items.filter((item) => item.id !== id);
+        await this._loadItems(); // Re-fetch to update pagination and filters
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
         }
@@ -151,7 +153,7 @@ export const useFamilyStore = defineStore('family', {
       try {
         // Use a large itemsPerPage to fetch all items
         const response: Paginated<Family> =
-          await this.services.family.searchFamilies(
+          await this.services.family.searchItems(
             '',
             'all',
             1,
