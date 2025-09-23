@@ -63,7 +63,11 @@ export class MockMemberService implements IMemberService {
     return this.simulateLatency(undefined);
   }
 
-  async searchMembers(filters: MemberFilter): Promise<Member[]> {
+  async searchMembers(
+    filters: MemberFilter,
+    page: number,
+    itemsPerPage: number,
+  ): Promise<Paginated<Member>> {
     let filteredMembers = this.members;
 
     if (filters.fullName) {
@@ -91,7 +95,7 @@ export class MockMemberService implements IMemberService {
     }
     if (filters.placeOfDeath) {
       const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
-      filteredMembers = filteredMembers.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath));
+      filteredMembers = filteredMembers.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfBirth));
     }
     if (filters.occupation) {
       const lowerCaseOccupation = filters.occupation.toLowerCase();
@@ -101,6 +105,16 @@ export class MockMemberService implements IMemberService {
       filteredMembers = filteredMembers.filter(m => m.familyId === filters.familyId);
     }
 
-    return this.simulateLatency(filteredMembers);
+    const totalItems = filteredMembers.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const items = filteredMembers.slice(start, end);
+
+    return this.simulateLatency({
+      items,
+      totalItems,
+      totalPages,
+    });
   }
 }

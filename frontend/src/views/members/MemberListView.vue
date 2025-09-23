@@ -3,8 +3,8 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList
-      :members="paginatedItems"
-      :total-members="filteredItems.length"
+      :items="paginatedItems"
+      :total-items="memberStore.items.length"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
@@ -66,7 +66,7 @@ import { useRouter } from 'vue-router';
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { loading, currentPage, paginatedItems, filteredItems } =
+const { loading, currentPage, paginatedItems } =
   storeToRefs(memberStore);
 const currentFilters = ref<MemberFilter>({});
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
