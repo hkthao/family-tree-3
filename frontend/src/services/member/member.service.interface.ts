@@ -1,9 +1,9 @@
-import type { Member } from '@/types/member';
+import type { Member } from '@/types/family';
 import type { ICrudService } from '../common/crud.service.interface'; // Import ICrudService
-import type { Result } from '@/types/result';
+import type { Result } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
-import type { Paginated } from '@/types/pagination';
+import type { Paginated } from '@/types/common';
 
 export interface MemberFilter {
   fullName?: string;

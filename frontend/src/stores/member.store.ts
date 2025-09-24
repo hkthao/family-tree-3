@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import type { Member } from '@/types/member';
+import type { Member } from '@/types/family';
 import type { MemberFilter } from '@/services/member';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { Paginated } from '@/types/pagination';
+import type { Paginated } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export const useMemberStore = defineStore('member', {

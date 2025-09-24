@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Family, FamilySearchFilter } from '@/types/family';
-import type { Paginated } from '@/types/pagination';
+import type { Paginated } from '@/types/common';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { ApiError } from '@/utils/api';
 

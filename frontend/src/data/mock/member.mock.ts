@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { Member } from '@/types/member';
+import type { Member } from '@/types/family';
 import { mockFamilies as fixedMockFamilies } from '@/data/mock/family.mock';
 
 // Generate some mock families to link members to

@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
-import { type Result, ok, err } from '@/types/result';
+import { type Result, ok, err } from '@/types/common';
 
 // Define a custom error type for API errors
 export interface ApiError {

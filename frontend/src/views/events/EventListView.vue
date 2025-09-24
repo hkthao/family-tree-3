@@ -125,8 +125,12 @@ const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
   }
 
   await familyEventStore.searchItems(
-    currentFilters.value.name || '',
-    currentFilters.value.familyId || undefined,
+    {
+      ...currentFilters.value,
+      searchQuery: currentFilters.value.searchQuery || '',
+    },
+    currentPage.value,
+    itemsPerPage.value,
   );
 };
 
@@ -157,7 +161,6 @@ const navigateToEditEvent = (event: FamilyEvent) => {
 
 const handleFilterUpdate = (filters: EventFilter) => {
   currentFilters.value = filters;
-  currentPage.value = 1; // Reset to first page on filter change
   loadEvents();
 };
 

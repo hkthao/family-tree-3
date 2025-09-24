@@ -87,9 +87,9 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await familyStore.searchItems(
-    currentFilters.value.fullName || '',
-    currentFilters.value.visibility || 'all'
+  await familyEventStore.searchItems(
+    currentFilters.value.name || '',
+    currentFilters.value.familyId || undefined,
   );
 };
 

@@ -1,9 +1,9 @@
 import type { IFamilyService } from './family.service.interface';
 import type { Family } from '@/types/family';
-import type { Paginated } from '@/types/pagination';
+import type { Paginated } from '@/types/common';
 import { fixedMockFamilies } from '@/data/mock/fixed.family.mock';
 import { simulateLatency } from '@/utils/mockUtils';
-import { Result, ok, err } from '@/types/result';
+import { Result, ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export class MockFamilyService implements IFamilyService {
