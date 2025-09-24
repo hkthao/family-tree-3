@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyFilter } from '@/types/family';
+import type { FamilyFilter } from '@/services/family/family.service.interface';
 
 const emit = defineEmits(['update:filters', 'create']);
 

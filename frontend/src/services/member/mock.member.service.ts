@@ -1,121 +1,165 @@
+import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import type { Member } from '@/types/member';
 import type { Paginated } from '@/types/pagination';
-import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
-import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock'; // Import generateMockMember for ID generation
+import { fixedMockMembers } from '@/data/mock/fixed.member.mock';
+import { simulateLatency } from '@/utils/mockUtils';
+import { Result, ok, err } from '@/types/result';
+import type { ApiError } from '@/utils/api';
+
+// Helper function to transform date strings to Date objects
+function transformMemberDates(member: any): Member {
+  if (member.dateOfBirth && typeof member.dateOfBirth === 'string') {
+    member.dateOfBirth = new Date(member.dateOfBirth);
+  }
+  if (member.dateOfDeath && typeof member.dateOfDeath === 'string') {
+    member.dateOfDeath = new Date(member.dateOfDeath);
+  }
+  return member;
+}
+
+// Helper function to transform Member object to API request format (lastName/firstName to fullName)
+function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
+  const apiMember: any = { ...member };
+
+  if (apiMember.dateOfBirth instanceof Date) {
+    apiMember.dateOfBirth = apiMember.dateOfBirth.toISOString();
+  }
+  if (apiMember.dateOfDeath instanceof Date) {
+    apiMember.dateOfDeath = apiMember.dateOfDeath.toISOString();
+  }
+  return apiMember;
+}
 
 export class MockMemberService implements IMemberService {
-  private members: Member[] = generateMockMembers(20); // Start with 20 mock members
+  private _members: Member[] = fixedMockMembers;
 
-  private simulateLatency<T>(data: T, error?: string): Promise<T> {
-    return new Promise((resolve, reject) => setTimeout(() => {
-      if (error) {
-        reject(new Error(error));
-      } else {
-        resolve(data);
+  get members(): Member[] {
+    return [...this._members];
+  }
+
+  async fetch(): Promise<Result<Member[], ApiError>> { // Renamed from fetchMembers
+    try {
+      const members = await simulateLatency(this.members.map(m => transformMemberDates(m)));
+      return ok(members);
+    } catch (e) {
+      return err({ message: 'Failed to fetch members from mock service.', details: e as Error });
+    }
+  }
+
+  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
+    try {
+      const members = await simulateLatency(this.members.filter(m => m.familyId === familyId).map(m => transformMemberDates(m)));
+      return ok(members);
+    } catch (e) {
+      return err({ message: `Failed to fetch members for family ID ${familyId} from mock service.`, details: e as Error });
+    }
+  }
+
+  async getById(id: string): Promise<Result<Member | undefined, ApiError>> { // Renamed from getMemberById
+    try {
+      const member = await simulateLatency(this.members.find((m) => m.id === id));
+      return ok(member ? transformMemberDates(member) : undefined);
+    } catch (e) {
+      return err({ message: `Failed to get member with ID ${id} from mock service.`, details: e as Error });
+    }
+  }
+
+  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> { // Renamed to add
+    try {
+      const memberToAdd = { ...newItem, id: 'mock-id-' + Math.random().toString(36).substring(7) };
+      this._members.push(memberToAdd);
+      const addedMember = await simulateLatency(transformMemberDates(memberToAdd));
+      return ok(addedMember);
+    } catch (e) {
+      return err({ message: 'Failed to add member to mock service.', details: e as Error });
+    }
+  }
+
+  async update(updatedItem: Member): Promise<Result<Member, ApiError>> { // Renamed to update
+    try {
+      const index = this._members.findIndex((m) => m.id === updatedItem.id);
+      if (index !== -1) {
+        this._members[index] = updatedItem;
+        const updatedMember = await simulateLatency(transformMemberDates(updatedItem));
+        return ok(updatedMember);
       }
-    }, 0));
-  }
-
-  async fetch(): Promise<Member[]> { // Renamed from fetchMembers
-    return this.simulateLatency(this.members);
-  }
-
-  async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
-    const filteredMembers = this.members.filter(member => member.familyId === familyId);
-    return this.simulateLatency(filteredMembers);
-  }
-
-  async getById(id: string): Promise<Member | undefined> { // Renamed from getMemberById
-    const member = this.members.find((m) => m.id === id);
-    return this.simulateLatency(member);
-  }
-
-  async add(newItem: Omit<Member, 'id'>): Promise<Member> { // Renamed from addMember
-    const memberToAdd: Member = {
-      ...newItem,
-      id: generateMockMember().id,
-      dateOfBirth: newItem.dateOfBirth ? new Date(newItem.dateOfBirth) : undefined,
-      dateOfDeath: newItem.dateOfDeath ? new Date(newItem.dateOfDeath) : undefined,
-    };
-    this.members.push(memberToAdd);
-    return this.simulateLatency(memberToAdd);
-  }
-
-  async update(updatedItem: Member): Promise<Member> { // Renamed from updateMember
-    const index = this.members.findIndex((m) => m.id === updatedItem.id);
-    if (index !== -1) {
-      const memberToUpdate: Member = {
-        ...updatedItem,
-        dateOfBirth: updatedItem.dateOfBirth ? new Date(updatedItem.dateOfBirth) : undefined,
-        dateOfDeath: updatedItem.dateOfDeath ? new Date(updatedItem.dateOfDeath) : undefined,
-      };
-      this.members[index] = memberToUpdate;
-      return this.simulateLatency(memberToUpdate);
+      return err({ message: 'Member not found', statusCode: 404 });
+    } catch (e) {
+      return err({ message: 'Failed to update member in mock service.', details: e as Error });
     }
-    throw new Error('Member not found');
   }
 
-  async delete(id: string): Promise<void> { // Renamed from deleteMember
-    const initialLength = this.members.length;
-    this.members = this.members.filter((m) => m.id !== id);
-    if (this.members.length === initialLength) {
-      throw new Error('Member not found');
+  async delete(id: string): Promise<Result<void, ApiError>> { // Renamed to delete
+    try {
+      const initialLength = this._members.length;
+      this._members = this._members.filter((m) => m.id !== id);
+      if (this._members.length === initialLength) {
+        return err({ message: 'Member not found', statusCode: 404 });
+      }
+      await simulateLatency(undefined);
+      return ok(undefined);
+    } catch (e) {
+      return err({ message: 'Failed to delete member from mock service.', details: e as Error });
     }
-    return this.simulateLatency(undefined);
   }
 
   async searchMembers(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
-  ): Promise<Paginated<Member>> {
-    let filteredMembers = this.members;
+  ): Promise<Result<Paginated<Member>, ApiError>> {
+    try {
+      let filteredMembers = this.members;
 
-    if (filters.fullName) {
-      const lowerCaseFullName = filters.fullName.toLowerCase();
-      filteredMembers = filteredMembers.filter(m =>
-        m.lastName.toLowerCase().includes(lowerCaseFullName) ||
-        m.firstName.toLowerCase().includes(lowerCaseFullName) ||
-        `${m.lastName} ${m.firstName}`.toLowerCase().includes(lowerCaseFullName)
-      );
-    }
-    if (filters.dateOfBirth) {
-      // Compare Date objects
-      filteredMembers = filteredMembers.filter(m => m.dateOfBirth?.toISOString().split('T')[0] === filters.dateOfBirth?.toISOString().split('T')[0]);
-    }
-    if (filters.dateOfDeath) {
-      // Compare Date objects
-      filteredMembers = filteredMembers.filter(m => m.dateOfDeath?.toISOString().split('T')[0] === filters.dateOfDeath?.toISOString().split('T')[0]);
-    }
-    if (filters.gender) {
-      filteredMembers = filteredMembers.filter(m => m.gender === filters.gender);
-    }
-    if (filters.placeOfBirth) {
-      const lowerCasePlaceOfBirth = filters.placeOfBirth.toLowerCase();
-      filteredMembers = filteredMembers.filter(m => m.placeOfBirth?.toLowerCase().includes(lowerCasePlaceOfBirth));
-    }
-    if (filters.placeOfDeath) {
-      const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
-      filteredMembers = filteredMembers.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath));
-    }
-    if (filters.occupation) {
-      const lowerCaseOccupation = filters.occupation.toLowerCase();
-      filteredMembers = filteredMembers.filter(m => m.occupation?.toLowerCase().includes(lowerCaseOccupation));
-    }
-    if (filters.familyId) {
-      filteredMembers = filteredMembers.filter(m => m.familyId === filters.familyId);
-    }
+      if (filters.fullName) {
+        const lowerCaseFullName = filters.fullName.toLowerCase();
+        filteredMembers = filteredMembers.filter(m =>
+          m.lastName.toLowerCase().includes(lowerCaseFullName) ||
+          m.firstName.toLowerCase().includes(lowerCaseFullName) ||
+          `${m.lastName} ${m.firstName}`.toLowerCase().includes(lowerCaseFullName)
+        );
+      }
+      if (filters.dateOfBirth) {
+        // Compare Date objects
+        filteredMembers = filteredMembers.filter(m => m.dateOfBirth?.toISOString().split('T')[0] === filters.dateOfBirth?.toISOString().split('T')[0]);
+      }
+      if (filters.dateOfDeath) {
+        // Compare Date objects
+        filteredMembers = filteredMembers.filter(m => m.dateOfDeath?.toISOString().split('T')[0] === filters.dateOfDeath?.toISOString().split('T')[0]);
+      }
+      if (filters.gender) {
+        filteredMembers = filteredMembers.filter(m => m.gender === filters.gender);
+      }
+      if (filters.placeOfBirth) {
+        const lowerCasePlaceOfBirth = filters.placeOfBirth.toLowerCase();
+        filteredMembers = filteredMembers.filter(m => m.placeOfBirth?.toLowerCase().includes(lowerCasePlaceOfBirth));
+      }
+      if (filters.placeOfDeath) {
+        const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
+        filteredMembers = filteredMembers.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath));
+      }
+      if (filters.occupation) {
+        const lowerCaseOccupation = filters.occupation.toLowerCase();
+        filteredMembers = filteredMembers.filter(m => m.occupation?.toLowerCase().includes(lowerCaseOccupation));
+      }
+      if (filters.familyId) {
+        filteredMembers = filteredMembers.filter(m => m.familyId === filters.familyId);
+      }
 
-    const totalItems = filteredMembers.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const start = (page - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const items = filteredMembers.slice(start, end);
+      const totalItems = filteredMembers.length;
+      const totalPages = Math.ceil(totalItems / itemsPerPage);
+      const start = (page - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const items = filteredMembers.slice(start, end);
 
-    return this.simulateLatency({
-      items,
-      totalItems,
-      totalPages,
-    });
+      const paginatedResult = await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      });
+      return ok(paginatedResult);
+    } catch (e) {
+      return err({ message: 'Failed to search members from mock service.', details: e as Error });
+    }
   }
 }

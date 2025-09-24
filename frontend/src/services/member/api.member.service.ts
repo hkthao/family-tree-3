@@ -1,5 +1,8 @@
 import type { Member } from '@/types/member';
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
+import { safeApiCall } from '@/utils/api';
+import type { ApiError } from '@/utils/api';
+import { Result, ok } from '@/types/result';
 import axios from 'axios';
 
 // Base URL for your API - configure this based on your environment
@@ -32,42 +35,57 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
 export class ApiMemberService implements IMemberService {
   private apiUrl = `${API_BASE_URL}/members`;
 
-  async fetch(): Promise<Member[]> { // Renamed from fetchMembers
-    const response = await axios.get<Member[]>(this.apiUrl);
-    return response.data.map(m => transformMemberDates(m));
+  async fetch(): Promise<Result<Member[], ApiError>> { // Renamed from fetchMembers
+    const result = await safeApiCall(axios.get<Member[]>(this.apiUrl));
+    if (result.ok) {
+      return ok(result.value.map(m => transformMemberDates(m)));
+    }
+    return result;
   }
 
-  async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
-    const response = await axios.get<Member[]>(`${this.apiUrl}?familyId=${familyId}`);
-    return response.data.map(m => transformMemberDates(m));
+  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
+    const result = await safeApiCall(axios.get<Member[]>(`${this.apiUrl}?familyId=${familyId}`));
+    if (result.ok) {
+      return ok(result.value.map(m => transformMemberDates(m)));
+    }
+    return result;
   }
 
-  async getById(id: string): Promise<Member | undefined> { // Renamed from getMemberById
-    const response = await axios.get<Member>(`${this.apiUrl}/${id}`);
-    return response.data ? transformMemberDates(response.data) : undefined;
+  async getById(id: string): Promise<Result<Member | undefined, ApiError>> { // Renamed from getMemberById
+    const result = await safeApiCall(axios.get<Member>(`${this.apiUrl}/${id}`));
+    if (result.ok) {
+      return ok(result.value ? transformMemberDates(result.value) : undefined);
+    }
+    return result;
   }
 
-  async add(newItem: Omit<Member, 'id'>): Promise<Member> { // Renamed from addMember
+  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> { // Renamed from addMember
     const apiMember = prepareMemberForApi(newItem);
-    const response = await axios.post<Member>(this.apiUrl, apiMember);
-    return transformMemberDates(response.data);
+    const result = await safeApiCall(axios.post<Member>(this.apiUrl, apiMember));
+    if (result.ok) {
+      return ok(transformMemberDates(result.value));
+    }
+    return result;
   }
 
-  async update(updatedItem: Member): Promise<Member> { // Renamed from updateMember
+  async update(updatedItem: Member): Promise<Result<Member, ApiError>> { // Renamed from updateMember
     const apiMember = prepareMemberForApi(updatedItem);
-    const response = await axios.put<Member>(`${this.apiUrl}/${updatedItem.id}`, apiMember);
-    return transformMemberDates(response.data);
+    const result = await safeApiCall(axios.put<Member>(`${this.apiUrl}/${updatedItem.id}`, apiMember));
+    if (result.ok) {
+      return ok(transformMemberDates(result.value));
+    }
+    return result;
   }
 
-  async delete(id: string): Promise<void> { // Renamed from deleteMember
-    await axios.delete(`${this.apiUrl}/${id}`);
+  async delete(id: string): Promise<Result<void, ApiError>> { // Renamed from deleteMember
+    return safeApiCall(axios.delete<void>(`${this.apiUrl}/${id}`));
   }
 
   async searchMembers(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
-  ): Promise<Paginated<Member>> {
+  ): Promise<Result<Paginated<Member>, ApiError>> {
     const params = new URLSearchParams();
     if (filters.fullName) params.append('fullName', filters.fullName);
     if (filters.dateOfBirth) params.append('dateOfBirth', filters.dateOfBirth.toISOString());
@@ -82,10 +100,13 @@ export class ApiMemberService implements IMemberService {
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
 
-    const response = await axios.get<Paginated<Member>>(`${this.apiUrl}?${params.toString()}`);
-    // Assuming the API returns a Paginated object with items, totalItems, totalPages
-    // The items in the response might need date transformation
-    response.data.items = response.data.items.map(transformMemberDates);
-    return response.data;
+    const result = await safeApiCall(axios.get<Paginated<Member>>(`${this.apiUrl}?${params.toString()}`));
+    if (result.ok) {
+      // Assuming the API returns a Paginated object with items, totalItems, totalPages
+      // The items in the response might need date transformation
+      result.value.items = result.value.items.map(transformMemberDates);
+      return ok(result.value);
+    }
+    return result;
   }
 }

@@ -50,7 +50,8 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 const familyStore = useFamilyStore();
 import { useMemberStore } from '@/stores/member.store';
-import type { Family, FamilyFilter } from '@/types/family';
+import type { Family } from '@/types/family';
+import type { FamilyFilter } from '@/services/family/family.service.interface';
 
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';

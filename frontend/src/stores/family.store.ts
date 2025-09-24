@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type { Family, FamilySearchFilter } from '@/types/family';
 import type { Paginated } from '@/types/pagination';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import type { ApiError } from '@/utils/api';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
@@ -30,77 +31,73 @@ export const useFamilyStore = defineStore('family', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      try {
-        const response: Paginated<Family> =
-          await this.services.family.searchItems(
-            this.filter,
-            this.currentPage,
-            this.itemsPerPage,
-          );
-        this.items = response.items;
-        this.totalItems = response.totalItems;
-        this.totalPages = response.totalPages;
-      } catch (e) {
-        this.error = 'Không thể tải danh sách gia đình.';
+      const result = await this.services.family.searchItems(
+        this.filter,
+        this.currentPage,
+        this.itemsPerPage,
+      );
+
+      if (result.ok) {
+        this.items = result.value.items;
+        this.totalItems = result.value.totalItems;
+        this.totalPages = result.value.totalPages;
+      } else {
+        this.error = result.error.message || 'Không thể tải danh sách gia đình.';
         this.items = []; // Clear items on error
         this.totalItems = 0; // Reset totalItems on error
         this.totalPages = 1; // Reset totalPages on error
-        console.error(e);
-      } finally {
-        this.loading = false;
+        console.error(result.error);
       }
+      this.loading = false;
     },
 
     async addItem(newItem: Omit<Family, 'id'>) {
       this.loading = true;
       this.error = null;
-      try {
-        const addedItem = await this.services.family.add(newItem);
-        this.items.push(addedItem);
+      const result = await this.services.family.add(newItem);
+      if (result.ok) {
+        this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
-      } catch (e) {
-        this.error = 'Không thể thêm gia đình.';
-        console.error(e);
-      } finally {
-        this.loading = false;
+      } else {
+        this.error = result.error.message || 'Không thể thêm gia đình.';
+        console.error(result.error);
       }
+      this.loading = false;
     },
 
     async updateItem(updatedItem: Family) {
       this.loading = true;
       this.error = null;
-      try {
-        const updated = await this.services.family.update(updatedItem);
-        const index = this.items.findIndex((item) => item.id === updated.id);
+      const result = await this.services.family.update(updatedItem);
+      if (result.ok) {
+        const index = this.items.findIndex((item) => item.id === result.value.id);
         if (index !== -1) {
-          this.items[index] = updated;
+          this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
-          throw new Error('Không tìm thấy gia đình để cập nhật trong kho.');
+          this.error = 'Không tìm thấy gia đình để cập nhật trong kho.';
         }
-      } catch (e) {
-        this.error = 'Không thể cập nhật gia đình.';
-        console.error(e);
-      } finally {
-        this.loading = false;
+      } else {
+        this.error = result.error.message || 'Không thể cập nhật gia đình.';
+        console.error(result.error);
       }
+      this.loading = false;
     },
 
     async deleteItem(id: string) {
       this.loading = true;
       this.error = null;
-      try {
-        await this.services.family.delete(id);
+      const result = await this.services.family.delete(id);
+      if (result.ok) {
         await this._loadItems(); // Re-fetch to update pagination and filters
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
         }
-      } catch (e) {
-        this.error = 'Không thể xóa gia đình.';
-        console.error(e);
-      } finally {
-        this.loading = false;
+      } else {
+        this.error = result.error.message || 'Không thể xóa gia đình.';
+        console.error(result.error);
       }
+      this.loading = false;
     },
 
     async searchItems(
@@ -134,14 +131,14 @@ export const useFamilyStore = defineStore('family', {
       if (this.itemCache[id]) {
         return this.itemCache[id];
       }
-      try {
-        const item = await this.services.family.getById(id);
-        if (item) {
-          this.itemCache[id] = item;
+      const result = await this.services.family.getById(id);
+      if (result.ok) {
+        if (result.value) {
+          this.itemCache[id] = result.value;
         }
-        return item;
-      } catch (e) {
-        console.error(`Error fetching item with ID ${id}:`, e);
+        return result.value;
+      } else {
+        console.error(`Error fetching item with ID ${id}:`, result.error);
         return undefined;
       }
     },
@@ -149,24 +146,23 @@ export const useFamilyStore = defineStore('family', {
     async fetchAllItems() {
       this.loading = true;
       this.error = null;
-      try {
-        // Use a large itemsPerPage to fetch all items
-        const response: Paginated<Family> =
-          await this.services.family.searchItems(
-            '',
-            'all',
-            1,
-            1000, // A large number
-          );
-        this.items = response.items;
-        this.totalItems = response.totalItems;
+      // Use a large itemsPerPage to fetch all items
+      const result = await this.services.family.searchItems(
+        '',
+        'all',
+        1,
+        1000, // A large number
+      );
+
+      if (result.ok) {
+        this.items = result.value.items;
+        this.totalItems = result.value.totalItems;
         this.totalPages = 1;
-      } catch (e) {
-        this.error = 'Không thể tải danh sách gia đình.';
-        console.error(e);
-      } finally {
-        this.loading = false;
+      } else {
+        this.error = result.error.message || 'Không thể tải danh sách gia đình.';
+        console.error(result.error);
       }
+      this.loading = false;
     },
 
     async searchLookup(filter: FamilySearchFilter, page: number, itemsPerPage: number) {
