@@ -1,11 +1,11 @@
-
-import { mount, VueWrapper } from '@vue/test-utils';
+import { mount, flushPromises, VueWrapper } from '@vue/test-utils';
 import {
   describe,
   it,
   expect,
   vi,
   beforeEach,
+  type MockedFunction,
 } from 'vitest';
 import MemberListView from '@/views/members/MemberListView.vue';
 import { useMemberStore } from '@/stores/member.store';
@@ -33,7 +33,6 @@ Object.defineProperty(window, 'visualViewport', {
   },
   writable: true,
 });
-
 
 class MockMemberServiceForTest implements IMemberService {
   private _items: Member[] = [];
@@ -142,27 +141,32 @@ const router = createRouter({
 
 let memberStore: ReturnType<typeof useMemberStore>;
 let mockMemberService: MockMemberServiceForTest;
-let notificationStore: ReturnType<typeof useNotificationStore>;
 
 describe('MemberListView.vue', () => {
+  let memberStore: ReturnType<typeof useMemberStore>;
+  let mockMemberService: MockMemberServiceForTest;
+  let notificationStore: ReturnType<typeof useNotificationStore>;
+
   beforeEach(() => {
     vi.clearAllMocks();
     const pinia = createPinia();
     setActivePinia(pinia);
 
     mockMemberService = new MockMemberServiceForTest();
-    notificationStore = useNotificationStore();
     memberStore = useMemberStore();
+    memberStore.$reset();
     memberStore.services = createServices('test', {
       member: mockMemberService,
     });
 
-    memberStore.$reset();
+    notificationStore = useNotificationStore();
     notificationStore.$reset();
+    mockedShowSnackbar.mockClear();
 
     vi.spyOn(memberStore, 'setPage');
     vi.spyOn(memberStore, 'setItemsPerPage');
     vi.spyOn(memberStore, 'searchItems');
+    vi.spyOn(memberStore, 'fetchItems');
   });
 
   it('renders without errors', () => {
@@ -224,5 +228,125 @@ describe('MemberListView.vue', () => {
     expect(memberStore.setPage).toHaveBeenCalledWith(2);
     expect(memberStore.setItemsPerPage).toHaveBeenCalledWith(25);
     expect(memberStore.searchItems).toHaveBeenCalled();
+  });
+
+  describe('Delete Member', () => {
+    beforeEach(() => {
+      vi.spyOn(mockMemberService, 'delete');
+    });
+
+    it('opens confirm delete dialog', async () => {
+      const member = { id: '1', fullName: 'John Doe' } as Member;
+
+      const wrapper: VueWrapper<InstanceType<typeof MemberListView>> = mount(
+        MemberListView,
+        {
+          global: {
+            plugins: [i18n, vuetify, router],
+          },
+        },
+      );
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(member);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+      expect((wrapper.vm as any).memberToDelete).toEqual(member);
+    });
+
+    it('deletes a member successfully after confirmation', async () => {
+      const member = { id: '1', fullName: 'John Doe' } as Member;
+      (
+        mockMemberService.delete as MockedFunction<
+          typeof mockMemberService.delete
+        >
+      ).mockResolvedValue(ok(undefined));
+
+      const wrapper: VueWrapper<InstanceType<typeof MemberListView>> = mount(
+        MemberListView,
+        {
+          global: {
+            plugins: [i18n, vuetify, router],
+          },
+        },
+      );
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(member);
+      // Simulate confirming the delete dialog
+      await (wrapper.vm as any).handleDeleteConfirm();
+
+      expect(mockMemberService.delete).toHaveBeenCalledWith(member.id);
+      expect(memberStore.searchItems).toHaveBeenCalled(); // Reload members after deletion
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+      expect((wrapper.vm as any).memberToDelete).toBeUndefined();
+      expect(mockedShowSnackbar).toHaveBeenCalledWith(
+        'member.messages.deleteSuccess',
+        'success',
+      );
+    });
+
+    it('handles error during member deletion', async () => {
+      const member = { id: '1', fullName: 'John Doe' } as Member;
+      const wrapper: VueWrapper<InstanceType<typeof MemberListView>> = mount(
+        MemberListView,
+        {
+          global: {
+            plugins: [i18n, vuetify, router],
+          },
+        },
+      );
+      (wrapper.vm as any).loadMembers = vi.fn();
+      (wrapper.vm as any).loadAllMembers = vi.fn();
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(member);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+      expect((wrapper.vm as any).memberToDelete).toEqual(member);
+
+      // Simulate confirming the delete dialog
+      await (wrapper.vm as any).handleDeleteConfirm();
+
+      expect(mockMemberService.delete).toHaveBeenCalledWith(member.id);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+      expect((wrapper.vm as any).memberToDelete).toBeUndefined();
+      expect(mockedShowSnackbar).toHaveBeenCalledWith(
+        'member.messages.deleteError',
+        'error',
+      );
+    });
+
+    it('cancels member deletion', async () => {
+      const member = { id: '1', fullName: 'John Doe' } as Member;
+
+      const wrapper: VueWrapper<InstanceType<typeof MemberListView>> = mount(
+        MemberListView,
+        {
+          global: {
+            plugins: [i18n, vuetify, router],
+          },
+        },
+      );
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(member);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+      expect((wrapper.vm as any).memberToDelete).toEqual(member);
+
+      // Simulate canceling the delete dialog
+      (wrapper.vm as any).handleDeleteCancel();
+
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+      expect((wrapper.vm as any).memberToDelete).toBeUndefined();
+      expect(mockMemberService.delete).not.toHaveBeenCalled();
+      expect(mockedShowSnackbar).not.toHaveBeenCalled();
+    });
   });
 });
