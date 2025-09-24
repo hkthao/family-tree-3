@@ -1,21 +1,37 @@
-Bạn là một senior frontend engineer. Hãy tạo hoặc refactor component Vue 3 dùng chung tên `Lookup.vue` theo các yêu cầu sau:
+gemini update --repo . --ask "Repo hiện tại đang có nhiều code xử lý lỗi trực tiếp bằng try/catch trong các store, service và API client. Anh hãy refactor toàn bộ code để sử dụng Result/Either pattern (có thể tham khảo cách implement trong fp-ts hoặc tự viết một utility Result<T, E>).
 
-1. Component dùng Vuetify 3 `v-select`.
-2. Props:
-   - `dataSource`: có thể là Array<any> hoặc Pinia store. Store có thể chứa danh sách data hoặc method fetch data.
-   - `value`: id hiện tại (string | number | null).
-   - `displayExpr`: field để hiển thị label (ví dụ "name").
-   - `valueExpr`: field dùng làm value (ví dụ "id").
-3. Behavior:
-   - `v-select` hiển thị `value` dựa trên `displayExpr`.
-   - Khi click nút search (icon bên cạnh v-select), mở dialog (`v-dialog`) chứa danh sách:
-       - v-list show dữ liệu từ `dataSource`.
-       - On-demand search: nếu `dataSource` là store, gọi method fetch / ensureLoaded.
-       - Phân trang
-       - Cho phép sort / filter cơ bản.
-   - **Preload selected item**: nếu `value` đã có nhưng `items` chưa load, fetch riêng item đó để hiển thị label trong v-select.
-   - Khi chọn item trong dialog → cập nhật `value` của v-select.
-4. Component phải hỗ trợ binding 2 chiều `v-model:value`.
-5. Code bằng TypeScript.
-6. Comment rõ ràng để junior dễ hiểu.
-7. Đảm bảo component reusable với nhiều store hoặc array, và on-demand load vẫn hiển thị label của selected value ngay cả khi items chưa load.
+Yêu cầu chi tiết:
+
+Tạo một Result type:
+type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+hoặc dùng kiểu tương tự (Either cũng được).
+
+Trong tất cả các service (ví dụ MemberService, FamilyService…), khi gọi API:
+
+Thay vì throw error, hãy luôn trả về Result.
+
+Ví dụ: return { ok: true, value: data } hoặc return { ok: false, error }.
+
+Trong các store (Pinia stores), thay đổi logic:
+
+Khi nhận Result từ service, check if (result.ok) để set state.
+
+Nếu !result.ok, hãy gán error state chuẩn, thay vì để exception propagate.
+
+Code store cần gọn gàng hơn, không bị lặp đi lặp lại phần try/catch.
+
+Viết lại unit test tương ứng:
+
+Test cả case ok và case error.
+
+Đảm bảo store update state đúng khi service trả về error.
+
+Áp dụng cho toàn bộ store chính trong repo (family.store, member.store, v.v.), và service liên quan.
+
+Code sau refactor cần:
+
+Type-safe (không dùng any).
+
+Giảm lặp lại trong xử lý lỗi.
+
+Đảm bảo test (npx vitest run) vẫn pass."

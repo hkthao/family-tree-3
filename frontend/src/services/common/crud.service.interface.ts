@@ -1,7 +1,10 @@
+import type { Result } from '@/types/result';
+import type { ApiError } from '@/utils/api';
+
 export interface ICrudService<T> {
-  fetch(): Promise<T[]>;
-  getById(id: string): Promise<T | undefined>;
-  add(newItem: Omit<T, 'id'>): Promise<T>;
-  update(updatedItem: T): Promise<T>;
-  delete(id: string): Promise<void>;
+  fetch(): Promise<Result<T[], ApiError>>;
+  getById(id: string): Promise<Result<T | undefined, ApiError>>;
+  add(newItem: Omit<T, 'id'>): Promise<Result<T, ApiError>>;
+  update(updatedItem: T): Promise<Result<T, ApiError>>;
+  delete(id: string): Promise<Result<void, ApiError>>;
 }
