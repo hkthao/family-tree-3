@@ -1,4 +1,4 @@
-import type { IFamilyEventService } from './family-event.service.interface';
+import type { IFamilyEventService, EventFilter } from './family-event.service.interface';
 import type { FamilyEvent } from '@/types/family-event';
 import type { Paginated } from '@/types/pagination';
 import { generateMockFamilyEvents } from '@/data/mock/family-event.mock';
@@ -43,25 +43,41 @@ export class MockFamilyEventService implements IFamilyEventService {
     return simulateLatency(undefined);
   }
 
-  async searchFamilyEvents(
-    searchQuery: string,
-    familyId?: string,
+  async searchItems(
+    filters: EventFilter,
     page: number = 1,
     itemsPerPage: number = 10
   ): Promise<Paginated<FamilyEvent>> {
     let filtered = this._familyEvents;
 
-    if (familyId) {
-      filtered = filtered.filter((event) => event.familyId === familyId);
+    if (filters.familyId) {
+      filtered = filtered.filter((event) => event.familyId === filters.familyId);
     }
 
-    if (searchQuery) {
-      const lowerCaseSearchQuery = searchQuery.toLowerCase();
+    if (filters.searchQuery) {
+      const lowerCaseSearchQuery = filters.searchQuery.toLowerCase();
       filtered = filtered.filter(
         (event) =>
           event.name.toLowerCase().includes(lowerCaseSearchQuery) ||
           (event.description && event.description.toLowerCase().includes(lowerCaseSearchQuery))
       );
+    }
+
+    if (filters.type) {
+      filtered = filtered.filter(e => e.type === filters.type);
+    }
+
+    if (filters.startDate) {
+      filtered = filtered.filter(e => e.startDate && new Date(e.startDate) >= new Date(filters.startDate!));
+    }
+
+    if (filters.endDate) {
+      filtered = filtered.filter(e => e.endDate && new Date(e.endDate) <= new Date(filters.endDate!));
+    }
+
+    if (filters.location) {
+      const lowerCaseLocation = filters.location.toLowerCase();
+      filtered = filtered.filter(e => e.location?.toLowerCase().includes(lowerCaseLocation));
     }
 
     const totalItems = filtered.length;
