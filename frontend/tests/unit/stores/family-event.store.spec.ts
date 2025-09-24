@@ -11,14 +11,21 @@ import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/f
 import { simulateLatency } from '@/utils/mockUtils';
 
 export class MockFamilyEventServiceForTest implements IFamilyEventService {
-  private _events: FamilyEvent[] = generateMockFamilyEvents(20);
+  private _events: FamilyEvent[];
 
+  constructor() {
+    this._events = generateMockFamilyEvents(20);
+  }
+
+  reset() {
+    this._events = generateMockFamilyEvents(20);
+  }
   get events(): FamilyEvent[] {
     return [...this._events];
   }
 
   async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
-    return ok([]);
+    return ok(await simulateLatency(this.events));
   }
 
   async getById(id: string): Promise<Result<FamilyEvent | undefined, ApiError>> {
@@ -45,6 +52,13 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
+    console.log('Before delete, _events.length:', this._events.length);
+    const initialLength = this._events.length;
+    this._events = this._events.filter((event) => event.id !== id);
+    console.log('After delete, _events.length:', this._events.length);
+    if (this._events.length === initialLength) {
+      return err({ message: 'Event not found', statusCode: 404 });
+    }
     return ok(undefined);
   }
 
@@ -53,11 +67,52 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
     page?: number,
     itemsPerPage?: number
   ): Promise<Result<Paginated<FamilyEvent>, ApiError>> {
-    return ok({
-      items: [],
-      totalItems: 0,
-      totalPages: 0,
-    });
+    let filteredEvents = this._events;
+
+    if (filters.searchQuery) {
+      const lowerCaseSearchQuery = filters.searchQuery.toLowerCase();
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.name.toLowerCase().includes(lowerCaseSearchQuery) ||
+          (event.description && event.description.toLowerCase().includes(lowerCaseSearchQuery))
+      );
+    }
+
+    if (filters.type) {
+      filteredEvents = filteredEvents.filter((event) => event.type === filters.type);
+    }
+
+    if (filters.familyId) {
+      filteredEvents = filteredEvents.filter((event) => event.familyId === filters.familyId);
+    }
+
+    if (filters.startDate) {
+      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) >= filters.startDate!);
+    }
+
+    if (filters.endDate) {
+      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) <= filters.endDate!); // Use event.startDate
+    }
+
+    if (filters.location) {
+      const lowerCaseLocation = filters.location.toLowerCase();
+      filteredEvents = filteredEvents.filter((event) => event.location && event.location.toLowerCase().includes(lowerCaseLocation));
+    }
+
+    const totalItems = filteredEvents.length;
+    const currentPage = page || 1;
+    const currentItemsPerPage = itemsPerPage || 10;
+    const totalPages = Math.ceil(totalItems / currentItemsPerPage);
+    const start = (currentPage - 1) * currentItemsPerPage;
+    const end = start + currentItemsPerPage;
+    const items = filteredEvents.slice(start, end);
+
+    console.log('MockFamilyEventServiceForTest.searchItems returning:', { items, totalItems, totalPages });
+    return ok(await simulateLatency({
+      items,
+      totalItems,
+      totalPages,
+    }));
   }
 }
 
@@ -66,11 +121,12 @@ describe('Family Event Store', () => {
 
   beforeEach(async () => {
     mockFamilyEventService = new MockFamilyEventServiceForTest();
+    mockFamilyEventService.reset(); // Call reset here
     const pinia = createPinia();
     setActivePinia(pinia);
     const store = useFamilyEventStore();
-    store.$reset();
     store.services = createServices('test', { familyEvent: mockFamilyEventService });
+    store.$reset(); // Call reset here
     await store._loadItems(); // Ensure store is populated before tests run
   });
 
@@ -150,6 +206,7 @@ describe('Family Event Store', () => {
     const initialTotalItems = store.totalItems;
     const eventToDeleteId = store.items[0]?.id;
     if (eventToDeleteId) {
+      console.log('Before delete, store.totalItems:', store.totalItems);
       await store.deleteItem(eventToDeleteId);
       expect(store.totalItems).toBe(initialTotalItems - 1);
       expect(store.getItemById(eventToDeleteId)).toBeUndefined();

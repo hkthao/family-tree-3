@@ -48,9 +48,6 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { useFamilyEventStore } from '@/stores/family-event.store';
-import type { EventFilter } from '@/services/family-event/family-event.service.interface';
-const familyStore = useFamilyStore();
 import { useMemberStore } from '@/stores/member.store';
 import type { Family } from '@/types/family';
 import type { FamilySearchFilter } from '@/types/family';
@@ -65,6 +62,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 const { t } = useI18n();
 const router = useRouter();
 
+const familyStore = useFamilyStore();
 const { items } = storeToRefs(familyStore);
 const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
@@ -89,11 +87,8 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await useFamilyEventStore().searchItems(
-    {
-      searchQuery: currentFilters.value.name || '',
-      familyId: currentFilters.value.familyId || undefined,
-    } as EventFilter
+  await familyStore.searchItems(
+    currentFilters.value,
   );
 };
 

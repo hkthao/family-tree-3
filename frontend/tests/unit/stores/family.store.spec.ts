@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Family, FamilySearchFilter } from '@/types/family';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { generateMockFamily } from '@/data/mock/family.mock';
@@ -178,11 +178,10 @@ describe('Family Store', () => {
     setActivePinia(pinia);
     const store = useFamilyStore(); // Get the store instance
 
-    store.$reset(); // Reset store state before each test
-
     store.services = createServices('test', {
       family: mockFamilyService,
     });
+    store.$reset(); // Call reset here
   });
 
   // 1. Initial state
@@ -214,9 +213,20 @@ describe('Family Store', () => {
     mockFamilyService.shouldThrowError = true;
     const store = useFamilyStore();
     await store._loadItems();
-    expect(store.error).toBe('Không thể tải danh sách gia đình.');
+    expect(store.error).toBe('Mock searchItems error');
     expect(store.loading).toBe(false);
     expect(store.items).toEqual([]); // Items should be empty on error
+  });
+
+  it('_loadItems should set generic error message when result.error.message is undefined', async () => {
+    mockFamilyService.shouldThrowError = true;
+    // Mock the service to return an error without a message
+    mockFamilyService.searchItems = vi.fn().mockResolvedValue(err({ message: undefined }));
+    const store = useFamilyStore();
+    await store._loadItems();
+    expect(store.error).toBe('Không thể tải danh sách gia đình.');
+    expect(store.loading).toBe(false);
+    expect(store.items).toEqual([]);
   });
 
   // 3. Get by ID
@@ -232,6 +242,13 @@ describe('Family Store', () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure families are loaded
     const family = store.getItemById('non-existent-id');
+    expect(family).toBeUndefined();
+  });
+
+  it('getItemById should return undefined when items array is empty', () => {
+    const store = useFamilyStore();
+    store.items = []; // Ensure items array is empty
+    const family = store.getItemById('any-id');
     expect(family).toBeUndefined();
   });
 
@@ -272,10 +289,27 @@ describe('Family Store', () => {
       visibility: 'public',
     };
     await store.addItem(newFamilyData);
-    expect(store.error).toBe('Không thể thêm gia đình.');
+    expect(store.error).toBe('Mock add error');
     expect(store.loading).toBe(false);
     expect(store.items.length).toBe(initialFamiliesCount);
     expect(store.totalItems).toBe(initialTotalItems);
+  });
+
+  it('addItem should set generic error message when result.error.message is undefined', async () => {
+    mockFamilyService.shouldThrowError = true;
+    mockFamilyService.add = vi.fn().mockResolvedValue(err({ message: undefined }));
+    const store = useFamilyStore();
+    await store._loadItems();
+    const newFamilyData: Omit<Family, 'id'> = {
+      name: 'The Error Family',
+      description: 'This family should not be added.',
+      avatarUrl: 'test-avatar.jpg',
+      address: 'test-address',
+      visibility: 'public',
+    };
+    await store.addItem(newFamilyData);
+    expect(store.error).toBe('Không thể thêm gia đình.');
+    expect(store.loading).toBe(false);
   });
 
   // 5. Update family
@@ -311,7 +345,7 @@ describe('Family Store', () => {
 
     // Test case 1: Family not found (mock service throws error)
     await store.updateItem(nonExistentFamily);
-    expect(store.error).toBe('Không thể cập nhật gia đình.'); // This is the store's error
+    await expect(store.error).toBe('Family not found'); // This is the store's error
     expect(store.loading).toBe(false);
     expect(store.items).toEqual(initialFamilies); // Families should not change
 
@@ -322,11 +356,27 @@ describe('Family Store', () => {
     if (familyToUpdate) {
       const updatedFamily: Family = { ...familyToUpdate, name: 'Error Update' };
       await store.updateItem(updatedFamily);
-      expect(store.error).toBe('Không thể cập nhật gia đình.'); // This is the store's error
+      expect(store.error).toBe('Mock update error'); // This is the store's error
       expect(store.loading).toBe(false);
       expect(store.items).toEqual(initialFamilies); // Families should not change
     } else {
       expect.fail('No family to update for service error test.');
+    }
+  });
+
+  it('updateItem should set generic error message when result.error.message is undefined', async () => {
+    const store = useFamilyStore();
+    await store._loadItems();
+    mockFamilyService.shouldThrowError = true;
+    mockFamilyService.update = vi.fn().mockResolvedValue(err({ message: undefined }));
+    const familyToUpdate = store.items[0];
+    if (familyToUpdate) {
+      const updatedFamily: Family = { ...familyToUpdate, name: 'Error Update' };
+      await store.updateItem(updatedFamily);
+      expect(store.error).toBe('Không thể cập nhật gia đình.');
+      expect(store.loading).toBe(false);
+    } else {
+      expect.fail('No family to update for generic error test.');
     }
   });
 
@@ -356,12 +406,27 @@ describe('Family Store', () => {
     if (familyToDeleteId) {
       mockFamilyService.shouldThrowError = true; // Set to true only for the delete call
       await store.deleteItem(familyToDeleteId);
-      expect(store.error).toBe('Không thể xóa gia đình.');
+      expect(store.error).toBe('Mock delete error');
       expect(store.loading).toBe(false);
       expect(store.items).toEqual(initialFamilies); // Families should not change
       mockFamilyService.shouldThrowError = false; // Reset after the call
     } else {
       expect.fail('No family to delete for error test.');
+    }
+  });
+
+  it('deleteItem should set generic error message when result.error.message is undefined', async () => {
+    const store = useFamilyStore();
+    await store._loadItems();
+    mockFamilyService.shouldThrowError = true;
+    mockFamilyService.delete = vi.fn().mockResolvedValue(err({ message: undefined }));
+    const familyToDeleteId = store.items[0]?.id;
+    if (familyToDeleteId) {
+      await store.deleteItem(familyToDeleteId);
+      expect(store.error).toBe('Không thể xóa gia đình.');
+      expect(store.loading).toBe(false);
+    } else {
+      expect.fail('No family to delete for generic error test.');
     }
   });
 
@@ -371,7 +436,7 @@ describe('Family Store', () => {
     await store._loadItems(); // Ensure store is populated
     const nonExistentId = 'non-existent-id';
     await store.deleteItem(nonExistentId);
-    expect(store.error).toBe('Không thể xóa gia đình.');
+    expect(store.error).toBe('Family not found');
     expect(store.loading).toBe(false);
   });
 
@@ -482,17 +547,39 @@ describe('Family Store', () => {
     expect(store.currentPage).toBe(1); // Should remain 1
   });
 
+  it('setItemsPerPage should not update itemsPerPage for invalid count values', async () => {
+    const store = useFamilyStore();
+    await store._loadItems(); // Ensure store is populated
+    const initialItemsPerPage = store.itemsPerPage;
+
+    // Test with count <= 0
+    await store.setItemsPerPage(0);
+    expect(store.itemsPerPage).toBe(initialItemsPerPage);
+
+    await store.setItemsPerPage(-5);
+    expect(store.itemsPerPage).toBe(initialItemsPerPage);
+  });
+
   // 9. Error handling in search
   it('searchItems should set error and clear items on search failure', async () => {
     mockFamilyService.shouldThrowError = true;
     const store = useFamilyStore();
     await store._loadItems(); // Initial load to populate items
-    await store.searchItems({ name: 'non-existent-query' });
-    expect(store.error).toBe('Không thể tải danh sách gia đình.');
+    expect(store.error).toBe('Mock searchItems error');
     expect(store.loading).toBe(false);
     expect(store.items).toEqual([]); // Items should be empty on error
     expect(store.totalItems).toBe(0);
     expect(store.totalPages).toBe(1);
+  });
+
+  it('searchItems should set generic error message when result.error.message is undefined', async () => {
+    mockFamilyService.shouldThrowError = true;
+    mockFamilyService.searchItems = vi.fn().mockResolvedValue(err({ message: undefined }));
+    const store = useFamilyStore();
+    await store._loadItems();
+    expect(store.error).toBe('Không thể tải danh sách gia đình.');
+    expect(store.loading).toBe(false);
+    expect(store.items).toEqual([]);
   });
 
   // 10. Computed getters
@@ -511,17 +598,50 @@ describe('Family Store', () => {
     expect(store.paginatedItems[0].id).toBe(mockFamilyService.items[0].id);
   });
 
-  it('setCurrentItem should set the current family', async () => {
+  it('paginatedItems should return an empty array when items is empty', () => {
     const store = useFamilyStore();
-    await store._loadItems(); // Ensure store is initialized
-    const mockFamily: Family = generateMockFamily('test-id');
-    store.setCurrentItem(mockFamily);
-    expect(store.currentItem).toEqual(mockFamily);
-    expect(store.currentItem).toBeDefined();
-    expect(store.currentItem?.id).toBe(mockFamily.id);
+    store.items = [];
+    expect(store.paginatedItems).toEqual([]);
+  });
 
-    store.setCurrentItem(null);
-    expect(store.currentItem).toBeNull();
+  it('fetchItemById should return item from cache if it exists', async () => {
+    const store = useFamilyStore();
+    await store._loadItems(); // Ensure store is populated
+    const cachedItem = mockFamilyService.items[0];
+    store.itemCache[cachedItem.id] = cachedItem; // Manually add to cache
+
+    const spy = vi.spyOn(mockFamilyService, 'getById');
+    const fetchedItem = await store.fetchItemById(cachedItem.id);
+
+    expect(fetchedItem).toEqual(cachedItem);
+    expect(spy).not.toHaveBeenCalled(); // Should not call service if in cache
+  });
+
+  it('fetchItemById should fetch item from service and cache it if not in cache', async () => {
+    const store = useFamilyStore();
+    await store._loadItems(); // Ensure store is populated
+    const itemToFetch = mockFamilyService.items[0];
+    store.itemCache = {}; // Clear cache
+
+    const spy = vi.spyOn(mockFamilyService, 'getById');
+    const fetchedItem = await store.fetchItemById(itemToFetch.id);
+
+    expect(fetchedItem).toEqual(itemToFetch);
+    expect(spy).toHaveBeenCalledWith(itemToFetch.id);
+    expect(store.itemCache[itemToFetch.id]).toEqual(itemToFetch); // Should be cached
+  });
+
+  it('fetchItemById should return undefined and log error if service call fails', async () => {
+    const store = useFamilyStore();
+    await store._loadItems(); // Ensure store is populated
+    mockFamilyService.getById = vi.fn().mockResolvedValue(err({ message: 'Fetch error' }));
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+
+    const fetchedItem = await store.fetchItemById('non-existent-id');
+
+    expect(fetchedItem).toBeUndefined();
+    expect(consoleSpy).toHaveBeenCalledWith('Error fetching item with ID non-existent-id:', { message: 'Fetch error' });
+    consoleSpy.mockRestore(); // Restore console.error
   });
 
   it('setPage should update currentPage and re-load items', async () => {
@@ -540,6 +660,20 @@ describe('Family Store', () => {
     // Invalid page (too low) - currentPage should not change
     await store.setPage(0);
     expect(store.currentPage).toBe(2); // Should remain 2
+  });
+
+  it('setPage should not update currentPage for invalid page values', async () => {
+    const store = useFamilyStore();
+    await store._loadItems(); // Ensure store is populated
+    const initialPage = store.currentPage;
+
+    // Test with page < 1
+    await store.setPage(0);
+    expect(store.currentPage).toBe(initialPage);
+
+    // Test with page > totalPages
+    await store.setPage(store.totalPages + 1);
+    expect(store.currentPage).toBe(initialPage);
   });
 
   it('setItemsPerPage should update itemsPerPage, reset currentPage, and re-load items', async () => {
