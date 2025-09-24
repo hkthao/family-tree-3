@@ -2,9 +2,9 @@ import type { Family } from '@/types/family';
 import type { IFamilyService } from './family.service.interface';
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
-import type { Result } from '@/types/result';
+import type { Result } from '@/types/common';
 import axios from 'axios';
-import type { Paginated } from '@/types/pagination'; // Correct placement of import
+import type { Paginated } from '@/types/common'; // Correct placement of import
 
 // Base URL for your API - configure this based on your environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';

@@ -1,4 +1,4 @@
-import type { FamilyEvent } from '@/types/family-event';
+import type { FamilyEvent } from '@/types/family';
 import { faker } from '@faker-js/faker';
 
 export function generateMockFamilyEvent(index: number, familyId?: string): FamilyEvent {

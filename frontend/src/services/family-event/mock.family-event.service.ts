@@ -1,9 +1,9 @@
 import type { IFamilyEventService, EventFilter } from './family-event.service.interface';
-import type { FamilyEvent } from '@/types/family-event';
-import type { Paginated } from '@/types/pagination';
+import type { FamilyEvent } from '@/types/family';
+import type { Paginated } from '@/types/common';
 import { fixedMockFamilyEvents } from '@/data/mock/fixed.family-event.mock';
 import { simulateLatency } from '@/utils/mockUtils';
-import { Result, ok, err } from '@/types/result';
+import { Result, ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export class MockFamilyEventService implements IFamilyEventService {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
-import type { FamilyEvent } from '@/types/family-event';
-import type { Paginated } from '@/types/pagination';
+import type { FamilyEvent } from '@/types/family';
+import type { Paginated } from '@/types/common';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { EventFilter } from '@/services/family-event/family-event.service.interface';
 import type { ApiError } from '@/utils/api';

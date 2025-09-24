@@ -13,7 +13,7 @@
           <v-row>
             <v-col cols="12" md="4">
               <v-text-field
-                v-model="filters.name"
+                v-model="filters.searchQuery"
                 :label="t('event.search.name')"
                 clearable
                 prepend-inner-icon="mdi-magnify"
@@ -81,7 +81,7 @@ const { t } = useI18n();
 const expanded = ref(false); // Default to collapsed
 
 const filters = ref<EventFilter>({
-  name: '',
+  searchQuery: '',
   type: undefined,
   familyId: null, // familyId should be string or null, not undefined
   startDate: undefined,
@@ -108,7 +108,7 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filters.value = {
-    name: '',
+    searchQuery: '',
     type: undefined,
     familyId: null, // familyId should be string or null, not undefined
     startDate: undefined,

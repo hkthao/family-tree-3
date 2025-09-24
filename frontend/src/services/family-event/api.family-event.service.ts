@@ -1,10 +1,10 @@
 import type { IFamilyEventService } from './family-event.service.interface';
-import type { FamilyEvent } from '@/types/family-event';
-import type { Paginated } from '@/types/pagination';
+import type { FamilyEvent } from '@/types/family';
+import type { Paginated } from '@/types/common';
 import type { EventFilter } from './family-event.service.interface';
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
-import type { Result } from '@/types/result';
+import type { Result } from '@/types/common';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';

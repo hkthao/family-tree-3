@@ -1,7 +1,7 @@
-import type { FamilyEvent } from '@/types/family-event';
-import type { Paginated } from '@/types/pagination';
+import type { FamilyEvent } from '@/types/family';
+import type { Paginated } from '@/types/common';
 import type { ICrudService } from '../common/crud.service.interface';
-import type { Result } from '@/types/result';
+import type { Result } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export interface EventFilter {

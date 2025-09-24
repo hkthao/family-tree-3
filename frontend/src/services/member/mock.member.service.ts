@@ -1,9 +1,9 @@
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
-import type { Member } from '@/types/member';
-import type { Paginated } from '@/types/pagination';
+import type { Member } from '@/types/family';
+import type { Paginated } from '@/types/common';
 import { fixedMockMembers } from '@/data/mock/fixed.member.mock';
 import { simulateLatency } from '@/utils/mockUtils';
-import { Result, ok, err } from '@/types/result';
+import { Result, ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 // Helper function to transform date strings to Date objects
