@@ -70,6 +70,7 @@ export const useMemberStore = defineStore('member', {
           : await this.services.member.fetch(); // Renamed to fetch and added fullName
         this.currentPage = 1;
       } catch (e) {
+        this.items = [];
         this.error =
           e instanceof Error
             ? e.message

@@ -485,8 +485,6 @@ describe('Family Store', () => {
     mockFamilyService.shouldThrowError = true;
     const store = useFamilyStore();
     await store._loadItems(); // Initial load to populate items
-    const initialItems = [...store.items];
-
     await store.searchItems({ name: 'non-existent-query' });
     expect(store.error).toBe('Không thể tải danh sách gia đình.');
     expect(store.loading).toBe(false);
