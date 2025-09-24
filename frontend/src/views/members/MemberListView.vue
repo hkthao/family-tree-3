@@ -115,6 +115,7 @@ const handleListOptionsUpdate = (options: {
 }) => {
   memberStore.setPage(options.page);
   memberStore.setItemsPerPage(options.itemsPerPage);
+  loadMembers();
 };
 
 const confirmDelete = (member: Member) => {

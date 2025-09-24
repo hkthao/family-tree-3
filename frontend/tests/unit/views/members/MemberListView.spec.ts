@@ -1,12 +1,112 @@
-import { mount } from '@vue/test-utils';
-import { describe, it, expect, vi } from 'vitest';
+
+import { mount, VueWrapper } from '@vue/test-utils';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+} from 'vitest';
 import MemberListView from '@/views/members/MemberListView.vue';
 import { useMemberStore } from '@/stores/member.store';
-import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
 import { createRouter, createWebHistory } from 'vue-router';
+import type { Member } from '@/types/family';
+import type { MemberFilter } from '@/services/member/member.service.interface';
+import { createPinia, setActivePinia } from 'pinia';
+import { createServices } from '@/services/service.factory';
+import type { IMemberService } from '@/services/member/member.service.interface';
+import type { Paginated, Result } from '@/types/common';
+import { ok, err } from '@/types/common';
+import { simulateLatency } from '@/utils/mockUtils';
+import type { ApiError } from '@/utils/api';
+
+Object.defineProperty(window, 'visualViewport', {
+  value: {
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    width: 1024,
+    height: 768,
+    scale: 1,
+  },
+  writable: true,
+});
+
+
+class MockMemberServiceForTest implements IMemberService {
+  private _items: Member[] = [];
+
+  get items(): Member[] {
+    return [...this._items];
+  }
+
+  async fetch(): Promise<Result<Member[], ApiError>> {
+    return ok(await simulateLatency(this.items));
+  }
+  async fetchMembersByFamilyId(
+    familyId: string,
+  ): Promise<Result<Member[], ApiError>> {
+    const filteredItems = this.items.filter(
+      (member) => member.familyId === familyId,
+    );
+    return ok(await simulateLatency(filteredItems));
+  }
+  async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
+    const member = this.items.find((m) => m.id === id);
+    return ok(await simulateLatency(member));
+  }
+  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
+    const memberToAdd = { ...newItem, id: 'new-member-id' };
+    this._items.push(memberToAdd);
+    return ok(await simulateLatency(memberToAdd));
+  }
+  async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
+    const index = this._items.findIndex((m) => m.id === updatedItem.id);
+    if (index !== -1) {
+      this._items[index] = updatedItem;
+      return ok(await simulateLatency(updatedItem));
+    }
+    return err({ message: 'Member not found', statusCode: 404 });
+  }
+  async delete(id: string): Promise<Result<void, ApiError>> {
+    const initialLength = this._items.length;
+    this._items = this._items.filter((m) => m.id !== id);
+    if (this._items.length === initialLength) {
+      return err({ message: 'Member not found', statusCode: 404 });
+    }
+    return ok(await simulateLatency(undefined));
+  }
+  async searchMembers(
+    filters: MemberFilter,
+    page: number,
+    itemsPerPage: number,
+  ): Promise<Result<Paginated<Member>, ApiError>> {
+    let filteredItems = this._items;
+
+    if (filters.fullName) {
+      const lowerCaseFullName = filters.fullName.toLowerCase();
+      filteredItems = filteredItems.filter((m) =>
+        m.fullName?.toLowerCase().includes(lowerCaseFullName),
+      );
+    }
+
+    const totalItems = filteredItems.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const items = filteredItems.slice(start, end);
+
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
+  }
+}
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn(() => ({
@@ -15,31 +115,13 @@ global.ResizeObserver = vi.fn(() => ({
   disconnect: vi.fn(),
 }));
 
-// Mock the stores
-vi.mock('@/stores/member.store', () => ({
-  useMemberStore: vi.fn(() => ({
-    members: [],
-    filteredMembers: [],
-    loading: false,
-    fetchMembers: vi.fn(),
-    searchMembers: vi.fn(),
-    deleteMember: vi.fn(),
-    setPage: vi.fn(),
-    setItemsPerPage: vi.fn(),
-  })),
-}));
-
-vi.mock('@/stores/family.store', () => ({
-  useFamilyStore: vi.fn(() => ({
-    families: [],
-    searchFamilies: vi.fn(),
-  })),
-}));
+const mockedShowSnackbar = vi.fn();
 
 vi.mock('@/stores/notification.store', () => ({
   useNotificationStore: vi.fn(() => ({
     snackbar: { show: false, message: '', color: '' },
-    showSnackbar: vi.fn(),
+    showSnackbar: mockedShowSnackbar,
+    $reset: vi.fn(),
   })),
 }));
 
@@ -58,13 +140,89 @@ const router = createRouter({
   routes: [{ path: '/', component: { template: '' } }],
 });
 
+let memberStore: ReturnType<typeof useMemberStore>;
+let mockMemberService: MockMemberServiceForTest;
+let notificationStore: ReturnType<typeof useNotificationStore>;
+
 describe('MemberListView.vue', () => {
-  it('renders without errors', () => {
-    const wrapper = mount(MemberListView, {
-      global: {
-        plugins: [i18n, vuetify, router],
-      },
+  beforeEach(() => {
+    vi.clearAllMocks();
+    const pinia = createPinia();
+    setActivePinia(pinia);
+
+    mockMemberService = new MockMemberServiceForTest();
+    notificationStore = useNotificationStore();
+    memberStore = useMemberStore();
+    memberStore.services = createServices('test', {
+      member: mockMemberService,
     });
+
+    memberStore.$reset();
+    notificationStore.$reset();
+
+    vi.spyOn(memberStore, 'setPage');
+    vi.spyOn(memberStore, 'setItemsPerPage');
+    vi.spyOn(memberStore, 'searchItems');
+  });
+
+  it('renders without errors', () => {
+    const wrapper: VueWrapper<InstanceType<typeof MemberListView>> = mount(
+      MemberListView,
+      { global: { plugins: [i18n, vuetify, router] } },
+    );
     expect(wrapper.exists()).toBe(true);
+  });
+
+  it('navigates to create view on create button click', async () => {
+    const routerPushSpy = vi.spyOn(router, 'push');
+    const wrapper = mount(MemberListView, {
+      global: { plugins: [i18n, vuetify, router] },
+    });
+    await (wrapper.vm as any).navigateToCreateView();
+    expect(routerPushSpy).toHaveBeenCalledWith('/members/add');
+  });
+
+  it('navigates to edit member page on edit button click', async () => {
+    const routerPushSpy = vi.spyOn(router, 'push');
+    const wrapper = mount(MemberListView, {
+      global: { plugins: [i18n, vuetify, router] },
+    });
+    const member = { id: '1', fullName: 'John Doe' } as Member;
+    await (wrapper.vm as any).navigateToEditMember(member);
+    expect(routerPushSpy).toHaveBeenCalledWith('/members/edit/1');
+  });
+
+  it('opens and closes the view dialog', async () => {
+    const wrapper = mount(MemberListView, {
+      global: { plugins: [i18n, vuetify, router] },
+    });
+    const member = { id: '1', fullName: 'John Doe' } as Member;
+    await (wrapper.vm as any).openViewDialog(member);
+    expect((wrapper.vm as any).viewDialog).toBe(true);
+    expect((wrapper.vm as any).selectedMemberForView).toEqual(member);
+
+    await (wrapper.vm as any).closeViewDialog();
+    expect((wrapper.vm as any).viewDialog).toBe(false);
+    expect((wrapper.vm as any).selectedMemberForView).toBeNull();
+  });
+
+  it('handles filter update', async () => {
+    const wrapper = mount(MemberListView, {
+      global: { plugins: [i18n, vuetify, router] },
+    });
+    const filters = { fullName: 'John' };
+    await (wrapper.vm as any).handleFilterUpdate(filters);
+    expect(memberStore.searchItems).toHaveBeenCalledWith(filters);
+  });
+
+  it('handles list options update', async () => {
+    const wrapper = mount(MemberListView, {
+      global: { plugins: [i18n, vuetify, router] },
+    });
+    const newOptions = { page: 2, itemsPerPage: 25 };
+    await (wrapper.vm as any).handleListOptionsUpdate(newOptions);
+    expect(memberStore.setPage).toHaveBeenCalledWith(2);
+    expect(memberStore.setItemsPerPage).toHaveBeenCalledWith(25);
+    expect(memberStore.searchItems).toHaveBeenCalled();
   });
 });

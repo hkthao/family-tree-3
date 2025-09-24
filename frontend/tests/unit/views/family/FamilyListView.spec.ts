@@ -85,7 +85,9 @@ class MockFamilyServiceForTest implements IFamilyService {
     }
 
     if (filter.visibility && filter.visibility !== 'all') {
-      filtered = filtered.filter((family) => family.visibility === filter.visibility);
+      filtered = filtered.filter(
+        (family) => family.visibility === filter.visibility,
+      );
     }
 
     const totalItems = filtered.length;
@@ -94,11 +96,13 @@ class MockFamilyServiceForTest implements IFamilyService {
     const end = start + itemsPerPage;
     const items = filtered.slice(start, end);
 
-    return ok(await simulateLatency({
-      items,
-      totalItems,
-      totalPages,
-    }));
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
   }
 }
 
@@ -112,8 +116,12 @@ class MockMemberServiceForTest implements IMemberService {
   async fetch(): Promise<Result<Member[], ApiError>> {
     return ok(await simulateLatency(this.items));
   }
-  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
-    const filteredItems = this.items.filter(member => member.familyId === familyId);
+  async fetchMembersByFamilyId(
+    familyId: string,
+  ): Promise<Result<Member[], ApiError>> {
+    const filteredItems = this.items.filter(
+      (member) => member.familyId === familyId,
+    );
     return ok(await simulateLatency(filteredItems));
   }
   async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
@@ -151,7 +159,9 @@ class MockMemberServiceForTest implements IMemberService {
     // Simplified search for testing
     if (filters.fullName) {
       const lowerCaseFullName = filters.fullName.toLowerCase();
-      filteredItems = filteredItems.filter(m => m.fullName?.toLowerCase().includes(lowerCaseFullName));
+      filteredItems = filteredItems.filter((m) =>
+        m.fullName?.toLowerCase().includes(lowerCaseFullName),
+      );
     }
 
     const totalItems = filteredItems.length;
@@ -160,16 +170,24 @@ class MockMemberServiceForTest implements IMemberService {
     const end = start + itemsPerPage;
     const items = filteredItems.slice(start, end);
 
-    return ok(await simulateLatency({
-      items,
-      totalItems,
-      totalPages,
-    }));
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
   }
 }
 
-import type { IFamilyEventService, EventFilter } from '@/services/family-event/family-event.service.interface';
-import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/family-event.mock';
+import type {
+  IFamilyEventService,
+  EventFilter,
+} from '@/services/family-event/family-event.service.interface';
+import {
+  generateMockFamilyEvents,
+  generateMockFamilyEvent,
+} from '@/data/mock/family-event.mock';
 
 export class MockFamilyEventServiceForTest implements IFamilyEventService {
   private _events: FamilyEvent[];
@@ -189,12 +207,16 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
     return ok(await simulateLatency(this.events));
   }
 
-  async getById(id: string): Promise<Result<FamilyEvent | undefined, ApiError>> {
+  async getById(
+    id: string,
+  ): Promise<Result<FamilyEvent | undefined, ApiError>> {
     const event = this.events.find((e) => e.id === id);
     return ok(await simulateLatency(event));
   }
 
-  async add(newEvent: Omit<FamilyEvent, 'id'>): Promise<Result<FamilyEvent, ApiError>> {
+  async add(
+    newEvent: Omit<FamilyEvent, 'id'>,
+  ): Promise<Result<FamilyEvent, ApiError>> {
     const eventToAdd: FamilyEvent = {
       ...newEvent,
       id: generateMockFamilyEvent(this._events.length + 1).id,
@@ -203,7 +225,9 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
     return ok(await simulateLatency(eventToAdd));
   }
 
-  async update(updatedEvent: FamilyEvent): Promise<Result<FamilyEvent, ApiError>> {
+  async update(
+    updatedEvent: FamilyEvent,
+  ): Promise<Result<FamilyEvent, ApiError>> {
     const index = this._events.findIndex((e) => e.id === updatedEvent.id);
     if (index !== -1) {
       this._events[index] = updatedEvent;
@@ -224,7 +248,7 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
   async searchItems(
     filters: EventFilter,
     page?: number,
-    itemsPerPage?: number
+    itemsPerPage?: number,
   ): Promise<Result<Paginated<FamilyEvent>, ApiError>> {
     let filteredEvents = this._events;
 
@@ -233,29 +257,44 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
       filteredEvents = filteredEvents.filter(
         (event) =>
           event.name.toLowerCase().includes(lowerCaseSearchQuery) ||
-          (event.description && event.description.toLowerCase().includes(lowerCaseSearchQuery))
+          (event.description &&
+            event.description.toLowerCase().includes(lowerCaseSearchQuery)),
       );
     }
 
     if (filters.type) {
-      filteredEvents = filteredEvents.filter((event) => event.type === filters.type);
+      filteredEvents = filteredEvents.filter(
+        (event) => event.type === filters.type,
+      );
     }
 
     if (filters.familyId) {
-      filteredEvents = filteredEvents.filter((event) => event.familyId === filters.familyId);
+      filteredEvents = filteredEvents.filter(
+        (event) => event.familyId === filters.familyId,
+      );
     }
 
     if (filters.startDate) {
-      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) >= filters.startDate!);
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.startDate && new Date(event.startDate) >= filters.startDate!,
+      );
     }
 
     if (filters.endDate) {
-      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) <= filters.endDate!); // Use event.startDate
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.startDate && new Date(event.startDate) <= filters.endDate!,
+      ); // Use event.startDate
     }
 
     if (filters.location) {
       const lowerCaseLocation = filters.location.toLowerCase();
-      filteredEvents = filteredEvents.filter((event) => event.location && event.location.toLowerCase().includes(lowerCaseLocation));
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.location &&
+          event.location.toLowerCase().includes(lowerCaseLocation),
+      );
     }
 
     const totalItems = filteredEvents.length;
@@ -266,56 +305,93 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
     const end = start + currentItemsPerPage;
     const items = filteredEvents.slice(start, end);
 
-    return ok(await simulateLatency({
-      items,
-      totalItems,
-      totalPages,
-    }));
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
   }
 }
 
 // Mock the stores
 
+let familyStore: ReturnType<typeof useFamilyStore>;
+let memberStore: ReturnType<typeof useMemberStore>;
+let familyEventStore: ReturnType<typeof useFamilyEventStore>;
+let notificationStore: ReturnType<typeof useNotificationStore>;
+let mockFamilyService: MockFamilyServiceForTest;
+let mockMemberService: MockMemberServiceForTest;
+let mockFamilyEventService: MockFamilyEventServiceForTest;
 
-  let familyStore: ReturnType<typeof useFamilyStore>;
-  let memberStore: ReturnType<typeof useMemberStore>;
-  let familyEventStore: ReturnType<typeof useFamilyEventStore>;
-  let notificationStore: ReturnType<typeof useNotificationStore>;
-  let mockFamilyService: MockFamilyServiceForTest;
-  let mockMemberService: MockMemberServiceForTest;
-  let mockFamilyEventService: MockFamilyEventServiceForTest;
+beforeEach(async () => {
+  const pinia = createPinia();
+  setActivePinia(pinia);
 
-  beforeEach(async () => {
-    const pinia = createPinia();
-    setActivePinia(pinia);
+  mockFamilyService = new MockFamilyServiceForTest();
+  mockMemberService = new MockMemberServiceForTest();
+  mockFamilyEventService = new MockFamilyEventServiceForTest();
 
-    mockFamilyService = new MockFamilyServiceForTest();
-    mockMemberService = new MockMemberServiceForTest();
-    mockFamilyEventService = new MockFamilyEventServiceForTest();
+  familyStore = useFamilyStore();
+  memberStore = useMemberStore();
+  familyEventStore = useFamilyEventStore();
+  notificationStore = useNotificationStore();
 
-    familyStore = useFamilyStore();
-    memberStore = useMemberStore();
-    familyEventStore = useFamilyEventStore();
-    notificationStore = useNotificationStore();
+  familyStore.$reset();
+  memberStore.$reset();
+  notificationStore.$reset();
 
-    familyStore.$reset();
-    memberStore.$reset();
-    notificationStore.$reset();
-
-    familyStore.services = createServices('test', { family: mockFamilyService });
-    memberStore.services = createServices('test', { member: mockMemberService });
-    familyEventStore.services = createServices('test', { familyEvent: mockFamilyEventService });
-
-    vi.spyOn(familyStore, 'searchItems');
-
-    await familyStore._loadItems();
+  familyStore.services = createServices('test', { family: mockFamilyService });
+  memberStore.services = createServices('test', { member: mockMemberService });
+  familyEventStore.services = createServices('test', {
+    familyEvent: mockFamilyEventService,
   });
+
+  vi.spyOn(familyStore, 'searchItems');
+  vi.spyOn(notificationStore, 'showSnackbar');
+  global.visualViewport = { width: 1024, height: 768 } as any; // Mock visualViewport
+});
 
 const i18n = createI18n({
   legacy: false,
   locale: 'en',
   messages: {
-    en: {},
+    en: {
+      confirmDelete: {
+        title: '',
+        message: '',
+      },
+      family: {
+        management: {
+          title: '',
+          searchLabel: '',
+          visibility: {
+            all: '',
+            private: '',
+            public: '',
+          },
+          filterLabel: '',
+          headers: {
+            avatar: '',
+            name: '',
+            totalMembers: '',
+            visibility: '',
+            actions: '',
+          },
+          messages: {
+            deleteSuccess: 'Family deleted successfully',
+            deleteError: 'Failed to delete family',
+          },
+        },
+      },
+      member: {
+        search: {
+          apply: '',
+          reset: '',
+        },
+      },
+    },
   },
 });
 
@@ -355,5 +431,232 @@ describe('FamilyListView.vue', () => {
     // Check if the items are rendered in the component
     const familyList = wrapper.findComponent({ name: 'FamilyList' });
     expect(familyList.props('items')).toEqual(mockFamilyService.items);
+  });
+
+  it('navigates to add family page', async () => {
+    const routerPushSpy = vi.spyOn(router, 'push');
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    (wrapper.vm as any).navigateToAddFamily();
+    expect(routerPushSpy).toHaveBeenCalledWith('/family/add');
+  });
+
+  it('navigates to edit family page', async () => {
+    const routerPushSpy = vi.spyOn(router, 'push');
+    const family = mockFamilyService.items[0];
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    (wrapper.vm as any).navigateToEditFamily(family);
+    expect(routerPushSpy).toHaveBeenCalledWith(`/family/edit/${family.id}`);
+  });
+
+  it('navigates to view family detail', async () => {
+    const family = mockFamilyService.items[0];
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    (wrapper.vm as any).navigateToViewFamily(family);
+    expect((wrapper.vm as any).selectedFamily).toEqual({ ...family });
+    expect((wrapper.vm as any).detailDialog).toBe(true);
+  });
+
+  it('closes family detail dialog', async () => {
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    (wrapper.vm as any).navigateToViewFamily(mockFamilyService.items[0]); // Open dialog first
+    expect((wrapper.vm as any).detailDialog).toBe(true);
+    (wrapper.vm as any).closeDetail();
+    expect((wrapper.vm as any).detailDialog).toBe(false);
+    expect((wrapper.vm as any).selectedFamily).toBeUndefined();
+  });
+
+  it('handles filter update and reloads families', async () => {
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    const newFilters: FamilySearchFilter = {
+      searchQuery: 'test',
+      visibility: 'public',
+    };
+    (wrapper.vm as any).handleFilterUpdate(newFilters);
+    expect((wrapper.vm as any).currentFilters).toEqual(newFilters);
+    expect((wrapper.vm as any).currentPage).toBe(1);
+    expect(familyStore.searchItems).toHaveBeenCalledTimes(4); // Initial load + after filter update + watcher trigger
+  });
+
+  it('handles list options update', async () => {
+    const familySetPageSpy = vi.spyOn(familyStore, 'setPage');
+    const familySetItemsPerPageSpy = vi.spyOn(familyStore, 'setItemsPerPage');
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    const newOptions = { page: 2, itemsPerPage: 25 };
+    (wrapper.vm as any).handleListOptionsUpdate(newOptions);
+    expect(familySetPageSpy).toHaveBeenCalledWith(2);
+    expect(familySetItemsPerPageSpy).toHaveBeenCalledWith(25);
+  });
+
+  it('loads all members on mount', async () => {
+    const memberStoreFetchItemsSpy = vi.spyOn(memberStore, 'fetchItems');
+    mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    expect(memberStoreFetchItemsSpy).toHaveBeenCalled();
+  });
+
+  it('computes family member counts correctly', async () => {
+    // Mock memberStore.items to have some members
+    memberStore.items = [
+      { id: 'f1', familyId: 'f1', fullName: 'Member 1' } as Member,
+      { id: 'f2', familyId: 'f1', fullName: 'Member 2' } as Member,
+      { id: 'f3', familyId: 'f2', fullName: 'Member 3' } as Member,
+    ];
+
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+
+    const familyMemberCounts = (wrapper.vm as any).familyMemberCounts;
+    expect(familyMemberCounts).toEqual({
+      f1: 2,
+      f2: 1,
+    });
+  });
+
+  it('reloads families when currentPage changes', async () => {
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+    expect(familyStore.searchItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
+  });
+
+  describe('Delete Family', () => {
+    beforeEach(() => {
+      vi.spyOn(notificationStore, 'showSnackbar');
+      vi.spyOn(familyStore, 'deleteItem');
+    });
+
+    it('confirms and deletes a family successfully', async () => {
+      const family = mockFamilyService.items[0];
+      vi.spyOn(familyStore, 'deleteItem').mockImplementation(
+        async (id: string): Promise<void> => {
+          return Promise.resolve();
+        },
+      ); // Mock successful deletion
+
+      const wrapper = mount(FamilyListView, {
+        global: {
+          plugins: [i18n, vuetify, router],
+        },
+      });
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(family);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+      expect((wrapper.vm as any).familyToDelete).toEqual(family);
+
+      // Simulate confirming the delete dialog
+      await (wrapper.vm as any).handleDeleteConfirm();
+
+      expect(familyStore.deleteItem).toHaveBeenCalledWith(family.id);
+      expect(notificationStore.showSnackbar).toHaveBeenCalledWith(
+        'Family deleted successfully',
+        'success',
+      );
+      expect(familyStore.searchItems).toHaveBeenCalledTimes(3); // Initial load + reload after delete + watcher trigger
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+      expect((wrapper.vm as any).familyToDelete).toBeUndefined();
+    });
+
+    it('handles error during family deletion', async () => {
+      const family = mockFamilyService.items[0];
+      vi.spyOn(familyStore, 'deleteItem').mockImplementation(
+        async (id: string): Promise<void> => {
+          return Promise.reject(new Error('Delete failed')); // Simulate an actual error being thrown
+        },
+      );
+
+      const wrapper = mount(FamilyListView, {
+        global: {
+          plugins: [i18n, vuetify, router],
+        },
+      });
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(family);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+      expect((wrapper.vm as any).familyToDelete).toEqual(family);
+
+      // Simulate confirming the delete dialog
+      await (wrapper.vm as any).handleDeleteConfirm();
+
+      expect(familyStore.deleteItem).toHaveBeenCalledWith(family.id);
+      expect(notificationStore.showSnackbar).toHaveBeenCalledWith(
+        'Failed to delete family',
+        'error',
+      );
+      expect(familyStore.searchItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+      expect((wrapper.vm as any).familyToDelete).toBeUndefined();
+    });
+
+    it('cancels family deletion', async () => {
+      const family = mockFamilyService.items[0];
+
+      const wrapper = mount(FamilyListView, {
+        global: {
+          plugins: [i18n, vuetify, router],
+        },
+      });
+
+      await flushPromises();
+
+      // Simulate confirming delete
+      (wrapper.vm as any).confirmDelete(family);
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+      expect((wrapper.vm as any).familyToDelete).toEqual(family);
+
+      // Simulate canceling the delete dialog
+      (wrapper.vm as any).handleDeleteCancel();
+
+      expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+      expect((wrapper.vm as any).familyToDelete).toBeUndefined();
+      expect(familyStore.deleteItem).not.toHaveBeenCalled();
+      expect(notificationStore.showSnackbar).not.toHaveBeenCalled();
+    });
   });
 });

@@ -6,6 +6,7 @@ export default mergeConfig(
   viteConfig,
   defineConfig({
     test: {
+      setupFiles: ['./tests/setup.ts'],
       environment: 'jsdom',
       exclude: [...configDefaults.exclude, 'e2e/**'],
       root: fileURLToPath(new URL('./', import.meta.url)),
@@ -20,7 +21,7 @@ export default mergeConfig(
           functions: 0,
           lines: 0
         },
-        include: ['src/stores/**/*.ts']
+        include: ['src/stores/**/*.ts', 'src/views/family/FamilyListView.vue', 'src/views/members/MemberListView.vue']
       },
       server: {
         deps: {
