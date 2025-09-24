@@ -11,6 +11,7 @@ import type { Paginated } from '@/types/pagination';
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
   private _members: Member[] = generateMockMembers(20); // Use a private variable
+  public shouldThrowError: boolean = false;
 
   // Getter to return a copy of the members array
   get members(): Member[] {
@@ -18,6 +19,9 @@ class MockMemberServiceForTest implements IMemberService {
   }
 
   async fetch(): Promise<Member[]> { // Renamed from fetchItems
+    if (this.shouldThrowError) {
+      throw new Error('Không thể tải danh sách thành viên.');
+    }
     return simulateLatency(this.members);
   }
 
@@ -208,6 +212,35 @@ describe('Member Store', () => {
     expect(store.loading).toBe(false);
   });
 
+  it('addItem should set error for placeOfBirth and placeOfDeath being the same', async () => {
+    const store = useMemberStore();
+    const newMemberData: Omit<Member, 'id'> = {
+      lastName: 'Test',
+      firstName: 'Member',
+      fullName: 'Test Member',
+      familyId: mockMemberService.members[0].familyId,
+      placeOfBirth: 'Same Place',
+      placeOfDeath: 'Same Place',
+    };
+    await store.addItem(newMemberData);
+    expect(store.error).toBe('Nơi sinh và nơi mất không thể giống nhau.');
+    expect(store.loading).toBe(false);
+  });
+
+  it('addItem should set error for occupation length greater than 100', async () => {
+    const store = useMemberStore();
+    const newMemberData: Omit<Member, 'id'> = {
+      lastName: 'Test',
+      firstName: 'Member',
+      fullName: 'Test Member',
+      familyId: mockMemberService.members[0].familyId,
+      occupation: 'a'.repeat(101),
+    };
+    await store.addItem(newMemberData);
+    expect(store.error).toBe('Nghề nghiệp không được vượt quá 100 ký tự.');
+    expect(store.loading).toBe(false);
+  });
+
   it('updateItem should update an existing member', async () => {
     const store = useMemberStore();
     await store._loadItems();
@@ -251,6 +284,41 @@ describe('Member Store', () => {
       };
       await store.updateItem(updatedMember); // Call the action
       expect(store.error).toBe('Ngày sinh không thể sau ngày mất.');
+      expect(store.loading).toBe(false);
+    } else {
+      expect.fail('No member to update.');
+    }
+  });
+
+  it('updateItem should set error for placeOfBirth and placeOfDeath being the same', async () => {
+    const store = useMemberStore();
+    await store._loadItems();
+    const memberToUpdate = store.items[0];
+    if (memberToUpdate) {
+      const updatedMember: Member = {
+        ...memberToUpdate,
+        placeOfBirth: 'Same Place',
+        placeOfDeath: 'Same Place',
+      };
+      await store.updateItem(updatedMember);
+      expect(store.error).toBe('Nơi sinh và nơi mất không thể giống nhau.');
+      expect(store.loading).toBe(false);
+    } else {
+      expect.fail('No member to update.');
+    }
+  });
+
+  it('updateItem should set error for occupation length greater than 100', async () => {
+    const store = useMemberStore();
+    await store._loadItems();
+    const memberToUpdate = store.items[0];
+    if (memberToUpdate) {
+      const updatedMember: Member = {
+        ...memberToUpdate,
+        occupation: 'a'.repeat(101),
+      };
+      await store.updateItem(updatedMember);
+      expect(store.error).toBe('Nghề nghiệp không được vượt quá 100 ký tự.');
       expect(store.loading).toBe(false);
     } else {
       expect.fail('No member to update.');
@@ -367,5 +435,14 @@ describe('Member Store', () => {
 
     store.setCurrentItem(null);
     expect(store.currentItem).toBeNull();
+  });
+
+  it('fetchItems should set error and loading to false on fetch failure', async () => {
+    const store = useMemberStore();
+    mockMemberService.shouldThrowError = true;
+    await store.fetchItems();
+    expect(store.error).toBe('Không thể tải danh sách thành viên.');
+    expect(store.loading).toBe(false);
+    expect(store.items).toEqual([]);
   });
 });

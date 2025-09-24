@@ -19,7 +19,8 @@ export default mergeConfig(
           branches: 0,
           functions: 0,
           lines: 0
-        }
+        },
+        include: ['src/stores/**/*.ts']
       },
       server: {
         deps: {
