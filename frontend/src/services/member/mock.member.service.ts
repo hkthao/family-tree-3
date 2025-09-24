@@ -1,4 +1,5 @@
 import type { Member } from '@/types/member';
+import type { Paginated } from '@/types/pagination';
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock'; // Import generateMockMember for ID generation
 
@@ -95,7 +96,7 @@ export class MockMemberService implements IMemberService {
     }
     if (filters.placeOfDeath) {
       const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
-      filteredMembers = filteredMembers.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfBirth));
+      filteredMembers = filteredMembers.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath));
     }
     if (filters.occupation) {
       const lowerCaseOccupation = filters.occupation.toLowerCase();

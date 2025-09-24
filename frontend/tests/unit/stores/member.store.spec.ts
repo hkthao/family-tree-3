@@ -6,6 +6,7 @@ import type { IMemberService, MemberFilter } from '@/services/member/member.serv
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 import { createServices } from '@/services/service.factory';
+import type { Paginated } from '@/types/pagination';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
@@ -157,7 +158,7 @@ describe('Member Store', () => {
 
   it('getItemById should return the correct member', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const member = store.getItemById(mockMemberService.members[0].id);
     expect(member).toBeDefined();
     expect(member?.lastName).toBe(mockMemberService.members[0].lastName);
@@ -165,7 +166,7 @@ describe('Member Store', () => {
 
   it('addItem should add a new member and update members array', async () => {
     const store = useMemberStore();
-    await store.fetchItems(); // This will now call _loadItems
+    await store._loadItems(); // This will now call _loadItems
     const initialTotalItems = store.totalItems; // Use totalItems
     const newMemberData: Omit<Member, 'id'> = {
       lastName: 'New',
@@ -209,13 +210,13 @@ describe('Member Store', () => {
 
   it('updateItem should update an existing member', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const memberToUpdate = store.items[0];
     if (memberToUpdate) {
       const updatedLastName = 'Updated';
       const updatedMember: Member = { ...memberToUpdate, lastName: updatedLastName };
       await store.updateItem(updatedMember);
-      await store.fetchItems(); // Force re-fetch after update
+      await store._loadItems(); // Force re-fetch after update
       const foundMember = store.getItemById(memberToUpdate.id);
       expect(foundMember?.lastName).toBe(updatedLastName);
       expect(store.loading).toBe(false);
@@ -226,7 +227,7 @@ describe('Member Store', () => {
 
   it('updateItem should set error for empty full name', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const memberToUpdate = store.items[0];
     if (memberToUpdate) {
       const updatedMember: Member = { ...memberToUpdate, lastName: '' };
@@ -240,7 +241,7 @@ describe('Member Store', () => {
 
   it('updateItem should set error for dateOfBirth after dateOfDeath', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const memberToUpdate = store.items[0];
     if (memberToUpdate) {
       const updatedMember: Member = {
@@ -258,7 +259,7 @@ describe('Member Store', () => {
 
   it('deleteMember should remove a member', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const initialTotalItems = store.totalItems; // Use totalItems
     const memberToDeleteId = store.items[0]?.id;
     if (memberToDeleteId) {
@@ -273,7 +274,7 @@ describe('Member Store', () => {
 
   it('searchItems should filter members by fullName', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const existingMember = mockMemberService.members[0];
     const searchName = existingMember.lastName.substring(0, 3); // Search by part of last name
 
@@ -291,7 +292,7 @@ describe('Member Store', () => {
 
   it('searchItems should filter members by dateOfBirth', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const existingMember = mockMemberService.members.find(m => m.dateOfBirth !== undefined);
     if (!existingMember || !existingMember.dateOfBirth) {
       expect.fail('No member with dateOfBirth found in mock data.');
@@ -310,7 +311,7 @@ describe('Member Store', () => {
 
   it('searchItems should filter members by gender', async () => {
     const store = useMemberStore();
-    await store.fetchItems();
+    await store._loadItems();
     const searchGender = 'male';
 
     await store.searchItems({ gender: searchGender });
@@ -323,7 +324,7 @@ describe('Member Store', () => {
 
   it('setPage should update currentPage and affect paginatedItems', async () => {
     const store = useMemberStore();
-    await store.fetchItems(); // 20 members, 10 per page, 2 pages
+    await store._loadItems(); // 20 members, 10 per page, 2 pages
 
     store.setPage(2);
     expect(store.currentPage).toBe(2);
@@ -340,22 +341,22 @@ describe('Member Store', () => {
 
   it('setItemsPerPage should update itemsPerPage, reset currentPage, and affect paginatedItems', async () => {
     const store = useMemberStore();
-    await store.fetchItems(); // 20 members, 10 per page, 2 pages
+    await store._loadItems(); // 20 members, 10 per page, 2 pages
 
     expect(store.itemsPerPage).toBe(10);
     expect(store.totalPages).toBe(2);
 
     // Change to 5 items per page
-    store.setItemsPerPage(5); // 20 members, 5 per page -> 4 pages
+    await store.setItemsPerPage(5); // 20 members, 5 per page -> 4 pages
     expect(store.itemsPerPage).toBe(5);
     expect(store.totalPages).toBe(4);
     expect(store.currentPage).toBe(1);
 
     // Change to 20 items per page, current page is 1
-    store.setItemsPerPage(20); // 20 members, 20 per page -> 1 page
+    await store.setItemsPerPage(20); // 20 members, 20 per page -> 1 page
+    expect(store.currentPage).toBe(1);
     expect(store.itemsPerPage).toBe(20);
     expect(store.totalPages).toBe(1);
-    expect(store.currentPage).toBe(1);
   });
 
   it('setCurrentItem should set the current item', () => {

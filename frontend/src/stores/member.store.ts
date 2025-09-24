@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type { Member } from '@/types/member';
 import type { MemberFilter } from '@/services/member';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import type { Paginated } from '@/types/pagination';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -21,77 +22,13 @@ export const useMemberStore = defineStore('member', {
     } as MemberFilter,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
+    totalItems: 0,
+    totalPages: 1,
   }),
 
   getters: {
-    /** Lọc dữ liệu dựa trên filters */
-    filteredItems: (state): Member[] => {
-      const f = state.filters;
-      return state.items
-        ? state.items.filter((m: Member) => {
-            if (f.fullName) {
-              const lowerCaseFullName = f.fullName.toLowerCase();
-              if (
-                !(
-                  m.fullName &&
-                  m.fullName.toLowerCase().includes(lowerCaseFullName)
-                )
-              ) {
-                return false;
-              }
-            }
-            // Compare Date objects
-            if (
-              f.dateOfBirth &&
-              m.dateOfBirth &&
-              m.dateOfBirth.toISOString().split('T')[0] !==
-                f.dateOfBirth.toISOString().split('T')[0]
-            )
-              return false;
-            if (
-              f.dateOfDeath &&
-              m.dateOfDeath &&
-              m.dateOfDeath.toISOString().split('T')[0] !==
-                f.dateOfDeath.toISOString().split('T')[0]
-            )
-              return false;
-            if (f.gender && m.gender !== f.gender) return false;
-            if (
-              f.placeOfBirth &&
-              !m.placeOfBirth
-                ?.toLowerCase()
-                .includes(f.placeOfBirth.toLowerCase())
-            )
-              return false;
-            if (
-              f.placeOfDeath &&
-              !m.placeOfDeath
-                ?.toLowerCase()
-                .includes(f.placeOfDeath.toLowerCase())
-            )
-              return false;
-            if (
-              f.occupation &&
-              !m.occupation?.toLowerCase().includes(f.occupation.toLowerCase())
-            )
-              return false;
-            if (f.familyId && m.familyId !== f.familyId) return false;
-            return true;
-          })
-        : [];
-    },
-
-    /** Phân trang dựa trên filteredItems */
     paginatedItems: (state): Member[] => {
-      const start = (state.currentPage - 1) * state.itemsPerPage;
-      const end = start + state.itemsPerPage;
-      return (useMemberStore().filteredItems as Member[]).slice(start, end);
-    },
-
-    /** Tổng số trang (không cần lưu state) */
-    totalPages: (state): number => {
-      const total = (useMemberStore().filteredItems as Member[]).length;
-      return Math.ceil(total / state.itemsPerPage);
+      return state.items;
     },
 
     /** Lấy 1 member theo id */
@@ -101,6 +38,29 @@ export const useMemberStore = defineStore('member', {
   },
 
   actions: {
+    async _loadItems() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response: Paginated<Member> =
+          await this.services.member.searchMembers(
+            this.filters,
+            this.currentPage,
+            this.itemsPerPage,
+          );
+        this.items = response.items;
+        this.totalItems = response.totalItems;
+        this.totalPages = response.totalPages;
+      } catch (e) {
+        this.error = 'Không thể tải danh sách thành viên.';
+        this.items = [];
+        this.totalItems = 0;
+        this.totalPages = 1;
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
+    },
     async fetchItems(familyId?: string) {
       this.loading = true;
       this.error = null;
@@ -158,6 +118,7 @@ export const useMemberStore = defineStore('member', {
 
         const added = await this.services.member.add(newItem); // Renamed to add
         this.items.push(added);
+        await this._loadItems();
       } catch (e) {
         this.error =
           e instanceof Error ? e.message : 'Không thể thêm thành viên.';
@@ -219,10 +180,7 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       try {
         await this.services.member.delete(id); // Renamed to delete
-        this.items = this.items.filter((m) => m.id !== id);
-        if (this.currentPage > this.totalPages && this.totalPages > 0) {
-          this.currentPage = this.totalPages;
-        }
+        await this._loadItems();
       } catch (e) {
         this.error =
           e instanceof Error ? e.message : 'Failed to delete member.';
@@ -232,7 +190,7 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    searchItems(filters: MemberFilter) {
+    async searchItems(filters: MemberFilter) {
       const newFilters: MemberFilter = { ...filters };
       if (typeof newFilters.dateOfBirth === 'string') {
         newFilters.dateOfBirth = new Date(newFilters.dateOfBirth);
@@ -242,22 +200,21 @@ export const useMemberStore = defineStore('member', {
       }
       this.filters = { ...this.filters, ...newFilters };
       this.currentPage = 1;
+      await this._loadItems();
     },
 
-    setPage(page: number) {
+    async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
+        await this._loadItems();
       }
     },
 
-    setItemsPerPage(count: number) {
+    async setItemsPerPage(count: number) {
       if (count > 0) {
         this.itemsPerPage = count;
-        if (this.currentPage > this.totalPages && this.totalPages > 0) {
-          this.currentPage = this.totalPages;
-        } else if (this.totalPages === 0) {
-          this.currentPage = 1;
-        }
+        this.currentPage = 1;
+        await this._loadItems();
       }
     },
 
