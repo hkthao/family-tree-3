@@ -48,10 +48,12 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
+import { useFamilyEventStore } from '@/stores/family-event.store';
+import type { EventFilter } from '@/services/family-event/family-event.service.interface';
 const familyStore = useFamilyStore();
 import { useMemberStore } from '@/stores/member.store';
 import type { Family } from '@/types/family';
-import type { FamilyFilter } from '@/services/family/family.service.interface';
+import type { FamilySearchFilter } from '@/types/family';
 
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
@@ -67,7 +69,7 @@ const { items } = storeToRefs(familyStore);
 const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
-const currentFilters = ref<FamilyFilter>({});
+const currentFilters = ref<FamilySearchFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
@@ -87,9 +89,11 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await familyEventStore.searchItems(
-    currentFilters.value.name || '',
-    currentFilters.value.familyId || undefined,
+  await useFamilyEventStore().searchItems(
+    {
+      searchQuery: currentFilters.value.name || '',
+      familyId: currentFilters.value.familyId || undefined,
+    } as EventFilter
   );
 };
 
@@ -97,7 +101,7 @@ const loadAllMembers = async () => {
   await membersStore.fetchItems(); // Fetch all members
 };
 
-const handleFilterUpdate = (filters: FamilyFilter) => {
+const handleFilterUpdate = (filters: FamilySearchFilter) => {
   currentFilters.value = filters;
   currentPage.value = 1; // Reset to first page on filter change
   loadFamilies();

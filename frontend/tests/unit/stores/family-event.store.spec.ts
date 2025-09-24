@@ -1,9 +1,11 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { FamilyEvent } from '@/types/family-event';
+import type { FamilyEvent } from '@/types/family';
 import { useFamilyEventStore } from '@/stores/family-event.store';
 import { createServices } from '@/services/service.factory';
-import type { Paginated } from '@/types/pagination';
+import type { Paginated, Result } from '@/types/common';
+import { ok, err } from '@/types/common';
+import type { ApiError } from '@/utils/api';
 import type { IFamilyEventService, EventFilter } from '@/services/family-event/family-event.service.interface';
 import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/family-event.mock';
 import { simulateLatency } from '@/utils/mockUtils';
@@ -15,88 +17,46 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
     return [...this._events];
   }
 
-  async fetch(): Promise<FamilyEvent[]> {
-    return simulateLatency(this.events);
+  async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
+    return ok([]);
   }
 
-  async getById(id: string): Promise<FamilyEvent | undefined> {
+  async getById(id: string): Promise<Result<FamilyEvent | undefined, ApiError>> {
     const event = this.events.find((e) => e.id === id);
-    return simulateLatency(event);
+    return ok(await simulateLatency(event));
   }
 
-  async add(newEvent: Omit<FamilyEvent, 'id'>): Promise<FamilyEvent> {
+  async add(newEvent: Omit<FamilyEvent, 'id'>): Promise<Result<FamilyEvent, ApiError>> {
     const eventToAdd: FamilyEvent = {
       ...newEvent,
       id: generateMockFamilyEvent(this._events.length + 1).id,
     };
     this._events.push(eventToAdd);
-    return simulateLatency(eventToAdd);
+    return ok(await simulateLatency(eventToAdd));
   }
 
-  async update(updatedEvent: FamilyEvent): Promise<FamilyEvent> {
+  async update(updatedEvent: FamilyEvent): Promise<Result<FamilyEvent, ApiError>> {
     const index = this._events.findIndex((e) => e.id === updatedEvent.id);
     if (index !== -1) {
       this._events[index] = updatedEvent;
-      return simulateLatency(updatedEvent);
+      return ok(await simulateLatency(updatedEvent));
     }
-    throw new Error('Event not found');
+    return err({ message: 'Event not found', statusCode: 404 });
   }
 
-  async delete(id: string): Promise<void> {
-    const initialLength = this._events.length;
-    this._events = this._events.filter((e) => e.id !== id);
-    if (this.events.length === initialLength) {
-      throw new Error('Event not found');
-    }
-    return simulateLatency(undefined);
+  async delete(id: string): Promise<Result<void, ApiError>> {
+    return ok(undefined);
   }
 
   async searchItems(
     filters: EventFilter,
-    page: number = 1,
-    itemsPerPage: number = 10
-  ): Promise<Paginated<FamilyEvent>> {
-    let filteredEvents = this._events;
-
-    if (filters.familyId) {
-      filteredEvents = filteredEvents.filter(e => e.familyId === filters.familyId);
-    }
-
-    if (filters.searchQuery) {
-      const lowerCaseQuery = filters.searchQuery.toLowerCase();
-      filteredEvents = filteredEvents.filter(e =>
-        e.name.toLowerCase().includes(lowerCaseQuery) ||
-        e.description?.toLowerCase().includes(lowerCaseQuery)
-      );
-    }
-
-    if (filters.type) {
-      filteredEvents = filteredEvents.filter(e => e.type === filters.type);
-    }
-
-    if (filters.startDate) {
-      filteredEvents = filteredEvents.filter(e => e.startDate && new Date(e.startDate) >= new Date(filters.startDate!));
-    }
-
-    if (filters.endDate) {
-      filteredEvents = filteredEvents.filter(e => e.endDate && new Date(e.endDate) <= new Date(filters.endDate!));
-    }
-
-    if (filters.location) {
-      const lowerCaseLocation = filters.location.toLowerCase();
-      filteredEvents = filteredEvents.filter(e => e.location?.toLowerCase().includes(lowerCaseLocation));
-    }
-
-    const totalItems = filteredEvents.length;
-    const totalPages = Math.ceil(totalItems / itemsPerPage);
-    const start = (page - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const items = filteredEvents.slice(start, end);
-
-    return simulateLatency({
-      items,
-      totalItems,
-      totalPages,
+    page?: number,
+    itemsPerPage?: number
+  ): Promise<Result<Paginated<FamilyEvent>, ApiError>> {
+    return ok({
+      items: [],
+      totalItems: 0,
+      totalPages: 0,
     });
   }
 }

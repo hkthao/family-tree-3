@@ -1,9 +1,11 @@
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import type { Member } from '@/types/family';
 import type { Paginated } from '@/types/common';
-import { fixedMockMembers } from '@/data/mock/fixed.member.mock';
+import { generateMockMembers } from '@/data/mock/member.mock';
+
 import { simulateLatency } from '@/utils/mockUtils';
-import { Result, ok, err } from '@/types/common';
+import type { Result } from '@/types/common';
+import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 // Helper function to transform date strings to Date objects
@@ -31,7 +33,7 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
 }
 
 export class MockMemberService implements IMemberService {
-  private _members: Member[] = fixedMockMembers;
+  private _members: Member[] = generateMockMembers(50);
 
   get members(): Member[] {
     return [...this._members];

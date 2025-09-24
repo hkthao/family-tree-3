@@ -1,15 +1,20 @@
 import type { Family } from '@/types/family';
+import type { ICrudService } from '../common/crud.service.interface';
 import type { IFamilyService } from './family.service.interface';
-import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
-import type { Result } from '@/types/common';
+import { safeApiCall } from '@/utils/api';
+import type { AxiosInstance } from 'axios';
+import type { FamilySearchFilter } from '@/types/family';
+import type { Paginated, Result } from '@/types/common';
+import { ok, err } from '@/types/common';
 import axios from 'axios';
-import type { Paginated } from '@/types/common'; // Correct placement of import
 
 // Base URL for your API - configure this based on your environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export class ApiFamilyService implements IFamilyService {
+  constructor(private http: AxiosInstance) {}
+
   private apiUrl = `${API_BASE_URL}/families`;
 
   async fetch(): Promise<Result<Family[], ApiError>> { // Renamed from fetchFamilies
@@ -28,22 +33,36 @@ export class ApiFamilyService implements IFamilyService {
     return safeApiCall(axios.put<Family>(`${this.apiUrl}/${updatedItem.id}`, updatedItem));
   }
 
-  async delete(id: string): Promise<Result<void, ApiError>> { // Renamed from deleteFamily
-    return safeApiCall(axios.delete<void>(`${this.apiUrl}/${id}`));
+  async delete(id: string): Promise<Result<void, ApiError>> {
+    try {
+      await this.http.delete<void>(`/api/family/${id}`);
+      return ok(undefined);
+    } catch (error: any) {
+      return err(error);
+    }
   }
 
-  async searchFamilies(
-    searchQuery: string,
-    visibility: 'all' | 'public' | 'private',
+  async searchItems(
+    filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number
   ): Promise<Result<Paginated<Family>, ApiError>> {
-    const params = new URLSearchParams();
-    if (searchQuery) params.append('searchQuery', searchQuery);
-    if (visibility !== 'all') params.append('visibility', visibility);
-    params.append('page', page.toString());
-    params.append('itemsPerPage', itemsPerPage.toString());
+    try {
+      const params = new URLSearchParams();
+      if (filter.searchQuery) params.append('searchQuery', filter.searchQuery);
+      if (filter.familyId) params.append('familyId', filter.familyId);
+      if (filter.startDate) params.append('startDate', filter.startDate.toISOString());
+      if (filter.endDate) params.append('endDate', filter.endDate.toISOString());
+      if (filter.location) params.append('location', filter.location);
+      if (filter.type) params.append('type', filter.type);
 
-    return safeApiCall(axios.get<Paginated<Family>>(`${this.apiUrl}?${params.toString()}`));
+      params.append('page', page.toString());
+      params.append('itemsPerPage', itemsPerPage.toString());
+
+      const response = await this.http.get<Paginated<Family>>(`/api/family/search?${params.toString()}`);
+      return ok(response.data);
+    } catch (error: any) {
+      return err(error);
+    }
   }
 }

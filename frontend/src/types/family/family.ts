@@ -18,6 +18,12 @@ export interface FamilySearchFilter {
   createdAtEnd?: Date;
   updatedAtStart?: Date;
   updatedAtEnd?: Date;
+  searchQuery?: string;
+  familyId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  location?: string;
+  type?: string;
 }
 
 export interface ConfirmDeleteDialogProps {

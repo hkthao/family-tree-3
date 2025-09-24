@@ -5,11 +5,14 @@ import type { EventFilter } from './family-event.service.interface';
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
 import type { Result } from '@/types/common';
+import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export class ApiFamilyEventService implements IFamilyEventService {
+  constructor(private http: AxiosInstance) {}
+
   private apiUrl = `${API_BASE_URL}/family-events`;
 
   async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
@@ -50,7 +53,7 @@ export class ApiFamilyEventService implements IFamilyEventService {
     if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
     if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
     if (filters.location) params.append('location', filters.location);
-    if (filters.description) params.append('description', filters.description);
+
 
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());

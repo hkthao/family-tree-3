@@ -1,13 +1,15 @@
 import type { IFamilyEventService, EventFilter } from './family-event.service.interface';
 import type { FamilyEvent } from '@/types/family';
 import type { Paginated } from '@/types/common';
-import { fixedMockFamilyEvents } from '@/data/mock/fixed.family-event.mock';
+import { generateMockFamilyEvents } from '@/data/mock/family-event.mock';
+
 import { simulateLatency } from '@/utils/mockUtils';
-import { Result, ok, err } from '@/types/common';
+import type { Result } from '@/types/common';
+import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export class MockFamilyEventService implements IFamilyEventService {
-  private _familyEvents: FamilyEvent[] = fixedMockFamilyEvents;
+  private _familyEvents: FamilyEvent[] = generateMockFamilyEvents(50);
 
   get familyEvents(): FamilyEvent[] {
     return [...this._familyEvents];
@@ -96,16 +98,16 @@ export class MockFamilyEventService implements IFamilyEventService {
       }
 
       if (filters.startDate) {
-        filteredEvents = filteredEvents.filter((event) => new Date(event.date) >= filters.startDate!);
+        filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) >= filters.startDate!);
       }
 
       if (filters.endDate) {
-        filteredEvents = filteredEvents.filter((event) => new Date(event.date) <= filters.endDate!);
+        filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) <= filters.endDate!);
       }
 
       if (filters.location) {
         const lowerCaseLocation = filters.location.toLowerCase();
-        filteredEvents = filteredEvents.filter((event) => event.location.toLowerCase().includes(lowerCaseLocation));
+        filteredEvents = filteredEvents.filter((event) => event.location && event.location.toLowerCase().includes(lowerCaseLocation));
       }
 
       const totalItems = filteredEvents.length;
