@@ -125,15 +125,17 @@ const confirmDelete = (member: Member) => {
 
 const handleDeleteConfirm = async () => {
   if (memberToDelete.value) {
-    try {
-      await memberStore.deleteItem(memberToDelete.value.id);
+    await memberStore.deleteItem(memberToDelete.value.id);
+    if (memberStore.error) {
+      notificationStore.showSnackbar(
+        t('member.messages.deleteError', { error: memberStore.error }),
+        'error',
+      );
+    } else {
       notificationStore.showSnackbar(
         t('member.messages.deleteSuccess'),
         'success',
       );
-      await memberStore.fetchItems(); // Reload members after deletion
-    } catch (error) {
-      notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
     }
   }
   deleteConfirmDialog.value = false;
