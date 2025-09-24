@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type { FamilyEvent } from '@/types/family-event';
 import type { Paginated } from '@/types/pagination';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import type { EventFilter } from '@/services/family-event/family-event.service.interface';
 
 export const useFamilyEventStore = defineStore('familyEvent', {
   state: () => ({
@@ -9,8 +10,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
     currentItem: null as FamilyEvent | null,
     loading: false,
     error: null as string | null,
-    searchTerm: '',
-    familyIdFilter: undefined as string | undefined,
+    filter: {} as EventFilter,
     totalItems: 0,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
@@ -30,8 +30,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       this.error = null;
       try {
         const response: Paginated<FamilyEvent> = await this.services.familyEvent.searchItems(
-          this.searchTerm,
-          this.familyIdFilter,
+          this.filter,
           this.currentPage,
           this.itemsPerPage
         );
@@ -98,9 +97,8 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       }
     },
 
-    async searchItems(term: string, familyId?: string) {
-      this.searchTerm = term;
-      this.familyIdFilter = familyId;
+    async searchItems(filters: EventFilter) {
+      this.filter = filters;
       this.currentPage = 1; // Reset to first page on new search
       await this._loadItems(); // Trigger fetch with new search terms
     },

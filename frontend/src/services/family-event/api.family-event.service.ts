@@ -33,9 +33,8 @@ export class ApiFamilyEventService implements IFamilyEventService {
     throw new Error('Not implemented');
   }
 
-  async searchFamilyEvents(
-    searchQuery: string,
-    familyId?: string,
+  async searchItems(
+    filters: EventFilter,
     page: number = 1,
     itemsPerPage: number = 10
   ): Promise<Paginated<FamilyEvent>> {

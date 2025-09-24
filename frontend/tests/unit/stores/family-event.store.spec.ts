@@ -1,93 +1,103 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { FamilyEvent } from '@/types/family-event';
-import type { IFamilyEventService } from '@/services/family-event/family-event.service.interface';
-import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/family-event.mock';
-import type { Paginated } from '@/types/pagination';
 import { useFamilyEventStore } from '@/stores/family-event.store';
-import { simulateLatency } from '@/utils/mockUtils';
 import { createServices } from '@/services/service.factory';
+import type { Paginated } from '@/types/pagination';
+import type { IFamilyEventService, EventFilter } from '@/services/family-event/family-event.service.interface';
+import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/family-event.mock';
+import { simulateLatency } from '@/utils/mockUtils';
 
-// Create a mock service for testing
-class MockFamilyEventServiceForTest implements IFamilyEventService {
-  private _familyEvents: FamilyEvent[];
+export class MockFamilyEventServiceForTest implements IFamilyEventService {
+  private _events: FamilyEvent[] = generateMockFamilyEvents(20);
 
-  constructor() {
-    this._familyEvents = generateMockFamilyEvents(10); // Initialize with 10 events
-  }
-
-  get items(): FamilyEvent[] {
-    return [...this._familyEvents];
+  get events(): FamilyEvent[] {
+    return [...this._events];
   }
 
   async fetch(): Promise<FamilyEvent[]> {
-    return simulateLatency(this.familyEvents);
+    return simulateLatency(this.events);
   }
 
   async getById(id: string): Promise<FamilyEvent | undefined> {
-    return simulateLatency(this.items.find((event) => event.id === id));
+    const event = this.events.find((e) => e.id === id);
+    return simulateLatency(event);
   }
 
-  async add(newItem: Omit<FamilyEvent, 'id'>): Promise<FamilyEvent> {
-    const familyEventToAdd = { ...newItem, id: `event-${this._familyEvents.length + 1}` };
-    this._familyEvents.push(familyEventToAdd);
-    return simulateLatency(familyEventToAdd);
+  async add(newEvent: Omit<FamilyEvent, 'id'>): Promise<FamilyEvent> {
+    const eventToAdd: FamilyEvent = {
+      ...newEvent,
+      id: generateMockFamilyEvent(this._events.length + 1).id,
+    };
+    this._events.push(eventToAdd);
+    return simulateLatency(eventToAdd);
   }
 
-  async update(updatedItem: FamilyEvent): Promise<FamilyEvent> {
-    const index = this._familyEvents.findIndex((event) => event.id === updatedItem.id);
+  async update(updatedEvent: FamilyEvent): Promise<FamilyEvent> {
+    const index = this._events.findIndex((e) => e.id === updatedEvent.id);
     if (index !== -1) {
-      this._familyEvents[index] = updatedItem;
-      return simulateLatency(updatedItem);
+      this._events[index] = updatedEvent;
+      return simulateLatency(updatedEvent);
     }
-    throw new Error('Family Event not found');
+    throw new Error('Event not found');
   }
 
   async delete(id: string): Promise<void> {
-    const initialLength = this._familyEvents.length;
-    this._familyEvents = this._familyEvents.filter((event) => event.id !== id);
-    if (this._familyEvents.length === initialLength) {
-      throw new Error('Family Event not found');
+    const initialLength = this._events.length;
+    this._events = this._events.filter((e) => e.id !== id);
+    if (this.events.length === initialLength) {
+      throw new Error('Event not found');
     }
     return simulateLatency(undefined);
   }
 
   async searchItems(
-    searchQuery: string,
-    familyId?: string,
+    filters: EventFilter,
     page: number = 1,
     itemsPerPage: number = 10
   ): Promise<Paginated<FamilyEvent>> {
-    let filtered = this._familyEvents;
+    let filteredEvents = this._events;
 
-    if (familyId) {
-      filtered = filtered.filter((event) => event.familyId === familyId);
+    if (filters.familyId) {
+      filteredEvents = filteredEvents.filter(e => e.familyId === filters.familyId);
     }
 
-    if (searchQuery) {
-      const lowerCaseSearchQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (event) =>
-          event.name.toLowerCase().includes(lowerCaseSearchQuery) ||
-          (event.description && event.description.toLowerCase().includes(lowerCaseSearchQuery))
+    if (filters.searchQuery) {
+      const lowerCaseQuery = filters.searchQuery.toLowerCase();
+      filteredEvents = filteredEvents.filter(e =>
+        e.name.toLowerCase().includes(lowerCaseQuery) ||
+        e.description?.toLowerCase().includes(lowerCaseQuery)
       );
     }
 
-    const totalItems = filtered.length;
+    if (filters.type) {
+      filteredEvents = filteredEvents.filter(e => e.type === filters.type);
+    }
+
+    if (filters.startDate) {
+      filteredEvents = filteredEvents.filter(e => e.startDate && new Date(e.startDate) >= new Date(filters.startDate!));
+    }
+
+    if (filters.endDate) {
+      filteredEvents = filteredEvents.filter(e => e.endDate && new Date(e.endDate) <= new Date(filters.endDate!));
+    }
+
+    if (filters.location) {
+      const lowerCaseLocation = filters.location.toLowerCase();
+      filteredEvents = filteredEvents.filter(e => e.location?.toLowerCase().includes(lowerCaseLocation));
+    }
+
+    const totalItems = filteredEvents.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const start = (page - 1) * itemsPerPage;
     const end = start + itemsPerPage;
-    const items = filtered.slice(start, end);
+    const items = filteredEvents.slice(start, end);
 
     return simulateLatency({
       items,
       totalItems,
       totalPages,
     });
-  }
-
-  reset(count: number = 10) {
-    this._familyEvents = generateMockFamilyEvents(count);
   }
 }
 
@@ -109,31 +119,30 @@ describe('Family Event Store', () => {
     expect(store.items.length).toBe(10); // 10 items per page
     expect(store.loading).toBe(false);
     expect(store.error).toBe(null);
-    expect(store.searchTerm).toBe('');
-    expect(store.familyIdFilter).toBeUndefined();
-    expect(store.totalItems).toBe(10); // Based on mock service initial data
+    expect(store.filter).toEqual({});
+    expect(store.totalItems).toBe(20); // Based on mock service initial data
     expect(store.currentItem).toBe(null);
     expect(store.currentPage).toBe(1);
     expect(store.itemsPerPage).toBe(10);
-    expect(store.totalPages).toBe(1); // 10 events, 10 per page
+    expect(store.totalPages).toBe(2); // 20 events, 10 per page
   });
 
   it('_loadItems should populate family events array, totalItems, and totalPages', async () => {
     const store = useFamilyEventStore();
     await store._loadItems();
     expect(store.items.length).toBe(10); // 10 items per page
-    expect(store.totalItems).toBe(10); // Based on mock service initial data
-    expect(store.items[0].name).toBe(mockFamilyEventService.items[0].name);
+    expect(store.totalItems).toBe(20); // Based on mock service initial data
+    expect(store.items[0].name).toBe(mockFamilyEventService.events[0].name);
     expect(store.loading).toBe(false);
-    expect(store.totalPages).toBe(1); // 10 events, 10 per page
+    expect(store.totalPages).toBe(2); // 20 events, 10 per page
   });
 
   it('getItemById should return the correct family event', async () => {
     const store = useFamilyEventStore();
     await store._loadItems();
-    const event = store.getItemById(mockFamilyEventService.items[0].id);
+    const event = store.getItemById(mockFamilyEventService.events[0].id);
     expect(event).toBeDefined();
-    expect(event?.name).toBe(mockFamilyEventService.items[0].name);
+    expect(event?.name).toBe(mockFamilyEventService.events[0].name);
   });
 
   it('addFamilyEvent should add a new family event and re-load family events', async () => {
@@ -145,15 +154,15 @@ describe('Family Event Store', () => {
       description: 'This is a new event',
       type: 'Birth',
       startDate: new Date(),
-      familyId: mockFamilyEventService.items[0].familyId,
+      familyId: mockFamilyEventService.events[0].familyId,
     };
     await store.addItem(newEventData);
     expect(store.totalItems).toBe(initialTotalItems + 1);
     expect(store.loading).toBe(false);
-    expect(store.totalPages).toBe(2); // 11 events, 10 per page
+    expect(store.totalPages).toBe(3); // 21 events, 10 per page
 
     // Now, search for the newly added event to confirm its presence
-    await store.searchItems('New Event');
+    await store.searchItems({ searchQuery: 'New Event' });
     expect(store.totalItems).toBe(1);
     expect(store.items[0].name).toBe('New Event');
   });
@@ -169,7 +178,7 @@ describe('Family Event Store', () => {
       const foundEvent = store.getItemById(eventToUpdate.id);
       expect(foundEvent?.name).toBe(updatedName);
       expect(store.loading).toBe(false);
-      expect(store.totalPages).toBe(1); // Should remain 1
+      expect(store.totalPages).toBe(2); // Should remain 2
     } else {
       expect.fail('No family event to update.');
     }
@@ -177,7 +186,7 @@ describe('Family Event Store', () => {
 
   it('deleteFamilyEvent should remove a family event and re-load family events', async () => {
     const store = useFamilyEventStore();
-    await store._loadItems(); // 10 events, 1 page
+    await store._loadItems(); // 20 events, 2 pages
     const initialTotalItems = store.totalItems;
     const eventToDeleteId = store.items[0]?.id;
     if (eventToDeleteId) {
@@ -185,7 +194,7 @@ describe('Family Event Store', () => {
       expect(store.totalItems).toBe(initialTotalItems - 1);
       expect(store.getItemById(eventToDeleteId)).toBeUndefined();
       expect(store.loading).toBe(false);
-      expect(store.totalPages).toBe(1); // 9 events, 10 per page, still 1 page
+      expect(store.totalPages).toBe(2); // 19 events, 10 per page, still 2 pages
     } else {
       expect.fail('No family event to delete.');
     }
@@ -193,13 +202,13 @@ describe('Family Event Store', () => {
 
   it('searchItems should filter family events by search term and reset page', async () => {
     const store = useFamilyEventStore();
-    await store._loadItems(); // 10 events
+    await store._loadItems(); // 20 events
 
-    const existingEvent = mockFamilyEventService.items[0];
+    const existingEvent = mockFamilyEventService.events[0];
     const searchName = existingEvent.name.substring(0, 3);
 
-    await store.searchItems(searchName);
-    const expectedFilteredCount = mockFamilyEventService.items.filter(e =>
+    await store.searchItems({ searchQuery: searchName });
+    const expectedFilteredCount = mockFamilyEventService.events.filter(e =>
       e.name.toLowerCase().includes(searchName.toLowerCase()) ||
       (e.description && e.description.toLowerCase().includes(searchName.toLowerCase()))
     ).length;
@@ -207,28 +216,28 @@ describe('Family Event Store', () => {
     expect(store.totalItems).toBe(expectedFilteredCount);
     expect(store.items.length).toBe(Math.min(store.itemsPerPage, expectedFilteredCount));
     expect(store.currentPage).toBe(1);
-    expect(store.searchTerm).toBe(searchName);
+    expect(store.filter.searchQuery).toBe(searchName);
   });
 
   it('searchItems should filter family events by familyId', async () => {
     const store = useFamilyEventStore();
     await store._loadItems();
 
-    const existingEvent = mockFamilyEventService.items[0];
+    const existingEvent = mockFamilyEventService.events[0];
     const searchFamilyId = existingEvent.familyId || 'non-existent-family';
 
-    await store.searchItems('', searchFamilyId);
-    const expectedFilteredCount = mockFamilyEventService.items.filter(e => e.familyId === searchFamilyId).length;
+    await store.searchItems({ familyId: searchFamilyId });
+    const expectedFilteredCount = mockFamilyEventService.events.filter(e => e.familyId === searchFamilyId).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount);
     expect(store.items.length).toBe(Math.min(store.itemsPerPage, expectedFilteredCount));
     expect(store.currentPage).toBe(1);
-    expect(store.familyIdFilter).toBe(searchFamilyId);
+    expect(store.filter.familyId).toBe(searchFamilyId);
   });
 
   it('setCurrentFamilyEvent should set the current family event', () => {
     const store = useFamilyEventStore();
-    const mockEvent: FamilyEvent = generateMockFamilyEvent(999);
+    const mockEvent: FamilyEvent = mockFamilyEventService.events[0];
     store.setCurrentItem(mockEvent);
     expect(store.currentItem).toEqual(mockEvent);
 
@@ -238,13 +247,12 @@ describe('Family Event Store', () => {
 
   it('setPage should update currentPage and re-load family events', async () => {
     const store = useFamilyEventStore();
-    mockFamilyEventService.reset(20); // Generate 20 events for pagination test
     await store._loadItems(); // 20 events, 10 per page, 2 pages
 
     await store.setPage(2);
     expect(store.currentPage).toBe(2);
     expect(store.items.length).toBe(10); // Second page of 10 items
-    expect(store.items[0]?.name).toBe(mockFamilyEventService.items[10].name); // First item of second page
+    expect(store.items[0]?.name).toBe(mockFamilyEventService.events[10].name); // First item of second page
 
     // Invalid page (too high)
     await store.setPage(3);
@@ -257,7 +265,6 @@ describe('Family Event Store', () => {
 
   it('setItemsPerPage should update itemsPerPage, reset currentPage, and re-load family events', async () => {
     const store = useFamilyEventStore();
-    mockFamilyEventService.reset(20); // Generate 20 events for pagination test
     await store._loadItems(); // 20 events, 10 per page, 2 pages
 
     expect(store.itemsPerPage).toBe(10);
