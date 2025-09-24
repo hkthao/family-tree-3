@@ -151,8 +151,8 @@ describe('Member Store', () => {
     const pinia = createPinia();
     setActivePinia(pinia);
     const store = useMemberStore();
-    store.$reset(); // Reset store state before each test
     store.services = createServices('test', { member: mockMemberService });
+    store.$reset(); // Call reset here
     await store._loadItems(); // Ensure store is populated before tests run
   });
 

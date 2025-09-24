@@ -17,27 +17,27 @@ export class ApiFamilyEventService implements IFamilyEventService {
 
   async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
     console.log('Fetching family events from API');
-    return safeApiCall(axios.get<FamilyEvent[]>(this.apiUrl));
+    return safeApiCall(this.http.get<FamilyEvent[]>(this.apiUrl));
   }
 
   async getById(id: string): Promise<Result<FamilyEvent | undefined, ApiError>> {
     console.log(`Fetching family event ${id} from API`);
-    return safeApiCall(axios.get<FamilyEvent>(`${this.apiUrl}/${id}`));
+    return safeApiCall(this.http.get<FamilyEvent>(`${this.apiUrl}/${id}`));
   }
 
   async add(newItem: Omit<FamilyEvent, 'id'>): Promise<Result<FamilyEvent, ApiError>> {
     console.log('Adding family event via API');
-    return safeApiCall(axios.post<FamilyEvent>(this.apiUrl, newItem));
+    return safeApiCall(this.http.post<FamilyEvent>(this.apiUrl, newItem));
   }
 
   async update(updatedItem: FamilyEvent): Promise<Result<FamilyEvent, ApiError>> {
     console.log(`Updating family event ${updatedItem.id} via API`);
-    return safeApiCall(axios.put<FamilyEvent>(`${this.apiUrl}/${updatedItem.id}`, updatedItem));
+    return safeApiCall(this.http.put<FamilyEvent>(`${this.apiUrl}/${updatedItem.id}`, updatedItem));
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     console.log(`Deleting family event ${id} via API`);
-    return safeApiCall(axios.delete<void>(`${this.apiUrl}/${id}`));
+    return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 
   async searchItems(
@@ -58,6 +58,6 @@ export class ApiFamilyEventService implements IFamilyEventService {
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
 
-    return safeApiCall(axios.get<Paginated<FamilyEvent>>(`${this.apiUrl}?${params.toString()}`));
+    return safeApiCall(this.http.get<Paginated<FamilyEvent>>(`${this.apiUrl}?${params.toString()}`));
   }
 }

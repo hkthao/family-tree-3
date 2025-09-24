@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import FamilyListView from '@/views/family/FamilyListView.vue';
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
+import { useFamilyEventStore } from '@/stores/family-event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
@@ -22,6 +23,7 @@ import type { IFamilyService } from '@/services/family/family.service.interface'
 import type { IMemberService } from '@/services/member/member.service.interface';
 import type { Family } from '@/types/family';
 import type { Member } from '@/types/family';
+import type { FamilyEvent } from '@/types/family/family-event';
 import type { Paginated, Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import { simulateLatency } from '@/utils/mockUtils';
@@ -166,14 +168,122 @@ class MockMemberServiceForTest implements IMemberService {
   }
 }
 
+import type { IFamilyEventService, EventFilter } from '@/services/family-event/family-event.service.interface';
+import { generateMockFamilyEvents, generateMockFamilyEvent } from '@/data/mock/family-event.mock';
+
+export class MockFamilyEventServiceForTest implements IFamilyEventService {
+  private _events: FamilyEvent[];
+
+  constructor() {
+    this._events = generateMockFamilyEvents(20);
+  }
+
+  reset() {
+    this._events = generateMockFamilyEvents(20);
+  }
+  get events(): FamilyEvent[] {
+    return [...this._events];
+  }
+
+  async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
+    return ok(await simulateLatency(this.events));
+  }
+
+  async getById(id: string): Promise<Result<FamilyEvent | undefined, ApiError>> {
+    const event = this.events.find((e) => e.id === id);
+    return ok(await simulateLatency(event));
+  }
+
+  async add(newEvent: Omit<FamilyEvent, 'id'>): Promise<Result<FamilyEvent, ApiError>> {
+    const eventToAdd: FamilyEvent = {
+      ...newEvent,
+      id: generateMockFamilyEvent(this._events.length + 1).id,
+    };
+    this._events.push(eventToAdd);
+    return ok(await simulateLatency(eventToAdd));
+  }
+
+  async update(updatedEvent: FamilyEvent): Promise<Result<FamilyEvent, ApiError>> {
+    const index = this._events.findIndex((e) => e.id === updatedEvent.id);
+    if (index !== -1) {
+      this._events[index] = updatedEvent;
+      return ok(await simulateLatency(updatedEvent));
+    }
+    return err({ message: 'Event not found', statusCode: 404 });
+  }
+
+  async delete(id: string): Promise<Result<void, ApiError>> {
+    const initialLength = this._events.length;
+    this._events = this._events.filter((event) => event.id !== id);
+    if (this._events.length === initialLength) {
+      return err({ message: 'Event not found', statusCode: 404 });
+    }
+    return ok(undefined);
+  }
+
+  async searchItems(
+    filters: EventFilter,
+    page?: number,
+    itemsPerPage?: number
+  ): Promise<Result<Paginated<FamilyEvent>, ApiError>> {
+    let filteredEvents = this._events;
+
+    if (filters.searchQuery) {
+      const lowerCaseSearchQuery = filters.searchQuery.toLowerCase();
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.name.toLowerCase().includes(lowerCaseSearchQuery) ||
+          (event.description && event.description.toLowerCase().includes(lowerCaseSearchQuery))
+      );
+    }
+
+    if (filters.type) {
+      filteredEvents = filteredEvents.filter((event) => event.type === filters.type);
+    }
+
+    if (filters.familyId) {
+      filteredEvents = filteredEvents.filter((event) => event.familyId === filters.familyId);
+    }
+
+    if (filters.startDate) {
+      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) >= filters.startDate!);
+    }
+
+    if (filters.endDate) {
+      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) <= filters.endDate!); // Use event.startDate
+    }
+
+    if (filters.location) {
+      const lowerCaseLocation = filters.location.toLowerCase();
+      filteredEvents = filteredEvents.filter((event) => event.location && event.location.toLowerCase().includes(lowerCaseLocation));
+    }
+
+    const totalItems = filteredEvents.length;
+    const currentPage = page || 1;
+    const currentItemsPerPage = itemsPerPage || 10;
+    const totalPages = Math.ceil(totalItems / currentItemsPerPage);
+    const start = (currentPage - 1) * currentItemsPerPage;
+    const end = start + currentItemsPerPage;
+    const items = filteredEvents.slice(start, end);
+
+    return ok(await simulateLatency({
+      items,
+      totalItems,
+      totalPages,
+    }));
+  }
+}
+
 // Mock the stores
 
 
   let familyStore: ReturnType<typeof useFamilyStore>;
   let memberStore: ReturnType<typeof useMemberStore>;
+  let familyEventStore: ReturnType<typeof useFamilyEventStore>;
   let notificationStore: ReturnType<typeof useNotificationStore>;
   let mockFamilyService: MockFamilyServiceForTest;
   let mockMemberService: MockMemberServiceForTest;
+  let mockFamilyEventService: MockFamilyEventServiceForTest;
 
   beforeEach(async () => {
     const pinia = createPinia();
@@ -181,9 +291,11 @@ class MockMemberServiceForTest implements IMemberService {
 
     mockFamilyService = new MockFamilyServiceForTest();
     mockMemberService = new MockMemberServiceForTest();
+    mockFamilyEventService = new MockFamilyEventServiceForTest();
 
     familyStore = useFamilyStore();
     memberStore = useMemberStore();
+    familyEventStore = useFamilyEventStore();
     notificationStore = useNotificationStore();
 
     familyStore.$reset();
@@ -192,10 +304,11 @@ class MockMemberServiceForTest implements IMemberService {
 
     familyStore.services = createServices('test', { family: mockFamilyService });
     memberStore.services = createServices('test', { member: mockMemberService });
+    familyEventStore.services = createServices('test', { familyEvent: mockFamilyEventService });
 
-    vi.spyOn(familyStore, 'searchItems'); // Moved this line here
+    vi.spyOn(familyStore, 'searchItems');
 
-    await familyStore._loadItems(); // This is where the error occurs
+    await familyStore._loadItems();
   });
 
 const i18n = createI18n({
@@ -217,7 +330,7 @@ describe('FamilyListView.vue', () => {
   it('renders without errors', () => {
     const wrapper = mount(FamilyListView, {
       global: {
-        plugins: [i18n, vuetify, router], // Add router plugin
+        plugins: [i18n, vuetify, router],
       },
     });
     expect(wrapper.exists()).toBe(true);
