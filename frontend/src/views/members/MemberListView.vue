@@ -54,7 +54,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { useFamilyStore } from '@/stores/family.store';
-import type { Member } from '@/types/member';
+import type { Member } from '@/types/family';
 import type { MemberFilter } from '@/services/member/member.service.interface';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';

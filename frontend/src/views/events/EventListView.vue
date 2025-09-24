@@ -83,7 +83,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyEventStore } from '@/stores/family-event.store';
-import type { FamilyEvent } from '@/types/family-event';
+import type { FamilyEvent } from '@/types/family';
 import type { EventFilter } from '@/services/family-event/family-event.service.interface';
 import EventSearch from '@/components/events/EventSearch.vue';
 import EventList from '@/components/events/EventList.vue';

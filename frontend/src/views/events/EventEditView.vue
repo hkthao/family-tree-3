@@ -20,7 +20,7 @@ import { useFamilyEventStore } from '@/stores/family-event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import EventForm from '@/components/events/EventForm.vue';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { FamilyEvent } from '@/types/family-event';
+import type { FamilyEvent } from '@/types/family';
 
 const { t } = useI18n();
 const router = useRouter();

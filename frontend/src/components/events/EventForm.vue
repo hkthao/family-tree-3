@@ -100,7 +100,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyEvent } from '@/types/family-event';
+import type { FamilyEvent } from '@/types/family';
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 

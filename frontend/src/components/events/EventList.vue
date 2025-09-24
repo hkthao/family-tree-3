@@ -63,8 +63,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyEvent } from '@/types/family-event';
-import type { Member } from '@/types/member';
+import type { FamilyEvent } from '@/types/family';
+import type { Member } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberStore } from '@/stores/member.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
