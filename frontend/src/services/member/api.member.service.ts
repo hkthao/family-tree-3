@@ -2,7 +2,9 @@ import type { Member } from '@/types/family';
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
-import { Result, ok } from '@/types/common';
+import type { AxiosInstance } from 'axios';
+import type { Result, Paginated } from '@/types/common';
+import { ok } from '@/types/common';
 import axios from 'axios';
 
 // Base URL for your API - configure this based on your environment
@@ -33,6 +35,8 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
 }
 
 export class ApiMemberService implements IMemberService {
+  constructor(private http: AxiosInstance) {}
+
   private apiUrl = `${API_BASE_URL}/members`;
 
   async fetch(): Promise<Result<Member[], ApiError>> { // Renamed from fetchMembers

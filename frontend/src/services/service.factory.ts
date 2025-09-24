@@ -16,6 +16,8 @@ export interface AppServices {
   familyEvent: IFamilyEventService;
 }
 
+import apiClient from '@/plugins/axios';
+
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
   console.log(`Creating services in ${mode} mode.`);
   return {
@@ -23,19 +25,19 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'mock'
         ? new MockFamilyService()
         : mode === 'real'
-        ? new ApiFamilyService()
+        ? new ApiFamilyService(apiClient)
         : testServices?.family || new MockFamilyService(), // Use testServices.family if provided
     member:
       mode === 'mock'
         ? new MockMemberService()
         : mode === 'real'
-        ? new ApiMemberService()
+        ? new ApiMemberService(apiClient)
         : testServices?.member || new MockMemberService(), // Use testServices.member if provided
     familyEvent:
       mode === 'mock'
         ? new MockFamilyEventService()
         : mode === 'real'
-        ? new ApiFamilyEventService()
+        ? new ApiFamilyEventService(apiClient)
         : testServices?.familyEvent || new MockFamilyEventService(), // Use testServices.familyEvent if provided
   };
 }

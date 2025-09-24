@@ -3,7 +3,9 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import type { Family, FamilySearchFilter } from '@/types/family';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { generateMockFamily } from '@/data/mock/family.mock';
-import type { Paginated } from '@/types/pagination';
+import type { Paginated, Result } from '@/types/common';
+import { ok, err } from '@/types/common';
+import type { ApiError } from '@/utils/api';
 import { useFamilyStore } from '@/stores/family.store';
 import { simulateLatency } from '@/utils/mockUtils';
 import { createServices } from '@/services/service.factory';
@@ -33,56 +35,56 @@ class MockFamilyServiceForTest implements IFamilyService {
     return [...this._items]; // Return a shallow copy
   }
 
-  async fetch(): Promise<Family[]> {
+  async fetch(): Promise<Result<Family[], ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Mock fetch error');
+      return err({ message: 'Mock fetch error' });
     }
-    return simulateLatency(this.items);
+    return ok(await simulateLatency(this.items));
   }
-  async getById(id: string): Promise<Family | undefined> {
+  async getById(id: string): Promise<Result<Family | undefined, ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Mock getById error');
+      return err({ message: 'Mock getById error' });
     }
-    return simulateLatency(this.items.find((f) => f.id === id));
+    return ok(await simulateLatency(this.items.find((f) => f.id === id)));
   }
-  async add(newItem: Omit<Family, 'id'>): Promise<Family> {
+  async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Mock add error');
+      return err({ message: 'Mock add error' });
     }
     const familyToAdd = { ...newItem, id: generateMockFamily().id };
     this._items.push(familyToAdd);
-    return simulateLatency(familyToAdd);
+    return ok(await simulateLatency(familyToAdd));
   }
-  async update(updatedItem: Family): Promise<Family> {
+  async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Mock update error');
+      return err({ message: 'Mock update error' });
     }
     const index = this._items.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
       this._items[index] = updatedItem;
-      return simulateLatency(updatedItem);
+      return ok(await simulateLatency(updatedItem));
     }
-    throw new Error('Family not found');
+    return err({ message: 'Family not found', statusCode: 404 });
   }
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<Result<void, ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Mock delete error');
+      return err({ message: 'Mock delete error' });
     }
     const initialLength = this._items.length;
     this._items = this._items.filter((f) => f.id !== id);
     if (this._items.length === initialLength) {
-      throw new Error('Family not found');
+      return err({ message: 'Family not found', statusCode: 404 });
     }
-    return simulateLatency(undefined);
+    return ok(await simulateLatency(undefined));
   }
 
   async searchItems(
     filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number,
-  ): Promise<Paginated<Family>> {
+  ): Promise<Result<Paginated<Family>, ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Mock searchItems error');
+      return err({ message: 'Mock searchItems error' });
     }
     let filtered = this._items;
 
@@ -158,11 +160,11 @@ class MockFamilyServiceForTest implements IFamilyService {
     const end = start + itemsPerPage;
     const items = filtered.slice(start, end);
 
-    return simulateLatency({
+    return ok(await simulateLatency({
       items,
       totalItems,
       totalPages,
-    });
+    }));
   }
 }
 

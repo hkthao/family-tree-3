@@ -21,9 +21,13 @@ import { createServices } from '@/services/service.factory';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import type { IMemberService } from '@/services/member/member.service.interface';
 import type { Family } from '@/types/family';
-import type { Member } from '@/types/member';
-import type { Paginated } from '@/types/pagination';
+import type { Member } from '@/types/family';
+import type { Paginated, Result } from '@/types/common';
+import { ok, err } from '@/types/common';
 import { simulateLatency } from '@/utils/mockUtils';
+import type { ApiError } from '@/utils/api';
+import type { MemberFilter } from '@/services/member/member.service.interface';
+import type { FamilySearchFilter } from '@/types/family';
 
 // Mock services
 class MockFamilyServiceForTest implements IFamilyService {
@@ -33,44 +37,43 @@ class MockFamilyServiceForTest implements IFamilyService {
     return [...this._items];
   }
 
-  async fetch(): Promise<Family[]> {
-    return simulateLatency(this.items);
+  async fetch(): Promise<Result<Family[], ApiError>> {
+    return ok(await simulateLatency(this.items));
   }
-  async getById(id: string): Promise<Family | undefined> {
-    return simulateLatency(this.items.find((f) => f.id === id));
+  async getById(id: string): Promise<Result<Family | undefined, ApiError>> {
+    return ok(await simulateLatency(this.items.find((f) => f.id === id)));
   }
-  async add(newItem: Omit<Family, 'id'>): Promise<Family> {
+  async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
     const familyToAdd = { ...newItem, id: 'new-family-id' };
     this._items.push(familyToAdd);
-    return simulateLatency(familyToAdd);
+    return ok(await simulateLatency(familyToAdd));
   }
-  async update(updatedItem: Family): Promise<Family> {
+  async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     const index = this._items.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
       this._items[index] = updatedItem;
-      return simulateLatency(updatedItem);
+      return ok(await simulateLatency(updatedItem));
     }
-    throw new Error('Family not found');
+    return err({ message: 'Family not found', statusCode: 404 });
   }
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<Result<void, ApiError>> {
     const initialLength = this._items.length;
     this._items = this._items.filter((f) => f.id !== id);
     if (this._items.length === initialLength) {
-      throw new Error('Family not found');
+      return err({ message: 'Family not found', statusCode: 404 });
     }
-    return simulateLatency(undefined);
+    return ok(await simulateLatency(undefined));
   }
 
   async searchItems(
-    searchQuery: string,
-    visibility: 'all' | 'public' | 'private',
+    filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number,
-  ): Promise<Paginated<Family>> {
+  ): Promise<Result<Paginated<Family>, ApiError>> {
     let filtered = this._items;
 
-    if (searchQuery) {
-      const lowerCaseSearchQuery = searchQuery.toLowerCase();
+    if (filter.searchQuery) {
+      const lowerCaseSearchQuery = filter.searchQuery.toLowerCase();
       filtered = filtered.filter(
         (family) =>
           family.name.toLowerCase().includes(lowerCaseSearchQuery) ||
@@ -79,8 +82,8 @@ class MockFamilyServiceForTest implements IFamilyService {
       );
     }
 
-    if (visibility !== 'all') {
-      filtered = filtered.filter((family) => family.visibility === visibility);
+    if (filter.visibility && filter.visibility !== 'all') {
+      filtered = filtered.filter((family) => family.visibility === filter.visibility);
     }
 
     const totalItems = filtered.length;
@@ -89,11 +92,11 @@ class MockFamilyServiceForTest implements IFamilyService {
     const end = start + itemsPerPage;
     const items = filtered.slice(start, end);
 
-    return simulateLatency({
+    return ok(await simulateLatency({
       items,
       totalItems,
       totalPages,
-    });
+    }));
   }
 }
 
@@ -104,39 +107,62 @@ class MockMemberServiceForTest implements IMemberService {
     return [...this._items];
   }
 
-  async fetch(): Promise<Member[]> {
-    return simulateLatency(this.items);
+  async fetch(): Promise<Result<Member[], ApiError>> {
+    return ok(await simulateLatency(this.items));
   }
-  async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
-    return simulateLatency(this.items.filter(m => m.familyId === familyId));
+  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
+    const filteredItems = this.items.filter(member => member.familyId === familyId);
+    return ok(await simulateLatency(filteredItems));
   }
-  async getById(id: string): Promise<Member | undefined> {
-    return simulateLatency(this.items.find((m) => m.id === id));
+  async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
+    const member = this.items.find((m) => m.id === id);
+    return ok(await simulateLatency(member));
   }
-  async add(newItem: Omit<Member, 'id'>): Promise<Member> {
+  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
     const memberToAdd = { ...newItem, id: 'new-member-id' };
     this._items.push(memberToAdd);
-    return simulateLatency(memberToAdd);
+    return ok(await simulateLatency(memberToAdd));
   }
-  async update(updatedItem: Member): Promise<Member> {
+  async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
     const index = this._items.findIndex((m) => m.id === updatedItem.id);
     if (index !== -1) {
       this._items[index] = updatedItem;
-      return simulateLatency(updatedItem);
+      return ok(await simulateLatency(updatedItem));
     }
-    throw new Error('Member not found');
+    return err({ message: 'Member not found', statusCode: 404 });
   }
-  async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<Result<void, ApiError>> {
     const initialLength = this._items.length;
     this._items = this._items.filter((m) => m.id !== id);
     if (this._items.length === initialLength) {
-      throw new Error('Member not found');
+      return err({ message: 'Member not found', statusCode: 404 });
     }
-    return simulateLatency(undefined);
+    return ok(await simulateLatency(undefined));
   }
-  async searchMembers(filters: any): Promise<Member[]> {
+  async searchMembers(
+    filters: MemberFilter,
+    page: number,
+    itemsPerPage: number,
+  ): Promise<Result<Paginated<Member>, ApiError>> {
+    let filteredItems = this._items;
+
     // Simplified search for testing
-    return simulateLatency(this.items.filter(m => m.fullName?.includes(filters.fullName || '')));
+    if (filters.fullName) {
+      const lowerCaseFullName = filters.fullName.toLowerCase();
+      filteredItems = filteredItems.filter(m => m.fullName?.toLowerCase().includes(lowerCaseFullName));
+    }
+
+    const totalItems = filteredItems.length;
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    const start = (page - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    const items = filteredItems.slice(start, end);
+
+    return ok(await simulateLatency({
+      items,
+      totalItems,
+      totalPages,
+    }));
   }
 }
 

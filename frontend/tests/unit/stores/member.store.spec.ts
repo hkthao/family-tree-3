@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types/member';
+import type { Member } from '@/types/family';
 import type { IMemberService, MemberFilter } from '@/services/member/member.service.interface';
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 import { createServices } from '@/services/service.factory';
-import type { Paginated } from '@/types/pagination';
+import type { Paginated, Result } from '@/types/common';
+import { ok, err } from '@/types/common';
+import type { ApiError } from '@/utils/api';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
@@ -18,24 +20,33 @@ class MockMemberServiceForTest implements IMemberService {
     return [...this._members]; // Return a shallow copy
   }
 
-  async fetch(): Promise<Member[]> { // Renamed from fetchItems
+  async fetch(): Promise<Result<Member[], ApiError>> {
     if (this.shouldThrowError) {
-      throw new Error('Không thể tải danh sách thành viên.');
+      return err({ message: 'Không thể tải danh sách thành viên.' });
     }
-    return simulateLatency(this.members);
+    return ok(await simulateLatency(this.members));
   }
 
-  async fetchMembersByFamilyId(familyId: string): Promise<Member[]> {
+  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
+    if (this.shouldThrowError) {
+      return err({ message: 'Không thể tải danh sách thành viên theo ID gia đình.' });
+    }
     const filteredItems = this.members.filter(member => member.familyId === familyId);
-    return simulateLatency(filteredItems);
+    return ok(await simulateLatency(filteredItems));
   }
 
-  async getById(id: string): Promise<Member | undefined> { // Renamed from getItemById
+  async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
+    if (this.shouldThrowError) {
+      return err({ message: 'Không thể tải thành viên theo ID.' });
+    }
     const member = this.members.find((m) => m.id === id);
-    return simulateLatency(member);
+    return ok(await simulateLatency(member));
   }
 
-  async add(newItem: Omit<Member, 'id'>): Promise<Member> { // Renamed from addItem
+  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
+    if (this.shouldThrowError) {
+      return err({ message: 'Không thể thêm thành viên.' });
+    }
     const memberToAdd: Member = {
       ...newItem,
       id: generateMockMember().id,
@@ -43,10 +54,13 @@ class MockMemberServiceForTest implements IMemberService {
       dateOfDeath: newItem.dateOfDeath ? new Date(newItem.dateOfDeath) : undefined,
     };
     this._members.push(memberToAdd);
-    return simulateLatency(memberToAdd);
+    return ok(await simulateLatency(memberToAdd));
   }
 
-  async update(updatedItem: Member): Promise<Member> { // Renamed from updateItem
+  async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
+    if (this.shouldThrowError) {
+      return err({ message: 'Không thể cập nhật thành viên.' });
+    }
     const index = this._members.findIndex((m) => m.id === updatedItem.id);
     if (index !== -1) {
       const memberToUpdate: Member = {
@@ -55,25 +69,31 @@ class MockMemberServiceForTest implements IMemberService {
         dateOfDeath: updatedItem.dateOfDeath ? new Date(updatedItem.dateOfDeath) : undefined,
       };
       this._members[index] = memberToUpdate;
-      return simulateLatency(memberToUpdate);
+      return ok(await simulateLatency(memberToUpdate));
     }
-    throw new Error('Member not found');
+    return err({ message: 'Không tìm thấy thành viên.', statusCode: 404 });
   }
 
-  async delete(id: string): Promise<void> { // Renamed from deleteMember
+  async delete(id: string): Promise<Result<void, ApiError>> {
+    if (this.shouldThrowError) {
+      return err({ message: 'Không thể xóa thành viên.' });
+    }
     const initialLength = this._members.length;
     this._members = this._members.filter((m) => m.id !== id);
     if (this.members.length === initialLength) {
-      throw new Error('Member not found');
+      return err({ message: 'Không tìm thấy thành viên.', statusCode: 404 });
     }
-    return simulateLatency(undefined);
+    return ok(await simulateLatency(undefined));
   }
 
   async searchMembers(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
-  ): Promise<Paginated<Member>> {
+  ): Promise<Result<Paginated<Member>, ApiError>> {
+    if (this.shouldThrowError) {
+      return err({ message: 'Không thể tìm kiếm thành viên.' });
+    }
     let filteredItems = this._members;
 
     if (filters.fullName) {
@@ -115,11 +135,11 @@ class MockMemberServiceForTest implements IMemberService {
     const end = start + itemsPerPage;
     const items = filteredItems.slice(start, end);
 
-    return simulateLatency({
+    return ok(await simulateLatency({
       items,
       totalItems,
       totalPages,
-    });
+    }));
   }
 }
 

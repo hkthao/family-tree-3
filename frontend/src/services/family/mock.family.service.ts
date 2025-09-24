@@ -1,9 +1,11 @@
 import type { IFamilyService } from './family.service.interface';
 import type { Family } from '@/types/family';
+import type { FamilySearchFilter } from '@/types/family';
 import type { Paginated } from '@/types/common';
 import { fixedMockFamilies } from '@/data/mock/fixed.family.mock';
 import { simulateLatency } from '@/utils/mockUtils';
-import { Result, ok, err } from '@/types/common';
+import type { Result } from '@/types/common';
+import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export class MockFamilyService implements IFamilyService {
@@ -65,17 +67,16 @@ export class MockFamilyService implements IFamilyService {
       return err({ message: 'Failed to delete family from mock service.', details: e as Error });
     }
   }
-  async searchFamilies(
-    searchQuery: string,
-    visibility: 'all' | 'public' | 'private',
+  async searchItems(
+    filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number
   ): Promise<Result<Paginated<Family>, ApiError>> {
     try {
       let filtered = this._families;
 
-      if (searchQuery) {
-        const lowerCaseSearchQuery = searchQuery.toLowerCase();
+      if (filter.searchQuery) {
+        const lowerCaseSearchQuery = filter.searchQuery.toLowerCase();
         filtered = filtered.filter(
           (family) =>
             family.name.toLowerCase().includes(lowerCaseSearchQuery) ||
@@ -83,8 +84,26 @@ export class MockFamilyService implements IFamilyService {
         );
       }
 
-      if (visibility !== 'all') {
-        filtered = filtered.filter((family) => (family as any).visibility === visibility);
+      if (filter.visibility && filter.visibility !== 'all') {
+        filtered = filtered.filter((family) => (family as any).visibility === filter.visibility);
+      }
+
+      if (filter.startDate) {
+        filtered = filtered.filter((family) => family.createdAt && new Date(family.createdAt) >= filter.startDate!);
+      }
+
+      if (filter.endDate) {
+        filtered = filtered.filter((family) => family.createdAt && new Date(family.createdAt) <= filter.endDate!);
+      }
+
+      if (filter.location) {
+        const lowerCaseLocation = filter.location.toLowerCase();
+        filtered = filtered.filter((family) => family.address && family.address.toLowerCase().includes(lowerCaseLocation));
+      }
+
+      if (filter.type) {
+        // Assuming 'type' refers to some property in Family, adjust as needed
+        // filtered = filtered.filter((family) => family.someTypeProperty === filter.type);
       }
 
       const totalItems = filtered.length;

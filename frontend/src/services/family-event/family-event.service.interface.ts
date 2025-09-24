@@ -7,6 +7,7 @@ import type { ApiError } from '@/utils/api';
 export interface EventFilter {
   searchQuery?: string;
   type?: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
+  eventType?: string;
   familyId?: string | null ;
   startDate?: Date | null;
   endDate?: Date | null;

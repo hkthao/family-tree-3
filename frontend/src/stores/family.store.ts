@@ -148,10 +148,9 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       // Use a large itemsPerPage to fetch all items
       const result = await this.services.family.searchItems(
-        '',
-        'all',
+        { searchQuery: '', visibility: 'all' },
         1,
-        1000, // A large number
+        1000,
       );
 
       if (result.ok) {

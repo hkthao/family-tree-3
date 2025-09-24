@@ -124,15 +124,12 @@ const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
     return;
   }
 
-  await familyEventStore.searchItems(
-    {
-      ...currentFilters.value,
-      searchQuery: currentFilters.value.searchQuery || '',
-    },
-    currentPage.value,
-    itemsPerPage.value,
-  );
-};
+      await familyEventStore.searchItems(
+        {
+          ...currentFilters.value,
+          searchQuery: currentFilters.value.searchQuery || '',
+        },
+      );};
 
 watch(selectedTab, (newTab) => {
   if (newTab === 'calendar') {
