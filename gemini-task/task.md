@@ -1,37 +1,34 @@
-gemini update --repo . --ask "Repo hiện tại đang có nhiều code xử lý lỗi trực tiếp bằng try/catch trong các store, service và API client. Anh hãy refactor toàn bộ code để sử dụng Result/Either pattern (có thể tham khảo cách implement trong fp-ts hoặc tự viết một utility Result<T, E>).
+Trong component MemberListView.vue bạn dùng ref cho các biến reactive như currentFilters và viewDialog:
 
-Yêu cầu chi tiết:
+const currentFilters = ref<MemberFilter>({});
+const viewDialog = ref(false);
 
-Tạo một Result type:
-type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
-hoặc dùng kiểu tương tự (Either cũng được).
 
-Trong tất cả các service (ví dụ MemberService, FamilyService…), khi gọi API:
+Trong test, nếu bạn mock store hoặc mount component mà không giữ nguyên các ref, thì khi gọi:
 
-Thay vì throw error, hãy luôn trả về Result.
+currentFilters.value = filters;
+currentPage.value = 1;
 
-Ví dụ: return { ok: true, value: data } hoặc return { ok: false, error }.
 
-Trong các store (Pinia stores), thay đổi logic:
+→ sẽ lỗi: Cannot set properties of undefined (setting 'value').
 
-Khi nhận Result từ service, check if (result.ok) để set state.
+Cách fix:
 
-Nếu !result.ok, hãy gán error state chuẩn, thay vì để exception propagate.
+Đảm bảo test dùng ref() cho các reactive property:
 
-Code store cần gọn gàng hơn, không bị lặp đi lặp lại phần try/catch.
+const currentFilters = ref<MemberFilter>({});
+const currentPage = ref(1);
 
-Viết lại unit test tương ứng:
+vi.mock('@/stores/member.store', () => ({
+  useMemberStore: () => ({
+    searchItems: vi.fn(),
+    currentFilters, // <- ref
+    currentPage,    // <- ref
+    paginatedItems: ref([]),
+    setPage: vi.fn(),
+    setItemsPerPage: vi.fn(),
+  }),
+}));
 
-Test cả case ok và case error.
 
-Đảm bảo store update state đúng khi service trả về error.
-
-Áp dụng cho toàn bộ store chính trong repo (family.store, member.store, v.v.), và service liên quan.
-
-Code sau refactor cần:
-
-Type-safe (không dùng any).
-
-Giảm lặp lại trong xử lý lỗi.
-
-Đảm bảo test (npx vitest run) vẫn pass."
+Khi mount component trong test, đừng overwrite các ref này bằng undefined.
