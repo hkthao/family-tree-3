@@ -137,13 +137,12 @@
                   display-expr="fullName"
                   value-expr="id"
                   :label="t('member.form.father')"
-                  :rules="[rules.required]"
                   :readonly="true"
                   :disabled="!memberForm.familyId"
                   subtitle-expr="birthDeathYears"
                   :additional-filters="{
                     familyId: memberForm.familyId,
-                    gender: 'male',
+                    gender: Gender.Male,
                   }"
                 />
               </v-col>
@@ -154,13 +153,12 @@
                   display-expr="fullName"
                   value-expr="id"
                   :label="t('member.form.mother')"
-                  :rules="[rules.required]"
                   :readonly="props.readOnly"
                   :disabled="!memberForm.familyId"
                   subtitle-expr="birthDeathYears"
                   :additional-filters="{
                     familyId: memberForm.familyId,
-                    gender: 'female',
+                    gender: Gender.Female,
                   }"
                 />
               </v-col>
@@ -171,7 +169,6 @@
                   display-expr="fullName"
                   value-expr="id"
                   :label="t('member.form.spouse')"
-                  :rules="[rules.required]"
                   :readonly="true"
                   :disabled="!memberForm.familyId"
                   subtitle-expr="birthDeathYears"
@@ -228,6 +225,7 @@ import { DateInputField, GenderSelect, Lookup } from '@/components/common';
 import MemberTimeline from './MemberTimeline.vue';
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
+import { Gender } from '@/types/gender';
 
 import type { TimelineEvent } from '@/types/timeline/timeline-event';
 
@@ -306,7 +304,7 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
         lastName: '',
         firstName: '',
         dateOfBirth: undefined,
-        gender: 'male',
+        gender: Gender.Male,
         familyId: '',
         fatherId: null,
         motherId: null,
