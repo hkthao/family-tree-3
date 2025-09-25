@@ -128,6 +128,6 @@ const confirmDelete = (event: FamilyEvent) => {
 // Fetch all members on component mount
 import { onMounted } from 'vue';
 onMounted(async () => {
-  await memberStore.fetchItems(); // Fetch all members
+  await memberStore.searchItems({}); // Fetch all members
   allMembers.value = memberStore.items;
 });</script>

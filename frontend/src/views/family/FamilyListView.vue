@@ -93,7 +93,7 @@ const loadFamilies = async () => {
 };
 
 const loadAllMembers = async () => {
-  await membersStore.fetchItems(); // Fetch all members
+  await membersStore.searchItems({}); // Fetch all members
 };
 
 const handleFilterUpdate = (filters: FamilySearchFilter) => {
