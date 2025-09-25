@@ -1,13 +1,13 @@
-import type { FamilyEvent } from '@/types/family';
+import type { Event } from '@/types/event/event';
 import { faker } from '@faker-js/faker';
 
 // Assume member IDs from 1 to 1200 exist in mock.member.service.ts
 const existingMemberIds: string[] = Array.from({ length: 1200 }, (_, i) => (i + 1).toString());
 
-export function generateMockFamilyEvent(
+export function generateMockEvent(
   index: number,
   familyId?: string,
-): FamilyEvent {
+): Event {
   const startDate = faker.date.past({ years: 5 });
   const endDate = faker.datatype.boolean()
     ? faker.date.soon({ refDate: startDate })
@@ -39,14 +39,14 @@ export function generateMockFamilyEvent(
   };
 }
 
-export function generateMockFamilyEvents(
+export function generateMockEvents(
   count: number,
   familyId?: string,
-): FamilyEvent[] {
-  const events: FamilyEvent[] = [];
+): Event[] {
+  const events: Event[] = [];
 
   for (let i = 0; i < count; i++) {
-    events.push(generateMockFamilyEvent(i + 1, familyId)); // Pass member IDs
+    events.push(generateMockEvent(i + 1, familyId)); // Pass member IDs
   }
   return events;
 }

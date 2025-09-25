@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import FamilyListView from '@/views/family/FamilyListView.vue';
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
-import { useFamilyEventStore } from '@/stores/family-event.store';
+import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
@@ -23,7 +23,7 @@ import type { IFamilyService } from '@/services/family/family.service.interface'
 import type { IMemberService } from '@/services/member/member.service.interface';
 import type { Family } from '@/types/family';
 import type { Member } from '@/types/family';
-import type { FamilyEvent } from '@/types/family/family-event';
+import type { Event } from '@/types/event';
 import type { Paginated, Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import { simulateLatency } from '@/utils/mockUtils';
@@ -181,53 +181,53 @@ class MockMemberServiceForTest implements IMemberService {
 }
 
 import type {
-  IFamilyEventService,
+  IEventService,
   EventFilter,
-} from '@/services/family-event/family-event.service.interface';
+} from '@/services/event/event.service.interface';
 import {
-  generateMockFamilyEvents,
-  generateMockFamilyEvent,
-} from '@/data/mock/family-event.mock';
+  generateMockEvents,
+  generateMockEvent,
+} from '@/data/mock/event.mock';
 
-export class MockFamilyEventServiceForTest implements IFamilyEventService {
-  private _events: FamilyEvent[];
+export class MockEventServiceForTest implements IEventService {
+  private _events: Event[];
 
   constructor() {
-    this._events = generateMockFamilyEvents(20);
+    this._events = generateMockEvents(20);
   }
 
   reset() {
-    this._events = generateMockFamilyEvents(20);
+    this._events = generateMockEvents(20);
   }
-  get events(): FamilyEvent[] {
+  get events(): Event[] {
     return [...this._events];
   }
 
-  async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
+  async fetch(): Promise<Result<Event[], ApiError>> {
     return ok(await simulateLatency(this.events));
   }
 
   async getById(
     id: string,
-  ): Promise<Result<FamilyEvent | undefined, ApiError>> {
+  ): Promise<Result<Event | undefined, ApiError>> {
     const event = this.events.find((e) => e.id === id);
     return ok(await simulateLatency(event));
   }
 
   async add(
-    newEvent: Omit<FamilyEvent, 'id'>,
-  ): Promise<Result<FamilyEvent, ApiError>> {
-    const eventToAdd: FamilyEvent = {
+    newEvent: Omit<Event, 'id'>,
+  ): Promise<Result<Event, ApiError>> {
+    const eventToAdd: Event = {
       ...newEvent,
-      id: generateMockFamilyEvent(this._events.length + 1).id,
+      id: generateMockEvent(this._events.length + 1).id,
     };
     this._events.push(eventToAdd);
     return ok(await simulateLatency(eventToAdd));
   }
 
   async update(
-    updatedEvent: FamilyEvent,
-  ): Promise<Result<FamilyEvent, ApiError>> {
+    updatedEvent: Event,
+  ): Promise<Result<Event, ApiError>> {
     const index = this._events.findIndex((e) => e.id === updatedEvent.id);
     if (index !== -1) {
       this._events[index] = updatedEvent;
@@ -249,7 +249,7 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
     filters: EventFilter,
     page?: number,
     itemsPerPage?: number,
-  ): Promise<Result<Paginated<FamilyEvent>, ApiError>> {
+  ): Promise<Result<Paginated<Event>, ApiError>> {
     let filteredEvents = this._events;
 
     if (filters.searchQuery) {
@@ -319,11 +319,11 @@ export class MockFamilyEventServiceForTest implements IFamilyEventService {
 
 let familyStore: ReturnType<typeof useFamilyStore>;
 let memberStore: ReturnType<typeof useMemberStore>;
-let familyEventStore: ReturnType<typeof useFamilyEventStore>;
+let familyEventStore: ReturnType<typeof useEventStore>;
 let notificationStore: ReturnType<typeof useNotificationStore>;
 let mockFamilyService: MockFamilyServiceForTest;
 let mockMemberService: MockMemberServiceForTest;
-let mockFamilyEventService: MockFamilyEventServiceForTest;
+let mockEventService: MockEventServiceForTest;
 
 beforeEach(async () => {
   const pinia = createPinia();
@@ -331,11 +331,11 @@ beforeEach(async () => {
 
   mockFamilyService = new MockFamilyServiceForTest();
   mockMemberService = new MockMemberServiceForTest();
-  mockFamilyEventService = new MockFamilyEventServiceForTest();
+  mockEventService = new MockEventServiceForTest();
 
   familyStore = useFamilyStore();
   memberStore = useMemberStore();
-  familyEventStore = useFamilyEventStore();
+  familyEventStore = useEventStore();
   notificationStore = useNotificationStore();
 
   familyStore.$reset();
@@ -345,7 +345,7 @@ beforeEach(async () => {
   familyStore.services = createServices('test', { family: mockFamilyService });
   memberStore.services = createServices('test', { member: mockMemberService });
   familyEventStore.services = createServices('test', {
-    familyEvent: mockFamilyEventService,
+    event: mockEventService,
   });
 
   vi.spyOn(familyStore, 'searchItems');

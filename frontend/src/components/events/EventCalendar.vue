@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyEvent } from '@/types/family';
+import type { Event } from '@/types/event/event';
 
 interface CalendarEvent {
   color: string;
@@ -61,7 +61,7 @@ interface CalendarEvent {
   start: Date;
   end: Date;
   timed: boolean;
-  eventObject: FamilyEvent;
+  eventObject: Event;
 }
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
@@ -75,7 +75,7 @@ interface EventSlotScope {
 }
 
 const props = defineProps<{
-  events: FamilyEvent[];
+  events: Event[];
 }>();
 
 const { t, locale } = useI18n();

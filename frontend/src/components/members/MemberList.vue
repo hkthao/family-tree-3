@@ -40,7 +40,7 @@
     <!-- Family column -->
     <template #item.family="{ item }">
       <ChipLookup
-        :value="item.familyId"
+        :modelValue="item.familyId"
         :data-source="familyStore"
         display-expr="name"
         value-expr="id"

@@ -9,6 +9,7 @@ import { createServices } from '@/services/service.factory';
 import type { Paginated, Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
+import { Gender } from '@/types/gender';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
@@ -400,7 +401,7 @@ describe('Member Store', () => {
   it('searchItems should filter members by gender', async () => {
     const store = useMemberStore();
     await store._loadItems();
-    const searchGender = 'male';
+    const searchGender = Gender.Male;
 
     await store.searchItems({ gender: searchGender });
     const expectedFilteredCount = mockMemberService.members.filter(m => m.gender === searchGender).length;
@@ -457,10 +458,10 @@ describe('Member Store', () => {
     expect(store.currentItem).toBeNull();
   });
 
-  it('fetchItems should set error and loading to false on fetch failure', async () => {
+  it('loadItems should set error and loading to false on fetch failure', async () => {
     const store = useMemberStore();
     mockMemberService.shouldThrowError = true;
-    await store.fetchItems();
+    await store._loadItems();
     expect(store.error).toBe('Không thể tải danh sách thành viên.');
     expect(store.loading).toBe(false);
     expect(store.items).toEqual([]);

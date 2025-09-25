@@ -19,14 +19,14 @@
           <div v-if="event.location" class="text-caption text-grey">
             <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
           </div>
-          <v-chip-group v-if="event.relatedMembers && event.relatedMembers.length > 0" class="mt-2">
-            <v-chip v-for="memberId in event.relatedMembers" :key="memberId" size="small">
-              <v-avatar start>
-                <v-img :src="getMemberAvatar(memberId)"></v-img>
-              </v-avatar>
-              {{ getMemberName(memberId) }}
-            </v-chip>
-          </v-chip-group>
+          <ChipLookup
+            v-if="event.relatedMembers && event.relatedMembers.length > 0"
+            :model-value="event.relatedMembers"
+            :data-source="memberStore"
+            display-expr="fullName"
+            value-expr="id"
+            image-expr="avatarUrl"
+          />
         </v-timeline-item>
       </v-timeline>
     </v-card-text>
@@ -36,34 +36,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyEvent } from '@/types/family';
-import type { Member } from '@/types/family';
+import type { Event } from '@/types/event/event';
 import { formatDate } from '@/utils/dateUtils';
 import { useMemberStore } from '@/stores/member.store';
+import ChipLookup from '@/components/common/ChipLookup.vue';
 
 const { events } = defineProps<{
-  events: FamilyEvent[];
+  events: Event[];
 }>();
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
 
-const allMembers = ref<Member[]>([]);
-
-const getMemberName = (memberId: string) => {
-  const member = allMembers.value.find(m => m.id === memberId);
-  return member ? member.fullName : 'Unknown';
-};
-
-const getMemberAvatar = (memberId: string) => {
-  const member = allMembers.value.find(m => m.id === memberId);
-  return member ? member.avatarUrl : '';
-};
-
-onMounted(async () => {
-  await memberStore.fetchItems(); // Fetch all members
-  allMembers.value = memberStore.items;
-});
 </script>
 
 <style scoped>

@@ -4,16 +4,16 @@ import { ApiFamilyService } from './family/api.family.service';
 import type { IMemberService } from './member/member.service.interface';
 import { MockMemberService } from './member/mock.member.service';
 import { ApiMemberService } from './member/api.member.service';
-import type { IFamilyEventService } from './family-event/family-event.service.interface';
-import { MockFamilyEventService } from './family-event/mock.family-event.service';
-import { ApiFamilyEventService } from './family-event/api.family-event.service';
+import type { IEventService } from './event/event.service.interface';
+import { MockEventService } from './event/mock.event.service';
+import { ApiEventService } from './event/api.event.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
 export interface AppServices {
   family: IFamilyService;
   member: IMemberService; 
-  familyEvent: IFamilyEventService;
+  event: IEventService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -33,11 +33,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiMemberService(apiClient)
         : testServices?.member || new MockMemberService(), // Use testServices.member if provided
-    familyEvent:
+    event:
       mode === 'mock'
-        ? new MockFamilyEventService()
+        ? new MockEventService()
         : mode === 'real'
-        ? new ApiFamilyEventService(apiClient)
-        : testServices?.familyEvent || new MockFamilyEventService(), // Use testServices.familyEvent if provided
+        ? new ApiEventService(apiClient)
+        : testServices?.event || new MockEventService(), // Use testServices.event if provided
   };
 }

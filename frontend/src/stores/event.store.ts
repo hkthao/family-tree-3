@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia';
-import type { FamilyEvent } from '@/types/family';
+import type { Event } from '@/types/event/event';
 import type { Paginated } from '@/types/common';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { EventFilter } from '@/services/family-event/family-event.service.interface';
+import type { EventFilter } from '@/services/event/event.service.interface';
 import type { ApiError } from '@/utils/api';
 
-export const useFamilyEventStore = defineStore('familyEvent', {
+export const useEventStore = defineStore('event', {
   state: () => ({
-    items: [] as FamilyEvent[],
-    currentItem: null as FamilyEvent | null,
+    items: [] as Event[],
+    currentItem: null as Event | null,
     loading: false,
     error: null as string | null,
     filter: {} as EventFilter,
@@ -29,7 +29,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.familyEvent.searchItems(
+      const result = await this.services.event.searchItems(
         this.filter,
         this.currentPage,
         this.itemsPerPage
@@ -40,40 +40,40 @@ export const useFamilyEventStore = defineStore('familyEvent', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách sự kiện gia đình.';
+        this.error = result.error.message || 'Không thể tải danh sách sự kiện.';
         console.error(result.error);
       }
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<FamilyEvent, 'id'>) {
+    async addItem(newItem: Omit<Event, 'id'>) {
       this.loading = true;
       this.error = null;
-      const result = await this.services.familyEvent.add(newItem);
+      const result = await this.services.event.add(newItem);
       if (result.ok) {
         this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
-        this.error = result.error.message || 'Không thể thêm sự kiện gia đình.';
+        this.error = result.error.message || 'Không thể thêm sự kiện.';
         console.error(result.error);
       }
       this.loading = false;
     },
 
-    async updateItem(updatedItem: FamilyEvent) {
+    async updateItem(updatedItem: Event) {
       this.loading = true;
       this.error = null;
-      const result = await this.services.familyEvent.update(updatedItem);
+      const result = await this.services.event.update(updatedItem);
       if (result.ok) {
         const index = this.items.findIndex((item) => item.id === result.value.id);
         if (index !== -1) {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
-          this.error = 'Không tìm thấy sự kiện gia đình để cập nhật trong kho.';
+          this.error = 'Không tìm thấy sự kiện để cập nhật trong kho.';
         }
       } else {
-        this.error = result.error.message || 'Không thể cập nhật sự kiện gia đình.';
+        this.error = result.error.message || 'Không thể cập nhật sự kiện.';
         console.error(result.error);
       }
       this.loading = false;
@@ -82,14 +82,14 @@ export const useFamilyEventStore = defineStore('familyEvent', {
     async deleteItem(id: string) {
       this.loading = true;
       this.error = null;
-      const result = await this.services.familyEvent.delete(id);
+      const result = await this.services.event.delete(id);
       if (result.ok) {
         await this._loadItems(); // Re-fetch to update pagination and filters
         if (this.currentPage > this.totalPages && this.totalPages > 0) {
           this.currentPage = this.totalPages;
         }
       } else {
-        this.error = result.error.message || 'Không thể xóa sự kiện gia đình.';
+        this.error = result.error.message || 'Không thể xóa sự kiện.';
         console.error(result.error);
       }
       this.loading = false;
@@ -116,7 +116,7 @@ export const useFamilyEventStore = defineStore('familyEvent', {
       }
     },
 
-    setCurrentItem(item: FamilyEvent | null) {
+    setCurrentItem(item: Event | null) {
       this.currentItem = item;
     },
   },
