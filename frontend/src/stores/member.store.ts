@@ -177,6 +177,20 @@ export const useMemberStore = defineStore('member', {
       await this._loadItems();
     },
 
+    // New searchLookup for Lookup component
+    async searchLookup(filters: MemberFilter, page: number, itemsPerPage: number) {
+      // Only apply filters relevant to Lookup: searchQuery (from searchTerm) and familyId
+      const newFilters: MemberFilter = {
+        fullName: filters.searchQuery, // Map searchQuery to fullName for filtering
+        familyId: filters.familyId,
+      };
+
+      this.filters = { ...this.filters, ...newFilters };
+      this.currentPage = page; // Use passed page
+      this.itemsPerPage = itemsPerPage; // Use passed itemsPerPage
+      await this._loadItems();
+    },
+
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
