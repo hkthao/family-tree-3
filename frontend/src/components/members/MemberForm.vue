@@ -220,6 +220,17 @@ const tab = ref('general'); // Default to general tab
 
 const form = ref<HTMLFormElement | null>(null);
 const timelineEvents = ref<TimelineEvent[]>([]);
+
+// Mock data for timeline
+const mockTimelineEvents = [
+  { year: 2005, title: 'Tốt nghiệp cấp 3', description: 'Hoàn thành chương trình trung học phổ thông với bằng danh dự.', color: 'blue' },
+  { year: 2009, title: 'Tốt nghiệp đại học', description: 'Nhận bằng Cử nhân Khoa học Máy tính.', color: 'blue' },
+  { year: 2010, title: 'Bắt đầu công việc đầu tiên', description: 'Bắt đầu sự nghiệp với tư cách là một nhà phát triển phần mềm.', color: 'green' },
+  { year: 2015, title: 'Kết hôn', description: 'Kết hôn với người bạn đời của mình.', color: 'pink' },
+  { year: 2018, title: 'Sinh con đầu lòng', description: 'Chào đón đứa con đầu lòng chào đời.', color: 'purple' },
+];
+
+timelineEvents.value = mockTimelineEvents;
 const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData ? {
   ...props.initialMemberData,
   fatherId: props.initialMemberData.fatherId === undefined ? null : props.initialMemberData.fatherId,
