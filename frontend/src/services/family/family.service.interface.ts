@@ -10,4 +10,5 @@ export interface IFamilyService extends ICrudService<Family> {
     page: number,
     itemsPerPage: number
   ): Promise<Result<Paginated<Family>, ApiError>>; // Keep searchFamilies
+  getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>>; // New method for fetching multiple families by IDs
 }
