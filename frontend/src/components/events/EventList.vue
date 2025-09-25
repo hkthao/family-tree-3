@@ -33,14 +33,13 @@
 
     <!-- Related Members column -->
     <template #item.relatedMembers="{ item }">
-      <v-chip-group>
-        <v-chip v-for="memberId in item.relatedMembers" :key="memberId" size="small">
-          <v-avatar start>
-            <v-img :src="getMemberAvatar(memberId)"></v-img>
-          </v-avatar>
-          {{ getMemberName(memberId) }}
-        </v-chip>
-      </v-chip-group>
+      <ChipLookup
+        :model-value="item.relatedMembers || []"
+        :data-source="memberStore"
+        display-expr="fullName"
+        value-expr="id"
+        image-expr="avatarUrl"
+      />
     </template>
 
     <!-- Actions column -->
@@ -64,10 +63,11 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyEvent } from '@/types/family';
-import type { Member } from '@/types/family';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberStore } from '@/stores/member.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import ChipLookup from '@/components/common/ChipLookup.vue';
+import { formatDate } from '@/utils/dateUtils';
 
 defineProps({
   events: {
@@ -89,8 +89,6 @@ const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create'])
 const { t } = useI18n();
 const memberStore = useMemberStore();
 
-const allMembers = ref<Member[]>([]);
-
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const headers = computed<DataTableHeader[]>(() => [
@@ -100,18 +98,6 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('event.list.headers.location'), key: 'location', width: '150px', align: 'start' },
   { title: t('event.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
-
-import { formatDate } from '@/utils/dateUtils';
-
-const getMemberName = (memberId: string) => {
-  const member = allMembers.value.find(m => m.id === memberId);
-  return member ? member.fullName : 'Unknown';
-};
-
-const getMemberAvatar = (memberId: string) => {
-  const member = allMembers.value.find(m => m.id === memberId);
-  return member ? member.avatarUrl : '';
-};
 
 const loadEvents = (options: { page: number; itemsPerPage: number; sortBy: string | string[] | null }) => {
   emit('update:options', options);
@@ -124,10 +110,4 @@ const editEvent = (event: FamilyEvent) => {
 const confirmDelete = (event: FamilyEvent) => {
   emit('delete', event);
 };
-
-// Fetch all members on component mount
-import { onMounted } from 'vue';
-onMounted(async () => {
-  await memberStore.searchItems({}); // Fetch all members
-  allMembers.value = memberStore.items;
-});</script>
+</script>

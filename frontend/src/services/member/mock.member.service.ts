@@ -1,13 +1,12 @@
 import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
 import type { Member } from '@/types/family';
 import type { Paginated } from '@/types/common';
-import { generateMockMembers } from '@/data/mock/member.mock';
-
 import { simulateLatency } from '@/utils/mockUtils';
 import type { Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 import { fixedMockFamilies } from '@/data/mock/fixed.family.mock'; // Import fixed mock families
+import { Gender } from '@/types/gender';
 
 // Helper function to transform date strings to Date objects
 function transformMemberDates(member: any): Member {
@@ -20,19 +19,6 @@ function transformMemberDates(member: any): Member {
   return member;
 }
 
-// Helper function to transform Member object to API request format (lastName/firstName to fullName)
-function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
-  const apiMember: any = { ...member };
-
-  if (apiMember.dateOfBirth instanceof Date) {
-    apiMember.dateOfBirth = apiMember.dateOfBirth.toISOString();
-  }
-  if (apiMember.dateOfDeath instanceof Date) {
-    apiMember.dateOfDeath = apiMember.dateOfDeath.toISOString();
-  }
-  return apiMember;
-}
-
 // Mock data generation (outside the class definition)
 let mockMembers: Member[] = [];
 for (let i = 1; i <= 1200; i++) {
@@ -42,7 +28,7 @@ for (let i = 1; i <= 1200; i++) {
     firstName: `First${i}`,
     fullName: `First${i} Last${i}`,
     familyId: fixedMockFamilies[i % 10].id, // Assign to the first 10 fixed families
-    gender: i % 2 === 0 ? 'male' : 'female',
+    gender: i % 2 === 0 ? Gender.Female : Gender.Male,
     dateOfBirth: new Date(1980 + (i % 30), (i % 12), (i % 28) + 1),
     dateOfDeath: i % 7 === 0 ? new Date(2010 + (i % 10), (i % 12), (i % 28) + 1) : undefined, // Add some death dates
     birthDeathYears: `(${1980 + (i % 30)} - ${i % 7 === 0 ? (2010 + (i % 10)) : ''})`, // Formatted years
@@ -186,6 +172,15 @@ export class MockMemberService implements IMemberService {
       return ok(paginatedResult);
     } catch (e) {
       return err({ message: 'Failed to search members from mock service.', details: e as Error });
+    }
+  }
+
+  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+    try {
+      const members = await simulateLatency(this._members.filter((m) => ids.includes(m.id)).map(m => transformMemberDates(m)));
+      return ok(members);
+    } catch (e) {
+      return err({ message: 'Failed to get members by IDs from mock service.', details: e as Error });
     }
   }
 }

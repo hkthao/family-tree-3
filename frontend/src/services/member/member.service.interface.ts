@@ -20,4 +20,5 @@ export interface MemberFilter {
 export interface IMemberService extends ICrudService<Member> { // Extend ICrudService
   fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>>; // Keep specific method
   searchMembers(filters: MemberFilter, page: number, itemsPerPage: number): Promise<Result<Paginated<Member>, ApiError>>; // Keep specific method
+  getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>>; // New method to fetch multiple members by IDs
 }

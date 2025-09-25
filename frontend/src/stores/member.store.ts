@@ -34,6 +34,11 @@ export const useMemberStore = defineStore('member', {
     getItemById: (state) => (id: string) => {
       return state.items.find((m) => m.id === id);
     },
+
+    /** Lấy nhiều member theo id */
+    getItemsByIds: (state) => (ids: string[]) => {
+      return state.items.filter((m) => ids.includes(m.id));
+    },
   },
 
   actions: {
@@ -189,6 +194,20 @@ export const useMemberStore = defineStore('member', {
       this.currentPage = page; // Use passed page
       this.itemsPerPage = itemsPerPage; // Use passed itemsPerPage
       await this._loadItems();
+    },
+
+    async getManyItemsByIds(ids: string[]): Promise<Member[]> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.member.getManyByIds(ids);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error = result.error.message || 'Không thể tải danh sách thành viên.';
+        console.error(result.error);
+        return [];
+      }
     },
 
     async setPage(page: number) {

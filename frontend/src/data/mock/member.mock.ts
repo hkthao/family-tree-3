@@ -6,17 +6,24 @@ import { Gender } from '@/types/gender';
 // Generate some mock families to link members to
 const mockFamilies = fixedMockFamilies;
 
-export function generateMockMember(familyId?: string, overrides?: Partial<Member>): Member {
+export function generateMockMember(
+  familyId?: string,
+  overrides?: Partial<Member>,
+  index?: number,
+): Member {
   const selectedFamilyId = familyId || faker.helpers.arrayElement(mockFamilies).id;
   return {
-    id: faker.string.uuid(),
+    id: `member-${index || faker.string.uuid()}`,
     lastName: faker.person.lastName(), // Generate last name
     firstName: faker.person.firstName(), // Generate first name
     fullName: `${faker.person.firstName()} ${faker.person.lastName()}`.trim(), // Generate full name
     familyId: selectedFamilyId,
     gender: faker.helpers.arrayElement(Object.values(Gender)),
     dateOfBirth: faker.date.past({ years: 50 }),
-    dateOfDeath: faker.helpers.arrayElement([undefined, faker.date.past({ years: 10 })]),
+    dateOfDeath: faker.helpers.arrayElement([
+      undefined,
+      faker.date.past({ years: 10 }),
+    ]),
     avatarUrl: faker.image.avatar(),
     nickname: faker.person.firstName(),
     placeOfBirth: faker.location.city(),
@@ -30,10 +37,13 @@ export function generateMockMember(familyId?: string, overrides?: Partial<Member
   };
 }
 
-export function generateMockMembers(count: number, specificFamilyId?: string): Member[] {
+export function generateMockMembers(
+  count: number,
+  specificFamilyId?: string,
+): Member[] {
   const members: Member[] = [];
   for (let i = 0; i < count; i++) {
-    members.push(generateMockMember(specificFamilyId));
+    members.push(generateMockMember(specificFamilyId, {}, i));
   }
   return members;
 }
