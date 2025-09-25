@@ -4,20 +4,27 @@
       <span class="text-h5 text-uppercase">{{ title }}</span>
     </v-card-title>
     <v-card-text>
-      <v-tabs v-model="tab" >
+      <v-tabs v-model="tab">
         <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
         <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="tab">
         <v-window-item value="general">
-          <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
+          <v-form
+            ref="form"
+            @submit.prevent="submitForm"
+            :disabled="props.readOnly"
+          >
             <!-- Thông tin cơ bản -->
             <v-row>
               <v-col cols="12">
                 <div class="d-flex justify-center mb-4">
                   <v-avatar size="96">
-                    <v-img v-if="memberForm.avatarUrl" :src="memberForm.avatarUrl"></v-img>
+                    <v-img
+                      v-if="memberForm.avatarUrl"
+                      :src="memberForm.avatarUrl"
+                    ></v-img>
                     <v-icon v-else size="96">mdi-account-circle</v-icon>
                   </v-avatar>
                 </div>
@@ -130,6 +137,9 @@
                       {{ item.raw.name }}
                     </v-chip>
                   </template>
+                  <template v-slot:item="{ props, item }">
+                    <AutocompleteItem v-bind="props" :item="item.raw" />
+                  </template>
                 </v-autocomplete>
               </v-col>
             </v-row>
@@ -143,7 +153,11 @@
                   :label="t('member.form.father')"
                   :readonly="props.readOnly"
                   clearable
-                ></v-autocomplete>
+                >
+                  <template v-slot:item="{ props, item }">
+                    <AutocompleteItem v-bind="props" :item="item.raw" />
+                  </template>
+                </v-autocomplete>
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
@@ -154,7 +168,11 @@
                   :label="t('member.form.mother')"
                   :readonly="props.readOnly"
                   clearable
-                ></v-autocomplete>
+                >
+                  <template v-slot:item="{ props, item }">
+                    <AutocompleteItem v-bind="props" :item="item.raw" />
+                  </template>
+                </v-autocomplete>
               </v-col>
               <v-col cols="12" md="4">
                 <v-autocomplete
@@ -165,7 +183,11 @@
                   :label="t('member.form.spouse')"
                   :readonly="props.readOnly"
                   clearable
-                ></v-autocomplete>
+                >
+                  <template v-slot:item="{ props, item }">
+                    <AutocompleteItem v-bind="props" :item="item.raw" />
+                  </template>
+                </v-autocomplete>
               </v-col>
             </v-row>
 
@@ -195,8 +217,16 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{ props.readOnly ? t('common.close') : t('common.cancel') }}</v-btn>
-      <v-btn v-if="!props.readOnly" color="blue-darken-1" variant="text" @click="submitForm">{{ t('common.save') }}</v-btn>
+      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{
+        props.readOnly ? t('common.close') : t('common.cancel')
+      }}</v-btn>
+      <v-btn
+        v-if="!props.readOnly"
+        color="blue-darken-1"
+        variant="text"
+        @click="submitForm"
+        >{{ t('common.save') }}</v-btn
+      >
     </v-card-actions>
   </v-card>
 </template>
@@ -205,19 +235,16 @@
 import { ref, computed, onMounted } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
-import DateInputField from '@/components/common/DateInputField.vue';
-import MemberTimeline from '@/components/members/MemberTimeline.vue';
-
+import {
+  DateInputField,
+  GenderSelect,
+  AutocompleteItem,
+} from '@/components/common';
+import MemberTimeline from './MemberTimeline.vue';
 import { useFamilyStore } from '@/stores/family.store';
-import GenderSelect from '@/components/common/GenderSelect.vue';
 import { useMemberStore } from '@/stores/member.store';
 
-interface TimelineEvent {
-  year: number;
-  title: string;
-  description: string;
-  color: string;
-}
+import type { TimelineEvent } from '@/types/timeline/timeline-event';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -242,47 +269,95 @@ const timelineEvents = ref<TimelineEvent[]>([]);
 
 // Mock data for timeline
 const mockTimelineEvents = [
-  { year: 2005, title: 'Tốt nghiệp cấp 3', description: 'Hoàn thành chương trình trung học phổ thông với bằng danh dự.', color: 'blue' },
-  { year: 2009, title: 'Tốt nghiệp đại học', description: 'Nhận bằng Cử nhân Khoa học Máy tính.', color: 'blue' },
-  { year: 2010, title: 'Bắt đầu công việc đầu tiên', description: 'Bắt đầu sự nghiệp với tư cách là một nhà phát triển phần mềm.', color: 'green' },
-  { year: 2015, title: 'Kết hôn', description: 'Kết hôn với người bạn đời của mình.', color: 'pink' },
-  { year: 2018, title: 'Sinh con đầu lòng', description: 'Chào đón đứa con đầu lòng chào đời.', color: 'purple' },
+  {
+    year: 2005,
+    title: 'Tốt nghiệp cấp 3',
+    description:
+      'Hoàn thành chương trình trung học phổ thông với bằng danh dự.',
+    color: 'blue',
+  },
+  {
+    year: 2009,
+    title: 'Tốt nghiệp đại học',
+    description: 'Nhận bằng Cử nhân Khoa học Máy tính.',
+    color: 'blue',
+  },
+  {
+    year: 2010,
+    title: 'Bắt đầu công việc đầu tiên',
+    description:
+      'Bắt đầu sự nghiệp với tư cách là một nhà phát triển phần mềm.',
+    color: 'green',
+  },
+  {
+    year: 2015,
+    title: 'Kết hôn',
+    description: 'Kết hôn với người bạn đời của mình.',
+    color: 'pink',
+  },
+  {
+    year: 2018,
+    title: 'Sinh con đầu lòng',
+    description: 'Chào đón đứa con đầu lòng chào đời.',
+    color: 'purple',
+  },
 ];
 timelineEvents.value = mockTimelineEvents;
 
-const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData ? {
-  ...props.initialMemberData,
-  fatherId: props.initialMemberData.fatherId === undefined ? null : props.initialMemberData.fatherId,
-  motherId: props.initialMemberData.motherId === undefined ? null : props.initialMemberData.motherId,
-  spouseId: props.initialMemberData.spouseId === undefined ? null : props.initialMemberData.spouseId,
-} : {
-  lastName: '',
-  firstName: '',
-  dateOfBirth: undefined,
-  gender: 'male',
-  familyId: '',
-  fatherId: null,
-  motherId: null,
-  spouseId: null,
-});
+const memberForm = ref<Omit<Member, 'id'> | Member>(
+  props.initialMemberData
+    ? {
+        ...props.initialMemberData,
+        fatherId:
+          props.initialMemberData.fatherId === undefined
+            ? null
+            : props.initialMemberData.fatherId,
+        motherId:
+          props.initialMemberData.motherId === undefined
+            ? null
+            : props.initialMemberData.motherId,
+        spouseId:
+          props.initialMemberData.spouseId === undefined
+            ? null
+            : props.initialMemberData.spouseId,
+      }
+    : {
+        lastName: '',
+        firstName: '',
+        dateOfBirth: undefined,
+        gender: 'male',
+        familyId: '',
+        fatherId: null,
+        motherId: null,
+        spouseId: null,
+      },
+);
 
 const membersInFamily = computed(() => {
   if (!memberForm.value.familyId || !memberStore.items) {
     return [];
   }
-  return memberStore.items.filter(m => m.familyId === memberForm.value.familyId);
+  return memberStore.items.filter(
+    (m) => m.familyId === memberForm.value.familyId,
+  );
 });
 
 const potentialFathers = computed(() => {
-  return membersInFamily.value.filter(m => m.gender === 'male' && m.id !== props.initialMemberData?.id);
+  return membersInFamily.value.filter(
+    (m) => m.gender === 'male' && m.id !== props.initialMemberData?.id,
+  );
 });
 
 const potentialMothers = computed(() => {
-  return membersInFamily.value.filter(m => m.gender === 'female' && m.id !== props.initialMemberData?.id);
+  return membersInFamily.value.filter(
+    (m) => m.gender === 'female' && m.id !== props.initialMemberData?.id,
+  );
 });
 
 const potentialSpouses = computed(() => {
-  return membersInFamily.value.filter(m => m.id !== props.initialMemberData?.id);
+  return membersInFamily.value.filter(
+    (m) => m.id !== props.initialMemberData?.id,
+  );
 });
 
 const formatFamilyItemProps = (item: any) => {
@@ -301,9 +376,10 @@ const dateOfDeathRule = (value: string | Date | null) => {
   if (!memberForm.value.dateOfBirth) return true;
 
   const dateOfDeath = typeof value === 'string' ? new Date(value) : value;
-  const dateOfBirth = typeof memberForm.value.dateOfBirth === 'string'
-    ? new Date(memberForm.value.dateOfBirth)
-    : memberForm.value.dateOfBirth;
+  const dateOfBirth =
+    typeof memberForm.value.dateOfBirth === 'string'
+      ? new Date(memberForm.value.dateOfBirth)
+      : memberForm.value.dateOfBirth;
 
   if (!dateOfDeath || !dateOfBirth) return true;
   return dateOfDeath > dateOfBirth || t('validation.dateOfDeathAfterBirth');
