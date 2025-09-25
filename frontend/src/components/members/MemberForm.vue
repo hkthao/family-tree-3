@@ -140,6 +140,7 @@
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
                   subtitle-expr="birthDeathYears"
+                  :additional-filters="{ familyId: memberForm.familyId }"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -152,6 +153,7 @@
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
                   subtitle-expr="birthDeathYears"
+                  :additional-filters="{ familyId: memberForm.familyId }"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -164,6 +166,7 @@
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
                   subtitle-expr="birthDeathYears"
+                  :additional-filters="{ familyId: memberForm.familyId }"
                 />
               </v-col>
             </v-row>

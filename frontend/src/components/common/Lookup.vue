@@ -72,6 +72,7 @@ interface LookupProps {
   clearable?: boolean;
   rules?: any[];
   subtitleExpr?: string; // New prop for subtitle
+  additionalFilters?: any; // New prop for additional filters
 }
 
 const { t } = useI18n(); // Moved here
@@ -135,7 +136,7 @@ const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPe
 
   loading.value = true;
   try {
-    const filter = { searchQuery: searchTerm.value }; // Construct filter object
+    const filter = { searchQuery: searchTerm.value, ...props.additionalFilters }; // Merge with additional filters
     await props.dataSource.searchLookup(filter, page, itemsPerPage);
     items.value = props.dataSource.items;
     totalItems.value = props.dataSource.totalItems;
