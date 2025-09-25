@@ -1,5 +1,12 @@
-// tests/setup.ts
+
 import { vi } from 'vitest';
+
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));// tests/setup.ts
 
 // Mock visualViewport để Vuetify không quăng lỗi
 Object.defineProperty(window, 'visualViewport', {
