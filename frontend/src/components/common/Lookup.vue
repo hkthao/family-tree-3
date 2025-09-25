@@ -28,7 +28,7 @@
         <v-card-text>
           <v-text-field
             v-model="searchTerm"
-            label="Search"
+            :label="t('common.search')"
             prepend-inner-icon="mdi-magnify"
             variant="outlined"
             density="compact"
@@ -48,7 +48,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue-darken-1" variant="text" @click="closeDialog">
-            Close
+            {{ t('common.close') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 // Define Props
 interface LookupProps {
@@ -80,6 +81,8 @@ const props = withDefaults(defineProps<LookupProps>(), {
 
 // Define Emits
 const emit = defineEmits(['update:modelValue']);
+
+const { t } = useI18n();
 
 // Internal state
 const dialog = ref(false);
@@ -121,7 +124,7 @@ const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPe
   loading.value = true;
   try {
     await props.dataSource.searchLookup(searchTerm.value, page, itemsPerPage);
-    items.value = props.dataSource.families;
+    items.value = props.dataSource.items;
     totalItems.value = props.dataSource.totalItems;
   } catch (error) {
     console.error('Error loading items:', error);
@@ -147,9 +150,9 @@ const closeDialog = () => {
 };
 
 // Item selection
-const selectItem = (event: Event, { item }: { item: { raw: any } }) => {
-  selectedItem.value = item.raw;
-  emit('update:modelValue', item.raw[props.valueExpr]);
+const selectItem = (event: Event, { item }: { item: any }) => {
+  selectedItem.value = item;
+  emit('update:modelValue', item[props.valueExpr]);
   closeDialog();
 };
 
