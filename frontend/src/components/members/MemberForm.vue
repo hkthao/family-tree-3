@@ -124,7 +124,7 @@
                   value-expr="id"
                   :label="t('member.form.familyId')"
                   :rules="[rules.required]"
-                  :readonly="props.readOnly"
+                  :readonly="true"
                   subtitle-expr="address"
                 />
               </v-col>
@@ -138,9 +138,13 @@
                   value-expr="id"
                   :label="t('member.form.father')"
                   :rules="[rules.required]"
-                  :readonly="props.readOnly"
+                  :readonly="true"
+                  :disabled="!memberForm.familyId"
                   subtitle-expr="birthDeathYears"
-                  :additional-filters="{ familyId: memberForm.familyId, gender: 'male' }"
+                  :additional-filters="{
+                    familyId: memberForm.familyId,
+                    gender: 'male',
+                  }"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -152,8 +156,12 @@
                   :label="t('member.form.mother')"
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
+                  :disabled="!memberForm.familyId"
                   subtitle-expr="birthDeathYears"
-                  :additional-filters="{ familyId: memberForm.familyId, gender: 'female' }"
+                  :additional-filters="{
+                    familyId: memberForm.familyId,
+                    gender: 'female',
+                  }"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -164,7 +172,8 @@
                   value-expr="id"
                   :label="t('member.form.spouse')"
                   :rules="[rules.required]"
-                  :readonly="props.readOnly"
+                  :readonly="true"
+                  :disabled="!memberForm.familyId"
                   subtitle-expr="birthDeathYears"
                   :additional-filters="{ familyId: memberForm.familyId }"
                 />
@@ -215,11 +224,7 @@
 import { ref, computed, watch } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
-import {
-  DateInputField,
-  GenderSelect,
-  Lookup,
-} from '@/components/common';
+import { DateInputField, GenderSelect, Lookup } from '@/components/common';
 import MemberTimeline from './MemberTimeline.vue';
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
@@ -237,8 +242,6 @@ const emit = defineEmits(['close', 'submit']);
 const { t } = useI18n();
 const familyStore = useFamilyStore();
 const memberStore = useMemberStore();
-
-
 
 const tab = ref('general');
 
@@ -311,15 +314,18 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
       },
 );
 
-watch(() => memberForm.value.familyId, (newFamilyId) => {
-  if (newFamilyId) {
-    memberStore.searchItems({ familyId: newFamilyId });
-  } else {
-    memberStore.searchItems({}); // Clear filters if no family is selected
-  }
-}, { immediate: true }); // Immediate to load members for initial familyId
-
-
+watch(
+  () => memberForm.value.familyId,
+  (newFamilyId) => {
+    // Clear father, mother, and spouse when familyId changes
+    if (memberForm.value.fatherId != newFamilyId) {
+      memberForm.value.fatherId = null;
+      memberForm.value.motherId = null;
+      memberForm.value.spouseId = null;
+    }
+  },
+  { immediate: true },
+); // Immediate to load members for initial familyId
 
 const rules = {
   required: (value: unknown) => !!value || t('validation.required'),
