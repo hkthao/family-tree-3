@@ -241,5 +241,6 @@
       "child": "Con cái"
     }
   },
-  "common.name": "Tên"
+  "common.name": "Tên",
+  "common.noData": "Không có dữ liệu"
 }
