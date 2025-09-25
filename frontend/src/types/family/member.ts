@@ -20,3 +20,15 @@ export interface Member {
   spouseId?: string | null; // New
   biography?: string; // New
 }
+
+export interface MemberFilter {
+  fullName?: string;
+  dateOfBirth?: Date | null;
+  dateOfDeath?: Date | null;
+  gender?: Gender | undefined;
+  placeOfBirth?: string;
+  placeOfDeath?: string;
+  occupation?: string;
+  familyId?: string | null;
+  searchQuery?: string; // New property for search term
+}

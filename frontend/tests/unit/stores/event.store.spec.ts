@@ -114,6 +114,11 @@ export class MockEventServiceForTest implements IEventService {
       totalPages,
     }));
   }
+
+  async getManyByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
+    const events = this._events.filter(e => ids.includes(e.id));
+    return ok(await simulateLatency(events));
+  }
 }
 
 describe('Family Event Store', () => {

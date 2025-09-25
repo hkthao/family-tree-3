@@ -122,4 +122,13 @@ export class MockFamilyService implements IFamilyService {
       return err({ message: 'Failed to search families from mock service.', details: e as Error });
     }
   }
+
+  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+    try {
+      const families = await simulateLatency(this.families.filter(f => ids.includes(f.id)));
+      return ok(families);
+    } catch (e) {
+      return err({ message: 'Failed to get families by IDs from mock service.', details: e as Error });
+    }
+  }
 }

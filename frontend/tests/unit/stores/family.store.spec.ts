@@ -166,6 +166,11 @@ class MockFamilyServiceForTest implements IFamilyService {
       totalPages,
     }));
   }
+
+  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+    const families = this._items.filter(f => ids.includes(f.id));
+    return ok(await simulateLatency(families));
+  }
 }
 
 describe('Family Store', () => {

@@ -19,7 +19,7 @@ import { ref, watch, computed } from 'vue';
 // Define Props
 interface ChipLookupProps {
   dataSource: any[] | any; // Can be an array or a Pinia store
-  modelValue: (string | number)[] | undefined; // Array of IDs
+  modelValue: (string | number | (string | number)[]) | undefined; // Single ID or Array of IDs
   displayExpr?: string;
   valueExpr?: string;
   imageExpr?: string;
@@ -43,16 +43,26 @@ const isStore = computed(() => {
 });
 
 const loadItems = async () => {
-  if (!props.modelValue || props.modelValue.length === 0) {
+  let idsToFetch: (string | number)[] = [];
+
+  if (props.modelValue) {
+    if (Array.isArray(props.modelValue)) {
+      idsToFetch = props.modelValue;
+    } else {
+      idsToFetch = [props.modelValue];
+    }
+  }
+
+  if (idsToFetch.length === 0) {
     selectedItems.value = [];
     return;
   }
 
   if (isStore.value && typeof props.dataSource.getManyItemsByIds === 'function') {
-    selectedItems.value = await props.dataSource.getManyItemsByIds(props.modelValue);
+    selectedItems.value = await props.dataSource.getManyItemsByIds(idsToFetch);
   } else if (Array.isArray(props.dataSource)) {
     selectedItems.value = props.dataSource.filter((item) =>
-      props.modelValue?.includes(item[props.valueExpr])
+      idsToFetch.includes(item[props.valueExpr])
     );
   }
 };

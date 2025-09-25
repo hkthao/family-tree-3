@@ -65,4 +65,11 @@ export class ApiFamilyService implements IFamilyService {
       return err(error);
     }
   }
+
+  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+    console.log(`Fetching families by IDs: ${ids.join(', ')} from API`);
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('ids', id));
+    return safeApiCall(this.http.get<Family[]>(`${this.apiUrl}/by-ids?${params.toString()}`));
+  }
 }

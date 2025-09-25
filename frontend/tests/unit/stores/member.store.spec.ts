@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types/family';
-import type { IMemberService, MemberFilter } from '@/services/member/member.service.interface';
+import type { Member, MemberFilter } from '@/types/family';
+import type { IMemberService } from '@/services/member/member.service.interface';
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 import { createServices } from '@/services/service.factory';
@@ -141,6 +141,11 @@ class MockMemberServiceForTest implements IMemberService {
       totalItems,
       totalPages,
     }));
+  }
+
+  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+    const members = this._members.filter(m => ids.includes(m.id));
+    return ok(await simulateLatency(members));
   }
 }
 

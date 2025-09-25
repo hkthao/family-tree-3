@@ -126,4 +126,13 @@ export class MockEventService implements IEventService {
       return err({ message: 'Failed to search events from mock service.', details: e as Error });
     }
   }
+
+  async getManyByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
+    try {
+      const events = await simulateLatency(this.events.filter(e => ids.includes(e.id)));
+      return ok(events);
+    } catch (e) {
+      return err({ message: 'Failed to get events by IDs from mock service.', details: e as Error });
+    }
+  }
 }

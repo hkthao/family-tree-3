@@ -1,5 +1,5 @@
-import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
-import type { Member } from '@/types/family';
+import type { IMemberService } from './member.service.interface'; // Import MemberFilter
+import type { Member, MemberFilter } from '@/types/family/member';
 import type { Paginated } from '@/types/common';
 import { simulateLatency } from '@/utils/mockUtils';
 import type { Result } from '@/types/common';
