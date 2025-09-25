@@ -115,7 +115,7 @@ export class MockMemberService implements IMemberService {
     }
   }
 
-  async searchMembers(
+  async searchItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,

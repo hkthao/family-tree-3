@@ -85,7 +85,7 @@ export class ApiMemberService implements IMemberService {
     return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 
-  async searchMembers(
+  async searchItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
