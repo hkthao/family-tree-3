@@ -1,64 +1,61 @@
 <template>
-  <v-chip v-if="displayValue" :color="chipColor" label size="small">
-    {{ displayValue }}
-  </v-chip>
-  <span v-else-if="loading">Loading...</span>
-  <span v-else>N/A</span>
+  <v-chip-group>
+    <v-chip
+      v-for="item in selectedItems"
+      :key="item[valueExpr]"
+      size="small"
+    >
+      <v-avatar v-if="imageExpr && item[imageExpr]" start>
+        <v-img :src="item[imageExpr]"></v-img>
+      </v-avatar>
+      {{ item[displayExpr] }}
+    </v-chip>
+  </v-chip-group>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 
 // Define Props
 interface ChipLookupProps {
   dataSource: any[] | any; // Can be an array or a Pinia store
-  value: string | number | null; // Current ID to look up
-  displayExpr?: string; // Field name to display (e.g., "name")
-  valueExpr?: string; // Field name for the value (e.g., "id")
-  color?: string; // Color for the chip
+  modelValue: (string | number)[] | undefined; // Array of IDs
+  displayExpr?: string;
+  valueExpr?: string;
+  imageExpr?: string;
 }
 
 const props = withDefaults(defineProps<ChipLookupProps>(), {
   displayExpr: 'name',
   valueExpr: 'id',
-  color: 'primary',
+  imageExpr: undefined,
 });
 
+const selectedItems = ref<any[]>([]);
 
-const displayValue = ref<string | null>(null);
-const loading = ref(false);
-
-watch(
-  () => props.value,
-  async (newValue) => {
-    if (newValue) {
-      loading.value = true;
-      let foundItem: any = null;
-
-      if (Array.isArray(props.dataSource)) {
-        foundItem = props.dataSource.find(item => item[props.valueExpr] === newValue);
-      } else if (props.dataSource && typeof props.dataSource === 'object' && '_p' in props.dataSource) {
-        // Assuming dataSource is a Pinia store
-        if (typeof props.dataSource.fetchItemById === 'function') {
-          foundItem = await props.dataSource.fetchItemById(newValue as string);
-        }
-      }
-
-      displayValue.value = foundItem ? foundItem[props.displayExpr] : 'N/A';
-      loading.value = false;
-    } else {
-      displayValue.value = null;
-    }
-  },
-  { immediate: true },
-);
-
-// Computed property for chip color
-const chipColor = computed(() => {
-  return props.color;
+// Check if dataSource is a Pinia store
+const isStore = computed(() => {
+  return (
+    props.dataSource &&
+    typeof props.dataSource === 'object' &&
+    '_p' in props.dataSource
+  );
 });
+
+const loadItems = async () => {
+  if (!props.modelValue || props.modelValue.length === 0) {
+    selectedItems.value = [];
+    return;
+  }
+
+  if (isStore.value && typeof props.dataSource.getManyItemsByIds === 'function') {
+    selectedItems.value = await props.dataSource.getManyItemsByIds(props.modelValue);
+  } else if (Array.isArray(props.dataSource)) {
+    selectedItems.value = props.dataSource.filter((item) =>
+      props.modelValue?.includes(item[props.valueExpr])
+    );
+  }
+};
+
+watch(() => props.modelValue, loadItems, { immediate: true });
 </script>
-
-<style scoped>
-/* Add any specific styles for ChipLookup.vue here */
-</style>
