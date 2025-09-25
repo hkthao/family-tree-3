@@ -218,6 +218,7 @@
   "timeline.form.addTitle": "Add Timeline Event",
   "timeline.addEvent": "Add New Event",
   "common.close": "Close",
+  "common.subtitle": "Description",
   "common.today": "Today",
   "common.search": "Search",
   "event.calendar.viewMode": "View Mode",
@@ -238,5 +239,6 @@
       "spouse": "Spouse",
       "child": "Child"
     }
-  }
+  },
+  "common.name": "Name"
 }

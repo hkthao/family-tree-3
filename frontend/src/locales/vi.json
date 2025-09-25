@@ -220,6 +220,7 @@
   "timeline.form.addTitle": "Thêm Sự kiện Dòng Thời Gian",
   "timeline.addEvent": "Thêm Sự kiện Mới",
   "common.close": "Đóng",
+  "common.subtitle": "Mô tả",
   "common.today": "Hôm nay",
   "event.calendar.viewMode": "Chế độ xem",
   "event.calendar.viewMode.month": "Tháng",
@@ -239,5 +240,6 @@
       "spouse": "Vợ/Chồng",
       "child": "Con cái"
     }
-  }
+  },
+  "common.name": "Tên"
 }

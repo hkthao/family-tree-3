@@ -125,6 +125,7 @@
                   :label="t('member.form.familyId')"
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
+                  subtitle-expr="address"
                 />
               </v-col>
             </v-row>
@@ -136,7 +137,9 @@
                   display-expr="fullName"
                   value-expr="id"
                   :label="t('member.form.father')"
+                  :rules="[rules.required]"
                   :readonly="props.readOnly"
+                  subtitle-expr="birthDeathYears"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -146,7 +149,9 @@
                   display-expr="fullName"
                   value-expr="id"
                   :label="t('member.form.mother')"
+                  :rules="[rules.required]"
                   :readonly="props.readOnly"
+                  subtitle-expr="birthDeathYears"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -156,7 +161,9 @@
                   display-expr="fullName"
                   value-expr="id"
                   :label="t('member.form.spouse')"
+                  :rules="[rules.required]"
                   :readonly="props.readOnly"
+                  subtitle-expr="birthDeathYears"
                 />
               </v-col>
             </v-row>

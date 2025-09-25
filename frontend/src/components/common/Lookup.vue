@@ -5,7 +5,7 @@
       :items="selectedItem ? [selectedItem] : []"
       :item-title="displayExpr"
       :item-value="valueExpr"
-      :label="label"
+      :label="computedLabel"
       :loading="loading"
       :clearable="clearable"
       :rules="rules"
@@ -13,7 +13,7 @@
       variant="outlined"
       density="compact"
       hide-dropdown-icon
-      @click:append-inner="openDialog"
+      @click="openDialog"
     >
       <template #append-inner>
         <v-icon @click.stop="openDialog">mdi-magnify</v-icon>
@@ -27,6 +27,7 @@
         </v-card-title>
         <v-card-text>
           <v-text-field
+            ref="searchInput"
             v-model="searchTerm"
             :label="t('common.search')"
             prepend-inner-icon="mdi-magnify"
@@ -41,6 +42,7 @@
             :items-length="totalItems"
             :loading="loading"
             :search="searchTerm"
+            hover
             @update:options="loadItems"
             @click:row="selectItem"
           ></v-data-table-server>
@@ -57,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 // Define Props
@@ -69,20 +71,24 @@ interface LookupProps {
   label?: string;
   clearable?: boolean;
   rules?: any[];
+  subtitleExpr?: string; // New prop for subtitle
 }
+
+const { t } = useI18n(); // Moved here
 
 const props = withDefaults(defineProps<LookupProps>(), {
   displayExpr: 'name',
   valueExpr: 'id',
-  label: 'Select an item',
+  label: undefined, // Remove default label here
   clearable: false,
   rules: () => [],
+  subtitleExpr: undefined, // Default value for subtitleExpr
 });
 
 // Define Emits
 const emit = defineEmits(['update:modelValue']);
 
-const { t } = useI18n();
+const computedLabel = computed(() => props.label || t('common.selectItem'));
 
 // Internal state
 const dialog = ref(false);
@@ -90,13 +96,19 @@ const loading = ref(false);
 const items = ref<any[]>([]);
 const totalItems = ref(0);
 const searchTerm = ref('');
+const searchInput = ref<HTMLInputElement | null>(null); // Ref for search input
 const selectedItem = ref<any>(null);
 
 // Headers for the data table
-const headers = computed(() => [
-  { title: props.displayExpr, value: props.displayExpr },
-  // Add more headers if needed
-]);
+const headers = computed(() => {
+  const cols: any[] = [
+    { title: t('common.name'), value: props.displayExpr },
+  ];
+  if (props.subtitleExpr) {
+    cols.push({ title: t('common.subtitle'), value: props.subtitleExpr });
+  }
+  return cols;
+});
 
 // Check if dataSource is a Pinia store
 const isStore = computed(() => {
@@ -123,7 +135,8 @@ const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPe
 
   loading.value = true;
   try {
-    await props.dataSource.searchLookup(searchTerm.value, page, itemsPerPage);
+    const filter = { searchQuery: searchTerm.value }; // Construct filter object
+    await props.dataSource.searchLookup(filter, page, itemsPerPage);
     items.value = props.dataSource.items;
     totalItems.value = props.dataSource.totalItems;
   } catch (error) {
@@ -140,8 +153,10 @@ const searchItems = () => {
 };
 
 // Dialog control
-const openDialog = () => {
+const openDialog = async () => {
   dialog.value = true;
+  await nextTick(); // Ensure dialog is rendered before focusing
+  searchInput.value?.focus();
   loadItems({ page: 1, itemsPerPage: 10, sortBy: [] });
 };
 
