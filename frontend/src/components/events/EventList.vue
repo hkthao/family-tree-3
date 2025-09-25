@@ -31,9 +31,20 @@
       </a>
     </template>
 
+    <!-- Family column -->
+    <template #item.familyId="{ item }">
+      <ChipLookup
+        :model-value="item.familyId"
+        :data-source="familyStore"
+        display-expr="name"
+        value-expr="id"
+        image-expr="avatarUrl"
+      />
+    </template>
+
     <!-- Related Members column -->
     <template #item.relatedMembers="{ item }">
-      <ChipLookup
+ <ChipLookup
         :model-value="item.relatedMembers || []"
         :data-source="memberStore"
         display-expr="fullName"
@@ -65,6 +76,7 @@ import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types/event/event';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberStore } from '@/stores/member.store';
+import { useFamilyStore } from '@/stores/family.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import ChipLookup from '@/components/common/ChipLookup.vue';
 import { formatDate } from '@/utils/dateUtils';
@@ -88,13 +100,15 @@ const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create'])
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
+const familyStore = useFamilyStore();
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('event.list.headers.date'), key: 'startDate', width: '120px', align: 'center' },
-  { title: t('event.list.headers.name'), key: 'name', width: 'auto', align: 'start' },
-  { title: t('event.list.headers.relatedMembers'), key: 'relatedMembers', width: '150px', align: 'start', sortable: false },
+  { title: t('event.list.headers.name'), key: 'name', minWidth: '150px', align: 'start', class: 'text-truncate' },
+  { title: t('event.list.headers.family'), key: 'familyId', width: '150px', align: 'start', sortable: false },
+  { title: t('event.list.headers.relatedMembers'), key: 'relatedMembers', width: '200px', align: 'start', sortable: false },
   { title: t('event.list.headers.location'), key: 'location', width: '150px', align: 'start' },
   { title: t('event.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
 ]);
