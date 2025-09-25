@@ -219,6 +219,7 @@
   "timeline.addEvent": "Add New Event",
   "common.close": "Close",
   "common.today": "Today",
+  "common.search": "Search",
   "event.calendar.viewMode": "View Mode",
   "event.calendar.viewMode.month": "Month",
   "event.calendar.viewMode.week": "Week",
