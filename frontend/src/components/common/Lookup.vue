@@ -12,6 +12,7 @@
       readonly
       variant="outlined"
       density="compact"
+      hide-dropdown-icon
       @click:append-inner="openDialog"
     >
       <template #append-inner>

@@ -117,77 +117,47 @@
 
             <v-row>
               <v-col cols="12">
-                <v-autocomplete
+                <Lookup
                   v-model="memberForm.familyId"
-                  :items="familyStore.items"
-                  item-value="id"
+                  :data-source="familyStore"
+                  display-expr="name"
+                  value-expr="id"
                   :label="t('member.form.familyId')"
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
-                  clearable
-                  :item-props="formatFamilyItemProps"
-                >
-                  <template v-slot:selection="{ item }">
-                    <v-chip
-                      v-if="item.raw"
-                      :prepend-avatar="item.raw.avatarUrl"
-                      :closable="!props.readOnly"
-                      @click:close="memberForm.familyId = ''"
-                    >
-                      {{ item.raw.name }}
-                    </v-chip>
-                  </template>
-                  <template v-slot:item="{ props, item }">
-                    <AutocompleteItem v-bind="props" :item="item.raw" />
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" md="4">
-                <v-autocomplete
+                <Lookup
                   v-model="memberForm.fatherId"
-                  :items="potentialFathers"
-                  item-title="fullName"
-                  item-value="id"
+                  :data-source="memberStore"
+                  display-expr="fullName"
+                  value-expr="id"
                   :label="t('member.form.father')"
                   :readonly="props.readOnly"
-                  clearable
-                >
-                  <template v-slot:item="{ props, item }">
-                    <AutocompleteItem v-bind="props" :item="item.raw" />
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
               <v-col cols="12" md="4">
-                <v-autocomplete
+                <Lookup
                   v-model="memberForm.motherId"
-                  :items="potentialMothers"
-                  item-title="fullName"
-                  item-value="id"
+                  :data-source="memberStore"
+                  display-expr="fullName"
+                  value-expr="id"
                   :label="t('member.form.mother')"
                   :readonly="props.readOnly"
-                  clearable
-                >
-                  <template v-slot:item="{ props, item }">
-                    <AutocompleteItem v-bind="props" :item="item.raw" />
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
               <v-col cols="12" md="4">
-                <v-autocomplete
+                <Lookup
                   v-model="memberForm.spouseId"
-                  :items="potentialSpouses"
-                  item-title="fullName"
-                  item-value="id"
+                  :data-source="memberStore"
+                  display-expr="fullName"
+                  value-expr="id"
                   :label="t('member.form.spouse')"
                   :readonly="props.readOnly"
-                  clearable
-                >
-                  <template v-slot:item="{ props, item }">
-                    <AutocompleteItem v-bind="props" :item="item.raw" />
-                  </template>
-                </v-autocomplete>
+                />
               </v-col>
             </v-row>
 
@@ -232,13 +202,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import {
   DateInputField,
   GenderSelect,
-  AutocompleteItem,
+  Lookup,
 } from '@/components/common';
 import MemberTimeline from './MemberTimeline.vue';
 import { useFamilyStore } from '@/stores/family.store';
@@ -258,9 +228,7 @@ const { t } = useI18n();
 const familyStore = useFamilyStore();
 const memberStore = useMemberStore();
 
-onMounted(() => {
-  familyStore.fetchAllItems();
-});
+
 
 const tab = ref('general');
 
@@ -333,39 +301,7 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
       },
 );
 
-const membersInFamily = computed(() => {
-  if (!memberForm.value.familyId || !memberStore.items) {
-    return [];
-  }
-  return memberStore.items.filter(
-    (m) => m.familyId === memberForm.value.familyId,
-  );
-});
 
-const potentialFathers = computed(() => {
-  return membersInFamily.value.filter(
-    (m) => m.gender === 'male' && m.id !== props.initialMemberData?.id,
-  );
-});
-
-const potentialMothers = computed(() => {
-  return membersInFamily.value.filter(
-    (m) => m.gender === 'female' && m.id !== props.initialMemberData?.id,
-  );
-});
-
-const potentialSpouses = computed(() => {
-  return membersInFamily.value.filter(
-    (m) => m.id !== props.initialMemberData?.id,
-  );
-});
-
-const formatFamilyItemProps = (item: any) => {
-  return {
-    title: item.name,
-    subtitle: item.address,
-  };
-};
 
 const rules = {
   required: (value: unknown) => !!value || t('validation.required'),

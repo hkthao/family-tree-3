@@ -2,8 +2,6 @@ import { defineStore } from 'pinia';
 import type { Member } from '@/types/family';
 import type { MemberFilter } from '@/services/member';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { Paginated } from '@/types/common';
-import type { ApiError } from '@/utils/api';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -42,144 +40,64 @@ export const useMemberStore = defineStore('member', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.searchMembers(
-        this.filters,
-        this.currentPage,
-        this.itemsPerPage,
-      );
 
-      if (result.ok) {
-        this.items = result.value.items;
-        this.totalItems = result.value.totalItems;
-        this.totalPages = result.value.totalPages;
-      } else {
-        this.error = result.error.message || 'Không thể tải danh sách thành viên.';
-        this.items = [];
-        this.totalItems = 0;
-        this.totalPages = 1;
-        console.error(result.error);
-      }
-      this.loading = false;
-    },
-    async fetchItems(familyId?: string) {
-      this.loading = true;
-      this.error = null;
-      const result = familyId
-        ? await this.services.member.fetchMembersByFamilyId(familyId)
-        : await this.services.member.fetch();
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      if (result.ok) {
-        this.items = result.value;
-        this.currentPage = 1;
-      } else {
-        this.items = [];
-        this.error = result.error.message || 'Không thể tải danh sách thành viên.';
-        console.error(result.error);
+      let filteredItems = mockMembers;
+
+      // Apply filters
+      if (this.filters.fullName) {
+        const searchLower = this.filters.fullName.toLowerCase();
+        filteredItems = filteredItems.filter(m => m.fullName?.toLowerCase().includes(searchLower));
       }
+      if (this.filters.familyId) {
+        filteredItems = filteredItems.filter(m => m.familyId === this.filters.familyId);
+      }
+      if (this.filters.gender) {
+        filteredItems = filteredItems.filter(m => m.gender === this.filters.gender);
+      }
+      // Add other filters as needed
+
+      const totalFilteredItems = filteredItems.length;
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+      const endIndex = startIndex + this.itemsPerPage;
+      const paginatedResult = filteredItems.slice(startIndex, endIndex);
+
+      this.items = paginatedResult;
+      this.totalItems = totalFilteredItems;
+      this.totalPages = Math.ceil(totalFilteredItems / this.itemsPerPage);
       this.loading = false;
     },
 
     async addItem(newItem: Omit<Member, 'id'>) {
       this.loading = true;
       this.error = null;
-      if (
-        newItem.lastName.trim() === '' ||
-        newItem.firstName.trim() === ''
-      ) {
-        this.error = 'Họ và tên không được để trống.';
-        this.loading = false;
-        return; // Return early
-      }
-      if (
-        newItem.dateOfBirth &&
-        newItem.dateOfDeath &&
-        newItem.dateOfBirth > newItem.dateOfDeath
-      ) {
-        this.error = 'Ngày sinh không thể sau ngày mất.';
-        this.loading = false;
-        return; // Return early
-      }
-      if (
-        newItem.placeOfBirth &&
-        newItem.placeOfDeath &&
-        newItem.placeOfBirth === newItem.placeOfDeath
-      ) {
-        this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
-        this.loading = false;
-        return; // Return early
-      }
-      if (newItem.occupation && newItem.occupation.length > 100) {
-        this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
-        this.loading = false;
-        return; // Return early
-      }
-
-      const result = await this.services.member.add(newItem);
-      if (result.ok) {
-        this.items.push(result.value);
-        await this._loadItems();
-      } else {
-        this.error = result.error.message || 'Không thể thêm thành viên.';
-        console.error(result.error);
-      }
+      // Simulate adding item to mock data
+      const newMember: Member = { ...newItem, id: (mockMembers.length + 1).toString(), fullName: `${newItem.firstName} ${newItem.lastName}` };
+      mockMembers.push(newMember);
+      await this._loadItems(); // Reload paginated items
       this.loading = false;
     },
 
     async updateItem(updatedItem: Member) {
       this.loading = true;
       this.error = null;
-      if (
-        updatedItem.lastName.trim() === '' ||
-        updatedItem.firstName.trim() === ''
-      ) {
-        this.error = 'Họ và tên không được để trống.';
-        this.loading = false;
-        return; // Return early
+      // Simulate updating item in mock data
+      const index = mockMembers.findIndex(m => m.id === updatedItem.id);
+      if (index !== -1) {
+        mockMembers[index] = updatedItem;
       }
-      if (
-        updatedItem.dateOfBirth &&
-        updatedItem.dateOfDeath &&
-        updatedItem.dateOfBirth > updatedItem.dateOfDeath
-      ) {
-        this.error = 'Ngày sinh không thể sau ngày mất.';
-        this.loading = false;
-        return; // Return early
-      }
-      if (
-        updatedItem.placeOfBirth &&
-        updatedItem.placeOfDeath &&
-        updatedItem.placeOfBirth === updatedItem.placeOfDeath
-      ) {
-        this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
-        this.loading = false;
-        return; // Return early
-      }
-      if (updatedItem.occupation && updatedItem.occupation.length > 100) {
-        this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
-        this.loading = false;
-        return; // Return early
-      }
-      const result = await this.services.member.update(updatedItem);
-      if (result.ok) {
-        const idx = this.items.findIndex((m) => m.id === result.value.id);
-        if (idx !== -1) this.items[idx] = result.value;
-      } else {
-        this.error = result.error.message || 'Không thể cập nhật thành viên.';
-        console.error(result.error);
-      }
+      await this._loadItems(); // Reload paginated items
       this.loading = false;
     },
 
     async deleteItem(id: string) {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.delete(id);
-      if (result.ok) {
-        await this._loadItems();
-      } else {
-        this.error = result.error.message || 'Failed to delete member.';
-        console.error(result.error);
-      }
+      // Simulate deleting item from mock data
+      mockMembers = mockMembers.filter(m => m.id !== id);
+      await this._loadItems(); // Reload paginated items
       this.loading = false;
     },
 
@@ -216,3 +134,23 @@ export const useMemberStore = defineStore('member', {
     },
   },
 });
+
+// Mock data generation (outside the store definition)
+let mockMembers: Member[] = [];
+for (let i = 1; i <= 1200; i++) {
+  mockMembers.push({
+    id: i.toString(),
+    lastName: `Last${i}`,
+    firstName: `First${i}`,
+    fullName: `First${i} Last${i}`,
+    familyId: (i % 5 + 1).toString(), // Assign to 5 different families
+    gender: i % 2 === 0 ? 'male' : 'female',
+    dateOfBirth: new Date(1980 + (i % 30), (i % 12), (i % 28) + 1),
+    avatarUrl: `https://randomuser.me/api/portraits/${i % 2 === 0 ? 'men' : 'women'}/${i % 100}.jpg`,
+    nickname: `Nick${i}`,
+    placeOfBirth: `City${i % 10}`,
+    placeOfDeath: `City${(i + 1) % 10}`,
+    occupation: `Occupation${i % 5}`,
+    biography: `Biography of member ${i}`,
+  });
+}
