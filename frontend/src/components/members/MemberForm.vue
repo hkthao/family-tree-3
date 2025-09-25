@@ -110,47 +110,62 @@
 
             <v-row>
               <v-col cols="12">
-                <Lookup
+                <v-autocomplete
                   v-model="memberForm.familyId"
-                  :data-source="familyStore"
-                  display-expr="name"
-                  value-expr="id"
+                  :items="familyStore.items"
+                  item-value="id"
                   :label="t('member.form.familyId')"
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
-                />
+                  clearable
+                  :item-props="formatFamilyItemProps"
+                >
+                  <template v-slot:selection="{ item }">
+                    <v-chip
+                      v-if="item.raw"
+                      :prepend-avatar="item.raw.avatarUrl"
+                      :closable="!props.readOnly"
+                      @click:close="memberForm.familyId = ''"
+                    >
+                      {{ item.raw.name }}
+                    </v-chip>
+                  </template>
+                </v-autocomplete>
               </v-col>
             </v-row>
             <v-row>
               <v-col cols="12" md="4">
-                <Lookup
+                <v-autocomplete
                   v-model="memberForm.fatherId"
-                  :data-source="memberStore"
-                  display-expr="fullName"
-                  value-expr="id"
+                  :items="potentialFathers"
+                  item-title="fullName"
+                  item-value="id"
                   :label="t('member.form.father')"
                   :readonly="props.readOnly"
-                />
+                  clearable
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12" md="4">
-                <Lookup
+                <v-autocomplete
                   v-model="memberForm.motherId"
-                  :data-source="memberStore"
-                  display-expr="fullName"
-                  value-expr="id"
+                  :items="potentialMothers"
+                  item-title="fullName"
+                  item-value="id"
                   :label="t('member.form.mother')"
                   :readonly="props.readOnly"
-                />
+                  clearable
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12" md="4">
-                <Lookup
+                <v-autocomplete
                   v-model="memberForm.spouseId"
-                  :data-source="memberStore"
-                  display-expr="fullName"
-                  value-expr="id"
+                  :items="potentialSpouses"
+                  item-title="fullName"
+                  item-value="id"
                   :label="t('member.form.spouse')"
                   :readonly="props.readOnly"
-                />
+                  clearable
+                ></v-autocomplete>
               </v-col>
             </v-row>
 
@@ -187,12 +202,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import DateInputField from '@/components/common/DateInputField.vue';
 import MemberTimeline from '@/components/members/MemberTimeline.vue';
-import Lookup from '@/components/common/Lookup.vue';
+
 import { useFamilyStore } from '@/stores/family.store';
 import GenderSelect from '@/components/common/GenderSelect.vue';
 import { useMemberStore } from '@/stores/member.store';
@@ -216,7 +231,11 @@ const { t } = useI18n();
 const familyStore = useFamilyStore();
 const memberStore = useMemberStore();
 
-const tab = ref('general'); // Default to general tab
+onMounted(() => {
+  familyStore.fetchAllItems();
+});
+
+const tab = ref('general');
 
 const form = ref<HTMLFormElement | null>(null);
 const timelineEvents = ref<TimelineEvent[]>([]);
@@ -229,8 +248,8 @@ const mockTimelineEvents = [
   { year: 2015, title: 'Kết hôn', description: 'Kết hôn với người bạn đời của mình.', color: 'pink' },
   { year: 2018, title: 'Sinh con đầu lòng', description: 'Chào đón đứa con đầu lòng chào đời.', color: 'purple' },
 ];
-
 timelineEvents.value = mockTimelineEvents;
+
 const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData ? {
   ...props.initialMemberData,
   fatherId: props.initialMemberData.fatherId === undefined ? null : props.initialMemberData.fatherId,
@@ -247,13 +266,39 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(props.initialMemberData ? {
   spouseId: null,
 });
 
+const membersInFamily = computed(() => {
+  if (!memberForm.value.familyId || !memberStore.items) {
+    return [];
+  }
+  return memberStore.items.filter(m => m.familyId === memberForm.value.familyId);
+});
+
+const potentialFathers = computed(() => {
+  return membersInFamily.value.filter(m => m.gender === 'male' && m.id !== props.initialMemberData?.id);
+});
+
+const potentialMothers = computed(() => {
+  return membersInFamily.value.filter(m => m.gender === 'female' && m.id !== props.initialMemberData?.id);
+});
+
+const potentialSpouses = computed(() => {
+  return membersInFamily.value.filter(m => m.id !== props.initialMemberData?.id);
+});
+
+const formatFamilyItemProps = (item: any) => {
+  return {
+    title: item.name,
+    subtitle: item.address,
+  };
+};
+
 const rules = {
   required: (value: unknown) => !!value || t('validation.required'),
 };
 
 const dateOfDeathRule = (value: string | Date | null) => {
-  if (!value) return true; // Optional field
-  if (!memberForm.value.dateOfBirth) return true; // Cannot compare if dateOfBirth is not set
+  if (!value) return true;
+  if (!memberForm.value.dateOfBirth) return true;
 
   const dateOfDeath = typeof value === 'string' ? new Date(value) : value;
   const dateOfBirth = typeof memberForm.value.dateOfBirth === 'string'
