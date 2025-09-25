@@ -1,11 +1,12 @@
 import type { FamilyEvent } from '@/types/family';
 import { faker } from '@faker-js/faker';
-import { generateMockMembers } from './member.mock'; // Import mock members
+
+// Assume member IDs from 1 to 1200 exist in mock.member.service.ts
+const existingMemberIds: string[] = Array.from({ length: 1200 }, (_, i) => (i + 1).toString());
 
 export function generateMockFamilyEvent(
   index: number,
   familyId?: string,
-  memberIds?: string[],
 ): FamilyEvent {
   const startDate = faker.date.past({ years: 5 });
   const endDate = faker.datatype.boolean()
@@ -14,12 +15,10 @@ export function generateMockFamilyEvent(
   const location = faker.location.city() + ', ' + faker.location.country();
 
   // Select a few random members from the provided list
-  const relatedMembers = memberIds
-    ? faker.helpers.arrayElements(
-        memberIds,
-        faker.number.int({ min: 0, max: Math.min(memberIds.length, 3) }),
-      )
-    : [];
+  const relatedMembers = faker.helpers.arrayElements(
+    existingMemberIds,
+    faker.number.int({ min: 0, max: Math.min(existingMemberIds.length, 3) }),
+  );
 
   return {
     id: `event-${index}`,
@@ -45,11 +44,9 @@ export function generateMockFamilyEvents(
   familyId?: string,
 ): FamilyEvent[] {
   const events: FamilyEvent[] = [];
-  const mockMembers = generateMockMembers(10, familyId); // Generate some members for the family
-  const memberIds = mockMembers.map((m) => m.id);
 
   for (let i = 0; i < count; i++) {
-    events.push(generateMockFamilyEvent(i + 1, familyId, memberIds)); // Pass member IDs
+    events.push(generateMockFamilyEvent(i + 1, familyId)); // Pass member IDs
   }
   return events;
 }
