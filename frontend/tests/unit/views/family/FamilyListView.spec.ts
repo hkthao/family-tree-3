@@ -28,7 +28,7 @@ import type { Paginated, Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import { simulateLatency } from '@/utils/mockUtils';
 import type { ApiError } from '@/utils/api';
-import type { MemberFilter } from '@/services/member/member.service.interface';
+import type { MemberFilter } from '@/types/family/member';
 import type { FamilySearchFilter } from '@/types/family';
 
 // Mock services
@@ -104,6 +104,11 @@ class MockFamilyServiceForTest implements IFamilyService {
       }),
     );
   }
+
+  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+    const families = this._items.filter(f => ids.includes(f.id));
+    return ok(await simulateLatency(families));
+  }
 }
 
 class MockMemberServiceForTest implements IMemberService {
@@ -177,6 +182,11 @@ class MockMemberServiceForTest implements IMemberService {
         totalPages,
       }),
     );
+  }
+
+  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+    const members = this._items.filter(m => ids.includes(m.id));
+    return ok(await simulateLatency(members));
   }
 }
 
@@ -312,6 +322,11 @@ export class MockEventServiceForTest implements IEventService {
         totalPages,
       }),
     );
+  }
+
+  async getManyByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
+    const events = this._events.filter(e => ids.includes(e.id));
+    return ok(await simulateLatency(events));
   }
 }
 
@@ -518,14 +533,14 @@ describe('FamilyListView.vue', () => {
   });
 
   it('loads all members on mount', async () => {
-    const memberStoreFetchItemsSpy = vi.spyOn(memberStore, 'fetchItems');
+    const memberStoreSearchItemsSpy = vi.spyOn(memberStore, 'searchItems');
     mount(FamilyListView, {
       global: {
         plugins: [i18n, vuetify, router],
       },
     });
     await flushPromises();
-    expect(memberStoreFetchItemsSpy).toHaveBeenCalled();
+    expect(memberStoreSearchItemsSpy).toHaveBeenCalledWith({});
   });
 
   it('computes family member counts correctly', async () => {

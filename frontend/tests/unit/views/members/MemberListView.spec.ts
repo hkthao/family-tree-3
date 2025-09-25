@@ -14,7 +14,7 @@ import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
 import { createRouter, createWebHistory } from 'vue-router';
 import type { Member } from '@/types/family';
-import type { MemberFilter } from '@/services/member/member.service.interface';
+import type { MemberFilter } from '@/types/family/member';
 import { createPinia, setActivePinia } from 'pinia';
 import { createServices } from '@/services/service.factory';
 import type { IMemberService } from '@/services/member/member.service.interface';
@@ -93,6 +93,11 @@ class MockMemberServiceForTest implements IMemberService {
         totalPages,
       }),
     );
+  }
+
+  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+    const members = this._items.filter(m => ids.includes(m.id));
+    return ok(await simulateLatency(members));
   }
 }
 

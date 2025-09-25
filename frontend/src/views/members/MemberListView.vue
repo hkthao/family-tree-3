@@ -54,7 +54,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import type { Member } from '@/types/family';
-import type { MemberFilter } from '@/services/member/member.service.interface';
+import type { MemberFilter } from '@/types/family';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';

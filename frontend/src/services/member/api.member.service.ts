@@ -1,5 +1,5 @@
-import type { Member } from '@/types/family';
-import type { IMemberService, MemberFilter } from './member.service.interface'; // Import MemberFilter
+import type { Member, MemberFilter } from '@/types/family/member';
+import type { IMemberService } from './member.service.interface'; // Import MemberFilter
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
 import type { AxiosInstance } from 'axios';
@@ -110,6 +110,17 @@ export class ApiMemberService implements IMemberService {
       // The items in the response might need date transformation
       result.value.items = result.value.items.map(transformMemberDates);
       return ok(result.value);
+    }
+    return result;
+  }
+
+  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+    console.log(`Fetching members by IDs: ${ids.join(', ')} from API`);
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('ids', id));
+    const result = await safeApiCall(this.http.get<Member[]>(`${this.apiUrl}/by-ids?${params.toString()}`));
+    if (result.ok) {
+      return ok(result.value.map(m => transformMemberDates(m)));
     }
     return result;
   }
