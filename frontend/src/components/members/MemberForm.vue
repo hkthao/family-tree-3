@@ -140,7 +140,7 @@
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
                   subtitle-expr="birthDeathYears"
-                  :additional-filters="{ familyId: memberForm.familyId }"
+                  :additional-filters="{ familyId: memberForm.familyId, gender: 'male' }"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -153,7 +153,7 @@
                   :rules="[rules.required]"
                   :readonly="props.readOnly"
                   subtitle-expr="birthDeathYears"
-                  :additional-filters="{ familyId: memberForm.familyId }"
+                  :additional-filters="{ familyId: memberForm.familyId, gender: 'female' }"
                 />
               </v-col>
               <v-col cols="12" md="4">
@@ -212,7 +212,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import {
@@ -310,6 +310,14 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
         spouseId: null,
       },
 );
+
+watch(() => memberForm.value.familyId, (newFamilyId) => {
+  if (newFamilyId) {
+    memberStore.searchItems({ familyId: newFamilyId });
+  } else {
+    memberStore.searchItems({}); // Clear filters if no family is selected
+  }
+}, { immediate: true }); // Immediate to load members for initial familyId
 
 
 

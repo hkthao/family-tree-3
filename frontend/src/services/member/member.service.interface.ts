@@ -14,6 +14,7 @@ export interface MemberFilter {
   placeOfDeath?: string;
   occupation?: string;
   familyId?: string | null;
+  searchQuery?: string; // New property for search term
 }
 
 export interface IMemberService extends ICrudService<Member> { // Extend ICrudService

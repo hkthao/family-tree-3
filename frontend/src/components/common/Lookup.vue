@@ -120,15 +120,20 @@ const isStore = computed(() => {
 // Preload selected item label
 watch(() => props.modelValue, async (newValue) => {
   if (newValue && !selectedItem.value) {
-    if (isStore.value && typeof props.dataSource.fetchFamilyById === 'function') {
+    if (isStore.value && typeof props.dataSource.getItemById === 'function') {
       loading.value = true;
-      selectedItem.value = await props.dataSource.fetchFamilyById(newValue);
+      selectedItem.value = await props.dataSource.getItemById(newValue);
       loading.value = false;
     } else if (Array.isArray(props.dataSource)) {
       selectedItem.value = props.dataSource.find(item => item[props.valueExpr] === newValue);
     }
   }
 }, { immediate: true });
+
+// Watch for changes in additionalFilters and reload items
+watch(() => props.additionalFilters, () => {
+  loadItems({ page: 1, itemsPerPage: 10, sortBy: [] });
+});
 
 // Load items for the dialog table
 const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: any[] }) => {
