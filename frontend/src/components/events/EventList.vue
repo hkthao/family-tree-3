@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyEvent } from '@/types/family';
+import type { Event } from '@/types/event/event';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberStore } from '@/stores/member.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -71,7 +71,7 @@ import { formatDate } from '@/utils/dateUtils';
 
 defineProps({
   events: {
-    type: Array as () => FamilyEvent[],
+    type: Array as () => Event[],
     required: true,
   },
   totalEvents: {
@@ -103,11 +103,11 @@ const loadEvents = (options: { page: number; itemsPerPage: number; sortBy: strin
   emit('update:options', options);
 };
 
-const editEvent = (event: FamilyEvent) => {
+const editEvent = (event: Event) => {
   emit('edit', event);
 };
 
-const confirmDelete = (event: FamilyEvent) => {
+const confirmDelete = (event: Event) => {
   emit('delete', event);
 };
 </script>

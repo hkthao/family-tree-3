@@ -1,74 +1,74 @@
-import type { IFamilyEventService, EventFilter } from './family-event.service.interface';
-import type { FamilyEvent } from '@/types/family';
+import type { IEventService, EventFilter } from './event.service.interface';
+import type { Event } from '@/types/event/event';
 import type { Paginated } from '@/types/common';
-import { generateMockFamilyEvents } from '@/data/mock/family-event.mock';
+import { generateMockEvents } from '@/data/mock/event.mock';
 
 import { simulateLatency } from '@/utils/mockUtils';
 import type { Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
-export class MockFamilyEventService implements IFamilyEventService {
-  private _familyEvents: FamilyEvent[] = generateMockFamilyEvents(50);
+export class MockEventService implements IEventService {
+  private _events: Event[] = generateMockEvents(50);
 
-  get familyEvents(): FamilyEvent[] {
-    return [...this._familyEvents];
+  get events(): Event[] {
+    return [...this._events];
   }
 
-  async fetch(): Promise<Result<FamilyEvent[], ApiError>> {
+  async fetch(): Promise<Result<Event[], ApiError>> {
     try {
-      const events = await simulateLatency(this.familyEvents);
+      const events = await simulateLatency(this.events);
       return ok(events);
     } catch (e) {
-      return err({ message: 'Failed to fetch family events from mock service.', details: e as Error });
+      return err({ message: 'Failed to fetch events from mock service.', details: e as Error });
     }
   }
 
-  async getById(id: string): Promise<Result<FamilyEvent | undefined, ApiError>> {
+  async getById(id: string): Promise<Result<Event | undefined, ApiError>> {
     try {
-      const event = await simulateLatency(this.familyEvents.find((event) => event.id === id));
+      const event = await simulateLatency(this.events.find((event) => event.id === id));
       return ok(event);
     } catch (e) {
-      return err({ message: `Failed to get family event with ID ${id} from mock service.`, details: e as Error });
+      return err({ message: `Failed to get event with ID ${id} from mock service.`, details: e as Error });
     }
   }
 
-  async add(newItem: Omit<FamilyEvent, 'id'>): Promise<Result<FamilyEvent, ApiError>> {
+  async add(newItem: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
     try {
       const eventToAdd = { ...newItem, id: 'mock-id-' + Math.random().toString(36).substring(7) };
-      this._familyEvents.push(eventToAdd);
+      this._events.push(eventToAdd);
       const addedEvent = await simulateLatency(eventToAdd);
       return ok(addedEvent);
     } catch (e) {
-      return err({ message: 'Failed to add family event to mock service.', details: e as Error });
+      return err({ message: 'Failed to add event to mock service.', details: e as Error });
     }
   }
 
-  async update(updatedItem: FamilyEvent): Promise<Result<FamilyEvent, ApiError>> {
+  async update(updatedItem: Event): Promise<Result<Event, ApiError>> {
     try {
-      const index = this._familyEvents.findIndex((event) => event.id === updatedItem.id);
+      const index = this._events.findIndex((event) => event.id === updatedItem.id);
       if (index !== -1) {
-        this._familyEvents[index] = updatedItem;
+        this._events[index] = updatedItem;
         const updatedEvent = await simulateLatency(updatedItem);
         return ok(updatedEvent);
       }
-      return err({ message: 'Family event not found', statusCode: 404 });
+      return err({ message: 'Event not found', statusCode: 404 });
     } catch (e) {
-      return err({ message: 'Failed to update family event in mock service.', details: e as Error });
+      return err({ message: 'Failed to update event in mock service.', details: e as Error });
     }
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     try {
-      const initialLength = this._familyEvents.length;
-      this._familyEvents = this._familyEvents.filter((event) => event.id !== id);
-      if (this._familyEvents.length === initialLength) {
-        return err({ message: 'Family event not found', statusCode: 404 });
+      const initialLength = this._events.length;
+      this._events = this._events.filter((event) => event.id !== id);
+      if (this._events.length === initialLength) {
+        return err({ message: 'Event not found', statusCode: 404 });
       }
       await simulateLatency(undefined);
       return ok(undefined);
     } catch (e) {
-      return err({ message: 'Failed to delete family event from mock service.', details: e as Error });
+      return err({ message: 'Failed to delete event from mock service.', details: e as Error });
     }
   }
 
@@ -76,9 +76,9 @@ export class MockFamilyEventService implements IFamilyEventService {
     filters: EventFilter,
     page: number = 1,
     itemsPerPage: number = 10
-  ): Promise<Result<Paginated<FamilyEvent>, ApiError>> {
+  ): Promise<Result<Paginated<Event>, ApiError>> {
     try {
-      let filteredEvents = this.familyEvents;
+      let filteredEvents = this.events;
 
       if (filters.searchQuery) {
         const lowerCaseSearchQuery = filters.searchQuery.toLowerCase();
@@ -123,7 +123,7 @@ export class MockFamilyEventService implements IFamilyEventService {
       });
       return ok(paginatedResult);
     } catch (e) {
-      return err({ message: 'Failed to search family events from mock service.', details: e as Error });
+      return err({ message: 'Failed to search events from mock service.', details: e as Error });
     }
   }
 }

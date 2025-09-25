@@ -148,7 +148,7 @@ describe('MemberListView.vue', () => {
     vi.spyOn(memberStore, 'setPage');
     vi.spyOn(memberStore, 'setItemsPerPage');
     vi.spyOn(memberStore, 'searchItems');
-    vi.spyOn(memberStore, 'fetchItems');
+    vi.spyOn(memberStore, '_loadItems');
   });
 
   it('renders without errors', () => {

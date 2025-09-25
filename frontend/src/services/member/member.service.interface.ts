@@ -4,12 +4,13 @@ import type { Result } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 import type { Paginated } from '@/types/common';
+import type { Gender } from '@/types/gender';
 
 export interface MemberFilter {
   fullName?: string;
   dateOfBirth?: Date | null;
   dateOfDeath?: Date | null;
-  gender?: 'male' | 'female' | 'other' | undefined;
+  gender?: Gender | undefined;
   placeOfBirth?: string;
   placeOfDeath?: string;
   occupation?: string;

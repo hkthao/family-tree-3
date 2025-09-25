@@ -1,4 +1,4 @@
-import type { FamilyEvent } from '@/types/family';
+import type { Event } from '@/types/event/event';
 import type { Paginated } from '@/types/common';
 import type { ICrudService } from '../common/crud.service.interface';
 import type { Result } from '@/types/common';
@@ -14,10 +14,10 @@ export interface EventFilter {
   location?: string;
 }
 
-export interface IFamilyEventService extends ICrudService<FamilyEvent> { // Extend ICrudService
+export interface IEventService extends ICrudService<Event> { // Extend ICrudService
   searchItems(
     filters: EventFilter,
     page?: number,
     itemsPerPage?: number
-  ): Promise<Result<Paginated<FamilyEvent>, ApiError>>
+  ): Promise<Result<Paginated<Event>, ApiError>>
 }

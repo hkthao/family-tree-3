@@ -100,13 +100,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilyEvent } from '@/types/family';
+import type { Event } from '@/types/event/event';
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
-  initialEventData?: FamilyEvent;
+  initialEventData?: Event;
   title: string;
 }>();
 
@@ -116,7 +116,7 @@ const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);
 
-const eventForm = ref<Omit<FamilyEvent, 'id'> | FamilyEvent>(props.initialEventData || {
+const eventForm = ref<Omit<Event, 'id'> | Event>(props.initialEventData || {
   name: '',
   type: 'Other',
   familyId: null,
