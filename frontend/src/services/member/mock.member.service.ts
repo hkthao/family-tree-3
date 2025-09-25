@@ -32,8 +32,30 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   return apiMember;
 }
 
+// Mock data generation (outside the class definition)
+let mockMembers: Member[] = [];
+for (let i = 1; i <= 1200; i++) {
+  mockMembers.push({
+    id: i.toString(),
+    lastName: `Last${i}`,
+    firstName: `First${i}`,
+    fullName: `First${i} Last${i}`,
+    familyId: (i % 5 + 1).toString(), // Assign to 5 different families
+    gender: i % 2 === 0 ? 'male' : 'female',
+    dateOfBirth: new Date(1980 + (i % 30), (i % 12), (i % 28) + 1),
+    dateOfDeath: i % 7 === 0 ? new Date(2010 + (i % 10), (i % 12), (i % 28) + 1) : undefined, // Add some death dates
+    birthDeathYears: `(${1980 + (i % 30)} - ${i % 7 === 0 ? (2010 + (i % 10)) : ''})`, // Formatted years
+    avatarUrl: `https://randomuser.me/api/portraits/${i % 2 === 0 ? 'men' : 'women'}/${i % 100}.jpg`,
+    nickname: `Nick${i}`,
+    placeOfBirth: `City${i % 10}`,
+    placeOfDeath: `City${(i + 1) % 10}`,
+    occupation: `Occupation${i % 5}`,
+    biography: `Biography of member ${i}`,
+  });
+}
+
 export class MockMemberService implements IMemberService {
-  private _members: Member[] = generateMockMembers(50);
+  private _members: Member[] = mockMembers;
 
   get members(): Member[] {
     return [...this._members];
