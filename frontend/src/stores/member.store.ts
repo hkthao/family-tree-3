@@ -45,7 +45,7 @@ export const useMemberStore = defineStore('member', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.searchMembers(
+      const result = await this.services.member.searchItems(
         this.filters,
         this.currentPage,
         this.itemsPerPage,

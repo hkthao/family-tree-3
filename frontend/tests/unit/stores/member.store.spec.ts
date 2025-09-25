@@ -87,7 +87,7 @@ class MockMemberServiceForTest implements IMemberService {
     return ok(await simulateLatency(undefined));
   }
 
-  async searchMembers(
+  async searchItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
