@@ -7,17 +7,14 @@
       :item-value="valueExpr"
       :label="computedLabel"
       :loading="loading"
-      :clearable="clearable"
+      :clearable="true"
       :rules="rules"
-      readonly
+      :disabled="props.disabled"
       variant="outlined"
       density="compact"
       hide-dropdown-icon
       @click="openDialog"
     >
-      <template #append-inner>
-        <v-icon @click.stop="openDialog">mdi-magnify</v-icon>
-      </template>
     </v-select>
 
     <v-dialog v-model="dialog" max-width="800px">
@@ -73,6 +70,7 @@ interface LookupProps {
   rules?: any[];
   subtitleExpr?: string; // New prop for subtitle
   additionalFilters?: any; // New prop for additional filters
+  disabled?: boolean; // New prop for disabling the component
 }
 
 const { t } = useI18n(); // Moved here
@@ -84,6 +82,7 @@ const props = withDefaults(defineProps<LookupProps>(), {
   clearable: false,
   rules: () => [],
   subtitleExpr: undefined, // Default value for subtitleExpr
+  disabled: false, // Default value for disabled
 });
 
 // Define Emits
@@ -102,9 +101,7 @@ const selectedItem = ref<any>(null);
 
 // Headers for the data table
 const headers = computed(() => {
-  const cols: any[] = [
-    { title: t('common.name'), value: props.displayExpr },
-  ];
+  const cols: any[] = [{ title: t('common.name'), value: props.displayExpr }];
   if (props.subtitleExpr) {
     cols.push({ title: t('common.subtitle'), value: props.subtitleExpr });
   }
@@ -114,34 +111,59 @@ const headers = computed(() => {
 // Check if dataSource is a Pinia store
 const isStore = computed(() => {
   // A more robust check for Pinia store instance
-  return props.dataSource && typeof props.dataSource === 'object' && '_p' in props.dataSource;
+  return (
+    props.dataSource &&
+    typeof props.dataSource === 'object' &&
+    '_p' in props.dataSource
+  );
 });
 
 // Preload selected item label
-watch(() => props.modelValue, async (newValue) => {
-  if (newValue && !selectedItem.value) {
-    if (isStore.value && typeof props.dataSource.getItemById === 'function') {
-      loading.value = true;
-      selectedItem.value = await props.dataSource.getItemById(newValue);
-      loading.value = false;
-    } else if (Array.isArray(props.dataSource)) {
-      selectedItem.value = props.dataSource.find(item => item[props.valueExpr] === newValue);
+watch(
+  () => props.modelValue,
+  async (newValue) => {
+    if (newValue && !selectedItem.value) {
+      if (isStore.value && typeof props.dataSource.getItemById === 'function') {
+        loading.value = true;
+        selectedItem.value = await props.dataSource.getItemById(newValue);
+        loading.value = false;
+      } else if (Array.isArray(props.dataSource)) {
+        selectedItem.value = props.dataSource.find(
+          (item) => item[props.valueExpr] === newValue,
+        );
+      }
     }
-  }
-}, { immediate: true });
+  },
+  { immediate: true },
+);
 
 // Watch for changes in additionalFilters and reload items
-watch(() => props.additionalFilters, () => {
-  loadItems({ page: 1, itemsPerPage: 10, sortBy: [] });
-});
+watch(
+  () => props.additionalFilters,
+  () => {
+    loadItems({ page: 1, itemsPerPage: 10, sortBy: [] });
+  },
+);
 
 // Load items for the dialog table
-const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: any[] }) => {
-  if (!isStore.value || typeof props.dataSource.searchLookup !== 'function') return;
+const loadItems = async ({
+  page,
+  itemsPerPage,
+  sortBy,
+}: {
+  page: number;
+  itemsPerPage: number;
+  sortBy: any[];
+}) => {
+  if (!isStore.value || typeof props.dataSource.searchLookup !== 'function')
+    return;
 
   loading.value = true;
   try {
-    const filter = { searchQuery: searchTerm.value, ...props.additionalFilters }; // Merge with additional filters
+    const filter = {
+      searchQuery: searchTerm.value,
+      ...props.additionalFilters,
+    }; // Merge with additional filters
     await props.dataSource.searchLookup(filter, page, itemsPerPage);
     items.value = props.dataSource.items;
     totalItems.value = props.dataSource.totalItems;
@@ -151,7 +173,6 @@ const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPe
     loading.value = false;
   }
 };
-
 
 // Search items
 const searchItems = () => {
@@ -176,5 +197,4 @@ const selectItem = (event: Event, { item }: { item: any }) => {
   emit('update:modelValue', item[props.valueExpr]);
   closeDialog();
 };
-
 </script>
