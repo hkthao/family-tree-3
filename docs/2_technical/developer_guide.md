@@ -1,143 +1,185 @@
-# Hướng Dẫn cho Developer
+# Hướng dẫn cho Developer
 
-## 1. Cài đặt môi trường phát triển
-Để phát triển dự án, bạn cần cài đặt các công cụ sau:
-- **Docker & Docker Compose**: Để chạy các dịch vụ (backend API, frontend, MongoDB) một cách nhất quán.
-- **.NET 8 SDK**: Cho việc phát triển và build phần backend.
-- **Node.js 20+**: Cho việc phát triển và build phần frontend.
+## 1. Giới thiệu
+Hướng dẫn này cung cấp các chỉ dẫn để thiết lập môi trường phát triển, chạy dự án và đóng góp vào dự án Cây Gia Phả.
 
-## 2. Khởi tạo dự án (Scaffolding)
+**Tổng quan dự án:**
+-   **Backend:** .NET 8, ASP.NET Core, Entity Framework Core, MySQL
+-   **Frontend:** Vue.js 3, Vite, Vuetify, Pinia
+-   **Cơ sở dữ liệu:** MySQL 8.0
+-   **Containerization:** Docker
 
-## 3. Chạy dự án local với Docker Compose
-MySQL
-1.  Đảm bảo Docker Desktop đang chạy trên máy của bạn.
-2.  Mở terminal tại thư mục gốc của dự án (`family-tree-3`).
-3.  Chạy lệnh sau để build và khởi động tất cả các dịch vụ:
+## 2. Yêu cầu cần thiết
+-   [Docker & Docker Compose](https://docs.docker.com/get-docker/)
+-   [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+-   [Node.js 20+](https://nodejs.org/en/download/)
+
+## 3. Bắt đầu
+
+### 3.1. Clone Repository
+```bash
+git clone https://github.com/hkthao/family-tree-3.git
+cd family-tree-3
+```
+
+### 3.2. Cấu hình
+Dự án sử dụng các biến môi trường để cấu hình.
+
+-   **Backend:** Cấu hình backend được quản lý trong `backend/src/Web/appsettings.json` và có thể được ghi đè bởi các biến môi trường. Tệp `docker-compose.yml` thiết lập chuỗi kết nối cho cơ sở dữ liệu.
+-   **Frontend:** Cấu hình frontend được quản lý thông qua các tệp `.env` trong thư mục `frontend`. Điểm cuối API được cấu hình trong các tệp này.
+
+## 4. Chạy ứng dụng
+
+### 4.1. Sử dụng Docker Compose (Khuyến nghị)
+Đây là cách dễ nhất để chạy toàn bộ ứng dụng.
+
+1.  Đảm bảo Docker Desktop đang chạy.
+2.  Trong thư mục gốc của dự án, chạy:
     ```bash
     docker-compose -f infra/docker-compose.yml up --build
     ```
-    - `--build`: Buộc Docker Compose build lại các image từ Dockerfile (hữu ích khi có thay đổi code).
-4.  **Truy cập ứng dụng**:
-    - **Frontend**: `http://localhost`
-    - **Backend API (Swagger UI)**: `http://localhost:8080/swagger`
+3.  Truy cập ứng dụng:
+    -   **Frontend:** `http://localhost`
+    -   **Backend API (Swagger UI):** `http://localhost:8080/swagger`
 
-## 4. Biến môi trường (Environment Variables)
-Các biến môi trường quan trọng được quản lý thông qua file `appsettings.json` (cho backend) và `.env` files (cho frontend).
-- **Backend**: `backend/src/Web/appsettings.json` chứa cấu hình kết nối MySQL.
-  ```json
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Port=3306;Database=familytree_db;Uid=root;Pwd=password;"
-  }
-  ```
-- **Frontend**: Cấu hình API endpoint có thể được quản lý qua biến môi trường trong `.env` file.
+### 4.2. Chạy Backend và Frontend riêng lẻ
 
-## 5. Chạy Tests và Coverage
-### Backend Tests
-Để chạy unit tests và kiểm tra coverage cho backend, sử dụng script `run-coverage.sh`:
-```bash
-./run-coverage.sh
-```
-Script này sẽ tự động:
-- Chạy tất cả các unit tests trong solution `backend/backend.sln`.
-- Thu thập code coverage bằng Coverlet.
-- In ra tổng phần trăm coverage trên console.
-- Kiểm tra ngưỡng coverage 80% (sẽ báo lỗi nếu thấp hơn).
+#### 4.2.1. Backend
+1.  Đảm bảo bạn có một instance MySQL đang chạy. Bạn có thể sử dụng instance từ tệp `docker-compose.yml`:
+    ```bash
+    docker-compose -f infra/docker-compose.yml up -d mysql
+    ```
+2.  Thiết lập chuỗi kết nối cơ sở dữ liệu. Bạn có thể sử dụng một biến môi trường hoặc cập nhật `backend/src/Web/appsettings.Development.json`.
+    ```json
+    "ConnectionStrings": {
+      "DefaultConnection": "Server=localhost;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;"
+    }
+    ```
+3.  Chạy backend:
+    ```bash
+    cd backend
+    dotnet run --project src/Web
+    ```
 
-#### Unit Tests Cụ Thể
-- **`ColourTests`**: Kiểm tra tính đúng đắn của Value Object `Colour`, bao gồm các phương thức khởi tạo, chuyển đổi, và so sánh. Đảm bảo rằng các giá trị màu sắc được xử lý nhất quán và chính xác.
-
-### Frontend Tests
-Để chạy unit/component tests và kiểm tra coverage cho frontend:
-```bash
-# Chạy tests và xem kết quả coverage
-npm run test:coverage --prefix frontend
-```
-
-## 6. Code Style và Linting
-### Backend
-Để kiểm tra và định dạng code backend:
-```bash
-# Kiểm tra định dạng code
-dotnet format backend/ --verify-no-changes --include-generated
-
-# Tự động định dạng code
-dotnet format backend/ --include-generated
-```
-### Frontend
-Để kiểm tra và định dạng code frontend:
-```bash
-# Kiểm tra định dạng code
-npm run lint --prefix frontend
-
-# Tự động định dạng code
-npm run lint:fix --prefix frontend
-```
-- **Lưu ý về TypeScript:** Dự án sử dụng TypeScript phiên bản `~5.5.0` để đảm bảo tương thích với các công cụ linting. Nếu bạn gặp lỗi liên quan đến phiên bản TypeScript không được hỗ trợ, hãy đảm bảo phiên bản TypeScript của bạn nằm trong khoảng `>=4.7.4 <5.6.0`.
-
-## 7. Quy trình Pull Request (PR Checklist)
-Khi tạo Pull Request, hãy đảm bảo các điểm sau:
-- [ ] Code đã được định dạng (`dotnet format` và `npm run lint`).
-- [ ] Tất cả các unit tests đều pass.
-- [ ] Test coverage đạt ngưỡng yêu cầu (>=80%).
-- [ ] Đã cập nhật tài liệu liên quan (nếu có).
-- [ ] Branch được đặt tên theo quy tắc (`feature/`, `bugfix/`, `hotfix/`, `docs/`).
-- [ ] Commit message tuân thủ Conventional Commits.
-
-## 8. Branch Strategy
-Dự án sử dụng chiến lược nhánh cơ bản:
-- `main`: Nhánh ổn định, chứa code sẵn sàng triển khai lên môi trường Production.
-- `develop`: Nhánh phát triển chính, nơi các tính năng mới được tích hợp.
-- `feature/<tên-tính-năng>`: Nhánh con được tạo từ `develop` để phát triển một tính năng cụ thể.
-- `bugfix/<tên-lỗi>`: Nhánh con được tạo từ `main` (hoặc `develop` tùy mức độ) để sửa lỗi.
-- `docs/<tên-tài-liệu>`: Nhánh con để cập nhật tài liệu.
-- `hotfix/<tên-fix>`: Nhánh con được tạo từ `main` để sửa lỗi khẩn cấp trên Production.
-
-Tất cả các thay đổi phải được merge vào `main` thông qua Pull Request.
-
-## 9. CI/CD Pipeline
-Pipeline được cấu hình tại `.github/workflows/ci.yml`. Các bước chính bao gồm:
-- Build và Test backend (với coverage check).
-- Build và Test frontend (với coverage check).
-- Lint code (backend và frontend).
-- Build và Push Docker images lên Docker Hub.
-
-## 10. Logging và Xử lý lỗi (Logging and Error Handling)
-- **Logging**: Hệ thống sử dụng Serilog để ghi log.
-  - Cấu hình Serilog được thực hiện trong `Program.cs`. Mặc định, log được ghi ra console với định dạng rõ ràng.
-  - Để thêm các sink khác (ví dụ: ghi ra file), bạn có thể cài đặt package `Serilog.Sinks.File` và thêm `.WriteTo.File("logs/log.txt")` vào cấu hình.
-- **Global Error Handling**: Middleware xử lý lỗi tập trung.
-  - Một `CustomExceptionHandler` middleware đã được cấu hình để bắt tất cả các exception chưa được xử lý.
-  - Middleware này sẽ ghi lại lỗi và trả về một response JSON chuẩn hóa với mã lỗi 500, giúp frontend xử lý một cách nhất quán.
-
-## 11. Quản lý Schema Database (Schema Versioning)
-Dự án sử dụng Entity Framework Core Migrations để quản lý thay đổi schema database cho MySQL.
-
-- **Tạo Migration mới**: Khi có thay đổi trong các Entity hoặc DbContext, bạn có thể tạo một migration mới bằng lệnh sau (chạy từ thư mục `backend/`):
-  ```bash
-  dotnet ef migrations add [MigrationName] --project src/Infrastructure --startup-project src/Web
-  ```
-  Thay thế `[MigrationName]` bằng tên mô tả cho migration của bạn (ví dụ: `InitialCreate`, `AddMembersTable`).
-
-- **Cập nhật Database**: Để áp dụng các migration vào database, sử dụng lệnh sau (chạy từ thư mục `backend/`):
-  ```bash
-  dotnet ef database update --project src/Infrastructure --startup-project src/Web
-  ```
-  Lệnh này sẽ tạo hoặc cập nhật schema database MySQL dựa trên các migration đã định nghĩa.
-
-- **Xóa Migration cuối cùng**: Nếu bạn cần hoàn tác migration cuối cùng (chỉ nên làm trong quá trình phát triển), sử dụng:
-  ```bash
-  dotnet ef migrations remove --project src/Infrastructure --startup-project src/Web
-  ```
-
-## 12. Chạy Seed Data
-Để populate database với dữ liệu mẫu, bạn có thể chạy script seed data:
-1.  Đảm bảo MySQL đang chạy (ví dụ: thông qua `docker-compose up -d mongo`).
-2.  Mở terminal tại thư mục `infra/seeds`.
-3.  Cài đặt các dependencies cho seed script:
+#### 4.2.2. Frontend
+1.  Điều hướng đến thư mục `frontend`:
+    ```bash
+    cd frontend
+    ```
+2.  Cài đặt các dependency:
     ```bash
     npm install
     ```
-4.  Chạy script seed data:
+3.  Chạy máy chủ phát triển:
+    ```bash
+    npm run dev
+    ```
+4.  Frontend sẽ có sẵn tại `http://localhost:5173` (hoặc một cổng khác nếu 5173 đang được sử dụng).
+
+## 5. Quy trình phát triển
+
+### 5.1. Backend
+
+#### 5.1.1. Chạy Tests
+Để chạy tất cả các unit test cho backend, chạy lệnh sau từ thư mục gốc:
+```bash
+dotnet test backend/backend.sln
+```
+
+#### 5.1.2. Chạy Tests với Coverage
+Để chạy test và tạo báo cáo coverage, sử dụng lệnh sau từ thư mục gốc:
+```bash
+dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./backend/artifacts/coverage/coverage.cobertura.xml
+```
+Lệnh này sẽ tạo ra một tệp `coverage.cobertura.xml`. Để xem báo cáo ở định dạng HTML, bạn có thể sử dụng `reportgenerator`:
+```bash
+dotnet tool install -g dotnet-reportgenerator-globaltool
+reportgenerator "-reports:./backend/artifacts/coverage/coverage.cobertura.xml" "-targetdir:./backend/coverage-report" -reporttypes:Html
+```
+Báo cáo sẽ có sẵn trong thư mục `backend/coverage-report`.
+
+#### 5.1.3. Code Style
+Để kiểm tra các vấn đề về định dạng:
+```bash
+dotnet format backend/ --verify-no-changes --include-generated
+```
+Để tự động định dạng code:
+```bash
+dotnet format backend/ --include-generated
+```
+
+#### 5.1.4. Database Migrations
+Dự án sử dụng Entity Framework Core Migrations để quản lý các thay đổi schema của cơ sở dữ liệu.
+
+-   **Để tạo một migration mới:**
+    ```bash
+    dotnet ef migrations add <MigrationName> --project backend/src/Infrastructure --startup-project backend/src/Web
+    ```
+-   **Để áp dụng các migration vào cơ sở dữ liệu:**
+    ```bash
+    dotnet ef database update --project backend/src/Infrastructure --startup-project backend/src/Web
+    ```
+
+### 5.2. Frontend
+
+#### 5.2.1. Chạy Tests
+Để chạy tất cả các unit và component test cho frontend:
+```bash
+npm run test:unit --prefix frontend
+```
+
+#### 5.2.2. Chạy Tests với Coverage
+Để chạy test và kiểm tra ngưỡng coverage 80%:
+```bash
+npm run test:coverage --prefix frontend
+```
+
+#### 5.2.3. Code Style và Linting
+Để kiểm tra các vấn đề về linting:
+```bash
+npm run lint --prefix frontend
+```
+Để tự động sửa các vấn đề về linting:
+```bash
+npm run lint:fix --prefix frontend
+```
+
+## 6. Hướng dẫn đóng góp
+
+### 6.1. Chiến lược Branch
+-   `main`: Branch ổn định cho code sẵn sàng sản xuất.
+-   `develop`: Branch phát triển chính.
+-   `feature/<feature-name>`: Cho các tính năng mới.
+-   `bugfix/<bug-name>`: Cho các bản sửa lỗi.
+-   `docs/<docs-name>`: Cho các cập nhật tài liệu.
+-   `hotfix/<fix-name>`: Cho các bản sửa lỗi khẩn cấp trên production.
+
+### 6.2. Commit Messages
+Dự án này tuân theo đặc tả [Conventional Commits](https://www.conventionalcommits.org/).
+
+### 6.3. Quy trình Pull Request
+-   Đảm bảo code của bạn được định dạng và lint.
+-   Tất cả các test phải qua.
+-   Test coverage phải đạt ngưỡng yêu cầu (>=80%).
+-   Cập nhật tài liệu nếu cần.
+-   Sử dụng tiêu đề mô tả và cung cấp mô tả rõ ràng về các thay đổi.
+
+## 7. CI/CD
+Pipeline CI/CD được định nghĩa trong `.github/workflows/ci.yml`. Nó bao gồm các bước sau:
+-   Build và test backend và frontend.
+-   Kiểm tra các vấn đề về định dạng và linting.
+-   Tạo và tải lên các báo cáo coverage.
+-   Build các Docker image.
+
+## 8. Seeding a Database
+Để điền dữ liệu mẫu vào cơ sở dữ liệu:
+1.  Đảm bảo container MySQL đang chạy.
+2.  Điều hướng đến thư mục `infra/seeds`.
+3.  Cài đặt các dependency:
+    ```bash
+    npm install
+    ```
+4.  Chạy seed script:
     ```bash
     npm run seed
     ```
