@@ -3,6 +3,8 @@
     :model-value="modelValue"
     @update:model-value="updateModelValue('update:modelValue', $event)"
     :items="genderOptions"
+    item-title="title"
+    item-value="value"
     :label="label"
     :rules="rules"
     :readonly="readOnly"
@@ -12,11 +14,11 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { Gender } from '@/types/gender';
 
 const { modelValue, label, rules, readOnly, clearable } = defineProps<{
-  modelValue: string | null | undefined;
+  modelValue: Gender | null | undefined;
   label?: string;
-  // eslint-disable-next-line no-unused-vars
   rules?: Array<(value: unknown) => boolean | string>;
   readOnly?: boolean;
   clearable?: boolean;
@@ -26,9 +28,8 @@ const updateModelValue = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
 
-const genderOptions = [
-  { title: t('member.gender.male'), value: 'Male' },
-  { title: t('member.gender.female'), value: 'Female' },
-  { title: t('member.gender.other'), value: 'Other' },
-];
+const genderOptions = Object.values(Gender).map((gender) => ({
+  title: t(`member.gender.${gender.toLowerCase()}`),
+  value: gender,
+}));
 </script>

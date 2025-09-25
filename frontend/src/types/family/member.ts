@@ -1,10 +1,12 @@
+import { Gender } from '@/types/gender';
+
 export interface Member {
   id: string;
   lastName: string; // Last name
   firstName: string; // First name
   fullName?: string; // Full name (optional, often derived)
   familyId: string;
-  gender?: 'male' | 'female' | 'other';
+  gender?: Gender;
   dateOfBirth?: Date; // Renamed from 'birthDate'
   dateOfDeath?: Date; // Renamed from 'deathDate'
   birthDeathYears?: string; // Formatted birth and death years

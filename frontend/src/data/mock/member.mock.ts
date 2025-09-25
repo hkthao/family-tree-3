@@ -1,9 +1,10 @@
 import { faker } from '@faker-js/faker';
 import type { Member } from '@/types/family';
 import { mockFamilies as fixedMockFamilies } from '@/data/mock/family.mock';
+import { Gender } from '@/types/gender';
 
 // Generate some mock families to link members to
-const mockFamilies = fixedMockFamilies; 
+const mockFamilies = fixedMockFamilies;
 
 export function generateMockMember(familyId?: string, overrides?: Partial<Member>): Member {
   const selectedFamilyId = familyId || faker.helpers.arrayElement(mockFamilies).id;
@@ -13,7 +14,7 @@ export function generateMockMember(familyId?: string, overrides?: Partial<Member
     firstName: faker.person.firstName(), // Generate first name
     fullName: `${faker.person.firstName()} ${faker.person.lastName()}`.trim(), // Generate full name
     familyId: selectedFamilyId,
-    gender: faker.helpers.arrayElement(['male', 'female', 'other']),
+    gender: faker.helpers.arrayElement(Object.values(Gender)),
     dateOfBirth: faker.date.past({ years: 50 }),
     dateOfDeath: faker.helpers.arrayElement([undefined, faker.date.past({ years: 10 })]),
     avatarUrl: faker.image.avatar(),
