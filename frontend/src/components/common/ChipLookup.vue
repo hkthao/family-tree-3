@@ -1,16 +1,12 @@
 <template>
-  <v-chip-group>
-    <v-chip
-      v-for="item in selectedItems"
-      :key="item[valueExpr]"
-      size="small"
-    >
+  <div class="chip-lookup-group">
+    <v-chip v-for="item in selectedItems" :key="item[valueExpr]" size="small">
       <v-avatar v-if="imageExpr && item[imageExpr]" start>
         <v-img :src="item[imageExpr]"></v-img>
       </v-avatar>
       {{ item[displayExpr] }}
     </v-chip>
-  </v-chip-group>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -58,14 +54,25 @@ const loadItems = async () => {
     return;
   }
 
-  if (isStore.value && typeof props.dataSource.getManyItemsByIds === 'function') {
+  if (
+    isStore.value &&
+    typeof props.dataSource.getManyItemsByIds === 'function'
+  ) {
     selectedItems.value = await props.dataSource.getManyItemsByIds(idsToFetch);
   } else if (Array.isArray(props.dataSource)) {
     selectedItems.value = props.dataSource.filter((item) =>
-      idsToFetch.includes(item[props.valueExpr])
+      idsToFetch.includes(item[props.valueExpr]),
     );
   }
 };
 
 watch(() => props.modelValue, loadItems, { immediate: true });
 </script>
+<style scoped>
+.chip-lookup-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 0px;
+}
+</style>
