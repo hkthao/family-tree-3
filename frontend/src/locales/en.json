@@ -240,5 +240,6 @@
       "child": "Child"
     }
   },
-  "common.name": "Name"
+  "common.name": "Name",
+  "common.noData": "No data available"
 }

@@ -15,41 +15,77 @@
       hide-dropdown-icon
       @click="openDialog"
     >
+      <template #selection="{ item }">
+        <div class="d-flex align-center">
+          <v-avatar
+            v-if="imageExpr && item.raw[imageExpr]"
+            :image="item.raw[imageExpr]"
+            size="32"
+            class="mr-2"
+          ></v-avatar>
+          <span>{{ item.title }}</span>
+        </div>
+      </template>
     </v-select>
 
-    <v-dialog v-model="dialog" max-width="800px">
+    <v-dialog v-model="dialog" max-width="600px" scrollable>
       <v-card>
-        <v-card-title>
+        <v-card-title class="d-flex align-center">
           <span class="text-h5">{{ label }}</span>
+          <v-spacer></v-spacer>
+          <v-btn icon="mdi-close" variant="text" @click="closeDialog"></v-btn>
         </v-card-title>
+        <v-divider></v-divider>
+
         <v-card-text>
           <v-text-field
             ref="searchInput"
             v-model="searchTerm"
             :label="t('common.search')"
             prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            density="compact"
+            variant="solo-filled"
+            flat
             clearable
+            autofocus
+            hide-details
             @input="searchItems"
           ></v-text-field>
-          <v-data-table-server
-            :headers="headers"
-            :items="items"
-            :items-length="totalItems"
-            :loading="loading"
-            :search="searchTerm"
-            hover
-            @update:options="loadItems"
-            @click:row="selectItem"
-          ></v-data-table-server>
         </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="closeDialog">
-            {{ t('common.close') }}
-          </v-btn>
-        </v-card-actions>
+
+        <v-divider></v-divider>
+
+        <v-list v-if="!loading && items.length > 0" lines="two">
+          <v-list-item
+            v-for="item in items"
+            :key="item[valueExpr]"
+            :title="item[displayExpr]"
+            :subtitle="subtitleExpr ? item[subtitleExpr] : undefined"
+            @click="selectItem(item)"
+          >
+            <template #prepend>
+              <v-avatar
+                v-if="imageExpr && item[imageExpr]"
+                :image="item[imageExpr]"
+                class="mr-4"
+              ></v-avatar>
+            </template>
+          </v-list-item>
+        </v-list>
+
+        <div
+          v-if="loading"
+          class="d-flex justify-center align-center pa-4"
+          style="min-height: 200px"
+        >
+          <v-progress-circular indeterminate color="primary"></v-progress-circular>
+        </div>
+
+        <div
+          v-if="!loading && items.length === 0"
+          class="text-center pa-4 text-grey"
+        >
+          {{ t('common.noData') }}
+        </div>
       </v-card>
     </v-dialog>
   </div>
@@ -65,6 +101,7 @@ interface LookupProps {
   modelValue: string | number | null | undefined; // v-model:value
   displayExpr?: string;
   valueExpr?: string;
+  imageExpr?: string; // New prop for image
   label?: string;
   clearable?: boolean;
   rules?: any[];
@@ -78,6 +115,7 @@ const { t } = useI18n(); // Moved here
 const props = withDefaults(defineProps<LookupProps>(), {
   displayExpr: 'name',
   valueExpr: 'id',
+  imageExpr: undefined, // Default value for imageExpr
   label: undefined, // Remove default label here
   clearable: false,
   rules: () => [],
@@ -94,19 +132,9 @@ const computedLabel = computed(() => props.label || t('common.selectItem'));
 const dialog = ref(false);
 const loading = ref(false);
 const items = ref<any[]>([]);
-const totalItems = ref(0);
 const searchTerm = ref('');
 const searchInput = ref<HTMLInputElement | null>(null); // Ref for search input
 const selectedItem = ref<any>(null);
-
-// Headers for the data table
-const headers = computed(() => {
-  const cols: any[] = [{ title: t('common.name'), value: props.displayExpr }];
-  if (props.subtitleExpr) {
-    cols.push({ title: t('common.subtitle'), value: props.subtitleExpr });
-  }
-  return cols;
-});
 
 // Check if dataSource is a Pinia store
 const isStore = computed(() => {
@@ -166,7 +194,6 @@ const loadItems = async ({
     }; // Merge with additional filters
     await props.dataSource.searchLookup(filter, page, itemsPerPage);
     items.value = props.dataSource.items;
-    totalItems.value = props.dataSource.totalItems;
   } catch (error) {
     console.error('Error loading items:', error);
   } finally {
@@ -192,7 +219,7 @@ const closeDialog = () => {
 };
 
 // Item selection
-const selectItem = (event: Event, { item }: { item: any }) => {
+const selectItem = (item: any) => {
   selectedItem.value = item;
   emit('update:modelValue', item[props.valueExpr]);
   closeDialog();
