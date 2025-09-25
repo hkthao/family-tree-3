@@ -36,7 +36,7 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="4">
                 <v-text-field
                   v-model="memberForm.lastName"
                   :label="t('member.form.lastName')"
@@ -44,7 +44,7 @@
                   :readonly="props.readOnly"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="4">
                 <v-text-field
                   v-model="memberForm.firstName"
                   :label="t('member.form.firstName')"
@@ -52,7 +52,7 @@
                   :readonly="props.readOnly"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" md="4">
                 <v-text-field
                   v-model="memberForm.nickname"
                   :label="t('member.form.nickname')"
