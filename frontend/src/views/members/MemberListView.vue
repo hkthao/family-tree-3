@@ -3,8 +3,8 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList
-      :items="paginatedItems"
-      :total-items="memberStore.items.length"
+      :items="memberStore.items"
+      :total-items="memberStore.totalItems"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
       @view="openViewDialog"
@@ -53,7 +53,6 @@ import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { useFamilyStore } from '@/stores/family.store';
 import type { Member } from '@/types/family';
 import type { MemberFilter } from '@/services/member/member.service.interface';
 import MemberSearch from '@/components/members/MemberSearch.vue';
@@ -66,8 +65,7 @@ import { useRouter } from 'vue-router';
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { loading, currentPage, paginatedItems } =
-  storeToRefs(memberStore);
+const { loading, currentPage } = storeToRefs(memberStore);
 const currentFilters = ref<MemberFilter>({});
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
@@ -79,10 +77,6 @@ const notificationStore = useNotificationStore();
 // Function Declarations (moved to top)
 const loadMembers = () => {
   memberStore.searchItems(currentFilters.value);
-};
-
-const loadAllMembers = async () => {
-  await memberStore.fetchItems(); // Fetch all members
 };
 
 const openViewDialog = (member: Member) => {
@@ -149,6 +143,5 @@ const handleDeleteCancel = () => {
 
 onMounted(async () => {
   await loadMembers();
-  await loadAllMembers();
 });
 </script>
