@@ -7,6 +7,7 @@ import { simulateLatency } from '@/utils/mockUtils';
 import type { Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
+import { fixedMockFamilies } from '@/data/mock/fixed.family.mock'; // Import fixed mock families
 
 // Helper function to transform date strings to Date objects
 function transformMemberDates(member: any): Member {
@@ -40,7 +41,7 @@ for (let i = 1; i <= 1200; i++) {
     lastName: `Last${i}`,
     firstName: `First${i}`,
     fullName: `First${i} Last${i}`,
-    familyId: (i % 5 + 1).toString(), // Assign to 5 different families
+    familyId: fixedMockFamilies[i % 10].id, // Assign to the first 10 fixed families
     gender: i % 2 === 0 ? 'male' : 'female',
     dateOfBirth: new Date(1980 + (i % 30), (i % 12), (i % 28) + 1),
     dateOfDeath: i % 7 === 0 ? new Date(2010 + (i % 10), (i % 12), (i % 28) + 1) : undefined, // Add some death dates
@@ -90,7 +91,8 @@ export class MockMemberService implements IMemberService {
 
   async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> { // Renamed to add
     try {
-      const memberToAdd = { ...newItem, id: 'mock-id-' + Math.random().toString(36).substring(7) };
+      const newId = (this._members.length + 1).toString(); // Simple sequential ID
+      const memberToAdd = { ...newItem, id: newId };
       this._members.push(memberToAdd);
       const addedMember = await simulateLatency(transformMemberDates(memberToAdd));
       return ok(addedMember);

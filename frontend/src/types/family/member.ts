@@ -7,6 +7,7 @@ export interface Member {
   gender?: 'male' | 'female' | 'other';
   dateOfBirth?: Date; // Renamed from 'birthDate'
   dateOfDeath?: Date; // Renamed from 'deathDate'
+  birthDeathYears?: string; // Formatted birth and death years
   avatarUrl?: string;
   nickname?: string; // New
   placeOfBirth?: string; // New (replaces address)
