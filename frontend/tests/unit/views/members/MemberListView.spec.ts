@@ -23,17 +23,6 @@ import { ok, err } from '@/types/common';
 import { simulateLatency } from '@/utils/mockUtils';
 import type { ApiError } from '@/utils/api';
 
-Object.defineProperty(window, 'visualViewport', {
-  value: {
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    width: 1024,
-    height: 768,
-    scale: 1,
-  },
-  writable: true,
-});
-
 class MockMemberServiceForTest implements IMemberService {
   private _items: Member[] = [];
 
@@ -106,13 +95,6 @@ class MockMemberServiceForTest implements IMemberService {
     );
   }
 }
-
-// Mock ResizeObserver
-global.ResizeObserver = vi.fn(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
-}));
 
 const mockedShowSnackbar = vi.fn();
 
