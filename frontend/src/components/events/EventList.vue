@@ -26,7 +26,10 @@
 
     <!-- Event Name column -->
     <template #item.name="{ item }">
-      <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+      <a
+        @click="$emit('view', item)"
+        class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
+      >
         {{ item.name }}
       </a>
     </template>
@@ -44,7 +47,7 @@
 
     <!-- Related Members column -->
     <template #item.relatedMembers="{ item }">
- <ChipLookup
+      <ChipLookup
         :model-value="item.relatedMembers || []"
         :data-source="memberStore"
         display-expr="fullName"
@@ -71,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types/event/event';
 import type { DataTableHeader } from 'vuetify';
@@ -96,7 +99,13 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['update:options', 'view', 'edit', 'delete', 'create']);
+const emit = defineEmits([
+  'update:options',
+  'view',
+  'edit',
+  'delete',
+  'create',
+]);
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
@@ -105,15 +114,53 @@ const familyStore = useFamilyStore();
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const headers = computed<DataTableHeader[]>(() => [
-  { title: t('event.list.headers.date'), key: 'startDate', width: '120px', align: 'center' },
-  { title: t('event.list.headers.name'), key: 'name', minWidth: '150px', align: 'start', class: 'text-truncate' },
-  { title: t('event.list.headers.family'), key: 'familyId', width: '150px', align: 'start', sortable: false },
-  { title: t('event.list.headers.relatedMembers'), key: 'relatedMembers', width: '200px', align: 'start', sortable: false },
-  { title: t('event.list.headers.location'), key: 'location', width: '150px', align: 'start' },
-  { title: t('event.list.headers.actions'), key: 'actions', sortable: false, width: '120px', align: 'center' },
+  {
+    title: t('event.list.headers.date'),
+    key: 'startDate',
+    width: '120px',
+    align: 'center',
+  },
+  {
+    title: t('event.list.headers.name'),
+    key: 'name',
+    minWidth: '150px',
+    align: 'start',
+    class: 'text-truncate',
+  },
+  {
+    title: t('event.list.headers.family'),
+    key: 'familyId',
+    width: '150px',
+    align: 'start',
+    sortable: false,
+  },
+  {
+    title: t('event.list.headers.relatedMembers'),
+    key: 'relatedMembers',
+    width: 'auto',
+    align: 'start',
+    sortable: false,
+  },
+  {
+    title: t('event.list.headers.location'),
+    key: 'location',
+    width: '150px',
+    align: 'start',
+  },
+  {
+    title: t('event.list.headers.actions'),
+    key: 'actions',
+    sortable: false,
+    width: '120px',
+    align: 'center',
+  },
 ]);
 
-const loadEvents = (options: { page: number; itemsPerPage: number; sortBy: string | string[] | null }) => {
+const loadEvents = (options: {
+  page: number;
+  itemsPerPage: number;
+  sortBy: string | string[] | null;
+}) => {
   emit('update:options', options);
 };
 

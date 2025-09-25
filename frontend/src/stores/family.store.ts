@@ -170,5 +170,19 @@ export const useFamilyStore = defineStore('family', {
       this.itemsPerPage = itemsPerPage;
       await this._loadItems();
     },
+
+    async getManyByIds(ids: string[]): Promise<Family[]> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.family.getManyByIds(ids);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error = result.error.message || 'Không thể tải danh sách gia đình.';
+        console.error(result.error);
+        return [];
+      }
+    },
   },
 });
