@@ -1,5 +1,10 @@
 <template>
   <v-breadcrumbs :items="breadcrumbs">
+    <template v-slot:item="{ item }">
+      <v-breadcrumbs-item :disabled="item.disabled" @click="item.href && router.push(item.href)">
+        {{ item.title }}
+      </v-breadcrumbs-item>
+    </template>
     <template v-slot:divider>
       <v-icon icon="mdi-chevron-right"></v-icon>
     </template>
