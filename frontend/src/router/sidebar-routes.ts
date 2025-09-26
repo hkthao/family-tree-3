@@ -3,46 +3,28 @@ import type { RouteRecordRaw } from 'vue-router';
 
 export const sidebarRoutes: RouteRecordRaw[] = [
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: DashboardView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
-  },
-  {
     path: '/family/tree',
     name: 'FamilyTree',
     component: FamilyTreeView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
-  },
-  {
-    path: '/events',
-    name: 'Events',
-    component: EventListView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
+    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'family.tree.title' },
   },
   {
     path: '/profile',
     name: 'UserProfile',
     component: ProfileView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
+    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'profile.myProfile' },
   },
   {
     path: '/admin/users',
     name: 'UserManagement',
     component: UserManagementView,
-    meta: { roles: ['Admin'] },
+    meta: { roles: ['Admin'], breadcrumb: 'admin.users' },
   },
   {
     path: '/admin/roles',
     name: 'RoleManagement',
     component: RoleManagementView,
-    meta: { roles: ['Admin'] },
-  },
-  {
-    path: '/family',
-    name: 'FamilyManagement',
-    component: FamilyListView,
-    meta: { roles: ['Admin', 'FamilyManager'] },
+    meta: { roles: ['Admin'], breadcrumb: 'admin.roles' },
   },
   // Add other routes here...
 ];
