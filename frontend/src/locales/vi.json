@@ -172,6 +172,7 @@
   "event.list.headers.name": "Tên Sự kiện",
   "event.list.headers.relatedMembers": "Thành viên liên quan",
   "event.list.headers.location": "Địa điểm",
+  "event.list.headers.family": "Gia đình/Dòng họ",
   "event.list.headers.actions": "Hành động",
   "event.list.confirmDelete": "Bạn có chắc muốn xoá sự kiện {name} không?",
   "event.form.title": "Biểu mẫu Sự kiện",
