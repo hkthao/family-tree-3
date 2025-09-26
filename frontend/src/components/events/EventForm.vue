@@ -26,12 +26,22 @@
         </v-row>
 
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" md="6">
             <FamilyAutocomplete
-              v-model="eventForm.familyId"
+              v-model="computedFamilyId"
               :label="t('event.form.family')"
               :rules="[rules.required]"
               :read-only="props.readOnly"
+              :multiple="false"
+            />
+          </v-col>
+          <v-col cols="12" md="6">
+            <MemberAutocomplete
+              v-model="eventForm.relatedMembers"
+              :label="t('event.form.relatedMembers')"
+              :read-only="props.readOnly"
+              clearable
+              multiple
             />
           </v-col>
         </v-row>
@@ -67,6 +77,16 @@
 
         <v-row>
           <v-col cols="12">
+            <v-textarea
+              v-model="eventForm.description"
+              :label="t('event.form.description')"
+              :readonly="props.readOnly"
+            ></v-textarea>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12">
             <v-color-picker
               v-model="eventForm.color"
               :label="t('event.form.color')"
@@ -75,16 +95,6 @@
               hide-sliders
               show-swatches
             ></v-color-picker>
-          </v-col>
-        </v-row>
-
-        <v-row>
-          <v-col cols="12">
-            <v-textarea
-              v-model="eventForm.description"
-              :label="t('event.form.description')"
-              :readonly="props.readOnly"
-            ></v-textarea>
           </v-col>
         </v-row>
       </v-form>
@@ -98,11 +108,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types/event/event';
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -155,4 +166,11 @@ const submitForm = async () => {
 const closeForm = () => {
   emit('close');
 };
+
+const computedFamilyId = computed<string | undefined>({
+  get: () => eventForm.value.familyId ?? undefined,
+  set: (value) => {
+    eventForm.value.familyId = value ?? null;
+  },
+});
 </script>

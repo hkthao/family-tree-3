@@ -2,8 +2,8 @@
   <v-autocomplete
     v-model="internalSelectedItems"
     @update:model-value="handleAutocompleteUpdate"
-    :items="families"
-    item-title="name"
+    :items="items"
+    item-title="fullName"
     item-value="id"
     :label="label"
     :rules="rules"
@@ -23,13 +23,13 @@
         size="small"
         v-if="item.raw"
         :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined"
-        :text="item.raw.name"
+        :text="item.raw.fullName"
       ></v-chip>
     </template>
     <template #item="{ props, item }">
-      <v-list-item v-bind="props" :subtitle="item.raw.address">
+      <v-list-item v-bind="props" :subtitle="item.raw?.birthDeathYears">
         <template #prepend>
-          <v-avatar v-if="item.raw.avatarUrl" :image="item.raw.avatarUrl" size="small"></v-avatar>
+          <v-avatar v-if="item.raw?.avatarUrl" :image="item.raw.avatarUrl" size="small"></v-avatar>
         </template>
       </v-list-item>
     </template>
@@ -38,7 +38,8 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import { useFamilyStore } from '@/stores/family.store';
+import { useI18n } from 'vue-i18n';
+import { useMemberStore } from '@/stores/member.store'; // Import memberStore directly
 
 // Simple debounce utility
 const debounce = (func: Function, delay: number) => {
@@ -50,46 +51,70 @@ const debounce = (func: Function, delay: number) => {
   };
 };
 
-interface FamilyAutocompleteProps {
+interface MemberAutocompleteProps {
   modelValue: (string | number)[] | string | number | undefined;
   label?: string;
   rules?: any[];
   readOnly?: boolean;
   clearable?: boolean;
+  additionalFilters?: any;
   multiple?: boolean; // New prop for multiple selection
 }
 
-const { modelValue, label, rules, readOnly, clearable, multiple } = defineProps<FamilyAutocompleteProps>();
+const props = withDefaults(defineProps<MemberAutocompleteProps>(), {
+  label: undefined,
+  rules: () => [],
+  readOnly: false,
+  clearable: false,
+  additionalFilters: () => ({}),
+  multiple: false, // Default to single selection
+});
 
 const emit = defineEmits(['update:modelValue']);
 
-const familyStore = useFamilyStore();
+const { t } = useI18n();
+
+const memberStore = useMemberStore(); // Use memberStore directly
+
 const loading = ref(false);
+const items = ref<any[]>([]);
 const searchTerm = ref('');
-const internalSelectedItems = ref<any[]>([]); // For return-object handling
 
-const families = computed(() => familyStore.items);
+// Internal state for selected items to handle `return-object`
+const internalSelectedItems = ref<any[]>([]);
 
-const fetchFamilies = async (query: string = '') => {
+const fetchItems = async (query: string = '') => {
+  if (typeof memberStore.searchLookup !== 'function') {
+    console.warn('memberStore is missing searchLookup method.');
+    return;
+  }
+
   loading.value = true;
   try {
-    await familyStore.searchLookup({ searchQuery: query }, 1, 100); // Fetch first 100 items for autocomplete
+    const filter = {
+      searchQuery: query,
+      ...props.additionalFilters,
+    };
+    // Assuming searchLookup handles pagination internally or returns all matching for autocomplete
+    await memberStore.searchLookup(filter, 1, 100); // Fetch first 100 items for autocomplete
+    items.value = memberStore.items; // Assuming searchLookup updates memberStore.items
   } catch (error) {
-    console.error('Error fetching families:', error);
-  } finally {
+    console.error('Error fetching items:', error);
+  }
+  finally {
     loading.value = false;
   }
 };
 
-const debouncedFetchFamilies = debounce(fetchFamilies, 300);
+const debouncedFetchItems = debounce(fetchItems, 300);
 
 const onSearchInput = (query: string) => {
   searchTerm.value = query;
-  debouncedFetchFamilies(query);
+  debouncedFetchItems(query);
 };
 
 const handleAutocompleteUpdate = (newValues: any | any[]) => {
-  if (multiple) {
+  if (props.multiple) {
     internalSelectedItems.value = newValues; // newValues is an array of objects
     emit('update:modelValue', newValues.map((item: any) => item.id)); // Emit array of IDs
   } else {
@@ -98,15 +123,15 @@ const handleAutocompleteUpdate = (newValues: any | any[]) => {
   }
 };
 
-// Preload selected family based on modelValue (IDs)
+// Preload selected items based on modelValue (IDs)
 watch(
-  () => modelValue,
+  () => props.modelValue,
   async (newModelValue) => {
     internalSelectedItems.value = []; // Clear current selections
 
     let idsToFetch: string[] = [];
 
-    if (multiple) {
+    if (props.multiple) {
       if (Array.isArray(newModelValue) && newModelValue.length > 0) {
         idsToFetch = newModelValue.map(id => String(id));
       }
@@ -116,10 +141,10 @@ watch(
       }
     }
 
-    if (idsToFetch.length > 0 && typeof familyStore.getManyItemsByIds === 'function') {
+    if (idsToFetch.length > 0 && typeof memberStore.getManyItemsByIds === 'function') {
       loading.value = true;
       try {
-        const fetchedItems = await familyStore.getManyItemsByIds(idsToFetch);
+        const fetchedItems = await memberStore.getManyItemsByIds(idsToFetch);
         internalSelectedItems.value = fetchedItems;
       } catch (error) {
         console.error('Error preloading selected items:', error);
@@ -133,6 +158,15 @@ watch(
 
 // Initial fetch for empty search to show some options
 onMounted(() => {
-  fetchFamilies();
+  fetchItems();
 });
+
+// Watch for changes in additionalFilters and reload items
+watch(
+  () => props.additionalFilters,
+  () => {
+    fetchItems(searchTerm.value);
+  },
+  { deep: true }
+);
 </script>
