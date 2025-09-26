@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import type { Family } from '@/types/family';
+import { FamilyVisibility } from '@/types/family/family-visibility'; // Import FamilyVisibility
 
 export function generateMockFamily(id?: string): Family {
   return {
@@ -8,7 +9,7 @@ export function generateMockFamily(id?: string): Family {
     description: faker.lorem.sentence(),
     avatarUrl: faker.image.avatar(),
     address: faker.location.streetAddress(true),
-    visibility: faker.helpers.arrayElement(['public', 'private']),
+    visibility: faker.helpers.arrayElement([FamilyVisibility.Public, FamilyVisibility.Private]),
   };
 }
 

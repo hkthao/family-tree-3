@@ -1,9 +1,6 @@
 <template>
   <v-card-text>
-    <v-form
-      ref="form"
-      :disabled="props.readOnly"
-    >
+    <v-form ref="form" :disabled="props.readOnly">
       <!-- Thông tin cơ bản -->
       <v-row>
         <v-col cols="12">
@@ -265,10 +262,6 @@ defineExpose({
   validate,
   getFormData,
 });
-
-const closeForm = () => {
-  emit('close');
-};
 
 const computedFatherId = computed<string | undefined>({
   get: () => memberForm.value.fatherId ?? undefined,

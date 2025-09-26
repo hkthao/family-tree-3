@@ -1,10 +1,12 @@
+import { FamilyVisibility } from './family-visibility';
+
 export interface Family {
   id: string;
   name: string;
   description?: string;
   avatarUrl?: string;
   address?: string;
-  visibility?: 'public' | 'private' | 'shared';
+  visibility?: FamilyVisibility;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -13,7 +15,7 @@ export interface FamilySearchFilter {
   name?: string;
   description?: string;
   address?: string;
-  visibility?: 'all' | 'public' | 'private' | 'shared';
+  visibility?: 'all' | FamilyVisibility;
   createdAtStart?: Date;
   createdAtEnd?: Date;
   updatedAtStart?: Date;
