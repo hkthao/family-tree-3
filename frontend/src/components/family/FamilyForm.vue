@@ -16,25 +16,31 @@
       :label="$t('family.form.avatarUrlLabel')"
       variant="outlined"
     ></v-text-field>
-    <v-text-field
-      v-model="familyForm.name"
-      :label="$t('family.form.nameLabel')"
-      :rules="[rules.required]"
-      required
-      variant="outlined"
-    ></v-text-field>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="familyForm.name"
+          :label="$t('family.form.nameLabel')"
+          :rules="[rules.required]"
+          required
+          variant="outlined"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-select
+          v-model="familyForm.visibility"
+          :items="visibilityItems"
+          :label="$t('family.form.visibilityLabel')"
+          required
+          variant="outlined"
+        ></v-select>
+      </v-col>
+    </v-row>
     <v-text-field
       v-model="familyForm.address"
       :label="$t('family.form.addressLabel')"
       variant="outlined"
     ></v-text-field>
-    <v-select
-      v-model="familyForm.visibility"
-      :items="visibilityItems"
-      :label="$t('family.form.visibilityLabel')"
-      required
-      variant="outlined"
-    ></v-select>
     <v-textarea
       v-model="familyForm.description"
       :label="$t('family.form.descriptionLabel')"
