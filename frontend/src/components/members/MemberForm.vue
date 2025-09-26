@@ -109,7 +109,7 @@
             v-model="memberForm.familyId"
             :label="t('member.form.familyId')"
             :rules="[rules.required]"
-            :readonly="true"
+            :readonly="props.readOnly"
             :multiple="false"
           />
         </v-col>
@@ -119,8 +119,7 @@
           <MemberAutocomplete
             v-model="computedFatherId"
             :label="t('member.form.father')"
-            :readonly="true"
-            :disabled="!memberForm.familyId"
+            :readonly="props.readOnly || !memberForm.familyId"
             :additional-filters="{
               familyId: memberForm.familyId,
               gender: Gender.Male,
@@ -132,8 +131,7 @@
           <MemberAutocomplete
             v-model="computedMotherId"
             :label="t('member.form.mother')"
-            :readonly="props.readOnly"
-            :disabled="!memberForm.familyId"
+            :readonly="props.readOnly || !memberForm.familyId"
             :additional-filters="{
               familyId: memberForm.familyId,
               gender: Gender.Female,
@@ -145,8 +143,7 @@
           <MemberAutocomplete
             v-model="computedSpouseId"
             :label="t('member.form.spouse')"
-            :readonly="true"
-            :disabled="!memberForm.familyId"
+            :readonly="props.readOnly || !memberForm.familyId"
             :additional-filters="{ familyId: memberForm.familyId }"
             :multiple="false"
           />
