@@ -7,21 +7,11 @@
       :total-items="memberStore.totalItems"
       :loading="loading"
       @update:options="handleListOptionsUpdate"
-      @view="openViewDialog"
+      @view="navigateToDetailView"
       @edit="navigateToEditMember"
       @delete="confirmDelete"
       @create="navigateToCreateView"
     />
-
-    <v-dialog v-model="viewDialog" max-width="800px">
-      <MemberForm
-        v-if="selectedMemberForView"
-        :initial-member-data="selectedMemberForView"
-        :read-only="true"
-        :title="t('member.form.title')"
-        @close="closeViewDialog"
-      />
-    </v-dialog>
 
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog
@@ -69,8 +59,6 @@ const { loading, currentPage } = storeToRefs(memberStore);
 const currentFilters = ref<MemberFilter>({});
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
-const viewDialog = ref(false);
-const selectedMemberForView = ref<Member | null>(null);
 
 const notificationStore = useNotificationStore();
 
@@ -79,14 +67,8 @@ const loadMembers = () => {
   memberStore.searchItems(currentFilters.value);
 };
 
-const openViewDialog = (member: Member) => {
-  selectedMemberForView.value = member;
-  viewDialog.value = true;
-};
-
-const closeViewDialog = () => {
-  viewDialog.value = false;
-  selectedMemberForView.value = null;
+const navigateToDetailView = (member: Member) => {
+  router.push(`/members/detail/${member.id}`);
 };
 
 const navigateToCreateView = () => {
