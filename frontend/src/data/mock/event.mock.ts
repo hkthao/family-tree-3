@@ -1,4 +1,5 @@
 import type { Event } from '@/types/event/event';
+import { EventType } from '@/types/event/event-type'; // Import EventType enum
 import { faker } from '@faker-js/faker';
 
 // Assume member IDs from 1 to 1200 exist in mock.member.service.ts
@@ -29,13 +30,7 @@ export function generateMockEvent(
     location: location,
     familyId: familyId || `family-00${(index % 5) + 1}`,
     relatedMembers: relatedMembers,
-    type: faker.helpers.arrayElement([
-      'Birth',
-      'Marriage',
-      'Death',
-      'Migration',
-      'Other',
-    ]),
+    type: faker.helpers.arrayElement(Object.values(EventType)), // Use enum values
     color: faker.color.rgb(), // Generate a random color
   };
 }

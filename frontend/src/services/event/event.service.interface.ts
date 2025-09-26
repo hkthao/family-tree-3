@@ -3,11 +3,12 @@ import type { Paginated } from '@/types/common';
 import type { ICrudService } from '../common/crud.service.interface';
 import type { Result } from '@/types/common';
 import type { ApiError } from '@/utils/api';
+import { EventType } from '@/types/event/event-type'; // Import EventType enum
 
 export interface EventFilter {
   searchQuery?: string;
-  type?: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
-  eventType?: string;
+  type?: EventType;
+  eventType?: EventType;
   familyId?: string | null ;
   startDate?: Date | null;
   endDate?: Date | null;

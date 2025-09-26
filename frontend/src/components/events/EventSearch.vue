@@ -72,6 +72,7 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/services/event/event.service.interface';
+import { EventType } from '@/types/event/event-type'; // Import EventType enum
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
@@ -91,11 +92,11 @@ const filters = ref<EventFilter>({
 });
 
 const eventTypes = [
-  { title: t('event.type.birth'), value: 'Birth' },
-  { title: t('event.type.marriage'), value: 'Marriage' },
-  { title: t('event.type.death'), value: 'Death' },
-  { title: t('event.type.migration'), value: 'Migration' },
-  { title: t('event.type.other'), value: 'Other' },
+  { title: t('event.type.birth'), value: EventType.Birth },
+  { title: t('event.type.marriage'), value: EventType.Marriage },
+  { title: t('event.type.death'), value: EventType.Death },
+  { title: t('event.type.migration'), value: EventType.Migration },
+  { title: t('event.type.other'), value: EventType.Other },
 ];
 
 watch(filters.value, () => {

@@ -1,3 +1,5 @@
+import { EventType } from './event-type';
+
 export interface Event {
   id: string;
   name: string;
@@ -7,6 +9,6 @@ export interface Event {
   location?: string;
   familyId: string | null;
   relatedMembers?: string[];
-  type: 'Birth' | 'Marriage' | 'Death' | 'Migration' | 'Other';
+  type: EventType;
   color?: string; // Added color property
 }
