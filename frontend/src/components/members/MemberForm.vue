@@ -88,7 +88,7 @@
         <v-col cols="12" md="4">
           <v-text-field
             v-model="memberForm.placeOfDeath"
-            :label="t('member.form.placeOfOfDeath')"
+            :label="t('member.form.placeOfDeath')"
             :readonly="props.readOnly"
           ></v-text-field>
         </v-col>
