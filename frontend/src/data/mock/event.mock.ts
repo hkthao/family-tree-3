@@ -27,7 +27,7 @@ export function generateMockEvent(
     startDate: startDate,
     endDate: endDate,
     location: location,
-    familyId: familyId || `family-${Math.floor(Math.random() * 5) + 1}`,
+    familyId: familyId || `family-00${(index % 5) + 1}`,
     relatedMembers: relatedMembers,
     type: faker.helpers.arrayElement([
       'Birth',

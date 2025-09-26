@@ -171,7 +171,7 @@ export const useFamilyStore = defineStore('family', {
       await this._loadItems();
     },
 
-    async getManyByIds(ids: string[]): Promise<Family[]> {
+    async getManyItemsByIds(ids: string[]): Promise<Family[]> {
       this.loading = true;
       this.error = null;
       const result = await this.services.family.getManyByIds(ids);

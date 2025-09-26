@@ -37,7 +37,7 @@
     <!-- Family column -->
     <template #item.familyId="{ item }">
       <ChipLookup
-        :model-value="item.familyId"
+        :model-value="item.familyId ?? undefined"
         :data-source="familyStore"
         display-expr="name"
         value-expr="id"
