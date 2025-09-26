@@ -9,7 +9,7 @@ import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export class MockEventService implements IEventService {
-  private _events: Event[] = generateMockEvents(50);
+  private _events: Event[] = generateMockEvents(200);
 
   get events(): Event[] {
     return [...this._events];

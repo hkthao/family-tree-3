@@ -19,7 +19,6 @@ import { useRouter, useRoute } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import EventForm from '@/components/events/EventForm.vue';
-
 import type { Event } from '@/types/event/event';
 
 const { t } = useI18n();
