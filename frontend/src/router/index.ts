@@ -99,9 +99,15 @@ const router = createRouter({
         {
           path: 'events',
           name: 'Events',
-          component: () => import('@/views/events/EventListView.vue'),
+          component: () => import('@/views/events/EventRouterView.vue'),
           meta: { breadcrumb: 'event.list.title' },
           children: [
+            {
+              path: '',
+              name: 'EventList',
+              component: () => import('@/views/events/EventListView.vue'),
+              meta: { breadcrumb: 'event.list.title' },
+            },
             {
               path: 'add',
               name: 'AddEvent',
@@ -113,6 +119,12 @@ const router = createRouter({
               name: 'EditEvent',
               component: () => import('@/views/events/EventEditView.vue'),
               meta: { breadcrumb: 'event.form.editTitle' },
+            },
+            {
+              path: 'detail/:id',
+              name: 'EventDetail',
+              component: () => import('@/views/events/EventDetailView.vue'),
+              meta: { breadcrumb: 'event.detail.title' },
             },
           ],
         },
