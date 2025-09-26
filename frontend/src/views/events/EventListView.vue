@@ -22,14 +22,10 @@
         />
       </v-window-item>
       <v-window-item value="timeline">
-        <EventTimeline :events="eventStore.items" />
-        <v-pagination
-          v-if="eventStore.totalItems > 0"
-          v-model="timelineCurrentPage"
-          :length="eventStore.totalPages"
-          @update:model-value="handleTimelinePageUpdate"
-          class="mt-4"
-        ></v-pagination>
+        <EventTimeline
+          :family-id="currentFilters.familyId ?? undefined"
+          :read-only="true"
+        />
       </v-window-item>
       <v-window-item value="calendar">
         <EventCalendar
@@ -106,9 +102,6 @@ const notificationStore = useNotificationStore();
 
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
-const timelineCurrentPage = ref(1);
-const timelineItemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
-const timelineTotalItems = ref(0);
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 // ... (rest of the file)
@@ -129,7 +122,7 @@ const eventFormTitle = computed(() => {
 
 const loadEvents = async (page: number = currentPage.value, itemsPerPageCount: number = itemsPerPage.value) => {
   if (
-    (selectedTab.value === 'timeline' || selectedTab.value === 'calendar') &&
+    selectedTab.value === 'calendar' &&
     !currentFilters.value.familyId
   ) {
     eventStore.items = [];
@@ -147,32 +140,15 @@ const loadEvents = async (page: number = currentPage.value, itemsPerPageCount: n
       searchQuery: currentFilters.value.searchQuery || '',
     },
   );
-
-  if (selectedTab.value === 'timeline') {
-    timelineTotalItems.value = eventStore.totalItems;
-  }
 };
 
 watch(selectedTab, (newTab) => {
   if (newTab === 'calendar') {
     loadEvents(1, -1); // Fetch all events for calendar view
-  } else if (newTab === 'timeline') {
-    loadEvents(timelineCurrentPage.value, timelineItemsPerPage.value);
   } else {
     loadEvents(currentPage.value, itemsPerPage.value); // Use current itemsPerPage for other views
   }
 });
-
-const handleTimelinePageUpdate = (newPage: number) => {
-  timelineCurrentPage.value = newPage;
-  loadEvents(newPage, timelineItemsPerPage.value);
-};
-
-const handleTimelineItemsPerPageUpdate = (newItemsPerPage: number) => {
-  timelineItemsPerPage.value = newItemsPerPage;
-  timelineCurrentPage.value = 1; // Reset to first page when items per page changes
-  loadEvents(1, newItemsPerPage);
-};
 const openViewDialog = (event: Event) => {
   selectedEventForView.value = event;
   viewDialog.value = true;
