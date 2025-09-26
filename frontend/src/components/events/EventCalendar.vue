@@ -55,6 +55,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types/event/event';
 import { useEventStore } from '@/stores/event.store'; // Import event store
+import { useRouter } from 'vue-router';
+const router = useRouter();
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
@@ -163,7 +165,7 @@ const getEventColor: CalendarEventColorFunction = (event: {
 const emit = defineEmits(['viewEvent']);
 
 const showEventDetails = (eventSlotScope: Event) => {
-  emit('viewEvent', eventSlotScope);
+   router.push(`/events/detail/${eventSlotScope.id}`);
 };
 
 watch(
