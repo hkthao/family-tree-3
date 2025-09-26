@@ -105,66 +105,50 @@
 
       <v-row>
         <v-col cols="12">
-          <Lookup
+          <FamilyAutocomplete
             v-model="memberForm.familyId"
-            :data-source="familyStore"
-            display-expr="name"
-            value-expr="id"
-            image-expr="avatarUrl"
             :label="t('member.form.familyId')"
             :rules="[rules.required]"
             :readonly="true"
-            subtitle-expr="address"
+            :multiple="false"
           />
         </v-col>
       </v-row>
       <v-row>
         <v-col cols="12" md="4">
-          <Lookup
-            v-model="memberForm.fatherId"
-            :data-source="memberStore"
-            display-expr="fullName"
-            value-expr="id"
-            image-expr="avatarUrl"
+          <MemberAutocomplete
+            v-model="computedFatherId"
             :label="t('member.form.father')"
             :readonly="true"
             :disabled="!memberForm.familyId"
-            subtitle-expr="birthDeathYears"
             :additional-filters="{
               familyId: memberForm.familyId,
               gender: Gender.Male,
             }"
+            :multiple="false"
           />
         </v-col>
         <v-col cols="12" md="4">
-          <Lookup
-            v-model="memberForm.motherId"
-            :data-source="memberStore"
-            display-expr="fullName"
-            value-expr="id"
-            image-expr="avatarUrl"
+          <MemberAutocomplete
+            v-model="computedMotherId"
             :label="t('member.form.mother')"
             :readonly="props.readOnly"
             :disabled="!memberForm.familyId"
-            subtitle-expr="birthDeathYears"
             :additional-filters="{
               familyId: memberForm.familyId,
               gender: Gender.Female,
             }"
+            :multiple="false"
           />
         </v-col>
         <v-col cols="12" md="4">
-          <Lookup
-            v-model="memberForm.spouseId"
-            :data-source="memberStore"
-            display-expr="fullName"
-            value-expr="id"
-            image-expr="avatarUrl"
+          <MemberAutocomplete
+            v-model="computedSpouseId"
             :label="t('member.form.spouse')"
             :readonly="true"
             :disabled="!memberForm.familyId"
-            subtitle-expr="birthDeathYears"
             :additional-filters="{ familyId: memberForm.familyId }"
+            :multiple="false"
           />
         </v-col>
       </v-row>
@@ -188,6 +172,8 @@ import { ref, computed, watch } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import { DateInputField, GenderSelect, Lookup } from '@/components/common';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
 import { Gender } from '@/types/gender';
@@ -197,7 +183,7 @@ const props = defineProps<{
   initialMemberData?: Member;
 }>();
 
-const emit = defineEmits([]);
+const emit = defineEmits(['close']);
 
 const { t } = useI18n();
 const familyStore = useFamilyStore();
@@ -281,5 +267,30 @@ const getFormData = () => {
 defineExpose({
   validate,
   getFormData,
+});
+
+const closeForm = () => {
+  emit('close');
+};
+
+const computedFatherId = computed<string | undefined>({
+  get: () => memberForm.value.fatherId ?? undefined,
+  set: (value) => {
+    memberForm.value.fatherId = value ?? null;
+  },
+});
+
+const computedMotherId = computed<string | undefined>({
+  get: () => memberForm.value.motherId ?? undefined,
+  set: (value) => {
+    memberForm.value.motherId = value ?? null;
+  },
+});
+
+const computedSpouseId = computed<string | undefined>({
+  get: () => memberForm.value.spouseId ?? undefined,
+  set: (value) => {
+    memberForm.value.spouseId = value ?? null;
+  },
 });
 </script>
