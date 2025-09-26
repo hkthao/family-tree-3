@@ -199,24 +199,10 @@
             :events="memberRelatedEvents"
             :read-only="props.readOnly"
             :hide-title="true"
-            @addEvent="handleAddTimelineEvent"
-            @editEvent="handleEditTimelineEvent"
-            @deleteEvent="handleDeleteTimelineEvent"
           />
         </v-window-item>
       </v-window>
     </v-card-text>
-
-    <v-dialog v-model="eventFormDialog" max-width="800px">
-      <EventForm
-        v-if="selectedEventForForm"
-        :initial-event-data="selectedEventForForm"
-        :read-only="props.readOnly"
-        :title="isEditEventMode ? t('event.form.editTitle') : t('event.form.addTitle')"
-        @close="handleCancelEventForm"
-        @submit="handleSaveEventForm"
-      />
-    </v-dialog>
 
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -240,11 +226,9 @@ import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import { DateInputField, GenderSelect, Lookup } from '@/components/common';
 import EventTimeline from '@/components/events/EventTimeline.vue'; // Use EventTimeline
-import EventForm from '@/components/events/EventForm.vue'; // Import EventForm
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
 import { useEventStore } from '@/stores/event.store'; // Import event store
-import { useNotificationStore } from '@/stores/notification.store'; // Import notification store
 import { Gender } from '@/types/gender';
 import type { Event } from '@/types/event/event'; // Import Event type
 
@@ -260,8 +244,6 @@ const { t } = useI18n();
 const familyStore = useFamilyStore();
 const memberStore = useMemberStore();
 const eventStore = useEventStore(); // Initialize event store
-const notificationStore = useNotificationStore(); // Initialize notification store
-
 const tab = ref('general');
 
 const form = ref<HTMLFormElement | null>(null);
@@ -299,14 +281,18 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
 const memberId = computed(() => (memberForm.value as Member).id || ''); // Safely get member ID
 
 // Watch for tab changes and member ID to fetch related events
-watch([tab, memberId], async ([newTab, currentMemberId]) => {
-  if (newTab === 'timeline' && currentMemberId) {
-    await eventStore.searchItems({ relatedMemberId: currentMemberId });
-    memberRelatedEvents.value = eventStore.items;
-  } else if (newTab === 'timeline' && !currentMemberId) {
-    memberRelatedEvents.value = []; // Clear events if no member ID
-  }
-}, { immediate: true });
+watch(
+  [tab, memberId],
+  async ([newTab, currentMemberId]) => {
+    if (newTab === 'timeline' && currentMemberId) {
+      await eventStore.searchItems({ relatedMemberId: currentMemberId });
+      memberRelatedEvents.value = eventStore.items;
+    } else if (newTab === 'timeline' && !currentMemberId) {
+      memberRelatedEvents.value = []; // Clear events if no member ID
+    }
+  },
+  { immediate: true },
+);
 
 watch(
   () => memberForm.value.familyId,
@@ -351,71 +337,4 @@ const submitForm = async () => {
 const closeForm = () => {
   emit('close');
 };
-
-const eventFormDialog = ref(false);
-const selectedEventForForm = ref<Event | undefined>(undefined);
-const isEditEventMode = ref(false);
-
-const handleAddTimelineEvent = () => {
-  selectedEventForForm.value = {
-    id: '',
-    name: '',
-    description: '',
-    startDate: null,
-    endDate: null,
-    location: '',
-    familyId: memberForm.value.familyId || null, // Pre-fill familyId
-    relatedMembers: memberId.value ? [memberId.value] : [], // Pre-fill related member using computed memberId
-    type: 'Other',
-    color: 'blue',
-  };
-  isEditEventMode.value = false;
-  eventFormDialog.value = true;
-};
-
-const handleEditTimelineEvent = (event: Event) => {
-  selectedEventForForm.value = { ...event };
-  isEditEventMode.value = true;
-  eventFormDialog.value = true;
-};
-
-const handleDeleteTimelineEvent = async (event: Event) => {
-  if (!event.id) return; // Ensure event has an ID
-  try {
-    await eventStore.deleteItem(event.id);
-    notificationStore.showSnackbar(t('event.messages.deleteSuccess'), 'success');
-    // Re-fetch events for the timeline after deletion
-    if (memberId.value) {
-      await eventStore.searchItems({ relatedMemberId: memberId.value });
-      memberRelatedEvents.value = eventStore.items;
-    }
-  } catch (error) {
-    notificationStore.showSnackbar(t('event.messages.deleteError'), 'error');
-  }
-};
-
-const handleSaveEventForm = async (eventData: Event) => {
-  try {
-    if (isEditEventMode.value) {
-      await eventStore.updateItem(eventData);
-      notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');
-    } else {
-      await eventStore.addItem(eventData);
-      notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
-    }
-    // After saving, re-fetch events for the timeline
-    if (memberId.value) {
-      await eventStore.searchItems({ relatedMemberId: memberId.value });
-      memberRelatedEvents.value = eventStore.items;
-    }
-    eventFormDialog.value = false;
-    selectedEventForForm.value = undefined;
-  } catch (error) {
-    notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
-  }
-};
-
-const handleCancelEventForm = () => {
-  eventFormDialog.value = false;
-  selectedEventForForm.value = undefined;
-};</script>
+</script>
