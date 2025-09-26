@@ -29,9 +29,10 @@
             </v-col>
             <v-col cols="12" md="4">
               <FamilyAutocomplete
-                v-model="filters.familyId"
+                v-model="computedFamilyId"
                 :label="t('event.search.family')"
                 clearable
+                :multiple="false"
               />
             </v-col>
             <v-col cols="12" md="4">
@@ -68,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/services/event/event.service.interface';
 import DateInputField from '@/components/common/DateInputField.vue';
@@ -117,4 +118,11 @@ const resetFilters = () => {
   };
   emit('update:filters', filters.value);
 };
+
+const computedFamilyId = computed<string | undefined>({
+  get: () => filters.value.familyId ?? undefined,
+  set: (value: string | undefined) => {
+    filters.value.familyId = value ?? null;
+  },
+});
 </script>
