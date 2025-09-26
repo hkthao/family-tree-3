@@ -97,6 +97,12 @@ export class MockEventService implements IEventService {
         filteredEvents = filteredEvents.filter((event) => event.familyId === filters.familyId);
       }
 
+      if (filters.relatedMemberId) {
+        filteredEvents = filteredEvents.filter((event) =>
+          event.relatedMembers?.includes(filters.relatedMemberId!)
+        );
+      }
+
       if (filters.startDate) {
         filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) >= filters.startDate!);
       }
