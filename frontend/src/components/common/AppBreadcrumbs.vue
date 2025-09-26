@@ -19,7 +19,7 @@ import { useI18n } from 'vue-i18n';
 interface BreadcrumbItem {
   title: string;
   disabled: boolean;
-  href?: string;
+  to?: string; // Changed from href to to
 }
 
 const route = useRoute();
@@ -50,13 +50,13 @@ const generateBreadcrumbs = () => {
       const newBreadcrumb: BreadcrumbItem = {
         title: t(match.meta.breadcrumb as string),
         disabled: match.path === route.path,
-        href: href,
+        to: href, // Changed from href to to
       };
 
       // Prevent adding duplicate breadcrumbs (e.g., for parent and default child with same title)
       if (newBreadcrumbs.length > 0 &&
           newBreadcrumbs[newBreadcrumbs.length - 1].title === newBreadcrumb.title &&
-          newBreadcrumbs[newBreadcrumbs.length - 1].href === newBreadcrumb.href) {
+          newBreadcrumbs[newBreadcrumbs.length - 1].to === newBreadcrumb.to) {
         return; // Skip adding duplicate
       }
 
@@ -65,12 +65,16 @@ const generateBreadcrumbs = () => {
   });
 
   // Add a default home breadcrumb if not present
-  if (newBreadcrumbs.length === 0 || newBreadcrumbs[0].href !== '/') {
+  if (newBreadcrumbs.length === 0 || newBreadcrumbs[0].to !== '/') {
     newBreadcrumbs.unshift({
       title: t('dashboard.overview'), // Assuming 'dashboard.overview' is the home breadcrumb
       disabled: false,
-      href: '/',
+      to: '/',
     });
+  }
+
+  if (newBreadcrumbs.length > 0) {
+    newBreadcrumbs[newBreadcrumbs.length - 1].disabled = true;
   }
 
   breadcrumbs.value = newBreadcrumbs;
