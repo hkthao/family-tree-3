@@ -8,6 +8,7 @@
         <v-tabs v-model="selectedTab" class="mb-4">
           <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
           <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
+          <v-tab value="calendar">{{ t('event.view.calendar') }}</v-tab>
         </v-tabs>
 
         <v-window v-model="selectedTab">
@@ -21,6 +22,13 @@
 
           <v-window-item value="timeline">
             <EventTimeline
+              :family-id="family.id"
+              :read-only="readOnly"
+            />
+          </v-window-item>
+
+          <v-window-item value="calendar">
+            <EventCalendar
               :family-id="family.id"
               :read-only="readOnly"
             />
@@ -49,6 +57,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import FamilyForm from '@/components/family/FamilyForm.vue';
 import EventTimeline from '@/components/events/EventTimeline.vue';
+import EventCalendar from '@/components/events/EventCalendar.vue'; // Import EventCalendar
 import type { Family } from '@/types/family';
 
 const { t } = useI18n();
