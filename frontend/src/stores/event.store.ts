@@ -116,8 +116,22 @@ export const useEventStore = defineStore('event', {
       }
     },
 
-    setCurrentItem(item: Event | null) {
+    async setCurrentItem(item: Event | null) {
       this.currentItem = item;
+    },
+
+    async fetchItemById(id: string): Promise<Event | undefined> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.event.getById(id);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error = result.error.message || 'Không thể tải sự kiện.';
+        console.error(result.error);
+        return undefined;
+      }
     },
   },
 });

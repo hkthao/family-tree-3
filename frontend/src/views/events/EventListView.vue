@@ -50,7 +50,7 @@
         v-if="selectedEventForView"
         :initial-event-data="selectedEventForView"
         :read-only="true"
-        :title="t('event.form.title')"
+        :title="eventFormTitle"
         @close="closeViewDialog"
       />
     </v-dialog>
@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
@@ -112,6 +112,10 @@ const deleteConfirmDialog = ref(false);
 const eventToDelete = ref<Event | undefined>(undefined);
 const viewDialog = ref(false);
 const selectedEventForView = ref<Event | null>(null);
+
+const eventFormTitle = computed(() => {
+  return selectedEventForView.value ? t('event.detail.title') : t('event.form.title');
+});
 
 const loadEvents = async (fetchItemsPerPage: number = itemsPerPage.value) => {
   if (

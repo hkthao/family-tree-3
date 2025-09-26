@@ -140,7 +140,7 @@ const getEventColor: CalendarEventColorFunction = (event: { [key: string]: any }
 
 const emit = defineEmits(['viewEvent']);
 
-const showEventDetails = (eventSlotScope: CalendarEvent ) => {
-  emit('viewEvent', eventSlotScope.eventObject);
+const showEventDetails = (eventSlotScope: Event ) => {
+  emit('viewEvent', eventSlotScope);
 };
 </script>
