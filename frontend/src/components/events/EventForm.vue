@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" :disabled="props.readOnly">
+  <v-form class="mt-3" ref="form" :disabled="props.readOnly">
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field
