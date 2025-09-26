@@ -8,9 +8,9 @@ export function generateMockEvent(
   index: number,
   familyId?: string,
 ): Event {
-  const startDate = faker.date.past({ years: 5 });
+  const startDate = faker.date.between({ from: '2025-08-01T00:00:00.000Z', to: '2025-09-30T23:59:59.999Z' });
   const endDate = faker.datatype.boolean()
-    ? faker.date.soon({ refDate: startDate })
+    ? faker.date.soon({ refDate: startDate, days: 30 })
     : undefined;
   const location = faker.location.city() + ', ' + faker.location.country();
 
