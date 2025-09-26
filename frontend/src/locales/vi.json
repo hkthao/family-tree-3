@@ -1,7 +1,8 @@
 {
   "dashboard.overview": "Tổng quan",
+  "dashboard.title": "Tổng quan",
   "family.view": "Xem cây gia phả",
-  "family.addMember": "Thêm thành viên",
+  "family.tree.title": "Cây Gia Phả",  "family.addMember": "Thêm thành viên",
   "family.manageMembers": "Quản lý thành viên",
   "family.manageFamilies": "Quản lý gia đình/dòng họ",
   "family.timeline": "Sự kiện gia đình",
