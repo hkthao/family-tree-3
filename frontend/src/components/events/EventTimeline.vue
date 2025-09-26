@@ -1,43 +1,37 @@
 <template>
-  <v-card class="mb-4">
-    <v-card-title class="text-h6 d-flex align-center">
-      {{ t('event.timeline.title') }}
-      <v-spacer></v-spacer>
-    </v-card-title>
-    <v-card-text>
-      <v-timeline density="compact" side="end" truncate-line="both">
-        <v-timeline-item
-          v-for="event in paginatedEvents"
-          :key="event.id"
-          :dot-color="event.color || 'primary'"
-          size="small"
-        >
-          <div class="d-flex justify-space-between flex-wrap">
-            <div class="text-h6">{{ event.name }}</div>
-            <div class="text-caption text-grey">{{ formatDate(event.startDate) }}</div>
-          </div>
-          <div v-if="event.location" class="text-caption text-grey">
-            <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
-          </div>
-          <ChipLookup
-            v-if="event.relatedMembers && event.relatedMembers.length > 0"
-            :model-value="event.relatedMembers"
-            :data-source="memberStore"
-            display-expr="fullName"
-            value-expr="id"
-            image-expr="avatarUrl"
-          />
-        </v-timeline-item>
-      </v-timeline>
-      <v-pagination
-        v-if="totalEvents > 0"
-        v-model="page"
-        :length="Math.max(1, Math.ceil(totalEvents / itemsPerPage))"
-        @update:model-value="loadEvents"
-        class="mt-4"
-      ></v-pagination>
-    </v-card-text>
-  </v-card>
+  <v-card-text>
+    <v-timeline density="compact" side="end" truncate-line="both">
+      <v-timeline-item
+        v-for="event in paginatedEvents"
+        :key="event.id"
+        :dot-color="event.color || 'primary'"
+        size="small"
+      >
+        <div class="d-flex justify-space-between flex-wrap">
+          <div class="text-h6">{{ event.name }}</div>
+          <div class="text-caption text-grey">{{ formatDate(event.startDate) }}</div>
+        </div>
+        <div v-if="event.location" class="text-caption text-grey">
+          <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
+        </div>
+        <ChipLookup
+          v-if="event.relatedMembers && event.relatedMembers.length > 0"
+          :model-value="event.relatedMembers"
+          :data-source="memberStore"
+          display-expr="fullName"
+          value-expr="id"
+          image-expr="avatarUrl"
+        />
+      </v-timeline-item>
+    </v-timeline>
+    <v-pagination
+      v-if="totalEvents > 0"
+      v-model="page"
+      :length="Math.max(1, Math.ceil(totalEvents / itemsPerPage))"
+      @update:model-value="loadEvents"
+      class="mt-4"
+    ></v-pagination>
+  </v-card-text>
 </template>
 
 <script setup lang="ts">
