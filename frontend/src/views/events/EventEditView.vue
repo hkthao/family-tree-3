@@ -19,7 +19,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import EventForm from '@/components/events/EventForm.vue';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 import type { Event } from '@/types/event/event';
 
 const { t } = useI18n();
@@ -30,7 +30,12 @@ const notificationStore = useNotificationStore();
 
 const event = ref<Event | undefined>(undefined);
 
-// ... (rest of the code)
+onMounted(async () => {
+  const eventId = route.params.id as string;
+  if (eventId) {
+    event.value = await eventStore.fetchItemById(eventId);
+  }
+});
 
 const handleUpdateEvent = async (eventData: Event) => {
   try {

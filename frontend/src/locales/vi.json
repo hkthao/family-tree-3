@@ -176,6 +176,7 @@
   "event.list.headers.actions": "Hành động",
   "event.list.confirmDelete": "Bạn có chắc muốn xoá sự kiện {name} không?",
   "event.form.title": "Biểu mẫu Sự kiện",
+  "event.detail.title": "Chi tiết Sự kiện",
   "event.form.addTitle": "Thêm Sự kiện Mới",
   "event.form.editTitle": "Chỉnh sửa Sự kiện",
   "event.form.name": "Tên Sự kiện",
