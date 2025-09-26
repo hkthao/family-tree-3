@@ -36,6 +36,7 @@ export function generateMockEvent(
       'Migration',
       'Other',
     ]),
+    color: faker.color.rgb(), // Generate a random color
   };
 }
 
