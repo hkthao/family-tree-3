@@ -1,5 +1,4 @@
 <template>
-  <v-card-text>
     <v-form ref="form" :disabled="props.readOnly">
       <!-- Thông tin cơ bản -->
       <v-row>
@@ -158,7 +157,6 @@
         </v-col>
       </v-row>
     </v-form>
-  </v-card-text>
 </template>
 
 <script setup lang="ts">

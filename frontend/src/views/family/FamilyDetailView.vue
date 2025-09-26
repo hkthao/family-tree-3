@@ -1,5 +1,4 @@
 <template>
-  <v-container fluid>
     <v-card v-if="family" class="mb-4">
       <v-card-title class="text-h6 d-flex align-center">
         {{ family.name }}
@@ -41,7 +40,6 @@
     <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
       {{ t('common.noData') }}
     </v-alert>
-  </v-container>
 </template>
 
 <script setup lang="ts">

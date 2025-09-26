@@ -1,5 +1,4 @@
 <template>
-  <v-container fluid>
     <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList
@@ -35,7 +34,6 @@
     >
       {{ notificationStore.snackbar.message }}
     </v-snackbar>
-  </v-container>
 </template>
 
 <script setup lang="ts">

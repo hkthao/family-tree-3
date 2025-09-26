@@ -1,7 +1,9 @@
 <template>
   <v-card>
     <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('family.form.editTitle') }}</span>
+      <span class="text-h5 text-uppercase">{{
+        t('family.form.editTitle')
+      }}</span>
     </v-card-title>
     <v-card-text>
       <FamilyForm
@@ -18,8 +20,12 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1" variant="text" @click="handleUpdateItem">{{ t('common.save') }}</v-btn>
+      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{
+        t('common.cancel')
+      }}</v-btn>
+      <v-btn color="blue-darken-1" variant="text" @click="handleUpdateItem">{{
+        t('common.save')
+      }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -47,7 +53,6 @@ const router = useRouter();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-
 onMounted(async () => {
   const itemId = route.params.id as string;
   if (itemId) {
@@ -62,16 +67,25 @@ const handleUpdateItem = async () => {
 
   const itemData = familyFormRef.value.getFormData() as Family;
   if (!itemData.id) {
-    notificationStore.showSnackbar(t('family.management.messages.saveError'), 'error');
+    notificationStore.showSnackbar(
+      t('family.management.messages.saveError'),
+      'error',
+    );
     return;
   }
 
   try {
     await familyStore.updateItem(itemData);
-    notificationStore.showSnackbar(t('family.management.messages.updateSuccess'), 'success');
+    notificationStore.showSnackbar(
+      t('family.management.messages.updateSuccess'),
+      'success',
+    );
     closeForm();
   } catch (error) {
-    notificationStore.showSnackbar(t('family.management.messages.saveError'), 'error');
+    notificationStore.showSnackbar(
+      t('family.management.messages.saveError'),
+      'error',
+    );
   }
 };
 

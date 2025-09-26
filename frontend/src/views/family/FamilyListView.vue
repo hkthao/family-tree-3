@@ -1,7 +1,5 @@
 <template>
-  <v-container fluid>
     <FamilySearch @update:filters="handleFilterUpdate" />
-
     <FamilyList
       :items="items"
       :total-items="familyStore.totalItems"
@@ -29,7 +27,6 @@
     <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
       {{ notificationStore.snackbar.message }}
     </v-snackbar>
-  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -44,7 +41,6 @@ import type { FamilySearchFilter } from '@/types/family';
 
 import FamilySearch from '@/components/family/FamilySearch.vue';
 import FamilyList from '@/components/family/FamilyList.vue';
-import FamilyForm from '@/components/family/FamilyForm.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
