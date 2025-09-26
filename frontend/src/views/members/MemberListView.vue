@@ -48,7 +48,6 @@ import type { MemberFilter } from '@/types/family';
 import MemberSearch from '@/components/members/MemberSearch.vue';
 import MemberList from '@/components/members/MemberList.vue';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
-import MemberForm from '@/components/members/MemberForm.vue';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
 
