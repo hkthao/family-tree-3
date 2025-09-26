@@ -1,66 +1,57 @@
 <template>
-  <v-card>
-    <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ title }}</span>
-    </v-card-title>
-    <v-card-text>
-      <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
-        <v-col cols="12">
-          <div class="d-flex justify-center mb-4">
-            <v-avatar size="96">
-              <v-img v-if="familyForm.avatarUrl" :src="familyForm.avatarUrl"></v-img>
-              <v-icon v-else size="96">mdi-account-group</v-icon>
-            </v-avatar>
-          </div>
-        </v-col>
-        <v-text-field
-          v-model="familyForm.avatarUrl"
-          :label="$t('family.form.avatarUrlLabel')"
-          variant="outlined"
-        ></v-text-field>
-        <v-text-field
-          v-model="familyForm.name"
-          :label="$t('family.form.nameLabel')"
-          :rules="[rules.required]"
-          required
-          variant="outlined"
-        ></v-text-field>
-        <v-text-field
-          v-model="familyForm.address"
-          :label="$t('family.form.addressLabel')"
-          variant="outlined"
-        ></v-text-field>
-        <v-select
-          v-model="familyForm.visibility"
-          :items="visibilityItems"
-          :label="$t('family.form.visibilityLabel')"
-          required
-          variant="outlined"
-        ></v-select>
-        <v-textarea
-          v-model="familyForm.description"
-          :label="$t('family.form.descriptionLabel')"
-          variant="outlined"
-        ></v-textarea>
-      </v-form>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue-darken-1" variant="text" @click="$emit('cancel')">{{ props.readOnly ? $t('common.close') : $t('common.cancel') }}</v-btn>
-      <v-btn v-if="!props.readOnly" color="blue-darken-1" variant="text" @click="submitForm">{{ $t('common.save') }}</v-btn>
-    </v-card-actions>
-  </v-card>
+  <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
+    <v-col cols="12">
+      <div class="d-flex justify-center mb-4">
+        <v-avatar size="96">
+          <v-img
+            v-if="familyForm.avatarUrl"
+            :src="familyForm.avatarUrl"
+          ></v-img>
+          <v-icon v-else size="96">mdi-account-group</v-icon>
+        </v-avatar>
+      </div>
+    </v-col>
+    <v-text-field
+      v-model="familyForm.avatarUrl"
+      :label="$t('family.form.avatarUrlLabel')"
+      variant="outlined"
+    ></v-text-field>
+    <v-text-field
+      v-model="familyForm.name"
+      :label="$t('family.form.nameLabel')"
+      :rules="[rules.required]"
+      required
+      variant="outlined"
+    ></v-text-field>
+    <v-text-field
+      v-model="familyForm.address"
+      :label="$t('family.form.addressLabel')"
+      variant="outlined"
+    ></v-text-field>
+    <v-select
+      v-model="familyForm.visibility"
+      :items="visibilityItems"
+      :label="$t('family.form.visibilityLabel')"
+      required
+      variant="outlined"
+    ></v-select>
+    <v-textarea
+      v-model="familyForm.description"
+      :label="$t('family.form.descriptionLabel')"
+      variant="outlined"
+    ></v-textarea>
+  </v-form>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types/family';
+import { FamilyVisibility } from '@/types/family/family-visibility';
 
 const props = defineProps<{
   initialFamilyData?: Family;
   readOnly?: boolean;
-  title: string;
 }>();
 const emit = defineEmits(['submit', 'cancel']);
 
@@ -68,17 +59,22 @@ const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);
 
-const familyForm = ref<Family | Omit<Family, 'id'>>(props.initialFamilyData || {
-  name: '',
-  description: '',
-  address: '',
-  avatarUrl: '',
-  visibility: 'private',
-});
+const familyForm = ref<Family | Omit<Family, 'id'>>(
+  props.initialFamilyData || {
+    name: '',
+    description: '',
+    address: '',
+    avatarUrl: '',
+    visibility: FamilyVisibility.Public,
+  },
+);
 
 const visibilityItems = computed(() => [
-  { title: t('family.form.visibility.private'), value: 'Private' },
-  { title: t('family.form.visibility.public'), value: 'Public' },
+  {
+    title: t('family.form.visibility.private'),
+    value: FamilyVisibility.Private,
+  },
+  { title: t('family.form.visibility.public'), value: FamilyVisibility.Public },
 ]);
 
 const rules = {
@@ -91,4 +87,22 @@ const submitForm = async () => {
     emit('submit', familyForm.value);
   }
 };
+
+// Expose form validation and data for parent component
+const validate = async () => {
+  if (form.value) {
+    const { valid } = await form.value.validate();
+    return valid;
+  }
+  return false;
+};
+
+const getFormData = () => {
+  return familyForm.value;
+};
+
+defineExpose({
+  validate,
+  getFormData,
+});
 </script>

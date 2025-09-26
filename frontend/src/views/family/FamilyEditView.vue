@@ -1,12 +1,14 @@
 <template>
   <v-card>
+    <v-card-title class="text-center">
+      <span class="text-h5 text-uppercase">{{ t('family.form.editTitle') }}</span>
+    </v-card-title>
     <v-card-text>
       <FamilyForm
-        v-if="initialItemData"
-        :initial-family-data="initialItemData"
-        :title="t('family.form.editTitle')"
-        @cancel="closeForm"
-        @submit="handleUpdateItem"
+        ref="familyFormRef"
+        v-if="family"
+        :initial-family-data="family"
+        :read-only="false"
       />
       <v-progress-circular
         v-else
@@ -14,6 +16,11 @@
         color="primary"
       ></v-progress-circular>
     </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="blue-darken-1" variant="text" @click="handleUpdateItem">{{ t('common.save') }}</v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -26,29 +33,39 @@ import { useNotificationStore } from '@/stores/notification.store';
 import FamilyForm from '@/components/family/FamilyForm.vue';
 import type { Family } from '@/types/family';
 
+interface FamilyFormExposed {
+  validate: () => Promise<boolean>;
+  getFormData: () => Family | Omit<Family, 'id'>;
+}
+
+const family = ref<Family | undefined>(undefined);
+const familyFormRef = ref<FamilyFormExposed | null>(null);
+
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-const initialItemData = ref<Family | null>(null);
 
-onMounted(() => {
+onMounted(async () => {
   const itemId = route.params.id as string;
   if (itemId) {
-    const item = familyStore.items.find(f => f.id === itemId);
-    if (item) {
-      initialItemData.value = { ...item };
-    } else {
-      router.push('/family');
-    }
-  } else {
-    router.push('/family');
+    family.value = await familyStore.fetchItemById(itemId);
   }
 });
 
-const handleUpdateItem = async (itemData: Family) => {
+const handleUpdateItem = async () => {
+  if (!familyFormRef.value) return;
+  const isValid = await familyFormRef.value.validate();
+  if (!isValid) return;
+
+  const itemData = familyFormRef.value.getFormData() as Family;
+  if (!itemData.id) {
+    notificationStore.showSnackbar(t('family.management.messages.saveError'), 'error');
+    return;
+  }
+
   try {
     await familyStore.updateItem(itemData);
     notificationStore.showSnackbar(t('family.management.messages.updateSuccess'), 'success');

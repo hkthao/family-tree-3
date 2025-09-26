@@ -25,16 +25,6 @@
       @cancel="handleDeleteCancel"
     />
 
-    <!-- Family Detail Dialog -->
-    <v-dialog v-model="detailDialog" max-width="600px" persistent>
-      <FamilyForm
-        :initial-family-data="selectedFamily"
-        :title="t('family.detail.title')"
-        :read-only="true"
-        @cancel="closeDetail"
-      />
-    </v-dialog>
-
     <!-- Snackbar -->
     <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
       {{ notificationStore.snackbar.message }}
@@ -71,8 +61,6 @@ const currentFilters = ref<FamilySearchFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
-const detailDialog = ref(false);
-const selectedFamily = ref<Family | undefined>(undefined);
 const deleteConfirmDialog = ref(false);
 const familyToDelete = ref<Family | undefined>(undefined);
 
@@ -116,13 +104,7 @@ const navigateToEditFamily = (family: Family) => {
 };
 
 const navigateToViewFamily = (family: Family) => {
-  selectedFamily.value = { ...family };
-  detailDialog.value = true;
-};
-
-const closeDetail = () => {
-  detailDialog.value = false;
-  selectedFamily.value = undefined;
+  router.push(`/family/detail/${family.id}`);
 };
 
 const confirmDelete = (family: Family) => {
