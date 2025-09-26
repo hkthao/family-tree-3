@@ -89,11 +89,7 @@ const loadEvents = async () => {
 
 watch([page, itemsPerPage, () => props.familyId, () => props.memberId], () => {
   loadEvents();
-});
-
-onMounted(() => {
-  loadEvents();
-});
+}, { immediate: true });
 
 
 </script>
