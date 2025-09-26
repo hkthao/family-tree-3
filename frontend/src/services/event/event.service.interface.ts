@@ -12,6 +12,7 @@ export interface EventFilter {
   startDate?: Date | null;
   endDate?: Date | null;
   location?: string;
+  relatedMemberId?: string;
 }
 
 export interface IEventService extends ICrudService<Event> { // Extend ICrudService

@@ -1,7 +1,11 @@
 <template>
   <v-card class="mb-4">
-    <v-card-title class="text-h6 d-flex align-center">
+    <v-card-title v-if="!props.hideTitle" class="text-h6 d-flex align-center">
       {{ t('event.timeline.title') }}
+      <v-spacer></v-spacer>
+      <v-btn v-if="!props.readOnly" color="primary" @click="openAddEventForm">
+        {{ t('timeline.addEvent') }}
+      </v-btn>
     </v-card-title>
     <v-card-text>
       <v-timeline density="compact" side="end" truncate-line="both">
@@ -40,12 +44,28 @@ import { formatDate } from '@/utils/dateUtils';
 import { useMemberStore } from '@/stores/member.store';
 import ChipLookup from '@/components/common/ChipLookup.vue';
 
-const { events } = defineProps<{
+const props = defineProps<{
   events: Event[];
+  readOnly?: boolean;
+  hideTitle?: boolean; // New prop to hide the title
 }>();
+
+const emit = defineEmits(['addEvent', 'editEvent', 'deleteEvent']);
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
+
+const openAddEventForm = () => {
+  emit('addEvent');
+};
+
+const openEditEventForm = (event: Event) => {
+  emit('editEvent', event);
+};
+
+const confirmDelete = (event: Event) => {
+  emit('deleteEvent', event);
+};
 
 </script>
 

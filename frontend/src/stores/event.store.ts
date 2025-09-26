@@ -96,7 +96,7 @@ export const useEventStore = defineStore('event', {
     },
 
     async searchItems(filters: EventFilter) {
-      this.filter = filters;
+      this.filter = { ...this.filter, ...filters }; // Merge new filters with existing ones
       this.currentPage = 1; // Reset to first page on new search
       await this._loadItems(); // Trigger fetch with new search terms
     },
