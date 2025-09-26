@@ -196,9 +196,8 @@
 
         <v-window-item value="timeline">
           <EventTimeline
-            :events="memberRelatedEvents"
+            :member-id="memberId"
             :read-only="props.readOnly"
-            :hide-title="true"
           />
         </v-window-item>
       </v-window>
@@ -228,7 +227,6 @@ import { DateInputField, GenderSelect, Lookup } from '@/components/common';
 import EventTimeline from '@/components/events/EventTimeline.vue'; // Use EventTimeline
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
-import { useEventStore } from '@/stores/event.store'; // Import event store
 import { Gender } from '@/types/gender';
 import type { Event } from '@/types/event/event'; // Import Event type
 
@@ -243,11 +241,10 @@ const emit = defineEmits(['close', 'submit']);
 const { t } = useI18n();
 const familyStore = useFamilyStore();
 const memberStore = useMemberStore();
-const eventStore = useEventStore(); // Initialize event store
+
 const tab = ref('general');
 
 const form = ref<HTMLFormElement | null>(null);
-const memberRelatedEvents = ref<Event[]>([]); // Ref to hold events related to this member
 
 const memberForm = ref<Omit<Member, 'id'> | Member>(
   props.initialMemberData
@@ -279,20 +276,6 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
 );
 
 const memberId = computed(() => (memberForm.value as Member).id || ''); // Safely get member ID
-
-// Watch for tab changes and member ID to fetch related events
-watch(
-  [tab, memberId],
-  async ([newTab, currentMemberId]) => {
-    if (newTab === 'timeline' && currentMemberId) {
-      await eventStore.searchItems({ relatedMemberId: currentMemberId });
-      memberRelatedEvents.value = eventStore.items;
-    } else if (newTab === 'timeline' && !currentMemberId) {
-      memberRelatedEvents.value = []; // Clear events if no member ID
-    }
-  },
-  { immediate: true },
-);
 
 watch(
   () => memberForm.value.familyId,
