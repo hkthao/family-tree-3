@@ -1,14 +1,21 @@
 <template>
   <v-card>
+    <v-card-title class="text-center">
+      <span class="text-h5 text-uppercase">{{ t('member.form.editTitle') }}</span>
+    </v-card-title>
     <v-card-text>
       <MemberForm
+        ref="memberFormRef"
         v-if="member"
-        :title="t('member.form.editTitle')"
         :initial-member-data="member"
         @close="closeForm"
-        @submit="handleUpdateMember"
       />
     </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="blue-darken-1" variant="text" @click="handleUpdateMember">{{ t('common.save') }}</v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -28,15 +35,28 @@ const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
 const member = ref<Member | undefined>(undefined);
+const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 
-onMounted(() => {
+onMounted(async () => {
   const memberId = route.params.id as string;
-  member.value = memberStore.items.find(m => m.id === memberId);
+  if (memberId) {
+    member.value = await memberStore.fetchItemById(memberId);
+  }
 });
 
-const handleUpdateMember = async (memberData: Member) => {
+const handleUpdateMember = async () => {
+  if (!memberFormRef.value) return;
+  const isValid = await memberFormRef.value.validate();
+  if (!isValid) return;
+
+  const memberData = memberFormRef.value.getFormData() as Member;
+  if (!memberData.id) {
+    notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
+    return;
+  }
+
   try {
-    await memberStore.updateItem(memberData);
+    await memberStore.updateItem(memberData as Member);
     notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
     closeForm();
   } catch (error) {

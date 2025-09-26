@@ -224,8 +224,22 @@ export const useMemberStore = defineStore('member', {
       }
     },
 
-    setCurrentItem(item: Member | null) {
+    async setCurrentItem(item: Member | null) {
       this.currentItem = item;
+    },
+
+    async fetchItemById(id: string): Promise<Member | undefined> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.member.getById(id);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error = result.error.message || 'Không thể tải thành viên.';
+        console.error(result.error);
+        return undefined;
+      }
     },
   },
 });
