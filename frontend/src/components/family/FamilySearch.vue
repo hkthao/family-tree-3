@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 d-flex align-center">
-      {{ $t('family.management.title') }}
+      {{ $t('member.search.title') }}
       <v-spacer></v-spacer>
       <v-btn icon size="small" variant="text" @click="expanded = !expanded">
         <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
