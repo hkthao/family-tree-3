@@ -111,6 +111,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types/event/event';
+import { EventType } from '@/types/event/event-type'; // Import EventType enum
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
@@ -129,7 +130,7 @@ const form = ref<HTMLFormElement | null>(null);
 
 const eventForm = ref<Omit<Event, 'id'> | Event>(props.initialEventData || {
   name: '',
-  type: 'Other',
+  type: EventType.Other, // Use enum value
   familyId: null,
   startDate: null,
   endDate: null,
@@ -140,11 +141,11 @@ const eventForm = ref<Omit<Event, 'id'> | Event>(props.initialEventData || {
 });
 
 const eventTypes = [
-  { title: t('event.type.birth'), value: 'Birth' },
-  { title: t('event.type.marriage'), value: 'Marriage' },
-  { title: t('event.type.death'), value: 'Death' },
-  { title: t('event.type.migration'), value: 'Migration' },
-  { title: t('event.type.other'), value: 'Other' },
+  { title: t('event.type.birth'), value: EventType.Birth }, // Use enum value
+  { title: t('event.type.marriage'), value: EventType.Marriage }, // Use enum value
+  { title: t('event.type.death'), value: EventType.Death }, // Use enum value
+  { title: t('event.type.migration'), value: EventType.Migration }, // Use enum value
+  { title: t('event.type.other'), value: EventType.Other }, // Use enum value
 ];
 
 const rules = {
