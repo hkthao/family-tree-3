@@ -1,7 +1,7 @@
 <template>
   <v-breadcrumbs :items="breadcrumbs">
     <template v-slot:item="{ item }">
-      <v-breadcrumbs-item :disabled="item.disabled" @click="item.href && router.push(item.href)">
+      <v-breadcrumbs-item v-bind="item">
         {{ item.title }}
       </v-breadcrumbs-item>
     </template>
@@ -35,20 +35,32 @@ const generateBreadcrumbs = () => {
   matchedRoutes.forEach((match) => {
     if (match.meta && match.meta.breadcrumb) {
       let href = match.path;
-      // For dynamic routes, try to navigate to the parent list view
-      if (match.path.includes(':id') && route.params.id) {
-        href = match.path.substring(0, match.path.lastIndexOf('/')); // Remove the /:id part
+      // For dynamic routes, the breadcrumb should link to the parent list view
+      if (match.path.includes(':id')) {
+        // Example: /members/detail/:id -> /members
+        // Example: /members/edit/:id -> /members
+        href = match.path.substring(0, match.path.lastIndexOf('/'));
       }
-      // Special case for /members/add or /family/add, their parent is /members or /family
-      if (match.name === 'AddMember' || match.name === 'AddFamily' || match.name === 'AddEvent') {
+      // For add routes, the breadcrumb should link to the parent list view
+      if (match.path.endsWith('/add')) {
+        // Example: /members/add -> /members
         href = match.path.substring(0, match.path.lastIndexOf('/'));
       }
 
-      newBreadcrumbs.push({
+      const newBreadcrumb: BreadcrumbItem = {
         title: t(match.meta.breadcrumb as string),
         disabled: match.path === route.path,
         href: href,
-      });
+      };
+
+      // Prevent adding duplicate breadcrumbs (e.g., for parent and default child with same title)
+      if (newBreadcrumbs.length > 0 &&
+          newBreadcrumbs[newBreadcrumbs.length - 1].title === newBreadcrumb.title &&
+          newBreadcrumbs[newBreadcrumbs.length - 1].href === newBreadcrumb.href) {
+        return; // Skip adding duplicate
+      }
+
+      newBreadcrumbs.push(newBreadcrumb);
     }
   });
 
