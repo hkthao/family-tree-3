@@ -4,15 +4,12 @@
       <v-toolbar dense flat>
         <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-text-field
-          v-model="searchTerm"
-          label="Tìm kiếm thành viên..."
-          variant="solo-inverted"
-          density="compact"
-          hide-details
-          clearable
-          class="ml-4 mr-2"
-        ></v-text-field>
+        <FamilyAutocomplete
+          class="mt-2"
+          label="Lọc theo gia đình..."
+          v-model="selectedFamilyId"
+          @update:model-value="handleFamilySelect"
+        />
       </v-toolbar>
       <div ref="chartContainer" class="f3 flex-grow-1"></div>
     </v-col>
@@ -20,20 +17,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import f3 from 'family-chart'; // Corrected import
-import rawData from '@/data/family-data.json';
 import 'family-chart/styles/family-chart.css';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import { useMemberStore } from '@/stores/member.store';
+import type { Member } from '@/types/family';
 
 const chartContainer = ref<HTMLDivElement | null>(null);
-const searchTerm = ref('');
+const selectedFamilyId = ref<string | null>(null);
 let chart: any = null; // To hold the chart instance
+const memberStore = useMemberStore();
 
-const transformData = (data: typeof rawData) => {
+// --- DATA TRANSFORMATION ---
+const transformData = (members: Member[]) => {
   const transformedMap = new Map<string, any>(); // Use a map for easier lookup
 
   // Initialize all persons with basic data and empty rels
-  data.forEach((person) => {
+  members.forEach((person : Member) => {
     transformedMap.set(String(person.id), {
       id: String(person.id),
       data: {
@@ -53,7 +54,7 @@ const transformData = (data: typeof rawData) => {
   });
 
   // Populate father/mother for children, and children for parents
-  data.forEach((person) => {
+  members.forEach((person) => {
     const transformedPerson = transformedMap.get(String(person.id));
     if (person.parents && person.parents.length > 0) {
       transformedPerson.rels.father = String(person.parents[0]);
@@ -76,7 +77,7 @@ const transformData = (data: typeof rawData) => {
 
   // Populate spouses
   // Iterate through all children, if they have two parents, those parents are spouses
-  data.forEach((person) => {
+  members.forEach((person) => {
     if (person.parents && person.parents.length === 2) {
       const parent1Id = String(person.parents[0]);
       const parent2Id = String(person.parents[1]);
@@ -98,32 +99,49 @@ const transformData = (data: typeof rawData) => {
   return Array.from(transformedMap.values());
 };
 
-onMounted(() => {
-  if (chartContainer.value) {
-    const transformedData = transformData(rawData);
+const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
+  if (!chartContainer.value) return;
 
-    chart = f3
-      .createChart(chartContainer.value, transformedData)
-      .setTransitionTime(1000)
-      .setCardXSpacing(200) // Adjust spacing (card width 150 + 50 padding)
-      .setCardYSpacing(250); // Adjust spacing (card height 200 + 50 padding)
+  // Clear previous chart
+  chartContainer.value.innerHTML = '';
 
-    chart
-      .setCardHtml()
-      .setCardDim({ w: 150, h: 200 }) // Communicate custom card dimensions
-      .setOnCardUpdate(Card());
+  const transformedData = transformData(dataToRender);
 
-    chart.updateTree({
-      initial: true,
-      ancestry_depth: 100,
-      progeny_depth: 100,
-    });
+  if (transformedData.length === 0) {
+    // Display a message if no data
+    chartContainer.value.innerHTML =
+      '<div style="text-align: center; padding-top: 50px;">Không có thành viên nào để hiển thị.</div>';
+    chart = null;
+    return;
   }
-});
+
+  // Determine main_id for the chart
+  let chartMainId = mainId || transformedData[0].id;
+  if (!transformedData.some((d) => d.id === chartMainId)) {
+    chartMainId = transformedData[0].id; // Fallback if mainId is not in current data
+  }
+
+  chart = f3
+    .createChart(chartContainer.value, transformedData)
+    .setTransitionTime(1000)
+    .setCardXSpacing(200) // Adjust spacing (card width 150 + 50 padding)
+    .setCardYSpacing(250); // Adjust spacing (card height 200 + 50 padding)
+
+  chart
+    .setCardHtml()
+    .setCardDim({ w: 150, h: 200 }) // Communicate custom card dimensions
+    .setOnCardUpdate(Card());
+
+  chart.updateTree({
+    initial: true,
+    main_id: chartMainId,
+    ancestry_depth: 100,
+    progeny_depth: 100,
+  });
+};
 
 onUnmounted(() => {
   if (chart) {
-    // family-chart does not have a dedicated destroy method, so we clear the container
     if (chartContainer.value) {
       chartContainer.value.innerHTML = '';
     }
@@ -131,7 +149,13 @@ onUnmounted(() => {
   }
 });
 
-const Card = () => {
+// Watch for family filter changes
+watch(selectedFamilyId, (newFamilyId) => {});
+
+const handleFamilySelect = (familyId: string | null) => {};
+
+// --- CUSTOM CARD RENDERING ---
+function Card() {
   return function (this: HTMLElement, d: any) {
     // Update innerHTML instead of outerHTML, and let the library handle positioning
     this.innerHTML = `
@@ -176,47 +200,7 @@ const Card = () => {
 
     return class_list;
   }
-};
-
-watch(searchTerm, (query) => {
-  if (!chart) return;
-
-  // Reset styles if search is cleared
-  if (!query) {
-    chart.meta.data.forEach((d: any) => {
-      chart.store.update.node({
-        id: d.id,
-        data: { ...d.data, '[style]': null },
-      });
-    });
-    chart.updateTree({});
-    return;
-  }
-
-  // Find matching nodes
-  const results = chart.meta.data.filter((d: any) =>
-    d.data['Họ và tên'].toLowerCase().includes(query.toLowerCase()),
-  );
-
-  if (results.length > 0) {
-    // Apply highlight style to found nodes
-    chart.meta.data.forEach((d: any) => {
-      const isMatch = results.some((res: any) => res.id === d.id);
-      chart.store.update.node({
-        id: d.id,
-        data: {
-          ...d.data,
-          '[style]': isMatch ? 'border: 4px solid #ff5722;' : null,
-        },
-      });
-    });
-    chart.updateTree({});
-
-    // Focus on the first found person
-    const firstResultId = results[0].id;
-    chart.focus(firstResultId);
-  }
-});
+}
 </script>
 
 <style>
