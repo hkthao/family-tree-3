@@ -1,19 +1,23 @@
 <template>
-  <v-row class="fill-height">
-    <v-col cols="12" class="d-flex flex-column">
-      <v-toolbar dense flat>
-        <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <FamilyAutocomplete
-          class="mt-2 fa-filter"
-          label="Lọc theo gia đình..."
-          v-model="selectedFamilyId"
-          @update:model-value="handleFamilySelect"
-        />
-      </v-toolbar>
-      <div ref="chartContainer" class="f3 flex-grow-1"></div>
-    </v-col>
-  </v-row>
+  <v-container fluid>
+    <v-card fluid class="fill-height">
+      <v-row class="fill-height">
+        <v-col cols="12" class="d-flex flex-column">
+          <v-toolbar dense flat>
+            <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
+            <v-spacer></v-spacer>
+            <FamilyAutocomplete
+              class="mr-2 mt-4 fa-filter"
+              label="Lọc theo gia đình..."
+              v-model="selectedFamilyId"
+              @update:model-value="handleFamilySelect"
+            />
+          </v-toolbar>
+          <div ref="chartContainer" class="f3 flex-grow-1"></div>
+        </v-col>
+      </v-row>
+    </v-card>
+  </v-container>
 </template>
 
 <script setup lang="ts">
@@ -191,7 +195,10 @@ function Card() {
 <style>
 .main_svg {
   width: 100% !important;
-  height: 100% !important;
+  min-height: 80vh !important;
+}
+.f3 {
+  min-height: 80vh !important;
 }
 
 .f3 div.card {
@@ -289,7 +296,7 @@ function Card() {
   width: 100%;
   flex-direction: column;
 }
-.fa-filter{
-  width: 100px;
+.fa-filter {
+  width: 80px;
 }
 </style>
