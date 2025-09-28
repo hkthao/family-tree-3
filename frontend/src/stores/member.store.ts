@@ -241,6 +241,20 @@ export const useMemberStore = defineStore('member', {
         return undefined;
       }
     },
+
+    async getMembersByFamilyId(familyId: string): Promise<Member[]> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.member.fetchMembersByFamilyId(familyId);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error = result.error.message || 'Không thể tải danh sách thành viên theo gia đình.';
+        console.error(result.error);
+        return [];
+      }
+    },
   },
 });
 
