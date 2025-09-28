@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height" style="min-height: 100vh;">
+  <v-container fluid class="fill-height" style="min-height: 100vh">
     <v-row class="fill-height">
       <v-col cols="12" class="d-flex flex-column">
         <v-toolbar dense flat>
@@ -16,7 +16,10 @@
           ></v-text-field>
           <v-btn @click="exportToPdf" color="primary">Xuất PDF</v-btn>
         </v-toolbar>
-        <div ref="chartContainer" class="family-tree-container flex-grow-1"></div>
+        <div
+          ref="chartContainer"
+          class="family-tree-container f3 flex-grow-1"
+        ></div>
       </v-col>
     </v-row>
   </v-container>
@@ -29,35 +32,23 @@ import html2pdf from 'html2pdf.js';
 import rawData from '@/data/family-data.json';
 import 'family-chart/styles/family-chart.css';
 
-interface Member {
-  id: number;
-  name: string;
-  avatar: string;
-  birthYear: number;
-  deathYear: number | null;
-  parents: number[];
-  gender: string; // Added gender
-}
-
-// --- REFS & STATE ---
 const chartContainer = ref<HTMLDivElement | null>(null);
 const searchTerm = ref('');
 let chart: any = null; // To hold the chart instance
 
-// --- DATA TRANSFORMATION ---
 const transformData = (data: typeof rawData) => {
   const transformedMap = new Map<string, any>(); // Use a map for easier lookup
 
   // Initialize all persons with basic data and empty rels
-  data.forEach(person => {
+  data.forEach((person) => {
     transformedMap.set(String(person.id), {
       id: String(person.id),
       data: {
         'Họ và tên': person.name,
         'Năm sinh': person.birthYear,
         'Năm mất': person.deathYear || 'nay',
-        'avatar': person.avatar,
-        'gender': person.gender, // Added gender
+        avatar: person.avatar,
+        gender: person.gender, // Added gender
       },
       rels: {
         spouses: [],
@@ -69,7 +60,7 @@ const transformData = (data: typeof rawData) => {
   });
 
   // Populate father/mother for children, and children for parents
-  data.forEach(person => {
+  data.forEach((person) => {
     const transformedPerson = transformedMap.get(String(person.id));
     if (person.parents && person.parents.length > 0) {
       transformedPerson.rels.father = String(person.parents[0]);
@@ -78,9 +69,12 @@ const transformData = (data: typeof rawData) => {
       }
 
       // Add this person as a child to their parents
-      person.parents.forEach(parentId => {
+      person.parents.forEach((parentId) => {
         const transformedParent = transformedMap.get(String(parentId));
-        if (transformedParent && !transformedParent.rels.children.includes(transformedPerson.id)) {
+        if (
+          transformedParent &&
+          !transformedParent.rels.children.includes(transformedPerson.id)
+        ) {
           transformedParent.rels.children.push(transformedPerson.id);
         }
       });
@@ -89,7 +83,7 @@ const transformData = (data: typeof rawData) => {
 
   // Populate spouses
   // Iterate through all children, if they have two parents, those parents are spouses
-  data.forEach(person => {
+  data.forEach((person) => {
     if (person.parents && person.parents.length === 2) {
       const parent1Id = String(person.parents[0]);
       const parent2Id = String(person.parents[1]);
@@ -111,18 +105,26 @@ const transformData = (data: typeof rawData) => {
   return Array.from(transformedMap.values());
 };
 
-// --- CHART INITIALIZATION ---
 onMounted(() => {
   if (chartContainer.value) {
     const transformedData = transformData(rawData);
 
-    chart = f3.createChart(chartContainer.value, transformedData);
+    chart = f3
+      .createChart(chartContainer.value, transformedData)
+      .setTransitionTime(1000)
+      .setCardXSpacing(200) // Adjust spacing (card width 150 + 50 padding)
+      .setCardYSpacing(250); // Adjust spacing (card height 200 + 50 padding)
 
-    chart.setCardHtml()
-      .setCardDim({ w: 150, h: 180 }) // Communicate custom card dimensions
+    chart
+      .setCardHtml()
+      .setCardDim({ w: 150, h: 200 }) // Communicate custom card dimensions
       .setOnCardUpdate(Card());
 
-    chart.updateTree({ initial: true, ancestry_depth: 100, progeny_depth: 100 });
+    chart.updateTree({
+      initial: true,
+      ancestry_depth: 100,
+      progeny_depth: 100,
+    });
   }
 });
 
@@ -140,11 +142,11 @@ onUnmounted(() => {
 function Card() {
   return function (this: HTMLElement, d: any) {
     // Update innerHTML instead of outerHTML, and let the library handle positioning
-    this.innerHTML = (`
+    this.innerHTML = `
       <div class="card">
         ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
       </div>
-      `);
+      `;
     this.addEventListener('click', (e: Event) => onCardClick(e, d));
   };
 
@@ -154,22 +156,22 @@ function Card() {
   }
 
   function getCardInnerImage(d: any) {
-    return (`
+    return `
       <div class="card-image ${getClassList(d).join(' ')}">
         <img src="${d.data.data.avatar}" />
         <div class="card-label">${d.data.data['Họ và tên']}</div>
         <div class="card-dates">${d.data.data['Năm sinh']} - ${d.data.data['Năm mất']}</div>
       </div>
-      `);
+      `;
   }
 
   function getCardInnerText(d: any) {
-    return (`
+    return `
       <div class="card-text ${getClassList(d).join(' ')}">
         <div class="card-label">${d.data.data['Họ và tên']}</div>
         <div class="card-dates">${d.data.data['Năm sinh']} - ${d.data.data['Năm mất']}</div>
       </div>
-      `);
+      `;
   }
 
   function getClassList(d: any) {
@@ -207,23 +209,32 @@ watch(searchTerm, (query) => {
   // Reset styles if search is cleared
   if (!query) {
     chart.meta.data.forEach((d: any) => {
-      chart.store.update.node({id: d.id, data: {...d.data, '[style]': null}})
-    })
+      chart.store.update.node({
+        id: d.id,
+        data: { ...d.data, '[style]': null },
+      });
+    });
     chart.updateTree({});
     return;
   }
 
   // Find matching nodes
   const results = chart.meta.data.filter((d: any) =>
-    d.data['Họ và tên'].toLowerCase().includes(query.toLowerCase())
+    d.data['Họ và tên'].toLowerCase().includes(query.toLowerCase()),
   );
 
   if (results.length > 0) {
     // Apply highlight style to found nodes
     chart.meta.data.forEach((d: any) => {
       const isMatch = results.some((res: any) => res.id === d.id);
-      chart.store.update.node({id: d.id, data: {...d.data, '[style]': isMatch ? 'border: 4px solid #ff5722;' : null}})
-    })
+      chart.store.update.node({
+        id: d.id,
+        data: {
+          ...d.data,
+          '[style]': isMatch ? 'border: 4px solid #ff5722;' : null,
+        },
+      });
+    });
     chart.updateTree({});
 
     // Focus on the first found person
@@ -231,7 +242,6 @@ watch(searchTerm, (query) => {
     chart.focus(firstResultId);
   }
 });
-
 </script>
 
 <style scoped>
@@ -241,80 +251,98 @@ watch(searchTerm, (query) => {
   overflow: hidden;
   /* background-color: white; */
 }
-
 </style>
 
 <style>
-.main_svg{
+.main_svg {
   width: 100% !important;
   height: 100% !important;
 }
 
-/* Custom Card Styles */
-.card {
-  position: absolute;
-  top: -100px;
-  left: 0;
-  width: 150px; /* Adjust as needed */
-  height: 180px; /* Adjust as needed */
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.f3 div.card {
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-family: Arial, sans-serif;
+  pointer-events: auto;
+  color: #fff;
+  position: relative;
+  margin-top: -50px;
+  margin-left: -50px;
 }
 
-.card-image {
+.f3 div.card-image {
+  border-radius: 50%;
+  padding: 5px;
+  width: 90px;
+  height: 90px;
+}
+
+.f3 div.card-image div.card-label {
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  max-width: 150%;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+.f3 div.card-image div.card-dates {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  max-width: 150%;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: 3px;
+  padding: 0 5px;
+}
+
+.f3 div.card-image img {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-image img {
-  width: 80px;
-  height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  margin-bottom: 8px;
-  border: 2px solid #eee;
 }
 
-.card-label {
-  font-weight: bold;
-  font-size: 0.9em;
-  color: #333;
+.f3 div.card-text {
+  padding: 5px;
+  border-radius: 3px;
+  width: 120px;
+  height: 70px;
+  overflow: hidden;
+  line-height: 1.2;
 }
 
-.card-dates {
-  font-size: 0.7em;
-  color: #666;
+.f3 div.card > div {
+  transition: transform 0.2s ease-in-out;
 }
 
-.card-male {
-  border-color: #2196F3;
+.f3 div.card:hover > div {
+  transform: scale(1.1);
 }
 
-.card-female {
-  border-color: #E91E63;
+.f3 div.card-main {
+  transform: scale(1.2) !important;
 }
 
-.card-main {
-  border-color: #4CAF50;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+.f3 div.card-female {
+  background-color: rgb(196, 138, 146);
 }
-
-.f3-path-to-main {
-  border-color: #ff5722 !important;
-  box-shadow: 0 0 8px rgba(255, 87, 34, 0.5) !important;
-  opacity: 1 !important;
+.f3 div.card-male {
+  background-color: rgb(120, 159, 172);
+}
+.f3 div.card-genderless {
+  background-color: lightgray;
+}
+.f3 div.card-main {
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
 }
 </style>
