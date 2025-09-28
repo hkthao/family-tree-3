@@ -1,0 +1,164 @@
+[
+  {
+    "id": 1,
+    "name": "King George VI",
+    "avatar": "https://i.pravatar.cc/150?u=1",
+    "birthYear": 1895,
+    "deathYear": 1952,
+    "parents": [],
+    "gender": "M"
+  },
+  {
+    "id": 2,
+    "name": "Queen Elizabeth The Queen Mother",
+    "avatar": "https://i.pravatar.cc/150?u=2",
+    "birthYear": 1900,
+    "deathYear": 2002,
+    "parents": [],
+    "gender": "F"
+  },
+  {
+    "id": 3,
+    "name": "Prince Philip",
+    "avatar": "https://i.pravatar.cc/150?u=3",
+    "birthYear": 1921,
+    "deathYear": 2021,
+    "parents": [],
+    "gender": "M"
+  },
+  {
+    "id": 4,
+    "name": "Queen Elizabeth II",
+    "avatar": "https://i.pravatar.cc/150?u=4",
+    "birthYear": 1926,
+    "deathYear": 2022,
+    "parents": [1, 2],
+    "gender": "F"
+  },
+  {
+    "id": 5,
+    "name": "Princess Margaret",
+    "avatar": "https://i.pravatar.cc/150?u=5",
+    "birthYear": 1930,
+    "deathYear": 2002,
+    "parents": [1, 2],
+    "gender": "F"
+  },
+  {
+    "id": 6,
+    "name": "Camila",
+    "avatar": "https://i.pravatar.cc/150?u=6",
+    "birthYear": 1947,
+    "deathYear": null,
+    "parents": [],
+    "gender": "F"
+  },
+  {
+    "id": 7,
+    "name": "Charles",
+    "avatar": "https://i.pravatar.cc/150?u=7",
+    "birthYear": 1948,
+    "deathYear": null,
+    "parents": [3, 4],
+    "gender": "M"
+  },
+  {
+    "id": 8,
+    "name": "Diana",
+    "avatar": "https://i.pravatar.cc/150?u=8",
+    "birthYear": 1961,
+    "deathYear": 1997,
+    "parents": [],
+    "gender": "F"
+  },
+  {
+    "id": 9,
+    "name": "Anne",
+    "avatar": "https://i.pravatar.cc/150?u=9",
+    "birthYear": 1950,
+    "deathYear": null,
+    "parents": [3, 4],
+    "gender": "F"
+  },
+  {
+    "id": 10,
+    "name": "Prince Andrew",
+    "avatar": "https://i.pravatar.cc/150?u=10",
+    "birthYear": 1960,
+    "deathYear": null,
+    "parents": [3, 4],
+    "gender": "M"
+  },
+  {
+    "id": 11,
+    "name": "Prince Edward",
+    "avatar": "https://i.pravatar.cc/150?u=11",
+    "birthYear": 1964,
+    "deathYear": null,
+    "parents": [3, 4],
+    "gender": "M"
+  },
+  {
+    "id": 12,
+    "name": "Catherine",
+    "avatar": "https://i.pravatar.cc/150?u=12",
+    "birthYear": 1982,
+    "deathYear": null,
+    "parents": [],
+    "gender": "F"
+  },
+  {
+    "id": 13,
+    "name": "Prince William",
+    "avatar": "https://i.pravatar.cc/150?u=13",
+    "birthYear": 1982,
+    "deathYear": null,
+    "parents": [7, 8],
+    "gender": "M"
+  },
+  {
+    "id": 14,
+    "name": "Prince Harry",
+    "avatar": "https://i.pravatar.cc/150?u=14",
+    "birthYear": 1984,
+    "deathYear": null,
+    "parents": [7, 8],
+    "gender": "M"
+  },
+  {
+    "id": 15,
+    "name": "Meghan Markle",
+    "avatar": "https://i.pravatar.cc/150?u=15",
+    "birthYear": 1981,
+    "deathYear": null,
+    "parents": [],
+    "gender": "F"
+  },
+  {
+    "id": 16,
+    "name": "Prince George",
+    "avatar": "https://i.pravatar.cc/150?u=16",
+    "birthYear": 2013,
+    "deathYear": null,
+    "parents": [13, 12],
+    "gender": "M"
+  },
+  {
+    "id": 17,
+    "name": "Princess Charlotte",
+    "avatar": "https://i.pravatar.cc/150?u=17",
+    "birthYear": 2015,
+    "deathYear": null,
+    "parents": [13, 12],
+    "gender": "F"
+  },
+  {
+    "id": 18,
+    "name": "Prince Louis",
+    "avatar": "https://i.pravatar.cc/150?u=18",
+    "birthYear": 2018,
+    "deathYear": null,
+    "parents": [13, 12],
+    "gender": "M"
+  }
+]

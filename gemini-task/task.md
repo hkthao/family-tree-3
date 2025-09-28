@@ -1,34 +1,27 @@
-Trong component MemberListView.vue bạn dùng ref cho các biến reactive như currentFilters và viewDialog:
+gemini-cli \
+  --ask "
+Tạo một Vue 3 component sử dụng D3.js để vẽ cây gia phả với các yêu cầu sau:
 
-const currentFilters = ref<MemberFilter>({});
-const viewDialog = ref(false);
+1. Dữ liệu:
+   - Mỗi thành viên có id, name, avatar (URL), birthYear, deathYear, parents (mảng 0–2 ID).
+   - Có thể mở rộng nhiều thế hệ.
 
+2. Multiple parents:
+   - Một người có thể có 2 cha mẹ.
+   - Liên kết bằng cạnh từ cả hai parent đến node con.
 
-Trong test, nếu bạn mock store hoặc mount component mà không giữ nguyên các ref, thì khi gọi:
+3. UI:
+   - Node hiển thị avatar (hình tròn), tên, năm sinh – năm mất.
+   - Hover vào node: highlight node + edges liên quan.
 
-currentFilters.value = filters;
-currentPage.value = 1;
+4. Chức năng:
+   - Ô tìm kiếm: nhập tên → highlight node và focus vào vị trí node.
+   - Hỗ trợ zoom và pan trên sơ đồ.
+   - Responsive, tự fit vào container.
 
-
-→ sẽ lỗi: Cannot set properties of undefined (setting 'value').
-
-Cách fix:
-
-Đảm bảo test dùng ref() cho các reactive property:
-
-const currentFilters = ref<MemberFilter>({});
-const currentPage = ref(1);
-
-vi.mock('@/stores/member.store', () => ({
-  useMemberStore: () => ({
-    searchItems: vi.fn(),
-    currentFilters, // <- ref
-    currentPage,    // <- ref
-    paginatedItems: ref([]),
-    setPage: vi.fn(),
-    setItemsPerPage: vi.fn(),
-  }),
-}));
-
-
-Khi mount component trong test, đừng overwrite các ref này bằng undefined.
+5. Yêu cầu:
+   - D3.js v6+.
+   - TypeScript + Vue 3 SFC.
+   - Dữ liệu mẫu để trong file JSON riêng.
+   - Giải thích cách mở rộng thêm tính năng (ví dụ click node để mở chi tiết).
+"

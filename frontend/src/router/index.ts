@@ -94,6 +94,12 @@ const router = createRouter({
               component: () => import('@/views/family/FamilyEditView.vue'),
               meta: { breadcrumb: 'family.form.editTitle' },
             },
+            {
+              path: 'tree',
+              name: 'FamilyTree',
+              component: () => import('@/views/family/FamilyTreeView.vue'),
+              meta: { breadcrumb: 'Cây Gia Phả' },
+            },
           ],
         },
         {
