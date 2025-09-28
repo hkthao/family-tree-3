@@ -1,34 +1,27 @@
 <template>
-  <v-container fluid class="fill-height" style="min-height: 100vh">
-    <v-row class="fill-height">
-      <v-col cols="12" class="d-flex flex-column">
-        <v-toolbar dense flat>
-          <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-text-field
-            v-model="searchTerm"
-            label="Tìm kiếm thành viên..."
-            variant="solo-inverted"
-            density="compact"
-            hide-details
-            clearable
-            class="ml-4 mr-2"
-          ></v-text-field>
-          <v-btn @click="exportToPdf" color="primary">Xuất PDF</v-btn>
-        </v-toolbar>
-        <div
-          ref="chartContainer"
-          class="family-tree-container f3 flex-grow-1"
-        ></div>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-row class="fill-height">
+    <v-col cols="12" class="d-flex flex-column">
+      <v-toolbar dense flat>
+        <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-text-field
+          v-model="searchTerm"
+          label="Tìm kiếm thành viên..."
+          variant="solo-inverted"
+          density="compact"
+          hide-details
+          clearable
+          class="ml-4 mr-2"
+        ></v-text-field>
+      </v-toolbar>
+      <div ref="chartContainer" class="f3 flex-grow-1"></div>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import f3 from 'family-chart'; // Corrected import
-import html2pdf from 'html2pdf.js';
 import rawData from '@/data/family-data.json';
 import 'family-chart/styles/family-chart.css';
 
@@ -138,8 +131,7 @@ onUnmounted(() => {
   }
 });
 
-// --- CUSTOM CARD RENDERING ---
-function Card() {
+const Card = () => {
   return function (this: HTMLElement, d: any) {
     // Update innerHTML instead of outerHTML, and let the library handle positioning
     this.innerHTML = `
@@ -184,23 +176,6 @@ function Card() {
 
     return class_list;
   }
-}
-
-// --- FUNCTIONALITY ---
-const exportToPdf = () => {
-  if (chartContainer.value) {
-    const element = chartContainer.value.querySelector('#f3Canvas'); // Target the f3Canvas div
-    if (element) {
-      const options = {
-        margin: 10,
-        filename: 'family-tree.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a2', orientation: 'landscape' },
-      };
-      html2pdf().from(element).set(options).save();
-    }
-  }
 };
 
 watch(searchTerm, (query) => {
@@ -243,15 +218,6 @@ watch(searchTerm, (query) => {
   }
 });
 </script>
-
-<style scoped>
-.family-tree-container {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  /* background-color: white; */
-}
-</style>
 
 <style>
 .main_svg {
