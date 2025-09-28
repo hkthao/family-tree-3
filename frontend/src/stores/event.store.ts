@@ -1,9 +1,7 @@
 import { defineStore } from 'pinia';
 import type { Event } from '@/types/event/event';
-import type { Paginated } from '@/types/common';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { EventFilter } from '@/services/event/event.service.interface';
-import type { ApiError } from '@/utils/api';
 
 export const useEventStore = defineStore('event', {
   state: () => ({
@@ -40,7 +38,7 @@ export const useEventStore = defineStore('event', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách sự kiện.';
+        this.error = this.i18n.t('event.errors.load');
         console.error(result.error);
       }
       this.loading = false;
@@ -54,7 +52,7 @@ export const useEventStore = defineStore('event', {
         this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
-        this.error = result.error.message || 'Không thể thêm sự kiện.';
+        this.error = this.i18n.t('event.errors.add');
         console.error(result.error);
       }
       this.loading = false;
@@ -70,10 +68,10 @@ export const useEventStore = defineStore('event', {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
-          this.error = 'Không tìm thấy sự kiện để cập nhật trong kho.';
+          this.error = this.i18n.t('event.errors.notFound');
         }
       } else {
-        this.error = result.error.message || 'Không thể cập nhật sự kiện.';
+        this.error = this.i18n.t('event.errors.update');
         console.error(result.error);
       }
       this.loading = false;
@@ -89,7 +87,7 @@ export const useEventStore = defineStore('event', {
           this.currentPage = this.totalPages;
         }
       } else {
-        this.error = result.error.message || 'Không thể xóa sự kiện.';
+        this.error = this.i18n.t('event.errors.delete');
         console.error(result.error);
       }
       this.loading = false;
@@ -128,7 +126,7 @@ export const useEventStore = defineStore('event', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = result.error.message || 'Không thể tải sự kiện.';
+        this.error = this.i18n.t('event.errors.loadById');
         console.error(result.error);
         return undefined;
       }

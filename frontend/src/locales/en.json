@@ -241,5 +241,22 @@
     }
   },
   "common.name": "Name",
-  "common.noData": "No data available"
+  "common.noData": "No data available",
+  "familyTree.fullName": "Full Name",
+  "familyTree.birthYear": "Birth Year",
+  "familyTree.deathYear": "Death Year",
+  "familyTree.noMembersMessage": "No members in this family yet. Add one to get started!",
+  "family.tree.title": "Family Tree",
+  "family.tree.filterByFamily": "Filter by family...",
+  "event.errors.load": "Failed to load events.",
+  "event.errors.add": "Failed to add event.",
+  "event.errors.notFound": "Event not found in store for update.",
+  "event.errors.update": "Failed to update event.",
+  "event.errors.delete": "Failed to delete event.",
+  "event.errors.loadById": "Failed to load event.",
+  "family.errors.load": "Failed to load families.",
+  "family.errors.add": "Failed to add family.",
+  "family.errors.notFound": "Family not found in store for update.",
+  "family.errors.update": "Failed to update family.",
+  "family.errors.delete": "Failed to delete family."
 }

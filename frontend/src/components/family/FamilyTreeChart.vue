@@ -9,17 +9,35 @@ import 'family-chart/styles/family-chart.css';
 import { useMemberStore } from '@/stores/member.store';
 import type { Member } from '@/types/family';
 import { Gender } from '@/types/gender';
+import { useI18n } from 'vue-i18n';
+
+// Define the type for the data used in the family chart cards
+interface CardData {
+  data: {
+    id: string;
+    data: {
+      [key: string]: string | number | undefined;
+      avatar?: string;
+      gender: 'M' | 'F';
+    };
+    main?: boolean;
+  };
+}
+
+const { t } = useI18n();
 
 const props = defineProps({
   familyId: { type: String, default: null },
 });
 
 const chartContainer = ref<HTMLDivElement | null>(null);
-let chart: any = null; // To hold the chart instance
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let chart: any = null; // To hold the chart instance, 'any' is used due to the library's lack of exported types
 const memberStore = useMemberStore();
 
 // --- DATA TRANSFORMATION ---
 const transformData = (members: Member[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transformedMap = new Map<string, any>();
 
   // First pass: Initialize all persons with basic data and empty rels
@@ -27,9 +45,9 @@ const transformData = (members: Member[]) => {
     transformedMap.set(String(person.id), {
       id: String(person.id),
       data: {
-        'Họ và tên': person.fullName || `${person.firstName} ${person.lastName}`,
-        'Năm sinh': person.dateOfBirth?.getFullYear(),
-        'Năm mất': person.dateOfDeath?.getFullYear() || ' ',
+        [t('familyTree.fullName')]: person.fullName || `${person.firstName} ${person.lastName}`,
+        [t('familyTree.birthYear')]: person.dateOfBirth?.getFullYear(),
+        [t('familyTree.deathYear')]: person.dateOfDeath?.getFullYear() || ' ',
         avatar: person.avatarUrl,
         gender: person.gender == Gender.Male ? 'M' : 'F', // Map to 'M', 'F', 'U'
       },
@@ -78,7 +96,7 @@ const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
   if (transformedData.length === 0) {
     // Display a message if no data
     chartContainer.value.innerHTML =
-      '<div style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 1.2em; color: #666;">Không có thành viên nào để hiển thị.</div>';
+      `<div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; font-size: 1.2em; color: #666;">${t('familyTree.noMembersMessage')}</div>`;
     chart = null;
     return;
   }
@@ -126,7 +144,7 @@ onUnmounted(() => {
 
 // --- CUSTOM CARD RENDERING ---
 function Card() {
-  return function (this: HTMLElement, d: any) {
+  return function (this: HTMLElement, d: CardData) {
     // Update innerHTML instead of outerHTML, and let the library handle positioning
     this.innerHTML = `
       <div class="card">
@@ -136,31 +154,31 @@ function Card() {
     this.addEventListener('click', (e: Event) => onCardClick(e, d));
   };
 
-  function onCardClick(e: Event, d: any) {
+  function onCardClick(e: Event, d: CardData) {
     chart.updateMainId(d.data.id);
     chart.updateTree({});
   }
 
-  function getCardInnerImage(d: any) {
+  function getCardInnerImage(d: CardData) {
     return `
       <div class="card-image ${getClassList(d).join(' ')}">
         <img src="${d.data.data.avatar}" />
-        <div class="card-label">${d.data.data['Họ và tên']}</div>
-        <div class="card-dates">${d.data.data['Năm sinh']} - ${d.data.data['Năm mất']}</div>
+        <div class="card-label">${d.data.data[t('familyTree.fullName')]}</div>
+        <div class="card-dates">${d.data.data[t('familyTree.birthYear')]} - ${d.data.data[t('familyTree.deathYear')]}</div>
       </div>
       `;
   }
 
-  function getCardInnerText(d: any) {
+  function getCardInnerText(d: CardData) {
     return `
       <div class="card-text ${getClassList(d).join(' ')}">
-        <div class="card-label">${d.data.data['Họ và tên']}</div>
-        <div class="card-dates">${d.data.data['Năm sinh']} - ${d.data.data['Năm mất']}</div>
+        <div class="card-label">${d.data.data[t('familyTree.fullName')]}</div>
+        <div class="card-dates">${d.data.data[t('familyTree.birthYear')]} - ${d.data.data[t('familyTree.deathYear')]}</div>
       </div>
       `;
   }
 
-  function getClassList(d: any) {
+  function getClassList(d: CardData) {
     const class_list = [];
     if (d.data.data.gender === 'M') class_list.push('card-male');
     else if (d.data.data.gender === 'F') class_list.push('card-female');

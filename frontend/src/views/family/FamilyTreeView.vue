@@ -4,11 +4,11 @@
       <v-row class="fill-height">
         <v-col cols="12" class="d-flex flex-column">
           <v-toolbar dense flat>
-            <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
+            <v-toolbar-title>{{ t('family.tree.title') }}</v-toolbar-title>
             <v-spacer></v-spacer>
             <FamilyAutocomplete
               class="mr-2 mt-4 fa-filter"
-              label="Lọc theo gia đình..."
+              :label="t('family.tree.filterByFamily')"
               v-model="selectedFamilyId"
             />
           </v-toolbar>
@@ -23,6 +23,9 @@
 import { ref } from 'vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import FamilyTreeChart from '@/components/family/FamilyTreeChart.vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 const selectedFamilyId = ref<string | null>(null);
 
 </script>

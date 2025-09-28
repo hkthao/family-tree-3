@@ -246,5 +246,22 @@
     }
   },
   "common.name": "Tên",
-  "common.noData": "Không có dữ liệu"
+  "common.noData": "Không có dữ liệu",
+  "familyTree.fullName": "Họ và tên",
+  "familyTree.birthYear": "Năm sinh",
+  "familyTree.deathYear": "Năm mất",
+  "familyTree.noMembersMessage": "Chưa có thành viên nào trong gia đình này. Hãy thêm một thành viên để bắt đầu!",
+  "family.tree.title": "Cây Gia Phả",
+  "family.tree.filterByFamily": "Lọc theo gia đình...",
+  "event.errors.load": "Không thể tải danh sách sự kiện.",
+  "event.errors.add": "Không thể thêm sự kiện.",
+  "event.errors.notFound": "Không tìm thấy sự kiện để cập nhật trong kho.",
+  "event.errors.update": "Không thể cập nhật sự kiện.",
+  "event.errors.delete": "Không thể xóa sự kiện.",
+  "event.errors.loadById": "Không thể tải sự kiện.",
+  "family.errors.load": "Không thể tải danh sách gia đình.",
+  "family.errors.add": "Không thể thêm gia đình.",
+  "family.errors.notFound": "Không tìm thấy gia đình để cập nhật trong kho.",
+  "family.errors.update": "Không thể cập nhật gia đình.",
+  "family.errors.delete": "Không thể xóa gia đình."
 }

@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
 import type { Family, FamilySearchFilter } from '@/types/family';
-import type { Paginated } from '@/types/common';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { ApiError } from '@/utils/api';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
@@ -42,7 +40,7 @@ export const useFamilyStore = defineStore('family', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách gia đình.';
+        this.error = this.i18n.t('family.errors.load');
         this.items = []; // Clear items on error
         this.totalItems = 0; // Reset totalItems on error
         this.totalPages = 1; // Reset totalPages on error
@@ -59,7 +57,7 @@ export const useFamilyStore = defineStore('family', {
         this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
-        this.error = result.error.message || 'Không thể thêm gia đình.';
+        this.error = this.i18n.t('family.errors.add');
         console.error(result.error);
       }
       this.loading = false;
@@ -75,10 +73,10 @@ export const useFamilyStore = defineStore('family', {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
-          this.error = 'Không tìm thấy gia đình để cập nhật trong kho.';
+          this.error = this.i18n.t('family.errors.notFound');
         }
       } else {
-        this.error = result.error.message || 'Không thể cập nhật gia đình.';
+        this.error = this.i18n.t('family.errors.update');
         console.error(result.error);
       }
       this.loading = false;
@@ -94,7 +92,7 @@ export const useFamilyStore = defineStore('family', {
           this.currentPage = this.totalPages;
         }
       } else {
-        this.error = result.error.message || 'Không thể xóa gia đình.';
+        this.error = this.i18n.t('family.errors.delete');
         console.error(result.error);
       }
       this.loading = false;
@@ -158,7 +156,7 @@ export const useFamilyStore = defineStore('family', {
         this.totalItems = result.value.totalItems;
         this.totalPages = 1;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách gia đình.';
+        this.error = this.i18n.t('family.errors.load');
         console.error(result.error);
       }
       this.loading = false;
