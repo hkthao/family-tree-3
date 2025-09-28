@@ -60,7 +60,8 @@
     "birthYear": 1948,
     "deathYear": null,
     "parents": [3, 4],
-    "gender": "M"
+    "gender": "M",
+    "spouses": [8, 6]
   },
   {
     "id": 8,
@@ -123,7 +124,8 @@
     "birthYear": 1984,
     "deathYear": null,
     "parents": [7, 8],
-    "gender": "M"
+    "gender": "M",
+    "spouses": [15]
   },
   {
     "id": 15,

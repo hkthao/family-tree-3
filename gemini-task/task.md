@@ -1,27 +1,70 @@
-gemini-cli \
-  --ask "
-Tạo một Vue 3 component sử dụng D3.js để vẽ cây gia phả với các yêu cầu sau:
 
-1. Dữ liệu:
-   - Mỗi thành viên có id, name, avatar (URL), birthYear, deathYear, parents (mảng 0–2 ID).
-   - Có thể mở rộng nhiều thế hệ.
+import * as d3 from 'd3';  // npm install d3 or yarn add d3
+import * as f3 from 'family-chart';  // npm install family-chart@0.8.0 or yarn add family-chart@0.8.0
+import 'family-chart/styles/family-chart.css';
 
-2. Multiple parents:
-   - Một người có thể có 2 cha mẹ.
-   - Liên kết bằng cạnh từ cả hai parent đến node con.
+fetch('https://donatso.github.io/family-chart-doc/data/wikidata-popular.json')
+  .then(res => res.json())
+  .then(data => create(data))
+  .catch(err => console.error(err))
 
-3. UI:
-   - Node hiển thị avatar (hình tròn), tên, năm sinh – năm mất.
-   - Hover vào node: highlight node + edges liên quan.
+function create(data) {
+  const f3Chart = f3.createChart('#FamilyChart', data)
+    .setTransitionTime(1000)
+    .setCardXSpacing(150)
+    .setCardYSpacing(150)
 
-4. Chức năng:
-   - Ô tìm kiếm: nhập tên → highlight node và focus vào vị trí node.
-   - Hỗ trợ zoom và pan trên sơ đồ.
-   - Responsive, tự fit vào container.
+  f3Chart.setCardHtml()
+    .setOnCardUpdate(Card())
 
-5. Yêu cầu:
-   - D3.js v6+.
-   - TypeScript + Vue 3 SFC.
-   - Dữ liệu mẫu để trong file JSON riêng.
-   - Giải thích cách mở rộng thêm tính năng (ví dụ click node để mở chi tiết).
-"
+  f3Chart.updateMainId('Q43274')  // Charles III
+
+  f3Chart.updateTree({initial: true})
+
+
+  function Card() {
+    return function (d) {
+      const card = this.querySelector('.card')
+      card.outerHTML = (`
+      <div class="card" style="transform: translate(-50%, -50%);">
+        ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
+      </div>
+      `)
+      this.addEventListener('click', e => onCardClick(e, d))
+    }
+
+    function onCardClick(e, d) {
+      f3Chart.updateMainId(d.data.id)
+      f3Chart.updateTree({})
+    }
+
+    function getCardInnerImage(d) {
+      return (`
+      <div class="card-image ${getClassList(d).join(' ')}">
+        <img src="${d.data.data["avatar"]}">
+        <div class="card-label">${d.data.data["label"]}</div>
+      </div>
+      `)
+    }
+
+    function getCardInnerText(d) {
+      return (`
+      <div class="card-text ${getClassList(d).join(' ')}">
+        ${d.data.data["label"]}
+      </div>
+      `)
+    }
+
+  }
+
+  function getClassList(d) {
+    const class_list = []
+    if (d.data.data.gender === 'M') class_list.push('card-male')
+    else if (d.data.data.gender === 'F') class_list.push('card-female')
+    else class_list.push('card-genderless')
+
+    if (d.data.main) class_list.push('card-main')
+
+    return class_list
+  }
+}

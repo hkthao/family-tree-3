@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height">
+  <v-container fluid class="fill-height" style="min-height: 100vh;">
     <v-row class="fill-height">
       <v-col cols="12" class="d-flex flex-column">
         <v-toolbar dense flat>
@@ -13,7 +13,6 @@
             hide-details
             clearable
             class="ml-4 mr-2"
-            style="max-width: 300px"
           ></v-text-field>
           <v-btn @click="exportToPdf" color="primary">Xuất PDF</v-btn>
         </v-toolbar>
@@ -117,15 +116,11 @@ onMounted(() => {
   if (chartContainer.value) {
     const transformedData = transformData(rawData);
 
-    chart = f3.createChart(chartContainer.value, transformedData, {
-      enableAdmin: false, // Disable editing features
-      node_separation: 100, // Adjust spacing
-      level_separation: 150, // Adjust spacing
-      main_id: '4', // Start from Queen Elizabeth II
-    });
+    chart = f3.createChart(chartContainer.value, transformedData);
 
-    chart.setCardSvg()
-      .setCardDisplay([['Họ và tên'], ['Năm sinh', 'Năm mất']]);
+    chart.setCardHtml()
+      .setCardDim({ w: 150, h: 180 }) // Communicate custom card dimensions
+      .setOnCardUpdate(Card());
 
     chart.updateTree({ initial: true, ancestry_depth: 100, progeny_depth: 100 });
   }
@@ -141,10 +136,58 @@ onUnmounted(() => {
   }
 });
 
+// --- CUSTOM CARD RENDERING ---
+function Card() {
+  return function (this: HTMLElement, d: any) {
+    // Update innerHTML instead of outerHTML, and let the library handle positioning
+    this.innerHTML = (`
+      <div class="card">
+        ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
+      </div>
+      `);
+    this.addEventListener('click', (e: Event) => onCardClick(e, d));
+  };
+
+  function onCardClick(e: Event, d: any) {
+    chart.updateMainId(d.data.id);
+    chart.updateTree({});
+  }
+
+  function getCardInnerImage(d: any) {
+    return (`
+      <div class="card-image ${getClassList(d).join(' ')}">
+        <img src="${d.data.data.avatar}" />
+        <div class="card-label">${d.data.data['Họ và tên']}</div>
+        <div class="card-dates">${d.data.data['Năm sinh']} - ${d.data.data['Năm mất']}</div>
+      </div>
+      `);
+  }
+
+  function getCardInnerText(d: any) {
+    return (`
+      <div class="card-text ${getClassList(d).join(' ')}">
+        <div class="card-label">${d.data.data['Họ và tên']}</div>
+        <div class="card-dates">${d.data.data['Năm sinh']} - ${d.data.data['Năm mất']}</div>
+      </div>
+      `);
+  }
+
+  function getClassList(d: any) {
+    const class_list = [];
+    if (d.data.data.gender === 'M') class_list.push('card-male');
+    else if (d.data.data.gender === 'F') class_list.push('card-female');
+    else class_list.push('card-genderless');
+
+    if (d.data.main) class_list.push('card-main');
+
+    return class_list;
+  }
+}
+
 // --- FUNCTIONALITY ---
 const exportToPdf = () => {
   if (chartContainer.value) {
-    const element = chartContainer.value.querySelector('svg');
+    const element = chartContainer.value.querySelector('#f3Canvas'); // Target the f3Canvas div
     if (element) {
       const options = {
         margin: 10,
@@ -196,6 +239,7 @@ watch(searchTerm, (query) => {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  /* background-color: white; */
 }
 
 </style>
@@ -204,5 +248,73 @@ watch(searchTerm, (query) => {
 .main_svg{
   width: 100% !important;
   height: 100% !important;
+}
+
+/* Custom Card Styles */
+.card {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  width: 150px; /* Adjust as needed */
+  height: 180px; /* Adjust as needed */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-image img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 8px;
+  border: 2px solid #eee;
+}
+
+.card-label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #333;
+}
+
+.card-dates {
+  font-size: 0.7em;
+  color: #666;
+}
+
+.card-male {
+  border-color: #2196F3;
+}
+
+.card-female {
+  border-color: #E91E63;
+}
+
+.card-main {
+  border-color: #4CAF50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+}
+
+.f3-path-to-main {
+  border-color: #ff5722 !important;
+  box-shadow: 0 0 8px rgba(255, 87, 34, 0.5) !important;
+  opacity: 1 !important;
 }
 </style>
