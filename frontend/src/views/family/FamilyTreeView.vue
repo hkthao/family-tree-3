@@ -17,12 +17,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import f3 from 'family-chart'; // Corrected import
 import 'family-chart/styles/family-chart.css';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import { useMemberStore } from '@/stores/member.store';
 import type { Member } from '@/types/family';
+import { Gender } from '@/types/gender';
 
 const chartContainer = ref<HTMLDivElement | null>(null);
 const selectedFamilyId = ref<string | null>(null);
@@ -31,67 +32,46 @@ const memberStore = useMemberStore();
 
 // --- DATA TRANSFORMATION ---
 const transformData = (members: Member[]) => {
-  const transformedMap = new Map<string, any>(); // Use a map for easier lookup
+  const transformedMap = new Map<string, any>();
 
-  // Initialize all persons with basic data and empty rels
-  members.forEach((person : Member) => {
+  // First pass: Initialize all persons with basic data and empty rels
+  members.forEach((person) => {
     transformedMap.set(String(person.id), {
       id: String(person.id),
       data: {
-        'Họ và tên': person.name,
-        'Năm sinh': person.birthYear,
-        'Năm mất': person.deathYear || 'nay',
-        avatar: person.avatar,
-        gender: person.gender, // Added gender
+        'Họ và tên': person.fullName || `${person.firstName} ${person.lastName}`,
+        'Năm sinh': person.dateOfBirth?.getFullYear(),
+        'Năm mất': person.dateOfDeath?.getFullYear() || ' ',
+        avatar: person.avatarUrl,
+        gender: person.gender == Gender.Male ? 'M' : 'F', // Map to 'M', 'F', 'U'
       },
       rels: {
         spouses: [],
         children: [],
-        father: undefined,
-        mother: undefined,
+        father: person.fatherId ? String(person.fatherId) : undefined, // Use fatherId
+        mother: person.motherId ? String(person.motherId) : undefined, // Use motherId
       },
     });
   });
 
-  // Populate father/mother for children, and children for parents
+  // Second pass: Populate children and spouses
   members.forEach((person) => {
     const transformedPerson = transformedMap.get(String(person.id));
-    if (person.parents && person.parents.length > 0) {
-      transformedPerson.rels.father = String(person.parents[0]);
-      if (person.parents[1]) {
-        transformedPerson.rels.mother = String(person.parents[1]);
+
+    // Populate children for parents
+    // Iterate through all members to find their children
+    members.forEach(child => {
+      if (child.fatherId === person.id || child.motherId === person.id) {
+        if (transformedPerson && !transformedPerson.rels.children.includes(String(child.id))) {
+          transformedPerson.rels.children.push(String(child.id));
+        }
       }
+    });
 
-      // Add this person as a child to their parents
-      person.parents.forEach((parentId) => {
-        const transformedParent = transformedMap.get(String(parentId));
-        if (
-          transformedParent &&
-          !transformedParent.rels.children.includes(transformedPerson.id)
-        ) {
-          transformedParent.rels.children.push(transformedPerson.id);
-        }
-      });
-    }
-  });
-
-  // Populate spouses
-  // Iterate through all children, if they have two parents, those parents are spouses
-  members.forEach((person) => {
-    if (person.parents && person.parents.length === 2) {
-      const parent1Id = String(person.parents[0]);
-      const parent2Id = String(person.parents[1]);
-
-      const transformedParent1 = transformedMap.get(parent1Id);
-      const transformedParent2 = transformedMap.get(parent2Id);
-
-      if (transformedParent1 && transformedParent2) {
-        if (!transformedParent1.rels.spouses.includes(parent2Id)) {
-          transformedParent1.rels.spouses.push(parent2Id);
-        }
-        if (!transformedParent2.rels.spouses.includes(parent1Id)) {
-          transformedParent2.rels.spouses.push(parent1Id);
-        }
+    // Populate spouses
+    if (person.spouseId) {
+      if (transformedPerson && !transformedPerson.rels.spouses.includes(String(person.spouseId))) {
+        transformedPerson.rels.spouses.push(String(person.spouseId));
       }
     }
   });
@@ -140,19 +120,17 @@ const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
   });
 };
 
-onUnmounted(() => {
-  if (chart) {
-    if (chartContainer.value) {
-      chartContainer.value.innerHTML = '';
-    }
-    chart = null;
-  }
+onMounted(async () => {
+  renderChart(memberStore.items);
 });
 
-// Watch for family filter changes
-watch(selectedFamilyId, (newFamilyId) => {});
-
-const handleFamilySelect = (familyId: string | null) => {};
+const handleFamilySelect = async (familyId: string | null) => {
+  let membersToRender: Member[] = [];
+  if (familyId) {
+    membersToRender = await memberStore.getMembersByFamilyId(familyId);
+  } 
+  renderChart(membersToRender);
+};
 
 // --- CUSTOM CARD RENDERING ---
 function Card() {
