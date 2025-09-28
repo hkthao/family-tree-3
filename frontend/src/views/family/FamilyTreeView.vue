@@ -5,7 +5,7 @@
         <v-toolbar-title>Cây Gia Phả</v-toolbar-title>
         <v-spacer></v-spacer>
         <FamilyAutocomplete
-          class="mt-2"
+          class="mt-2 fa-filter"
           label="Lọc theo gia đình..."
           v-model="selectedFamilyId"
           @update:model-value="handleFamilySelect"
@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import f3 from 'family-chart'; // Corrected import
 import 'family-chart/styles/family-chart.css';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
@@ -39,7 +39,8 @@ const transformData = (members: Member[]) => {
     transformedMap.set(String(person.id), {
       id: String(person.id),
       data: {
-        'Họ và tên': person.fullName || `${person.firstName} ${person.lastName}`,
+        'Họ và tên':
+          person.fullName || `${person.firstName} ${person.lastName}`,
         'Năm sinh': person.dateOfBirth?.getFullYear(),
         'Năm mất': person.dateOfDeath?.getFullYear() || ' ',
         avatar: person.avatarUrl,
@@ -60,9 +61,12 @@ const transformData = (members: Member[]) => {
 
     // Populate children for parents
     // Iterate through all members to find their children
-    members.forEach(child => {
+    members.forEach((child) => {
       if (child.fatherId === person.id || child.motherId === person.id) {
-        if (transformedPerson && !transformedPerson.rels.children.includes(String(child.id))) {
+        if (
+          transformedPerson &&
+          !transformedPerson.rels.children.includes(String(child.id))
+        ) {
           transformedPerson.rels.children.push(String(child.id));
         }
       }
@@ -70,7 +74,10 @@ const transformData = (members: Member[]) => {
 
     // Populate spouses
     if (person.spouseId) {
-      if (transformedPerson && !transformedPerson.rels.spouses.includes(String(person.spouseId))) {
+      if (
+        transformedPerson &&
+        !transformedPerson.rels.spouses.includes(String(person.spouseId))
+      ) {
         transformedPerson.rels.spouses.push(String(person.spouseId));
       }
     }
@@ -90,7 +97,7 @@ const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
   if (transformedData.length === 0) {
     // Display a message if no data
     chartContainer.value.innerHTML =
-      '<div style="text-align: center; padding-top: 50px;">Không có thành viên nào để hiển thị.</div>';
+      '<div class="empty-message">Không có thành viên nào để hiển thị.</div>';
     chart = null;
     return;
   }
@@ -128,7 +135,7 @@ const handleFamilySelect = async (familyId: string | null) => {
   let membersToRender: Member[] = [];
   if (familyId) {
     membersToRender = await memberStore.getMembersByFamilyId(familyId);
-  } 
+  }
   renderChart(membersToRender);
 };
 
@@ -272,5 +279,17 @@ function Card() {
 }
 .f3 div.card-main {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
+}
+
+.empty-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  flex-direction: column;
+}
+.fa-filter{
+  width: 100px;
 }
 </style>
