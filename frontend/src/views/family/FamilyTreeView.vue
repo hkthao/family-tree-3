@@ -297,6 +297,6 @@ function Card() {
   flex-direction: column;
 }
 .fa-filter {
-  width: 80px;
+  max-width: 300px;
 }
 </style>
