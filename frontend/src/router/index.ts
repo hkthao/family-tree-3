@@ -98,7 +98,7 @@ const router = createRouter({
               path: 'tree',
               name: 'FamilyTree',
               component: () => import('@/views/family/FamilyTreeView.vue'),
-              meta: { breadcrumb: 'Cây Gia Phả' },
+              meta: { breadcrumb: 'family.tree.title' },
             },
           ],
         },

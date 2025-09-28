@@ -263,5 +263,17 @@
   "family.errors.add": "Không thể thêm gia đình.",
   "family.errors.notFound": "Không tìm thấy gia đình để cập nhật trong kho.",
   "family.errors.update": "Không thể cập nhật gia đình.",
-  "family.errors.delete": "Không thể xóa gia đình."
+  "family.errors.delete": "Không thể xóa gia đình.",
+  "member.errors.load": "Không thể tải danh sách thành viên.",
+  "member.errors.emptyName": "Họ và tên không được để trống.",
+  "member.errors.birthAfterDeath": "Ngày sinh không thể sau ngày mất.",
+  "member.errors.sameBirthAndDeathPlace": "Nơi sinh và nơi mất không thể giống nhau.",
+  "member.errors.occupationTooLong": "Nghề nghiệp không được vượt quá 100 ký tự.",
+  "member.errors.add": "Không thể thêm thành viên.",
+  "member.errors.update": "Không thể cập nhật thành viên.",
+  "member.errors.loadById": "Không thể tải thành viên.",
+  "member.errors.loadByFamilyId": "Không thể tải danh sách thành viên theo gia đình.",
+  "menu.profileAndContent": "Hồ sơ & Nội dung",
+  "menu.utilitiesAndAI": "Tiện ích & AI",
+  "menu.cultureAndTraditions": "Văn hóa & Truyền thống"
 }

@@ -96,7 +96,7 @@ const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
   if (transformedData.length === 0) {
     // Display a message if no data
     chartContainer.value.innerHTML =
-      `<div style="display: flex; justify-content: center; align-items: center; height: 100%; width: 100%; font-size: 1.2em; color: #666;">${t('familyTree.noMembersMessage')}</div>`;
+      `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
     chart = null;
     return;
   }
@@ -293,5 +293,14 @@ watch(() => props.familyId, async (newFamilyId) => {
 }
 .f3 div.card-main {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
+}
+
+.empty-message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  flex-direction: column;
+  height: 80vh;
 }
 </style>

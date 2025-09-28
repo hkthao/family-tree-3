@@ -258,5 +258,17 @@
   "family.errors.add": "Failed to add family.",
   "family.errors.notFound": "Family not found in store for update.",
   "family.errors.update": "Failed to update family.",
-  "family.errors.delete": "Failed to delete family."
+  "family.errors.delete": "Failed to delete family.",
+  "member.errors.load": "Failed to load members.",
+  "member.errors.emptyName": "Full name cannot be empty.",
+  "member.errors.birthAfterDeath": "Date of birth cannot be after date of death.",
+  "member.errors.sameBirthAndDeathPlace": "Place of birth and place of death cannot be the same.",
+  "member.errors.occupationTooLong": "Occupation cannot exceed 100 characters.",
+  "member.errors.add": "Failed to add member.",
+  "member.errors.update": "Failed to update member.",
+  "member.errors.loadById": "Failed to load member.",
+  "member.errors.loadByFamilyId": "Failed to load members by family.",
+  "menu.profileAndContent": "Profile & Content",
+  "menu.utilitiesAndAI": "Utilities & AI",
+  "menu.cultureAndTraditions": "Culture & Traditions"
 }

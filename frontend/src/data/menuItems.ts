@@ -75,7 +75,7 @@ const menu: MenuSection[] = [
     ],
   },
   {
-    title: 'Hồ sơ & Nội dung',
+    titleKey: 'menu.profileAndContent',
     items: [
       {
         titleKey: 'profile.myProfile',
@@ -152,7 +152,7 @@ const menu: MenuSection[] = [
     ],
   },
   {
-    title: 'Tiện ích & AI',
+    titleKey: 'menu.utilitiesAndAI',
     items: [
       {
         titleKey: 'search.smart',
@@ -193,7 +193,7 @@ const menu: MenuSection[] = [
     ],
   },
   {
-    title: 'Văn hóa & Truyền thống',
+    titleKey: 'menu.cultureAndTraditions',
     items: [
       {
         titleKey: 'culture.traditions',

@@ -55,7 +55,7 @@ export const useMemberStore = defineStore('member', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách thành viên.';
+        this.error = this.i18n.t('member.errors.load');
         this.items = [];
         this.totalItems = 0;
         this.totalPages = 1;
@@ -67,36 +67,38 @@ export const useMemberStore = defineStore('member', {
     async addItem(newItem: Omit<Member, 'id'>) {
       this.loading = true;
       this.error = null;
+
       if (
+        !newItem.lastName ||
+        !newItem.firstName ||
         newItem.lastName.trim() === '' ||
         newItem.firstName.trim() === ''
       ) {
-        this.error = 'Họ và tên không được để trống.';
+        this.error = this.i18n.t('member.errors.emptyName');
         this.loading = false;
-        return; // Return early
+        return;
       }
-      if (
-        newItem.dateOfBirth &&
-        newItem.dateOfDeath &&
-        newItem.dateOfBirth > newItem.dateOfDeath
-      ) {
-        this.error = 'Ngày sinh không thể sau ngày mất.';
+
+      if (newItem.dateOfBirth && newItem.dateOfDeath && newItem.dateOfBirth > newItem.dateOfDeath) {
+        this.error = this.i18n.t('member.errors.birthAfterDeath');
         this.loading = false;
-        return; // Return early
+        return;
       }
+
       if (
         newItem.placeOfBirth &&
         newItem.placeOfDeath &&
-        newItem.placeOfBirth === newItem.placeOfDeath
+        newItem.placeOfBirth.trim() === newItem.placeOfDeath.trim()
       ) {
-        this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
+        this.error = this.i18n.t('member.errors.sameBirthAndDeathPlace');
         this.loading = false;
-        return; // Return early
+        return;
       }
+
       if (newItem.occupation && newItem.occupation.length > 100) {
-        this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
+        this.error = this.i18n.t('member.errors.occupationTooLong');
         this.loading = false;
-        return; // Return early
+        return;
       }
 
       const result = await this.services.member.add(newItem);
@@ -104,7 +106,7 @@ export const useMemberStore = defineStore('member', {
         this.items.push(result.value);
         await this._loadItems();
       } else {
-        this.error = result.error.message || 'Không thể thêm thành viên.';
+        this.error = this.i18n.t('member.errors.add');
         console.error(result.error);
       }
       this.loading = false;
@@ -113,43 +115,49 @@ export const useMemberStore = defineStore('member', {
     async updateItem(updatedItem: Member) {
       this.loading = true;
       this.error = null;
+
       if (
+        !updatedItem.lastName ||
+        !updatedItem.firstName ||
         updatedItem.lastName.trim() === '' ||
         updatedItem.firstName.trim() === ''
       ) {
-        this.error = 'Họ và tên không được để trống.';
+        this.error = this.i18n.t('member.errors.emptyName');
         this.loading = false;
-        return; // Return early
+        return;
       }
+
       if (
         updatedItem.dateOfBirth &&
         updatedItem.dateOfDeath &&
         updatedItem.dateOfBirth > updatedItem.dateOfDeath
       ) {
-        this.error = 'Ngày sinh không thể sau ngày mất.';
+        this.error = this.i18n.t('member.errors.birthAfterDeath');
         this.loading = false;
-        return; // Return early
+        return;
       }
+
       if (
         updatedItem.placeOfBirth &&
         updatedItem.placeOfDeath &&
-        updatedItem.placeOfBirth === updatedItem.placeOfDeath
+        updatedItem.placeOfBirth.trim() === updatedItem.placeOfDeath.trim()
       ) {
-        this.error = 'Nơi sinh và nơi mất không thể giống nhau.';
+        this.error = this.i18n.t('member.errors.sameBirthAndDeathPlace');
         this.loading = false;
-        return; // Return early
+        return;
       }
+
       if (updatedItem.occupation && updatedItem.occupation.length > 100) {
-        this.error = 'Nghề nghiệp không được vượt quá 100 ký tự.';
+        this.error = this.i18n.t('member.errors.occupationTooLong');
         this.loading = false;
-        return; // Return early
+        return;
       }
       const result = await this.services.member.update(updatedItem);
       if (result.ok) {
         const idx = this.items.findIndex((m) => m.id === result.value.id);
         if (idx !== -1) this.items[idx] = result.value;
       } else {
-        this.error = result.error.message || 'Không thể cập nhật thành viên.';
+        this.error = this.i18n.t('member.errors.update');
         console.error(result.error);
       }
       this.loading = false;
@@ -203,7 +211,7 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách thành viên.';
+        this.error = this.i18n.t('member.errors.load');
         console.error(result.error);
         return [];
       }
@@ -236,7 +244,7 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = result.error.message || 'Không thể tải thành viên.';
+        this.error = this.i18n.t('member.errors.loadById');
         console.error(result.error);
         return undefined;
       }
@@ -250,11 +258,11 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách thành viên theo gia đình.';
+        this.error = this.i18n.t('member.errors.loadByFamilyId');
         console.error(result.error);
         return [];
       }
-    },
+    }
   },
 });
 
