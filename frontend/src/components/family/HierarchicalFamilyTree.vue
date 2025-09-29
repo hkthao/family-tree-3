@@ -1,5 +1,17 @@
 <template>
-  <div ref="chartContainer" class="f3 flex-grow-1"></div>
+  <div class="hierarchical-tree-container">
+    <div ref="chartContainer" class="f3 flex-grow-1"></div>
+    <div class="legend">
+      <div class="legend-item">
+        <span class="legend-color-box legend-male"></span>
+        <span>{{ t('member.gender.male') }}</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-color-box legend-female"></span>
+        <span>{{ t('member.gender.female') }}</span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -200,18 +212,26 @@ watch(() => props.familyId, async (newFamilyId) => {
 </script>
 
 <style>
+.hierarchical-tree-container {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+}
+
 .main_svg {
   width: 100% !important;
-  height: 80vh !important;
+  height: 100% !important;
 }
-.f3{
+
+.f3 {
   cursor: pointer;
+  height: 100%;
 }
 
 .f3 div.card {
   cursor: pointer;
   pointer-events: auto;
-  color: #fff;
+  color: rgb(var(--v-theme-on-surface));
   position: relative;
   margin-top: -50px;
   margin-left: -50px;
@@ -224,34 +244,29 @@ watch(() => props.familyId, async (newFamilyId) => {
   height: 90px;
 }
 
-.f3 div.card-image div.card-label {
+.f3 div.card-image div.card-label,
+.f3 div.card-image div.card-dates {
   position: absolute;
-  bottom: -12px;
   left: 50%;
-  transform: translate(-50%, 50%);
+  transform: translateX(-50%) !important;
   max-width: 150%;
   text-align: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(var(--v-theme-surface-variant-rgb), 0.7);
+  color: rgb(var(--v-theme-on-surface));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   border-radius: 3px;
-  padding: 0 5px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
+
+.f3 div.card-image div.card-label {
+  bottom: -20px;
 }
 
 .f3 div.card-image div.card-dates {
-  position: absolute;
-  bottom: -32px;
-  left: 50%;
-  transform: translate(-50%, 50%);
-  max-width: 150%;
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  border-radius: 3px;
-  padding: 0 5px;
+  bottom: -35px;
 }
 
 .f3 div.card-image img {
@@ -268,6 +283,16 @@ watch(() => props.familyId, async (newFamilyId) => {
   height: 70px;
   overflow: hidden;
   line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.f3 div.card-text .card-label {
+  font-weight: bold;
+  margin-bottom: 4px;
 }
 
 .f3 div.card > div {
@@ -278,15 +303,15 @@ watch(() => props.familyId, async (newFamilyId) => {
   transform: scale(1.1);
 }
 
-.f3 div.card-main {
+.f3 div.card-main > div {
   transform: scale(1.2) !important;
 }
 
 .f3 div.card-female {
-  background-color: rgb(196, 138, 146);
+  background-color: #f48fb1;
 }
 .f3 div.card-male {
-  background-color: rgb(120, 159, 172);
+  background-color: #81d4fa;
 }
 .f3 div.card-genderless {
   background-color: lightgray;
@@ -301,6 +326,43 @@ watch(() => props.familyId, async (newFamilyId) => {
   align-items: center;
   width: 100%;
   flex-direction: column;
-  height: 80vh;
+  height: 100%;
+}
+
+/* Legend Styles */
+.legend {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: rgba(var(--v-theme-surface-variant-rgb), 0.8);
+  padding: 10px;
+  border-radius: 5px;
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.legend-item:last-child {
+  margin-bottom: 0;
+}
+
+.legend-color-box {
+  width: 15px;
+  height: 15px;
+  margin-right: 8px;
+  border-radius: 3px;
+  border: 1px solid #ccc;
+}
+
+.legend-male {
+  background-color: #81d4fa;
+}
+
+.legend-female {
+  background-color: #f48fb1;
 }
 </style>
