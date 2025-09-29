@@ -254,6 +254,8 @@
   "family.tree.title": "Cây Gia Phả",
   "familyTree.title": "Cây Gia Phả",
   "family.tree.filterByFamily": "Lọc theo gia đình...",
+  "family.tree.view.hierarchical": "Phân cấp",
+  "family.tree.view.network": "Mạng lưới",
   "event.errors.load": "Không thể tải danh sách sự kiện.",
   "event.errors.add": "Không thể thêm sự kiện.",
   "event.errors.notFound": "Không tìm thấy sự kiện để cập nhật trong kho.",

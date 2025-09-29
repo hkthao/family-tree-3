@@ -1,37 +1,47 @@
 <template>
   <v-container fluid>
-    <v-card fluid class="fill-height">
-      <v-row class="fill-height">
-        <v-col cols="12" class="d-flex flex-column">
-          <v-toolbar dense flat>
-            <v-toolbar-title>{{ t('family.tree.title') }}</v-toolbar-title>
-            <v-spacer></v-spacer>
-            <FamilyAutocomplete
-              class="mr-2 mt-4 fa-filter"
-              :label="t('family.tree.filterByFamily')"
-              v-model="selectedFamilyId"
-            />
-          </v-toolbar>
-          <FamilyTreeChart :familyId="selectedFamilyId" />
-        </v-col>
-      </v-row>
+    <v-card>
+      <v-card-title>
+        <div class="d-flex flex-row">
+          <h1 class="text-h5 flex-grow-1">
+            {{ t('family.tree.title') }}
+          </h1>
+          <FamilyAutocomplete
+            v-model="selectedFamilyId"
+            class="tree-filter-input"
+            :label="t('family.tree.filterByFamily')"
+            clearable
+            @update:modelValue="onFamilyChange"
+          />
+        </div>
+      </v-card-title>
+
+      <v-card-text>
+        <div v-if="!selectedFamilyId" class="text-center pa-8">
+          <p>{{ t('event.messages.selectFamily') }}</p>
+        </div>
+        <template v-else>
+          <TreeChart :family-id="selectedFamilyId" />
+        </template>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import FamilyTreeChart from '@/components/family/FamilyTreeChart.vue';
 import { useI18n } from 'vue-i18n';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import TreeChart from '@/components/family/TreeChart.vue';
 
 const { t } = useI18n();
 const selectedFamilyId = ref<string | null>(null);
-
+const onFamilyChange = (familyId: string | null) => {
+  selectedFamilyId.value = familyId;
+};
 </script>
-
-<style scoped>
-.fa-filter {
-  max-width: 300px;
+<style>
+.tree-filter-input {
+  max-width: 320px;
 }
 </style>

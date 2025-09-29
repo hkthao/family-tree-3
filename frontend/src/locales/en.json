@@ -249,6 +249,8 @@
   "family.tree.title": "Family Tree",
   "familyTree.title": "Family Tree",
   "family.tree.filterByFamily": "Filter by family...",
+  "family.tree.view.hierarchical": "Hierarchical",
+  "family.tree.view.network": "Network",
   "event.errors.load": "Failed to load events.",
   "event.errors.add": "Failed to add event.",
   "event.errors.notFound": "Event not found in store for update.",

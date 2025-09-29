@@ -36,7 +36,7 @@
           </v-window-item>
 
           <v-window-item value="family-tree">
-            <FamilyTreeChart
+            <TreeChart
               :family-id="family.id"
             />
           </v-window-item>
@@ -65,7 +65,7 @@ import { useFamilyStore } from '@/stores/family.store';
 import FamilyForm from '@/components/family/FamilyForm.vue';
 import EventTimeline from '@/components/events/EventTimeline.vue';
 import EventCalendar from '@/components/events/EventCalendar.vue'; // Import EventCalendar
-import FamilyTreeChart from '@/components/family/FamilyTreeChart.vue';
+import TreeChart from '@/components/family/TreeChart.vue';
 import type { Family } from '@/types/family';
 
 const { t } = useI18n();
