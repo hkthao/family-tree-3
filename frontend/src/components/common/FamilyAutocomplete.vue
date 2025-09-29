@@ -40,13 +40,14 @@
 import { ref, watch, computed, onMounted } from 'vue';
 import { useFamilyStore } from '@/stores/family.store';
 
-// Simple debounce utility
-const debounce = (func: Function, delay: number) => {
+// A more specific type for the function being debounced
+type DebounceableFunction = (...args: any[]) => void;
+
+const debounce = (func: DebounceableFunction, delay: number) => {
   let timeout: ReturnType<typeof setTimeout>;
-  return function(this: any, ...args: any[]) {
-    const context = this;
+  return (...args: any[]) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), delay);
+    timeout = setTimeout(() => func(...args), delay);
   };
 };
 

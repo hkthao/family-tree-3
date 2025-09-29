@@ -126,9 +126,6 @@ const router = createRouter({
   routes: [{ path: '/', component: { template: '' } }],
 });
 
-let memberStore: ReturnType<typeof useMemberStore>;
-let mockMemberService: MockMemberServiceForTest;
-
 describe('MemberListView.vue', () => {
   let memberStore: ReturnType<typeof useMemberStore>;
   let mockMemberService: MockMemberServiceForTest;

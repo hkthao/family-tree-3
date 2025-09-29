@@ -35,9 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event/event';
+import { ref, computed, watch } from 'vue';
 import { formatDate } from '@/utils/dateUtils';
 import { useMemberStore } from '@/stores/member.store';
 import { useEventStore } from '@/stores/event.store'; // Import event store
@@ -50,7 +48,6 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
-const { t } = useI18n();
 const memberStore = useMemberStore();
 const eventStore = useEventStore(); // Initialize event store
 

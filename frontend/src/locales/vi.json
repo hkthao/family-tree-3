@@ -252,6 +252,7 @@
   "familyTree.deathYear": "Năm mất",
   "familyTree.noMembersMessage": "Chưa có thành viên nào trong gia đình này. Hãy thêm một thành viên để bắt đầu!",
   "family.tree.title": "Cây Gia Phả",
+  "familyTree.title": "Cây Gia Phả",
   "family.tree.filterByFamily": "Lọc theo gia đình...",
   "event.errors.load": "Không thể tải danh sách sự kiện.",
   "event.errors.add": "Không thể thêm sự kiện.",

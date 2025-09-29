@@ -37,17 +37,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref, watch, onMounted } from 'vue';
 import { useMemberStore } from '@/stores/member.store'; // Import memberStore directly
 
-// Simple debounce utility
-const debounce = (func: Function, delay: number) => {
+// A more specific type for the function being debounced
+type DebounceableFunction = (...args: any[]) => void;
+
+const debounce = (func: DebounceableFunction, delay: number) => {
   let timeout: ReturnType<typeof setTimeout>;
-  return function(this: any, ...args: any[]) {
-    const context = this;
+  return (...args: any[]) => {
     clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(context, args), delay);
+    timeout = setTimeout(() => func(...args), delay);
   };
 };
 
@@ -71,8 +71,6 @@ const props = withDefaults(defineProps<MemberAutocompleteProps>(), {
 });
 
 const emit = defineEmits(['update:modelValue']);
-
-const { t } = useI18n();
 
 const memberStore = useMemberStore(); // Use memberStore directly
 

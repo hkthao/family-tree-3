@@ -12,6 +12,7 @@ import { createServices } from '@/services/service.factory';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 import { fixedMockFamilies } from '@/data/mock/fixed.family.mock';
+import { FamilyVisibility } from '@/types/family/family-visibility';
 
 const TOTAL_ITEMS = fixedMockFamilies.length;
 const ITEMS_PER_PAGE = DEFAULT_ITEMS_PER_PAGE;
@@ -267,7 +268,7 @@ describe('Family Store', () => {
       description: 'A newly added family.',
       avatarUrl: 'test-avatar.jpg',
       address: 'test-address',
-      visibility: 'public',
+      visibility: FamilyVisibility.Public,
     };
     await store.addItem(newFamilyData);
     expect(store.totalItems).toBe(initialTotalItems + 1);
@@ -291,7 +292,7 @@ describe('Family Store', () => {
       description: 'This family should not be added.',
       avatarUrl: 'test-avatar.jpg',
       address: 'test-address',
-      visibility: 'public',
+      visibility: FamilyVisibility.Public,
     };
     await store.addItem(newFamilyData);
     expect(store.error).toBe('Mock add error');
@@ -310,7 +311,7 @@ describe('Family Store', () => {
       description: 'This family should not be added.',
       avatarUrl: 'test-avatar.jpg',
       address: 'test-address',
-      visibility: 'public',
+      visibility: FamilyVisibility.Public,
     };
     await store.addItem(newFamilyData);
     expect(store.error).toBe('Không thể thêm gia đình.');
@@ -345,7 +346,7 @@ describe('Family Store', () => {
       description: 'Should not be updated',
       avatarUrl: 'test-avatar.jpg',
       address: 'test-address',
-      visibility: 'private',
+      visibility: FamilyVisibility.Private,
     };
 
     // Test case 1: Family not found (mock service throws error)
@@ -389,7 +390,6 @@ describe('Family Store', () => {
   it('deleteItem should remove a family and update state on success', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Initial fetch
-    const initialFamiliesCount = store.items.length;
     const initialTotalItems = store.totalItems;
     const familyToDeleteId = store.items[0]?.id;
     if (familyToDeleteId) {
@@ -483,7 +483,6 @@ describe('Family Store', () => {
       await store.setPage(2);
       expect(store.currentPage).toBe(2);
       // Verify families are different from page 1
-      const familiesPage1 = expectedFilteredFamilies.slice(0, ITEMS_PER_PAGE);
       const familiesPage2 = expectedFilteredFamilies.slice(ITEMS_PER_PAGE, ITEMS_PER_PAGE * 2);
       expect(store.items.map(f => f.id)).toEqual(familiesPage2.map(f => f.id));
     }
@@ -497,12 +496,12 @@ describe('Family Store', () => {
     expect(store.totalPages).toBe(1); // Directly assert 1
 
     // Test 4: Filter by visibility
-    await store.searchItems({ visibility: 'public' }); // Pass only filter object
-    const publicFamilies = mockFamilyService.items.filter(f => f.visibility === 'public');
+    await store.searchItems({ visibility: FamilyVisibility.Public }); // Pass only filter object
+    const publicFamilies = mockFamilyService.items.filter(f => f.visibility === FamilyVisibility.Public);
     expect(store.totalItems).toBe(publicFamilies.length);
-    expect(store.items.every(f => f.visibility === 'public')).toBe(true);
+    expect(store.items.every(f => f.visibility === FamilyVisibility.Public)).toBe(true);
     expect(store.currentPage).toBe(1);
-    expect(store.filter.visibility).toBe('public');
+    expect(store.filter.visibility).toBe(FamilyVisibility.Public);
   });
 
   // 8. Pagination edge cases

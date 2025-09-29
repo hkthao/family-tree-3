@@ -584,7 +584,7 @@ describe('FamilyListView.vue', () => {
     it('confirms and deletes a family successfully', async () => {
       const family = mockFamilyService.items[0];
       vi.spyOn(familyStore, 'deleteItem').mockImplementation(
-        async (id: string): Promise<void> => {
+        async (_: string): Promise<void> => {
           return Promise.resolve();
         },
       ); // Mock successful deletion

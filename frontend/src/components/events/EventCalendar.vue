@@ -162,8 +162,6 @@ const getEventColor: CalendarEventColorFunction = (event: {
   return event.color;
 };
 
-const emit = defineEmits(['viewEvent']);
-
 const showEventDetails = (eventSlotScope: Event) => {
    router.push(`/events/detail/${eventSlotScope.id}`);
 };

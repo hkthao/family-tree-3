@@ -247,6 +247,7 @@
   "familyTree.deathYear": "Death Year",
   "familyTree.noMembersMessage": "No members in this family yet. Add one to get started!",
   "family.tree.title": "Family Tree",
+  "familyTree.title": "Family Tree",
   "family.tree.filterByFamily": "Filter by family...",
   "event.errors.load": "Failed to load events.",
   "event.errors.add": "Failed to add event.",

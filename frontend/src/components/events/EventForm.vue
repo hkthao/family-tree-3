@@ -109,8 +109,6 @@ const props = defineProps<{
   initialEventData?: Event;
 }>();
 
-const emit = defineEmits(['submit']);
-
 const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);

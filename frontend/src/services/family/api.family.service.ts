@@ -1,5 +1,4 @@
 import type { Family } from '@/types/family';
-import type { ICrudService } from '../common/crud.service.interface';
 import type { IFamilyService } from './family.service.interface';
 import type { ApiError } from '@/utils/api';
 import { safeApiCall } from '@/utils/api';

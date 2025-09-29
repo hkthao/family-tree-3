@@ -177,7 +177,6 @@ watch(
 const loadItems = async ({
   page,
   itemsPerPage,
-  sortBy,
 }: {
   page: number;
   itemsPerPage: number;

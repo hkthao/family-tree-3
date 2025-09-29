@@ -20,5 +20,6 @@ module.exports = {
     'vue/no-unused-components': 'warn',
     'vue/multi-word-component-names': 'off',
     'vue/valid-v-slot': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
 };

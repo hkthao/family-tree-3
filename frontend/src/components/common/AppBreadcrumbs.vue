@@ -23,7 +23,6 @@ interface BreadcrumbItem {
 }
 
 const route = useRoute();
-const router = useRouter();
 const { t } = useI18n();
 
 const breadcrumbs = ref<BreadcrumbItem[]>([]);

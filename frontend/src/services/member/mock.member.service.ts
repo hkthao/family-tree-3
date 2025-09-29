@@ -9,7 +9,7 @@ import { fixedMockFamilies } from '@/data/mock/fixed.family.mock'; // Import fix
 import { Gender } from '@/types/gender';
 
 // Helper function to transform date strings to Date objects
-function transformMemberDates(member: any): Member {
+function transformMemberDates(member: Member): Member {
   if (member.dateOfBirth && typeof member.dateOfBirth === 'string') {
     member.dateOfBirth = new Date(member.dateOfBirth);
   }
@@ -420,7 +420,7 @@ const g4_taylor_m1_c1_c1 = generateMember(
 taylorFamilyMembers.push(g4_taylor_m1_c1_c1);
 
 // Combine all mock members
-let mockMembers: Member[] = [...royalFamilyMembers, ...taylorFamilyMembers];
+const mockMembers: Member[] = [...royalFamilyMembers, ...taylorFamilyMembers];
 
 export class MockMemberService implements IMemberService {
   private _members: Member[] = mockMembers;

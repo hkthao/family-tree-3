@@ -163,11 +163,9 @@
 import { ref, computed, watch } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
-import { DateInputField, GenderSelect, Lookup } from '@/components/common';
+import { DateInputField, GenderSelect } from '@/components/common';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
-import { useFamilyStore } from '@/stores/family.store';
-import { useMemberStore } from '@/stores/member.store';
 import { Gender } from '@/types/gender';
 
 const props = defineProps<{
@@ -175,11 +173,8 @@ const props = defineProps<{
   initialMemberData?: Member;
 }>();
 
-const emit = defineEmits(['close']);
 
 const { t } = useI18n();
-const familyStore = useFamilyStore();
-const memberStore = useMemberStore();
 
 const form = ref<HTMLFormElement | null>(null);
 

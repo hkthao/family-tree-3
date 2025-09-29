@@ -1,4 +1,4 @@
-import { DashboardView, FamilyTreeView, ProfileView, UserManagementView, RoleManagementView, FamilyListView, EventListView } from '@/views';
+import { FamilyTreeView, ProfileView, UserManagementView, RoleManagementView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const sidebarRoutes: RouteRecordRaw[] = [

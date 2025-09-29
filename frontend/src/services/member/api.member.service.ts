@@ -5,7 +5,6 @@ import type { ApiError } from '@/utils/api';
 import type { AxiosInstance } from 'axios';
 import type { Result, Paginated } from '@/types/common';
 import { ok } from '@/types/common';
-import axios from 'axios';
 
 // Base URL for your API - configure this based on your environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
