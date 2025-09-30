@@ -27,6 +27,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { VListSubheader } from 'vuetify/components';
 import menu from '@/data/menuItems';
 import { canAccessMenu } from '@/utils/menu-permissions';
 

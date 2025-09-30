@@ -131,6 +131,12 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: 'settings',
+          name: 'UserSettings',
+          component: () => import('@/views/settings/UserSettingsPage.vue'),
+          meta: { breadcrumb: 'userSettings.title', roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
+        },
         ...sidebarRoutes,
       ],
     },

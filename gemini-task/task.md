@@ -1,34 +1,30 @@
-Tạo hệ thống Auth pluggable cho dự án Vue 3 + TypeScript + Pinia + Vuetify, kết hợp với các component sẵn có `LoginForm.vue` và `Register.vue`:
+Create a Vue 3 + Vuetify page called "UserSettingsPage" for a family tree management application. 
+Requirements:
 
-1. Tạo file `authService.ts`:
-   - Interface `AuthService` với phương thức: `login(credentials)`, `logout()`, `register(data)`, `getUser(): Promise<AuthUser | null>`, `getAccessToken(): Promise<string | null>`.
-   - Type `AuthUser` gồm: `id`, `name`, `email`, optional `avatar`, optional `roles` (array string).
-   - Export hàm `setAuthService(service: AuthService)` và `useAuthService(): AuthService`.
+1. Layout:
+   - Responsive design with a sidebar navigation for "Profile", "Preferences", "Security".
+   - Main content area changes according to selected tab.
 
-2. Tạo file `auth0Service.ts`:
-   - Implement `AuthService` dùng `@auth0/auth0-vue` SDK.
-   - Các phương thức `login`, `logout`, `getUser`, `getAccessToken` map với Auth0 SDK.
-   - Không tạo UI mới, chỉ service.
+2. Profile Tab:
+   - Form with fields: Full Name, Email, Profile Picture upload.
+   - "Save" button with form validation.
 
-3. Tạo file `fakeAuthService.ts`:
-   - Implement `AuthService` dùng mock data.
-   - Trả về user mặc định (`roles: ['admin']`) cho development/testing.
+3. Preferences Tab:
+   - Theme selection (Light / Dark).
+   - Notification preferences (checkboxes: Email, SMS, In-app).
+   - "Save" button.
 
-4. Tạo Pinia store `useAuthStore.ts`:
-   - State: `user: AuthUser | null`, `token: string | null`.
-   - Actions: `login(credentials)`, `logout()`, `register(data)` gọi tương ứng từ `useAuthService()` và cập nhật state.
-   - Store không quan tâm provider (Auth0/Fake).
+4. Security Tab:
+   - Change password form: Current Password, New Password, Confirm Password.
+   - "Save" button with validation: passwords match, minimum length 8.
 
-5. Hướng dẫn tích hợp:
-   - `LoginForm.vue` và `Register.vue` sẽ gọi store `useAuthStore().login()` hoặc `register()`.
-   - Frontend không dính trực tiếp Auth0, chỉ dùng service interface.
+5. General:
+   - Use Vuetify components only.
+   - Provide reactive state with Vue 3 `ref` or `reactive`.
+   - Include basic validation feedback (required fields, password mismatch).
+   - Keep design clean and simple, similar to Vuetify style guide.
+   - Use only images/icons available in Vuetify (no custom assets needed).
 
-6. Kiến trúc:
-   - Có thể thay thế service bất kỳ (Auth0 ↔ Fake ↔ JWT) bằng `setAuthService()`.
-   - Component UI chỉ tương tác store.
-   - Dễ test, dev, và bảo trì.
-
-7. Yêu cầu code:
-   - Vue 3 + `<script setup lang="ts">`.
-   - TypeScript đầy đủ type.
-   - Comment giải thích rõ ràng.
+6. Bonus:
+   - Include a snackbar notification after saving changes.
+   - Structure code with components per tab if possible.

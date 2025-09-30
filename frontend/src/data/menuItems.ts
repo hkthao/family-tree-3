@@ -205,6 +205,12 @@ const menu: MenuSection[] = [
         roles: ['Admin'],
       },
       {
+        titleKey: 'userSettings.title',
+        icon: 'mdi-cog',
+        to: '/settings',
+        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
+      },
+      {
         titleKey: 'settings.account',
         icon: 'mdi-lock',
         to: '/settings/account',
