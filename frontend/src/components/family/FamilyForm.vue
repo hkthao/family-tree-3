@@ -1,12 +1,15 @@
 <template>
   <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <div class="mb-4">
-<AvatarInput
+    <v-col cols="12">
+      <AvatarInput
+        v-if="!props.readOnly"
         v-model="familyForm.avatarUrl"
         :size="96"
-        :read-only="props.readOnly"
       />
-    </div>
+      <div v-else class="d-flex justify-center mb-4">
+        <AvatarDisplay :src="familyForm.avatarUrl" :size="96" />
+      </div>
+    </v-col>
       
     <v-row>
       <v-col cols="12" md="6">
@@ -47,6 +50,7 @@ import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types/family';
 import { FamilyVisibility } from '@/types/family/family-visibility';
 import AvatarInput from '@/components/common/AvatarInput.vue';
+import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
 
 const props = defineProps<{
   initialFamilyData?: Family;
