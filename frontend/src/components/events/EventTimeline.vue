@@ -7,10 +7,17 @@
       size="small"
     >
       <template v-slot:opposite>
-        <div class="text-h6">{{ formatDate(event.startDate) }}</div>
+        <div
+          :style="{ color: event.color || 'primary' }"
+          class="text-subtitle-1"
+        >
+          {{ formatDate(event.startDate) }}
+        </div>
       </template>
       <div class="d-flex justify-space-between flex-wrap">
-        <div class="text-h6">{{ event.name }}</div>
+        <div class="text-h6" :style="{ color: event.color || 'primary' }">
+          {{ event.name }}
+        </div>
       </div>
       <div v-if="event.location" class="text-caption text-grey">
         <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
