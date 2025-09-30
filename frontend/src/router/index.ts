@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { DashboardLayout } from '@/layouts/dashboard';
+import { MainLayout } from '@/layouts';
 import { sidebarRoutes } from './sidebar-routes';
 import { canAccessMenu } from '@/utils/menu-permissions';
 
@@ -24,7 +24,7 @@ const router = createRouter({
     {
       path: '/',
       redirect: '/dashboard',
-      component: DashboardLayout,
+      component: MainLayout,
       children: [
         {
           path: 'dashboard',
