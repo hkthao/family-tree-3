@@ -3,20 +3,14 @@
       <!-- Thông tin cơ bản -->
       <v-row>
         <v-col cols="12">
-          <div class="d-flex justify-center mb-4">
-            <v-avatar size="96">
-              <v-img
-                v-if="memberForm.avatarUrl"
-                :src="memberForm.avatarUrl"
-              ></v-img>
-              <v-icon v-else size="96">mdi-account-circle</v-icon>
-            </v-avatar>
-          </div>
-          <v-text-field
+          <AvatarInput
+            v-if="!props.readOnly"
             v-model="memberForm.avatarUrl"
-            :label="t('member.form.avatarUrl')"
-            :readonly="props.readOnly"
-          ></v-text-field>
+            :size="96"
+          />
+          <div v-else class="d-flex justify-center mb-4">
+            <AvatarDisplay :src="memberForm.avatarUrl" :size="96" />
+          </div>
         </v-col>
       </v-row>
       <v-row>
@@ -167,6 +161,8 @@ import { DateInputField, GenderSelect } from '@/components/common';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 import { Gender } from '@/types/gender';
+import AvatarInput from '@/components/common/AvatarInput.vue';
+import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
