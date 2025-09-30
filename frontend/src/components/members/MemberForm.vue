@@ -113,7 +113,7 @@
       <v-row>
         <v-col cols="12" md="4">
           <MemberAutocomplete
-            v-model="computedFatherId"
+            v-model="memberForm.fatherId"
             :label="t('member.form.father')"
             :readonly="props.readOnly || !memberForm.familyId"
             :additional-filters="{
@@ -125,7 +125,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <MemberAutocomplete
-            v-model="computedMotherId"
+            v-model="memberForm.motherId"
             :label="t('member.form.mother')"
             :readonly="props.readOnly || !memberForm.familyId"
             :additional-filters="{
@@ -137,7 +137,7 @@
         </v-col>
         <v-col cols="12" md="4">
           <MemberAutocomplete
-            v-model="computedSpouseId"
+            v-model="memberForm.spouseId"
             :label="t('member.form.spouse')"
             :readonly="props.readOnly || !memberForm.familyId"
             :additional-filters="{ familyId: memberForm.familyId }"
@@ -160,7 +160,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref } from 'vue';
 import type { Member } from '@/types/family';
 import { useI18n } from 'vue-i18n';
 import { DateInputField, GenderSelect } from '@/components/common';
@@ -173,7 +173,6 @@ const props = defineProps<{
   initialMemberData?: Member;
 }>();
 
-
 const { t } = useI18n();
 
 const form = ref<HTMLFormElement | null>(null);
@@ -182,18 +181,6 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
   props.initialMemberData
     ? {
         ...props.initialMemberData,
-        fatherId:
-          props.initialMemberData.fatherId === undefined
-            ? null
-            : props.initialMemberData.fatherId,
-        motherId:
-          props.initialMemberData.motherId === undefined
-            ? null
-            : props.initialMemberData.motherId,
-        spouseId:
-          props.initialMemberData.spouseId === undefined
-            ? null
-            : props.initialMemberData.spouseId,
       }
     : {
         lastName: '',
@@ -206,19 +193,6 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
         spouseId: null,
       },
 );
-
-watch(
-  () => memberForm.value.familyId,
-  (newFamilyId) => {
-    // Clear father, mother, and spouse when familyId changes
-    if (memberForm.value.fatherId != newFamilyId) {
-      memberForm.value.fatherId = null;
-      memberForm.value.motherId = null;
-      memberForm.value.spouseId = null;
-    }
-  },
-  { immediate: true },
-); // Immediate to load members for initial familyId
 
 const rules = {
   required: (value: unknown) => !!value || t('validation.required'),
@@ -251,29 +225,10 @@ const getFormData = () => {
   return memberForm.value;
 };
 
+const emit = defineEmits(['close']);
+
 defineExpose({
   validate,
   getFormData,
-});
-
-const computedFatherId = computed<string | undefined>({
-  get: () => memberForm.value.fatherId ?? undefined,
-  set: (value) => {
-    memberForm.value.fatherId = value ?? null;
-  },
-});
-
-const computedMotherId = computed<string | undefined>({
-  get: () => memberForm.value.motherId ?? undefined,
-  set: (value) => {
-    memberForm.value.motherId = value ?? null;
-  },
-});
-
-const computedSpouseId = computed<string | undefined>({
-  get: () => memberForm.value.spouseId ?? undefined,
-  set: (value) => {
-    memberForm.value.spouseId = value ?? null;
-  },
 });
 </script>
