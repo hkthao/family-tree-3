@@ -103,9 +103,9 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .attr('viewBox', [0, 0, width, height]);
 
   simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 80 : 200).strength(1))
-    .force('charge', d3.forceManyBody().strength(-800))
-    .force('collide', d3.forceCollide(45))
+    .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 120 : 300).strength(1))
+    .force('charge', d3.forceManyBody().strength(-1200))
+    .force('collide', d3.forceCollide(67.5))
     .force('x', d3.forceX(width / 2).strength(0.1))
     .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 240).strength(0.8));
 
