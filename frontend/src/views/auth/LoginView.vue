@@ -34,8 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import LoginForm from '@/components/auth/LoginForm.vue';
-import SocialLogin from '@/components/auth/SocialLogin.vue';
+import { LoginForm, SocialLogin } from '@/components/auth';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
 

@@ -52,7 +52,7 @@ const debounce = (func: DebounceableFunction, delay: number) => {
 };
 
 interface MemberAutocompleteProps {
-  modelValue: (string | number)[] | string | number | undefined;
+  modelValue: (string | number)[] | string | number | undefined | null;
   label?: string;
   rules?: any[];
   readOnly?: boolean;

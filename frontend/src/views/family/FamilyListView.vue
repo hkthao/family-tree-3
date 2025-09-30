@@ -41,8 +41,7 @@ import { useMemberStore } from '@/stores/member.store';
 import type { Family } from '@/types/family';
 import type { FamilySearchFilter } from '@/types/family';
 
-import FamilySearch from '@/components/family/FamilySearch.vue';
-import FamilyList from '@/components/family/FamilyList.vue';
+import { FamilySearch, FamilyList } from '@/components/family';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';

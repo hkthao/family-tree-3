@@ -38,8 +38,7 @@ import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import type { Event } from '@/types/event/event';
 import type { EventFilter } from '@/services/event/event.service.interface';
-import EventSearch from '@/components/events/EventSearch.vue';
-import EventList from '@/components/events/EventList.vue';
+import { EventSearch, EventList } from '@/components/events';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import { useNotificationStore } from '@/stores/notification.store';
 

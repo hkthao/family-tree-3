@@ -154,15 +154,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import type { Member } from '@/types/family';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { DateInputField, GenderSelect } from '@/components/common';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // Import FamilyAutocomplete
-import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
+
+import type { Member } from '@/types/family';
 import { Gender } from '@/types/gender';
-import AvatarInput from '@/components/common/AvatarInput.vue';
-import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+
+import { DateInputField, GenderSelect, FamilyAutocomplete, MemberAutocomplete, AvatarInput, AvatarDisplay } from '@/components/common';
 
 const props = defineProps<{
   readOnly?: boolean;

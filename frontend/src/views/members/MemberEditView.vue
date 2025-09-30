@@ -25,7 +25,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
-import MemberForm from '@/components/members/MemberForm.vue';
+import { MemberForm } from '@/components/members';
 import type { Member } from '@/types/family';
 
 const { t } = useI18n();

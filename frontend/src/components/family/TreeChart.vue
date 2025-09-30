@@ -23,8 +23,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import HierarchicalFamilyTree from '@/components/family/HierarchicalFamilyTree.vue';
-import ForceDirectedFamilyTree from '@/components/family/ForceDirectedFamilyTree.vue';
+import { HierarchicalFamilyTree, ForceDirectedFamilyTree } from '@/components/family';
 
 const props = defineProps({
   familyId: { type: String, default: null },

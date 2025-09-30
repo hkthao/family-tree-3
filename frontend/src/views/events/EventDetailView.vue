@@ -38,7 +38,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
-import EventForm from '@/components/events/EventForm.vue';
+import { EventForm } from '@/components/events';
 import type { Event } from '@/types/event/event';
 
 const { t } = useI18n();

@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
-import FamilyForm from '@/components/family/FamilyForm.vue';
+import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types/family';
 
 const familyFormRef = ref<InstanceType<typeof FamilyForm> | null>(null);

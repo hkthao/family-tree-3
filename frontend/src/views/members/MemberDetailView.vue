@@ -51,9 +51,8 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
-import MemberForm from '@/components/members/MemberForm.vue';
-import EventTimeline from '@/components/events/EventTimeline.vue';
-import EventCalendar from '@/components/events/EventCalendar.vue'; // Import EventCalendar
+import { MemberForm } from '@/components/members';
+import { EventTimeline, EventCalendar } from '@/components/events';
 import type { Member } from '@/types/family';
 
 const { t } = useI18n();

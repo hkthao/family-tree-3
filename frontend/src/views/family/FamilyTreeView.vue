@@ -33,7 +33,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import TreeChart from '@/components/family/TreeChart.vue';
+import { TreeChart } from '@/components/family';
 
 const { t } = useI18n();
 const selectedFamilyId = ref<string | null>(null);

@@ -47,10 +47,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import type { Family } from '@/types/family';
 import { FamilyVisibility } from '@/types/family/family-visibility';
-import AvatarInput from '@/components/common/AvatarInput.vue';
-import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+
+import { AvatarInput, AvatarDisplay } from '@/components/common';
 
 const props = defineProps<{
   initialFamilyData?: Family;

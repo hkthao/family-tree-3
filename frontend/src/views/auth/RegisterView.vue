@@ -36,8 +36,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import RegisterForm from '@/components/auth/RegisterForm.vue';
-import SocialLogin from '@/components/auth/SocialLogin.vue';
+import { RegisterForm, SocialLogin } from '@/components/auth';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
 

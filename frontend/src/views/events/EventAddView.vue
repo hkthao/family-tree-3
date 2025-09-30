@@ -23,7 +23,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
-import EventForm from '@/components/events/EventForm.vue';
+import { EventForm } from '@/components/events';
 
 import type { Event } from '@/types/event/event';
 

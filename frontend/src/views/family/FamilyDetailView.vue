@@ -62,10 +62,9 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import FamilyForm from '@/components/family/FamilyForm.vue';
-import EventTimeline from '@/components/events/EventTimeline.vue';
-import EventCalendar from '@/components/events/EventCalendar.vue'; // Import EventCalendar
-import TreeChart from '@/components/family/TreeChart.vue';
+import { FamilyForm, TreeChart } from '@/components/family';
+import { EventTimeline, EventCalendar } from '@/components/events';
+
 import type { Family } from '@/types/family';
 
 const { t } = useI18n();

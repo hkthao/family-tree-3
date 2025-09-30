@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import DashboardLayout from '@/layouts/dashboard/DashboardLayout.vue';
+import { DashboardLayout } from '@/layouts/dashboard';
 import { sidebarRoutes } from './sidebar-routes';
 import { canAccessMenu } from '@/utils/menu-permissions';
 
