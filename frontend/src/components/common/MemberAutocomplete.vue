@@ -1,30 +1,11 @@
 <template>
-  <v-autocomplete
-    v-model="internalSelectedItems"
-    @update:model-value="handleAutocompleteUpdate"
-    :items="items"
-    item-title="fullName"
-    item-value="id"
-    :label="label"
-    :rules="rules"
-    :readonly="readOnly"
-    :clearable="clearable"
-    :loading="loading"
-    :search="searchTerm"
-    @update:search="onSearchInput"
-    :multiple="multiple"
-    :chips="multiple"
-    :closable-chips="multiple"
-    return-object
-  >
+  <v-autocomplete v-model="internalSelectedItems" @update:model-value="handleAutocompleteUpdate" :items="items"
+    item-title="fullName" item-value="id" :label="label" :rules="rules" :readonly="readOnly" :clearable="clearable"
+    :loading="loading" :search="searchTerm" @update:search="onSearchInput" :multiple="multiple" :chips="multiple"
+    :closable-chips="multiple" return-object>
     <template #chip="{ props, item }">
-      <v-chip
-        v-bind="props"
-        size="small"
-        v-if="item.raw"
-        :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined"
-        :text="item.raw.fullName"
-      ></v-chip>
+      <v-chip v-bind="props" size="small" v-if="item.raw"
+        :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.fullName"></v-chip>
     </template>
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw?.birthDeathYears">
@@ -82,20 +63,14 @@ const searchTerm = ref('');
 const internalSelectedItems = ref<any[]>([]);
 
 const fetchItems = async (query: string = '') => {
-  if (typeof memberStore.searchLookup !== 'function') {
-    console.warn('memberStore is missing searchLookup method.');
-    return;
-  }
-
   loading.value = true;
   try {
-    const filter = {
+    memberStore.filters = {
       searchQuery: query,
       ...props.additionalFilters,
-    };
-    // Assuming searchLookup handles pagination internally or returns all matching for autocomplete
-    await memberStore.searchLookup(filter, 1, 100); // Fetch first 100 items for autocomplete
-    items.value = memberStore.items; // Assuming searchLookup updates memberStore.items
+    }
+    await memberStore._loadItems();
+    items.value = memberStore.items;
   } catch (error) {
     console.error('Error fetching items:', error);
   }

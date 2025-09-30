@@ -6,7 +6,7 @@ import { defineStore } from 'pinia';
 export const useEventStore = defineStore('event', {
   state: () => ({
     items: [] as Event[],
-    currentItem: null as Event | null,
+    currentItem: {} as Event,
     loading: false,
     error: null as string | null,
     filter: {} as EventFilter,
@@ -68,7 +68,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.delete(id);
       if (result.ok) {
-        await this._loadItems(); 
+        await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.delete');
         console.error(result.error);
@@ -90,23 +90,21 @@ export const useEventStore = defineStore('event', {
         this._loadItems();
       }
     },
-    
-    setCurrentItem(item: Event | null) {
+
+    setCurrentItem(item: Event) {
       this.currentItem = item;
     },
 
-    async getById(id: string): Promise<Event | undefined> {
+    async getById(id: string): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.getById(id);
       this.loading = false;
       if (result.ok) {
-        this.currentItem = result.value as Event; // Set currentItem
-        return result.value;
+        this.currentItem = { ...(result.value as Event) }; // Set currentItem
       } else {
         this.error = i18n.global.t('event.errors.loadById');
         console.error(result.error);
-        return undefined;
       }
     },
   },

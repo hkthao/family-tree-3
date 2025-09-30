@@ -10,23 +10,19 @@
       </v-tabs>
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <EventForm
-            :initial-event-data="event"
-            :read-only="true"
-            :title="t('event.detail.title')"
-          />
+          <EventForm :initial-event-data="event" :read-only="true" :title="t('event.detail.title')" />
         </v-window-item>
       </v-window>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-       <v-btn color="gray"  @click="closeView">
+      <v-btn color="gray" @click="closeView">
         {{ t('common.close') }}
       </v-btn>
       <v-btn color="primary" @click="navigateToEditEvent(event.id)">
         {{ t('common.edit') }}
       </v-btn>
-     
+
     </v-card-actions>
   </v-card>
   <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
@@ -40,6 +36,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import type { Event } from '@/types';
+import { EventForm } from '@/components/events';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -54,7 +51,8 @@ const loadEvent = async () => {
   loading.value = true;
   const eventId = route.params.id as string;
   if (eventId) {
-    event.value = await eventStore.getById(eventId);
+    await eventStore.getById(eventId);
+    event.value = eventStore.currentItem
   }
   loading.value = false;
 };

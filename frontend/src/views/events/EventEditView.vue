@@ -4,22 +4,13 @@
       <span class="text-h5 text-uppercase">{{ t('event.form.editTitle') }}</span>
     </v-card-title>
     <v-card-text>
-      <EventForm
-        ref="eventFormRef"
-        v-if="event"
-        :initial-event-data="event"
-        :read-only="false"
-      />
-      <v-progress-circular
-        v-else
-        indeterminate
-        color="primary"
-      ></v-progress-circular>
+      <EventForm ref="eventFormRef" v-if="event" :initial-event-data="event" :read-only="false" />
+      <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey"  @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1"  @click="handleUpdateEvent">{{ t('common.save') }}</v-btn>
+      <v-btn color="grey" @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="blue-darken-1" @click="handleUpdateEvent">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -51,7 +42,8 @@ const event = ref<Event | undefined>(undefined);
 onMounted(async () => {
   const eventId = route.params.id as string;
   if (eventId) {
-    event.value = await eventStore.getById(eventId);
+    await eventStore.getById(eventId);
+    event.value = eventStore.currentItem
   }
 });
 
