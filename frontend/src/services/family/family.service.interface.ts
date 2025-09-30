@@ -1,12 +1,10 @@
-import type { Family, FamilySearchFilter } from '@/types/family';
-import type { Paginated } from '@/types/common';
-import type { ICrudService } from '../common/crud.service.interface';
-import type { Result } from '@/types/common';
-import type { ApiError } from '@/utils/api';
+import type { Family, FamilyFilter, Result, Paginated } from "@/types";
+import type { ApiError } from "@/utils/api";
+import type { ICrudService } from "../common/crud.service.interface";
 
 export interface IFamilyService extends ICrudService<Family> {
   loadItems(
-    filter: FamilySearchFilter,
+    filter: FamilyFilter,
     page: number,
     itemsPerPage: number
   ): Promise<Result<Paginated<Family>, ApiError>>; // Keep searchFamilies

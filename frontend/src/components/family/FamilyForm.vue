@@ -46,8 +46,8 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { Family } from '@/types/family';
-import { FamilyVisibility } from '@/types/family/family-visibility';
+import type { Family } from '@/types';
+import { FamilyVisibility } from '@/types';
 
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 

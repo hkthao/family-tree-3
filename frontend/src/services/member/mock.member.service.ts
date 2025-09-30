@@ -1,12 +1,9 @@
-import type { IMemberService } from './member.service.interface'; // Import MemberFilter
-import type { Member, MemberFilter } from '@/types/family/member';
-import type { Paginated } from '@/types/common';
-import { simulateLatency } from '@/utils/mockUtils';
-import type { Result } from '@/types/common';
-import { ok, err } from '@/types/common';
-import type { ApiError } from '@/utils/api';
-import { fixedMockFamilies } from '@/data/mock/fixed.family.mock'; // Import fixed mock families
-import { Gender } from '@/types';
+import { fixedMockFamilies } from "@/data/mock/fixed.family.mock";
+import { err, type Member, Gender, ok, type Result, type MemberFilter, type Paginated } from "@/types";
+import type { ApiError } from "@/utils/api";
+import { simulateLatency } from "@/utils/mockUtils";
+import type { IMemberService } from "./member.service.interface";
+
 
 // Helper function to transform date strings to Date objects
 function transformMemberDates(member: Member): Member {

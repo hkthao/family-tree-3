@@ -1,18 +1,22 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { Family, FamilySearchFilter } from '@/types/family';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import { generateMockFamily } from '@/data/mock/family.mock';
-import type { Paginated, Result } from '@/types/common';
-import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 import { useFamilyStore } from '@/stores/family.store';
 import { simulateLatency } from '@/utils/mockUtils';
 import { createServices } from '@/services/service.factory';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-
 import { fixedMockFamilies } from '@/data/mock/fixed.family.mock';
-import { FamilyVisibility } from '@/types/family/family-visibility';
+import {
+  type Family,
+  type Result,
+  ok,
+  err,
+  FamilyVisibility,
+  type FamilyFilter,
+  type Paginated,
+} from '@/types';
 
 const TOTAL_ITEMS = fixedMockFamilies.length;
 const ITEMS_PER_PAGE = DEFAULT_ITEMS_PER_PAGE;
@@ -80,7 +84,7 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 
   async loadItems(
-    filter: FamilySearchFilter,
+    filter: FamilyFilter,
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<Family>, ApiError>> {
@@ -92,8 +96,8 @@ class MockFamilyServiceForTest implements IFamilyService {
     // Filter by name
     if (filter.name) {
       const lowerCaseName = filter.name.toLowerCase();
-      filtered = filtered.filter(
-        (family) => family.name.toLowerCase().includes(lowerCaseName),
+      filtered = filtered.filter((family) =>
+        family.name.toLowerCase().includes(lowerCaseName),
       );
     }
 
@@ -112,7 +116,8 @@ class MockFamilyServiceForTest implements IFamilyService {
       const lowerCaseAddress = filter.address.toLowerCase();
       filtered = filtered.filter(
         (family) =>
-          family.address && family.address.toLowerCase().includes(lowerCaseAddress),
+          family.address &&
+          family.address.toLowerCase().includes(lowerCaseAddress),
       );
     }
 
@@ -161,15 +166,17 @@ class MockFamilyServiceForTest implements IFamilyService {
     const end = start + itemsPerPage;
     const items = filtered.slice(start, end);
 
-    return ok(await simulateLatency({
-      items,
-      totalItems,
-      totalPages,
-    }));
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
   }
 
   async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
-    const families = this._items.filter(f => ids.includes(f.id));
+    const families = this._items.filter((f) => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
 }
@@ -227,7 +234,9 @@ describe('Family Store', () => {
   it('_loadItems should set generic error message when result.error.message is undefined', async () => {
     mockFamilyService.shouldThrowError = true;
     // Mock the service to return an error without a message
-    mockFamilyService.loadItems = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.loadItems = vi
+      .fn()
+      .mockResolvedValue(err({ message: undefined }));
     const store = useFamilyStore();
     await store._loadItems();
     expect(store.error).toBe('Không thể tải danh sách gia đình.');
@@ -303,7 +312,9 @@ describe('Family Store', () => {
 
   it('addItem should set generic error message when result.error.message is undefined', async () => {
     mockFamilyService.shouldThrowError = true;
-    mockFamilyService.add = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.add = vi
+      .fn()
+      .mockResolvedValue(err({ message: undefined }));
     const store = useFamilyStore();
     await store._loadItems();
     const newFamilyData: Omit<Family, 'id'> = {
@@ -374,7 +385,9 @@ describe('Family Store', () => {
     const store = useFamilyStore();
     await store._loadItems();
     mockFamilyService.shouldThrowError = true;
-    mockFamilyService.update = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.update = vi
+      .fn()
+      .mockResolvedValue(err({ message: undefined }));
     const familyToUpdate = store.items[0];
     if (familyToUpdate) {
       const updatedFamily: Family = { ...familyToUpdate, name: 'Error Update' };
@@ -424,7 +437,9 @@ describe('Family Store', () => {
     const store = useFamilyStore();
     await store._loadItems();
     mockFamilyService.shouldThrowError = true;
-    mockFamilyService.delete = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.delete = vi
+      .fn()
+      .mockResolvedValue(err({ message: undefined }));
     const familyToDeleteId = store.items[0]?.id;
     if (familyToDeleteId) {
       await store.deleteItem(familyToDeleteId);
@@ -468,23 +483,32 @@ describe('Family Store', () => {
     // Test 1: Search with query, page 1, itemsPerPage = 1
     const searchQuery = mockFamilyService.items[0].name;
     await store.loadItems({ name: searchQuery }); // Pass only filter object
-    const expectedFilteredFamilies = mockFamilyService.items.filter(f =>
+    const expectedFilteredFamilies = mockFamilyService.items.filter((f) =>
       f.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
-    expect(store.items.length).toBe(Math.min(1, expectedFilteredFamilies.length));
+    expect(store.items.length).toBe(
+      Math.min(1, expectedFilteredFamilies.length),
+    );
     expect(store.totalItems).toBe(expectedFilteredFamilies.length);
     expect(store.currentPage).toBe(1);
     expect(store.filter.name).toBe(searchQuery); // Check filter.name
     expect(store.filter.visibility).toBeUndefined(); // Check filter.visibility
-    expect(store.totalPages).toBe(Math.ceil(expectedFilteredFamilies.length / 1)); // Expect totalPages to be 1
+    expect(store.totalPages).toBe(
+      Math.ceil(expectedFilteredFamilies.length / 1),
+    ); // Expect totalPages to be 1
 
     // Test 2: Change page
     if (store.totalPages > 1) {
       await store.setPage(2);
       expect(store.currentPage).toBe(2);
       // Verify families are different from page 1
-      const familiesPage2 = expectedFilteredFamilies.slice(ITEMS_PER_PAGE, ITEMS_PER_PAGE * 2);
-      expect(store.items.map(f => f.id)).toEqual(familiesPage2.map(f => f.id));
+      const familiesPage2 = expectedFilteredFamilies.slice(
+        ITEMS_PER_PAGE,
+        ITEMS_PER_PAGE * 2,
+      );
+      expect(store.items.map((f) => f.id)).toEqual(
+        familiesPage2.map((f) => f.id),
+      );
     }
 
     // Test 3: Change search query, should reset to page 1
@@ -497,9 +521,13 @@ describe('Family Store', () => {
 
     // Test 4: Filter by visibility
     await store.loadItems({ visibility: FamilyVisibility.Public }); // Pass only filter object
-    const publicFamilies = mockFamilyService.items.filter(f => f.visibility === FamilyVisibility.Public);
+    const publicFamilies = mockFamilyService.items.filter(
+      (f) => f.visibility === FamilyVisibility.Public,
+    );
     expect(store.totalItems).toBe(publicFamilies.length);
-    expect(store.items.every(f => f.visibility === FamilyVisibility.Public)).toBe(true);
+    expect(
+      store.items.every((f) => f.visibility === FamilyVisibility.Public),
+    ).toBe(true);
     expect(store.currentPage).toBe(1);
     expect(store.filter.visibility).toBe(FamilyVisibility.Public);
   });
@@ -511,7 +539,9 @@ describe('Family Store', () => {
     // For example, if we have 11 items and ITEMS_PER_PAGE = 10, totalPages = 2.
     // Deleting one item makes it 10 items, totalPages = 1. currentPage should go from 2 to 1.
     mockFamilyService.reset(); // Reset to default 50 items
-    mockFamilyService._items = [...fixedMockFamilies.slice(0, ITEMS_PER_PAGE + 1)]; // 11 items
+    mockFamilyService._items = [
+      ...fixedMockFamilies.slice(0, ITEMS_PER_PAGE + 1),
+    ]; // 11 items
     await store._loadItems(); // totalItems = 11, totalPages = 2
     expect(store.totalItems).toBe(ITEMS_PER_PAGE + 1);
     expect(store.totalPages).toBe(2);
@@ -578,7 +608,9 @@ describe('Family Store', () => {
 
   it('loadItems should set generic error message when result.error.message is undefined', async () => {
     mockFamilyService.shouldThrowError = true;
-    mockFamilyService.loadItems = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.loadItems = vi
+      .fn()
+      .mockResolvedValue(err({ message: undefined }));
     const store = useFamilyStore();
     await store._loadItems();
     expect(store.error).toBe('Không thể tải danh sách gia đình.');
@@ -638,13 +670,18 @@ describe('Family Store', () => {
   it('getItemById should return undefined and log error if service call fails', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
-    mockFamilyService.getById = vi.fn().mockResolvedValue(err({ message: 'Fetch error' }));
+    mockFamilyService.getById = vi
+      .fn()
+      .mockResolvedValue(err({ message: 'Fetch error' }));
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
     const fetchedItem = await store.getItemById('non-existent-id');
 
     expect(fetchedItem).toBeUndefined();
-    expect(consoleSpy).toHaveBeenCalledWith('Error fetching item with ID non-existent-id:', { message: 'Fetch error' });
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error fetching item with ID non-existent-id:',
+      { message: 'Fetch error' },
+    );
     consoleSpy.mockRestore(); // Restore console.error
   });
 

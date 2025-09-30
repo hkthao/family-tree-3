@@ -13,13 +13,10 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
 import { createRouter, createWebHistory } from 'vue-router';
-import type { Member } from '@/types/family';
-import type { MemberFilter } from '@/types/family/member';
 import { createPinia, setActivePinia } from 'pinia';
 import { createServices } from '@/services/service.factory';
 import type { IMemberService } from '@/services/member/member.service.interface';
-import type { Paginated, Result } from '@/types/common';
-import { ok, err } from '@/types/common';
+import { ok, err, type Member, type MemberFilter, type Paginated, type Result } from '@/types';
 import { simulateLatency } from '@/utils/mockUtils';
 import type { ApiError } from '@/utils/api';
 

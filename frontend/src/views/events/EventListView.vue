@@ -36,7 +36,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
-import type { Event } from '@/types/event/event';
+import type { Event } from '@/types';
 import type { EventFilter } from '@/services/event/event.service.interface';
 import { EventSearch, EventList } from '@/components/events';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';

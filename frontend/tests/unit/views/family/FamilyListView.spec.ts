@@ -9,6 +9,27 @@ import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
 import { createRouter, createWebHistory } from 'vue-router';
 import { generateMockFamilies } from '@/data/mock/family.mock';
+import { createPinia, setActivePinia } from 'pinia';
+import { createServices } from '@/services/service.factory';
+import type { IFamilyService } from '@/services/family/family.service.interface';
+import type { IMemberService } from '@/services/member/member.service.interface';
+import { simulateLatency } from '@/utils/mockUtils';
+import type { ApiError } from '@/utils/api';
+import type { IEventService } from '@/services/event/event.service.interface';
+import { generateMockEvents, generateMockEvent } from '@/data/mock/event.mock';
+import {
+  err,
+  type Event,
+  type Family,
+  type Result,
+  ok,
+  type FamilyFilter,
+  type Paginated,
+  type Member,
+  type MemberFilter,
+  FamilyVisibility,
+  type EventFilter,
+} from '@/types';
 
 // Mock ResizeObserver
 global.ResizeObserver = vi.fn(() => ({
@@ -16,20 +37,6 @@ global.ResizeObserver = vi.fn(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }));
-
-import { createPinia, setActivePinia } from 'pinia';
-import { createServices } from '@/services/service.factory';
-import type { IFamilyService } from '@/services/family/family.service.interface';
-import type { IMemberService } from '@/services/member/member.service.interface';
-import type { Family } from '@/types/family';
-import type { Member } from '@/types/family';
-import type { Event } from '@/types/event';
-import type { Paginated, Result } from '@/types/common';
-import { ok, err } from '@/types/common';
-import { simulateLatency } from '@/utils/mockUtils';
-import type { ApiError } from '@/utils/api';
-import type { MemberFilter } from '@/types/family/member';
-import type { FamilySearchFilter } from '@/types/family';
 
 // Mock services
 class MockFamilyServiceForTest implements IFamilyService {
@@ -68,7 +75,7 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 
   async loadItems(
-    filter: FamilySearchFilter,
+    filter: FamilyFilter,
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<Family>, ApiError>> {
@@ -106,7 +113,7 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
-    const families = this._items.filter(f => ids.includes(f.id));
+    const families = this._items.filter((f) => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
 }
@@ -185,20 +192,10 @@ class MockMemberServiceForTest implements IMemberService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
-    const members = this._items.filter(m => ids.includes(m.id));
+    const members = this._items.filter((m) => ids.includes(m.id));
     return ok(await simulateLatency(members));
   }
 }
-
-import type {
-  IEventService,
-  EventFilter,
-} from '@/services/event/event.service.interface';
-import {
-  generateMockEvents,
-  generateMockEvent,
-} from '@/data/mock/event.mock';
-import { FamilyVisibility } from '@/types/family/family-visibility';
 
 export class MockEventServiceForTest implements IEventService {
   private _events: Event[];
@@ -218,16 +215,12 @@ export class MockEventServiceForTest implements IEventService {
     return ok(await simulateLatency(this.events));
   }
 
-  async getById(
-    id: string,
-  ): Promise<Result<Event | undefined, ApiError>> {
+  async getById(id: string): Promise<Result<Event | undefined, ApiError>> {
     const event = this.events.find((e) => e.id === id);
     return ok(await simulateLatency(event));
   }
 
-  async add(
-    newEvent: Omit<Event, 'id'>,
-  ): Promise<Result<Event, ApiError>> {
+  async add(newEvent: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
     const eventToAdd: Event = {
       ...newEvent,
       id: generateMockEvent(this._events.length + 1).id,
@@ -236,9 +229,7 @@ export class MockEventServiceForTest implements IEventService {
     return ok(await simulateLatency(eventToAdd));
   }
 
-  async update(
-    updatedEvent: Event,
-  ): Promise<Result<Event, ApiError>> {
+  async update(updatedEvent: Event): Promise<Result<Event, ApiError>> {
     const index = this._events.findIndex((e) => e.id === updatedEvent.id);
     if (index !== -1) {
       this._events[index] = updatedEvent;
@@ -326,7 +317,7 @@ export class MockEventServiceForTest implements IEventService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
-    const events = this._events.filter(e => ids.includes(e.id));
+    const events = this._events.filter((e) => ids.includes(e.id));
     return ok(await simulateLatency(events));
   }
 }
@@ -508,7 +499,7 @@ describe('FamilyListView.vue', () => {
       },
     });
     await flushPromises();
-    const newFilters: FamilySearchFilter = {
+    const newFilters: FamilyFilter = {
       searchQuery: 'test',
       visibility: FamilyVisibility.Public,
     };

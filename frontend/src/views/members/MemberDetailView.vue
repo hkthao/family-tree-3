@@ -53,7 +53,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
 import { MemberForm } from '@/components/members';
 import { EventTimeline, EventCalendar } from '@/components/events';
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 
 const { t } = useI18n();
 const route = useRoute();

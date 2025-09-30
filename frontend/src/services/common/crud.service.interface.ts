@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common';
+import type { Result } from '@/types';
 import type { ApiError } from '@/utils/api';
 
 export interface ICrudService<T> {

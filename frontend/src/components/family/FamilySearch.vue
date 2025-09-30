@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { FamilySearchFilter } from '@/types/family';
+import type { FamilyFilter } from '@/types';
 
 const emit = defineEmits(['update:filters', 'create']);
 
@@ -64,7 +64,7 @@ const applyFilters = () => {
   emit('update:filters', {
     fullName: searchQuery.value,
     visibility: filtervisibility.value === 'All' ? undefined : filtervisibility.value,
-  } as FamilySearchFilter);
+  } as FamilyFilter);
 };
 
 const resetFilters = () => {

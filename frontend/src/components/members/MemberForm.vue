@@ -157,7 +157,7 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 import { Gender } from '@/types';
 
 import { DateInputField, GenderSelect, FamilyAutocomplete, MemberAutocomplete, AvatarInput, AvatarDisplay } from '@/components/common';

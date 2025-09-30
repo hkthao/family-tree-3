@@ -24,7 +24,7 @@ import { useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/members';
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 
 const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 

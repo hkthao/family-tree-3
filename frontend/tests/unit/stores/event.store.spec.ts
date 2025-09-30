@@ -1,15 +1,19 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { Event } from '@/types/event';
 import { useEventStore } from '@/stores/event.store';
 import { createServices } from '@/services/service.factory';
-import type { Paginated, Result } from '@/types/common';
-import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
-import type { IEventService, EventFilter } from '@/services/event/event.service.interface';
-import { generateMockEvents, generateMockEvent } from '@/data/mock/event.mock';
 import { simulateLatency } from '@/utils/mockUtils';
-import { EventType } from '@/types/event/event-type';
+import type { IEventService } from '@/services/event/event.service.interface';
+import {
+  type Result,
+  ok,
+  err,
+  type EventFilter,
+  type Paginated,
+  EventType,
+  type Event,
+} from '@/types';
 
 export class MockEventServiceForTest implements IEventService {
   private _events: Event[];
@@ -66,7 +70,7 @@ export class MockEventServiceForTest implements IEventService {
   async loadItems(
     filters: EventFilter,
     page?: number,
-    itemsPerPage?: number
+    itemsPerPage?: number,
   ): Promise<Result<Paginated<Event>, ApiError>> {
     let filteredEvents = this._events;
 
@@ -75,29 +79,44 @@ export class MockEventServiceForTest implements IEventService {
       filteredEvents = filteredEvents.filter(
         (event) =>
           event.name.toLowerCase().includes(lowerCaseSearchQuery) ||
-          (event.description && event.description.toLowerCase().includes(lowerCaseSearchQuery))
+          (event.description &&
+            event.description.toLowerCase().includes(lowerCaseSearchQuery)),
       );
     }
 
     if (filters.type) {
-      filteredEvents = filteredEvents.filter((event) => event.type === filters.type);
+      filteredEvents = filteredEvents.filter(
+        (event) => event.type === filters.type,
+      );
     }
 
     if (filters.familyId) {
-      filteredEvents = filteredEvents.filter((event) => event.familyId === filters.familyId);
+      filteredEvents = filteredEvents.filter(
+        (event) => event.familyId === filters.familyId,
+      );
     }
 
     if (filters.startDate) {
-      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) >= filters.startDate!);
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.startDate && new Date(event.startDate) >= filters.startDate!,
+      );
     }
 
     if (filters.endDate) {
-      filteredEvents = filteredEvents.filter((event) => event.startDate && new Date(event.startDate) <= filters.endDate!); // Use event.startDate
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.startDate && new Date(event.startDate) <= filters.endDate!,
+      ); // Use event.startDate
     }
 
     if (filters.location) {
       const lowerCaseLocation = filters.location.toLowerCase();
-      filteredEvents = filteredEvents.filter((event) => event.location && event.location.toLowerCase().includes(lowerCaseLocation));
+      filteredEvents = filteredEvents.filter(
+        (event) =>
+          event.location &&
+          event.location.toLowerCase().includes(lowerCaseLocation),
+      );
     }
 
     const totalItems = filteredEvents.length;
@@ -108,16 +127,22 @@ export class MockEventServiceForTest implements IEventService {
     const end = start + currentItemsPerPage;
     const items = filteredEvents.slice(start, end);
 
-    console.log('MockEventServiceForTest.loadItems returning:', { items, totalItems, totalPages });
-    return ok(await simulateLatency({
+    console.log('MockEventServiceForTest.loadItems returning:', {
       items,
       totalItems,
       totalPages,
-    }));
+    });
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
   }
 
   async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
-    const events = this._events.filter(e => ids.includes(e.id));
+    const events = this._events.filter((e) => ids.includes(e.id));
     return ok(await simulateLatency(events));
   }
 }
@@ -231,13 +256,17 @@ describe('Family Event Store', () => {
     const searchName = existingEvent.name.substring(0, 3);
 
     await store.loadItems({ searchQuery: searchName });
-    const expectedFilteredCount = mockEventService.events.filter(e =>
-      e.name.toLowerCase().includes(searchName.toLowerCase()) ||
-      (e.description && e.description.toLowerCase().includes(searchName.toLowerCase()))
+    const expectedFilteredCount = mockEventService.events.filter(
+      (e) =>
+        e.name.toLowerCase().includes(searchName.toLowerCase()) ||
+        (e.description &&
+          e.description.toLowerCase().includes(searchName.toLowerCase())),
     ).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount);
-    expect(store.items.length).toBe(Math.min(store.itemsPerPage, expectedFilteredCount));
+    expect(store.items.length).toBe(
+      Math.min(store.itemsPerPage, expectedFilteredCount),
+    );
     expect(store.currentPage).toBe(1);
     expect(store.filter.searchQuery).toBe(searchName);
   });
@@ -250,10 +279,14 @@ describe('Family Event Store', () => {
     const searchFamilyId = existingEvent.familyId || 'non-existent-family';
 
     await store.loadItems({ familyId: searchFamilyId });
-    const expectedFilteredCount = mockEventService.events.filter(e => e.familyId === searchFamilyId).length;
+    const expectedFilteredCount = mockEventService.events.filter(
+      (e) => e.familyId === searchFamilyId,
+    ).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount);
-    expect(store.items.length).toBe(Math.min(store.itemsPerPage, expectedFilteredCount));
+    expect(store.items.length).toBe(
+      Math.min(store.itemsPerPage, expectedFilteredCount),
+    );
     expect(store.currentPage).toBe(1);
     expect(store.filter.familyId).toBe(searchFamilyId);
   });
@@ -306,3 +339,7 @@ describe('Family Event Store', () => {
     expect(store.currentPage).toBe(1);
   });
 });
+
+function generateMockEvents(arg0: number): Event[] {
+  throw new Error('Function not implemented.');
+}

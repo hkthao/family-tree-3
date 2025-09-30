@@ -38,13 +38,11 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
-import type { Family } from '@/types/family';
-import type { FamilySearchFilter } from '@/types/family';
-
 import { FamilySearch, FamilyList } from '@/components/family';
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import type { FamilyFilter, Family } from '@/types';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -54,7 +52,7 @@ const { items } = storeToRefs(familyStore);
 const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
-const currentFilters = ref<FamilySearchFilter>({});
+const currentFilters = ref<FamilyFilter>({});
 const currentPage = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
@@ -79,7 +77,7 @@ const loadAllMembers = async () => {
   await membersStore.loadItems({}); // Fetch all members
 };
 
-const handleFilterUpdate = (filters: FamilySearchFilter) => {
+const handleFilterUpdate = (filters: FamilyFilter) => {
   currentFilters.value = filters;
   currentPage.value = 1; // Reset to first page on filter change
   loadFamilies();

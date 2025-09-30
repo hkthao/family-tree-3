@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Family } from '@/types/family';
+import type { Family } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 
 const { items, totalItems, loading, itemsPerPage, familyMemberCounts } =

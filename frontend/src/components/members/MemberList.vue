@@ -85,11 +85,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
-import ChipLookup from '@/components/common/ChipLookup.vue';
+import { ChipLookup } from '@/components/common';
 
 const familyStore = useFamilyStore();
 

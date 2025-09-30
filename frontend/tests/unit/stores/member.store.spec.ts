@@ -1,15 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member, MemberFilter } from '@/types/family';
 import type { IMemberService } from '@/services/member/member.service.interface';
 import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 import { createServices } from '@/services/service.factory';
-import type { Paginated, Result } from '@/types/common';
-import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
-import { Gender } from '@/types';
+import { err, Gender, ok, type Member, type MemberFilter, type Paginated, type Result } from '@/types';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {

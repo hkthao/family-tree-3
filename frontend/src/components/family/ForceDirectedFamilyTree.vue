@@ -6,7 +6,7 @@
 import { ref, onMounted, watch, onUnmounted } from 'vue';
 import * as d3 from 'd3';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

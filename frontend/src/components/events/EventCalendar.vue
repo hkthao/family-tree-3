@@ -53,7 +53,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event/event';
+import type { Event } from '@/types';
 import { useEventStore } from '@/stores/event.store'; // Import event store
 import { useRouter } from 'vue-router';
 const router = useRouter();

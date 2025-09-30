@@ -41,12 +41,11 @@ import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types/family';
-import type { MemberFilter } from '@/types/family';
 import { MemberSearch, MemberList } from '@/components/members';
-import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
+import {ConfirmDeleteDialog} from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
+import type { MemberFilter, Member } from '@/types';
 
 const { t } = useI18n();
 const router = useRouter();

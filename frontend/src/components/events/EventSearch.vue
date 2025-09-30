@@ -3,7 +3,7 @@
     <v-card-title class="text-h6 d-flex align-center">
       {{ t('event.search.title') }}
       <v-spacer></v-spacer>
-      <v-btn variant="text" icon size="small"  @click="expanded = !expanded">
+      <v-btn variant="text" icon size="small" @click="expanded = !expanded">
         <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
       </v-btn>
     </v-card-title>
@@ -60,7 +60,9 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="applyFilters">{{ t('event.search.apply') }}</v-btn>
+          <v-btn color="primary" @click="applyFilters">{{
+            t('event.search.apply')
+          }}</v-btn>
           <v-btn @click="resetFilters">{{ t('event.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
@@ -72,9 +74,8 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/types';
-import { EventType } from '@/types/event/event-type'; // Import EventType enum
-import DateInputField from '@/components/common/DateInputField.vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import { EventType } from '@/types'; // Import EventType enum
+import { DateInputField, FamilyAutocomplete } from '@/components/common';
 
 const emit = defineEmits(['update:filters']);
 
@@ -99,10 +100,14 @@ const eventTypes = [
   { title: t('event.type.other'), value: EventType.Other },
 ];
 
-watch(filters.value, () => {
-  // Debounce or apply immediately based on preference
-  applyFilters();
-}, { deep: true });
+watch(
+  filters.value,
+  () => {
+    // Debounce or apply immediately based on preference
+    applyFilters();
+  },
+  { deep: true },
+);
 
 const applyFilters = () => {
   emit('update:filters', filters.value);

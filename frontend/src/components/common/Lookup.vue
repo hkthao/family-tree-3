@@ -201,7 +201,7 @@ const loadItems = async ({
 };
 
 // Search items
-const loadItems = () => {
+const _loadItems = () => {
   loadItems({ page: 1, itemsPerPage: 10, sortBy: [] }); // Reset pagination on search
 };
 

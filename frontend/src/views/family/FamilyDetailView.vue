@@ -56,8 +56,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm, TreeChart } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/events';
-
-import type { Family } from '@/types/family';
+import type { Family } from '@/types';
 
 const { t } = useI18n();
 const route = useRoute();

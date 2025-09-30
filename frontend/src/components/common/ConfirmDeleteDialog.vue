@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 
-import type { ConfirmDeleteDialogProps } from '@/types/family';
+import type { ConfirmDeleteDialogProps } from '@/types';
 
 defineProps<ConfirmDeleteDialogProps>();
 defineEmits(['confirm', 'cancel']);

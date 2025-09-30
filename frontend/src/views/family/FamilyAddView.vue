@@ -27,7 +27,7 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyForm } from '@/components/family';
-import type { Family } from '@/types/family';
+import type { Family } from '@/types';
 
 const familyFormRef = ref<InstanceType<typeof FamilyForm> | null>(null);
 

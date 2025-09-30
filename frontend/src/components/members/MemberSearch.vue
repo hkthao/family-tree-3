@@ -3,7 +3,7 @@
     <v-card-title class="text-h6 d-flex align-center">
       {{ t('member.search.title') }}
       <v-spacer></v-spacer>
-      <v-btn variant="text" icon size="small"  @click="expanded = !expanded">
+      <v-btn variant="text" icon size="small" @click="expanded = !expanded">
         <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
       </v-btn>
     </v-card-title>
@@ -88,10 +88,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { MemberFilter } from '@/types/family';
-import DateInputField from '@/components/common/DateInputField.vue';
-import GenderSelect from '@/components/common/GenderSelect.vue';
-import Lookup from '@/components/common/Lookup.vue';
+import type { MemberFilter } from '@/types';
+import { DateInputField, GenderSelect, Lookup } from '@/components/common';
 import { useFamilyStore } from '@/stores/family.store';
 
 const emit = defineEmits(['update:filters']);

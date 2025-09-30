@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia';
-import type { Family, FamilySearchFilter } from '@/types/family';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
+import type { Family, FamilyFilter } from '@/types';
+import { defineStore } from 'pinia';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
@@ -9,7 +9,7 @@ export const useFamilyStore = defineStore('family', {
     currentItem: null as Family | null,
     loading: false,
     error: null as string | null,
-    filter: {} as FamilySearchFilter, // New filter object
+    filter: {} as FamilyFilter, // New filter object
     totalItems: 0,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
@@ -69,7 +69,9 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       const result = await this.services.family.update(updatedItem);
       if (result.ok) {
-        const index = this.items.findIndex((item) => item.id === result.value.id);
+        const index = this.items.findIndex(
+          (item) => item.id === result.value.id,
+        );
         if (index !== -1) {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
@@ -99,9 +101,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
-    async loadItems(
-      filter: FamilySearchFilter,
-    ) {
+    async loadItems(filter: FamilyFilter) {
       this.filter = filter;
       this.currentPage = 1; // Reset to first page on new search
       await this._loadItems(); // Trigger fetch with new search terms
@@ -163,7 +163,11 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
-    async searchLookup(filter: FamilySearchFilter, page: number, itemsPerPage: number) {
+    async searchLookup(
+      filter: FamilyFilter,
+      page: number,
+      itemsPerPage: number,
+    ) {
       this.filter = filter;
       this.currentPage = page;
       this.itemsPerPage = itemsPerPage;
@@ -178,7 +182,8 @@ export const useFamilyStore = defineStore('family', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = result.error.message || 'Không thể tải danh sách gia đình.';
+        this.error =
+          result.error.message || 'Không thể tải danh sách gia đình.';
         console.error(result.error);
         return [];
       }

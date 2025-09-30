@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 import { mockFamilies as fixedMockFamilies } from '@/data/mock/family.mock';
 import { Gender } from '@/types';
 

@@ -76,7 +76,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event/event';
+import type { Event } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { useMemberStore } from '@/stores/member.store';
 import { useFamilyStore } from '@/stores/family.store';

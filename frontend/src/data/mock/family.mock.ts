@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
-import type { Family } from '@/types/family';
-import { FamilyVisibility } from '@/types/family/family-visibility'; // Import FamilyVisibility
+import type { Family } from '@/types';
+import { FamilyVisibility } from '@/types'; // Import FamilyVisibility
 
 export function generateMockFamily(id?: string): Family {
   return {

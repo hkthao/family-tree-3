@@ -1,5 +1,5 @@
-import type { Family } from '@/types/family';
-import { FamilyVisibility } from '@/types/family/family-visibility';
+import type { Family } from '@/types';
+import { FamilyVisibility } from '@/types';
 
 export const fixedMockFamilies: Family[] = [
   {

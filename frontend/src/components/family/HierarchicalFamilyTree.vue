@@ -19,7 +19,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue';
 import f3 from 'family-chart'; // Corrected import
 import 'family-chart/styles/family-chart.css';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types/family';
+import type { Member } from '@/types';
 import { Gender } from '@/types';
 import { useI18n } from 'vue-i18n';
 

@@ -11,7 +11,7 @@ export interface Family {
   updatedAt?: Date;
 }
 
-export interface FamilySearchFilter {
+export interface FamilyFilter {
   name?: string;
   description?: string;
   address?: string;

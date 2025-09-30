@@ -1,10 +1,8 @@
-import type { Member, MemberFilter } from '@/types/family/member';
+import { type Member, type Result, ok, type MemberFilter, type Paginated } from '@/types';
 import type { IMemberService } from './member.service.interface'; // Import MemberFilter
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
 import type { AxiosInstance } from 'axios';
-import type { Result, Paginated } from '@/types/common';
-import { ok } from '@/types/common';
 
 // Base URL for your API - configure this based on your environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';

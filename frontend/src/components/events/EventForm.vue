@@ -98,11 +98,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { Event } from '@/types/event/event';
-import { EventType } from '@/types/event/event-type'; // Import EventType enum
-import DateInputField from '@/components/common/DateInputField.vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
-import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import type { Event } from '@/types';
+import { EventType } from '@/types'; // Import EventType enum
+import {
+  DateInputField,
+  FamilyAutocomplete,
+  MemberAutocomplete,
+} from '@/components/common';
 
 const props = defineProps<{
   readOnly?: boolean;

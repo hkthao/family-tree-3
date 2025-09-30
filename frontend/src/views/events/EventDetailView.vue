@@ -35,12 +35,11 @@
 </template>
 
 <script setup lang="ts">
+import { useEventStore } from '@/stores/event.store';
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { useEventStore } from '@/stores/event.store';
-import { EventForm } from '@/components/events';
-import type { Event } from '@/types/event/event';
+import type { Event } from '@/types';
 
 const { t } = useI18n();
 const route = useRoute();
