@@ -40,7 +40,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, type PropType } from 'vue';
+import { ref, type PropType, watch } from 'vue';
 import { useTheme } from 'vuetify';
 import UserMenu from './UserMenu.vue';
 import { useRouter } from 'vue-router';
@@ -67,8 +67,11 @@ defineEmits(['toggle-drawer']);
 function toggleTheme() {
   const newTheme = theme.global.current.value.dark ? 'light' : 'dark';
   userSettingsStore.setTheme(newTheme);
-  theme.global.name.value = newTheme;
 }
+
+watch(() => userSettingsStore.theme, (newTheme) => {
+  theme.global.name.value = newTheme;
+}, { immediate: true }); // Immediate to set theme on initial load
 
 function focusSearch() {
   if (searchField.value) {

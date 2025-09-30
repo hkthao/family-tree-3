@@ -5,7 +5,7 @@
         <v-row>
           <v-col cols="12">
             <VListSubheader>{{ t('userSettings.preferences.theme') }}</VListSubheader>
-            <v-radio-group v-model="preferencesForm.theme" inline>
+            <v-radio-group v-model="preferencesForm.theme" inline hide-details>
               <v-radio :label="t('userSettings.preferences.themeLight')" value="light"></v-radio>
               <v-radio :label="t('userSettings.preferences.themeDark')" value="dark"></v-radio>
             </v-radio-group>
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from 'vuetify';
@@ -84,11 +84,13 @@ const languageOptions = computed(() => [
 ]);
 
 onMounted(() => {
-  // Ensure theme is synced with Vuetify's current theme
-  userSettingsStore.setTheme(theme.global.name.value as 'light' | 'dark');
   preferencesForm.value.theme = userSettingsStore.theme;
   preferencesForm.value.language = userSettingsStore.language;
 });
+
+watch(() => userSettingsStore.theme, (newTheme) => {
+  theme.global.name.value = newTheme;
+}, { immediate: true }); // Immediate to set theme on initial load
 
 const savePreferences = async () => {
   // Update store state
