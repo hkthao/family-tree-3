@@ -77,6 +77,7 @@
 <script setup lang="ts">
 import { userMenuItems } from '@/data/userMenuItems';
 import { ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
 import { onMounted, onBeforeUnmount } from 'vue';
 import { AvatarDisplay } from '@/components/common';
@@ -97,6 +98,7 @@ const confirmLogoutDialog = ref(false);
 
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
+const router = useRouter();
 
 const userInitials = computed(() => {
   if (currentUser.value?.name) {
@@ -120,6 +122,7 @@ const handleMenuItemClick = (route?: string) => {
 const handleLogoutConfirm = async () => {
   confirmLogoutDialog.value = false;
   await authStore.logout();
+  router.push({ name: 'Login' }); // Redirect to login page
 };</script>
 
 <style scoped>

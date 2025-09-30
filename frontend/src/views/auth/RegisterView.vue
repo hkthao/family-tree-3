@@ -6,7 +6,7 @@
           <v-col cols="12" sm="8" md="6" lg="4">
             <v-card class="elevation-12">
               <v-card-title class="text-center text-h5 py-4">
-                <span class="font-weight-bold">FamilyTree</span>
+                <AppNameDisplay />
               </v-card-title>
               <v-card-subtitle class="text-center">
                 {{ t('register.title') }} 🚀
@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { RegisterForm, SocialLogin } from '@/components/auth';
+import { AppNameDisplay } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
 

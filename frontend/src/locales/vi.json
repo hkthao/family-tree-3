@@ -315,5 +315,8 @@
   "userSettings.security.saveError": "Lỗi khi cập nhật mật khẩu.",
   "userSettings.preferences.language": "Ngôn ngữ",
   "userSettings.preferences.languageEnglish": "Tiếng Anh",
-  "userSettings.preferences.languageVietnamese": "Tiếng Việt"
+  "userSettings.preferences.languageVietnamese": "Tiếng Việt",
+  "login.welcomeMessage": "Chào mừng đến với Cây Gia Phả! 👋",
+  "login.newOnPlatform": "Mới trên nền tảng của chúng tôi?",
+  "login.createAccount": "Tạo tài khoản"
 }

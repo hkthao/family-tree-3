@@ -1,7 +1,7 @@
 <template>
   <v-navigation-drawer app>
     <v-list-item class="pa-4">
-      <v-list-item-title class="text-h6 font-weight-bold app-name-font">Cây Gia Phả</v-list-item-title>
+      <AppNameDisplay />
     </v-list-item>
 
     <v-divider></v-divider>
@@ -28,6 +28,7 @@ import { VListSubheader } from 'vuetify/components';
 import menu from '@/data/menuItems';
 import { canAccessMenu } from '@/utils/menu-permissions';
 import type { User } from '@/types';
+import { AppNameDisplay } from '@/components/common';
 
 const props = defineProps({
   currentUser: {
@@ -56,9 +57,5 @@ const filteredMenu = computed(() => {
 
 .active-item .v-list-item-title {
   font-weight: bold;
-}
-
-.app-name-font {
-  font-family: 'Dancing Script', cursive;
 }
 </style>

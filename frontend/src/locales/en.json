@@ -310,5 +310,8 @@
   "userSettings.security.saveError": "Error updating password.",
   "userSettings.preferences.language": "Language",
   "userSettings.preferences.languageEnglish": "English",
-  "userSettings.preferences.languageVietnamese": "Vietnamese"
+  "userSettings.preferences.languageVietnamese": "Vietnamese",
+  "login.welcomeMessage": "Welcome to Family Tree! 👋",
+  "login.newOnPlatform": "New on our platform?",
+  "login.createAccount": "Create an account"
 }
