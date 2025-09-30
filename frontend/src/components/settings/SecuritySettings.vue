@@ -27,7 +27,11 @@
       :rules="[rules.required, rules.passwordMatch]"
       class="mb-2"
     ></v-text-field>
-      <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
+    <v-row>
+      <v-col cols="12" class="text-right">
+        <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 

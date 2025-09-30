@@ -56,7 +56,7 @@ Hệ thống bao gồm:
 ## 4. Công nghệ sử dụng
 
 * **Backend**: ASP.NET Core.
-* **Database**: MongoDB.
+* **Database**: MySQL.
 * **Frontend**: Vue.js + Vuetify 3.
 
 ---
@@ -67,7 +67,7 @@ Hệ thống bao gồm:
 * Tạo project chuyên nghiệp (cấu trúc chuẩn, có unit test, CI/CD cơ bản).
 * Không tạo hoặc yêu cầu triển khai hạ tầng Azure (không cần `.bicep`, Terraform).
 * Hiệu năng: tải nhanh, hỗ trợ tối thiểu 1.000 thành viên.
-* Bảo mật: xác thực người dùng (IAM cơ bản), phân quyền (admin, thành viên thường).
+* Bảo mật: hệ thống xác thực pluggable (Auth0, FakeAuth), phân quyền (admin, thành viên thường).
 
 ---
 
@@ -85,7 +85,7 @@ Hệ thống bao gồm:
 * **System Design**: kiến trúc hệ thống, sơ đồ thành phần, cơ sở dữ liệu.
 * **Requirement**: tài liệu yêu cầu (tài liệu này).
 * **User Guide**: hướng dẫn cài đặt, sử dụng cho người dùng cuối.
-* **Component Design**: thiết kế chi tiết từng module, API, UI component.
+* **Component Design**: thiết kế chi tiết từng module, API, UI component (ví dụ: `AvatarInput`, `UserSettingsPage`).
 
 ---
 

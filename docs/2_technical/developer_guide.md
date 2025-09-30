@@ -151,6 +151,15 @@ Khi phát triển các thành phần UI mới, hãy tuân thủ các nguyên t�
 -   Đối với các thành phần phức tạp như `AvatarInput`, hãy tích hợp các thư viện bên thứ ba (ví dụ: `vue-advanced-cropper`) một cách cẩn thận.
 -   **Nhóm Import**: Để giữ cho code sạch sẽ và dễ đọc, các import nên được nhóm lại theo loại (Vue core, thư viện, types, components) và sử dụng `index.ts` để xuất các thành phần từ các thư mục chung (ví dụ: `import { ComponentA, ComponentB } from '@/components/common';`).
 
+### 5.3. Hệ thống xác thực
+Dự án sử dụng một hệ thống xác thực pluggable để dễ dàng chuyển đổi giữa các nhà cung cấp xác thực (ví dụ: Auth0, FakeAuth).
+-   **`AuthService`**: Giao diện định nghĩa các phương thức xác thực cốt lõi (login, logout, register, getUser, getAccessToken).
+-   **`AuthUser`**: Kiểu dữ liệu đại diện cho thông tin người dùng được trả về bởi dịch vụ xác thực.
+-   **`fakeAuthService.ts`**: Triển khai `AuthService` sử dụng dữ liệu giả lập cho mục đích phát triển và thử nghiệm.
+-   **`auth0Service.ts`**: Triển khai `AuthService` sử dụng SDK của Auth0.
+-   **`useAuthStore.ts`**: Pinia store quản lý trạng thái xác thực (user, token, loading, error) và gọi các phương thức từ `useAuthService()`.
+-   **Tích hợp**: Các component UI (ví dụ: `LoginForm`, `RegisterForm`) tương tác với `useAuthStore()` mà không cần biết chi tiết về nhà cung cấp xác thực.
+
 ## 6. Hướng dẫn đóng góp
 
 ### 6.1. Chiến lược Branch
