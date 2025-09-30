@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { useNotificationStore } from './notification.store';
-import { useI18n } from 'vue-i18n';
+import i18n from '@/plugins/i18n'; // Import global i18n instance
 
 export const useUserSettingsStore = defineStore('userSettings', {
   // State: Defines the reactive data of the store.
@@ -11,7 +11,7 @@ export const useUserSettingsStore = defineStore('userSettings', {
       sms: false,
       inApp: true,
     },
-    language: 'en',
+    language: 'en' as 'en' | 'vi',
     loading: false,
     error: null as string | null,
   }),
@@ -39,9 +39,8 @@ export const useUserSettingsStore = defineStore('userSettings', {
      * @param lang The language code (e.g., 'en', 'vi').
      */
     setLanguage(lang: string) {
-      this.language = lang;
-      const { locale } = useI18n();
-      locale.value = lang;
+      this.language = lang as 'en' | 'vi';
+      i18n.global.locale.value = lang as 'en' | 'vi'; // Use global i18n instance
     },
 
     /**
@@ -52,7 +51,7 @@ export const useUserSettingsStore = defineStore('userSettings', {
       this.loading = true;
       this.error = null;
       const notificationStore = useNotificationStore();
-      const { t } = useI18n();
+      const { t } = i18n.global; // Use global i18n instance for t
 
       try {
         // Simulate API call delay

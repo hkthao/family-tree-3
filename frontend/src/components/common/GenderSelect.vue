@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { Gender } from '@/types/gender';
+import { Gender } from '@/types';
 
 const { modelValue, label, rules, readOnly, clearable } = defineProps<{
   modelValue: Gender | null | undefined;

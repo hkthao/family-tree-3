@@ -65,14 +65,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AvatarDisplay from './AvatarDisplay.vue';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 
 const props = defineProps({
-  modelValue: { type: String, default: null },
+  modelValue: { type: String as PropType<string | null | undefined>, default: null },
   size: { type: Number, default: 128 },
 });
 

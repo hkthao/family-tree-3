@@ -1,8 +1,9 @@
 export interface User {
   id: string;
   name: string;
-  roles: string[];
-  avatarUrl?: string;
+  email: string;
+  roles?: string[];
+  avatar?: string;
   online?: boolean;
 }
 

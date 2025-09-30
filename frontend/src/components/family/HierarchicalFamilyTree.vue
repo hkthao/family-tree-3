@@ -20,7 +20,7 @@ import f3 from 'family-chart'; // Corrected import
 import 'family-chart/styles/family-chart.css';
 import { useMemberStore } from '@/stores/member.store';
 import type { Member } from '@/types/family';
-import { Gender } from '@/types/gender';
+import { Gender } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 // Define the type for the data used in the family chart cards

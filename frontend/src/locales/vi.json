@@ -312,5 +312,8 @@
   "userSettings.security.passwordMinLength": "Mật khẩu phải có ít nhất {length} ký tự.",
   "userSettings.security.passwordMismatch": "Mật khẩu không khớp.",
   "userSettings.security.saveSuccess": "Cập nhật mật khẩu thành công!",
-  "userSettings.security.saveError": "Lỗi khi cập nhật mật khẩu."
+  "userSettings.security.saveError": "Lỗi khi cập nhật mật khẩu.",
+  "userSettings.preferences.language": "Ngôn ngữ",
+  "userSettings.preferences.languageEnglish": "Tiếng Anh",
+  "userSettings.preferences.languageVietnamese": "Tiếng Việt"
 }

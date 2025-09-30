@@ -30,16 +30,17 @@ import { computed } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import menu from '@/data/menuItems';
 import { canAccessMenu } from '@/utils/menu-permissions';
+import type { User } from '@/types';
 
 const props = defineProps({
   currentUser: {
-    type: Object,
-    default: () => ({ id: 'u1', name: 'John', roles: ['FamilyManager'] })
+    type: Object as () => User | null,
+    required: false, // Not required as it can be null
   }
 });
 
 const filteredMenu = computed(() => {
-  const userRoles = props.currentUser.roles;
+  const userRoles = props.currentUser?.roles || [];
   return menu
     .map(section => ({
       ...section,

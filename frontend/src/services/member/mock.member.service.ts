@@ -6,7 +6,7 @@ import type { Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 import { fixedMockFamilies } from '@/data/mock/fixed.family.mock'; // Import fixed mock families
-import { Gender } from '@/types/gender';
+import { Gender } from '@/types';
 
 // Helper function to transform date strings to Date objects
 function transformMemberDates(member: Member): Member {

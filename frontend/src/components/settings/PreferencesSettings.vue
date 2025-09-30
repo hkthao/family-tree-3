@@ -14,6 +14,20 @@
 
         <v-row>
           <v-col cols="12">
+            <VListSubheader>{{ t('userSettings.preferences.language') }}</VListSubheader>
+            <v-select
+              v-model="preferencesForm.language"
+              :items="languageOptions"
+              :label="t('userSettings.preferences.language')"
+              item-title="text"
+              item-value="value"
+              hide-details
+            ></v-select>
+          </v-col>
+        </v-row>
+
+        <v-row>
+          <v-col cols="12">
             <VListSubheader>{{ t('userSettings.preferences.notifications') }}</VListSubheader>
             <v-checkbox
               v-model="preferencesForm.notifications.email"
@@ -42,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from 'vuetify';
@@ -61,12 +75,19 @@ const preferencesForm = ref({
     sms: userSettingsStore.notifications.sms,
     inApp: userSettingsStore.notifications.inApp,
   },
+  language: userSettingsStore.language,
 });
+
+const languageOptions = computed(() => [
+  { text: t('userSettings.preferences.languageEnglish'), value: 'en' },
+  { text: t('userSettings.preferences.languageVietnamese'), value: 'vi' },
+]);
 
 onMounted(() => {
   // Ensure theme is synced with Vuetify's current theme
   userSettingsStore.setTheme(theme.global.name.value as 'light' | 'dark');
   preferencesForm.value.theme = userSettingsStore.theme;
+  preferencesForm.value.language = userSettingsStore.language;
 });
 
 const savePreferences = async () => {
@@ -75,6 +96,7 @@ const savePreferences = async () => {
   userSettingsStore.notifications.email = preferencesForm.value.notifications.email;
   userSettingsStore.notifications.sms = preferencesForm.value.notifications.sms;
   userSettingsStore.notifications.inApp = preferencesForm.value.notifications.inApp;
+  userSettingsStore.setLanguage(preferencesForm.value.language);
 
   // Save settings via store action
   try {

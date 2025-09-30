@@ -1,17 +1,20 @@
 import { useAuth0 } from '@auth0/auth0-vue';
-import type { AuthUser, AuthService } from './authService';
-import type { Credentials } from '@/types/auth';
+import type { AuthService } from './authService';
+import type { User } from '@/types';
+import type { Credentials } from '@/types';
 
-// This is a placeholder for Auth0 configuration. 
+// This is a placeholder for Auth0 configuration.
 // In a real app, these would come from environment variables.
 const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN || 'YOUR_AUTH0_DOMAIN';
-const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID || 'YOUR_AUTH0_CLIENT_ID';
-const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE || 'YOUR_AUTH0_AUDIENCE';
+const AUTH0_CLIENT_ID =
+  import.meta.env.VITE_AUTH0_CLIENT_ID || 'YOUR_AUTH0_CLIENT_ID';
+const AUTH0_AUDIENCE =
+  import.meta.env.VITE_AUTH0_AUDIENCE || 'YOUR_AUTH0_AUDIENCE';
 
 class Auth0Service implements AuthService {
   private auth0 = useAuth0();
 
-  async login(credentials: Credentials): Promise<AuthUser | null> {
+  async login(credentials: Credentials): Promise<User | null> {
     // Auth0's loginWithRedirect doesn't directly take credentials
     // This method would typically trigger a redirect to the Auth0 login page
     // For direct credential login, you'd use a different Auth0 flow (e.g., Resource Owner Password Flow)
@@ -37,16 +40,19 @@ class Auth0Service implements AuthService {
     });
   }
 
-  async register(data: any): Promise<AuthUser | null> {
+  async register(data: any): Promise<User | null> {
     // Auth0 registration typically happens via their hosted login page or Management API.
     // This method would usually redirect to a signup page or call a backend endpoint.
     // For this implementation, we'll just log a message.
-    console.warn('Auth0Service: Register method not fully implemented for direct client-side use.', data);
+    console.warn(
+      'Auth0Service: Register method not fully implemented for direct client-side use.',
+      data,
+    );
     // You would typically redirect to Auth0's signup page or use a custom flow
     return null;
   }
 
-  async getUser(): Promise<AuthUser | null> {
+  async getUser(): Promise<User | null> {
     const { user, isAuthenticated } = this.auth0;
     if (isAuthenticated.value && user.value) {
       return {

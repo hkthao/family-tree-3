@@ -1,8 +1,8 @@
-import type { AuthUser, AuthService } from './authService';
-import type { Credentials } from '@/types/auth';
+import type { AuthService } from './authService';
+import type { Credentials, User } from '@/types';
 
 class FakeAuthService implements AuthService {
-  private currentUser: AuthUser | null = null;
+  private currentUser: User | null = null;
   private currentToken: string | null = null;
 
   constructor() {
@@ -17,9 +17,12 @@ class FakeAuthService implements AuthService {
     this.currentToken = 'fake-jwt-token';
   }
 
-  async login(credentials: Credentials): Promise<AuthUser | null> {
+  async login(credentials: Credentials): Promise<User | null> {
     console.log('Fake login attempt with:', credentials);
-    if (credentials.email === 'test@example.com' && credentials.password === 'password') {
+    if (
+      credentials.email === 'test@example.com' &&
+      credentials.password === 'password'
+    ) {
       this.currentUser = {
         id: 'test-user-456',
         name: 'Test User',
@@ -39,7 +42,7 @@ class FakeAuthService implements AuthService {
     this.currentToken = null;
   }
 
-  async register(data: any): Promise<AuthUser | null> {
+  async register(data: any): Promise<User | null> {
     console.log('Fake register attempt with:', data);
     // Simulate successful registration
     this.currentUser = {
@@ -53,7 +56,7 @@ class FakeAuthService implements AuthService {
     return this.currentUser;
   }
 
-  async getUser(): Promise<AuthUser | null> {
+  async getUser(): Promise<User | null> {
     return this.currentUser;
   }
 

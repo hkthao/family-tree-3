@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 import type { Member } from '@/types/family';
 import { mockFamilies as fixedMockFamilies } from '@/data/mock/family.mock';
-import { Gender } from '@/types/gender';
+import { Gender } from '@/types';
 
 // Generate some mock families to link members to
 const mockFamilies = fixedMockFamilies;

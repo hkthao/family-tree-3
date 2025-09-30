@@ -9,7 +9,7 @@ import { createServices } from '@/services/service.factory';
 import type { Paginated, Result } from '@/types/common';
 import { ok, err } from '@/types/common';
 import type { ApiError } from '@/utils/api';
-import { Gender } from '@/types/gender';
+import { Gender } from '@/types';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {

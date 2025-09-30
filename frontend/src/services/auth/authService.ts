@@ -1,18 +1,10 @@
-import type { Credentials } from '@/types/auth';
-
-export interface AuthUser {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  roles?: string[];
-}
+import type { Credentials, User } from '@/types';
 
 export interface AuthService {
-  login(credentials: Credentials): Promise<AuthUser | null>;
+  login(credentials: Credentials): Promise<User | null>;
   logout(): Promise<void>;
-  register(data: any): Promise<AuthUser | null>; // 'any' for now, define specific type later
-  getUser(): Promise<AuthUser | null>;
+  register(data: any): Promise<User | null>; // 'any' for now, define specific type later
+  getUser(): Promise<User | null>;
   getAccessToken(): Promise<string | null>;
 }
 

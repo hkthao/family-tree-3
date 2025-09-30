@@ -1,4 +1,4 @@
-import type { UserMenuItem } from '@/components/layout/UserMenu.types';
+import type { UserMenuItem } from '@/types';
 
 export const userMenuItems: UserMenuItem[] = [
 

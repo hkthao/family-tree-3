@@ -307,5 +307,8 @@
   "userSettings.security.passwordMinLength": "Password must be at least {length} characters.",
   "userSettings.security.passwordMismatch": "Passwords do not match.",
   "userSettings.security.saveSuccess": "Password updated successfully!",
-  "userSettings.security.saveError": "Error updating password."
+  "userSettings.security.saveError": "Error updating password.",
+  "userSettings.preferences.language": "Language",
+  "userSettings.preferences.languageEnglish": "English",
+  "userSettings.preferences.languageVietnamese": "Vietnamese"
 }

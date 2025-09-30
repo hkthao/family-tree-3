@@ -45,7 +45,7 @@ import { useTheme } from 'vuetify';
 import UserMenu from './UserMenu.vue';
 import { useRouter } from 'vue-router';
 import type { VTextField } from 'vuetify/components';
-import type { User } from './UserMenu.types';
+import type { User } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores/userSettings.store';
 
@@ -57,8 +57,8 @@ const userSettingsStore = useUserSettingsStore();
 
 defineProps({
   currentUser: {
-    type: Object as PropType<User>,
-    required: true,
+    type: Object as PropType<User | null>,
+    required: false,
   },
 });
 

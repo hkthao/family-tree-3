@@ -1,4 +1,4 @@
-import { Gender } from '@/types/gender';
+import { Gender } from '@/types';
 
 export interface Member {
   id: string;
