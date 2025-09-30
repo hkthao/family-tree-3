@@ -70,7 +70,8 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await familyStore.loadItems(currentFilters.value);
+  familyStore.filter = currentFilters.value;
+  await familyStore._loadItems();
 };
 
 const loadAllMembers = async () => {

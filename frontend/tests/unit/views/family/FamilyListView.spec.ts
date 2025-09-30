@@ -8,7 +8,6 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { createI18n } from 'vue-i18n';
 import { createVuetify } from 'vuetify';
 import { createRouter, createWebHistory } from 'vue-router';
-import { generateMockFamilies } from '@/data/mock/family.mock';
 import { createPinia, setActivePinia } from 'pinia';
 import { createServices } from '@/services/service.factory';
 import type { IFamilyService } from '@/services/family/family.service.interface';
@@ -16,7 +15,9 @@ import type { IMemberService } from '@/services/member/member.service.interface'
 import { simulateLatency } from '@/utils/mockUtils';
 import type { ApiError } from '@/utils/api';
 import type { IEventService } from '@/services/event/event.service.interface';
-import { generateMockEvents, generateMockEvent } from '@/data/mock/event.mock';
+import events from '@/data/mock/events.json';
+import families from '@/data/mock/families.json';
+
 import {
   err,
   type Event,
@@ -40,11 +41,7 @@ global.ResizeObserver = vi.fn(() => ({
 
 // Mock services
 class MockFamilyServiceForTest implements IFamilyService {
-  private _items: Family[] = generateMockFamilies(5); // Use a private variable
-
-  get items(): Family[] {
-    return [...this._items];
-  }
+  public items: Family[] = families as Family[]; // Use a private variable
 
   async fetch(): Promise<Result<Family[], ApiError>> {
     return ok(await simulateLatency(this.items));
@@ -54,21 +51,21 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
   async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
     const familyToAdd = { ...newItem, id: 'new-family-id' };
-    this._items.push(familyToAdd);
+    this.items.push(familyToAdd);
     return ok(await simulateLatency(familyToAdd));
   }
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
-    const index = this._items.findIndex((f) => f.id === updatedItem.id);
+    const index = this.items.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
-      this._items[index] = updatedItem;
+      this.items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
     return err({ message: 'Family not found', statusCode: 404 });
   }
   async delete(id: string): Promise<Result<void, ApiError>> {
-    const initialLength = this._items.length;
-    this._items = this._items.filter((f) => f.id !== id);
-    if (this._items.length === initialLength) {
+    const initialLength = this.items.length;
+    this.items = this.items.filter((f) => f.id !== id);
+    if (this.items.length === initialLength) {
       return err({ message: 'Family not found', statusCode: 404 });
     }
     return ok(await simulateLatency(undefined));
@@ -79,7 +76,7 @@ class MockFamilyServiceForTest implements IFamilyService {
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<Family>, ApiError>> {
-    let filtered = this._items;
+    let filtered = this.items;
 
     if (filter.searchQuery) {
       const lowerCaseSearchQuery = filter.searchQuery.toLowerCase();
@@ -113,17 +110,13 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
-    const families = this._items.filter((f) => ids.includes(f.id));
+    const families = this.items.filter((f) => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
 }
 
 class MockMemberServiceForTest implements IMemberService {
-  private _items: Member[] = []; // No members initially
-
-  get items(): Member[] {
-    return [...this._items];
-  }
+  private items: Member[] = []; // No members initially
 
   async fetch(): Promise<Result<Member[], ApiError>> {
     return ok(await simulateLatency(this.items));
@@ -142,21 +135,21 @@ class MockMemberServiceForTest implements IMemberService {
   }
   async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
     const memberToAdd = { ...newItem, id: 'new-member-id' };
-    this._items.push(memberToAdd);
+    this.items.push(memberToAdd);
     return ok(await simulateLatency(memberToAdd));
   }
   async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
-    const index = this._items.findIndex((m) => m.id === updatedItem.id);
+    const index = this.items.findIndex((m) => m.id === updatedItem.id);
     if (index !== -1) {
-      this._items[index] = updatedItem;
+      this.items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
     return err({ message: 'Member not found', statusCode: 404 });
   }
   async delete(id: string): Promise<Result<void, ApiError>> {
-    const initialLength = this._items.length;
-    this._items = this._items.filter((m) => m.id !== id);
-    if (this._items.length === initialLength) {
+    const initialLength = this.items.length;
+    this.items = this.items.filter((m) => m.id !== id);
+    if (this.items.length === initialLength) {
       return err({ message: 'Member not found', statusCode: 404 });
     }
     return ok(await simulateLatency(undefined));
@@ -166,7 +159,7 @@ class MockMemberServiceForTest implements IMemberService {
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<Member>, ApiError>> {
-    let filteredItems = this._items;
+    let filteredItems = this.items;
 
     // Simplified search for testing
     if (filters.fullName) {
@@ -192,38 +185,30 @@ class MockMemberServiceForTest implements IMemberService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
-    const members = this._items.filter((m) => ids.includes(m.id));
+    const members = this.items.filter((m) => ids.includes(m.id));
     return ok(await simulateLatency(members));
   }
 }
 
 export class MockEventServiceForTest implements IEventService {
-  private _events: Event[];
-
-  constructor() {
-    this._events = generateMockEvents(20);
-  }
-
+  private _events: Event[] = events as unknown as Event[];
   reset() {
-    this._events = generateMockEvents(20);
-  }
-  get events(): Event[] {
-    return [...this._events];
+    this._events = events as unknown as Event[];
   }
 
   async fetch(): Promise<Result<Event[], ApiError>> {
-    return ok(await simulateLatency(this.events));
+    return ok(await simulateLatency(this._events));
   }
 
   async getById(id: string): Promise<Result<Event | undefined, ApiError>> {
-    const event = this.events.find((e) => e.id === id);
+    const event = this._events.find((e) => e.id === id);
     return ok(await simulateLatency(event));
   }
 
   async add(newEvent: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
     const eventToAdd: Event = {
       ...newEvent,
-      id: generateMockEvent(this._events.length + 1).id,
+      id: new Date().getTime().toString(),
     };
     this._events.push(eventToAdd);
     return ok(await simulateLatency(eventToAdd));
@@ -355,7 +340,7 @@ beforeEach(async () => {
     event: mockEventService,
   });
 
-  vi.spyOn(familyStore, 'loadItems');
+  vi.spyOn(familyStore, '_loadItems');
   vi.spyOn(notificationStore, 'showSnackbar');
   global.visualViewport = { width: 1024, height: 768 } as any; // Mock visualViewport
 });
@@ -433,7 +418,7 @@ describe('FamilyListView.vue', () => {
     await (wrapper.vm as any).loadFamilies(); // Add this line back
 
     // Check if the familyStore.loadItems is called
-    expect(familyStore.loadItems).toHaveBeenCalled();
+    expect(familyStore._loadItems).toHaveBeenCalled();
 
     // Check if the items are rendered in the component
     const familyList = wrapper.findComponent({ name: 'FamilyList' });
@@ -506,7 +491,7 @@ describe('FamilyListView.vue', () => {
     (wrapper.vm as any).handleFilterUpdate(newFilters);
     expect((wrapper.vm as any).currentFilters).toEqual(newFilters);
     expect((wrapper.vm as any).currentPage).toBe(1);
-    expect(familyStore.loadItems).toHaveBeenCalledTimes(4); // Initial load + after filter update + watcher trigger
+    expect(familyStore._loadItems).toHaveBeenCalledTimes(4); // Initial load + after filter update + watcher trigger
   });
 
   it('handles list options update', async () => {
@@ -564,7 +549,7 @@ describe('FamilyListView.vue', () => {
       },
     });
     await flushPromises();
-    expect(familyStore.loadItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
+    expect(familyStore._loadItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
   });
 
   describe('Delete Family', () => {
@@ -602,7 +587,7 @@ describe('FamilyListView.vue', () => {
         'Family deleted successfully',
         'success',
       );
-      expect(familyStore.loadItems).toHaveBeenCalledTimes(3); // Initial load + reload after delete + watcher trigger
+      expect(familyStore._loadItems).toHaveBeenCalledTimes(3); // Initial load + reload after delete + watcher trigger
       expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
       expect((wrapper.vm as any).familyToDelete).toBeUndefined();
     });
@@ -636,7 +621,7 @@ describe('FamilyListView.vue', () => {
         'Failed to delete family',
         'error',
       );
-      expect(familyStore.loadItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
+      expect(familyStore._loadItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
       expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
       expect((wrapper.vm as any).familyToDelete).toBeUndefined();
     });

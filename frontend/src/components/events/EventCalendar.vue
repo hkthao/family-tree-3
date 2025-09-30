@@ -136,8 +136,8 @@ const loadEvents = async () => {
   } else if (props.familyId) {
     filters.familyId = props.familyId;
   }
-
-  await eventStore.loadItems(filters);
+  eventStore.filter = filters;
+  await eventStore._loadItems();
 };
 
 const formattedEvents = computed(() => {
@@ -163,7 +163,7 @@ const getEventColor: CalendarEventColorFunction = (event: {
 };
 
 const showEventDetails = (eventSlotScope: Event) => {
-   router.push(`/events/detail/${eventSlotScope.id}`);
+  router.push(`/events/detail/${eventSlotScope.id}`);
 };
 
 watch(

@@ -1,4 +1,4 @@
-import { fixedMockFamilies } from "@/data/mock/fixed.family.mock";
+import fixedMockFamilies from "@/data/mock/families.json"
 import { err, type Member, Gender, ok, type Result, type MemberFilter, type Paginated } from "@/types";
 import type { ApiError } from "@/utils/api";
 import { simulateLatency } from "@/utils/mockUtils";

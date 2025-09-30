@@ -14,16 +14,17 @@ import {
   EventType,
   type Event,
 } from '@/types';
+import events from '@/data/mock/events.json';
 
 export class MockEventServiceForTest implements IEventService {
   private _events: Event[];
 
   constructor() {
-    this._events = generateMockEvents(20);
+    this._events = events as unknown as Event[];
   }
 
   reset() {
-    this._events = generateMockEvents(20);
+    this._events = events as unknown as Event[];
   }
   get events(): Event[] {
     return [...this._events];
@@ -41,7 +42,7 @@ export class MockEventServiceForTest implements IEventService {
   async add(newEvent: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
     const eventToAdd: Event = {
       ...newEvent,
-      id: generateMockEvent(this._events.length + 1).id,
+      id: new Date().getTime().toString(),
     };
     this._events.push(eventToAdd);
     return ok(await simulateLatency(eventToAdd));
@@ -187,7 +188,7 @@ describe('Family Event Store', () => {
   it('getById should return the correct family event', async () => {
     const store = useEventStore();
     await store._loadItems();
-    const event = store.getById(mockEventService.events[0].id);
+    const event = await store.getById(mockEventService.events[0].id);
     expect(event).toBeDefined();
     expect(event?.name).toBe(mockEventService.events[0].name);
   });
@@ -209,7 +210,8 @@ describe('Family Event Store', () => {
     expect(store.totalPages).toBe(3); // 21 events, 10 per page
 
     // Now, search for the newly added event to confirm its presence
-    await store.loadItems({ searchQuery: 'New Event' });
+    store.filter = { searchQuery: 'New Event' };
+    await store._loadItems();
     expect(store.totalItems).toBe(1);
     expect(store.items[0].name).toBe('New Event');
   });
@@ -222,7 +224,7 @@ describe('Family Event Store', () => {
       const updatedName = 'Updated Event';
       const updatedEvent: Event = { ...eventToUpdate, name: updatedName };
       await store.updateItem(updatedEvent);
-      const foundEvent = store.getById(eventToUpdate.id);
+      const foundEvent = await store.getById(eventToUpdate.id);
       expect(foundEvent?.name).toBe(updatedName);
       expect(store.loading).toBe(false);
       expect(store.totalPages).toBe(2); // Should remain 2
@@ -255,7 +257,8 @@ describe('Family Event Store', () => {
     const existingEvent = mockEventService.events[0];
     const searchName = existingEvent.name.substring(0, 3);
 
-    await store.loadItems({ searchQuery: searchName });
+    store.filter = { searchQuery: searchName };
+    await store._loadItems();
     const expectedFilteredCount = mockEventService.events.filter(
       (e) =>
         e.name.toLowerCase().includes(searchName.toLowerCase()) ||
@@ -277,8 +280,8 @@ describe('Family Event Store', () => {
 
     const existingEvent = mockEventService.events[0];
     const searchFamilyId = existingEvent.familyId || 'non-existent-family';
-
-    await store.loadItems({ familyId: searchFamilyId });
+    store.filter = { familyId: searchFamilyId };
+    await store._loadItems();
     const expectedFilteredCount = mockEventService.events.filter(
       (e) => e.familyId === searchFamilyId,
     ).length;
@@ -339,7 +342,3 @@ describe('Family Event Store', () => {
     expect(store.currentPage).toBe(1);
   });
 });
-
-function generateMockEvents(arg0: number): Event[] {
-  throw new Error('Function not implemented.');
-}

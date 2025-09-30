@@ -1,7 +1,7 @@
-import { DEFAULT_ITEMS_PER_PAGE } from "@/constants/pagination";
-import i18n from "@/plugins/i18n";
-import type { EventFilter, Event } from "@/types";
-import { defineStore } from "pinia";
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import i18n from '@/plugins/i18n';
+import type { EventFilter, Event } from '@/types';
+import { defineStore } from 'pinia';
 
 export const useEventStore = defineStore('event', {
   state: () => ({
@@ -15,8 +15,7 @@ export const useEventStore = defineStore('event', {
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 0,
   }),
-  getters: {
-  },
+  getters: {},
   actions: {
     async _loadItems() {
       this.loading = true;
@@ -43,8 +42,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.add(newItem);
       if (result.ok) {
-        this.items.push(result.value);
-        await this._loadItems(); // Re-fetch to update pagination and filters
+        await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.add');
         console.error(result.error);
@@ -57,15 +55,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.update(updatedItem);
       if (result.ok) {
-        const index = this.items.findIndex(
-          (item) => item.id === result.value.id,
-        );
-        if (index !== -1) {
-          this.items[index] = result.value;
-          await this._loadItems(); // Re-fetch to update pagination and filters
-        } else {
-          this.error = i18n.global.t('event.errors.notFound');
-        }
+        await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.update');
         console.error(result.error);
@@ -78,10 +68,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.delete(id);
       if (result.ok) {
-        await this._loadItems(); // Re-fetch to update pagination and filters
-        if (this.currentPage > this.totalPages && this.totalPages > 0) {
-          this.currentPage = this.totalPages;
-        }
+        await this._loadItems(); 
       } else {
         this.error = i18n.global.t('event.errors.delete');
         console.error(result.error);
@@ -92,15 +79,15 @@ export const useEventStore = defineStore('event', {
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
-        await this._loadItems(); // Trigger fetch with new page
+        await this._loadItems(); 
       }
     },
 
     async setItemsPerPage(count: number) {
       if (count > 0) {
         this.itemsPerPage = count;
-        this.currentPage = 1; // Reset to first page when items per page changes
-        await this._loadItems(); // Trigger fetch with new items per page
+        this.currentPage = 1; 
+        await this._loadItems();
       }
     },
 

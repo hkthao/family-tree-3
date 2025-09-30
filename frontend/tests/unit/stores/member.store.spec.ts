@@ -2,21 +2,24 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useMemberStore } from '@/stores/member.store';
 import type { IMemberService } from '@/services/member/member.service.interface';
-import { generateMockMembers, generateMockMember } from '@/data/mock/member.mock';
 import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
 import { createServices } from '@/services/service.factory';
 import type { ApiError } from '@/utils/api';
-import { err, Gender, ok, type Member, type MemberFilter, type Paginated, type Result } from '@/types';
+import {
+  err,
+  Gender,
+  ok,
+  type Member,
+  type MemberFilter,
+  type Paginated,
+  type Result,
+} from '@/types';
+import fix_members from '@/data/mock/members.json';
 
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
-  private _members: Member[] = generateMockMembers(20); // Use a private variable
+  public members: Member[] = fix_members as unknown as Member[]; // Use a copy of fix_members
   public shouldThrowError: boolean = false;
-
-  // Getter to return a copy of the members array
-  get members(): Member[] {
-    return [...this._members]; // Return a shallow copy
-  }
 
   async fetch(): Promise<Result<Member[], ApiError>> {
     if (this.shouldThrowError) {
@@ -25,11 +28,17 @@ class MockMemberServiceForTest implements IMemberService {
     return ok(await simulateLatency(this.members));
   }
 
-  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
+  async fetchMembersByFamilyId(
+    familyId: string,
+  ): Promise<Result<Member[], ApiError>> {
     if (this.shouldThrowError) {
-      return err({ message: 'Không thể tải danh sách thành viên theo ID gia đình.' });
+      return err({
+        message: 'Không thể tải danh sách thành viên theo ID gia đình.',
+      });
     }
-    const filteredItems = this.members.filter(member => member.familyId === familyId);
+    const filteredItems = this.members.filter(
+      (member) => member.familyId === familyId,
+    );
     return ok(await simulateLatency(filteredItems));
   }
 
@@ -47,11 +56,15 @@ class MockMemberServiceForTest implements IMemberService {
     }
     const memberToAdd: Member = {
       ...newItem,
-      id: generateMockMember().id,
-      dateOfBirth: newItem.dateOfBirth ? new Date(newItem.dateOfBirth) : undefined,
-      dateOfDeath: newItem.dateOfDeath ? new Date(newItem.dateOfDeath) : undefined,
+      id: new Date().getTime().toString(),
+      dateOfBirth: newItem.dateOfBirth
+        ? new Date(newItem.dateOfBirth)
+        : undefined,
+      dateOfDeath: newItem.dateOfDeath
+        ? new Date(newItem.dateOfDeath)
+        : undefined,
     };
-    this._members.push(memberToAdd);
+    this.members.push(memberToAdd);
     return ok(await simulateLatency(memberToAdd));
   }
 
@@ -59,14 +72,18 @@ class MockMemberServiceForTest implements IMemberService {
     if (this.shouldThrowError) {
       return err({ message: 'Không thể cập nhật thành viên.' });
     }
-    const index = this._members.findIndex((m) => m.id === updatedItem.id);
+    const index = this.members.findIndex((m) => m.id === updatedItem.id);
     if (index !== -1) {
       const memberToUpdate: Member = {
         ...updatedItem,
-        dateOfBirth: updatedItem.dateOfBirth ? new Date(updatedItem.dateOfBirth) : undefined,
-        dateOfDeath: updatedItem.dateOfDeath ? new Date(updatedItem.dateOfDeath) : undefined,
+        dateOfBirth: updatedItem.dateOfBirth
+          ? new Date(updatedItem.dateOfBirth)
+          : undefined,
+        dateOfDeath: updatedItem.dateOfDeath
+          ? new Date(updatedItem.dateOfDeath)
+          : undefined,
       };
-      this._members[index] = memberToUpdate;
+      this.members[index] = memberToUpdate;
       return ok(await simulateLatency(memberToUpdate));
     }
     return err({ message: 'Không tìm thấy thành viên.', statusCode: 404 });
@@ -76,8 +93,8 @@ class MockMemberServiceForTest implements IMemberService {
     if (this.shouldThrowError) {
       return err({ message: 'Không thể xóa thành viên.' });
     }
-    const initialLength = this._members.length;
-    this._members = this._members.filter((m) => m.id !== id);
+    const initialLength = this.members.length;
+    this.members = this.members.filter((m) => m.id !== id);
     if (this.members.length === initialLength) {
       return err({ message: 'Không tìm thấy thành viên.', statusCode: 404 });
     }
@@ -92,39 +109,58 @@ class MockMemberServiceForTest implements IMemberService {
     if (this.shouldThrowError) {
       return err({ message: 'Không thể tìm kiếm thành viên.' });
     }
-    let filteredItems = this._members;
+    let filteredItems = this.members;
 
     if (filters.fullName) {
       const lowerCaseFullName = filters.fullName.toLowerCase();
-      filteredItems = filteredItems.filter(m =>
-        m.lastName.toLowerCase().includes(lowerCaseFullName) ||
-        m.firstName.toLowerCase().includes(lowerCaseFullName) ||
-        `${m.lastName} ${m.firstName}`.toLowerCase().includes(lowerCaseFullName)
+      filteredItems = filteredItems.filter(
+        (m) =>
+          m.lastName.toLowerCase().includes(lowerCaseFullName) ||
+          m.firstName.toLowerCase().includes(lowerCaseFullName) ||
+          `${m.lastName} ${m.firstName}`
+            .toLowerCase()
+            .includes(lowerCaseFullName),
       );
     }
     if (filters.dateOfBirth) {
-      filteredItems = filteredItems.filter(m => m.dateOfBirth?.toISOString().split('T')[0] === filters.dateOfBirth?.toISOString().split('T')[0]);
+      filteredItems = filteredItems.filter(
+        (m) =>
+          m.dateOfBirth?.toISOString().split('T')[0] ===
+          filters.dateOfBirth?.toISOString().split('T')[0],
+      );
     }
     if (filters.dateOfDeath) {
-      filteredItems = filteredItems.filter(m => m.dateOfDeath?.toISOString().split('T')[0] === filters.dateOfDeath?.toISOString().split('T')[0]);
+      filteredItems = filteredItems.filter(
+        (m) =>
+          m.dateOfDeath?.toISOString().split('T')[0] ===
+          filters.dateOfDeath?.toISOString().split('T')[0],
+      );
     }
     if (filters.gender) {
-      filteredItems = filteredItems.filter(m => m.gender === filters.gender);
+      filteredItems = filteredItems.filter((m) => m.gender === filters.gender);
     }
     if (filters.placeOfBirth) {
       const lowerCasePlaceOfBirth = filters.placeOfBirth.toLowerCase();
-      filteredItems = filteredItems.filter(m => m.placeOfBirth?.toLowerCase().includes(lowerCasePlaceOfBirth));
+      filteredItems = filteredItems.filter((m) =>
+        m.placeOfBirth?.toLowerCase().includes(lowerCasePlaceOfBirth),
+      );
     }
     if (filters.placeOfDeath) {
       const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
-      filteredItems = filteredItems.filter(m => m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath));
+      filteredItems = filteredItems.filter((m) =>
+        m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath),
+      );
     }
     if (filters.occupation) {
       const lowerCaseOccupation = filters.occupation.toLowerCase();
-      filteredItems = filteredItems.filter(m => m.occupation?.toLowerCase().includes(lowerCaseOccupation));
+      filteredItems = filteredItems.filter((m) =>
+        m.occupation?.toLowerCase().includes(lowerCaseOccupation),
+      );
     }
     if (filters.familyId) {
-      filteredItems = filteredItems.filter(m => m.familyId === filters.familyId);
+      filteredItems = filteredItems.filter(
+        (m) => m.familyId === filters.familyId,
+      );
     }
 
     const totalItems = filteredItems.length;
@@ -133,15 +169,17 @@ class MockMemberServiceForTest implements IMemberService {
     const end = start + itemsPerPage;
     const items = filteredItems.slice(start, end);
 
-    return ok(await simulateLatency({
-      items,
-      totalItems,
-      totalPages,
-    }));
+    return ok(
+      await simulateLatency({
+        items,
+        totalItems,
+        totalPages,
+      }),
+    );
   }
 
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
-    const members = this._members.filter(m => ids.includes(m.id));
+    const members = this.members.filter((m) => ids.includes(m.id));
     return ok(await simulateLatency(members));
   }
 }
@@ -181,14 +219,12 @@ describe('Member Store', () => {
     expect(store.totalPages).toBe(2); // 20 members, 10 per page
   });
 
-
-
   it('getById should return the correct member', async () => {
     const store = useMemberStore();
     await store._loadItems();
-    const member = store.getById(mockMemberService.members[0].id);
+    const member = store.getById(fix_members[0].id);
     expect(member).toBeDefined();
-    expect(member?.lastName).toBe(mockMemberService.members[0].lastName);
+    expect(member?.lastName).toBe(fix_members[0].lastName);
   });
 
   it('addItem should add a new member and update members array', async () => {
@@ -270,7 +306,10 @@ describe('Member Store', () => {
     const memberToUpdate = store.items[0];
     if (memberToUpdate) {
       const updatedLastName = 'Updated';
-      const updatedMember: Member = { ...memberToUpdate, lastName: updatedLastName };
+      const updatedMember: Member = {
+        ...memberToUpdate,
+        lastName: updatedLastName,
+      };
       await store.updateItem(updatedMember);
       await store._loadItems(); // Force re-fetch after update
       const foundMember = store.getById(memberToUpdate.id);
@@ -370,10 +409,13 @@ describe('Member Store', () => {
     const searchName = existingMember.lastName.substring(0, 3); // Search by part of last name
 
     await store.loadItems({ fullName: searchName });
-    const expectedFilteredCount = mockMemberService.members.filter(m =>
-      m.lastName.toLowerCase().includes(searchName.toLowerCase()) ||
-      m.firstName.toLowerCase().includes(searchName.toLowerCase()) ||
-      `${m.lastName} ${m.firstName}`.toLowerCase().includes(searchName.toLowerCase())
+    const expectedFilteredCount = mockMemberService.members.filter(
+      (m) =>
+        m.lastName.toLowerCase().includes(searchName.toLowerCase()) ||
+        m.firstName.toLowerCase().includes(searchName.toLowerCase()) ||
+        `${m.lastName} ${m.firstName}`
+          .toLowerCase()
+          .includes(searchName.toLowerCase()),
     ).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems
@@ -384,20 +426,26 @@ describe('Member Store', () => {
   it('loadItems should filter members by dateOfBirth', async () => {
     const store = useMemberStore();
     await store._loadItems();
-    const existingMember = mockMemberService.members.find(m => m.dateOfBirth !== undefined);
+    const existingMember = mockMemberService.members.find(
+      (m) => m.dateOfBirth !== undefined,
+    );
     if (!existingMember || !existingMember.dateOfBirth) {
       expect.fail('No member with dateOfBirth found in mock data.');
     }
     const searchDate = existingMember.dateOfBirth;
 
     await store.loadItems({ dateOfBirth: searchDate });
-    const expectedFilteredCount = mockMemberService.members.filter(m =>
-      m.dateOfBirth?.toISOString().split('T')[0] === searchDate.toISOString().split('T')[0]
+    const expectedFilteredCount = mockMemberService.members.filter(
+      (m) =>
+        m.dateOfBirth?.toISOString().split('T')[0] ===
+        searchDate.toISOString().split('T')[0],
     ).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems
     expect(store.currentPage).toBe(1);
-    expect(store.filters.dateOfBirth?.toISOString().split('T')[0]).toBe(searchDate.toISOString().split('T')[0]);
+    expect(store.filters.dateOfBirth?.toISOString().split('T')[0]).toBe(
+      searchDate.toISOString().split('T')[0],
+    );
   });
 
   it('loadItems should filter members by gender', async () => {
@@ -406,7 +454,9 @@ describe('Member Store', () => {
     const searchGender = Gender.Male;
 
     await store.loadItems({ gender: searchGender });
-    const expectedFilteredCount = mockMemberService.members.filter(m => m.gender === searchGender).length;
+    const expectedFilteredCount = mockMemberService.members.filter(
+      (m) => m.gender === searchGender,
+    ).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems
     expect(store.currentPage).toBe(1);
@@ -452,7 +502,19 @@ describe('Member Store', () => {
 
   it('setCurrentItem should set the current item', () => {
     const store = useMemberStore();
-    const mockMember: Member = generateMockMember('test-family-id');
+    const mockMember: Member = {
+      id: 'test-family-id',
+      lastName: 'Doe',
+      firstName: 'John',
+      fullName: 'John Doe',
+      familyId: '1',
+      dateOfBirth: new Date('2000-01-01'),
+      dateOfDeath: new Date('2020-01-01'),
+      gender: Gender.Male,
+      placeOfBirth: 'New York',
+      placeOfDeath: 'Los Angeles',
+      occupation: 'Engineer',
+    };
     store.setCurrentItem(mockMember);
     expect(store.currentItem).toEqual(mockMember);
 

@@ -1,11 +1,11 @@
 import type { IFamilyService } from './family.service.interface';
-import { fixedMockFamilies } from '@/data/mock/fixed.family.mock';
+import fixedMockFamilies from '@/data/mock/families.json';
 import { simulateLatency } from '@/utils/mockUtils';
 import type { ApiError } from '@/utils/api';
 import { err, type Family, type Result, ok, type FamilyFilter, type Paginated } from '@/types';
 
 export class MockFamilyService implements IFamilyService {
-  private _families: Family[] = fixedMockFamilies;
+  private _families: Family[] = fixedMockFamilies as unknown as Family[];
 
   get families(): Family[] {
     return [...this._families];

@@ -36,11 +36,11 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
-import type { Event } from '@/types';
-import type { EventFilter } from '@/services/event/event.service.interface';
+import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList } from '@/components/events';
-import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
+import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -49,9 +49,6 @@ const notificationStore = useNotificationStore();
 
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-
-// ... (rest of the file)
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
