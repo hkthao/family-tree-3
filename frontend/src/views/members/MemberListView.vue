@@ -60,7 +60,7 @@ const notificationStore = useNotificationStore();
 
 // Function Declarations (moved to top)
 const loadMembers = () => {
-  memberStore.searchItems(currentFilters.value);
+  memberStore.loadItems(currentFilters.value);
 };
 
 const navigateToDetailView = (member: Member) => {

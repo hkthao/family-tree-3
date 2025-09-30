@@ -137,7 +137,7 @@ const loadEvents = async () => {
     filters.familyId = props.familyId;
   }
 
-  await eventStore.searchItems(filters);
+  await eventStore.loadItems(filters);
 };
 
 const formattedEvents = computed(() => {

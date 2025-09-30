@@ -533,7 +533,7 @@ export class MockMemberService implements IMemberService {
     }
   }
 
-  async searchItems(
+  async loadItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
@@ -617,7 +617,7 @@ export class MockMemberService implements IMemberService {
     }
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
     try {
       const members = await simulateLatency(
         this._members

@@ -63,7 +63,7 @@ export class MockEventServiceForTest implements IEventService {
     return ok(undefined);
   }
 
-  async searchItems(
+  async loadItems(
     filters: EventFilter,
     page?: number,
     itemsPerPage?: number
@@ -108,7 +108,7 @@ export class MockEventServiceForTest implements IEventService {
     const end = start + currentItemsPerPage;
     const items = filteredEvents.slice(start, end);
 
-    console.log('MockEventServiceForTest.searchItems returning:', { items, totalItems, totalPages });
+    console.log('MockEventServiceForTest.loadItems returning:', { items, totalItems, totalPages });
     return ok(await simulateLatency({
       items,
       totalItems,
@@ -116,7 +116,7 @@ export class MockEventServiceForTest implements IEventService {
     }));
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
     const events = this._events.filter(e => ids.includes(e.id));
     return ok(await simulateLatency(events));
   }
@@ -184,7 +184,7 @@ describe('Family Event Store', () => {
     expect(store.totalPages).toBe(3); // 21 events, 10 per page
 
     // Now, search for the newly added event to confirm its presence
-    await store.searchItems({ searchQuery: 'New Event' });
+    await store.loadItems({ searchQuery: 'New Event' });
     expect(store.totalItems).toBe(1);
     expect(store.items[0].name).toBe('New Event');
   });
@@ -223,14 +223,14 @@ describe('Family Event Store', () => {
     }
   });
 
-  it('searchItems should filter family events by search term and reset page', async () => {
+  it('loadItems should filter family events by search term and reset page', async () => {
     const store = useEventStore();
     await store._loadItems(); // 20 events
 
     const existingEvent = mockEventService.events[0];
     const searchName = existingEvent.name.substring(0, 3);
 
-    await store.searchItems({ searchQuery: searchName });
+    await store.loadItems({ searchQuery: searchName });
     const expectedFilteredCount = mockEventService.events.filter(e =>
       e.name.toLowerCase().includes(searchName.toLowerCase()) ||
       (e.description && e.description.toLowerCase().includes(searchName.toLowerCase()))
@@ -242,14 +242,14 @@ describe('Family Event Store', () => {
     expect(store.filter.searchQuery).toBe(searchName);
   });
 
-  it('searchItems should filter family events by familyId', async () => {
+  it('loadItems should filter family events by familyId', async () => {
     const store = useEventStore();
     await store._loadItems();
 
     const existingEvent = mockEventService.events[0];
     const searchFamilyId = existingEvent.familyId || 'non-existent-family';
 
-    await store.searchItems({ familyId: searchFamilyId });
+    await store.loadItems({ familyId: searchFamilyId });
     const expectedFilteredCount = mockEventService.events.filter(e => e.familyId === searchFamilyId).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount);

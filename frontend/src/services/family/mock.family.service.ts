@@ -67,7 +67,7 @@ export class MockFamilyService implements IFamilyService {
       return err({ message: 'Failed to delete family from mock service.', details: e as Error });
     }
   }
-  async searchItems(
+  async loadItems(
     filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number
@@ -123,7 +123,7 @@ export class MockFamilyService implements IFamilyService {
     }
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
     try {
       const families = await simulateLatency(this.families.filter(f => ids.includes(f.id)));
       return ok(families);

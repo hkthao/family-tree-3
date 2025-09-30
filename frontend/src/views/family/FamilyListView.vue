@@ -72,11 +72,11 @@ const familyMemberCounts = computed(() => {
 });
 
 const loadFamilies = async () => {
-  await familyStore.searchItems(currentFilters.value);
+  await familyStore.loadItems(currentFilters.value);
 };
 
 const loadAllMembers = async () => {
-  await membersStore.searchItems({}); // Fetch all members
+  await membersStore.loadItems({}); // Fetch all members
 };
 
 const handleFilterUpdate = (filters: FamilySearchFilter) => {

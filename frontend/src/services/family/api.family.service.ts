@@ -41,7 +41,7 @@ export class ApiFamilyService implements IFamilyService {
     }
   }
 
-  async searchItems(
+  async loadItems(
     filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number
@@ -65,7 +65,7 @@ export class ApiFamilyService implements IFamilyService {
     }
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
     console.log(`Fetching families by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
     ids.forEach(id => params.append('ids', id));

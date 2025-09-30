@@ -39,7 +39,7 @@ export class ApiEventService implements IEventService {
     return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 
-  async searchItems(
+  async loadItems(
     filters: EventFilter,
     page: number = 1,
     itemsPerPage: number = 10
@@ -60,7 +60,7 @@ export class ApiEventService implements IEventService {
     return safeApiCall(this.http.get<Paginated<Event>>(`${this.apiUrl}?${params.toString()}`));
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
     console.log(`Fetching events by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
     ids.forEach(id => params.append('ids', id));

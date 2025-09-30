@@ -22,7 +22,7 @@ export const useEventStore = defineStore('event', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.event.searchItems(
+      const result = await this.services.event.loadItems(
         this.filter,
         this.currentPage,
         this.itemsPerPage,

@@ -5,10 +5,10 @@ import type { Result } from '@/types/common';
 import type { ApiError } from '@/utils/api';
 
 export interface IFamilyService extends ICrudService<Family> {
-  searchItems(
+  loadItems(
     filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number
   ): Promise<Result<Paginated<Family>, ApiError>>; // Keep searchFamilies
-  getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>>; // New method for fetching multiple families by IDs
+  getByIds(ids: string[]): Promise<Result<Family[], ApiError>>; // New method for fetching multiple families by IDs
 }

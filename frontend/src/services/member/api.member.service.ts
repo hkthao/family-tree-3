@@ -84,7 +84,7 @@ export class ApiMemberService implements IMemberService {
     return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 
-  async searchItems(
+  async loadItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
@@ -113,7 +113,7 @@ export class ApiMemberService implements IMemberService {
     return result;
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
     console.log(`Fetching members by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
     ids.forEach(id => params.append('ids', id));

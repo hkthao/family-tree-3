@@ -67,7 +67,7 @@ class MockFamilyServiceForTest implements IFamilyService {
     return ok(await simulateLatency(undefined));
   }
 
-  async searchItems(
+  async loadItems(
     filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number,
@@ -105,7 +105,7 @@ class MockFamilyServiceForTest implements IFamilyService {
     );
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
     const families = this._items.filter(f => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
@@ -154,7 +154,7 @@ class MockMemberServiceForTest implements IMemberService {
     }
     return ok(await simulateLatency(undefined));
   }
-  async searchItems(
+  async loadItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
@@ -184,7 +184,7 @@ class MockMemberServiceForTest implements IMemberService {
     );
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
     const members = this._items.filter(m => ids.includes(m.id));
     return ok(await simulateLatency(members));
   }
@@ -256,7 +256,7 @@ export class MockEventServiceForTest implements IEventService {
     return ok(undefined);
   }
 
-  async searchItems(
+  async loadItems(
     filters: EventFilter,
     page?: number,
     itemsPerPage?: number,
@@ -325,7 +325,7 @@ export class MockEventServiceForTest implements IEventService {
     );
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
     const events = this._events.filter(e => ids.includes(e.id));
     return ok(await simulateLatency(events));
   }
@@ -364,7 +364,7 @@ beforeEach(async () => {
     event: mockEventService,
   });
 
-  vi.spyOn(familyStore, 'searchItems');
+  vi.spyOn(familyStore, 'loadItems');
   vi.spyOn(notificationStore, 'showSnackbar');
   global.visualViewport = { width: 1024, height: 768 } as any; // Mock visualViewport
 });
@@ -441,8 +441,8 @@ describe('FamilyListView.vue', () => {
     // Manually trigger the loadFamilies function
     await (wrapper.vm as any).loadFamilies(); // Add this line back
 
-    // Check if the familyStore.searchItems is called
-    expect(familyStore.searchItems).toHaveBeenCalled();
+    // Check if the familyStore.loadItems is called
+    expect(familyStore.loadItems).toHaveBeenCalled();
 
     // Check if the items are rendered in the component
     const familyList = wrapper.findComponent({ name: 'FamilyList' });
@@ -515,7 +515,7 @@ describe('FamilyListView.vue', () => {
     (wrapper.vm as any).handleFilterUpdate(newFilters);
     expect((wrapper.vm as any).currentFilters).toEqual(newFilters);
     expect((wrapper.vm as any).currentPage).toBe(1);
-    expect(familyStore.searchItems).toHaveBeenCalledTimes(4); // Initial load + after filter update + watcher trigger
+    expect(familyStore.loadItems).toHaveBeenCalledTimes(4); // Initial load + after filter update + watcher trigger
   });
 
   it('handles list options update', async () => {
@@ -534,7 +534,7 @@ describe('FamilyListView.vue', () => {
   });
 
   it('loads all members on mount', async () => {
-    const memberStoreSearchItemsSpy = vi.spyOn(memberStore, 'searchItems');
+    const memberStoreSearchItemsSpy = vi.spyOn(memberStore, 'loadItems');
     mount(FamilyListView, {
       global: {
         plugins: [i18n, vuetify, router],
@@ -573,7 +573,7 @@ describe('FamilyListView.vue', () => {
       },
     });
     await flushPromises();
-    expect(familyStore.searchItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
+    expect(familyStore.loadItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
   });
 
   describe('Delete Family', () => {
@@ -611,7 +611,7 @@ describe('FamilyListView.vue', () => {
         'Family deleted successfully',
         'success',
       );
-      expect(familyStore.searchItems).toHaveBeenCalledTimes(3); // Initial load + reload after delete + watcher trigger
+      expect(familyStore.loadItems).toHaveBeenCalledTimes(3); // Initial load + reload after delete + watcher trigger
       expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
       expect((wrapper.vm as any).familyToDelete).toBeUndefined();
     });
@@ -645,7 +645,7 @@ describe('FamilyListView.vue', () => {
         'Failed to delete family',
         'error',
       );
-      expect(familyStore.searchItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
+      expect(familyStore.loadItems).toHaveBeenCalledTimes(3); // Initial load + watcher trigger
       expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
       expect((wrapper.vm as any).familyToDelete).toBeUndefined();
     });

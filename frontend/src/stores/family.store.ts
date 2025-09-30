@@ -30,7 +30,7 @@ export const useFamilyStore = defineStore('family', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.family.searchItems(
+      const result = await this.services.family.loadItems(
         this.filter,
         this.currentPage,
         this.itemsPerPage,
@@ -99,7 +99,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
-    async searchItems(
+    async loadItems(
       filter: FamilySearchFilter,
     ) {
       this.filter = filter;
@@ -146,7 +146,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       this.error = null;
       // Use a large itemsPerPage to fetch all items
-      const result = await this.services.family.searchItems(
+      const result = await this.services.family.loadItems(
         { searchQuery: '', visibility: 'all' },
         1,
         1000,
@@ -173,7 +173,7 @@ export const useFamilyStore = defineStore('family', {
     async getManyItemsByIds(ids: string[]): Promise<Family[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.family.getManyByIds(ids);
+      const result = await this.services.family.getByIds(ids);
       this.loading = false;
       if (result.ok) {
         return result.value;

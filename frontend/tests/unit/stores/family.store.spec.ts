@@ -79,13 +79,13 @@ class MockFamilyServiceForTest implements IFamilyService {
     return ok(await simulateLatency(undefined));
   }
 
-  async searchItems(
+  async loadItems(
     filter: FamilySearchFilter,
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<Family>, ApiError>> {
     if (this.shouldThrowError) {
-      return err({ message: 'Mock searchItems error' });
+      return err({ message: 'Mock loadItems error' });
     }
     let filtered = this._items;
 
@@ -168,7 +168,7 @@ class MockFamilyServiceForTest implements IFamilyService {
     }));
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
     const families = this._items.filter(f => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
@@ -219,7 +219,7 @@ describe('Family Store', () => {
     mockFamilyService.shouldThrowError = true;
     const store = useFamilyStore();
     await store._loadItems();
-    expect(store.error).toBe('Mock searchItems error');
+    expect(store.error).toBe('Mock loadItems error');
     expect(store.loading).toBe(false);
     expect(store.items).toEqual([]); // Items should be empty on error
   });
@@ -227,7 +227,7 @@ describe('Family Store', () => {
   it('_loadItems should set generic error message when result.error.message is undefined', async () => {
     mockFamilyService.shouldThrowError = true;
     // Mock the service to return an error without a message
-    mockFamilyService.searchItems = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.loadItems = vi.fn().mockResolvedValue(err({ message: undefined }));
     const store = useFamilyStore();
     await store._loadItems();
     expect(store.error).toBe('Không thể tải danh sách gia đình.');
@@ -276,7 +276,7 @@ describe('Family Store', () => {
     expect(store.error).toBeNull();
 
     // Verify the new family can be found by searching for it
-    await store.searchItems({ name: newFamilyData.name });
+    await store.loadItems({ name: newFamilyData.name });
     expect(store.items.length).toBe(1);
     expect(store.items[0].name).toBe(newFamilyData.name);
   });
@@ -461,13 +461,13 @@ describe('Family Store', () => {
   });
 
   // 7. Search families (dùng SearchFilter + pagination)
-  it('searchItems should filter, paginate, and update state correctly', async () => {
+  it('loadItems should filter, paginate, and update state correctly', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Initial load
 
     // Test 1: Search with query, page 1, itemsPerPage = 1
     const searchQuery = mockFamilyService.items[0].name;
-    await store.searchItems({ name: searchQuery }); // Pass only filter object
+    await store.loadItems({ name: searchQuery }); // Pass only filter object
     const expectedFilteredFamilies = mockFamilyService.items.filter(f =>
       f.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
@@ -489,14 +489,14 @@ describe('Family Store', () => {
 
     // Test 3: Change search query, should reset to page 1
     const newSearchQuery = mockFamilyService.items[1].name;
-    await store.searchItems({ name: newSearchQuery }); // Pass only filter object
+    await store.loadItems({ name: newSearchQuery }); // Pass only filter object
     expect(store.currentPage).toBe(1);
     expect(store.filter.name).toBe(newSearchQuery); // Check filter.name
     expect(store.totalItems).toBe(1); // Directly assert 1
     expect(store.totalPages).toBe(1); // Directly assert 1
 
     // Test 4: Filter by visibility
-    await store.searchItems({ visibility: FamilyVisibility.Public }); // Pass only filter object
+    await store.loadItems({ visibility: FamilyVisibility.Public }); // Pass only filter object
     const publicFamilies = mockFamilyService.items.filter(f => f.visibility === FamilyVisibility.Public);
     expect(store.totalItems).toBe(publicFamilies.length);
     expect(store.items.every(f => f.visibility === FamilyVisibility.Public)).toBe(true);
@@ -565,20 +565,20 @@ describe('Family Store', () => {
   });
 
   // 9. Error handling in search
-  it('searchItems should set error and clear items on search failure', async () => {
+  it('loadItems should set error and clear items on search failure', async () => {
     mockFamilyService.shouldThrowError = true;
     const store = useFamilyStore();
     await store._loadItems(); // Initial load to populate items
-    expect(store.error).toBe('Mock searchItems error');
+    expect(store.error).toBe('Mock loadItems error');
     expect(store.loading).toBe(false);
     expect(store.items).toEqual([]); // Items should be empty on error
     expect(store.totalItems).toBe(0);
     expect(store.totalPages).toBe(1);
   });
 
-  it('searchItems should set generic error message when result.error.message is undefined', async () => {
+  it('loadItems should set generic error message when result.error.message is undefined', async () => {
     mockFamilyService.shouldThrowError = true;
-    mockFamilyService.searchItems = vi.fn().mockResolvedValue(err({ message: undefined }));
+    mockFamilyService.loadItems = vi.fn().mockResolvedValue(err({ message: undefined }));
     const store = useFamilyStore();
     await store._loadItems();
     expect(store.error).toBe('Không thể tải danh sách gia đình.');

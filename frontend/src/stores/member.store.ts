@@ -45,7 +45,7 @@ export const useMemberStore = defineStore('member', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.searchItems(
+      const result = await this.services.member.loadItems(
         this.filters,
         this.currentPage,
         this.itemsPerPage,
@@ -177,7 +177,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async searchItems(filters: MemberFilter) {
+    async loadItems(filters: MemberFilter) {
       const newFilters: MemberFilter = { ...filters };
       if (typeof newFilters.dateOfBirth === 'string') {
         newFilters.dateOfBirth = new Date(newFilters.dateOfBirth);
@@ -207,7 +207,7 @@ export const useMemberStore = defineStore('member', {
     async getManyItemsByIds(ids: string[]): Promise<Member[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.getManyByIds(ids);
+      const result = await this.services.member.getByIds(ids);
       this.loading = false;
       if (result.ok) {
         return result.value;

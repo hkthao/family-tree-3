@@ -48,7 +48,7 @@
             clearable
             autofocus
             hide-details
-            @input="searchItems"
+            @input="loadItems"
           ></v-text-field>
         </v-card-text>
 
@@ -201,7 +201,7 @@ const loadItems = async ({
 };
 
 // Search items
-const searchItems = () => {
+const loadItems = () => {
   loadItems({ page: 1, itemsPerPage: 10, sortBy: [] }); // Reset pagination on search
 };
 

@@ -87,7 +87,7 @@ class MockMemberServiceForTest implements IMemberService {
     return ok(await simulateLatency(undefined));
   }
 
-  async searchItems(
+  async loadItems(
     filters: MemberFilter,
     page: number,
     itemsPerPage: number,
@@ -143,7 +143,7 @@ class MockMemberServiceForTest implements IMemberService {
     }));
   }
 
-  async getManyByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
+  async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
     const members = this._members.filter(m => ids.includes(m.id));
     return ok(await simulateLatency(members));
   }
@@ -366,13 +366,13 @@ describe('Member Store', () => {
     }
   });
 
-  it('searchItems should filter members by fullName', async () => {
+  it('loadItems should filter members by fullName', async () => {
     const store = useMemberStore();
     await store._loadItems();
     const existingMember = mockMemberService.members[0];
     const searchName = existingMember.lastName.substring(0, 3); // Search by part of last name
 
-    await store.searchItems({ fullName: searchName });
+    await store.loadItems({ fullName: searchName });
     const expectedFilteredCount = mockMemberService.members.filter(m =>
       m.lastName.toLowerCase().includes(searchName.toLowerCase()) ||
       m.firstName.toLowerCase().includes(searchName.toLowerCase()) ||
@@ -384,7 +384,7 @@ describe('Member Store', () => {
     expect(store.filters.fullName).toBe(searchName);
   });
 
-  it('searchItems should filter members by dateOfBirth', async () => {
+  it('loadItems should filter members by dateOfBirth', async () => {
     const store = useMemberStore();
     await store._loadItems();
     const existingMember = mockMemberService.members.find(m => m.dateOfBirth !== undefined);
@@ -393,7 +393,7 @@ describe('Member Store', () => {
     }
     const searchDate = existingMember.dateOfBirth;
 
-    await store.searchItems({ dateOfBirth: searchDate });
+    await store.loadItems({ dateOfBirth: searchDate });
     const expectedFilteredCount = mockMemberService.members.filter(m =>
       m.dateOfBirth?.toISOString().split('T')[0] === searchDate.toISOString().split('T')[0]
     ).length;
@@ -403,12 +403,12 @@ describe('Member Store', () => {
     expect(store.filters.dateOfBirth?.toISOString().split('T')[0]).toBe(searchDate.toISOString().split('T')[0]);
   });
 
-  it('searchItems should filter members by gender', async () => {
+  it('loadItems should filter members by gender', async () => {
     const store = useMemberStore();
     await store._loadItems();
     const searchGender = Gender.Male;
 
-    await store.searchItems({ gender: searchGender });
+    await store.loadItems({ gender: searchGender });
     const expectedFilteredCount = mockMemberService.members.filter(m => m.gender === searchGender).length;
 
     expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems

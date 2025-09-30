@@ -12,3 +12,14 @@ export interface Event {
   type: EventType;
   color?: string; // Added color property
 }
+
+export interface EventFilter {
+  searchQuery?: string;
+  type?: EventType;
+  eventType?: EventType;
+  familyId?: string | null ;
+  startDate?: Date | null;
+  endDate?: Date | null;
+  location?: string;
+  relatedMemberId?: string;
+}

@@ -71,7 +71,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { EventFilter } from '@/services/event/event.service.interface';
+import type { EventFilter } from '@/types';
 import { EventType } from '@/types/event/event-type'; // Import EventType enum
 import DateInputField from '@/components/common/DateInputField.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
