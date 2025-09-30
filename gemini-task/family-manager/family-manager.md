@@ -4,28 +4,28 @@ Yêu cầu theo backlog: **Thêm gia đình, Chỉnh sửa gia đình, Tìm ki�
 
 ### 1. Quản lý Gia đình (FamilyListView.vue)
 - Màn hình chính hiển thị danh sách các gia đình.
-- Tích hợp `FamilySearch.vue` để tìm kiếm và lọc.
-- Tích hợp `FamilyList.vue` để hiển thị bảng danh sách các gia đình: Avatar (nếu có), Name, Visibility.
+- Tích hợp `FamilySearch` (từ `@/components/family`) để tìm kiếm và lọc.
+- Tích hợp `FamilyList` (từ `@/components/family`) để hiển thị bảng danh sách các gia đình: Avatar (nếu có), Name, Visibility.
 - Có phân trang (pagination).
 - Có nút 'Thêm mới Family' điều hướng đến màn hình thêm mới (`/family/add`).
 - Mỗi dòng có action: Xem chi tiết (mở dialog), Chỉnh sửa (điều hướng đến màn hình chỉnh sửa), Xoá (xoá phải confirm).
 
 ### 2. Thêm Gia đình
-- Màn hình riêng `FamilyAddView.vue` sử dụng `FamilyForm.vue`.
-- `FamilyForm.vue` (được dùng chung cho cả thêm mới, chỉnh sửa và xem chi tiết) để nhập thông tin:
-  - Trường: Name (bắt buộc), Description (textarea), Avatar URL (text field), Visibility (select: Private, Public).
+- Màn hình riêng `FamilyAddView` (từ `@/views/family`) sử dụng `FamilyForm` (từ `@/components/family`).
+- `FamilyForm` (được dùng chung cho cả thêm mới, chỉnh sửa và xem chi tiết) để nhập thông tin:
+  - Trường: Name (bắt buộc), Description (textarea), AvatarInput component, Visibility (select: Private, Public).
   - Hiển thị ảnh đại diện (avatar) ngay trên form.
   - Validation: Name không để trống.
 - Submit → thêm vào store/mock data và điều hướng về trang danh sách.
 
 ### 3. Chỉnh sửa Gia đình
-- Màn hình riêng `FamilyEditView.vue` sử dụng `FamilyForm.vue`.
+- Màn hình riêng `FamilyEditView` (từ `@/views/family`) sử dụng `FamilyForm` (từ `@/components/family`).
 - Khi chọn 'Chỉnh sửa' từ bảng danh sách hoặc nút actions → điều hướng đến màn hình chỉnh sửa với dữ liệu prefilled (`/family/edit/:id`).
 - Cho phép cập nhật tất cả trường, validate như khi thêm mới.
 - Sau khi lưu → dữ liệu cập nhật trong store và điều hướng về trang danh sách.
 
 ### 4. Xem chi tiết Gia đình
-- Dialog `FamilyForm.vue` (chế độ chỉ đọc).
+- Dialog `FamilyForm` (từ `@/components/family`) (chế độ chỉ đọc).
 - Hiển thị thông tin đầy đủ:
   - Ảnh đại diện.
   - Name, Description, Visibility.
@@ -38,12 +38,12 @@ Yêu cầu theo backlog: **Thêm gia đình, Chỉnh sửa gia đình, Tìm ki�
 - Routing: `/family` (danh sách & tìm kiếm), `/family/add` (thêm mới), `/family/edit/:id` (chỉnh sửa). Xem chi tiết gia đình được hiển thị trong dialog trên trang `/family`.
 - Mock data mẫu trong `src/data/families.ts` (JSON array).
 - Code chia component:
-  - `FamilyForm.vue`
-  - `FamilySearch.vue`
-  - `FamilyList.vue`
-  - `FamilyListView.vue`
-  - `FamilyAddView.vue`
-  - `FamilyEditView.vue`
+  - `FamilyForm` (từ `@/components/family`)
+  - `FamilySearch` (từ `@/components/family`)
+  - `FamilyList` (từ `@/components/family`)
+  - `FamilyListView` (từ `@/views/family`)
+  - `FamilyAddView` (từ `@/views/family`)
+  - `FamilyEditView` (từ `@/views/family`)
 
 ### Yêu cầu UI/UX
 - Phong cách hiện đại, spacing thoáng, giống Google/IBM.

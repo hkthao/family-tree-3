@@ -35,8 +35,8 @@ Thiết kế và triển khai màn hình Đăng ký tài khoản (Sign Up).
   - Khi đăng ký thành công (mock logic), hiển thị snackbar "Account created successfully" và chuyển hướng sang `/dashboard`.
   - Nếu lỗi → snackbar "Please fill in all fields".
 - **Tách component:**
-  - `RegisterForm.vue`
-  - `SocialLogin.vue`
+  - `RegisterForm` (từ `@/components/auth`)
+  - `SocialLogin` (từ `@/components/auth`)
 
 ### Kết quả mong muốn
 - Source code cho `RegisterView.vue` và các component con.

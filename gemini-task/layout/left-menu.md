@@ -20,7 +20,7 @@ Thiết kế và triển khai Left Sidebar (Navigation Drawer).
   - Hỗ trợ keyboard navigation.
 
 ### 3. Kỹ thuật chung
-- **Component:** `Sidebar.vue`
+- **Component:** `Sidebar` (từ `@/components/layout`)
 - **Framework:** Vue 3 + Composition API
 - **UI Library:** Vuetify 3
 - **Dữ liệu menu:** `menuItems.ts`
@@ -33,11 +33,10 @@ Thiết kế và triển khai Left Sidebar (Navigation Drawer).
   - Tổng quan
 - **Gia phả:**
   - Xem cây gia phả
-  - Thêm thành viên
   - Quản lý thành viên
   - Sự kiện gia đình (Timeline)
-  - Thay đổi nút gốc cây
-  - In / Xuất
+  - Quản lý cây gia phả
+  - Nhập / Xuất
 - **Hồ sơ & Nội dung:**
   - Hồ sơ của tôi
   - Cập nhật thông tin
@@ -68,5 +67,5 @@ Thiết kế và triển khai Left Sidebar (Navigation Drawer).
   - Báo cáo & Thống kê
 
 ### Kết quả mong muốn
-- Source code cho `Sidebar.vue` và các file liên quan.
+- Source code cho `Sidebar` và các file liên quan.
 - Sidebar hiển thị đúng và hoạt động đầy đủ chức năng."

@@ -20,7 +20,7 @@ Thiết kế và triển khai UserMenu (avatar dropdown).
   - Trên màn hình nhỏ, menu hiển thị dưới dạng bottom sheet.
 
 ### 3. Kỹ thuật chung
-- **Component:** `UserMenu.vue`
+- **Component:** `UserMenu` (từ `@/components/layout`)
 - **Framework:** Vue 3 + Composition API
 - **UI Library:** Vuetify 3
 - **Props:**
@@ -32,5 +32,5 @@ Thiết kế và triển khai UserMenu (avatar dropdown).
 - **i18n:** Sử dụng i18n keys cho tất cả các label.
 
 ### Kết quả mong muốn
-- Source code cho `UserMenu.vue`.
+- Source code cho `UserMenu`.
 - Component UserMenu hiển thị đúng và hoạt động đầy đủ chức năng."

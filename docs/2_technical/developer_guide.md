@@ -144,6 +144,13 @@ npm run lint --prefix frontend
 npm run lint:fix --prefix frontend
 ```
 
+#### 5.2.4. Phát triển thành phần Frontend
+Khi phát triển các thành phần UI mới, hãy tuân thủ các nguyên tắc sau:
+-   Sử dụng Vue 3 với `<script setup lang="ts">`.
+-   Tận dụng các thành phần và tiện ích của Vuetify.
+-   Đối với các thành phần phức tạp như `AvatarInput`, hãy tích hợp các thư viện bên thứ ba (ví dụ: `vue-advanced-cropper`) một cách cẩn thận.
+-   **Nhóm Import**: Để giữ cho code sạch sẽ và dễ đọc, các import nên được nhóm lại theo loại (Vue core, thư viện, types, components) và sử dụng `index.ts` để xuất các thành phần từ các thư mục chung (ví dụ: `import { ComponentA, ComponentB } from '@/components/common';`).
+
 ## 6. Hướng dẫn đóng góp
 
 ### 6.1. Chiến lược Branch

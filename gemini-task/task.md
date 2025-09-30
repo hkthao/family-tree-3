@@ -1,3 +1,7 @@
+## Task Completed: AvatarInput Component
+
+**Status:** Hoàn thành
+
 Tạo một component Vue 3 + TypeScript tên là AvatarInput.vue với các yêu cầu sau:
 
 1. Chức năng:

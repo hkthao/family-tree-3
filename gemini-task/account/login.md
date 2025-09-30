@@ -39,8 +39,8 @@ Thiết kế và triển khai màn hình Login.
   - Khi login thành công (mock data check), điều hướng sang `/dashboard`.
   - Nếu sai → hiển thị snackbar "Invalid credentials".
 - **Tách component:**
-  - `LoginForm.vue`
-  - `SocialLogin.vue`
+  - `LoginForm` (từ `@/components/auth`)
+  - `SocialLogin` (từ `@/components/auth`)
 
 ### Kết quả mong muốn
 - Source code cho `LoginView.vue` và các component con.

@@ -30,11 +30,11 @@ Thiết kế và triển khai các màn hình/quy trình quản lý sự kiện 
 - Routing: `/events` (danh sách & tìm kiếm), `/events/add` (thêm mới), `/events/edit/:id` (chỉnh sửa). Xem chi tiết sự kiện được hiển thị trong dialog trên trang `/events`.
 - Mock data mẫu trong `src/data/events.ts` (JSON array), với các gia đình 'Smith Family' (ID 1) và 'Johnson Family' (ID 2) có sẵn sự kiện để kiểm tra.
 - Code chia component:
-  - `EventList.vue`
-  - `EventForm.vue`
-  - `EventSearch.vue`
-  - `EventTimeline.vue`
-  - `EventCalendar.vue`
+  - `EventList` (từ `@/components/events`)
+  - `EventForm` (từ `@/components/events`)
+  - `EventSearch` (từ `@/components/events`)
+  - `EventTimeline` (từ `@/components/events`)
+  - `EventCalendar` (từ `@/components/events`)
 
 ### Yêu cầu UI/UX
 - Phong cách hiện đại, spacing thoáng, giống Google/IBM.

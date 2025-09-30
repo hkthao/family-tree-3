@@ -85,33 +85,3 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
 *   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.
 *   **Seed Data:** Có script để populate database với dữ liệu mẫu (`infra/seeds`).
-
-## 7. Ghi chú Gỡ lỗi (Debugging Notes)
-
-Phần này ghi lại các lỗi đã gặp và cách khắc phục để tham khảo trong tương lai.
-
-### a. Lỗi Build Docker do sai Build Context
-
-*   **Vấn đề:** Lệnh `docker-compose -f infra/docker-compose.yml up --build` thất bại với các lỗi như `COPY backend/ ./backend/: not found` hoặc `MSBUILD : error MSB1009: Project file does not exist`.
-*   **Nguyên nhân:** Có sự không nhất quán về `build context` giữa môi trường local (`docker-compose.yml`) và CI/CD (`.github/workflows/ci.yml`).
-    *   `docker-compose.yml` ban đầu sử dụng `context: ../backend` và `context: ../frontend`, khiến build context là các thư mục con.
-    *   `ci.yml` sử dụng `context: .`, khiến build context là thư mục gốc của kho lưu trữ.
-    *   Các `Dockerfile` được viết với giả định build context là thư mục gốc.
-*   **Giải pháp:**
-    1.  **Đồng bộ `docker-compose.yml` với `ci.yml`:** Sửa đổi `infra/docker-compose.yml` để sử dụng `context: .` cho cả hai dịch vụ `backend` và `frontend`.
-    2.  **Cập nhật đường dẫn `Dockerfile`:** Đảm bảo đường dẫn `dockerfile` trong `docker-compose.yml` là chính xác so với context mới (ví dụ: `dockerfile: infra/Dockerfile.backend`).
-    3.  **Khôi phục `Dockerfile`:** Hoàn nguyên các `Dockerfile` về trạng thái ban đầu, sử dụng các đường dẫn tương đối so với thư mục gốc (ví dụ: `COPY backend/ ./backend/`).
-
-### b. Lỗi Frontend Build do thiếu `sass-embedded`
-
-*   **Vấn đề:** Build frontend thất bại với lỗi `Preprocessor dependency "sass-embedded" not found`.
-*   **Nguyên nhân:** `sass-embedded` là một `devDependency` và không được cài đặt trong môi trường build production của Docker.
-*   **Giải pháp:** Chuyển `sass-embedded` từ `devDependencies` thành `dependencies` trong tệp `frontend/package.json`.
-
-### c. Lỗi TypeScript `verbatimModuleSyntax`
-
-*   **Vấn đề:** Build frontend thất bại với lỗi `error TS1484: 'TypeName' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.`
-*   **Nguyên nhân:** Khi `verbatimModuleSyntax` được bật trong `tsconfig.json`, các import chỉ dành cho type phải được đánh dấu rõ ràng.
-*   **Giải pháp:** Sửa đổi các câu lệnh import trong các tệp `.vue` bị ảnh hưởng.
-    *   **Sai:** `import { MyType } from './my-file';`
-    *   **Đúng:** `import type { MyType } from './my-file';`

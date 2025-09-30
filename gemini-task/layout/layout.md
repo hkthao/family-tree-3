@@ -22,12 +22,12 @@ Thiết kế layout dashboard hiện đại.
   - Grid layout với các `v-card` bo góc.
 
 ### 3. Kỹ thuật chung
-- **Component:** `DashboardLayout.vue`
+- **Component:** `DashboardLayout` (từ `@/layouts/dashboard`)
 - **Framework:** Vue 3 + Composition API
 - **UI Library:** Vuetify 3
 - **Components con:**
-  - `Sidebar.vue`
-  - `TopBar.vue`
+  - `Sidebar` (từ `@/components/layout`)
+  - `TopBar` (từ `@/components/layout`)
 - **Theme:**
   - Primary: #696CFF
   - Secondary: #8592A3
@@ -36,5 +36,5 @@ Thiết kế layout dashboard hiện đại.
   - Warning: #FFAB00
 
 ### Kết quả mong muốn
-- Source code cho `DashboardLayout.vue` và các component con.
+- Source code cho `DashboardLayout` và các component con.
 - Layout dashboard hiển thị đúng và responsive."
