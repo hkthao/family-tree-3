@@ -12,6 +12,7 @@
             :label="t('family.tree.filterByFamily')"
             clearable
             @update:modelValue="onFamilyChange"
+            hideDetails
           />
         </div>
       </v-card-title>
@@ -42,6 +43,7 @@ const onFamilyChange = (familyId: string | null) => {
 </script>
 <style>
 .tree-filter-input {
+  margin-top: 3px;
   max-width: 320px;
 }
 </style>

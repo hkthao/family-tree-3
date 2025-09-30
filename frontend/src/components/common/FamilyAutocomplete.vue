@@ -16,6 +16,7 @@
     :chips="multiple"
     :closable-chips="multiple"
     return-object
+    :hide-details="hideDetails"
   >
     <template #chip="{ props, item }">
       <v-chip
@@ -58,9 +59,10 @@ interface FamilyAutocompleteProps {
   readOnly?: boolean;
   clearable?: boolean;
   multiple?: boolean; // New prop for multiple selection
+  hideDetails?: boolean | "auto";
 }
 
-const { modelValue, label, rules, readOnly, clearable, multiple } = defineProps<FamilyAutocompleteProps>();
+const { modelValue, label, rules, readOnly, clearable, multiple, hideDetails } = defineProps<FamilyAutocompleteProps>();
 
 const emit = defineEmits(['update:modelValue']);
 
