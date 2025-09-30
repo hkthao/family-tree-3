@@ -8,8 +8,8 @@
       type="email"
       :rules="[rules.required, rules.email]"
     ></v-text-field>
-
     <v-text-field
+      class="mt-4"
       v-model="password"
       :label="t('login.password')"
       :type="showPassword ? 'text' : 'password'"
@@ -20,11 +20,17 @@
     ></v-text-field>
 
     <div class="d-flex justify-space-between align-center">
-      <v-checkbox v-model="rememberMe" :label="t('login.rememberMe')" hide-details></v-checkbox>
+      <v-checkbox
+        v-model="rememberMe"
+        :label="t('login.rememberMe')"
+        hide-details
+      ></v-checkbox>
       <a href="#" class="text-primary">{{ t('login.forgotPassword') }}</a>
     </div>
 
-    <v-btn type="submit" block color="primary" class="mt-4">{{ t('login.login') }}</v-btn>
+    <v-btn type="submit" block color="primary" class="mt-4">{{
+      t('login.login')
+    }}</v-btn>
   </v-form>
 </template>
 
@@ -58,7 +64,10 @@ const handleLogin = async () => {
     notificationStore.showSnackbar(t('login.success'), 'success');
     router.push('/dashboard');
   } else {
-    notificationStore.showSnackbar(authStore.error || t('login.invalidCredentials'), 'error');
+    notificationStore.showSnackbar(
+      authStore.error || t('login.invalidCredentials'),
+      'error',
+    );
   }
 };
 </script>
