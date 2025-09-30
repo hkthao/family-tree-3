@@ -70,7 +70,7 @@ function toggleTheme() {
 }
 
 watch(() => userSettingsStore.theme, (newTheme) => {
-  theme.global.name.value = newTheme;
+  theme.change(newTheme);
 }, { immediate: true }); // Immediate to set theme on initial load
 
 function focusSearch() {
