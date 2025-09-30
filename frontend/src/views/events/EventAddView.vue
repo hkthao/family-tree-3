@@ -11,8 +11,8 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="blue-darken-1" variant="text" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1" variant="text" @click="handleAddEvent">{{ t('common.save') }}</v-btn>
+      <v-btn color="blue-darken-1"  @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="blue-darken-1"  @click="handleAddEvent">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

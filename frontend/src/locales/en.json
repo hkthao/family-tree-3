@@ -277,5 +277,12 @@
   "menu.dashboards": "Dashboards",
   "menu.family": "Family Tree",
   "menu.admin": "Admin",
-  "menu.system": "System"
+  "menu.system": "System",
+  "avatarInput.title": "Select Avatar",
+  "avatarInput.tab.url": "Paste URL",
+  "avatarInput.tab.upload": "Upload Image",
+  "avatarInput.urlInput.label": "Image URL",
+  "avatarInput.urlInput.confirm": "Confirm URL",
+  "avatarInput.uploadInput.label": "Select Image",
+  "avatarInput.cropper.title": "Crop Image"
 }

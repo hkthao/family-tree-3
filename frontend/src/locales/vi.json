@@ -282,5 +282,12 @@
   "menu.dashboards": "Tổng quan",
   "menu.family": "Gia phả",
   "menu.admin": "Quản trị",
-  "menu.system": "Hệ thống"
+  "menu.system": "Hệ thống",
+  "avatarInput.title": "Chọn ảnh đại diện",
+  "avatarInput.tab.url": "Dán URL",
+  "avatarInput.tab.upload": "Tải ảnh lên",
+  "avatarInput.urlInput.label": "URL hình ảnh",
+  "avatarInput.urlInput.confirm": "Xác nhận URL",
+  "avatarInput.uploadInput.label": "Chọn ảnh",
+  "avatarInput.cropper.title": "Cắt ảnh"
 }

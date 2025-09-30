@@ -1,70 +1,38 @@
+Tạo một component Vue 3 + TypeScript tên là AvatarInput.vue với các yêu cầu sau:
 
-import * as d3 from 'd3';  // npm install d3 or yarn add d3
-import * as f3 from 'family-chart';  // npm install family-chart@0.8.0 or yarn add family-chart@0.8.0
-import 'family-chart/styles/family-chart.css';
+1. Chức năng:
+   - Cho phép người dùng chọn avatar theo 2 cách:
+     a) Nhập URL hình ảnh.
+     b) Upload hình ảnh từ máy tính.
+   - Nếu upload hình ảnh:
+     - Mở cropper trước khi lưu (dùng thư viện cropper như cropperjs hoặc vue-advanced-cropper).
+     - Sau khi crop, giảm dung lượng bằng cách resize và export ra base64 hoặc blob.
+   - Sau khi chọn (URL hoặc crop), emit sự kiện `update:src` để truyền dữ liệu hình ảnh cho component cha.
 
-fetch('https://donatso.github.io/family-chart-doc/data/wikidata-popular.json')
-  .then(res => res.json())
-  .then(data => create(data))
-  .catch(err => console.error(err))
+2. UI:
+   - Dùng Vuetify `v-card` hoặc `v-sheet` để chứa form.
+   - Có 2 tab (`v-tabs`):
+     - Tab 1: "Dán URL"
+       - Input (`v-text-field`) cho phép nhập link hình ảnh.
+       - Nút "Xác nhận" để emit link này.
+     - Tab 2: "Tải ảnh lên"
+       - Nút `v-file-input` để chọn ảnh từ máy tính.
+       - Khi ảnh được chọn, hiển thị cropper trong modal/dialog.
+       - Có nút "Lưu" trong cropper để export ảnh crop và emit.
 
-function create(data) {
-  const f3Chart = f3.createChart('#FamilyChart', data)
-    .setTransitionTime(1000)
-    .setCardXSpacing(150)
-    .setCardYSpacing(150)
+3. Props:
+   - `modelValue: string | null` (ảnh hiện tại).
+   - `size?: number` (kích thước preview, mặc định 128).
 
-  f3Chart.setCardHtml()
-    .setOnCardUpdate(Card())
+4. Emits:
+   - `update:modelValue` (trả về URL hoặc base64 sau khi chọn).
 
-  f3Chart.updateMainId('Q43274')  // Charles III
+5. Preview:
+   - Luôn hiển thị avatar preview bằng cách tái sử dụng component `AvatarDisplay.vue`.
+   - Preview cập nhật theo giá trị `modelValue`.
 
-  f3Chart.updateTree({initial: true})
-
-
-  function Card() {
-    return function (d) {
-      const card = this.querySelector('.card')
-      card.outerHTML = (`
-      <div class="card" style="transform: translate(-50%, -50%);">
-        ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
-      </div>
-      `)
-      this.addEventListener('click', e => onCardClick(e, d))
-    }
-
-    function onCardClick(e, d) {
-      f3Chart.updateMainId(d.data.id)
-      f3Chart.updateTree({})
-    }
-
-    function getCardInnerImage(d) {
-      return (`
-      <div class="card-image ${getClassList(d).join(' ')}">
-        <img src="${d.data.data["avatar"]}">
-        <div class="card-label">${d.data.data["label"]}</div>
-      </div>
-      `)
-    }
-
-    function getCardInnerText(d) {
-      return (`
-      <div class="card-text ${getClassList(d).join(' ')}">
-        ${d.data.data["label"]}
-      </div>
-      `)
-    }
-
-  }
-
-  function getClassList(d) {
-    const class_list = []
-    if (d.data.data.gender === 'M') class_list.push('card-male')
-    else if (d.data.data.gender === 'F') class_list.push('card-female')
-    else class_list.push('card-genderless')
-
-    if (d.data.main) class_list.push('card-main')
-
-    return class_list
-  }
-}
+6. Yêu cầu code:
+   - Vue 3 + `<script setup lang="ts">`.
+   - Dùng Vuetify components (`v-avatar`, `v-tabs`, `v-file-input`, `v-dialog`, `v-btn`, `v-img`).
+   - Có integration với thư viện cropper (cropperjs hoặc vue-advanced-cropper).
+   - Code rõ ràng, có comment giải thích.

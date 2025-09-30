@@ -27,7 +27,7 @@
           <span v-else class="text-h5">{{ userInitials }}</span>
         </v-avatar>
         <!-- Placeholder for upload photo button -->
-        <v-btn icon size="small" variant="text" class="mt-2">
+        <v-btn icon size="small"  class="mt-2">
           <v-icon>mdi-camera</v-icon>
           <v-tooltip activator="parent" location="bottom">{{ $t('userMenu.uploadPhoto') }}</v-tooltip>
         </v-btn>

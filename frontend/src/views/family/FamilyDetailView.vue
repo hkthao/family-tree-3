@@ -47,7 +47,7 @@
         <v-btn color="primary" @click="navigateToEditFamily(family.id)">
           {{ t('common.edit') }}
         </v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="closeView">
+        <v-btn color="blue-darken-1"  @click="closeView">
           {{ t('common.close') }}
         </v-btn>
       </v-card-actions>

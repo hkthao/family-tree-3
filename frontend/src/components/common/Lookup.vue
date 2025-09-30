@@ -33,7 +33,7 @@
         <v-card-title class="d-flex align-center">
           <span class="text-h5">{{ label }}</span>
           <v-spacer></v-spacer>
-          <v-btn icon="mdi-close" variant="text" @click="closeDialog"></v-btn>
+          <v-btn icon="mdi-close"  @click="closeDialog"></v-btn>
         </v-card-title>
         <v-divider></v-divider>
 

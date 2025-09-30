@@ -1,21 +1,13 @@
 <template>
   <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <v-col cols="12">
-      <div class="d-flex justify-center mb-4">
-        <v-avatar size="96">
-          <v-img
-            v-if="familyForm.avatarUrl"
-            :src="familyForm.avatarUrl"
-          ></v-img>
-          <v-icon v-else size="96">mdi-account-group</v-icon>
-        </v-avatar>
-      </div>
-    </v-col>
-    <v-text-field
-      v-model="familyForm.avatarUrl"
-      :label="$t('family.form.avatarUrlLabel')"
-      variant="outlined"
-    ></v-text-field>
+    <div class="mb-4">
+<AvatarInput
+        v-model="familyForm.avatarUrl"
+        :size="96"
+        :read-only="props.readOnly"
+      />
+    </div>
+      
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field
@@ -54,6 +46,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types/family';
 import { FamilyVisibility } from '@/types/family/family-visibility';
+import AvatarInput from '@/components/common/AvatarInput.vue';
 
 const props = defineProps<{
   initialFamilyData?: Family;

@@ -38,7 +38,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="primary" @click="navigateToEditMember(member.id)">{{ t('common.edit') }}</v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="closeView">{{ t('common.close') }}</v-btn>
+        <v-btn color="blue-darken-1"  @click="closeView">{{ t('common.close') }}</v-btn>
       </v-card-actions>
     </v-card>
     <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
