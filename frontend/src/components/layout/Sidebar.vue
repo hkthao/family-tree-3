@@ -1,17 +1,14 @@
 <template>
   <v-navigation-drawer app>
     <v-list-item class="pa-4">
-      <template v-slot:prepend>
-        <v-icon color="primary">mdi-family-tree</v-icon>
-      </template>
-      <v-list-item-title class="text-h6 font-weight-bold">FamilyTree</v-list-item-title>
+      <v-list-item-title class="text-h6 font-weight-bold app-name-font">Cây Gia Phả</v-list-item-title>
     </v-list-item>
 
     <v-divider></v-divider>
 
     <v-list nav>
       <template v-for="(section, i) in filteredMenu" :key="i">
-        <v-list-subheader>{{ section.titleKey ? $t(section.titleKey) : section.title }}</v-list-subheader>
+        <VListSubheader>{{ section.titleKey ? $t(section.titleKey) : section.title }}</VListSubheader>
         <v-list-item
           v-for="(item, j) in section.items"
           :key="j"
@@ -57,8 +54,11 @@ const filteredMenu = computed(() => {
   border-radius: 8px;
 }
 
-
 .active-item .v-list-item-title {
   font-weight: bold;
+}
+
+.app-name-font {
+  font-family: 'Dancing Script', cursive;
 }
 </style>
