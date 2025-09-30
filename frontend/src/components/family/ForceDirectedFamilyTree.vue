@@ -115,7 +115,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .data(links)
     .join('line')
     .attr('stroke-width', d => d.type === 'spouse' ? 3 : 1.5)
-    .attr('stroke', d => d.type === 'spouse' ? '#ff4081' : '#999');
+    .attr('stroke', d => d.type === 'spouse' ? 'rgb(var(--v-theme-error))' : 'rgb(var(--v-theme-on-surface))');
 
   const node = svg.append('g')
     .selectAll('g')
@@ -135,8 +135,8 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
   node.append('circle')
     .attr('r', 25)
-    .attr('fill', d => d.avatarUrl ? `url(#avatar-${d.id})` : (d.gender === 'Male' ? '#81d4fa' : '#f48fb1'))
-    .attr('stroke', d => d.gender === 'Male' ? '#81d4fa' : '#f48fb1') // Gender-based border
+    .attr('fill', d => d.avatarUrl ? `url(#avatar-${d.id})` : (d.gender === 'Male' ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))'))
+    .attr('stroke', d => d.gender === 'Male' ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))') // Gender-based border
     .attr('stroke-width', 4); // Increased border width
 
   node.append('text')
@@ -151,10 +151,10 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .attr('transform', `translate(20, 20)`);
 
   const legendData = [
-    { color: '#81d4fa', text: t('member.gender.male'), type: 'circle' },
-    { color: '#f48fb1', text: t('member.gender.female'), type: 'circle' },
-    { color: '#ff4081', text: t('relationship.type.spouse'), type: 'line' },
-    { color: '#999', text: t('relationship.type.parent') + '-' + t('relationship.type.child'), type: 'line' },
+    { color: 'rgb(var(--v-theme-primary))', text: t('member.gender.male'), type: 'circle' },
+    { color: 'rgb(var(--v-theme-secondary))', text: t('member.gender.female'), type: 'circle' },
+    { color: 'rgb(var(--v-theme-error))', text: t('relationship.type.spouse'), type: 'line' },
+    { color: 'rgb(var(--v-theme-on-surface))', text: t('relationship.type.parent') + '-' + t('relationship.type.child'), type: 'line' },
   ];
 
   const legendItem = legend.selectAll('.legend-item')
@@ -170,7 +170,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
         .attr('r', 8)
         .attr('cx', 0)
         .attr('cy', 0)
-        .attr('fill', d.color === '#81d4fa' ? '#fff' : '#fff') // White fill for legend circles
+        .attr('fill', '#fff') // White fill for legend circles
         .attr('stroke', d.color)
         .attr('stroke-width', 3);
     } else {

@@ -223,6 +223,10 @@ watch(() => props.familyId, async (newFamilyId) => {
   height: 100% !important;
 }
 
+.main_svg path.link {
+  stroke: rgb(var(--v-theme-on-surface));
+}
+
 .f3 {
   cursor: pointer;
   height: 100%;
@@ -308,10 +312,10 @@ watch(() => props.familyId, async (newFamilyId) => {
 }
 
 .f3 div.card-female {
-  background-color: #f48fb1;
+  background-color: rgb(var(--v-theme-secondary));
 }
 .f3 div.card-male {
-  background-color: #81d4fa;
+  background-color: rgb(var(--v-theme-primary));
 }
 .f3 div.card-genderless {
   background-color: lightgray;
@@ -359,10 +363,10 @@ watch(() => props.familyId, async (newFamilyId) => {
 }
 
 .legend-male {
-  background-color: #81d4fa;
+  background-color: rgb(var(--v-theme-primary));
 }
 
 .legend-female {
-  background-color: #f48fb1;
+  background-color: rgb(var(--v-theme-secondary));
 }
 </style>
