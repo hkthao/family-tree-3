@@ -1,8 +1,7 @@
-import { DEFAULT_ITEMS_PER_PAGE } from "@/constants/pagination";
-import i18n from "@/plugins/i18n";
-import type { Member, MemberFilter } from "@/types";
-import { defineStore } from "pinia";
-
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import i18n from '@/plugins/i18n';
+import type { Member, MemberFilter } from '@/types';
+import { defineStore } from 'pinia';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -19,6 +18,8 @@ export const useMemberStore = defineStore('member', {
       placeOfDeath: '',
       occupation: '',
       familyId: undefined,
+      searchQuery: '',
+      ids: [],
     } as MemberFilter,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
@@ -26,21 +27,7 @@ export const useMemberStore = defineStore('member', {
     totalPages: 1,
   }),
 
-  getters: {
-    paginatedItems: (state): Member[] => {
-      return state.items;
-    },
-
-    /** Lấy 1 member theo id */
-    getById: (state) => (id: string) => {
-      return state.items.find((m) => m.id === id);
-    },
-
-    /** Lấy nhiều member theo id */
-    getByIds: (state) => (ids: string[]) => {
-      return state.items.filter((m) => ids.includes(m.id));
-    },
-  },
+  getters: {},
 
   actions: {
     async _loadItems() {
@@ -69,40 +56,6 @@ export const useMemberStore = defineStore('member', {
     async addItem(newItem: Omit<Member, 'id'>) {
       this.loading = true;
       this.error = null;
-
-      if (
-        !newItem.lastName ||
-        !newItem.firstName ||
-        newItem.lastName.trim() === '' ||
-        newItem.firstName.trim() === ''
-      ) {
-        this.error = i18n.global.t('member.errors.emptyName');
-        this.loading = false;
-        return;
-      }
-
-      if (newItem.dateOfBirth && newItem.dateOfDeath && newItem.dateOfBirth > newItem.dateOfDeath) {
-        this.error = i18n.global.t('member.errors.birthAfterDeath');
-        this.loading = false;
-        return;
-      }
-
-      if (
-        newItem.placeOfBirth &&
-        newItem.placeOfDeath &&
-        newItem.placeOfBirth.trim() === newItem.placeOfDeath.trim()
-      ) {
-        this.error = i18n.global.t('member.errors.sameBirthAndDeathPlace');
-        this.loading = false;
-        return;
-      }
-
-      if (newItem.occupation && newItem.occupation.length > 100) {
-        this.error = i18n.global.t('member.errors.occupationTooLong');
-        this.loading = false;
-        return;
-      }
-
       const result = await this.services.member.add(newItem);
       if (result.ok) {
         this.items.push(result.value);
@@ -117,47 +70,9 @@ export const useMemberStore = defineStore('member', {
     async updateItem(updatedItem: Member) {
       this.loading = true;
       this.error = null;
-
-      if (
-        !updatedItem.lastName ||
-        !updatedItem.firstName ||
-        updatedItem.lastName.trim() === '' ||
-        updatedItem.firstName.trim() === ''
-      ) {
-        this.error = i18n.global.t('member.errors.emptyName');
-        this.loading = false;
-        return;
-      }
-
-      if (
-        updatedItem.dateOfBirth &&
-        updatedItem.dateOfDeath &&
-        updatedItem.dateOfBirth > updatedItem.dateOfDeath
-      ) {
-        this.error = i18n.global.t('member.errors.birthAfterDeath');
-        this.loading = false;
-        return;
-      }
-
-      if (
-        updatedItem.placeOfBirth &&
-        updatedItem.placeOfDeath &&
-        updatedItem.placeOfBirth.trim() === updatedItem.placeOfDeath.trim()
-      ) {
-        this.error = i18n.global.t('member.errors.sameBirthAndDeathPlace');
-        this.loading = false;
-        return;
-      }
-
-      if (updatedItem.occupation && updatedItem.occupation.length > 100) {
-        this.error = i18n.global.t('member.errors.occupationTooLong');
-        this.loading = false;
-        return;
-      }
       const result = await this.services.member.update(updatedItem);
       if (result.ok) {
-        const idx = this.items.findIndex((m) => m.id === result.value.id);
-        if (idx !== -1) this.items[idx] = result.value;
+        this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.update');
         console.error(result.error);
@@ -178,33 +93,6 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async loadItems(filters: MemberFilter) {
-      const newFilters: MemberFilter = { ...filters };
-      if (typeof newFilters.dateOfBirth === 'string') {
-        newFilters.dateOfBirth = new Date(newFilters.dateOfBirth);
-      }
-      if (typeof newFilters.dateOfDeath === 'string') {
-        newFilters.dateOfDeath = new Date(newFilters.dateOfDeath);
-      }
-      this.filters = { ...this.filters, ...newFilters };
-      this.currentPage = 1;
-      await this._loadItems();
-    },
-
-    // New searchLookup for Lookup component
-    async searchLookup(filters: MemberFilter, page: number, itemsPerPage: number) {
-      // Only apply filters relevant to Lookup: searchQuery (from searchTerm) and familyId
-      const newFilters: MemberFilter = {
-        fullName: filters.searchQuery, // Map searchQuery to fullName for filtering
-        familyId: filters.familyId,
-      };
-
-      this.filters = { ...this.filters, ...newFilters };
-      this.currentPage = page; // Use passed page
-      this.itemsPerPage = itemsPerPage; // Use passed itemsPerPage
-      await this._loadItems();
-    },
-
     async getByIds(ids: string[]): Promise<Member[]> {
       this.loading = true;
       this.error = null;
@@ -220,16 +108,16 @@ export const useMemberStore = defineStore('member', {
     },
 
     async setPage(page: number) {
-      if (page >= 1 && page <= this.totalPages) {
+      if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
         this.currentPage = page;
         await this._loadItems();
       }
     },
 
     async setItemsPerPage(count: number) {
-      if (count > 0) {
+      if (count > 0 && this.itemsPerPage !== count) {
         this.itemsPerPage = count;
-        this.currentPage = 1;
+        this.currentPage = 1; // Reset to first page when items per page changes
         await this._loadItems();
       }
     },
@@ -255,7 +143,8 @@ export const useMemberStore = defineStore('member', {
     async getMembersByFamilyId(familyId: string): Promise<Member[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.fetchMembersByFamilyId(familyId);
+      const result =
+        await this.services.member.fetchMembersByFamilyId(familyId);
       this.loading = false;
       if (result.ok) {
         return result.value;
@@ -264,8 +153,6 @@ export const useMemberStore = defineStore('member', {
         console.error(result.error);
         return [];
       }
-    }
+    },
   },
 });
-
-

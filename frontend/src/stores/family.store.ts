@@ -45,7 +45,6 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       const result = await this.services.family.add(newItem);
       if (result.ok) {
-        this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('family.errors.add');
@@ -59,15 +58,7 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       const result = await this.services.family.update(updatedItem);
       if (result.ok) {
-        const index = this.items.findIndex(
-          (item) => item.id === result.value.id,
-        );
-        if (index !== -1) {
-          this.items[index] = result.value;
-          await this._loadItems(); // Re-fetch to update pagination and filters
-        } else {
-          this.error = i18n.global.t('family.errors.notFound');
-        }
+        await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('family.errors.update');
         console.error(result.error);
@@ -79,30 +70,27 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       this.error = null;
       const result = await this.services.family.delete(id);
-      if (result.ok) {
-        await this._loadItems(); // Re-fetch to update pagination and filters
-        if (this.currentPage > this.totalPages && this.totalPages > 0) {
-          this.currentPage = this.totalPages;
-        }
-      } else {
+      if (!result.ok) {
         this.error = i18n.global.t('family.errors.delete');
         console.error(result.error);
+      } else {
+        await this._loadItems();
       }
       this.loading = false;
     },
 
     async setPage(page: number) {
-      if (page >= 1 && page <= this.totalPages) {
+      if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
         this.currentPage = page;
-        await this._loadItems(); // Trigger fetch with new page
+        this._loadItems();
       }
     },
 
     async setItemsPerPage(count: number) {
-      if (count > 0) {
+      if (count > 0 && this.itemsPerPage !== count) {
         this.itemsPerPage = count;
         this.currentPage = 1; // Reset to first page when items per page changes
-        await this._loadItems(); // Trigger fetch with new items per page
+        this._loadItems();
       }
     },
 

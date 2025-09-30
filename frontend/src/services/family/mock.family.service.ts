@@ -5,11 +5,7 @@ import type { ApiError } from '@/utils/api';
 import { err, type Family, type Result, ok, type FamilyFilter, type Paginated } from '@/types';
 
 export class MockFamilyService implements IFamilyService {
-  private _families: Family[] = fixedMockFamilies as unknown as Family[];
-
-  get families(): Family[] {
-    return [...this._families];
-  }
+  public families: Family[] = [...fixedMockFamilies as unknown as Family[]];
 
   async fetch(): Promise<Result<Family[], ApiError>> {
     try {
@@ -30,7 +26,7 @@ export class MockFamilyService implements IFamilyService {
   async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
     try {
       const familyToAdd = { ...newItem, id: 'mock-id-' + Math.random().toString(36).substring(7) };
-      this._families.push(familyToAdd);
+      this.families.push(familyToAdd);
       const addedFamily = await simulateLatency(familyToAdd);
       return ok(addedFamily);
     } catch (e) {
@@ -39,9 +35,9 @@ export class MockFamilyService implements IFamilyService {
   }
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     try {
-      const index = this._families.findIndex((f) => f.id === updatedItem.id);
+      const index = this.families.findIndex((f) => f.id === updatedItem.id);
       if (index !== -1) {
-        this._families[index] = updatedItem;
+        this.families[index] = updatedItem;
         const updatedFamily = await simulateLatency(updatedItem);
         return ok(updatedFamily);
       }
@@ -52,9 +48,9 @@ export class MockFamilyService implements IFamilyService {
   }
   async delete(id: string): Promise<Result<void, ApiError>> {
     try {
-      const initialLength = this._families.length;
-      this._families = this._families.filter((f) => f.id !== id);
-      if (this._families.length === initialLength) {
+      const initialLength = this.families.length;
+      this.families = this.families.filter((f) => f.id !== id);
+      if (this.families.length === initialLength) {
         return err({ message: 'Family not found', statusCode: 404 });
       }
       await simulateLatency(undefined);
@@ -69,7 +65,7 @@ export class MockFamilyService implements IFamilyService {
     itemsPerPage: number
   ): Promise<Result<Paginated<Family>, ApiError>> {
     try {
-      let filtered = this._families;
+      let filtered = this.families;
 
       if (filter.searchQuery) {
         const lowerCaseSearchQuery = filter.searchQuery.toLowerCase();
@@ -95,11 +91,6 @@ export class MockFamilyService implements IFamilyService {
       if (filter.location) {
         const lowerCaseLocation = filter.location.toLowerCase();
         filtered = filtered.filter((family) => family.address && family.address.toLowerCase().includes(lowerCaseLocation));
-      }
-
-      if (filter.type) {
-        // Assuming 'type' refers to some property in Family, adjust as needed
-        // filtered = filtered.filter((family) => family.someTypeProperty === filter.type);
       }
 
       const totalItems = filtered.length;

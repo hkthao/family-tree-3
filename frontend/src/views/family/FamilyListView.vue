@@ -1,38 +1,21 @@
 <template>
   <FamilySearch @update:filters="handleFilterUpdate" />
-  <FamilyList
-    :items="items"
-    :total-items="familyStore.totalItems"
-    :loading="familyStore.loading"
-    :items-per-page="itemsPerPage"
-    :family-member-counts="familyMemberCounts"
-    @update:options="handleListOptionsUpdate"
-    @update:itemsPerPage="itemsPerPage = $event"
-    @view="navigateToViewFamily"
-    @edit="navigateToEditFamily"
-    @delete="confirmDelete"
-    @create="navigateToAddFamily"
-  />
+  <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
+    :items-per-page="itemsPerPage" :family-member-counts="familyMemberCounts" @update:options="handleListOptionsUpdate"
+    @update:itemsPerPage="itemsPerPage = $event" @view="navigateToViewFamily" @edit="navigateToEditFamily"
+    @delete="confirmDelete" @create="navigateToAddFamily" />
   <!-- Confirm Delete Dialog -->
-  <ConfirmDeleteDialog
-    :model-value="deleteConfirmDialog"
-    :title="t('confirmDelete.title')"
-    :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })"
-    @confirm="handleDeleteConfirm"
-    @cancel="handleDeleteCancel"
-  />
+  <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
+    :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })" @confirm="handleDeleteConfirm"
+    @cancel="handleDeleteCancel" />
   <!-- Snackbar -->
-  <v-snackbar
-    v-model="notificationStore.snackbar.show"
-    :color="notificationStore.snackbar.color"
-    timeout="3000"
-  >
+  <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
     {{ notificationStore.snackbar.message }}
   </v-snackbar>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -69,19 +52,10 @@ const familyMemberCounts = computed(() => {
   return counts;
 });
 
-const loadFamilies = async () => {
-  familyStore.filter = currentFilters.value;
-  await familyStore._loadItems();
-};
-
-const loadAllMembers = async () => {
-  await membersStore.loadItems({}); // Fetch all members
-};
-
 const handleFilterUpdate = (filters: FamilyFilter) => {
   currentFilters.value = filters;
   currentPage.value = 1; // Reset to first page on filter change
-  loadFamilies();
+  familyStore._loadItems()
 };
 
 const handleListOptionsUpdate = (options: {
@@ -117,7 +91,6 @@ const handleDeleteConfirm = async () => {
         t('family.management.messages.deleteSuccess'),
         'success',
       );
-      await familyStore._loadItems(); // Reload families after deletion
     } catch (error) {
       notificationStore.showSnackbar(
         t('family.management.messages.deleteError'),
@@ -133,13 +106,4 @@ const handleDeleteCancel = () => {
   deleteConfirmDialog.value = false;
   familyToDelete.value = undefined;
 };
-
-watch([currentFilters, currentPage, itemsPerPage], () => {
-  loadFamilies();
-});
-
-onMounted(async () => {
-  await loadFamilies();
-  await loadAllMembers();
-});
 </script>

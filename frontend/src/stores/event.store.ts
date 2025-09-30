@@ -77,20 +77,20 @@ export const useEventStore = defineStore('event', {
     },
 
     async setPage(page: number) {
-      if (page >= 1 && page <= this.totalPages) {
+      if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
         this.currentPage = page;
-        await this._loadItems(); 
+        this._loadItems();
       }
     },
 
     async setItemsPerPage(count: number) {
-      if (count > 0) {
+      if (count > 0 && this.itemsPerPage !== count) {
         this.itemsPerPage = count;
-        this.currentPage = 1; 
-        await this._loadItems();
+        this.currentPage = 1; // Reset to first page when items per page changes
+        this._loadItems();
       }
     },
-
+    
     setCurrentItem(item: Event | null) {
       this.currentItem = item;
     },

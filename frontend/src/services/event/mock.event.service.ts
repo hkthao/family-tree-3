@@ -6,11 +6,7 @@ import type { ApiError } from '@/utils/api';
 import type { IEventService } from './event.service.interface';
 
 export class MockEventService implements IEventService {
-  private _events: Event[] = mockEvents as unknown as Event[];
-
-  get events(): Event[] {
-    return [...this._events];
-  }
+  private events: Event[] = [...mockEvents as unknown as Event[]];
 
   async fetch(): Promise<Result<Event[], ApiError>> {
     try {
@@ -44,7 +40,7 @@ export class MockEventService implements IEventService {
         ...newItem,
         id: 'mock-id-' + Math.random().toString(36).substring(7),
       };
-      this._events.push(eventToAdd);
+      this.events.push(eventToAdd);
       const addedEvent = await simulateLatency(eventToAdd);
       return ok(addedEvent);
     } catch (e) {
@@ -57,11 +53,11 @@ export class MockEventService implements IEventService {
 
   async update(updatedItem: Event): Promise<Result<Event, ApiError>> {
     try {
-      const index = this._events.findIndex(
+      const index = this.events.findIndex(
         (event) => event.id === updatedItem.id,
       );
       if (index !== -1) {
-        this._events[index] = updatedItem;
+        this.events[index] = updatedItem;
         const updatedEvent = await simulateLatency(updatedItem);
         return ok(updatedEvent);
       }
@@ -76,9 +72,9 @@ export class MockEventService implements IEventService {
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     try {
-      const initialLength = this._events.length;
-      this._events = this._events.filter((event) => event.id !== id);
-      if (this._events.length === initialLength) {
+      const initialLength = this.events.length;
+      this.events = this.events.filter((event) => event.id !== id);
+      if (this.events.length === initialLength) {
         return err({ message: 'Event not found', statusCode: 404 });
       }
       await simulateLatency(undefined);
