@@ -9,6 +9,7 @@ import type { ApiError } from '@/utils/api';
 import type { IEventService, EventFilter } from '@/services/event/event.service.interface';
 import { generateMockEvents, generateMockEvent } from '@/data/mock/event.mock';
 import { simulateLatency } from '@/utils/mockUtils';
+import { EventType } from '@/types/event/event-type';
 
 export class MockEventServiceForTest implements IEventService {
   private _events: Event[];
@@ -173,7 +174,7 @@ describe('Family Event Store', () => {
     const newEventData: Omit<Event, 'id'> = {
       name: 'New Event',
       description: 'This is a new event',
-      type: 'Birth',
+      type: EventType.Birth,
       startDate: new Date(),
       familyId: mockEventService.events[0].familyId,
     };

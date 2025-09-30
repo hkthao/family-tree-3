@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import type { Family, FamilySearchFilter } from '@/types/family';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import i18n from '@/plugins/i18n';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
@@ -40,7 +41,7 @@ export const useFamilyStore = defineStore('family', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = this.i18n.t('family.errors.load');
+        this.error = i18n.global.t('family.errors.load');
         this.items = []; // Clear items on error
         this.totalItems = 0; // Reset totalItems on error
         this.totalPages = 1; // Reset totalPages on error
@@ -57,7 +58,7 @@ export const useFamilyStore = defineStore('family', {
         this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
-        this.error = this.i18n.t('family.errors.add');
+        this.error = i18n.global.t('family.errors.add');
         console.error(result.error);
       }
       this.loading = false;
@@ -73,10 +74,10 @@ export const useFamilyStore = defineStore('family', {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
-          this.error = this.i18n.t('family.errors.notFound');
+          this.error = i18n.global.t('family.errors.notFound');
         }
       } else {
-        this.error = this.i18n.t('family.errors.update');
+        this.error = i18n.global.t('family.errors.update');
         console.error(result.error);
       }
       this.loading = false;
@@ -92,7 +93,7 @@ export const useFamilyStore = defineStore('family', {
           this.currentPage = this.totalPages;
         }
       } else {
-        this.error = this.i18n.t('family.errors.delete');
+        this.error = i18n.global.t('family.errors.delete');
         console.error(result.error);
       }
       this.loading = false;
@@ -156,7 +157,7 @@ export const useFamilyStore = defineStore('family', {
         this.totalItems = result.value.totalItems;
         this.totalPages = 1;
       } else {
-        this.error = this.i18n.t('family.errors.load');
+        this.error = i18n.global.t('family.errors.load');
         console.error(result.error);
       }
       this.loading = false;

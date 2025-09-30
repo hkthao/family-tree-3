@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type { Event } from '@/types/event/event';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { EventFilter } from '@/services/event/event.service.interface';
+import i18n from '@/plugins/i18n';
 
 export const useEventStore = defineStore('event', {
   state: () => ({
@@ -38,7 +39,7 @@ export const useEventStore = defineStore('event', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = this.i18n.t('event.errors.load');
+        this.error = i18n.global.t('event.errors.load');
         console.error(result.error);
       }
       this.loading = false;
@@ -52,7 +53,7 @@ export const useEventStore = defineStore('event', {
         this.items.push(result.value);
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
-        this.error = this.i18n.t('event.errors.add');
+        this.error = i18n.global.t('event.errors.add');
         console.error(result.error);
       }
       this.loading = false;
@@ -68,10 +69,10 @@ export const useEventStore = defineStore('event', {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
         } else {
-          this.error = this.i18n.t('event.errors.notFound');
+          this.error = i18n.global.t('event.errors.notFound');
         }
       } else {
-        this.error = this.i18n.t('event.errors.update');
+        this.error = i18n.global.t('event.errors.update');
         console.error(result.error);
       }
       this.loading = false;
@@ -87,7 +88,7 @@ export const useEventStore = defineStore('event', {
           this.currentPage = this.totalPages;
         }
       } else {
-        this.error = this.i18n.t('event.errors.delete');
+        this.error = i18n.global.t('event.errors.delete');
         console.error(result.error);
       }
       this.loading = false;
@@ -126,7 +127,7 @@ export const useEventStore = defineStore('event', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = this.i18n.t('event.errors.loadById');
+        this.error = i18n.global.t('event.errors.loadById');
         console.error(result.error);
         return undefined;
       }

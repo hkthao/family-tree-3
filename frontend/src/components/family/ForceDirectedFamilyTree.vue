@@ -22,8 +22,8 @@ const memberStore = useMemberStore();
 
 interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
-  name: string;
-  gender: string;
+  name: string | undefined;
+  gender: string | undefined;
   avatarUrl?: string;
   depth: number;
 }
@@ -121,7 +121,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .selectAll('g')
     .data(nodes)
     .join('g')
-    .call(drag(simulation));
+    .call(drag(simulation) as any);
 
   const defs = svg.append('defs');
   nodes.forEach(d => {
@@ -140,7 +140,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .attr('stroke-width', 4); // Increased border width
 
   node.append('text')
-    .text(d => d.name)
+    .text(d => d.name || '')
     .attr('x', 0).attr('y', 38)
     .attr('text-anchor', 'middle').attr('font-family', 'sans-serif')
     .attr('font-size', '12px')

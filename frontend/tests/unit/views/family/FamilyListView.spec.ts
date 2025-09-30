@@ -198,6 +198,7 @@ import {
   generateMockEvents,
   generateMockEvent,
 } from '@/data/mock/event.mock';
+import { FamilyVisibility } from '@/types/family/family-visibility';
 
 export class MockEventServiceForTest implements IEventService {
   private _events: Event[];
@@ -509,7 +510,7 @@ describe('FamilyListView.vue', () => {
     await flushPromises();
     const newFilters: FamilySearchFilter = {
       searchQuery: 'test',
-      visibility: 'public',
+      visibility: FamilyVisibility.Public,
     };
     (wrapper.vm as any).handleFilterUpdate(newFilters);
     expect((wrapper.vm as any).currentFilters).toEqual(newFilters);

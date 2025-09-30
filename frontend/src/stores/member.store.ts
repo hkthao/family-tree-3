@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import type { Member, MemberFilter } from '@/types/family/member';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import i18n from '@/plugins/i18n';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -55,7 +56,7 @@ export const useMemberStore = defineStore('member', {
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
-        this.error = this.i18n.t('member.errors.load');
+        this.error = i18n.global.t('member.errors.load');
         this.items = [];
         this.totalItems = 0;
         this.totalPages = 1;
@@ -74,13 +75,13 @@ export const useMemberStore = defineStore('member', {
         newItem.lastName.trim() === '' ||
         newItem.firstName.trim() === ''
       ) {
-        this.error = this.i18n.t('member.errors.emptyName');
+        this.error = i18n.global.t('member.errors.emptyName');
         this.loading = false;
         return;
       }
 
       if (newItem.dateOfBirth && newItem.dateOfDeath && newItem.dateOfBirth > newItem.dateOfDeath) {
-        this.error = this.i18n.t('member.errors.birthAfterDeath');
+        this.error = i18n.global.t('member.errors.birthAfterDeath');
         this.loading = false;
         return;
       }
@@ -90,13 +91,13 @@ export const useMemberStore = defineStore('member', {
         newItem.placeOfDeath &&
         newItem.placeOfBirth.trim() === newItem.placeOfDeath.trim()
       ) {
-        this.error = this.i18n.t('member.errors.sameBirthAndDeathPlace');
+        this.error = i18n.global.t('member.errors.sameBirthAndDeathPlace');
         this.loading = false;
         return;
       }
 
       if (newItem.occupation && newItem.occupation.length > 100) {
-        this.error = this.i18n.t('member.errors.occupationTooLong');
+        this.error = i18n.global.t('member.errors.occupationTooLong');
         this.loading = false;
         return;
       }
@@ -106,7 +107,7 @@ export const useMemberStore = defineStore('member', {
         this.items.push(result.value);
         await this._loadItems();
       } else {
-        this.error = this.i18n.t('member.errors.add');
+        this.error = i18n.global.t('member.errors.add');
         console.error(result.error);
       }
       this.loading = false;
@@ -122,7 +123,7 @@ export const useMemberStore = defineStore('member', {
         updatedItem.lastName.trim() === '' ||
         updatedItem.firstName.trim() === ''
       ) {
-        this.error = this.i18n.t('member.errors.emptyName');
+        this.error = i18n.global.t('member.errors.emptyName');
         this.loading = false;
         return;
       }
@@ -132,7 +133,7 @@ export const useMemberStore = defineStore('member', {
         updatedItem.dateOfDeath &&
         updatedItem.dateOfBirth > updatedItem.dateOfDeath
       ) {
-        this.error = this.i18n.t('member.errors.birthAfterDeath');
+        this.error = i18n.global.t('member.errors.birthAfterDeath');
         this.loading = false;
         return;
       }
@@ -142,13 +143,13 @@ export const useMemberStore = defineStore('member', {
         updatedItem.placeOfDeath &&
         updatedItem.placeOfBirth.trim() === updatedItem.placeOfDeath.trim()
       ) {
-        this.error = this.i18n.t('member.errors.sameBirthAndDeathPlace');
+        this.error = i18n.global.t('member.errors.sameBirthAndDeathPlace');
         this.loading = false;
         return;
       }
 
       if (updatedItem.occupation && updatedItem.occupation.length > 100) {
-        this.error = this.i18n.t('member.errors.occupationTooLong');
+        this.error = i18n.global.t('member.errors.occupationTooLong');
         this.loading = false;
         return;
       }
@@ -157,7 +158,7 @@ export const useMemberStore = defineStore('member', {
         const idx = this.items.findIndex((m) => m.id === result.value.id);
         if (idx !== -1) this.items[idx] = result.value;
       } else {
-        this.error = this.i18n.t('member.errors.update');
+        this.error = i18n.global.t('member.errors.update');
         console.error(result.error);
       }
       this.loading = false;
@@ -211,7 +212,7 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = this.i18n.t('member.errors.load');
+        this.error = i18n.global.t('member.errors.load');
         console.error(result.error);
         return [];
       }
@@ -244,7 +245,7 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = this.i18n.t('member.errors.loadById');
+        this.error = i18n.global.t('member.errors.loadById');
         console.error(result.error);
         return undefined;
       }
@@ -258,7 +259,7 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error = this.i18n.t('member.errors.loadByFamilyId');
+        this.error = i18n.global.t('member.errors.loadByFamilyId');
         console.error(result.error);
         return [];
       }
