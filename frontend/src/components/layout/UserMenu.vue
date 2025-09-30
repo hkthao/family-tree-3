@@ -6,31 +6,22 @@
     v-model="menuOpen"
   >
     <template v-slot:activator="{ props: activatorProps }">
-              <v-avatar
-                size="36"
+              <AvatarDisplay
+                :src="currentUser?.avatar"
+                :size="36"
                 class="cursor-pointer"
                 :aria-label="$t('userMenu.ariaLabel')"
                 aria-haspopup="true"
                 :aria-expanded="menuOpen"
                 v-bind="activatorProps"
-              >
-                <v-img v-if="currentUser?.avatar" :src="currentUser.avatar"></v-img>
-                <span v-else class="text-h6">{{ userInitials }}</span>
-              </v-avatar>
+              />
     </template>
 
     <v-sheet class="user-menu-sheet rounded-lg elevation-3 pa-3">
       <!-- Header -->
       <div class="user-menu-header d-flex flex-column align-center">
-        <v-avatar size="56" :color="currentUser?.avatar ? 'transparent' : 'primary'">
-          <v-img v-if="currentUser?.avatar" :src="currentUser.avatar"></v-img>
-          <span v-else class="text-h5">{{ userInitials }}</span>
-        </v-avatar>
-        <!-- Placeholder for upload photo button -->
-        <v-btn icon size="small"  class="mt-2">
-          <v-icon>mdi-camera</v-icon>
-          <v-tooltip activator="parent" location="bottom">{{ $t('userMenu.uploadPhoto') }}</v-tooltip>
-        </v-btn>
+        <AvatarDisplay :src="currentUser?.avatar" :size="56" />
+
         <div class="d-flex flex-column align-center mt-2">
           <span class="text-h6 font-weight-medium">{{ currentUser?.name }}</span>
           <v-chip label size="small" color="primary" variant="tonal" class="mt-1">
@@ -88,6 +79,7 @@ import { userMenuItems } from '@/data/userMenuItems';
 import { ref, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
 import { onMounted, onBeforeUnmount } from 'vue';
+import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;
 
