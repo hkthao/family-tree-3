@@ -237,7 +237,7 @@ export const useMemberStore = defineStore('member', {
       this.currentItem = item;
     },
 
-    async fetchItemById(id: string): Promise<Member | undefined> {
+    async getItemById(id: string): Promise<Member | undefined> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.getById(id);

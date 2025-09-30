@@ -126,7 +126,7 @@ export const useFamilyStore = defineStore('family', {
       this.currentItem = item;
     },
 
-    async fetchItemById(id: string): Promise<Family | undefined> {
+    async getItemById(id: string): Promise<Family | undefined> {
       if (this.itemCache[id]) {
         return this.itemCache[id];
       }

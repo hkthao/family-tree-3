@@ -51,7 +51,7 @@ const event = ref<Event | undefined>(undefined);
 onMounted(async () => {
   const eventId = route.params.id as string;
   if (eventId) {
-    event.value = await eventStore.fetchItemById(eventId);
+    event.value = await eventStore.getItemById(eventId);
   }
 });
 

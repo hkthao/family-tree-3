@@ -62,13 +62,15 @@ const loadEvents = async (
   page: number = currentPage.value,
   itemsPerPageCount: number = itemsPerPage.value,
 ) => {
+  eventStore.filter = {
+    ...eventStore.filter,
+    ...currentFilters.value,
+    searchQuery: currentFilters.value.searchQuery || '',
+  };
   eventStore.setPage(page);
   eventStore.setItemsPerPage(itemsPerPageCount);
 
-  await eventStore.searchItems({
-    ...currentFilters.value,
-    searchQuery: currentFilters.value.searchQuery || '',
-  });
+  await eventStore._loadItems(); // Call _loadItems directly
 };
 
 const navigateToDetailView = (event: Event) => {

@@ -20,12 +20,13 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
+       <v-btn color="gray"  @click="closeView">
+        {{ t('common.close') }}
+      </v-btn>
       <v-btn color="primary" @click="navigateToEditEvent(event.id)">
         {{ t('common.edit') }}
       </v-btn>
-      <v-btn color="blue-darken-1"  @click="closeView">
-        {{ t('common.close') }}
-      </v-btn>
+     
     </v-card-actions>
   </v-card>
   <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
@@ -54,7 +55,7 @@ const loadEvent = async () => {
   loading.value = true;
   const eventId = route.params.id as string;
   if (eventId) {
-    event.value = await eventStore.fetchItemById(eventId);
+    event.value = await eventStore.getItemById(eventId);
   }
   loading.value = false;
 };

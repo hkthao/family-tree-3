@@ -17,12 +17,6 @@ export const useEventStore = defineStore('event', {
     totalPages: 0,
   }),
   getters: {
-    getItemById: (state) => (id: string) => {
-      return state.items.find((item) => item.id === id);
-    },
-    paginatedItems: (state) => {
-      return state.items; // Events are already paginated by the service
-    },
   },
   actions: {
     async _loadItems() {
@@ -31,7 +25,7 @@ export const useEventStore = defineStore('event', {
       const result = await this.services.event.searchItems(
         this.filter,
         this.currentPage,
-        this.itemsPerPage
+        this.itemsPerPage,
       );
 
       if (result.ok) {
@@ -64,7 +58,9 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.update(updatedItem);
       if (result.ok) {
-        const index = this.items.findIndex((item) => item.id === result.value.id);
+        const index = this.items.findIndex(
+          (item) => item.id === result.value.id,
+        );
         if (index !== -1) {
           this.items[index] = result.value;
           await this._loadItems(); // Re-fetch to update pagination and filters
@@ -94,12 +90,6 @@ export const useEventStore = defineStore('event', {
       this.loading = false;
     },
 
-    async searchItems(filters: EventFilter) {
-      this.filter = { ...this.filter, ...filters }; // Merge new filters with existing ones
-      this.currentPage = 1; // Reset to first page on new search
-      await this._loadItems(); // Trigger fetch with new search terms
-    },
-
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
@@ -115,16 +105,17 @@ export const useEventStore = defineStore('event', {
       }
     },
 
-    async setCurrentItem(item: Event | null) {
+    setCurrentItem(item: Event | null) {
       this.currentItem = item;
     },
 
-    async fetchItemById(id: string): Promise<Event | undefined> {
+    async getItemById(id: string): Promise<Event | undefined> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.getById(id);
       this.loading = false;
       if (result.ok) {
+        this.currentItem = result.value as Event; // Set currentItem
         return result.value;
       } else {
         this.error = i18n.global.t('event.errors.loadById');

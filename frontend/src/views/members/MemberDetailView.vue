@@ -37,8 +37,8 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
+        <v-btn color="gray"  @click="closeView">{{ t('common.close') }}</v-btn>
         <v-btn color="primary" @click="navigateToEditMember(member.id)">{{ t('common.edit') }}</v-btn>
-        <v-btn color="blue-darken-1"  @click="closeView">{{ t('common.close') }}</v-btn>
       </v-card-actions>
     </v-card>
     <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
@@ -69,7 +69,7 @@ const loadMember = async () => {
   loading.value = true;
   const memberId = route.params.id as string;
   if (memberId) {
-    member.value = await memberStore.fetchItemById(memberId);
+    member.value = await memberStore.getItemById(memberId);
   }
   loading.value = false;
 };

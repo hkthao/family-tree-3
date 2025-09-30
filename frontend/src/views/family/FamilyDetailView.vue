@@ -1,60 +1,52 @@
 <template>
-    <v-card v-if="family" class="mb-4">
-      <v-card-title class="text-h6 d-flex align-center">
-        {{ family.name }}
-        <v-spacer></v-spacer>
-      </v-card-title>
-      <v-card-text>
-        <v-tabs v-model="selectedTab" class="mb-4">
-          <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
-          <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
-          <v-tab value="calendar">{{ t('event.view.calendar') }}</v-tab>
-          <v-tab value="family-tree">{{ t('family.tree.title') }}</v-tab>
-        </v-tabs>
+  <v-card v-if="family" class="mb-4">
+    <v-card-title class="text-h6 d-flex align-center">
+      {{ family.name }}
+      <v-spacer></v-spacer>
+    </v-card-title>
+    <v-card-text>
+      <v-tabs v-model="selectedTab" class="mb-4">
+        <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
+        <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
+        <v-tab value="calendar">{{ t('event.view.calendar') }}</v-tab>
+        <v-tab value="family-tree">{{ t('family.tree.title') }}</v-tab>
+      </v-tabs>
 
-        <v-window v-model="selectedTab">
-          <v-window-item value="general">
-            <FamilyForm
-              :initial-family-data="family"
-              :read-only="true"
-              :title="t('family.detail.title')"
-            />
-          </v-window-item>
+      <v-window v-model="selectedTab">
+        <v-window-item value="general">
+          <FamilyForm
+            :initial-family-data="family"
+            :read-only="true"
+            :title="t('family.detail.title')"
+          />
+        </v-window-item>
 
-          <v-window-item value="timeline">
-            <EventTimeline
-              :family-id="family.id"
-              :read-only="readOnly"
-            />
-          </v-window-item>
+        <v-window-item value="timeline">
+          <EventTimeline :family-id="family.id" :read-only="readOnly" />
+        </v-window-item>
 
-          <v-window-item value="calendar">
-            <EventCalendar
-              :family-id="family.id"
-              :read-only="readOnly"
-            />
-          </v-window-item>
+        <v-window-item value="calendar">
+          <EventCalendar :family-id="family.id" :read-only="readOnly" />
+        </v-window-item>
 
-          <v-window-item value="family-tree">
-            <TreeChart
-              :family-id="family.id"
-            />
-          </v-window-item>
-        </v-window>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" @click="navigateToEditFamily(family.id)">
-          {{ t('common.edit') }}
-        </v-btn>
-        <v-btn color="blue-darken-1"  @click="closeView">
-          {{ t('common.close') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-    <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
-      {{ t('common.noData') }}
-    </v-alert>
+        <v-window-item value="family-tree">
+          <TreeChart :family-id="family.id" />
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="gray" @click="closeView">
+        {{ t('common.close') }}
+      </v-btn>
+      <v-btn color="primary" @click="navigateToEditFamily(family.id)">
+        {{ t('common.edit') }}
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
+    {{ t('common.noData') }}
+  </v-alert>
 </template>
 
 <script setup lang="ts">
@@ -81,7 +73,7 @@ const loadFamily = async () => {
   loading.value = true;
   const familyId = route.params.id as string;
   if (familyId) {
-    family.value = await familyStore.fetchItemById(familyId);
+    family.value = await familyStore.getItemById(familyId);
   }
   loading.value = false;
 };
@@ -105,4 +97,5 @@ watch(
       loadFamily();
     }
   },
-);</script>
+);
+</script>

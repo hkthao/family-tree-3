@@ -71,9 +71,6 @@ const loadEvents = async () => {
     return;
   }
 
-  eventStore.setPage(page.value);
-  eventStore.setItemsPerPage(itemsPerPage.value);
-
   const filters: any = {};
   if (props.memberId) {
     filters.relatedMemberId = props.memberId;
@@ -81,7 +78,10 @@ const loadEvents = async () => {
     filters.familyId = props.familyId;
   }
 
-  await eventStore.searchItems(filters);
+  eventStore.filter = { ...eventStore.filter, ...filters }; // Directly update filter
+  eventStore.setPage(page.value);
+  eventStore.setItemsPerPage(itemsPerPage.value);
+  await eventStore._loadItems(); // Call _loadItems directly
   totalEvents.value = eventStore.totalItems;
 };
 

@@ -608,40 +608,40 @@ describe('Family Store', () => {
     expect(store.paginatedItems).toEqual([]);
   });
 
-  it('fetchItemById should return item from cache if it exists', async () => {
+  it('getItemById should return item from cache if it exists', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
     const cachedItem = mockFamilyService.items[0];
     store.itemCache[cachedItem.id] = cachedItem; // Manually add to cache
 
     const spy = vi.spyOn(mockFamilyService, 'getById');
-    const fetchedItem = await store.fetchItemById(cachedItem.id);
+    const fetchedItem = await store.getItemById(cachedItem.id);
 
     expect(fetchedItem).toEqual(cachedItem);
     expect(spy).not.toHaveBeenCalled(); // Should not call service if in cache
   });
 
-  it('fetchItemById should fetch item from service and cache it if not in cache', async () => {
+  it('getItemById should fetch item from service and cache it if not in cache', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
     const itemToFetch = mockFamilyService.items[0];
     store.itemCache = {}; // Clear cache
 
     const spy = vi.spyOn(mockFamilyService, 'getById');
-    const fetchedItem = await store.fetchItemById(itemToFetch.id);
+    const fetchedItem = await store.getItemById(itemToFetch.id);
 
     expect(fetchedItem).toEqual(itemToFetch);
     expect(spy).toHaveBeenCalledWith(itemToFetch.id);
     expect(store.itemCache[itemToFetch.id]).toEqual(itemToFetch); // Should be cached
   });
 
-  it('fetchItemById should return undefined and log error if service call fails', async () => {
+  it('getItemById should return undefined and log error if service call fails', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
     mockFamilyService.getById = vi.fn().mockResolvedValue(err({ message: 'Fetch error' }));
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
-    const fetchedItem = await store.fetchItemById('non-existent-id');
+    const fetchedItem = await store.getItemById('non-existent-id');
 
     expect(fetchedItem).toBeUndefined();
     expect(consoleSpy).toHaveBeenCalledWith('Error fetching item with ID non-existent-id:', { message: 'Fetch error' });
