@@ -40,7 +40,8 @@ const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 onMounted(async () => {
   const memberId = route.params.id as string;
   if (memberId) {
-    member.value = await memberStore.getById(memberId);
+    await memberStore.getById(memberId);
+    member.value =  memberStore.currentItem as Member;
   }
 });
 

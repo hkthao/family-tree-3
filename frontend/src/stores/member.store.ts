@@ -19,7 +19,6 @@ export const useMemberStore = defineStore('member', {
       occupation: '',
       familyId: undefined,
       searchQuery: '',
-      ids: [],
     } as MemberFilter,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
@@ -126,33 +125,24 @@ export const useMemberStore = defineStore('member', {
       this.currentItem = item;
     },
 
-    async getById(id: string): Promise<Member | undefined> {
+    async getById(id: string): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.getById(id);
       this.loading = false;
       if (result.ok) {
-        return result.value;
+        this.currentItem = { ...(result.value as Member) };
       } else {
         this.error = i18n.global.t('member.errors.loadById');
         console.error(result.error);
-        return undefined;
       }
     },
 
-    async getMembersByFamilyId(familyId: string): Promise<Member[]> {
-      this.loading = true;
-      this.error = null;
-      const result =
-        await this.services.member.fetchMembersByFamilyId(familyId);
-      this.loading = false;
-      if (result.ok) {
-        return result.value;
-      } else {
-        this.error = i18n.global.t('member.errors.loadByFamilyId');
-        console.error(result.error);
-        return [];
-      }
+    async getByFamilyId(familyId: string): Promise<void> {
+      this.filters.familyId = familyId;
+      this.setPage(1);
+      this.setItemsPerPage(5000);
+      await this._loadItems();
     },
   },
 });

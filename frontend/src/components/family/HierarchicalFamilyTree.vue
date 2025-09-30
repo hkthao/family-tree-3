@@ -140,9 +140,9 @@ const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
 
 onMounted(async () => {
   if (props.familyId) {
-    const members = await memberStore.getMembersByFamilyId(props.familyId);
-    renderChart(members);
-  } 
+    await memberStore.getByFamilyId(props.familyId);
+    renderChart(memberStore.items);
+  }
 });
 
 onUnmounted(() => {
@@ -205,8 +205,9 @@ function Card() {
 watch(() => props.familyId, async (newFamilyId) => {
   let membersToRender: Member[] = [];
   if (newFamilyId) {
-    membersToRender = await memberStore.getMembersByFamilyId(newFamilyId);
-  } 
+    await memberStore.getByFamilyId(newFamilyId);
+    membersToRender = [...memberStore.items]
+  }
   renderChart(membersToRender);
 });
 </script>
@@ -299,27 +300,30 @@ watch(() => props.familyId, async (newFamilyId) => {
   margin-bottom: 4px;
 }
 
-.f3 div.card > div {
+.f3 div.card>div {
   transition: transform 0.2s ease-in-out;
 }
 
-.f3 div.card:hover > div {
+.f3 div.card:hover>div {
   transform: scale(1.1);
 }
 
-.f3 div.card-main > div {
+.f3 div.card-main>div {
   transform: scale(1.2) !important;
 }
 
 .f3 div.card-female {
   background-color: rgb(var(--v-theme-secondary));
 }
+
 .f3 div.card-male {
   background-color: rgb(var(--v-theme-primary));
 }
+
 .f3 div.card-genderless {
   background-color: lightgray;
 }
+
 .f3 div.card-main {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.8);
 }

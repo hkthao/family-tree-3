@@ -243,7 +243,8 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
 const initialize = async () => {
   if (props.familyId) {
-    const members = await memberStore.getMembersByFamilyId(props.familyId);
+    memberStore.getByFamilyId(props.familyId)
+    const members = [...memberStore.items]
     if (members && members.length > 0) {
       const { nodes, links } = transformData(members);
       renderChart(nodes, links);

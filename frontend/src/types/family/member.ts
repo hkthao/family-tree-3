@@ -31,5 +31,5 @@ export interface MemberFilter {
   occupation?: string;
   familyId?: string | null;
   searchQuery?: string; // New property for search term
-  ids: string[],
+  ids?: string[] | null; // New property for array of member IDs,
 }
