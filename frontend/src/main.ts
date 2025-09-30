@@ -10,6 +10,8 @@ import vuetify from './plugins/vuetify';
 import i18n from './plugins/i18n';
 
 import { ServicesPlugin } from './plugins/services.plugin'; // Import ServicesPlugin
+import { setAuthService } from '@/services/auth/authService';
+import { fakeAuthService } from '@/services/auth/fakeAuthService';
 
 const app = createApp(App);
 
@@ -21,5 +23,7 @@ app.use(vuetify);
 app.use(i18n);
 i18n.global.locale.value = 'vi';
 app.directive('resize', Resize);
+
+setAuthService(fakeAuthService); // Initialize auth service
 
 app.mount('#app');

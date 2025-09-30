@@ -38,6 +38,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth.store';
 
 const username = ref('');
 const email = ref('');
@@ -47,8 +48,8 @@ const showPassword = ref(false);
 const router = useRouter();
 
 const rules = {
-  required: (value: string | null | undefined) => !!value || 'Required.',
-  email: (value: string) => /.+@.+\..+/.test(value) || 'E-mail must be valid.',
+  required: (value: string | null | undefined) => !!value || t('validation.required'),
+  email: (value: string) => /.+@.+\..+/.test(value) || t('validation.email'),
 };
 
 import { useNotificationStore } from '@/stores/notification.store'; // Add import
@@ -58,12 +59,20 @@ const { t } = useI18n(); // Initialize t
 
 const notificationStore = useNotificationStore(); // Initialize store
 
-const handleRegister = () => {
-  if (username.value && email.value && password.value && agreeToTerms.value) {
+const handleRegister = async () => {
+  const authStore = useAuthStore();
+  await authStore.register({
+    name: username.value,
+    email: email.value,
+    password: password.value,
+    // Assuming agreeToTerms is handled by the backend or not needed for basic registration
+  });
+
+  if (authStore.isAuthenticated) {
     notificationStore.showSnackbar(t('register.success'), 'success');
     router.push('/dashboard');
   } else {
-    notificationStore.showSnackbar(t('register.fillAllFields'), 'error'); // Assuming 'register.fillAllFields' key exists
+    notificationStore.showSnackbar(authStore.error || t('register.fillAllFields'), 'error');
   }
 };
 </script>

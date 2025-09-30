@@ -32,6 +32,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '@/stores/auth.store';
 
 const { t } = useI18n();
 const email = ref('');
@@ -49,13 +50,15 @@ import { useNotificationStore } from '@/stores/notification.store';
 
 const notificationStore = useNotificationStore();
 
-const handleLogin = () => {
-  // Mock login logic
-  if (email.value === 'admin@demo.com' && password.value === 'password') {
-    notificationStore.showSnackbar(t('login.success'), 'success'); // Assuming 'login.success' key exists
+const handleLogin = async () => {
+  const authStore = useAuthStore();
+  await authStore.login({ email: email.value, password: password.value });
+
+  if (authStore.isAuthenticated) {
+    notificationStore.showSnackbar(t('login.success'), 'success');
     router.push('/dashboard');
   } else {
-    notificationStore.showSnackbar(t('login.invalidCredentials'), 'error');
+    notificationStore.showSnackbar(authStore.error || t('login.invalidCredentials'), 'error');
   }
 };
 </script>

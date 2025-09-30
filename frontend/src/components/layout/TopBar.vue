@@ -32,9 +32,7 @@
 
     <div class="mx-2">
       <UserMenu
-        :current-user="currentUser"
         @navigate="handleNavigation"
-        @logout="handleLogout"
         @open-settings="handleOpenSettings"
       />
     </div>
@@ -76,11 +74,6 @@ function focusSearch() {
 
 const handleNavigation = (route: string) => {
   router.push(route);
-};
-
-const handleLogout = () => {
-  // Implement logout logic
-  console.log('Logging out...');
 };
 
 const handleOpenSettings = () => {

@@ -14,7 +14,7 @@
                 :aria-expanded="menuOpen"
                 v-bind="activatorProps"
               >
-                <v-img v-if="currentUser.avatarUrl" :src="currentUser.avatarUrl"></v-img>
+                <v-img v-if="currentUser?.avatar" :src="currentUser.avatar"></v-img>
                 <span v-else class="text-h6">{{ userInitials }}</span>
               </v-avatar>
     </template>
@@ -22,8 +22,8 @@
     <v-sheet class="user-menu-sheet rounded-lg elevation-3 pa-3">
       <!-- Header -->
       <div class="user-menu-header d-flex flex-column align-center">
-        <v-avatar size="56" :color="currentUser.avatarUrl ? 'transparent' : 'primary'">
-          <v-img v-if="currentUser.avatarUrl" :src="currentUser.avatarUrl"></v-img>
+        <v-avatar size="56" :color="currentUser?.avatar ? 'transparent' : 'primary'">
+          <v-img v-if="currentUser?.avatar" :src="currentUser.avatar"></v-img>
           <span v-else class="text-h5">{{ userInitials }}</span>
         </v-avatar>
         <!-- Placeholder for upload photo button -->
@@ -32,9 +32,9 @@
           <v-tooltip activator="parent" location="bottom">{{ $t('userMenu.uploadPhoto') }}</v-tooltip>
         </v-btn>
         <div class="d-flex flex-column align-center mt-2">
-          <span class="text-h6 font-weight-medium">{{ currentUser.name }}</span>
+          <span class="text-h6 font-weight-medium">{{ currentUser?.name }}</span>
           <v-chip label size="small" color="primary" variant="tonal" class="mt-1">
-            {{ $t('userMenu.role') }}: {{ currentUser.roles[0] }}
+            {{ $t('userMenu.role') }}: {{ currentUser?.roles?.[0] }}
           </v-chip>
         </div>
       </div>
@@ -84,30 +84,31 @@
 </template>
 
 <script setup lang="ts">
-import type { User } from './UserMenu.types';
 import { userMenuItems } from '@/data/userMenuItems';
 import { ref, computed, watch } from 'vue';
+import { useAuthStore } from '@/stores/auth.store';
+import { onMounted, onBeforeUnmount } from 'vue';
+
 const menuItems = userMenuItems;
 
 const props = defineProps({
-  currentUser: {
-    type: Object as () => User,
-    required: true,
-  },
   placement: {
     type: String as () => 'bottom' | 'bottom-end' | 'bottom-start',
     default: 'bottom-end',
   },
 });
 
-const emit = defineEmits(['navigate', 'logout', 'openSettings']);
+const emit = defineEmits(['navigate', 'openSettings']);
 
 const menuOpen = ref(false);
 const confirmLogoutDialog = ref(false);
 
+const authStore = useAuthStore();
+const currentUser = computed(() => authStore.user);
+
 const userInitials = computed(() => {
-  if (props.currentUser.name) {
-    const parts = props.currentUser.name.split(' ');
+  if (currentUser.value?.name) {
+    const parts = currentUser.value.name.split(' ');
     if (parts.length > 1) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     } else if (parts.length === 1) {
@@ -124,40 +125,10 @@ const handleMenuItemClick = (route?: string) => {
   menuOpen.value = false;
 };
 
-const handleLogoutConfirm = () => {
+const handleLogoutConfirm = async () => {
   confirmLogoutDialog.value = false;
-  emit('logout');
-};
-
-// Accessibility: Focus management
-watch(menuOpen, (newVal) => {
-  if (newVal) {
-    // Focus the first menu item when opened
-    // This might require a ref on the v-list-item and nextTick
-    // For now, just a placeholder comment
-    console.log('Menu opened, focusing first item...');
-  } else {
-    // Return focus to activator when closed
-    console.log('Menu closed, returning focus to activator...');
-  }
-});
-
-// Global shortcut Ctrl/Cmd+U to open UserMenu (placeholder)
-const handleGlobalKeyDown = (event: KeyboardEvent) => {
-  if ((event.metaKey || event.ctrlKey) && event.key === 'u') {
-    event.preventDefault();
-    menuOpen.value = !menuOpen.value;
-  }
-};
-
-// Attach global keydown listener
-import { onMounted, onBeforeUnmount } from 'vue';
-onMounted(() => {
-  window.addEventListener('keydown', handleGlobalKeyDown);
-});
-onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleGlobalKeyDown);
-});</script>
+  await authStore.logout();
+};</script>
 
 <style scoped>
 

@@ -2,11 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { MainLayout } from '@/layouts';
 import { sidebarRoutes } from './sidebar-routes';
 import { canAccessMenu } from '@/utils/menu-permissions';
-
-// Mock user store
-const useUserStore = () => ({
-  roles: ['FamilyManager'], // or ['Admin'], ['Viewer'] etc.
-});
+import { useAuthStore } from '@/stores/auth.store';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +21,7 @@ const router = createRouter({
       path: '/',
       redirect: '/dashboard',
       component: MainLayout,
+      meta: { requiresAuth: true }, // Add requiresAuth meta
       children: [
         {
           path: 'dashboard',
@@ -145,19 +142,19 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to, from, next) => {
-  const userStore = useUserStore();
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+  await authStore.initAuth(); // Ensure auth state is initialized
+
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiredRoles = to.meta.roles as string[];
 
-  if (requiredRoles) {
-    if (canAccessMenu(userStore.roles, requiredRoles)) {
-      next();
-    } else {
-      next({ name: 'Dashboard' }); // Or a dedicated 'Access Denied' page
-    }
-  }
-  else {
-    next(); // No roles required
+  if (requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'Login' });
+  } else if (requiredRoles && !canAccessMenu(authStore.user?.roles || [], requiredRoles)) {
+    next({ name: 'Dashboard' }); // Or a dedicated 'Access Denied' page
+  } else {
+    next();
   }
 });
 
