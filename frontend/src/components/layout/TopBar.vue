@@ -47,11 +47,13 @@ import { useRouter } from 'vue-router';
 import type { VTextField } from 'vuetify/components';
 import type { User } from './UserMenu.types';
 import { useI18n } from 'vue-i18n';
+import { useUserSettingsStore } from '@/stores/userSettings.store';
 
 const { t } = useI18n();
 const theme = useTheme();
 const searchField = ref<VTextField | null>(null);
 const router = useRouter();
+const userSettingsStore = useUserSettingsStore();
 
 defineProps({
   currentUser: {
@@ -63,7 +65,9 @@ defineProps({
 defineEmits(['toggle-drawer']);
 
 function toggleTheme() {
-  theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark';
+  const newTheme = theme.global.current.value.dark ? 'light' : 'dark';
+  userSettingsStore.setTheme(newTheme);
+  theme.global.name.value = newTheme;
 }
 
 function focusSearch() {

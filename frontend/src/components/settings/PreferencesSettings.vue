@@ -47,27 +47,41 @@ import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from 'vuetify';
 import { useNotificationStore } from '@/stores/notification.store';
+import { useUserSettingsStore } from '@/stores/userSettings.store';
 
 const { t } = useI18n();
 const theme = useTheme();
 const notificationStore = useNotificationStore();
+const userSettingsStore = useUserSettingsStore();
 
 const preferencesForm = ref({
-  theme: 'light',
+  theme: userSettingsStore.theme,
   notifications: {
-    email: true,
-    sms: false,
-    inApp: true,
+    email: userSettingsStore.notifications.email,
+    sms: userSettingsStore.notifications.sms,
+    inApp: userSettingsStore.notifications.inApp,
   },
 });
 
 onMounted(() => {
-  preferencesForm.value.theme = theme.global.name.value;
+  // Ensure theme is synced with Vuetify's current theme
+  userSettingsStore.setTheme(theme.global.name.value as 'light' | 'dark');
+  preferencesForm.value.theme = userSettingsStore.theme;
 });
 
-const savePreferences = () => {
-  theme.global.name.value = preferencesForm.value.theme;
-  console.log('Saving preferences:', preferencesForm.value);
-  notificationStore.showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
+const savePreferences = async () => {
+  // Update store state
+  userSettingsStore.setTheme(preferencesForm.value.theme);
+  userSettingsStore.notifications.email = preferencesForm.value.notifications.email;
+  userSettingsStore.notifications.sms = preferencesForm.value.notifications.sms;
+  userSettingsStore.notifications.inApp = preferencesForm.value.notifications.inApp;
+
+  // Save settings via store action
+  try {
+    await userSettingsStore.saveSettings();
+    // Snackbar is handled by the store action
+  } catch (error) {
+    // Error snackbar is handled by the store action
+  }
 };
 </script>

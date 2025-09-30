@@ -1,30 +1,20 @@
-Create a Vue 3 + Vuetify page called "UserSettingsPage" for a family tree management application. 
+Create a Pinia store called "userSettingsStore" for a Vue 3 + Vuetify 3 family tree management application. 
+
 Requirements:
 
-1. Layout:
-   - Responsive design with a sidebar navigation for "Profile", "Preferences", "Security".
-   - Main content area changes according to selected tab.
+1. State:
+   - theme: 'light' | 'dark', default 'light'
+   - notifications: object with keys { email: boolean, sms: boolean, inApp: boolean }, default { email: true, sms: false, inApp: true }
+   - language: string, default 'en'
 
-2. Profile Tab:
-   - Form with fields: Full Name, Email, Profile Picture upload.
-   - "Save" button with form validation.
+2. Actions:
+   - setTheme(theme: 'light' | 'dark'): updates theme
+   - toggleNotification(type: 'email' | 'sms' | 'inApp'): toggles the notification setting
+   - setLanguage(lang: string): updates language
+   - saveSettings(): simulate an API call to save current settings and return a success/failure message
 
-3. Preferences Tab:
-   - Theme selection (Light / Dark).
-   - Notification preferences (checkboxes: Email, SMS, In-app).
-   - "Save" button.
-
-4. Security Tab:
-   - Change password form: Current Password, New Password, Confirm Password.
-   - "Save" button with validation: passwords match, minimum length 8.
-
-5. General:
-   - Use Vuetify components only.
-   - Provide reactive state with Vue 3 `ref` or `reactive`.
-   - Include basic validation feedback (required fields, password mismatch).
-   - Keep design clean and simple, similar to Vuetify style guide.
-   - Use only images/icons available in Vuetify (no custom assets needed).
-
-6. Bonus:
-   - Include a snackbar notification after saving changes.
-   - Structure code with components per tab if possible.
+3. Features:
+   - Use Vue 3 reactive state (`ref` or `reactive`)
+   - Export store using Composition API style
+   - Ensure store is ready to be imported in components and bound directly to forms
+   - Include comments for each section explaining purpose
