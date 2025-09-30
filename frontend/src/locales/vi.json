@@ -278,5 +278,9 @@
   "member.errors.loadByFamilyId": "Không thể tải danh sách thành viên theo gia đình.",
   "menu.profileAndContent": "Hồ sơ & Nội dung",
   "menu.utilitiesAndAI": "Tiện ích & AI",
-  "menu.cultureAndTraditions": "Văn hóa & Truyền thống"
+  "menu.cultureAndTraditions": "Văn hóa & Truyền thống",
+  "menu.dashboards": "Tổng quan",
+  "menu.family": "Gia phả",
+  "menu.admin": "Quản trị",
+  "menu.system": "Hệ thống"
 }

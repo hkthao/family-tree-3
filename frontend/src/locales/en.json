@@ -273,5 +273,9 @@
   "member.errors.loadByFamilyId": "Failed to load members by family.",
   "menu.profileAndContent": "Profile & Content",
   "menu.utilitiesAndAI": "Utilities & AI",
-  "menu.cultureAndTraditions": "Culture & Traditions"
+  "menu.cultureAndTraditions": "Culture & Traditions",
+  "menu.dashboards": "Dashboards",
+  "menu.family": "Family Tree",
+  "menu.admin": "Admin",
+  "menu.system": "System"
 }

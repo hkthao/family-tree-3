@@ -18,7 +18,7 @@ export interface MenuSection {
 
 const menu: MenuSection[] = [
   {
-    title: 'Dashboards',
+    titleKey: 'menu.dashboards',
     items: [
       {
         titleKey: 'dashboard.overview',
@@ -29,7 +29,7 @@ const menu: MenuSection[] = [
     ],
   },
   {
-    title: 'Gia phả',
+    titleKey: 'menu.family',
     items: [
       {
         titleKey: 'family.view',
@@ -37,12 +37,7 @@ const menu: MenuSection[] = [
         to: '/family/tree',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
-      {
-        titleKey: 'family.addMember',
-        icon: 'mdi-account-plus',
-        to: '/family/add',
-        roles: ['Admin', 'FamilyManager', 'Editor'],
-      },
+
       {
         titleKey: 'family.manageMembers',
         icon: 'mdi-account-multiple',
@@ -61,18 +56,8 @@ const menu: MenuSection[] = [
         to: '/events',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
-      {
-        titleKey: 'family.reroot',
-        icon: 'mdi-target',
-        to: '/family/reroot',
-        roles: ['Admin', 'FamilyManager', 'Editor'],
-      },
-      {
-        titleKey: 'family.export',
-        icon: 'mdi-printer',
-        to: '/family/export',
-        roles: ['Admin', 'FamilyManager'],
-      },
+
+
     ],
   },
   {
@@ -111,7 +96,7 @@ const menu: MenuSection[] = [
     ],
   },
   {
-    title: 'Quản trị (Admin)',
+    titleKey: 'menu.admin',
     items: [
       {
         titleKey: 'admin.users',
@@ -211,7 +196,7 @@ const menu: MenuSection[] = [
     ],
   },
   {
-    title: 'Hệ thống',
+    titleKey: 'menu.system',
     items: [
       {
         titleKey: 'settings.system',
