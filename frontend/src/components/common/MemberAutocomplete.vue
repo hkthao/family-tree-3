@@ -139,10 +139,10 @@ watch(
       }
     }
 
-    if (idsToFetch.length > 0 && typeof memberStore.getManyItemsByIds === 'function') {
+    if (idsToFetch.length > 0 && typeof memberStore.getByIds === 'function') {
       loading.value = true;
       try {
-        const fetchedItems = await memberStore.getManyItemsByIds(idsToFetch);
+        const fetchedItems = await memberStore.getByIds(idsToFetch);
         internalSelectedItems.value = fetchedItems;
       } catch (error) {
         console.error('Error preloading selected items:', error);

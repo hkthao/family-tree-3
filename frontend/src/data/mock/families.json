@@ -1,0 +1,402 @@
+[
+  {
+    "id": "family-001",
+    "name": "Nguyen Family",
+    "description": "A prominent family.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "123 Nguyen St",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-002",
+    "name": "Tran Family",
+    "description": "A historical lineage.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "456 Tran Ave",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-003",
+    "name": "Le Family",
+    "description": "Known for their resilience.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "789 Le Rd",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-004",
+    "name": "Pham Family",
+    "description": "A family of scholars.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "101 Pham Blvd",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-005",
+    "name": "Huynh Family",
+    "description": "Guardians of tradition.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "202 Huynh Ln",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-006",
+    "name": "Phan Family",
+    "description": "Pioneers of innovation.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "303 Phan Dr",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-007",
+    "name": "Vo Family",
+    "description": "Strong and united.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "404 Vo Pl",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-008",
+    "name": "Dang Family",
+    "description": "Rich in heritage.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "505 Dang Ct",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-009",
+    "name": "Bui Family",
+    "description": "Artistic and creative.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "606 Bui Way",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-010",
+    "name": "Do Family",
+    "description": "Diligent and prosperous.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "707 Do Cir",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-011",
+    "name": "Ngo Family",
+    "description": "Respected and wise.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "808 Ngo Sq",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-012",
+    "name": "Duong Family",
+    "description": "Generous and kind.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "909 Duong Pk",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-013",
+    "name": "Dinh Family",
+    "description": "Brave and honorable.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "111 Dinh Gr",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-014",
+    "name": "Hoang Family",
+    "description": "Loyal and true.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "222 Hoang Tr",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-015",
+    "name": "Truong Family",
+    "description": "Strong and enduring.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "333 Truong Fd",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-016",
+    "name": "Cao Family",
+    "description": "Noble and proud.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "444 Cao Lg",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-017",
+    "name": "Chau Family",
+    "description": "Peaceful and serene.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "555 Chau Pt",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-018",
+    "name": "Bach Family",
+    "description": "Pure and honest.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "666 Bach Is",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-019",
+    "name": "Ly Family",
+    "description": "Wise and influential.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "777 Ly Mt",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-020",
+    "name": "Vu Family",
+    "description": "Powerful and respected.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "888 Vu Vl",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-021",
+    "name": "Mai Family",
+    "description": "Graceful and elegant.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "999 Mai Gl",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-022",
+    "name": "Kieu Family",
+    "description": "Charming and captivating.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "121 Kieu Ht",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-023",
+    "name": "Ha Family",
+    "description": "Joyful and lively.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "343 Ha Bch",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-024",
+    "name": "Quach Family",
+    "description": "Strong and protective.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "565 Quach Cny",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-025",
+    "name": "Diep Family",
+    "description": "Deep and profound.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "787 Diep Lk",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-026",
+    "name": "Luu Family",
+    "description": "Flowing and adaptable.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "909 Luu Rv",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-027",
+    "name": "Trinh Family",
+    "description": "Orderly and precise.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "131 Trinh Fld",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-028",
+    "name": "Khong Family",
+    "description": "Open and vast.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "242 Khong Vly",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-029",
+    "name": "Mac Family",
+    "description": "Solid and reliable.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "353 Mac Pk",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-030",
+    "name": "Giang Family",
+    "description": "River of life.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "464 Giang Str",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-031",
+    "name": "Thach Family",
+    "description": "Rock solid.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "575 Thach Rd",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-032",
+    "name": "Chung Family",
+    "description": "United and whole.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "686 Chung Ave",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-033",
+    "name": "Au Family",
+    "description": "European connection.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "797 Au Blvd",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-034",
+    "name": "Vi Family",
+    "description": "Small but mighty.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "818 Vi Ln",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-035",
+    "name": "Que Family",
+    "description": "Cinnamon scented.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "929 Que Dr",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-036",
+    "name": "Lam Family",
+    "description": "Forest dwellers.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "141 Lam Pl",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-037",
+    "name": "Chau Family",
+    "description": "Pearl of the orient.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "252 Chau Ct",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-038",
+    "name": "Doan Family",
+    "description": "United in purpose.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "363 Doan Way",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-039",
+    "name": "Giap Family",
+    "description": "Armored and strong.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "474 Giap Cir",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-040",
+    "name": "La Family",
+    "description": "Leafy and green.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "585 La Sq",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-041",
+    "name": "Banh Family",
+    "description": "Cake makers.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "696 Banh Pk",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-042",
+    "name": "Tang Family",
+    "description": "Rising high.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "717 Tang Gr",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-043",
+    "name": "Dau Family",
+    "description": "Bean growers.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "828 Dau Tr",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-044",
+    "name": "Kha Family",
+    "description": "Capable and able.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "939 Kha Fd",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-045",
+    "name": "Ung Family",
+    "description": "Responsive and quick.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "151 Ung Lg",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-046",
+    "name": "Ma Family",
+    "description": "Horse riders.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "262 Ma Pt",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-047",
+    "name": "Phung Family",
+    "description": "Phoenix rising.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "373 Phung Is",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-048",
+    "name": "Dieu Family",
+    "description": "Wonderful and marvelous.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "484 Dieu Mt",
+    "visibility": "Private"
+  },
+  {
+    "id": "family-049",
+    "name": "Banh Family",
+    "description": "Cake makers.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "595 Banh Vl",
+    "visibility": "Public"
+  },
+  {
+    "id": "family-050",
+    "name": "Tang Family",
+    "description": "Rising high.",
+    "avatarUrl": "https://picsum.photos/200/300",
+    "address": "616 Tang Gl",
+    "visibility": "Private"
+  }
+]

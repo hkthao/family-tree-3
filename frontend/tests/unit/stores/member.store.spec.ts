@@ -183,10 +183,10 @@ describe('Member Store', () => {
 
 
 
-  it('getItemById should return the correct member', async () => {
+  it('getById should return the correct member', async () => {
     const store = useMemberStore();
     await store._loadItems();
-    const member = store.getItemById(mockMemberService.members[0].id);
+    const member = store.getById(mockMemberService.members[0].id);
     expect(member).toBeDefined();
     expect(member?.lastName).toBe(mockMemberService.members[0].lastName);
   });
@@ -273,7 +273,7 @@ describe('Member Store', () => {
       const updatedMember: Member = { ...memberToUpdate, lastName: updatedLastName };
       await store.updateItem(updatedMember);
       await store._loadItems(); // Force re-fetch after update
-      const foundMember = store.getItemById(memberToUpdate.id);
+      const foundMember = store.getById(memberToUpdate.id);
       expect(foundMember?.lastName).toBe(updatedLastName);
       expect(store.loading).toBe(false);
     } else {
@@ -356,7 +356,7 @@ describe('Member Store', () => {
     if (memberToDeleteId) {
       await store.deleteItem(memberToDeleteId);
       expect(store.totalItems).toBe(initialTotalItems - 1); // Check totalItems
-      expect(store.getItemById(memberToDeleteId)).toBeUndefined();
+      expect(store.getById(memberToDeleteId)).toBeUndefined();
       expect(store.loading).toBe(false);
     } else {
       expect.fail('No member to delete.');

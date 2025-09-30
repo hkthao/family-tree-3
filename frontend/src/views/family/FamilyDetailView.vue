@@ -72,7 +72,7 @@ const loadFamily = async () => {
   loading.value = true;
   const familyId = route.params.id as string;
   if (familyId) {
-    family.value = await familyStore.getItemById(familyId);
+    family.value = await familyStore.getById(familyId);
   }
   loading.value = false;
 };

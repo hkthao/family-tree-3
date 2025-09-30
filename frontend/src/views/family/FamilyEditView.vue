@@ -54,7 +54,7 @@ const notificationStore = useNotificationStore();
 onMounted(async () => {
   const itemId = route.params.id as string;
   if (itemId) {
-    family.value = await familyStore.getItemById(itemId);
+    family.value = await familyStore.getById(itemId);
   }
 });
 

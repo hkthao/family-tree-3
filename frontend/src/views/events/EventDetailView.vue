@@ -54,7 +54,7 @@ const loadEvent = async () => {
   loading.value = true;
   const eventId = route.params.id as string;
   if (eventId) {
-    event.value = await eventStore.getItemById(eventId);
+    event.value = await eventStore.getById(eventId);
   }
   loading.value = false;
 };

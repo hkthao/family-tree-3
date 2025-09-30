@@ -184,10 +184,10 @@ describe('Family Event Store', () => {
     expect(store.totalPages).toBe(2); // 20 events, 10 per page
   });
 
-  it('getItemById should return the correct family event', async () => {
+  it('getById should return the correct family event', async () => {
     const store = useEventStore();
     await store._loadItems();
-    const event = store.getItemById(mockEventService.events[0].id);
+    const event = store.getById(mockEventService.events[0].id);
     expect(event).toBeDefined();
     expect(event?.name).toBe(mockEventService.events[0].name);
   });
@@ -222,7 +222,7 @@ describe('Family Event Store', () => {
       const updatedName = 'Updated Event';
       const updatedEvent: Event = { ...eventToUpdate, name: updatedName };
       await store.updateItem(updatedEvent);
-      const foundEvent = store.getItemById(eventToUpdate.id);
+      const foundEvent = store.getById(eventToUpdate.id);
       expect(foundEvent?.name).toBe(updatedName);
       expect(store.loading).toBe(false);
       expect(store.totalPages).toBe(2); // Should remain 2
@@ -240,7 +240,7 @@ describe('Family Event Store', () => {
       console.log('Before delete, store.totalItems:', store.totalItems);
       await store.deleteItem(eventToDeleteId);
       expect(store.totalItems).toBe(initialTotalItems - 1);
-      expect(store.getItemById(eventToDeleteId)).toBeUndefined();
+      expect(store.getById(eventToDeleteId)).toBeUndefined();
       expect(store.loading).toBe(false);
       expect(store.totalPages).toBe(2); // 19 events, 10 per page, still 2 pages
     } else {

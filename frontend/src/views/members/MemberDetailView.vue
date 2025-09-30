@@ -69,7 +69,7 @@ const loadMember = async () => {
   loading.value = true;
   const memberId = route.params.id as string;
   if (memberId) {
-    member.value = await memberStore.getItemById(memberId);
+    member.value = await memberStore.getById(memberId);
   }
   loading.value = false;
 };

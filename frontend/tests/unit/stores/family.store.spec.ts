@@ -245,25 +245,25 @@ describe('Family Store', () => {
   });
 
   // 3. Get by ID
-  it('getItemById should return the correct family when found', async () => {
+  it('getById should return the correct family when found', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure families are loaded
-    const family = store.getItemById(mockFamilyService.items[0].id);
+    const family = store.getById(mockFamilyService.items[0].id);
     expect(family).toBeDefined();
     expect(family?.name).toBe(mockFamilyService.items[0].name);
   });
 
-  it('getItemById should return undefined when family is not found', async () => {
+  it('getById should return undefined when family is not found', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure families are loaded
-    const family = store.getItemById('non-existent-id');
+    const family = store.getById('non-existent-id');
     expect(family).toBeUndefined();
   });
 
-  it('getItemById should return undefined when items array is empty', () => {
+  it('getById should return undefined when items array is empty', () => {
     const store = useFamilyStore();
     store.items = []; // Ensure items array is empty
-    const family = store.getItemById('any-id');
+    const family = store.getById('any-id');
     expect(family).toBeUndefined();
   });
 
@@ -338,7 +338,7 @@ describe('Family Store', () => {
       const updatedName = 'The Updated Family';
       const updatedFamily: Family = { ...familyToUpdate, name: updatedName };
       await store.updateItem(updatedFamily);
-      const foundFamily = store.getItemById(familyToUpdate.id);
+      const foundFamily = store.getById(familyToUpdate.id);
       expect(foundFamily?.name).toBe(updatedName);
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
@@ -408,7 +408,7 @@ describe('Family Store', () => {
     if (familyToDeleteId) {
       await store.deleteItem(familyToDeleteId);
       expect(store.totalItems).toBe(initialTotalItems - 1);
-      expect(store.getItemById(familyToDeleteId)).toBeUndefined();
+      expect(store.getById(familyToDeleteId)).toBeUndefined();
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
     } else {
@@ -640,34 +640,34 @@ describe('Family Store', () => {
     expect(store.paginatedItems).toEqual([]);
   });
 
-  it('getItemById should return item from cache if it exists', async () => {
+  it('getById should return item from cache if it exists', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
     const cachedItem = mockFamilyService.items[0];
     store.itemCache[cachedItem.id] = cachedItem; // Manually add to cache
 
     const spy = vi.spyOn(mockFamilyService, 'getById');
-    const fetchedItem = await store.getItemById(cachedItem.id);
+    const fetchedItem = await store.getById(cachedItem.id);
 
     expect(fetchedItem).toEqual(cachedItem);
     expect(spy).not.toHaveBeenCalled(); // Should not call service if in cache
   });
 
-  it('getItemById should fetch item from service and cache it if not in cache', async () => {
+  it('getById should fetch item from service and cache it if not in cache', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
     const itemToFetch = mockFamilyService.items[0];
     store.itemCache = {}; // Clear cache
 
     const spy = vi.spyOn(mockFamilyService, 'getById');
-    const fetchedItem = await store.getItemById(itemToFetch.id);
+    const fetchedItem = await store.getById(itemToFetch.id);
 
     expect(fetchedItem).toEqual(itemToFetch);
     expect(spy).toHaveBeenCalledWith(itemToFetch.id);
     expect(store.itemCache[itemToFetch.id]).toEqual(itemToFetch); // Should be cached
   });
 
-  it('getItemById should return undefined and log error if service call fails', async () => {
+  it('getById should return undefined and log error if service call fails', async () => {
     const store = useFamilyStore();
     await store._loadItems(); // Ensure store is populated
     mockFamilyService.getById = vi
@@ -675,7 +675,7 @@ describe('Family Store', () => {
       .mockResolvedValue(err({ message: 'Fetch error' }));
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
-    const fetchedItem = await store.getItemById('non-existent-id');
+    const fetchedItem = await store.getById('non-existent-id');
 
     expect(fetchedItem).toBeUndefined();
     expect(consoleSpy).toHaveBeenCalledWith(

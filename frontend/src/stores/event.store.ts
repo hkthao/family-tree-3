@@ -108,7 +108,7 @@ export const useEventStore = defineStore('event', {
       this.currentItem = item;
     },
 
-    async getItemById(id: string): Promise<Event | undefined> {
+    async getById(id: string): Promise<Event | undefined> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.getById(id);

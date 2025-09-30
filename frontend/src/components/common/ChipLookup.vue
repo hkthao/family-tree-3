@@ -56,9 +56,9 @@ const loadItems = async () => {
 
   if (
     isStore.value &&
-    typeof props.dataSource.getManyItemsByIds === 'function'
+    typeof props.dataSource.getByIds === 'function'
   ) {
-    selectedItems.value = await props.dataSource.getManyItemsByIds(idsToFetch);
+    selectedItems.value = await props.dataSource.getByIds(idsToFetch);
   } else if (Array.isArray(props.dataSource)) {
     selectedItems.value = props.dataSource.filter((item) =>
       idsToFetch.includes(item[props.valueExpr]),

@@ -151,9 +151,9 @@ watch(
   () => props.modelValue,
   async (newValue) => {
     if (newValue && !selectedItem.value) {
-      if (isStore.value && typeof props.dataSource.getItemById === 'function') {
+      if (isStore.value && typeof props.dataSource.getById === 'function') {
         loading.value = true;
-        selectedItem.value = await props.dataSource.getItemById(newValue);
+        selectedItem.value = await props.dataSource.getById(newValue);
         loading.value = false;
       } else if (Array.isArray(props.dataSource)) {
         selectedItem.value = props.dataSource.find(

@@ -14,18 +14,8 @@ export const useFamilyStore = defineStore('family', {
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 1,
-    itemCache: {} as Record<string, Family>, // Cache for individual items
   }),
-  getters: {
-    getItemById: (state) => (id: string) => {
-      return state.items.find((item) => item.id === id);
-    },
-    paginatedItems: (state) => {
-      const start = (state.currentPage - 1) * state.itemsPerPage;
-      const end = start + state.itemsPerPage;
-      return state.items.slice(start, end);
-    },
-  },
+  getters: {},
   actions: {
     async _loadItems() {
       this.loading = true;
@@ -101,12 +91,6 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
-    async loadItems(filter: FamilyFilter) {
-      this.filter = filter;
-      this.currentPage = 1; // Reset to first page on new search
-      await this._loadItems(); // Trigger fetch with new search terms
-    },
-
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page;
@@ -126,41 +110,17 @@ export const useFamilyStore = defineStore('family', {
       this.currentItem = item;
     },
 
-    async getItemById(id: string): Promise<Family | undefined> {
-      if (this.itemCache[id]) {
-        return this.itemCache[id];
-      }
+    async getById(id: string): Promise<Family | undefined> {
       const result = await this.services.family.getById(id);
       if (result.ok) {
         if (result.value) {
-          this.itemCache[id] = result.value;
+          this.currentItem = result.value;
         }
         return result.value;
       } else {
         console.error(`Error fetching item with ID ${id}:`, result.error);
         return undefined;
       }
-    },
-
-    async fetchAllItems() {
-      this.loading = true;
-      this.error = null;
-      // Use a large itemsPerPage to fetch all items
-      const result = await this.services.family.loadItems(
-        { searchQuery: '', visibility: 'all' },
-        1,
-        1000,
-      );
-
-      if (result.ok) {
-        this.items = result.value.items;
-        this.totalItems = result.value.totalItems;
-        this.totalPages = 1;
-      } else {
-        this.error = i18n.global.t('family.errors.load');
-        console.error(result.error);
-      }
-      this.loading = false;
     },
 
     async searchLookup(
@@ -174,7 +134,7 @@ export const useFamilyStore = defineStore('family', {
       await this._loadItems();
     },
 
-    async getManyItemsByIds(ids: string[]): Promise<Family[]> {
+    async getByIds(ids: string[]): Promise<Family[]> {
       this.loading = true;
       this.error = null;
       const result = await this.services.family.getByIds(ids);

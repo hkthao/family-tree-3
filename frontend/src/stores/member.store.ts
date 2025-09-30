@@ -32,12 +32,12 @@ export const useMemberStore = defineStore('member', {
     },
 
     /** Lấy 1 member theo id */
-    getItemById: (state) => (id: string) => {
+    getById: (state) => (id: string) => {
       return state.items.find((m) => m.id === id);
     },
 
     /** Lấy nhiều member theo id */
-    getItemsByIds: (state) => (ids: string[]) => {
+    getByIds: (state) => (ids: string[]) => {
       return state.items.filter((m) => ids.includes(m.id));
     },
   },
@@ -205,7 +205,7 @@ export const useMemberStore = defineStore('member', {
       await this._loadItems();
     },
 
-    async getManyItemsByIds(ids: string[]): Promise<Member[]> {
+    async getByIds(ids: string[]): Promise<Member[]> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.getByIds(ids);
@@ -238,7 +238,7 @@ export const useMemberStore = defineStore('member', {
       this.currentItem = item;
     },
 
-    async getItemById(id: string): Promise<Member | undefined> {
+    async getById(id: string): Promise<Member | undefined> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.getById(id);
