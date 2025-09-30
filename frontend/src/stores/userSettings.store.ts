@@ -5,7 +5,7 @@ import i18n from '@/plugins/i18n'; // Import global i18n instance
 export const useUserSettingsStore = defineStore('userSettings', {
   // State: Defines the reactive data of the store.
   state: () => ({
-    theme: 'light' as 'light' | 'dark',
+    theme: 'dark' as 'dark' | 'light',
     notifications: {
       email: true,
       sms: false,

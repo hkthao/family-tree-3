@@ -1,16 +1,14 @@
 <template>
   <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <v-col cols="12">
-      <AvatarInput
-        v-if="!props.readOnly"
-        v-model="familyForm.avatarUrl"
-        :size="96"
-      />
-      <div v-else class="d-flex justify-center mb-4">
-        <AvatarDisplay :src="familyForm.avatarUrl" :size="96" />
-      </div>
-    </v-col>
-      
+    <AvatarInput
+      v-if="!props.readOnly"
+      v-model="familyForm.avatarUrl"
+      :size="96"
+    />
+    <div v-else class="d-flex justify-center mb-4">
+      <AvatarDisplay :src="familyForm.avatarUrl" :size="96" />
+    </div>
+
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field
