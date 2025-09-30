@@ -1,40 +1,34 @@
 <template>
-  <v-card flat>
-    <v-card-text>
-      <v-form ref="securityForm" @submit.prevent="saveSecurity">
-        <v-text-field
-          v-model="securityForm.currentPassword"
-          :label="t('userSettings.security.currentPassword')"
-          :type="showCurrentPassword ? 'text' : 'password'"
-          :append-inner-icon="showCurrentPassword ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append-inner="showCurrentPassword = !showCurrentPassword"
-          :rules="[rules.required]"
-          class="mb-2"
-        ></v-text-field>
-        <v-text-field
-          v-model="securityForm.newPassword"
-          :label="t('userSettings.security.newPassword')"
-          :type="showNewPassword ? 'text' : 'password'"
-          :append-inner-icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append-inner="showNewPassword = !showNewPassword"
-          :rules="[rules.required, rules.min(8)]"
-          class="mb-2"
-        ></v-text-field>
-        <v-text-field
-          v-model="securityForm.confirmPassword"
-          :label="t('userSettings.security.confirmPassword')"
-          :type="showConfirmPassword ? 'text' : 'password'"
-          :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
-          @click:append-inner="showConfirmPassword = !showConfirmPassword"
-          :rules="[rules.required, rules.passwordMatch]"
-          class="mb-2"
-        ></v-text-field>
-        <v-card-actions class="justify-end">
-          <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
-        </v-card-actions>
-      </v-form>
-    </v-card-text>
-  </v-card>
+  <v-form ref="securityForm" @submit.prevent="saveSecurity">
+    <v-text-field
+      v-model="securityForm.currentPassword"
+      :label="t('userSettings.security.currentPassword')"
+      :type="showCurrentPassword ? 'text' : 'password'"
+      :append-inner-icon="showCurrentPassword ? 'mdi-eye-off' : 'mdi-eye'"
+      @click:append-inner="showCurrentPassword = !showCurrentPassword"
+      :rules="[rules.required]"
+      class="mb-2"
+    ></v-text-field>
+    <v-text-field
+      v-model="securityForm.newPassword"
+      :label="t('userSettings.security.newPassword')"
+      :type="showNewPassword ? 'text' : 'password'"
+      :append-inner-icon="showNewPassword ? 'mdi-eye-off' : 'mdi-eye'"
+      @click:append-inner="showNewPassword = !showNewPassword"
+      :rules="[rules.required, rules.min(8)]"
+      class="mb-2"
+    ></v-text-field>
+    <v-text-field
+      v-model="securityForm.confirmPassword"
+      :label="t('userSettings.security.confirmPassword')"
+      :type="showConfirmPassword ? 'text' : 'password'"
+      :append-inner-icon="showConfirmPassword ? 'mdi-eye-off' : 'mdi-eye'"
+      @click:append-inner="showConfirmPassword = !showConfirmPassword"
+      :rules="[rules.required, rules.passwordMatch]"
+      class="mb-2"
+    ></v-text-field>
+      <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
+  </v-form>
 </template>
 
 <script setup lang="ts">
@@ -60,9 +54,11 @@ const showConfirmPassword = ref(false);
 const rules = {
   required: (value: string) => !!value || t('validation.required'),
   min: (length: number) => (value: string) =>
-    value.length >= length || t('userSettings.security.passwordMinLength', { length }),
+    value.length >= length ||
+    t('userSettings.security.passwordMinLength', { length }),
   passwordMatch: (value: string) =>
-    value === securityForm.value.newPassword || t('userSettings.security.passwordMismatch'),
+    value === securityForm.value.newPassword ||
+    t('userSettings.security.passwordMismatch'),
 };
 
 const saveSecurity = async () => {
@@ -71,13 +67,19 @@ const saveSecurity = async () => {
     if (valid) {
       // Simulate API call
       console.log('Saving security settings:', securityForm.value);
-      notificationStore.showSnackbar(t('userSettings.security.saveSuccess'), 'success');
+      notificationStore.showSnackbar(
+        t('userSettings.security.saveSuccess'),
+        'success',
+      );
       // Clear form
       securityForm.value.currentPassword = '';
       securityForm.value.newPassword = '';
       securityForm.value.confirmPassword = '';
     } else {
-      notificationStore.showSnackbar(t('userSettings.security.saveError'), 'error');
+      notificationStore.showSnackbar(
+        t('userSettings.security.saveError'),
+        'error',
+      );
     }
   }
 };

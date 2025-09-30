@@ -1,32 +1,26 @@
 <template>
-  <v-card flat>
-    <v-card-text>
-      <v-form ref="profileForm" @submit.prevent="saveProfile">
-        <v-row>
-          <v-col cols="12">
-            <AvatarInput v-model="profileForm.avatar" :size="128" />
-          </v-col>
-          <v-col cols="12">
-            <v-text-field
-              v-model="profileForm.fullName"
-              :label="t('userSettings.profile.fullName')"
-              :rules="[rules.required]"
-              class="mb-2"
-            ></v-text-field>
-            <v-text-field
-              v-model="profileForm.email"
-              :label="t('userSettings.profile.email')"
-              :rules="[rules.required, rules.email]"
-              class="mb-2"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-        <v-card-actions class="justify-end">
-          <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
-        </v-card-actions>
-      </v-form>
-    </v-card-text>
-  </v-card>
+  <v-form ref="profileForm" @submit.prevent="saveProfile">
+    <v-row>
+      <v-col cols="12">
+        <AvatarInput v-model="profileForm.avatar" :size="128" />
+      </v-col>
+      <v-col cols="12">
+        <v-text-field
+          v-model="profileForm.fullName"
+          :label="t('userSettings.profile.fullName')"
+          :rules="[rules.required]"
+          class="mb-2"
+        ></v-text-field>
+        <v-text-field
+          v-model="profileForm.email"
+          :label="t('userSettings.profile.email')"
+          :rules="[rules.required, rules.email]"
+          class="mb-2"
+        ></v-text-field>
+      </v-col>
+    </v-row>
+    <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
+  </v-form>
 </template>
 
 <script setup lang="ts">
@@ -67,10 +61,16 @@ const saveProfile = async () => {
     if (valid) {
       // Simulate API call
       console.log('Saving profile:', profileForm.value);
-      notificationStore.showSnackbar(t('userSettings.profile.saveSuccess'), 'success');
+      notificationStore.showSnackbar(
+        t('userSettings.profile.saveSuccess'),
+        'success',
+      );
       // In a real app, you would dispatch an action to update the user in authStore
     } else {
-      notificationStore.showSnackbar(t('userSettings.profile.saveError'), 'error');
+      notificationStore.showSnackbar(
+        t('userSettings.profile.saveError'),
+        'error',
+      );
     }
   }
 };
