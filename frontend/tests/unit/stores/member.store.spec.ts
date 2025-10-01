@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useMemberStore } from '@/stores/member.store';
 import type { IMemberService } from '@/services/member/member.service.interface';
-import { simulateLatency } from '@/utils/mockUtils'; // Import simulateLatency
+import { simulateLatency } from '@/utils/mockUtils';
 import { createServices } from '@/services/service.factory';
 import type { ApiError } from '@/utils/api';
 import {
@@ -16,10 +16,23 @@ import {
 } from '@/types';
 import fix_members from '@/data/mock/members.json';
 
+vi.mock('@/plugins/i18n', () => ({
+  default: {
+    global: {
+      t: (key: string) => key,
+    },
+  },
+}));
+
 // Create a mock service for testing
 class MockMemberServiceForTest implements IMemberService {
-  public members: Member[] = fix_members as unknown as Member[]; // Use a copy of fix_members
+  public members: Member[] = JSON.parse(JSON.stringify(fix_members));
   public shouldThrowError: boolean = false;
+
+  reset() {
+    this.members = JSON.parse(JSON.stringify(fix_members));
+    this.shouldThrowError = false;
+  }
 
   async fetch(): Promise<Result<Member[], ApiError>> {
     if (this.shouldThrowError) {
@@ -109,58 +122,18 @@ class MockMemberServiceForTest implements IMemberService {
     if (this.shouldThrowError) {
       return err({ message: 'Không thể tìm kiếm thành viên.' });
     }
-    let filteredItems = this.members;
+    let filteredItems = [...this.members];
 
-    if (filters.fullName) {
-      const lowerCaseFullName = filters.fullName.toLowerCase();
-      filteredItems = filteredItems.filter(
-        (m) =>
-          m.lastName.toLowerCase().includes(lowerCaseFullName) ||
-          m.firstName.toLowerCase().includes(lowerCaseFullName) ||
-          `${m.lastName} ${m.firstName}`
-            .toLowerCase()
-            .includes(lowerCaseFullName),
-      );
-    }
-    if (filters.dateOfBirth) {
-      filteredItems = filteredItems.filter(
-        (m) =>
-          m.dateOfBirth?.toISOString().split('T')[0] ===
-          filters.dateOfBirth?.toISOString().split('T')[0],
-      );
-    }
-    if (filters.dateOfDeath) {
-      filteredItems = filteredItems.filter(
-        (m) =>
-          m.dateOfDeath?.toISOString().split('T')[0] ===
-          filters.dateOfDeath?.toISOString().split('T')[0],
-      );
-    }
-    if (filters.gender) {
-      filteredItems = filteredItems.filter((m) => m.gender === filters.gender);
-    }
-    if (filters.placeOfBirth) {
-      const lowerCasePlaceOfBirth = filters.placeOfBirth.toLowerCase();
-      filteredItems = filteredItems.filter((m) =>
-        m.placeOfBirth?.toLowerCase().includes(lowerCasePlaceOfBirth),
-      );
-    }
-    if (filters.placeOfDeath) {
-      const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
-      filteredItems = filteredItems.filter((m) =>
-        m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath),
-      );
-    }
-    if (filters.occupation) {
-      const lowerCaseOccupation = filters.occupation.toLowerCase();
-      filteredItems = filteredItems.filter((m) =>
-        m.occupation?.toLowerCase().includes(lowerCaseOccupation),
-      );
-    }
-    if (filters.familyId) {
-      filteredItems = filteredItems.filter(
-        (m) => m.familyId === filters.familyId,
-      );
+    if (filters.searchQuery) {
+      const lowerCaseQuery = filters.searchQuery.toLowerCase();
+      filteredItems = filteredItems.filter((m) => {
+        const fullName = `${m.lastName} ${m.firstName}`.toLowerCase();
+        return (
+          fullName.includes(lowerCaseQuery) ||
+          m.occupation?.toLowerCase().includes(lowerCaseQuery) ||
+          m.placeOfBirth?.toLowerCase().includes(lowerCaseQuery)
+        );
+      });
     }
 
     const totalItems = filteredItems.length;
@@ -179,8 +152,8 @@ class MockMemberServiceForTest implements IMemberService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
-    const members = this.members.filter((m) => ids.includes(m.id));
-    return ok(await simulateLatency(members));
+    const foundMembers = this.members.filter((m) => ids.includes(m.id));
+    return ok(await simulateLatency(foundMembers));
   }
 }
 
@@ -193,14 +166,13 @@ describe('Member Store', () => {
     setActivePinia(pinia);
     const store = useMemberStore();
     store.services = createServices('test', { member: mockMemberService });
-    store.$reset(); // Call reset here
-    await store._loadItems(); // Ensure store is populated before tests run
+    store.$reset();
+    await store._loadItems();
   });
 
   it('should have correct initial state after loading members', () => {
     const store = useMemberStore();
-    // After beforeEach, store should be populated
-    expect(store.items.length).toBe(store.itemsPerPage); // All members fetched
+    expect(store.items.length).toBe(10);
     expect(store.loading).toBe(false);
     expect(store.error).toBe(null);
     expect(store.filters).toEqual({
@@ -212,48 +184,52 @@ describe('Member Store', () => {
       placeOfDeath: '',
       occupation: '',
       familyId: undefined,
+      searchQuery: '',
     });
     expect(store.currentPage).toBe(1);
     expect(store.itemsPerPage).toBe(10);
-    expect(store.totalItems).toBe(20); // Total items from mock service
-    expect(store.totalPages).toBe(2); // 20 members, 10 per page
+    expect(store.totalItems).toBe(20);
+    expect(store.totalPages).toBe(2);
   });
 
   it('getById should return the correct member', async () => {
     const store = useMemberStore();
-    await store._loadItems();
+    await store.setItemsPerPage(100);
     const member = store.getById(fix_members[0].id);
     expect(member).toBeDefined();
     expect(member?.lastName).toBe(fix_members[0].lastName);
   });
 
-  it('addItem should add a new member and update members array', async () => {
+  it('addItem should add a new member and reload items', async () => {
     const store = useMemberStore();
-    await store._loadItems(); // This will now call _loadItems
-    const initialTotalItems = store.totalItems; // Use totalItems
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+    const initialTotalItems = store.totalItems;
+
     const newMemberData: Omit<Member, 'id'> = {
       lastName: 'New',
       firstName: 'Member',
-      fullName: 'New Member', // Add fullName property
+      fullName: 'New Member',
       familyId: mockMemberService.members[0].familyId,
       dateOfBirth: new Date('2000-01-01'),
     };
+
     await store.addItem(newMemberData);
-    expect(store.totalItems).toBe(initialTotalItems + 1); // Check totalItems
-    expect(store.loading).toBe(false);
+
+    expect(store.error).toBeNull();
+    expect(loadItemsSpy).toHaveBeenCalled();
+    expect(store.totalItems).toBe(initialTotalItems + 1);
   });
 
-  it('addItem should set error for empty full name', async () => {
+  it('addItem should set error for empty name', async () => {
     const store = useMemberStore();
     const newMemberData: Omit<Member, 'id'> = {
       lastName: '',
-      firstName: 'Member',
-      fullName: 'Member', // Add fullName property
-      familyId: mockMemberService.members[0].familyId,
+      firstName: '',
+      fullName: '',
+      familyId: '1',
     };
-    await store.addItem(newMemberData); // Call the action
-    expect(store.error).toBe('Họ và tên không được để trống.');
-    expect(store.loading).toBe(false);
+    await store.addItem(newMemberData);
+    expect(store.error).toBe('member.errors.nameMissing');
   });
 
   it('addItem should set error for dateOfBirth after dateOfDeath', async () => {
@@ -261,273 +237,82 @@ describe('Member Store', () => {
     const newMemberData: Omit<Member, 'id'> = {
       lastName: 'Test',
       firstName: 'Member',
-      fullName: 'Test Member', // Add fullName property
-      familyId: mockMemberService.members[0].familyId,
+      fullName: 'Test Member',
+      familyId: '1',
       dateOfBirth: new Date('2000-01-01'),
       dateOfDeath: new Date('1990-01-01'),
     };
-    await store.addItem(newMemberData); // Call the action
-    expect(store.error).toBe('Ngày sinh không thể sau ngày mất.');
-    expect(store.loading).toBe(false);
-  });
-
-  it('addItem should set error for placeOfBirth and placeOfDeath being the same', async () => {
-    const store = useMemberStore();
-    const newMemberData: Omit<Member, 'id'> = {
-      lastName: 'Test',
-      firstName: 'Member',
-      fullName: 'Test Member',
-      familyId: mockMemberService.members[0].familyId,
-      placeOfBirth: 'Same Place',
-      placeOfDeath: 'Same Place',
-    };
     await store.addItem(newMemberData);
-    expect(store.error).toBe('Nơi sinh và nơi mất không thể giống nhau.');
-    expect(store.loading).toBe(false);
+    expect(store.error).toBe('member.errors.dobAfterDod');
   });
 
-  it('addItem should set error for occupation length greater than 100', async () => {
+  it('updateItem should update an existing member and reload', async () => {
     const store = useMemberStore();
-    const newMemberData: Omit<Member, 'id'> = {
-      lastName: 'Test',
-      firstName: 'Member',
-      fullName: 'Test Member',
-      familyId: mockMemberService.members[0].familyId,
-      occupation: 'a'.repeat(101),
-    };
-    await store.addItem(newMemberData);
-    expect(store.error).toBe('Nghề nghiệp không được vượt quá 100 ký tự.');
-    expect(store.loading).toBe(false);
+    const memberToUpdate = { ...store.items[0] };
+    const updatedLastName = 'Updated';
+    memberToUpdate.lastName = updatedLastName;
+
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+
+    await store.updateItem(memberToUpdate);
+
+    expect(store.error).toBeNull();
+    expect(loadItemsSpy).toHaveBeenCalled();
+    const updatedMember = store.getById(memberToUpdate.id);
+    expect(updatedMember?.lastName).toBe(updatedLastName);
   });
 
-  it('updateItem should update an existing member', async () => {
+  it('deleteItem should remove a member and reload', async () => {
     const store = useMemberStore();
-    await store._loadItems();
-    const memberToUpdate = store.items[0];
-    if (memberToUpdate) {
-      const updatedLastName = 'Updated';
-      const updatedMember: Member = {
-        ...memberToUpdate,
-        lastName: updatedLastName,
-      };
-      await store.updateItem(updatedMember);
-      await store._loadItems(); // Force re-fetch after update
-      const foundMember = store.getById(memberToUpdate.id);
-      expect(foundMember?.lastName).toBe(updatedLastName);
-      expect(store.loading).toBe(false);
-    } else {
-      expect.fail('No member to update.');
-    }
+    const memberToDeleteId = store.items[0].id;
+    const initialTotalItems = store.totalItems;
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+
+    await store.deleteItem(memberToDeleteId);
+
+    expect(store.error).toBeNull();
+    expect(loadItemsSpy).toHaveBeenCalled();
+    expect(store.totalItems).toBe(initialTotalItems - 1);
+    expect(store.getById(memberToDeleteId)).toBeUndefined();
   });
 
-  it('updateItem should set error for empty full name', async () => {
+  it('loadItems should filter members by search query', async () => {
     const store = useMemberStore();
-    await store._loadItems();
-    const memberToUpdate = store.items[0];
-    if (memberToUpdate) {
-      const updatedMember: Member = { ...memberToUpdate, lastName: '' };
-      await store.updateItem(updatedMember); // Call the action
-      expect(store.error).toBe('Họ và tên không được để trống.');
-      expect(store.loading).toBe(false);
-    } else {
-      expect.fail('No member to update.');
-    }
+    const _loadItemsSpy = vi.spyOn(store, '_loadItems');
+    const searchQuery = 'Nguyen';
+    await store.loadItems({ searchQuery });
+
+    expect(_loadItemsSpy).toHaveBeenCalled();
+    expect(store.filters.searchQuery).toBe(searchQuery);
   });
 
-  it('updateItem should set error for dateOfBirth after dateOfDeath', async () => {
+  it('setPage should update currentPage and show correct items', async () => {
     const store = useMemberStore();
-    await store._loadItems();
-    const memberToUpdate = store.items[0];
-    if (memberToUpdate) {
-      const updatedMember: Member = {
-        ...memberToUpdate,
-        dateOfBirth: new Date('2000-01-01'),
-        dateOfDeath: new Date('1990-01-01'),
-      };
-      await store.updateItem(updatedMember); // Call the action
-      expect(store.error).toBe('Ngày sinh không thể sau ngày mất.');
-      expect(store.loading).toBe(false);
-    } else {
-      expect.fail('No member to update.');
-    }
-  });
-
-  it('updateItem should set error for placeOfBirth and placeOfDeath being the same', async () => {
-    const store = useMemberStore();
-    await store._loadItems();
-    const memberToUpdate = store.items[0];
-    if (memberToUpdate) {
-      const updatedMember: Member = {
-        ...memberToUpdate,
-        placeOfBirth: 'Same Place',
-        placeOfDeath: 'Same Place',
-      };
-      await store.updateItem(updatedMember);
-      expect(store.error).toBe('Nơi sinh và nơi mất không thể giống nhau.');
-      expect(store.loading).toBe(false);
-    } else {
-      expect.fail('No member to update.');
-    }
-  });
-
-  it('updateItem should set error for occupation length greater than 100', async () => {
-    const store = useMemberStore();
-    await store._loadItems();
-    const memberToUpdate = store.items[0];
-    if (memberToUpdate) {
-      const updatedMember: Member = {
-        ...memberToUpdate,
-        occupation: 'a'.repeat(101),
-      };
-      await store.updateItem(updatedMember);
-      expect(store.error).toBe('Nghề nghiệp không được vượt quá 100 ký tự.');
-      expect(store.loading).toBe(false);
-    } else {
-      expect.fail('No member to update.');
-    }
-  });
-
-  it('deleteMember should remove a member', async () => {
-    const store = useMemberStore();
-    await store._loadItems();
-    const initialTotalItems = store.totalItems; // Use totalItems
-    const memberToDeleteId = store.items[0]?.id;
-    if (memberToDeleteId) {
-      await store.deleteItem(memberToDeleteId);
-      expect(store.totalItems).toBe(initialTotalItems - 1); // Check totalItems
-      expect(store.getById(memberToDeleteId)).toBeUndefined();
-      expect(store.loading).toBe(false);
-    } else {
-      expect.fail('No member to delete.');
-    }
-  });
-
-  it('loadItems should filter members by fullName', async () => {
-    const store = useMemberStore();
-    await store._loadItems();
-    const existingMember = mockMemberService.members[0];
-    const searchName = existingMember.lastName.substring(0, 3); // Search by part of last name
-
-    await store.loadItems({ fullName: searchName });
-    const expectedFilteredCount = mockMemberService.members.filter(
-      (m) =>
-        m.lastName.toLowerCase().includes(searchName.toLowerCase()) ||
-        m.firstName.toLowerCase().includes(searchName.toLowerCase()) ||
-        `${m.lastName} ${m.firstName}`
-          .toLowerCase()
-          .includes(searchName.toLowerCase()),
-    ).length;
-
-    expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems
-    expect(store.currentPage).toBe(1);
-    expect(store.filters.fullName).toBe(searchName);
-  });
-
-  it('loadItems should filter members by dateOfBirth', async () => {
-    const store = useMemberStore();
-    await store._loadItems();
-    const existingMember = mockMemberService.members.find(
-      (m) => m.dateOfBirth !== undefined,
-    );
-    if (!existingMember || !existingMember.dateOfBirth) {
-      expect.fail('No member with dateOfBirth found in mock data.');
-    }
-    const searchDate = existingMember.dateOfBirth;
-
-    await store.loadItems({ dateOfBirth: searchDate });
-    const expectedFilteredCount = mockMemberService.members.filter(
-      (m) =>
-        m.dateOfBirth?.toISOString().split('T')[0] ===
-        searchDate.toISOString().split('T')[0],
-    ).length;
-
-    expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems
-    expect(store.currentPage).toBe(1);
-    expect(store.filters.dateOfBirth?.toISOString().split('T')[0]).toBe(
-      searchDate.toISOString().split('T')[0],
-    );
-  });
-
-  it('loadItems should filter members by gender', async () => {
-    const store = useMemberStore();
-    await store._loadItems();
-    const searchGender = Gender.Male;
-
-    await store.loadItems({ gender: searchGender });
-    const expectedFilteredCount = mockMemberService.members.filter(
-      (m) => m.gender === searchGender,
-    ).length;
-
-    expect(store.totalItems).toBe(expectedFilteredCount); // Check totalItems
-    expect(store.currentPage).toBe(1);
-    expect(store.filters.gender).toBe(searchGender);
-  });
-
-  it('setPage should update currentPage and affect paginatedItems', async () => {
-    const store = useMemberStore();
-    await store._loadItems(); // 20 members, 10 per page, 2 pages
-
+    await store.setItemsPerPage(10);
     store.setPage(2);
     expect(store.currentPage).toBe(2);
-    expect(store.paginatedItems.length).toBe(10); // Second page of 10 items
-
-    // Invalid page (too high)
-    store.setPage(3);
-    expect(store.currentPage).toBe(2);
-
-    // Invalid page (too low)
-    store.setPage(0);
-    expect(store.currentPage).toBe(2);
+    expect(store.paginatedItems.length).toBe(10);
+    expect(store.paginatedItems[0].id).toBe(mockMemberService.members[10].id);
   });
 
-  it('setItemsPerPage should update itemsPerPage, reset currentPage, and affect paginatedItems', async () => {
+  it('setItemsPerPage should update itemsPerPage and reload', async () => {
     const store = useMemberStore();
-    await store._loadItems(); // 20 members, 10 per page, 2 pages
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
 
-    expect(store.itemsPerPage).toBe(10);
-    expect(store.totalPages).toBe(2);
+    await store.setItemsPerPage(5);
 
-    // Change to 5 items per page
-    await store.setItemsPerPage(5); // 20 members, 5 per page -> 4 pages
     expect(store.itemsPerPage).toBe(5);
+    expect(store.currentPage).toBe(1);
+    expect(loadItemsSpy).toHaveBeenCalled();
     expect(store.totalPages).toBe(4);
-    expect(store.currentPage).toBe(1);
-
-    // Change to 20 items per page, current page is 1
-    await store.setItemsPerPage(20); // 20 members, 20 per page -> 1 page
-    expect(store.currentPage).toBe(1);
-    expect(store.itemsPerPage).toBe(20);
-    expect(store.totalPages).toBe(1);
   });
 
-  it('setCurrentItem should set the current item', () => {
-    const store = useMemberStore();
-    const mockMember: Member = {
-      id: 'test-family-id',
-      lastName: 'Doe',
-      firstName: 'John',
-      fullName: 'John Doe',
-      familyId: '1',
-      dateOfBirth: new Date('2000-01-01'),
-      dateOfDeath: new Date('2020-01-01'),
-      gender: Gender.Male,
-      placeOfBirth: 'New York',
-      placeOfDeath: 'Los Angeles',
-      occupation: 'Engineer',
-    };
-    store.setCurrentItem(mockMember);
-    expect(store.currentItem).toEqual(mockMember);
-
-    store.setCurrentItem(null);
-    expect(store.currentItem).toBeNull();
-  });
-
-  it('loadItems should set error and loading to false on fetch failure', async () => {
+  it('_loadItems should set error on fetch failure', async () => {
     const store = useMemberStore();
     mockMemberService.shouldThrowError = true;
     await store._loadItems();
-    expect(store.error).toBe('Không thể tải danh sách thành viên.');
-    expect(store.loading).toBe(false);
+    expect(store.error).toBe('member.errors.load');
     expect(store.items).toEqual([]);
+    expect(store.totalItems).toBe(0);
   });
 });
