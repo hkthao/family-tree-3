@@ -1,6 +1,13 @@
 # Đội ngũ Phát triển
 
-## Thành viên
+## Mục lục
+
+- [1. Thành viên](#1-thành-viên)
+- [2. Trách nhiệm](#2-trách-nhiệm)
+
+---
+
+## 1. Thành viên
 
 | Tên           | Vai trò                  | Liên hệ                      |
 | :------------ | :----------------------- | :--------------------------- |
@@ -9,7 +16,7 @@
 | **Lê Văn C**    | QA Engineer              | `c.le@example.com`           |
 | **Phạm Thị D**  | Project Manager          | `d.pham@example.com`         |
 
-## Trách nhiệm
+## 2. Trách nhiệm
 
 -   **Backend**: Chịu trách nhiệm về API, database, và kiến trúc hệ thống.
 -   **Frontend**: Chịu trách nhiệm về giao diện người dùng và trải nghiệm người dùng.

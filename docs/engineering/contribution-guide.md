@@ -1,5 +1,14 @@
 # Hướng dẫn Đóng góp
 
+## Mục lục
+
+- [1. Chiến lược Branch](#1-chiến-lược-branch)
+- [2. Commit Messages](#2-commit-messages)
+- [3. Quy trình Pull Request](#3-quy-trình-pull-request)
+- [4. Code Style](#4-code-style)
+
+---
+
 Tài liệu này mô tả các quy tắc và quy trình để đóng góp vào dự án Cây Gia Phả.
 
 ## 1. Chiến lược Branch

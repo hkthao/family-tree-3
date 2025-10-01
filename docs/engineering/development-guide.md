@@ -1,5 +1,22 @@
 # Hướng dẫn Phát triển
 
+## Mục lục
+
+- [1. Yêu cầu môi trường](#1-yêu-cầu-môi-trường)
+- [2. Cài đặt và Chạy dự án](#2-cài-đặt-và-chạy-dự-án)
+  - [2.1. Clone repository](#21-clone-repository)
+  - [2.2. Chạy với Docker Compose (Khuyến nghị)](#22-chạy-với-docker-compose-khuyến-nghị)
+  - [2.3. Chạy riêng lẻ](#23-chạy-riêng-lẻ)
+- [3. Build và Deploy](#3-build-và-deploy)
+  - [3.1. Build Docker images](#31-build-docker-images)
+  - [3.2. Deploy](#32-deploy)
+- [4. Quản lý Database](#4-quản-lý-database)
+  - [4.1. Tạo migration mới](#41-tạo-migration-mới)
+  - [4.2. Áp dụng migration](#42-áp-dụng-migration)
+- [5. Seeding a Database](#5-seeding-a-database)
+
+---
+
 Tài liệu này hướng dẫn cách cài đặt môi trường, build, và deploy dự án Cây Gia Phả.
 
 ## 1. Yêu cầu môi trường
@@ -77,13 +94,13 @@ docker-compose -f infra/docker-compose.yml up -d
 
 Dự án sử dụng Entity Framework Core Migrations để quản lý schema database.
 
-### Tạo migration mới
+### 4.1. Tạo migration mới
 
 ```bash
 dotnet ef migrations add [MigrationName] --project backend/src/Infrastructure --startup-project backend/src/Web
 ```
 
-### Áp dụng migration
+### 4.2. Áp dụng migration
 
 ```bash
 dotnet ef database update --project backend/src/Infrastructure --startup-project backend/src/Web

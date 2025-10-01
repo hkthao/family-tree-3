@@ -1,72 +1,117 @@
 # Hướng dẫn Frontend
 
-Tài liệu này cung cấp hướng dẫn chi tiết về cấu trúc, quy tắc và các phương pháp tốt nhất cho việc phát triển Frontend của dự án.
+## Mục lục
 
-## 1. Cấu trúc thư mục
+- [1. Giới thiệu](#1-giới-thiệu)
+- [2. Cấu trúc thư mục](#2-cấu-trúc-thư-mục)
+- [3. Quản lý trạng thái với Pinia](#3-quản-lý-trạng-thái-với-pinia)
+- [4. Quy tắc đặt tên Component](#4-quy-tắc-đặt-tên-component)
+- [5. Coding Style](#5-coding-style)
+- [6. Bất đồng bộ](#6-bất-đồng-bộ)
+- [7. Mapping Dữ liệu từ API](#7-mapping-dữ-liệu-từ-api)
+- [8. Hướng dẫn Kiểm thử](#8-hướng-dẫn-kiểm-thử)
+
+---
+
+## 1. Giới thiệu
+
+Frontend của dự án được xây dựng bằng **Vue 3** với **TypeScript**, sử dụng **Vite** làm công cụ build. Giao diện người dùng được xây dựng bằng **Vuetify 3**, và quản lý trạng thái bằng **Pinia**. **ESLint** và **Prettier** được sử dụng để đảm bảo chất lượng code.
+
+## 2. Cấu trúc thư mục
 
 ```
 frontend/
 ├── src/
-│   ├── assets/         # Chứa các tài sản tĩnh (hình ảnh, fonts)
-│   ├── components/     # Chứa các component có thể tái sử dụng
-│   ├── composables/    # Chứa các hàm logic có thể tái sử dụng (Vue 3)
-│   ├── constants/      # Chứa các hằng số
-│   ├── data/           # Chứa dữ liệu mock
-│   ├── layouts/        # Chứa các layout chính của ứng dụng
-│   ├── locales/        # Chứa các file dịch (i18n)
-│   ├── plugins/        # Chứa các plugin của Vue (vuetify, pinia, ...)
+│   ├── assets/         # Tài sản tĩnh (hình ảnh, fonts)
+│   ├── components/     # Component có thể tái sử dụng
+│   ├── composables/    # Logic tái sử dụng (Vue 3 composables)
+│   ├── constants/      # Hằng số
+│   ├── data/           # Dữ liệu mock
+│   ├── layouts/        # Layout chính của ứng dụng
+│   ├── locales/        # File dịch (i18n)
+│   ├── plugins/        # Plugin của Vue (vuetify, pinia, ...)
 │   ├── router/         # Cấu hình routing
-│   ├── services/       # Chứa các service giao tiếp với API
-│   ├── stores/         # Chứa các store của Pinia
-│   ├── styles/         # Chứa các file style chung
-│   ├── types/          # Chứa các định nghĩa type/interface
-│   ├── utils/          # Chứa các hàm tiện ích
-│   └── views/          # Chứa các trang (page components)
-├── tests/              # Chứa các file test
+│   ├── services/       # Service giao tiếp với API
+│   ├── stores/         # Store của Pinia
+│   ├── styles/         # Style chung
+│   ├── types/          # Định nghĩa type/interface
+│   ├── utils/          # Hàm tiện ích
+│   └── views/          # Page components
+├── tests/              # File test
 └── ...
 ```
 
-## 2. Quản lý trạng thái với Pinia
+## 3. Quản lý trạng thái với Pinia
 
-Dự án sử dụng Pinia để quản lý trạng thái. Các store được đặt trong `src/stores`.
+Pinia được sử dụng để quản lý trạng thái toàn cục. Các store được đặt trong `src/stores`.
 
-### Quy tắc đặt tên
-
--   Tên file: `[name].store.ts` (ví dụ: `family.store.ts`)
--   Tên store (id): `[name]` (ví dụ: `family`)
-
-### Cấu trúc một store
+**Lifecycle Hooks & API Service:**
 
 ```typescript
+// stores/family.store.ts
 import { defineStore } from 'pinia';
+import { useFamilyService } from '@/services';
 
-export const useMyStore = defineStore('myStore', {
-  state: () => ({
-    // ... state properties
-  }),
-  getters: {
-    // ... getters
-  },
+export const useFamilyStore = defineStore('family', {
+  state: () => ({ families: [], loading: false }),
   actions: {
-    // ... actions
+    async fetchFamilies() {
+      this.loading = true;
+      const familyService = useFamilyService();
+      try {
+        this.families = await familyService.getAll();
+      } catch (error) {
+        console.error("Failed to fetch families:", error);
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });
 ```
 
-## 3. Quy tắc đặt tên Component
+## 4. Quy tắc đặt tên Component
 
--   **PascalCase**: Tên component luôn ở dạng PascalCase (ví dụ: `FamilyTree.vue`).
--   **Tiền tố `Base`**: Các component cơ bản, có thể tái sử dụng cao nên có tiền tố `Base` (ví dụ: `BaseButton.vue`).
--   **Tên component cha**: Component con nên có tên component cha làm tiền tố (ví dụ: `FamilyTreeMember.vue` là con của `FamilyTree.vue`).
+-   **PascalCase**: `FamilyTree.vue`.
+-   **Hierarchy**: Component con nên có tên component cha làm tiền tố. Ví dụ: `FamilyTreeMember.vue` là con của `FamilyTree.vue`.
+-   **Slots**: Khi sử dụng slot, đặt tên slot rõ ràng. Ví dụ: `<slot name="header"></slot>`.
 
-## 4. Coding Style
+## 5. Coding Style
 
--   Sử dụng **ESLint** và **Prettier** để đảm bảo code style nhất quán. Chạy `npm run lint` để kiểm tra.
--   Luôn sử dụng `<script setup lang="ts">` cho các component Vue 3.
--   Sử dụng TypeScript cho tất cả các file `.ts` và `.vue`.
--   Viết comment rõ ràng cho các logic phức tạp.
+-   **Import Order**: Nhóm các import theo thứ tự: thư viện bên ngoài, alias của project (`@/`), import tương đối (`./`, `../`).
+-   **Props Order**: `defineProps` nên được định nghĩa ở đầu `<script setup>`.
+-   **CSS**: Sử dụng `<style scoped>` để CSS chỉ ảnh hưởng đến component hiện tại. Các style toàn cục đặt trong `src/styles`.
+-   **Vuetify**: Sử dụng các component của Vuetify một cách nhất quán.
 
-## 5. Bất đồng bộ
+## 6. Bất đồng bộ
 
--   Sử dụng `async/await` cho tất cả các tác vụ bất đồng bộ (ví dụ: gọi API).
--   Xử lý lỗi bằng `try...catch` hoặc trong các service.
+-   **Mocking**: Trong môi trường development, các service có thể được mock để trả về dữ liệu giả lập từ `src/data`.
+-   **Error Handling**: Sử dụng `try...catch` trong các action của Pinia hoặc trong component để xử lý lỗi từ API.
+-   **Retry Strategy**: (Chưa áp dụng) Có thể xem xét sử dụng thư viện như `axios-retry` nếu cần.
+
+## 7. Mapping Dữ liệu từ API
+
+Sử dụng TypeScript interfaces trong `src/types` để định nghĩa cấu trúc dữ liệu từ API.
+
+```typescript
+// src/types/member.ts
+export interface Member {
+  id: string;
+  familyId: string;
+  fullName: string;
+  gender?: 'Male' | 'Female' | 'Other';
+  dateOfBirth?: string; // ISO 8601 format
+}
+```
+
+## 8. Hướng dẫn Kiểm thử
+
+-   **Component Tests**: Kiểm tra giao diện và tương tác của component. Sử dụng `Vue Test Utils` và `Vitest`.
+-   **Store Tests**: Kiểm tra logic của Pinia store.
+-   **API Service Tests**: Mock API để kiểm tra các service.
+
+-   **Chạy test:**
+
+    ```bash
+    npm run test:unit --prefix frontend
+    ```

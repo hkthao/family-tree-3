@@ -45,19 +45,20 @@ Một hệ thống quản lý gia phả chuyên nghiệp cho phép bạn xây d�
     -   **Frontend:** [http://localhost](http://localhost)
     -   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 
-Để có hướng dẫn chi tiết hơn, bao gồm cách chạy các dịch vụ riêng lẻ để phát triển, vui lòng tham khảo [Hướng dẫn cho Developer](./docs/2_technical/developer_guide.md).
+Để có hướng dẫn chi tiết hơn, bao gồm cách chạy các dịch vụ riêng lẻ để phát triển, vui lòng tham khảo [Hướng dẫn Phát triển](./docs/engineering/development-guide.md).
 
 ## 📚 Tài Liệu Dự Án
 
-Tất cả tài liệu dự án được đặt trong thư mục [`docs/`](./docs/). Dưới đây là một số tài liệu quan trọng để bạn bắt đầu:
+Tất cả tài liệu dự án được đặt trong thư mục [`docs/`](./docs/README.md). Dưới đây là một số tài liệu quan trọng để bạn bắt đầu:
 
--   [**Hướng dẫn cho Developer**](./docs/2_technical/developer_guide.md): Hướng dẫn toàn diện để thiết lập môi trường phát triển, chạy dự án và hiểu quy trình phát triển.
--   [**Thiết kế Hệ thống**](./docs/2_technical/system_design.md): Tổng quan về kiến trúc hệ thống, các sơ đồ và thiết kế cơ sở dữ liệu.
--   [**Thiết kế API**](./docs/2_technical/api_design.md): Tài liệu chi tiết về các điểm cuối API.
+-   [**Kiến trúc tổng quan**](./docs/engineering/architecture.md)
+-   [**Hướng dẫn Phát triển**](./docs/engineering/development-guide.md)
+-   [**Tham chiếu API**](./docs/engineering/api-reference.md)
+-   [**Product Backlog**](./docs/project/backlog.md)
 
 ## 🤝 Đóng Góp
 
-Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc [Hướng dẫn Đóng góp](./docs/2_technical/contribution.md) của chúng tôi để biết chi tiết về quy tắc ứng xử và quy trình gửi pull request.
+Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md) của chúng tôi để biết chi tiết về quy tắc ứng xử và quy trình gửi pull request.
 
 ## 📄 Giấy Phép
 

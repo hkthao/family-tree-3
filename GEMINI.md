@@ -56,31 +56,29 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 *   `frontend/`: Chứa mã nguồn ứng dụng Vue.js frontend.
 *   `infra/`: Chứa các tệp cấu hình cho Docker (docker-compose.yml, Dockerfile.backend, Dockerfile.frontend), Nginx và seed data.
 *   `docs/`: Chứa toàn bộ tài liệu dự án, được phân loại thành các thư mục con:
-    *   `1_product/`: Tài liệu sản phẩm (backlog, epics, yêu cầu, ước tính story, v.v.).
-    *   `2_technical/`: Tài liệu kỹ thuật (thiết kế API, hướng dẫn đóng góp, hướng dẫn phát triển, thiết kế hệ thống, v.v.).
-    *   `3_process/`: Tài liệu quy trình (thiết lập bảng Kanban, lộ trình, kế hoạch sprint).
-    *   `4_testing/`: Các kịch bản kiểm thử.
-    *   `5_user/`: Hướng dẫn sử dụng.
+    *   `engineering/`: Tài liệu kỹ thuật (kiến trúc, hướng dẫn phát triển, API, mô hình dữ liệu, kiểm thử, bảo mật).
+    *   `project/`: Tài liệu quản lý dự án (backlog, sprint, test cases, release notes, roadmap, team).
 
 ## 5. Tổng quan Tài liệu
 
 Thư mục `docs/` chứa các tài liệu quan trọng sau:
 
-*   **Product Backlog (`backlog.md`):** Danh sách chi tiết các User Story.
-*   **Epics (`epics.md`):** Phân loại User Story theo các nhóm chức năng lớn.
-*   **Requirements (`requirements.md`):** Tài liệu yêu cầu chi tiết, bao gồm chức năng và phi chức năng.
-*   **API Design (`api_design.md`):** Mô tả các endpoint API của backend.
-*   **System Design (`system_design.md`):** Kiến trúc tổng quan, sơ đồ hệ thống và schema database.
-*   **Developer Guide (`developer_guide.md`):** Hướng dẫn cài đặt môi trường, chạy dự án, test, linting, v.v.
-*   **Roadmap (`roadmap.md`):** Lộ trình phát triển sản phẩm theo quý.
-*   **Sprint Planning (`sprint_planning.md`):** Kế hoạch chi tiết cho các sprint đầu tiên.
-*   **Test Cases (`TestCases.md`):** Các kịch bản kiểm thử cho các chức năng chính.
+*   [**Tổng quan Tài liệu**](./docs/README.md): Giới thiệu và liên kết đến tất cả các tài liệu con.
+*   [**Kiến trúc hệ thống**](./docs/engineering/architecture.md): Mô tả kiến trúc tổng quan, sơ đồ hệ thống và schema database.
+*   [**Hướng dẫn Phát triển**](./docs/engineering/development-guide.md): Hướng dẫn cài đặt môi trường, chạy dự án, test, linting, v.v.
+*   [**Tham chiếu API**](./docs/engineering/api-reference.md): Mô tả các endpoint API của backend.
+*   [**Product Backlog**](./docs/project/backlog.md): Danh sách chi tiết các User Story.
+*   [**Kế hoạch Sprint**](./docs/project/sprints.md): Kế hoạch chi tiết cho các sprint.
+*   [**Kịch bản Kiểm thử**](./docs/project/test-cases.md): Các kịch bản kiểm thử cho các chức năng chính.
+*   [**Ghi chú phát hành**](./docs/project/release-notes.md): Lịch sử các phiên bản và thay đổi.
+*   [**Lộ trình Phát triển**](./docs/project/roadmap.md): Lộ trình phát triển sản phẩm theo quý.
+*   [**Đội ngũ Phát triển**](./docs/project/team.md): Thông tin về các thành viên trong đội.
 
 ## 6. Hướng dẫn Phát triển
 
 *   **Code Style & Linting:** Sử dụng `dotnet format` cho backend và `eslint` cho frontend.
-*   **Testing:** Chạy unit tests và kiểm tra code coverage cho cả backend (`./run-coverage.sh`) và frontend (`npm run test:coverage --prefix frontend`).
-*   **Quy trình Pull Request:** Tuân thủ quy tắc đặt tên branch, commit message (Conventional Commits) và checklist review code.
+*   **Testing:** Chạy unit tests và kiểm tra code coverage cho cả backend và frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
+*   **Quy trình Pull Request:** Tuân thủ quy tắc đặt tên branch, commit message (Conventional Commits) và checklist review code. Chi tiết tại [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md).
 *   **Chiến lược nhánh:** Sử dụng `main`, `develop`, `feature/`, `bugfix/`, `hotfix/`, `docs/`.
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
 *   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.

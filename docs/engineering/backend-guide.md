@@ -1,67 +1,161 @@
 # Hướng dẫn Backend
 
-Tài liệu này cung cấp hướng dẫn chi tiết về cấu trúc, quy tắc và các phương pháp tốt nhất cho việc phát triển Backend của dự án.
+## Mục lục
 
-## 1. Cấu trúc thư mục (Clean Architecture)
+- [1. Giới thiệu](#1-giới-thiệu)
+- [2. Yêu cầu môi trường](#2-yêu-cầu-môi-trường)
+- [3. Cấu trúc Dự án](#3-cấu-trúc-dự-án)
+- [4. Luồng Request](#4-luồng-request)
+- [5. Dependency Injection](#5-dependency-injection)
+- [6. Middleware](#6-middleware)
+- [7. Xác thực & Phân quyền](#7-xác-thực--phân-quyền)
+- [8. Repository Pattern](#8-repository-pattern)
+- [9. Database Migration](#9-database-migration)
+- [10. Hướng dẫn Kiểm thử](#10-hướng-dẫn-kiểm-thử)
+- [11. Logging & Monitoring](#11-logging--monitoring)
+- [12. Coding Style](#12-coding-style)
+- [13. Best Practices](#13-best-practices)
+- [14. Tài liệu liên quan](#14-tài-liệu-liên-quan)
 
-Dự án sử dụng kiến trúc Clean Architecture, chia thành 4 project chính:
+---
+
+## 1. Giới thiệu
+
+Backend của dự án được xây dựng bằng **ASP.NET Core 8** và tuân thủ theo **Clean Architecture**. Kiến trúc này giúp tách biệt các mối quan tâm, dễ dàng bảo trì và mở rộng.
+
+## 2. Yêu cầu môi trường
+
+-   **.NET 8 SDK**
+-   **Docker** (để chạy database)
+-   **Công cụ CLI**: `dotnet-ef` để quản lý migration.
+
+## 3. Cấu trúc Dự án
+
+Dự án được chia thành các project chính:
 
 ```
 backend/
 ├── src/
-│   ├── Domain/         # Chứa các entity, value object, enum, và domain event
-│   ├── Application/    # Chứa logic nghiệp vụ, DTOs, và các interface
-│   ├── Infrastructure/ # Chứa các triển khai của interface (repository, services)
-│   └── Web/            # Chứa API controllers và cấu hình ASP.NET Core
-└── tests/              # Chứa các project test
+│   ├── Domain/         # Entities, Value Objects, Enums, Domain Events
+│   ├── Application/    # Logic nghiệp vụ, DTOs, Interfaces
+│   ├── Infrastructure/ # Triển khai Interfaces (Repositories, Services)
+│   └── Web/            # API Controllers, Cấu hình ASP.NET Core
+└── tests/
+    ├── Application.UnitTests/
+    └── Infrastructure.IntegrationTests/
 ```
 
-## 2. Dependency Injection
+## 4. Luồng Request
 
--   Sử dụng built-in Dependency Injection của ASP.NET Core.
--   Các service và repository được đăng ký trong file `DependencyInjection.cs` của mỗi project.
+Một request từ client sẽ đi qua các lớp như sau:
 
-## 3. Middleware
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller (Web)
+    participant MediatR (Application)
+    participant Handler (Application)
+    participant Repository (Infrastructure)
+    participant Database
 
--   **Error Handling**: Middleware xử lý lỗi tập trung, bắt các exception và trả về response lỗi chuẩn.
--   **Authentication & Authorization**: Middleware xác thực JWT token và kiểm tra quyền truy cập.
+    Client->>Controller: Gửi HTTP Request
+    Controller->>MediatR: Gửi Command/Query
+    MediatR->>Handler: Điều phối đến Handler tương ứng
+    Handler->>Repository: Gọi phương thức truy vấn dữ liệu
+    Repository->>Database: Thực thi câu lệnh SQL
+    Database-->>Repository: Trả về dữ liệu
+    Repository-->>Handler: Trả về domain model
+    Handler-->>Controller: Trả về DTO
+    Controller-->>Client: Trả về HTTP Response
+```
 
-## 4. Repository Pattern
+## 5. Dependency Injection
 
--   Sử dụng Repository Pattern để tách biệt logic nghiệp vụ khỏi lớp truy cập dữ liệu.
--   Các interface của repository được định nghĩa trong `Application` layer.
--   Các triển khai cụ thể (sử dụng Entity Framework Core) được đặt trong `Infrastructure` layer.
+Sử dụng built-in DI container của ASP.NET Core. Các services được đăng ký trong `DependencyInjection.cs` của mỗi project và gọi trong `Program.cs` của project `Web`.
 
-### Ví dụ
-
-**Interface trong Application Layer:**
+**Ví dụ (`Web/Program.cs`):**
 
 ```csharp
-public interface IFamilyRepository
-{
-    Task<Family?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task AddAsync(Family family, CancellationToken cancellationToken = default);
-}
+builder.Services
+    .AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration)
+    .AddWebServices();
 ```
 
-**Triển khai trong Infrastructure Layer:**
+## 6. Middleware
+
+-   **Error Handling**: Middleware `UseExceptionHandler` bắt tất cả exception chưa được xử lý và trả về một response lỗi chuẩn theo [ProblemDetails](https://tools.ietf.org/html/rfc7807).
+-   **Authentication & Authorization**: `UseAuthentication` và `UseAuthorization` để xác thực và phân quyền.
+
+## 7. Xác thực & Phân quyền
+
+-   **Cơ chế**: Sử dụng **JWT Bearer Token**.
+-   **Provider hiện tại**: **Auth0**. Tuy nhiên, hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách triển khai một `IAuthService` mới.
+-   **Luồng JWT**: Client lấy token từ Auth0 và gửi trong header `Authorization` của mỗi request.
+
+## 8. Repository Pattern
+
+-   **Interface**: Định nghĩa trong `Application` layer.
+-   **Triển khai**: Trong `Infrastructure` layer, sử dụng Entity Framework Core.
+
+**Kiểm thử Repository với In-Memory Database:**
 
 ```csharp
-public class FamilyRepository : IFamilyRepository
-{
-    private readonly ApplicationDbContext _context;
+// Trong file test
+var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+    .UseInMemoryDatabase(databaseName: "TestDb")
+    .Options;
 
-    public FamilyRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
-    // ... triển khai các phương thức
-}
+_context = new ApplicationDbContext(options);
+_repository = new MemberRepository(_context);
 ```
 
-## 5. Coding Style
+## 9. Database Migration
 
--   Sử dụng `dotnet format` để đảm bảo code style nhất quán.
--   Tuân thủ các quy tắc đặt tên và coding convention của C#.
--   Viết comment XML cho các public API để Swagger có thể tự động tạo tài liệu.
+Sử dụng `dotnet-ef` để quản lý schema.
+
+-   **Tạo migration:**
+
+    ```bash
+    dotnet ef migrations add InitialCreate --project src/Infrastructure -s src/Web
+    ```
+
+-   **Cập nhật database:**
+
+    ```bash
+    dotnet ef database update --project src/Infrastructure -s src/Web
+    ```
+
+## 10. Hướng dẫn Kiểm thử
+
+-   **Unit Tests**: `Application.UnitTests`
+-   **Integration Tests**: `Infrastructure.IntegrationTests`
+
+-   **Chạy tất cả test:**
+
+    ```bash
+    dotnet test
+    ```
+
+## 11. Logging & Monitoring
+
+-   **Logging**: Sử dụng `ILogger` của .NET và **Serilog** để ghi log ra console và file.
+-   **Monitoring**: (Chưa triển khai) Sẽ tích hợp **OpenTelemetry** để thu thập metrics và traces.
+
+## 12. Coding Style
+
+-   Sử dụng `dotnet format` để duy trì code style nhất quán.
+-   Tuân thủ [Microsoft C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions).
+
+## 13. Best Practices
+
+-   Luôn inject dependency qua interface.
+-   Sử dụng `CancellationToken` trong các phương thức async.
+-   Áp dụng **Unit of Work pattern** khi cần thực hiện nhiều thao tác trong một transaction.
+-   Sử dụng `async/await` một cách nhất quán.
+
+## 14. Tài liệu liên quan
+
+-   [Kiến trúc tổng quan](./architecture.md)
+-   [Hướng dẫn API](./api-reference.md)
+-   [Hướng dẫn Kiểm thử](./testing-guide.md)

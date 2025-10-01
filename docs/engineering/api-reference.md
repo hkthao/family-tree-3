@@ -1,73 +1,143 @@
-# Tham chiếu API
+# Hướng dẫn API
 
-Tài liệu này mô tả chi tiết về các endpoint của API theo chuẩn OpenAPI.
+## Mục lục
 
-## 1. Chuẩn OpenAPI
+- [1. Tổng quan](#1-tổng-quan)
+- [2. Xác thực (Authentication)](#2-xác-thực-authentication)
+- [3. Phân trang (Pagination)](#3-phân-trang-pagination)
+- [4. Lọc và Tìm kiếm](#4-lọc-và-tìm-kiếm)
+- [5. Cấu trúc Phản hồi Lỗi (Error Response)](#5-cấu-trúc-phản-hồi-lỗi-error-response)
+- [6. Các Endpoint chính](#6-các-endpoint-chính)
+  - [6.1. Quản lý Dòng họ (`/api/families`)](#61-quản-lý-dòng-họ-apifamilies)
+  - [6.2. Quản lý Thành viên (`/api/members`)](#62-quản-lý-thành-viên-apimembers)
+- [7. Mô hình Dữ liệu (Response Models)](#7-mô-hình-dữ-liệu-response-models)
+  - [7.1. Family](#71-family)
+  - [7.2. Member](#72-member)
 
-API của chúng ta tuân thủ chuẩn [OpenAPI 3.0](https://swagger.io/specification/).
+---
 
-Bạn có thể xem tài liệu API trực quan qua Swagger UI tại địa chỉ: `http://localhost:8080/swagger`
+## 1. Tổng quan
 
-## 2. Cấu trúc Endpoint
+- **Base URL**: `/api`
+- **Định dạng**: JSON
+- **Swagger UI**: Tài liệu tương tác có tại `http://localhost:8080/swagger`.
 
-Mỗi endpoint được mô tả theo cấu trúc sau:
+## 2. Xác thực (Authentication)
 
--   **Path**: Đường dẫn của endpoint (ví dụ: `/api/families`).
--   **Method**: Phương thức HTTP (GET, POST, PUT, DELETE).
--   **Description**: Mô tả ngắn về chức năng của endpoint.
--   **Request**: Mô tả về request body, query parameters, và headers.
--   **Response**: Mô tả về các response có thể có, bao gồm cả success và error.
--   **Error Codes**: Danh sách các mã lỗi và ý nghĩa.
+Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu API. Cơ chế này được thiết kế để không phụ thuộc vào nhà cung cấp xác thực cụ thể (provider-agnostic).
 
-## 3. Các Endpoint chính
+### Luồng xác thực
 
-### a. Quản lý Dòng họ (`/api/families`)
-- `GET /api/families`: Lấy danh sách tất cả dòng họ.
-- `GET /api/families/{id}`: Lấy chi tiết một dòng họ theo ID.
-- `POST /api/families`: Tạo dòng họ mới.
-- `PUT /api/families/{id}`: Cập nhật thông tin dòng họ.
-- `DELETE /api/families/{id}`: Xóa một dòng họ.
+1.  **Client lấy Token**: Client (ví dụ: Frontend app) chịu trách nhiệm lấy JWT từ một nhà cung cấp xác thực (ví dụ: Auth0, Keycloak, Firebase Auth).
+2.  **Gửi Token trong Header**: Với mỗi yêu cầu đến các endpoint được bảo vệ, client phải gửi token trong header `Authorization`.
 
-### b. Quản lý Thành viên (`/api/members`)
-- `GET /api/members`: Lấy danh sách tất cả thành viên (có thể hỗ trợ filter, search).
-- `GET /api/members/{id}`: Lấy chi tiết một thành viên theo ID.
-- `POST /api/members`: Thêm thành viên mới.
-- `PUT /api/members/{id}`: Cập nhật thông tin thành viên.
-- `DELETE /api/members/{id}`: Xóa một thành viên.
+    ```http
+    GET /api/families/some-family-id
+    Host: localhost:8080
+    Authorization: Bearer <YOUR_JWT_TOKEN>
+    ```
 
-### c. Quản lý Quan hệ (`/api/relationships`)
-- `POST /api/relationships`: Tạo quan hệ mới.
-- `GET /api/relationships/member/{memberId}`: Lấy tất cả các mối quan hệ của một thành viên.
-- `PUT /api/relationships/{id}`: Cập nhật thông tin một mối quan hệ.
-- `DELETE /api/relationships/{id}`: Xóa một quan hệ.
+## 3. Phân trang (Pagination)
 
-### d. Cây Gia Phả (`/api/family-trees`)
-- `GET /api/family-trees/{familyId}`: Lấy dữ liệu cây gia phả dạng JSON để frontend vẽ.
+Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/members`) đều hỗ trợ phân trang qua các query parameter sau:
 
-### e. Quản lý File đính kèm (`/api/members/{memberId}/attachments`)
-- `POST /api/members/{memberId}/attachments`: Tải lên một file đính kèm cho thành viên.
-- `DELETE /api/members/{memberId}/attachments/{attachmentId}`: Xóa một file đính kèm.
+-   `pageNumber` (int, optional, default: 1): Số trang muốn lấy.
+-   `pageSize` (int, optional, default: 10): Số lượng mục trên mỗi trang.
 
-## 4. Ví dụ chi tiết
+**Ví dụ:**
 
-### Tạo thành viên mới
+```http
+GET /api/families?pageNumber=2&pageSize=20
+```
 
-**Request:** `POST /api/members`
+Phản hồi sẽ có cấu trúc `Paginated<T>`:
 
 ```json
 {
-  "familyId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-  "fullName": "Nguyễn Văn A",
-  "gender": "Male",
-  "dateOfBirth": "1990-01-15T00:00:00Z",
-  "placeOfBirth": "Hà Nội"
+  "items": [ ... ],
+  "pageNumber": 2,
+  "pageSize": 20,
+  "totalItems": 150,
+  "totalPages": 8
 }
 ```
 
-**Response (201 Created)**:
+## 4. Lọc và Tìm kiếm
+
+Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. Ví dụ, `GET /api/members` có thể hỗ trợ:
+
+-   `search`: Chuỗi ký tự để tìm kiếm theo tên, nghề nghiệp, v.v.
+-   `gender`: Lọc theo giới tính.
+
+**Ví dụ:**
+
+```http
+GET /api/members?search=Văn&gender=Male
+```
+
+## 5. Cấu trúc Phản hồi Lỗi (Error Response)
+
+Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với cấu trúc sau:
 
 ```json
 {
-  "id": "m1b2c3d4-e5f6-7890-1234-567890abcdef"
+  "type": "string",
+  "title": "string",
+  "status": number,
+  "detail": "string",
+  "errors": { ... }
+}
+```
+
+**Ví dụ lỗi validation (400 Bad Request):**
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "One or more validation errors occurred.",
+  "status": 400,
+  "errors": {
+    "Name": [
+      "The Name field is required."
+    ]
+  }
+}
+```
+
+## 6. Các Endpoint chính
+
+### 6.1. Quản lý Dòng họ (`/api/families`)
+
+-   `GET /api/families`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
+-   `POST /api/families`: Tạo dòng họ mới.
+
+### 6.2. Quản lý Thành viên (`/api/members`)
+
+-   `GET /api/members`: Lấy danh sách thành viên (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
+-   `POST /api/members`: Thêm thành viên mới.
+
+## 7. Mô hình Dữ liệu (Response Models)
+
+### 7.1. Family
+
+```json
+{
+  "id": "string (uuid)",
+  "name": "string",
+  "description": "string",
+  "address": "string"
+}
+```
+
+### 7.2. Member
+
+```json
+{
+  "id": "string (uuid)",
+  "familyId": "string (uuid)",
+  "fullName": "string",
+  "gender": "string (Male/Female)",
+  "dateOfBirth": "string (date-time)",
+  "placeOfBirth": "string"
 }
 ```

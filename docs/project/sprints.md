@@ -1,8 +1,18 @@
 # Kế hoạch Sprint
 
-Tài liệu này mô tả kế hoạch cho các sprint phát triển của dự án.
+## Mục lục
 
-## Sprint 1 (Ngày bắt đầu - Ngày kết thúc)
+- [1. Giới thiệu](#1-giới-thiệu)
+- [2. Sprint 1](#2-sprint-1)
+- [3. Sprint 2](#3-sprint-2)
+
+---
+
+## 1. Giới thiệu
+
+Tài liệu này mô tả kế hoạch cho các sprint phát triển của dự án Cây Gia Phả, bao gồm mục tiêu, các User Story dự kiến và thành viên tham gia.
+
+## 2. Sprint 1 (Ngày bắt đầu - Ngày kết thúc)
 
 **Mục tiêu:**
 - Hoàn thành chức năng đăng nhập và đăng ký.
@@ -18,7 +28,7 @@ Tài liệu này mô tả kế hoạch cho các sprint phát triển của dự 
 - Developer B (Frontend)
 - QA A
 
-## Sprint 2 (Ngày bắt đầu - Ngày kết thúc)
+## 3. Sprint 2 (Ngày bắt đầu - Ngày kết thúc)
 
 **Mục tiêu:**
 - Hoàn thành chức năng thêm, sửa, xóa thành viên.
