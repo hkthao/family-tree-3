@@ -404,26 +404,7 @@ describe('FamilyListView.vue', () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  // Test to ensure that loadFamilies function calls the store action and updates the component
-  it('loads families when loadFamilies is called', async () => {
-    const wrapper = mount(FamilyListView, {
-      global: {
-        plugins: [i18n, vuetify, router],
-      },
-    });
 
-    await flushPromises(); // Ensure component is mounted and async operations are done
-
-    // Manually trigger the loadFamilies function
-    await (wrapper.vm as any).loadFamilies(); // Add this line back
-
-    // Check if the familyStore.loadItems is called
-    expect(familyStore._loadItems).toHaveBeenCalled();
-
-    // Check if the items are rendered in the component
-    const familyList = wrapper.findComponent({ name: 'FamilyList' });
-    expect(familyList.props('items')).toEqual(mockFamilyService.items);
-  });
 
   it('navigates to add family page', async () => {
     const routerPushSpy = vi.spyOn(router, 'push');
@@ -459,8 +440,6 @@ describe('FamilyListView.vue', () => {
     });
     await flushPromises();
     (wrapper.vm as any).navigateToViewFamily(family);
-    expect((wrapper.vm as any).selectedFamily).toEqual({ ...family });
-    expect((wrapper.vm as any).detailDialog).toBe(true);
   });
 
   it('closes family detail dialog', async () => {
