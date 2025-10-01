@@ -57,7 +57,6 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.add(newItem);
       if (result.ok) {
-        this.items.push(result.value);
         await this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.add');
@@ -71,7 +70,7 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.update(updatedItem);
       if (result.ok) {
-        this._loadItems();
+       await this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.update');
         console.error(result.error);

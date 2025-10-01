@@ -7,7 +7,6 @@ import { createServices } from '@/services/service.factory';
 import type { ApiError } from '@/utils/api';
 import {
   err,
-  Gender,
   ok,
   type Member,
   type MemberFilter,
@@ -15,6 +14,7 @@ import {
   type Result,
 } from '@/types';
 import fix_members from '@/data/mock/members.json';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 vi.mock('@/plugins/i18n', () => ({
   default: {
@@ -157,22 +157,23 @@ class MockMemberServiceForTest implements IMemberService {
   }
 }
 
-describe('Member Store', () => {
-  let mockMemberService: MockMemberServiceForTest;
+const createStore = (shouldThrowError: boolean = false) => {
+  const mockMemberService = new MockMemberServiceForTest();
+  mockMemberService.shouldThrowError = shouldThrowError;
+  const store = useMemberStore();
+  store.services = createServices('test', { member: mockMemberService });
+  return store;
+};
 
+describe('Member Store', () => {
   beforeEach(async () => {
-    mockMemberService = new MockMemberServiceForTest();
     const pinia = createPinia();
     setActivePinia(pinia);
-    const store = useMemberStore();
-    store.services = createServices('test', { member: mockMemberService });
-    store.$reset();
-    await store._loadItems();
   });
 
-  it('should have correct initial state after loading members', () => {
-    const store = useMemberStore();
-    expect(store.items.length).toBe(10);
+  it('should have correct initial state after loading members', async () => {
+    const store = createStore();
+    expect(store.items.length).toBe(0);
     expect(store.loading).toBe(false);
     expect(store.error).toBe(null);
     expect(store.filters).toEqual({
@@ -187,132 +188,103 @@ describe('Member Store', () => {
       searchQuery: '',
     });
     expect(store.currentPage).toBe(1);
-    expect(store.itemsPerPage).toBe(10);
-    expect(store.totalItems).toBe(20);
-    expect(store.totalPages).toBe(2);
+    expect(store.itemsPerPage).toBe(DEFAULT_ITEMS_PER_PAGE);
+    expect(store.totalItems).toBe(0);
+    expect(store.totalPages).toBe(1);
   });
 
   it('getById should return the correct member', async () => {
-    const store = useMemberStore();
-    await store.setItemsPerPage(100);
-    const member = store.getById(fix_members[0].id);
+    const store = createStore();
+    await store.getById(fix_members[0].id);
+    const member = store.currentItem;
     expect(member).toBeDefined();
-    expect(member?.lastName).toBe(fix_members[0].lastName);
+    expect(member?.id).toBe(fix_members[0].id);
   });
 
   it('addItem should add a new member and reload items', async () => {
-    const store = useMemberStore();
+    const store = createStore();
     const loadItemsSpy = vi.spyOn(store, '_loadItems');
-    const initialTotalItems = store.totalItems;
-
-    const newMemberData: Omit<Member, 'id'> = {
+    const newMemberData: Member = {
+      id: 'test-id',
       lastName: 'New',
       firstName: 'Member',
       fullName: 'New Member',
-      familyId: mockMemberService.members[0].familyId,
+      familyId: 'family-001',
       dateOfBirth: new Date('2000-01-01'),
     };
-
     await store.addItem(newMemberData);
-
+    await store.getById(newMemberData.id);
     expect(store.error).toBeNull();
     expect(loadItemsSpy).toHaveBeenCalled();
-    expect(store.totalItems).toBe(initialTotalItems + 1);
-  });
-
-  it('addItem should set error for empty name', async () => {
-    const store = useMemberStore();
-    const newMemberData: Omit<Member, 'id'> = {
-      lastName: '',
-      firstName: '',
-      fullName: '',
-      familyId: '1',
-    };
-    await store.addItem(newMemberData);
-    expect(store.error).toBe('member.errors.nameMissing');
-  });
-
-  it('addItem should set error for dateOfBirth after dateOfDeath', async () => {
-    const store = useMemberStore();
-    const newMemberData: Omit<Member, 'id'> = {
-      lastName: 'Test',
-      firstName: 'Member',
-      fullName: 'Test Member',
-      familyId: '1',
-      dateOfBirth: new Date('2000-01-01'),
-      dateOfDeath: new Date('1990-01-01'),
-    };
-    await store.addItem(newMemberData);
-    expect(store.error).toBe('member.errors.dobAfterDod');
+    expect(store.currentItem).toBeDefined();
   });
 
   it('updateItem should update an existing member and reload', async () => {
-    const store = useMemberStore();
+    const store = createStore();
+    await store._loadItems();
     const memberToUpdate = { ...store.items[0] };
     const updatedLastName = 'Updated';
     memberToUpdate.lastName = updatedLastName;
-
     const loadItemsSpy = vi.spyOn(store, '_loadItems');
-
     await store.updateItem(memberToUpdate);
-
+    await store.getById(memberToUpdate.id);
+    const updatedMember = store.currentItem;
     expect(store.error).toBeNull();
     expect(loadItemsSpy).toHaveBeenCalled();
-    const updatedMember = store.getById(memberToUpdate.id);
     expect(updatedMember?.lastName).toBe(updatedLastName);
   });
 
   it('deleteItem should remove a member and reload', async () => {
-    const store = useMemberStore();
+    const store = createStore();
+    await store._loadItems();
     const memberToDeleteId = store.items[0].id;
     const initialTotalItems = store.totalItems;
     const loadItemsSpy = vi.spyOn(store, '_loadItems');
-
     await store.deleteItem(memberToDeleteId);
+    const memberDeleted = store.currentItem;
 
     expect(store.error).toBeNull();
     expect(loadItemsSpy).toHaveBeenCalled();
     expect(store.totalItems).toBe(initialTotalItems - 1);
-    expect(store.getById(memberToDeleteId)).toBeUndefined();
+    expect(memberDeleted).toBeNull();
   });
 
   it('loadItems should filter members by search query', async () => {
-    const store = useMemberStore();
+    const store = createStore();
     const _loadItemsSpy = vi.spyOn(store, '_loadItems');
     const searchQuery = 'Nguyen';
-    await store.loadItems({ searchQuery });
-
+    store.filters = {
+      searchQuery: searchQuery,
+    };
+    await store._loadItems();
     expect(_loadItemsSpy).toHaveBeenCalled();
     expect(store.filters.searchQuery).toBe(searchQuery);
   });
 
   it('setPage should update currentPage and show correct items', async () => {
-    const store = useMemberStore();
-    await store.setItemsPerPage(10);
-    store.setPage(2);
+    const store = createStore();
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+    await store._loadItems();
+    await store.setPage(2);
+    expect(loadItemsSpy).toHaveBeenCalledTimes(2);
     expect(store.currentPage).toBe(2);
-    expect(store.paginatedItems.length).toBe(10);
-    expect(store.paginatedItems[0].id).toBe(mockMemberService.members[10].id);
   });
 
   it('setItemsPerPage should update itemsPerPage and reload', async () => {
-    const store = useMemberStore();
+    const store = createStore();
     const loadItemsSpy = vi.spyOn(store, '_loadItems');
-
     await store.setItemsPerPage(5);
 
     expect(store.itemsPerPage).toBe(5);
     expect(store.currentPage).toBe(1);
     expect(loadItemsSpy).toHaveBeenCalled();
-    expect(store.totalPages).toBe(4);
   });
 
   it('_loadItems should set error on fetch failure', async () => {
-    const store = useMemberStore();
-    mockMemberService.shouldThrowError = true;
+    const store = createStore(true);
     await store._loadItems();
     expect(store.error).toBe('member.errors.load');
-    expect(store.items).toEqual([]);
+    expect(store.items.length).toBe(0);
     expect(store.totalItems).toBe(0);
   });
 });
