@@ -17,28 +17,15 @@ import {
 } from '@/types';
 
 import fixedMockFamilies from '@/data/mock/families.json';
+import { json } from 'd3';
 
 const TOTAL_ITEMS = fixedMockFamilies.length;
 const ITEMS_PER_PAGE = DEFAULT_ITEMS_PER_PAGE;
 
 // Create a mock service for testing
 class MockFamilyServiceForTest implements IFamilyService {
-  public _items: Family[] = [];
+  public items: Family[] = [...fixedMockFamilies as unknown as Family[]];
   public shouldThrowError: boolean = false;
-
-  constructor() {
-    this.reset();
-  }
-
-  reset() {
-    this._items =  fixedMockFamilies as unknown as Family[]; // Use a copy of fixed mock families
-    this.shouldThrowError = false;
-  }
-
-  // Getter to return a copy of the items array
-  get items(): Family[] {
-    return [...this._items]; // Return a shallow copy
-  }
 
   async fetch(): Promise<Result<Family[], ApiError>> {
     if (this.shouldThrowError) {
@@ -57,16 +44,16 @@ class MockFamilyServiceForTest implements IFamilyService {
       return err({ message: 'Mock add error' });
     }
     const familyToAdd = { ...newItem, id: new Date().getTime().toString() };
-    this._items.push(familyToAdd);
+    this.items.push(familyToAdd);
     return ok(await simulateLatency(familyToAdd));
   }
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     if (this.shouldThrowError) {
       return err({ message: 'Mock update error' });
     }
-    const index = this._items.findIndex((f) => f.id === updatedItem.id);
+    const index = this.items.findIndex((f) => f.id === updatedItem.id);
     if (index !== -1) {
-      this._items[index] = updatedItem;
+      this.items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
     return err({ message: 'Family not found', statusCode: 404 });
@@ -75,9 +62,9 @@ class MockFamilyServiceForTest implements IFamilyService {
     if (this.shouldThrowError) {
       return err({ message: 'Mock delete error' });
     }
-    const initialLength = this._items.length;
-    this._items = this._items.filter((f) => f.id !== id);
-    if (this._items.length === initialLength) {
+    const initialLength = this.items.length;
+    this.items = this.items.filter((f) => f.id !== id);
+    if (this.items.length === initialLength) {
       return err({ message: 'Family not found', statusCode: 404 });
     }
     return ok(await simulateLatency(undefined));
@@ -91,7 +78,7 @@ class MockFamilyServiceForTest implements IFamilyService {
     if (this.shouldThrowError) {
       return err({ message: 'Mock loadItems error' });
     }
-    let filtered = this._items;
+    let filtered = this.items;
 
     // Filter by name
     if (filter.name) {
@@ -176,7 +163,7 @@ class MockFamilyServiceForTest implements IFamilyService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
-    const families = this._items.filter((f) => ids.includes(f.id));
+    const families = this.items.filter((f) => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
 }
