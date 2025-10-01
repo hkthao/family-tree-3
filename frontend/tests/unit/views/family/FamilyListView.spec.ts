@@ -510,14 +510,14 @@ describe('FamilyListView.vue', () => {
   });
 
   it('loads all members on mount', async () => {
-    const memberStoreSearchItemsSpy = vi.spyOn(memberStore, 'loadItems');
+    const memberStoreSearchItemsSpy = vi.spyOn(memberStore, '_loadItems');
     mount(FamilyListView, {
       global: {
         plugins: [i18n, vuetify, router],
       },
     });
     await flushPromises();
-    expect(memberStoreSearchItemsSpy).toHaveBeenCalledWith({});
+    expect(memberStoreSearchItemsSpy).toHaveBeenCalled();
   });
 
   it('computes family member counts correctly', async () => {

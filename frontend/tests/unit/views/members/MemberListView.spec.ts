@@ -146,7 +146,7 @@ describe('MemberListView.vue', () => {
 
     vi.spyOn(memberStore, 'setPage');
     vi.spyOn(memberStore, 'setItemsPerPage');
-    vi.spyOn(memberStore, 'loadItems');
+    vi.spyOn(memberStore, '_loadItems');
     vi.spyOn(memberStore, '_loadItems');
   });
 
@@ -197,7 +197,7 @@ describe('MemberListView.vue', () => {
     });
     const filters = { fullName: 'John' };
     await (wrapper.vm as any).handleFilterUpdate(filters);
-    expect(memberStore.loadItems).toHaveBeenCalledWith(filters);
+    expect(memberStore._loadItems).toHaveBeenCalledWith(filters);
   });
 
   it('handles list options update', async () => {
@@ -208,7 +208,7 @@ describe('MemberListView.vue', () => {
     await (wrapper.vm as any).handleListOptionsUpdate(newOptions);
     expect(memberStore.setPage).toHaveBeenCalledWith(2);
     expect(memberStore.setItemsPerPage).toHaveBeenCalledWith(25);
-    expect(memberStore.loadItems).toHaveBeenCalled();
+    expect(memberStore._loadItems).toHaveBeenCalled();
   });
 
   describe('Delete Member', () => {
@@ -261,7 +261,7 @@ describe('MemberListView.vue', () => {
       await (wrapper.vm as any).handleDeleteConfirm();
 
       expect(mockMemberService.delete).toHaveBeenCalledWith(member.id);
-      expect(memberStore.loadItems).toHaveBeenCalled(); // Reload members after deletion
+      expect(memberStore._loadItems).toHaveBeenCalled(); // Reload members after deletion
       expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
       expect((wrapper.vm as any).memberToDelete).toBeUndefined();
       expect(mockedShowSnackbar).toHaveBeenCalledWith(
