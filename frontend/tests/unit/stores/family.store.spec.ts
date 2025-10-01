@@ -348,8 +348,73 @@ describe('Family Store', () => {
   });
 
   it('getById should return undefined and log error if service call fails', async () => {
-    const store = createStore();
-    await store.getById('non-existent-id');
+    const store = createStore(true, 'getById');
+    const result = await store.getById('any-id');
+    expect(result).toBeUndefined();
     expect(store.currentItem).toBeNull();
+  });
+
+  it('setItemsPerPage should not do anything if count is invalid or the same', async () => {
+    const store = createStore();
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+    await store.setItemsPerPage(store.itemsPerPage); // Same count
+    await store.setItemsPerPage(0); // Invalid count
+    await store.setItemsPerPage(-10); // Invalid count
+    expect(loadItemsSpy).not.toHaveBeenCalled();
+  });
+
+  it('searchLookup should update filter, pagination and call _loadItems', async () => {
+    const store = createStore();
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+    const filter: FamilyFilter = { searchQuery: 'test' };
+    const page = 2;
+    const itemsPerPage = 20;
+
+    await store.searchLookup(filter, page, itemsPerPage);
+
+    expect(store.filter).toEqual(filter);
+    expect(store.currentPage).toBe(page);
+    expect(store.itemsPerPage).toBe(itemsPerPage);
+    expect(loadItemsSpy).toHaveBeenCalled();
+  });
+
+  it('getByIds should return families on success', async () => {
+    const store = createStore();
+    const mockService = store.services.family as MockFamilyServiceForTest;
+    const ids = mockService.items.slice(0, 2).map((f) => f.id);
+    const result = await store.getByIds(ids);
+    expect(result.length).toBe(2);
+    expect(result[0].id).toBe(ids[0]);
+    expect(store.error).toBeNull();
+    expect(store.loading).toBe(false);
+  });
+
+  it('getByIds should return empty array on failure', async () => {
+    const store = createStore(true, 'getByIds');
+    const result = await store.getByIds(['1', '2']);
+    expect(result).toEqual([]);
+    expect(store.loading).toBe(false);
+  });
+
+  it('getByIds should set a generic error message if none is provided on failure', async () => {
+    const store = createStore();
+    const mockService = store.services.family as MockFamilyServiceForTest;
+    // Force an error without a message
+    vi.spyOn(mockService, 'getByIds').mockResolvedValueOnce(
+      err({ message: '' }),
+    );
+
+    const result = await store.getByIds(['1', '2']);
+
+    expect(result).toEqual([]);
+    expect(store.error).toBe('Không thể tải danh sách gia đình.');
+  });
+
+  it('deleteItem should not reload items on failure', async () => {
+    const store = createStore(true, 'delete');
+    const loadItemsSpy = vi.spyOn(store, '_loadItems');
+    await store.deleteItem('some-id');
+    expect(loadItemsSpy).not.toHaveBeenCalled();
+    expect(store.error).not.toBeNull();
   });
 });
