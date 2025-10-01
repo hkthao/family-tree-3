@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { useNotificationStore } from './notification.store';
 import i18n from '@/plugins/i18n'; // Import global i18n instance
 
 export const useUserSettingsStore = defineStore('userSettings', {
@@ -50,7 +49,6 @@ export const useUserSettingsStore = defineStore('userSettings', {
     async saveSettings(): Promise<string> {
       this.loading = true;
       this.error = null;
-      const notificationStore = useNotificationStore();
       const { t } = i18n.global; // Use global i18n instance for t
 
       try {
@@ -61,14 +59,12 @@ export const useUserSettingsStore = defineStore('userSettings', {
         const isSuccess = Math.random() > 0.2; // 80% chance of success
 
         if (isSuccess) {
-          notificationStore.showSnackbar(t('userSettings.saveSuccess'), 'success');
           return t('userSettings.saveSuccess');
         } else {
           throw new Error(t('userSettings.saveError'));
         }
       } catch (err: any) {
         this.error = err.message;
-        notificationStore.showSnackbar(err.message, 'error');
         throw err;
       } finally {
         this.loading = false;

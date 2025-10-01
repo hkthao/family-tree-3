@@ -6,7 +6,7 @@ import { defineStore } from 'pinia';
 export const useEventStore = defineStore('event', {
   state: () => ({
     items: [] as Event[],
-    currentItem: {} as Event,
+    currentItem: null as unknown as Event,
     loading: false,
     error: null as string | null,
     filter: {} as EventFilter,
@@ -105,6 +105,21 @@ export const useEventStore = defineStore('event', {
       } else {
         this.error = i18n.global.t('event.errors.loadById');
         console.error(result.error);
+      }
+    },
+
+    async getByIds(ids: string[]): Promise<Event[]> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.event.getByIds(ids);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error =
+          result.error.message || 'Không thể tải danh sách sự kiện.';
+        console.error(result.error);
+        return [];
       }
     },
   },
