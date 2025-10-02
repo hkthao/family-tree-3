@@ -1,5 +1,9 @@
 ﻿using System.Reflection;
 using backend.Application.Common.Behaviours;
+using backend.Application.Common.Interfaces;
+using backend.Application.Families;
+using backend.Application.Members;
+using backend.Application.Search;
 using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -21,5 +25,9 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
+
+        builder.Services.AddScoped<IMemberService, MemberService>();
+        builder.Services.AddScoped<IFamilyService, FamilyService>();
+        builder.Services.AddScoped<ISearchService, SearchService>();
     }
 }
