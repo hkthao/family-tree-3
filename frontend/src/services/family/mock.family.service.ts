@@ -80,19 +80,6 @@ export class MockFamilyService implements IFamilyService {
         filtered = filtered.filter((family) => (family as any).visibility === filter.visibility);
       }
 
-      if (filter.startDate) {
-        filtered = filtered.filter((family) => family.createdAt && new Date(family.createdAt) >= filter.startDate!);
-      }
-
-      if (filter.endDate) {
-        filtered = filtered.filter((family) => family.createdAt && new Date(family.createdAt) <= filter.endDate!);
-      }
-
-      if (filter.location) {
-        const lowerCaseLocation = filter.location.toLowerCase();
-        filtered = filtered.filter((family) => family.address && family.address.toLowerCase().includes(lowerCaseLocation));
-      }
-
       const totalItems = filtered.length;
       const totalPages = Math.ceil(totalItems / itemsPerPage);
       const start = (page - 1) * itemsPerPage;

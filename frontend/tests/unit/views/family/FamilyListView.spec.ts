@@ -334,8 +334,14 @@ beforeEach(async () => {
   });
 
   vi.spyOn(familyStore, '_loadItems');
+  vi.spyOn(familyStore, 'deleteItem');
   vi.spyOn(notificationStore, 'showSnackbar');
-  global.visualViewport = { width: 1024, height: 768 } as any; // Mock visualViewport
+  global.visualViewport = {
+    width: 1024,
+    height: 768,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  } as any; // Mock visualViewport
 });
 
 const i18n = createI18n({
@@ -388,6 +394,14 @@ const router = createRouter({
 });
 
 describe('FamilyListView.vue', () => {
+  beforeEach(() => {
+    // Reset mocks before each test to ensure clean state
+    familyStore.$reset();
+    memberStore.$reset();
+    notificationStore.$reset();
+    vi.clearAllMocks();
+  });
+
   it('renders without errors', () => {
     const wrapper = mount(FamilyListView, {
       global: {
@@ -423,6 +437,7 @@ describe('FamilyListView.vue', () => {
   });
 
   it('navigates to view family detail', async () => {
+    const routerPushSpy = vi.spyOn(router, 'push');
     const family = mockFamilyService.items[0];
     const wrapper = mount(FamilyListView, {
       global: {
@@ -431,6 +446,29 @@ describe('FamilyListView.vue', () => {
     });
     await flushPromises();
     (wrapper.vm as any).navigateToViewFamily(family);
+    expect(routerPushSpy).toHaveBeenCalledWith(`/family/detail/${family.id}`);
+  });
+
+  it('computes family member counts correctly', async () => {
+    // Mock memberStore.items to have some members
+    memberStore.items = [
+      { id: 'member-1', familyId: 'family-001', fullName: 'Member 1' } as Member,
+      { id: 'member-2', familyId: 'family-001', fullName: 'Member 2' } as Member,
+      { id: 'member-3', familyId: 'family-002', fullName: 'Member 3' } as Member,
+    ];
+
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+
+    const familyMemberCounts = (wrapper.vm as any).familyMemberCounts;
+    expect(familyMemberCounts).toEqual({
+      'family-001': 2,
+      'family-002': 1,
+    });
   });
 
   it('handles filter update and reloads families', async () => {
@@ -447,6 +485,7 @@ describe('FamilyListView.vue', () => {
     (wrapper.vm as any).handleFilterUpdate(newFilters);
     expect((wrapper.vm as any).currentFilters).toEqual(newFilters);
     expect((wrapper.vm as any).currentPage).toBe(1);
+    expect(familyStore._loadItems).toHaveBeenCalledTimes(2); // Initial load + after filter update
   });
 
   it('handles list options update', async () => {
@@ -464,13 +503,86 @@ describe('FamilyListView.vue', () => {
     expect(familySetItemsPerPageSpy).toHaveBeenCalledWith(25);
   });
 
+  it('confirms and deletes a family successfully', async () => {
+    const family = mockFamilyService.items[0];
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+
+    (wrapper.vm as any).confirmDelete(family);
+    expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+    expect((wrapper.vm as any).familyToDelete).toEqual(family);
+
+    await (wrapper.vm as any).handleDeleteConfirm();
+
+    expect(familyStore.deleteItem).toHaveBeenCalledWith(family.id);
+    expect(notificationStore.showSnackbar).toHaveBeenCalledWith(
+      'Family deleted successfully',
+      'success',
+    );
+    expect(familyStore._loadItems).toHaveBeenCalled()
+    expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+    expect((wrapper.vm as any).familyToDelete).toBeUndefined();
+  });
+
+  it('handles error during family deletion', async () => {
+    const family = mockFamilyService.items[0];
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+
+    (wrapper.vm as any).confirmDelete(family);
+    expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+    expect((wrapper.vm as any).familyToDelete).toEqual(family);
+
+    await (wrapper.vm as any).handleDeleteConfirm();
+
+    expect(familyStore.deleteItem).toHaveBeenCalledWith(family.id);
+    expect(notificationStore.showSnackbar).toHaveBeenCalled();
+    expect(familyStore._loadItems).toHaveBeenCalledTimes(2); // Initial load, no reload on failure
+    expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+    expect((wrapper.vm as any).familyToDelete).toBeUndefined();
+  });
+
+  it('cancels family deletion', async () => {
+    const family = mockFamilyService.items[0];
+
+    const wrapper = mount(FamilyListView, {
+      global: {
+        plugins: [i18n, vuetify, router],
+      },
+    });
+    await flushPromises();
+
+    (wrapper.vm as any).confirmDelete(family);
+    expect((wrapper.vm as any).deleteConfirmDialog).toBe(true);
+    expect((wrapper.vm as any).familyToDelete).toEqual(family);
+
+    (wrapper.vm as any).handleDeleteCancel();
+
+    expect((wrapper.vm as any).deleteConfirmDialog).toBe(false);
+    expect((wrapper.vm as any).familyToDelete).toBeUndefined();
+    expect(familyStore.deleteItem).not.toHaveBeenCalled();
+    expect(notificationStore.showSnackbar).not.toHaveBeenCalled();
+  });
+
   it('reloads families when currentPage changes', async () => {
+    const familyStoreLoadItemsSpy = vi.spyOn(familyStore, '_loadItems');
     mount(FamilyListView, {
       global: {
         plugins: [i18n, vuetify, router],
       },
     });
     await flushPromises();
-    expect(familyStore._loadItems).toHaveBeenCalledTimes(1); // Initial load + watcher trigger
+    familyStoreLoadItemsSpy.mockClear(); // Clear initial load call
+    familyStore.setPage(2);
+    await flushPromises();
+    expect(familyStoreLoadItemsSpy).toHaveBeenCalledTimes(1);
   });
 });

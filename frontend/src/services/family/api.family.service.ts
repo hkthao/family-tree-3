@@ -60,13 +60,6 @@ export class ApiFamilyService implements IFamilyService {
       const params = new URLSearchParams();
       if (filter.searchQuery) params.append('searchQuery', filter.searchQuery);
       if (filter.familyId) params.append('familyId', filter.familyId);
-      if (filter.startDate)
-        params.append('startDate', filter.startDate.toISOString());
-      if (filter.endDate)
-        params.append('endDate', filter.endDate.toISOString());
-      if (filter.location) params.append('location', filter.location);
-      if (filter.type) params.append('type', filter.type);
-
       params.append('page', page.toString());
       params.append('itemsPerPage', itemsPerPage.toString());
 
