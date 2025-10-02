@@ -4,20 +4,21 @@ namespace backend.Application.Families.Queries.GetFamiliesByIds;
 
 public class GetFamiliesByIdsQueryHandler : IRequestHandler<GetFamiliesByIdsQuery, List<FamilyDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IFamilyRepository _familyRepository;
     private readonly IMapper _mapper;
 
-    public GetFamiliesByIdsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetFamiliesByIdsQueryHandler(IFamilyRepository familyRepository, IMapper mapper)
     {
-        _context = context;
+        _familyRepository = familyRepository;
         _mapper = mapper;
     }
 
     public async Task<List<FamilyDto>> Handle(GetFamiliesByIdsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Families
+        return (await _familyRepository.GetAllAsync())
             .Where(f => request.Ids.Contains(f.Id))
+            .AsQueryable()
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 }

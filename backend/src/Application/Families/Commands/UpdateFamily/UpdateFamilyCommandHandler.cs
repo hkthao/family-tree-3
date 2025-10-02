@@ -5,16 +5,16 @@ namespace backend.Application.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IFamilyRepository _familyRepository;
 
-    public UpdateFamilyCommandHandler(IApplicationDbContext context)
+    public UpdateFamilyCommandHandler(IFamilyRepository familyRepository)
     {
-        _context = context;
+        _familyRepository = familyRepository;
     }
 
     public async Task Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Families.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await _familyRepository.GetByIdAsync(request.Id);
 
         if (entity == null)
         {
@@ -26,8 +26,6 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand>
         entity.Address = request.Address;
         entity.AvatarUrl = request.AvatarUrl;
 
-        _context.Families.Update(entity);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _familyRepository.UpdateAsync(entity);
     }
 }

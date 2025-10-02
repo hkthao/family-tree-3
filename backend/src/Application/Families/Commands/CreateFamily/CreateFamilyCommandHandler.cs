@@ -5,11 +5,11 @@ namespace backend.Application.Families.Commands.CreateFamily;
 
 public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Guid>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IFamilyRepository _familyRepository;
 
-    public CreateFamilyCommandHandler(IApplicationDbContext context)
+    public CreateFamilyCommandHandler(IFamilyRepository familyRepository)
     {
-        _context = context;
+        _familyRepository = familyRepository;
     }
 
     public async Task<Guid> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
@@ -22,9 +22,7 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, G
             AvatarUrl = request.AvatarUrl
         };
 
-        _context.Families.Add(entity);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _familyRepository.AddAsync(entity);
 
         return entity.Id;
     }

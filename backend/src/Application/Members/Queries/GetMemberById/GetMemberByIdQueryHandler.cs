@@ -5,18 +5,18 @@ namespace backend.Application.Members.Queries.GetMemberById;
 
 public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, MemberDto>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMemberRepository _memberRepository;
     private readonly IMapper _mapper;
 
-    public GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetMemberByIdQueryHandler(IMemberRepository memberRepository, IMapper mapper)
     {
-        _context = context;
+        _memberRepository = memberRepository;
         _mapper = mapper;
     }
 
     public async Task<MemberDto> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
-        var member = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
+        var member = await _memberRepository.GetByIdAsync(request.Id);
 
         if (member == null)
         {

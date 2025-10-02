@@ -6,18 +6,18 @@ namespace backend.Application.Members.Queries.SearchMembers;
 
 public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, PaginatedList<MemberDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMemberRepository _memberRepository;
     private readonly IMapper _mapper;
 
-    public SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public SearchMembersQueryHandler(IMemberRepository memberRepository, IMapper mapper)
     {
-        _context = context;
+        _memberRepository = memberRepository;
         _mapper = mapper;
     }
 
     public async Task<PaginatedList<MemberDto>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Members.AsNoTracking();
+        var query = (await _memberRepository.GetAllAsync()).AsQueryable();
 
         if (!string.IsNullOrEmpty(request.Keyword))
         {

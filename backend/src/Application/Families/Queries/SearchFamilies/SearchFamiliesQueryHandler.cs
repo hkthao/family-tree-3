@@ -6,18 +6,18 @@ namespace backend.Application.Families.Queries.SearchFamilies;
 
 public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, PaginatedList<FamilyDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IFamilyRepository _familyRepository;
     private readonly IMapper _mapper;
 
-    public SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public SearchFamiliesQueryHandler(IFamilyRepository familyRepository, IMapper mapper)
     {
-        _context = context;
+        _familyRepository = familyRepository;
         _mapper = mapper;
     }
 
     public async Task<PaginatedList<FamilyDto>> Handle(SearchFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Families.AsNoTracking();
+        var query = (await _familyRepository.GetAllAsync()).AsQueryable();
 
         if (!string.IsNullOrEmpty(request.Keyword))
         {

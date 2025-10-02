@@ -5,11 +5,13 @@ namespace backend.Application.Events.Commands.CreateEvent;
 
 public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Guid>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IEventRepository _eventRepository;
+    private readonly IMemberRepository _memberRepository;
 
-    public CreateEventCommandHandler(IApplicationDbContext context)
+    public CreateEventCommandHandler(IEventRepository eventRepository, IMemberRepository memberRepository)
     {
-        _context = context;
+        _eventRepository = eventRepository;
+        _memberRepository = memberRepository;
     }
 
     public async Task<Guid> Handle(CreateEventCommand request, CancellationToken cancellationToken)
@@ -28,15 +30,13 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Gui
 
         if (request.RelatedMembers.Any())
         {
-            var members = await _context.Members
+            var members = (await _memberRepository.GetAllAsync())
                 .Where(m => request.RelatedMembers.Contains(m.Id))
-                .ToListAsync(cancellationToken);
+                .ToList();
             entity.RelatedMembers = members;
         }
 
-        _context.Events.Add(entity);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _eventRepository.AddAsync(entity);
 
         return entity.Id;
     }

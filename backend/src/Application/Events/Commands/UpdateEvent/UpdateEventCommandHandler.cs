@@ -6,18 +6,18 @@ namespace backend.Application.Events.Commands.UpdateEvent;
 
 public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IEventRepository _eventRepository;
+    private readonly IMemberRepository _memberRepository;
 
-    public UpdateEventCommandHandler(IApplicationDbContext context)
+    public UpdateEventCommandHandler(IEventRepository eventRepository, IMemberRepository memberRepository)
     {
-        _context = context;
+        _eventRepository = eventRepository;
+        _memberRepository = memberRepository;
     }
 
     public async Task Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Events
-            .Include(e => e.RelatedMembers)
-            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+        var entity = await _eventRepository.GetByIdAsync(request.Id);
 
         if (entity == null)
         {
@@ -35,9 +35,9 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
 
         if (request.RelatedMembers.Any())
         {
-            var members = await _context.Members
+            var members = (await _memberRepository.GetAllAsync())
                 .Where(m => request.RelatedMembers.Contains(m.Id))
-                .ToListAsync(cancellationToken);
+                .ToList();
             entity.RelatedMembers = members;
         }
         else
@@ -45,6 +45,6 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
             entity.RelatedMembers.Clear();
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _eventRepository.UpdateAsync(entity);
     }
 }

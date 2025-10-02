@@ -5,18 +5,18 @@ namespace backend.Application.Families.Queries.GetFamilyById;
 
 public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, FamilyDto>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IFamilyRepository _familyRepository;
     private readonly IMapper _mapper;
 
-    public GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetFamilyByIdQueryHandler(IFamilyRepository familyRepository, IMapper mapper)
     {
-        _context = context;
+        _familyRepository = familyRepository;
         _mapper = mapper;
     }
 
     public async Task<FamilyDto> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Families.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await _familyRepository.GetByIdAsync(request.Id);
 
         if (entity == null)
         {

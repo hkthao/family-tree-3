@@ -6,24 +6,22 @@ namespace backend.Application.Events.Commands.DeleteEvent;
 
 public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommand>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IEventRepository _eventRepository;
 
-    public DeleteEventCommandHandler(IApplicationDbContext context)
+    public DeleteEventCommandHandler(IEventRepository eventRepository)
     {
-        _context = context;
+        _eventRepository = eventRepository;
     }
 
     public async Task Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Events.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await _eventRepository.GetByIdAsync(request.Id);
 
         if (entity == null)
         {
             throw new NotFoundException(nameof(Event), request.Id);
         }
 
-        _context.Events.Remove(entity);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _eventRepository.DeleteAsync(request.Id);
     }
 }

@@ -4,18 +4,20 @@ namespace backend.Application.Events.Queries.GetEvents;
 
 public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyList<EventDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IEventRepository _eventRepository;
+    private readonly IMemberRepository _memberRepository;
     private readonly IMapper _mapper;
 
-    public GetEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetEventsQueryHandler(IEventRepository eventRepository, IMemberRepository memberRepository, IMapper mapper)
     {
-        _context = context;
+        _eventRepository = eventRepository;
+        _memberRepository = memberRepository;
         _mapper = mapper;
     }
 
     public async Task<IReadOnlyList<EventDto>> Handle(GetEventsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Events.AsNoTracking();
+        var query = (await _eventRepository.GetAllAsync()).AsQueryable();
 
         if (!string.IsNullOrEmpty(request.SearchQuery))
         {
@@ -49,6 +51,7 @@ public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyLi
 
         if (request.RelatedMemberId.HasValue)
         {
+            var members = await _memberRepository.GetAllAsync();
             query = query.Where(e => e.RelatedMembers.Any(m => m.Id == request.RelatedMemberId.Value));
         }
 

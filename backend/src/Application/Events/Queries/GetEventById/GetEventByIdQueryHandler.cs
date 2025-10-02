@@ -5,21 +5,22 @@ namespace backend.Application.Events.Queries.GetEventById;
 
 public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, EventDto>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IEventRepository _eventRepository;
     private readonly IMapper _mapper;
 
-    public GetEventByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetEventByIdQueryHandler(IEventRepository eventRepository, IMapper mapper)
     {
-        _context = context;
+        _eventRepository = eventRepository;
         _mapper = mapper;
     }
 
     public async Task<EventDto> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Events
+        var entity = (await _eventRepository.GetAllAsync())
+            .AsQueryable()
             .Where(e => e.Id == request.Id)
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefault();
 
         return entity ?? throw new Common.Exceptions.NotFoundException(nameof(Event), request.Id);
     }

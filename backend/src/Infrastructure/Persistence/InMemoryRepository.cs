@@ -41,6 +41,12 @@ public class InMemoryRepository<T> : IRepository<T>
         return Task.CompletedTask;
     }
 
+    public Task DeleteAsync(Guid id)
+    {
+        _items.RemoveAll(x => x.Id == id);
+        return Task.CompletedTask;
+    }
+
     public Task<IReadOnlyList<T>> GetByIdsAsync(IEnumerable<Guid> ids)
     {
         var result = _items.Where(x => ids.Contains(x.Id)).ToList();

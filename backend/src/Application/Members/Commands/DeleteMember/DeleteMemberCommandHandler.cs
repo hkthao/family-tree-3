@@ -1,3 +1,4 @@
+using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 
@@ -5,24 +6,22 @@ namespace backend.Application.Members.Commands.DeleteMember;
 
 public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMemberRepository _memberRepository;
 
-    public DeleteMemberCommandHandler(IApplicationDbContext context)
+    public DeleteMemberCommandHandler(IMemberRepository memberRepository)
     {
-        _context = context;
+        _memberRepository = memberRepository;
     }
 
     public async Task Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await _memberRepository.GetByIdAsync(request.Id);
 
         if (entity == null)
         {
-            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Member), request.Id);
+            throw new NotFoundException(nameof(Member), request.Id);
         }
 
-        _context.Members.Remove(entity);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _memberRepository.DeleteAsync(request.Id);
     }
 }

@@ -4,20 +4,21 @@ namespace backend.Application.Members.Queries.GetMembersByIds;
 
 public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery, List<MemberDto>>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMemberRepository _memberRepository;
     private readonly IMapper _mapper;
 
-    public GetMembersByIdsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetMembersByIdsQueryHandler(IMemberRepository memberRepository, IMapper mapper)
     {
-        _context = context;
+        _memberRepository = memberRepository;
         _mapper = mapper;
     }
 
     public async Task<List<MemberDto>> Handle(GetMembersByIdsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Members
+        return (await _memberRepository.GetAllAsync())
             .Where(m => request.Ids.Contains(m.Id))
+            .AsQueryable()
             .ProjectTo<MemberDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 }

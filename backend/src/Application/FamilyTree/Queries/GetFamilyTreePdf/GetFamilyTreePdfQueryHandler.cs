@@ -5,18 +5,19 @@ namespace backend.Application.FamilyTree.Queries.GetFamilyTreePdf;
 
 public class GetFamilyTreePdfQueryHandler : IRequestHandler<GetFamilyTreePdfQuery, byte[]>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IFamilyRepository _familyRepository;
 
-    public GetFamilyTreePdfQueryHandler(IApplicationDbContext context)
+    public GetFamilyTreePdfQueryHandler(IFamilyRepository familyRepository)
     {
-        _context = context;
+        _familyRepository = familyRepository;
     }
 
     public async Task<byte[]> Handle(GetFamilyTreePdfQuery request, CancellationToken cancellationToken)
     {
-        var family = await _context.Families
+        var family = (await _familyRepository.GetAllAsync())
+            .AsQueryable()
             .Where(f => f.Id == request.FamilyId)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefault();
 
         if (family == null)
         {

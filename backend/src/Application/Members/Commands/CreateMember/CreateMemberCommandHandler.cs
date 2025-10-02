@@ -5,11 +5,11 @@ namespace backend.Application.Members.Commands.CreateMember;
 
 public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, Guid>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMemberRepository _memberRepository;
 
-    public CreateMemberCommandHandler(IApplicationDbContext context)
+    public CreateMemberCommandHandler(IMemberRepository memberRepository)
     {
-        _context = context;
+        _memberRepository = memberRepository;
     }
 
     public async Task<Guid> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
@@ -33,9 +33,7 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, G
             SpouseId = request.SpouseId
         };
 
-        _context.Members.Add(entity);
-
-        await _context.SaveChangesAsync(cancellationToken);
+        await _memberRepository.AddAsync(entity);
 
         return entity.Id;
     }

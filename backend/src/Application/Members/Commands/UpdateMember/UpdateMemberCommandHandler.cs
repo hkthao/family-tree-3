@@ -6,16 +6,16 @@ namespace backend.Application.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 {
-    private readonly IApplicationDbContext _context;
+    private readonly IMemberRepository _memberRepository;
 
-    public UpdateMemberCommandHandler(IApplicationDbContext context)
+    public UpdateMemberCommandHandler(IMemberRepository memberRepository)
     {
-        _context = context;
+        _memberRepository = memberRepository;
     }
 
     public async Task Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
+        var entity = await _memberRepository.GetByIdAsync(request.Id);
 
         if (entity == null)
         {
@@ -38,6 +38,6 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
         entity.MotherId = request.MotherId;
         entity.SpouseId = request.SpouseId;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _memberRepository.UpdateAsync(entity);
     }
 }
