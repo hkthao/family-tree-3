@@ -98,7 +98,9 @@ Sử dụng TypeScript interfaces trong `src/types` để định nghĩa cấu t
 export interface Member {
   id: string;
   familyId: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
+  fullName?: string;
   gender?: 'Male' | 'Female' | 'Other';
   dateOfBirth?: string; // ISO 8601 format
 }

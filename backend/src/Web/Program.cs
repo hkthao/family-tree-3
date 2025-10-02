@@ -1,5 +1,4 @@
 using backend.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

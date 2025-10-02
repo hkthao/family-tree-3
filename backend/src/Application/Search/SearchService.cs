@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Search;

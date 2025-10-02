@@ -1,8 +1,4 @@
-﻿using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-
-namespace backend.Application.Common.Mappings;
+﻿namespace backend.Application.Common.Mappings;
 
 public static class MappingExtensions
 {

@@ -1,6 +1,5 @@
 using backend.Application.Families;
 using backend.Application.Members;
-using backend.Domain.Enums;
 
 namespace backend.Application.FamilyTree;
 

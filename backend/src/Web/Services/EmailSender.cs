@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using backend.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 

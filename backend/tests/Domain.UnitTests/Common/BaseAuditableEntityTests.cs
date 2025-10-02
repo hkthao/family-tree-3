@@ -1,4 +1,3 @@
-using System;
 using backend.Domain.Common;
 using FluentAssertions;
 using Xunit;

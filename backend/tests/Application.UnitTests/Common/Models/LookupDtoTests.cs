@@ -1,4 +1,3 @@
-using System;
 using backend.Application.Common.Models;
 using FluentAssertions;
 using Xunit;

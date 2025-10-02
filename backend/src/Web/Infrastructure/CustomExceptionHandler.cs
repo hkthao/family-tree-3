@@ -1,5 +1,4 @@
 ﻿using backend.Application.Common.Exceptions;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Infrastructure;

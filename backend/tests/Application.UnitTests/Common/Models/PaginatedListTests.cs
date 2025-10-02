@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Xunit;
 using backend.Application.Common.Models;
 

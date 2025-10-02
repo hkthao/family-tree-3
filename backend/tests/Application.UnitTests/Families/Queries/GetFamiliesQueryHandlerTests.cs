@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;

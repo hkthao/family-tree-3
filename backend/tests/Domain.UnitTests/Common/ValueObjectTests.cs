@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using backend.Domain.Common;
 using FluentAssertions;
 using Xunit;

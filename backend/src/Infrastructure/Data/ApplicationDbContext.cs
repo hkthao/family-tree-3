@@ -13,6 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
 
     public DbSet<Family> Families => Set<Family>();
     public DbSet<Member> Members => Set<Member>();
+    public DbSet<Event> Events => Set<Event>();
 
 
     protected override void OnModelCreating(ModelBuilder builder)

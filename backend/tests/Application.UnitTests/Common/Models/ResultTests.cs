@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using backend.Application.Common.Models;
 using FluentAssertions;
 using Xunit;

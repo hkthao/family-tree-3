@@ -1,6 +1,5 @@
 using backend.Domain.Entities;
 using backend.Application.Common.Interfaces;
-using System.Linq;
 
 namespace backend.Infrastructure.Persistence;
 

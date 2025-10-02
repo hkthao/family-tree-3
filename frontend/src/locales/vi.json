@@ -319,5 +319,6 @@
   "userSettings.preferences.languageVietnamese": "Tiếng Việt",
   "login.welcomeMessage": "Chào mừng đến với Cây Gia Phả! 👋",
   "login.newOnPlatform": "Mới trên nền tảng của chúng tôi?",
-  "login.createAccount": "Tạo tài khoản"
+  "login.createAccount": "Tạo tài khoản",
+  "member.search.search": "Tìm kiếm"
 }

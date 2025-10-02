@@ -12,64 +12,15 @@
         <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
-              <v-text-field
-                v-model="filters.fullName"
-                :label="t('member.search.fullName')"
-                clearable
-                prepend-inner-icon="mdi-magnify"
-              ></v-text-field>
+              <v-text-field v-model="filters.searchQuery" :label="t('member.search.search')" clearable
+                prepend-inner-icon="mdi-magnify"></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
-              <DateInputField
-                v-model="filters.dateOfBirth"
-                :label="t('member.search.dateOfBirth')"
-                optional
-              />
+              <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable />
             </v-col>
             <v-col cols="12" md="4">
-              <DateInputField
-                v-model="filters.dateOfDeath"
-                :label="t('member.search.dateOfDeath')"
-                optional
-              />
-            </v-col>
-            <v-col cols="12" md="4">
-              <GenderSelect
-                v-model="filters.gender"
-                :label="t('member.search.gender')"
-                clearable
-              />
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-text-field
-                v-model="filters.placeOfBirth"
-                :label="t('member.search.placeOfBirth')"
-                clearable
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-text-field
-                v-model="filters.placeOfDeath"
-                :label="t('member.search.placeOfDeath')"
-                clearable
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-text-field
-                v-model="filters.occupation"
-                :label="t('member.search.occupation')"
-                clearable
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
-              <Lookup
-                v-model="filters.familyId as any"
-                :data-source="familyStore"
-                display-expr="name"
-                value-expr="id"
-                :label="t('member.search.family')"
-                clearable
-              />
+              <Lookup v-model="filters.familyId as any" :data-source="familyStore" display-expr="name" value-expr="id"
+                :label="t('member.search.family')" clearable />
             </v-col>
           </v-row>
         </v-card-text>
@@ -100,13 +51,8 @@ const familyStore = useFamilyStore();
 const expanded = ref(false); // Default to collapsed
 
 const filters = ref<MemberFilter>({
-  fullName: '',
-  dateOfBirth: null,
-  dateOfDeath: null,
+  searchQuery: '',
   gender: undefined,
-  placeOfBirth: '',
-  placeOfDeath: '',
-  occupation: '',
   familyId: null,
 });
 
@@ -125,13 +71,8 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filters.value = {
-    fullName: '',
-    dateOfBirth: null,
-    dateOfDeath: null,
+    searchQuery: '',
     gender: undefined,
-    placeOfBirth: '',
-    placeOfDeath: '',
-    occupation: '',
     familyId: null,
   };
   emit('update:filters', filters.value);

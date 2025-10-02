@@ -314,5 +314,6 @@
   "userSettings.preferences.languageVietnamese": "Vietnamese",
   "login.welcomeMessage": "Welcome to Family Tree! 👋",
   "login.newOnPlatform": "New on our platform?",
-  "login.createAccount": "Create an account"
+  "login.createAccount": "Create an account",
+  "member.search.search": "Search"
 }

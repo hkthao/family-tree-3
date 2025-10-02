@@ -121,7 +121,15 @@ Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với c�
 -   `PUT /api/members/{id}`: Cập nhật thông tin thành viên.
 -   `DELETE /api/members/{id}`: Xóa thành viên.
 
-### 6.3. Tìm kiếm chung (`/api/search`)
+### 6.3. Quản lý Sự kiện (`/api/events`)
+
+-   `GET /api/events`: Lấy danh sách sự kiện (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
+-   `GET /api/events/{id}`: Lấy thông tin sự kiện theo ID.
+-   `POST /api/events`: Tạo sự kiện mới.
+-   `PUT /api/events/{id}`: Cập nhật thông tin sự kiện.
+-   `DELETE /api/events/{id}`: Xóa sự kiện.
+
+### 6.4. Tìm kiếm chung (`/api/search`)
 
 -   `GET /api/search?keyword=...`: Tìm kiếm chung trên cả dòng họ và thành viên theo từ khóa.
 
@@ -152,5 +160,22 @@ Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với c�
   "motherId": "string (uuid, nullable)",
   "spouseId": "string (uuid, nullable)",
   "childrenIds": "array of string (uuid)"
+}
+```
+
+### 7.3. Event
+
+```json
+{
+  "id": "string (uuid)",
+  "name": "string",
+  "description": "string",
+  "startDate": "string (date-time)",
+  "endDate": "string (date-time)",
+  "location": "string",
+  "familyId": "string (uuid, nullable)",
+  "type": "string (Birth, Marriage, Death, etc.)",
+  "color": "string",
+  "relatedMembers": "array of string (uuid)"
 }
 ```

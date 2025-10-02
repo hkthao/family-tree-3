@@ -1,10 +1,6 @@
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
-using backend.Application.Members;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;

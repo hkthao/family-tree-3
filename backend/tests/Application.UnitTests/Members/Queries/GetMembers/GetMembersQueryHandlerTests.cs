@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
 using backend.Application.Members;
 using backend.Application.Members.Queries.GetMembers;

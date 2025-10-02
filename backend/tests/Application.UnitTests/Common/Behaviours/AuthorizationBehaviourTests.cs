@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Common.Behaviours;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;

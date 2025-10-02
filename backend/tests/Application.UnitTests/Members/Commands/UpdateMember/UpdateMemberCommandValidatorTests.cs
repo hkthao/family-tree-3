@@ -1,4 +1,3 @@
-using System;
 using backend.Application.Members.Commands.UpdateMember;
 using FluentValidation.TestHelper;
 using Xunit;

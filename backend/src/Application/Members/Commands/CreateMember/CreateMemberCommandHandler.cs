@@ -1,4 +1,3 @@
-using System;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 

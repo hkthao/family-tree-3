@@ -40,13 +40,24 @@ erDiagram
         string gender "Giới tính"
         string father_id FK "ID cha"
         string mother_id FK "ID mẹ"
-        string spouse_id FK "ID vợ/chồng"
+    }
+
+    EVENT {
+        string id PK "ID duy nhất"
+        string name "Tên sự kiện"
+        string description "Mô tả"
+        datetime startDate "Ngày bắt đầu"
+        datetime endDate "Ngày kết thúc"
+        string location "Địa điểm"
+        string familyId FK "ID gia đình"
+        string type "Loại sự kiện"
     }
 
     FAMILY ||--o{ MEMBER : "có"
     MEMBER ||--o| MEMBER : "cha của"
     MEMBER ||--o| MEMBER : "mẹ của"
-    MEMBER ||--o| MEMBER : "vợ/chồng của"
+    FAMILY ||--o{ EVENT : "có"
+    MEMBER }o--o{ EVENT : "liên quan"
 ```
 
 ## 3. Mô tả các bảng
@@ -78,14 +89,35 @@ Lưu trữ thông tin chi tiết của từng thành viên, bao gồm các mối
 | `gender`        | `varchar(10)`| NULL      | Giới tính (Male, Female, Other) |
 | `father_id`     | `varchar(36)`| FK, NULL  | ID của cha              |
 | `mother_id`     | `varchar(36)`| FK, NULL  | ID của mẹ               |
-| `spouse_id`     | `varchar(36)`| FK, NULL  | ID của vợ/chồng         |
 
 - **Foreign Keys**:
   - `family_id`: tham chiếu đến `Families(id)`.
   - `father_id`: tham chiếu đến `Members(id)`.
   - `mother_id`: tham chiếu đến `Members(id)`.
-  - `spouse_id`: tham chiếu đến `Members(id)`.
-- **Mối quan hệ**: Một `Member` thuộc về một `Family` và có thể có các mối quan hệ trực tiếp với các `Member` khác (cha, mẹ, vợ/chồng).
+- **Mối quan hệ**: Một `Member` thuộc về một `Family` và có thể có các mối quan hệ trực tiếp với các `Member` khác (cha, mẹ). Mối quan hệ vợ chồng được xác định thông qua sự kiện kết hôn (`Event` có `EventType` là `Marriage`).
+
+### 3.3. Bảng `Events`
+
+Lưu trữ thông tin về các sự kiện quan trọng của gia đình.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :-------------- | :----------- | :-------- | :---------------------- |
+| `id`            | `varchar(36)`| PK        | ID duy nhất của sự kiện |
+| `name`          | `varchar(200)`| NOT NULL  | Tên sự kiện             |
+| `description`   | `text`       | NULL      | Mô tả chi tiết          |
+| `start_date`    | `datetime`   | NULL      | Ngày bắt đầu            |
+| `end_date`      | `datetime`   | NULL      | Ngày kết thúc           |
+| `location`      | `varchar(200)`| NULL      | Địa điểm diễn ra        |
+| `family_id`     | `varchar(36)`| FK, NULL  | ID của gia đình liên quan |
+| `type`          | `varchar(50)`| NOT NULL  | Loại sự kiện (Birth, Marriage, Death, etc.) |
+| `color`         | `varchar(20)`| NULL      | Mã màu để hiển thị      |
+
+- **Foreign Keys**:
+  - `family_id`: tham chiếu đến `Families(id)`.
+- **Mối quan hệ**: 
+  - Một `Event` có thể liên quan đến nhiều `Member`.
+  - Một `Member` có thể tham gia nhiều `Event`.
+  - Đây là mối quan hệ nhiều-nhiều, được thể hiện qua một bảng trung gian `EventMember`.
 
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu
 

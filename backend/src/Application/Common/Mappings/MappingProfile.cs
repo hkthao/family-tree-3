@@ -1,3 +1,6 @@
+using backend.Application.Events;
+using backend.Domain.Entities;
+
 namespace backend.Application.Common.Mappings;
 
 public class MappingProfile : Profile
@@ -5,6 +8,9 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         ApplyMappingsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
+
+        CreateMap<Event, EventDto>()
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
     }
 
     private void ApplyMappingsFromAssembly(System.Reflection.Assembly assembly)

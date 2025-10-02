@@ -1,12 +1,6 @@
-
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
-using backend.Application.Families;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data;
