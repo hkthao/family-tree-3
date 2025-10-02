@@ -61,7 +61,7 @@ public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
         }
     }
 
-    public async Task<Result<TEntity>> CreateAsync(TEntity entity)
+    public virtual async Task<Result<TEntity>> CreateAsync(TEntity entity)
     {
         var source = $"{_serviceName}.CreateAsync";
         try
@@ -76,7 +76,7 @@ public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
         }
     }
 
-    public async Task<Result> UpdateAsync(TEntity entity)
+    public virtual async Task<Result> UpdateAsync(TEntity entity)
     {
         var source = $"{_serviceName}.UpdateAsync";
         try
@@ -96,7 +96,7 @@ public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
         }
     }
 
-    public async Task<Result> DeleteAsync(Guid id)
+    public virtual async Task<Result> DeleteAsync(Guid id)
     {
         var source = $"{_serviceName}.DeleteAsync";
         try

@@ -26,6 +26,11 @@ public class Result<T>
     {
         return new Result<T>(false, default, error, errorCode, source);
     }
+
+    public Result ToResult()
+    {
+        return IsSuccess ? Result.Success() : Result.Failure(Error!, ErrorCode, Source);
+    }
 }
 
 // Non-generic Result for operations that don't return a value
