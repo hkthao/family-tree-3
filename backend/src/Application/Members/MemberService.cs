@@ -6,32 +6,91 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members;
 
-public class MemberService : BaseCrudService<Member, IMemberRepository>, IMemberService
+public class MemberService : BaseCrudService<Member, IMemberRepository, MemberDto>, IMemberService
 {
     private readonly IFamilyRepository _familyRepository;
 
-    public MemberService(IMemberRepository memberRepository, IFamilyRepository familyRepository, ILogger<MemberService> logger)
-        : base(memberRepository, logger)
+    public MemberService(IMemberRepository memberRepository, IFamilyRepository familyRepository, ILogger<MemberService> logger, IMapper _mapper)
+        : base(memberRepository, logger, _mapper)
     {
         _familyRepository = familyRepository;
     }
 
-    public async Task<Result<List<Member>>> GetMembersByIdsAsync(IEnumerable<Guid> ids)
+    public async Task<Result<List<MemberDto>>> GetByIdsAsync(IEnumerable<Guid> ids)
     {
-        const string source = "MemberService.GetMembersByIdsAsync";
+        const string source = "MemberService.GetByIdsAsync";
         try
         {
             var members = await _repository.GetByIdsAsync(ids);
-            return Result<List<Member>>.Success(members.ToList());
+            return Result<List<MemberDto>>.Success(_mapper.Map<List<MemberDto>>(members));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, string.Join(",", ids));
-            return Result<List<Member>>.Failure(ex.Message, source: source);
+            return Result<List<MemberDto>>.Failure(ex.Message, source: source);
         }
     }
 
-    public override async Task<Result<Member>> CreateAsync(Member member)
+    public async Task<Result<PaginatedList<MemberDto>>> SearchAsync(MemberFilterModel filter)
+    {
+        const string source = "MemberService.SearchAsync";
+        try
+        {
+            var members = await _repository.GetAllAsync();
+            var query = members.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
+            {
+                query = query.Where(m => m.FullName.Contains(filter.SearchQuery) || (m.Biography != null && m.Biography.Contains(filter.SearchQuery)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Gender))
+            {
+                query = query.Where(m => m.Gender == filter.Gender);
+            }
+
+
+            if (filter.FamilyId.HasValue)
+            {
+                query = query.Where(m => m.FamilyId == filter.FamilyId.Value);
+            }
+
+            if (filter.Ids != null && filter.Ids.Any())
+            {
+                query = query.Where(m => filter.Ids.Contains(m.Id));
+            }
+
+            var totalCount = query.Count();
+            var items = query.Skip((filter.Page - 1) * filter.ItemsPerPage).Take(filter.ItemsPerPage).ProjectTo<MemberDto>(_mapper.ConfigurationProvider).ToList();
+            return Result<PaginatedList<MemberDto>>.Success(new PaginatedList<MemberDto>(items, totalCount, filter.Page, filter.ItemsPerPage));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for filter {@Filter}", source, filter);
+            return Result<PaginatedList<MemberDto>>.Failure(ex.Message, source: source);
+        }
+    }
+
+    public async Task<Result<MemberDto>> GetMemberDtoByIdAsync(Guid id)
+    {
+        const string source = "MemberService.GetMemberDtoByIdAsync";
+        try
+        {
+            var memberResult = await base.GetByIdAsync(id);
+            if (memberResult.IsSuccess && memberResult.Value != null)
+            {
+                return Result<MemberDto>.Success(memberResult.Value);
+            }
+            return Result<MemberDto>.Failure(memberResult.Error!, source: memberResult.Source);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for ID {Id}", source, id);
+            return Result<MemberDto>.Failure(ex.Message, source: source);
+        }
+    }
+
+    public override async Task<Result<MemberDto>> CreateAsync(Member member)
     {
         var result = await base.CreateAsync(member);
         if (result.IsSuccess)

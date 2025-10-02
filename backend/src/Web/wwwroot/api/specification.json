@@ -116,7 +116,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Family"
+                    "$ref": "#/components/schemas/FamilyDto"
                   }
                 }
               }
@@ -179,7 +179,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Family"
+                  "$ref": "#/components/schemas/FamilyDto"
                 }
               }
             }
@@ -321,7 +321,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedListOfFamily"
+                  "$ref": "#/components/schemas/PaginatedListOfFamilyDto"
                 }
               }
             }
@@ -394,70 +394,6 @@
         }
       }
     },
-    "/api/Members": {
-      "get": {
-        "tags": [
-          "Members"
-        ],
-        "operationId": "Members_GetAllMembers",
-        "parameters": [
-          {
-            "name": "ids",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Member"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Members"
-        ],
-        "operationId": "Members_CreateMember",
-        "requestBody": {
-          "x-name": "member",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Member"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Member"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Members/{id}": {
       "get": {
         "tags": [
@@ -482,7 +418,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Member"
+                  "$ref": "#/components/schemas/MemberDto"
                 }
               }
             }
@@ -557,6 +493,38 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Members": {
+      "post": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_CreateMember",
+        "requestBody": {
+          "x-name": "member",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Member"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberDto"
                 }
               }
             }
@@ -681,6 +649,55 @@
           }
         }
       },
+      "FamilyDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PaginatedListOfFamilyDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FamilyDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "Family": {
         "allOf": [
           {
@@ -765,30 +782,6 @@
         "x-abstract": true,
         "additionalProperties": false
       },
-      "PaginatedListOfFamily": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Family"
-            }
-          },
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "FamilyTreeDto": {
         "type": "object",
         "additionalProperties": false,
@@ -806,27 +799,6 @@
             "items": {
               "$ref": "#/components/schemas/MemberDto"
             }
-          }
-        }
-      },
-      "FamilyDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "avatarUrl": {
-            "type": "string",
-            "nullable": true
           }
         }
       },
@@ -875,6 +847,10 @@
           "generation": {
             "type": "integer",
             "format": "int32"
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid"
           },
           "biography": {
             "type": "string",

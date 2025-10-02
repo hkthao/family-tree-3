@@ -1,9 +1,8 @@
-using backend.Application.Common.Models;
+using backend.Application.Members;
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Interfaces;
 
-public interface IMemberService : IBaseCrudService<Member>
+public interface IMemberService : IBaseCrudService<Member, MemberDto>
 {
-    Task<Result<List<Member>>> GetMembersByIdsAsync(IEnumerable<Guid> ids);
 }

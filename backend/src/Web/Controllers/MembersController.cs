@@ -1,5 +1,5 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
+using backend.Application.Members;
 using backend.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,29 +16,8 @@ public class MembersController : ControllerBase
         _memberService = memberService;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<List<Member>>> GetAllMembers([FromQuery] string? ids)
-    {
-        Result<List<Member>> result;
-        if (!string.IsNullOrEmpty(ids))
-        {
-            var guids = ids.Split(',').Select(Guid.Parse).ToList();
-            result = await _memberService.GetMembersByIdsAsync(guids);
-        }
-        else
-        {
-            result = await _memberService.GetAllAsync();
-        }
-
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
-    }
-
     [HttpGet("{id}")]
-    public async Task<ActionResult<Member>> GetMemberById(Guid id)
+    public async Task<ActionResult<MemberDto>> GetMemberById(Guid id)
     {
         var result = await _memberService.GetByIdAsync(id);
         if (result.IsSuccess)
@@ -53,7 +32,7 @@ public class MembersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Member>> CreateMember([FromBody] Member member)
+    public async Task<ActionResult<MemberDto>> CreateMember([FromBody] Member member)
     {
         var result = await _memberService.CreateAsync(member);
         if (result.IsSuccess)

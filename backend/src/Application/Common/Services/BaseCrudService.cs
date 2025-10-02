@@ -6,47 +6,50 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Services;
 
-public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
+public class BaseCrudService<TEntity, TRepository, TDto> : IBaseCrudService<TEntity, TDto>
     where TEntity : BaseAuditableEntity
+    where TDto : class
     where TRepository : class, IRepository<TEntity>
 {
     protected readonly TRepository _repository;
     protected readonly ILogger _logger;
+    protected readonly IMapper _mapper;
     protected readonly string _serviceName;
 
-    public BaseCrudService(TRepository repository, ILogger logger)
+    public BaseCrudService(TRepository repository, ILogger logger, IMapper mapper)
     {
         _repository = repository;
         _logger = logger;
+        _mapper = mapper;
         _serviceName = typeof(TEntity).Name + "Service";
     }
 
-    protected async Task<Result<TEntity>> FindEntityOrFailAsync(Guid id, string source)
+    protected async Task<Result<TDto>> FindEntityOrFailAsync(Guid id, string source)
     {
         var entity = await _repository.GetByIdAsync(id);
         if (entity == null)
         {
-            return Result<TEntity>.Failure($"{typeof(TEntity).Name} with ID {id} not found.", source: source);
+            return Result<TDto>.Failure($"{typeof(TEntity).Name} with ID {id} not found.", source: source);
         }
-        return Result<TEntity>.Success(entity);
+        return Result<TDto>.Success(_mapper.Map<TDto>(entity));
     }
 
-    public async Task<Result<List<TEntity>>> GetAllAsync()
+    public virtual async Task<Result<List<TDto>>> GetAllAsync()
     {
         var source = $"{_serviceName}.GetAllAsync";
         try
         {
             var entities = await _repository.GetAllAsync();
-            return Result<List<TEntity>>.Success(entities.ToList());
+            return Result<List<TDto>>.Success(_mapper.Map<List<TDto>>(entities));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source}", source);
-            return Result<List<TEntity>>.Failure(ex.Message, source: source);
+            return Result<List<TDto>>.Failure(ex.Message, source: source);
         }
     }
 
-    public async Task<Result<TEntity>> GetByIdAsync(Guid id)
+    public virtual async Task<Result<TDto>> GetByIdAsync(Guid id)
     {
         var source = $"{_serviceName}.GetByIdAsync";
         try
@@ -57,22 +60,37 @@ public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for ID {Id}", source, id);
-            return Result<TEntity>.Failure(ex.Message, source: source);
+            return Result<TDto>.Failure(ex.Message, source: source);
         }
     }
 
-    public virtual async Task<Result<TEntity>> CreateAsync(TEntity entity)
+     public virtual async Task<Result<List<TDto>>> GetByIdsAsync(List<Guid> ids)
+    {
+        var source = $"{_serviceName}.GetByIdAsync";
+        try
+        {
+            var result = await _repository.GetByIdsAsync(ids);
+            return Result<List<TDto>>.Success(_mapper.Map<List<TDto>>(result));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, ids);
+            return Result<List<TDto>>.Failure(ex.Message, source: source);
+        }
+    }
+
+    public virtual async Task<Result<TDto>> CreateAsync(TEntity entity)
     {
         var source = $"{_serviceName}.CreateAsync";
         try
         {
             var createdEntity = await _repository.AddAsync(entity);
-            return Result<TEntity>.Success(createdEntity);
+            return Result<TDto>.Success(_mapper.Map<TDto>(createdEntity));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for entity {EntityId}", source, entity.Id);
-            return Result<TEntity>.Failure(ex.Message, source: source);
+            return Result<TDto>.Failure(ex.Message, source: source);
         }
     }
 
@@ -101,12 +119,10 @@ public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
         var source = $"{_serviceName}.DeleteAsync";
         try
         {
-            var result = await FindEntityOrFailAsync(id, source);
-            if (!result.IsSuccess)
-            {
-                return Result.Failure(result.Error!, source: result.Source);
-            }
-            await _repository.DeleteAsync(result.Value!);
+            var result = await _repository.GetByIdAsync(id);
+            if (result == null)
+                return Result.Failure($"{typeof(TEntity).Name} with ID {id} not found.", source: source);
+            await _repository.DeleteAsync(result);
             return Result.Success();
         }
         catch (Exception ex)

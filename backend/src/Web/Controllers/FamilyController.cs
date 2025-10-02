@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families;
 using backend.Domain.Entities;
 // using backend.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -11,18 +12,16 @@ namespace backend.Web.Controllers;
 public class FamilyController : ControllerBase
 {
     private readonly IFamilyService _familyService;
-    private readonly ISearchService _searchService;
 
-    public FamilyController(IFamilyService familyService, ISearchService searchService)
+    public FamilyController(IFamilyService familyService)
     {
         _familyService = familyService;
-        _searchService = searchService;
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Family>>> GetAllFamilies([FromQuery] string? ids)
+    public async Task<ActionResult<List<FamilyDto>>> GetAllFamilies([FromQuery] string? ids)
     {
-        Result<List<Family>> result;
+        Result<List<FamilyDto>> result;
         if (!string.IsNullOrEmpty(ids))
         {
             var guids = ids.Split(',').Select(Guid.Parse).ToList();
@@ -41,22 +40,20 @@ public class FamilyController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Family>> GetFamilyById(Guid id)
+    public async Task<ActionResult<FamilyDto>> GetFamilyById(Guid id)
     {
-        var result = await _familyService.GetByIdsAsync(new[] { id });
+        var result = await _familyService.GetByIdAsync(id);
         if (result.IsSuccess)
         {
-            if (result.Value == null || !result.Value.Any())
-            {
+            if (result.Value == null)
                 return NotFound();
-            }
-            return Ok(result.Value.First());
+            return Ok(result.Value);
         }
         return StatusCode(500, result.Error);
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<Family>>> SearchFamilies([FromQuery] FamilyFilterModel filter)
+    public async Task<ActionResult<PaginatedList<FamilyDto>>> SearchFamilies([FromQuery] FamilyFilterModel filter)
     {
         var result = await _familyService.SearchAsync(filter);
         if (result.IsSuccess)

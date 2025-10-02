@@ -15,8 +15,7 @@ public class MemberDto : IMapFrom<Member>
     public string? Phone { get; set; }
     public string? Email { get; set; }
     public int Generation { get; set; }
-
-
+    public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
     public object? Metadata { get; set; }
 }

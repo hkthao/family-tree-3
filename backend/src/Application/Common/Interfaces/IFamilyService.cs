@@ -1,10 +1,10 @@
 using backend.Application.Common.Models;
+using backend.Application.Families;
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Interfaces;
 
-public interface IFamilyService : IBaseCrudService<Family>
+public interface IFamilyService : IBaseCrudService<Family, FamilyDto>
 {
-    Task<Result<List<Family>>> GetByIdsAsync(IEnumerable<Guid> ids);
-    Task<Result<PaginatedList<Family>>> SearchAsync(FamilyFilterModel filter);
+    Task<Result<PaginatedList<FamilyDto>>> SearchAsync(FamilyFilterModel filter);
 }

@@ -2,34 +2,18 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Domain.Entities;
-// using backend.Domain.Enums; // Remove this
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families;
 
-public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamilyService
+public class FamilyService : BaseCrudService<Family, IFamilyRepository, FamilyDto>, IFamilyService
 {
-    public FamilyService(IFamilyRepository familyRepository, ILogger<FamilyService> logger)
-        : base(familyRepository, logger)
+    public FamilyService(IFamilyRepository familyRepository, ILogger<FamilyService> logger, IMapper mapper)
+        : base(familyRepository, logger, mapper)
     {
     }
 
-    public async Task<Result<List<Family>>> GetByIdsAsync(IEnumerable<Guid> ids)
-    {
-        const string source = "FamilyService.GetByIdsAsync";
-        try
-        {
-            var families = await _repository.GetByIdsAsync(ids);
-            return Result<List<Family>>.Success(families.ToList());
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, string.Join(",", ids));
-            return Result<List<Family>>.Failure(ex.Message, source: source);
-        }
-    }
-
-    public async Task<Result<PaginatedList<Family>>> SearchAsync(FamilyFilterModel filter)
+    public async Task<Result<PaginatedList<FamilyDto>>> SearchAsync(FamilyFilterModel filter)
     {
         const string source = "FamilyService.SearchAsync";
         try
@@ -53,14 +37,14 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
             }
 
             var totalCount = query.Count();
-            var items = query.Skip((filter.Page - 1) * filter.ItemsPerPage).Take(filter.ItemsPerPage).ToList();
+            var items = query.Skip((filter.Page - 1) * filter.ItemsPerPage).Take(filter.ItemsPerPage).ProjectTo<FamilyDto>(_mapper.ConfigurationProvider).ToList();
 
-            return Result<PaginatedList<Family>>.Success(new PaginatedList<Family>(items, totalCount, filter.Page, filter.ItemsPerPage));
+            return Result<PaginatedList<FamilyDto>>.Success(new PaginatedList<FamilyDto>(items, totalCount, filter.Page, filter.ItemsPerPage));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for filter {@Filter}", source, filter);
-            return Result<PaginatedList<Family>>.Failure(ex.Message, source: source);
+            return Result<PaginatedList<FamilyDto>>.Failure(ex.Message, source: source);
         }
     }
 }
