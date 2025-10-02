@@ -16,9 +16,9 @@ public class MemberService : BaseCrudService<Member, IMemberRepository>, IMember
         _familyRepository = familyRepository;
     }
 
-    public async Task<Result<List<Member>>> GetMembersByIdsAsync(IEnumerable<Guid> ids)
+    public async Task<Result<List<Member>>> GetByIdsAsync(IEnumerable<Guid> ids)
     {
-        const string source = "MemberService.GetMembersByIdsAsync";
+        const string source = "MemberService.GetByIdsAsync";
         try
         {
             var members = await _repository.GetByIdsAsync(ids);
@@ -28,6 +28,58 @@ public class MemberService : BaseCrudService<Member, IMemberRepository>, IMember
         {
             _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, string.Join(",", ids));
             return Result<List<Member>>.Failure(ex.Message, source: source);
+        }
+    }
+
+    public async Task<Result<PaginatedList<Member>>> SearchAsync(MemberFilterModel filter)
+    {
+        const string source = "MemberService.SearchAsync";
+        try
+        {
+            var members = await _repository.GetAllAsync();
+            var query = members.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
+            {
+                query = query.Where(m => m.FullName.Contains(filter.SearchQuery) || (m.Biography != null && m.Biography.Contains(filter.SearchQuery)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Gender))
+            {
+                query = query.Where(m => m.Gender == filter.Gender);
+            }
+
+            // Removed PlaceOfBirth filter
+            // if (!string.IsNullOrWhiteSpace(filter.PlaceOfBirth))
+            // {
+            //     query = query.Where(m => m.PlaceOfBirth != null && m.PlaceOfBirth.ToLower().Contains(filter.PlaceOfBirth.ToLower()));
+            // }
+
+            // Removed PlaceOfDeath filter
+            // if (!string.IsNullOrWhiteSpace(filter.PlaceOfDeath))
+            // {
+            //     query = query.Where(m => m.PlaceOfDeath != null && m.PlaceOfDeath.ToLower().Contains(filter.PlaceOfDeath.ToLower()));
+            // }
+
+            if (filter.FamilyId.HasValue)
+            {
+                query = query.Where(m => m.FamilyId == filter.FamilyId.Value);
+            }
+
+            if (filter.Ids != null && filter.Ids.Any())
+            {
+                query = query.Where(m => filter.Ids.Contains(m.Id));
+            }
+
+            var totalCount = query.Count();
+            var items = query.Skip((filter.Page - 1) * filter.ItemsPerPage).Take(filter.ItemsPerPage).ToList();
+
+            return Result<PaginatedList<Member>>.Success(new PaginatedList<Member>(items, totalCount, filter.Page, filter.ItemsPerPage));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for filter {@Filter}", source, filter);
+            return Result<PaginatedList<Member>>.Failure(ex.Message, source: source);
         }
     }
 
