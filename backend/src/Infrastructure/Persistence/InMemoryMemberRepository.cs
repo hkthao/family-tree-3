@@ -25,7 +25,6 @@ public class InMemoryMemberRepository : InMemoryRepository<Member>, IMemberRepos
         Guid louisId = Guid.NewGuid();
         Guid harryId = Guid.NewGuid();
         Guid meghanId = Guid.NewGuid();
-        Guid archieId = Guid.NewGuid();
         Guid dianaId = Guid.NewGuid(); // Deceased, but for lineage
         Guid beatriceId = Guid.NewGuid();
         Guid eugenieId = Guid.NewGuid();

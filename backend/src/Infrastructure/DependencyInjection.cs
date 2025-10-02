@@ -17,6 +17,7 @@ public static class DependencyInjection
     {
         // Register IMemberRepository first, as InMemoryFamilyRepository depends on it
         services.AddSingleton<IMemberRepository, InMemoryMemberRepository>();
+        services.AddSingleton<IEventRepository, InMemoryEventRepository>();
         services.AddSingleton<IFamilyRepository>(sp => new InMemoryFamilyRepository(sp.GetRequiredService<IMemberRepository>()));
         services.AddSingleton<IAuthProvider, Auth0Provider>();
 
