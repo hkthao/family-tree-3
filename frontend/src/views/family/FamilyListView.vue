@@ -22,7 +22,7 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { useMemberStore } from '@/stores/member.store';
 import { FamilySearch, FamilyList } from '@/components/family';
-import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
+import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
