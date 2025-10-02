@@ -1,7 +1,7 @@
 <template>
   <FamilySearch @update:filters="handleFilterUpdate" />
   <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
-    :items-per-page="itemsPerPage" :family-member-counts="familyMemberCounts" @update:options="handleListOptionsUpdate"
+    :items-per-page="itemsPerPage"  @update:options="handleListOptionsUpdate"
     @update:itemsPerPage="itemsPerPage = $event" @view="navigateToViewFamily" @edit="navigateToEditFamily"
     @delete="confirmDelete" @create="navigateToAddFamily" />
   <!-- Confirm Delete Dialog -->
@@ -15,12 +15,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { useMemberStore } from '@/stores/member.store';
 import { FamilySearch, FamilyList } from '@/components/family';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -32,7 +31,6 @@ const router = useRouter();
 
 const familyStore = useFamilyStore();
 const { items } = storeToRefs(familyStore);
-const membersStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
 const currentFilters = ref<FamilyFilter>({});
@@ -41,16 +39,6 @@ const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const deleteConfirmDialog = ref(false);
 const familyToDelete = ref<Family | undefined>(undefined);
-
-const familyMemberCounts = computed(() => {
-  const counts: { [key: string]: number } = {};
-  membersStore.items.forEach((member) => {
-    if (member.familyId) {
-      counts[member.familyId] = (counts[member.familyId] || 0) + 1;
-    }
-  });
-  return counts;
-});
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
   currentFilters.value = filters;

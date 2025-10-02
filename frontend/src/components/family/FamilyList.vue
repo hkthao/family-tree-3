@@ -40,10 +40,13 @@
         </div>
       </div>
     </template>
-    <!-- visibility column -->
+
+    <!-- totalMembers column -->
     <template #item.totalMembers="{ item }">
-      {{ familyMemberCounts[item.id] || 0 }}
+      {{ item.totalMembers }}
     </template>
+
+    <!-- visibility column -->
     <template #item.visibility="{ item }">
       <v-chip
         :color="
@@ -86,13 +89,12 @@ import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 
-const { items, totalItems, loading, itemsPerPage, familyMemberCounts } =
+const { items, totalItems, loading, itemsPerPage } =
   defineProps<{
     items: Family[];
     totalItems: number;
     loading: boolean;
     itemsPerPage: number;
-    familyMemberCounts: { [key: string]: number };
   }>();
 
 defineEmits([

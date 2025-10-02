@@ -7,6 +7,7 @@ export interface Family {
   avatarUrl?: string;
   address?: string;
   visibility?: FamilyVisibility;
+  totalMembers: number
 }
 
 export interface FamilyFilter {

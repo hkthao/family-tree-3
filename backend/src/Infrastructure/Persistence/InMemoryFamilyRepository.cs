@@ -13,7 +13,7 @@ public class InMemoryFamilyRepository : InMemoryRepository<Family>, IFamilyRepos
         _memberRepository = memberRepository;
         _items.AddRange(new List<Family>
         {
-            new Family { Id = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"), Name = "Nguyen Family", Description = "A prominent family.", AvatarUrl = "https://picsum.photos/200/300", Visibility = "Public" },
+            new Family { Id = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"), Name = "Royal Family", Description = "A prominent family.", AvatarUrl = "https://picsum.photos/200/300", Visibility = "Public", TotalMembers = 20 },
             new Family { Id = Guid.Parse("3cfc98c1-cd0a-4d4d-bb6a-bdbc47dd27dc"), Name = "Tran Family", Description = "A historical lineage.", AvatarUrl = "https://picsum.photos/200/300", Visibility = "Private" },
             new Family { Id = Guid.Parse("548ce66d-2d39-4f8f-9326-959ffabb1632"), Name = "Le Family", Description = "Known for their resilience.", AvatarUrl = "https://picsum.photos/200/300", Visibility = "Public" },
             new Family { Id = Guid.Parse("58cc481c-8eb6-4664-be90-944e7f2453ae"), Name = "Pham Family", Description = "A family of scholars.", AvatarUrl = "https://picsum.photos/200/300", Visibility = "Private" },
