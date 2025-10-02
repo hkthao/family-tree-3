@@ -269,7 +269,7 @@
         "operationId": "Family_SearchFamilies",
         "parameters": [
           {
-            "name": "searchQuery",
+            "name": "SearchQuery",
             "in": "query",
             "schema": {
               "type": "string",
@@ -278,7 +278,7 @@
             "x-position": 1
           },
           {
-            "name": "familyId",
+            "name": "FamilyId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -288,24 +288,35 @@
             "x-position": 2
           },
           {
-            "name": "page",
+            "name": "Visibility",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FamilyVisibility"
+                }
+              ]
             },
             "x-position": 3
           },
           {
-            "name": "itemsPerPage",
+            "name": "Page",
             "in": "query",
             "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 10
+              "format": "int32"
             },
             "x-position": 4
+          },
+          {
+            "name": "ItemsPerPage",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 5
           }
         ],
         "responses": {
@@ -695,10 +706,22 @@
                 "nullable": true
               },
               "visibility": {
-                "type": "string"
+                "$ref": "#/components/schemas/FamilyVisibility"
               }
             }
           }
+        ]
+      },
+      "FamilyVisibility": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Private",
+          "Public"
+        ],
+        "enum": [
+          0,
+          1
         ]
       },
       "BaseAuditableEntity": {

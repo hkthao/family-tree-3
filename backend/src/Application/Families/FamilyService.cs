@@ -2,6 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families;
@@ -13,9 +14,9 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
     {
     }
 
-    public async Task<Result<List<Family>>> GetFamiliesByIdsAsync(IEnumerable<Guid> ids)
+    public async Task<Result<List<Family>>> GetByIdsAsync(IEnumerable<Guid> ids)
     {
-        const string source = "FamilyService.GetFamiliesByIdsAsync";
+        const string source = "FamilyService.GetByIdsAsync";
         try
         {
             var families = await _repository.GetByIdsAsync(ids);
@@ -28,32 +29,37 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
         }
     }
 
-    public async Task<Result<PaginatedList<Family>>> SearchFamiliesAsync(string? searchQuery, Guid? familyId, int page, int itemsPerPage)
+    public async Task<Result<PaginatedList<Family>>> SearchAsync(FamilyFilterModel filter)
     {
-        const string source = "FamilyService.SearchFamiliesAsync";
+        const string source = "FamilyService.SearchAsync";
         try
         {
             var families = await _repository.GetAllAsync();
             var query = families.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(searchQuery))
+            if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
             {
-                query = query.Where(f => f.Name.Contains(searchQuery) || (f.Description != null && f.Description.Contains(searchQuery)));
+                query = query.Where(f => f.Name.Contains(filter.SearchQuery) || (f.Description != null && f.Description.Contains(filter.SearchQuery)));
             }
 
-            if (familyId.HasValue)
+            if (filter.FamilyId.HasValue)
             {
-                query = query.Where(f => f.Id == familyId.Value);
+                query = query.Where(f => f.Id == filter.FamilyId.Value);
+            }
+
+            if (filter.Visibility.HasValue)
+            {
+                query = query.Where(f => f.Visibility == filter.Visibility.Value);
             }
 
             var totalCount = query.Count();
-            var items = query.Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
+            var items = query.Skip((filter.Page - 1) * filter.ItemsPerPage).Take(filter.ItemsPerPage).ToList();
 
-            return Result<PaginatedList<Family>>.Success(new PaginatedList<Family>(items, totalCount, page, itemsPerPage));
+            return Result<PaginatedList<Family>>.Success(new PaginatedList<Family>(items, totalCount, filter.Page, filter.ItemsPerPage));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {Source} for searchQuery {SearchQuery}, familyId {FamilyId}, page {Page}, itemsPerPage {ItemsPerPage}", source, searchQuery, familyId, page, itemsPerPage);
+            _logger.LogError(ex, "Error in {Source} for filter {@Filter}", source, filter);
             return Result<PaginatedList<Family>>.Failure(ex.Message, source: source);
         }
     }

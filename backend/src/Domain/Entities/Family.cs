@@ -1,4 +1,6 @@
-﻿namespace backend.Domain.Entities;
+﻿using backend.Domain.Enums;
+
+namespace backend.Domain.Entities;
 
 /// <summary>
 /// Represents a family or clan.
@@ -9,5 +11,5 @@ public class Family : BaseAuditableEntity
     public string? Description { get; set; }
 
     public string? AvatarUrl { get; set; }
-    public string Visibility { get; set; } = "Private"; // e.g., Private, Public
+    public FamilyVisibility Visibility { get; set; } = FamilyVisibility.Private;
 }

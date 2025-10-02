@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -25,7 +26,7 @@ public class FamilyController : ControllerBase
         if (!string.IsNullOrEmpty(ids))
         {
             var guids = ids.Split(',').Select(Guid.Parse).ToList();
-            result = await _familyService.GetFamiliesByIdsAsync(guids);
+            result = await _familyService.GetByIdsAsync(guids);
         }
         else
         {
@@ -55,13 +56,9 @@ public class FamilyController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<Family>>> SearchFamilies(
-        [FromQuery] string? searchQuery,
-        [FromQuery] Guid? familyId,
-        [FromQuery] int page = 1,
-        [FromQuery] int itemsPerPage = 10)
+    public async Task<ActionResult<PaginatedList<Family>>> SearchFamilies([FromQuery] FamilyFilterModel filter)
     {
-        var result = await _familyService.SearchFamiliesAsync(searchQuery, familyId, page, itemsPerPage);
+        var result = await _familyService.SearchAsync(filter);
         if (result.IsSuccess)
         {
             return Ok(result.Value);
