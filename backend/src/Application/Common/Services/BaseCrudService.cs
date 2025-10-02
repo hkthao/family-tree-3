@@ -6,22 +6,19 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Services;
 
-public abstract class BaseCrudService<TEntity, TRepository, TDto> : IBaseCrudService<TEntity, TDto>
+public class BaseCrudService<TEntity, TRepository> : IBaseCrudService<TEntity>
     where TEntity : BaseAuditableEntity
     where TRepository : class, IRepository<TEntity>
-    where TDto : class
 {
     protected readonly TRepository _repository;
     protected readonly ILogger _logger;
     protected readonly string _serviceName;
-    protected readonly Func<TEntity, TDto> _mapper;
 
-    public BaseCrudService(TRepository repository, ILogger logger, Func<TEntity, TDto> mapper)
+    public BaseCrudService(TRepository repository, ILogger logger)
     {
         _repository = repository;
         _logger = logger;
         _serviceName = typeof(TEntity).Name + "Service";
-        _mapper = mapper;
     }
 
     protected async Task<Result<TEntity>> FindEntityOrFailAsync(Guid id, string source)
@@ -34,37 +31,33 @@ public abstract class BaseCrudService<TEntity, TRepository, TDto> : IBaseCrudSer
         return Result<TEntity>.Success(entity);
     }
 
-    public virtual async Task<Result<List<TDto>>> GetAllAsync()
+    public async Task<Result<List<TEntity>>> GetAllAsync()
     {
         var source = $"{_serviceName}.GetAllAsync";
         try
         {
             var entities = await _repository.GetAllAsync();
-            return Result<List<TDto>>.Success(entities.Select(_mapper).ToList());
+            return Result<List<TEntity>>.Success(entities.ToList());
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source}", source);
-            return Result<List<TDto>>.Failure(ex.Message, source: source);
+            return Result<List<TEntity>>.Failure(ex.Message, source: source);
         }
     }
 
-    public virtual async Task<Result<TDto>> GetByIdAsync(Guid id)
+    public async Task<Result<TEntity>> GetByIdAsync(Guid id)
     {
         var source = $"{_serviceName}.GetByIdAsync";
         try
         {
             var result = await FindEntityOrFailAsync(id, source);
-            if (!result.IsSuccess)
-            {
-                return Result<TDto>.Failure(result.Error!, source: result.Source);
-            }
-            return Result<TDto>.Success(_mapper(result.Value!));
+            return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for ID {Id}", source, id);
-            return Result<TDto>.Failure(ex.Message, source: source);
+            return Result<TEntity>.Failure(ex.Message, source: source);
         }
     }
 
