@@ -7,39 +7,18 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/Families": {
-      "get": {
-        "tags": [
-          "Families"
-        ],
-        "operationId": "GetApiFamiliesAll",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FamilyDto"
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/Auth/login": {
       "post": {
         "tags": [
-          "Families"
+          "Auth"
         ],
-        "operationId": "PostApiFamilies",
+        "operationId": "Auth_Login",
         "requestBody": {
-          "x-name": "command",
+          "x-name": "request",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateFamilyCommand"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             }
           },
@@ -52,8 +31,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "guid"
+                  "$ref": "#/components/schemas/AuthResult"
                 }
               }
             }
@@ -61,12 +39,128 @@
         }
       }
     },
-    "/api/Families/{id}": {
+    "/api/Auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_Register",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/user": {
       "get": {
         "tags": [
-          "Families"
+          "Auth"
         ],
-        "operationId": "GetApiFamilies",
+        "operationId": "Auth_GetCurrentUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Family": {
+      "get": {
+        "tags": [
+          "Family"
+        ],
+        "operationId": "Family_GetAllFamilies",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Family"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Family"
+        ],
+        "operationId": "Family_CreateFamily",
+        "requestBody": {
+          "x-name": "family",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Family"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Family"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Family/{id}": {
+      "get": {
+        "tags": [
+          "Family"
+        ],
+        "operationId": "Family_GetFamilyById",
         "parameters": [
           {
             "name": "id",
@@ -85,7 +179,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FamilyDto"
+                  "$ref": "#/components/schemas/Family"
                 }
               }
             }
@@ -94,9 +188,9 @@
       },
       "put": {
         "tags": [
-          "Families"
+          "Family"
         ],
-        "operationId": "PutApiFamilies",
+        "operationId": "Family_UpdateFamily",
         "parameters": [
           {
             "name": "id",
@@ -110,11 +204,11 @@
           }
         ],
         "requestBody": {
-          "x-name": "command",
+          "x-name": "family",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateFamilyCommand"
+                "$ref": "#/components/schemas/Family"
               }
             }
           },
@@ -123,15 +217,23 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
           }
         }
       },
       "delete": {
         "tags": [
-          "Families"
+          "Family"
         ],
-        "operationId": "DeleteApiFamilies",
+        "operationId": "Family_DeleteFamily",
         "parameters": [
           {
             "name": "id",
@@ -146,7 +248,76 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Family/search": {
+      "get": {
+        "tags": [
+          "Family"
+        ],
+        "operationId": "Family_SearchFamilies",
+        "parameters": [
+          {
+            "name": "searchQuery",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "familyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            },
+            "x-position": 3
+          },
+          {
+            "name": "itemsPerPage",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfFamily"
+                }
+              }
+            }
           }
         }
       }
@@ -156,7 +327,7 @@
         "tags": [
           "FamilyTree"
         ],
-        "operationId": "GetApiFamilyTree",
+        "operationId": "FamilyTree_GetFamilyTreeJson",
         "parameters": [
           {
             "name": "familyId",
@@ -188,7 +359,7 @@
         "tags": [
           "FamilyTree"
         ],
-        "operationId": "GetApiFamilyTreePdf",
+        "operationId": "FamilyTree_GetFamilyTreePdf",
         "parameters": [
           {
             "name": "familyId",
@@ -203,7 +374,15 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
           }
         }
       }
@@ -213,7 +392,18 @@
         "tags": [
           "Members"
         ],
-        "operationId": "GetApiMembersAll",
+        "operationId": "Members_GetAllMembers",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -222,7 +412,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MemberDto"
+                    "$ref": "#/components/schemas/Member"
                   }
                 }
               }
@@ -234,13 +424,13 @@
         "tags": [
           "Members"
         ],
-        "operationId": "PostApiMembers",
+        "operationId": "Members_CreateMember",
         "requestBody": {
-          "x-name": "command",
+          "x-name": "member",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateMemberCommand"
+                "$ref": "#/components/schemas/Member"
               }
             }
           },
@@ -248,13 +438,12 @@
           "x-position": 1
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "guid"
+                  "$ref": "#/components/schemas/Member"
                 }
               }
             }
@@ -267,7 +456,7 @@
         "tags": [
           "Members"
         ],
-        "operationId": "GetApiMembers",
+        "operationId": "Members_GetMemberById",
         "parameters": [
           {
             "name": "id",
@@ -286,7 +475,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MemberDto"
+                  "$ref": "#/components/schemas/Member"
                 }
               }
             }
@@ -297,7 +486,7 @@
         "tags": [
           "Members"
         ],
-        "operationId": "PutApiMembers",
+        "operationId": "Members_UpdateMember",
         "parameters": [
           {
             "name": "id",
@@ -311,11 +500,11 @@
           }
         ],
         "requestBody": {
-          "x-name": "command",
+          "x-name": "member",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateMemberCommand"
+                "$ref": "#/components/schemas/Member"
               }
             }
           },
@@ -323,11 +512,16 @@
           "x-position": 2
         },
         "responses": {
-          "204": {
-            "description": ""
-          },
-          "404": {
-            "description": ""
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
           }
         }
       },
@@ -335,7 +529,7 @@
         "tags": [
           "Members"
         ],
-        "operationId": "DeleteApiMembers",
+        "operationId": "Members_DeleteMember",
         "parameters": [
           {
             "name": "id",
@@ -349,42 +543,13 @@
           }
         ],
         "responses": {
-          "204": {
-            "description": ""
-          },
-          "404": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/Users/register": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersRegister",
-        "requestBody": {
-          "x-name": "registration",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
           "200": {
-            "description": ""
-          },
-          "400": {
             "description": "",
             "content": {
-              "application/json": {
+              "application/octet-stream": {
                 "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
@@ -392,687 +557,93 @@
         }
       }
     },
-    "/api/Users/login": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersLogin",
-        "parameters": [
-          {
-            "name": "useCookies",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "nullable": true
-            },
-            "x-position": 2
-          },
-          {
-            "name": "useSessionCookies",
-            "in": "query",
-            "schema": {
-              "type": "boolean",
-              "nullable": true
-            },
-            "x-position": 3
-          }
-        ],
-        "requestBody": {
-          "x-name": "login",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccessTokenResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Users/refresh": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersRefresh",
-        "requestBody": {
-          "x-name": "refreshRequest",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccessTokenResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Users/confirmEmail": {
+    "/api/Search": {
       "get": {
         "tags": [
-          "Users"
+          "Search"
         ],
-        "operationId": "GetApiUsersConfirmEmail",
+        "operationId": "Search_Search",
         "parameters": [
           {
-            "name": "userId",
+            "name": "keyword",
             "in": "query",
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "string"
             },
             "x-position": 1
           },
           {
-            "name": "code",
+            "name": "page",
             "in": "query",
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "integer",
+              "format": "int32",
+              "default": 1
             },
             "x-position": 2
           },
           {
-            "name": "changedEmail",
+            "name": "itemsPerPage",
             "in": "query",
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "integer",
+              "format": "int32",
+              "default": 10
             },
             "x-position": 3
           }
         ],
         "responses": {
           "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/Users/resendConfirmationEmail": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersResendConfirmationEmail",
-        "requestBody": {
-          "x-name": "resendRequest",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResendConfirmationEmailRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/Users/forgotPassword": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersForgotPassword",
-        "requestBody": {
-          "x-name": "resetRequest",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ForgotPasswordRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
             "description": "",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                  "$ref": "#/components/schemas/PaginatedListOfSearchItem"
                 }
               }
             }
           }
         }
-      }
-    },
-    "/api/Users/resetPassword": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersResetPassword",
-        "requestBody": {
-          "x-name": "resetRequest",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetPasswordRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Users/manage/2fa": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersManage2fa",
-        "requestBody": {
-          "x-name": "tfaRequest",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TwoFactorRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TwoFactorResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      }
-    },
-    "/api/Users/manage/info": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "GetApiUsersManageInfo",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InfoResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      },
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "operationId": "PostApiUsersManageInfo",
-        "requestBody": {
-          "x-name": "infoRequest",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InfoRequest"
-              }
-            }
-          },
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InfoResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
       }
     }
   },
   "components": {
     "schemas": {
-      "FamilyDto": {
+      "AuthResult": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "Id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "Name": {
-            "type": "string"
-          },
-          "Description": {
+          "userId": {
             "type": "string",
             "nullable": true
           },
-          "AvatarUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "CreateFamilyCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Name": {
-            "type": "string"
-          },
-          "Description": {
+          "email": {
             "type": "string",
             "nullable": true
           },
-          "AvatarUrl": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "UpdateFamilyCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "Name": {
-            "type": "string"
-          },
-          "Description": {
+          "username": {
             "type": "string",
             "nullable": true
           },
-          "AvatarUrl": {
+          "accessToken": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "FamilyTreeDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Family": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/FamilyDto"
-              }
-            ]
           },
-          "Members": {
+          "roles": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MemberDto"
+              "type": "string"
             }
-          }
-        }
-      },
-      "MemberDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "guid"
           },
-          "FullName": {
-            "type": "string",
-            "nullable": true
+          "succeeded": {
+            "type": "boolean"
           },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "DateOfDeath": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "PlaceOfBirth": {
-            "type": "string",
-            "nullable": true
-          },
-          "Gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "AvatarUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "Phone": {
-            "type": "string",
-            "nullable": true
-          },
-          "Email": {
-            "type": "string",
-            "nullable": true
-          },
-          "Generation": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Biography": {
-            "type": "string",
-            "nullable": true
-          },
-          "Metadata": {
-            "nullable": true
-          }
-        }
-      },
-      "CreateMemberCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "FullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "DateOfDeath": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "Gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "AvatarUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "PlaceOfBirth": {
-            "type": "string",
-            "nullable": true
-          },
-          "Phone": {
-            "type": "string",
-            "nullable": true
-          },
-          "Email": {
-            "type": "string",
-            "nullable": true
-          },
-          "Generation": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Biography": {
-            "type": "string",
-            "nullable": true
-          },
-          "Metadata": {
-            "type": "string",
-            "nullable": true
-          },
-          "FamilyId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          }
-        }
-      },
-      "UpdateMemberCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "FullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "DateOfDeath": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "Gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "AvatarUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "PlaceOfBirth": {
-            "type": "string",
-            "nullable": true
-          },
-          "Phone": {
-            "type": "string",
-            "nullable": true
-          },
-          "Email": {
-            "type": "string",
-            "nullable": true
-          },
-          "Generation": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Biography": {
-            "type": "string",
-            "nullable": true
-          },
-          "Metadata": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "HttpValidationProblemDetails": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/ProblemDetails"
-          },
-          {
-            "type": "object",
-            "additionalProperties": {
-              "nullable": true
-            },
-            "properties": {
-              "errors": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
-          }
-        ]
-      },
-      "ProblemDetails": {
-        "type": "object",
-        "additionalProperties": {
-          "nullable": true
-        },
-        "properties": {
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "detail": {
-            "type": "string",
-            "nullable": true
-          },
-          "instance": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "RegisterRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Email": {
-            "type": "string"
-          },
-          "Password": {
-            "type": "string"
-          }
-        }
-      },
-      "AccessTokenResponse": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "TokenType": {
-            "type": "string"
-          },
-          "AccessToken": {
-            "type": "string"
-          },
-          "ExpiresIn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "RefreshToken": {
-            "type": "string"
           }
         }
       },
@@ -1080,138 +651,383 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "Email": {
+          "email": {
             "type": "string"
           },
-          "Password": {
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
             "type": "string"
           },
-          "TwoFactorCode": {
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "Family": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "avatarUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "visibility": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "BaseAuditableEntity": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseEntity"
+          },
+          {
+            "type": "object",
+            "x-abstract": true,
+            "additionalProperties": false,
+            "properties": {
+              "created": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "createdBy": {
+                "type": "string",
+                "nullable": true
+              },
+              "lastModified": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "lastModifiedBy": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "BaseEntity": {
+        "type": "object",
+        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "id": {
             "type": "string",
-            "nullable": true
+            "format": "guid"
           },
-          "TwoFactorRecoveryCode": {
-            "type": "string",
-            "nullable": true
+          "domainEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseEvent"
+            }
           }
         }
       },
-      "RefreshRequest": {
+      "BaseEvent": {
         "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "RefreshToken": {
-            "type": "string"
-          }
-        }
+        "x-abstract": true,
+        "additionalProperties": false
       },
-      "ResendConfirmationEmailRequest": {
+      "PaginatedListOfFamily": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "Email": {
-            "type": "string"
-          }
-        }
-      },
-      "ForgotPasswordRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Email": {
-            "type": "string"
-          }
-        }
-      },
-      "ResetPasswordRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Email": {
-            "type": "string"
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Family"
+            }
           },
-          "ResetCode": {
-            "type": "string"
-          },
-          "NewPassword": {
-            "type": "string"
-          }
-        }
-      },
-      "TwoFactorResponse": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "SharedKey": {
-            "type": "string"
-          },
-          "RecoveryCodesLeft": {
+          "pageNumber": {
             "type": "integer",
             "format": "int32"
           },
-          "RecoveryCodes": {
-            "type": "array",
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FamilyTreeDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "family": {
             "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/FamilyDto"
+              }
+            ]
+          },
+          "members": {
+            "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/MemberDto"
             }
-          },
-          "IsTwoFactorEnabled": {
-            "type": "boolean"
-          },
-          "IsMachineRemembered": {
-            "type": "boolean"
           }
         }
       },
-      "TwoFactorRequest": {
+      "FamilyDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "Enable": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "TwoFactorCode": {
+          "id": {
             "type": "string",
-            "nullable": true
+            "format": "guid"
           },
-          "ResetSharedKey": {
-            "type": "boolean"
-          },
-          "ResetRecoveryCodes": {
-            "type": "boolean"
-          },
-          "ForgetMachine": {
-            "type": "boolean"
-          }
-        }
-      },
-      "InfoResponse": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Email": {
+          "name": {
             "type": "string"
           },
-          "IsEmailConfirmed": {
-            "type": "boolean"
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
-      "InfoRequest": {
+      "MemberDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "NewEmail": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "fullName": {
             "type": "string",
             "nullable": true
           },
-          "NewPassword": {
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateOfDeath": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "placeOfBirth": {
             "type": "string",
             "nullable": true
           },
-          "OldPassword": {
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "generation": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "biography": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "nullable": true
+          }
+        }
+      },
+      "Member": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableEntity"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "fullName": {
+                "type": "string"
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "dateOfDeath": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "placeOfDeath": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "placeOfBirth": {
+                "type": "string",
+                "nullable": true
+              },
+              "gender": {
+                "type": "string",
+                "nullable": true
+              },
+              "avatarUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "phone": {
+                "type": "string",
+                "nullable": true
+              },
+              "email": {
+                "type": "string",
+                "nullable": true
+              },
+              "generation": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "familyId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "biography": {
+                "type": "string",
+                "nullable": true
+              },
+              "metadata": {
+                "type": "string",
+                "nullable": true
+              },
+              "fatherId": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "father": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Member"
+                  }
+                ]
+              },
+              "motherId": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "mother": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Member"
+                  }
+                ]
+              },
+              "spouseId": {
+                "type": "string",
+                "format": "guid",
+                "nullable": true
+              },
+              "spouse": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Member"
+                  }
+                ]
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Member"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PaginatedListOfSearchItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchItem"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SearchItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "url": {
             "type": "string",
             "nullable": true
           }

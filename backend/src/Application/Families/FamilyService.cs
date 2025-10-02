@@ -28,7 +28,7 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
         }
     }
 
-    public async Task<Result<PaginatedList<Family>>> SearchFamiliesAsync(string? keyword, int page, int itemsPerPage)
+    public async Task<Result<PaginatedList<Family>>> SearchFamiliesAsync(string? searchQuery, Guid? familyId, int page, int itemsPerPage)
     {
         const string source = "FamilyService.SearchFamiliesAsync";
         try
@@ -36,9 +36,14 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
             var families = await _repository.GetAllAsync();
             var query = families.AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(keyword))
+            if (!string.IsNullOrWhiteSpace(searchQuery))
             {
-                query = query.Where(f => f.Name.Contains(keyword) || (f.Description != null && f.Description.Contains(keyword)));
+                query = query.Where(f => f.Name.Contains(searchQuery) || (f.Description != null && f.Description.Contains(searchQuery)));
+            }
+
+            if (familyId.HasValue)
+            {
+                query = query.Where(f => f.Id == familyId.Value);
             }
 
             var totalCount = query.Count();
@@ -48,7 +53,7 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {Source} for keyword {Keyword}, page {Page}, itemsPerPage {ItemsPerPage}", source, keyword, page, itemsPerPage);
+            _logger.LogError(ex, "Error in {Source} for searchQuery {SearchQuery}, familyId {FamilyId}, page {Page}, itemsPerPage {ItemsPerPage}", source, searchQuery, familyId, page, itemsPerPage);
             return Result<PaginatedList<Family>>.Failure(ex.Message, source: source);
         }
     }

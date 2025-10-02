@@ -21,6 +21,9 @@ builder.Services.AddCors(options =>
 
 builder.AddWebServices();
 
+// Add controllers service
+builder.Services.AddControllers();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,7 +61,10 @@ app.UseExceptionHandler(options => { });
 
 app.Map("/", () => Results.Redirect("/api"));
 
-app.MapEndpoints();
+// app.MapEndpoints(); // Removed this line
+
+// Map controllers
+app.MapControllers();
 
 app.Run();
 

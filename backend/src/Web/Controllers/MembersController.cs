@@ -27,20 +27,20 @@ public class MembersController : ControllerBase
         }
         else
         {
-            result = await _memberService.GetAllAsync(); // Use GetAllAsync from IBaseCrudService
+            result = await _memberService.GetAllAsync();
         }
 
         if (result.IsSuccess)
         {
             return Ok(result.Value);
         }
-        return StatusCode(500, result.Error); // Or a more specific error code
+        return StatusCode(500, result.Error);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Member>> GetMemberById(Guid id)
     {
-        var result = await _memberService.GetByIdAsync(id); // Use GetByIdAsync from IBaseCrudService
+        var result = await _memberService.GetByIdAsync(id);
         if (result.IsSuccess)
         {
             if (result.Value == null)
@@ -49,18 +49,18 @@ public class MembersController : ControllerBase
             }
             return Ok(result.Value);
         }
-        return StatusCode(500, result.Error); // Or a more specific error code
+        return StatusCode(500, result.Error);
     }
 
     [HttpPost]
     public async Task<ActionResult<Member>> CreateMember([FromBody] Member member)
     {
-        var result = await _memberService.CreateAsync(member); // Use CreateAsync from IBaseCrudService
+        var result = await _memberService.CreateAsync(member);
         if (result.IsSuccess)
         {
             return CreatedAtAction(nameof(GetMemberById), new { id = result.Value!.Id }, result.Value);
         }
-        return StatusCode(500, result.Error); // Or a more specific error code
+        return StatusCode(500, result.Error);
     }
 
     [HttpPut("{id}")]
@@ -70,22 +70,22 @@ public class MembersController : ControllerBase
         {
             return BadRequest();
         }
-        var result = await _memberService.UpdateAsync(member); // Use UpdateAsync from IBaseCrudService
+        var result = await _memberService.UpdateAsync(member);
         if (result.IsSuccess)
         {
             return NoContent();
         }
-        return StatusCode(500, result.Error); // Or a more specific error code
+        return StatusCode(500, result.Error);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMember(Guid id)
     {
-        var result = await _memberService.DeleteAsync(id); // Use DeleteAsync from IBaseCrudService
+        var result = await _memberService.DeleteAsync(id);
         if (result.IsSuccess)
         {
             return NoContent();
         }
-        return StatusCode(500, result.Error); // Or a more specific error code
+        return StatusCode(500, result.Error);
     }
 }

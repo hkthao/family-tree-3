@@ -18,7 +18,7 @@ public class SearchService : ISearchService
         _logger = logger;
     }
 
-    public async Task<Result<SearchResult>> SearchAsync(string keyword)
+    public async Task<Result<PaginatedList<SearchItem>>> SearchAsync(string keyword, int page, int itemsPerPage)
     {
         const string source = "SearchService.SearchAsync";
         try
@@ -56,16 +56,15 @@ public class SearchService : ISearchService
                 });
             results.AddRange(matchingMembers);
 
-            return Result<SearchResult>.Success(new SearchResult
-            {
-                Items = results,
-                TotalCount = results.Count
-            });
+            var totalCount = results.Count;
+            var paginatedItems = results.Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
+
+            return Result<PaginatedList<SearchItem>>.Success(new PaginatedList<SearchItem>(paginatedItems, totalCount, page, itemsPerPage));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in {Source} for keyword {Keyword}", source, keyword);
-            return Result<SearchResult>.Failure(ex.Message, source: source);
+            _logger.LogError(ex, "Error in {Source} for keyword {Keyword}, page {Page}, itemsPerPage {ItemsPerPage}", source, keyword, page, itemsPerPage);
+            return Result<PaginatedList<SearchItem>>.Failure(ex.Message, source: source);
         }
     }
 }

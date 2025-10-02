@@ -29,7 +29,7 @@ public class FamilyController : ControllerBase
         }
         else
         {
-            result = await _familyService.GetAllAsync(); // Use GetAllAsync from IBaseCrudService
+            result = await _familyService.GetAllAsync();
         }
 
         if (result.IsSuccess)
@@ -42,7 +42,7 @@ public class FamilyController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Family>> GetFamilyById(Guid id)
     {
-        var result = await _familyService.GetByIdAsync(id); // Use GetByIdAsync from IBaseCrudService
+        var result = await _familyService.GetByIdAsync(id);
         if (result.IsSuccess)
         {
             if (result.Value == null)
@@ -54,10 +54,25 @@ public class FamilyController : ControllerBase
         return StatusCode(500, result.Error);
     }
 
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginatedList<Family>>> SearchFamilies(
+        [FromQuery] string? searchQuery,
+        [FromQuery] Guid? familyId,
+        [FromQuery] int page = 1,
+        [FromQuery] int itemsPerPage = 10)
+    {
+        var result = await _familyService.SearchFamiliesAsync(searchQuery, familyId, page, itemsPerPage);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error);
+    }
+
     [HttpPost]
     public async Task<ActionResult<Family>> CreateFamily([FromBody] Family family)
     {
-        var result = await _familyService.CreateAsync(family); // Use CreateAsync from IBaseCrudService
+        var result = await _familyService.CreateAsync(family);
         if (result.IsSuccess)
         {
             return CreatedAtAction(nameof(GetFamilyById), new { id = result.Value!.Id }, result.Value);
@@ -72,7 +87,7 @@ public class FamilyController : ControllerBase
         {
             return BadRequest();
         }
-        var result = await _familyService.UpdateAsync(family); // Use UpdateAsync from IBaseCrudService
+        var result = await _familyService.UpdateAsync(family);
         if (result.IsSuccess)
         {
             return NoContent();
@@ -83,24 +98,10 @@ public class FamilyController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFamily(Guid id)
     {
-        var result = await _familyService.DeleteAsync(id); // Use DeleteAsync from IBaseCrudService
+        var result = await _familyService.DeleteAsync(id);
         if (result.IsSuccess)
         {
             return NoContent();
-        }
-        return StatusCode(500, result.Error);
-    }
-
-    [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<Family>>> SearchFamilies(
-        [FromQuery] string? keyword,
-        [FromQuery] int page = 1,
-        [FromQuery] int itemsPerPage = 10)
-    {
-        var result = await _familyService.SearchFamiliesAsync(keyword, page, itemsPerPage);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
         }
         return StatusCode(500, result.Error);
     }

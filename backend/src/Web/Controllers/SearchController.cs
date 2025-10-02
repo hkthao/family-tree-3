@@ -16,13 +16,16 @@ public class SearchController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<SearchResult>> Search([FromQuery] string keyword)
+    public async Task<ActionResult<PaginatedList<SearchItem>>> Search(
+        [FromQuery] string keyword,
+        [FromQuery] int page = 1,
+        [FromQuery] int itemsPerPage = 10)
     {
         if (string.IsNullOrWhiteSpace(keyword))
         {
             return BadRequest("Keyword cannot be empty.");
         }
-        var result = await _searchService.SearchAsync(keyword);
+        var result = await _searchService.SearchAsync(keyword, page, itemsPerPage);
         if (result.IsSuccess)
         {
             return Ok(result.Value);
