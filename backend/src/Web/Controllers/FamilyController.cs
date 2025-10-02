@@ -1,8 +1,15 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families;
+using backend.Application.Families.Commands.CreateFamily;
+using backend.Application.Families.Commands.DeleteFamily;
+using backend.Application.Families.Commands.UpdateFamily;
+using backend.Application.Families.Queries.GetFamilies;
+using backend.Application.Families.Queries.GetFamiliesByIds;
+using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Families.Queries.SearchFamilies;
 using backend.Domain.Entities;
-// using backend.Domain.Enums;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -11,106 +18,71 @@ namespace backend.Web.Controllers;
 [Route("api/[controller]")]
 public class FamilyController : ControllerBase
 {
-    private readonly IFamilyService _familyService;
+    private readonly IMediator _mediator;
 
-    public FamilyController(IFamilyService familyService)
+    public FamilyController(IMediator mediator)
     {
-        _familyService = familyService;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<FamilyDto>>> GetAllFamilies([FromQuery] string? ids)
     {
-        Result<List<FamilyDto>> result;
         if (!string.IsNullOrEmpty(ids))
         {
             var guids = ids.Split(',').Select(Guid.Parse).ToList();
-            result = await _familyService.GetByIdsAsync(guids);
+            return await _mediator.Send(new GetFamiliesByIdsQuery(guids));
         }
         else
         {
-            result = await _familyService.GetAllAsync();
+            return await _mediator.Send(new GetFamiliesQuery());
         }
-
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<FamilyDto>> GetFamilyById(Guid id)
     {
-        var result = await _familyService.GetByIdAsync(id);
-        if (result.IsSuccess)
-        {
-            if (result.Value == null)
-                return NotFound();
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
+        var result = await _mediator.Send(new GetFamilyByIdQuery(id));
+        if (result == null)
+            return NotFound();
+        return Ok(result);
     }
 
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] FamilyFilterModel filter)
     {
-        var result = await _familyService.SearchAsync(filter);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
+        return await _mediator.Send(new SearchFamiliesQuery { Keyword = filter.Keyword, PageNumber = filter.PageNumber, PageSize = filter.PageSize });
     }
 
     [HttpPost]
-    public async Task<ActionResult<Family>> CreateFamily([FromBody] Family family)
+    public async Task<ActionResult<Guid>> CreateFamily([FromBody] CreateFamilyCommand command)
     {
-        var result = await _familyService.CreateAsync(family);
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetFamilyById), new { id = result.Value!.Id }, result.Value);
-        }
-        return StatusCode(500, result.Error);
+        var result = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetFamilyById), new { id = result }, result);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateFamily(Guid id, [FromBody] Family family)
+    public async Task<IActionResult> UpdateFamily(Guid id, [FromBody] UpdateFamilyCommand command)
     {
-        if (id != family.Id)
+        if (id != command.Id)
         {
             return BadRequest();
         }
-        var result = await _familyService.UpdateAsync(family);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return StatusCode(500, result.Error);
+        await _mediator.Send(command);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFamily(Guid id)
     {
-        var result = await _familyService.DeleteAsync(id);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return StatusCode(500, result.Error);
+        await _mediator.Send(new DeleteFamilyCommand(id));
+        return NoContent();
     }
 
     [HttpGet("by-ids")]
-    public async Task<ActionResult<FamilyDto>> GetMemberByIds([FromQuery] string ids)
+    public async Task<ActionResult<List<FamilyDto>>> GetFamiliesByIds([FromQuery] string ids)
     {
-        var _ids = ids.Split(',').Select(e => Guid.Parse(e)).ToList();
-        var result = await _familyService.GetByIdsAsync(_ids);
-        if (result.IsSuccess)
-        {
-            if (result.Value == null)
-                return NotFound();
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
+        var guids = ids.Split(',').Select(Guid.Parse).ToList();
+        return await _mediator.Send(new GetFamiliesByIdsQuery(guids));
     }
 }

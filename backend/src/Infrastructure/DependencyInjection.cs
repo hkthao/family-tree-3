@@ -15,10 +15,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // Register IMemberRepository first, as InMemoryFamilyRepository depends on it
-        services.AddSingleton<IMemberRepository, InMemoryMemberRepository>();
         services.AddSingleton<IEventRepository>(sp => new InMemoryEventRepository(sp.GetRequiredService<IMemberRepository>()));
-        services.AddSingleton<IFamilyRepository>(sp => new InMemoryFamilyRepository(sp.GetRequiredService<IMemberRepository>()));
         services.AddSingleton<IAuthProvider, Auth0Provider>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");

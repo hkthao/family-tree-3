@@ -1,8 +1,6 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Application.Common.Interfaces;
-using backend.Application.Services;
 
 namespace backend.Application;
 
@@ -19,8 +17,6 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
-
-        services.AddScoped<IEventService, EventService>();
 
         return services;
     }

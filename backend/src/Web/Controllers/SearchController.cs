@@ -1,5 +1,6 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Search.Queries.Search;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -8,11 +9,11 @@ namespace backend.Web.Controllers;
 [Route("api/[controller]")]
 public class SearchController : ControllerBase
 {
-    private readonly ISearchService _searchService;
+    private readonly IMediator _mediator;
 
-    public SearchController(ISearchService searchService)
+    public SearchController(IMediator mediator)
     {
-        _searchService = searchService;
+        _mediator = mediator;
     }
 
     [HttpGet]
@@ -25,11 +26,6 @@ public class SearchController : ControllerBase
         {
             return BadRequest("Keyword cannot be empty.");
         }
-        var result = await _searchService.SearchAsync(keyword, page, itemsPerPage);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error); // Or a more specific error code
+        return await _mediator.Send(new SearchQuery { Keyword = keyword, PageNumber = page, PageSize = itemsPerPage });
     }
 }

@@ -1,9 +1,10 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Events;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
+using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -12,57 +13,30 @@ namespace backend.Web.Controllers;
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
 {
-    private readonly IEventService _eventService;
+    private readonly IMediator _mediator;
 
-    public EventsController(IEventService eventService)
+    public EventsController(IMediator mediator)
     {
-        _eventService = eventService;
+        _mediator = mediator;
     }
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<EventDto>>> GetEvents([FromQuery] GetEventsQuery query)
     {
-        var result = await _eventService.GetAllAsync();
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
+        return Ok(await _mediator.Send(query));
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<EventDto>> GetEventById(Guid id)
     {
-        var result = await _eventService.GetByIdAsync(id);
-        if (result.IsSuccess)
-        {
-            if (result.Value == null)
-                return NotFound();
-            return Ok(result.Value);
-        }
-        return StatusCode(500, result.Error);
+        return Ok(await _mediator.Send(new GetEventByIdQuery(id)));
     }
 
     [HttpPost]
     public async Task<ActionResult<Guid>> Create(CreateEventCommand command)
     {
-        var anEvent = new Event
-        {
-            Name = command.Name,
-            Description = command.Description,
-            StartDate = command.StartDate,
-            EndDate = command.EndDate,
-            Location = command.Location,
-            FamilyId = command.FamilyId,
-            Type = command.Type,
-            Color = command.Color,
-        };
-        var result = await _eventService.CreateAsync(anEvent);
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value);
-        }
-        return StatusCode(500, result.Error);
+        var result = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetEventById), new { id = result }, result);
     }
 
     [HttpPut("{id}")]
@@ -73,35 +47,16 @@ public class EventsController : ControllerBase
             return BadRequest();
         }
 
-        var anEvent = new Event
-        {
-            Id = command.Id,
-            Name = command.Name,
-            Description = command.Description,
-            StartDate = command.StartDate,
-            EndDate = command.EndDate,
-            Location = command.Location,
-            FamilyId = command.FamilyId,
-            Type = command.Type,
-            Color = command.Color,
-        };
+        await _mediator.Send(command);
 
-        var result = await _eventService.UpdateAsync(anEvent);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return StatusCode(500, result.Error);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(Guid id)
     {
-        var result = await _eventService.DeleteAsync(id);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return StatusCode(500, result.Error);
+        await _mediator.Send(new DeleteEventCommand(id));
+
+        return NoContent();
     }
 }
