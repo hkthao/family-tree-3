@@ -35,34 +35,43 @@ public class MemberDtoTests : IDisposable
     {
         var member = new Member
         {
-            FullName = "John Doe",
+            FirstName = "John",
+            LastName = "Doe",
+            Nickname = "Johnny",
             DateOfBirth = new DateTime(1990, 1, 1),
             DateOfDeath = null,
             PlaceOfBirth = "New York",
+            PlaceOfDeath = "Los Angeles",
             Gender = "Male",
             AvatarUrl = "http://example.com/avatar.jpg",
-            Phone = "123-456-7890",
-            Email = "john.doe@example.com",
-            Generation = 1,
+            Occupation = "Developer",
             Biography = "Some biography",
-            Metadata = "Some metadata",
-            FamilyId = Guid.NewGuid()
+            FamilyId = Guid.NewGuid(),
+            FatherId = Guid.NewGuid(),
+            MotherId = Guid.NewGuid(),
+            SpouseId = Guid.NewGuid()
         };
 
         var memberDto = _mapper.Map<MemberDto>(member);
 
         memberDto.Should().NotBeNull();
         memberDto.Id.Should().Be(member.Id);
-        memberDto.FullName.Should().Be(member.FullName);
+        memberDto.FirstName.Should().Be(member.FirstName);
+        memberDto.LastName.Should().Be(member.LastName);
+        memberDto.FullName.Should().Be("Doe John");
+        memberDto.Nickname.Should().Be(member.Nickname);
         memberDto.DateOfBirth.Should().Be(member.DateOfBirth);
         memberDto.DateOfDeath.Should().Be(member.DateOfDeath);
-        memberDto.Gender.Should().Be(member.Gender);
-        memberDto.Phone.Should().Be(member.Phone);
         memberDto.PlaceOfBirth.Should().Be(member.PlaceOfBirth);
-        memberDto.Generation.Should().Be(member.Generation);
+        memberDto.PlaceOfDeath.Should().Be(member.PlaceOfDeath);
+        memberDto.Gender.Should().Be(member.Gender);
         memberDto.AvatarUrl.Should().Be(member.AvatarUrl);
+        memberDto.Occupation.Should().Be(member.Occupation);
         memberDto.Biography.Should().Be(member.Biography);
-        memberDto.Metadata.Should().BeEquivalentTo(member.Metadata);
+        memberDto.FamilyId.Should().Be(member.FamilyId);
+        memberDto.FatherId.Should().Be(member.FatherId);
+        memberDto.MotherId.Should().Be(member.MotherId);
+        memberDto.SpouseId.Should().Be(member.SpouseId);
     }
 
     public void Dispose()

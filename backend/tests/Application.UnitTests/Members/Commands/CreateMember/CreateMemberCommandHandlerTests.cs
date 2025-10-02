@@ -28,7 +28,8 @@ public class CreateMemberCommandHandlerTests
         // Arrange
         var command = new CreateMemberCommand
         {
-            FullName = "Test Member",
+            FirstName = "Test",
+            LastName = "Member",
             DateOfBirth = new DateTime(1990, 1, 1),
             Gender = "Male",
             FamilyId = Guid.NewGuid()
@@ -42,6 +43,7 @@ public class CreateMemberCommandHandlerTests
         // Assert
         var createdMember = await _context.Members.FindAsync(result);
         createdMember.Should().NotBeNull();
-        createdMember!.FullName.Should().Be("Test Member");
+        createdMember!.FirstName.Should().Be("Test");
+        createdMember!.LastName.Should().Be("Member");
     }
 }

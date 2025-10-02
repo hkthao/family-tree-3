@@ -26,7 +26,7 @@ public class DeleteMemberCommandHandlerTests
     {
         // Arrange
         var memberId = Guid.NewGuid();
-        var member = new Member { Id = memberId, FullName = "Test Member", FamilyId = Guid.NewGuid() };
+        var member = new Member { Id = memberId, FirstName = "Test", LastName = "Member", FamilyId = Guid.NewGuid() };
         _context.Members.Add(member);
         await _context.SaveChangesAsync(CancellationToken.None);
 

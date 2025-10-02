@@ -112,7 +112,6 @@ export class ApiMemberService implements IMemberService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
-    console.log(`Fetching members by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
     ids.forEach(id => params.append('ids', id));
     const result = await safeApiCall(this.http.get<Member[]>(`${this.apiUrl}/by-ids?${params.toString()}`));

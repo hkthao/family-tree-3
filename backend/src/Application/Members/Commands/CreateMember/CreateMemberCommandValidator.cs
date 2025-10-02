@@ -4,9 +4,12 @@ public class CreateMemberCommandValidator : AbstractValidator<CreateMemberComman
 {
     public CreateMemberCommandValidator()
     {
-        RuleFor(v => v.FullName)
-            .MaximumLength(200)
+        RuleFor(v => v.FirstName)
+            .MaximumLength(100)
             .NotEmpty();
 
+        RuleFor(v => v.LastName)
+            .MaximumLength(100)
+            .NotEmpty();
     }
 }

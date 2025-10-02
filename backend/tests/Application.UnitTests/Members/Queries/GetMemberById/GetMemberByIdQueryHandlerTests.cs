@@ -46,7 +46,7 @@ public class GetMemberByIdQueryHandlerTests
     {
         // Arrange
         var memberId = Guid.NewGuid();
-        var member = new Member { Id = memberId, FullName = "Test Member" };
+        var member = new Member { Id = memberId, FirstName = "Test", LastName = "Member" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
@@ -56,7 +56,8 @@ public class GetMemberByIdQueryHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(memberId);
-        result.FullName.Should().Be(member.FullName);
+        result.FirstName.Should().Be(member.FirstName);
+        result.LastName.Should().Be(member.LastName);
     }
 
     [Fact]

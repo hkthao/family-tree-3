@@ -26,14 +26,15 @@ public class UpdateMemberCommandHandlerTests
     {
         // Arrange
         var memberId = Guid.NewGuid();
-        var member = new Member { Id = memberId, FullName = "Test Member", FamilyId = Guid.NewGuid() };
+        var member = new Member { Id = memberId, FirstName = "Test", LastName = "Member", FamilyId = Guid.NewGuid() };
         _context.Members.Add(member);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new UpdateMemberCommand
         {
             Id = memberId,
-            FullName = "Updated Name",
+            FirstName = "Updated",
+            LastName = "Name",
             Gender = "Female"
         };
         var handler = new UpdateMemberCommandHandler(_context);
@@ -44,7 +45,8 @@ public class UpdateMemberCommandHandlerTests
         // Assert
         var updatedMember = await _context.Members.FindAsync(memberId);
         updatedMember.Should().NotBeNull();
-        updatedMember?.FullName.Should().Be("Updated Name");
+        updatedMember?.FirstName.Should().Be("Updated");
+        updatedMember?.LastName.Should().Be("Name");
         updatedMember?.Gender.Should().Be("Female");
     }
 

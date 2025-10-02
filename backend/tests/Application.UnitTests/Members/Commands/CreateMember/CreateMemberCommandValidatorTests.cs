@@ -14,26 +14,50 @@ public class CreateMemberCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveErrorWhenFullNameIsEmpty()
+    public void ShouldHaveErrorWhenFirstNameIsEmpty()
     {
-        var command = new CreateMemberCommand { FullName = "" };
+        var command = new CreateMemberCommand { FirstName = "" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.FullName);
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
-    public void ShouldHaveErrorWhenFullNameExceeds200Characters()
+    public void ShouldHaveErrorWhenFirstNameExceeds100Characters()
     {
-        var command = new CreateMemberCommand { FullName = new string('A', 201) };
+        var command = new CreateMemberCommand { FirstName = new string('A', 101) };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.FullName);
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
-    public void ShouldNotHaveErrorWhenFullNameIsValid()
+    public void ShouldNotHaveErrorWhenFirstNameIsValid()
     {
-        var command = new CreateMemberCommand { FullName = "Valid Name" };
+        var command = new CreateMemberCommand { FirstName = "Valid Name" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.FullName);
+        result.ShouldNotHaveValidationErrorFor(x => x.FirstName);
+    }
+
+    [Fact]
+    public void ShouldHaveErrorWhenLastNameIsEmpty()
+    {
+        var command = new CreateMemberCommand { LastName = "" };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
+    }
+
+    [Fact]
+    public void ShouldHaveErrorWhenLastNameExceeds100Characters()
+    {
+        var command = new CreateMemberCommand { LastName = new string('A', 101) };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
+    }
+
+    [Fact]
+    public void ShouldNotHaveErrorWhenLastNameIsValid()
+    {
+        var command = new CreateMemberCommand { LastName = "Valid Name" };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.LastName);
     }
 }

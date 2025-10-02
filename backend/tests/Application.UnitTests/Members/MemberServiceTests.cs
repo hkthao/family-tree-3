@@ -39,7 +39,7 @@ public class MemberServiceTests
     {
         // Arrange
         var memberId = Guid.NewGuid();
-        var member = new Member { Id = memberId, FullName = "John Doe", FamilyId = Guid.NewGuid() };
+        var member = new Member { Id = memberId, FirstName = "John", LastName = "Doe", FamilyId = Guid.NewGuid() };
         _context.Members.Add(member);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -52,7 +52,8 @@ public class MemberServiceTests
         // Assert
         result.Should().NotBeNull();
         result.Id.Should().Be(memberId);
-        result.FullName.Should().Be("John Doe");
+        result.FirstName.Should().Be("John");
+        result.LastName.Should().Be("Doe");
     }
 
     [Fact]

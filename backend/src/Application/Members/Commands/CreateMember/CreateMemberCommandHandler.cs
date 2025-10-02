@@ -15,30 +15,24 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, G
 
     public async Task<Guid> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
-        if (!request.FamilyId.HasValue)
-        {
-            throw new ArgumentNullException(nameof(request.FamilyId), "FamilyId cannot be null.");
-        }
-
         var entity = new Member
         {
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Nickname = request.Nickname,
             DateOfBirth = request.DateOfBirth,
             DateOfDeath = request.DateOfDeath,
+            PlaceOfBirth = request.PlaceOfBirth,
+            PlaceOfDeath = request.PlaceOfDeath,
             Gender = request.Gender,
             AvatarUrl = request.AvatarUrl,
-            PlaceOfBirth = request.PlaceOfBirth,
-            Phone = request.Phone,
-            Email = request.Email,
-            Generation = request.Generation,
+            Occupation = request.Occupation,
             Biography = request.Biography,
-            Metadata = request.Metadata,
-            FamilyId = request.FamilyId.Value
+            FamilyId = request.FamilyId,
+            FatherId = request.FatherId,
+            MotherId = request.MotherId,
+            SpouseId = request.SpouseId
         };
-
-        if (request.FullName != null)
-        {
-            entity.FullName = request.FullName;
-        }
 
         _context.Members.Add(entity);
 

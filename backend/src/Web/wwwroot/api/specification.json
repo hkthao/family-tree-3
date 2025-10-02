@@ -964,7 +964,16 @@
             "type": "string",
             "format": "guid"
           },
+          "lastName": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
           "fullName": {
+            "type": "string"
+          },
+          "nickname": {
             "type": "string",
             "nullable": true
           },
@@ -982,6 +991,10 @@
             "type": "string",
             "nullable": true
           },
+          "placeOfDeath": {
+            "type": "string",
+            "nullable": true
+          },
           "gender": {
             "type": "string",
             "nullable": true
@@ -990,17 +1003,9 @@
             "type": "string",
             "nullable": true
           },
-          "phone": {
+          "occupation": {
             "type": "string",
             "nullable": true
-          },
-          "email": {
-            "type": "string",
-            "nullable": true
-          },
-          "generation": {
-            "type": "integer",
-            "format": "int32"
           },
           "familyId": {
             "type": "string",
@@ -1010,7 +1015,19 @@
             "type": "string",
             "nullable": true
           },
-          "metadata": {
+          "fatherId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "motherId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "spouseId": {
+            "type": "string",
+            "format": "guid",
             "nullable": true
           }
         }
@@ -1048,8 +1065,22 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
+              "lastName": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
               "fullName": {
                 "type": "string"
+              },
+              "nickname": {
+                "type": "string",
+                "nullable": true
+              },
+              "gender": {
+                "type": "string",
+                "nullable": true
               },
               "dateOfBirth": {
                 "type": "string",
@@ -1061,16 +1092,15 @@
                 "format": "date-time",
                 "nullable": true
               },
-              "placeOfDeath": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
               "placeOfBirth": {
                 "type": "string",
                 "nullable": true
               },
-              "gender": {
+              "placeOfDeath": {
+                "type": "string",
+                "nullable": true
+              },
+              "occupation": {
                 "type": "string",
                 "nullable": true
               },
@@ -1078,29 +1108,13 @@
                 "type": "string",
                 "nullable": true
               },
-              "phone": {
-                "type": "string",
-                "nullable": true
-              },
-              "email": {
-                "type": "string",
-                "nullable": true
-              },
-              "generation": {
-                "type": "integer",
-                "format": "int32"
-              },
-              "familyId": {
-                "type": "string",
-                "format": "guid"
-              },
               "biography": {
                 "type": "string",
                 "nullable": true
               },
-              "metadata": {
+              "familyId": {
                 "type": "string",
-                "nullable": true
+                "format": "guid"
               },
               "fatherId": {
                 "type": "string",

@@ -72,7 +72,6 @@ export class ApiFamilyService implements IFamilyService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
-    console.log(`Fetching families by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
     ids.forEach((id) => params.append('ids', id));
     return safeApiCall(

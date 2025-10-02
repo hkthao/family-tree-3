@@ -15,26 +15,50 @@ public class UpdateMemberCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldHaveErrorWhenFullNameIsEmpty()
+    public void ShouldHaveErrorWhenFirstNameIsEmpty()
     {
-        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), FullName = "" };
+        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), FirstName = "" };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.FullName);
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
-    public void ShouldHaveErrorWhenFullNameExceeds200Characters()
+    public void ShouldHaveErrorWhenFirstNameExceeds100Characters()
     {
-        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), FullName = new string('A', 201) };
+        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), FirstName = new string('A', 101) };
         var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.FullName);
+        result.ShouldHaveValidationErrorFor(x => x.FirstName);
     }
 
     [Fact]
-    public void ShouldNotHaveErrorWhenFullNameIsValid()
+    public void ShouldNotHaveErrorWhenFirstNameIsValid()
     {
-        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), FullName = "Valid Name" };
+        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), FirstName = "Valid Name" };
         var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.FullName);
+        result.ShouldNotHaveValidationErrorFor(x => x.FirstName);
+    }
+
+    [Fact]
+    public void ShouldHaveErrorWhenLastNameIsEmpty()
+    {
+        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), LastName = "" };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
+    }
+
+    [Fact]
+    public void ShouldHaveErrorWhenLastNameExceeds100Characters()
+    {
+        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), LastName = new string('A', 101) };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.LastName);
+    }
+
+    [Fact]
+    public void ShouldNotHaveErrorWhenLastNameIsValid()
+    {
+        var command = new UpdateMemberCommand { Id = Guid.NewGuid(), LastName = "Valid Name" };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.LastName);
     }
 }

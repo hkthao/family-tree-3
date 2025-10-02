@@ -1,3 +1,4 @@
+using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 
@@ -14,20 +15,28 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 
     public async Task Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        Member? entity = await _context.Members.FindAsync([request.Id], cancellationToken);
+        var entity = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
+
         if (entity == null)
-            throw new Common.Exceptions.NotFoundException(nameof(Member), request.Id!);
-        entity.FullName = request.FullName ?? string.Empty;
+        {
+            throw new NotFoundException(nameof(Member), request.Id);
+        }
+
+        entity.FirstName = request.FirstName;
+        entity.LastName = request.LastName;
+        entity.Nickname = request.Nickname;
         entity.DateOfBirth = request.DateOfBirth;
         entity.DateOfDeath = request.DateOfDeath;
+        entity.PlaceOfBirth = request.PlaceOfBirth;
+        entity.PlaceOfDeath = request.PlaceOfDeath;
         entity.Gender = request.Gender;
         entity.AvatarUrl = request.AvatarUrl;
-        entity.PlaceOfBirth = request.PlaceOfBirth;
-        entity.Phone = request.Phone;
-        entity.Email = request.Email;
-        entity.Generation = request.Generation;
+        entity.Occupation = request.Occupation;
         entity.Biography = request.Biography;
-        entity.Metadata = request.Metadata;
+        entity.FamilyId = request.FamilyId;
+        entity.FatherId = request.FatherId;
+        entity.MotherId = request.MotherId;
+        entity.SpouseId = request.SpouseId;
 
         await _context.SaveChangesAsync(cancellationToken);
     }

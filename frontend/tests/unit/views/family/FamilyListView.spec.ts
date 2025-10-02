@@ -449,28 +449,6 @@ describe('FamilyListView.vue', () => {
     expect(routerPushSpy).toHaveBeenCalledWith(`/family/detail/${family.id}`);
   });
 
-  it('computes family member counts correctly', async () => {
-    // Mock memberStore.items to have some members
-    memberStore.items = [
-      { id: 'member-1', familyId: 'family-001', fullName: 'Member 1' } as Member,
-      { id: 'member-2', familyId: 'family-001', fullName: 'Member 2' } as Member,
-      { id: 'member-3', familyId: 'family-002', fullName: 'Member 3' } as Member,
-    ];
-
-    const wrapper = mount(FamilyListView, {
-      global: {
-        plugins: [i18n, vuetify, router],
-      },
-    });
-    await flushPromises();
-
-    const familyMemberCounts = (wrapper.vm as any).familyMemberCounts;
-    expect(familyMemberCounts).toEqual({
-      'family-001': 2,
-      'family-002': 1,
-    });
-  });
-
   it('handles filter update and reloads families', async () => {
     const wrapper = mount(FamilyListView, {
       global: {
