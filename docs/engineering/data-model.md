@@ -38,16 +38,15 @@ erDiagram
         date date_of_birth "Ngày sinh"
         date date_of_death "Ngày mất"
         string gender "Giới tính"
-    }
-
-    RELATIONSHIP {
-        string from_member_id PK, FK "ID thành viên nguồn"
-        string to_member_id PK, FK "ID thành viên đích"
-        string relationship_type "Loại quan hệ"
+        string father_id FK "ID cha"
+        string mother_id FK "ID mẹ"
+        string spouse_id FK "ID vợ/chồng"
     }
 
     FAMILY ||--o{ MEMBER : "có"
-    MEMBER }o--|| RELATIONSHIP : "liên quan đến"
+    MEMBER ||--o| MEMBER : "cha của"
+    MEMBER ||--o| MEMBER : "mẹ của"
+    MEMBER ||--o| MEMBER : "vợ/chồng của"
 ```
 
 ## 3. Mô tả các bảng
@@ -66,7 +65,7 @@ Lưu trữ thông tin về các gia đình hoặc dòng họ.
 
 ### 3.2. Bảng `Members`
 
-Lưu trữ thông tin chi tiết của từng thành viên.
+Lưu trữ thông tin chi tiết của từng thành viên, bao gồm các mối quan hệ trực tiếp.
 
 | Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
 | :-------------- | :----------- | :-------- | :---------------------- |
@@ -77,31 +76,23 @@ Lưu trữ thông tin chi tiết của từng thành viên.
 | `date_of_birth` | `date`       | NULL      | Ngày sinh               |
 | `date_of_death` | `date`       | NULL      | Ngày mất                |
 | `gender`        | `varchar(10)`| NULL      | Giới tính (Male, Female, Other) |
+| `father_id`     | `varchar(36)`| FK, NULL  | ID của cha              |
+| `mother_id`     | `varchar(36)`| FK, NULL  | ID của mẹ               |
+| `spouse_id`     | `varchar(36)`| FK, NULL  | ID của vợ/chồng         |
 
 - **Foreign Keys**:
   - `family_id`: tham chiếu đến `Families(id)`.
-- **Mối quan hệ**: Một `Member` thuộc về một `Family` và có thể có nhiều `Relationship`.
-
-### 3.3. Bảng `Relationships`
-
-Lưu trữ các mối quan hệ giữa các thành viên.
-
-| Tên cột             | Kiểu dữ liệu | Ràng buộc | Mô tả                        |
-| :------------------ | :----------- | :-------- | :--------------------------- |
-| `from_member_id`    | `varchar(36)`| PK, FK    | ID của thành viên nguồn        |
-| `to_member_id`      | `varchar(36)`| PK, FK    | ID của thành viên đích       |
-| `relationship_type` | `varchar(20)`| NOT NULL  | Loại quan hệ (PARENT, SPOUSE, SIBLING) |
-
-- **Foreign Keys**:
-  - `from_member_id`: tham chiếu đến `Members(id)`.
-  - `to_member_id`: tham chiếu đến `Members(id)`.
+  - `father_id`: tham chiếu đến `Members(id)`.
+  - `mother_id`: tham chiếu đến `Members(id)`.
+  - `spouse_id`: tham chiếu đến `Members(id)`.
+- **Mối quan hệ**: Một `Member` thuộc về một `Family` và có thể có các mối quan hệ trực tiếp với các `Member` khác (cha, mẹ, vợ/chồng).
 
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu
 
 - **ID duy nhất**: Tất cả các khóa chính (`id`) đều là `GUID` để đảm bảo tính duy nhất trên toàn hệ thống.
 - **Ngày sinh/mất**: `date_of_death` phải lớn hơn `date_of_birth`.
 - **Giới tính**: Trường `gender` nên được giới hạn trong một tập các giá trị cụ thể (ví dụ: `Male`, `Female`, `Other`).
-- **Quan hệ**: Không cho phép một thành viên có quan hệ với chính mình.
+
 
 ## 5. Hướng dẫn Mapping
 
@@ -114,10 +105,26 @@ Các bảng được map sang các class Entity trong `Domain` layer. EF Core s�
 modelBuilder.Entity<Member>(builder =>
 {
     builder.HasKey(m => m.Id);
-    builder.Property(m => m.FirstName).IsRequired().HasMaxLength(50);
+    builder.Property(m => m.FullName).IsRequired().HasMaxLength(100);
     builder.HasOne(m => m.Family)
-           .WithMany(f => f.Members)
+           .WithMany()
            .HasForeignKey(m => m.FamilyId);
+
+    // Cấu hình mối quan hệ cha, mẹ, vợ/chồng
+    builder.HasOne(m => m.Father)
+           .WithMany(m => m.Children)
+           .HasForeignKey(m => m.FatherId)
+           .IsRequired(false); // Cha là tùy chọn
+
+    builder.HasOne(m => m.Mother)
+           .WithMany(m => m.Children)
+           .HasForeignKey(m => m.MotherId)
+           .IsRequired(false); // Mẹ là tùy chọn
+
+    builder.HasOne(m => m.Spouse)
+           .WithMany()
+           .HasForeignKey(m => m.SpouseId)
+           .IsRequired(false); // Vợ/chồng là tùy chọn
 });
 ```
 
@@ -126,13 +133,17 @@ modelBuilder.Entity<Member>(builder =>
 Trong Frontend, dữ liệu từ API được map sang các interface/type trong thư mục `src/types`.
 
 ```typescript
-// src/types/member.ts
+// src/types/family/member.ts
 export interface Member {
   id: string;
   familyId: string;
   fullName: string;
   gender?: 'Male' | 'Female' | 'Other';
   dateOfBirth?: string; // ISO 8601 format
+  fatherId?: string;
+  motherId?: string;
+  spouseId?: string;
+  childrenIds?: string[];
   // ... các trường khác
 }
 ```
@@ -157,9 +168,13 @@ export interface Member {
 {
   "id": "m1b3b3b3-3b3b-3b3b-3b3b-3b3b3b3b3b3b",
   "familyId": "f7b3b3b3-3b3b-3b3b-3b3b-3b3b3b3b3b3b",
+  "fullName": "Văn A Nguyễn",
   "firstName": "Văn A",
   "lastName": "Nguyễn",
   "dateOfBirth": "1950-01-01T00:00:00Z",
-  "gender": "Male"
+  "gender": "Male",
+  "fatherId": "m2c4c4c4-4c4c-4c4c-4c4c-4c4c4c4c4c4c",
+  "motherId": "m3d5d5d5-5d5d-5d5d-5d5d-5d5d5d5d5d5d",
+  "spouseId": "m4e6e6e6-6e6e-6e6e-6e6e-6e6e6e6e6e6e"
 }
 ```

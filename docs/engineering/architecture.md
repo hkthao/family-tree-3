@@ -63,30 +63,31 @@ graph TD
 ```
 
 -   **Web API (Web Layer)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các lệnh/truy vấn trong Application Layer, và trả về phản hồi.
--   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), và các giao diện (Interfaces) cho các dịch vụ bên ngoài.
+-   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các dịch vụ nghiệp vụ (Business Services) sử dụng `Result Pattern` để trả về kết quả thống nhất. Các dịch vụ CRUD được trừu tượng hóa thông qua `IBaseCrudService`.
 -   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
 -   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
 
 ## 4. Sơ đồ mã nguồn (Code Diagram - C4)
 
-Ví dụ chi tiết về `MemberService` trong Application Layer.
+Ví dụ chi tiết về `MemberService` trong Application Layer, kế thừa từ `BaseCrudService` và sử dụng `Result Pattern`.
 
 ```mermaid
 graph TD
     subgraph "Application Layer"
-        A(MemberService) -->|Sử dụng| B(IMemberRepository)
-        A -->|Sử dụng| C(IUnitOfWork)
-        A -->|Sử dụng| D(IMapper)
+        A(MemberService) -->|Kế thừa từ| B(BaseCrudService)
+        B -->|Sử dụng| C(IMemberRepository)
+        A -->|Trả về| D(Result<Member>)
     end
 
     subgraph "Infrastructure Layer"
-        E(MemberRepository) -->|Triển khai| B
+        E(InMemoryMemberRepository) -->|Triển khai| C
     end
 ```
 
--   `MemberService`: Chứa logic nghiệp vụ để quản lý thành viên.
+-   `MemberService`: Chứa logic nghiệp vụ để quản lý thành viên, kế thừa các thao tác CRUD cơ bản từ `BaseCrudService`.
+-   `BaseCrudService`: Lớp cơ sở cung cấp các thao tác CRUD chung, xử lý `Result Pattern` và logging.
 -   `IMemberRepository`: Interface định nghĩa các phương thức truy cập dữ liệu thành viên.
--   `MemberRepository`: Triển khai cụ thể của `IMemberRepository` sử dụng Entity Framework Core.
+-   `InMemoryMemberRepository`: Triển khai cụ thể của `IMemberRepository` sử dụng dữ liệu trong bộ nhớ.
 
 ## 5. Sơ đồ triển khai (Deployment View)
 
@@ -112,14 +113,14 @@ graph TD
 
 Hệ thống sử dụng **JWT Bearer Token** và được thiết kế để không phụ thuộc vào nhà cung cấp xác thực.
 
--   **Nhà cung cấp hiện tại**: Auth0.
+-   **Nhà cung cấp hiện tại**: Auth0 (được trừu tượng hóa qua `IAuthProvider` và triển khai mock `Auth0Provider` cho môi trường phát triển không cần DB).
 -   **Luồng hoạt động**: Frontend chịu trách nhiệm lấy token từ Auth0 và gửi kèm mỗi request API trong header `Authorization`.
 -   **Khả năng thay thế**: Kiến trúc cho phép thay thế Auth0 bằng các provider khác (Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend, chỉ cần cập nhật cấu hình.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 
 -   **Bảo mật**: Sử dụng HTTPS, mã hóa mật khẩu, và tuân thủ các nguyên tắc bảo mật của OWASP.
--   **Logging**: Sử dụng Serilog để ghi log ra file và console.
+-   **Logging**: Sử dụng `ILogger` của .NET Core để ghi log, kết hợp với `try/catch` và `source` tracking trong `Result Pattern` để theo dõi chi tiết lỗi và stack trace.
 -   **Monitoring**: (Chưa triển khai) Sẽ tích hợp Prometheus và Grafana để theo dõi hiệu năng hệ thống.
 -   **Scaling**: Hệ thống được thiết kế để có thể scale theo chiều ngang bằng cách tăng số lượng container cho Backend và Frontend.
 
