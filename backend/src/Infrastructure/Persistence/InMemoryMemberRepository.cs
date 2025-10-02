@@ -11,29 +11,30 @@ public class InMemoryMemberRepository : InMemoryRepository<Member>, IMemberRepos
         Guid royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb");
 
         // Define GUIDs for key members
-        Guid elizabethIIId = Guid.NewGuid();
-        Guid philipId = Guid.NewGuid();
-        Guid charlesIIIId = Guid.NewGuid();
-        Guid camillaId = Guid.NewGuid();
-        Guid anneId = Guid.NewGuid();
-        Guid andrewId = Guid.NewGuid();
-        Guid edwardId = Guid.NewGuid();
-        Guid williamId = Guid.NewGuid();
-        Guid catherineId = Guid.NewGuid();
-        Guid georgeId = Guid.NewGuid();
-        Guid charlotteId = Guid.NewGuid();
-        Guid louisId = Guid.NewGuid();
-        Guid harryId = Guid.NewGuid();
-        Guid meghanId = Guid.NewGuid();
-        Guid dianaId = Guid.NewGuid(); // Deceased, but for lineage
-        Guid beatriceId = Guid.NewGuid();
-        Guid eugenieId = Guid.NewGuid();
-        Guid louiseId = Guid.NewGuid();
-        Guid jamesId = Guid.NewGuid();
-        Guid sarahId = Guid.NewGuid(); // Sarah Ferguson
-        Guid timothyId = Guid.NewGuid(); // Timothy Laurence
-        Guid sophieId = Guid.NewGuid(); // Sophie, Duchess of Edinburgh
-        Guid lilibetId = Guid.NewGuid(); // Lilibet Mountbatten-Windsor
+        Guid elizabethIIId = Guid.Parse("be6eae23-4572-4bd3-ac8d-18f0fa6ab1fe");
+        Guid philipId = Guid.Parse("afb9d4fb-cb0a-4af5-ad73-a5f15810dae7");
+        Guid charlesIIIId = Guid.Parse("d81a0cce-3a8f-4abf-b622-5cee0b7406f4");
+        Guid camillaId = Guid.Parse("43432be4-f04d-48a3-8932-e5099979efdb");
+        Guid anneId = Guid.Parse("bc159782-68dc-4341-b24c-4ae5b7c9c477");
+        Guid andrewId = Guid.Parse("b3cc383c-9151-4c78-b82f-c52395370009");
+        Guid edwardId = Guid.Parse("243f3b40-f0ce-473b-9ce0-3483f104cad7");
+        Guid williamId = Guid.Parse("dcbe63bf-dfbf-4278-9d1c-d82083831a50");
+        Guid catherineId = Guid.Parse("0c0510bc-af3a-4ea4-a596-5c324a585ba1");
+        Guid georgeId = Guid.Parse("1edce7e7-6e7a-47a4-820b-574eea14e14f");
+        Guid charlotteId = Guid.Parse("c21d3e3e-9dd6-47f3-82aa-1323778c3a65");
+        Guid louisId = Guid.Parse("8394229c-7ccb-4e7e-8151-fd4f587b4707");
+        Guid harryId = Guid.Parse("605f56c4-6c0b-4c93-a0fa-8a12a53d201d");
+        Guid meghanId = Guid.Parse("69188b7d-c117-4ed0-bbb4-6a52828f2555");
+        Guid dianaId = Guid.Parse("e29a5466-558d-4248-9aa9-20a18784143b");
+        Guid beatriceId = Guid.Parse("89d5d27c-0795-4e03-89d1-c5b5aeae2422");
+        Guid eugenieId = Guid.Parse("a3e1b971-ba2c-4443-b8ee-68be58976b9d");
+        Guid louiseId = Guid.Parse("a7dff2be-aca1-47ee-b46a-7f0156be8ee9");
+        Guid jamesId = Guid.Parse("3a759b93-328c-47e7-ac28-cfeba234c789");
+        Guid sarahId = Guid.Parse("304b4cdc-8097-4858-8914-0e13a3f2b8aa");
+        Guid timothyId = Guid.Parse("d0d57733-32a2-4a74-b1b0-a6f56dc58310");
+        Guid sophieId = Guid.Parse("99d68383-3ddd-43ca-885d-0116e708b20d");
+        Guid lilibetId = Guid.Parse("edf86d00-c012-4795-9ab1-732968fd028c");
+        Guid archieId = Guid.Parse("4c61f779-04ee-44af-a21a-154dffab94ef");
 
         _items.AddRange(new List<Member>
         {
@@ -68,7 +69,7 @@ public class InMemoryMemberRepository : InMemoryRepository<Member>, IMemberRepos
             new Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte of Wales", FamilyId = royalFamilyId, Gender = "Female", DateOfBirth = new DateTime(2015, 5, 2), FatherId = williamId, MotherId = catherineId, AvatarUrl = "https://picsum.photos/200/300?random=21" },
             new Member { Id = louisId, FirstName = "Prince", LastName = "Louis of Wales", FamilyId = royalFamilyId, Gender = "Male", DateOfBirth = new DateTime(2018, 4, 23), FatherId = williamId, MotherId = catherineId, AvatarUrl = "https://picsum.photos/200/300?random=22" },
             new Member { Id = lilibetId, FirstName = "Princess", LastName = "Lilibet of Sussex", FamilyId = royalFamilyId, Gender = "Female", DateOfBirth = new DateTime(2021, 6, 4), FatherId = harryId, MotherId = meghanId, AvatarUrl = "https://picsum.photos/200/300?random=23" },
-            new Member { Id = Guid.NewGuid(), FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Gender = "Male", DateOfBirth = new DateTime(2019, 5, 6), FatherId = harryId, MotherId = meghanId, AvatarUrl = "https://picsum.photos/200/300?random=24" },
+            new Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Gender = "Male", DateOfBirth = new DateTime(2019, 5, 6), FatherId = harryId, MotherId = meghanId, AvatarUrl = "https://picsum.photos/200/300?random=24" },
         });
     }
 
