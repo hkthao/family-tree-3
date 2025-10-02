@@ -101,7 +101,7 @@ export class ApiMemberService implements IMemberService {
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
 
-    const result = await safeApiCall(this.http.get<Paginated<Member>>(`${this.apiUrl}?${params.toString()}`));
+    const result = await safeApiCall(this.http.get<Paginated<Member>>(`${this.apiUrl}/search?${params.toString()}`));
     if (result.ok) {
       // Assuming the API returns a Paginated object with items, totalItems, totalPages
       // The items in the response might need date transformation

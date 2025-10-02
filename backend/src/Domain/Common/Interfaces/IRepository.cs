@@ -1,5 +1,3 @@
-using backend.Domain.Common;
-
 namespace backend.Domain.Common.Interfaces;
 
 public interface IRepository<T>

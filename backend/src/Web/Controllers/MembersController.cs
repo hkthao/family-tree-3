@@ -41,6 +41,20 @@ public class MembersController : ControllerBase
         return StatusCode(500, result.Error);
     }
 
+    [HttpGet("by-ids")]
+    public async Task<ActionResult<MemberDto>> GetMemberByIds([FromQuery] string ids)
+    {
+        var _ids = ids.Split(',').Select(e => Guid.Parse(e)).ToList();
+        var result = await _memberService.GetByIdsAsync(_ids);
+        if (result.IsSuccess)
+        {
+            if (result.Value == null)
+                return NotFound();
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error);
+    }
+
     [HttpPost]
     public async Task<ActionResult<MemberDto>> CreateMember([FromBody] Member member)
     {

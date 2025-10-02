@@ -266,7 +266,7 @@
         "tags": [
           "Family"
         ],
-        "operationId": "Family_SearchFamilies",
+        "operationId": "Family_Search",
         "parameters": [
           {
             "name": "SearchQuery",
@@ -322,6 +322,36 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaginatedListOfFamilyDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Family/by-ids": {
+      "get": {
+        "tags": [
+          "Family"
+        ],
+        "operationId": "Family_GetMemberByIds",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyDto"
                 }
               }
             }
@@ -387,6 +417,88 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Members/search": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_Search",
+        "parameters": [
+          {
+            "name": "SearchQuery",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "Gender",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 2
+          },
+          {
+            "name": "FamilyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "Ids",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "guid"
+              }
+            },
+            "x-position": 4
+          },
+          {
+            "name": "Page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 5
+          },
+          {
+            "name": "ItemsPerPage",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 6
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfMemberDto"
                 }
               }
             }
@@ -493,6 +605,36 @@
                 "schema": {
                   "type": "string",
                   "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Members/by-ids": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_GetMemberByIds",
+        "parameters": [
+          {
+            "name": "ids",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MemberDto"
                 }
               }
             }
@@ -870,6 +1012,30 @@
           },
           "metadata": {
             "nullable": true
+          }
+        }
+      },
+      "PaginatedListOfMemberDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

@@ -99,4 +99,18 @@ public class FamilyController : ControllerBase
         }
         return StatusCode(500, result.Error);
     }
+
+    [HttpGet("by-ids")]
+    public async Task<ActionResult<FamilyDto>> GetMemberByIds([FromQuery] string ids)
+    {
+        var _ids = ids.Split(',').Select(e => Guid.Parse(e)).ToList();
+        var result = await _familyService.GetByIdsAsync(_ids);
+        if (result.IsSuccess)
+        {
+            if (result.Value == null)
+                return NotFound();
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error);
+    }
 }
