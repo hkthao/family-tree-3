@@ -1,8 +1,6 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.FamilyTree;
 using backend.Application.FamilyTree.Queries.GetFamilyTreeJson;
 using backend.Application.FamilyTree.Queries.GetFamilyTreePdf;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;

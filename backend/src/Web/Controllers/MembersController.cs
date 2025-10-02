@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Members;
 using backend.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +15,15 @@ public class MembersController : ControllerBase
     public MembersController(IMemberService memberService)
     {
         _memberService = memberService;
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginatedList<MemberDto>>> Search([FromQuery] MemberFilterModel filter)
+    {
+        var result = await _memberService.SearchAsync(filter);
+        if (result.IsSuccess)
+            return Ok(result.Value);
+        return StatusCode(500, result.Error);
     }
 
     [HttpGet("{id}")]

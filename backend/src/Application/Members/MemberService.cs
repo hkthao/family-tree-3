@@ -16,21 +16,6 @@ public class MemberService : BaseCrudService<Member, IMemberRepository, MemberDt
         _familyRepository = familyRepository;
     }
 
-    public async Task<Result<List<MemberDto>>> GetByIdsAsync(IEnumerable<Guid> ids)
-    {
-        const string source = "MemberService.GetByIdsAsync";
-        try
-        {
-            var members = await _repository.GetByIdsAsync(ids);
-            return Result<List<MemberDto>>.Success(_mapper.Map<List<MemberDto>>(members));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, string.Join(",", ids));
-            return Result<List<MemberDto>>.Failure(ex.Message, source: source);
-        }
-    }
-
     public async Task<Result<PaginatedList<MemberDto>>> SearchAsync(MemberFilterModel filter)
     {
         const string source = "MemberService.SearchAsync";
@@ -68,25 +53,6 @@ public class MemberService : BaseCrudService<Member, IMemberRepository, MemberDt
         {
             _logger.LogError(ex, "Error in {Source} for filter {@Filter}", source, filter);
             return Result<PaginatedList<MemberDto>>.Failure(ex.Message, source: source);
-        }
-    }
-
-    public async Task<Result<MemberDto>> GetMemberDtoByIdAsync(Guid id)
-    {
-        const string source = "MemberService.GetMemberDtoByIdAsync";
-        try
-        {
-            var memberResult = await base.GetByIdAsync(id);
-            if (memberResult.IsSuccess && memberResult.Value != null)
-            {
-                return Result<MemberDto>.Success(memberResult.Value);
-            }
-            return Result<MemberDto>.Failure(memberResult.Error!, source: memberResult.Source);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error in {Source} for ID {Id}", source, id);
-            return Result<MemberDto>.Failure(ex.Message, source: source);
         }
     }
 

@@ -53,7 +53,7 @@ public class FamilyController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<FamilyDto>>> SearchFamilies([FromQuery] FamilyFilterModel filter)
+    public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] FamilyFilterModel filter)
     {
         var result = await _familyService.SearchAsync(filter);
         if (result.IsSuccess)
