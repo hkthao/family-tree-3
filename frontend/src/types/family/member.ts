@@ -22,7 +22,13 @@ export interface Member {
 }
 
 export interface MemberFilter {
+  fullName?: string;
+  dateOfBirth?: Date | null;
+  dateOfDeath?: Date | null;
   gender?: Gender | undefined;
+  placeOfBirth?: string;
+  placeOfDeath?: string;
+  occupation?: string;
   familyId?: string | null;
   searchQuery?: string; // New property for search term
   ids?: string[] | null; // New property for array of member IDs,

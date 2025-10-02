@@ -17,9 +17,19 @@ public class MembersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<Member>>> GetAllMembers([FromQuery] MemberFilterModel filter)
+    public async Task<ActionResult<List<Member>>> GetAllMembers([FromQuery] string? ids)
     {
-        var result = await _memberService.SearchAsync(filter);
+        Result<List<Member>> result;
+        if (!string.IsNullOrEmpty(ids))
+        {
+            var guids = ids.Split(',').Select(Guid.Parse).ToList();
+            result = await _memberService.GetMembersByIdsAsync(guids);
+        }
+        else
+        {
+            result = await _memberService.GetAllAsync();
+        }
+
         if (result.IsSuccess)
         {
             return Ok(result.Value);

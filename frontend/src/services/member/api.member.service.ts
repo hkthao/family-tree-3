@@ -88,7 +88,13 @@ export class ApiMemberService implements IMemberService {
     itemsPerPage: number,
   ): Promise<Result<Paginated<Member>, ApiError>> {
     const params = new URLSearchParams();
+    if (filters.fullName) params.append('fullName', filters.fullName);
+    if (filters.dateOfBirth) params.append('dateOfBirth', filters.dateOfBirth.toISOString());
+    if (filters.dateOfDeath) params.append('dateOfDeath', filters.dateOfDeath.toISOString());
     if (filters.gender) params.append('gender', filters.gender);
+    if (filters.placeOfBirth) params.append('placeOfBirth', filters.placeOfBirth);
+    if (filters.placeOfDeath) params.append('placeOfDeath', filters.placeOfDeath);
+    if (filters.occupation) params.append('occupation', filters.occupation);
     if (filters.familyId) params.append('familyId', filters.familyId);
 
     // Add pagination parameters
