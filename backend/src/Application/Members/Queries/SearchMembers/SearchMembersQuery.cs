@@ -1,6 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Members;
-
 namespace backend.Application.Members.Queries.SearchMembers;
 
 public record SearchMembersQuery : IRequest<PaginatedList<MemberDto>>

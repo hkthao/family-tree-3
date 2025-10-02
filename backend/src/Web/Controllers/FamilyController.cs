@@ -1,4 +1,3 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families;
 using backend.Application.Families.Commands.CreateFamily;
@@ -8,8 +7,6 @@ using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
-using backend.Domain.Entities;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -51,7 +48,7 @@ public class FamilyController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] FamilyFilterModel filter)
     {
-        return await _mediator.Send(new SearchFamiliesQuery { Keyword = filter.Keyword, PageNumber = filter.PageNumber, PageSize = filter.PageSize });
+        return await _mediator.Send(new SearchFamiliesQuery { Keyword = filter.SearchQuery, PageNumber = filter.Page, PageSize = filter.ItemsPerPage });
     }
 
     [HttpPost]

@@ -1,6 +1,5 @@
 using backend.Application.Common.Models;
 using backend.Application.Search.Queries.Search;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;

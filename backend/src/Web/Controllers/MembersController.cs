@@ -1,4 +1,3 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members;
 using backend.Application.Members.Commands.CreateMember;
@@ -7,8 +6,6 @@ using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
-using backend.Domain.Entities;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -27,7 +24,7 @@ public class MembersController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<MemberDto>>> Search([FromQuery] MemberFilterModel filter)
     {
-        return await _mediator.Send(new SearchMembersQuery { Keyword = filter.Keyword, PageNumber = filter.PageNumber, PageSize = filter.PageSize });
+        return await _mediator.Send(new SearchMembersQuery { Keyword = filter.SearchQuery, PageNumber = filter.Page, PageSize = filter.ItemsPerPage });
     }
 
     [HttpGet("{id}")]

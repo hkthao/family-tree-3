@@ -91,6 +91,239 @@
         }
       }
     },
+    "/api/Events": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "operationId": "Events_GetEvents",
+        "parameters": [
+          {
+            "name": "SearchQuery",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 1
+          },
+          {
+            "name": "EventType",
+            "in": "query",
+            "schema": {
+              "nullable": true,
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/EventType"
+                }
+              ]
+            },
+            "x-position": 2
+          },
+          {
+            "name": "FamilyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "StartDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 4
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 5
+          },
+          {
+            "name": "Location",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 6
+          },
+          {
+            "name": "RelatedMemberId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 7
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Events"
+        ],
+        "operationId": "Events_Create",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEventCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "guid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Events/{id}": {
+      "get": {
+        "tags": [
+          "Events"
+        ],
+        "operationId": "Events_GetEventById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Events"
+        ],
+        "operationId": "Events_Update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEventCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Events"
+        ],
+        "operationId": "Events_Delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Family": {
       "get": {
         "tags": [
@@ -130,11 +363,11 @@
         ],
         "operationId": "Family_CreateFamily",
         "requestBody": {
-          "x-name": "family",
+          "x-name": "command",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Family"
+                "$ref": "#/components/schemas/CreateFamilyCommand"
               }
             }
           },
@@ -147,7 +380,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Family"
+                  "type": "string",
+                  "format": "guid"
                 }
               }
             }
@@ -204,11 +438,11 @@
           }
         ],
         "requestBody": {
-          "x-name": "family",
+          "x-name": "command",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Family"
+                "$ref": "#/components/schemas/UpdateFamilyCommand"
               }
             }
           },
@@ -334,7 +568,7 @@
         "tags": [
           "Family"
         ],
-        "operationId": "Family_GetMemberByIds",
+        "operationId": "Family_GetFamiliesByIds",
         "parameters": [
           {
             "name": "ids",
@@ -351,7 +585,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FamilyDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyDto"
+                  }
                 }
               }
             }
@@ -555,11 +792,11 @@
           }
         ],
         "requestBody": {
-          "x-name": "member",
+          "x-name": "command",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Member"
+                "$ref": "#/components/schemas/UpdateMemberCommand"
               }
             }
           },
@@ -617,7 +854,7 @@
         "tags": [
           "Members"
         ],
-        "operationId": "Members_GetMemberByIds",
+        "operationId": "Members_GetMembersByIds",
         "parameters": [
           {
             "name": "ids",
@@ -634,7 +871,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MemberDto"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
                 }
               }
             }
@@ -649,11 +889,11 @@
         ],
         "operationId": "Members_CreateMember",
         "requestBody": {
-          "x-name": "member",
+          "x-name": "command",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Member"
+                "$ref": "#/components/schemas/CreateMemberCommand"
               }
             }
           },
@@ -666,7 +906,8 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MemberDto"
+                  "type": "string",
+                  "format": "guid"
                 }
               }
             }
@@ -791,6 +1032,170 @@
           }
         }
       },
+      "EventDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "relatedMembers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "guid"
+            }
+          }
+        }
+      },
+      "EventType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Birth",
+          "Marriage",
+          "Death",
+          "Migration",
+          "Other"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "CreateEventCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "relatedMembers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "guid"
+            }
+          }
+        }
+      },
+      "UpdateEventCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "location": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/EventType"
+          },
+          "color": {
+            "type": "string",
+            "nullable": true
+          },
+          "relatedMembers": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "guid"
+            }
+          }
+        }
+      },
       "FamilyDto": {
         "type": "object",
         "additionalProperties": false,
@@ -848,93 +1253,51 @@
           }
         }
       },
-      "Family": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAuditableEntity"
-          },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string",
-                "nullable": true
-              },
-              "address": {
-                "type": "string",
-                "nullable": true
-              },
-              "avatarUrl": {
-                "type": "string",
-                "nullable": true
-              },
-              "visibility": {
-                "type": "string"
-              },
-              "totalMembers": {
-                "type": "integer",
-                "format": "int32"
-              }
-            }
-          }
-        ]
-      },
-      "BaseAuditableEntity": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseEntity"
-          },
-          {
-            "type": "object",
-            "x-abstract": true,
-            "additionalProperties": false,
-            "properties": {
-              "created": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "createdBy": {
-                "type": "string",
-                "nullable": true
-              },
-              "lastModified": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "lastModifiedBy": {
-                "type": "string",
-                "nullable": true
-              }
-            }
-          }
-        ]
-      },
-      "BaseEntity": {
+      "CreateFamilyCommand": {
         "type": "object",
-        "x-abstract": true,
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateFamilyCommand": {
+        "type": "object",
         "additionalProperties": false,
         "properties": {
           "id": {
             "type": "string",
             "format": "guid"
           },
-          "domainEvents": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BaseEvent"
-            }
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
           }
         }
-      },
-      "BaseEvent": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false
       },
       "FamilyTreeDto": {
         "type": "object",
@@ -1056,114 +1419,147 @@
           }
         }
       },
-      "Member": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BaseAuditableEntity"
+      "CreateMemberCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "lastName": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "lastName": {
-                "type": "string"
-              },
-              "firstName": {
-                "type": "string"
-              },
-              "fullName": {
-                "type": "string"
-              },
-              "nickname": {
-                "type": "string",
-                "nullable": true
-              },
-              "gender": {
-                "type": "string",
-                "nullable": true
-              },
-              "dateOfBirth": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "dateOfDeath": {
-                "type": "string",
-                "format": "date-time",
-                "nullable": true
-              },
-              "placeOfBirth": {
-                "type": "string",
-                "nullable": true
-              },
-              "placeOfDeath": {
-                "type": "string",
-                "nullable": true
-              },
-              "occupation": {
-                "type": "string",
-                "nullable": true
-              },
-              "avatarUrl": {
-                "type": "string",
-                "nullable": true
-              },
-              "biography": {
-                "type": "string",
-                "nullable": true
-              },
-              "familyId": {
-                "type": "string",
-                "format": "guid"
-              },
-              "fatherId": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "father": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/Member"
-                  }
-                ]
-              },
-              "motherId": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "mother": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/Member"
-                  }
-                ]
-              },
-              "spouseId": {
-                "type": "string",
-                "format": "guid",
-                "nullable": true
-              },
-              "spouse": {
-                "nullable": true,
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/Member"
-                  }
-                ]
-              },
-              "children": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Member"
-                }
-              }
-            }
+          "firstName": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateOfDeath": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "placeOfBirth": {
+            "type": "string",
+            "nullable": true
+          },
+          "placeOfDeath": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "occupation": {
+            "type": "string",
+            "nullable": true
+          },
+          "biography": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "fatherId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "motherId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "spouseId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
           }
-        ]
+        }
+      },
+      "UpdateMemberCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateOfDeath": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "placeOfBirth": {
+            "type": "string",
+            "nullable": true
+          },
+          "placeOfDeath": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "occupation": {
+            "type": "string",
+            "nullable": true
+          },
+          "biography": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "fatherId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "motherId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "spouseId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          }
+        }
       },
       "PaginatedListOfSearchItem": {
         "type": "object",
@@ -1194,12 +1590,13 @@
         "additionalProperties": false,
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "guid"
           },
           "type": {
             "type": "string"
           },
-          "title": {
+          "name": {
             "type": "string"
           },
           "description": {

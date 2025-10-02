@@ -1,8 +1,6 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
+using backend.Application.Common.Mappings;
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 

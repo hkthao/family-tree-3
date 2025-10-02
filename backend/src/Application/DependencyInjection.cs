@@ -1,6 +1,5 @@
-﻿using FluentValidation;
-using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using backend.Application.Common.Behaviours;
 
 namespace backend.Application;
 

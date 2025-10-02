@@ -1,7 +1,4 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Interfaces;
-using backend.Application.Events;
 using backend.Domain.Entities;
 
 namespace backend.Application.Events.Queries.GetEventById;

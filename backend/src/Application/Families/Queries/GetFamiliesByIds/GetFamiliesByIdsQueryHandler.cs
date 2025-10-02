@@ -1,7 +1,4 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 
 namespace backend.Application.Families.Queries.GetFamiliesByIds;
 

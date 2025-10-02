@@ -19,7 +19,7 @@ public class DependencyInjectionTests
         hostApplicationBuilderMock.Setup(b => b.Services).Returns(services);
 
         // Act
-        hostApplicationBuilderMock.Object.AddApplicationServices();
+        services.AddApplicationServices();
 
         // Assert
         services.Should().NotBeNull();
