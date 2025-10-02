@@ -1,37 +1,38 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
+using backend.Application.Members.Queries;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members;
 
-public class MemberService : BaseCrudService<Member, IMemberRepository>, IMemberService
+public class MemberService : BaseCrudService<Member, IMemberRepository, MemberDto>, IMemberService
 {
     private readonly IFamilyRepository _familyRepository;
 
     public MemberService(IMemberRepository memberRepository, IFamilyRepository familyRepository, ILogger<MemberService> logger)
-        : base(memberRepository, logger)
+        : base(memberRepository, logger, MemberDto.FromEntity)
     {
         _familyRepository = familyRepository;
     }
 
-    public async Task<Result<List<Member>>> GetByIdsAsync(IEnumerable<Guid> ids)
+    public async Task<Result<List<MemberDto>>> GetByIdsAsync(IEnumerable<Guid> ids)
     {
         const string source = "MemberService.GetByIdsAsync";
         try
         {
             var members = await _repository.GetByIdsAsync(ids);
-            return Result<List<Member>>.Success(members.ToList());
+            return Result<List<MemberDto>>.Success(members.Select(MemberDto.FromEntity).ToList());
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, string.Join(",", ids));
-            return Result<List<Member>>.Failure(ex.Message, source: source);
+            return Result<List<MemberDto>>.Failure(ex.Message, source: source);
         }
     }
 
-    public async Task<Result<PaginatedList<Member>>> SearchAsync(MemberFilterModel filter)
+    public async Task<Result<PaginatedList<MemberDto>>> SearchAsync(MemberFilterModel filter)
     {
         const string source = "MemberService.SearchAsync";
         try
@@ -49,18 +50,6 @@ public class MemberService : BaseCrudService<Member, IMemberRepository>, IMember
                 query = query.Where(m => m.Gender == filter.Gender);
             }
 
-            // Removed PlaceOfBirth filter
-            // if (!string.IsNullOrWhiteSpace(filter.PlaceOfBirth))
-            // {
-            //     query = query.Where(m => m.PlaceOfBirth != null && m.PlaceOfBirth.ToLower().Contains(filter.PlaceOfBirth.ToLower()));
-            // }
-
-            // Removed PlaceOfDeath filter
-            // if (!string.IsNullOrWhiteSpace(filter.PlaceOfDeath))
-            // {
-            //     query = query.Where(m => m.PlaceOfDeath != null && m.PlaceOfDeath.ToLower().Contains(filter.PlaceOfDeath.ToLower()));
-            // }
-
             if (filter.FamilyId.HasValue)
             {
                 query = query.Where(m => m.FamilyId == filter.FamilyId.Value);
@@ -74,12 +63,31 @@ public class MemberService : BaseCrudService<Member, IMemberRepository>, IMember
             var totalCount = query.Count();
             var items = query.Skip((filter.Page - 1) * filter.ItemsPerPage).Take(filter.ItemsPerPage).ToList();
 
-            return Result<PaginatedList<Member>>.Success(new PaginatedList<Member>(items, totalCount, filter.Page, filter.ItemsPerPage));
+            return Result<PaginatedList<MemberDto>>.Success(new PaginatedList<MemberDto>(items.Select(MemberDto.FromEntity).ToList(), totalCount, filter.Page, filter.ItemsPerPage));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for filter {@Filter}", source, filter);
-            return Result<PaginatedList<Member>>.Failure(ex.Message, source: source);
+            return Result<PaginatedList<MemberDto>>.Failure(ex.Message, source: source);
+        }
+    }
+
+    public async Task<Result<MemberDto>> GetMemberDtoByIdAsync(Guid id)
+    {
+        const string source = "MemberService.GetMemberDtoByIdAsync";
+        try
+        {
+            var memberResult = await base.GetByIdAsync(id);
+            if (memberResult.IsSuccess && memberResult.Value != null)
+            {
+                return Result<MemberDto>.Success(MemberDto.FromEntity(memberResult.Value));
+            }
+            return Result<MemberDto>.Failure(memberResult.Error!, source: memberResult.Source);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for ID {Id}", source, id);
+            return Result<MemberDto>.Failure(ex.Message, source: source);
         }
     }
 
@@ -125,10 +133,10 @@ public class MemberService : BaseCrudService<Member, IMemberRepository>, IMember
     {
         const string source = "MemberService.UpdateFamilyTotalMembers";
         var familyResult = await _familyRepository.GetByIdAsync(familyId);
-        if (familyResult != null)
+        if (familyResult.IsSuccess && familyResult.Value != null)
         {
-            familyResult.TotalMembers += change;
-            await _familyRepository.UpdateAsync(familyResult);
+            familyResult.Value.TotalMembers += change;
+            await _familyRepository.UpdateAsync(familyResult.Value);
         }
         else
         {
