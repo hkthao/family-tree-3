@@ -12,4 +12,5 @@ public class Family : BaseAuditableEntity
 
     public string? AvatarUrl { get; set; }
     public FamilyVisibility Visibility { get; set; } = FamilyVisibility.Private;
+    public int TotalMembers { get; set; }
 }

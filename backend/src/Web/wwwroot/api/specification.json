@@ -707,6 +707,10 @@
               },
               "visibility": {
                 "$ref": "#/components/schemas/FamilyVisibility"
+              },
+              "totalMembers": {
+                "type": "integer",
+                "format": "int32"
               }
             }
           }

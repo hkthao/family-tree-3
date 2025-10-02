@@ -37,6 +37,11 @@ public class InMemoryMemberRepository : InMemoryRepository<Member>, IMemberRepos
         return members;
     }
 
+    public Task<int> CountMembersByFamilyIdAsync(Guid familyId)
+    {
+        return Task.FromResult(_items.Count(m => m.FamilyId == familyId));
+    }
+
     private async Task PopulateRelationships(Member member)
     {
         if (member.FatherId.HasValue)
