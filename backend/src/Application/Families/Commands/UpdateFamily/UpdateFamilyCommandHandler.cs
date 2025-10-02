@@ -23,6 +23,7 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand>
 
         entity.Name = request.Name;
         entity.Description = request.Description;
+        entity.Address = request.Address;
         entity.AvatarUrl = request.AvatarUrl;
 
         _context.Families.Update(entity);

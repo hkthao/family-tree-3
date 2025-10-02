@@ -18,6 +18,7 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, G
         {
             Name = request.Name!,
             Description = request.Description,
+            Address = request.Address,
             AvatarUrl = request.AvatarUrl
         };
 

@@ -7,6 +7,11 @@ public class Family : BaseAuditableEntity
 {
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
+    
+    /// <summary>
+    /// Dia chi
+    /// </summary>
+    public string? Address { get; set; }
 
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = "Private"; // e.g., Private, Public

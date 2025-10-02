@@ -664,9 +664,17 @@
             "type": "string",
             "nullable": true
           },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
           "totalMembers": {
             "type": "integer",
             "format": "int32"
+          },
+          "visibility": {
+            "type": "string",
+            "nullable": true
           },
           "avatarUrl": {
             "type": "string",
@@ -711,6 +719,10 @@
                 "type": "string"
               },
               "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "address": {
                 "type": "string",
                 "nullable": true
               },
