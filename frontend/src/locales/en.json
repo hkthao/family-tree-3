@@ -37,6 +37,7 @@
   "family.management.visibility.all": "All",
   "family.management.visibility.private": "Private",
   "family.management.visibility.public": "Public",
+  "family.management.visibility.shared": "Shared",
   "family.management.headers.avatar": "Avatar",
   "family.management.headers.name": "Name",
   "family.management.headers.totalMembers": "Total Members",
