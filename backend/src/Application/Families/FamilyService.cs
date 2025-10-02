@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
+// using backend.Domain.Enums; // Remove this
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families;
@@ -47,9 +47,9 @@ public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamily
                 query = query.Where(f => f.Id == filter.FamilyId.Value);
             }
 
-            if (filter.Visibility.HasValue)
+            if (!string.IsNullOrWhiteSpace(filter.Visibility))
             {
-                query = query.Where(f => f.Visibility == filter.Visibility.Value);
+                query = query.Where(f => f.Visibility == filter.Visibility);
             }
 
             var totalCount = query.Count();

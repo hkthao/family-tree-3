@@ -291,12 +291,8 @@
             "name": "Visibility",
             "in": "query",
             "schema": {
-              "nullable": true,
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/FamilyVisibility"
-                }
-              ]
+              "type": "string",
+              "nullable": true
             },
             "x-position": 3
           },
@@ -706,7 +702,7 @@
                 "nullable": true
               },
               "visibility": {
-                "$ref": "#/components/schemas/FamilyVisibility"
+                "type": "string"
               },
               "totalMembers": {
                 "type": "integer",
@@ -714,18 +710,6 @@
               }
             }
           }
-        ]
-      },
-      "FamilyVisibility": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Private",
-          "Public"
-        ],
-        "enum": [
-          0,
-          1
         ]
       },
       "BaseAuditableEntity": {
@@ -799,7 +783,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalCount": {
+          "totalItems": {
             "type": "integer",
             "format": "int32"
           }
@@ -1031,7 +1015,7 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalCount": {
+          "totalItems": {
             "type": "integer",
             "format": "int32"
           }

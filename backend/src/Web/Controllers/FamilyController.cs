@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
+// using backend.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -43,14 +43,14 @@ public class FamilyController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Family>> GetFamilyById(Guid id)
     {
-        var result = await _familyService.GetByIdAsync(id);
+        var result = await _familyService.GetByIdsAsync(new[] { id });
         if (result.IsSuccess)
         {
-            if (result.Value == null)
+            if (result.Value == null || !result.Value.Any())
             {
                 return NotFound();
             }
-            return Ok(result.Value);
+            return Ok(result.Value.First());
         }
         return StatusCode(500, result.Error);
     }

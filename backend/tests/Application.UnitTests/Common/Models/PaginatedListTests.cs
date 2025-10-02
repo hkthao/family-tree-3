@@ -19,7 +19,7 @@ public class PaginatedListTests
         Assert.Equal(items, paginatedList.Items);
         Assert.Equal(pageNumber, paginatedList.PageNumber);
         Assert.Equal(4, paginatedList.TotalPages);
-        Assert.Equal(count, paginatedList.TotalCount);
+        Assert.Equal(count, paginatedList.TotalItems);
     }
 
     [Theory]

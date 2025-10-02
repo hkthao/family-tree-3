@@ -1,5 +1,5 @@
 using backend.Domain.Entities;
-using backend.Domain.Enums;
+// using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
 
@@ -11,7 +11,7 @@ public class FamilyTests
     public void Family_ShouldHaveCorrectDefaultVisibility()
     {
         var family = new Family();
-        family.Visibility.Should().Be(FamilyVisibility.Private);
+        family.Visibility.Should().Be("Private");
     }
 
     [Fact]
@@ -22,12 +22,12 @@ public class FamilyTests
             Name = "Test Family",
             Description = "A test description",
             AvatarUrl = "http://example.com/avatar.jpg",
-            Visibility = FamilyVisibility.Public
+            Visibility = "Public"
         };
 
         family.Name.Should().Be("Test Family");
         family.Description.Should().Be("A test description");
         family.AvatarUrl.Should().Be("http://example.com/avatar.jpg");
-        family.Visibility.Should().Be(FamilyVisibility.Public);
+        family.Visibility.Should().Be("Public");
     }
 }
