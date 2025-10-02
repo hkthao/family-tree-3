@@ -1,14 +1,17 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Auth;
 
 public class Auth0Provider : IAuthProvider
 {
     private readonly List<AuthResult> _users = new();
+    private readonly ILogger<Auth0Provider> _logger;
 
-    public Auth0Provider()
+    public Auth0Provider(ILogger<Auth0Provider> logger)
     {
+        _logger = logger;
         // Seed a dummy user for testing
         _users.Add(new AuthResult
         {
@@ -21,49 +24,85 @@ public class Auth0Provider : IAuthProvider
         });
     }
 
-    public Task<AuthResult> LoginAsync(string email, string password)
+    public Task<Result<AuthResult>> LoginAsync(string email, string password)
     {
-        var user = _users.FirstOrDefault(u => u.Email == email && password == "password"); // Simple password check
-        if (user != null)
+        const string source = "Auth0Provider.LoginAsync";
+        try
         {
-            return Task.FromResult(new AuthResult { UserId = user.UserId, Email = user.Email, Username = user.Username, AccessToken = "new_access_token", Roles = user.Roles, Succeeded = true });
+            var user = _users.FirstOrDefault(u => u.Email == email && password == "password"); // Simple password check
+            if (user != null)
+            {
+                return Task.FromResult(Result<AuthResult>.Success(new AuthResult { UserId = user.UserId, Email = user.Email, Username = user.Username, AccessToken = "new_access_token", Roles = user.Roles, Succeeded = true }));
+            }
+            return Task.FromResult(Result<AuthResult>.Failure("Invalid credentials", source: source));
         }
-        return Task.FromResult(new AuthResult { Succeeded = false, Errors = new[] { "Invalid credentials" } });
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for email {Email}", source, email);
+            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, source: source));
+        }
     }
 
-    public Task<AuthResult> RegisterAsync(string email, string password, string username)
+    public Task<Result<AuthResult>> RegisterAsync(string email, string password, string username)
     {
-        if (_users.Any(u => u.Email == email))
+        const string source = "Auth0Provider.RegisterAsync";
+        try
         {
-            return Task.FromResult(new AuthResult { Succeeded = false, Errors = new[] { "Email already registered" } });
-        }
+            if (_users.Any(u => u.Email == email))
+            {
+                return Task.FromResult(Result<AuthResult>.Failure("Email already registered", source: source));
+            }
 
-        var newUser = new AuthResult
+            var newUser = new AuthResult
+            {
+                UserId = $"auth0|{Guid.NewGuid()}",
+                Email = email,
+                Username = username,
+                AccessToken = "new_access_token",
+                Roles = new List<string> { "User" },
+                Succeeded = true
+            };
+            _users.Add(newUser);
+            return Task.FromResult(Result<AuthResult>.Success(newUser));
+        }
+        catch (Exception ex)
         {
-            UserId = $"auth0|{Guid.NewGuid()}",
-            Email = email,
-            Username = username,
-            AccessToken = "new_access_token",
-            Roles = new List<string> { "User" },
-            Succeeded = true
-        };
-        _users.Add(newUser);
-        return Task.FromResult(newUser);
+            _logger.LogError(ex, "Error in {Source} for email {Email}", source, email);
+            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, source: source));
+        }
     }
 
-    public Task<AuthResult> GetUserAsync(string userId)
+    public Task<Result<AuthResult>> GetUserAsync(string userId)
     {
-        var user = _users.FirstOrDefault(u => u.UserId == userId);
-        if (user != null)
+        const string source = "Auth0Provider.GetUserAsync";
+        try
         {
-            return Task.FromResult(new AuthResult { UserId = user.UserId, Email = user.Email, Username = user.Username, AccessToken = "current_access_token", Roles = user.Roles, Succeeded = true });
+            var user = _users.FirstOrDefault(u => u.UserId == userId);
+            if (user != null)
+            {
+                return Task.FromResult(Result<AuthResult>.Success(new AuthResult { UserId = user.UserId, Email = user.Email, Username = user.Username, AccessToken = "current_access_token", Roles = user.Roles, Succeeded = true }));
+            }
+            return Task.FromResult(Result<AuthResult>.Failure("User not found", source: source));
         }
-        return Task.FromResult(new AuthResult { Succeeded = false, Errors = new[] { "User not found" } });
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for user ID {UserId}", source, userId);
+            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, source: source));
+        }
     }
 
-    public Task<string?> GetAccessTokenAsync()
+    public Task<Result<string>> GetAccessTokenAsync()
     {
-        // In a real scenario, this would retrieve the current access token from a secure storage
-        return Task.FromResult<string?>("current_access_token");
+        const string source = "Auth0Provider.GetAccessTokenAsync";
+        try
+        {
+            // In a real scenario, this would retrieve the current access token from a secure storage
+            return Task.FromResult(Result<string>.Success("current_access_token"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source}", source);
+            return Task.FromResult(Result<string>.Failure(ex.Message, source: source));
+        }
     }
 }

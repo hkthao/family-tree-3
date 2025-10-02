@@ -23,6 +23,10 @@ public class SearchController : ControllerBase
             return BadRequest("Keyword cannot be empty.");
         }
         var result = await _searchService.SearchAsync(keyword);
-        return Ok(result);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error); // Or a more specific error code
     }
 }

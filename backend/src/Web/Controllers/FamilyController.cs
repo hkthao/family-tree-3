@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,41 +10,59 @@ namespace backend.Web.Controllers;
 public class FamilyController : ControllerBase
 {
     private readonly IFamilyService _familyService;
+    private readonly ISearchService _searchService;
 
-    public FamilyController(IFamilyService familyService)
+    public FamilyController(IFamilyService familyService, ISearchService searchService)
     {
         _familyService = familyService;
+        _searchService = searchService;
     }
 
     [HttpGet]
     public async Task<ActionResult<List<Family>>> GetAllFamilies([FromQuery] string? ids)
     {
+        Result<List<Family>> result;
         if (!string.IsNullOrEmpty(ids))
         {
             var guids = ids.Split(',').Select(Guid.Parse).ToList();
-            var familiesByIds = await _familyService.GetFamiliesByIdsAsync(guids);
-            return Ok(familiesByIds);
+            result = await _familyService.GetFamiliesByIdsAsync(guids);
         }
-        var families = await _familyService.GetAllFamiliesAsync();
-        return Ok(families);
+        else
+        {
+            result = await _familyService.GetAllAsync(); // Use GetAllAsync from IBaseCrudService
+        }
+
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Family>> GetFamilyById(Guid id)
     {
-        var family = await _familyService.GetFamilyByIdAsync(id);
-        if (family == null)
+        var result = await _familyService.GetByIdAsync(id); // Use GetByIdAsync from IBaseCrudService
+        if (result.IsSuccess)
         {
-            return NotFound();
+            if (result.Value == null)
+            {
+                return NotFound();
+            }
+            return Ok(result.Value);
         }
-        return Ok(family);
+        return StatusCode(500, result.Error);
     }
 
     [HttpPost]
     public async Task<ActionResult<Family>> CreateFamily([FromBody] Family family)
     {
-        var createdFamily = await _familyService.CreateFamilyAsync(family);
-        return CreatedAtAction(nameof(GetFamilyById), new { id = createdFamily.Id }, createdFamily);
+        var result = await _familyService.CreateAsync(family); // Use CreateAsync from IBaseCrudService
+        if (result.IsSuccess)
+        {
+            return CreatedAtAction(nameof(GetFamilyById), new { id = result.Value!.Id }, result.Value);
+        }
+        return StatusCode(500, result.Error);
     }
 
     [HttpPut("{id}")]
@@ -53,14 +72,36 @@ public class FamilyController : ControllerBase
         {
             return BadRequest();
         }
-        await _familyService.UpdateFamilyAsync(family);
-        return NoContent();
+        var result = await _familyService.UpdateAsync(family); // Use UpdateAsync from IBaseCrudService
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return StatusCode(500, result.Error);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFamily(Guid id)
     {
-        await _familyService.DeleteFamilyAsync(id);
-        return NoContent();
+        var result = await _familyService.DeleteAsync(id); // Use DeleteAsync from IBaseCrudService
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return StatusCode(500, result.Error);
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginatedList<Family>>> SearchFamilies(
+        [FromQuery] string? keyword,
+        [FromQuery] int page = 1,
+        [FromQuery] int itemsPerPage = 10)
+    {
+        var result = await _familyService.SearchFamiliesAsync(keyword, page, itemsPerPage);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error);
     }
 }

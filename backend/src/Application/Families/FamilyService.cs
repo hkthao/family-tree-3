@@ -1,50 +1,55 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.Common.Services;
 using backend.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families;
 
-public class FamilyService : IFamilyService
+public class FamilyService : BaseCrudService<Family, IFamilyRepository>, IFamilyService
 {
-    private readonly IFamilyRepository _familyRepository;
-
-    public FamilyService(IFamilyRepository familyRepository)
+    public FamilyService(IFamilyRepository familyRepository, ILogger<FamilyService> logger)
+        : base(familyRepository, logger)
     {
-        _familyRepository = familyRepository;
     }
 
-    public async Task<List<Family>> GetAllFamiliesAsync()
+    public async Task<Result<List<Family>>> GetFamiliesByIdsAsync(IEnumerable<Guid> ids)
     {
-        var families = await _familyRepository.GetAllAsync();
-        return families.ToList();
-    }
-
-    public async Task<Family?> GetFamilyByIdAsync(Guid id)
-    {
-        return await _familyRepository.GetByIdAsync(id);
-    }
-
-    public async Task<List<Family>> GetFamiliesByIdsAsync(IEnumerable<Guid> ids)
-    {
-        var families = await _familyRepository.GetByIdsAsync(ids);
-        return families.ToList();
-    }
-
-    public async Task<Family> CreateFamilyAsync(Family family)
-    {
-        return await _familyRepository.AddAsync(family);
-    }
-
-    public async Task UpdateFamilyAsync(Family family)
-    {
-        await _familyRepository.UpdateAsync(family);
-    }
-
-    public async Task DeleteFamilyAsync(Guid id)
-    {
-        var family = await _familyRepository.GetByIdAsync(id);
-        if (family != null)
+        const string source = "FamilyService.GetFamiliesByIdsAsync";
+        try
         {
-            await _familyRepository.DeleteAsync(family);
+            var families = await _repository.GetByIdsAsync(ids);
+            return Result<List<Family>>.Success(families.ToList());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for IDs {Ids}", source, string.Join(",", ids));
+            return Result<List<Family>>.Failure(ex.Message, source: source);
+        }
+    }
+
+    public async Task<Result<PaginatedList<Family>>> SearchFamiliesAsync(string? keyword, int page, int itemsPerPage)
+    {
+        const string source = "FamilyService.SearchFamiliesAsync";
+        try
+        {
+            var families = await _repository.GetAllAsync();
+            var query = families.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                query = query.Where(f => f.Name.Contains(keyword) || (f.Description != null && f.Description.Contains(keyword)));
+            }
+
+            var totalCount = query.Count();
+            var items = query.Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
+
+            return Result<PaginatedList<Family>>.Success(new PaginatedList<Family>(items, totalCount, page, itemsPerPage));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for keyword {Keyword}, page {Page}, itemsPerPage {ItemsPerPage}", source, keyword, page, itemsPerPage);
+            return Result<PaginatedList<Family>>.Failure(ex.Message, source: source);
         }
     }
 }

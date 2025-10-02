@@ -4,5 +4,5 @@ namespace backend.Application.Common.Interfaces;
 
 public interface ISearchService
 {
-    Task<SearchResult> SearchAsync(string keyword);
+    Task<Result<SearchResult>> SearchAsync(string keyword);
 }

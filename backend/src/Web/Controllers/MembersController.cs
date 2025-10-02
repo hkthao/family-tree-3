@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,32 +19,48 @@ public class MembersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<Member>>> GetAllMembers([FromQuery] string? ids)
     {
+        Result<List<Member>> result;
         if (!string.IsNullOrEmpty(ids))
         {
             var guids = ids.Split(',').Select(Guid.Parse).ToList();
-            var membersByIds = await _memberService.GetMembersByIdsAsync(guids);
-            return Ok(membersByIds);
+            result = await _memberService.GetMembersByIdsAsync(guids);
         }
-        var members = await _memberService.GetAllMembersAsync();
-        return Ok(members);
+        else
+        {
+            result = await _memberService.GetAllAsync(); // Use GetAllAsync from IBaseCrudService
+        }
+
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return StatusCode(500, result.Error); // Or a more specific error code
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Member>> GetMemberById(Guid id)
     {
-        var member = await _memberService.GetMemberByIdAsync(id);
-        if (member == null)
+        var result = await _memberService.GetByIdAsync(id); // Use GetByIdAsync from IBaseCrudService
+        if (result.IsSuccess)
         {
-            return NotFound();
+            if (result.Value == null)
+            {
+                return NotFound();
+            }
+            return Ok(result.Value);
         }
-        return Ok(member);
+        return StatusCode(500, result.Error); // Or a more specific error code
     }
 
     [HttpPost]
     public async Task<ActionResult<Member>> CreateMember([FromBody] Member member)
     {
-        var createdMember = await _memberService.CreateMemberAsync(member);
-        return CreatedAtAction(nameof(GetMemberById), new { id = createdMember.Id }, createdMember);
+        var result = await _memberService.CreateAsync(member); // Use CreateAsync from IBaseCrudService
+        if (result.IsSuccess)
+        {
+            return CreatedAtAction(nameof(GetMemberById), new { id = result.Value!.Id }, result.Value);
+        }
+        return StatusCode(500, result.Error); // Or a more specific error code
     }
 
     [HttpPut("{id}")]
@@ -53,14 +70,22 @@ public class MembersController : ControllerBase
         {
             return BadRequest();
         }
-        await _memberService.UpdateMemberAsync(member);
-        return NoContent();
+        var result = await _memberService.UpdateAsync(member); // Use UpdateAsync from IBaseCrudService
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return StatusCode(500, result.Error); // Or a more specific error code
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMember(Guid id)
     {
-        await _memberService.DeleteMemberAsync(id);
-        return NoContent();
+        var result = await _memberService.DeleteAsync(id); // Use DeleteAsync from IBaseCrudService
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return StatusCode(500, result.Error); // Or a more specific error code
     }
 }
