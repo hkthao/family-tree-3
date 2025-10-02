@@ -13,7 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
 
     public DbSet<Family> Families => Set<Family>();
     public DbSet<Member> Members => Set<Member>();
-    public DbSet<Relationship> Relationships => Set<Relationship>();
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

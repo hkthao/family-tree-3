@@ -358,67 +358,6 @@
         }
       }
     },
-    "/api/Relationships": {
-      "post": {
-        "tags": [
-          "Relationships"
-        ],
-        "operationId": "PostApiRelationships",
-        "requestBody": {
-          "x-name": "command",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateRelationshipCommand"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "201": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "guid"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Relationships/{id}": {
-      "delete": {
-        "tags": [
-          "Relationships"
-        ],
-        "operationId": "DeleteApiRelationships",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": ""
-          },
-          "404": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/Users/register": {
       "post": {
         "tags": [
@@ -882,12 +821,6 @@
             "items": {
               "$ref": "#/components/schemas/MemberDto"
             }
-          },
-          "Relationships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RelationshipDto"
-            }
           }
         }
       },
@@ -945,59 +878,6 @@
             "nullable": true
           }
         }
-      },
-      "RelationshipDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "FamilyId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "SourceMemberId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "Type": {
-            "$ref": "#/components/schemas/RelationshipType"
-          },
-          "TargetMemberId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "RelationshipType": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Parent",
-          "Spouse",
-          "Child"
-        ],
-        "enum": [
-          0,
-          1,
-          2
-        ]
       },
       "CreateMemberCommand": {
         "type": "object",
@@ -1108,40 +988,6 @@
           },
           "Metadata": {
             "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "CreateRelationshipCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "SourceMemberId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "Type": {
-            "$ref": "#/components/schemas/RelationshipType"
-          },
-          "TargetMemberId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "FamilyId": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time",
             "nullable": true
           }
         }

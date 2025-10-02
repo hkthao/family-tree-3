@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Families;
 using backend.Application.Members;
-using backend.Application.Relationships;
 using backend.Domain.Entities;
 
 namespace backend.Application.FamilyTree.Queries.GetFamilyTreeJson;
@@ -27,13 +26,11 @@ public class GetFamilyTreeJsonQueryHandler : IRequestHandler<GetFamilyTreeJsonQu
         }
 
         var members = await _context.Members.Where(m => m.FamilyId == request.FamilyId).ToListAsync(cancellationToken);
-        var relationships = await _context.Relationships.ToListAsync(cancellationToken);
 
         var familyTreeDto = new FamilyTreeDto
         {
             Family = _mapper.Map<FamilyDto>(family),
-            Members = _mapper.Map<List<MemberDto>>(members),
-            Relationships = _mapper.Map<List<RelationshipDto>>(relationships)
+            Members = _mapper.Map<List<MemberDto>>(members)
         };
 
         return familyTreeDto;

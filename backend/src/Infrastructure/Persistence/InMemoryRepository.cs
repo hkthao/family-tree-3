@@ -8,12 +8,12 @@ public class InMemoryRepository<T> : IRepository<T>
 {
     protected readonly List<T> _items = new();
 
-    public Task<T?> GetByIdAsync(Guid id)
+    public virtual Task<T?> GetByIdAsync(Guid id)
     {
         return Task.FromResult(_items.FirstOrDefault(x => x.Id == id));
     }
 
-    public Task<IReadOnlyList<T>> GetAllAsync()
+    public virtual Task<IReadOnlyList<T>> GetAllAsync()
     {
         return Task.FromResult<IReadOnlyList<T>>(_items.AsReadOnly());
     }
