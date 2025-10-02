@@ -10,7 +10,6 @@ import {
   type FamilyFilter,
   type Paginated,
 } from '@/types';
-import axios from 'axios';
 
 // Base URL for your API - configure this based on your environment
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -18,33 +17,33 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: AxiosInstance) {}
 
-  private apiUrl = `${API_BASE_URL}/families`;
+  private apiUrl = `${API_BASE_URL}/family`;
 
   async fetch(): Promise<Result<Family[], ApiError>> {
     // Renamed from fetchFamilies
-    return safeApiCall(axios.get<Family[]>(this.apiUrl));
+    return safeApiCall(this.http.get<Family[]>(this.apiUrl));
   }
 
   async getById(id: string): Promise<Result<Family, ApiError>> {
-    // Renamed from getFamilyById
-    return safeApiCall(axios.get<Family>(`${this.apiUrl}/${id}`));
+    // Renamed from getById
+    return safeApiCall(this.http.get<Family>(`${this.apiUrl}/${id}`));
   }
 
   async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
     // Renamed from addFamily
-    return safeApiCall(axios.post<Family>(this.apiUrl, newItem));
+    return safeApiCall(this.http.post<Family>(this.apiUrl, newItem));
   }
 
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     // Renamed from updateFamily
     return safeApiCall(
-      axios.put<Family>(`${this.apiUrl}/${updatedItem.id}`, updatedItem),
+      this.http.put<Family>(`${this.apiUrl}/${updatedItem.id}`, updatedItem),
     );
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     try {
-      await this.http.delete<void>(`/api/family/${id}`);
+      await this.http.delete<void>(`${this.apiUrl}/${id}`);
       return ok(undefined);
     } catch (error: any) {
       return err(error);
