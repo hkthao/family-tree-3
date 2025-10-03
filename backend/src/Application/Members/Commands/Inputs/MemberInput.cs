@@ -1,8 +1,7 @@
-namespace backend.Application.Members.Commands;
+namespace backend.Application.Members.Inputs;
 
-public record UpdateMemberCommand : IRequest
+public record MemberInput
 {
-    public Guid Id { get; init; }
     public string LastName { get; init; } = null!;
     public string FirstName { get; init; } = null!;
     public string? Nickname { get; init; }
@@ -15,7 +14,5 @@ public record UpdateMemberCommand : IRequest
     public string? Occupation { get; init; }
     public string? Biography { get; init; }
     public Guid FamilyId { get; init; }
-    public Guid? FatherId { get; init; }
-    public Guid? MotherId { get; init; }
-    public Guid? SpouseId { get; init; }
+    public ICollection<RelationshipInput> Relationships { get; init; } = [];
 }

@@ -1,7 +1,6 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using backend.Application.Common.Dtos;
-using backend.Application.Members.Queries;
 
 namespace backend.Application.Members.Queries.GetMembers;
 

@@ -6,16 +6,18 @@ namespace backend.Application.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 {
-    private readonly IMemberRepository _memberRepository;
+    private readonly IApplicationDbContext _context;
 
-    public UpdateMemberCommandHandler(IMemberRepository memberRepository)
+    public UpdateMemberCommandHandler(IApplicationDbContext context)
     {
-        _memberRepository = memberRepository;
+        _context = context;
     }
 
     public async Task Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _memberRepository.GetByIdAsync(request.Id);
+        var entity = await _context.Members
+            .Include(m => m.Relationships)
+            .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
 
         if (entity == null)
         {
@@ -34,10 +36,45 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
         entity.Occupation = request.Occupation;
         entity.Biography = request.Biography;
         entity.FamilyId = request.FamilyId;
-        entity.FatherId = request.FatherId;
-        entity.MotherId = request.MotherId;
-        entity.SpouseId = request.SpouseId;
 
-        await _memberRepository.UpdateAsync(entity);
+        // Manage Relationships
+        var existingRelationships = entity.Relationships.ToList();
+        var incomingRelationships = request.Relationships.ToList();
+
+        // Remove relationships explicitly marked for deletion
+        foreach (var deletedRelId in request.DeletedRelationshipIds)
+        {
+            var relToRemove = existingRelationships.FirstOrDefault(er => er.Id == deletedRelId);
+            if (relToRemove != null)
+            {
+                _context.Relationships.Remove(relToRemove);
+            }
+        }
+
+        // Add or update relationships from the incoming list
+        foreach (var incomingRel in incomingRelationships)
+        {
+            var existingRel = existingRelationships.FirstOrDefault(er => er.Id == incomingRel.Id);
+
+            if (existingRel == null) // New relationship
+            {
+                _context.Relationships.Add(new Relationship
+                {
+                    SourceMemberId = entity.Id,
+                    TargetMemberId = incomingRel.TargetMemberId,
+                    Type = incomingRel.Type,
+                    Order = incomingRel.Order
+                });
+            }
+            else // Update existing relationship
+            {
+                existingRel.TargetMemberId = incomingRel.TargetMemberId;
+                existingRel.Type = incomingRel.Type;
+                existingRel.Order = incomingRel.Order;
+            }
+        }
+
+        // Comment: Write-side invariant: Member and Relationships are updated in the database context.
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

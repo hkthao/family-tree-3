@@ -1,7 +1,6 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using backend.Application.Common.Dtos;
-using backend.Application.Members.Queries;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
@@ -20,6 +19,6 @@ public class MemberDetailDto : BaseAuditableDto, IMapFrom<Member>
     public string? AvatarUrl { get; set; }
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
-    public string? Biography { get; set; };
+    public string? Biography { get; set; }
     public ICollection<RelationshipDto> Relationships { get; set; } = new List<RelationshipDto>();
 }

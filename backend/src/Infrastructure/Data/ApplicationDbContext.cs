@@ -29,9 +29,22 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Entity<Relationship>()
+            .HasOne(r => r.SourceMember)
+            .WithMany(m => m.Relationships)
+            .HasForeignKey(r => r.SourceMemberId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Relationship>()
             .HasOne(r => r.TargetMember)
             .WithMany()
             .HasForeignKey(r => r.TargetMemberId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Event>()
+            .HasOne<Family>()
+            .WithMany()
+            .HasForeignKey(e => e.FamilyId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
         base.OnModelCreating(builder);

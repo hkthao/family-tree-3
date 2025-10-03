@@ -5,11 +5,11 @@ namespace backend.Application.Members.Commands.CreateMember;
 
 public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, Guid>
 {
-    private readonly IMemberRepository _memberRepository;
+    private readonly IApplicationDbContext _context;
 
-    public CreateMemberCommandHandler(IMemberRepository memberRepository)
+    public CreateMemberCommandHandler(IApplicationDbContext context)
     {
-        _memberRepository = memberRepository;
+        _context = context;
     }
 
     public async Task<Guid> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
@@ -28,12 +28,23 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, G
             Occupation = request.Occupation,
             Biography = request.Biography,
             FamilyId = request.FamilyId,
-            FatherId = request.FatherId,
-            MotherId = request.MotherId,
-            SpouseId = request.SpouseId
         };
 
-        await _memberRepository.AddAsync(entity);
+        _context.Members.Add(entity);
+
+        foreach (var relDto in request.Relationships)
+        {
+            entity.Relationships.Add(new Relationship
+            {
+                SourceMemberId = entity.Id,
+                TargetMemberId = relDto.TargetMemberId,
+                Type = relDto.Type,
+                Order = relDto.Order
+            });
+        }
+
+        // Comment: Write-side invariant: Member and Relationships are added to the database context.
+        await _context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
