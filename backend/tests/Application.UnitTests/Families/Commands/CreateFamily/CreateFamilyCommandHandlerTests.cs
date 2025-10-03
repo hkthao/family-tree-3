@@ -1,21 +1,20 @@
 using backend.Application.Families.Commands.CreateFamily;
 using FluentAssertions;
-using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
+using backend.Application.UnitTests.Common;
+using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 
-public class CreateFamilyCommandHandlerTests
+public class CreateFamilyCommandHandlerTests : IDisposable
 {
     private readonly CreateFamilyCommandHandler _handler;
-    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
+    private readonly ApplicationDbContext _context;
 
     public CreateFamilyCommandHandlerTests()
     {
-        _mockFamilyRepository = new Mock<IFamilyRepository>();
-        _handler = new CreateFamilyCommandHandler(_mockFamilyRepository.Object);
+        _context = TestDbContextFactory.Create();
+        _handler = new CreateFamilyCommandHandler(_context);
     }
 
     [Fact]
@@ -24,23 +23,23 @@ public class CreateFamilyCommandHandlerTests
         // Arrange
         var command = new CreateFamilyCommand
         {
-            Name = "Test Family",
-            AvatarUrl = "logo.png",
-            Description = "A long time ago..."
+            Name = "New Test Family",
+            AvatarUrl = "new_logo.png",
+            Description = "A new family..."
         };
-
-        _mockFamilyRepository.Setup(repo => repo.AddAsync(It.IsAny<Family>()))
-            .ReturnsAsync((Family family) =>
-            {
-                family.Id = Guid.NewGuid(); // Simulate ID generation
-                return family;
-            });
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeEmpty();
-        _mockFamilyRepository.Verify(repo => repo.AddAsync(It.Is<Family>(f => f.Name == command.Name)), Times.Once);
+        var createdFamily = await _context.Families.FindAsync(result);
+        createdFamily.Should().NotBeNull();
+        createdFamily!.Name.Should().Be(command.Name);
+    }
+
+    public void Dispose()
+    {
+        TestDbContextFactory.Destroy(_context);
     }
 }

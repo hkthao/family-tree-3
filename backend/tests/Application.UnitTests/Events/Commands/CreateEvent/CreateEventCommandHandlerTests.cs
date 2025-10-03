@@ -1,21 +1,20 @@
 using backend.Application.Events.Commands.CreateEvent;
 using FluentAssertions;
-using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
+using backend.Application.UnitTests.Common;
+using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandlerTests
+public class CreateEventCommandHandlerTests : IDisposable
 {
-    private readonly Mock<IEventRepository> _mockEventRepository;
-    private readonly Mock<IMemberRepository> _mockMemberRepository;
+    private readonly CreateEventCommandHandler _handler;
+    private readonly ApplicationDbContext _context;
 
     public CreateEventCommandHandlerTests()
     {
-        _mockEventRepository = new Mock<IEventRepository>();
-        _mockMemberRepository = new Mock<IMemberRepository>();
+        _context = TestDbContextFactory.Create();
+        _handler = new CreateEventCommandHandler(_context);
     }
 
     [Fact]
@@ -24,26 +23,24 @@ public class CreateEventCommandHandlerTests
         // Arrange
         var command = new CreateEventCommand
         {
-            Name = "Test Event",
+            Name = "New Test Event",
             StartDate = new DateTime(2023, 1, 1),
-            FamilyId = Guid.NewGuid()
+            FamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"), // Use a seeded family ID
+            RelatedMembers = new List<Guid>()
         };
 
-        _mockEventRepository.Setup(repo => repo.AddAsync(It.IsAny<Event>()))
-            .ReturnsAsync((Event ev) =>
-            {
-                ev.Id = Guid.NewGuid(); // Simulate ID generation
-                return ev;
-            });
-        _mockMemberRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(new List<Member>());
-
-        var handler = new CreateEventCommandHandler(_mockEventRepository.Object, _mockMemberRepository.Object);
-
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeEmpty();
-        _mockEventRepository.Verify(repo => repo.AddAsync(It.Is<Event>(e => e.Name == command.Name)), Times.Once);
+        var createdEvent = await _context.Events.FindAsync(result);
+        createdEvent.Should().NotBeNull();
+        createdEvent!.Name.Should().Be(command.Name);
+    }
+
+    public void Dispose()
+    {
+        TestDbContextFactory.Destroy(_context);
     }
 }

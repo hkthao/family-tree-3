@@ -6,23 +6,27 @@ namespace backend.Application.Events.Commands.UpdateEvent;
 
 public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
 {
-    private readonly IEventRepository _eventRepository;
-    private readonly IMemberRepository _memberRepository;
+    private readonly IApplicationDbContext _context;
 
-    public UpdateEventCommandHandler(IEventRepository eventRepository, IMemberRepository memberRepository)
+    public UpdateEventCommandHandler(IApplicationDbContext context)
     {
-        _eventRepository = eventRepository;
-        _memberRepository = memberRepository;
+        _context = context;
     }
 
     public async Task Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _eventRepository.GetByIdAsync(request.Id);
+        var entity = await _context.Events
+            .Include(e => e.RelatedMembers)
+            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 
         if (entity == null)
         {
             throw new NotFoundException(nameof(Event), request.Id);
         }
+
+        var relatedMembers = await _context.Members
+            .Where(m => request.RelatedMembers.Contains(m.Id))
+            .ToListAsync(cancellationToken);
 
         entity.Name = request.Name;
         entity.Description = request.Description;
@@ -32,19 +36,9 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
         entity.FamilyId = request.FamilyId;
         entity.Type = request.Type;
         entity.Color = request.Color;
+        entity.RelatedMembers = relatedMembers; // Update related members
 
-        if (request.RelatedMembers.Any())
-        {
-            var members = (await _memberRepository.GetAllAsync())
-                .Where(m => request.RelatedMembers.Contains(m.Id))
-                .ToList();
-            entity.RelatedMembers = members;
-        }
-        else
-        {
-            entity.RelatedMembers.Clear();
-        }
-
-        await _eventRepository.UpdateAsync(entity);
+        // Comment: Write-side invariant: Event is updated in the database context.
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

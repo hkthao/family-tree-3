@@ -3,7 +3,6 @@ using backend.Domain.Constants;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Identity;
-using backend.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,7 +14,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IEventRepository>(sp => new InMemoryEventRepository(sp.GetRequiredService<IMemberRepository>()));
+
         services.AddSingleton<IAuthProvider, Auth0Provider>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");

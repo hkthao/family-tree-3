@@ -5,17 +5,19 @@ namespace backend.Application.Events.Commands.CreateEvent;
 
 public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Guid>
 {
-    private readonly IEventRepository _eventRepository;
-    private readonly IMemberRepository _memberRepository;
+    private readonly IApplicationDbContext _context;
 
-    public CreateEventCommandHandler(IEventRepository eventRepository, IMemberRepository memberRepository)
+    public CreateEventCommandHandler(IApplicationDbContext context)
     {
-        _eventRepository = eventRepository;
-        _memberRepository = memberRepository;
+        _context = context;
     }
 
     public async Task<Guid> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
+        var relatedMembers = await _context.Members
+            .Where(m => request.RelatedMembers.Contains(m.Id)) // Comment: Write-side invariant: Ensure related members exist.
+            .ToListAsync(cancellationToken);
+
         var entity = new Event
         {
             Name = request.Name,
@@ -26,17 +28,13 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Gui
             FamilyId = request.FamilyId,
             Type = request.Type,
             Color = request.Color,
+            RelatedMembers = relatedMembers
         };
 
-        if (request.RelatedMembers.Any())
-        {
-            var members = (await _memberRepository.GetAllAsync())
-                .Where(m => request.RelatedMembers.Contains(m.Id))
-                .ToList();
-            entity.RelatedMembers = members;
-        }
+        _context.Events.Add(entity);
 
-        await _eventRepository.AddAsync(entity);
+        // Comment: Write-side invariant: Event is added to the database context.
+        await _context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

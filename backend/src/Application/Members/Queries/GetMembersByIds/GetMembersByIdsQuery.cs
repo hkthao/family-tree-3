@@ -1,3 +1,5 @@
+using backend.Application.Members.Queries.GetMembers;
+
 namespace backend.Application.Members.Queries.GetMembersByIds;
 
-public record GetMembersByIdsQuery(List<Guid> Ids) : IRequest<List<MemberDto>>;
+public record GetMembersByIdsQuery(List<Guid> Ids) : IRequest<IReadOnlyList<MemberListDto>>;

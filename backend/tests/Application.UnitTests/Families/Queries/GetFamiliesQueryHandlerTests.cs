@@ -1,49 +1,64 @@
 using AutoMapper;
-using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilies;
-using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces;
+using backend.Application.UnitTests.Common;
+using backend.Infrastructure.Data;
+using backend.Application.Common.Mappings;
 
-namespace backend.Application.UnitTests.Families.Queries;
+namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 
-public class GetFamiliesQueryHandlerTests
+public class GetFamiliesQueryHandlerTests : IDisposable
 {
-    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
+    private readonly GetFamiliesQueryHandler _handler;
+    private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
 
     public GetFamiliesQueryHandlerTests()
     {
-        _mockFamilyRepository = new Mock<IFamilyRepository>();
+        _context = TestDbContextFactory.Create();
 
         var configurationProvider = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<MappingProfile>();
+            cfg.AddMaps(typeof(MappingProfile).Assembly);
         });
         _mapper = configurationProvider.CreateMapper();
+
+        _handler = new GetFamiliesQueryHandler(_context, _mapper);
     }
 
     [Fact]
     public async Task Handle_Should_Return_All_Families()
     {
         // Arrange
-        var families = new List<Family>
-        {
-            new Family { Id = Guid.NewGuid(), Name = "Family 1" },
-            new Family { Id = Guid.NewGuid(), Name = "Family 2" }
-        };
-        _mockFamilyRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(families);
-
-        var handler = new GetFamiliesQueryHandler(_mockFamilyRepository.Object, _mapper);
+        // Data is seeded by TestDbContextFactory
 
         // Act
-        var result = await handler.Handle(new GetFamiliesQuery(), CancellationToken.None);
+        var result = await _handler.Handle(new GetFamiliesQuery(), CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(2);
-        result.Should().ContainEquivalentOf(new { Name = "Family 1" });
-        result.Should().ContainEquivalentOf(new { Name = "Family 2" });
+        result.Should().HaveCount(1); // Royal Family is seeded
+        result.Should().ContainEquivalentOf(new { Name = "Royal Family" });
+    }
+
+    [Fact]
+    public async Task Handle_Should_Return_EmptyList_When_NoFamiliesExist()
+    {
+        // Arrange
+        var emptyContext = TestDbContextFactory.Create();
+        var emptyHandler = new GetFamiliesQueryHandler(emptyContext, _mapper);
+
+        // Act
+        var result = await emptyHandler.Handle(new GetFamiliesQuery(), CancellationToken.None);
+
+        // Assert
+        result.Should().BeEmpty();
+
+        TestDbContextFactory.Destroy(emptyContext);
+    }
+
+    public void Dispose()
+    {
+        TestDbContextFactory.Destroy(_context);
     }
 }

@@ -13,5 +13,5 @@ public record UpdateEventCommand : IRequest
     public Guid? FamilyId { get; init; }
     public EventType Type { get; init; }
     public string? Color { get; init; }
-    public ICollection<Guid> RelatedMembers { get; init; } = new List<Guid>();
+    public List<Guid> RelatedMembers { get; init; } = new List<Guid>();
 }

@@ -5,24 +5,28 @@ namespace backend.Application.Families.Commands.CreateFamily;
 
 public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Guid>
 {
-    private readonly IFamilyRepository _familyRepository;
+    private readonly IApplicationDbContext _context;
 
-    public CreateFamilyCommandHandler(IFamilyRepository familyRepository)
+    public CreateFamilyCommandHandler(IApplicationDbContext context)
     {
-        _familyRepository = familyRepository;
+        _context = context;
     }
 
     public async Task<Guid> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
         var entity = new Family
         {
-            Name = request.Name!,
+            Name = request.Name,
             Description = request.Description,
             Address = request.Address,
-            AvatarUrl = request.AvatarUrl
+            AvatarUrl = request.AvatarUrl,
+            Visibility = request.Visibility
         };
 
-        await _familyRepository.AddAsync(entity);
+        _context.Families.Add(entity);
+
+        // Comment: Write-side invariant: Family is added to the database context.
+        await _context.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }

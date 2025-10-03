@@ -3,7 +3,6 @@ using backend.Application.Families;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.UpdateFamily;
-using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
@@ -23,17 +22,10 @@ public class FamilyController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<FamilyDto>>> GetAllFamilies([FromQuery] string? ids)
+    public async Task<ActionResult<List<FamilyDto>>> GetAllFamilies([FromQuery] string ids)
     {
-        if (!string.IsNullOrEmpty(ids))
-        {
-            var guids = ids.Split(',').Select(Guid.Parse).ToList();
-            return await _mediator.Send(new GetFamiliesByIdsQuery(guids));
-        }
-        else
-        {
-            return await _mediator.Send(new GetFamiliesQuery());
-        }
+        var guids = ids.Split(',').Select(Guid.Parse).ToList();
+        return await _mediator.Send(new GetFamiliesByIdsQuery(guids));
     }
 
     [HttpGet("{id}")]

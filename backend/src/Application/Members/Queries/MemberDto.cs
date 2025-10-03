@@ -1,7 +1,7 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members;
+namespace backend.Application.Members.Queries;
 
 public class MemberDto : IMapFrom<Member>
 {

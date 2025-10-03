@@ -2,21 +2,21 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces;
+using backend.Application.UnitTests.Common;
+using backend.Infrastructure.Data;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
-public class UpdateFamilyCommandHandlerTests
+public class UpdateFamilyCommandHandlerTests : IDisposable
 {
     private readonly UpdateFamilyCommandHandler _handler;
-    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
+    private readonly ApplicationDbContext _context;
 
     public UpdateFamilyCommandHandlerTests()
     {
-        _mockFamilyRepository = new Mock<IFamilyRepository>();
-        _handler = new UpdateFamilyCommandHandler(_mockFamilyRepository.Object);
+        _context = TestDbContextFactory.Create();
+        _handler = new UpdateFamilyCommandHandler(_context);
     }
 
     [Fact]
@@ -25,8 +25,8 @@ public class UpdateFamilyCommandHandlerTests
         // Arrange
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Old Name" };
-        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(familyId)).ReturnsAsync(family);
-        _mockFamilyRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Family>())).Returns(Task.CompletedTask);
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
 
         var command = new UpdateFamilyCommand
         {
@@ -39,7 +39,10 @@ public class UpdateFamilyCommandHandlerTests
         await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockFamilyRepository.Verify(repo => repo.UpdateAsync(It.Is<Family>(f => f.Id == familyId && f.Name == command.Name && f.Description == command.Description)), Times.Once);
+        var updatedFamily = await _context.Families.FindAsync(familyId);
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.Name.Should().Be(command.Name);
+        updatedFamily.Description.Should().Be(command.Description);
     }
 
     [Fact]
@@ -47,12 +50,16 @@ public class UpdateFamilyCommandHandlerTests
     {
         // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid() };
-        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(command.Id)).ReturnsAsync(null as Family);
 
         // Act
-        var act = () => _handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    public void Dispose()
+    {
+        TestDbContextFactory.Destroy(_context);
     }
 }

@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Members;
+namespace backend.Application.Members.Queries.GetMembers;
 
 public class MemberFilterModel : PaginationModel
 {

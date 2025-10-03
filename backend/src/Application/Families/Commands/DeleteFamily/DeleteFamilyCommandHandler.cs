@@ -5,22 +5,24 @@ namespace backend.Application.Families.Commands.DeleteFamily;
 
 public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand>
 {
-    private readonly IFamilyRepository _familyRepository;
+    private readonly IApplicationDbContext _context;
 
-    public DeleteFamilyCommandHandler(IFamilyRepository familyRepository)
+    public DeleteFamilyCommandHandler(IApplicationDbContext context)
     {
-        _familyRepository = familyRepository;
+        _context = context;
     }
 
     public async Task Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _familyRepository.GetByIdAsync(request.Id);
+        var entity = await _context.Families.FindAsync(request.Id);
 
         if (entity == null)
         {
             throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
         }
 
-        await _familyRepository.DeleteAsync(request.Id);
+        _context.Families.Remove(entity);
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

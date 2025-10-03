@@ -99,7 +99,7 @@
         "operationId": "Events_GetEvents",
         "parameters": [
           {
-            "name": "SearchQuery",
+            "name": "SearchTerm",
             "in": "query",
             "schema": {
               "type": "string",
@@ -168,6 +168,24 @@
               "nullable": true
             },
             "x-position": 7
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 8
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 9
           }
         ],
         "responses": {
@@ -335,8 +353,7 @@
             "name": "ids",
             "in": "query",
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "string"
             },
             "x-position": 1
           }
@@ -596,71 +613,6 @@
         }
       }
     },
-    "/api/FamilyTree/{familyId}": {
-      "get": {
-        "tags": [
-          "FamilyTree"
-        ],
-        "operationId": "FamilyTree_GetFamilyTreeJson",
-        "parameters": [
-          {
-            "name": "familyId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FamilyTreeDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/FamilyTree/{familyId}/pdf": {
-      "get": {
-        "tags": [
-          "FamilyTree"
-        ],
-        "operationId": "FamilyTree_GetFamilyTreePdf",
-        "parameters": [
-          {
-            "name": "familyId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Members/search": {
       "get": {
         "tags": [
@@ -735,7 +687,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedListOfMemberDto"
+                  "$ref": "#/components/schemas/PaginatedListOfMemberListDto"
                 }
               }
             }
@@ -767,7 +719,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MemberDto"
+                  "$ref": "#/components/schemas/MemberDetailDto"
                 }
               }
             }
@@ -873,7 +825,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/MemberDto"
+                    "$ref": "#/components/schemas/MemberListDto"
                   }
                 }
               }
@@ -1271,6 +1223,9 @@
           "avatarUrl": {
             "type": "string",
             "nullable": true
+          },
+          "visibility": {
+            "type": "string"
           }
         }
       },
@@ -1296,30 +1251,54 @@
           "avatarUrl": {
             "type": "string",
             "nullable": true
+          },
+          "visibility": {
+            "type": "string"
           }
         }
       },
-      "FamilyTreeDto": {
+      "PaginatedListOfMemberListDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "family": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/FamilyDto"
-              }
-            ]
-          },
-          "members": {
+          "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MemberDto"
+              "$ref": "#/components/schemas/MemberListDto"
             }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalItems": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
-      "MemberDto": {
+      "MemberListDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MemberDetailDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
@@ -1392,30 +1371,15 @@
             "type": "string",
             "format": "guid",
             "nullable": true
-          }
-        }
-      },
-      "PaginatedListOfMemberDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MemberDto"
-            }
           },
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalItems": {
-            "type": "integer",
-            "format": "int32"
+          "lastModifiedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         }
       },

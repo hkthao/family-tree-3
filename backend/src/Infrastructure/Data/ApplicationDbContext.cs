@@ -20,6 +20,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+        builder.Entity<Member>()
+            .HasOne(m => m.Father)
+            .WithMany()
+            .HasForeignKey(m => m.FatherId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Member>()
+            .HasOne(m => m.Mother)
+            .WithMany()
+            .HasForeignKey(m => m.MotherId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+
         base.OnModelCreating(builder);
     }
 }

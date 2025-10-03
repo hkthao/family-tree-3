@@ -1,11 +1,10 @@
 using backend.Application.Common.Models;
-using backend.Application.Members;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.Members.Commands.UpdateMember;
+using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembersByIds;
-using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -22,13 +21,13 @@ public class MembersController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<MemberDto>>> Search([FromQuery] MemberFilterModel filter)
+    public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] MemberFilterModel filter)
     {
-        return await _mediator.Send(new SearchMembersQuery { Keyword = filter.SearchQuery, PageNumber = filter.Page, PageSize = filter.ItemsPerPage });
+        return await _mediator.Send(new GetMembersWithPaginationQuery { SearchTerm = filter.SearchQuery, PageNumber = filter.Page, PageSize = filter.ItemsPerPage });
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<MemberDto>> GetMemberById(Guid id)
+    public async Task<ActionResult<MemberDetailDto>> GetMemberById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberByIdQuery(id));
         if (result == null)
@@ -37,10 +36,10 @@ public class MembersController : ControllerBase
     }
 
     [HttpGet("by-ids")]
-    public async Task<ActionResult<List<MemberDto>>> GetMembersByIds([FromQuery] string ids)
+    public async Task<ActionResult<List<MemberListDto>>> GetMembersByIds([FromQuery] string ids)
     {
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
-        return await _mediator.Send(new GetMembersByIdsQuery(guids));
+        return Ok(await _mediator.Send(new GetMembersByIdsQuery(guids)));
     }
 
     [HttpPost]

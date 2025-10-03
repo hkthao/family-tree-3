@@ -2,19 +2,26 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Domain.Entities;
 using FluentAssertions;
-using backend.Application.Common.Interfaces;
 using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 
 public class DeleteFamilyCommandTests
 {
-    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
+    private readonly Mock<IApplicationDbContext> _mockContext;
+    private readonly Mock<DbSet<Family>> _mockDbSetFamily;
 
     public DeleteFamilyCommandTests()
     {
-        _mockFamilyRepository = new Mock<IFamilyRepository>();
+        _mockContext = new Mock<IApplicationDbContext>();
+        _mockDbSetFamily = new Mock<DbSet<Family>>();
+
+        _mockContext.Setup(c => c.Families).Returns(_mockDbSetFamily.Object);
+        _mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
     }
 
     [Fact]
@@ -23,17 +30,19 @@ public class DeleteFamilyCommandTests
         // Arrange
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family" };
-        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(familyId)).ReturnsAsync(family);
-        _mockFamilyRepository.Setup(repo => repo.DeleteAsync(familyId)).Returns(Task.CompletedTask);
+
+        _mockDbSetFamily.Setup(db => db.FindAsync(familyId)).ReturnsAsync(family);
+        _mockDbSetFamily.Setup(db => db.Remove(It.IsAny<Family>()));
 
         var command = new DeleteFamilyCommand(familyId);
-        var handler = new DeleteFamilyCommandHandler(_mockFamilyRepository.Object);
+        var handler = new DeleteFamilyCommandHandler(_mockContext.Object);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        _mockFamilyRepository.Verify(repo => repo.DeleteAsync(familyId), Times.Once);
+        _mockDbSetFamily.Verify(db => db.Remove(It.Is<Family>(f => f.Id == familyId)), Times.Once);
+        _mockContext.Verify(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -41,9 +50,10 @@ public class DeleteFamilyCommandTests
     {
         // Arrange
         var invalidId = Guid.NewGuid();
+        _mockDbSetFamily.Setup(db => db.FindAsync(invalidId)).ReturnsAsync((Family?)null);
+
         var command = new DeleteFamilyCommand(invalidId);
-        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(invalidId)).ReturnsAsync((Family)null!);
-        var handler = new DeleteFamilyCommandHandler(_mockFamilyRepository.Object);
+        var handler = new DeleteFamilyCommandHandler(_mockContext.Object);
 
         // Act
         Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

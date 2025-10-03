@@ -7,4 +7,5 @@ public record UpdateFamilyCommand : IRequest
     public string? Description { get; init; }
     public string? Address { get; init; }
     public string? AvatarUrl { get; init; }
+    public string Visibility { get; init; } = "Private";
 }

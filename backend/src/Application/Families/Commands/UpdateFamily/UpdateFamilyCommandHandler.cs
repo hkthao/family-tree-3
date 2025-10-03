@@ -1,31 +1,35 @@
-﻿using backend.Application.Common.Interfaces;
+using backend.Application.Common.Exceptions;
+using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand>
 {
-    private readonly IFamilyRepository _familyRepository;
+    private readonly IApplicationDbContext _context;
 
-    public UpdateFamilyCommandHandler(IFamilyRepository familyRepository)
+    public UpdateFamilyCommandHandler(IApplicationDbContext context)
     {
-        _familyRepository = familyRepository;
+        _context = context;
     }
 
     public async Task Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _familyRepository.GetByIdAsync(request.Id);
+        var entity = await _context.Families
+            .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
         if (entity == null)
         {
-            throw new backend.Application.Common.Exceptions.NotFoundException(nameof(Family), request.Id);
+            throw new NotFoundException(nameof(Family), request.Id);
         }
 
         entity.Name = request.Name;
         entity.Description = request.Description;
         entity.Address = request.Address;
         entity.AvatarUrl = request.AvatarUrl;
+        entity.Visibility = request.Visibility;
 
-        await _familyRepository.UpdateAsync(entity);
+        // Comment: Write-side invariant: Family is updated in the database context.
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

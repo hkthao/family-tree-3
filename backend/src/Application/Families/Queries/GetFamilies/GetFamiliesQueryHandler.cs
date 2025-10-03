@@ -1,21 +1,36 @@
-﻿using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Specifications;
+using backend.Application.Families.Specifications;
+using backend.Domain.Entities;
 
 namespace backend.Application.Families.Queries.GetFamilies;
 
-public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, List<FamilyDto>>
+public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, IReadOnlyList<FamilyListDto>>
 {
-    private readonly IFamilyRepository _familyRepository;
+    private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetFamiliesQueryHandler(IFamilyRepository familyRepository, IMapper mapper)
+    public GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
-        _familyRepository = familyRepository;
+        _context = context;
         _mapper = mapper;
     }
 
-    public async Task<List<FamilyDto>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<FamilyListDto>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var families = await _familyRepository.GetAllAsync();
-        return _mapper.Map<List<FamilyDto>>(families);
+        var spec = new FamilyFilterSpecification(
+            request.SearchTerm,
+            request.CreatedAfter,
+            (request.PageNumber - 1) * request.PageSize,
+            request.PageSize);
+
+        // Comment: Specification pattern is applied here to filter, sort, and page the results at the database level.
+        var query = SpecificationEvaluator<Family>.GetQuery(_context.Families.AsQueryable(), spec);
+
+        // Comment: DTO projection is used here to select only the necessary columns from the database,
+        // optimizing the SQL query and reducing the amount of data transferred.
+        return await query
+            .ProjectTo<FamilyListDto>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
     }
 }

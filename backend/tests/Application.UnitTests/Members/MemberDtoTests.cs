@@ -1,9 +1,9 @@
 using AutoMapper;
 using backend.Application.Common.Mappings;
-using backend.Application.Members;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
+using backend.Application.Members.Queries.GetMemberById;
 
 namespace backend.Application.UnitTests.Members;
 
@@ -50,7 +50,7 @@ public class MemberDtoTests : IDisposable
             SpouseId = Guid.NewGuid()
         };
 
-        var memberDto = _mapper.Map<MemberDto>(member);
+        var memberDto = _mapper.Map<MemberDetailDto>(member);
 
         memberDto.Should().NotBeNull();
         memberDto.Id.Should().Be(member.Id);
