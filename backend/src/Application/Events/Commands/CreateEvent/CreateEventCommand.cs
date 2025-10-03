@@ -1,16 +1,8 @@
-using backend.Domain.Enums;
+using backend.Application.Events.Commands.Inputs;
+using MediatR;
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public record CreateEventCommand : IRequest<Guid>
+public record CreateEventCommand : EventInput, IRequest<Guid>
 {
-    public string Name { get; init; } = null!;
-    public string? Description { get; init; }
-    public DateTime? StartDate { get; init; }
-    public DateTime? EndDate { get; init; }
-    public string? Location { get; init; }
-    public Guid? FamilyId { get; init; }
-    public EventType Type { get; init; }
-    public string? Color { get; init; }
-    public List<Guid> RelatedMembers { get; init; } = new List<Guid>();
 }

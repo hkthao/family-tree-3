@@ -1,11 +1,9 @@
+using MediatR;
+using backend.Application.Families.Commands.Inputs;
+
 namespace backend.Application.Families.Commands.UpdateFamily;
 
-public record UpdateFamilyCommand : IRequest
+public record UpdateFamilyCommand : FamilyInput, IRequest
 {
     public Guid Id { get; init; }
-    public string Name { get; init; } = null!;
-    public string? Description { get; init; }
-    public string? Address { get; init; }
-    public string? AvatarUrl { get; init; }
-    public string Visibility { get; init; } = "Private";
 }

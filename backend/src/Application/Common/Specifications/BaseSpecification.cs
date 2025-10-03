@@ -18,12 +18,12 @@ public abstract class BaseSpecification<T> : ISpecification<T>
         Criteria = criteriaExpression;
     }
 
-    protected void AddInclude(Expression<Func<T, object>> includeExpression)
+    public void AddInclude(Expression<Func<T, object>> includeExpression)
     {
         Includes.Add(includeExpression);
     }
 
-    protected void AddInclude(string includeString)
+    public void AddInclude(string includeString)
     {
         IncludeStrings.Add(includeString);
     }
