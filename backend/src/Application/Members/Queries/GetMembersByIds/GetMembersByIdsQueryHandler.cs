@@ -18,6 +18,7 @@ public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery,
     {
         return await _context.Members
             .Where(m => request.Ids.Contains(m.Id))
+            .Include(m => m.Relationships)
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
     }

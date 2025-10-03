@@ -6,6 +6,8 @@ using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Events.Queries.GetEvents;
+using backend.Application.Events.Queries.GetEventById;
+using backend.Application.Members.Queries;
 
 namespace backend.Application.Common.Mappings;
 
@@ -22,5 +24,7 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyListDto>();
         CreateMap<Family, FamilyDetailDto>();
         CreateMap<Event, EventListDto>();
+        CreateMap<Event, EventDetailDto>();
+        CreateMap<Relationship, RelationshipDto>();
     }
 }

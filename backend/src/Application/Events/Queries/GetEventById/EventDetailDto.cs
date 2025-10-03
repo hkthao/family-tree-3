@@ -1,10 +1,12 @@
+using AutoMapper;
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Application.Common.Dtos;
 
 namespace backend.Application.Events.Queries.GetEventById;
 
-public class EventDetailDto : IMapFrom<Event>
+public class EventDetailDto : BaseAuditableDto, IMapFrom<Event>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
@@ -16,8 +18,6 @@ public class EventDetailDto : IMapFrom<Event>
     public EventType Type { get; set; }
     public string? Color { get; set; }
     public List<Guid> RelatedMembers { get; set; } = new List<Guid>();
-    public DateTime Created { get; set; }
-    public DateTime? LastModified { get; set; }
 
     public void Mapping(Profile profile)
     {

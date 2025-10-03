@@ -17,15 +17,6 @@ public class Member : BaseAuditableEntity
     public string? Biography { get; set; } // New
     public Guid FamilyId { get; set; }
 
-
     // Relationships
-    public Guid? FatherId { get; set; }
-    public Member? Father { get; set; }
-
-    public Guid? MotherId { get; set; }
-    public Member? Mother { get; set; }
-
-    public Guid? SpouseId { get; set; } // New
-    public Member? Spouse { get; set; }
-
-    public ICollection<Member> Children { get; set; } = new List<Member>();}
+    public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();
+}

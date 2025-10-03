@@ -1,13 +1,15 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
+using backend.Application.Common.Dtos;
+using backend.Application.Members.Queries;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
-public class MemberListDto : IMapFrom<Member>
+public class MemberListDto : BaseAuditableDto, IMapFrom<Member>
 {
     public Guid Id { get; set; }
     public string FullName { get; set; } = null!;
-    public DateTime CreatedAt { get; set; }
+    public ICollection<RelationshipDto> Relationships { get; set; } = new List<RelationshipDto>();
 
     public void Mapping(Profile profile)
     {

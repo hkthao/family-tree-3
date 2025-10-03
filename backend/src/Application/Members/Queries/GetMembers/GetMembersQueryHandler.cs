@@ -24,6 +24,8 @@ public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, IReadOnly
             0, // No skip
             int.MaxValue); // No take (get all)
 
+        spec.AddInclude(m => m.Relationships);
+
         // Comment: Specification pattern is applied here to filter the results at the database level.
         var query = SpecificationEvaluator<Member>.GetQuery(_context.Members.AsQueryable(), spec);
 

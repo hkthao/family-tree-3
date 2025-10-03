@@ -1,10 +1,11 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Application.Common.Dtos;
 
 namespace backend.Application.Events.Queries.GetEvents;
 
-public class EventListDto : IMapFrom<Event>
+public class EventListDto : BaseAuditableDto, IMapFrom<Event>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
@@ -14,5 +15,4 @@ public class EventListDto : IMapFrom<Event>
     public string? Location { get; set; }
     public EventType Type { get; set; }
     public Guid? FamilyId { get; set; }
-    public DateTime Created { get; set; }
 }

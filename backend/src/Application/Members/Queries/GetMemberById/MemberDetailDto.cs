@@ -1,9 +1,11 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
+using backend.Application.Common.Dtos;
+using backend.Application.Members.Queries;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
-public class MemberDetailDto : IMapFrom<Member>
+public class MemberDetailDto : BaseAuditableDto, IMapFrom<Member>
 {
     public Guid Id { get; set; }
     public string LastName { get; set; } = null!;
@@ -18,10 +20,6 @@ public class MemberDetailDto : IMapFrom<Member>
     public string? AvatarUrl { get; set; }
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
-    public string? Biography { get; set; }
-    public Guid? FatherId { get; set; }
-    public Guid? MotherId { get; set; }
-    public Guid? SpouseId { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime? LastModifiedAt { get; set; }
+    public string? Biography { get; set; };
+    public ICollection<RelationshipDto> Relationships { get; set; } = new List<RelationshipDto>();
 }

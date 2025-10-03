@@ -21,6 +21,7 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Mem
     {
         // Comment: Specification pattern is applied here to filter the result by ID at the database level.
         var spec = new MemberByIdSpecification(request.Id);
+        spec.AddInclude(m => m.Relationships);
 
         var query = SpecificationEvaluator<Member>.GetQuery(_context.Members.AsQueryable(), spec);
 

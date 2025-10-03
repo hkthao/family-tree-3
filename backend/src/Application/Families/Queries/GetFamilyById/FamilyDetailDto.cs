@@ -1,9 +1,10 @@
 using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
+using backend.Application.Common.Dtos;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public class FamilyDetailDto : IMapFrom<Family>
+public class FamilyDetailDto : BaseAuditableDto, IMapFrom<Family>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
@@ -12,6 +13,4 @@ public class FamilyDetailDto : IMapFrom<Family>
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = null!;
     public int TotalMembers { get; set; }
-    public DateTime Created { get; set; }
-    public DateTime? LastModified { get; set; }
 }

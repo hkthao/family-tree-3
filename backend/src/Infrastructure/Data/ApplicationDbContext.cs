@@ -14,6 +14,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     public DbSet<Family> Families => Set<Family>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Event> Events => Set<Event>();
+    public DbSet<Relationship> Relationships => Set<Relationship>();
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -21,17 +22,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
         builder.Entity<Member>()
-            .HasOne(m => m.Father)
+            .HasOne<Family>()
             .WithMany()
-            .HasForeignKey(m => m.FatherId)
-            .IsRequired(false)
+            .HasForeignKey(m => m.FamilyId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<Member>()
-            .HasOne(m => m.Mother)
+        builder.Entity<Relationship>()
+            .HasOne(r => r.TargetMember)
             .WithMany()
-            .HasForeignKey(m => m.MotherId)
-            .IsRequired(false)
+            .HasForeignKey(r => r.TargetMemberId)
             .OnDelete(DeleteBehavior.Restrict);
 
         base.OnModelCreating(builder);
