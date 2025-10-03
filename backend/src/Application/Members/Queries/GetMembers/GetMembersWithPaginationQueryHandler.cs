@@ -21,7 +21,7 @@ public class GetMembersWithPaginationQueryHandler : IRequestHandler<GetMembersWi
     {
         var spec = new MemberFilterSpecification(
             request.SearchTerm,
-            request.CreatedAfter,
+            request.FamilyId,
             (request.PageNumber - 1) * request.PageSize,
             request.PageSize);
 

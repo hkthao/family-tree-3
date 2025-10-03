@@ -20,7 +20,7 @@ public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, IReadOnly
     {
         var spec = new MemberFilterSpecification(
             request.SearchTerm,
-            request.CreatedAfter,
+            request.FamilyId,
             0, // No skip
             int.MaxValue); // No take (get all)
 

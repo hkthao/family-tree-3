@@ -19,7 +19,5 @@ public class MemberDto : IMapFrom<Member>
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
-    public Guid? FatherId { get; set; }
-    public Guid? MotherId { get; set; }
-    public Guid? SpouseId { get; set; }
+    public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }

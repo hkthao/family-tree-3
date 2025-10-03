@@ -17,10 +17,4 @@ public class EventDetailDto : BaseAuditableDto, IMapFrom<Event>
     public EventType Type { get; set; }
     public string? Color { get; set; }
     public List<Guid> RelatedMembers { get; set; } = new List<Guid>();
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<Event, EventDetailDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
-    }
 }

@@ -15,16 +15,17 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<Event, EventDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
-
         CreateMap<Family, FamilyDto>();
+        CreateMap<Family, FamilyDetailDto>();
+        CreateMap<Family, FamilyListDto>();
+        CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>();
         CreateMap<Member, MemberDetailDto>();
-        CreateMap<Family, FamilyListDto>();
-        CreateMap<Family, FamilyDetailDto>();
         CreateMap<Event, EventListDto>();
-        CreateMap<Event, EventDetailDto>();
+        CreateMap<Event, EventDetailDto>()
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
+        CreateMap<Event, EventDto>()
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
         CreateMap<Relationship, RelationshipDto>();
     }
 }

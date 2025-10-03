@@ -44,10 +44,7 @@ public class MemberDtoTests : IDisposable
             AvatarUrl = "http://example.com/avatar.jpg",
             Occupation = "Developer",
             Biography = "Some biography",
-            FamilyId = Guid.NewGuid(),
-            FatherId = Guid.NewGuid(),
-            MotherId = Guid.NewGuid(),
-            SpouseId = Guid.NewGuid()
+            FamilyId = Guid.NewGuid()
         };
 
         var memberDto = _mapper.Map<MemberDetailDto>(member);
@@ -67,9 +64,6 @@ public class MemberDtoTests : IDisposable
         memberDto.Occupation.Should().Be(member.Occupation);
         memberDto.Biography.Should().Be(member.Biography);
         memberDto.FamilyId.Should().Be(member.FamilyId);
-        memberDto.FatherId.Should().Be(member.FatherId);
-        memberDto.MotherId.Should().Be(member.MotherId);
-        memberDto.SpouseId.Should().Be(member.SpouseId);
     }
 
     public void Dispose()

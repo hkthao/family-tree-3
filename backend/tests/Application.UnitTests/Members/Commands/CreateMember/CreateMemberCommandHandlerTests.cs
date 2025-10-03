@@ -1,19 +1,21 @@
 using backend.Application.Members.Commands.CreateMember;
 using FluentAssertions;
-using Moq;
 using Xunit;
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
+using backend.Application.UnitTests.Common;
+using backend.Infrastructure.Data;
+using backend.Application.Members.Inputs;
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandlerTests
+public class CreateMemberCommandHandlerTests : IDisposable
 {
-    private readonly Mock<IMemberRepository> _mockMemberRepository;
+    private readonly CreateMemberCommandHandler _handler;
+    private readonly ApplicationDbContext _context;
 
     public CreateMemberCommandHandlerTests()
     {
-        _mockMemberRepository = new Mock<IMemberRepository>();
+        _context = TestDbContextFactory.Create();
+        _handler = new CreateMemberCommandHandler(_context);
     }
 
     [Fact]
@@ -26,23 +28,22 @@ public class CreateMemberCommandHandlerTests
             LastName = "Member",
             DateOfBirth = new DateTime(1990, 1, 1),
             Gender = "Male",
-            FamilyId = Guid.NewGuid()
+            FamilyId = Guid.NewGuid(),
+            Relationships = new List<RelationshipInput>()
         };
 
-        _mockMemberRepository.Setup(repo => repo.AddAsync(It.IsAny<Member>()))
-            .ReturnsAsync((Member member) =>
-            {
-                member.Id = Guid.NewGuid(); // Simulate ID generation
-                return member;
-            });
-
-        var handler = new CreateMemberCommandHandler(_mockMemberRepository.Object);
-
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeEmpty();
-        _mockMemberRepository.Verify(repo => repo.AddAsync(It.Is<Member>(m => m.FirstName == command.FirstName && m.LastName == command.LastName)), Times.Once);
+        var createdMember = await _context.Members.FindAsync(result);
+        createdMember.Should().NotBeNull();
+        createdMember!.FirstName.Should().Be("Test");
+    }
+
+    public void Dispose()
+    {
+        TestDbContextFactory.Destroy(_context);
     }
 }

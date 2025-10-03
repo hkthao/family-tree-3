@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
-using backend.Application.Members.Queries;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 

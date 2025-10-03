@@ -45,7 +45,7 @@ public class GetFamiliesQueryHandlerTests : IDisposable
     public async Task Handle_Should_Return_EmptyList_When_NoFamiliesExist()
     {
         // Arrange
-        var emptyContext = TestDbContextFactory.Create();
+        var emptyContext = TestDbContextFactory.Create(false);
         var emptyHandler = new GetFamiliesQueryHandler(emptyContext, _mapper);
 
         // Act

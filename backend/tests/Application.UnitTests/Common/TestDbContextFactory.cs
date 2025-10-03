@@ -5,19 +5,15 @@ namespace backend.Application.UnitTests.Common;
 
 public static class TestDbContextFactory
 {
-    public static ApplicationDbContext Create()
+    public static ApplicationDbContext Create(bool seedData = true)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
-
         var context = new ApplicationDbContext(options);
-
         context.Database.EnsureCreated();
-
-        // Seed data
-        SeedSampleData(context);
-
+        if (seedData)
+            SeedSampleData(context);
         return context;
     }
 
@@ -30,50 +26,54 @@ public static class TestDbContextFactory
     private static void SeedSampleData(ApplicationDbContext context)
     {
         Guid royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb");
+        if (context.Families.Any(f => f.Id == royalFamilyId))
+            return;
 
         context.Families.Add(new backend.Domain.Entities.Family { Id = royalFamilyId, Name = "Royal Family", Created = DateTime.UtcNow });
 
+        var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+        var catherineId = Guid.Parse("b2c3d4e5-f6a1-8901-2345-67890abcdef0");
+        var georgeId = Guid.Parse("c3d4e5f6-a1b2-9012-3456-7890abcdef01");
+        var elizabethIIId = Guid.Parse("d4e5f6a1-b2c3-0123-4567-890abcdef012");
+        var charlotteId = Guid.Parse("e5f6a1b2-c3d4-1234-5678-90abcdef0123");
+        var louisId = Guid.Parse("f6a1b2c3-d4e5-2345-6789-0abcdef01234");
+        var harryId = Guid.Parse("a1b2c3d4-e5f6-3456-7890-1234567890ab");
+        var meghanId = Guid.Parse("b2c3d4e5-f6a1-4567-8901-234567890abc");
+        var archieId = Guid.Parse("c3d4e5f6-a1b2-5678-9012-34567890abcd");
+        var lilibetMountbattenWindsorId = Guid.Parse("d4e5f6a1-b2c3-6789-0123-4567890abcde");
+        var charlesIIIId = Guid.Parse("e5f6a1b2-c3d4-7890-1234-567890abcdef");
+        var queenConsortId = Guid.Parse("f6a1b2c3-d4e5-8901-2345-67890abcdef0");
+        var philipId = Guid.Parse("a1b2c3d4-e5f6-9012-3456-7890abcdef01");
+        var dianaId = Guid.Parse("b2c3d4e5-f6a1-0123-4567-890abcdef012");
+        var andrewId = Guid.Parse("c3d4e5f6-a1b2-1234-5678-90abcdef0123");
+        var sarahId = Guid.Parse("d4e5f6a1-b2c3-2345-6789-0abcdef01234");
+        var eugenieId = Guid.Parse("e5f6a1b2-c3d4-3456-7890-1234567890ab");
+        var beatriceId = Guid.Parse("f6a1b2c3-d4e5-4567-8901-234567890abc");
+        var lilibetSussexId = Guid.Parse("a1b2c3d4-e5f6-5678-9012-34567890abcd");
+
         var members = new List<backend.Domain.Entities.Member>
         {
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Prince", LastName = "William, Prince of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Catherine,", LastName = "Princess of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Prince", LastName = "George of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Princess", LastName = "Charlotte of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Prince", LastName = "Louis of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Prince", LastName = "Harry, Duke of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Meghan,", LastName = "Duchess of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Prince", LastName = "Philip, Duke of Edinburgh", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Princess", LastName = "of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow }, // Diana
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Prince", LastName = "Andrew, Duke of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Princess", LastName = "Eugenie of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = Guid.NewGuid(), FirstName = "Princess", LastName = "Beatrice of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow }
+            new backend.Domain.Entities.Member { Id = williamId, FirstName = "Prince", LastName = "William, Prince of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = catherineId, FirstName = "Catherine,", LastName = "Princess of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = georgeId, FirstName = "Prince", LastName = "George of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = elizabethIIId, FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = louisId, FirstName = "Prince", LastName = "Louis of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = harryId, FirstName = "Prince", LastName = "Harry, Duke of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = meghanId, FirstName = "Meghan,", LastName = "Duchess of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = lilibetMountbattenWindsorId, FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = charlesIIIId, FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = queenConsortId, FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = philipId, FirstName = "Prince", LastName = "Philip, Duke of Edinburgh", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = dianaId, FirstName = "Princess", LastName = "of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow }, // Diana
+            new backend.Domain.Entities.Member { Id = andrewId, FirstName = "Prince", LastName = "Andrew, Duke of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = sarahId, FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = eugenieId, FirstName = "Princess", LastName = "Eugenie of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = beatriceId, FirstName = "Princess", LastName = "Beatrice of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
+            new backend.Domain.Entities.Member { Id = lilibetSussexId, FirstName = "Princess", LastName = "Lilibet of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow }
         };
         context.Members.AddRange(members);
-
-        var williamId = members.First(m => m.LastName == "William, Prince of Wales").Id;
-        var catherineId = members.First(m => m.LastName == "Princess of Wales" && m.FirstName == "Catherine,").Id;
-        var georgeId = members.First(m => m.LastName == "George of Wales").Id;
-        var elizabethIIId = members.First(m => m.LastName == "Elizabeth II").Id;
-        var charlotteId = members.First(m => m.LastName == "Charlotte of Wales").Id;
-        var louisId = members.First(m => m.LastName == "Louis of Wales").Id;
-        var harryId = members.First(m => m.LastName == "Harry, Duke of Sussex").Id;
-        var meghanId = members.First(m => m.LastName == "Duchess of Sussex").Id;
-        var archieId = members.First(m => m.LastName == "Mountbatten-Windsor").Id;
-        var lilibetId = members.First(m => m.LastName == "Lilibet of Sussex").Id;
-        var charlesIIIId = members.First(m => m.LastName == "Charles III").Id;
-        var queenConsortId = members.First(m => m.LastName == "Queen Consort").Id;
-        var philipId = members.First(m => m.LastName == "Philip, Duke of Edinburgh").Id;
-        var dianaId = members.First(m => m.LastName == "Princess of Wales" && m.FirstName == "Princess").Id;
-        var andrewId = members.First(m => m.LastName == "Andrew, Duke of York").Id;
-        var sarahId = members.First(m => m.LastName == "Ferguson").Id;
-        var eugenieId = members.First(m => m.LastName == "Eugenie of York").Id;
-        var beatriceId = members.First(m => m.LastName == "Beatrice of York").Id;
 
         context.Events.AddRange(new List<backend.Domain.Entities.Event>
         {
@@ -163,7 +163,7 @@ public static class TestDbContextFactory
                 Location = "Santa Barbara Cottage Hospital, California",
                 FamilyId = royalFamilyId,
                 Type = backend.Domain.Enums.EventType.Birth,
-                RelatedMembers = new List<backend.Domain.Entities.Member> { members.First(m => m.Id == lilibetId) }
+                RelatedMembers = new List<backend.Domain.Entities.Member> { members.First(m => m.Id == lilibetMountbattenWindsorId) }
             },
             new backend.Domain.Entities.Event
             {

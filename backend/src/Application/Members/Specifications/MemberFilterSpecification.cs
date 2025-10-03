@@ -5,16 +5,16 @@ namespace backend.Application.Members.Specifications;
 
 public class MemberFilterSpecification : BaseSpecification<Member>
 {
-    public MemberFilterSpecification(string? searchTerm, DateTime? createdAfter, int skip, int take)
+    public MemberFilterSpecification(string? searchTerm, Guid? familyId, int skip, int take)
     {
         if (!string.IsNullOrEmpty(searchTerm))
         {
             AddCriteria(m => m.FirstName.Contains(searchTerm) || m.LastName.Contains(searchTerm));
         }
 
-        if (createdAfter.HasValue)
+        if (familyId.HasValue)
         {
-            AddCriteria(m => m.Created > createdAfter.Value);
+            AddCriteria(m => m.FamilyId > familyId.Value);
         }
 
         ApplyPaging(skip, take);
