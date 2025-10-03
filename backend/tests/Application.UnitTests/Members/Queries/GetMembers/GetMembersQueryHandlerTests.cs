@@ -3,29 +3,22 @@ using backend.Application.Common.Mappings;
 using backend.Application.Members;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMembers;
 
 public class GetMembersQueryHandlerTests
 {
     private readonly GetMembersQueryHandler _handler;
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IMemberRepository> _mockMemberRepository;
     private readonly IMapper _mapper;
 
     public GetMembersQueryHandlerTests()
     {
-        // Setup in-memory database
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
-
-        _context = new ApplicationDbContext(options);
+        _mockMemberRepository = new Mock<IMemberRepository>();
 
         // Setup AutoMapper
         var configurationProvider = new MapperConfiguration(cfg =>
@@ -34,7 +27,7 @@ public class GetMembersQueryHandlerTests
         });
         _mapper = configurationProvider.CreateMapper();
 
-        _handler = new GetMembersQueryHandler(_context, _mapper);
+        _handler = new GetMembersQueryHandler(_mockMemberRepository.Object, _mapper);
     }
 
     [Fact]
@@ -46,8 +39,7 @@ public class GetMembersQueryHandlerTests
             new Member { Id = Guid.NewGuid(), FirstName = "Member", LastName = "1", FamilyId = Guid.NewGuid() },
             new Member { Id = Guid.NewGuid(), FirstName = "Member", LastName = "2", FamilyId = Guid.NewGuid() }
         };
-        _context.Members.AddRange(members);
-        await _context.SaveChangesAsync();
+        _mockMemberRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(members);
 
         // Act
         var result = await _handler.Handle(new GetMembersQuery(), CancellationToken.None);
@@ -62,6 +54,7 @@ public class GetMembersQueryHandlerTests
     public async Task Handle_Should_Return_EmptyList_When_NoMembersExist()
     {
         // Arrange - no members added to context
+        _mockMemberRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(new List<Member>());
 
         // Act
         var result = await _handler.Handle(new GetMembersQuery(), CancellationToken.None);

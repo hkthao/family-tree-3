@@ -1,23 +1,20 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using backend.Application.Common.Interfaces;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 
 public class DeleteFamilyCommandTests
 {
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
 
     public DeleteFamilyCommandTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _context = new ApplicationDbContext(options);
+        _mockFamilyRepository = new Mock<IFamilyRepository>();
     }
 
     [Fact]
@@ -26,18 +23,17 @@ public class DeleteFamilyCommandTests
         // Arrange
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family" };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(familyId)).ReturnsAsync(family);
+        _mockFamilyRepository.Setup(repo => repo.DeleteAsync(familyId)).Returns(Task.CompletedTask);
 
         var command = new DeleteFamilyCommand(familyId);
-        var handler = new DeleteFamilyCommandHandler(_context);
+        var handler = new DeleteFamilyCommandHandler(_mockFamilyRepository.Object);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var deletedFamily = await _context.Families.FindAsync(familyId);
-        deletedFamily.Should().BeNull();
+        _mockFamilyRepository.Verify(repo => repo.DeleteAsync(familyId), Times.Once);
     }
 
     [Fact]
@@ -46,7 +42,8 @@ public class DeleteFamilyCommandTests
         // Arrange
         var invalidId = Guid.NewGuid();
         var command = new DeleteFamilyCommand(invalidId);
-        var handler = new DeleteFamilyCommandHandler(_context);
+        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(invalidId)).ReturnsAsync((Family)null!);
+        var handler = new DeleteFamilyCommandHandler(_mockFamilyRepository.Object);
 
         // Act
         Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

@@ -2,23 +2,20 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandlerTests
 {
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IMemberRepository> _mockMemberRepository;
 
     public UpdateMemberCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _context = new ApplicationDbContext(options);
+        _mockMemberRepository = new Mock<IMemberRepository>();
     }
 
     [Fact]
@@ -27,8 +24,8 @@ public class UpdateMemberCommandHandlerTests
         // Arrange
         var memberId = Guid.NewGuid();
         var member = new Member { Id = memberId, FirstName = "Test", LastName = "Member", FamilyId = Guid.NewGuid() };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _mockMemberRepository.Setup(repo => repo.GetByIdAsync(memberId)).ReturnsAsync(member);
+        _mockMemberRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Member>())).Returns(Task.CompletedTask);
 
         var command = new UpdateMemberCommand
         {
@@ -37,17 +34,13 @@ public class UpdateMemberCommandHandlerTests
             LastName = "Name",
             Gender = "Female"
         };
-        var handler = new UpdateMemberCommandHandler(_context);
+        var handler = new UpdateMemberCommandHandler(_mockMemberRepository.Object);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var updatedMember = await _context.Members.FindAsync(memberId);
-        updatedMember.Should().NotBeNull();
-        updatedMember?.FirstName.Should().Be("Updated");
-        updatedMember?.LastName.Should().Be("Name");
-        updatedMember?.Gender.Should().Be("Female");
+        _mockMemberRepository.Verify(repo => repo.UpdateAsync(It.Is<Member>(m => m.Id == memberId && m.FirstName == command.FirstName && m.LastName == command.LastName)), Times.Once);
     }
 
     [Fact]
@@ -55,8 +48,10 @@ public class UpdateMemberCommandHandlerTests
     {
         // Arrange
         var invalidId = Guid.NewGuid();
+        _mockMemberRepository.Setup(repo => repo.GetByIdAsync(invalidId)).ReturnsAsync((Member?)null);
+
         var command = new UpdateMemberCommand { Id = invalidId };
-        var handler = new UpdateMemberCommandHandler(_context);
+        var handler = new UpdateMemberCommandHandler(_mockMemberRepository.Object);
 
         // Act
         Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

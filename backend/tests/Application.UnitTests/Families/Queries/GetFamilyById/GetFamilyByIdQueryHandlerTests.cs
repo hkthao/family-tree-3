@@ -3,29 +3,22 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
 public class GetFamilyByIdQueryHandlerTests
 {
     private readonly GetFamilyByIdQueryHandler _handler;
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
     private readonly IMapper _mapper;
 
     public GetFamilyByIdQueryHandlerTests()
     {
-        // Setup in-memory database
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
-
-        _context = new ApplicationDbContext(options);
+        _mockFamilyRepository = new Mock<IFamilyRepository>();
 
         // Setup AutoMapper
         var configurationProvider = new MapperConfiguration(cfg =>
@@ -34,7 +27,7 @@ public class GetFamilyByIdQueryHandlerTests
         });
         _mapper = configurationProvider.CreateMapper();
 
-        _handler = new GetFamilyByIdQueryHandler(_context, _mapper);
+        _handler = new GetFamilyByIdQueryHandler(_mockFamilyRepository.Object, _mapper);
     }
 
     [Fact]
@@ -43,8 +36,7 @@ public class GetFamilyByIdQueryHandlerTests
         // Arrange
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Family 1" };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync();
+        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(familyId)).ReturnsAsync(family);
 
         // Act
         var result = await _handler.Handle(new GetFamilyByIdQuery(familyId), CancellationToken.None);
@@ -60,6 +52,7 @@ public class GetFamilyByIdQueryHandlerTests
     {
         // Arrange
         var command = new GetFamilyByIdQuery(Guid.NewGuid());
+        _mockFamilyRepository.Setup(repo => repo.GetByIdAsync(command.Id)).ReturnsAsync((Family?)null);
 
         // Act
         var act = () => _handler.Handle(command, CancellationToken.None);

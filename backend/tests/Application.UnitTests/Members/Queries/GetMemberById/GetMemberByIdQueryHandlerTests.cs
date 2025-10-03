@@ -3,10 +3,9 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Mappings;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using backend.Application.Common.Interfaces;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
@@ -14,18 +13,12 @@ namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 public class GetMemberByIdQueryHandlerTests
 {
     private readonly GetMemberByIdQueryHandler _handler;
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IMemberRepository> _mockMemberRepository;
     private readonly IMapper _mapper;
 
     public GetMemberByIdQueryHandlerTests()
     {
-        // Setup in-memory database
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
-
-        _context = new ApplicationDbContext(options);
+        _mockMemberRepository = new Mock<IMemberRepository>();
 
         // Setup AutoMapper
         var configurationProvider = new MapperConfiguration(cfg =>
@@ -34,7 +27,7 @@ public class GetMemberByIdQueryHandlerTests
         });
         _mapper = configurationProvider.CreateMapper();
 
-        _handler = new GetMemberByIdQueryHandler(_context, _mapper);
+        _handler = new GetMemberByIdQueryHandler(_mockMemberRepository.Object, _mapper);
     }
 
     [Fact]
@@ -43,8 +36,7 @@ public class GetMemberByIdQueryHandlerTests
         // Arrange
         var memberId = Guid.NewGuid();
         var member = new Member { Id = memberId, FirstName = "Test", LastName = "Member" };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync();
+        _mockMemberRepository.Setup(repo => repo.GetByIdAsync(memberId)).ReturnsAsync(member);
 
         // Act
         var result = await _handler.Handle(new GetMemberByIdQuery(memberId), CancellationToken.None);
@@ -56,16 +48,17 @@ public class GetMemberByIdQueryHandlerTests
         result.LastName.Should().Be(member.LastName);
     }
 
-    [Fact]
-    public async Task Handle_Should_Throw_NotFoundException_When_Not_Found()
-    {
-        // Arrange
-        var command = new GetMemberByIdQuery(Guid.Empty); // Valid format, but non-existent
-
-        // Act
-        var act = () => _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        await act.Should().ThrowAsync<NotFoundException>();
-    }
-}
+        [Fact]
+        public async Task Handle_Should_Throw_NotFoundException_When_Not_Found()
+        {
+            // Arrange
+            var nonExistentMemberId = Guid.NewGuid();
+            var command = new GetMemberByIdQuery(nonExistentMemberId);
+            _mockMemberRepository.Setup(repo => repo.GetByIdAsync(nonExistentMemberId)).ReturnsAsync((Member)null!);
+    
+            // Act
+            var act = () => _handler.Handle(command, CancellationToken.None);
+    
+            // Assert
+            await act.Should().ThrowAsync<NotFoundException>();
+        }}

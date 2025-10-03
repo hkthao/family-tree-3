@@ -1,23 +1,20 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;
 
 public class DeleteEventCommandHandlerTests
 {
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IEventRepository> _mockEventRepository;
 
     public DeleteEventCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _context = new ApplicationDbContext(options);
+        _mockEventRepository = new Mock<IEventRepository>();
     }
 
     [Fact]
@@ -26,18 +23,17 @@ public class DeleteEventCommandHandlerTests
         // Arrange
         var eventId = Guid.NewGuid();
         var ev = new Event { Id = eventId, Name = "Test Event", FamilyId = Guid.NewGuid() };
-        _context.Events.Add(ev);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _mockEventRepository.Setup(repo => repo.GetByIdAsync(eventId)).ReturnsAsync(ev);
+        _mockEventRepository.Setup(repo => repo.DeleteAsync(eventId)).Returns(Task.CompletedTask);
 
         var command = new DeleteEventCommand(eventId);
-        var handler = new DeleteEventCommandHandler(_context);
+        var handler = new DeleteEventCommandHandler(_mockEventRepository.Object);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var deletedEvent = await _context.Events.FindAsync(eventId);
-        deletedEvent.Should().BeNull();
+        _mockEventRepository.Verify(repo => repo.DeleteAsync(eventId), Times.Once);
     }
 
     [Fact]
@@ -45,8 +41,10 @@ public class DeleteEventCommandHandlerTests
     {
         // Arrange
         var invalidId = Guid.NewGuid();
+        _mockEventRepository.Setup(repo => repo.GetByIdAsync(invalidId)).ReturnsAsync((Event?)null);
+
         var command = new DeleteEventCommand(invalidId);
-        var handler = new DeleteEventCommandHandler(_context);
+        var handler = new DeleteEventCommandHandler(_mockEventRepository.Object);
 
         // Act
         Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

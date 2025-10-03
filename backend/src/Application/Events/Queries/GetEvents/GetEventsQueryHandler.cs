@@ -5,13 +5,11 @@ namespace backend.Application.Events.Queries.GetEvents;
 public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyList<EventDto>>
 {
     private readonly IEventRepository _eventRepository;
-    private readonly IMemberRepository _memberRepository;
     private readonly IMapper _mapper;
 
-    public GetEventsQueryHandler(IEventRepository eventRepository, IMemberRepository memberRepository, IMapper mapper)
+    public GetEventsQueryHandler(IEventRepository eventRepository, IMapper mapper)
     {
         _eventRepository = eventRepository;
-        _memberRepository = memberRepository;
         _mapper = mapper;
     }
 
@@ -51,7 +49,6 @@ public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyLi
 
         if (request.RelatedMemberId.HasValue)
         {
-            var members = await _memberRepository.GetAllAsync();
             query = query.Where(e => e.RelatedMembers.Any(m => m.Id == request.RelatedMemberId.Value));
         }
 

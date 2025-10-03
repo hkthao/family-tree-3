@@ -1,21 +1,19 @@
 using backend.Application.Members.Commands.CreateMember;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
+using backend.Domain.Entities;
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMember;
 
 public class CreateMemberCommandHandlerTests
 {
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IMemberRepository> _mockMemberRepository;
 
     public CreateMemberCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _context = new ApplicationDbContext(options);
+        _mockMemberRepository = new Mock<IMemberRepository>();
     }
 
     [Fact]
@@ -31,15 +29,20 @@ public class CreateMemberCommandHandlerTests
             FamilyId = Guid.NewGuid()
         };
 
-        var handler = new CreateMemberCommandHandler(_context);
+        _mockMemberRepository.Setup(repo => repo.AddAsync(It.IsAny<Member>()))
+            .ReturnsAsync((Member member) =>
+            {
+                member.Id = Guid.NewGuid(); // Simulate ID generation
+                return member;
+            });
+
+        var handler = new CreateMemberCommandHandler(_mockMemberRepository.Object);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var createdMember = await _context.Members.FindAsync(result);
-        createdMember.Should().NotBeNull();
-        createdMember!.FirstName.Should().Be("Test");
-        createdMember!.LastName.Should().Be("Member");
+        result.Should().NotBeEmpty();
+        _mockMemberRepository.Verify(repo => repo.AddAsync(It.Is<Member>(m => m.FirstName == command.FirstName && m.LastName == command.LastName)), Times.Once);
     }
 }

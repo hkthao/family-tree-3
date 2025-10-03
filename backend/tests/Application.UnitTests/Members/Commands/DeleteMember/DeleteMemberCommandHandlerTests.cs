@@ -2,23 +2,20 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 
 public class DeleteMemberCommandHandlerTests
 {
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IMemberRepository> _mockMemberRepository;
 
     public DeleteMemberCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _context = new ApplicationDbContext(options);
+        _mockMemberRepository = new Mock<IMemberRepository>();
     }
 
     [Fact]
@@ -27,18 +24,17 @@ public class DeleteMemberCommandHandlerTests
         // Arrange
         var memberId = Guid.NewGuid();
         var member = new Member { Id = memberId, FirstName = "Test", LastName = "Member", FamilyId = Guid.NewGuid() };
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _mockMemberRepository.Setup(repo => repo.GetByIdAsync(memberId)).ReturnsAsync(member);
+        _mockMemberRepository.Setup(repo => repo.DeleteAsync(memberId)).Returns(Task.CompletedTask);
 
         var command = new DeleteMemberCommand(memberId);
-        var handler = new DeleteMemberCommandHandler(_context);
+        var handler = new DeleteMemberCommandHandler(_mockMemberRepository.Object);
 
         // Act
         await handler.Handle(command, CancellationToken.None);
 
         // Assert
-        var deletedMember = await _context.Members.FindAsync(memberId);
-        deletedMember.Should().BeNull();
+        _mockMemberRepository.Verify(repo => repo.DeleteAsync(memberId), Times.Once);
     }
 
     [Fact]
@@ -46,8 +42,10 @@ public class DeleteMemberCommandHandlerTests
     {
         // Arrange
         var invalidId = Guid.NewGuid();
+        _mockMemberRepository.Setup(repo => repo.GetByIdAsync(invalidId)).ReturnsAsync((Member?)null);
+
         var command = new DeleteMemberCommand(invalidId);
-        var handler = new DeleteMemberCommandHandler(_context);
+        var handler = new DeleteMemberCommandHandler(_mockMemberRepository.Object);
 
         // Act
         Func<Task> act = async () => await handler.Handle(command, CancellationToken.None);

@@ -2,24 +2,21 @@ using AutoMapper;
 using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;
-using backend.Infrastructure.Data;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Application.UnitTests.Families.Queries;
 
 public class GetFamiliesQueryHandlerTests
 {
-    private readonly ApplicationDbContext _context;
+    private readonly Mock<IFamilyRepository> _mockFamilyRepository;
     private readonly IMapper _mapper;
 
     public GetFamiliesQueryHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-        _context = new ApplicationDbContext(options);
+        _mockFamilyRepository = new Mock<IFamilyRepository>();
 
         var configurationProvider = new MapperConfiguration(cfg =>
         {
@@ -37,10 +34,9 @@ public class GetFamiliesQueryHandlerTests
             new Family { Id = Guid.NewGuid(), Name = "Family 1" },
             new Family { Id = Guid.NewGuid(), Name = "Family 2" }
         };
-        _context.Families.AddRange(families);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _mockFamilyRepository.Setup(repo => repo.GetAllAsync()).ReturnsAsync(families);
 
-        var handler = new GetFamiliesQueryHandler(_context, _mapper);
+        var handler = new GetFamiliesQueryHandler(_mockFamilyRepository.Object, _mapper);
 
         // Act
         var result = await handler.Handle(new GetFamiliesQuery(), CancellationToken.None);

@@ -19,12 +19,15 @@ public class CreateFamilyCommandTests
             AvatarUrl = "http://test.com/avatar.jpg"
         };
 
-        var mockContext = new Mock<IApplicationDbContext>();
-        mockContext.Setup(c => c.Families.Add(It.IsAny<Family>()));
-        mockContext.Setup(c => c.SaveChangesAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(1);
+        var mockFamilyRepository = new Mock<IFamilyRepository>();
+        mockFamilyRepository.Setup(repo => repo.AddAsync(It.IsAny<Family>()))
+            .ReturnsAsync((Family family) =>
+            {
+                family.Id = Guid.NewGuid();
+                return family;
+            });
 
-        var handler = new CreateFamilyCommandHandler(mockContext.Object);
+        var handler = new CreateFamilyCommandHandler(mockFamilyRepository.Object);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

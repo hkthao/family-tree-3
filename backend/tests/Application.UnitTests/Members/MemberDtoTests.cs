@@ -16,7 +16,7 @@ public class MemberDtoTests : IDisposable
     {
         _configuration = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<MappingProfile>();
+            cfg.AddMaps(typeof(MappingProfile).Assembly);
         });
 
         _mapper = _configuration.CreateMapper();
