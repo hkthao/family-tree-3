@@ -1,3 +1,4 @@
+using backend.Application.Common.Models;
 using backend.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System;
 
-namespace backend.Infrastructure.IntegrationTests;
+namespace backend.Infrastructure.IntegrationTests.Authentication;
 
 public class IdentityServiceTests
 {
@@ -101,7 +102,7 @@ public class IdentityServiceTests
 
         // Assert
         result.UserId.Should().Be(capturedUser!.Id);
-        result.Result.Succeeded.Should().Be(true);
+        result.Result.IsSuccess.Should().BeTrue();
     }
 
     [Fact]
@@ -117,8 +118,8 @@ public class IdentityServiceTests
         var result = await _identityService.CreateUserAsync(userName, password);
 
         // Assert
-        result.Result.Succeeded.Should().BeFalse();
-        result.Result.Errors.Should().NotBeEmpty();
+        result.Result.IsSuccess.Should().BeFalse();
+        result.Result.Error.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -184,7 +185,7 @@ public class IdentityServiceTests
         var result = await _identityService.DeleteUserAsync(userId);
 
         // Assert
-        result.Succeeded.Should().Be(false);
+        result.IsSuccess.Should().BeFalse();
     }
 
     [Fact]
@@ -198,7 +199,7 @@ public class IdentityServiceTests
         var result = await _identityService.DeleteUserAsync(userId);
 
         // Assert
-        result.Succeeded.Should().Be(true); // Returns true if user doesn't exist, as the goal (deletion) is achieved.
+        result.IsSuccess.Should().BeTrue(); // Returns true if user doesn't exist, as the goal (deletion) is achieved.
     }
 
     [Fact]
