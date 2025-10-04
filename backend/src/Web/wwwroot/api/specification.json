@@ -1236,6 +1236,23 @@
               "fullName": {
                 "type": "string"
               },
+              "avatarUrl": {
+                "type": "string",
+                "nullable": true
+              },
+              "familyId": {
+                "type": "string",
+                "format": "guid"
+              },
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "gender": {
+                "type": "string",
+                "nullable": true
+              },
               "relationships": {
                 "type": "array",
                 "items": {

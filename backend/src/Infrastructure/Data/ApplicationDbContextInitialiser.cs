@@ -82,7 +82,7 @@ public class ApplicationDbContextInitialiser
                 Id = royalFamilyId,
                 Name = "Royal Family",
                 Description = "The British Royal Family, a prominent family with a rich history.",
-                AvatarUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Royal_Arms_of_the_United_Kingdom_%281837%E2%80%931952%29.svg/1200px-Royal_Arms_of_the_United_Kingdom_%281837%E2%80%931952%29.svg.png",
+                AvatarUrl = "https://i.pravatar.cc/150?img=3",
                 Address = "Buckingham Palace, London, UK",
                 Visibility = backend.Domain.Enums.FamilyVisibility.Public.ToString(),
                 TotalMembers = 19, // Based on the members added below
@@ -97,7 +97,7 @@ public class ApplicationDbContextInitialiser
                     Id = Guid.NewGuid(),
                     Name = $"Family {i}",
                     Description = $"Description for Family {i}",
-                    AvatarUrl = $"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4" + i.ToString(),
+                    AvatarUrl = $"https://i.pravatar.cc/150?img=3",
                     Address = "Address" + i.ToString(),
                     Visibility = backend.Domain.Enums.FamilyVisibility.Public.ToString(),
                     TotalMembers = 0,
@@ -127,25 +127,25 @@ public class ApplicationDbContextInitialiser
 
             var members = new List<backend.Domain.Entities.Member>
             {
-                new backend.Domain.Entities.Member { Id = williamId, FirstName = "Prince", LastName = "William, Prince of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = catherineId, FirstName = "Catherine,", LastName = "Princess of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = georgeId, FirstName = "Prince", LastName = "George of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = elizabethIIId, FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = louisId, FirstName = "Prince", LastName = "Louis of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = harryId, FirstName = "Prince", LastName = "Harry, Duke of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = meghanId, FirstName = "Meghan,", LastName = "Duchess of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = lilibetMountbattenWindsorId, FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = charlesIIIId, FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = queenConsortId, FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = philipId, FirstName = "Prince", LastName = "Philip, Duke of Edinburgh", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = dianaId, FirstName = "Princess", LastName = "of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow }, // Diana
-                new backend.Domain.Entities.Member { Id = andrewId, FirstName = "Prince", LastName = "Andrew, Duke of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = sarahId, FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = eugenieId, FirstName = "Princess", LastName = "Eugenie of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = beatriceId, FirstName = "Princess", LastName = "Beatrice of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-                new backend.Domain.Entities.Member { Id = lilibetSussexId, FirstName = "Princess", LastName = "Lilibet of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow }
+                new backend.Domain.Entities.Member { Id = williamId, FirstName = "Prince", LastName = "William", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1982, 6, 21), PlaceOfBirth = "London", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = catherineId, FirstName = "Catherine", LastName = "Middleton", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1982, 1, 9), PlaceOfBirth = "Reading", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = georgeId, FirstName = "Prince", LastName = "George", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2013, 7, 22), PlaceOfBirth = "London" },
+                new backend.Domain.Entities.Member { Id = elizabethIIId, FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1926, 4, 21), DateOfDeath = new DateTime(2022, 9, 8), PlaceOfBirth = "London", PlaceOfDeath = "Balmoral", Occupation = "Monarch" },
+                new backend.Domain.Entities.Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2015, 5, 2), PlaceOfBirth = "London" },
+                new backend.Domain.Entities.Member { Id = louisId, FirstName = "Prince", LastName = "Louis", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2018, 4, 23), PlaceOfBirth = "London" },
+                new backend.Domain.Entities.Member { Id = harryId, FirstName = "Prince", LastName = "Harry", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1984, 9, 15), PlaceOfBirth = "London", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = meghanId, FirstName = "Meghan", LastName = "Markle", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1981, 8, 4), PlaceOfBirth = "Los Angeles", Occupation = "Actress" },
+                new backend.Domain.Entities.Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2019, 5, 6), PlaceOfBirth = "London" },
+                new backend.Domain.Entities.Member { Id = lilibetMountbattenWindsorId, FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" },
+                new backend.Domain.Entities.Member { Id = charlesIIIId, FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1948, 11, 14), PlaceOfBirth = "London", Occupation = "Monarch" },
+                new backend.Domain.Entities.Member { Id = queenConsortId, FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1947, 7, 17), PlaceOfBirth = "London", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = philipId, FirstName = "Prince", LastName = "Philip", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1921, 6, 10), DateOfDeath = new DateTime(2021, 4, 9), PlaceOfBirth = "Corfu", PlaceOfDeath = "Windsor", Occupation = "Royal Consort" },
+                new backend.Domain.Entities.Member { Id = dianaId, FirstName = "Princess", LastName = "Diana", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1961, 7, 1), DateOfDeath = new DateTime(1997, 8, 31), PlaceOfBirth = "Sandringham", PlaceOfDeath = "Paris", Occupation = "Princess" },
+                new backend.Domain.Entities.Member { Id = andrewId, FirstName = "Prince", LastName = "Andrew", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1960, 2, 19), PlaceOfBirth = "London", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = sarahId, FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1959, 10, 15), PlaceOfBirth = "London", Occupation = "Author" },
+                new backend.Domain.Entities.Member { Id = eugenieId, FirstName = "Princess", LastName = "Eugenie", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1990, 3, 23), PlaceOfBirth = "London", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = beatriceId, FirstName = "Princess", LastName = "Beatrice", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1988, 8, 8), PlaceOfBirth = "London", Occupation = "Royal" },
+                new backend.Domain.Entities.Member { Id = lilibetSussexId, FirstName = "Princess", LastName = "Lilibet", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = backend.Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" }
             };
             _context.Members.AddRange(members);
 
