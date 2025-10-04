@@ -1,27 +1,45 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
+using backend.Application.Common.Models; // Added for Result
+using Microsoft.EntityFrameworkCore; // Added for DbUpdateException
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand>
+public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, Result>
 {
-    private readonly IMemberRepository _memberRepository;
+    private readonly IApplicationDbContext _context;
 
-    public DeleteMemberCommandHandler(IMemberRepository memberRepository)
+    public DeleteMemberCommandHandler(IApplicationDbContext context)
     {
-        _memberRepository = memberRepository;
+        _context = context;
     }
 
-    public async Task Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _memberRepository.GetByIdAsync(request.Id);
-
-        if (entity == null)
+        try
         {
-            throw new NotFoundException(nameof(Member), request.Id);
-        }
+            var entity = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
 
-        await _memberRepository.DeleteAsync(request.Id);
+            if (entity == null)
+            {
+                return Result.Failure($"Member with ID {request.Id} not found.", "NotFound");
+            }
+
+            _context.Members.Remove(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
+        }
+        catch (DbUpdateException ex)
+        {
+            // Log the exception details here if a logger is available
+            return Result.Failure($"Database error occurred while deleting member: {ex.Message}", "Database");
+        }
+        catch (Exception ex)
+        {
+            // Log the exception details here if a logger is available
+            return Result.Failure($"An unexpected error occurred while deleting member: {ex.Message}", "Exception");
+        }
     }
 }

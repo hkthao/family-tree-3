@@ -34,12 +34,12 @@ public class Auth0Provider : IAuthProvider
             {
                 return Task.FromResult(Result<AuthResult>.Success(new AuthResult { UserId = user.UserId, Email = user.Email, Username = user.Username, AccessToken = "new_access_token", Roles = user.Roles, Succeeded = true }));
             }
-            return Task.FromResult(Result<AuthResult>.Failure("Invalid credentials", source: source));
+            return Task.FromResult(Result<AuthResult>.Failure("Invalid credentials", errorSource: source));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for email {Email}", source, email);
-            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, source: source));
+            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, errorSource: source));
         }
     }
 
@@ -50,7 +50,7 @@ public class Auth0Provider : IAuthProvider
         {
             if (_users.Any(u => u.Email == email))
             {
-                return Task.FromResult(Result<AuthResult>.Failure("Email already registered", source: source));
+                return Task.FromResult(Result<AuthResult>.Failure("Email already registered", errorSource: source));
             }
 
             var newUser = new AuthResult
@@ -68,7 +68,7 @@ public class Auth0Provider : IAuthProvider
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for email {Email}", source, email);
-            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, source: source));
+            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, errorSource: source));
         }
     }
 
@@ -82,12 +82,12 @@ public class Auth0Provider : IAuthProvider
             {
                 return Task.FromResult(Result<AuthResult>.Success(new AuthResult { UserId = user.UserId, Email = user.Email, Username = user.Username, AccessToken = "current_access_token", Roles = user.Roles, Succeeded = true }));
             }
-            return Task.FromResult(Result<AuthResult>.Failure("User not found", source: source));
+            return Task.FromResult(Result<AuthResult>.Failure("User not found", errorSource: source));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source} for user ID {UserId}", source, userId);
-            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, source: source));
+            return Task.FromResult(Result<AuthResult>.Failure(ex.Message, errorSource: source));
         }
     }
 
@@ -102,7 +102,7 @@ public class Auth0Provider : IAuthProvider
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in {Source}", source);
-            return Task.FromResult(Result<string>.Failure(ex.Message, source: source));
+            return Task.FromResult(Result<string>.Failure(ex.Message, errorSource: source));
         }
     }
 }
