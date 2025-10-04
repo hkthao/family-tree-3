@@ -34,7 +34,6 @@ const { items } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
 
 const currentFilters = ref<FamilyFilter>({});
-const currentPage = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const deleteConfirmDialog = ref(false);
@@ -42,7 +41,7 @@ const familyToDelete = ref<Family | undefined>(undefined);
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
   currentFilters.value = filters;
-  currentPage.value = 1; // Reset to first page on filter change
+  familyStore.filter = currentFilters.value;
   familyStore._loadItems()
 };
 

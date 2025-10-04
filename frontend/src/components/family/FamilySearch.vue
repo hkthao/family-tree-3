@@ -62,7 +62,7 @@ const visibilityItems = computed(() => [
 
 const applyFilters = () => {
   emit('update:filters', {
-    fullName: searchQuery.value,
+    searchQuery: searchQuery.value,
     visibility: filtervisibility.value === 'All' ? undefined : filtervisibility.value,
   } as FamilyFilter);
 };
