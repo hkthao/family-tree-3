@@ -19,9 +19,9 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Pagin
     {
         var query = _context.Events.AsQueryable();
 
-        if (!string.IsNullOrEmpty(request.Keyword))
+        if (!string.IsNullOrEmpty(request.SearchQuery))
         {
-            query = query.Where(f => f.Name.Contains(request.Keyword) || (f.Description != null && f.Description.Contains(request.Keyword)));
+            query = query.Where(e => e.Name.Contains(request.SearchQuery) || (e.Description != null && e.Description.Contains(request.SearchQuery)));
         }
 
         return await query

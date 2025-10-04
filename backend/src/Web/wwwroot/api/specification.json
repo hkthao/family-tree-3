@@ -529,41 +529,22 @@
             "x-position": 1
           },
           {
-            "name": "FamilyId",
+            "name": "PageNumber",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "guid",
-              "nullable": true
+              "type": "integer",
+              "format": "int32"
             },
             "x-position": 2
           },
           {
-            "name": "Visibility",
+            "name": "PageSize",
             "in": "query",
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "integer",
+              "format": "int32"
             },
             "x-position": 3
-          },
-          {
-            "name": "Page",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 4
-          },
-          {
-            "name": "ItemsPerPage",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 5
           },
           {
             "name": "SortBy",
@@ -572,7 +553,7 @@
               "type": "string",
               "nullable": true
             },
-            "x-position": 6
+            "x-position": 4
           },
           {
             "name": "SortOrder",
@@ -581,7 +562,7 @@
               "type": "string",
               "nullable": true
             },
-            "x-position": 7
+            "x-position": 5
           }
         ],
         "responses": {
@@ -648,55 +629,40 @@
             "x-position": 1
           },
           {
-            "name": "Gender",
+            "name": "PageNumber",
             "in": "query",
             "schema": {
-              "type": "string",
-              "nullable": true
+              "type": "integer",
+              "format": "int32"
             },
             "x-position": 2
           },
           {
-            "name": "FamilyId",
+            "name": "PageSize",
             "in": "query",
             "schema": {
-              "type": "string",
-              "format": "guid",
-              "nullable": true
+              "type": "integer",
+              "format": "int32"
             },
             "x-position": 3
           },
           {
-            "name": "Ids",
+            "name": "SortBy",
             "in": "query",
-            "style": "form",
-            "explode": true,
             "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "guid"
-              }
+              "type": "string",
+              "nullable": true
             },
             "x-position": 4
           },
           {
-            "name": "Page",
+            "name": "SortOrder",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "nullable": true
             },
             "x-position": 5
-          },
-          {
-            "name": "ItemsPerPage",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "x-position": 6
           }
         ],
         "responses": {

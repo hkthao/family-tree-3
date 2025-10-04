@@ -1,10 +1,9 @@
 using backend.Application.Common.Models;
+using backend.Application.Members.Queries.GetMembers;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
-public record SearchMembersQuery : IRequest<PaginatedList<MemberDto>>
+public record SearchMembersQuery : PaginatedQuery, IRequest<PaginatedList<MemberListDto>>
 {
-    public string? Keyword { get; init; }
-    public int PageNumber { get; init; } = 1;
-    public int PageSize { get; init; } = 10;
+    public string? SearchQuery { get; init; }
 }

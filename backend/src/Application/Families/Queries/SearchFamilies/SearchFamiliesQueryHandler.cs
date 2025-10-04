@@ -19,9 +19,9 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, P
     {
         var query = _context.Families.AsQueryable();
 
-        if (!string.IsNullOrEmpty(request.Keyword))
+        if (!string.IsNullOrEmpty(request.SearchQuery))
         {
-            query = query.Where(f => f.Name.Contains(request.Keyword) || (f.Description != null && f.Description.Contains(request.Keyword)));
+            query = query.Where(f => f.Name.Contains(request.SearchQuery) || (f.Description != null && f.Description.Contains(request.SearchQuery)));
         }
 
         if (!string.IsNullOrEmpty(request.SortBy))

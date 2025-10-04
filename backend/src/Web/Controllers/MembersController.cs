@@ -6,6 +6,7 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembersByIds;
 using Microsoft.AspNetCore.Mvc;
+using backend.Application.Members.Queries.SearchMembers;
 
 namespace backend.Web.Controllers;
 
@@ -21,9 +22,9 @@ public class MembersController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] MemberFilterModel filter)
+    public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] SearchMembersQuery query)
     {
-        return await _mediator.Send(new GetMembersWithPaginationQuery { SearchTerm = filter.SearchQuery, PageNumber = filter.Page, PageSize = filter.ItemsPerPage });
+        return await _mediator.Send(query);
     }
 
     [HttpGet("{id}")]

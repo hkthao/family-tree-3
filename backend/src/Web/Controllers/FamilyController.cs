@@ -38,9 +38,9 @@ public class FamilyController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] FamilyFilterModel filter)
+    public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] SearchFamiliesQuery query)
     {
-        return await _mediator.Send(new SearchFamiliesQuery { Keyword = filter.SearchQuery, PageNumber = filter.Page, PageSize = filter.ItemsPerPage, SortBy = filter.SortBy, SortOrder = filter.SortOrder });
+        return await _mediator.Send(query);
     }
 
     [HttpPost]

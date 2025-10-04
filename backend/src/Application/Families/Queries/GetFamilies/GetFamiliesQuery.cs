@@ -1,11 +1,8 @@
+using backend.Application.Common.Models;
+
 namespace backend.Application.Families.Queries.GetFamilies;
 
-public class GetFamiliesQuery : IRequest<IReadOnlyList<FamilyListDto>>
+public record class GetFamiliesQuery : PaginatedQuery, IRequest<IReadOnlyList<FamilyListDto>>
 {
     public string? SearchTerm { get; init; }
-    public DateTime? CreatedAfter { get; init; }
-    public int PageNumber { get; init; } = 1;
-    public int PageSize { get; init; } = 10;
-    public string? SortBy { get; init; }
-    public string? SortOrder { get; init; }
 }
