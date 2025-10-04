@@ -170,7 +170,7 @@
             "x-position": 7
           },
           {
-            "name": "PageNumber",
+            "name": "Page",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -179,13 +179,31 @@
             "x-position": 8
           },
           {
-            "name": "PageSize",
+            "name": "ItemsPerPage",
             "in": "query",
             "schema": {
               "type": "integer",
               "format": "int32"
             },
             "x-position": 9
+          },
+          {
+            "name": "SortBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 10
+          },
+          {
+            "name": "SortOrder",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 11
           }
         ],
         "responses": {
@@ -529,7 +547,7 @@
             "x-position": 1
           },
           {
-            "name": "PageNumber",
+            "name": "Page",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -538,7 +556,7 @@
             "x-position": 2
           },
           {
-            "name": "PageSize",
+            "name": "ItemsPerPage",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -629,7 +647,7 @@
             "x-position": 1
           },
           {
-            "name": "PageNumber",
+            "name": "Page",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -638,7 +656,7 @@
             "x-position": 2
           },
           {
-            "name": "PageSize",
+            "name": "ItemsPerPage",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -1103,7 +1121,7 @@
               "$ref": "#/components/schemas/FamilyDto"
             }
           },
-          "pageNumber": {
+          "page": {
             "type": "integer",
             "format": "int32"
           },
@@ -1179,7 +1197,7 @@
               "$ref": "#/components/schemas/MemberListDto"
             }
           },
-          "pageNumber": {
+          "page": {
             "type": "integer",
             "format": "int32"
           },

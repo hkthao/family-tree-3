@@ -26,8 +26,8 @@ public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyLi
             request.EndDate,
             request.Location,
             request.RelatedMemberId,
-            (request.PageNumber - 1) * request.PageSize,
-            request.PageSize);
+            (request.Page - 1) * request.ItemsPerPage,
+            request.ItemsPerPage);
 
         // Comment: Specification pattern is applied here to filter, sort, and page the results at the database level.
         var query = SpecificationEvaluator<Event>.GetQuery(_context.Events.AsQueryable(), spec);

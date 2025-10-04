@@ -26,6 +26,6 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Pagin
 
         return await query
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
     }
 }

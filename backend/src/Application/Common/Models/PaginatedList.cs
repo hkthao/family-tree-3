@@ -3,23 +3,23 @@ namespace backend.Application.Common.Models;
 public class PaginatedList<T>
 {
     public List<T> Items { get; set; } = new List<T>();
-    public int PageNumber { get; set; }
+    public int Page { get; set; }
     public int TotalPages { get; set; }
     public int TotalItems { get; set; }
 
-    public PaginatedList(List<T> items, int count, int pageNumber, int pageSize)
+    public PaginatedList(List<T> items, int count, int page, int itemsPerPage)
     {
-        PageNumber = pageNumber;
-        TotalPages = (int)Math.Ceiling(count / (double)pageSize);
+        Page = page;
+        TotalPages = (int)Math.Ceiling(count / (double)itemsPerPage);
         TotalItems = count;
         Items = items;
     }
 
-    public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int pageNumber, int pageSize)
+    public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int page, int itemsPerPage)
     {
         var count = await source.CountAsync();
-        var items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+        var items = await source.Skip((page - 1) * itemsPerPage).Take(itemsPerPage).ToListAsync();
 
-        return new PaginatedList<T>(items, count, pageNumber, pageSize);
+        return new PaginatedList<T>(items, count, page, itemsPerPage);
     }
 }

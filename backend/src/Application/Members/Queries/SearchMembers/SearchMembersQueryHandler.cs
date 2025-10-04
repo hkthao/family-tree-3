@@ -27,6 +27,6 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Pag
 
         return await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
     }
 }

@@ -20,8 +20,8 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, IReadOn
     {
         var spec = new FamilyFilterSpecification(
             request.SearchTerm,
-            (request.PageNumber - 1) * request.PageSize,
-            request.PageSize,
+            (request.Page - 1) * request.ItemsPerPage,
+            request.ItemsPerPage,
             request.SortBy,
             request.SortOrder);
 

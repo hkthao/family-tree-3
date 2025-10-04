@@ -49,6 +49,6 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, P
 
         return await query
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
     }
 }
