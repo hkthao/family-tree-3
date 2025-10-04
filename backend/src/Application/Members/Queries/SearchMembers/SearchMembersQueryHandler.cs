@@ -1,7 +1,10 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
+
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
@@ -18,44 +21,9 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Pag
 
     public async Task<PaginatedList<MemberListDto>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Members.AsQueryable();
+        var spec = new MemberFilterSpecification(request);
 
-        if (!string.IsNullOrEmpty(request.SearchQuery))
-        {
-            query = query.Where(f => f.FirstName.Contains(request.SearchQuery) || f.LastName.Contains(request.SearchQuery) || (f.Nickname != null && f.Nickname.Contains(request.SearchQuery)));
-        }
-
-        if (!string.IsNullOrEmpty(request.SortBy))
-        {
-            switch (request.SortBy.ToLower())
-            {
-                case "firstname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.FirstName) : query.OrderBy(m => m.FirstName);
-                    break;
-                case "lastname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.LastName) : query.OrderBy(m => m.LastName);
-                    break;
-                case "fullname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.FirstName).ThenByDescending(m => m.LastName) : query.OrderBy(m => m.FirstName).ThenBy(m => m.LastName);
-                    break;
-                case "dateofbirth":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.DateOfBirth) : query.OrderBy(m => m.DateOfBirth);
-                    break;
-                case "gender":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.Gender) : query.OrderBy(m => m.Gender);
-                    break;
-                case "created":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.Created) : query.OrderBy(m => m.Created);
-                    break;
-                default:
-                    query = query.OrderBy(m => m.FirstName).ThenBy(m => m.LastName); // Default sort by full name
-                    break;
-            }
-        }
-        else
-        {
-            query = query.OrderBy(m => m.FirstName).ThenBy(m => m.LastName); // Default sort if no sortBy is provided
-        }
+        var query = _context.Members.AsQueryable().WithSpecification(spec);
 
         return await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)

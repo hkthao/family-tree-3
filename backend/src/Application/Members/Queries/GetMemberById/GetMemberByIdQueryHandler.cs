@@ -1,6 +1,7 @@
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Specifications;
 using backend.Application.Members.Specifications;
 using backend.Domain.Entities;
 
@@ -19,11 +20,11 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Mem
 
     public async Task<MemberDetailDto> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
-        // Comment: Specification pattern is applied here to filter the result by ID at the database level.
         var spec = new MemberByIdSpecification(request.Id);
-        spec.AddInclude(m => m.Relationships);
+        spec.Query.Include(m => m.Relationships);
 
-        var query = SpecificationEvaluator<Member>.GetQuery(_context.Members.AsQueryable(), spec);
+        // Comment: Specification pattern is applied here to filter the result by ID at the database level.
+        var query = _context.Members.AsQueryable().WithSpecification(spec);
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.

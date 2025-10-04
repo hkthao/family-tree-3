@@ -19,8 +19,7 @@
               <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable />
             </v-col>
             <v-col cols="12" md="4">
-              <Lookup v-model="filters.familyId as any" :data-source="familyStore" display-expr="name" value-expr="id"
-                :label="t('member.search.family')" clearable />
+              <FamilyAutocomplete v-model="filters.familyId" :label="t('member.search.family')" clearable />
             </v-col>
           </v-row>
         </v-card-text>
@@ -40,13 +39,11 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types';
-import { GenderSelect, Lookup } from '@/components/common';
-import { useFamilyStore } from '@/stores/family.store';
+import { GenderSelect, FamilyAutocomplete } from '@/components/common';
 
 const emit = defineEmits(['update:filters']);
 
 const { t } = useI18n();
-const familyStore = useFamilyStore();
 
 const expanded = ref(false); // Default to collapsed
 

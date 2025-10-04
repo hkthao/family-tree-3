@@ -1,12 +1,12 @@
-using backend.Application.Common.Specifications;
+using Ardalis.Specification;
 using backend.Domain.Entities;
 
 namespace backend.Application.Events.Specifications;
 
-public class EventCreatedAfterSpecification : BaseSpecification<Event>
+public class EventCreatedAfterSpecification : Specification<Event>
 {
     public EventCreatedAfterSpecification(DateTime date)
     {
-        AddCriteria(e => e.Created > date);
+        Query.Where(e => e.Created > date);
     }
 }

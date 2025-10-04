@@ -20,5 +20,5 @@ public class MemberDetailDto : BaseAuditableDto, IMapFrom<Member>
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
-    public ICollection<RelationshipDto> Relationships { get; set; } = new List<RelationshipDto>();
+    public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }

@@ -13,5 +13,5 @@ public record class EventInput
     public Guid? FamilyId { get; init; }
     public EventType Type { get; init; }
     public string? Color { get; init; }
-    public ICollection<Guid> RelatedMembers { get; init; } = new List<Guid>();
+    public ICollection<Guid> RelatedMembers { get; init; } = [];
 }

@@ -1,8 +1,9 @@
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Specifications;
+using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.Members.Specifications;
-using backend.Domain.Entities;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
@@ -19,14 +20,18 @@ public class GetMembersWithPaginationQueryHandler : IRequestHandler<GetMembersWi
 
     public async Task<PaginatedList<MemberListDto>> Handle(GetMembersWithPaginationQuery request, CancellationToken cancellationToken)
     {
-        var spec = new MemberFilterSpecification(
-            request.SearchTerm,
-            request.FamilyId,
-            (request.Page - 1) * request.ItemsPerPage,
-            request.ItemsPerPage);
+        var searchQuery = new SearchMembersQuery
+        {
+            SearchQuery = request.SearchTerm,
+            FamilyId = request.FamilyId,
+            Page = request.Page,
+            ItemsPerPage = request.ItemsPerPage
+        };
+
+        var spec = new MemberFilterSpecification(searchQuery);
 
         // Comment: Specification pattern is applied here to filter, sort, and page the results at the database level.
-        var query = SpecificationEvaluator<Member>.GetQuery(_context.Members.AsQueryable(), spec);
+        var query = _context.Members.AsQueryable().WithSpecification(spec);
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.

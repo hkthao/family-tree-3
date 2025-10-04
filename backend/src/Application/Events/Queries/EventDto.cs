@@ -15,5 +15,5 @@ public class EventDto : IMapFrom<Event>
     public Guid? FamilyId { get; set; }
     public EventType Type { get; set; }
     public string? Color { get; set; }
-    public ICollection<Guid> RelatedMembers { get; set; } = new List<Guid>();
+    public ICollection<Guid> RelatedMembers { get; set; } = [];
 }

@@ -1,12 +1,12 @@
-using backend.Application.Common.Specifications;
+using Ardalis.Specification;
 using backend.Domain.Entities;
 
 namespace backend.Application.Families.Specifications;
 
-public class FamilyByIdSpecification : BaseSpecification<Family>
+public class FamilyByIdSpecification : Specification<Family>, ISingleResultSpecification<Family>
 {
     public FamilyByIdSpecification(Guid id)
     {
-        AddCriteria(family => family.Id == id);
+        Query.Where(f => f.Id == id);
     }
 }

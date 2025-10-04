@@ -16,5 +16,5 @@ public class EventDetailDto : BaseAuditableDto, IMapFrom<Event>
     public Guid? FamilyId { get; set; }
     public EventType Type { get; set; }
     public string? Color { get; set; }
-    public List<Guid> RelatedMembers { get; set; } = new List<Guid>();
+    public List<Guid> RelatedMembers { get; set; } = [];
 }

@@ -12,7 +12,7 @@ public class MemberListDto : BaseAuditableDto, IMapFrom<Member>
     public Guid FamilyId { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? Gender { get; set; }
-    public ICollection<RelationshipDto> Relationships { get; set; } = new List<RelationshipDto>();
+    public ICollection<RelationshipDto> Relationships { get; set; } = [];
 
     public void Mapping(Profile profile)
     {

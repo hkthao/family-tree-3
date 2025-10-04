@@ -1,6 +1,5 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using backend.Domain.Entities;
-using backend.Application.Common.Specifications;
 using backend.Application.Members.Specifications;
 
 namespace backend.Infrastructure.IntegrationTests.Database;
@@ -23,7 +22,7 @@ public class SpecificationTests : TestBase
         // Act
         var spec = new MemberByGenderSpecification("Female");
 
-        var query = SpecificationEvaluator<Member>.GetQuery(Context.Members.AsQueryable(), spec);
+        var query = Context.Members.AsQueryable().WithSpecification(spec);
         var filteredMembers = await query.ToListAsync();
 
         // Assert
@@ -51,7 +50,7 @@ public class SpecificationTests : TestBase
 
         var spec = new MemberByDateOfBirthRangeSpecification(startDate, endDate);
 
-        var query = SpecificationEvaluator<Member>.GetQuery(Context.Members.AsQueryable(), spec);
+        var query = Context.Members.AsQueryable().WithSpecification(spec);
         var filteredMembers = await query.ToListAsync();
 
         // Assert
@@ -74,8 +73,14 @@ public class SpecificationTests : TestBase
         await Context.SaveChangesAsync();
 
         // Act: Search for "Jo"
-        var spec = new MemberFilterSpecification(searchTerm: "Jo", familyId: null, skip: 0, take: 100);
-        var query = SpecificationEvaluator<Member>.GetQuery(Context.Members.AsQueryable(), spec);
+        var searchQuery = new backend.Application.Members.Queries.SearchMembers.SearchMembersQuery
+        {
+            SearchQuery = "Jo",
+            Page = 1,
+            ItemsPerPage = 100
+        };
+        var spec = new MemberFilterSpecification(searchQuery);
+        var query = Context.Members.AsQueryable().WithSpecification(spec);
         var filteredMembers = await query.ToListAsync();
 
         // Assert

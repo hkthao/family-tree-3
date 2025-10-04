@@ -1,6 +1,6 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Specifications;
 using backend.Application.Events.Specifications;
 using backend.Domain.Entities;
 
@@ -22,7 +22,7 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Event
         var spec = new EventByIdSpecification(request.Id);
 
         // Comment: Specification pattern is applied here to filter the result by ID at the database level.
-        var query = SpecificationEvaluator<Event>.GetQuery(_context.Events.AsQueryable(), spec);
+        var query = _context.Events.AsQueryable().WithSpecification(spec);
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.

@@ -1,84 +1,69 @@
-## 🎯 Mục tiêu
+### 🎯 Mục tiêu
+Tạo class `SpecificationBuilder<T>` cho dự án backend theo pattern Specification hiện có trong thư mục `Application/Common/Specifications`.
 
-Cập nhật toàn bộ tài liệu trong thư mục `docs` của project sao cho:
-
-* Không phá vỡ cấu trúc thư mục hiện có.
-* Không xóa hay làm sai lệch nội dung gốc.
-* Chỉ được phép bổ sung, chỉnh sửa nhẹ các phần lỗi thời hoặc chưa rõ ràng.
-* Bảo đảm mọi tài liệu đều đủ rõ ràng để **junior developer** cũng hiểu được.
-* Các phần bổ sung phải chi tiết, có ví dụ minh họa cụ thể và giải thích rõ ràng về ngữ cảnh kỹ thuật.
-
----
-
-## 📦 Phạm vi
-
-1. **Thư mục mục tiêu:** `backend/docs` hoặc `docs` (tùy repo).
-2. **Các loại tài liệu bao gồm:**
-   * Mọi file `.md` khác trong thư mục `docs`.
----
-
-## 🧩 Quy tắc chỉnh sửa
-
-1. Không thay đổi cấu trúc thư mục hoặc tên file hiện có.
-2. Không xóa bất kỳ phần nội dung nào (chỉ có thể thêm hoặc làm rõ).
-3. Không thay đổi ý nghĩa gốc của đoạn mô tả kỹ thuật.
-4. Nếu gặp nội dung lỗi thời hoặc không chính xác, hãy:
-
-   * Cập nhật lại cho đúng với codebase hiện tại.
-   * Giữ nguyên format cũ, chỉ cập nhật nội dung.
-5. Nếu có phần thiếu giải thích hoặc thiếu ví dụ, hãy bổ sung giải thích chi tiết, có thể gồm:
-
-   * Code snippet minh họa (C#, Vue, YAML, v.v.)
-   * Sơ đồ hoặc pseudocode mô tả luồng xử lý.
-   * Giải thích “tại sao” (WHY) để junior hiểu mục đích của thiết kế.
-6. Các bổ sung mới nên có format:
-
-### 🔄 [Updated Section]
-
-*(Updated to match current refactor: [tên phần hoặc class/module])*
+Mục tiêu của builder:
+- Cho phép xây dựng specification một cách **fluent** và **type-safe**.
+- Kết hợp các phần **filter (Criteria)**, **include**, **order by**, **paging**.
+- Có thể build ra một instance của `BaseSpecification<T>` tương thích với repository hiện tại.
+- Không thay đổi hoặc phá cấu trúc `BaseSpecification<T>`, `ISpecification<T>`, hay các spec cũ.
+- Code phải **dễ hiểu cho junior**, có **comment chi tiết**, và **viết theo C# 12**.
 
 ---
 
-## 🧰 Đầu vào cho Gemini
+### ⚙️ Yêu cầu kỹ thuật
 
-* Toàn bộ thư mục `docs` hiện có trong repo.
-* Cấu trúc codebase thực tế (để đối chiếu khi cần, ví dụ: `Application`, `Domain`, `Infrastructure`, `Web`).
-* Các commit gần nhất có refactor lớn (nếu có).
-* Không cần can thiệp vào file `.csproj`, `.json`, `.yml` hoặc mã nguồn — chỉ đọc để hiểu ngữ cảnh.
+1. **Vị trí file:**
+   - `Application/Common/Specifications/SpecificationBuilder.cs`
+
+2. **Phạm vi:**
+   - Dùng `System.Linq.Expressions` để giữ type safety.
+   - Hỗ trợ chuỗi gọi fluent:
+     ```csharp
+     var spec = new SpecificationBuilder<User>()
+         .Filter(u => u.IsActive)
+         .Include(u => u.Families)
+         .OrderByDescending(u => u.CreatedAt)
+         .Page(1, 20)
+         .Build();
+     ```
+
+3. **Phương thức builder cần có:**
+   | Method | Chức năng |
+   |---------|-----------|
+   | `Filter(Expression<Func<T, bool>> expression)` | Thêm tiêu chí lọc. |
+   | `Include(Expression<Func<T, object>> include)` | Thêm include theo navigation property. |
+   | `OrderBy(Expression<Func<T, object>> keySelector)` | Thêm sắp xếp tăng dần. |
+   | `OrderByDescending(Expression<Func<T, object>> keySelector)` | Thêm sắp xếp giảm dần. |
+   | `Page(int pageIndex, int pageSize)` | Áp dụng phân trang. |
+   | `Build()` | Tạo ra instance `BaseSpecification<T>` cuối cùng. |
+
+4. **Nguyên tắc khi build:**
+   - Nếu có nhiều `Filter` → nối bằng `AND`.
+   - `OrderBy` và `OrderByDescending` có thể gọi nhiều lần (ưu tiên theo thứ tự gọi).
+   - Nếu không có `Page` thì `IsPagingEnabled = false`.
+   - Nếu gọi `Build()` nhiều lần → luôn tạo object mới, không mutate instance cũ.
+
+5. **Yêu cầu thêm:**
+   - Có region hoặc XML doc comment để junior dễ đọc.
+   - Viết Unit Test mẫu cho class này (nếu có thể) ở `Application.UnitTests/Specifications/SpecificationBuilderTests.cs`.
+
+---
+
+### 💡 Lưu ý quan trọng
+- Không được thay đổi file `BaseSpecification<T>` hay `ISpecification<T>`.
+- Nếu cần helper nội bộ → tạo class `SpecificationBuilderExtensions` cùng thư mục, không chạm vào các spec domain hiện có.
+- Mọi logic phải **thread-safe** và **không giữ trạng thái ngoài scope builder**.
+- Ưu tiên clarity hơn cleverness.
 
 ---
 
-## 📘 Output mong muốn
+### ✅ Output mong đợi
+- File `SpecificationBuilder.cs` đầy đủ, sẵn sàng build và chạy test.
+- Có thể sử dụng như sau:
 
-* Cập nhật lại toàn bộ nội dung tài liệu trong `docs`, lưu thành phiên bản mới tương thích với code hiện tại.
-* Giữ format Markdown chuẩn (H2, H3, bullet points, tables, code block...).
-* Thêm ví dụ minh họa cụ thể, đặc biệt ở phần:
-
-  * Repository & Unit of Work pattern
-  * CQRS (Command, Query, Handler)
-  * Error Handling & Result Wrapper
-  * Integration Tests và Test Coverage
-  * API Gateway hoặc Vite proxy (nếu có FE)
-* Mỗi phần nên có:
-
-  * Giải thích ngắn gọn (mục đích)
-  * Luồng hoạt động (workflow hoặc sequence)
-  * Code example
-  * Best Practice / Note
-
----
-
-## ✅ Yêu cầu cuối cùng
-
-* Gemini chỉ cập nhật nội dung lỗi thời và mở rộng tài liệu, không được chỉnh sửa cấu trúc file.
-* Mục tiêu là tạo bộ tài liệu hoàn chỉnh, chi tiết, thân thiện cho **junior developer**, giúp họ nắm được:
-
-  * Cấu trúc DDD / Clean Architecture hiện tại.
-  * Cách Repository, Handler, và Service tương tác.
-  * Các nguyên tắc test, CI/CD, và error handling trong project.
-
----
-
-**Tóm lại:** Gemini đóng vai trò **người bảo trì tài liệu kỹ thuật** — không phá vỡ cấu trúc, chỉ **bổ sung, cập nhật và làm rõ** mọi phần lỗi thời để đảm bảo tính chính xác và dễ hiểu của tài liệu.
-
----
+```csharp
+var spec = new SpecificationBuilder<Family>()
+    .Filter(f => f.Visibility == "public")
+    .OrderBy(f => f.Name)
+    .Page(1, 10)
+    .Build();

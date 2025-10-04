@@ -6,4 +6,6 @@ namespace backend.Application.Members.Queries.SearchMembers;
 public record SearchMembersQuery : PaginatedQuery, IRequest<PaginatedList<MemberListDto>>
 {
     public string? SearchQuery { get; init; }
+    public string? Gender { get; init; }
+    public Guid? FamilyId { get; init; }
 }
