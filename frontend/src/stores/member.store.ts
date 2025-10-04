@@ -10,20 +10,15 @@ export const useMemberStore = defineStore('member', {
     loading: false,
     error: null as string | null,
     filters: {
-      fullName: '',
-      dateOfBirth: null,
-      dateOfDeath: null,
-      gender: undefined,
-      placeOfBirth: '',
-      placeOfDeath: '',
-      occupation: '',
-      familyId: undefined,
       searchQuery: '',
+      familyId: undefined,
+      gender: undefined,
     } as MemberFilter,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
     totalItems: 0,
     totalPages: 1,
+    sortBy: [] as { key: string; order: string }[], // Sorting key and order
   }),
 
   getters: {},
@@ -32,8 +27,11 @@ export const useMemberStore = defineStore('member', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.loadItems(
-        this.filters,
+      const result = await this.services.member.loadItems({
+        ...this.filters,
+        sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
+        sortOrder: this.sortBy.length > 0 ? (this.sortBy[0].order as 'asc' | 'desc') : undefined,
+      },
         this.currentPage,
         this.itemsPerPage,
       );
@@ -91,20 +89,6 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async getByIds(ids: string[]): Promise<Member[]> {
-      this.loading = true;
-      this.error = null;
-      const result = await this.services.member.getByIds(ids);
-      this.loading = false;
-      if (result.ok) {
-        return result.value;
-      } else {
-        this.error = i18n.global.t('member.errors.load');
-        console.error(result.error);
-        return [];
-      }
-    },
-
     async setPage(page: number) {
       if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
         this.currentPage = page;
@@ -118,6 +102,12 @@ export const useMemberStore = defineStore('member', {
         this.currentPage = 1; // Reset to first page when items per page changes
         await this._loadItems();
       }
+    },
+
+    setSortBy(sortBy: { key: string; order: string }[]) {
+      this.sortBy = sortBy;
+      this.currentPage = 1; // Reset to first page on sort change
+      this._loadItems();
     },
 
     async setCurrentItem(item: Member | null) {

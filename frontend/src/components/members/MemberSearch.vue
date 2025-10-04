@@ -40,7 +40,7 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types';
-import { DateInputField, GenderSelect, Lookup } from '@/components/common';
+import { GenderSelect, Lookup } from '@/components/common';
 import { useFamilyStore } from '@/stores/family.store';
 
 const emit = defineEmits(['update:filters']);

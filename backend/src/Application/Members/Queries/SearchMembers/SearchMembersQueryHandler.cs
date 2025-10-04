@@ -25,6 +25,38 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Pag
             query = query.Where(f => f.FirstName.Contains(request.SearchQuery) || f.LastName.Contains(request.SearchQuery) || (f.Nickname != null && f.Nickname.Contains(request.SearchQuery)));
         }
 
+        if (!string.IsNullOrEmpty(request.SortBy))
+        {
+            switch (request.SortBy.ToLower())
+            {
+                case "firstname":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.FirstName) : query.OrderBy(m => m.FirstName);
+                    break;
+                case "lastname":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.LastName) : query.OrderBy(m => m.LastName);
+                    break;
+                case "fullname":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.FirstName).ThenByDescending(m => m.LastName) : query.OrderBy(m => m.FirstName).ThenBy(m => m.LastName);
+                    break;
+                case "dateofbirth":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.DateOfBirth) : query.OrderBy(m => m.DateOfBirth);
+                    break;
+                case "gender":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.Gender) : query.OrderBy(m => m.Gender);
+                    break;
+                case "created":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(m => m.Created) : query.OrderBy(m => m.Created);
+                    break;
+                default:
+                    query = query.OrderBy(m => m.FirstName).ThenBy(m => m.LastName); // Default sort by full name
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(m => m.FirstName).ThenBy(m => m.LastName); // Default sort if no sortBy is provided
+        }
+
         return await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);

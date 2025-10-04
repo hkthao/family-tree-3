@@ -90,6 +90,9 @@ export class ApiMemberService implements IMemberService {
     const params = new URLSearchParams();
     if (filters.gender) params.append('gender', filters.gender);
     if (filters.familyId) params.append('familyId', filters.familyId);
+    if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
+    if (filters.sortBy) params.append('sortBy', filters.sortBy);
+    if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     // Add pagination parameters
     params.append('page', page.toString());

@@ -25,11 +25,6 @@ export interface MemberFilter {
   gender?: Gender | undefined;
   familyId?: string | null;
   searchQuery?: string; // New property for search term
-  ids?: string[] | null; // New property for array of member IDs,
-  fullName?: string; // Added for filtering
-  dateOfBirth?: Date | null; // Added for filtering
-  dateOfDeath?: Date | null; // Added for filtering
-  placeOfBirth?: string; // Added for filtering
-  placeOfDeath?: string; // Added for filtering
-  occupation?: string; // Added for filtering
+  sortBy?: string; // Column name to sort by
+  sortOrder?: 'asc' | 'desc'; // Sort order
 }
