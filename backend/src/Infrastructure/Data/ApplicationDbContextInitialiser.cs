@@ -77,7 +77,33 @@ public class ApplicationDbContextInitialiser
         if (!_context.Families.Any())
         {
             Guid royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb");
-            _context.Families.Add(new backend.Domain.Entities.Family { Id = royalFamilyId, Name = "Royal Family", Created = DateTime.UtcNow });
+            _context.Families.Add(new backend.Domain.Entities.Family
+            {
+                Id = royalFamilyId,
+                Name = "Royal Family",
+                Description = "The British Royal Family, a prominent family with a rich history.",
+                AvatarUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Royal_Arms_of_the_United_Kingdom_%281837%E2%80%931952%29.svg/1200px-Royal_Arms_of_the_United_Kingdom_%281837%E2%80%931952%29.svg.png",
+                Address = "Buckingham Palace, London, UK",
+                Visibility = backend.Domain.Enums.FamilyVisibility.Public.ToString(),
+                TotalMembers = 19, // Based on the members added below
+                Created = DateTime.UtcNow
+            });
+
+            // Add 20 more sample families
+            for (int i = 1; i <= 20; i++)
+            {
+                _context.Families.Add(new backend.Domain.Entities.Family
+                {
+                    Id = Guid.NewGuid(),
+                    Name = $"Family {i}",
+                    Description = $"Description for Family {i}",
+                    AvatarUrl = $"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4" + i.ToString(),
+                    Address = "Address" + i.ToString(),
+                    Visibility = backend.Domain.Enums.FamilyVisibility.Public.ToString(),
+                    TotalMembers = 0,
+                    Created = DateTime.UtcNow
+                });
+            }
 
             var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef");
             var catherineId = Guid.Parse("b2c3d4e5-f6a1-8901-2345-67890abcdef0");
