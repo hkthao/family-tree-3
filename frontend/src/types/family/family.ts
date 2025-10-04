@@ -14,6 +14,8 @@ export interface FamilyFilter {
   visibility?: 'all' | FamilyVisibility;
   searchQuery?: string;
   familyId?: string;
+  sortBy?: string; // Column name to sort by
+  sortOrder?: 'asc' | 'desc'; // Sort order
 }
 
 export interface ConfirmDeleteDialogProps {

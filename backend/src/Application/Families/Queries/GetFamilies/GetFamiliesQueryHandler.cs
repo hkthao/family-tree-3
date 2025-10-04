@@ -20,9 +20,10 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, IReadOn
     {
         var spec = new FamilyFilterSpecification(
             request.SearchTerm,
-            request.CreatedAfter,
             (request.PageNumber - 1) * request.PageSize,
-            request.PageSize);
+            request.PageSize,
+            request.SortBy,
+            request.SortOrder);
 
         // Comment: Specification pattern is applied here to filter, sort, and page the results at the database level.
         var query = SpecificationEvaluator<Family>.GetQuery(_context.Families.AsQueryable(), spec);

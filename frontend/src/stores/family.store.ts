@@ -14,6 +14,7 @@ export const useFamilyStore = defineStore('family', {
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 1,
+    sortBy: [] as { key: string; order: string }[], // Sorting key and order
   }),
   getters: {},
   actions: {
@@ -24,6 +25,8 @@ export const useFamilyStore = defineStore('family', {
         this.filter,
         this.currentPage,
         this.itemsPerPage,
+        this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
+        this.sortBy.length > 0 ? (this.sortBy[0].order as 'asc' | 'desc') : undefined,
       );
 
       if (result.ok) {
@@ -92,6 +95,12 @@ export const useFamilyStore = defineStore('family', {
         this.currentPage = 1; // Reset to first page when items per page changes
         this._loadItems();
       }
+    },
+
+    setSortBy(sortBy: { key: string; order: string }[]) {
+      this.sortBy = sortBy;
+      this.currentPage = 1; // Reset to first page on sort change
+      this._loadItems();
     },
 
     setCurrentItem(item: Family | null) {

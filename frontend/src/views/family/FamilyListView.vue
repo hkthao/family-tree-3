@@ -49,9 +49,11 @@ const handleFilterUpdate = (filters: FamilyFilter) => {
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
+  sortBy: { key: string; order: string }[];
 }) => {
   familyStore.setPage(options.page);
   familyStore.setItemsPerPage(options.itemsPerPage);
+  familyStore.setSortBy(options.sortBy);
 };
 
 const navigateToAddFamily = () => {

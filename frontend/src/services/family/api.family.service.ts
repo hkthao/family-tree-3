@@ -54,6 +54,8 @@ export class ApiFamilyService implements IFamilyService {
     filter: FamilyFilter,
     page: number,
     itemsPerPage: number,
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc',
   ): Promise<Result<Paginated<Family>, ApiError>> {
     try {
       const params = new URLSearchParams();
@@ -61,6 +63,8 @@ export class ApiFamilyService implements IFamilyService {
       if (filter.familyId) params.append('familyId', filter.familyId);
       params.append('page', page.toString());
       params.append('itemsPerPage', itemsPerPage.toString());
+      if (sortBy) params.append('sortBy', sortBy);
+      if (sortOrder) params.append('sortOrder', sortOrder);
 
       const response = await this.http.get<Paginated<Family>>(
         `/api/family/search?${params.toString()}`,

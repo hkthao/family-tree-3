@@ -24,6 +24,29 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, P
             query = query.Where(f => f.Name.Contains(request.Keyword) || (f.Description != null && f.Description.Contains(request.Keyword)));
         }
 
+        if (!string.IsNullOrEmpty(request.SortBy))
+        {
+            switch (request.SortBy.ToLower())
+            {
+                case "name":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(f => f.Name) : query.OrderBy(f => f.Name);
+                    break;
+                case "totalmembers":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(f => f.TotalMembers) : query.OrderBy(f => f.TotalMembers);
+                    break;
+                case "created":
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(f => f.Created) : query.OrderBy(f => f.Created);
+                    break;
+                default:
+                    query = query.OrderBy(f => f.Name); // Default sort
+                    break;
+            }
+        }
+        else
+        {
+            query = query.OrderBy(f => f.Name); // Default sort if no sortBy is provided
+        }
+
         return await query
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize);
