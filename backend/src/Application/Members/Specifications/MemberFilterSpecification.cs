@@ -49,13 +49,11 @@ public class MemberFilterSpecification : Specification<Member>
                 case "fullname":
                     if (query.SortOrder == "desc")
                     {
-                        Query.OrderByDescending(member => member.FirstName);
-                        Query.OrderByDescending(member => member.LastName);
+                        Query.OrderByDescending(member => member.FirstName).ThenByDescending(member => member.LastName);
                     }
                     else
                     {
-                        Query.OrderBy(member => member.FirstName);
-                        Query.OrderBy(member => member.LastName);
+                        Query.OrderBy(member => member.FirstName).ThenBy(member => member.LastName);
                     }
                     break;
                 case "dateofbirth":
@@ -77,15 +75,13 @@ public class MemberFilterSpecification : Specification<Member>
                         Query.OrderBy(member => member.Created);
                     break;
                 default:
-                    Query.OrderBy(member => member.FirstName);
-                    Query.OrderBy(member => member.LastName);
+                    Query.OrderBy(member => member.FirstName).ThenBy(member => member.LastName); // Default sort by first name, then last name
                     break;
             }
         }
         else
         {
-            Query.OrderBy(member => member.FirstName);
-            Query.OrderBy(member => member.LastName);
+            Query.OrderBy(member => member.FirstName).ThenBy(member => member.LastName); // Default order by first name, then last name
         }
     }
 }
