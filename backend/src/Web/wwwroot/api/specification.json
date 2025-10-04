@@ -547,16 +547,16 @@
             "x-position": 1
           },
           {
-            "name": "Page",
+            "name": "Visibility",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string",
+              "nullable": true
             },
             "x-position": 2
           },
           {
-            "name": "ItemsPerPage",
+            "name": "Page",
             "in": "query",
             "schema": {
               "type": "integer",
@@ -565,13 +565,22 @@
             "x-position": 3
           },
           {
+            "name": "ItemsPerPage",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 4
+          },
+          {
             "name": "SortBy",
             "in": "query",
             "schema": {
               "type": "string",
               "nullable": true
             },
-            "x-position": 4
+            "x-position": 5
           },
           {
             "name": "SortOrder",
@@ -580,7 +589,7 @@
               "type": "string",
               "nullable": true
             },
-            "x-position": 5
+            "x-position": 6
           }
         ],
         "responses": {

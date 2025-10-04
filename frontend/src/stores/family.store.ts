@@ -31,12 +31,13 @@ export const useFamilyStore = defineStore('family', {
       );
 
       if (result.ok) {
-        this.items = result.value.items;
+        // Clear existing items and add new ones using splice to preserve array reference
+        this.items.splice(0, this.items.length, ...result.value.items);
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
       } else {
         this.error = i18n.global.t('family.errors.load');
-        this.items = []; // Clear items on error
+        this.items.splice(0, this.items.length); // Clear items on error
         this.totalItems = 0; // Reset totalItems on error
         this.totalPages = 1; // Reset totalPages on error
         console.error(result.error);
