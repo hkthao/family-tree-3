@@ -1,10 +1,5 @@
-using Xunit;
-using FluentAssertions;
-using System.Threading.Tasks;
 using backend.Domain.Entities;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using System;
 using backend.Domain.Enums;
 namespace backend.Infrastructure.IntegrationTests.Database;
 

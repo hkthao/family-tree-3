@@ -1,7 +1,5 @@
 ﻿using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using backend.Application.Common.Models; // Added for Result
-using Microsoft.EntityFrameworkCore; // Added for DbUpdateException
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 

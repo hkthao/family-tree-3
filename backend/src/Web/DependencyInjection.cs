@@ -2,7 +2,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Infrastructure.Identity; // Added this using
 using backend.Web.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
@@ -46,18 +45,19 @@ public static class DependencyInjection
         });
 
         // Add Authentication and Authorization
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-            .AddJwtBearer(options =>
-            {
-                options.Authority = builder.Configuration["Auth0:Domain"];
-                options.Audience = builder.Configuration["Auth0:Audience"];
-            });
+        // builder.Services.AddAuthentication(options =>
+        // {
+        //     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        // })
+        //     .AddJwtBearer(options =>
+        //     {
+        //         options.Authority = builder.Configuration["Auth0:Domain"];
+        //         options.Audience = builder.Configuration["Auth0:Audience"];
+        //         options.RequireHttpsMetadata = false;
+        //     });
 
-        builder.Services.AddAuthorizationBuilder();
+        // builder.Services.AddAuthorizationBuilder();
 
         builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
     }

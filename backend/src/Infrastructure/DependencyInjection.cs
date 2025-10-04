@@ -17,15 +17,19 @@ public static class DependencyInjection
 
         services.AddSingleton<IAuthProvider, Auth0Provider>();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-        if (!string.IsNullOrEmpty(connectionString))
+        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
         {
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-
-            services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+                options.UseInMemoryDatabase("FamilyTreeDb"));
         }
+        else
+        {
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+        }
+
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
         services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()

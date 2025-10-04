@@ -1,14 +1,9 @@
-using backend.Application.Common.Models;
 using backend.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Xunit;
-using FluentAssertions;
-using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using System;
 
 namespace backend.Infrastructure.IntegrationTests.Authentication;
 

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <AspnetVersion>8.0.0</AspnetVersion>
-    <EfcoreVersion>8.0.11</EfcoreVersion>
+    <EfcoreVersion>8.0.0</EfcoreVersion>
     <MicrosoftExtensionsVersion>8.0.0</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <ItemGroup>
@@ -48,9 +48,9 @@
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Authorization" Version="8.0.0" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
-    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
+    <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0-beta.2" />
     <PackageVersion Include="Testcontainers.MySql" Version="3.8.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="$(EfcoreVersion)" />
     <PackageVersion Include="AWSSDK.SecurityToken" Version="4.0.2.2" />
 

@@ -1,11 +1,5 @@
-
-using Xunit;
 using Testcontainers.MySql;
 using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Interfaces;
-using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
-using System;
 using backend.Infrastructure.Data;
 
 namespace backend.Infrastructure.IntegrationTests;

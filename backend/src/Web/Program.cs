@@ -1,8 +1,11 @@
+using backend.Application;
 using backend.Infrastructure;
+using backend.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Add CORS services
@@ -11,7 +14,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         builder =>
         {
-            builder.WithOrigins("http://localhost:5173") // Frontend development server URL
+            builder.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:5001") // Frontend development server URL
                    .AllowAnyHeader()
                    .AllowAnyMethod();
         });
@@ -28,12 +31,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     // Initialise and seed database
-    // using (var scope = app.Services.CreateScope())
-    // {
-    //     var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
-    //     await initialiser.InitialiseAsync();
-    //     await initialiser.SeedAsync();
-    // }
+    using (var scope = app.Services.CreateScope())
+    {
+        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        await initialiser.InitialiseAsync();
+        await initialiser.SeedAsync();
+    }
 }
 else
 {

@@ -1,8 +1,5 @@
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Xunit;
-using System;
-using System.Threading.Tasks;
 using backend.Domain.Entities; // Add this using directive
 
 namespace backend.Infrastructure.IntegrationTests;
