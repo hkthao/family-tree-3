@@ -31,23 +31,22 @@ Backend của dự án được xây dựng bằng **ASP.NET Core 8** và tuân 
 
 ## 3. Cấu trúc Dự án
 
-Dự án được chia thành các project chính:
+Dự án được chia thành các project chính, tuân thủ theo nguyên tắc của Clean Architecture:
 
 ```
 backend/
 ├── src/
-│   ├── Domain/         # Entities, Value Objects, Enums, Domain Events
-│   ├── Application/    # Logic nghiệp vụ, DTOs, Interfaces
-│   ├── Infrastructure/ # Triển khai Interfaces (Repositories, Services)
-│   └── Web/            # API Controllers, Cấu hình ASP.NET Core
+│   ├── Domain/         # Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), định nghĩa các quy tắc nghiệp vụ cốt lõi, và Domain Events. Đây là trái tim của ứng dụng, độc lập với các lớp khác.
+│   ├── Application/    # Chứa logic nghiệp vụ chính của ứng dụng (Use Cases), các DTOs (Data Transfer Objects), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các Commands/Queries/Handlers theo mô hình CQRS.
+│   ├── Infrastructure/ # Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer. Bao gồm truy cập cơ sở dữ liệu (Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
+│   └── Web/            # Là lớp trình bày (Presentation Layer), chứa các API Controllers, cấu hình ASP.NET Core, và là điểm vào của ứng dụng.
 └── tests/
-    ├── Application.UnitTests/
-    └── Infrastructure.IntegrationTests/
+    ├── Application.UnitTests/ # Chứa các Unit Tests cho Application Layer.
+    └── Infrastructure.IntegrationTests/ # Chứa các Integration Tests cho Infrastructure Layer và tương tác với Database.
 ```
-
 ## 4. Luồng Request
 
-Một request từ client sẽ đi qua các lớp như sau:
+Một request từ client sẽ đi qua các lớp của Clean Architecture như sau:
 
 ```mermaid
 sequenceDiagram
@@ -58,34 +57,107 @@ sequenceDiagram
     participant Repository (Infrastructure)
     participant Database
 
-    Client->>Controller: Gửi HTTP Request
-    Controller->>MediatR: Gửi Command/Query
-    MediatR->>Handler: Điều phối đến Handler tương ứng
-    Handler->>Repository: Gọi phương thức truy vấn dữ liệu
-    Repository->>Database: Thực thi câu lệnh SQL
-    Database-->>Repository: Trả về dữ liệu
-    Repository-->>Handler: Trả về domain model
-    Handler-->>Controller: Trả về DTO
-    Controller-->>Client: Trả về HTTP Response
+    Client->>Controller: Gửi HTTP Request (ví dụ: GET /api/families)
+    Controller->>MediatR: Gửi Command/Query (ví dụ: GetFamiliesQuery)
+    MediatR->>Handler: Điều phối đến Handler tương ứng (ví dụ: GetFamiliesQueryHandler)
+    Handler->>Repository: Gọi phương thức truy vấn dữ liệu (ví dụ: _context.Families.ToListAsync())
+    Repository->>Database: Thực thi câu lệnh SQL (qua Entity Framework Core)
+    Database-->>Repository: Trả về dữ liệu thô từ DB
+    Repository-->>Handler: Trả về domain model (ví dụ: List<Family>)
+    Handler-->>Controller: Trả về DTO (ví dụ: List<FamilyDto>)
+    Controller-->>Client: Trả về HTTP Response (JSON)
 ```
+
+**Giải thích chi tiết:**
+
+1.  **Client gửi HTTP Request**: Người dùng tương tác với Frontend, Frontend gửi một yêu cầu HTTP (GET, POST, PUT, DELETE) đến Backend API.
+2.  **Controller (Web Layer) nhận Request**: Controller trong lớp `Web` nhận yêu cầu, thực hiện các kiểm tra ban đầu (ví dụ: validation của request model) và chuyển đổi request thành một `Command` hoặc `Query`.
+3.  **MediatR (Application Layer) gửi Command/Query**: Controller sử dụng `MediatR` để gửi `Command` hoặc `Query` đến Application Layer. `MediatR` đóng vai trò là một mediator, giúp tách rời Controller khỏi việc biết Handler cụ thể nào sẽ xử lý yêu cầu.
+4.  **Handler (Application Layer) xử lý Command/Query**: `MediatR` tìm và điều phối yêu cầu đến `Handler` tương ứng. `Handler` chứa logic nghiệp vụ chính, sử dụng các dịch vụ và Repository để thực hiện công việc.
+    *   **Command Handler**: Xử lý các yêu cầu thay đổi trạng thái (tạo, cập nhật, xóa). Nó thường tương tác với Repository để lưu trữ dữ liệu và sử dụng Unit of Work để đảm bảo tính nhất quán của transaction.
+    *   **Query Handler**: Xử lý các yêu cầu truy vấn dữ liệu. Nó thường tương tác với Repository để lấy dữ liệu và ánh xạ dữ liệu đó sang DTO trước khi trả về.
+5.  **Repository (Infrastructure Layer) truy cập dữ liệu**: `Handler` gọi các phương thức trên interface Repository (được định nghĩa trong Domain hoặc Application Layer). Triển khai cụ thể của Repository (trong Infrastructure Layer) sẽ tương tác với cơ sở dữ liệu (sử dụng Entity Framework Core).
+6.  **Database thực thi**: Entity Framework Core chuyển đổi các thao tác của Repository thành các câu lệnh SQL và thực thi trên cơ sở dữ liệu MySQL.
+7.  **Database trả về dữ liệu**: Cơ sở dữ liệu trả về kết quả cho Repository.
+8.  **Repository trả về Domain Model**: Repository chuyển đổi dữ liệu thô từ DB thành các Domain Model (Entities) và trả về cho Handler.
+9.  **Handler trả về DTO**: Handler ánh xạ Domain Model sang DTO và trả về cho Controller.
+10. **Controller trả về HTTP Response**: Controller nhận DTO từ Handler, định dạng thành JSON và gửi lại cho Client dưới dạng HTTP Response.
 
 ## 5. Dependency Injection
 
-Sử dụng built-in DI container của ASP.NET Core. Các services được đăng ký trong `DependencyInjection.cs` của mỗi project và gọi trong `Program.cs` của project `Web`.
+Sử dụng built-in DI container của ASP.NET Core để quản lý vòng đời của các services và inject chúng vào các thành phần cần thiết. Việc đăng ký services được tổ chức theo từng lớp (layer) để dễ quản lý và tuân thủ Clean Architecture.
+
+#### Cách đăng ký Services
+
+Các services được đăng ký trong các phương thức mở rộng (extension methods) `Add[Layer]Services()` của mỗi project (Application, Infrastructure, Web) và được gọi trong `Program.cs` của project `Web`.
 
 **Ví dụ (`Web/Program.cs`):**
 
 ```csharp
+// backend/src/Web/Program.cs
+
 builder.Services
-    .AddApplicationServices()
-    .AddInfrastructureServices(builder.Configuration)
-    .AddWebServices();
+    .AddApplicationServices()    // Đăng ký services từ Application Layer
+    .AddInfrastructureServices(builder.Configuration) // Đăng ký services từ Infrastructure Layer
+    .AddWebServices();           // Đăng ký services từ Web Layer
 ```
+
+**Giải thích:**
+
+*   `AddApplicationServices()`: Đăng ký tất cả các services, Handlers, Validators, và AutoMapper profiles từ Application Layer. Ví dụ: `MediatR`, `FluentValidation`.
+*   `AddInfrastructureServices()`: Đăng ký các triển khai cụ thể của các interfaces từ Application Layer, như `IApplicationDbContext` (với Entity Framework Core), `IIdentityService`, và các Repository.
+*   `AddWebServices()`: Đăng ký các services dành riêng cho Web Layer, như `IUser` (để lấy thông tin người dùng hiện tại), `HttpContextAccessor`, và cấu hình Swagger/OpenAPI.
+
+#### Vòng đời của Services (Service Lifetimes)
+
+ASP.NET Core DI hỗ trợ ba loại vòng đời:
+
+*   **Singleton**: Một instance duy nhất được tạo ra và sử dụng trong suốt vòng đời của ứng dụng.
+    ```csharp
+    services.AddSingleton<IMySingletonService, MySingletonService>();
+    ```
+*   **Scoped**: Một instance được tạo ra một lần cho mỗi request HTTP. Phù hợp cho các services cần duy trì trạng thái trong một request (ví dụ: `DbContext`).
+    ```csharp
+    services.AddScoped<IMyScopedService, MyScopedService>();
+    ```
+*   **Transient**: Một instance mới được tạo ra mỗi khi service được yêu cầu. Phù hợp cho các services nhẹ, không trạng thái.
+    ```csharp
+    services.AddTransient<IMyTransientService, MyTransientService>();
+    ```
+
+**Best Practice:** Luôn inject dependency qua interface để tăng tính linh hoạt và dễ kiểm thử.
 
 ## 6. Middleware
 
--   **Error Handling**: Middleware `UseExceptionHandler` bắt tất cả exception chưa được xử lý và trả về một response lỗi chuẩn theo [ProblemDetails](https://tools.ietf.org/html/rfc7807).
--   **Authentication & Authorization**: `UseAuthentication` và `UseAuthorization` để xác thực và phân quyền.
+ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP request. Mỗi middleware có thể thực hiện một tác vụ cụ thể (ví dụ: logging, authentication, routing) và sau đó chuyển request cho middleware tiếp theo trong pipeline.
+
+#### Error Handling Middleware
+
+*   **`UseExceptionHandler`**: Middleware này được cấu hình để bắt tất cả các exception chưa được xử lý (unhandled exceptions) trong ứng dụng. Thay vì trả về lỗi 500 mặc định của server, nó sẽ trả về một response lỗi chuẩn hóa theo định dạng `ProblemDetails` (RFC 7807) hoặc cấu trúc `Result Pattern` của chúng ta. Điều này giúp client dễ dàng xử lý lỗi một cách nhất quán.
+
+    **Cấu hình trong `Program.cs`:**
+
+    ```csharp
+    // backend/src/Web/Program.cs
+    app.UseExceptionHandler(options => { }); // Sử dụng CustomExceptionHandler đã đăng ký
+    ```
+
+    **`CustomExceptionHandler`**: Một triển khai tùy chỉnh của `IExceptionHandler` để định dạng phản hồi lỗi theo `Result Pattern`.
+
+#### Authentication & Authorization Middleware
+
+*   **`UseAuthentication`**: Middleware này chịu trách nhiệm xác thực người dùng. Nó đọc thông tin xác thực từ request (ví dụ: JWT Bearer Token từ header `Authorization`), xác minh tính hợp lệ của nó và tạo ra một `ClaimsPrincipal` đại diện cho người dùng đã xác thực.
+*   **`UseAuthorization`**: Middleware này chịu trách nhiệm phân quyền. Sau khi người dùng được xác thực, `UseAuthorization` sẽ kiểm tra xem người dùng có quyền truy cập vào tài nguyên hoặc thực hiện hành động được yêu cầu hay không, dựa trên các chính sách phân quyền đã được định nghĩa (ví dụ: `[Authorize]` attribute).
+
+    **Cấu hình trong `Program.cs`:**
+
+    ```csharp
+    // backend/src/Web/Program.cs
+    app.UseAuthentication();
+    app.UseAuthorization();
+    ```
+
+    **Lưu ý:** `UseAuthentication` phải được gọi trước `UseAuthorization` trong pipeline.
 
 ## 7. Xác thực & Phân quyền
 
@@ -93,54 +165,257 @@ builder.Services
 -   **Provider hiện tại**: **Auth0**. Tuy nhiên, hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách triển khai một `IAuthService` mới.
 -   **Luồng JWT**: Client lấy token từ Auth0 và gửi trong header `Authorization` của mỗi request.
 
+Để biết thêm chi tiết về luồng xác thực, cấu hình và các cân nhắc bảo mật, vui lòng tham khảo phần [Xác thực & Phân quyền trong Kiến trúc tổng quan](./architecture.md#6-xác-thực--phân-quyền-authentication--authorization).
+
 ## 8. Repository Pattern
 
--   **Interface**: Định nghĩa trong `Application` layer.
--   **Triển khai**: Trong `Infrastructure` layer, sử dụng Entity Framework Core.
+Repository Pattern là một mẫu thiết kế giúp trừu tượng hóa lớp truy cập dữ liệu khỏi logic nghiệp vụ. Nó cung cấp một tập hợp các phương thức để truy cập và thao tác với dữ liệu mà không cần biết chi tiết về cách dữ liệu được lưu trữ (ví dụ: database, API bên ngoài).
+
+#### Mục đích
+
+*   **Tách biệt mối quan tâm (Separation of Concerns):** Logic nghiệp vụ không cần quan tâm đến chi tiết triển khai của việc lưu trữ dữ liệu.
+*   **Dễ kiểm thử (Testability):** Có thể dễ dàng mock (giả lập) Repository trong các unit test.
+*   **Dễ thay đổi (Maintainability):** Có thể thay đổi công nghệ lưu trữ dữ liệu mà không ảnh hưởng đến logic nghiệp vụ.
+
+#### IBaseRepository
+
+`IBaseRepository<TEntity>` là một interface chung định nghĩa các thao tác CRUD (Create, Read, Update, Delete) cơ bản cho mọi thực thể (Entity) trong hệ thống. Nó được định nghĩa trong `Application` layer.
+
+**Ví dụ (`Application/Common/Interfaces/IBaseRepository.cs`):**
+
+```csharp
+public interface IBaseRepository<TEntity> where TEntity : class
+{
+    Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
+    void Update(TEntity entity);
+    void Delete(TEntity entity);
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+}
+```
+
+#### Triển khai Repository
+
+Các triển khai cụ thể của Repository (ví dụ: `FamilyRepository`, `MemberRepository`) nằm trong `Infrastructure` layer và sử dụng Entity Framework Core để tương tác với cơ sở dữ liệu.
+
+**Ví dụ (`Infrastructure/Data/Repositories/FamilyRepository.cs`):**
+
+```csharp
+public class FamilyRepository : IBaseRepository<Family>
+{
+    private readonly ApplicationDbContext _context;
+
+    public FamilyRepository(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Family?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Families.FindAsync(new object[] { id }, cancellationToken);
+    }
+
+    public async Task<List<Family>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Families.ToListAsync(cancellationToken);
+    }
+
+    public async Task AddAsync(Family entity, CancellationToken cancellationToken = default)
+    {
+        await _context.Families.AddAsync(entity, cancellationToken);
+    }
+
+    public void Update(Family entity)
+    {
+        _context.Families.Update(entity);
+    }
+
+    public void Delete(Family entity)
+    {
+        _context.Families.Remove(entity);
+    }
+
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
+    }
+}
+```
+
+#### Unit of Work Pattern
+
+Unit of Work (UoW) Pattern đảm bảo rằng một tập hợp các thao tác (thêm, sửa, xóa) trên nhiều Repository được thực hiện như một giao dịch duy nhất. Nếu bất kỳ thao tác nào thất bại, toàn bộ giao dịch sẽ được rollback, đảm bảo tính nhất quán của dữ liệu.
+
+Trong dự án này, `ApplicationDbContext` của Entity Framework Core đóng vai trò là Unit of Work. Phương thức `SaveChangesAsync()` trên `DbContext` sẽ commit tất cả các thay đổi đã được theo dõi trong một giao dịch duy nhất.
+
+**Ví dụ sử dụng trong Handler:**
+
+```csharp
+// backend/src/Application/Families/Commands/CreateFamily/CreateFamilyCommandHandler.cs
+public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Result<Guid>>
+{
+    private readonly IApplicationDbContext _context; // IApplicationDbContext kế thừa từ DbContext
+
+    public CreateFamilyCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
+    {
+        var entity = new Family { Name = request.Name, Description = request.Description };
+
+        _context.Families.Add(entity);
+        await _context.SaveChangesAsync(cancellationToken); // SaveChangesAsync hoạt động như Commit của Unit of Work
+
+        return Result<Guid>.Success(entity.Id);
+    }
+}
+```
 
 **Kiểm thử Repository với In-Memory Database:**
 
 ```csharp
-// Trong file test
+// Trong file test (ví dụ: backend/tests/Application.UnitTests/Common/TestDbContextFactory.cs)
+
+// Tạo một DbContext sử dụng In-Memory Database cho mục đích test
 var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-    .UseInMemoryDatabase(databaseName: "TestDb")
+    .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()) // Sử dụng tên DB duy nhất cho mỗi test
     .Options;
 
-_context = new ApplicationDbContext(options);
-_repository = new MemberRepository(_context);
+var context = new ApplicationDbContext(options);
+context.Database.EnsureCreated(); // Đảm bảo database được tạo
+
+// Khởi tạo Repository với context test
+var repository = new FamilyRepository(context);
+
+// Thực hiện các thao tác test trên repository
+await repository.AddAsync(new Family { Id = Guid.NewGuid(), Name = "Test Family" });
+await repository.SaveChangesAsync();
+
+// ... kiểm tra kết quả ...
+
+// Sau khi test, có thể xóa database
+context.Database.EnsureDeleted();
+context.Dispose();
 ```
 
 ## 9. Database Migration
 
-Sử dụng `dotnet-ef` để quản lý schema.
+Sử dụng **Entity Framework Core Migrations** với công cụ `dotnet-ef` để quản lý schema của cơ sở dữ liệu. Migrations cho phép bạn định nghĩa cấu trúc database thông qua code (Code-First approach) và dễ dàng cập nhật schema khi có thay đổi trong mô hình dữ liệu.
 
--   **Tạo migration:**
+#### 1. Tạo Migration ban đầu (Initial Migration)
 
-    ```bash
-    dotnet ef migrations add InitialCreate --project src/Infrastructure -s src/Web
-    ```
+Khi bạn bắt đầu dự án hoặc sau khi định nghĩa các Entity đầu tiên, bạn cần tạo một migration ban đầu để tạo tất cả các bảng và cấu trúc database.
 
--   **Cập nhật database:**
+```bash
+# Đảm bảo bạn đang ở thư mục gốc của project backend
+dotnet ef migrations add InitialCreate --project src/Infrastructure --startup-project src/Web
+```
 
-    ```bash
-    dotnet ef database update --project src/Infrastructure -s src/Web
-    ```
+*   `InitialCreate`: Tên của migration. Bạn có thể đặt tên khác có ý nghĩa.
+*   `--project src/Infrastructure`: Chỉ định project chứa `DbContext` và các migration files.
+*   `--startup-project src/Web`: Chỉ định project khởi động (Web API) để `dotnet ef` có thể tìm thấy cấu hình và chuỗi kết nối.
+
+#### 2. Tạo Migration cho các thay đổi sau này
+
+Khi bạn thay đổi các Entity (thêm thuộc tính, thay đổi quan hệ, v.v.), bạn cần tạo một migration mới để cập nhật schema database.
+
+```bash
+# Đảm bảo bạn đang ở thư mục gốc của project backend
+dotnet ef migrations add AddNewFieldToMember --project src/Infrastructure --startup-project src/Web
+```
+
+#### 3. Cập nhật Database
+
+Sau khi tạo migration, bạn cần áp dụng nó vào database. Lệnh này sẽ thực thi các thay đổi schema được định nghĩa trong migration.
+
+```bash
+# Đảm bảo bạn đang ở thư mục gốc của project backend
+dotnet ef database update --project src/Infrastructure --startup-project src/Web
+```
+
+**Lưu ý:**
+
+*   Luôn chạy `dotnet ef database update` sau khi tạo migration mới để đảm bảo database của bạn được đồng bộ với code.
+*   Trong môi trường phát triển, khi sử dụng In-Memory Database, migrations sẽ không được áp dụng. `ApplicationDbContextInitialiser` sẽ tự động xử lý việc tạo database trong trường hợp này.
 
 ## 10. Hướng dẫn Kiểm thử
 
--   **Unit Tests**: `Application.UnitTests`
--   **Integration Tests**: `Infrastructure.IntegrationTests`
+Kiểm thử là một phần quan trọng của quá trình phát triển phần mềm, giúp đảm bảo chất lượng và độ tin cậy của ứng dụng. Dự án này áp dụng các loại kiểm thử chính sau:
 
--   **Chạy tất cả test:**
+#### 1. Unit Tests
+
+*   **Mục đích**: Kiểm tra các đơn vị mã nguồn nhỏ nhất (ví dụ: một phương thức, một class) một cách độc lập, tách biệt khỏi các phụ thuộc bên ngoài (như database, hệ thống file, API).
+*   **Phạm vi**: Tập trung vào logic nghiệp vụ trong Application Layer và Domain Layer.
+*   **Project**: `backend/tests/Application.UnitTests`
+*   **Cách chạy**: 
 
     ```bash
+    # Chạy tất cả Unit Tests
+    dotnet test backend/tests/Application.UnitTests
+    
+    # Hoặc chạy tất cả test trong toàn bộ solution
     dotnet test
     ```
 
+*   **Best Practice**: Sử dụng các mock framework (ví dụ: Moq) để giả lập các phụ thuộc, đảm bảo Unit Test chỉ kiểm tra đơn vị mã nguồn đang xét.
+
+#### 2. Integration Tests
+
+*   **Mục đích**: Kiểm tra sự tương tác giữa các thành phần khác nhau của hệ thống (ví dụ: Application Layer với Infrastructure Layer, hoặc API với Database). Integration Tests đảm bảo rằng các thành phần hoạt động cùng nhau một cách chính xác.
+*   **Phạm vi**: Tập trung vào Infrastructure Layer và các luồng end-to-end qua API.
+*   **Project**: `backend/tests/Infrastructure.IntegrationTests`
+*   **Cách chạy**: 
+
+    ```bash
+    # Chạy tất cả Integration Tests
+    dotnet test backend/tests/Infrastructure.IntegrationTests
+    
+    # Hoặc chạy tất cả test trong toàn bộ solution
+    dotnet test
+    ```
+
+*   **Best Practice**: Sử dụng In-Memory Database hoặc Testcontainers để tạo môi trường database độc lập cho mỗi lần chạy test, đảm bảo tính nhất quán và tốc độ.
+
+#### 3. Test Coverage
+
+*   **Mục đích**: Đo lường tỷ lệ phần trăm mã nguồn được thực thi bởi các bài kiểm thử. Test Coverage cao giúp tăng cường sự tự tin vào chất lượng mã nguồn.
+*   **Cách tạo báo cáo**: 
+
+    ```bash
+    # Chạy test và tạo báo cáo coverage
+    dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectionFile="$(SolutionDir)backend/tests/coverlet.runsettings"
+    
+    # Sau đó, bạn có thể sử dụng ReportGenerator để tạo báo cáo HTML
+    # dotnet tool install -g dotnet-reportgenerator-globaltool
+    # reportgenerator -reports:"path/to/coverage.xml" -targetdir:"coverage_report"
+    ```
+
+*   **Ngưỡng Coverage**: Đặt mục tiêu coverage hợp lý (ví dụ: 80% cho logic nghiệp vụ quan trọng) nhưng không nên coi coverage là mục tiêu duy nhất. Chất lượng test quan trọng hơn số lượng.
+
 ## 11. Logging & Monitoring
 
--   **Logging**: Sử dụng `ILogger` của .NET và **Serilog** để ghi log ra console và file.
--   **Monitoring**: (Chưa triển khai) Sẽ tích hợp **OpenTelemetry** để thu thập metrics và traces.
+Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt động của ứng dụng, phát hiện lỗi và đánh giá hiệu suất.
+
+#### 1. Logging
+
+*   **Công cụ**: Sử dụng `ILogger` của .NET Core làm abstraction cho logging, và **Serilog** làm implementation. Serilog là một thư viện logging mạnh mẽ, linh hoạt, cho phép ghi log ra nhiều sink khác nhau (console, file, database, các hệ thống log tập trung).
+*   **Cấu hình**: Serilog được cấu hình trong `Program.cs` hoặc thông qua `appsettings.json`.
+*   **Mục đích**: Ghi lại các sự kiện quan trọng của ứng dụng (thông tin, cảnh báo, lỗi, debug) để hỗ trợ debug, phân tích hành vi người dùng và theo dõi các vấn đề.
+*   **Best Practice**: 
+    *   Sử dụng các cấp độ log phù hợp (Information, Warning, Error, Debug, Verbose).
+    *   Tránh ghi log thông tin nhạy cảm.
+    *   Sử dụng structured logging để dễ dàng tìm kiếm và phân tích log.
+
+#### 2. Monitoring (Chưa triển khai)
+
+*   **Kế hoạch**: Sẽ tích hợp **OpenTelemetry** để thu thập metrics (số liệu), traces (dấu vết) và logs. OpenTelemetry là một bộ công cụ mã nguồn mở cung cấp một cách chuẩn hóa để thu thập dữ liệu telemetry từ các ứng dụng.
+*   **Mục đích**: 
+    *   **Metrics**: Thu thập các số liệu về hiệu suất (CPU, RAM, số lượng request, thời gian phản hồi) để theo dõi sức khỏe của hệ thống.
+    *   **Traces**: Theo dõi luồng của một request qua nhiều services và components, giúp xác định nguyên nhân gốc rễ của các vấn đề về hiệu suất hoặc lỗi trong hệ thống phân tán.
+*   **Công cụ tích hợp**: Dự kiến tích hợp với Prometheus (để lưu trữ metrics) và Grafana (để trực quan hóa metrics và traces).
 
 ## 12. Coding Style
 
@@ -149,10 +424,42 @@ Sử dụng `dotnet-ef` để quản lý schema.
 
 ## 13. Best Practices
 
--   Luôn inject dependency qua interface.
--   Sử dụng `CancellationToken` trong các phương thức async.
--   Áp dụng **Unit of Work pattern** khi cần thực hiện nhiều thao tác trong một transaction.
--   Sử dụng `async/await` một cách nhất quán.
+Để duy trì chất lượng mã nguồn cao, dễ bảo trì và mở rộng, hãy tuân thủ các nguyên tắc và thực tiễn tốt nhất sau:
+
+*   **Luôn inject dependency qua interface**: Thay vì inject trực tiếp các class cụ thể, hãy inject qua interface. Điều này giúp giảm sự phụ thuộc chặt chẽ (tight coupling), tăng tính linh hoạt và khả năng kiểm thử của code.
+
+    **Ví dụ:**
+    ```csharp
+    // Tốt
+    public class MyService(IMyDependency dependency) { /* ... */ }
+
+    // Không tốt
+    public class MyService(MyConcreteDependency dependency) { /* ... */ }
+    ```
+
+*   **Sử dụng `CancellationToken` trong các phương thức async**: Khi làm việc với các thao tác bất đồng bộ (`async/await`), luôn truyền và kiểm tra `CancellationToken`. Điều này cho phép hủy bỏ các thao tác đang chạy dở một cách duyên dáng, giúp cải thiện hiệu suất và khả năng phản hồi của ứng dụng, đặc biệt trong các tình huống timeout hoặc khi người dùng hủy yêu cầu.
+
+    **Ví dụ:**
+    ```csharp
+    public async Task<Result<List<FamilyDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
+    {
+        // ...
+        await _context.Families.ToListAsync(cancellationToken);
+        // ...
+    }
+    ```
+
+*   **Áp dụng Unit of Work pattern**: Khi cần thực hiện nhiều thao tác thêm, sửa, xóa trong một transaction duy nhất để đảm bảo tính nhất quán của dữ liệu, hãy sử dụng Unit of Work. Trong Entity Framework Core, `DbContext` đóng vai trò là Unit of Work, và `SaveChangesAsync()` sẽ commit tất cả các thay đổi.
+
+*   **Sử dụng `async/await` một cách nhất quán**: Luôn sử dụng `async` và `await` cho các thao tác I/O-bound để giải phóng thread và cải thiện khả năng mở rộng của ứng dụng. Tránh `async void` (trừ các event handler) và `Task.Result` hoặc `Task.Wait()` vì chúng có thể dẫn đến deadlock.
+
+*   **Sử dụng `Result Pattern` cho các thao tác nghiệp vụ**: Thay vì throw exception cho các trường hợp lỗi nghiệp vụ (ví dụ: không tìm thấy tài nguyên, dữ liệu không hợp lệ), hãy trả về một đối tượng `Result<T>` để chỉ rõ thành công hay thất bại và cung cấp thông tin lỗi chi tiết. Điều này giúp luồng code rõ ràng hơn và dễ dàng xử lý lỗi ở phía gọi.
+
+*   **Validation đầu vào**: Luôn xác thực dữ liệu đầu vào ở biên của ứng dụng (ví dụ: trong các Command/Query Validators sử dụng FluentValidation) để đảm bảo dữ liệu hợp lệ trước khi xử lý logic nghiệp vụ.
+
+*   **Tách biệt mối quan tâm (Separation of Concerns)**: Tuân thủ chặt chẽ Clean Architecture bằng cách đảm bảo mỗi lớp chỉ có một trách nhiệm duy nhất và không phụ thuộc vào các lớp bên ngoài nó.
+
+*   **Sử dụng DTOs (Data Transfer Objects)**: Luôn ánh xạ Domain Entities sang DTOs khi trả về dữ liệu cho client hoặc khi nhận dữ liệu từ client. Điều này giúp bảo vệ Domain Model khỏi việc bị lộ ra ngoài và cho phép tùy chỉnh cấu trúc dữ liệu cho từng trường hợp sử dụng.
 
 ## 14. Tài liệu liên quan
 

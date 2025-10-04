@@ -37,6 +37,36 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
     Authorization: Bearer <YOUR_JWT_TOKEN>
     ```
 
+### 🔄 Áp dụng xác thực trên Endpoint
+
+*(Updated to match current refactor: Authentication enforcement)*
+
+Các endpoint yêu cầu xác thực sẽ được đánh dấu bằng attribute `[Authorize]` trong các Controller hoặc trên từng action method. Điều này đảm bảo rằng chỉ những request có JWT hợp lệ mới có thể truy cập tài nguyên.
+
+**Ví dụ:**
+
+```csharp
+// backend/src/Web/Controllers/FamilyController.cs
+
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
+public class FamilyController : ApiControllerBase
+{
+    // ... các action methods ...
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Result<FamilyDto>>> GetFamilyById(Guid id)
+    {
+        return await Mediator.Send(new GetFamilyByIdQuery(id));
+    }
+
+    // ...
+}
+```
+
+Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nếu một request không có hoặc có JWT không hợp lệ, API sẽ trả về lỗi `401 Unauthorized` hoặc `403 Forbidden`.
+
 ## 3. Phân trang (Pagination)
 
 Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/members`) đều hỗ trợ phân trang qua các query parameter sau:
@@ -63,75 +93,152 @@ Phản hồi sẽ có cấu trúc `PaginatedList<T>`:
 
 ## 4. Lọc và Tìm kiếm
 
-Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. Ví dụ, `GET /api/members` có thể hỗ trợ:
+Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. Các tham số lọc cụ thể sẽ phụ thuộc vào từng tài nguyên (resource).
 
--   `search`: Chuỗi ký tự để tìm kiếm theo tên, nghề nghiệp, v.v.
--   `gender`: Lọc theo giới tính.
+**Ví dụ với `GET /api/members`:**
+
+-   `searchQuery`: Chuỗi ký tự để tìm kiếm theo tên, nghề nghiệp, v.v. (ví dụ: `searchQuery=Văn`)
+-   `gender`: Lọc theo giới tính (ví dụ: `gender=Male`)
+-   `familyId`: Lọc theo ID của dòng họ (ví dụ: `familyId=some-uuid`)
 
 **Ví dụ:**
 
 ```http
-GET /api/members?search=Văn&gender=Male
+GET /api/members?searchQuery=Văn&gender=Male&pageNumber=1&pageSize=10
+```
+
+**Ví dụ với `GET /api/family/search`:**
+
+-   `keyword`: Từ khóa để tìm kiếm theo tên dòng họ, mô tả, v.v.
+
+```http
+GET /api/family/search?keyword=Royal&pageNumber=1&pageSize=5
 ```
 
 ## 5. Cấu trúc Phản hồi Lỗi (Error Response)
 
-Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với cấu trúc sau, được bao gói trong `Result Pattern`:
+Khi có lỗi xảy ra hoặc một thao tác hoàn tất, API sẽ trả về một phản hồi chuẩn sử dụng **Result Pattern**. `Result Pattern` là một cách tiếp cận để xử lý kết quả của các thao tác (thành công hoặc thất bại) một cách nhất quán, tránh việc throw exceptions không cần thiết và làm rõ ràng luồng xử lý lỗi.
+
+#### Mục đích của Result Pattern
+
+*   **Minh bạch:** Rõ ràng chỉ ra một thao tác có thành công hay không.
+*   **Thông tin lỗi chi tiết:** Cung cấp thông tin cụ thể về lỗi (thông báo, mã lỗi, nguồn gốc) mà không cần throw exception.
+*   **Dễ kiểm soát:** Giúp client dễ dàng kiểm tra kết quả và xử lý các trường hợp thành công/thất bại.
+
+#### Cấu trúc Phản hồi
+
+Phản hồi sẽ có cấu trúc sau:
 
 ```json
 {
-  "isSuccess": false,
-  "value": null,
-  "error": "string",
-  "errorCode": number,
-  "source": "string"
+  "isSuccess": boolean, // true nếu thao tác thành công, false nếu thất bại
+  "value": any | null,  // Dữ liệu trả về nếu thành công, null nếu thất bại
+  "error": string | null, // Thông báo lỗi nếu thất bại, null nếu thành công
+  "errorCode": number | null, // Mã lỗi HTTP (ví dụ: 400, 404, 500) nếu thất bại, null nếu thành công
+  "source": string | null // Nguồn gốc của lỗi (ví dụ: tên phương thức, class) để dễ debug
 }
 ```
 
-**Ví dụ lỗi:**
+#### Ví dụ Phản hồi Thành công
 
 ```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "isSuccess": true,
+  "value": {
+    "id": "16905e2b-5654-4ed0-b118-bbdd028df6eb",
+    "name": "Royal Family",
+    "description": "The British Royal Family",
+    "address": "Buckingham Palace"
+  },
+  "error": null,
+  "errorCode": null,
+  "source": null
+}
+```
+
+#### Ví dụ Phản hồi Lỗi
+
+```json
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
 {
   "isSuccess": false,
   "value": null,
-  "error": "Family with ID {id} not found.",
+  "error": "Family with ID 'some-invalid-id' not found.",
   "errorCode": 404,
   "source": "FamilyService.GetFamilyByIdAsync"
 }
 ```
+
+**Giải thích các trường lỗi:**
+
+*   `isSuccess`: Luôn là `false` khi có lỗi.
+*   `value`: Luôn là `null` khi có lỗi.
+*   `error`: Một chuỗi mô tả lỗi, thường là thông báo thân thiện với người dùng hoặc thông tin chi tiết cho nhà phát triển.
+*   `errorCode`: Mã trạng thái HTTP tương ứng với lỗi (ví dụ: 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 500 Internal Server Error).
+*   `source`: Cho biết nơi lỗi phát sinh trong mã nguồn (ví dụ: tên class và phương thức), rất hữu ích cho việc debug.
 
 ## 6. Các Endpoint chính
 
 ### 6.1. Quản lý Dòng họ (`/api/family`)
 
 -   `GET /api/family`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
+    *   **Phản hồi:** `PaginatedList<Family>`
 -   `GET /api/family/{id}`: Lấy thông tin dòng họ theo ID.
+    *   **Phản hồi:** `Result<Family>`
 -   `GET /api/family?ids=id1,id2`: Lấy thông tin nhiều dòng họ theo danh sách ID.
+    *   **Phản hồi:** `Result<List<Family>>`
 -   `GET /api/family/search?keyword=...&page=...&itemsPerPage=...`: Tìm kiếm dòng họ theo từ khóa và hỗ trợ phân trang.
+    *   **Phản hồi:** `PaginatedList<Family>`
 -   `POST /api/family`: Tạo dòng họ mới.
+    *   **Request Body:** `CreateFamilyCommand` (ví dụ: `{ "name": "Tên dòng họ", "description": "Mô tả" }`)
+    *   **Phản hồi:** `Result<Guid>` (ID của dòng họ vừa tạo)
 -   `PUT /api/family/{id}`: Cập nhật thông tin dòng họ.
+    *   **Request Body:** `UpdateFamilyCommand` (ví dụ: `{ "id": "uuid", "name": "Tên mới", "description": "Mô tả mới" }`)
+    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/family/{id}`: Xóa dòng họ.
+    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
 
 ### 6.2. Quản lý Thành viên (`/api/members`)
 
 -   `GET /api/members`: Lấy danh sách thành viên (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
+    *   **Phản hồi:** `PaginatedList<Member>`
 -   `GET /api/members/{id}`: Lấy thông tin thành viên theo ID.
+    *   **Phản hồi:** `Result<Member>`
 -   `GET /api/members?ids=id1,id2`: Lấy thông tin nhiều thành viên theo danh sách ID.
+    *   **Phản hồi:** `Result<List<Member>>`
 -   `POST /api/members`: Thêm thành viên mới.
+    *   **Request Body:** `CreateMemberCommand` (ví dụ: `{ "firstName": "Tên", "lastName": "Họ", "familyId": "uuid" }`)
+    *   **Phản hồi:** `Result<Guid>` (ID của thành viên vừa tạo)
 -   `PUT /api/members/{id}`: Cập nhật thông tin thành viên.
+    *   **Request Body:** `UpdateMemberCommand` (ví dụ: `{ "id": "uuid", "firstName": "Tên mới", "lastName": "Họ mới" }`)
+    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/members/{id}`: Xóa thành viên.
+    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
 
 ### 6.3. Quản lý Sự kiện (`/api/events`)
 
 -   `GET /api/events`: Lấy danh sách sự kiện (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
+    *   **Phản hồi:** `PaginatedList<Event>`
 -   `GET /api/events/{id}`: Lấy thông tin sự kiện theo ID.
+    *   **Phản hồi:** `Result<Event>`
 -   `POST /api/events`: Tạo sự kiện mới.
+    *   **Request Body:** `CreateEventCommand` (ví dụ: `{ "name": "Tên sự kiện", "startDate": "2023-01-01T00:00:00Z", "familyId": "uuid" }`)
+    *   **Phản hồi:** `Result<Guid>` (ID của sự kiện vừa tạo)
 -   `PUT /api/events/{id}`: Cập nhật thông tin sự kiện.
+    *   **Request Body:** `UpdateEventCommand` (ví dụ: `{ "id": "uuid", "name": "Tên sự kiện mới" }`)
+    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/events/{id}`: Xóa sự kiện.
+    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
 
 ### 6.4. Tìm kiếm chung (`/api/search`)
 
 -   `GET /api/search?keyword=...`: Tìm kiếm chung trên cả dòng họ và thành viên theo từ khóa.
+    *   **Phản hồi:** `Result<SearchResultsDto>` (chứa danh sách Family và Member tìm được)
 
 ## 7. Mô hình Dữ liệu (Response Models)
 
@@ -142,7 +249,10 @@ Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với c�
   "id": "string (uuid)",
   "name": "string",
   "description": "string",
-  "address": "string"
+  "address": "string",
+  "avatarUrl": "string (url, nullable)",
+  "visibility": "string (Public/Private)",
+  "totalMembers": "number"
 }
 ```
 
@@ -152,14 +262,22 @@ Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với c�
 {
   "id": "string (uuid)",
   "familyId": "string (uuid)",
+  "firstName": "string",
+  "lastName": "string",
   "fullName": "string",
   "gender": "string (Male/Female/Other)",
-  "dateOfBirth": "string (date-time)",
-  "placeOfBirth": "string",
+  "dateOfBirth": "string (date-time, nullable)",
+  "dateOfDeath": "string (date-time, nullable)",
+  "birthDeathYears": "string (nullable)",
+  "avatarUrl": "string (url, nullable)",
+  "nickname": "string (nullable)",
+  "placeOfBirth": "string (nullable)",
+  "placeOfDeath": "string (nullable)",
+  "occupation": "string (nullable)",
   "fatherId": "string (uuid, nullable)",
   "motherId": "string (uuid, nullable)",
   "spouseId": "string (uuid, nullable)",
-  "childrenIds": "array of string (uuid)"
+  "biography": "string (nullable)"
 }
 ```
 
@@ -169,13 +287,27 @@ Khi có lỗi xảy ra, API sẽ trả về một response body chuẩn với c�
 {
   "id": "string (uuid)",
   "name": "string",
-  "description": "string",
+  "description": "string (nullable)",
   "startDate": "string (date-time)",
-  "endDate": "string (date-time)",
-  "location": "string",
+  "endDate": "string (date-time, nullable)",
+  "location": "string (nullable)",
   "familyId": "string (uuid, nullable)",
-  "type": "string (Birth, Marriage, Death, etc.)",
-  "color": "string",
+  "type": "string (Birth, Marriage, Death, Other)",
+  "color": "string (nullable)",
   "relatedMembers": "array of string (uuid)"
 }
+```
+
+### 7.4. SearchResultsDto
+
+```json
+{
+  "families": [
+    // ... Family objects ...
+  ],
+  "members": [
+    // ... Member objects ...
+  ]
+}
+```
 ```

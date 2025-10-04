@@ -26,30 +26,71 @@
 
 ## 1. Giới thiệu
 
-Bảo mật là yếu tố tối quan trọng trong mọi hệ thống. Dự án Cây Gia Phả áp dụng các nguyên tắc bảo mật như **Zero Trust** (không tin tưởng bất kỳ ai/thứ gì mặc định) và **Least Privilege** (cấp quyền tối thiểu cần thiết) để bảo vệ dữ liệu người dùng. Tài liệu này mô tả các cơ chế xác thực, phân quyền và các biện pháp bảo mật khác được triển khai.
+Bảo mật là yếu tố tối quan trọng trong mọi hệ thống phần mềm, đặc biệt là với các ứng dụng xử lý dữ liệu cá nhân như Cây Gia Phả. Dự án này áp dụng các nguyên tắc bảo mật cốt lõi như **Zero Trust** (không tin tưởng bất kỳ ai/thứ gì mặc định, luôn xác minh) và **Least Privilege** (cấp quyền tối thiểu cần thiết cho người dùng và hệ thống) để bảo vệ dữ liệu người dùng khỏi các mối đe dọa. Tài liệu này mô tả chi tiết các cơ chế xác thực (Authentication), phân quyền (Authorization) và các biện pháp bảo mật khác được triển khai để đảm bảo an toàn cho ứng dụng.
 
 ## 2. Xác thực (Authentication)
 
 ### 2.1. Cơ chế JWT
 
-Hệ thống sử dụng **JSON Web Tokens (JWT)** để xác thực người dùng. JWT là một chuỗi JSON được mã hóa, chứa thông tin về người dùng (claims) và được ký điện tử để đảm bảo tính toàn vẹn. Khi người dùng đăng nhập thành công, server sẽ trả về một JWT.
+Hệ thống sử dụng **JSON Web Tokens (JWT)** để xác thực người dùng. JWT là một tiêu chuẩn mở (RFC 7519) định nghĩa một cách nhỏ gọn và tự chứa để truyền thông tin an toàn giữa các bên dưới dạng một đối tượng JSON. Thông tin này có thể được xác minh và tin cậy vì nó được ký điện tử.
 
--   **Access Token**: Dùng để truy cập các tài nguyên được bảo vệ. Có thời gian sống ngắn.
--   **Refresh Token**: Dùng để lấy Access Token mới khi Access Token hết hạn. Có thời gian sống dài hơn và được lưu trữ an toàn hơn.
+#### Cấu trúc của JWT
+
+Một JWT bao gồm ba phần, được phân tách bằng dấu chấm (`.`):
+
+1.  **Header**: Chứa thông tin về loại token (JWT) và thuật toán mã hóa được sử dụng (ví dụ: HS256, RS256).
+    ```json
+    {
+      "alg": "HS256",
+      "typ": "JWT"
+    }
+    ```
+2.  **Payload (Claims)**: Chứa các "claims" (tuyên bố) về người dùng và các dữ liệu bổ sung. Các claims có thể là:
+    *   **Registered claims**: Các claims tiêu chuẩn (ví dụ: `iss` - issuer, `exp` - expiration time, `sub` - subject).
+    *   **Public claims**: Các claims tùy chỉnh được định nghĩa công khai.
+    *   **Private claims**: Các claims tùy chỉnh được sử dụng giữa các bên tham gia.
+    ```json
+    {
+      "sub": "1234567890",
+      "name": "John Doe",
+      "admin": true,
+      "iat": 1516239022
+    }
+    ```
+3.  **Signature**: Được tạo bằng cách mã hóa Header, Payload và một khóa bí mật (secret key) bằng thuật toán đã chỉ định trong Header. Chữ ký này được sử dụng để xác minh rằng token không bị giả mạo và được gửi từ nguồn đáng tin cậy.
+
+#### Vai trò của JWT trong xác thực
+
+*   **Access Token**: Dùng để truy cập các tài nguyên được bảo vệ. Có thời gian sống ngắn (ví dụ: 15 phút đến 1 giờ) để giảm thiểu rủi ro nếu token bị lộ.
+*   **Refresh Token**: Dùng để lấy Access Token mới khi Access Token hiện tại hết hạn mà không yêu cầu người dùng đăng nhập lại. Có thời gian sống dài hơn và được lưu trữ an toàn hơn (thường là trong `HttpOnly Cookie`).
 
 ### 2.2. Lưu trữ Token an toàn
 
--   **Access Token**: Nên được lưu trữ trong bộ nhớ (in-memory) của Frontend để giảm thiểu rủi ro XSS (Cross-Site Scripting).
--   **Refresh Token**: Nên được lưu trữ trong `HttpOnly Cookie` để chống lại các cuộc tấn công XSS, đồng thời được đánh dấu `Secure` để chỉ gửi qua HTTPS.
+Việc lưu trữ JWT một cách an toàn là rất quan trọng để ngăn chặn các cuộc tấn công như XSS (Cross-Site Scripting) và CSRF (Cross-Site Request Forgery).
+
+*   **Access Token**: 
+    *   Nên được lưu trữ trong bộ nhớ (in-memory) của Frontend (ví dụ: trong một biến JavaScript hoặc Pinia store) thay vì `localStorage` hoặc `sessionStorage`.
+    *   Lý do: Giảm thiểu rủi ro XSS. Nếu một script độc hại được inject vào trang, nó sẽ khó truy cập vào Access Token nếu nó không được lưu trữ trong DOM hoặc `localStorage`.
+    *   Thời gian sống ngắn của Access Token cũng giúp giảm thiểu tác động nếu nó bị lộ.
+
+*   **Refresh Token**: 
+    *   Nên được lưu trữ trong `HttpOnly Cookie`.
+    *   Lý do: `HttpOnly Cookie` không thể truy cập được bằng JavaScript, giúp chống lại các cuộc tấn công XSS.
+    *   Cookie cũng nên được đánh dấu `Secure` (chỉ gửi qua HTTPS) và `SameSite=Lax` hoặc `Strict` để chống CSRF.
+    *   Refresh Token có thời gian sống dài hơn Access Token và được sử dụng để lấy Access Token mới khi Access Token hết hạn.
 
 ### 2.3. Tích hợp Auth0 (Provider-agnostic)
 
-Hệ thống được thiết kế với một lớp trừu tượng cho dịch vụ xác thực, cho phép dễ dàng thay đổi nhà cung cấp (Auth0, Keycloak, Firebase Auth) mà không ảnh hưởng đến logic nghiệp vụ cốt lõi.
+Hệ thống được thiết kế với một lớp trừu tượng cho dịch vụ xác thực, cho phép dễ dàng thay đổi nhà cung cấp (Identity Provider - IdP) như Auth0, Keycloak, Firebase Auth mà không ảnh hưởng đến logic nghiệp vụ cốt lõi của Backend.
 
--   **Backend**: Chỉ tương tác với các interface xác thực chung.
--   **Frontend**: Sử dụng SDK của nhà cung cấp (ví dụ: Auth0 SDK) để quản lý luồng đăng nhập/đăng ký và lấy token.
+*   **Backend**: Chỉ tương tác với các interface xác thực chung (ví dụ: `IAuthProvider`). Điều này có nghĩa là Backend không cần biết chi tiết về cách Auth0 hoạt động, chỉ cần biết cách nhận và xác thực JWT hợp lệ.
+*   **Frontend**: Sử dụng SDK của nhà cung cấp (ví dụ: Auth0 SDK) để quản lý luồng đăng nhập/đăng ký và lấy token. Frontend sẽ gửi token này đến Backend.
+
+**Lợi ích**: Tăng tính linh hoạt, giảm sự phụ thuộc vào một nhà cung cấp cụ thể, giúp dễ dàng chuyển đổi hoặc hỗ trợ nhiều IdP trong tương lai.
 
 ### 2.4. Luồng Đăng nhập/Đăng xuất
+
+Luồng đăng nhập và đăng xuất được thiết kế để đảm bảo an toàn và trải nghiệm người dùng tốt nhất:
 
 ```mermaid
 sequenceDiagram
@@ -58,116 +99,293 @@ sequenceDiagram
     participant Auth0 (hoặc IdP khác)
     participant Backend
 
-    User->>Frontend: Yêu cầu Đăng nhập
-    Frontend->>Auth0: Chuyển hướng đến trang Đăng nhập của Auth0
-    Auth0->>User: Hiển thị form Đăng nhập
-    User->>Auth0: Nhập thông tin đăng nhập
-    Auth0-->>Frontend: Trả về JWT (Access Token, ID Token, Refresh Token)
-    Frontend->>Frontend: Lưu trữ Token an toàn
-    Frontend->>Backend: Gửi Access Token trong Header Authorization
-    Backend->>Backend: Xác thực Access Token
-    Backend-->>Frontend: Phản hồi thành công
+    User->>Frontend: Yêu cầu Đăng nhập (ví dụ: click nút Login)
+    Frontend->>Auth0: Chuyển hướng đến trang Đăng nhập của Auth0 (hoặc hiển thị widget)
+    Auth0->>User: Hiển thị form Đăng nhập/Đăng ký
+    User->>Auth0: Nhập thông tin đăng nhập (email/password, social login)
+    Auth0-->>Frontend: Trả về JWT (Access Token, ID Token, Refresh Token) sau khi xác thực thành công
+    Frontend->>Frontend: Lưu trữ Token an toàn (Access Token trong bộ nhớ, Refresh Token trong HttpOnly Cookie)
+    Frontend->>Backend: Gửi Access Token trong Header Authorization cho các yêu cầu API
+    Backend->>Backend: Xác thực Access Token (kiểm tra chữ ký, thời hạn, claims)
+    Backend-->>Frontend: Phản hồi thành công (dữ liệu người dùng, v.v.)
 
-    User->>Frontend: Yêu cầu Đăng xuất
-    Frontend->>Auth0: Xóa session (nếu có)
-    Frontend->>Frontend: Xóa Token đã lưu
-    Frontend-->>User: Chuyển hướng về trang chủ
+    User->>Frontend: Yêu cầu Đăng xuất (ví dụ: click nút Logout)
+    Frontend->>Auth0: Xóa session tại IdP (nếu có, để đăng xuất hoàn toàn)
+    Frontend->>Frontend: Xóa tất cả Token đã lưu (Access Token, Refresh Token)
+    Frontend-->>User: Chuyển hướng về trang chủ hoặc trang đăng nhập
 ```
+
+**Giải thích:**
+
+*   **Đăng nhập**: Người dùng được chuyển hướng đến IdP để xác thực. Sau khi thành công, IdP trả về các token cho Frontend. Frontend lưu trữ các token này và sử dụng Access Token để gọi API Backend.
+*   **Đăng xuất**: Frontend yêu cầu IdP xóa session và xóa tất cả các token đã lưu trữ cục bộ. Điều này đảm bảo người dùng không còn được xác thực.
 
 ## 3. Phân quyền (Authorization)
 
 ### 3.1. Cơ chế RBAC
 
-Hệ thống sử dụng **Role-Based Access Control (RBAC)** để quản lý quyền truy cập. Mỗi người dùng được gán một hoặc nhiều vai trò, và mỗi vai trò có một tập hợp các quyền hạn nhất định.
+Hệ thống sử dụng **Role-Based Access Control (RBAC)** để quản lý quyền truy cập. RBAC là một phương pháp quản lý quyền hạn dựa trên vai trò của người dùng trong hệ thống. Thay vì gán quyền trực tiếp cho từng người dùng, quyền hạn được gán cho các vai trò, và người dùng sẽ được gán các vai trò phù hợp.
 
--   **Roles**: `Admin`, `FamilyAdmin`, `Member`.
--   **Claims trong JWT**: Vai trò của người dùng được mã hóa thành claims trong JWT. Backend sẽ đọc các claims này để kiểm tra quyền.
+#### Các khái niệm chính
+
+*   **Người dùng (Users)**: Các cá nhân hoặc hệ thống tương tác với ứng dụng.
+*   **Vai trò (Roles)**: Các chức danh hoặc nhóm chức năng trong hệ thống (ví dụ: `Admin`, `FamilyAdmin`, `Member`). Mỗi vai trò đại diện cho một tập hợp các quyền hạn nhất định.
+*   **Quyền hạn (Permissions)**: Các hành động cụ thể mà người dùng có thể thực hiện (ví dụ: `family:create`, `member:edit`, `event:delete`).
+
+#### Cách thức hoạt động
+
+1.  **Gán quyền cho vai trò**: Các quyền hạn được gán cho các vai trò (ví dụ: vai trò `Admin` có tất cả các quyền, vai trò `FamilyAdmin` có quyền quản lý dòng họ của mình).
+2.  **Gán vai trò cho người dùng**: Khi người dùng đăng ký hoặc được tạo, họ sẽ được gán một hoặc nhiều vai trò.
+3.  **Kiểm tra quyền**: Khi người dùng cố gắng truy cập một tài nguyên hoặc thực hiện một hành động, hệ thống sẽ kiểm tra xem người dùng đó có vai trò cần thiết để thực hiện hành động đó hay không.
+
+#### Triển khai trong hệ thống
+
+*   **Roles**: Các vai trò được định nghĩa trong `backend/src/Domain/Constants/Roles.cs` (ví dụ: `Administrator`).
+*   **Claims trong JWT**: Vai trò của người dùng được mã hóa thành claims trong JWT. Backend sẽ đọc các claims này để kiểm tra quyền.
 
 ### 3.2. Bảo vệ Endpoint (Backend)
 
-Sử dụng `[Authorize]` attribute trong ASP.NET Core để bảo vệ các controller hoặc action.
+Trong ASP.NET Core, việc bảo vệ các endpoint API được thực hiện bằng cách sử dụng attribute `[Authorize]` trên các Controller hoặc trên từng action method cụ thể. Điều này cho phép bạn định nghĩa các yêu cầu xác thực và phân quyền cho từng phần của API.
+
+#### Ví dụ cơ bản
+
+*   **Bảo vệ toàn bộ Controller**: Áp dụng `[Authorize]` trên class Controller để yêu cầu xác thực cho tất cả các action trong Controller đó.
+
+    ```csharp
+    // backend/src/Web/Controllers/FamilyController.cs
+    [Authorize] // Yêu cầu xác thực cho tất cả các action trong FamilyController
+    [ApiController]
+    [Route("api/[controller]")]
+    public class FamilyController : ApiControllerBase
+    {
+        // ...
+    }
+    ```
+
+*   **Bảo vệ từng Action**: Áp dụng `[Authorize]` trên một action method cụ thể.
+
+    ```csharp
+    // backend/src/Web/Controllers/MemberController.cs
+    [HttpGet("{id}")]
+    [Authorize] // Chỉ yêu cầu xác thực cho action này
+    public async Task<ActionResult<Result<MemberDto>>> GetMemberById(Guid id)
+    {
+        // ...
+    }
+    ```
+
+#### Phân quyền theo vai trò (Role-based Authorization)
+
+Sử dụng `Roles` parameter trong `[Authorize]` để chỉ định những vai trò nào được phép truy cập.
 
 ```csharp
+// backend/src/Web/Controllers/AdminController.cs
 [ApiController]
 [Route("api/[controller]")]
-public class FamiliesController : ControllerBase
+public class AdminController : ApiControllerBase
 {
-    [HttpGet]
-    [Authorize(Roles = "Admin,FamilyAdmin")] // Chỉ Admin và FamilyAdmin mới có quyền truy cập
-    public async Task<IActionResult> GetFamilies()
+    [HttpGet("users")]
+    [Authorize(Roles = Roles.Administrator)] // Chỉ người dùng có vai trò Administrator mới được truy cập
+    public async Task<ActionResult<Result<List<UserDto>>>> GetUsers()
     {
         // ...
     }
 
-    [HttpPost]
-    [Authorize(Policy = "CanCreateFamily")] // Sử dụng Policy-based Authorization
-    public async Task<IActionResult> CreateFamily([FromBody] CreateFamilyCommand command)
+    [HttpPost("family/{id}/assign-admin")]
+    [Authorize(Roles = Roles.Administrator + "," + Roles.FamilyAdmin)] // Admin hoặc FamilyAdmin
+    public async Task<ActionResult> AssignFamilyAdmin(Guid id, [FromBody] AssignFamilyAdminCommand command)
     {
         // ...
     }
 }
 ```
 
+#### Phân quyền dựa trên chính sách (Policy-based Authorization)
+
+Sử dụng `Policy` parameter trong `[Authorize]` để áp dụng các chính sách phân quyền phức tạp hơn, được định nghĩa trong `Program.cs`.
+
+```csharp
+// backend/src/Web/Program.cs (trong AddAuthorization)
+builder.Services.AddAuthorization(options =>
+    options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+
+// Sử dụng trong Controller
+[HttpPost]
+[Authorize(Policy = Policies.CanPurge)] // Chỉ người dùng thỏa mãn chính sách CanPurge mới được truy cập
+public async Task<IActionResult> PurgeData([FromBody] PurgeDataCommand command)
+{
+    // ...
+}
+```
+
 ### 3.3. Kiểm tra quyền (Frontend)
 
-Frontend có thể kiểm tra vai trò hoặc quyền của người dùng để điều chỉnh giao diện (ví dụ: ẩn/hiện nút, menu).
+Frontend cần kiểm tra vai trò hoặc quyền của người dùng để điều chỉnh giao diện người dùng (UI) và trải nghiệm người dùng (UX). Điều này bao gồm việc ẩn/hiện các nút, menu, hoặc các phần tử UI khác mà người dùng không có quyền truy cập.
+
+#### Ví dụ trong Vue component (sử dụng Pinia Store)
 
 ```typescript
-// Ví dụ trong Vue component
+// frontend/src/stores/auth.store.ts (ví dụ về một auth store)
+import { defineStore } from 'pinia';
+
+interface UserProfile {
+  id: string;
+  email: string;
+  roles: string[]; // Danh sách các vai trò của người dùng
+  permissions: string[]; // Danh sách các quyền cụ thể của người dùng
+}
+
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    user: null as UserProfile | null,
+    isAuthenticated: false,
+  }),
+  actions: {
+    setUser(profile: UserProfile) {
+      this.user = profile;
+      this.isAuthenticated = true;
+    },
+    logout() {
+      this.user = null;
+      this.isAuthenticated = false;
+      // Xóa token và chuyển hướng
+    },
+  },
+  getters: {
+    isAdmin: (state) => state.user?.roles.includes('Administrator'),
+    canEditFamily: (state) => state.user?.permissions.includes('family:edit'),
+  },
+});
+
+// frontend/src/components/AdminPanel.vue
+<script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.store';
 import { computed } from 'vue';
 
-export default {
-  setup() {
-    const authStore = useAuthStore();
-    const isAdmin = computed(() => authStore.user?.roles.includes('Admin'));
-    const canEditFamily = computed(() => authStore.user?.permissions.includes('family:edit'));
+const authStore = useAuthStore();
+const isAdmin = computed(() => authStore.isAdmin);
+const canEditFamily = computed(() => authStore.canEditFamily);
+</script>
 
-    return { isAdmin, canEditFamily };
-  },
-};
+<template>
+  <div v-if="isAdmin">
+    <h2>Bảng điều khiển Admin</h2>
+    <button v-if="canEditFamily">Chỉnh sửa thông tin dòng họ</button>
+    <!-- Các chức năng khác dành cho Admin -->
+  </div>
+  <div v-else>
+    <p>Bạn không có quyền truy cập vào bảng điều khiển Admin.</p>
+  </div>
+</template>
 ```
+
+**Giải thích:**
+
+*   Frontend nhận thông tin về vai trò và quyền hạn của người dùng từ Backend (thường là một phần của JWT Payload hoặc một endpoint riêng).
+*   Thông tin này được lưu trữ trong một Pinia store (ví dụ: `auth.store.ts`).
+*   Các `computed property` trong Vue component được sử dụng để kiểm tra quyền hạn và điều chỉnh hiển thị UI một cách linh hoạt.
 
 ## 4. Các biện pháp bảo mật khác
 
+Ngoài xác thực và phân quyền, dự án còn áp dụng nhiều biện pháp bảo mật khác để tăng cường khả năng phòng thủ của hệ thống.
+
 ### 4.1. HTTPS
 
--   **Vì sao cần**: Mã hóa tất cả lưu lượng mạng giữa client và server, ngăn chặn nghe lén và tấn công Man-in-the-Middle.
--   **Best Practices**: Luôn sử dụng HTTPS trong môi trường production. Redirect tất cả HTTP traffic sang HTTPS.
+*   **Vì sao cần**: HTTPS (Hypertext Transfer Protocol Secure) mã hóa tất cả lưu lượng mạng giữa client và server. Điều này ngăn chặn các cuộc tấn công nghe lén (eavesdropping), giả mạo (tampering) và tấn công Man-in-the-Middle (MitM), đảm bảo rằng dữ liệu truyền tải là riêng tư và toàn vẹn.
+*   **Best Practices**: 
+    *   Luôn sử dụng HTTPS trong môi trường production.
+    *   Cấu hình server để tự động chuyển hướng (redirect) tất cả các yêu cầu HTTP sang HTTPS.
+    *   Sử dụng HSTS (HTTP Strict Transport Security) để buộc trình duyệt chỉ kết nối qua HTTPS.
 
 ### 4.2. CORS (Cross-Origin Resource Sharing)
 
--   **Vì sao cần**: Ngăn chặn các website độc hại thực hiện các yêu cầu cross-origin trái phép đến API của chúng ta.
--   **Best Practices**: Cấu hình CORS chặt chẽ, chỉ cho phép các origin được tin cậy truy cập API.
+*   **Vì sao cần**: CORS là một cơ chế bảo mật của trình duyệt, ngăn chặn các website độc hại thực hiện các yêu cầu cross-origin (yêu cầu từ một domain khác) trái phép đến API của chúng ta. Nếu không cấu hình đúng, ứng dụng có thể bị tấn công CSRF hoặc bị lộ dữ liệu.
+*   **Best Practices**: 
+    *   Cấu hình CORS chặt chẽ trên Backend, chỉ cho phép các origin (domain) được tin cậy truy cập API.
+    *   Tránh sử dụng `AllowAnyOrigin()` trong môi trường production.
+
+    **Ví dụ cấu hình trong ASP.NET Core (`Program.cs`):**
+
+    ```csharp
+    // backend/src/Web/Program.cs
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowFrontend",
+            builder =>
+            {
+                builder.WithOrigins("http://localhost:5173", "https://your-production-frontend.com")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
+            });
+    });
+
+    // Sử dụng policy trong pipeline
+    app.UseCors("AllowFrontend");
+    ```
 
 ### 4.3. Input Validation
 
--   **Vì sao cần**: Bảo vệ ứng dụng khỏi các cuộc tấn công như SQL Injection, XSS, và Buffer Overflow bằng cách đảm bảo dữ liệu đầu vào hợp lệ.
--   **Best Practices**: Validate dữ liệu ở cả Frontend và Backend. Sử dụng các thư viện validation mạnh mẽ (ví dụ: FluentValidation trong Backend).
+*   **Vì sao cần**: Input Validation là tuyến phòng thủ đầu tiên chống lại nhiều loại tấn công, bao gồm SQL Injection, XSS (Cross-Site Scripting), Command Injection, và Buffer Overflow. Bằng cách xác thực dữ liệu đầu vào, chúng ta đảm bảo rằng ứng dụng chỉ xử lý dữ liệu hợp lệ và an toàn.
+*   **Best Practices**: 
+    *   Validate dữ liệu ở cả Frontend (để cải thiện UX) và Backend (để đảm bảo an toàn).
+    *   Sử dụng các thư viện validation mạnh mẽ (ví dụ: FluentValidation trong Backend, VeeValidate/Zod trong Frontend).
+    *   Không tin tưởng bất kỳ dữ liệu nào đến từ client.
 
 ### 4.4. Password Hashing
 
--   **Vì sao cần**: Bảo vệ mật khẩu người dùng ngay cả khi database bị lộ. Không bao giờ lưu trữ mật khẩu dưới dạng plaintext.
--   **Best Practices**: Sử dụng các thuật toán hashing mạnh mẽ và có salt (ví dụ: bcrypt, Argon2) thay vì MD5 hoặc SHA-1.
+*   **Vì sao cần**: Bảo vệ mật khẩu người dùng ngay cả khi database bị lộ. Không bao giờ lưu trữ mật khẩu dưới dạng plaintext. Nếu mật khẩu bị lộ, kẻ tấn công có thể sử dụng chúng để truy cập tài khoản người dùng.
+*   **Best Practices**: 
+    *   Sử dụng các thuật toán hashing mạnh mẽ, có salt và chậm (ví dụ: bcrypt, Argon2, PBKDF2) thay vì các thuật toán nhanh và yếu như MD5 hoặc SHA-1.
+    *   Không tự triển khai thuật toán hashing mà nên sử dụng các thư viện đã được kiểm chứng.
 
 ### 4.5. Rate Limiting
 
--   **Vì sao cần**: Ngăn chặn các cuộc tấn công brute-force, DDoS bằng cách giới hạn số lượng request mà một client có thể gửi trong một khoảng thời gian nhất định.
--   **Best Practices**: Áp dụng rate limiting cho các endpoint nhạy cảm như đăng nhập, đăng ký.
+*   **Vì sao cần**: Ngăn chặn các cuộc tấn công brute-force (thử mật khẩu liên tục), DDoS (Distributed Denial of Service) và lạm dụng API bằng cách giới hạn số lượng request mà một client hoặc một IP có thể gửi trong một khoảng thời gian nhất định.
+*   **Best Practices**: 
+    *   Áp dụng rate limiting cho các endpoint nhạy cảm như đăng nhập, đăng ký, reset mật khẩu.
+    *   Cấu hình rate limiting ở tầng Gateway (ví dụ: Nginx) hoặc trong Backend.
 
 ### 4.6. Logging cho Audit
 
--   **Vì sao cần**: Ghi lại các hoạt động quan trọng của người dùng và hệ thống để phục vụ mục đích kiểm toán, phát hiện và điều tra sự cố bảo mật.
--   **Best Practices**: Ghi log các sự kiện đăng nhập/đăng xuất, thay đổi quyền, truy cập dữ liệu nhạy cảm. Đảm bảo log được bảo vệ và không chứa thông tin nhạy cảm.
+*   **Vì sao cần**: Ghi lại các hoạt động quan trọng của người dùng và hệ thống để phục vụ mục đích kiểm toán (audit), phát hiện và điều tra sự cố bảo mật. Log audit giúp theo dõi ai đã làm gì, khi nào và ở đâu.
+*   **Best Practices**: 
+    *   Ghi log các sự kiện quan trọng: đăng nhập/đăng xuất, thay đổi quyền, truy cập dữ liệu nhạy cảm, các thao tác CRUD quan trọng.
+    *   Đảm bảo log được bảo vệ khỏi việc giả mạo và không chứa thông tin nhạy cảm (mật khẩu, PII).
+    *   Sử dụng các hệ thống quản lý log tập trung.
 
 ### 4.7. Monitoring Security Events
 
--   **Vì sao cần**: Phát hiện sớm các hành vi bất thường hoặc các cuộc tấn công đang diễn ra.
--   **Best Practices**: Tích hợp với các công cụ SIEM (Security Information and Event Management) hoặc các hệ thống cảnh báo để theo dõi log và metrics liên quan đến bảo mật.
+*   **Vì sao cần**: Phát hiện sớm các hành vi bất thường hoặc các cuộc tấn công đang diễn ra. Monitoring liên tục giúp phản ứng nhanh chóng với các mối đe dọa bảo mật.
+*   **Best Practices**: 
+    *   Tích hợp với các công cụ SIEM (Security Information and Event Management) hoặc các hệ thống cảnh báo để theo dõi log và metrics liên quan đến bảo mật.
+    *   Thiết lập cảnh báo cho các sự kiện như đăng nhập thất bại liên tục, truy cập trái phép, thay đổi cấu hình bảo mật.
 
 ## 5. Kiểm thử Bảo mật
 
--   **Unit Tests**: Kiểm tra các hàm xác thực, phân quyền riêng lẻ.
--   **Integration Tests**: Kiểm tra luồng xác thực/phân quyền qua các endpoint API.
--   **Penetration Testing (PenTest)**: Thực hiện định kỳ để phát hiện các lỗ hổng bảo mật.
--   **Sử dụng công cụ**: Sử dụng các công cụ quét lỗ hổng tự động (ví dụ: OWASP ZAP, SonarQube).
+Kiểm thử bảo mật là một phần không thể thiếu để đảm bảo ứng dụng an toàn và vững chắc trước các mối đe dọa. Dự án áp dụng nhiều phương pháp kiểm thử bảo mật khác nhau:
+
+#### 1. Unit Tests
+
+*   **Mục đích**: Kiểm tra các hàm và module liên quan đến bảo mật một cách riêng lẻ. Ví dụ: kiểm tra các hàm hashing mật khẩu, các hàm kiểm tra quyền hạn, các hàm mã hóa/giải mã dữ liệu.
+*   **Phạm vi**: Tập trung vào các đơn vị code nhỏ, đảm bảo logic bảo mật hoạt động đúng như thiết kế.
+
+#### 2. Integration Tests
+
+*   **Mục đích**: Kiểm tra luồng xác thực và phân quyền qua các endpoint API. Đảm bảo rằng các cơ chế bảo mật hoạt động chính xác khi các thành phần tương tác với nhau.
+*   **Phạm vi**: Kiểm tra các kịch bản như đăng nhập, truy cập tài nguyên được bảo vệ, truy cập tài nguyên không được phép, v.v.
+
+#### 3. Penetration Testing (PenTest)
+
+*   **Mục đích**: Mô phỏng một cuộc tấn công thực tế vào hệ thống để tìm kiếm các lỗ hổng bảo mật mà các phương pháp kiểm thử khác có thể bỏ sót.
+*   **Thực hiện**: Thường được thực hiện bởi các chuyên gia bảo mật độc lập định kỳ hoặc sau các thay đổi lớn của hệ thống.
+
+#### 4. Sử dụng công cụ quét lỗ hổng tự động (Automated Vulnerability Scanners)
+
+*   **Mục đích**: Tự động quét code hoặc ứng dụng đang chạy để phát hiện các lỗ hổng bảo mật phổ biến.
+*   **Công cụ ví dụ**: 
+    *   **SAST (Static Application Security Testing)**: Phân tích mã nguồn mà không cần chạy ứng dụng (ví dụ: SonarQube, Snyk).
+    *   **DAST (Dynamic Application Security Testing)**: Quét ứng dụng đang chạy để tìm lỗ hổng (ví dụ: OWASP ZAP, Burp Suite).
+
+#### 5. Code Review tập trung vào bảo mật
+
+*   **Mục đích**: Trong quá trình code review, các thành viên trong nhóm sẽ đặc biệt chú ý đến các khía cạnh bảo mật của code, tìm kiếm các lỗ hổng tiềm ẩn hoặc các vi phạm best practices về bảo mật.

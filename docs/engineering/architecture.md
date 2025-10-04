@@ -63,7 +63,7 @@ graph TD
 ```
 
 -   **Web API (Web Layer)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các dịch vụ nghiệp vụ (Business Services) trong Application Layer, và trả về phản hồi.
--   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các dịch vụ nghiệp vụ (Business Services) sử dụng `Result Pattern` để trả về kết quả thống nhất. Các dịch vụ CRUD được trừu tượng hóa thông qua `IBaseCrudService`.
+-   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các dịch vụ nghiệp vụ (Business Services) sử dụng `Result Pattern` để trả về kết quả thống nhất. Các dịch vụ CRUD được trừu tượng hóa thông qua `IBaseCrudService`. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `Repository Pattern` để tương tác với dữ liệu.**
 -   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
 -   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
 
@@ -89,9 +89,143 @@ graph TD
 -   `IMemberRepository`: Interface định nghĩa các phương thức truy cập dữ liệu thành viên.
 -   `InMemoryMemberRepository`: Triển khai cụ thể của `IMemberRepository` sử dụng dữ liệu trong bộ nhớ.
 
+## 4. Sơ đồ mã nguồn (Code Diagram - C4)
+
+Ví dụ chi tiết về `MemberService` trong Application Layer, kế thừa từ `BaseCrudService` và sử dụng `Result Pattern`.
+
+```mermaid
+graph TD
+    subgraph "Application Layer"
+        A(MemberService) -->|Kế thừa từ| B(BaseCrudService)
+        B -->|Sử dụng| C(IMemberRepository)
+        A -->|Trả về| D(Result<Member>)
+    end
+
+    subgraph "Infrastructure Layer"
+        E(InMemoryMemberRepository) -->|Triển khai| C
+    end
+```
+
+-   `MemberService`: Chứa logic nghiệp vụ để quản lý thành viên, kế thừa các thao tác CRUD cơ bản từ `BaseCrudService`.
+-   `BaseCrudService`: Lớp cơ sở cung cấp các thao tác CRUD chung, xử lý `Result Pattern` và logging.
+-   `IMemberRepository`: Interface định nghĩa các phương thức truy cập dữ liệu thành viên.
+-   `InMemoryMemberRepository`: Triển khai cụ thể của `IMemberRepository` sử dụng dữ liệu trong bộ nhớ.
+
+### 🔄 CQRS (Command, Query, Handler)
+
+*(Updated to match current refactor: Application Layer's CQRS implementation)*
+
+CQRS (Command Query Responsibility Segregation) là một kiến trúc tách biệt các hoạt động đọc (Queries) và ghi (Commands) dữ liệu. Điều này giúp tối ưu hóa hiệu suất, khả năng mở rộng và bảo trì của ứng dụng.
+
+#### Mục đích
+
+*   **Tách biệt trách nhiệm:** Các mô hình đọc và ghi được tối ưu hóa độc lập.
+*   **Hiệu suất:** Queries có thể được tối ưu hóa để đọc nhanh, trong khi Commands tập trung vào tính nhất quán của dữ liệu.
+*   **Khả năng mở rộng:** Có thể scale các phần đọc và ghi độc lập.
+
+#### Luồng hoạt động
+
+1.  **Command/Query:** Yêu cầu từ Web API được đóng gói thành một `Command` (để thay đổi trạng thái) hoặc `Query` (để lấy dữ liệu).
+2.  **Mediator:** `MediatR` library được sử dụng để gửi `Command` hoặc `Query` đến `Handler` tương ứng.
+3.  **Handler:** `Handler` chứa logic nghiệp vụ để xử lý `Command` hoặc `Query`.
+    *   `CommandHandler` thực hiện thay đổi dữ liệu thông qua Repository và Unit of Work.
+    *   `QueryHandler` truy vấn dữ liệu thông qua Repository và trả về kết quả.
+4.  **Result Pattern:** Kết quả của `Handler` thường được trả về dưới dạng `Result<T>` để xử lý lỗi và thành công một cách nhất quán.
+
+#### Code Example
+
+**1. Command (Tạo mới một Family)**
+
+```csharp
+// backend/src/Application/Families/Commands/CreateFamily/CreateFamilyCommand.cs
+public record CreateFamilyCommand(string Name, string Description) : IRequest<Result<Guid>>;
+
+public class CreateFamilyCommandValidator : AbstractValidator<CreateFamilyCommand>
+{
+    public CreateFamilyCommandValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("Tên dòng họ không được để trống.")
+            .MaximumLength(200).WithMessage("Tên dòng họ không được vượt quá 200 ký tự.");
+    }
+}
+```
+
+**2. Query (Lấy danh sách Families)**
+
+```csharp
+// backend/src/Application/Families/Queries/GetFamilies/GetFamiliesQuery.cs
+public record GetFamiliesQuery : IRequest<Result<List<FamilyDto>>>;
+```
+
+**3. Command Handler (Xử lý CreateFamilyCommand)**
+
+```csharp
+// backend/src/Application/Families/Commands/CreateFamily/CreateFamilyCommandHandler.cs
+public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Result<Guid>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public CreateFamilyCommandHandler(IApplicationDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
+    {
+        var entity = new Family
+        {
+            Name = request.Name,
+            Description = request.Description
+        };
+
+        _context.Families.Add(entity);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return Result<Guid>.Success(entity.Id);
+    }
+}
+```
+
+**4. Query Handler (Xử lý GetFamiliesQuery)**
+
+```csharp
+// backend/src/Application/Families/Queries/GetFamilies/GetFamiliesQueryHandler.cs
+public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, Result<List<FamilyDto>>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<List<FamilyDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
+    {
+        var entities = await _context.Families
+            .AsNoTracking()
+            .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
+
+        return Result<List<FamilyDto>>.Success(entities);
+    }
+}
+```
+
+#### Best Practice / Note
+
+*   **Commands** nên là bất biến (immutable) và chỉ chứa dữ liệu cần thiết để thực hiện một hành động.
+*   **Queries** cũng nên là bất biến và chỉ chứa dữ liệu cần thiết để truy vấn.
+*   **Handlers** nên là nhỏ gọn, tập trung vào một nhiệm vụ duy nhất và không chứa logic nghiệp vụ phức tạp (nên đặt trong Domain Layer hoặc Domain Services).
+*   Sử dụng **MediatR** để tách rời việc gửi yêu cầu và xử lý yêu cầu, giúp giảm sự phụ thuộc giữa các thành phần.
+
 ## 5. Sơ đồ triển khai (Deployment View)
 
-Hệ thống được triển khai bằng Docker trên một máy chủ ảo (VPS).
+Hệ thống được triển khai bằng Docker trên một máy chủ ảo (VPS). Trong môi trường phát triển cục bộ, Frontend có thể sử dụng Vite Proxy để kết nối với Backend.
 
 ```mermaid
 graph TD
@@ -104,18 +238,91 @@ graph TD
     E[Người dùng] -->|HTTPS| A
 ```
 
--   **Nginx**: Reverse proxy, xử lý SSL và điều hướng request.
+-   **Nginx**: Reverse proxy, xử lý SSL và điều hướng request đến Frontend và Backend. Nginx cũng có thể phục vụ các tệp tĩnh của Frontend.
 -   **Frontend Container**: Chứa ứng dụng Vue.js đã được build.
 -   **Backend Container**: Chứa ứng dụng ASP.NET Core API.
 -   **Database Container**: Chứa cơ sở dữ liệu MySQL.
 
+### 🔄 Vite Proxy trong môi trường phát triển
+
+*(Updated to match current refactor: Frontend development setup)*
+
+Trong môi trường phát triển cục bộ, Frontend (chạy bằng Vite) sử dụng cơ chế proxy để chuyển tiếp các yêu cầu API từ `http://localhost:5173/api` đến Backend (ví dụ: `http://localhost:8080` hoặc `https://localhost:5001`). Điều này giúp tránh các vấn đề CORS và cho phép Frontend tương tác liền mạch với Backend đang chạy cục bộ hoặc trong Docker.
+
+**Cấu hình ví dụ trong `vite.config.ts`:**
+
+```typescript
+// frontend/vite.config.ts
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080', // Hoặc 'https://localhost:5001' nếu Backend chạy HTTPS
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false, // Chỉ dùng khi Backend chạy HTTPS với chứng chỉ tự ký
+      },
+    },
+  },
+});
+```
+
+**Giải thích:**
+
+*   `target`: Địa chỉ của Backend API.
+*   `changeOrigin`: Đặt thành `true` để thay đổi `Host` header của request thành `target` host, cần thiết cho một số API.
+*   `rewrite`: Viết lại đường dẫn request, loại bỏ `/api` khỏi URL trước khi gửi đến Backend.
+*   `secure`: Đặt thành `false` nếu Backend sử dụng HTTPS với chứng chỉ tự ký (self-signed certificate) trong môi trường phát triển, để tránh lỗi SSL/TLS.
+
 ## 6. Xác thực & Phân quyền (Authentication & Authorization)
 
-Hệ thống sử dụng **JWT Bearer Token** và được thiết kế để không phụ thuộc vào nhà cung cấp xác thực.
+Hệ thống sử dụng **JWT Bearer Token** để xác thực và được thiết kế để không phụ thuộc vào nhà cung cấp xác thực (Identity Provider - IdP).
 
--   **Nhà cung cấp hiện tại**: Auth0 (được trừu tượng hóa qua `IAuthProvider` và triển khai mock `Auth0Provider` cho môi trường phát triển không cần DB).
--   **Luồng hoạt động**: Frontend chịu trách nhiệm lấy token từ Auth0 và gửi kèm mỗi request API trong header `Authorization`.
--   **Khả năng thay thế**: Kiến trúc cho phép thay thế Auth0 bằng các provider khác (Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend, chỉ cần cập nhật cấu hình.
+#### Luồng hoạt động
+
+1.  **Frontend lấy Token:** Frontend chịu trách nhiệm tương tác với IdP (ví dụ: Auth0) để lấy JWT (JSON Web Token).
+2.  **Gửi Token đến Backend:** Frontend gửi kèm JWT trong header `Authorization` (dưới dạng `Bearer <token>`) trong mỗi request API đến Backend.
+3.  **Backend xác thực Token:** Backend nhận JWT, giải mã và xác thực chữ ký của token, kiểm tra các claims (thông tin người dùng, quyền hạn) và thời hạn hiệu lực của token.
+4.  **Phân quyền:** Sau khi xác thực thành công, Backend sử dụng thông tin từ JWT để kiểm tra quyền hạn của người dùng đối với tài nguyên hoặc hành động được yêu cầu.
+
+#### Cấu hình Auth0 (Ví dụ)
+
+*   **Nhà cung cấp hiện tại**: Auth0 (được trừu tượng hóa qua `IAuthProvider` và triển khai mock `Auth0Provider` cho môi trường phát triển không cần DB).
+*   **Cấu hình trong `appsettings.json` hoặc `appsettings.Development.json`:**
+
+    ```json
+    "Auth0": {
+      "Domain": "https://YOUR_AUTH0_DOMAIN.auth0.com/",
+      "Audience": "YOUR_AUTH0_AUDIENCE"
+    }
+    ```
+
+*   **Cấu hình trong `backend/src/Web/DependencyInjection.cs`:**
+
+    ```csharp
+    builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+        .AddJwtBearer(options =>
+        {
+            options.Authority = builder.Configuration["Auth0:Domain"];
+            options.Audience = builder.Configuration["Auth0:Audience"];
+            options.RequireHttpsMetadata = false; // Đặt là false trong môi trường phát triển nếu không dùng HTTPS
+        });
+
+    builder.Services.AddAuthorizationBuilder();
+    ```
+
+    **Lưu ý về `options.RequireHttpsMetadata = false;`:**
+    *   Trong môi trường phát triển, khi Backend có thể chạy trên HTTP hoặc HTTPS với chứng chỉ tự ký, việc đặt `RequireHttpsMetadata = false` là cần thiết để cho phép xác thực JWT hoạt động mà không yêu cầu IdP phải cung cấp metadata qua HTTPS. **Tuyệt đối không đặt `false` trong môi trường Production.**
+
+#### Khả năng thay thế
+
+Kiến trúc cho phép thay thế Auth0 bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật triển khai `IAuthProvider` và cấu hình liên quan.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 

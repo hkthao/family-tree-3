@@ -10,36 +10,70 @@
 
 ## 1. Giới thiệu
 
-Tài liệu này mô tả kế hoạch cho các sprint phát triển của dự án Cây Gia Phả, bao gồm mục tiêu, các User Story dự kiến và thành viên tham gia.
+Tài liệu này mô tả kế hoạch cho các sprint phát triển của dự án Cây Gia Phả. Sprint là một khoảng thời gian cố định (thường là 1-4 tuần) trong phương pháp phát triển Agile Scrum, nơi đội ngũ phát triển làm việc để hoàn thành một tập hợp các tính năng hoặc mục tiêu cụ thể. Mỗi sprint có một mục tiêu rõ ràng, các User Story dự kiến sẽ được hoàn thành, và danh sách các thành viên tham gia.
 
-## 2. Sprint 1 (Ngày bắt đầu - Ngày kết thúc)
+Việc lập kế hoạch sprint giúp:
 
-**Mục tiêu:**
-- Hoàn thành chức năng đăng nhập và đăng ký.
-- Xây dựng giao diện cơ bản cho việc hiển thị cây gia phả.
+*   **Tập trung**: Đội ngũ tập trung vào một tập hợp nhỏ các mục tiêu trong một khoảng thời gian ngắn.
+*   **Minh bạch**: Mọi người đều biết những gì đang được phát triển và khi nào.
+*   **Linh hoạt**: Cho phép điều chỉnh kế hoạch dựa trên phản hồi và thay đổi yêu cầu.
 
-**User Stories:**
-- [ ] Đăng nhập hệ thống
-- [ ] Đăng ký tài khoản mới
-- [ ] Hiển thị cây gia phả cơ bản
+## 2. Sprint 1 (2023-10-20 - 2023-10-26)
 
-**Thành viên tham gia:**
-- Developer A (Backend)
-- Developer B (Frontend)
-- QA A
+**Mục tiêu:** Hoàn thành thiết lập dự án, chức năng xác thực cơ bản và xây dựng giao diện ban đầu cho việc hiển thị cây gia phả.
 
-## 3. Sprint 2 (Ngày bắt đầu - Ngày kết thúc)
+**User Stories đã hoàn thành:**
+-   [x] US_018: Đăng nhập hệ thống
+-   [ ] US_XXX: Đăng ký tài khoản mới (Chưa hoàn thành)
+-   [ ] US_001: Hiển thị cây gia phả cơ bản (Chưa hoàn thành)
 
-**Mục tiêu:**
-- Hoàn thành chức năng thêm, sửa, xóa thành viên.
-- Cải thiện giao diện cây gia phả.
-
-**User Stories:**
-- [ ] Thêm thành viên
-- [ ] Chỉnh sửa thành viên
-- [ ] Xóa thành viên
+**Mô tả chi tiết:**
+*   **Backend**: Thiết lập kiến trúc Clean Architecture, cấu hình Entity Framework Core với MySQL, triển khai cơ chế JWT Bearer Token cho xác thực. Hoàn thành endpoint đăng nhập.
+*   **Frontend**: Khởi tạo project Vue 3 với Vite, tích hợp Vuetify 3 cho UI, cấu hình Pinia cho quản lý trạng thái. Xây dựng giao diện đăng nhập cơ bản.
 
 **Thành viên tham gia:**
-- Developer A (Backend)
-- Developer B (Frontend)
-- QA A
+-   Developer A (Backend)
+-   Developer B (Frontend)
+-   QA A
+
+## 3. Sprint 2 (2023-10-27 - 2023-11-09)
+
+**Mục tiêu:** Hoàn thành chức năng quản lý thành viên cơ bản (thêm, sửa, xóa, xem chi tiết) và cải thiện giao diện cây gia phả.
+
+**User Stories đã hoàn thành:**
+-   [x] US_015: Thêm thành viên
+-   [x] US_016: Chỉnh sửa thành viên
+-   [x] US_017: Xóa thành viên
+-   [x] US_019: Xem chi tiết thành viên
+
+**Mô tả chi tiết:**
+*   **Backend**: Triển khai các endpoint API và logic nghiệp vụ cho việc thêm, sửa, xóa, xem chi tiết thành viên. Tích hợp Repository Pattern và CQRS cho các thao tác này.
+*   **Frontend**: Xây dựng các form và trang hiển thị thông tin thành viên, tích hợp với API Backend. Cải thiện hiển thị các mối quan hệ trên cây gia phả.
+
+**Thành viên tham gia:**
+-   Developer A (Backend)
+-   Developer B (Frontend)
+-   QA A
+
+## 4. Sprint 3 (2025-10-04 - 2025-10-18)
+
+**Mục tiêu:** Cải thiện môi trường phát triển, khắc phục các lỗi cấu hình và đảm bảo tính nhất quán của dữ liệu.
+
+**User Stories đã hoàn thành:**
+-   [x] US_020: Tạo dòng họ mới (thông qua seeding)
+-   [x] US_021: Xem danh sách dòng họ (thông qua seeding)
+
+**Mô tả chi tiết:**
+*   **Backend**: 
+    *   Cải thiện cấu hình Dependency Injection, cập nhật phiên bản các gói NuGet liên quan đến Entity Framework Core và Pomelo.MySql để tương thích với .NET 8.
+    *   Khắc phục lỗi NSwag khi khởi động, đảm bảo quá trình tạo tài liệu API diễn ra suôn sẻ.
+    *   Điều chỉnh chuỗi kết nối MySQL cho môi trường phát triển cục bộ và triển khai cơ chế seeding dữ liệu mẫu tự động khi khởi động.
+    *   Tạo và áp dụng migration ban đầu cho cơ sở dữ liệu MySQL.
+*   **Frontend**: 
+    *   Cập nhật định nghĩa kiểu dữ liệu `Family` và `MemberFilter` để giải quyết lỗi kiểm tra kiểu.
+    *   Cấu hình Vite proxy để kết nối chính xác với Backend đang chạy cục bộ, khắc phục lỗi CORS và `ECONNREFUSED`.
+
+**Thành viên tham gia:**
+-   Gemini (AI Assistant)
+-   Developer A (Backend)
+-   Developer B (Frontend)
