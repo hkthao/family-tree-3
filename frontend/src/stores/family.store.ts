@@ -21,12 +21,13 @@ export const useFamilyStore = defineStore('family', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.family.loadItems(
-        this.filter,
+      const result = await this.services.family.loadItems({
+        ...this.filter,
+        sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
+        sortOrder: this.sortBy.length > 0 ? (this.sortBy[0].order as 'asc' | 'desc') : undefined,
+      },
         this.currentPage,
         this.itemsPerPage,
-        this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
-        this.sortBy.length > 0 ? (this.sortBy[0].order as 'asc' | 'desc') : undefined,
       );
 
       if (result.ok) {

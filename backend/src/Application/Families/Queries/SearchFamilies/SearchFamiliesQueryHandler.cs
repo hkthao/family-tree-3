@@ -24,6 +24,11 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, P
             query = query.Where(f => f.Name.Contains(request.SearchQuery) || (f.Description != null && f.Description.Contains(request.SearchQuery)));
         }
 
+        if (!string.IsNullOrEmpty(request.Visibility))
+        {
+            query = query.Where(f => f.Visibility == request.Visibility);
+        }
+
         if (!string.IsNullOrEmpty(request.SortBy))
         {
             switch (request.SortBy.ToLower())

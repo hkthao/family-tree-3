@@ -22,7 +22,7 @@
             </v-col>
             <v-col cols="12" md="6">
               <v-select
-                v-model="filtervisibility"
+                v-model="visibility"
                 :items="visibilityItems"
                 :label="$t('family.management.filterLabel')"
                 density="compact"
@@ -52,7 +52,7 @@ const { t } = useI18n();
 const expanded = ref(false); // Default to collapsed
 
 const searchQuery = ref('');
-const filtervisibility = ref<'All' | 'Private' | 'Public'>('All');
+const visibility = ref<'All' | 'Private' | 'Public'>('All');
 
 const visibilityItems = computed(() => [
   { title: t('family.management.visibility.all'), value: 'All' },
@@ -63,13 +63,13 @@ const visibilityItems = computed(() => [
 const applyFilters = () => {
   emit('update:filters', {
     searchQuery: searchQuery.value,
-    visibility: filtervisibility.value === 'All' ? undefined : filtervisibility.value,
+    visibility: visibility.value === 'All' ? undefined : visibility.value,
   } as FamilyFilter);
 };
 
 const resetFilters = () => {
   searchQuery.value = '';
-  filtervisibility.value = 'All';
+  visibility.value = 'All';
   applyFilters();
 };
 
