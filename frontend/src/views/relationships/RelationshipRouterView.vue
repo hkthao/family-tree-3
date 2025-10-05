@@ -1,5 +1,7 @@
 <template>
-  <router-view />
+  <v-container fluid>
+    <router-view />
+  </v-container>
 </template>
 
 <script setup lang="ts">
