@@ -179,6 +179,42 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Hệ thống trả về danh sách các thành viên có khả năng trùng khớp cao nhất, kèm theo tỷ lệ tự tin.
     -   Người dùng có thể xem thông tin chi tiết của các thành viên được tìm thấy.
 
+### 2.5. Module: Quản lý Quan hệ
+
+#### US_022: Thêm mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn thêm một mối quan hệ mới giữa hai thành viên để xây dựng cây gia phả.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Có giao diện để chọn thành viên nguồn, thành viên đích và loại mối quan hệ.
+    -   Hệ thống lưu trữ mối quan hệ mới vào database.
+    -   Sau khi tạo thành công, mối quan hệ mới hiển thị trong danh sách quan hệ và trên cây gia phả.
+
+#### US_023: Chỉnh sửa mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn chỉnh sửa thông tin của một mối quan hệ hiện có.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Người dùng có thể chọn một mối quan hệ và truy cập biểu mẫu chỉnh sửa.
+    -   Các trường trong biểu mẫu chỉnh sửa được điền sẵn dữ liệu hiện tại.
+    -   Các thay đổi được lưu và phản ánh ngay lập tức.
+
+#### US_024: Xóa mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn xóa một mối quan hệ không còn phù hợp.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Người dùng có thể chọn một mối quan hệ và xác nhận xóa.
+    -   Mối quan hệ bị xóa khỏi hệ thống và không còn hiển thị.
+
+#### US_025: Xem danh sách mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn xem danh sách tất cả các mối quan hệ.
+-   **Priority**: Medium
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Hiển thị danh sách các mối quan hệ với thông tin chi tiết (thành viên nguồn, thành viên đích, loại).
+    -   Hỗ trợ phân trang và tìm kiếm/lọc.
+
 ## 3. In Progress (updated after refactor: All items moved to Done)
 
 Phần này liệt kê các User Story đang trong quá trình phát triển tích cực. Hiện tại không có User Story nào đang trong quá trình phát triển.

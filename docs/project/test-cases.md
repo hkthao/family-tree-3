@@ -44,6 +44,10 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_FAMILY_02 | Chỉnh sửa thông tin dòng họ            | Family Management      | High     | Manual/Automated  |
 | TC_REL_01    | Thêm mối quan hệ cha-con thành công    | Relationship Management| High     | Manual/Automated  |
 | TC_REL_02    | Xóa mối quan hệ                        | Relationship Management| Medium   | Manual/Automated  |
+| TC_REL_03    | Thêm mối quan hệ thành công            | Relationship Management| High     | Manual/Automated  |
+| TC_REL_04    | Chỉnh sửa mối quan hệ thành công       | Relationship Management| High     | Manual/Automated  |
+| TC_REL_05    | Xóa mối quan hệ thành công             | Relationship Management| High     | Manual/Automated  |
+| TC_REL_06    | Tìm kiếm mối quan hệ                   | Relationship Management| Medium   | Manual/Automated  |
 | TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual (Future Feature)            |
 | TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual (Future Feature)            |
 
@@ -289,38 +293,78 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
     *   Ứng dụng Frontend và Backend đang chạy.
 -   **Các bước thực hiện**:
     1.  Đăng nhập vào hệ thống.
-    2.  Truy cập trang chi tiết của thành viên A (con).
-    3.  Nhấn nút "Thêm quan hệ" hoặc "Chỉnh sửa quan hệ gia đình".
-    4.  Trong biểu mẫu, chọn thành viên B làm "Cha" hoặc "Mẹ" của thành viên A.
-    5.  Nhấn nút "Lưu" hoặc "Cập nhật quan hệ".
+    2.  Truy cập trang quản lý quan hệ.
+    3.  Nhấn nút "Thêm Quan hệ Mới".
+    4.  Chọn thành viên nguồn và thành viên đích.
+    5.  Chọn loại mối quan hệ (ví dụ: "Cha mẹ").
+    6.  Nhấn nút "Lưu".
 -   **Kết quả mong đợi**: 
-    *   Mối quan hệ cha-con được tạo thành công và hiển thị trên cây gia phả và trang chi tiết của cả hai thành viên.
-    *   Hệ thống hiển thị thông báo thành công (ví dụ: "Thêm quan hệ thành công!").
+    *   Mối quan hệ mới được tạo thành công và hiển thị trong danh sách quan hệ.
+    *   Hệ thống hiển thị thông báo thành công.
 -   **Thực tế**: (Để trống)
 -   **Severity**: High
 -   **Priority**: High
 -   **Type**: Manual/Automated
 
-#### TC_REL_02: Xóa mối quan hệ
--   **Mục tiêu**: Xác minh người dùng có thể xóa một mối quan hệ hiện có giữa hai thành viên.
+#### TC_REL_02: Chỉnh sửa mối quan hệ thành công
+-   **Mục tiêu**: Xác minh người dùng có thể chỉnh sửa thông tin của một mối quan hệ hiện có.
 -   **Điều kiện tiên quyết (Preconditions)**:
     *   Người dùng đã đăng nhập vào hệ thống.
-    *   Đã có một mối quan hệ tồn tại giữa hai thành viên (ví dụ: cha-con, vợ-chồng).
+    *   Đã có ít nhất một mối quan hệ tồn tại.
     *   Ứng dụng Frontend và Backend đang chạy.
 -   **Các bước thực hiện**:
     1.  Đăng nhập vào hệ thống.
-    2.  Truy cập trang chi tiết của một trong hai thành viên có mối quan hệ cần xóa.
-    3.  Tìm đến phần hiển thị mối quan hệ và nhấn nút "Xóa" (hoặc biểu tượng thùng rác) bên cạnh mối quan hệ đó.
-    4.  Xác nhận hành động xóa trong hộp thoại xác nhận (nếu có).
+    2.  Truy cập trang quản lý quan hệ.
+    3.  Chọn một mối quan hệ và nhấn nút "Chỉnh sửa".
+    4.  Thay đổi loại mối quan hệ hoặc thành viên.
+    5.  Nhấn nút "Lưu".
 -   **Kết quả mong đợi**: 
-    *   Mối quan hệ bị xóa thành công khỏi hệ thống và không còn hiển thị trên cây gia phả và trang chi tiết thành viên.
-    *   Hệ thống hiển thị thông báo thành công (ví dụ: "Xóa quan hệ thành công!").
+    *   Mối quan hệ được cập nhật thành công và hiển thị đúng trong danh sách.
+    *   Hệ thống hiển thị thông báo thành công.
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated
+
+#### TC_REL_03: Xóa mối quan hệ thành công
+-   **Mục tiêu**: Xác minh người dùng có thể xóa một mối quan hệ hiện có.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một mối quan hệ tồn tại.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang quản lý quan hệ.
+    3.  Chọn một mối quan hệ và nhấn nút "Xóa".
+    4.  Xác nhận xóa trong hộp thoại.
+-   **Kết quả mong đợi**: 
+    *   Mối quan hệ bị xóa thành công khỏi hệ thống.
+    *   Hệ thống hiển thị thông báo thành công.
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated
+
+#### TC_REL_04: Tìm kiếm mối quan hệ
+-   **Mục tiêu**: Xác minh người dùng có thể tìm kiếm mối quan hệ với các tiêu chí khác nhau.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một mối quan hệ tồn tại.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang quản lý quan hệ.
+    3.  Mở rộng phần "Tìm kiếm Quan hệ".
+    4.  Chọn thành viên nguồn hoặc đích, hoặc loại mối quan hệ.
+    5.  Nhấn nút "Áp dụng".
+-   **Kết quả mong đợi**: 
+    *   Danh sách mối quan hệ được cập nhật để chỉ hiển thị các mối quan hệ phù hợp với tiêu chí tìm kiếm.
 -   **Thực tế**: (Để trống)
 -   **Severity**: Medium
 -   **Priority**: Medium
 -   **Type**: Manual/Automated
 
-### 3.6. Module: File đính kèm (Attachments) (Future Feature)
+### 3.7. Module: File đính kèm (Attachments) (Future Feature)
 
 #### TC_ATTACH_01: Tải lên file đính kèm thành công
 -   **Mục tiêu**: Xác minh người dùng có thể tải lên một file đính kèm hợp lệ cho một thành viên.

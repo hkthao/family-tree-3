@@ -10,6 +10,9 @@
 - [6. Các Endpoint chính](#6-các-endpoint-chính)
   - [6.1. Quản lý Dòng họ (`/api/families`)](#61-quản-lý-dòng-họ-apifamilies)
   - [6.2. Quản lý Thành viên (`/api/members`)](#62-quản-lý-thành-viên-apimembers)
+- [6.3. Quản lý Sự kiện (`/api/events`)](#63-quản-lý-sự-kiện-apievents)
+- [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
+- [6.5. Quản lý Quan hệ (`/api/relationships`)](#65-quản-lý-quan-hệ-apirelationships)
 - [7. Mô hình Dữ liệu (Response Models)](#7-mô-hình-dữ-liệu-response-models)
   - [7.1. Family](#71-family)
   - [7.2. Member](#72-member)
@@ -240,6 +243,23 @@ Content-Type: application/json
 -   `GET /api/search?keyword=...`: Tìm kiếm chung trên cả dòng họ và thành viên theo từ khóa.
     *   **Phản hồi:** `Result<SearchResultsDto>` (chứa danh sách Family và Member tìm được)
 
+### 6.5. Quản lý Quan hệ (`/api/relationships`)
+
+-   `GET /api/relationships`: Lấy danh sách quan hệ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
+    *   **Phản hồi:** `Result<PaginatedList<RelationshipListDto>>`
+-   `GET /api/relationships/{id}`: Lấy thông tin quan hệ theo ID.
+    *   **Phản hồi:** `Result<RelationshipDto>`
+-   `GET /api/relationships/search?sourceMemberId=...&targetMemberId=...&type=...&page=...&itemsPerPage=...`: Tìm kiếm quan hệ theo các tiêu chí và hỗ trợ phân trang.
+    *   **Phản hồi:** `Result<PaginatedList<RelationshipListDto>>`
+-   `POST /api/relationships`: Tạo quan hệ mới.
+    *   **Request Body:** `CreateRelationshipCommand` (ví dụ: `{ "sourceMemberId": "uuid", "targetMemberId": "uuid", "type": "Parent" }`)
+    *   **Phản hồi:** `Result<Guid>` (ID của quan hệ vừa tạo)
+-   `PUT /api/relationships/{id}`: Cập nhật thông tin quan hệ.
+    *   **Request Body:** `UpdateRelationshipCommand` (ví dụ: `{ "id": "uuid", "sourceMemberId": "uuid", "targetMemberId": "uuid", "type": "Spouse" }`)
+    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
+-   `DELETE /api/relationships/{id}`: Xóa quan hệ.
+    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -278,6 +298,32 @@ Content-Type: application/json
   "motherId": "string (uuid, nullable)",
   "spouseId": "string (uuid, nullable)",
   "biography": "string (nullable)"
+}
+```
+
+### 7.5. Relationship
+
+```json
+{
+  "id": "string (uuid)",
+  "sourceMemberId": "string (uuid)",
+  "targetMemberId": "string (uuid)",
+  "type": "string (Parent/Child/Spouse/Sibling)",
+  "order": "number (nullable)"
+}
+```
+
+### 7.6. RelationshipListDto
+
+```json
+{
+  "id": "string (uuid)",
+  "sourceMemberId": "string (uuid)",
+  "targetMemberId": "string (uuid)",
+  "type": "string (Parent/Child/Spouse/Sibling)",
+  "order": "number (nullable)",
+  "sourceMemberFullName": "string",
+  "targetMemberFullName": "string"
 }
 ```
 

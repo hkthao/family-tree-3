@@ -79,3 +79,22 @@ Việc lập kế hoạch sprint giúp:
 -   Gemini (AI Assistant)
 -   Developer A (Backend)
 -   Developer B (Frontend)
+
+## 5. Sprint 4 (2025-10-19 - 2025-11-02)
+
+**Mục tiêu:** Triển khai chức năng quản lý mối quan hệ (CRUD) đầy đủ cho Frontend và Backend.
+
+**User Stories dự kiến hoàn thành:**
+-   [x] US_022: Thêm mối quan hệ
+-   [x] US_023: Chỉnh sửa mối quan hệ
+-   [x] US_024: Xóa mối quan hệ
+-   [x] US_025: Xem danh sách mối quan hệ
+
+**Mô tả chi tiết:**
+*   **Backend**: Triển khai các endpoint API, logic nghiệp vụ và các Specification cho việc thêm, sửa, xóa, xem chi tiết và tìm kiếm mối quan hệ. Đảm bảo sử dụng `Result Pattern` nhất quán.
+*   **Frontend**: Xây dựng các components (list, form, search) và views cho quản lý mối quan hệ. Tích hợp Pinia store và API service. Cập nhật router và menu điều hướng.
+
+**Thành viên tham gia:**
+-   Gemini (AI Assistant)
+-   Developer A (Backend)
+-   Developer B (Frontend)

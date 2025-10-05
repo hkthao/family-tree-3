@@ -356,6 +356,21 @@ public class EventOrderingSpecification : Specification<Event>
 }
 ```
 
+**Ví dụ về Specification cho Quan hệ (`Application/Relationships/Specifications/RelationshipBySourceMemberIdSpecification.cs`):**
+
+```csharp
+public class RelationshipBySourceMemberIdSpecification : Specification<Relationship>
+{
+    public RelationshipBySourceMemberIdSpecification(Guid? sourceMemberId)
+    {
+        if (sourceMemberId.HasValue)
+        {
+            Query.Where(r => r.SourceMemberId == sourceMemberId.Value);
+        }
+    }
+}
+```
+
 **Ví dụ sử dụng các Specification trong Query Handler (`Application/Events/Queries/SearchEvents/SearchEventsQueryHandler.cs`):**
 
 ```csharp

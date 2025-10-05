@@ -34,6 +34,9 @@ Trong giai đoạn ngắn hạn, chúng tôi tập trung vào việc hoàn thi�
 *   **Xử lý lỗi và thông báo**: 
     *   Triển khai `Result Pattern` nhất quán ở Backend.
     *   Hiển thị thông báo lỗi thân thiện và rõ ràng ở Frontend.
+*   **Quản lý Quan hệ**: (Đã hoàn thành)
+    *   Thêm, sửa, xóa, xem danh sách và chi tiết các mối quan hệ giữa các thành viên.
+    *   Hỗ trợ tìm kiếm và lọc mối quan hệ.
 
 ## 3. Mục tiêu Trung hạn (3-6 tháng)
 
