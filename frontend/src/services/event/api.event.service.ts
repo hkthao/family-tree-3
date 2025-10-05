@@ -58,7 +58,7 @@ export class ApiEventService implements IEventService {
     params.append('itemsPerPage', itemsPerPage.toString());
 
     return safeApiCall(
-      this.http.get<Paginated<Event>>(`${this.apiUrl}?${params.toString()}`),
+      this.http.get<Paginated<Event>>(`${this.apiUrl}/search?${params.toString()}`),
     );
   }
 
