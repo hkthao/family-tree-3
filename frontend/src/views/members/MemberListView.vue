@@ -59,9 +59,16 @@ const handleFilterUpdate = async (filters: MemberFilter) => {
 const handleListOptionsUpdate = async (options: {
   page: number;
   itemsPerPage: number;
+  sortBy: { key: string; order: string }[]; // Added sortBy
 }) => {
   await memberStore.setPage(options.page);
   await memberStore.setItemsPerPage(options.itemsPerPage);
+  // Handle sorting
+  if (options.sortBy && options.sortBy.length > 0) {
+    memberStore.setSortBy(options.sortBy);
+  } else {
+    memberStore.setSortBy([]); // Clear sort if no sortBy is provided
+  }
 };
 
 const confirmDelete = (member: Member) => {
