@@ -34,7 +34,7 @@ import { useI18n } from 'vue-i18n';
 import { useRelationshipStore } from '@/stores/relationship.store';
 
 import type { Relationship } from '@/types';
-import { RelationshipType } from '@/types';
+import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes'; // Added
 
 import { MemberAutocomplete } from '@/components/common';
 
@@ -50,12 +50,7 @@ const formTitle = computed(() =>
   props.id ? t('relationship.form.editTitle') : t('relationship.form.addTitle'),
 );
 
-const relationshipTypes = computed(() => [
-  { title: t('relationship.type.parent'), value: RelationshipType.Parent },
-  { title: t('relationship.type.child'), value: RelationshipType.Child },
-  { title: t('relationship.type.spouse'), value: RelationshipType.Spouse },
-  { title: t('relationship.type.sibling'), value: RelationshipType.Sibling },
-]);
+const relationshipTypes = RELATIONSHIP_TYPE_OPTIONS; // Used RELATIONSHIP_TYPE_OPTIONS
 
 const rules = {
   required: (value: any) => !!value || t('validation.required'),

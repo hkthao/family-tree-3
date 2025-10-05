@@ -52,8 +52,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type { RelationshipFilter } from '@/types';
-import { RelationshipType } from '@/types';
-
+import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes'; // Added
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 const emit = defineEmits(['update:filters']);
@@ -68,12 +67,7 @@ const filters = ref<RelationshipFilter>({
   type: null,
 });
 
-const relationshipTypes = computed(() => [
-  { title: t('relationship.type.parent'), value: RelationshipType.Parent },
-  { title: t('relationship.type.child'), value: RelationshipType.Child },
-  { title: t('relationship.type.spouse'), value: RelationshipType.Spouse },
-  { title: t('relationship.type.sibling'), value: RelationshipType.Sibling },
-]);
+const relationshipTypes = RELATIONSHIP_TYPE_OPTIONS; // Used RELATIONSHIP_TYPE_OPTIONS
 
 watch(
   filters,

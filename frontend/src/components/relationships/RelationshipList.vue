@@ -10,6 +10,15 @@
         :total-items="relationshipStore.totalItems"
         @update:options="loadItems"
       >
+        <template v-slot:item.sourceMemberFullName="{ item }">
+          {{ item.sourceMemberFullName }}
+        </template>
+        <template v-slot:item.targetMemberFullName="{ item }">
+          {{ item.targetMemberFullName }}
+        </template>
+        <template v-slot:item.type="{ item }">
+          {{ getRelationshipTypeTitle(item.type) }}
+        </template>
         <template v-slot:item.actions="{ item }">
           <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
           <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
@@ -37,16 +46,17 @@ import { useNotificationStore } from '@/stores/notification.store';
 import type { Relationship } from '@/types';
 
 import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
+import { getRelationshipTypeTitle } from '@/constants/relationshipTypes'; // Added
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
 const router = useRouter();
-const notificationStore = useNotificationStore(); // Added
+const notificationStore = useNotificationStore();
 
 const headers = computed(() => [
-  { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberId' },
-  { title: t('relationship.list.headers.targetMember'), key: 'targetMemberId' },
-  { title: t('relationship.list.headers.type'), key: 'type' },
+  { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberFullName', sortable: true },
+  { title: t('relationship.list.headers.targetMember'), key: 'targetMemberFullName', sortable: true },
+  { title: t('relationship.list.headers.type'), key: 'type', sortable: true },
   { title: t('common.actions'), key: 'actions', sortable: false },
 ]);
 
@@ -61,15 +71,15 @@ const editItem = (item: Relationship) => {
   router.push({ name: 'EditRelationship', params: { id: item.id } });
 };
 
-const deleteConfirmDialog = ref(false); // Added
-const relationshipToDelete = ref<Relationship | null>(null); // Added
+const deleteConfirmDialog = ref(false);
+const relationshipToDelete = ref<Relationship | null>(null);
 
-const confirmDelete = (item: Relationship) => { // Added
+const confirmDelete = (item: Relationship) => {
   relationshipToDelete.value = item;
   deleteConfirmDialog.value = true;
 };
 
-const handleDeleteConfirm = async () => { // Added
+const handleDeleteConfirm = async () => {
   if (relationshipToDelete.value) {
     const result = await relationshipStore.deleteItem(relationshipToDelete.value.id);
     if (result.ok) {
@@ -82,7 +92,7 @@ const handleDeleteConfirm = async () => { // Added
   }
 };
 
-const handleDeleteCancel = () => { // Added
+const handleDeleteCancel = () => {
   deleteConfirmDialog.value = false;
   relationshipToDelete.value = null;
 };
