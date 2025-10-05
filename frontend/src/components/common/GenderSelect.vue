@@ -14,7 +14,8 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { Gender } from '@/types';
+import { Gender } from '@/types'; // Added back
+import { GENDER_OPTIONS } from '@/constants/genders'; // Added
 
 const { modelValue, label, rules, readOnly, clearable } = defineProps<{
   modelValue: Gender | null | undefined;
@@ -28,8 +29,5 @@ const updateModelValue = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
 
-const genderOptions = Object.values(Gender).map((gender) => ({
-  title: t(`member.gender.${gender.toLowerCase()}`),
-  value: gender,
-}));
+const genderOptions = GENDER_OPTIONS; // Used GENDER_OPTIONS
 </script>
