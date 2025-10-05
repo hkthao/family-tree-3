@@ -150,6 +150,12 @@ const router = createRouter({
               meta: { breadcrumb: 'relationship.form.addTitle' },
             },
             {
+              path: 'detail/:id',
+              name: 'RelationshipDetail',
+              component: () => import('@/views/relationships/RelationshipDetailView.vue'),
+              meta: { breadcrumb: 'relationship.detail.title' },
+            },
+            {
               path: 'edit/:id',
               name: 'EditRelationship',
               component: () => import('@/views/relationships/RelationshipEditView.vue'),
