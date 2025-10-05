@@ -18,15 +18,12 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, Result<
 
     public async Task<Result<IReadOnlyList<FamilyListDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var spec = new FamilyFilterSpecification(
-            request.SearchTerm,
-            (request.Page - 1) * request.ItemsPerPage,
-            request.ItemsPerPage,
-            request.SortBy,
-            request.SortOrder);
+        var query = _context.Families.AsQueryable();
 
-        // Comment: Specification pattern is applied here to filter, sort, and page the results at the database level.
-        var query = _context.Families.AsQueryable().WithSpecification(spec);
+        // Apply individual specifications
+        query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchTerm));
+        query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
+        query = query.WithSpecification(new FamilyPaginationSpecification((request.Page - 1) * request.ItemsPerPage, request.ItemsPerPage));
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.

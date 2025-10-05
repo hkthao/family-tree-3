@@ -3,17 +3,10 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Families.Specifications;
 
-public class FamilyFilterSpecification : Specification<Family>
+public class FamilyOrderingSpecification : Specification<Family>
 {
-    public FamilyFilterSpecification(string? searchTerm, int skip, int take, string? sortBy, string? sortOrder)
+    public FamilyOrderingSpecification(string? sortBy, string? sortOrder)
     {
-        if (!string.IsNullOrEmpty(searchTerm))
-        {
-            Query.Where(f => f.Name.Contains(searchTerm) || (f.Description != null && f.Description.Contains(searchTerm)));
-        }
-
-        Query.Skip(skip).Take(take);
-
         if (!string.IsNullOrEmpty(sortBy))
         {
             switch (sortBy.ToLower())

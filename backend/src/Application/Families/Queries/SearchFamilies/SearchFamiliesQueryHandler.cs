@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore; // Added
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
+using backend.Application.Families.Specifications; // Added
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 
@@ -19,37 +21,14 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, R
     {
         var query = _context.Families.AsQueryable();
 
-        if (!string.IsNullOrEmpty(request.SearchQuery))
-        {
-            query = query.Where(f => f.Name.Contains(request.SearchQuery) || (f.Description != null && f.Description.Contains(request.SearchQuery)));
-        }
+        // Apply individual specifications
+        query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
+        // Note: Pagination is handled by PaginatedListAsync, not a separate specification here.
 
         if (!string.IsNullOrEmpty(request.Visibility))
         {
             query = query.Where(f => f.Visibility == request.Visibility);
-        }
-
-        if (!string.IsNullOrEmpty(request.SortBy))
-        {
-            switch (request.SortBy.ToLower())
-            {
-                case "name":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(f => f.Name) : query.OrderBy(f => f.Name);
-                    break;
-                case "totalmembers":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(f => f.TotalMembers) : query.OrderBy(f => f.TotalMembers);
-                    break;
-                case "created":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(f => f.Created) : query.OrderBy(f => f.Created);
-                    break;
-                default:
-                    query = query.OrderBy(f => f.Name); // Default sort
-                    break;
-            }
-        }
-        else
-        {
-            query = query.OrderBy(f => f.Name); // Default sort if no sortBy is provided
         }
 
         var paginatedList = await query
