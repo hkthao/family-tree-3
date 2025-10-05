@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Members.Queries.GetMembers;
 
 namespace backend.Application.Members.Queries.GetMembersByIds;
@@ -14,7 +15,7 @@ public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery,
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<MemberListDto>> Handle(GetMembersByIdsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersByIdsQuery request, CancellationToken cancellationToken)
     {
         var memberList = await _context.Members
             .Where(m => request.Ids.Contains(m.Id))

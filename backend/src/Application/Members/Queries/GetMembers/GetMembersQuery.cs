@@ -1,3 +1,5 @@
+using backend.Application.Common.Models; // Added
+
 namespace backend.Application.Members.Queries.GetMembers;
 
 public class GetMembersQuery : IRequest<Result<IReadOnlyList<MemberListDto>>>

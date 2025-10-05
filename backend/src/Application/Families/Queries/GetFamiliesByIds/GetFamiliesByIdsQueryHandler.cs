@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Application.Families.Queries.GetFamiliesByIds;
 
@@ -13,7 +14,7 @@ public class GetFamiliesByIdsQueryHandler : IRequestHandler<GetFamiliesByIdsQuer
         _mapper = mapper;
     }
 
-    public async Task<List<FamilyDto>> Handle(GetFamiliesByIdsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<FamilyDto>>> Handle(GetFamiliesByIdsQuery request, CancellationToken cancellationToken)
     {
         var familyList = await _context.Families
             .Where(f => request.Ids.Contains(f.Id))

@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Application.Events.Queries.GetEventsByIds;
 
@@ -13,7 +14,7 @@ public class GetEventsByIdsQueryHandler : IRequestHandler<GetEventsByIdsQuery, R
         _mapper = mapper;
     }
 
-    public async Task<List<EventDto>> Handle(GetEventsByIdsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<EventDto>>> Handle(GetEventsByIdsQuery request, CancellationToken cancellationToken)
     {
         var eventList = await _context.Events
             .Where(f => request.Ids.Contains(f.Id))

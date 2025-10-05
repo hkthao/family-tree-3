@@ -1,5 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.Members.Specifications;
 
@@ -16,7 +17,7 @@ public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<IR
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<MemberListDto>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
         var searchQuery = new SearchMembersQuery
         {

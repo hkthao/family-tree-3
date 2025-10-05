@@ -2,6 +2,7 @@ using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Members.Specifications;
 using backend.Domain.Entities;
 
@@ -18,7 +19,7 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Res
         _mapper = mapper;
     }
 
-    public async Task<MemberDetailDto> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<MemberDetailDto>> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
         var spec = new MemberByIdSpecification(request.Id);
         spec.Query.Include(m => m.Relationships);
