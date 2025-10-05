@@ -42,12 +42,7 @@ export class ApiFamilyService implements IFamilyService {
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    try {
-      await this.http.delete<void>(`${this.apiUrl}/${id}`);
-      return ok(undefined);
-    } catch (error: any) {
-      return err(error);
-    }
+    return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 
   async loadItems(
@@ -55,23 +50,20 @@ export class ApiFamilyService implements IFamilyService {
     page: number,
     itemsPerPage: number,
   ): Promise<Result<Paginated<Family>, ApiError>> {
-    try {
-      const params = new URLSearchParams();
-      if (filter.searchQuery) params.append('searchQuery', filter.searchQuery);
-      if (filter.familyId) params.append('familyId', filter.familyId);
-      if (filter.visibility) params.append('visibility', filter.visibility);
-      params.append('page', page.toString());
-      params.append('itemsPerPage', itemsPerPage.toString());
-      if (filter.sortBy) params.append('sortBy', filter.sortBy);
-      if (filter.sortOrder) params.append('sortOrder', filter.sortOrder);
+    const params = new URLSearchParams();
+    if (filter.searchQuery) params.append('searchQuery', filter.searchQuery);
+    if (filter.familyId) params.append('familyId', filter.familyId);
+    if (filter.visibility) params.append('visibility', filter.visibility);
+    params.append('page', page.toString());
+    params.append('itemsPerPage', itemsPerPage.toString());
+    if (filter.sortBy) params.append('sortBy', filter.sortBy);
+    if (filter.sortOrder) params.append('sortOrder', filter.sortOrder);
 
-      const response = await this.http.get<Paginated<Family>>(
+    return safeApiCall(
+      this.http.get<Paginated<Family>>(
         `/api/family/search?${params.toString()}`,
-      );
-      return ok(response.data);
-    } catch (error: any) {
-      return err(error);
-    }
+      ),
+    );
   }
 
   async getByIds(ids: string[]): Promise<Result<Family[], ApiError>> {
