@@ -538,54 +538,20 @@ export class MockMemberService implements IMemberService {
     try {
       let filteredMembers = this.members;
 
-      if (filters.fullName) {
-        const lowerCaseFullName = filters.fullName.toLowerCase();
+      if (filters.searchQuery) {
+        const lowerCaseSearchQuery = filters.searchQuery.toLowerCase();
         filteredMembers = filteredMembers.filter(
           (m) =>
-            m.lastName.toLowerCase().includes(lowerCaseFullName) ||
-            m.firstName.toLowerCase().includes(lowerCaseFullName) ||
+            m.lastName.toLowerCase().includes(lowerCaseSearchQuery) ||
+            m.firstName.toLowerCase().includes(lowerCaseSearchQuery) ||
             `${m.lastName} ${m.firstName}`
               .toLowerCase()
-              .includes(lowerCaseFullName),
-        );
-      }
-      if (filters.dateOfBirth) {
-        // Compare Date objects
-        filteredMembers = filteredMembers.filter(
-          (m) =>
-            m.dateOfBirth?.toISOString().split('T')[0] ===
-            filters.dateOfBirth?.toISOString().split('T')[0],
-        );
-      }
-      if (filters.dateOfDeath) {
-        // Compare Date objects
-        filteredMembers = filteredMembers.filter(
-          (m) =>
-            m.dateOfDeath?.toISOString().split('T')[0] ===
-            filters.dateOfDeath?.toISOString().split('T')[0],
+              .includes(lowerCaseSearchQuery),
         );
       }
       if (filters.gender) {
         filteredMembers = filteredMembers.filter(
           (m) => m.gender === filters.gender,
-        );
-      }
-      if (filters.placeOfBirth) {
-        const lowerCasePlaceOfBirth = filters.placeOfBirth.toLowerCase();
-        filteredMembers = filteredMembers.filter((m) =>
-          m.placeOfBirth?.toLowerCase().includes(lowerCasePlaceOfBirth),
-        );
-      }
-      if (filters.placeOfDeath) {
-        const lowerCasePlaceOfDeath = filters.placeOfDeath.toLowerCase();
-        filteredMembers = filteredMembers.filter((m) =>
-          m.placeOfDeath?.toLowerCase().includes(lowerCasePlaceOfDeath),
-        );
-      }
-      if (filters.occupation) {
-        const lowerCaseOccupation = filters.occupation.toLowerCase();
-        filteredMembers = filteredMembers.filter((m) =>
-          m.occupation?.toLowerCase().includes(lowerCaseOccupation),
         );
       }
       if (filters.familyId) {
