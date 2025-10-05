@@ -96,7 +96,8 @@ export const useRelationshipStore = defineStore('relationship', {
     setSortBy(sortBy: { key: string; order: string }[]) {
       // Assuming RelationshipFilter has sortBy and sortOrder properties
       this.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
-      this.filter.sortOrder = sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
+      this.filter.sortOrder =
+        sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
       this.currentPage = 1; // Reset to first page on sort change
       this._loadItems();
     },
@@ -126,8 +127,7 @@ export const useRelationshipStore = defineStore('relationship', {
       if (result.ok) {
         return result.value;
       } else {
-        this.error =
-          result.error.message || 'Không thể tải danh sách quan hệ.';
+        this.error = result.error.message || 'Không thể tải danh sách quan hệ.';
         console.error(result.error);
         return [];
       }

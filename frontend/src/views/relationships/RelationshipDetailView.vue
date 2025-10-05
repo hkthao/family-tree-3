@@ -11,8 +11,10 @@
 
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <RelationshipForm :initial-relationship-data="relationship" :read-only="true"
-            :title="t('relationship.detail.title')" />
+          <div class="mt-4">
+            <RelationshipForm :initial-relationship-data="relationship" :read-only="true"
+              :title="t('relationship.detail.title')" />
+          </div>
         </v-window-item>
       </v-window>
     </v-card-text>
