@@ -35,7 +35,7 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Res
 
         if (memberDto == null)
         {
-            return Result<MemberDetailDto>.Failure(new List<string> { $"Member with ID {request.Id} not found." });
+            return Result<MemberDetailDto>.Failure($"Member with ID {request.Id} not found.");
         }
 
         return Result<MemberDetailDto>.Success(memberDto);

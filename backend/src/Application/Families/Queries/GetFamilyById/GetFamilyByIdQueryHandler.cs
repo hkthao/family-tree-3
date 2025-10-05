@@ -33,7 +33,7 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Res
 
         if (familyDto == null)
         {
-            return Result<FamilyDetailDto>.Failure(new List<string> { $"Family with ID {request.Id} not found." });
+            return Result<FamilyDetailDto>.Failure($"Family with ID {request.Id} not found.");
         }
 
         return Result<FamilyDetailDto>.Success(familyDto);

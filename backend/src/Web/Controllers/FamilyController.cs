@@ -25,29 +25,45 @@ public class FamilyController : ControllerBase
     public async Task<ActionResult<List<FamilyDto>>> GetAllFamilies([FromQuery] string ids)
     {
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
-        return await _mediator.Send(new GetFamiliesByIdsQuery(guids));
+        var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<FamilyDto>> GetFamilyById(Guid id)
     {
         var result = await _mediator.Send(new GetFamilyByIdQuery(id));
-        if (result == null)
-            return NotFound();
-        return Ok(result);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return NotFound(result.Error); // Assuming NotFound for single item retrieval failure
     }
 
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<FamilyDto>>> Search([FromQuery] SearchFamiliesQuery query)
     {
-        return await _mediator.Send(query);
+        var result = await _mediator.Send(query);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpPost]
     public async Task<ActionResult<Guid>> CreateFamily([FromBody] CreateFamilyCommand command)
     {
         var result = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetFamilyById), new { id = result }, result);
+        if (result.IsSuccess)
+        {
+            return CreatedAtAction(nameof(GetFamilyById), new { id = result.Value }, result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpPut("{id}")]
@@ -57,21 +73,34 @@ public class FamilyController : ControllerBase
         {
             return BadRequest();
         }
-        await _mediator.Send(command);
-        return NoContent();
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteFamily(Guid id)
     {
-        await _mediator.Send(new DeleteFamilyCommand(id));
-        return NoContent();
+        var result = await _mediator.Send(new DeleteFamilyCommand(id));
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpGet("by-ids")]
     public async Task<ActionResult<List<FamilyDto>>> GetFamiliesByIds([FromQuery] string ids)
     {
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
-        return await _mediator.Send(new GetFamiliesByIdsQuery(guids));
+        var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
     }
 }

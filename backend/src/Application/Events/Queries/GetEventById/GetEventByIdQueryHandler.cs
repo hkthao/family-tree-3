@@ -33,7 +33,7 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Resul
 
         if (eventDto == null)
         {
-            return Result<EventDetailDto>.Failure(new List<string> { $"Event with ID {request.Id} not found." });
+            return Result<EventDetailDto>.Failure($"Event with ID {request.Id} not found.");
         }
 
         return Result<EventDetailDto>.Success(eventDto);

@@ -24,23 +24,35 @@ public class MembersController : ControllerBase
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] SearchMembersQuery query)
     {
-        return await _mediator.Send(query);
+        var result = await _mediator.Send(query);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error); // Or other appropriate error handling
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<MemberDetailDto>> GetMemberById(Guid id)
     {
         var result = await _mediator.Send(new GetMemberByIdQuery(id));
-        if (result == null)
-            return NotFound();
-        return Ok(result);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return NotFound(result.Error); // Assuming NotFound for single item retrieval failure
     }
 
     [HttpGet("by-ids")]
     public async Task<ActionResult<List<MemberListDto>>> GetMembersByIds([FromQuery] string ids)
     {
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
-        return Ok(await _mediator.Send(new GetMembersByIdsQuery(guids)));
+        var result = await _mediator.Send(new GetMembersByIdsQuery(guids));
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error); // Or other appropriate error handling
     }
 
     [HttpPost]
