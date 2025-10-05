@@ -62,7 +62,12 @@ const page = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const totalEvents = ref(0);
 
-const paginatedEvents = computed(() => eventStore.items);
+const paginationLength = computed(() => {
+  if (typeof totalEvents.value !== 'number' || typeof itemsPerPage.value !== 'number' || itemsPerPage.value <= 0) {
+    return 1; // Default to 1 or handle error appropriately
+  }
+  return Math.max(1, Math.ceil(totalEvents.value / itemsPerPage.value));
+});
 
 const loadEvents = async () => {
   if (!props.familyId && !props.memberId) {

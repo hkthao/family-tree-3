@@ -13,7 +13,7 @@ export const useEventStore = defineStore('event', {
     totalItems: 0,
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
-    totalPages: 0,
+    totalPages: 1,
   }),
   getters: {},
   actions: {
@@ -25,7 +25,6 @@ export const useEventStore = defineStore('event', {
         this.currentPage,
         this.itemsPerPage,
       );
-
       if (result.ok) {
         this.items = result.value.items;
         this.totalItems = result.value.totalItems;

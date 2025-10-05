@@ -58,4 +58,10 @@ public class EventsController : ControllerBase
 
         return NoContent();
     }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<PaginatedList<EventDto>>> Search([FromQuery] SearchEventsQuery query)
+    {
+        return await _mediator.Send(query);
+    }
 }
