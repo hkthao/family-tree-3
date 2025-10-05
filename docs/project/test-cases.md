@@ -37,6 +37,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_MEMBER_01 | Thêm thành viên mới thành công         | Member Management      | High     | Manual/Automated  |
 | TC_MEMBER_02 | Thêm thành viên thất bại (thiếu họ tên) | Member Management      | High     | Manual/Automated  |
 | TC_MEMBER_03 | Chỉnh sửa thông tin thành viên thành công| Member Management      | High     | Manual/Automated  |
+| TC_EVENT_04  | Tìm kiếm sự kiện thành công            | Event Management       | High     | Manual/Automated  |
 | TC_TREE_01   | Hiển thị cây gia phả đúng cấu trúc     | Family Tree            | High     | Manual/Automated (Future Feature)  |
 | TC_TREE_02   | Tương tác Zoom và Pan trên cây         | Family Tree            | Medium   | Manual (Future Feature)            |
 | TC_FAMILY_01 | Tạo dòng họ mới thành công             | Family Management      | High     | Manual/Automated  |
@@ -175,7 +176,29 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Priority**: High
 -   **Type**: Manual/Automated
 
-### 3.3. Module: Cây Gia Phả (Family Tree) (Future Feature)
+### 3.3. Module: Quản lý Sự kiện (Event Management)
+
+#### TC_EVENT_04: Tìm kiếm sự kiện thành công
+-   **Mục tiêu**: Xác minh người dùng có thể tìm kiếm sự kiện thành công với các tiêu chí khác nhau.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một sự kiện tồn tại trong hệ thống.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang quản lý sự kiện.
+    3.  Mở rộng phần "Tìm kiếm Nâng cao".
+    4.  Nhập "họp" vào ô "Tìm kiếm theo tên hoặc mô tả sự kiện...".
+    5.  Chọn "Họp mặt" từ danh sách "Loại Sự kiện".
+    6.  Nhấn nút "Áp dụng Bộ lọc".
+-   **Kết quả mong đợi**: 
+    *   Danh sách sự kiện được cập nhật để chỉ hiển thị các sự kiện có tên hoặc mô tả chứa "họp" và có loại là "Họp mặt".
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated
+
+### 3.3. Module: Quản lý Sự kiện (Event Management)
 
 #### TC_TREE_01: Hiển thị cây gia phả đúng cấu trúc
 -   **Mục tiêu**: Xác minh cây gia phả được hiển thị chính xác theo các mối quan hệ đã định nghĩa trong hệ thống.

@@ -187,13 +187,13 @@ Content-Type: application/json
 ### 6.1. Quản lý Dòng họ (`/api/Family`) (updated after refactor)
 
 -   `GET /api/Family`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
-    *   **Phản hồi:** `PaginatedList<Family>`
+    *   **Phản hồi:** `Result<PaginatedList<Family>>`
 -   `GET /api/Family/{id}`: Lấy thông tin dòng họ theo ID.
     *   **Phản hồi:** `Result<Family>`
 -   `GET /api/Family/by-ids?ids=id1,id2`: Lấy thông tin nhiều dòng họ theo danh sách ID.
     *   **Phản hồi:** `Result<List<Family>>`
 -   `GET /api/Family/search?keyword=...&page=...&itemsPerPage=...`: Tìm kiếm dòng họ theo từ khóa và hỗ trợ phân trang.
-    *   **Phản hồi:** `PaginatedList<Family>`
+    *   **Phản hồi:** `Result<PaginatedList<Family>>`
 -   `POST /api/Family`: Tạo dòng họ mới.
     *   **Request Body:** `CreateFamilyCommand` (ví dụ: `{ "name": "Tên dòng họ", "description": "Mô tả" }`)
     *   **Phản hồi:** `Result<Guid>` (ID của dòng họ vừa tạo)
@@ -206,7 +206,7 @@ Content-Type: application/json
 ### 6.2. Quản lý Thành viên (`/api/members`)
 
 -   `GET /api/members`: Lấy danh sách thành viên (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
-    *   **Phản hồi:** `PaginatedList<Member>`
+    *   **Phản hồi:** `Result<PaginatedList<Member>>`
 -   `GET /api/members/{id}`: Lấy thông tin thành viên theo ID.
     *   **Phản hồi:** `Result<Member>`
 -   `GET /api/members?ids=id1,id2`: Lấy thông tin nhiều thành viên theo danh sách ID.
@@ -223,7 +223,7 @@ Content-Type: application/json
 ### 6.3. Quản lý Sự kiện (`/api/events`)
 
 -   `GET /api/events`: Lấy danh sách sự kiện (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
-    *   **Phản hồi:** `PaginatedList<Event>`
+    *   **Phản hồi:** `Result<PaginatedList<Event>>`
 -   `GET /api/events/{id}`: Lấy thông tin sự kiện theo ID.
     *   **Phản hồi:** `Result<Event>`
 -   `POST /api/events`: Tạo sự kiện mới.

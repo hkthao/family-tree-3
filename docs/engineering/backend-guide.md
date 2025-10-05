@@ -297,45 +297,98 @@ Specification Pattern là một mẫu thiết kế giúp đóng gói logic nghi�
 
 Trong dự án này, chúng ta sử dụng thư viện `Ardalis.Specification` để triển khai Specification Pattern. Thư viện này cung cấp một cách mạnh mẽ để định nghĩa các tiêu chí truy vấn, bao gồm lọc, sắp xếp, phân trang và bao gồm các mối quan hệ.
 
-**Ví dụ (`Application/Members/Specifications/MemberFilterSpecification.cs`):**
+Thay vì một `Specification` tổng hợp, chúng ta tạo các `Specification` nhỏ hơn, tập trung vào một tiêu chí lọc hoặc sắp xếp cụ thể. Các `Specification` này sau đó được áp dụng trực tiếp trong `Query Handler`.
+
+**Ví dụ về các Specification nhỏ hơn (`Application/Events/Specifications/EventSearchTermSpecification.cs`):**
 
 ```csharp
-public class MemberFilterSpecification : Specification<Member>
+public class EventSearchTermSpecification : Specification<Event>
 {
-    public MemberFilterSpecification(string? searchTerm, Gender? gender, Guid? familyId)
+    public EventSearchTermSpecification(string? searchTerm)
     {
-        Query.Where(m =>
-            (searchTerm == null || m.FirstName.Contains(searchTerm) || m.LastName.Contains(searchTerm) || m.Nickname.Contains(searchTerm)) &&
-            (gender == null || m.Gender == gender) &&
-            (familyId == null || m.FamilyId == familyId));
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            Query.Where(e => e.Name.Contains(searchTerm) || (e.Description != null && e.Description.Contains(searchTerm)));
+        }
     }
 }
 ```
 
-**Ví dụ sử dụng trong Query Handler (`Application/Members/Queries/GetMembers/GetMembersQueryHandler.cs`):**
+**Ví dụ về Specification cho sắp xếp (`Application/Events/Specifications/EventOrderingSpecification.cs`):**
 
 ```csharp
-public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<List<MemberListDto>>>
+public class EventOrderingSpecification : Specification<Event>
+{
+    public EventOrderingSpecification(string? sortBy, string? sortOrder)
+    {
+        if (!string.IsNullOrEmpty(sortBy))
+        {
+            switch (sortBy.ToLower())
+            {
+                case "name":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(e => e.Name);
+                    else
+                        Query.OrderBy(e => e.Name);
+                    break;
+                case "startdate":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(e => e.StartDate);
+                    else
+                        Query.OrderBy(e => e.StartDate);
+                    break;
+                case "created":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(e => e.Created);
+                    else
+                        Query.OrderBy(e => e.Created);
+                    break;
+                default:
+                    Query.OrderBy(e => e.StartDate); // Default sort
+                    break;
+            }
+        }
+        else
+        {
+            Query.OrderBy(e => e.StartDate); // Default sort if no sortBy is provided
+        }
+    }
+}
+```
+
+**Ví dụ sử dụng các Specification trong Query Handler (`Application/Events/Queries/SearchEvents/SearchEventsQueryHandler.cs`):**
+
+```csharp
+public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<Result<List<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
-        var specification = new MemberFilterSpecification(request.SearchTerm, request.Gender, request.FamilyId);
+        var query = _context.Events.AsQueryable();
 
-        var members = await _context.Members
-            .WithSpecification(specification) // Áp dụng specification
-            .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+        // Apply individual specifications for filtering
+        query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
+        query = query.WithSpecification(new EventTypeSpecification(request.Type));
+        query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
+        query = query.WithSpecification(new EventByMemberIdSpecification(request.MemberId));
 
-        return Result<List<MemberListDto>>.Success(members);
+        // Apply ordering specification
+        query = query.WithSpecification(new EventOrderingSpecification(request.SortBy, request.SortOrder));
+
+        var paginatedList = await query
+            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<EventDto>>.Success(paginatedList);
     }
 }
 ```
@@ -499,6 +552,10 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
 *   **Tách biệt mối quan tâm (Separation of Concerns)**: Tuân thủ chặt chẽ Clean Architecture bằng cách đảm bảo mỗi lớp chỉ có một trách nhiệm duy nhất và không phụ thuộc vào các lớp bên ngoài nó.
 
 *   **Sử dụng DTOs (Data Transfer Objects)**: Luôn ánh xạ Domain Entities sang DTOs khi trả về dữ liệu cho client hoặc khi nhận dữ liệu từ client. Điều này giúp bảo vệ Domain Model khỏi việc bị lộ ra ngoài và cho phép tùy chỉnh cấu trúc dữ liệu cho từng trường hợp sử dụng.
+
+*   **Sử dụng `Result Pattern` nhất quán cho các thao tác nghiệp vụ (updated after refactor)**:
+    *   Tất cả các `Command` và `Query` handlers nên trả về một đối tượng `Result<T>` (hoặc `Result<Unit>` cho các thao tác không trả về dữ liệu) để chỉ rõ thành công hay thất bại và cung cấp thông tin lỗi chi tiết.
+    *   Các `Controller` nên kiểm tra `Result.IsSuccess` và trả về các `ActionResult` phù hợp (ví dụ: `Ok(result.Value)`, `BadRequest(result.Error)`, `NotFound(result.Error)`). Điều này giúp chuẩn hóa việc xử lý phản hồi API và tránh việc throw exceptions không cần thiết.
 
 ## 14. Tài liệu liên quan
 
