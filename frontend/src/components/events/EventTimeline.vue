@@ -5,6 +5,7 @@
       :key="event.id"
       :dot-color="event.color || 'primary'"
       size="small"
+      side="end"
     >
       <template v-slot:opposite>
         <div
