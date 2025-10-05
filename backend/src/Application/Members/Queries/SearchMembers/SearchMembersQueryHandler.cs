@@ -19,7 +19,7 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Res
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<MemberListDto>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
         var spec = new MemberFilterSpecification(request);
 

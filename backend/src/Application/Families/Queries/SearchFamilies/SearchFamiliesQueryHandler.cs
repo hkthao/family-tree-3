@@ -15,7 +15,7 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, R
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<FamilyDto>> Handle(SearchFamiliesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<FamilyDto>>> Handle(SearchFamiliesQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Families.AsQueryable();
 
