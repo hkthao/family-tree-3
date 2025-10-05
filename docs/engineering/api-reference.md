@@ -184,23 +184,23 @@ Content-Type: application/json
 
 ## 6. Các Endpoint chính
 
-### 6.1. Quản lý Dòng họ (`/api/family`)
+### 6.1. Quản lý Dòng họ (`/api/Family`) (updated after refactor)
 
--   `GET /api/family`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
+-   `GET /api/Family`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
     *   **Phản hồi:** `PaginatedList<Family>`
--   `GET /api/family/{id}`: Lấy thông tin dòng họ theo ID.
+-   `GET /api/Family/{id}`: Lấy thông tin dòng họ theo ID.
     *   **Phản hồi:** `Result<Family>`
--   `GET /api/family?ids=id1,id2`: Lấy thông tin nhiều dòng họ theo danh sách ID.
+-   `GET /api/Family/by-ids?ids=id1,id2`: Lấy thông tin nhiều dòng họ theo danh sách ID.
     *   **Phản hồi:** `Result<List<Family>>`
--   `GET /api/family/search?keyword=...&page=...&itemsPerPage=...`: Tìm kiếm dòng họ theo từ khóa và hỗ trợ phân trang.
+-   `GET /api/Family/search?keyword=...&page=...&itemsPerPage=...`: Tìm kiếm dòng họ theo từ khóa và hỗ trợ phân trang.
     *   **Phản hồi:** `PaginatedList<Family>`
--   `POST /api/family`: Tạo dòng họ mới.
+-   `POST /api/Family`: Tạo dòng họ mới.
     *   **Request Body:** `CreateFamilyCommand` (ví dụ: `{ "name": "Tên dòng họ", "description": "Mô tả" }`)
     *   **Phản hồi:** `Result<Guid>` (ID của dòng họ vừa tạo)
--   `PUT /api/family/{id}`: Cập nhật thông tin dòng họ.
+-   `PUT /api/Family/{id}`: Cập nhật thông tin dòng họ.
     *   **Request Body:** `UpdateFamilyCommand` (ví dụ: `{ "id": "uuid", "name": "Tên mới", "description": "Mô tả mới" }`)
     *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
--   `DELETE /api/family/{id}`: Xóa dòng họ.
+-   `DELETE /api/Family/{id}`: Xóa dòng họ.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
 
 ### 6.2. Quản lý Thành viên (`/api/members`)

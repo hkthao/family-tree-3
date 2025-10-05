@@ -63,53 +63,44 @@ graph TD
 ```
 
 -   **Web API (Web Layer)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các dịch vụ nghiệp vụ (Business Services) trong Application Layer, và trả về phản hồi.
--   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các dịch vụ nghiệp vụ (Business Services) sử dụng `Result Pattern` để trả về kết quả thống nhất. Các dịch vụ CRUD được trừu tượng hóa thông qua `IBaseCrudService`. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `Repository Pattern` để tương tác với dữ liệu.**
+-   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `Repository Pattern` để tương tác với dữ liệu và sử dụng `Result Pattern` để trả về kết quả thống nhất.** (updated after refactor)
 -   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
 -   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
 
-## 4. Sơ đồ mã nguồn (Code Diagram - C4)
+## 4. Sơ đồ mã nguồn (Code Diagram - C4) (updated after refactor)
 
-Ví dụ chi tiết về `MemberService` trong Application Layer, kế thừa từ `BaseCrudService` và sử dụng `Result Pattern`.
-
-```mermaid
-graph TD
-    subgraph "Application Layer"
-        A(MemberService) -->|Kế thừa từ| B(BaseCrudService)
-        B -->|Sử dụng| C(IMemberRepository)
-        A -->|Trả về| D(Result<Member>)
-    end
-
-    subgraph "Infrastructure Layer"
-        E(InMemoryMemberRepository) -->|Triển khai| C
-    end
-```
-
--   `MemberService`: Chứa logic nghiệp vụ để quản lý thành viên, kế thừa các thao tác CRUD cơ bản từ `BaseCrudService`.
--   `BaseCrudService`: Lớp cơ sở cung cấp các thao tác CRUD chung, xử lý `Result Pattern` và logging.
--   `IMemberRepository`: Interface định nghĩa các phương thức truy cập dữ liệu thành viên.
--   `InMemoryMemberRepository`: Triển khai cụ thể của `IMemberRepository` sử dụng dữ liệu trong bộ nhớ.
-
-## 4. Sơ đồ mã nguồn (Code Diagram - C4)
-
-Ví dụ chi tiết về `MemberService` trong Application Layer, kế thừa từ `BaseCrudService` và sử dụng `Result Pattern`.
+Ví dụ chi tiết về luồng CQRS (Command Query Responsibility Segregation) trong Application Layer, sử dụng MediatR và tương tác với `IApplicationDbContext`.
 
 ```mermaid
 graph TD
+    subgraph "Web API"
+        A[Controller] -->|Gửi Command/Query| B(MediatR)
+    end
+
     subgraph "Application Layer"
-        A(MemberService) -->|Kế thừa từ| B(BaseCrudService)
-        B -->|Sử dụng| C(IMemberRepository)
-        A -->|Trả về| D(Result<Member>)
+        B -->|Dispatch| C{Command/Query Handler}
+        C -->|Tương tác| D(IApplicationDbContext)
+        D -->|Truy cập dữ liệu| E(Entity Framework Core)
+    end
+
+    subgraph "Domain Layer"
+        E --> F(Entities)
     end
 
     subgraph "Infrastructure Layer"
-        E(InMemoryMemberRepository) -->|Triển khai| C
+        D --> G(ApplicationDbContext)
     end
 ```
 
--   `MemberService`: Chứa logic nghiệp vụ để quản lý thành viên, kế thừa các thao tác CRUD cơ bản từ `BaseCrudService`.
--   `BaseCrudService`: Lớp cơ sở cung cấp các thao tác CRUD chung, xử lý `Result Pattern` và logging.
--   `IMemberRepository`: Interface định nghĩa các phương thức truy cập dữ liệu thành viên.
--   `InMemoryMemberRepository`: Triển khai cụ thể của `IMemberRepository` sử dụng dữ liệu trong bộ nhớ.
+-   **Controller**: Nhận yêu cầu từ Frontend, tạo `Command` hoặc `Query` và gửi đến `MediatR`.
+-   **MediatR**: Thư viện giúp điều phối `Command` hoặc `Query` đến `Handler` tương ứng.
+-   **Command/Query Handler**: Chứa logic nghiệp vụ để xử lý `Command` hoặc `Query`.
+    -   `CommandHandler` thực hiện thay đổi dữ liệu thông qua `IApplicationDbContext`.
+    -   `QueryHandler` truy vấn dữ liệu thông qua `IApplicationDbContext`.
+-   **IApplicationDbContext**: Interface định nghĩa các DbSet và phương thức lưu thay đổi, được triển khai bởi `ApplicationDbContext` trong Infrastructure Layer.
+-   **Entity Framework Core**: ORM được sử dụng để tương tác với cơ sở dữ liệu.
+-   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer.
+
 
 ### 🔄 CQRS (Command, Query, Handler)
 

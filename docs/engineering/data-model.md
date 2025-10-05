@@ -25,159 +25,162 @@ Tài liệu này mô tả chi tiết về mô hình dữ liệu, schema của da
 ```mermaid
 erDiagram
     FAMILY {
-        string id PK "ID duy nhất"
-        string name "Tên gia đình"
-        string description "Mô tả"
-        string avatarUrl "URL ảnh đại diện"
-        string address "Địa chỉ"
-        string visibility "Chế độ hiển thị (Public/Private)"
-        int totalMembers "Tổng số thành viên"
+        string Id PK "ID duy nhất"
+        string Name "Tên gia đình"
+        string Description "Mô tả"
+        string AvatarUrl "URL ảnh đại diện"
+        string Address "Địa chỉ"
+        string Visibility "Chế độ hiển thị (Public/Private)"
+        int TotalMembers "Tổng số thành viên"
     }
 
     MEMBER {
-        string id PK "ID duy nhất"
-        string family_id FK "Khóa ngoại đến Families"
-        string first_name "Tên"
-        string last_name "Họ"
-        string full_name "Họ và tên đầy đủ"
-        date date_of_birth "Ngày sinh"
-        date date_of_death "Ngày mất"
-        string gender "Giới tính"
-        string avatarUrl "URL ảnh đại diện"
-        string nickname "Biệt danh"
-        string placeOfBirth "Nơi sinh"
-        string placeOfDeath "Nơi mất"
-        string occupation "Nghề nghiệp"
-        string father_id FK "ID cha"
-        string mother_id FK "ID mẹ"
-        string spouse_id FK "ID vợ/chồng"
+        string Id PK "ID duy nhất"
+        string FamilyId FK "Khóa ngoại đến Families"
+        string FirstName "Tên"
+        string LastName "Họ"
+        string FullName "Họ và tên đầy đủ"
+        date DateOfBirth "Ngày sinh"
+        date DateOfDeath "Ngày mất"
+        string Gender "Giới tính"
+        string AvatarUrl "URL ảnh đại diện"
+        string Nickname "Biệt danh"
+        string PlaceOfBirth "Nơi sinh"
+        string PlaceOfDeath "Nơi mất"
+        string Occupation "Nghề nghiệp"
     }
 
     EVENT {
-        string id PK "ID duy nhất"
-        string name "Tên sự kiện"
-        string description "Mô tả"
-        datetime startDate "Ngày bắt đầu"
-        datetime endDate "Ngày kết thúc"
-        string location "Địa điểm"
-        string familyId FK "ID gia đình"
-        string type "Loại sự kiện"
-        string color "Mã màu"
+        string Id PK "ID duy nhất"
+        string Name "Tên sự kiện"
+        string Description "Mô tả"
+        datetime StartDate "Ngày bắt đầu"
+        datetime EndDate "Ngày kết thúc"
+        string Location "Địa điểm"
+        string FamilyId FK "ID gia đình"
+        int Type "Loại sự kiện (Enum int)"
+        string Color "Mã màu"
+    }
+
+    RELATIONSHIP {
+        string Id PK "ID duy nhất"
+        string SourceMemberId FK "ID thành viên nguồn"
+        string TargetMemberId FK "ID thành viên đích"
+        int Type "Loại quan hệ (Enum int)"
+        int Order "Thứ tự (nếu có)"
     }
 
     EVENT_MEMBER {
-        string event_id PK,FK "ID sự kiện"
-        string member_id PK,FK "ID thành viên"
+        string EventId PK,FK "ID sự kiện"
+        string MemberId PK,FK "ID thành viên"
     }
 
     FAMILY ||--o{ MEMBER : "có"
-    MEMBER ||--o| MEMBER : "cha của"
-    MEMBER ||--o| MEMBER : "mẹ của"
-    MEMBER ||--o| MEMBER : "vợ/chồng của"
     FAMILY ||--o{ EVENT : "có"
-    EVENT ||--o{ EVENT_MEMBER : "liên quan đến"
+    MEMBER ||--o{ RELATIONSHIP : "có quan hệ"
     MEMBER ||--o{ EVENT_MEMBER : "liên quan đến"
+    EVENT ||--o{ EVENT_MEMBER : "liên quan đến"
+    RELATIONSHIP ||--o| MEMBER : "nguồn là"
+    RELATIONSHIP ||--o| MEMBER : "đích là"
 ```
 ## 3. Mô tả các bảng
 
-### 3.1. Bảng `Families`
+### 3.1. Bảng `Families` (updated after refactor)
 
 Lưu trữ thông tin về các gia đình hoặc dòng họ.
 
 | Tên cột      | Kiểu dữ liệu | Ràng buộc | Mô tả                  |
 | :------------ | :----------- | :-------- | :--------------------- |
-| `id`          | `varchar(36)`| PK        | ID duy nhất của gia đình |
-| `name`        | `varchar(100)`| NOT NULL  | Tên gia đình           |
-| `description` | `text`       | NULL      | Mô tả về gia đình      |
-| `avatar_url`  | `varchar(255)`| NULL      | URL ảnh đại diện của gia đình |
-| `address`     | `varchar(255)`| NULL      | Địa chỉ của gia đình   |
-| `visibility`  | `varchar(20)`| NOT NULL  | Chế độ hiển thị (Public, Private) |
-| `total_members`| `int`        | NOT NULL  | Tổng số thành viên trong gia đình |
+| `Id`          | `varchar(36)`| PK        | ID duy nhất của gia đình |
+| `Name`        | `varchar(100)`| NOT NULL  | Tên gia đình           |
+| `Description` | `text`       | NULL      | Mô tả về gia đình      |
+| `AvatarUrl`   | `longtext`   | NULL      | URL ảnh đại diện của gia đình |
+| `Address`     | `longtext`   | NULL      | Địa chỉ của gia đình   |
+| `Visibility`  | `varchar(20)`| NOT NULL  | Chế độ hiển thị (Public, Private) |
+| `TotalMembers`| `int`        | NOT NULL  | Tổng số thành viên trong gia đình |
 
 - **Mối quan hệ**: Một `Family` có thể có nhiều `Member` và nhiều `Event`.
 
-### 3.2. Bảng `Members`
+### 3.2. Bảng `Members` (updated after refactor)
 
-Lưu trữ thông tin chi tiết của từng thành viên, bao gồm các mối quan hệ trực tiếp.
+Lưu trữ thông tin chi tiết của từng thành viên. Các mối quan hệ giữa các thành viên được quản lý thông qua bảng `Relationships`.
 
 | Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
 | :-------------- | :----------- | :-------- | :---------------------- |
-| `id`            | `varchar(36)`| PK        | ID duy nhất của thành viên |
-| `family_id`     | `varchar(36)`| FK, NOT NULL | ID của gia đình mà thành viên thuộc về |
-| `first_name`    | `varchar(50)`| NOT NULL  | Tên                     |
-| `last_name`     | `varchar(50)`| NOT NULL  | Họ                      |
-| `full_name`     | `varchar(100)`| NOT NULL  | Họ và tên đầy đủ (tự động tạo) |
-| `date_of_birth` | `date`       | NULL      | Ngày sinh               |
-| `date_of_death` | `date`       | NULL      | Ngày mất                |
-| `gender`        | `varchar(10)`| NULL      | Giới tính (Male, Female, Other) |
-| `avatar_url`    | `varchar(255)`| NULL      | URL ảnh đại diện của thành viên |
-| `nickname`      | `varchar(50)`| NULL      | Biệt danh               |
-| `place_of_birth`| `varchar(255)`| NULL      | Nơi sinh                |
-| `place_of_death`| `varchar(255)`| NULL      | Nơi mất                 |
-| `occupation`    | `varchar(100)`| NULL      | Nghề nghiệp             |
-| `father_id`     | `varchar(36)`| FK, NULL  | ID của cha              |
-| `mother_id`     | `varchar(36)`| FK, NULL  | ID của mẹ               |
-| `spouse_id`     | `varchar(36)`| FK, NULL  | ID của vợ/chồng         |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của thành viên |
+| `FamilyId`      | `varchar(36)`| FK, NOT NULL | ID của gia đình mà thành viên thuộc về |
+| `FirstName`     | `varchar(250)`| NOT NULL  | Tên                     |
+| `LastName`      | `varchar(250)`| NOT NULL  | Họ                      |
+| `FullName`      | `varchar(100)`| NOT NULL  | Họ và tên đầy đủ (tự động tạo) |
+| `DateOfBirth`   | `date`       | NULL      | Ngày sinh               |
+| `DateOfDeath`   | `date`       | NULL      | Ngày mất                |
+| `Gender`        | `varchar(10)`| NULL      | Giới tính (Male, Female, Other) |
+| `AvatarUrl`     | `longtext`   | NULL      | URL ảnh đại diện của thành viên |
+| `Nickname`      | `varchar(100)`| NULL      | Biệt danh               |
+| `PlaceOfBirth`  | `varchar(200)`| NULL      | Nơi sinh                |
+| `PlaceOfDeath`  | `varchar(200)`| NULL      | Nơi mất                 |
+| `Occupation`    | `varchar(100)`| NULL      | Nghề nghiệp             |
 
 - **Foreign Keys**:
-  - `family_id`: tham chiếu đến `Families(id)`.
-  - `father_id`: tham chiếu đến `Members(id)` (tự tham chiếu).
-  - `mother_id`: tham chiếu đến `Members(id)` (tự tham chiếu).
-  - `spouse_id`: tham chiếu đến `Members(id)` (tự tham chiếu).
-- **Mối quan hệ**: Một `Member` thuộc về một `Family`. Các mối quan hệ cha, mẹ, vợ/chồng là các mối quan hệ tự tham chiếu trong bảng `Members`.
+  - `FamilyId`: tham chiếu đến `Families(Id)`.
+- **Mối quan hệ**: Một `Member` thuộc về một `Family`. Các mối quan hệ giữa các thành viên (cha, mẹ, vợ/chồng, v.v.) được định nghĩa và lưu trữ trong bảng `Relationships`.
 
-### 3.3. Bảng `Events`
+### 3.3. Bảng `Events` (updated after refactor)
 
 Lưu trữ thông tin về các sự kiện quan trọng của gia đình.
 
 | Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
 | :-------------- | :----------- | :-------- | :---------------------- |
-| `id`            | `varchar(36)`| PK        | ID duy nhất của sự kiện |
-| `name`          | `varchar(200)`| NOT NULL  | Tên sự kiện             |
-| `description`   | `text`       | NULL      | Mô tả chi tiết          |
-| `start_date`    | `datetime`   | NOT NULL  | Ngày bắt đầu            |
-| `end_date`      | `datetime`   | NULL      | Ngày kết thúc           |
-| `location`      | `varchar(200)`| NULL      | Địa điểm diễn ra        |
-| `family_id`     | `varchar(36)`| FK, NULL  | ID của gia đình liên quan |
-| `type`          | `varchar(50)`| NOT NULL  | Loại sự kiện (Birth, Marriage, Death, Other) |
-| `color`         | `varchar(20)`| NULL      | Mã màu để hiển thị      |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của sự kiện |
+| `Name`          | `varchar(200)`| NOT NULL  | Tên sự kiện             |
+| `Description`   | `text`       | NULL      | Mô tả chi tiết          |
+| `StartDate`     | `datetime`   | NOT NULL  | Ngày bắt đầu            |
+| `EndDate`       | `datetime`   | NULL      | Ngày kết thúc           |
+| `Location`      | `varchar(200)`| NULL      | Địa điểm diễn ra        |
+| `FamilyId`      | `varchar(36)`| FK, NULL  | ID của gia đình liên quan |
+| `Type`          | `int`        | NOT NULL  | Loại sự kiện (Birth, Marriage, Death, Other) |
+| `Color`         | `varchar(20)`| NULL      | Mã màu để hiển thị      |
 
 - **Foreign Keys**:
-  - `family_id`: tham chiếu đến `Families(id)`.
+  - `FamilyId`: tham chiếu đến `Families(Id)`.
 - **Mối quan hệ**: Một `Event` có thể liên quan đến một `Family`.
 
-### 3.4. Bảng `EventMembers` (Bảng trung gian)
+### 3.4. Bảng `Relationships` (updated after refactor)
 
-Lưu trữ mối quan hệ nhiều-nhiều giữa `Event` và `Member`.
+Lưu trữ các mối quan hệ giữa các thành viên (ví dụ: cha, mẹ, vợ/chồng, con cái).
 
-| Tên cột      | Kiểu dữ liệu | Ràng buộc | Mô tả                  |
-| :------------ | :----------- | :-------- | :--------------------- |
-| `event_id`    | `varchar(36)`| PK, FK    | ID của sự kiện         |
-| `member_id`   | `varchar(36)`| PK, FK    | ID của thành viên      |
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :-------------- | :----------- | :-------- | :---------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của mối quan hệ |
+| `SourceMemberId`| `varchar(36)`| FK, NOT NULL | ID của thành viên nguồn (ví dụ: cha/mẹ/vợ/chồng) |
+| `TargetMemberId`| `varchar(36)`| FK, NOT NULL | ID của thành viên đích (ví dụ: con/vợ/chồng) |
+| `Type`          | `int`        | NOT NULL  | Loại mối quan hệ (ví dụ: Parent, Child, Spouse) |
+| `Order`         | `int`        | NULL      | Thứ tự của mối quan hệ (nếu có) |
 
 - **Foreign Keys**:
-  - `event_id`: tham chiếu đến `Events(id)`.
-  - `member_id`: tham chiếu đến `Members(id)`.
-- **Mối quan hệ**: Một `Event` có thể liên quan đến nhiều `Member`, và một `Member` có thể liên quan đến nhiều `Event`.
+  - `SourceMemberId`: tham chiếu đến `Members(Id)`.
+  - `TargetMemberId`: tham chiếu đến `Members(Id)`.
+- **Mối quan hệ**: Một `Member` có thể là `SourceMember` hoặc `TargetMember` trong nhiều `Relationship`.
 
-## 4. Toàn vẹn và Ràng buộc Dữ liệu
+## 4. Toàn vẹn và Ràng buộc Dữ liệu (updated after refactor)
 
 Để đảm bảo tính chính xác và nhất quán của dữ liệu, hệ thống áp dụng các ràng buộc và quy tắc toàn vẹn dữ liệu sau:
 
-*   **ID duy nhất**: Tất cả các khóa chính (`id`) đều là `GUID` (Globally Unique Identifier) để đảm bảo tính duy nhất trên toàn hệ thống và dễ dàng trong việc phân tán dữ liệu.
-*   **Khóa ngoại (Foreign Keys)**: Đảm bảo tính toàn vẹn tham chiếu giữa các bảng. Ví dụ, `family_id` trong bảng `Members` phải tồn tại trong bảng `Families`.
+*   **ID duy nhất**: Tất cả các khóa chính (`Id`) đều là `GUID` (Globally Unique Identifier) để đảm bảo tính duy nhất trên toàn hệ thống và dễ dàng trong việc phân tán dữ liệu.
+*   **Khóa ngoại (Foreign Keys)**: Đảm bảo tính toàn vẹn tham chiếu giữa các bảng. Ví dụ, `FamilyId` trong bảng `Members` phải tồn tại trong bảng `Families`. Tương tự, `SourceMemberId` và `TargetMemberId` trong bảng `Relationships` phải tồn tại trong bảng `Members`.
 *   **Ngày sinh/mất**: 
-    *   `date_of_death` (nếu có) phải lớn hơn `date_of_birth`.
-    *   `date_of_birth` và `date_of_death` không được ở trong tương lai.
-*   **Giới tính**: Trường `gender` nên được giới hạn trong một tập các giá trị cụ thể (ví dụ: `Male`, `Female`, `Other`) để đảm bảo tính nhất quán.
-*   **Tên và Họ**: Các trường `first_name` và `last_name` là bắt buộc (`NOT NULL`) để đảm bảo mỗi thành viên có thông tin cơ bản đầy đủ.
-*   **Chế độ hiển thị (Visibility)**: Trường `visibility` trong bảng `Families` nên được giới hạn trong các giá trị như `Public` hoặc `Private`.
-*   **Loại sự kiện (Event Type)**: Trường `type` trong bảng `Events` nên được giới hạn trong các giá trị cụ thể (ví dụ: `Birth`, `Marriage`, `Death`, `Other`).
+    *   `DateOfDeath` (nếu có) phải lớn hơn `DateOfBirth`.
+    *   `DateOfBirth` và `DateOfDeath` không được ở trong tương lai.
+*   **Giới tính**: Trường `Gender` nên được giới hạn trong một tập các giá trị cụ thể (ví dụ: `Male`, `Female`, `Other`) để đảm bảo tính nhất quán.
+*   **Tên và Họ**: Các trường `FirstName` và `LastName` là bắt buộc (`NOT NULL`) để đảm bảo mỗi thành viên có thông tin cơ bản đầy đủ.
+*   **Chế độ hiển thị (Visibility)**: Trường `Visibility` trong bảng `Families` nên được giới hạn trong các giá trị như `Public` hoặc `Private`.
+*   **Loại sự kiện (Event Type)**: Trường `Type` trong bảng `Events` nên được giới hạn trong các giá trị cụ thể (ví dụ: `Birth`, `Marriage`, `Death`, `Other`).
+*   **Loại mối quan hệ (Relationship Type)**: Trường `Type` trong bảng `Relationships` nên được giới hạn trong các giá trị cụ thể (ví dụ: `Parent`, `Child`, `Spouse`, `Sibling`).
 
 
 ## 5. Hướng dẫn Mapping
 
-### 5.1. Backend (Entity Framework Core)
+### 5.1. Backend (Entity Framework Core) (updated after refactor)
 
 Các bảng được map sang các class Entity trong `Domain` layer. EF Core sử dụng Fluent API trong `ApplicationDbContext` để cấu hình chi tiết các mối quan hệ và thuộc tính của Entity.
 
@@ -188,22 +191,22 @@ modelBuilder.Entity<Family>(builder =>
 {
     builder.Property(f => f.Name).HasMaxLength(100).IsRequired();
     builder.Property(f => f.Description).HasMaxLength(1000);
-    builder.Property(f => f.AvatarUrl).HasMaxLength(255);
-    builder.Property(f => f.Address).HasMaxLength(255);
+    builder.Property(f => f.AvatarUrl); // longtext
+    builder.Property(f => f.Address); // longtext
     builder.Property(f => f.Visibility).HasConversion<string>().HasMaxLength(20).IsRequired();
     builder.Property(f => f.TotalMembers).IsRequired();
 });
 
 modelBuilder.Entity<Member>(builder =>
 {
-    builder.Property(m => m.FirstName).HasMaxLength(50).IsRequired();
-    builder.Property(m => m.LastName).HasMaxLength(50).IsRequired();
+    builder.Property(m => m.FirstName).HasMaxLength(250).IsRequired();
+    builder.Property(m => m.LastName).HasMaxLength(250).IsRequired();
     builder.Property(m => m.FullName).HasMaxLength(100).IsRequired();
     builder.Property(m => m.Gender).HasConversion<string>().HasMaxLength(10);
-    builder.Property(m => m.AvatarUrl).HasMaxLength(255);
-    builder.Property(m => m.Nickname).HasMaxLength(50);
-    builder.Property(m => m.PlaceOfBirth).HasMaxLength(255);
-    builder.Property(m => m.PlaceOfDeath).HasMaxLength(255);
+    builder.Property(m => m.AvatarUrl); // longtext
+    builder.Property(m => m.Nickname).HasMaxLength(100);
+    builder.Property(m => m.PlaceOfBirth).HasMaxLength(200);
+    builder.Property(m => m.PlaceOfDeath).HasMaxLength(200);
     builder.Property(m => m.Occupation).HasMaxLength(100);
 
     // Mối quan hệ với Family
@@ -211,22 +214,6 @@ modelBuilder.Entity<Member>(builder =>
            .WithMany(f => f.Members)
            .HasForeignKey(m => m.FamilyId)
            .IsRequired();
-
-    // Mối quan hệ tự tham chiếu (cha, mẹ, vợ/chồng)
-    builder.HasOne(m => m.Father)
-           .WithMany()
-           .HasForeignKey(m => m.FatherId)
-           .IsRequired(false);
-
-    builder.HasOne(m => m.Mother)
-           .WithMany()
-           .HasForeignKey(m => m.MotherId)
-           .IsRequired(false);
-
-    builder.HasOne(m => m.Spouse)
-           .WithMany()
-           .HasForeignKey(m => m.SpouseId)
-           .IsRequired(false);
 });
 
 modelBuilder.Entity<Event>(builder =>
@@ -234,7 +221,7 @@ modelBuilder.Entity<Event>(builder =>
     builder.Property(e => e.Name).HasMaxLength(200).IsRequired();
     builder.Property(e => e.Description).HasMaxLength(1000);
     builder.Property(e => e.Location).HasMaxLength(200);
-    builder.Property(e => e.Type).HasConversion<string>().HasMaxLength(50).IsRequired();
+    builder.Property(e => e.Type).IsRequired(); // Stored as int
     builder.Property(e => e.Color).HasMaxLength(20);
 
     // Mối quan hệ với Family
@@ -242,6 +229,27 @@ modelBuilder.Entity<Event>(builder =>
            .WithMany(f => f.Events)
            .HasForeignKey(e => e.FamilyId)
            .IsRequired(false); // Sự kiện có thể không thuộc về một Family cụ thể
+});
+
+// Cấu hình bảng Relationships
+modelBuilder.Entity<Relationship>(builder =>
+{
+    builder.HasKey(r => r.Id);
+
+    builder.Property(r => r.Type).IsRequired(); // Stored as int
+    builder.Property(r => r.Order);
+
+    builder.HasOne(r => r.SourceMember)
+           .WithMany()
+           .HasForeignKey(r => r.SourceMemberId)
+           .OnDelete(DeleteBehavior.Restrict)
+           .IsRequired();
+
+    builder.HasOne(r => r.TargetMember)
+           .WithMany()
+           .HasForeignKey(r => r.TargetMemberId)
+           .OnDelete(DeleteBehavior.Restrict)
+           .IsRequired();
 });
 
 // Cấu hình bảng trung gian cho mối quan hệ nhiều-nhiều giữa Event và Member
@@ -255,7 +263,7 @@ modelBuilder.Entity<EventMember>(builder =>
 
     builder.HasOne(em => em.Member)
            .WithMany(m => m.EventMembers)
-           .HasForeignKey(em => em.MemberId);
+           .HasForeignKey(em => m.MemberId);
 });
 ```
 
@@ -291,9 +299,6 @@ export interface Member {
   placeOfBirth?: string;
   placeOfDeath?: string;
   occupation?: string;
-  fatherId?: string | null;
-  motherId?: string | null;
-  spouseId?: string | null;
   biography?: string;
 }
 

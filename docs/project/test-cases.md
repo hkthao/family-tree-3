@@ -37,14 +37,14 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_MEMBER_01 | Thêm thành viên mới thành công         | Member Management      | High     | Manual/Automated  |
 | TC_MEMBER_02 | Thêm thành viên thất bại (thiếu họ tên) | Member Management      | High     | Manual/Automated  |
 | TC_MEMBER_03 | Chỉnh sửa thông tin thành viên thành công| Member Management      | High     | Manual/Automated  |
-| TC_TREE_01   | Hiển thị cây gia phả đúng cấu trúc     | Family Tree            | High     | Manual/Automated  |
-| TC_TREE_02   | Tương tác Zoom và Pan trên cây         | Family Tree            | Medium   | Manual            |
+| TC_TREE_01   | Hiển thị cây gia phả đúng cấu trúc     | Family Tree            | High     | Manual/Automated (Future Feature)  |
+| TC_TREE_02   | Tương tác Zoom và Pan trên cây         | Family Tree            | Medium   | Manual (Future Feature)            |
 | TC_FAMILY_01 | Tạo dòng họ mới thành công             | Family Management      | High     | Manual/Automated  |
 | TC_FAMILY_02 | Chỉnh sửa thông tin dòng họ            | Family Management      | High     | Manual/Automated  |
 | TC_REL_01    | Thêm mối quan hệ cha-con thành công    | Relationship Management| High     | Manual/Automated  |
 | TC_REL_02    | Xóa mối quan hệ                        | Relationship Management| Medium   | Manual/Automated  |
-| TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual            |
-| TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual            |
+| TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual (Future Feature)            |
+| TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual (Future Feature)            |
 
 ## 3. Chi tiết Test Cases
 
@@ -175,7 +175,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Priority**: High
 -   **Type**: Manual/Automated
 
-### 3.3. Module: Cây Gia Phả (Family Tree)
+### 3.3. Module: Cây Gia Phả (Family Tree) (Future Feature)
 
 #### TC_TREE_01: Hiển thị cây gia phả đúng cấu trúc
 -   **Mục tiêu**: Xác minh cây gia phả được hiển thị chính xác theo các mối quan hệ đã định nghĩa trong hệ thống.
@@ -297,7 +297,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Priority**: Medium
 -   **Type**: Manual/Automated
 
-### 3.6. Module: File đính kèm (Attachments)
+### 3.6. Module: File đính kèm (Attachments) (Future Feature)
 
 #### TC_ATTACH_01: Tải lên file đính kèm thành công
 -   **Mục tiêu**: Xác minh người dùng có thể tải lên một file đính kèm hợp lệ cho một thành viên.

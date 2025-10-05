@@ -13,7 +13,6 @@
 
 -   **Quản lý gia đình**: Người dùng có thể tạo, xem, và quản lý thông tin các gia đình.
 -   **Quản lý thành viên**: Hỗ trợ thêm, sửa, và xóa thành viên trong một gia đình.
--   **Vẽ cây gia phả**: Hiển thị cây gia phả cơ bản dựa trên quan hệ cha-con.
 
 ### Các vấn đề đã biết
 

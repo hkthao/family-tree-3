@@ -13,14 +13,17 @@
 
 Tài liệu này phác thảo **Lộ trình Phát triển (Roadmap)** cho dự án Cây Gia Phả, định hướng các mục tiêu và tính năng chính sẽ được phát triển trong các quý tiếp theo. Lộ trình này được xây dựng dựa trên các ưu tiên đã xác định trong [Product Backlog](./backlog.md) và tập trung vào việc cung cấp giá trị gia tăng cho người dùng theo từng giai đoạn. Nó giúp toàn bộ đội ngũ phát triển và các bên liên quan có cái nhìn tổng quan về hướng đi của sản phẩm.
 
-## 2. Mục tiêu Ngắn hạn (1-3 tháng)
+## 2. Mục tiêu Ngắn hạn (1-3 tháng) (updated after refactor)
 
 Trong giai đoạn ngắn hạn, chúng tôi tập trung vào việc hoàn thiện các chức năng cốt lõi và cải thiện trải nghiệm người dùng cơ bản:
 
-*   **Hoàn thiện chức năng quản lý Dòng họ và Thành viên**: 
+*   **Hoàn thiện chức năng quản lý Dòng họ và Thành viên**: (Đã hoàn thành)
     *   Thêm, sửa, xóa thông tin dòng họ và thành viên.
     *   Xem chi tiết thông tin thành viên và dòng họ.
     *   Tìm kiếm cơ bản thành viên và dòng họ.
+*   **Quản lý sự kiện**: (Đã hoàn thành)
+    *   Thêm, sửa, xóa các sự kiện quan trọng của gia đình (sinh, kết hôn, mất, họp mặt).
+    *   Xem dòng thời gian các sự kiện.
 *   **Cải thiện cây gia phả**: 
     *   Thêm các kiểu hiển thị mới cho cây gia phả (ví dụ: sơ đồ dọc, ngang).
     *   Chức năng phóng to/thu nhỏ và di chuyển trên cây gia phả.
@@ -46,9 +49,6 @@ Trong giai đoạn trung hạn, chúng tôi sẽ mở rộng các tính năng c�
 *   **Tích hợp AI (Giai đoạn 1)**: 
     *   Gợi ý nội dung tiểu sử dựa trên dữ liệu thành viên đã có sẵn.
     *   Nhận diện khuôn mặt từ ảnh để tự động gắn thẻ thành viên.
-*   **Quản lý sự kiện**: 
-    *   Thêm, sửa, xóa các sự kiện quan trọng của gia đình (sinh, kết hôn, mất, họp mặt).
-    *   Xem dòng thời gian các sự kiện.
 
 ## 4. Mục tiêu Dài hạn (6-12 tháng)
 

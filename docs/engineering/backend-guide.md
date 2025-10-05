@@ -167,89 +167,67 @@ ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP
 
 Để biết thêm chi tiết về luồng xác thực, cấu hình và các cân nhắc bảo mật, vui lòng tham khảo phần [Xác thực & Phân quyền trong Kiến trúc tổng quan](./architecture.md#6-xác-thực--phân-quyền-authentication--authorization).
 
-## 8. Repository Pattern
+## 8. Tương tác Dữ liệu với Entity Framework Core (updated after refactor)
 
-Repository Pattern là một mẫu thiết kế giúp trừu tượng hóa lớp truy cập dữ liệu khỏi logic nghiệp vụ. Nó cung cấp một tập hợp các phương thức để truy cập và thao tác với dữ liệu mà không cần biết chi tiết về cách dữ liệu được lưu trữ (ví dụ: database, API bên ngoài).
+Trong dự án này, chúng ta sử dụng **Entity Framework Core (EF Core)** để tương tác với cơ sở dữ liệu. Thay vì sử dụng các triển khai Repository Pattern tường minh (explicit Repository Pattern) với các lớp Repository riêng biệt, chúng ta tương tác trực tiếp với `DbContext` thông qua interface `IApplicationDbContext` trong Application Layer. Cách tiếp cận này tận dụng các tính năng sẵn có của EF Core như `DbSet<TEntity>` để hoạt động như một Repository hiệu quả.
 
 #### Mục đích
 
-*   **Tách biệt mối quan tâm (Separation of Concerns):** Logic nghiệp vụ không cần quan tâm đến chi tiết triển khai của việc lưu trữ dữ liệu.
-*   **Dễ kiểm thử (Testability):** Có thể dễ dàng mock (giả lập) Repository trong các unit test.
-*   **Dễ thay đổi (Maintainability):** Có thể thay đổi công nghệ lưu trữ dữ liệu mà không ảnh hưởng đến logic nghiệp vụ.
+*   **Đơn giản hóa:** Giảm số lượng lớp và interface cần thiết, làm cho codebase gọn gàng hơn.
+*   **Tận dụng EF Core:** Sử dụng trực tiếp các tính năng mạnh mẽ của EF Core như LINQ, Change Tracking, và các phương thức CRUD có sẵn trên `DbSet<TEntity>`.
+*   **Dễ kiểm thử:** `DbContext` có thể dễ dàng được mock hoặc sử dụng với In-Memory Database cho mục đích kiểm thử.
 
-#### IBaseRepository
+#### IApplicationDbContext
 
-`IBaseRepository<TEntity>` là một interface chung định nghĩa các thao tác CRUD (Create, Read, Update, Delete) cơ bản cho mọi thực thể (Entity) trong hệ thống. Nó được định nghĩa trong `Application` layer.
+`IApplicationDbContext` là interface được định nghĩa trong Application Layer, kế thừa từ `DbContext` của EF Core. Nó cung cấp quyền truy cập vào các `DbSet` cho các thực thể (Entities) của chúng ta.
 
-**Ví dụ (`Application/Common/Interfaces/IBaseRepository.cs`):**
+**Ví dụ (`Application/Common/Interfaces/IApplicationDbContext.cs`):**
 
 ```csharp
-public interface IBaseRepository<TEntity> where TEntity : class
+public interface IApplicationDbContext
 {
-    Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
-    void Update(TEntity entity);
-    void Delete(TEntity entity);
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    DbSet<Family> Families { get; }
+    DbSet<Member> Members { get; }
+    DbSet<Event> Events { get; }
+
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
 ```
 
-#### Triển khai Repository
+#### Sử dụng trong Handlers
 
-Các triển khai cụ thể của Repository (ví dụ: `FamilyRepository`, `MemberRepository`) nằm trong `Infrastructure` layer và sử dụng Entity Framework Core để tương tác với cơ sở dữ liệu.
+Các Command và Query Handlers trong Application Layer sẽ inject `IApplicationDbContext` và sử dụng trực tiếp các `DbSet` để thực hiện các thao tác CRUD.
 
-**Ví dụ (`Infrastructure/Data/Repositories/FamilyRepository.cs`):**
+**Ví dụ sử dụng trong Handler (CreateFamilyCommand):**
 
 ```csharp
-public class FamilyRepository : IBaseRepository<Family>
+// backend/src/Application/Families/Commands/CreateFamily/CreateFamilyCommandHandler.cs
+public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Result<Guid>>
 {
-    private readonly ApplicationDbContext _context;
+    private readonly IApplicationDbContext _context;
 
-    public FamilyRepository(ApplicationDbContext context)
+    public CreateFamilyCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
 
-    public async Task<Family?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
-        return await _context.Families.FindAsync(new object[] { id }, cancellationToken);
-    }
+        var entity = new Family { Name = request.Name, Description = request.Description };
 
-    public async Task<List<Family>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.Families.ToListAsync(cancellationToken);
-    }
+        _context.Families.Add(entity); // Thêm thực thể trực tiếp vào DbSet
+        await _context.SaveChangesAsync(cancellationToken); // Lưu thay đổi
 
-    public async Task AddAsync(Family entity, CancellationToken cancellationToken = default)
-    {
-        await _context.Families.AddAsync(entity, cancellationToken);
-    }
-
-    public void Update(Family entity)
-    {
-        _context.Families.Update(entity);
-    }
-
-    public void Delete(Family entity)
-    {
-        _context.Families.Remove(entity);
-    }
-
-    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return await _context.SaveChangesAsync(cancellationToken);
+        return Result<Guid>.Success(entity.Id);
     }
 }
 ```
 
 #### Unit of Work Pattern
 
-Unit of Work (UoW) Pattern đảm bảo rằng một tập hợp các thao tác (thêm, sửa, xóa) trên nhiều Repository được thực hiện như một giao dịch duy nhất. Nếu bất kỳ thao tác nào thất bại, toàn bộ giao dịch sẽ được rollback, đảm bảo tính nhất quán của dữ liệu.
-
 Trong dự án này, `ApplicationDbContext` của Entity Framework Core đóng vai trò là Unit of Work. Phương thức `SaveChangesAsync()` trên `DbContext` sẽ commit tất cả các thay đổi đã được theo dõi trong một giao dịch duy nhất.
 
-**Ví dụ sử dụng trong Handler:**
+**Ví dụ sử dụng trong Handler (CreateFamilyCommand):**
 
 ```csharp
 // backend/src/Application/Families/Commands/CreateFamily/CreateFamilyCommandHandler.cs
@@ -274,7 +252,11 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
 }
 ```
 
-**Kiểm thử Repository với In-Memory Database:**
+#### Kiểm thử với In-Memory Database
+
+Để kiểm thử các Handlers tương tác với dữ liệu, chúng ta có thể sử dụng In-Memory Database của Entity Framework Core.
+
+**Ví dụ trong Unit Test:**
 
 ```csharp
 // Trong file test (ví dụ: backend/tests/Application.UnitTests/Common/TestDbContextFactory.cs)
@@ -287,12 +269,10 @@ var options = new DbContextOptionsBuilder<ApplicationDbContext>()
 var context = new ApplicationDbContext(options);
 context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
-// Khởi tạo Repository với context test
-var repository = new FamilyRepository(context);
-
-// Thực hiện các thao tác test trên repository
-await repository.AddAsync(new Family { Id = Guid.NewGuid(), Name = "Test Family" });
-await repository.SaveChangesAsync();
+// Sử dụng context trực tiếp trong test
+var handler = new CreateFamilyCommandHandler(context);
+var command = new CreateFamilyCommand("Test Family", "Description");
+var result = await handler.Handle(command, CancellationToken.None);
 
 // ... kiểm tra kết quả ...
 

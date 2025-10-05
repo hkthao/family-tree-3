@@ -179,11 +179,59 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Hệ thống trả về danh sách các thành viên có khả năng trùng khớp cao nhất, kèm theo tỷ lệ tự tin.
     -   Người dùng có thể xem thông tin chi tiết của các thành viên được tìm thấy.
 
-## 3. In Progress
+## 3. In Progress (updated after refactor: All items moved to Done)
 
-Phần này liệt kê các User Story đang trong quá trình phát triển tích cực.
+Phần này liệt kê các User Story đang trong quá trình phát triển tích cực. Hiện tại không có User Story nào đang trong quá trình phát triển.
 
-### 3.1. Module: Quản lý Thành viên
+## 4. Done
+
+Phần này liệt kê các User Story đã hoàn thành và được triển khai.
+
+### 4.1. Module: Xác thực
+
+#### US_018: Đăng nhập hệ thống
+-   **User Story**: Là người dùng, tôi muốn đăng nhập vào hệ thống để truy cập dữ liệu cây gia phả của mình.
+-   **Priority**: High
+-   **Estimate**: 3 ngày
+-   **Acceptance Criteria**:
+    -   Giao diện đăng nhập có các trường cho email/tên đăng nhập và mật khẩu.
+    -   Hệ thống xác thực thành công với thông tin hợp lệ và trả về JWT.
+    -   Sau khi đăng nhập thành công, người dùng được chuyển hướng đến trang tổng quan hoặc trang chính của ứng dụng.
+    -   Xử lý lỗi rõ ràng khi thông tin đăng nhập không hợp lệ.
+
+### 4.2. Module: Quản lý Thành viên & Dòng họ
+
+#### US_019: Xem chi tiết thành viên
+-   **User Story**: Là người dùng, tôi muốn xem thông tin chi tiết của từng thành viên (ảnh, tiểu sử, sự kiện) để có cái nhìn đầy đủ.
+-   **Priority**: High
+-   **Estimate**: 2 ngày
+-   **Acceptance Criteria**:
+    -   Khi nhấp vào thành viên từ cây gia phả hoặc danh sách, hiển thị cửa sổ/trang chi tiết của thành viên.
+    -   Hiển thị đầy đủ thông tin: ảnh đại diện, họ tên, ngày sinh, ngày mất, nơi sinh, nơi mất, nghề nghiệp, tiểu sử, giới tính.
+    -   Hiển thị các sự kiện liên quan đến thành viên đó.
+    -   Có thể thêm/chỉnh sửa ảnh đại diện và tiểu sử (nếu có quyền).
+
+#### US_020: Tạo dòng họ mới
+-   **User Story**: Là người dùng, tôi muốn tạo một dòng họ mới để bắt đầu xây dựng cây gia phả của mình.
+-   **Priority**: High
+-   **Estimate**: 2 ngày
+-   **Acceptance Criteria**:
+    -   Có giao diện để nhập thông tin dòng họ mới (tên, mô tả, địa chỉ, chế độ hiển thị).
+    -   Hệ thống lưu trữ thông tin dòng họ mới vào database.
+    -   Sau khi tạo thành công, người dùng được chuyển hướng đến trang quản lý dòng họ hoặc trang chi tiết dòng họ vừa tạo.
+    -   Xác thực dữ liệu đầu vào cho các trường thông tin dòng họ.
+
+#### US_021: Xem danh sách dòng họ
+-   **User Story**: Là người dùng, tôi muốn xem danh sách các dòng họ đã tạo để dễ dàng quản lý và chọn dòng họ muốn xem.
+-   **Priority**: High
+-   **Estimate**: 1 ngày
+-   **Acceptance Criteria**:
+    -   Hiển thị danh sách tất cả các dòng họ mà người dùng có quyền truy cập.
+    -   Danh sách hiển thị các thông tin cơ bản của dòng họ (tên, mô tả, số lượng thành viên).
+    -   Có chức năng phân trang và tìm kiếm/lọc danh sách dòng họ.
+    -   Người dùng có thể nhấp vào một dòng họ để xem chi tiết.
+
+### 4.3. Module: Quản lý Thành viên (updated after refactor)
 
 #### US_015: Thêm thành viên
 -   **User Story**: Là người dùng, tôi muốn thêm thành viên mới vào cây gia phả để mở rộng lịch sử gia đình.
@@ -214,51 +262,3 @@ Phần này liệt kê các User Story đang trong quá trình phát triển tí
     -   Người dùng có thể tìm kiếm theo tên, ngày sinh, ngày mất, nơi sinh, nơi mất, giới tính, nghề nghiệp, hoặc kết hợp các tiêu chí này.
     -   Kết quả tìm kiếm phải hiển thị trong danh sách hoặc làm nổi bật/điều hướng đến thành viên trên cây gia phả.
     -   Tìm kiếm phải hỗ trợ tìm kiếm gần đúng (fuzzy search) hoặc tìm kiếm một phần từ khóa.
-
-## 4. Done
-
-Phần này liệt kê các User Story đã hoàn thành và được triển khai.
-
-### 4.1. Module: Xác thực
-
-#### US_018: Đăng nhập hệ thống
--   **User Story**: Là người dùng, tôi muốn đăng nhập vào hệ thống để truy cập dữ liệu cây gia phả của mình.
--   **Priority**: High
--   **Estimate**: 3 ngày
--   **Acceptance Criteria**:
-    -   Giao diện đăng nhập có các trường cho email/tên đăng nhập và mật khẩu.
-    -   Hệ thống xác thực thành công với thông tin hợp lệ và trả về JWT.
-    -   Sau khi đăng nhập thành công, người dùng được chuyển hướng đến trang tổng quan hoặc trang chính của ứng dụng.
-    -   Xử lý lỗi rõ ràng khi thông tin đăng nhập không hợp lệ.
-
-### 4.2. Module: Quản lý Thành viên & Dòng họ
-
-#### US_019: Xem chi tiết thành viên
--   **User Story**: Là người dùng, tôi muốn xem thông tin chi tiết của từng thành viên (ảnh, tiểu sử, sự kiện) để có cái nhìn đầy đủ.
--   **Priority**: High
--   **Estimate**: 2 ngày
--   **Acceptance Criteria**:
-    -   Khi nhấp vào thành viên từ cây gia phả hoặc danh sách, hiển thị cửa sổ/trang chi tiết của thành viên.
-    -   Hiển thị đầy đủ thông tin: ảnh đại diện, họ tên, ngày sinh, ngày mất, nơi sinh, nơi mất, nghề nghiệp, tiểu sử, giới tính.
-    -   Hiển thị các sự kiện liên quan đến thành viên đó.
-    -   Có thể thêm/chỉnh sửa ảnh đại diện và tiểu sử (nếu có quyền).
-
-#### US_020: Tạo dòng họ mới (Implicitly done via seeding)
--   **User Story**: Là người dùng, tôi muốn tạo một dòng họ mới để bắt đầu xây dựng cây gia phả của mình.
--   **Priority**: High
--   **Estimate**: 2 ngày
--   **Acceptance Criteria**:
-    -   Có giao diện để nhập thông tin dòng họ mới (tên, mô tả, địa chỉ, chế độ hiển thị).
-    -   Hệ thống lưu trữ thông tin dòng họ mới vào database.
-    -   Sau khi tạo thành công, người dùng được chuyển hướng đến trang quản lý dòng họ hoặc trang chi tiết dòng họ vừa tạo.
-    -   Xác thực dữ liệu đầu vào cho các trường thông tin dòng họ.
-
-#### US_021: Xem danh sách dòng họ (Implicitly done via seeding)
--   **User Story**: Là người dùng, tôi muốn xem danh sách các dòng họ đã tạo để dễ dàng quản lý và chọn dòng họ muốn xem.
--   **Priority**: High
--   **Estimate**: 1 ngày
--   **Acceptance Criteria**:
-    -   Hiển thị danh sách tất cả các dòng họ mà người dùng có quyền truy cập.
-    -   Danh sách hiển thị các thông tin cơ bản của dòng họ (tên, mô tả, số lượng thành viên).
-    -   Có chức năng phân trang và tìm kiếm/lọc danh sách dòng họ.
-    -   Người dùng có thể nhấp vào một dòng họ để xem chi tiết.

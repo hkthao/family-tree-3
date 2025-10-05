@@ -18,12 +18,13 @@ Việc lập kế hoạch sprint giúp:
 *   **Minh bạch**: Mọi người đều biết những gì đang được phát triển và khi nào.
 *   **Linh hoạt**: Cho phép điều chỉnh kế hoạch dựa trên phản hồi và thay đổi yêu cầu.
 
-## 2. Sprint 1 (2023-10-20 - 2023-10-26)
+## 2. Sprint 1 (2023-10-20 - 2023-10-26) (updated after refactor)
 
 **Mục tiêu:** Hoàn thành thiết lập dự án, chức năng xác thực cơ bản và xây dựng giao diện ban đầu cho việc hiển thị cây gia phả.
 
 **User Stories đã hoàn thành:**
 -   [x] US_018: Đăng nhập hệ thống
+-   [x] US_019: Xem chi tiết thành viên
 -   [ ] US_XXX: Đăng ký tài khoản mới (Chưa hoàn thành)
 -   [ ] US_001: Hiển thị cây gia phả cơ bản (Chưa hoàn thành)
 
@@ -36,18 +37,19 @@ Việc lập kế hoạch sprint giúp:
 -   Developer B (Frontend)
 -   QA A
 
-## 3. Sprint 2 (2023-10-27 - 2023-11-09)
+## 3. Sprint 2 (2023-10-27 - 2023-11-09) (updated after refactor)
 
 **Mục tiêu:** Hoàn thành chức năng quản lý thành viên cơ bản (thêm, sửa, xóa, xem chi tiết) và cải thiện giao diện cây gia phả.
 
 **User Stories đã hoàn thành:**
 -   [x] US_015: Thêm thành viên
 -   [x] US_016: Chỉnh sửa thành viên
--   [x] US_017: Xóa thành viên
+-   [x] US_017: Tìm kiếm thành viên (Tìm kiếm mở rộng)
 -   [x] US_019: Xem chi tiết thành viên
+-   [x] US_XXX: Xóa thành viên (Đã hoàn thành như một phần của quản lý thành viên)
 
 **Mô tả chi tiết:**
-*   **Backend**: Triển khai các endpoint API và logic nghiệp vụ cho việc thêm, sửa, xóa, xem chi tiết thành viên. Tích hợp Repository Pattern và CQRS cho các thao tác này.
+*   **Backend**: Triển khai các endpoint API và logic nghiệp vụ cho việc thêm, sửa, xóa, xem chi tiết thành viên. Tích hợp CQRS cho các thao tác này.
 *   **Frontend**: Xây dựng các form và trang hiển thị thông tin thành viên, tích hợp với API Backend. Cải thiện hiển thị các mối quan hệ trên cây gia phả.
 
 **Thành viên tham gia:**
@@ -55,13 +57,13 @@ Việc lập kế hoạch sprint giúp:
 -   Developer B (Frontend)
 -   QA A
 
-## 4. Sprint 3 (2025-10-04 - 2025-10-18)
+## 4. Sprint 3 (2025-10-04 - 2025-10-18) (updated after refactor)
 
 **Mục tiêu:** Cải thiện môi trường phát triển, khắc phục các lỗi cấu hình và đảm bảo tính nhất quán của dữ liệu.
 
 **User Stories đã hoàn thành:**
--   [x] US_020: Tạo dòng họ mới (thông qua seeding)
--   [x] US_021: Xem danh sách dòng họ (thông qua seeding)
+-   [x] US_020: Tạo dòng họ mới
+-   [x] US_021: Xem danh sách dòng họ
 
 **Mô tả chi tiết:**
 *   **Backend**: 
