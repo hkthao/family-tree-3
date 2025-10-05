@@ -1,9 +1,10 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Domain.Entities;
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Guid>
+public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -12,7 +13,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Gui
         _context = context;
     }
 
-    public async Task<Guid> Handle(CreateEventCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         var relatedMembers = await _context.Members
             .Where(m => request.RelatedMembers.Contains(m.Id)) // Comment: Write-side invariant: Ensure related members exist.
@@ -36,6 +37,6 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Gui
         // Comment: Write-side invariant: Event is added to the database context.
         await _context.SaveChangesAsync(cancellationToken);
 
-        return entity.Id;
+        return Result<Guid>.Success(entity.Id);
     }
 }

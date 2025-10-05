@@ -1,10 +1,11 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Domain.Entities;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
-public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
+public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -13,7 +14,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
         _context = context;
     }
 
-    public async Task Handle(UpdateEventCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.Events
             .Include(e => e.RelatedMembers)
@@ -21,7 +22,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
 
         if (entity == null)
         {
-            throw new NotFoundException(nameof(Event), request.Id);
+            return Result<bool>.Failure($"Event with ID {request.Id} not found.");
         }
 
         var relatedMembers = await _context.Members
@@ -40,5 +41,6 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand>
 
         // Comment: Write-side invariant: Event is updated in the database context.
         await _context.SaveChangesAsync(cancellationToken);
+        return Result<bool>.Success(true);
     }
 }
