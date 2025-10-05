@@ -33,22 +33,22 @@ public class SearchRelationshipsQueryHandler : IRequestHandler<SearchRelationshi
             switch (request.SortBy.ToLower())
             {
                 case "sourcememberfullname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.SourceMember!.FullName) : query.OrderBy(r => r.SourceMember!.FullName);
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.SourceMember!.LastName).ThenByDescending(r => r.SourceMember!.FirstName) : query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName);
                     break;
                 case "targetmemberfullname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.TargetMember!.FullName) : query.OrderBy(r => r.TargetMember!.FullName);
+                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.TargetMember!.LastName).ThenByDescending(r => r.TargetMember!.FirstName) : query.OrderBy(r => r.TargetMember!.LastName).ThenBy(r => r.TargetMember!.FirstName);
                     break;
                 case "type":
                     query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.Type) : query.OrderBy(r => r.Type);
                     break;
                 default:
-                    query = query.OrderBy(r => r.SourceMember!.FullName); // Default sort
+                    query = query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName); // Default sort
                     break;
             }
         }
         else
         {
-            query = query.OrderBy(r => r.SourceMember!.FullName); // Default sort if no sortBy is provided
+            query = query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName); // Default sort if no sortBy is provided
         }
 
         var paginatedList = await query
