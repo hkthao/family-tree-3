@@ -1,76 +1,81 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12">
-        <v-card v-if="relationshipStore.currentItem">
-          <v-card-title class="d-flex align-center">
-            {{ t('relationship.detail.title') }}
-            <v-spacer></v-spacer>
-            <v-btn
-              icon="mdi-pencil"
-              size="small"
-              variant="text"
-              @click="navigateToEdit"
-            ></v-btn>
-          </v-card-title>
-          <v-card-text>
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-list-item>
-                  <v-list-item-title>{{ t('relationship.form.sourceMember') }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ relationshipStore.currentItem.sourceMemberFullName }}</v-list-item-subtitle>
-                </v-list-item>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-list-item>
-                  <v-list-item-title>{{ t('relationship.form.targetMember') }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ relationshipStore.currentItem.targetMemberFullName }}</v-list-item-subtitle>
-                </v-list-item>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-list-item>
-                  <v-list-item-title>{{ t('relationship.form.type') }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ getRelationshipTypeTitle(relationshipStore.currentItem.type) }}</v-list-item-subtitle>
-                </v-list-item>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-list-item>
-                  <v-list-item-title>{{ t('relationship.form.order') }}</v-list-item-title>
-                  <v-list-item-subtitle>{{ relationshipStore.currentItem.order || t('common.na') }}</v-list-item-subtitle>
-                </v-list-item>
-              </v-col>
-            </v-row>
-          </v-card-text>
-        </v-card>
-        <v-alert v-else type="info">{{ t('relationship.detail.noRelationshipSelected') }}</v-alert>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-card v-if="relationship" class="mb-4">
+    <v-card-title class="text-h6 d-flex align-center">
+      {{ relationship.name }}
+      <v-spacer></v-spacer>
+    </v-card-title>
+    <v-card-text>
+      <v-tabs v-model="selectedTab" class="mb-4">
+        <v-tab value="general">{{ t('relationship.form.tab.general') }}</v-tab>
+      </v-tabs>
+
+      <v-window v-model="selectedTab">
+        <v-window-item value="general">
+          <RelationshipForm :initial-relationship-data="relationship" :read-only="true"
+            :title="t('relationship.detail.title')" />
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="gray" @click="closeView">
+        {{ t('common.close') }}
+      </v-btn>
+      <v-btn color="primary" @click="navigateToEditRelationship(relationship.id)">
+        {{ t('common.edit') }}
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
+    {{ t('common.noData') }}
+  </v-alert>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRoute, useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import { getRelationshipTypeTitle } from '@/constants/relationshipTypes';
+import { RelationshipForm } from '@/components/relationships';
+import type { Relationship } from '@/types';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
 
-const relationshipId = route.params.id as string;
+const relationship = ref<Relationship | undefined>(undefined);
+const loading = ref(false);
+const selectedTab = ref('general');
 
-onMounted(async () => {
+const loadRelationship = async () => {
+  loading.value = true;
+  const relationshipId = route.params.id as string;
   if (relationshipId) {
     await relationshipStore.getById(relationshipId);
+    relationship.value = relationshipStore.currentItem;
   }
+  loading.value = false;
+};
+
+const navigateToEditRelationship = (id: string) => {
+  router.push(`/relationship/edit/${id}`);
+};
+
+const closeView = () => {
+  router.push('/relationship');
+};
+
+onMounted(() => {
+  loadRelationship();
 });
 
-const navigateToEdit = () => {
-  if (relationshipStore.currentItem) {
-    router.push({ name: 'EditRelationship', params: { id: relationshipStore.currentItem.id } });
-  }
-};
+watch(
+  () => route.params.id,
+  (newId) => {
+    if (newId) {
+      loadRelationship();
+    }
+  },
+);
 </script>
