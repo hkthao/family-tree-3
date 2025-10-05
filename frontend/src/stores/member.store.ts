@@ -133,5 +133,20 @@ export const useMemberStore = defineStore('member', {
       this.setItemsPerPage(5000);
       await this._loadItems();
     },
+
+    async getByIds(ids: string[]): Promise<Member[]> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.member.getByIds(ids);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error =
+          result.error.message || 'Không thể tải danh sách thành viên.';
+        console.error(result.error);
+        return [];
+      }
+    },
   },
 });
