@@ -237,7 +237,8 @@
       "addTitle": "Thêm mối quan hệ",
       "type": "Loại mối quan hệ",
       "fullName": "Họ và tên",
-      "relationshipType": "Kiểu quan hệ"
+      "relationshipType": "Kiểu quan hệ",
+      "order": "Thứ tự (Tùy chọn)"
     },
     "type": {
       "parent": "Cha mẹ",
@@ -266,6 +267,8 @@
   "relationship.errors.update": "Không thể cập nhật quan hệ.",
   "relationship.errors.delete": "Không thể xóa quan hệ.",
   "relationship.errors.loadById": "Không thể tải quan hệ.",
+  "relationship.detail.title": "Chi tiết Quan hệ", 
+  "relationship.detail.noRelationshipSelected": "Chưa chọn quan hệ nào.", 
   "common.name": "Tên",
   "common.noData": "Không có dữ liệu",
   "familyTree.fullName": "Họ và tên",
