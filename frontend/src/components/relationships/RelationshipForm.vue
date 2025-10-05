@@ -4,7 +4,7 @@
       <v-card-title>{{ formTitle }}</v-card-title>
       <v-card-text>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" md="6">
             <MemberAutocomplete
               v-model="editableRelationship.sourceMemberId"
               :label="t('relationship.form.sourceMember')"
@@ -12,7 +12,7 @@
               :readonly="props.readOnly"
             />
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12" md="6">
             <MemberAutocomplete
               v-model="editableRelationship.targetMemberId"
               :label="t('relationship.form.targetMember')"
@@ -20,7 +20,9 @@
               :readonly="props.readOnly"
             />
           </v-col>
-          <v-col cols="12">
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="6">
             <v-select
               v-model="editableRelationship.type"
               :items="relationshipTypes"
@@ -29,7 +31,7 @@
               :readonly="props.readOnly"
             ></v-select>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12" md="6">
             <v-text-field
               v-model.number="editableRelationship.order"
               :label="t('relationship.form.order')"
