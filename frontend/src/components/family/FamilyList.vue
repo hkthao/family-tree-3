@@ -1,15 +1,7 @@
 <template>
-  <v-data-table-server
-    :items-per-page="itemsPerPage"
-    @update:itemsPerPage="$emit('update:itemsPerPage', $event)"
-    :headers="headers"
-    :items="items"
-    :items-length="totalItems"
-    :loading="loading"
-    item-value="id"
-    @update:options="$emit('update:options', $event)"
-    elevation="1"
-  >
+  <v-data-table-server :items-per-page="itemsPerPage" @update:itemsPerPage="$emit('update:itemsPerPage', $event)"
+    :headers="headers" :items="items" :items-length="totalItems" :loading="loading" item-value="id"
+    @update:options="$emit('update:options', $event)" elevation="1">
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
@@ -31,13 +23,9 @@
     <!-- name column -->
     <template #item.name="{ item }">
       <div class="text-left">
-        <div
-          class="text-primary text-none"
-          style="cursor: pointer"
-          @click="$emit('view', item)"
-        >
+        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
           {{ item.name }}
-        </div>
+        </a>
       </div>
     </template>
 
@@ -48,16 +36,10 @@
 
     <!-- visibility column -->
     <template #item.visibility="{ item }">
-      <v-chip
-        :color="
-          item.visibility && item.visibility.toLowerCase() === 'public'
-            ? 'success'
-            : 'error'
-        "
-        label
-        size="small"
-        class="text-capitalize"
-      >
+      <v-chip :color="item.visibility && item.visibility.toLowerCase() === 'public'
+          ? 'success'
+          : 'error'
+        " label size="small" class="text-capitalize">
         {{
           $t(
             `family.management.visibility.${item.visibility ? item.visibility.toLowerCase() : 'private'}`,

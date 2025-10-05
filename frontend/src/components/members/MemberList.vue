@@ -22,7 +22,7 @@
 
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
-      <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+      <a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
       </a>
     </template>
