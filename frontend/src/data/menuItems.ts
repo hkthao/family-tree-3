@@ -56,6 +56,12 @@ const menu: MenuSection[] = [
         to: '/events',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
+      {
+        titleKey: 'relationship.list.title',
+        icon: 'mdi-relation-many-to-many',
+        to: '/relationships',
+        roles: ['Admin', 'FamilyManager', 'Editor'],
+      },
 
 
     ],

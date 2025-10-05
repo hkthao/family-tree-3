@@ -132,6 +132,32 @@ const router = createRouter({
           ],
         },
         {
+          path: 'relationships',
+          name: 'Relationships',
+          component: () => import('@/views/relationships/RelationshipRouterView.vue'),
+          meta: { breadcrumb: 'relationship.list.title' },
+          children: [
+            {
+              path: '',
+              name: 'RelationshipList',
+              component: () => import('@/views/relationships/RelationshipListView.vue'),
+              meta: { breadcrumb: 'relationship.list.title' },
+            },
+            {
+              path: 'add',
+              name: 'AddRelationship',
+              component: () => import('@/views/relationships/RelationshipAddView.vue'),
+              meta: { breadcrumb: 'relationship.form.addTitle' },
+            },
+            {
+              path: 'edit/:id',
+              name: 'EditRelationship',
+              component: () => import('@/views/relationships/RelationshipEditView.vue'),
+              meta: { breadcrumb: 'relationship.form.editTitle' },
+            },
+          ],
+        },
+        {
           path: 'settings',
           name: 'UserSettings',
           component: () => import('@/views/settings/UserSettingsPage.vue'),
