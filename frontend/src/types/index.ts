@@ -4,5 +4,8 @@ export * from './user';
 export * from './common';
 export * from './event';
 export * from './family';
+export * from './family/relationship';
+export * from './family/relationship-type';
+export * from './family/relationship-filter';
 export * from './timeline';
 export * from './vendor';
