@@ -63,7 +63,7 @@ const navigateToEditRelationship = (id: string) => {
 };
 
 const closeView = () => {
-  router.push('/relationship');
+  router.push('/relationships');
 };
 
 onMounted(() => {

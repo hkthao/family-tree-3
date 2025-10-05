@@ -42,7 +42,10 @@ const headers = computed(() => [
   { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberFullName', sortable: true },
   { title: t('relationship.list.headers.targetMember'), key: 'targetMemberFullName', sortable: true },
   { title: t('relationship.list.headers.type'), key: 'type', sortable: true },
-  { title: t('common.actions'), key: 'actions', sortable: false },
+  {
+    title: t('common.actions'), key: 'actions', sortable: false, width: '120px',
+    align: 'center',
+  },
 ]);
 
 

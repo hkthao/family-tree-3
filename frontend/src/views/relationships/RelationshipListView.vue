@@ -18,7 +18,7 @@
     :model-value="deleteConfirmDialog"
     :title="t('confirmDelete.title')"
     :message="
-      t('relationship.list.confirmDelete', { name: relationshipToDelete?.id || '' })
+      t('relationship.list.confirmDelete', { name: relationshipToDelete?.sourceMemberFullName || '' })
     "
     @confirm="handleDeleteConfirm"
     @cancel="handleDeleteCancel"

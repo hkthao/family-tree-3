@@ -1,52 +1,42 @@
 <template>
-  <v-form ref="form" @submit.prevent="save" :disabled="props.readOnly">
-    <v-card>
-      <v-card-title>{{ formTitle }}</v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" md="6">
-            <MemberAutocomplete
-              v-model="editableRelationship.sourceMemberId"
-              :label="t('relationship.form.sourceMember')"
-              :rules="[rules.required]"
-              :readonly="props.readOnly"
-            />
-          </v-col>
-          <v-col cols="12" md="6">
-            <MemberAutocomplete
-              v-model="editableRelationship.targetMemberId"
-              :label="t('relationship.form.targetMember')"
-              :rules="[rules.required]"
-              :readonly="props.readOnly"
-            />
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-select
-              v-model="editableRelationship.type"
-              :items="relationshipTypes"
-              :label="t('relationship.form.type')"
-              :rules="[rules.required]"
-              :readonly="props.readOnly"
-            ></v-select>
-          </v-col>
-          <v-col cols="12" md="6">
-            <v-text-field
-              v-model.number="editableRelationship.order"
-              :label="t('relationship.form.order')"
-              type="number"
-              :readonly="props.readOnly"
-            ></v-text-field>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-card-actions v-if="!props.readOnly">
-        <v-spacer></v-spacer>
-        <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
-        <v-btn @click="cancel">{{ t('common.cancel') }}</v-btn>
-      </v-card-actions>
-    </v-card>
+  <v-form ref="form" :disabled="props.readOnly">
+    <v-row>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete
+          v-model="editableRelationship.sourceMemberId"
+          :label="t('relationship.form.sourceMember')"
+          :rules="[rules.required]"
+          :readonly="props.readOnly"
+        />
+      </v-col>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete
+          v-model="editableRelationship.targetMemberId"
+          :label="t('relationship.form.targetMember')"
+          :rules="[rules.required]"
+          :readonly="props.readOnly"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-select
+          v-model="editableRelationship.type"
+          :items="relationshipTypes"
+          :label="t('relationship.form.type')"
+          :rules="[rules.required]"
+          :readonly="props.readOnly"
+        ></v-select>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model.number="editableRelationship.order"
+          :label="t('relationship.form.order')"
+          type="number"
+          :readonly="props.readOnly"
+        ></v-text-field>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -84,9 +74,7 @@ const editableRelationship = ref<Partial<Relationship>>(
       },
 );
 
-const formTitle = computed(() =>
-  props.id ? t('relationship.form.editTitle') : t('relationship.form.addTitle'),
-);
+// formTitle is removed
 
 const relationshipTypes = RELATIONSHIP_TYPE_OPTIONS;
 
@@ -95,13 +83,13 @@ const rules = {
 };
 
 onMounted(async () => {
-  if (props.id && !props.initialRelationshipData) { // Only fetch if not provided
+  if (props.id && !props.initialRelationshipData) {
     await relationshipStore.getById(props.id);
     editableRelationship.value = { ...relationshipStore.currentItem };
   }
 });
 
-const validate = async () => { // Added
+const validate = async () => {
   if (form.value) {
     const { valid } = await form.value.validate();
     return valid;
@@ -109,19 +97,13 @@ const validate = async () => { // Added
   return false;
 };
 
-const getFormData = () => { // Added
+const getFormData = () => {
   return editableRelationship.value;
 };
 
-const save = () => {
-  emit('save', editableRelationship.value);
-};
+// save and cancel methods are removed
 
-const cancel = () => {
-  emit('cancel');
-};
-
-defineExpose({ // Added
+defineExpose({
   validate,
   getFormData,
 });
