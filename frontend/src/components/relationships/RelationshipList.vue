@@ -27,25 +27,26 @@
       </v-data-table>
     </v-card-text>
   </v-card>
-  <ConfirmDeleteDialog v-model="deleteConfirmDialog" :title="t('confirmDelete.title')"
-    :message="t('confirmDelete.message', { name: relationshipToDelete?.id || '' })" @confirm="handleDeleteConfirm"
-    @cancel="handleDeleteCancel" />
+
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue'; // Removed ref
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+
 import { useRelationshipStore } from '@/stores/relationship.store';
-import { useNotificationStore } from '@/stores/notification.store';
-import type { Relationship } from '@/types'; // Added Relationship
-import { ConfirmDeleteDialog } from '@/components/common';
-import { getRelationshipTypeTitle } from '@/constants/relationshipTypes'; // Added
+// Removed useNotificationStore
+
+import type { Relationship } from '@/types';
+
+// Removed ConfirmDeleteDialog import
+import { getRelationshipTypeTitle } from '@/constants/relationshipTypes';
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
 const router = useRouter();
-const notificationStore = useNotificationStore();
+// Removed notificationStore
 
 const headers = computed(() => [
   { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberFullName', sortable: true },
@@ -58,44 +59,23 @@ const navigateToMemberDetail = (memberId: string) => {
   router.push({ name: 'MemberDetail', params: { id: memberId } });
 };
 
-const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: any[] }) => {
-  await relationshipStore.setPage(page);
-  await relationshipStore.setItemsPerPage(itemsPerPage);
-  // You might need to implement sorting in your store
-  await relationshipStore._loadItems();
+const emit = defineEmits([ // Added emits
+  'update:options',
+  'view',
+  'edit',
+  'delete',
+  'create',
+]);
+
+const loadItems = async (options: { page: number; itemsPerPage: number; sortBy: any[] }) => {
+  emit('update:options', options);
 };
 
 const editItem = (item: Relationship) => {
-  router.push({ name: 'EditRelationship', params: { id: item.id } });
-};
-
-const deleteConfirmDialog = ref(false);
-const relationshipToDelete = ref<Relationship | null>(null);
-
-const confirmDelete = (item: Relationship) => {
-  relationshipToDelete.value = item;
-  deleteConfirmDialog.value = true;
-};
-
-const handleDeleteConfirm = async () => {
-  if (relationshipToDelete.value) {
-    const result = await relationshipStore.deleteItem(relationshipToDelete.value.id);
-    if (result.ok) {
-      notificationStore.showSnackbar(t('relationship.messages.deleteSuccess'), 'success');
-    } else {
-      notificationStore.showSnackbar(result.error?.message || t('relationship.messages.deleteError'), 'error');
-    }
-    deleteConfirmDialog.value = false;
-    relationshipToDelete.value = null;
-  }
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  relationshipToDelete.value = null;
+  emit('edit', item);
 };
 
 const deleteItem = (item: Relationship) => {
-  confirmDelete(item);
+  emit('delete', item);
 };
 </script>

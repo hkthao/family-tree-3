@@ -94,8 +94,11 @@ const handleListOptionsUpdate = (options: {
 }) => {
   relationshipStore.setPage(options.page);
   relationshipStore.setItemsPerPage(options.itemsPerPage);
-  // Assuming setSortBy exists in relationshipStore
-  // relationshipStore.setSortBy(options.sortBy);
+  if (options.sortBy && options.sortBy.length > 0) {
+    relationshipStore.setSortBy(options.sortBy);
+  } else {
+    relationshipStore.setSortBy([]);
+  }
 };
 
 const confirmDelete = (relationship: Relationship) => {
