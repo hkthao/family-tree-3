@@ -90,9 +90,16 @@ const handleFilterUpdate = (filters: EventFilter) => {
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
+  sortBy: { key: string; order: string }[]; // Added sortBy
 }) => {
   eventStore.setPage(options.page);
   eventStore.setItemsPerPage(options.itemsPerPage);
+  // Handle sorting
+  if (options.sortBy && options.sortBy.length > 0) {
+    eventStore.setSortBy(options.sortBy);
+  } else {
+    eventStore.setSortBy([]); // Clear sort if no sortBy is provided
+  }
 };
 
 const confirmDelete = (event: Event) => {

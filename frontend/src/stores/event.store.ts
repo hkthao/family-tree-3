@@ -90,6 +90,14 @@ export const useEventStore = defineStore('event', {
       }
     },
 
+    setSortBy(sortBy: { key: string; order: string }[]) {
+      // Assuming EventFilter has sortBy and sortOrder properties
+      this.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
+      this.filter.sortOrder = sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
+      this.currentPage = 1; // Reset to first page on sort change
+      this._loadItems();
+    },
+
     setCurrentItem(item: Event) {
       this.currentItem = item;
     },

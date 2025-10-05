@@ -22,4 +22,6 @@ export interface EventFilter {
   endDate?: Date | null;
   location?: string;
   relatedMemberId?: string;
+  sortBy?: string; // Added
+  sortOrder?: 'asc' | 'desc'; // Added
 }
