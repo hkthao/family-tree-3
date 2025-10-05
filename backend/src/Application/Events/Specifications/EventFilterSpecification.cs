@@ -6,40 +6,31 @@ namespace backend.Application.Events.Specifications;
 
 public class EventFilterSpecification : Specification<Event>
 {
-    public EventFilterSpecification(string? searchTerm, EventType? eventType, Guid? familyId, DateTime? startDate, DateTime? endDate, string? location, Guid? relatedMemberId, int skip, int take)
+    public EventFilterSpecification(string? searchTerm, DateTime? startDate, DateTime? endDate, string? type, Guid? familyId, Guid? memberId)
     {
-        if (!string.IsNullOrEmpty(searchTerm))
+        Query.Where(e =>
+            (searchTerm == null || e.Name.Contains(searchTerm) || (e.Description != null && e.Description.Contains(searchTerm))))
+            .Where(e =>
+            (startDate == null || e.StartDate >= startDate.Value))
+            .Where(e =>
+            (endDate == null || e.StartDate <= endDate.Value));
+
+        if (!string.IsNullOrEmpty(type))
         {
-            Query.Where(e => e.Name.Contains(searchTerm) || (e.Description != null && e.Description.Contains(searchTerm)));
+            if (Enum.TryParse<EventType>(type, true, out var eventType))
+            {
+                Query.Where(e => e.Type == eventType);
+            }
         }
 
-        if (eventType.HasValue)
+        if (familyId.HasValue)
         {
-            Query.Where(e => e.Type == eventType.Value);
+            Query.Where(e => e.FamilyId == familyId.Value);
         }
 
-        if (startDate.HasValue)
+        if (memberId.HasValue)
         {
-            Query.Where(e => e.StartDate >= startDate.Value);
+            Query.Where(e => e.EventMembers.Any(em => em.MemberId == memberId.Value));
         }
-
-        if (endDate.HasValue)
-        {
-            Query.Where(e => e.EndDate <= endDate.Value);
-        }
-
-        if (!string.IsNullOrEmpty(location))
-        {
-            Query.Where(e => e.Location != null && e.Location.Contains(location));
-        }
-
-        if (relatedMemberId.HasValue)
-        {
-            // This assumes a relationship between Event and Member that might need to be defined.
-            // For now, I'll assume a simple property. This might need adjustment.
-            // Query.Where(e => e.RelatedMemberId == relatedMemberId.Value);
-        }
-
-        Query.Skip(skip).Take(take);
     }
 }

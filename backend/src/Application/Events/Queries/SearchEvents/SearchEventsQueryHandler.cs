@@ -18,30 +18,16 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Pagin
 
     public async Task<PaginatedList<EventDto>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Events.AsQueryable();
+        var specification = new EventFilterSpecification(
+            request.SearchQuery,
+            request.StartDate,
+            request.EndDate,
+            request.Type,
+            request.FamilyId,
+            request.MemberId
+        );
 
-        if (!string.IsNullOrEmpty(request.SearchQuery))
-        {
-            query = query.Where(e => e.Name.Contains(request.SearchQuery) || (e.Description != null && e.Description.Contains(request.SearchQuery)));
-        }
-
-        if (request.StartDate.HasValue)
-        {
-            query = query.Where(e => e.StartDate >= request.StartDate.Value);
-        }
-
-        if (request.EndDate.HasValue)
-        {
-            query = query.Where(e => e.StartDate <= request.EndDate.Value);
-        }
-
-        if (!string.IsNullOrEmpty(request.Type))
-        {
-            if (Enum.TryParse<EventType>(request.Type, true, out var eventType))
-            {
-                query = query.Where(e => e.Type == eventType);
-            }
-        }
+        var query = _context.Events.WithSpecification(specification);
 
         if (!string.IsNullOrEmpty(request.SortBy))
         {
