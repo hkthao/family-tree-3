@@ -6,7 +6,7 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, FamilyDetailDto>
+public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -32,9 +32,9 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Fam
 
         if (familyDto == null)
         {
-            throw new NotFoundException(nameof(Family), request.Id);
+            return Result<FamilyDetailDto>.Failure(new List<string> { $"Family with ID {request.Id} not found." });
         }
 
-        return familyDto;
+        return Result<FamilyDetailDto>.Success(familyDto);
     }
 }

@@ -4,7 +4,7 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetEvents;
 
-public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyList<EventListDto>>
+public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, Result<IReadOnlyList<EventListDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -37,8 +37,10 @@ public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, IReadOnlyLi
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.
-        return await query
+        var eventList = await query
             .ProjectTo<EventListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<EventListDto>>.Success(eventList);
     }
 }

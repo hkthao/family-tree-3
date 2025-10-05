@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 
 namespace backend.Application.Families.Queries.GetFamiliesByIds;
 
-public class GetFamiliesByIdsQueryHandler : IRequestHandler<GetFamiliesByIdsQuery, List<FamilyDto>>
+public class GetFamiliesByIdsQueryHandler : IRequestHandler<GetFamiliesByIdsQuery, Result<List<FamilyDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -15,9 +15,11 @@ public class GetFamiliesByIdsQueryHandler : IRequestHandler<GetFamiliesByIdsQuer
 
     public async Task<List<FamilyDto>> Handle(GetFamiliesByIdsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Families
+        var familyList = await _context.Families
             .Where(f => request.Ids.Contains(f.Id))
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        return Result<List<FamilyDto>>.Success(familyList);
     }
 }

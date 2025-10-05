@@ -4,7 +4,7 @@ using backend.Application.Common.Mappings;
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 
-public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, PaginatedList<FamilyDto>>
+public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, Result<PaginatedList<FamilyDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -52,8 +52,10 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, P
             query = query.OrderBy(f => f.Name); // Default sort if no sortBy is provided
         }
 
-        return await query
+        var paginatedList = await query
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<FamilyDto>>.Success(paginatedList);
     }
 }

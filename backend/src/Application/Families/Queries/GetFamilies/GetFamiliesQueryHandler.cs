@@ -4,7 +4,7 @@ using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilies;
 
-public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, IReadOnlyList<FamilyListDto>>
+public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, Result<IReadOnlyList<FamilyListDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -29,8 +29,10 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, IReadOn
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.
-        return await query
+        var familyList = await query
             .ProjectTo<FamilyListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<FamilyListDto>>.Success(familyList);
     }
 }

@@ -8,7 +8,7 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
-public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, PaginatedList<MemberListDto>>
+public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -25,8 +25,10 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Pag
 
         var query = _context.Members.AsQueryable().WithSpecification(spec);
 
-        return await query
+        var paginatedList = await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<MemberListDto>>.Success(paginatedList);
     }
 }

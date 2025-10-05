@@ -7,7 +7,7 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
-public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, MemberDetailDto>
+public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -34,9 +34,9 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Mem
 
         if (memberDto == null)
         {
-            throw new NotFoundException(nameof(Member), request.Id);
+            return Result<MemberDetailDto>.Failure(new List<string> { $"Member with ID {request.Id} not found." });
         }
 
-        return memberDto;
+        return Result<MemberDetailDto>.Success(memberDto);
     }
 }

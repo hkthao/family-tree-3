@@ -6,7 +6,7 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Events.Queries.GetEventById;
 
-public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, EventDetailDto>
+public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Result<EventDetailDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -32,9 +32,9 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Event
 
         if (eventDto == null)
         {
-            throw new NotFoundException(nameof(Event), request.Id);
+            return Result<EventDetailDto>.Failure(new List<string> { $"Event with ID {request.Id} not found." });
         }
 
-        return eventDto;
+        return Result<EventDetailDto>.Success(eventDto);
     }
 }

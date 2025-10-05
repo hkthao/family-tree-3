@@ -7,7 +7,7 @@ using Ardalis.Specification.EntityFrameworkCore; // Added
 
 namespace backend.Application.Events.Queries.SearchEvents;
 
-public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, PaginatedList<EventDto>>
+public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -32,8 +32,10 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Pagin
         // Apply ordering specification
         query = query.WithSpecification(new EventOrderingSpecification(request.SortBy, request.SortOrder));
 
-        return await query
+        var paginatedList = await query
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<EventDto>>.Success(paginatedList);
     }
 }

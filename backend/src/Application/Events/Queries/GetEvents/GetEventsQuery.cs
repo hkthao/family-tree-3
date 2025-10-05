@@ -3,7 +3,7 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.Queries.GetEvents;
 
-public record class GetEventsQuery : PaginatedQuery, IRequest<IReadOnlyList<EventListDto>>
+public record class GetEventsQuery : PaginatedQuery, IRequest<Result<IReadOnlyList<EventListDto>>>
 {
     public string? SearchTerm { get; init; }
     public EventType? EventType { get; init; }

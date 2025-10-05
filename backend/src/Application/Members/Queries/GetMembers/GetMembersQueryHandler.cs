@@ -5,7 +5,7 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
-public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, IReadOnlyList<MemberListDto>>
+public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -33,8 +33,10 @@ public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, IReadOnly
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.
-        return await query
+        var memberList = await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<MemberListDto>>.Success(memberList);
     }
 }

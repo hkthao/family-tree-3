@@ -1,3 +1,3 @@
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public record GetFamilyByIdQuery(Guid Id) : IRequest<FamilyDetailDto>;
+public record GetFamilyByIdQuery(Guid Id) : IRequest<Result<FamilyDetailDto>>;

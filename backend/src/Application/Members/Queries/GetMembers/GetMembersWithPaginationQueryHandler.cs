@@ -7,7 +7,7 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
-public class GetMembersWithPaginationQueryHandler : IRequestHandler<GetMembersWithPaginationQuery, PaginatedList<MemberListDto>>
+public class GetMembersWithPaginationQueryHandler : IRequestHandler<GetMembersWithPaginationQuery, Result<PaginatedList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -35,6 +35,8 @@ public class GetMembersWithPaginationQueryHandler : IRequestHandler<GetMembersWi
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.
-        return await PaginatedList<MemberListDto>.CreateAsync(query.ProjectTo<MemberListDto>(_mapper.ConfigurationProvider).AsNoTracking(), request.Page, request.ItemsPerPage);
+        var paginatedList = await PaginatedList<MemberListDto>.CreateAsync(query.ProjectTo<MemberListDto>(_mapper.ConfigurationProvider).AsNoTracking(), request.Page, request.ItemsPerPage);
+
+        return Result<PaginatedList<MemberListDto>>.Success(paginatedList);
     }
 }

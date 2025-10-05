@@ -3,7 +3,7 @@ using backend.Application.Members.Queries.GetMembers;
 
 namespace backend.Application.Members.Queries.GetMembersByIds;
 
-public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery, IReadOnlyList<MemberListDto>>
+public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery, Result<IReadOnlyList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -16,10 +16,12 @@ public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery,
 
     public async Task<IReadOnlyList<MemberListDto>> Handle(GetMembersByIdsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Members
+        var memberList = await _context.Members
             .Where(m => request.Ids.Contains(m.Id))
             .Include(m => m.Relationships)
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<MemberListDto>>.Success(memberList);
     }
 }
