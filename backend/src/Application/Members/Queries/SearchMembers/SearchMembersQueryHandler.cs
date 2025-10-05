@@ -21,9 +21,14 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Res
 
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
-        var spec = new MemberFilterSpecification(request);
+        var query = _context.Members.AsQueryable();
 
-        var query = _context.Members.AsQueryable().WithSpecification(spec);
+        // Apply individual specifications
+        query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchQuery));
+        query = query.WithSpecification(new MemberByGenderSpecification(request.Gender));
+        query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
+        query = query.WithSpecification(new MemberOrderingSpecification(request.SortBy, request.SortOrder));
+        query = query.WithSpecification(new MemberPaginationSpecification((request.Page - 1) * request.ItemsPerPage, request.ItemsPerPage));
 
         var paginatedList = await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)

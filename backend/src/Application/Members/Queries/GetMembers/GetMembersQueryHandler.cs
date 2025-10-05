@@ -19,18 +19,14 @@ public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<IR
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        var searchQuery = new SearchMembersQuery
-        {
-            SearchQuery = request.SearchTerm,
-            FamilyId = request.FamilyId,
-            Page = 1,
-            ItemsPerPage = int.MaxValue
-        };
+        var query = _context.Members.AsQueryable();
 
-        var spec = new MemberFilterSpecification(searchQuery, true);
-
-        // Comment: Specification pattern is applied here to filter the results at the database level.
-        var query = _context.Members.AsQueryable().WithSpecification(spec);
+        // Apply individual specifications
+        query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchTerm));
+        query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
+        // Note: GetMembersQuery does not have explicit sorting or pagination parameters beyond what PaginatedQuery provides.
+        // If sorting is needed, a separate MemberOrderingSpecification would be applied here.
+        // Pagination is handled by the PaginatedListAsync extension method.
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.
