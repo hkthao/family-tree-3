@@ -35,7 +35,7 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false },
 ]);
 
-const loadItems = async ({ page, itemsPerPage, sortBy }) => {
+const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: any[] }) => {
   await relationshipStore.setPage(page);
   await relationshipStore.setItemsPerPage(itemsPerPage);
   // You might need to implement sorting in your store
