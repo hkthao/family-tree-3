@@ -24,12 +24,8 @@ public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, R
         // Apply individual specifications
         query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchQuery));
         query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));
+        query = query.WithSpecification(new FamilyVisibilitySpecification(request.Visibility));
         // Note: Pagination is handled by PaginatedListAsync, not a separate specification here.
-
-        if (!string.IsNullOrEmpty(request.Visibility))
-        {
-            query = query.Where(f => f.Visibility == request.Visibility);
-        }
 
         var paginatedList = await query
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
