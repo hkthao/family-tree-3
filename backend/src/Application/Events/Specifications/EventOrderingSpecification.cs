@@ -23,6 +23,12 @@ public class EventOrderingSpecification : Specification<Event>
                     else
                         Query.OrderBy(e => e.StartDate);
                     break;
+                case "location": // Added
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(e => e.Location);
+                    else
+                        Query.OrderBy(e => e.Location);
+                    break;
                 case "created":
                     if (sortOrder == "desc")
                         Query.OrderByDescending(e => e.Created);
