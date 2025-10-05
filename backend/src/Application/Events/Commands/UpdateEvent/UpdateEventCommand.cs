@@ -1,3 +1,4 @@
+using backend.Application.Common.Models; // Added
 using backend.Application.Events.Commands.Inputs;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
