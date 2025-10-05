@@ -238,13 +238,15 @@
       "type": "Loại mối quan hệ",
       "fullName": "Họ và tên",
       "relationshipType": "Kiểu quan hệ",
-      "order": "Thứ tự (Tùy chọn)"
+      "order": "Thứ tự (Tùy chọn)",
+      "tab.general": "Thông Tin Chung"
     },
     "type": {
       "parent": "Cha mẹ",
       "spouse": "Vợ/Chồng",
       "child": "Con cái",
-      "sibling": "Anh/Chị/Em"
+      "sibling": "Anh/Chị/Em",
+      "other": "Khác"
     }
   },
   "relationship.list.title": "Quản lý Quan hệ",
