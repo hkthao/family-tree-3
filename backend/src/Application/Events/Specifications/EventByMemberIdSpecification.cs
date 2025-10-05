@@ -9,7 +9,7 @@ public class EventByMemberIdSpecification : Specification<Event>
     {
         if (memberId.HasValue)
         {
-            Query.Where(e => e.EventMembers.Any(em => em.MemberId == memberId.Value));
+            Query.Where(e => e.RelatedMembers.Any(m => m.Id == memberId.Value));
         }
     }
 }
