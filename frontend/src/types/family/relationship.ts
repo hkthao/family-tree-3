@@ -6,4 +6,6 @@ export interface Relationship {
   targetMemberId: string;
   type: RelationshipType;
   order?: number;
+  sourceMemberFullName?: string; // Added
+  targetMemberFullName?: string; // Added
 }

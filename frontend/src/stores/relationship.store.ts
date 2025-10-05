@@ -1,8 +1,6 @@
 import { defineStore } from 'pinia';
-import type { Relationship, Paginated, Result, RelationshipFilter } from '@/types';
-import { safeApiCall } from '@/utils/api';
+import type { Relationship, Result, RelationshipFilter } from '@/types';
 import type { ApiError } from '@/utils/api';
-import type { IRelationshipService } from '@/services/relationship/relationship.service.interface';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 
@@ -23,7 +21,7 @@ export const useRelationshipStore = defineStore('relationship', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await (this.services.relationship as IRelationshipService).loadItems(
+      const result = await this.services.relationship.loadItems(
         this.filter,
         this.currentPage,
         this.itemsPerPage,
@@ -43,7 +41,7 @@ export const useRelationshipStore = defineStore('relationship', {
     async addItem(newItem: Omit<Relationship, 'id'>) {
       this.loading = true;
       this.error = null;
-      const result = await (this.services.relationship as IRelationshipService).add(newItem);
+      const result = await this.services.relationship.add(newItem);
       if (result.ok) {
         await this._loadItems();
       } else {
@@ -56,7 +54,7 @@ export const useRelationshipStore = defineStore('relationship', {
     async updateItem(updatedItem: Relationship) {
       this.loading = true;
       this.error = null;
-      const result = await (this.services.relationship as IRelationshipService).update(updatedItem);
+      const result = await this.services.relationship.update(updatedItem);
       if (result.ok) {
         await this._loadItems();
       } else {
@@ -69,7 +67,7 @@ export const useRelationshipStore = defineStore('relationship', {
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
-      const result = await (this.services.relationship as IRelationshipService).delete(id);
+      const result = await this.services.relationship.delete(id);
       if (result.ok) {
         await this._loadItems();
       } else {
@@ -95,6 +93,14 @@ export const useRelationshipStore = defineStore('relationship', {
       }
     },
 
+    setSortBy(sortBy: { key: string; order: string }[]) {
+      // Assuming RelationshipFilter has sortBy and sortOrder properties
+      this.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
+      this.filter.sortOrder = sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
+      this.currentPage = 1; // Reset to first page on sort change
+      this._loadItems();
+    },
+
     setCurrentItem(item: Relationship) {
       this.currentItem = item;
     },
@@ -102,7 +108,7 @@ export const useRelationshipStore = defineStore('relationship', {
     async getById(id: string): Promise<void> {
       this.loading = true;
       this.error = null;
-      const result = await (this.services.relationship as IRelationshipService).getById(id);
+      const result = await this.services.relationship.getById(id);
       this.loading = false;
       if (result.ok) {
         this.currentItem = { ...(result.value as Relationship) }; // Set currentItem
@@ -115,7 +121,7 @@ export const useRelationshipStore = defineStore('relationship', {
     async getByIds(ids: string[]): Promise<Relationship[]> {
       this.loading = true;
       this.error = null;
-      const result = await (this.services.relationship as IRelationshipService).getByIds(ids);
+      const result = await this.services.relationship.getByIds(ids);
       this.loading = false;
       if (result.ok) {
         return result.value;

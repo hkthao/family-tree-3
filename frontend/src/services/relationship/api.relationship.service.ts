@@ -1,5 +1,11 @@
 import type { IRelationshipService } from './relationship.service.interface';
-import type { Relationship, Paginated, Result, RelationshipFilter } from '@/types';
+import {
+  type Relationship,
+  type Paginated,
+  type Result,
+  type RelationshipFilter,
+  ok,
+} from '@/types'; // Added Relationship
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
 import type { AxiosInstance } from 'axios';
@@ -7,25 +13,52 @@ import type { AxiosInstance } from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export class ApiRelationshipService implements IRelationshipService {
+  private mapListDtoToRelationship(dto: Relationship): Relationship {
+    return {
+      id: dto.id,
+      sourceMemberId: dto.sourceMemberId,
+      targetMemberId: dto.targetMemberId,
+      type: dto.type,
+      order: dto.order,
+      sourceMemberFullName: dto.sourceMemberFullName,
+      targetMemberFullName: dto.targetMemberFullName,
+    };
+  }
+
   constructor(private http: AxiosInstance) {}
 
   private apiUrl = `${API_BASE_URL}/relationships`;
 
   async fetch(): Promise<Result<Relationship[], ApiError>> {
-    return safeApiCall(this.http.get<Relationship[]>(this.apiUrl));
+    const result = await safeApiCall(
+      this.http.get<Relationship[]>(this.apiUrl),
+    );
+    if (result.ok) {
+      return ok(result.value.map(this.mapListDtoToRelationship));
+    }
+    return result;
   }
 
-  async getById(id: string): Promise<Result<Relationship | undefined, ApiError>> {
+  async getById(
+    id: string,
+  ): Promise<Result<Relationship | undefined, ApiError>> {
     return safeApiCall(this.http.get<Relationship>(`${this.apiUrl}/${id}`));
   }
 
-  async add(newItem: Omit<Relationship, 'id'>): Promise<Result<Relationship, ApiError>> {
+  async add(
+    newItem: Omit<Relationship, 'id'>,
+  ): Promise<Result<Relationship, ApiError>> {
     return safeApiCall(this.http.post<Relationship>(this.apiUrl, newItem));
   }
 
-  async update(updatedItem: Relationship): Promise<Result<Relationship, ApiError>> {
+  async update(
+    updatedItem: Relationship,
+  ): Promise<Result<Relationship, ApiError>> {
     return safeApiCall(
-      this.http.put<Relationship>(`${this.apiUrl}/${updatedItem.id}`, updatedItem),
+      this.http.put<Relationship>(
+        `${this.apiUrl}/${updatedItem.id}`,
+        updatedItem,
+      ),
     );
   }
 
@@ -40,15 +73,19 @@ export class ApiRelationshipService implements IRelationshipService {
   ): Promise<Result<Paginated<Relationship>, ApiError>> {
     const params = new URLSearchParams();
     // Add filters to params if they exist
-    if (filters.sourceMemberId) params.append('sourceMemberId', filters.sourceMemberId);
-    if (filters.targetMemberId) params.append('targetMemberId', filters.targetMemberId);
+    if (filters.sourceMemberId)
+      params.append('sourceMemberId', filters.sourceMemberId);
+    if (filters.targetMemberId)
+      params.append('targetMemberId', filters.targetMemberId);
     if (filters.type) params.append('type', filters.type);
 
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
 
     return safeApiCall(
-      this.http.get<Paginated<Relationship>>(`${this.apiUrl}/search?${params.toString()}`),
+      this.http.get<Paginated<Relationship>>(
+        `${this.apiUrl}/search?${params.toString()}`,
+      ),
     );
   }
 
@@ -56,7 +93,9 @@ export class ApiRelationshipService implements IRelationshipService {
     const params = new URLSearchParams();
     ids.forEach((id) => params.append('ids', id));
     return safeApiCall(
-      this.http.get<Relationship[]>(`${this.apiUrl}/by-ids?${params.toString()}`),
+      this.http.get<Relationship[]>(
+        `${this.apiUrl}/by-ids?${params.toString()}`,
+      ),
     );
   }
 }

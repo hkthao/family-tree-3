@@ -2,19 +2,20 @@
   <v-card>
     <v-card-title>{{ t('relationship.list.title') }}</v-card-title>
     <v-card-text>
-      <v-data-table
-        :headers="headers"
-        :items="relationshipStore.items"
-        :loading="relationshipStore.loading"
-        :items-per-page="relationshipStore.itemsPerPage"
-        :total-items="relationshipStore.totalItems"
-        @update:options="loadItems"
-      >
+      <v-data-table :headers="headers" :items="relationshipStore.items" :loading="relationshipStore.loading"
+        :items-per-page="relationshipStore.itemsPerPage" :total-items="relationshipStore.totalItems"
+        @update:options="loadItems">
         <template v-slot:item.sourceMemberFullName="{ item }">
-          {{ item.sourceMemberFullName }}
+          <a @click="navigateToMemberDetail(item.sourceMemberId)"
+            class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+            {{ item.sourceMemberFullName }}
+          </a>
         </template>
         <template v-slot:item.targetMemberFullName="{ item }">
-          {{ item.targetMemberFullName }}
+          <a @click="navigateToMemberDetail(item.targetMemberId)"
+            class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+            {{ item.targetMemberFullName }}
+          </a>
         </template>
         <template v-slot:item.type="{ item }">
           {{ getRelationshipTypeTitle(item.type) }}
@@ -26,26 +27,19 @@
       </v-data-table>
     </v-card-text>
   </v-card>
-  <ConfirmDeleteDialog
-    v-model="deleteConfirmDialog"
-    :title="t('confirmDelete.title')"
-    :message="t('confirmDelete.message', { name: relationshipToDelete?.id || '' })"
-    @confirm="handleDeleteConfirm"
-    @cancel="handleDeleteCancel"
-  />
+  <ConfirmDeleteDialog v-model="deleteConfirmDialog" :title="t('confirmDelete.title')"
+    :message="t('confirmDelete.message', { name: relationshipToDelete?.id || '' })" @confirm="handleDeleteConfirm"
+    @cancel="handleDeleteCancel" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { useNotificationStore } from '@/stores/notification.store';
-
-import type { Relationship } from '@/types';
-
-import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
+import type { Relationship } from '@/types'; // Added Relationship
+import { ConfirmDeleteDialog } from '@/components/common';
 import { getRelationshipTypeTitle } from '@/constants/relationshipTypes'; // Added
 
 const { t } = useI18n();
@@ -59,6 +53,10 @@ const headers = computed(() => [
   { title: t('relationship.list.headers.type'), key: 'type', sortable: true },
   { title: t('common.actions'), key: 'actions', sortable: false },
 ]);
+
+const navigateToMemberDetail = (memberId: string) => {
+  router.push({ name: 'MemberDetail', params: { id: memberId } });
+};
 
 const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPerPage: number; sortBy: any[] }) => {
   await relationshipStore.setPage(page);
