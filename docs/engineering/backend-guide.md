@@ -9,7 +9,8 @@
 - [5. Dependency Injection](#5-dependency-injection)
 - [6. Middleware](#6-middleware)
 - [7. Xác thực & Phân quyền](#7-xác-thực--phân-quyền)
-- [8. Repository Pattern](#8-repository-pattern)
+- [8. Tương tác Dữ liệu với Entity Framework Core](#8-tương-tác-dữ-liệu-với-entity-framework-core-updated-after-refactor)
+  - [8.1. Specification Pattern](#81-specification-pattern-updated-after-refactor)
 - [9. Database Migration](#9-database-migration)
 - [10. Hướng dẫn Kiểm thử](#10-hướng-dẫn-kiểm-thử)
 - [11. Logging & Monitoring](#11-logging--monitoring)
@@ -279,6 +280,64 @@ var result = await handler.Handle(command, CancellationToken.None);
 // Sau khi test, có thể xóa database
 context.Database.EnsureDeleted();
 context.Dispose();
+```
+
+## 8.1. Specification Pattern (updated after refactor)
+
+Specification Pattern là một mẫu thiết kế giúp đóng gói logic nghiệp vụ để lọc hoặc truy vấn dữ liệu. Thay vì nhúng các điều kiện lọc trực tiếp vào các Query Handlers, chúng ta có thể định nghĩa chúng dưới dạng các "specification" có thể tái sử dụng. Điều này giúp giữ cho Query Handlers gọn gàng, dễ đọc và dễ kiểm thử hơn.
+
+#### Mục đích
+
+*   **Tách biệt mối quan tâm:** Tách biệt logic lọc dữ liệu khỏi logic nghiệp vụ chính trong Query Handlers.
+*   **Tái sử dụng:** Các specification có thể được tái sử dụng trên nhiều Query Handlers hoặc các ngữ cảnh khác nhau.
+*   **Dễ kiểm thử:** Mỗi specification có thể được kiểm thử độc lập.
+*   **Dễ đọc:** Làm cho các truy vấn dữ liệu trở nên rõ ràng và dễ hiểu hơn.
+
+#### Triển khai trong dự án
+
+Trong dự án này, chúng ta sử dụng thư viện `Ardalis.Specification` để triển khai Specification Pattern. Thư viện này cung cấp một cách mạnh mẽ để định nghĩa các tiêu chí truy vấn, bao gồm lọc, sắp xếp, phân trang và bao gồm các mối quan hệ.
+
+**Ví dụ (`Application/Members/Specifications/MemberFilterSpecification.cs`):**
+
+```csharp
+public class MemberFilterSpecification : Specification<Member>
+{
+    public MemberFilterSpecification(string? searchTerm, Gender? gender, Guid? familyId)
+    {
+        Query.Where(m =>
+            (searchTerm == null || m.FirstName.Contains(searchTerm) || m.LastName.Contains(searchTerm) || m.Nickname.Contains(searchTerm)) &&
+            (gender == null || m.Gender == gender) &&
+            (familyId == null || m.FamilyId == familyId));
+    }
+}
+```
+
+**Ví dụ sử dụng trong Query Handler (`Application/Members/Queries/GetMembers/GetMembersQueryHandler.cs`):**
+
+```csharp
+public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<List<MemberListDto>>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<List<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
+    {
+        var specification = new MemberFilterSpecification(request.SearchTerm, request.Gender, request.FamilyId);
+
+        var members = await _context.Members
+            .WithSpecification(specification) // Áp dụng specification
+            .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
+
+        return Result<List<MemberListDto>>.Success(members);
+    }
+}
 ```
 
 ## 9. Database Migration
