@@ -18,7 +18,7 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Resul
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<EventDto>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Events.AsQueryable();
 

@@ -1,6 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Families.Specifications;
 using backend.Domain.Entities;
 
@@ -17,7 +18,7 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Res
         _mapper = mapper;
     }
 
-    public async Task<FamilyDetailDto> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FamilyDetailDto>> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
     {
         var spec = new FamilyByIdSpecification(request.Id);
 

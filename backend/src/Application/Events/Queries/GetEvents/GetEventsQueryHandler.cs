@@ -1,5 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetEvents;
@@ -15,7 +16,7 @@ public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, Result<IRea
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<EventListDto>> Handle(GetEventsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<EventListDto>>> Handle(GetEventsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Events.AsQueryable();
 

@@ -1,6 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Events.Specifications;
 using backend.Domain.Entities;
 
@@ -17,7 +18,7 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Resul
         _mapper = mapper;
     }
 
-    public async Task<EventDetailDto> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<EventDetailDto>> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
     {
         var spec = new EventByIdSpecification(request.Id);
 

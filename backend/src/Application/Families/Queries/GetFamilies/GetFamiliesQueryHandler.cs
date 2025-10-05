@@ -1,5 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added
 using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilies;
@@ -15,7 +16,7 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, Result<
         _mapper = mapper;
     }
 
-    public async Task<IReadOnlyList<FamilyListDto>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<FamilyListDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
     {
         var spec = new FamilyFilterSpecification(
             request.SearchTerm,
