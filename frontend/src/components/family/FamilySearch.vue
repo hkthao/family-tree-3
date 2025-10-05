@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FamilyFilter } from '@/types';
 
@@ -70,9 +70,12 @@ const applyFilters = () => {
 const resetFilters = () => {
   searchQuery.value = '';
   visibility.value = 'All';
-  applyFilters();
+  // applyFilters(); // No need to call here, watch will handle it
 };
 
-// Initial apply of filters on component mount
-applyFilters();
+// Watch for changes in filters and apply them automatically
+watch([searchQuery, visibility], () => {
+  applyFilters();
+}, { immediate: true }); // immediate: true to apply filters on initial load
+
 </script>
