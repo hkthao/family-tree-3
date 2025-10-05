@@ -272,6 +272,7 @@
   "relationship.errors.loadById": "Không thể tải quan hệ.",
   "relationship.detail.title": "Chi tiết Quan hệ", 
   "relationship.detail.noRelationshipSelected": "Chưa chọn quan hệ nào.", 
+  "relationship.form.tab.general": "Thông tin chung",
   "common.name": "Tên",
   "common.noData": "Không có dữ liệu",
   "familyTree.fullName": "Họ và tên",

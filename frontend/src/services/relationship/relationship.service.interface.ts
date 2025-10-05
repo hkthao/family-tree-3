@@ -1,12 +1,8 @@
 import type { Relationship, Paginated, Result, RelationshipFilter } from '@/types'; // Added Relationship
 import type { ApiError } from '@/utils/api';
+import type { ICrudService } from '../common/crud.service.interface';
 
-export interface IRelationshipService {
-  fetch(): Promise<Result<Relationship[], ApiError>>; // Changed to Relationship[]
-  getById(id: string): Promise<Result<Relationship | undefined, ApiError>>;
-  add(newItem: Omit<Relationship, 'id'>): Promise<Result<Relationship, ApiError>>;
-  update(updatedItem: Relationship): Promise<Result<Relationship, ApiError>>;
-  delete(id: string): Promise<Result<void, ApiError>>;
+export interface IRelationshipService extends ICrudService<Relationship> {
   loadItems(
     filters: RelationshipFilter,
     page: number,
