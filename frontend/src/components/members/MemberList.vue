@@ -40,7 +40,7 @@
     <!-- Gender column -->
     <template #item.gender="{ item }">
       <v-chip label size="small" class="text-capitalize">
-        {{ item.gender }}
+        {{ getGenderTitle(item.gender) }}
       </v-chip>
     </template>
 
@@ -69,6 +69,7 @@ import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
 import { ChipLookup } from '@/components/common';
+import { getGenderTitle } from '@/constants/genders'; // Added
 
 const familyStore = useFamilyStore();
 
