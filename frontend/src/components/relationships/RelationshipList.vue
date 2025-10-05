@@ -6,14 +6,12 @@
         :items-per-page="relationshipStore.itemsPerPage" :total-items="relationshipStore.totalItems"
         @update:options="loadItems">
         <template v-slot:item.sourceMemberFullName="{ item }">
-          <a @click="navigateToMemberDetail(item.sourceMemberId)"
-            class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+          <a @click="viewItem(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
             {{ item.sourceMemberFullName }}
           </a>
         </template>
         <template v-slot:item.targetMemberFullName="{ item }">
-          <a @click="navigateToMemberDetail(item.targetMemberId)"
-            class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+          <a @click="viewItem(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
             {{ item.targetMemberFullName }}
           </a>
         </template>
@@ -33,20 +31,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'; // Removed ref
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-
 import { useRelationshipStore } from '@/stores/relationship.store';
-// Removed useNotificationStore
-
 import type { Relationship } from '@/types';
-
-// Removed ConfirmDeleteDialog import
 import { getRelationshipTypeTitle } from '@/constants/relationshipTypes';
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
-const router = useRouter();
-// Removed notificationStore
 
 const headers = computed(() => [
   { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberFullName', sortable: true },
@@ -55,9 +45,6 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false },
 ]);
 
-const navigateToMemberDetail = (memberId: string) => {
-  router.push({ name: 'MemberDetail', params: { id: memberId } });
-};
 
 const emit = defineEmits([ // Added emits
   'update:options',
@@ -69,6 +56,10 @@ const emit = defineEmits([ // Added emits
 
 const loadItems = async (options: { page: number; itemsPerPage: number; sortBy: any[] }) => {
   emit('update:options', options);
+};
+
+const viewItem = (item: Relationship) => {
+  emit('view', item);
 };
 
 const editItem = (item: Relationship) => {
