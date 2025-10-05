@@ -14,7 +14,7 @@
             <v-col cols="12" md="4">
               <v-text-field
                 v-model="filters.searchQuery"
-                :label="t('event.search.name')"
+                :label="t('event.search.searchQueryPlaceholder')"
                 clearable
                 prepend-inner-icon="mdi-magnify"
               ></v-text-field>
@@ -49,13 +49,7 @@
                 optional
               />
             </v-col>
-            <v-col cols="12" md="4">
-              <v-text-field
-                v-model="filters.location"
-                :label="t('event.search.location')"
-                clearable
-              ></v-text-field>
-            </v-col>
+
           </v-row>
         </v-card-text>
         <v-card-actions>
@@ -89,7 +83,6 @@ const filters = ref<EventFilter>({
   familyId: null, // familyId should be string or null, not undefined
   startDate: undefined,
   endDate: undefined,
-  location: '',
 });
 
 const eventTypes = [
@@ -120,7 +113,6 @@ const resetFilters = () => {
     familyId: null, // familyId should be string or null, not undefined
     startDate: undefined,
     endDate: undefined,
-    location: '',
   };
   emit('update:filters', filters.value);
 };
