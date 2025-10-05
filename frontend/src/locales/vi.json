@@ -209,7 +209,8 @@
   "event.search.startDate": "Ngày bắt đầu",
   "event.search.endDate": "Ngày kết thúc",
   "event.search.apply": "Áp dụng Bộ lọc",
-  "event.search.reset": "Đặt lại Bộ lọc",  "event.view.table": "Bảng",
+  "event.search.reset": "Đặt lại Bộ lọc",
+  "event.view.table": "Bảng",
   "event.view.timeline": "Dòng thời gian",
   "event.view.calendar": "Lịch",
   "event.calendar.title": "Lịch Sự kiện",
@@ -241,7 +242,8 @@
     "type": {
       "parent": "Cha mẹ",
       "spouse": "Vợ/Chồng",
-      "child": "Con cái"
+      "child": "Con cái",
+      "sibling": "Anh/Chị/Em"
     }
   },
   "relationship.list.title": "Quản lý Quan hệ",
