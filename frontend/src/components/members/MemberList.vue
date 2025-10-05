@@ -1,14 +1,6 @@
 <template>
-  <v-data-table-server
-    v-model:items-per-page="itemsPerPage"
-    :headers="headers"
-    :items="items"
-    :items-length="totalItems"
-    :loading="loading"
-    item-value="id"
-    @update:options="loadMembers"
-    elevation="0"
-  >
+  <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0">
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
@@ -22,11 +14,7 @@
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
         <v-avatar size="36" class="my-2">
-          <v-img
-            v-if="item.avatarUrl"
-            :src="item.avatarUrl"
-            :alt="item.fullName"
-          />
+          <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="item.fullName" />
           <v-icon v-else>mdi-account-circle</v-icon>
         </v-avatar>
       </div>
@@ -34,23 +22,14 @@
 
     <!-- Full Name column -->
     <template #item.fullName="{ item }">
-      <div
-        variant="text"
-        class="text-primary text-none cursor-pointer"
-        @click.prevent="viewMember(item)"
-      >
+      <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
-      </div>
+      </a>
     </template>
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup
-        :modelValue="item.familyId"
-        :data-source="familyStore"
-        display-expr="name"
-        value-expr="id"
-      />
+      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id" />
     </template>
 
     <!-- Date of Birth column -->
@@ -166,7 +145,7 @@ const headers = computed<DataTableHeader[]>(() => [
 const loadMembers = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: string | string[] | null;
+  sortBy: { key: string; order: string }[]; // Corrected type
 }) => {
   emit('update:options', options);
 };
