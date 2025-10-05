@@ -7,10 +7,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+
+import { useRelationshipStore } from '@/stores/relationship.store';
+
+import type { RelationshipFilter } from '@/types';
+
 import RelationshipList from '@/components/relationships/RelationshipList.vue';
 import RelationshipSearch from '@/components/relationships/RelationshipSearch.vue';
-import { useRelationshipStore } from '@/stores/relationship.store';
-import type { RelationshipFilter } from '@/types';
 
 const relationshipStore = useRelationshipStore();
 

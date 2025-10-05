@@ -4,9 +4,12 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-import RelationshipForm from '@/components/relationships/RelationshipForm.vue';
+
 import { useRelationshipStore } from '@/stores/relationship.store';
+
 import type { Relationship } from '@/types';
+
+import RelationshipForm from '@/components/relationships/RelationshipForm.vue';
 
 const props = defineProps<{ id: string }>();
 const router = useRouter();

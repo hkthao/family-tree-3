@@ -17,16 +17,31 @@
       </v-data-table>
     </v-card-text>
   </v-card>
+  <ConfirmDeleteDialog
+    v-model="deleteConfirmDialog"
+    :title="t('confirmDelete.title')"
+    :message="t('confirmDelete.message', { name: relationshipToDelete?.id || '' })"
+    @confirm="handleDeleteConfirm"
+    @cancel="handleDeleteCancel"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+
 import { useRelationshipStore } from '@/stores/relationship.store';
+import { useNotificationStore } from '@/stores/notification.store';
+
 import type { Relationship } from '@/types';
+
+import ConfirmDeleteDialog from '@/components/common/ConfirmDeleteDialog.vue';
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
+const router = useRouter();
+const notificationStore = useNotificationStore(); // Added
 
 const headers = computed(() => [
   { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberId' },
@@ -43,12 +58,36 @@ const loadItems = async ({ page, itemsPerPage, sortBy }: { page: number; itemsPe
 };
 
 const editItem = (item: Relationship) => {
-  // Navigate to edit page
-  console.log('Edit item', item);
+  router.push({ name: 'EditRelationship', params: { id: item.id } });
+};
+
+const deleteConfirmDialog = ref(false); // Added
+const relationshipToDelete = ref<Relationship | null>(null); // Added
+
+const confirmDelete = (item: Relationship) => { // Added
+  relationshipToDelete.value = item;
+  deleteConfirmDialog.value = true;
+};
+
+const handleDeleteConfirm = async () => { // Added
+  if (relationshipToDelete.value) {
+    const result = await relationshipStore.deleteItem(relationshipToDelete.value.id);
+    if (result.ok) {
+      notificationStore.showSnackbar(t('relationship.messages.deleteSuccess'), 'success');
+    } else {
+      notificationStore.showSnackbar(result.error?.message || t('relationship.messages.deleteError'), 'error');
+    }
+    deleteConfirmDialog.value = false;
+    relationshipToDelete.value = null;
+  }
+};
+
+const handleDeleteCancel = () => { // Added
+  deleteConfirmDialog.value = false;
+  relationshipToDelete.value = null;
 };
 
 const deleteItem = (item: Relationship) => {
-  // Show confirmation and delete
-  console.log('Delete item', item);
+  confirmDelete(item);
 };
 </script>

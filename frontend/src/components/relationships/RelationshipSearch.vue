@@ -50,8 +50,10 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import type { RelationshipFilter } from '@/types';
 import { RelationshipType } from '@/types';
+
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 const emit = defineEmits(['update:filters']);

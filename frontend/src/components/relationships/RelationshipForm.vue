@@ -6,15 +6,15 @@
         <v-row>
           <v-col cols="12">
             <MemberAutocomplete v-model="editableRelationship.sourceMemberId"
-              :label="t('relationship.form.sourceMember')" />
+              :label="t('relationship.form.sourceMember')" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12">
             <MemberAutocomplete v-model="editableRelationship.targetMemberId"
-              :label="t('relationship.form.targetMember')" />
+              :label="t('relationship.form.targetMember')" :rules="[rules.required]" />
           </v-col>
           <v-col cols="12">
             <v-select v-model="editableRelationship.type" :items="relationshipTypes"
-              :label="t('relationship.form.type')"></v-select>
+              :label="t('relationship.form.type')" :rules="[rules.required]"></v-select>
           </v-col>
         </v-row>
       </v-card-text>
@@ -30,9 +30,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 import { useRelationshipStore } from '@/stores/relationship.store';
+
 import type { Relationship } from '@/types';
 import { RelationshipType } from '@/types';
+
 import { MemberAutocomplete } from '@/components/common';
 
 const props = defineProps<{ id?: string }>();
@@ -53,6 +56,10 @@ const relationshipTypes = computed(() => [
   { title: t('relationship.type.spouse'), value: RelationshipType.Spouse },
   { title: t('relationship.type.sibling'), value: RelationshipType.Sibling },
 ]);
+
+const rules = {
+  required: (value: any) => !!value || t('validation.required'),
+};
 
 onMounted(async () => {
   if (props.id) {

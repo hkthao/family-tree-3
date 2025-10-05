@@ -66,7 +66,7 @@ export const useRelationshipStore = defineStore('relationship', {
       this.loading = false;
     },
 
-    async deleteItem(id: string) {
+    async deleteItem(id: string): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await (this.services.relationship as IRelationshipService).delete(id);
@@ -77,6 +77,7 @@ export const useRelationshipStore = defineStore('relationship', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
     async setPage(page: number) {
