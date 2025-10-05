@@ -59,7 +59,7 @@ const loadRelationship = async () => {
 };
 
 const navigateToEditRelationship = (id: string) => {
-  router.push(`/relationship/edit/${id}`);
+  router.push(`/relationships/edit/${id}`);
 };
 
 const closeView = () => {

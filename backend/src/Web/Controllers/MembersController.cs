@@ -46,6 +46,11 @@ public class MembersController : ControllerBase
     [HttpGet("by-ids")]
     public async Task<ActionResult<List<MemberListDto>>> GetMembersByIds([FromQuery] string ids)
     {
+        if (string.IsNullOrEmpty(ids))
+        {
+            return Ok(Result<List<MemberListDto>>.Success(new List<MemberListDto>()).Value);
+        }
+
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetMembersByIdsQuery(guids));
         if (result.IsSuccess)
