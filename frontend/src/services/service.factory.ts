@@ -7,6 +7,9 @@ import { ApiMemberService } from './member/api.member.service';
 import type { IEventService } from './event/event.service.interface';
 import { MockEventService } from './event/mock.event.service';
 import { ApiEventService } from './event/api.event.service';
+import type { IRelationshipService } from './relationship/relationship.service.interface';
+import { MockRelationshipService } from './relationship/mock.relationship.service';
+import { ApiRelationshipService } from './relationship/api.relationship.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -14,6 +17,7 @@ export interface AppServices {
   family: IFamilyService;
   member: IMemberService; 
   event: IEventService;
+  relationship: IRelationshipService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -39,5 +43,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiEventService(apiClient)
         : testServices?.event || new MockEventService(), // Use testServices.event if provided
+    relationship:
+      mode === 'mock'
+        ? new MockRelationshipService()
+        : mode === 'real'
+        ? new ApiRelationshipService(apiClient)
+        : testServices?.relationship || new MockRelationshipService(),
   };
 }

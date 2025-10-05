@@ -70,10 +70,10 @@ class MockMemberServiceForTest implements IMemberService {
   ): Promise<Result<Paginated<Member>, ApiError>> {
     let filteredItems = this._items;
 
-    if (filters.fullName) {
-      const lowerCaseFullName = filters.fullName.toLowerCase();
+    if (filters.searchQuery) {
+      const lowerCaseSearchQuery = filters.searchQuery.toLowerCase();
       filteredItems = filteredItems.filter((m) =>
-        m.fullName?.toLowerCase().includes(lowerCaseFullName),
+        m.fullName?.toLowerCase().includes(lowerCaseSearchQuery),
       );
     }
 
