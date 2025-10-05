@@ -27,28 +27,8 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Pagin
         query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new EventByMemberIdSpecification(request.MemberId));
 
-        if (!string.IsNullOrEmpty(request.SortBy))
-        {
-            switch (request.SortBy.ToLower())
-            {
-                case "name":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(e => e.Name) : query.OrderBy(e => e.Name);
-                    break;
-                case "startdate":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(e => e.StartDate) : query.OrderBy(e => e.StartDate);
-                    break;
-                case "created":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(e => e.Created) : query.OrderBy(e => e.Created);
-                    break;
-                default:
-                    query = query.OrderBy(e => e.StartDate); // Default sort
-                    break;
-            }
-        }
-        else
-        {
-            query = query.OrderBy(e => e.StartDate); // Default sort if no sortBy is provided
-        }
+        // Apply ordering specification
+        query = query.WithSpecification(new EventOrderingSpecification(request.SortBy, request.SortOrder));
 
         return await query
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
