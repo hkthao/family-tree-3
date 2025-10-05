@@ -5,23 +5,16 @@
       <v-card-text>
         <v-row>
           <v-col cols="12">
-            <MemberAutocomplete
-              v-model="editableRelationship.sourceMemberId"
-              :label="t('relationship.form.sourceMember')"
-            />
+            <MemberAutocomplete v-model="editableRelationship.sourceMemberId"
+              :label="t('relationship.form.sourceMember')" />
           </v-col>
           <v-col cols="12">
-            <MemberAutocomplete
-              v-model="editableRelationship.targetMemberId"
-              :label="t('relationship.form.targetMember')"
-            />
+            <MemberAutocomplete v-model="editableRelationship.targetMemberId"
+              :label="t('relationship.form.targetMember')" />
           </v-col>
           <v-col cols="12">
-            <v-select
-              v-model="editableRelationship.type"
-              :items="relationshipTypes"
-              :label="t('relationship.form.type')"
-            ></v-select>
+            <v-select v-model="editableRelationship.type" :items="relationshipTypes"
+              :label="t('relationship.form.type')"></v-select>
           </v-col>
         </v-row>
       </v-card-text>
@@ -40,7 +33,7 @@ import { useI18n } from 'vue-i18n';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import type { Relationship } from '@/types';
 import { RelationshipType } from '@/types';
-import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import { MemberAutocomplete } from '@/components/common';
 
 const props = defineProps<{ id?: string }>();
 const emit = defineEmits(['save', 'cancel']);

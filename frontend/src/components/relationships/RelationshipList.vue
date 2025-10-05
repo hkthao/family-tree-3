@@ -11,8 +11,8 @@
         @update:options="loadItems"
       >
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item.raw)">mdi-pencil</v-icon>
-          <v-icon small @click="deleteItem(item.raw)">mdi-delete</v-icon>
+          <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+          <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
         </template>
       </v-data-table>
     </v-card-text>
