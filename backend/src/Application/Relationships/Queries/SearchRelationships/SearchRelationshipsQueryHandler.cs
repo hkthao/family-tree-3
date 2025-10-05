@@ -23,7 +23,9 @@ public class SearchRelationshipsQueryHandler : IRequestHandler<SearchRelationshi
         var query = _context.Relationships.AsQueryable();
 
         // Apply individual specifications
-        query = query.WithSpecification(new RelationshipFilterSpecification(request.SourceMemberId, request.TargetMemberId, request.Type));
+        query = query.WithSpecification(new RelationshipBySourceMemberIdSpecification(request.SourceMemberId));
+        query = query.WithSpecification(new RelationshipByTargetMemberIdSpecification(request.TargetMemberId));
+        query = query.WithSpecification(new RelationshipByTypeSpecification(request.Type));
 
         // Include related members for full name display
         query = query.Include(r => r.SourceMember).Include(r => r.TargetMember);
