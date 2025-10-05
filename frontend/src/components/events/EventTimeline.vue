@@ -35,7 +35,7 @@
   <v-pagination
     v-if="totalEvents > 0"
     v-model="page"
-    :length="Math.max(1, Math.ceil(totalEvents / itemsPerPage))"
+    :length="paginationLength"
     @update:model-value="loadEvents"
     class="mt-4"
   ></v-pagination>
@@ -61,6 +61,8 @@ const eventStore = useEventStore(); // Initialize event store
 const page = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const totalEvents = ref(0);
+
+const paginatedEvents = computed(() => eventStore.items);
 
 const paginationLength = computed(() => {
   if (typeof totalEvents.value !== 'number' || typeof itemsPerPage.value !== 'number' || itemsPerPage.value <= 0) {
