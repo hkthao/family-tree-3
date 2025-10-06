@@ -15,9 +15,7 @@ export interface Member {
   placeOfBirth?: string; // New (replaces address)
   placeOfDeath?: string; // New (replaces address)
   occupation?: string; // New
-  fatherId?: string | null;
-  motherId?: string | null;
-  spouseId?: string | null; // New
+
   biography?: string; // New
 }
 

@@ -12,7 +12,6 @@ public class RelationshipListDto : IMapFrom<Relationship>
     public RelationshipType Type { get; set; }
     public int? Order { get; set; }
 
-    // Additional properties for display, e.g., member names
-    public string? SourceMemberFullName { get; set; }
-    public string? TargetMemberFullName { get; set; }
+    public RelationshipMemberDto? SourceMember { get; set; }
+    public RelationshipMemberDto? TargetMember { get; set; }
 }

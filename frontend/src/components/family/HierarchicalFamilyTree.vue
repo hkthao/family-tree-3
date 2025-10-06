@@ -16,11 +16,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue';
-import f3 from 'family-chart'; // Corrected import
+import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types';
-import { Gender } from '@/types';
+import { useRelationshipStore } from '@/stores/relationship.store';
+import type { Member, Relationship } from '@/types';
+import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 // Define the type for the data used in the family chart cards
@@ -43,91 +44,100 @@ const props = defineProps({
 });
 
 const chartContainer = ref<HTMLDivElement | null>(null);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let chart: any = null; // To hold the chart instance, 'any' is used due to the library's lack of exported types
+let chart: any = null; // To hold the chart instance
 const memberStore = useMemberStore();
+const relationshipStore = useRelationshipStore();
 
 // --- DATA TRANSFORMATION ---
-const transformData = (members: Member[]) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const transformedMap = new Map<string, any>();
+const transformData = (members: Member[], relationships: Relationship[]) => {
+  const personMap = new Map<string, any>();
 
-  // First pass: Initialize all persons with basic data and empty rels
+  // 1. Initialize all members in a map for quick access
   members.forEach((person) => {
-    transformedMap.set(String(person.id), {
+    personMap.set(String(person.id), {
       id: String(person.id),
       data: {
-        [t('familyTree.fullName')]: person.fullName || `${person.firstName} ${person.lastName}`,
-        [t('familyTree.birthYear')]: person.dateOfBirth?.getFullYear(),
-        [t('familyTree.deathYear')]: person.dateOfDeath?.getFullYear() || ' ',
+        fullName: person.fullName || `${person.firstName} ${person.lastName}`,
+        birthYear: person.dateOfBirth ? new Date(person.dateOfBirth).getFullYear() : '',
+        deathYear: person.dateOfDeath ? new Date(person.dateOfDeath).getFullYear() : '',
         avatar: person.avatarUrl,
-        gender: person.gender == Gender.Male ? 'M' : 'F', // Map to 'M', 'F', 'U'
+        gender: person.gender === Gender.Male ? 'M' : 'F',
       },
       rels: {
         spouses: [],
         children: [],
-        father: person.fatherId ? String(person.fatherId) : undefined,
-        mother: person.motherId ? String(person.motherId) : undefined,
       },
     });
   });
 
-  // Second pass: Populate children and spouses
-  members.forEach((person) => {
-    const transformedPerson = transformedMap.get(String(person.id));
+  // 2. Process relationships to build the tree structure
+  relationships.forEach((rel) => {
+    const sourcePerson = personMap.get(String(rel.sourceMemberId));
+    const targetPerson = personMap.get(String(rel.targetMemberId));
 
-    // Populate children for parents
-    // Iterate through all members to find their children
-    members.forEach(child => {
-      if (child.fatherId === person.id || child.motherId === person.id) {
-        if (transformedPerson && !transformedPerson.rels.children.includes(String(child.id))) {
-          transformedPerson.rels.children.push(String(child.id));
+    if (!sourcePerson || !targetPerson) {
+      console.warn('Could not find person for relationship:', rel);
+      return; // Skip if a person in the relationship doesn't exist in the member list
+    }
+
+    switch (rel.type) {
+      case RelationshipType.Wife:
+      case RelationshipType.Husband:
+        if (!sourcePerson.rels.spouses.includes(targetPerson.id)) {
+          sourcePerson.rels.spouses.push(targetPerson.id);
         }
-      }
-    });
+        if (!targetPerson.rels.spouses.includes(sourcePerson.id)) {
+          targetPerson.rels.spouses.push(sourcePerson.id);
+        }
+        break;
 
-    // Populate spouses
-    if (person.spouseId) {
-      if (transformedPerson && !transformedPerson.rels.spouses.includes(String(person.spouseId))) {
-        transformedPerson.rels.spouses.push(String(person.spouseId));
-      }
+      case RelationshipType.Father:
+        targetPerson.rels.father = sourcePerson.id;
+        if (!sourcePerson.rels.children.includes(targetPerson.id)) {
+          sourcePerson.rels.children.push(targetPerson.id);
+        }
+        break;
+
+      case RelationshipType.Mother:
+        targetPerson.rels.mother = sourcePerson.id;
+        if (!sourcePerson.rels.children.includes(targetPerson.id)) {
+          sourcePerson.rels.children.push(targetPerson.id);
+        }
+        break;
     }
   });
 
-  return Array.from(transformedMap.values());
+  return Array.from(personMap.values());
 };
 
-const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
+const renderChart = (members: Member[], relationships: Relationship[], mainId: string | null = null) => {
   if (!chartContainer.value) return;
 
-  // Clear previous chart
   chartContainer.value.innerHTML = '';
 
-  const transformedData = transformData(dataToRender);
+  const transformedData = transformData(members, relationships);
 
   if (transformedData.length === 0) {
-    // Display a message if no data
     chartContainer.value.innerHTML =
       `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
     chart = null;
     return;
   }
 
-  // Determine main_id for the chart
   let chartMainId = mainId || transformedData[0].id;
   if (!transformedData.some((d) => d.id === chartMainId)) {
-    chartMainId = transformedData[0].id; // Fallback if mainId is not in current data
+    chartMainId = transformedData[0].id;
   }
 
   chart = f3
     .createChart(chartContainer.value, transformedData)
     .setTransitionTime(1000)
-    .setCardXSpacing(200) // Adjust spacing (card width 150 + 50 padding)
-    .setCardYSpacing(250); // Adjust spacing (card height 200 + 50 padding)
+    .setCardXSpacing(200)
+    .setCardYSpacing(250);
 
   chart
     .setCardHtml()
-    .setCardDim({ w: 150, h: 200 }) // Communicate custom card dimensions
+    .setCardDim({ w: 150, h: 200 })
     .setOnCardUpdate(Card());
 
   chart.updateTree({
@@ -138,18 +148,23 @@ const renderChart = (dataToRender: Member[], mainId: string | null = null) => {
   });
 };
 
+const fetchDataAndRender = async (familyId: string) => {
+  await Promise.all([
+    memberStore.getByFamilyId(familyId),
+    relationshipStore.getByFamilyId(familyId),
+  ]);
+  renderChart(memberStore.items, relationshipStore.items);
+};
+
 onMounted(async () => {
   if (props.familyId) {
-    await memberStore.getByFamilyId(props.familyId);
-    renderChart(memberStore.items);
+    await fetchDataAndRender(props.familyId);
   }
 });
 
 onUnmounted(() => {
-  if (chart) {
-    if (chartContainer.value) {
-      chartContainer.value.innerHTML = '';
-    }
+  if (chart && chartContainer.value) {
+    chartContainer.value.innerHTML = '';
     chart = null;
   }
 });
@@ -157,7 +172,6 @@ onUnmounted(() => {
 // --- CUSTOM CARD RENDERING ---
 function Card() {
   return function (this: HTMLElement, d: CardData) {
-    // Update innerHTML instead of outerHTML, and let the library handle positioning
     this.innerHTML = `
       <div class="card">
         ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
@@ -175,8 +189,8 @@ function Card() {
     return `
       <div class="card-image ${getClassList(d).join(' ')}">
         <img src="${d.data.data.avatar}" />
-        <div class="card-label">${d.data.data[t('familyTree.fullName')]}</div>
-        <div class="card-dates">${d.data.data[t('familyTree.birthYear')]} - ${d.data.data[t('familyTree.deathYear')]}</div>
+        <div class="card-label">${d.data.data.fullName}</div>
+        <div class="card-dates">${d.data.data.birthYear} - ${d.data.data.deathYear}</div>
       </div>
       `;
   }
@@ -184,8 +198,8 @@ function Card() {
   function getCardInnerText(d: CardData) {
     return `
       <div class="card-text ${getClassList(d).join(' ')}">
-        <div class="card-label">${d.data.data[t('familyTree.fullName')]}</div>
-        <div class="card-dates">${d.data.data[t('familyTree.birthYear')]} - ${d.data.data[t('familyTree.deathYear')]}</div>
+        <div class="card-label">${d.data.data.fullName}</div>
+        <div class="card-dates">${d.data.data.birthYear} - ${d.data.data.deathYear}</div>
       </div>
       `;
   }
@@ -203,12 +217,11 @@ function Card() {
 }
 
 watch(() => props.familyId, async (newFamilyId) => {
-  let membersToRender: Member[] = [];
   if (newFamilyId) {
-    await memberStore.getByFamilyId(newFamilyId);
-    membersToRender = [...memberStore.items]
+    await fetchDataAndRender(newFamilyId);
+  } else {
+    renderChart([], []);
   }
-  renderChart(membersToRender);
 });
 </script>
 

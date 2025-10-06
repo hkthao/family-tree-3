@@ -29,7 +29,8 @@ public class MappingProfile : Profile
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()
-            .ForMember(dest => dest.SourceMemberFullName, opt => opt.MapFrom(src => src.SourceMember.FullName))
-            .ForMember(dest => dest.TargetMemberFullName, opt => opt.MapFrom(src => src.TargetMember.FullName));
+            .ForMember(dest => dest.SourceMember, opt => opt.MapFrom(src => src.SourceMember))
+            .ForMember(dest => dest.TargetMember, opt => opt.MapFrom(src => src.TargetMember));
+        CreateMap<Member, RelationshipMemberDto>();
     }
 }

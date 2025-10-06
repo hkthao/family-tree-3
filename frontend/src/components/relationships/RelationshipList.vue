@@ -7,12 +7,12 @@
         @update:options="loadItems">
         <template v-slot:item.sourceMemberFullName="{ item }">
           <a @click="viewItem(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-            {{ item.sourceMemberFullName }}
+            {{ item.sourceMember?.fullName }}
           </a>
         </template>
         <template v-slot:item.targetMemberFullName="{ item }">
           <a @click="viewItem(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-            {{ item.targetMemberFullName }}
+            {{ item.targetMember?.fullName }}
           </a>
         </template>
         <template v-slot:item.type="{ item }">

@@ -1021,7 +1021,7 @@
         "operationId": "Relationships_GetRelationships",
         "parameters": [
           {
-            "name": "SourceMemberId",
+            "name": "FamilyId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -1031,7 +1031,7 @@
             "x-position": 1
           },
           {
-            "name": "TargetMemberId",
+            "name": "SourceMemberId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -1041,13 +1041,23 @@
             "x-position": 2
           },
           {
+            "name": "TargetMemberId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
             "name": "Type",
             "in": "query",
             "schema": {
               "type": "string",
               "nullable": true
             },
-            "x-position": 3
+            "x-position": 4
           },
           {
             "name": "Page",
@@ -1056,7 +1066,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 4
+            "x-position": 5
           },
           {
             "name": "ItemsPerPage",
@@ -1065,7 +1075,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "x-position": 5
+            "x-position": 6
           },
           {
             "name": "SortBy",
@@ -1074,7 +1084,7 @@
               "type": "string",
               "nullable": true
             },
-            "x-position": 6
+            "x-position": 7
           },
           {
             "name": "SortOrder",
@@ -1083,7 +1093,7 @@
               "type": "string",
               "nullable": true
             },
-            "x-position": 7
+            "x-position": 8
           }
         ],
         "responses": {
@@ -2039,12 +2049,43 @@
             "format": "int32",
             "nullable": true
           },
-          "sourceMemberFullName": {
+          "sourceMember": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RelationshipMemberDto"
+              }
+            ]
+          },
+          "targetMember": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RelationshipMemberDto"
+              }
+            ]
+          }
+        }
+      },
+      "RelationshipMemberDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "fullName": {
             "type": "string",
             "nullable": true
           },
-          "targetMemberFullName": {
+          "avatarUrl": {
             "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }

@@ -132,5 +132,12 @@ export const useRelationshipStore = defineStore('relationship', {
         return [];
       }
     },
+
+    async getByFamilyId(familyId: string): Promise<void> {
+      this.filter.familyId = familyId;
+      this.setPage(1);
+      this.setItemsPerPage(5000); // Fetch all relationships for the tree
+      await this._loadItems();
+    },
   },
 });

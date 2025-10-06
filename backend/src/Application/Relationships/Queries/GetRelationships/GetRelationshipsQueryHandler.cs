@@ -2,7 +2,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
-using backend.Application.Relationships.Specifications;
 using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries.GetRelationships;
@@ -20,7 +19,15 @@ public class GetRelationshipsQueryHandler : IRequestHandler<GetRelationshipsQuer
 
     public async Task<Result<PaginatedList<RelationshipListDto>>> Handle(GetRelationshipsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Relationships.AsQueryable();
+        var query = _context.Relationships
+            .Include(r => r.SourceMember)
+            .Include(r => r.TargetMember)
+            .AsQueryable();
+
+        if (request.FamilyId.HasValue)
+        {
+            query = query.Where(r => r.SourceMember.FamilyId == request.FamilyId.Value);
+        }
 
         if (request.SourceMemberId.HasValue)
         {
@@ -32,38 +39,25 @@ public class GetRelationshipsQueryHandler : IRequestHandler<GetRelationshipsQuer
             query = query.Where(r => r.TargetMemberId == request.TargetMemberId.Value);
         }
 
-        if (!string.IsNullOrEmpty(request.Type))
+        if (!string.IsNullOrEmpty(request.Type) && Enum.TryParse<RelationshipType>(request.Type, true, out var relationshipType))
         {
-            if (Enum.TryParse<RelationshipType>(request.Type, true, out var relationshipType))
-            {
-                query = query.Where(r => r.Type == relationshipType);
-            }
+            query = query.Where(r => r.Type == relationshipType);
         }
-
-        // Include related members for full name display
-        query = query.Include(r => r.SourceMember).Include(r => r.TargetMember);
 
         if (!string.IsNullOrEmpty(request.SortBy))
         {
-            switch (request.SortBy.ToLower())
+            bool isDescending = request.SortOrder?.ToLower() == "desc";
+            query = request.SortBy.ToLower() switch
             {
-                case "sourcememberfullname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.SourceMember!.FullName) : query.OrderBy(r => r.SourceMember!.FullName);
-                    break;
-                case "targetmemberfullname":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.TargetMember!.FullName) : query.OrderBy(r => r.TargetMember!.FullName);
-                    break;
-                case "type":
-                    query = request.SortOrder == "desc" ? query.OrderByDescending(r => r.Type) : query.OrderBy(r => r.Type);
-                    break;
-                default:
-                    query = query.OrderBy(r => r.SourceMember!.FullName); // Default sort
-                    break;
-            }
+                "sourcememberfullname" => isDescending ? query.OrderByDescending(r => r.SourceMember!.FullName) : query.OrderBy(r => r.SourceMember!.FullName),
+                "targetmemberfullname" => isDescending ? query.OrderByDescending(r => r.TargetMember!.FullName) : query.OrderBy(r => r.TargetMember!.FullName),
+                "type" => isDescending ? query.OrderByDescending(r => r.Type) : query.OrderBy(r => r.Type),
+                _ => query.OrderBy(r => r.Id) // Default sort
+            };
         }
         else
-        {
-            query = query.OrderBy(r => r.SourceMember!.FullName); // Default sort if no sortBy is provided
+        { 
+            query = query.OrderBy(r => r.Id); // Default sort
         }
 
         var paginatedList = await query
