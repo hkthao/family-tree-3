@@ -6,7 +6,9 @@
 import { ref, onMounted, watch, onUnmounted } from 'vue';
 import * as d3 from 'd3';
 import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types';
+import { useRelationshipStore } from '@/stores/relationship.store';
+import type { Member, Relationship } from '@/types';
+import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
@@ -19,71 +21,97 @@ const chartContainer = ref<HTMLDivElement | null>(null);
 let simulation: d3.Simulation<GraphNode, GraphLink> | null = null;
 
 const memberStore = useMemberStore();
+const relationshipStore = useRelationshipStore();
 
 interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
   name: string | undefined;
   gender: string | undefined;
   avatarUrl?: string;
-  depth: number;
+  depth: number; // Re-add depth for forceY
+  isRoot?: boolean;
 }
 
 interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
-  source: GraphNode;
-  target: GraphNode;
+  source: GraphNode | string;
+  target: GraphNode | string;
   type: 'parent-child' | 'spouse';
 }
 
-const transformData = (members: Member[]): { nodes: GraphNode[], links: GraphLink[] } => {
+const transformData = (members: Member[], relationships: Relationship[]): { nodes: GraphNode[], links: GraphLink[] } => {
   const nodes: GraphNode[] = members.map(m => ({
     id: String(m.id),
-    name: m.fullName,
+    name: m.fullName || `${m.firstName} ${m.lastName}`,
     gender: m.gender,
     avatarUrl: m.avatarUrl,
     depth: -1, // Initialize depth
+    isRoot: m.isRoot,
   }));
 
   const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
-  // Calculate depth
-  const roots = nodes.filter(n => !members.find(m => m.id === n.id)?.fatherId && !members.find(m => m.id === n.id)?.motherId);
+  const links: GraphLink[] = [];
+  const spouseLinks = new Set<string>();
+
+  relationships.forEach(rel => {
+    const sourceId = String(rel.sourceMemberId);
+    const targetId = String(rel.targetMemberId);
+
+    switch (rel.type) {
+      case RelationshipType.Husband:
+      case RelationshipType.Wife:
+        // Ensure spouse links are added only once for a couple
+        const linkKey1 = `${sourceId}-${targetId}`;
+        const linkKey2 = `${targetId}-${sourceId}`;
+        if (!spouseLinks.has(linkKey1) && !spouseLinks.has(linkKey2)) {
+          links.push({ source: sourceId, target: targetId, type: 'spouse' });
+          spouseLinks.add(linkKey1);
+        }
+        break;
+      case RelationshipType.Father:
+      case RelationshipType.Mother:
+        links.push({ source: sourceId, target: targetId, type: 'parent-child' });
+        break;
+    }
+  });
+
+  // Calculate depth based on new relationships
+  const parentChildRelationships = relationships.filter(rel => rel.type === RelationshipType.Father || rel.type === RelationshipType.Mother);
+  const childrenOf = new Map<string, string[]>(); // Map parentId to array of childIds
+  const parentsOf = new Map<string, string[]>(); // Map childId to array of parentIds
+
+  parentChildRelationships.forEach(rel => {
+    const parentId = String(rel.sourceMemberId);
+    const childId = String(rel.targetMemberId);
+    if (!childrenOf.has(parentId)) childrenOf.set(parentId, []);
+    childrenOf.get(parentId)!.push(childId);
+
+    if (!parentsOf.has(childId)) parentsOf.set(childId, []);
+    parentsOf.get(childId)!.push(parentId);
+  });
+
+  const roots = nodes.filter(n => !parentsOf.has(n.id));
   const queue: { node: GraphNode; depth: number }[] = roots.map(r => ({ node: r, depth: 0 }));
-  const visited = new Set(roots.map(r => r.id));
+  const visited = new Set<string>();
 
   while (queue.length > 0) {
     const { node, depth } = queue.shift()!;
+    if (visited.has(node.id)) continue;
+    visited.add(node.id);
     node.depth = depth;
 
-    const children = members.filter(m => String(m.fatherId) === node.id || String(m.motherId) === node.id);
-    children.forEach(childData => {
-      const childNode = nodeMap.get(String(childData.id));
-      if (childNode && !visited.has(childNode.id)) {
-        visited.add(childNode.id);
+    const childrenIds = childrenOf.get(node.id) || [];
+    childrenIds.forEach(childId => {
+      const childNode = nodeMap.get(childId);
+      if (childNode) {
         queue.push({ node: childNode, depth: depth + 1 });
       }
     });
   }
-  // Assign depth to nodes that might have been missed (e.g., spouses of deep nodes)
+
+  // Fallback for isolated nodes or those not reached by depth calculation
   nodes.forEach(n => {
-    if (n.depth === -1) n.depth = 0; // Fallback for isolated nodes
-  });
-
-  const links: any[] = [];
-  const spouseLinks = new Set();
-
-  members.forEach(m => {
-    const sourceId = String(m.id);
-    if (m.fatherId) links.push({ source: sourceId, target: String(m.fatherId), type: 'parent-child' });
-    if (m.motherId) links.push({ source: sourceId, target: String(m.motherId), type: 'parent-child' });
-    if (m.spouseId) {
-      const targetId = String(m.spouseId);
-      const linkKey1 = `${sourceId}-${targetId}`;
-      const linkKey2 = `${targetId}-${sourceId}`;
-      if (!spouseLinks.has(linkKey1) && !spouseLinks.has(linkKey2)) {
-        links.push({ source: sourceId, target: targetId, type: 'spouse' });
-        spouseLinks.add(linkKey1);
-      }
-    }
+    if (n.depth === -1) n.depth = 0; // Assign a default depth
   });
 
   return { nodes, links };
@@ -135,8 +163,8 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
   node.append('circle')
     .attr('r', 25)
-    .attr('fill', d => d.avatarUrl ? `url(#avatar-${d.id})` : (d.gender === 'Male' ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))'))
-    .attr('stroke', d => d.gender === 'Male' ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))') // Gender-based border
+    .attr('fill', d => d.avatarUrl ? `url(#avatar-${d.id})` : (d.gender === Gender.Male.toString() ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))'))
+    .attr('stroke', d => d.gender === Gender.Male.toString() ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))') // Gender-based border
     .attr('stroke-width', 4); // Increased border width
 
   node.append('text')
@@ -192,10 +220,12 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
   // --- Highlighting Interaction ---
   const linkedByIndex = new Map<string, Set<string>>();
   links.forEach(d => {
-    linkedByIndex.set(d.source.id, linkedByIndex.get(d.source.id) || new Set());
-    linkedByIndex.set(d.target.id, linkedByIndex.get(d.target.id) || new Set());
-    linkedByIndex.get(d.source.id)!.add(d.target.id);
-    linkedByIndex.get(d.target.id)!.add(d.source.id);
+    const sourceId = (d.source as GraphNode).id;
+    const targetId = (d.target as GraphNode).id;
+    linkedByIndex.set(sourceId, linkedByIndex.get(sourceId) || new Set());
+    linkedByIndex.set(targetId, linkedByIndex.get(targetId) || new Set());
+    linkedByIndex.get(sourceId)!.add(targetId);
+    linkedByIndex.get(targetId)!.add(sourceId);
   });
 
   function isConnected(a: GraphNode, b: GraphNode) {
@@ -204,7 +234,11 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
   node.on('mouseover', (event, d) => {
     node.transition().duration(200).style('opacity', o => isConnected(d, o) ? 1 : 0.1);
-    link.transition().duration(200).style('stroke-opacity', o => o.source.id === d.id || o.target.id === d.id ? 1 : 0.1);
+    link.transition().duration(200).style('stroke-opacity', o => {
+      const sourceNode = o.source as GraphNode;
+      const targetNode = o.target as GraphNode;
+      return sourceNode.id === d.id || targetNode.id === d.id ? 1 : 0.1;
+    });
   });
 
   node.on('mouseout', () => {
@@ -214,10 +248,10 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
   simulation.on('tick', () => {
     link
-      .attr('x1', d => d.source.x!)
-      .attr('y1', d => d.source.y!)
-      .attr('x2', d => d.target.x!)
-      .attr('y2', d => d.target.y!);
+      .attr('x1', d => (d.source as GraphNode).x!)
+      .attr('y1', d => (d.source as GraphNode).y!)
+      .attr('x2', d => (d.target as GraphNode).x!)
+      .attr('y2', d => (d.target as GraphNode).y!);
     node.attr('transform', d => `translate(${d.x}, ${d.y})`);
   });
 
@@ -243,15 +277,21 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
 const initialize = async () => {
   if (props.familyId) {
-    memberStore.getByFamilyId(props.familyId)
-    const members = [...memberStore.items]
-    if (members && members.length > 0) {
-      const { nodes, links } = transformData(members);
+    await Promise.all([
+      memberStore.getByFamilyId(props.familyId),
+      relationshipStore.getByFamilyId(props.familyId),
+    ]);
+
+    const members = memberStore.items;
+    const relationships = relationshipStore.items;
+
+    if (members.length > 0) {
+      const { nodes, links } = transformData(members, relationships);
       renderChart(nodes, links);
     } else {
-       if (!chartContainer.value) return;
-       d3.select(chartContainer.value).select('svg').remove();
-       d3.select(chartContainer.value).html(`<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`);
+      if (!chartContainer.value) return;
+      d3.select(chartContainer.value).select('svg').remove();
+      d3.select(chartContainer.value).html(`<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`);
     }
   }
 };
