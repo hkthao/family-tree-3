@@ -3,6 +3,7 @@ using backend.Infrastructure;
 using backend.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,12 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
 
+// Log Auth0 configuration for debugging
+builder.Logging.AddConsole(); // Ensure console logging is enabled
+var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Auth0Config");
+logger.LogInformation("Auth0 Domain: {Auth0Domain}", auth0Domain);
+logger.LogInformation("Auth0 Audience: {Auth0Audience}", auth0Audience);
+
 // Configure Auth0 Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -24,6 +31,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuer = true,
             ValidateAudience = true,
+            ValidAudience = auth0Audience, // Explicitly set the valid audience
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
         };
@@ -76,7 +84,7 @@ else
 app.UseCors("AllowFrontend");
 
 app.UseHealthChecks("/health");
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Disabled to allow HTTP access for local development
 app.UseStaticFiles();
 
 app.UseSwaggerUi(settings =>

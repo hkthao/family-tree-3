@@ -62,7 +62,8 @@ export const auth0Service: AuthService = {
   },
   getAccessToken: async () => {
     const client = await initAuth0();
-    return client.getTokenSilently();
+    const token = await client.getTokenSilently();
+    return token;
   },
   handleRedirectCallback: async (): Promise<AppState> => {
     const client = await initAuth0();
