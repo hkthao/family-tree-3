@@ -14,5 +14,6 @@ public record MemberInput
     public string? Occupation { get; init; }
     public string? Biography { get; init; }
     public Guid FamilyId { get; init; }
+    public bool IsRoot { get; init; }
     public ICollection<RelationshipInput> Relationships { get; init; } = [];
 }

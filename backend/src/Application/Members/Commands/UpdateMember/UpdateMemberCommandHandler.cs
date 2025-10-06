@@ -36,6 +36,18 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
         entity.Occupation = request.Occupation;
         entity.Biography = request.Biography;
         entity.FamilyId = request.FamilyId;
+        entity.IsRoot = request.IsRoot;
+
+        if (request.IsRoot)
+        {
+            var currentRoot = await _context.Members
+                .Where(m => m.FamilyId == request.FamilyId && m.IsRoot && m.Id != request.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (currentRoot != null)
+            {
+                currentRoot.IsRoot = false;
+            }
+        }
 
         // Manage Relationships
         var existingRelationships = entity.Relationships.ToList();

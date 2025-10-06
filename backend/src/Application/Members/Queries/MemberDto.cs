@@ -15,4 +15,5 @@ public class MemberDto
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; }
     public Guid FamilyId { get; set; }
+    public bool IsRoot { get; set; }
 }

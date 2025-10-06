@@ -17,6 +17,7 @@ export interface Member {
   occupation?: string; // New
 
   biography?: string; // New
+  isRoot?: boolean;
 }
 
 export interface MemberFilter {

@@ -16,6 +16,7 @@ public class Member : BaseAuditableEntity
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; } // New
     public Guid FamilyId { get; set; }
+    public bool IsRoot { get; set; } = false;
 
     // Relationships
     public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();

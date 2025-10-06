@@ -28,7 +28,19 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, G
             Occupation = request.Occupation,
             Biography = request.Biography,
             FamilyId = request.FamilyId,
+            IsRoot = request.IsRoot
         };
+
+        if (request.IsRoot)
+        {
+            var currentRoot = await _context.Members
+                .Where(m => m.FamilyId == request.FamilyId && m.IsRoot)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (currentRoot != null)
+            {
+                currentRoot.IsRoot = false;
+            }
+        }
 
         _context.Members.Add(entity);
 

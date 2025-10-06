@@ -11,6 +11,7 @@ public class MemberListDto : BaseAuditableDto, IMapFrom<Member>
     public string FullName { get; set; } = null!;
     public string? AvatarUrl { get; set; }
     public Guid FamilyId { get; set; }
+    public bool IsRoot { get; set; }
     public DateTime? DateOfBirth { get; set; }
     public string? Gender { get; set; }
     public ICollection<RelationshipDto> Relationships { get; set; } = [];

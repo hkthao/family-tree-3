@@ -124,7 +124,23 @@ const renderChart = (members: Member[], relationships: Relationship[], mainId: s
     return;
   }
 
-  let chartMainId = mainId || transformedData[0].id;
+  let chartMainId = mainId;
+  const rootMember = members.find(m => m.isRoot);
+  if (rootMember) {
+    chartMainId = rootMember.id;
+  } else if (transformedData.length > 0) {
+    chartMainId = transformedData[0].id;
+  }
+
+  if (!chartMainId) {
+    // If no root member and no other members, display empty message
+    chartContainer.value.innerHTML =
+      `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
+    chart = null;
+    return;
+  }
+
+  // Fallback if the determined chartMainId is not in the current transformedData
   if (!transformedData.some((d) => d.id === chartMainId)) {
     chartMainId = transformedData[0].id;
   }
