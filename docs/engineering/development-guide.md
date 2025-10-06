@@ -26,7 +26,7 @@ Tài liệu này hướng dẫn cách cài đặt môi trường, build, và dep
 -   **Docker và Docker Compose**: Phiên bản mới nhất để chạy ứng dụng trong môi trường container.
 -   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn) cho việc phát triển Backend.
 -   **Node.js 20+**: Phiên bản 20.x (hoặc mới hơn) cho việc phát triển Frontend.
--   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations. Bạn có thể cài đặt bằng lệnh: `dotnet tool install --global dotnet-ef`.
+-   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations cho database nghiệp vụ. Bạn có thể cài đặt bằng lệnh: `dotnet tool install --global dotnet-ef`.
 
 ## 2. Cài đặt và Chạy dự án
 
@@ -60,7 +60,9 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```bash
     docker-compose -f infra/docker-compose.yml up -d mysql
     ```
-2.  **Cấu hình chuỗi kết nối**: Chỉnh sửa `backend/src/Web/appsettings.Development.json` để đảm bảo `UseInMemoryDatabase` là `false` và chuỗi kết nối `DefaultConnection` trỏ đến `localhost`:
+2.  **Cấu hình Backend**: 
+    *   **Database**: Chỉnh sửa `backend/src/Web/appsettings.Development.json` để đảm bảo `UseInMemoryDatabase` là `false` và chuỗi kết nối `DefaultConnection` trỏ đến `localhost`.
+    *   **Auth0**: Cấu hình Auth0 Domain và Audience trong `backend/src/Web/Properties/launchSettings.json` cho profile `backend.Web`.
 
     ```json
     // backend/src/Web/appsettings.Development.json
@@ -70,6 +72,22 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
       },
       "UseInMemoryDatabase": false,
       // ... các cấu hình khác
+    }
+    ```
+
+    ```json
+    // backend/src/Web/Properties/launchSettings.json
+    {
+      "profiles": {
+        "backend.Web": {
+          // ...
+          "environmentVariables": {
+            "ASPNETCORE_ENVIRONMENT": "Development",
+            "Auth0:Domain": "YOUR_AUTH0_DOMAIN", // Thay bằng Auth0 Domain của bạn
+            "Auth0:Audience": "YOUR_AUTH0_AUDIENCE" // Thay bằng Auth0 Audience của bạn
+          }
+        }
+      }
     }
     ```
 
@@ -90,7 +108,26 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```bash
     npm install
     ```
-3.  **Cấu hình Vite Proxy**: Đảm bảo `frontend/vite.config.ts` được cấu hình đúng để proxy các yêu cầu API đến Backend đang chạy. Ví dụ:
+3.  **Cấu hình Frontend**: 
+    *   **Biến môi trường**: Tạo file `.env.development` trong thư mục `frontend` dựa trên `frontend/.env.example`. File này chứa các biến môi trường cho Auth0 và API Base URL.
+        ```
+        # frontend/.env.example
+        VITE_USE_MOCK=false
+        VITE_AUTH0_DOMAIN="YOUR_AUTH0_DOMAIN"
+        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID"
+        VITE_AUTH0_AUDIENCE="YOUR_AUTH0_AUDIENCE"
+        VITE_API_BASE_URL="/api"
+        ```
+        Bạn cần tạo file `frontend/.env.development` và điền các giá trị thực tế của bạn. Ví dụ:
+        ```
+        # frontend/.env.development
+        VITE_USE_MOCK=false
+        VITE_AUTH0_DOMAIN="https://dev-g76tq00gicwdzk3z.us.auth0.com"
+        VITE_AUTH0_CLIENT_ID="v4jSe5QR4Uj6ddoBBMHNtaDNHwv8UzQN"
+        VITE_AUTH0_AUDIENCE="http://localhost:5000"
+        VITE_API_BASE_URL="/api"
+        ```
+    *   **Vite Proxy**: Đảm bảo `frontend/vite.config.ts` được cấu hình đúng để proxy các yêu cầu API đến Backend đang chạy. Ví dụ:
 
     ```typescript
     // frontend/vite.config.ts
@@ -98,7 +135,7 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
       server: {
         proxy: {
           '/api': {
-            target: 'http://localhost:8080', // Hoặc cổng Backend đang chạy
+            target: 'http://localhost:5000', // Hoặc cổng Backend đang chạy
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
             // secure: false, // Nếu Backend chạy HTTPS với chứng chỉ tự ký
@@ -137,6 +174,8 @@ docker-compose -f infra/docker-compose.yml up -d
 ## 4. Quản lý Database
 
 Dự án sử dụng Entity Framework Core Migrations để quản lý schema database. Các lệnh này cần được chạy từ thư mục gốc của project `backend`.
+
+**Lưu ý quan trọng:** Kể từ khi loại bỏ ASP.NET Core Identity, việc quản lý người dùng và vai trò (user/role) không còn được thực hiện qua database cục bộ nữa mà hoàn toàn do Auth0 đảm nhiệm. Database chỉ chứa dữ liệu nghiệp vụ của ứng dụng.
 
 ### 4.1. Tạo migration mới
 

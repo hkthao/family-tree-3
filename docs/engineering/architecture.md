@@ -65,7 +65,7 @@ graph TD
 -   **Web API (Web Layer)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các dịch vụ nghiệp vụ (Business Services) trong Application Layer, và trả về phản hồi.
 -   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `Repository Pattern` để tương tác với dữ liệu và sử dụng `Result Pattern` để trả về kết quả thống nhất.** (updated after refactor)
 -   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
--   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
+-   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), và các dịch vụ bên ngoài khác.
 
 ## 4. Sơ đồ mã nguồn (Code Diagram - C4) (updated after refactor)
 
@@ -238,7 +238,9 @@ graph TD
 
 *(Updated to match current refactor: Frontend development setup)*
 
-Trong môi trường phát triển cục bộ, Frontend (chạy bằng Vite) sử dụng cơ chế proxy để chuyển tiếp các yêu cầu API từ `http://localhost:5173/api` đến Backend (ví dụ: `http://localhost:8080` hoặc `https://localhost:5001`). Điều này giúp tránh các vấn đề CORS và cho phép Frontend tương tác liền mạch với Backend đang chạy cục bộ hoặc trong Docker.
+Trong môi trường phát triển cục bộ, Frontend (chạy bằng Vite) sử dụng cơ chế proxy để chuyển tiếp các yêu cầu API từ `http://localhost:5173/api` đến Backend (ví dụ: `http://localhost:5000`). Điều này giúp tránh các vấn đề CORS và cho phép Frontend tương tác liền mạch với Backend đang chạy cục bộ hoặc trong Docker.
+
+**Lưu ý:** Backend đã tắt `app.UseHttpsRedirection()` trong `Program.cs` để cho phép truy cập HTTP trong môi trường phát triển cục bộ.
 
 **Cấu hình ví dụ trong `vite.config.ts`:**
 
@@ -250,10 +252,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:8080', // Hoặc 'https://localhost:5001' nếu Backend chạy HTTPS
+        target: 'http://localhost:5000', // Địa chỉ Backend đang chạy
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: false, // Chỉ dùng khi Backend chạy HTTPS với chứng chỉ tự ký
+        // secure: false, // Không cần thiết nếu Backend chạy HTTP
       },
     },
   },
@@ -265,51 +267,69 @@ export default defineConfig({
 *   `target`: Địa chỉ của Backend API.
 *   `changeOrigin`: Đặt thành `true` để thay đổi `Host` header của request thành `target` host, cần thiết cho một số API.
 *   `rewrite`: Viết lại đường dẫn request, loại bỏ `/api` khỏi URL trước khi gửi đến Backend.
-*   `secure`: Đặt thành `false` nếu Backend sử dụng HTTPS với chứng chỉ tự ký (self-signed certificate) trong môi trường phát triển, để tránh lỗi SSL/TLS.
+*   `secure`: Không cần thiết nếu Backend chạy HTTP.
 
 ## 6. Xác thực & Phân quyền (Authentication & Authorization)
 
-Hệ thống sử dụng **JWT Bearer Token** để xác thực và được thiết kế để không phụ thuộc vào nhà cung cấp xác thực (Identity Provider - IdP).
+Hệ thống sử dụng **Auth0** làm nhà cung cấp xác thực và quản lý người dùng duy nhất, kết hợp với **JWT Bearer Token** để bảo vệ các API endpoint.
 
 #### Luồng hoạt động
 
-1.  **Frontend lấy Token:** Frontend chịu trách nhiệm tương tác với IdP (ví dụ: Auth0) để lấy JWT (JSON Web Token).
-2.  **Gửi Token đến Backend:** Frontend gửi kèm JWT trong header `Authorization` (dưới dạng `Bearer <token>`) trong mỗi request API đến Backend.
-3.  **Backend xác thực Token:** Backend nhận JWT, giải mã và xác thực chữ ký của token, kiểm tra các claims (thông tin người dùng, quyền hạn) và thời hạn hiệu lực của token.
-4.  **Phân quyền:** Sau khi xác thực thành công, Backend sử dụng thông tin từ JWT để kiểm tra quyền hạn của người dùng đối với tài nguyên hoặc hành động được yêu cầu.
+1.  **Frontend lấy Token:** Frontend tương tác với Auth0 để thực hiện quá trình đăng nhập và nhận về JWT (Access Token, ID Token).
+2.  **Gửi Token đến Backend:** Frontend gửi kèm Access Token trong header `Authorization` (dưới dạng `Bearer <token>`) trong mỗi request API đến Backend.
+3.  **Backend xác thực Token:** Backend nhận Access Token, giải mã và xác thực chữ ký của token, kiểm tra các claims (thông tin người dùng, quyền hạn) và thời hạn hiệu lực của token dựa trên cấu hình Auth0.
+4.  **Phân quyền:** Sau khi xác thực thành công, Backend sử dụng thông tin từ Access Token (đặc biệt là các custom claim về `roles` từ Auth0 Action) để kiểm tra quyền hạn của người dùng đối với tài nguyên hoặc hành động được yêu cầu.
 
-#### Cấu hình Auth0 (Ví dụ)
+#### Cấu hình Auth0
 
-*   **Nhà cung cấp hiện tại**: Auth0 (được trừu tượng hóa qua `IAuthProvider` và triển khai mock `Auth0Provider` cho môi trường phát triển không cần DB).
-*   **Cấu hình trong `appsettings.json` hoặc `appsettings.Development.json`:**
-
-    ```json
-    "Auth0": {
-      "Domain": "https://YOUR_AUTH0_DOMAIN.auth0.com/",
-      "Audience": "YOUR_AUTH0_AUDIENCE"
-    }
-    ```
-
-*   **Cấu hình trong `backend/src/Web/DependencyInjection.cs`:**
-
-    ```csharp
-    builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-        .AddJwtBearer(options =>
+*   **Cấu hình Backend**: 
+    *   Backend đọc cấu hình Auth0 từ các biến môi trường `Auth0:Domain` và `Auth0:Audience`.
+    *   **Cấu hình cục bộ (Local Development)**: Đối với môi trường phát triển cục bộ, bạn có thể đặt các biến này trong `backend/src/Web/Properties/launchSettings.json`.
+        ```json
+        // backend/src/Web/Properties/launchSettings.json
         {
-            options.Authority = builder.Configuration["Auth0:Domain"];
-            options.Audience = builder.Configuration["Auth0:Audience"];
-            options.RequireHttpsMetadata = false; // Đặt là false trong môi trường phát triển nếu không dùng HTTPS
-        });
-
-    builder.Services.AddAuthorizationBuilder();
-    ```
-
-    **Lưu ý về `options.RequireHttpsMetadata = false;`:**
-    *   Trong môi trường phát triển, khi Backend có thể chạy trên HTTP hoặc HTTPS với chứng chỉ tự ký, việc đặt `RequireHttpsMetadata = false` là cần thiết để cho phép xác thực JWT hoạt động mà không yêu cầu IdP phải cung cấp metadata qua HTTPS. **Tuyệt đối không đặt `false` trong môi trường Production.**
+          "profiles": {
+            "backend.Web": {
+              // ...
+              "environmentVariables": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "Auth0:Domain": "YOUR_AUTH0_DOMAIN", // Thay bằng Auth0 Domain của bạn
+                "Auth0:Audience": "YOUR_AUTH0_AUDIENCE" // Thay bằng Auth0 Audience của bạn
+              }
+            }
+          }
+        }
+        ```
+    *   **Cấu hình trong `Program.cs`**: 
+        ```csharp
+        // Configure Auth0 Authentication
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = auth0Domain;
+                options.Audience = auth0Audience;
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidAudience = auth0Audience, // Explicitly set the valid audience
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true
+                };
+            });
+        ```
+*   **Cấu hình Frontend**: 
+    *   Frontend đọc cấu hình Auth0 từ các biến môi trường trong file `.env.development` (hoặc `.env.production`).
+    *   **Biến môi trường**: 
+        ```
+        # frontend/.env.development
+        VITE_AUTH0_DOMAIN="YOUR_AUTH0_DOMAIN"
+        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID"
+        VITE_AUTH0_AUDIENCE="YOUR_AUTH0_AUDIENCE"
+        ```
+*   **Cấu hình Auth0 Dashboard**: 
+    *   **API**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `YOUR_AUTH0_AUDIENCE` (ví dụ: `http://localhost:5000`).
+    *   **Actions**: Cấu hình một Auth0 Action để thêm `roles` vào JWT token dưới dạng custom claim (ví dụ: `https://familytree.com/roles`).
 
 #### Khả năng thay thế
 

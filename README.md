@@ -17,7 +17,7 @@ Một hệ thống quản lý gia phả chuyên nghiệp cho phép bạn xây d�
 
 ## 🛠️ Công Nghệ Sử Dụng
 
--   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, JWT Authentication, MediatR, FluentValidation
+-   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation (Authentication handled by Auth0)
 -   **Frontend:** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
 -   **Cơ sở dữ liệu:** MySQL
 -   **Triển khai:** Docker, Docker Compose, Nginx
@@ -40,19 +40,25 @@ Một hệ thống quản lý gia phả chuyên nghiệp cho phép bạn xây d�
     cd family-tree-3
     ```
 
-2.  **Chạy ứng dụng với Docker Compose:**
+2.  **Cấu hình Auth0**: 
+    *   **Auth0 Dashboard**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `http://localhost:5000`. 
+    *   **Biến môi trường Frontend**: Tạo file `frontend/.env.development` dựa trên `frontend/.env.example` và điền các thông tin Auth0 của bạn (Domain, Client ID, Audience).
+    *   **Biến môi trường Backend (Local Development)**: Cấu hình `Auth0:Domain` và `Auth0:Audience` trong `backend/src/Web/Properties/launchSettings.json`.
+    *   **Biến môi trường Backend (Docker Compose)**: Nếu chạy với Docker Compose, đảm bảo các biến môi trường `Auth0__Domain` và `Auth0__Audience` được thiết lập trong file `.env` hoặc `docker-compose.yml`.
+
+3.  **Chạy ứng dụng với Docker Compose:**
     Lệnh này sẽ build (nếu cần) và chạy backend, frontend, và cơ sở dữ liệu. Đây là cách nhanh nhất để khởi động toàn bộ hệ thống.
     ```bash
     docker-compose -f infra/docker-compose.yml up --build
     ```
 
-3.  **Cấu hình Database (chỉ lần đầu)**:
+4.  **Cấu hình Database (chỉ lần đầu)**:
     Nếu bạn chạy Backend với MySQL (không phải In-Memory Database), bạn cần áp dụng migrations để tạo schema database và seed dữ liệu mẫu.
     ```bash
-    dotnet ef database update --project backend/src/Infrastructure --startup-project backend/src/Web
+dotnet ef database update --project backend/src/Infrastructure --startup-project backend/src/Web
     ```
 
-4.  **Truy cập ứng dụng:**
+5.  **Truy cập ứng dụng:**
     -   **Frontend:** [http://localhost](http://localhost) (được phục vụ bởi Nginx)
     -   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 
