@@ -243,11 +243,10 @@
       "tab.general": "Thông Tin Chung"
     },
     "type": {
-      "parent": "Cha mẹ",
-      "spouse": "Vợ/Chồng",
-      "child": "Con cái",
-      "sibling": "Anh/Chị/Em",
-      "other": "Khác"
+      "father": "Cha",
+      "mother": "Mẹ",
+      "wife": "Vợ",
+      "husband": "Chồng"
     }
   },
   "relationship.list.title": "Quản lý Quan hệ",

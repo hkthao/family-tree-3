@@ -1763,10 +1763,10 @@
         "type": "integer",
         "description": "",
         "x-enumNames": [
-          "ParentChild",
-          "Spouse",
-          "Sibling",
-          "Other"
+          "Father",
+          "Mother",
+          "Wife",
+          "Husband"
         ],
         "enum": [
           0,

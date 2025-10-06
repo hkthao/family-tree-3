@@ -236,9 +236,10 @@
       "relationshipType": "Relation Type"
     },
     "type": {
-      "parent": "Parent",
-      "spouse": "Spouse",
-      "child": "Child"
+      "father": "Father",
+      "mother": "Mother",
+      "wife": "Wife",
+      "husband": "Husband"
     }
   },
   "common.name": "Name",

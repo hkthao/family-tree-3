@@ -42,7 +42,7 @@ public class DbContextTests : TestBase
         {
             SourceMemberId = father.Id,
             TargetMemberId = child.Id,
-            Type = RelationshipType.ParentChild
+            Type = RelationshipType.Father
         };
 
         Context.Relationships.Add(relationship);
@@ -60,7 +60,7 @@ public class DbContextTests : TestBase
         retrievedRelationship.SourceMember.FirstName.Should().Be("Father");
         retrievedRelationship.TargetMember.Should().NotBeNull();
         retrievedRelationship.TargetMember.FirstName.Should().Be("Child");
-        retrievedRelationship.Type.Should().Be(RelationshipType.ParentChild);
+        retrievedRelationship.Type.Should().Be(RelationshipType.Father);
     }
 
     [Fact]
@@ -88,16 +88,16 @@ public class DbContextTests : TestBase
         await Context.SaveChangesAsync();
 
         // Father-Child relationships
-        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child1.Id, Type = RelationshipType.ParentChild });
-        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child2.Id, Type = RelationshipType.ParentChild });
+        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child1.Id, Type = RelationshipType.Father });
+        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child2.Id, Type = RelationshipType.Father });
 
         // Mother-Child relationships
-        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child1.Id, Type = RelationshipType.ParentChild });
-        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child2.Id, Type = RelationshipType.ParentChild });
+        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child1.Id, Type = RelationshipType.Mother });
+        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child2.Id, Type = RelationshipType.Mother });
 
         // Spouse relationship
-        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = mother.Id, Type = RelationshipType.Spouse });
-        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = father.Id, Type = RelationshipType.Spouse });
+        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = mother.Id, Type = RelationshipType.Husband });
+        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = father.Id, Type = RelationshipType.Wife });
 
         await Context.SaveChangesAsync();
 
@@ -116,16 +116,16 @@ public class DbContextTests : TestBase
 
         // Assert John's relationships
         johnRelationships.Should().NotBeNull();
-        johnRelationships.Should().HaveCount(4); // 2 ParentChild (father as source) + 2 ParentChild (father as target) + 1 Spouse (father as source)
-        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Alice" && r.Type == RelationshipType.ParentChild);
-        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Bob" && r.Type == RelationshipType.ParentChild);
-        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Jane" && r.Type == RelationshipType.Spouse);
-        johnRelationships.Should().Contain(r => r.SourceMember.FirstName == "Jane" && r.Type == RelationshipType.Spouse); // Mother is source for spouse relationship
+        johnRelationships.Should().HaveCount(4); // 2 Father (to children) + 1 Husband (to wife) + 1 Wife (from wife)
+        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Alice" && r.Type == RelationshipType.Father);
+        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Bob" && r.Type == RelationshipType.Father);
+        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Jane" && r.Type == RelationshipType.Husband);
+        johnRelationships.Should().Contain(r => r.SourceMember.FirstName == "Jane" && r.Type == RelationshipType.Wife);
 
         // Assert Alice's relationships
         aliceRelationships.Should().NotBeNull();
-        aliceRelationships.Should().HaveCount(2); // 2 ParentChild (Alice as target)
-        aliceRelationships.Should().Contain(r => r.SourceMember.FirstName == "John" && r.Type == RelationshipType.ParentChild);
-        aliceRelationships.Should().Contain(r => r.SourceMember.FirstName == "Jane" && r.Type == RelationshipType.ParentChild);
+        aliceRelationships.Should().HaveCount(2); // 1 Father (from John) + 1 Mother (from Jane)
+        aliceRelationships.Should().Contain(r => r.SourceMember.FirstName == "John" && r.Type == RelationshipType.Father);
+        aliceRelationships.Should().Contain(r => r.SourceMember.FirstName == "Jane" && r.Type == RelationshipType.Mother);
     }
 }
