@@ -246,7 +246,9 @@
       "father": "Cha",
       "mother": "Mẹ",
       "wife": "Vợ",
-      "husband": "Chồng"
+      "husband": "Chồng",
+      "spouse": "Vợ/Chồng",
+      "parent_child": "Cha-Con"
     }
   },
   "relationship.list.title": "Quản lý Quan hệ",

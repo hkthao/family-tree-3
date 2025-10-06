@@ -163,8 +163,8 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
   node.append('circle')
     .attr('r', 25)
-    .attr('fill', d => d.avatarUrl ? `url(#avatar-${d.id})` : (d.gender === Gender.Male.toString() ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))'))
-    .attr('stroke', d => d.gender === Gender.Male.toString() ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))') // Gender-based border
+    .attr('fill', d => d.avatarUrl ? `url(#avatar-${d.id})` : (d.gender === Gender.Male ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))'))
+    .attr('stroke', d => d.gender === Gender.Male ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-secondary))') // Gender-based border
     .attr('stroke-width', 4); // Increased border width
 
   node.append('text')
@@ -182,7 +182,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     { color: 'rgb(var(--v-theme-primary))', text: t('member.gender.male'), type: 'circle' },
     { color: 'rgb(var(--v-theme-secondary))', text: t('member.gender.female'), type: 'circle' },
     { color: 'rgb(var(--v-theme-error))', text: t('relationship.type.spouse'), type: 'line' },
-    { color: 'rgb(var(--v-theme-on-surface))', text: t('relationship.type.parent') + '-' + t('relationship.type.child'), type: 'line' },
+    { color: 'rgb(var(--v-theme-on-surface))', text: t('relationship.type.parent_child'), type: 'line' },
   ];
 
   const legendItem = legend.selectAll('.legend-item')

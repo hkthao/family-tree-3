@@ -239,7 +239,9 @@
       "father": "Father",
       "mother": "Mother",
       "wife": "Wife",
-      "husband": "Husband"
+      "husband": "Husband",
+      "spouse": "Spouse",
+      "parent_child": "Parent-Child"
     }
   },
   "common.name": "Name",
