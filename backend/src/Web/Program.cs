@@ -1,12 +1,38 @@
 using backend.Application;
 using backend.Infrastructure;
 using backend.Infrastructure.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Read Auth0 configuration from environment variables
+var auth0Domain = builder.Configuration["Auth0:Domain"];
+var auth0Audience = builder.Configuration["Auth0:Audience"];
+
+// Configure Auth0 Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = auth0Domain;
+        options.Audience = auth0Audience;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    // Example policies, adjust as needed
+    options.AddPolicy("read:messages", policy => policy.RequireClaim("permissions", "read:messages"));
+    options.AddPolicy("write:messages", policy => policy.RequireClaim("permissions", "write:messages"));
+});
 
 // Add CORS services
 builder.Services.AddCors(options =>
@@ -57,6 +83,8 @@ app.UseSwaggerUi(settings =>
     settings.DocumentPath = "/api/specification.json";
 });
 
+app.UseAuthentication(); // Add Authentication middleware
+app.UseAuthorization();  // Add Authorization middleware
 
 app.UseExceptionHandler(options => { });
 

@@ -1,7 +1,9 @@
 import type { Credentials, User } from '@/types';
+import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
 export interface AuthService {
-  login(credentials: Credentials): Promise<User | null>;
+  isAuthenticated(): Promise<boolean>;
+  login(options?: RedirectLoginOptions): Promise<void>;
   logout(): Promise<void>;
   register(data: any): Promise<User | null>; // 'any' for now, define specific type later
   getUser(): Promise<User | null>;

@@ -11,7 +11,7 @@ import i18n from './plugins/i18n';
 
 import { ServicesPlugin } from './plugins/services.plugin'; // Import ServicesPlugin
 import { setAuthService } from '@/services/auth/authService';
-import { fakeAuthService } from '@/services/auth/fakeAuthService';
+import { auth0Service } from '@/services/auth/auth0Service';
 
 const app = createApp(App);
 
@@ -24,6 +24,6 @@ app.use(i18n);
 i18n.global.locale.value = 'vi';
 app.directive('resize', Resize);
 
-setAuthService(fakeAuthService); // Initialize auth service
+setAuthService(auth0Service); // Initialize auth service
 
 app.mount('#app');
