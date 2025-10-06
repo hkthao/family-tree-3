@@ -5,6 +5,7 @@ import type { AppState, User } from '@/types';
 
 const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN;
 const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID;
+const AUTH0_AUDIENCE = import.meta.env.VITE_AUTH0_AUDIENCE;
 
 let auth0: Auth0Client | null = null;
 
@@ -16,7 +17,7 @@ const initAuth0 = async () => {
     clientId: AUTH0_CLIENT_ID,
     authorizationParams: {
       redirect_uri: window.location.origin,
-      //audience: 'https://familytree.api'
+      audience: AUTH0_AUDIENCE
     }
   });
 
