@@ -20,8 +20,8 @@ export class ApiRelationshipService implements IRelationshipService {
       targetMemberId: dto.targetMemberId,
       type: dto.type,
       order: dto.order,
-      sourceMemberFullName: dto.sourceMemberFullName,
-      targetMemberFullName: dto.targetMemberFullName,
+      sourceMember: dto.sourceMember,
+      targetMember: dto.targetMember,
     };
   }
 
@@ -77,7 +77,10 @@ export class ApiRelationshipService implements IRelationshipService {
       params.append('sourceMemberId', filters.sourceMemberId);
     if (filters.targetMemberId)
       params.append('targetMemberId', filters.targetMemberId);
-    if (filters.type) params.append('type', filters.type);
+    if (filters.type) 
+      params.append('type', filters.type);
+    if (filters.familyId) 
+      params.append('familyId', filters.familyId);
 
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());

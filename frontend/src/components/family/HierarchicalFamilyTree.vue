@@ -110,39 +110,16 @@ const transformData = (members: Member[], relationships: Relationship[]) => {
   return Array.from(personMap.values());
 };
 
-const renderChart = (members: Member[], relationships: Relationship[], mainId: string | null = null) => {
+const renderChart = (members: Member[], relationships: Relationship[]) => {
   if (!chartContainer.value) return;
 
   chartContainer.value.innerHTML = '';
-
   const transformedData = transformData(members, relationships);
-
   if (transformedData.length === 0) {
     chartContainer.value.innerHTML =
       `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
     chart = null;
     return;
-  }
-
-  let chartMainId = mainId;
-  const rootMember = members.find(m => m.isRoot);
-  if (rootMember) {
-    chartMainId = rootMember.id;
-  } else if (transformedData.length > 0) {
-    chartMainId = transformedData[0].id;
-  }
-
-  if (!chartMainId) {
-    // If no root member and no other members, display empty message
-    chartContainer.value.innerHTML =
-      `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
-    chart = null;
-    return;
-  }
-
-  // Fallback if the determined chartMainId is not in the current transformedData
-  if (!transformedData.some((d) => d.id === chartMainId)) {
-    chartMainId = transformedData[0].id;
   }
 
   chart = f3
@@ -156,12 +133,19 @@ const renderChart = (members: Member[], relationships: Relationship[], mainId: s
     .setCardDim({ w: 150, h: 200 })
     .setOnCardUpdate(Card());
 
-  chart.updateTree({
-    initial: true,
-    main_id: chartMainId,
-    ancestry_depth: 100,
-    progeny_depth: 100,
-  });
+  const rootMember = memberStore.items.find(m => m.isRoot);
+  if (rootMember) {
+    chart.updateMainId(rootMember.id);
+    chart.updateTree({
+      initial: true
+    });
+  }
+  else {
+    chart.updateMainId(transformedData[0].id);
+    chart.updateTree({
+      initial: true
+    });
+  }
 };
 
 const fetchDataAndRender = async (familyId: string) => {
@@ -196,7 +180,7 @@ function Card() {
     this.addEventListener('click', (e: Event) => onCardClick(e, d));
   };
 
-  function onCardClick(e: Event, d: CardData) {
+  function onCardClick(_: Event, d: CardData) {
     chart.updateMainId(d.data.id);
     chart.updateTree({});
   }

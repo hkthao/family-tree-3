@@ -1724,6 +1724,9 @@
                 "type": "string",
                 "format": "guid"
               },
+              "isRoot": {
+                "type": "boolean"
+              },
               "dateOfBirth": {
                 "type": "string",
                 "format": "date-time",
@@ -1946,6 +1949,9 @@
             "type": "string",
             "format": "guid"
           },
+          "isRoot": {
+            "type": "boolean"
+          },
           "relationships": {
             "type": "array",
             "items": {
@@ -2078,6 +2084,9 @@
           "fullName": {
             "type": "string",
             "nullable": true
+          },
+          "isRoot": {
+            "type": "boolean"
           },
           "avatarUrl": {
             "type": "string",
