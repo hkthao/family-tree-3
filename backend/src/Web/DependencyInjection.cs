@@ -1,8 +1,6 @@
 ﻿
 using backend.Application.Common.Interfaces;
-using backend.Infrastructure.Identity; // Added this using
 using backend.Web.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -58,8 +56,6 @@ public static class DependencyInjection
         //     });
 
         // builder.Services.AddAuthorizationBuilder();
-
-        builder.Services.AddTransient<IEmailSender<ApplicationUser>, EmailSender>();
     }
 
 }

@@ -19,6 +19,6 @@ public class CurrentUser : IUser
             return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
-    public List<string>? Roles => _httpContextAccessor.HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
+    public List<string>? Roles => _httpContextAccessor.HttpContext?.User?.FindAll("https://familytree.com/roles").Select(x => x.Value).ToList();
 
 }
