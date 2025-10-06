@@ -14,6 +14,10 @@ const initAuth0 = async () => {
   auth0 = await createAuth0Client({
     domain: AUTH0_DOMAIN,
     clientId: AUTH0_CLIENT_ID,
+    authorizationParams: {
+      redirect_uri: window.location.origin,
+      //audience: 'https://familytree.api'
+    }
   });
 
   return auth0;
