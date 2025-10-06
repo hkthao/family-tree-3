@@ -11,21 +11,21 @@
       <div v-show="expanded">
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <MemberAutocomplete
                 v-model="filters.sourceMemberId"
                 :label="t('relationship.search.sourceMember')"
                 clearable
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <MemberAutocomplete
                 v-model="filters.targetMemberId"
                 :label="t('relationship.search.targetMember')"
                 clearable
               />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="4">
               <v-select
                 v-model="filters.type"
                 :items="relationshipTypes"
@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type { RelationshipFilter } from '@/types';

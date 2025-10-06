@@ -62,27 +62,6 @@
           :readonly="props.readOnly" :multiple="false" />
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" md="4">
-        <MemberAutocomplete v-model="memberForm.fatherId" :label="t('member.form.father')"
-          :readonly="props.readOnly || !memberForm.familyId" :additional-filters="{
-            familyId: memberForm.familyId,
-            gender: Gender.Male,
-          }" :multiple="false" />
-      </v-col>
-      <v-col cols="12" md="4">
-        <MemberAutocomplete v-model="memberForm.motherId" :label="t('member.form.mother')"
-          :readonly="props.readOnly || !memberForm.familyId" :additional-filters="{
-            familyId: memberForm.familyId,
-            gender: Gender.Female,
-          }" :multiple="false" />
-      </v-col>
-      <v-col cols="12" md="4">
-        <MemberAutocomplete v-model="memberForm.spouseId" :label="t('member.form.spouse')"
-          :readonly="props.readOnly || !memberForm.familyId" :additional-filters="{ familyId: memberForm.familyId }"
-          :multiple="false" />
-      </v-col>
-    </v-row>
 
     <!-- Thông tin khác -->
     <v-row>
@@ -123,9 +102,6 @@ const memberForm = ref<Omit<Member, 'id'> | Member>(
       dateOfBirth: undefined,
       gender: Gender.Male,
       familyId: '',
-      fatherId: null,
-      motherId: null,
-      spouseId: null,
     },
 );
 
