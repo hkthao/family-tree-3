@@ -38,7 +38,7 @@ export const useRelationshipStore = defineStore('relationship', {
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<Relationship, 'id'>) {
+    async addItem(newItem: Omit<Relationship, 'id'>): Promise<Result<Relationship, ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await this.services.relationship.add(newItem);
@@ -49,9 +49,10 @@ export const useRelationshipStore = defineStore('relationship', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
-    async updateItem(updatedItem: Relationship) {
+    async updateItem(updatedItem: Relationship): Promise<Result<Relationship, ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await this.services.relationship.update(updatedItem);
@@ -62,6 +63,7 @@ export const useRelationshipStore = defineStore('relationship', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
     async deleteItem(id: string): Promise<Result<void, ApiError>> {

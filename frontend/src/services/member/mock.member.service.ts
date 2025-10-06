@@ -27,9 +27,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1895, 11, 14),
     dateOfDeath: new Date(1952, 1, 6),
     avatarUrl: 'https://i.pravatar.cc/150?u=1',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '2',
   },
   {
     id: '2',
@@ -41,9 +38,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1900, 7, 4),
     dateOfDeath: new Date(2002, 2, 30),
     avatarUrl: 'https://i.pravatar.cc/150?u=2',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '1',
   },
   {
     id: '3',
@@ -55,9 +49,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1921, 5, 10),
     dateOfDeath: new Date(2021, 3, 9),
     avatarUrl: 'https://i.pravatar.cc/150?u=3',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '4',
   },
   {
     id: '4',
@@ -69,9 +60,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1926, 3, 21),
     dateOfDeath: new Date(2022, 8, 8),
     avatarUrl: 'https://i.pravatar.cc/150?u=4',
-    fatherId: '1',
-    motherId: '2',
-    spouseId: '3',
   },
   {
     id: '5',
@@ -83,9 +71,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1930, 7, 21),
     dateOfDeath: new Date(2002, 1, 9),
     avatarUrl: 'https://i.pravatar.cc/150?u=5',
-    fatherId: '1',
-    motherId: '2',
-    spouseId: undefined, // No spouse in this simplified data
   },
   {
     id: '6',
@@ -97,9 +82,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1947, 6, 17),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=6',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '7',
   },
   {
     id: '7',
@@ -111,9 +93,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1948, 10, 14),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=7',
-    fatherId: '3',
-    motherId: '4',
-    spouseId: '6', // Married to Camila
   },
   {
     id: '8',
@@ -125,9 +104,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1961, 6, 1),
     dateOfDeath: new Date(1997, 7, 31),
     avatarUrl: 'https://i.pravatar.cc/150?u=8',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '7', // Was married to Charles
   },
   {
     id: '9',
@@ -139,9 +115,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1950, 7, 15),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=9',
-    fatherId: '3',
-    motherId: '4',
-    spouseId: undefined,
   },
   {
     id: '10',
@@ -153,9 +126,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1960, 1, 19),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=10',
-    fatherId: '3',
-    motherId: '4',
-    spouseId: undefined,
   },
   {
     id: '11',
@@ -167,9 +137,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1964, 2, 10),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=11',
-    fatherId: '3',
-    motherId: '4',
-    spouseId: undefined,
   },
   {
     id: '12',
@@ -181,9 +148,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1982, 0, 9),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=12',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '13',
   },
   {
     id: '13',
@@ -195,9 +159,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1982, 5, 21),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=13',
-    fatherId: '7',
-    motherId: '8',
-    spouseId: '12',
   },
   {
     id: '14',
@@ -209,9 +170,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1984, 8, 15),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=14',
-    fatherId: '7',
-    motherId: '8',
-    spouseId: '15',
   },
   {
     id: '15',
@@ -223,9 +181,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(1981, 7, 4),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=15',
-    fatherId: undefined,
-    motherId: undefined,
-    spouseId: '14',
   },
   {
     id: '16',
@@ -237,9 +192,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(2013, 6, 22),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=16',
-    fatherId: '13',
-    motherId: '12',
-    spouseId: undefined,
   },
   {
     id: '17',
@@ -251,9 +203,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(2015, 4, 2),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=17',
-    fatherId: '13',
-    motherId: '12',
-    spouseId: undefined,
   },
   {
     id: '18',
@@ -265,9 +214,6 @@ const royalFamilyMembers: Member[] = [
     dateOfBirth: new Date(2018, 3, 23),
     dateOfDeath: undefined,
     avatarUrl: 'https://i.pravatar.cc/150?u=18',
-    fatherId: '13',
-    motherId: '12',
-    spouseId: undefined,
   },
 ];
 
@@ -279,9 +225,6 @@ const generateMember = (
   gender: Gender,
   birthYear: number,
   familyId: string,
-  fatherId?: string,
-  motherId?: string,
-  spouseId?: string,
 ) => ({
   id: (nextId++).toString(),
   lastName,
@@ -292,9 +235,6 @@ const generateMember = (
   dateOfBirth: new Date(birthYear, 0, 1),
   dateOfDeath: undefined,
   avatarUrl: `https://i.pravatar.cc/150?u=${nextId}`,
-  fatherId,
-  motherId,
-  spouseId,
 });
 
 const taylorFamilyMembers: Member[] = [];
@@ -326,8 +266,6 @@ const g2_taylor_m1 = generateMember(
   Gender.Male,
   1965,
   family2Id,
-  g1_taylor_m.id,
-  g1_taylor_f.id,
 );
 const g2_taylor_f1 = generateMember(
   'Johnson',
@@ -346,8 +284,6 @@ const g2_taylor_f2 = generateMember(
   Gender.Female,
   1970,
   family2Id,
-  g1_taylor_m.id,
-  g1_taylor_f.id,
 );
 const g2_taylor_m2 = generateMember(
   'Brown',
@@ -367,8 +303,6 @@ const g3_taylor_m1_c1 = generateMember(
   Gender.Male,
   1995,
   family2Id,
-  g2_taylor_m1.id,
-  g2_taylor_f1.id,
 );
 taylorFamilyMembers.push(g3_taylor_m1_c1);
 const g3_taylor_f1_c2 = generateMember(
@@ -377,8 +311,6 @@ const g3_taylor_f1_c2 = generateMember(
   Gender.Female,
   1998,
   family2Id,
-  g2_taylor_m1.id,
-  g2_taylor_f1.id,
 );
 taylorFamilyMembers.push(g3_taylor_f1_c2);
 
@@ -389,8 +321,6 @@ const g3_taylor_f2_c1 = generateMember(
   Gender.Female,
   1996,
   family2Id,
-  g2_taylor_m2.id,
-  g2_taylor_f2.id,
 );
 taylorFamilyMembers.push(g3_taylor_f2_c1);
 const g3_taylor_m2_c2 = generateMember(
@@ -399,8 +329,6 @@ const g3_taylor_m2_c2 = generateMember(
   Gender.Male,
   1999,
   family2Id,
-  g2_taylor_m2.id,
-  g2_taylor_f2.id,
 );
 taylorFamilyMembers.push(g3_taylor_m2_c2);
 
@@ -411,8 +339,6 @@ const g4_taylor_m1_c1_c1 = generateMember(
   Gender.Male,
   2020,
   family2Id,
-  g3_taylor_m1_c1.id,
-  undefined,
 ); // Single parent
 taylorFamilyMembers.push(g4_taylor_m1_c1_c1);
 

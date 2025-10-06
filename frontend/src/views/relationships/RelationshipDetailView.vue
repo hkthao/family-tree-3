@@ -1,7 +1,7 @@
 <template>
   <v-card v-if="relationship" class="mb-4">
     <v-card-title class="text-h6 d-flex align-center">
-      {{ relationship.name }}
+      {{ relationship.sourceMember?.fullName }} - {{ relationship.targetMember?.fullName }} ({{ t(`relationship.type.${relationship.type.toLowerCase()}`) }})
       <v-spacer></v-spacer>
     </v-card-title>
     <v-card-text>
