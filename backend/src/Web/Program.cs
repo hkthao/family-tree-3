@@ -12,17 +12,15 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Read Auth0 configuration from environment variables
 var auth0Domain = builder.Configuration["Auth0:Domain"];
-var auth0Audience = builder.Configuration["Auth0:Audience"];
 
 // Configure Auth0 Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.Authority = auth0Domain;
-        options.Audience = auth0Audience;
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateAudience = true,
+            ValidateAudience = false, // Set to false if no specific audience is configured
             ValidateIssuerSigningKey = true
         };
     });

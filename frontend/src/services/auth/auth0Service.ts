@@ -39,6 +39,14 @@ export const auth0Service: AuthService = {
     }
     return null;
   },
+  register: async (data: any): Promise<User | null> => {
+    const client = await initAuth0();
+    await client.loginWithRedirect({
+      appState: { target: '/' }, // Redirect to home after signup
+      // You might pass other parameters from 'data' if Auth0 supports them
+    });
+    return null; // User data will be available after redirect
+  },
   login: async (options?: RedirectLoginOptions) => {
     const client = await initAuth0();
     await client.loginWithRedirect(options);

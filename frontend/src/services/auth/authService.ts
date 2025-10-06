@@ -8,6 +8,7 @@ export interface AuthService {
   register(data: any): Promise<User | null>; // 'any' for now, define specific type later
   getUser(): Promise<User | null>;
   getAccessToken(): Promise<string | null>;
+  handleRedirectCallback(): Promise<void>;
 }
 
 let authServiceInstance: AuthService | null = null;
