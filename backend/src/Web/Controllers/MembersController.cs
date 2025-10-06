@@ -5,11 +5,13 @@ using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembersByIds;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.Members.Queries.SearchMembers;
 
 namespace backend.Web.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class MembersController : ControllerBase

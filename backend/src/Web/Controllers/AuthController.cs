@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -16,6 +17,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthResult>> Login([FromBody] LoginRequest request)
     {
         var result = await _authProvider.LoginAsync(request.Email, request.Password);
@@ -27,6 +29,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<ActionResult<AuthResult>> Register([FromBody] RegisterRequest request)
     {
         var result = await _authProvider.RegisterAsync(request.Email, request.Password, request.Username);
@@ -38,6 +41,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("user")]
+    [Authorize]
     public async Task<ActionResult<AuthResult>> GetCurrentUser()
     {
         // In a real application, you would get the user ID from the authenticated context
