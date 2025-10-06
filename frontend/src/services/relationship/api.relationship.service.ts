@@ -6,8 +6,7 @@ import {
   type RelationshipFilter,
   ok,
 } from '@/types'; // Added Relationship
-import { safeApiCall, type ApiError } from '@/plugins/axios';
-import type { AxiosInstance } from 'axios';
+import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -24,14 +23,12 @@ export class ApiRelationshipService implements IRelationshipService {
     };
   }
 
-  constructor(private http: AxiosInstance) {}
+  constructor(private http: ApiClientMethods) {}
 
   private apiUrl = `${API_BASE_URL}/relationships`;
 
   async fetch(): Promise<Result<Relationship[], ApiError>> {
-    const result = await safeApiCall(
-      this.http.get<Relationship[]>(this.apiUrl),
-    );
+    const result = await this.http.get<Relationship[]>(this.apiUrl);
     if (result.ok) {
       return ok(result.value.map(this.mapListDtoToRelationship));
     }
@@ -41,28 +38,26 @@ export class ApiRelationshipService implements IRelationshipService {
   async getById(
     id: string,
   ): Promise<Result<Relationship | undefined, ApiError>> {
-    return safeApiCall(this.http.get<Relationship>(`${this.apiUrl}/${id}`));
+    return this.http.get<Relationship>(`${this.apiUrl}/${id}`);
   }
 
   async add(
     newItem: Omit<Relationship, 'id'>,
   ): Promise<Result<Relationship, ApiError>> {
-    return safeApiCall(this.http.post<Relationship>(this.apiUrl, newItem));
+    return this.http.post<Relationship>(this.apiUrl, newItem);
   }
 
   async update(
     updatedItem: Relationship,
   ): Promise<Result<Relationship, ApiError>> {
-    return safeApiCall(
-      this.http.put<Relationship>(
-        `${this.apiUrl}/${updatedItem.id}`,
-        updatedItem,
-      ),
+    return this.http.put<Relationship>(
+      `${this.apiUrl}/${updatedItem.id}`,
+      updatedItem,
     );
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
   async loadItems(
@@ -82,20 +77,16 @@ export class ApiRelationshipService implements IRelationshipService {
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
 
-    return safeApiCall(
-      this.http.get<Paginated<Relationship>>(
-        `${this.apiUrl}/search?${params.toString()}`,
-      ),
+    return this.http.get<Paginated<Relationship>>(
+      `${this.apiUrl}/search?${params.toString()}`,
     );
   }
 
   async getByIds(ids: string[]): Promise<Result<Relationship[], ApiError>> {
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
-    return safeApiCall(
-      this.http.get<Relationship[]>(
-        `${this.apiUrl}/by-ids?${params.toString()}`,
-      ),
+    return this.http.get<Relationship[]>(
+      `${this.apiUrl}/by-ids?${params.toString()}`,
     );
   }
 }
