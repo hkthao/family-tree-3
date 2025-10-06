@@ -33,7 +33,6 @@
     <div class="mx-2">
       <UserMenu
         @navigate="handleNavigation"
-        @open-settings="handleOpenSettings"
       />
     </div>
   </v-app-bar>
@@ -81,11 +80,5 @@ function focusSearch() {
 
 const handleNavigation = (route: string) => {
   router.push(route);
-};
-
-const handleOpenSettings = () => {
-  // Implement logic to open settings, e.g., navigate to settings page
-  console.log('Opening settings...');
-  router.push('/settings');
 };
 </script>

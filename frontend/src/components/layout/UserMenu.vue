@@ -76,10 +76,9 @@
 
 <script setup lang="ts">
 import { userMenuItems } from '@/data/userMenuItems';
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
-import { onMounted, onBeforeUnmount } from 'vue';
 import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;
@@ -91,7 +90,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['navigate', 'openSettings']);
+const emit = defineEmits(['navigate']);
 
 const menuOpen = ref(false);
 const confirmLogoutDialog = ref(false);
@@ -99,18 +98,6 @@ const confirmLogoutDialog = ref(false);
 const authStore = useAuthStore();
 const currentUser = computed(() => authStore.user);
 const router = useRouter();
-
-const userInitials = computed(() => {
-  if (currentUser.value?.name) {
-    const parts = currentUser.value.name.split(' ');
-    if (parts.length > 1) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    } else if (parts.length === 1) {
-      return parts[0][0].toUpperCase();
-    }
-  }
-  return '';
-});
 
 const handleMenuItemClick = (route?: string) => {
   if (route) {
