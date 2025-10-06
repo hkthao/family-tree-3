@@ -35,11 +35,9 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       try {
         const authService = useAuthService();
-        this.user = await authService.login(credentials);
-        this.token = await authService.getAccessToken();
-        if (!this.user) {
-          this.error = 'Invalid credentials or login failed.';
-        }
+        // Auth0 login initiates a redirect, so we don't get a user back immediately.
+        // The user will be set after the Auth0 callback.
+        await authService.login({ appState: { target: '/' } }); // Redirect to home after login
       } catch (err: any) {
         this.error = err.message || 'Login failed.';
         console.error(err);

@@ -255,8 +255,7 @@ const g1_taylor_f = generateMember(
   1942,
   family2Id,
 );
-g1_taylor_m.spouseId = g1_taylor_f.id;
-g1_taylor_f.spouseId = g1_taylor_m.id;
+
 taylorFamilyMembers.push(g1_taylor_m, g1_taylor_f);
 
 // Generation 2
@@ -274,8 +273,7 @@ const g2_taylor_f1 = generateMember(
   1968,
   family2Id,
 );
-g2_taylor_m1.spouseId = g2_taylor_f1.id;
-g2_taylor_f1.spouseId = g2_taylor_m1.id;
+
 taylorFamilyMembers.push(g2_taylor_m1, g2_taylor_f1);
 
 const g2_taylor_f2 = generateMember(
@@ -292,8 +290,7 @@ const g2_taylor_m2 = generateMember(
   1969,
   family2Id,
 );
-g2_taylor_f2.spouseId = g2_taylor_m2.id;
-g2_taylor_m2.spouseId = g2_taylor_f2.id;
+
 taylorFamilyMembers.push(g2_taylor_f2, g2_taylor_m2);
 
 // Generation 3 (Children of David & Sarah) (IDs will be 104, 105)

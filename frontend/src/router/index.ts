@@ -3,6 +3,8 @@ import { MainLayout } from '@/layouts';
 import { sidebarRoutes } from './sidebar-routes';
 import { canAccessMenu } from '@/utils/menu-permissions';
 import { useAuthStore } from '@/stores/auth.store';
+import { useAuthService } from '@/services/auth/authService';
+import type { AppState } from '@/types/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,6 +18,11 @@ const router = createRouter({
       path: '/register',
       name: 'Register',
       component: () => import('@/views/auth/RegisterView.vue'),
+    },
+    {
+      path: '/callback',
+      name: 'Auth0Callback',
+      redirect: '/', // Redirect to home after callback
     },
     {
       path: '/',
@@ -183,13 +190,33 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+  const authService = useAuthService();
+
+  // Handle Auth0 redirect callback
+  if (to.name === 'Auth0Callback' && (to.query.code || to.query.state)) {
+    try {
+      const appState = (await authService.handleRedirectCallback()) as AppState;
+      // Redirect to the original target or dashboard
+      const targetPath = appState?.target || '/';
+      next(targetPath);
+      return;
+    } catch (error) {
+      console.error('Error handling Auth0 redirect callback:', error);
+      // Redirect to login or an error page
+      next({ name: 'Login' });
+      return;
+    }
+  }
+
   await authStore.initAuth(); // Ensure auth state is initialized
 
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
   const requiredRoles = to.meta.roles as string[];
 
   if (requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'Login' });
+    // Initiate Auth0 login redirect
+    await authService.login({ appState: { target: to.fullPath } });
+    return; // Prevent further navigation
   } else if (requiredRoles && !canAccessMenu(authStore.user?.roles || [], requiredRoles)) {
     next({ name: 'Dashboard' }); // Or a dedicated 'Access Denied' page
   } else {

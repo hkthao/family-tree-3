@@ -1,4 +1,4 @@
-import type { Credentials, User } from '@/types';
+import type { AppState, User } from '@/types';
 import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 
 export interface AuthService {
@@ -8,7 +8,7 @@ export interface AuthService {
   register(data: any): Promise<User | null>; // 'any' for now, define specific type later
   getUser(): Promise<User | null>;
   getAccessToken(): Promise<string | null>;
-  handleRedirectCallback(): Promise<void>;
+  handleRedirectCallback(): Promise<AppState>;
 }
 
 let authServiceInstance: AuthService | null = null;

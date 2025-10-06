@@ -1,7 +1,7 @@
 import { Auth0Client, createAuth0Client } from '@auth0/auth0-spa-js';
 import type { RedirectLoginOptions, LogoutOptions } from '@auth0/auth0-spa-js';
 import type { AuthService } from './authService';
-import type { User } from '@/types';
+import type { AppState, User } from '@/types';
 
 const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN;
 const AUTH0_CLIENT_ID = import.meta.env.VITE_AUTH0_CLIENT_ID;
@@ -59,8 +59,9 @@ export const auth0Service: AuthService = {
     const client = await initAuth0();
     return client.getTokenSilently();
   },
-  handleRedirectCallback: async () => {
+  handleRedirectCallback: async (): Promise<AppState> => {
     const client = await initAuth0();
-    await client.handleRedirectCallback();
+    const appState = await client.handleRedirectCallback();
+    return appState as AppState;
   },
-};
+}
