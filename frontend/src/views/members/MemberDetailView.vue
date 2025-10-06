@@ -9,6 +9,7 @@
         <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
         <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
         <v-tab value="calendar">{{ t('event.view.calendar') }}</v-tab>
+        <v-tab value="relationships">{{ t('relationship.list.title') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="selectedTab">
@@ -22,6 +23,10 @@
 
         <v-window-item value="calendar">
           <EventCalendar :member-id="member.id" :read-only="readOnly" />
+        </v-window-item>
+
+        <v-window-item value="relationships">
+          <MemberRelationships :member-id="member.id" />
         </v-window-item>
       </v-window>
     </v-card-text>
@@ -43,6 +48,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
 import { MemberForm } from '@/components/members';
 import { EventTimeline, EventCalendar } from '@/components/events';
+import MemberRelationships from '@/components/members/MemberRelationships.vue';
 import type { Member } from '@/types';
 
 const { t } = useI18n();
