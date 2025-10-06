@@ -1,4 +1,8 @@
-import axios, { type AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, {
+  type AxiosError,
+  type AxiosRequestConfig,
+  type AxiosResponse,
+} from 'axios';
 import { auth0Service } from '@/services/auth/auth0Service';
 import { type Result, ok, err } from '@/types';
 
@@ -34,15 +38,14 @@ const createApiError = (error: AxiosError): ApiError => {
   }
 };
 
-const apiClient = axios.create({
+const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api', // Default to /api if not set
   headers: {
     'Content-type': 'application/json',
   },
 });
 
-// Add a request interceptor to attach the JWT token
-apiClient.interceptors.request.use(async (config) => {
+axiosInstance.interceptors.request.use(async (config) => {
   const token = await auth0Service.getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -50,7 +53,9 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
-export async function safeApiCall<T>(apiCall: Promise<AxiosResponse<T>>): Promise<Result<T, ApiError>> {
+async function safeApiCall<T>(
+  apiCall: Promise<AxiosResponse<T>>,
+): Promise<Result<T, ApiError>> {
   try {
     const response = await apiCall;
     return ok(response.data);
@@ -58,24 +63,61 @@ export async function safeApiCall<T>(apiCall: Promise<AxiosResponse<T>>): Promis
     if (axios.isAxiosError(error)) {
       return err(createApiError(error));
     } else {
-      return err({ message: 'An unexpected error occurred.', details: error as Error });
+      return err({
+        message: 'An unexpected error occurred.',
+        details: error as Error,
+      });
     }
   }
 }
 
-// You can also create specific wrappers for common HTTP methods if preferred
-export const api = {
-  get: async <T>(url: string, config?: AxiosRequestConfig): Promise<Result<T, ApiError>> => {
-    return safeApiCall(apiClient.get<T>(url, config));
+export interface ApiClientMethods {
+  get<T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>>;
+  post<T>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>>;
+  put<T>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>>;
+  delete<T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>>;
+}
+
+export const apiClient: ApiClientMethods = {
+  get: async <T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>> => {
+    return safeApiCall(axiosInstance.get<T>(url, config));
   },
-  post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<Result<T, ApiError>> => {
-    return safeApiCall(apiClient.post<T>(url, data, config));
+  post: async <T>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>> => {
+    return safeApiCall(axiosInstance.post<T>(url, data, config));
   },
-  put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<Result<T, ApiError>> => {
-    return safeApiCall(apiClient.put<T>(url, data, config));
+  put: async <T>(
+    url: string,
+    data?: unknown,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>> => {
+    return safeApiCall(axiosInstance.put<T>(url, data, config));
   },
-  delete: async <T>(url: string, config?: AxiosRequestConfig): Promise<Result<T, ApiError>> => {
-    return safeApiCall(apiClient.delete<T>(url, config));
+  delete: async <T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<Result<T, ApiError>> => {
+    return safeApiCall(axiosInstance.delete<T>(url, config));
   },
 };
 
