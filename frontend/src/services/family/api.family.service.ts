@@ -1,6 +1,5 @@
 import type { IFamilyService } from './family.service.interface';
-import type { ApiError } from '@/utils/api';
-import { safeApiCall } from '@/utils/api';
+import { safeApiCall, type ApiError } from '@/plugins/axios';
 import type { AxiosInstance } from 'axios';
 import {
   ok,

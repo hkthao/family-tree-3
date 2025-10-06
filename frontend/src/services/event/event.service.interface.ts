@@ -1,6 +1,6 @@
 import type { EventFilter, Paginated, Result, Event } from '@/types';
 import type { ICrudService } from '../common/crud.service.interface';
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 
 export interface IEventService extends ICrudService<Event> {
   // Extend ICrudService

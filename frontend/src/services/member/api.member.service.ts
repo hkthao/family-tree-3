@@ -6,8 +6,7 @@ import {
   type Paginated,
 } from '@/types';
 import type { IMemberService } from './member.service.interface'; // Import MemberFilter
-import { safeApiCall } from '@/utils/api';
-import type { ApiError } from '@/utils/api';
+import { safeApiCall, type ApiError } from '@/plugins/axios';
 import type { AxiosInstance } from 'axios';
 
 // Base URL for your API - configure this based on your environment

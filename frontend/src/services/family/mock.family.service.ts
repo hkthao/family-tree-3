@@ -1,7 +1,7 @@
 import type { IFamilyService } from './family.service.interface';
 import fixedMockFamilies from '@/data/mock/families.json';
 import { simulateLatency } from '@/utils/mockUtils';
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 import { err, type Family, type Result, ok, type FamilyFilter, type Paginated } from '@/types';
 
 export class MockFamilyService implements IFamilyService {

@@ -2,7 +2,7 @@ import mockEvents from '@/data/mock/events.json';
 import { simulateLatency } from '@/utils/mockUtils';
 import type { Result, Event, EventFilter, Paginated } from '@/types';
 import { ok, err } from '@/types';
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 import type { IEventService } from './event.service.interface';
 
 export class MockEventService implements IEventService {

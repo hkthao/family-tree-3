@@ -1,5 +1,5 @@
 import type { Relationship, Paginated, Result, RelationshipFilter } from '@/types'; // Added Relationship
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface IRelationshipService extends ICrudService<Relationship> {

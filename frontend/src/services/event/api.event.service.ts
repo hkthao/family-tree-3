@@ -1,7 +1,6 @@
 import type { IEventService } from './event.service.interface';
 import type { Event, Paginated, Result, EventFilter } from '@/types';
-import { safeApiCall } from '@/utils/api';
-import type { ApiError } from '@/utils/api';
+import { safeApiCall, type ApiError } from '@/plugins/axios';
 import type { AxiosInstance } from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
