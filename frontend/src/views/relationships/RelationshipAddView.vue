@@ -42,8 +42,8 @@ const handleAddItem = async () => {
   if (!isValid) return;
   const itemData = relationshipFormRef.value.getFormData();
   try {
-    const result = await relationshipStore.addItem(itemData as Omit<Relationship, 'id'>);
-    if (result.ok) {
+    await relationshipStore.addItem(itemData as Omit<Relationship, 'id'>);
+    if (!relationshipStore.error) {
       notificationStore.showSnackbar(
         t('relationship.messages.addSuccess'),
         'success',
@@ -51,7 +51,7 @@ const handleAddItem = async () => {
       closeForm();
     } else {
       notificationStore.showSnackbar(
-        result.error?.message || t('relationship.messages.saveError'),
+        relationshipStore.error || t('relationship.messages.saveError'),
         'error',
       );
     }

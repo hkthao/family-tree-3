@@ -46,8 +46,12 @@ const handleAddEvent = async () => {
 
   try {
     await eventStore.addItem(eventData as Omit<Event, 'id'>);
-    notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
-    closeForm();
+    if (!eventStore.error) {
+      notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
+    }
   } catch (error) {
     notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
   }

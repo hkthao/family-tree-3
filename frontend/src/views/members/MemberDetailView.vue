@@ -66,7 +66,11 @@ const loadMember = async () => {
   const memberId = route.params.id as string;
   if (memberId) {
     await memberStore.getById(memberId);
-    member.value = memberStore.currentItem as Member;
+    if (!memberStore.error) {
+      member.value = memberStore.currentItem as Member;
+    } else {
+      member.value = undefined; // Clear member on error
+    }
   }
   loading.value = false;
 };

@@ -58,8 +58,12 @@ const handleUpdateMember = async () => {
 
   try {
     await memberStore.updateItem(memberData as Member);
-    notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
-    closeForm();
+    if (!memberStore.error) {
+      notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
+    }
   } catch (error) {
     notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
   }

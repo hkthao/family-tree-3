@@ -52,7 +52,11 @@ const loadEvent = async () => {
   const eventId = route.params.id as string;
   if (eventId) {
     await eventStore.getById(eventId);
-    event.value = eventStore.currentItem
+    if (!eventStore.error) {
+      event.value = eventStore.currentItem;
+    } else {
+      event.value = undefined; // Clear event on error
+    }
   }
   loading.value = false;
 };

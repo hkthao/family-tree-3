@@ -60,8 +60,12 @@ const handleUpdateEvent = async () => {
 
   try {
     await eventStore.updateItem(eventData);
-    notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');
-    closeForm();
+    if (!eventStore.error) {
+      notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
+    }
   } catch (error) {
     notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
   }

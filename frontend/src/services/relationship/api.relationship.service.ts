@@ -77,10 +77,8 @@ export class ApiRelationshipService implements IRelationshipService {
       params.append('sourceMemberId', filters.sourceMemberId);
     if (filters.targetMemberId)
       params.append('targetMemberId', filters.targetMemberId);
-    if (filters.type) 
-      params.append('type', filters.type);
-    if (filters.familyId) 
-      params.append('familyId', filters.familyId);
+    if (filters.type) params.append('type', filters.type);
+    if (filters.familyId) params.append('familyId', filters.familyId);
 
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
@@ -94,7 +92,7 @@ export class ApiRelationshipService implements IRelationshipService {
 
   async getByIds(ids: string[]): Promise<Result<Relationship[], ApiError>> {
     const params = new URLSearchParams();
-    ids.forEach((id) => params.append('ids', id));
+    params.append('ids', ids.join(','));
     return safeApiCall(
       this.http.get<Relationship[]>(
         `${this.apiUrl}/by-ids?${params.toString()}`,

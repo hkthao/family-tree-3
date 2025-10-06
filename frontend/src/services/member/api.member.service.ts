@@ -1,4 +1,10 @@
-import { type Member, type Result, ok, type MemberFilter, type Paginated } from '@/types';
+import {
+  type Member,
+  type Result,
+  ok,
+  type MemberFilter,
+  type Paginated,
+} from '@/types';
 import type { IMemberService } from './member.service.interface'; // Import MemberFilter
 import { safeApiCall } from '@/utils/api';
 import type { ApiError } from '@/utils/api';
@@ -36,49 +42,64 @@ export class ApiMemberService implements IMemberService {
 
   private apiUrl = `${API_BASE_URL}/members`;
 
-  async fetch(): Promise<Result<Member[], ApiError>> { // Renamed from fetchMembers
+  async fetch(): Promise<Result<Member[], ApiError>> {
+    // Renamed from fetchMembers
     const result = await safeApiCall(this.http.get<Member[]>(this.apiUrl));
     if (result.ok) {
-      return ok(result.value.map(m => transformMemberDates(m)));
+      return ok(result.value.map((m) => transformMemberDates(m)));
     }
     return result;
   }
 
-  async fetchMembersByFamilyId(familyId: string): Promise<Result<Member[], ApiError>> {
-    const result = await safeApiCall(this.http.get<Member[]>(`${this.apiUrl}?familyId=${familyId}`));
+  async fetchMembersByFamilyId(
+    familyId: string,
+  ): Promise<Result<Member[], ApiError>> {
+    const result = await safeApiCall(
+      this.http.get<Member[]>(`${this.apiUrl}?familyId=${familyId}`),
+    );
     if (result.ok) {
-      return ok(result.value.map(m => transformMemberDates(m)));
+      return ok(result.value.map((m) => transformMemberDates(m)));
     }
     return result;
   }
 
-  async getById(id: string): Promise<Result<Member | undefined, ApiError>> { // Renamed from getMemberById
-    const result = await safeApiCall(this.http.get<Member>(`${this.apiUrl}/${id}`));
+  async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
+    // Renamed from getMemberById
+    const result = await safeApiCall(
+      this.http.get<Member>(`${this.apiUrl}/${id}`),
+    );
     if (result.ok) {
       return ok(result.value ? transformMemberDates(result.value) : undefined);
     }
     return result;
   }
 
-  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> { // Renamed from addMember
+  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
+    // Renamed from addMember
     const apiMember = prepareMemberForApi(newItem);
-    const result = await safeApiCall(this.http.post<Member>(this.apiUrl, apiMember));
+    const result = await safeApiCall(
+      this.http.post<Member>(this.apiUrl, apiMember),
+    );
     if (result.ok) {
       return ok(transformMemberDates(result.value));
     }
     return result;
   }
 
-  async update(updatedItem: Member): Promise<Result<Member, ApiError>> { // Renamed from updateMember
+  async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
+    // Renamed from updateMember
     const apiMember = prepareMemberForApi(updatedItem);
-    const result = await safeApiCall(this.http.put<Member>(`${this.apiUrl}/${updatedItem.id}`, apiMember));
+    const result = await safeApiCall(
+      this.http.put<Member>(`${this.apiUrl}/${updatedItem.id}`, apiMember),
+    );
     if (result.ok) {
       return ok(transformMemberDates(result.value));
     }
     return result;
   }
 
-  async delete(id: string): Promise<Result<void, ApiError>> { // Renamed from deleteMember
+  async delete(id: string): Promise<Result<void, ApiError>> {
+    // Renamed from deleteMember
     return safeApiCall(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 
@@ -98,7 +119,11 @@ export class ApiMemberService implements IMemberService {
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
 
-    const result = await safeApiCall(this.http.get<Paginated<Member>>(`${this.apiUrl}/search?${params.toString()}`));
+    const result = await safeApiCall(
+      this.http.get<Paginated<Member>>(
+        `${this.apiUrl}/search?${params.toString()}`,
+      ),
+    );
     if (result.ok) {
       // Assuming the API returns a Paginated object with items, totalItems, totalPages
       // The items in the response might need date transformation
@@ -110,10 +135,12 @@ export class ApiMemberService implements IMemberService {
 
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
     const params = new URLSearchParams();
-    ids.forEach(id => params.append('ids', id));
-    const result = await safeApiCall(this.http.get<Member[]>(`${this.apiUrl}/by-ids?${params.toString()}`));
+    params.append('ids', ids.join(','));
+    const result = await safeApiCall(
+      this.http.get<Member[]>(`${this.apiUrl}/by-ids?${params.toString()}`),
+    );
     if (result.ok) {
-      return ok(result.value.map(m => transformMemberDates(m)));
+      return ok(result.value.map((m) => transformMemberDates(m)));
     }
     return result;
   }

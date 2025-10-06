@@ -43,11 +43,18 @@ const handleAddItem = async () => {
   const itemData = familyFormRef.value.getFormData();
   try {
     await familyStore.addItem(itemData as Omit<Family, 'id'>);
-    notificationStore.showSnackbar(
-      t('family.management.messages.addSuccess'),
-      'success',
-    );
-    closeForm();
+    if (!familyStore.error) {
+      notificationStore.showSnackbar(
+        t('family.management.messages.addSuccess'),
+        'success',
+      );
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(
+        familyStore.error || t('family.management.messages.saveError'),
+        'error',
+      );
+    }
   } catch (error) {
     notificationStore.showSnackbar(
       t('family.management.messages.saveError'),

@@ -36,7 +36,7 @@ export const useEventStore = defineStore('event', {
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<Event, 'id'>) {
+    async addItem(newItem: Omit<Event, 'id'>): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.add(newItem);
@@ -49,7 +49,7 @@ export const useEventStore = defineStore('event', {
       this.loading = false;
     },
 
-    async updateItem(updatedItem: Event) {
+    async updateItem(updatedItem: Event): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.update(updatedItem);
@@ -62,7 +62,7 @@ export const useEventStore = defineStore('event', {
       this.loading = false;
     },
 
-    async deleteItem(id: string) {
+    async deleteItem(id: string): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.delete(id);
@@ -93,7 +93,8 @@ export const useEventStore = defineStore('event', {
     setSortBy(sortBy: { key: string; order: string }[]) {
       // Assuming EventFilter has sortBy and sortOrder properties
       this.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
-      this.filter.sortOrder = sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
+      this.filter.sortOrder =
+        sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
       this.currentPage = 1; // Reset to first page on sort change
       this._loadItems();
     },
@@ -121,12 +122,11 @@ export const useEventStore = defineStore('event', {
       const result = await this.services.event.getByIds(ids);
       this.loading = false;
       if (result.ok) {
-        return result.value;
+        return result.value
       } else {
-        this.error =
-          result.error.message || 'Không thể tải danh sách sự kiện.';
+        this.error = result.error.message || 'Không thể tải danh sách sự kiện.';
         console.error(result.error);
-        return [];
+        return []
       }
     },
   },

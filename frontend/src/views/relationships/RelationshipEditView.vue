@@ -54,12 +54,12 @@ const save = async () => {
   if (isValid) {
     const formData = relationshipForm.value?.getFormData();
     if (formData && formData.id) {
-      const result = await relationshipStore.updateItem(formData as Relationship);
-      if (result.ok) {
+      await relationshipStore.updateItem(formData as Relationship);
+      if (!relationshipStore.error) {
         notificationStore.showSnackbar(t('relationship.messages.updateSuccess'), 'success');
         router.push({ name: 'RelationshipList' });
       } else {
-        notificationStore.showSnackbar(result.error?.message || t('relationship.messages.saveError'), 'error');
+        notificationStore.showSnackbar(relationshipStore.error || t('relationship.messages.saveError'), 'error');
       }
     }
   }

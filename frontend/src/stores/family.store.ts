@@ -21,11 +21,15 @@ export const useFamilyStore = defineStore('family', {
     async _loadItems() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.family.loadItems({
-        ...this.filter,
-        sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
-        sortOrder: this.sortBy.length > 0 ? (this.sortBy[0].order as 'asc' | 'desc') : undefined,
-      },
+      const result = await this.services.family.loadItems(
+        {
+          ...this.filter,
+          sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
+          sortOrder:
+            this.sortBy.length > 0
+              ? (this.sortBy[0].order as 'asc' | 'desc')
+              : undefined,
+        },
         this.currentPage,
         this.itemsPerPage,
       );
@@ -45,7 +49,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<Family, 'id'>) {
+    async addItem(newItem: Omit<Family, 'id'>): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.family.add(newItem);
@@ -58,7 +62,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
-    async updateItem(updatedItem: Family) {
+    async updateItem(updatedItem: Family): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.family.update(updatedItem);
@@ -109,16 +113,18 @@ export const useFamilyStore = defineStore('family', {
       this.currentItem = item;
     },
 
-    async getById(id: string): Promise<Family | undefined> {
+    async getById(id: string): Promise<void> {
+      this.loading = true;
+      this.error = null;
       const result = await this.services.family.getById(id);
+      this.loading = false;
       if (result.ok) {
         if (result.value) {
           this.currentItem = result.value;
         }
-        return result.value;
       } else {
-        console.error(`Error fetching item with ID ${id}:`, result.error);
-        return undefined;
+        this.error = i18n.global.t('family.errors.loadById');
+        console.error(result.error);
       }
     },
 

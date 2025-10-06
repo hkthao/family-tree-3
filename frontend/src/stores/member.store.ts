@@ -50,7 +50,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<Member, 'id'>) {
+    async addItem(newItem: Omit<Member, 'id'>): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.add(newItem);
@@ -63,7 +63,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async updateItem(updatedItem: Member) {
+    async updateItem(updatedItem: Member): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.update(updatedItem);
@@ -76,7 +76,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async deleteItem(id: string) {
+    async deleteItem(id: string): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.delete(id);

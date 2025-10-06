@@ -3,27 +3,18 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{
         t('family.form.editTitle')
-      }}</span>
+        }}</span>
     </v-card-title>
     <v-card-text>
-      <FamilyForm
-        ref="familyFormRef"
-        v-if="family"
-        :initial-family-data="family"
-        :read-only="false"
-      />
-      <v-progress-circular
-        v-else
-        indeterminate
-        color="primary"
-      ></v-progress-circular>
+      <FamilyForm ref="familyFormRef" v-if="family" :initial-family-data="family" :read-only="false" />
+      <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" @click="closeForm">{{ t('common.cancel') }}</v-btn>
       <v-btn color="blue-darken-1" @click="handleUpdateItem">{{
         t('common.save')
-      }}</v-btn>
+        }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -54,7 +45,10 @@ const notificationStore = useNotificationStore();
 onMounted(async () => {
   const itemId = route.params.id as string;
   if (itemId) {
-    family.value = await familyStore.getById(itemId);
+    await familyStore.getById(itemId);
+    if (!familyStore.error) {
+      family.value = familyStore.currentItem as Family;
+    }
   }
 });
 
@@ -74,11 +68,18 @@ const handleUpdateItem = async () => {
 
   try {
     await familyStore.updateItem(itemData);
-    notificationStore.showSnackbar(
-      t('family.management.messages.updateSuccess'),
-      'success',
-    );
-    closeForm();
+    if (!familyStore.error) {
+      notificationStore.showSnackbar(
+        t('family.management.messages.updateSuccess'),
+        'success',
+      );
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(
+        familyStore.error || t('family.management.messages.saveError'),
+        'error',
+      );
+    }
   } catch (error) {
     notificationStore.showSnackbar(
       t('family.management.messages.saveError'),

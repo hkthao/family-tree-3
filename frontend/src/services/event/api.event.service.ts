@@ -58,14 +58,16 @@ export class ApiEventService implements IEventService {
     params.append('itemsPerPage', itemsPerPage.toString());
 
     return safeApiCall(
-      this.http.get<Paginated<Event>>(`${this.apiUrl}/search?${params.toString()}`),
+      this.http.get<Paginated<Event>>(
+        `${this.apiUrl}/search?${params.toString()}`,
+      ),
     );
   }
 
   async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
     console.log(`Fetching events by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
-    ids.forEach((id) => params.append('ids', id));
+    params.append('ids', ids.join(','));
     return safeApiCall(
       this.http.get<Event[]>(`${this.apiUrl}/by-ids?${params.toString()}`),
     );

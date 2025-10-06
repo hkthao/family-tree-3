@@ -42,8 +42,12 @@ const handleAddMember = async () => {
 
   try {
     await memberStore.addItem(memberData as Omit<Member, 'id'>);
-    notificationStore.showSnackbar(t('member.messages.addSuccess'), 'success');
-    closeForm();
+    if (!memberStore.error) {
+      notificationStore.showSnackbar(t('member.messages.addSuccess'), 'success');
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
+    }
   } catch (error) {
     notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
   }

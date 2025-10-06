@@ -8,10 +8,10 @@
         :no-data-text="t('common.noData')"
       >
         <template v-slot:item.sourceMemberFullName="{ item }">
-          {{ item.sourceMemberFullName }}
+          {{ item.sourceMember?.fullName }}
         </template>
         <template v-slot:item.targetMemberFullName="{ item }">
-          {{ item.targetMemberFullName }}
+          {{ item.targetMember?.fullName }}
         </template>
         <template v-slot:item.type="{ item }">
           {{ getRelationshipTypeTitle(item.type) }}

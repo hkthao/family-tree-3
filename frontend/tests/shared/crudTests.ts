@@ -196,8 +196,8 @@ export function defineCrudTests<
       const idsToFetch = mockService.items
         .slice(0, 2)
         .map((item: T) => item.id);
-
-      const fetchedItems = await store.getByIds(idsToFetch);
+      await store.getByIds(idsToFetch);
+      const fetchedItems = store.items;
 
       expect(fetchedItems.length).toBe(2);
       expect(fetchedItems[0].id).toBe(idsToFetch[0]);
@@ -208,7 +208,8 @@ export function defineCrudTests<
       mockService.shouldThrowError = true;
       mockService.errorType = 'getByIds';
       const store = setupStoreForTesting(useStore, serviceName, mockService);
-      const fetchedItems = await store.getByIds(['non-existent-id']);
+      await store.getByIds(['non-existent-id']);
+      const fetchedItems = store.items;
       expect(fetchedItems).toEqual([]);
       expect(store.error).not.toBeNull();
     });

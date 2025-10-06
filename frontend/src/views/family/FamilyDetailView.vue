@@ -72,7 +72,12 @@ const loadFamily = async () => {
   loading.value = true;
   const familyId = route.params.id as string;
   if (familyId) {
-    family.value = await familyStore.getById(familyId);
+    await familyStore.getById(familyId);
+    if (!familyStore.error) {
+      family.value = familyStore.currentItem as Family;
+    } else {
+      family.value = undefined; // Clear family on error
+    }
   }
   loading.value = false;
 };
