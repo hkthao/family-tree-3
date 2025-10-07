@@ -1,6 +1,5 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Common.Specifications;
 

@@ -1,7 +1,5 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
-using System;
-using System.Linq;
 
 namespace backend.Application.Families.Specifications;
 

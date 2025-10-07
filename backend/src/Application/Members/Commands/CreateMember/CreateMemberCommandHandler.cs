@@ -4,8 +4,6 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Commands.CreateMember;
 

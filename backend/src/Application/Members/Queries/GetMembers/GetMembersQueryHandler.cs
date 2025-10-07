@@ -2,13 +2,7 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
-using backend.Application.Families.Specifications;
 using backend.Application.Members.Specifications;
-using backend.Domain.Entities;
-using MediatR;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
