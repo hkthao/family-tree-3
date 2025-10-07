@@ -1,11 +1,9 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
 using backend.Application.Common.Dtos;
 using backend.Application.Relationships.Queries; // Added
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
-public class MemberDetailDto : BaseAuditableDto, IMapFrom<Member>
+public class MemberDetailDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
     public string LastName { get; set; } = null!;

@@ -1,9 +1,8 @@
-﻿using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
+﻿using backend.Application.Common.Dtos;
 
 namespace backend.Application.Families;
 
-public class FamilyDto : IMapFrom<Family> // IMapFrom will create a map from Family to FamilyDto
+public class FamilyDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

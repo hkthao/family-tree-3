@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
-using backend.Domain.Enums;
 using backend.Application.Events.Specifications; // Added
 using Ardalis.Specification.EntityFrameworkCore; // Added
 

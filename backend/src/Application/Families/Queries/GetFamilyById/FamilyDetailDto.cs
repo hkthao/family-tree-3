@@ -1,10 +1,8 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
 using backend.Application.Common.Dtos;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public class FamilyDetailDto : BaseAuditableDto, IMapFrom<Family>
+public class FamilyDetailDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

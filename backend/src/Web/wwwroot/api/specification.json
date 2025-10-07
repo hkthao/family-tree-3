@@ -1698,33 +1698,64 @@
         }
       },
       "FamilyDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BaseAuditableDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "guid"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string",
+                "nullable": true
+              },
+              "address": {
+                "type": "string",
+                "nullable": true
+              },
+              "totalMembers": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "visibility": {
+                "type": "string",
+                "nullable": true
+              },
+              "avatarUrl": {
+                "type": "string",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "BaseAuditableDto": {
         "type": "object",
+        "x-abstract": true,
         "additionalProperties": false,
         "properties": {
-          "id": {
+          "created": {
             "type": "string",
-            "format": "guid"
+            "format": "date-time"
           },
-          "name": {
-            "type": "string"
-          },
-          "description": {
+          "createdBy": {
             "type": "string",
             "nullable": true
           },
-          "address": {
+          "lastModified": {
             "type": "string",
+            "format": "date-time",
             "nullable": true
           },
-          "totalMembers": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "visibility": {
-            "type": "string",
-            "nullable": true
-          },
-          "avatarUrl": {
+          "lastModifiedBy": {
             "type": "string",
             "nullable": true
           }
@@ -1888,9 +1919,25 @@
             "type": "string",
             "format": "guid"
           },
+          "sourceMember": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RelationshipMemberDto"
+              }
+            ]
+          },
           "targetMemberId": {
             "type": "string",
             "format": "guid"
+          },
+          "targetMember": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RelationshipMemberDto"
+              }
+            ]
           },
           "type": {
             "$ref": "#/components/schemas/RelationshipType"
@@ -1898,6 +1945,32 @@
           "order": {
             "type": "integer",
             "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "RelationshipMemberDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "fullName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isRoot": {
+            "type": "boolean"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
             "nullable": true
           }
         }
@@ -1917,30 +1990,6 @@
           2,
           3
         ]
-      },
-      "BaseAuditableDto": {
-        "type": "object",
-        "x-abstract": true,
-        "additionalProperties": false,
-        "properties": {
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "type": "string",
-            "nullable": true
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "lastModifiedBy": {
-            "type": "string",
-            "nullable": true
-          }
-        }
       },
       "MemberDetailDto": {
         "allOf": [
@@ -2200,32 +2249,6 @@
                 "$ref": "#/components/schemas/RelationshipMemberDto"
               }
             ]
-          }
-        }
-      },
-      "RelationshipMemberDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "fullName": {
-            "type": "string",
-            "nullable": true
-          },
-          "isRoot": {
-            "type": "boolean"
-          },
-          "avatarUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "dateOfBirth": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
           }
         }
       },

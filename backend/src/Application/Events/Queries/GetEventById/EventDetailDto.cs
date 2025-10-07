@@ -1,11 +1,9 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Application.Common.Dtos;
 
 namespace backend.Application.Events.Queries.GetEventById;
 
-public class EventDetailDto : BaseAuditableDto, IMapFrom<Event>
+public class EventDetailDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

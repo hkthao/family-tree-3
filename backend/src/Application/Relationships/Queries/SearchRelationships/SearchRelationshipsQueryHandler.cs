@@ -3,7 +3,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
 using backend.Application.Relationships.Specifications;
-using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries.SearchRelationships;
 
@@ -26,9 +25,7 @@ public class SearchRelationshipsQueryHandler : IRequestHandler<SearchRelationshi
         query = query.WithSpecification(new RelationshipBySourceMemberIdSpecification(request.SourceMemberId));
         query = query.WithSpecification(new RelationshipByTargetMemberIdSpecification(request.TargetMemberId));
         query = query.WithSpecification(new RelationshipByTypeSpecification(request.Type));
-
-        // Include related members for full name display
-        query = query.Include(r => r.SourceMember).Include(r => r.TargetMember);
+        query = query.WithSpecification(new RelationshipIncludeSpecifications());
 
         // Apply ordering specification
         query = query.WithSpecification(new RelationshipOrderingSpecification(request.SortBy, request.SortOrder));

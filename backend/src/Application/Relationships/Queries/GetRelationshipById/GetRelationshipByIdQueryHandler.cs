@@ -2,7 +2,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Specifications;
-using backend.Domain.Entities;
 
 namespace backend.Application.Relationships.Queries.GetRelationshipById;
 
@@ -19,16 +18,14 @@ public class GetRelationshipByIdQueryHandler : IRequestHandler<GetRelationshipBy
 
     public async Task<Result<RelationshipDto>> Handle(GetRelationshipByIdQuery request, CancellationToken cancellationToken)
     {
-        var spec = new RelationshipByIdSpecification(request.Id);
-
-        var relationshipDto = await _context.Relationships.AsQueryable().WithSpecification(spec)
+        var query = _context.Relationships.AsQueryable();
+        query = query.WithSpecification(new RelationshipByIdSpecification(request.Id));
+        query = query.WithSpecification(new RelationshipIncludeSpecifications());
+        var relationshipDto = await query
             .ProjectTo<RelationshipDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
-
         if (relationshipDto == null)
-        {
             return Result<RelationshipDto>.Failure($"Relationship with ID {request.Id} not found.");
-        }
 
         return Result<RelationshipDto>.Success(relationshipDto);
     }

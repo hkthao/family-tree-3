@@ -1,10 +1,8 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries;
 
-public class RelationshipListDto : IMapFrom<Relationship>
+public class RelationshipListDto 
 {
     public Guid Id { get; set; }
     public Guid SourceMemberId { get; set; }

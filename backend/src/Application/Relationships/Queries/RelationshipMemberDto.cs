@@ -1,10 +1,6 @@
-
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
-
 namespace backend.Application.Relationships.Queries;
 
-public class RelationshipMemberDto : IMapFrom<Member>
+public class RelationshipMemberDto 
 {
     public Guid Id { get; set; }
     public string? FullName { get; set; }

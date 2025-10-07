@@ -1,14 +1,14 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries;
 
-public class RelationshipDto : IMapFrom<Relationship>
+public class RelationshipDto 
 {
     public Guid Id { get; set; }
     public Guid SourceMemberId { get; set; }
+    public RelationshipMemberDto? SourceMember { get; set; }
     public Guid TargetMemberId { get; set; }
+    public RelationshipMemberDto? TargetMember { get; set; }
     public RelationshipType Type { get; set; }
     public int? Order { get; set; }
 }

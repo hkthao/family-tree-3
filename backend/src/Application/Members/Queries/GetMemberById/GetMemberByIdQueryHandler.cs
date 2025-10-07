@@ -1,10 +1,8 @@
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models; // Added
 using backend.Application.Members.Specifications;
-using backend.Domain.Entities;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
