@@ -242,6 +242,9 @@ Content-Type: application/json
 -   `DELETE /api/events/{id}`: Xóa sự kiện.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
 
+-   `GET /api/events/upcoming?familyId=...`: Lấy danh sách các sự kiện sắp tới (trong 30 ngày tới).
+    *   **Phản hồi:** `Result<List<EventDto>>`
+
 ### 6.4. Tìm kiếm chung (`/api/search`)
 
 -   `GET /api/search?keyword=...`: Tìm kiếm chung trên cả dòng họ và thành viên theo từ khóa.

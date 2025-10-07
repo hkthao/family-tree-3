@@ -39,7 +39,7 @@ Dự án được chia thành các project chính, tuân thủ theo nguyên tắ
 backend/
 ├── src/
 │   ├── Domain/         # Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), định nghĩa các quy tắc nghiệp vụ cốt lõi, và Domain Events. Đây là trái tim của ứng dụng, độc lập với các lớp khác.
-│   ├── Application/    # Chứa logic nghiệp vụ chính của ứng dụng (Use Cases), các DTOs (Data Transfer Objects), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các Commands/Queries/Handlers theo mô hình CQRS. Bao gồm cả các UserActivities.
+│   ├── Application/    # Chứa logic nghiệp vụ chính của ứng dụng (Use Cases), các DTOs (Data Transfer Objects), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các Commands/Queries/Handlers theo mô hình CQRS. Bao gồm cả các UserActivities và FamilyTreeService.
 │   ├── Infrastructure/ # Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer. Bao gồm truy cập cơ sở dữ liệu (Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
 │   └── Web/            # Là lớp trình bày (Presentation Layer), chứa các API Controllers, cấu hình ASP.NET Core, và là điểm vào của ứng dụng.
 └── tests/
@@ -210,6 +210,15 @@ builder.Entity<UserActivity>()
     .Property(ua => ua.Metadata)
     .HasColumnType("json");
 ```
+
+#### Cập nhật thực thể `Family`
+
+Thực thể `Family` hiện bao gồm các trường `TotalMembers` và `TotalGenerations` để theo dõi số liệu thống kê của gia đình. Các trường này được cập nhật tự động khi có thay đổi đối với các thành viên trong gia đình.
+
+| Tên trường       | Kiểu dữ liệu | Mô tả                                      |
+| :--------------- | :----------- | :----------------------------------------- |
+| `TotalMembers`   | `int`        | Tổng số thành viên trong gia đình.         |
+| `TotalGenerations`| `int`        | Tổng số thế hệ trong cây gia phả của gia đình. |
 
 #### Sử dụng trong Handlers
 
@@ -493,7 +502,33 @@ Dự án sử dụng **FluentValidation** để xác thực các `Command` và `
 -   **`DeleteRelationshipCommandValidator`**:
     -   `Id`: Không được để trống.
 
-## 10. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)
+## 10. Quản lý Cây Gia Phả (Family Tree Management)
+
+Để duy trì tính toàn vẹn và cung cấp thông tin chính xác về cây gia phả, hệ thống tự động tính toán và cập nhật các số liệu thống kê của gia đình như tổng số thành viên và tổng số thế hệ.
+
+### 10.1. Dịch vụ `FamilyTreeService`
+
+`FamilyTreeService` (`backend/src/Application/Services/FamilyTreeService.cs`) là một dịch vụ chịu trách nhiệm tính toán các số liệu thống kê liên quan đến cây gia phả.
+
+-   **`IFamilyTreeService`** (`backend/src/Application/Common/Interfaces/IFamilyTreeService.cs`):
+    -   Định nghĩa giao diện cho dịch vụ cây gia phả.
+    -   Bao gồm các phương thức:
+        -   `CalculateTotalMembers(Guid familyId)`: Tính tổng số thành viên trong một gia đình.
+        -   `CalculateTotalGenerations(Guid familyId)`: Tính tổng số thế hệ trong cây gia phả của một gia đình (sử dụng thuật toán duyệt cây).
+        -   `UpdateFamilyStats(Guid familyId)`: Cập nhật cả `TotalMembers` và `TotalGenerations` cho một gia đình cụ thể.
+
+### 10.2. Tích hợp vào các Command Handlers
+
+`FamilyTreeService` được inject vào các Command Handlers liên quan đến `Family` và `Member`. Sau mỗi thao tác tạo, cập nhật hoặc xóa thành viên/gia đình, phương thức `UpdateFamilyStats` sẽ được gọi để đảm bảo các số liệu thống kê của gia đình luôn được cập nhật.
+
+-   **`CreateMemberCommandHandler`**
+-   **`UpdateMemberCommandHandler`**
+-   **`DeleteMemberCommandHandler`**
+-   **`CreateFamilyCommandHandler`**
+-   **`UpdateFamilyCommandHandler`**
+-   **`DeleteFamilyCommandHandler`**
+
+## 11. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)
 
 Tính năng ghi nhật ký hoạt động người dùng được triển khai để theo dõi các hành động quan trọng của người dùng trong hệ thống, phục vụ mục đích kiểm toán và cung cấp thông tin cho nguồn cấp dữ liệu hoạt động của người dùng.
 
@@ -558,9 +593,9 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
     -   Hỗ trợ các tham số `limit`, `targetType`, `targetId`, `familyId` qua query string.
     -   Yêu cầu xác thực (`[Authorize]`).
 
-## 11. Hướng dẫn Kiểm thử
+## 12. Hướng dẫn Kiểm thử
 
-## 12. Logging & Monitoring
+## 13. Logging & Monitoring
 
 Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt động của ứng dụng, phát hiện lỗi và đánh giá hiệu suất.
 
@@ -582,12 +617,12 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   **Traces**: Theo dõi luồng của một request qua nhiều services và components, giúp xác định nguyên nhân gốc rễ của các vấn đề về hiệu suất hoặc lỗi trong hệ thống phân tán.
 *   **Công cụ tích hợp**: Dự kiến tích hợp với Prometheus (để lưu trữ metrics) và Grafana (để trực quan hóa metrics và traces).
 
-## 13. Coding Style
+## 14. Coding Style
 
 -   Sử dụng `dotnet format` để duy trì code style nhất quán.
 -   Tuân thủ [Microsoft C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions).
 
-## 14. Best Practices
+## 15. Best Practices
 
 Để duy trì chất lượng mã nguồn cao, dễ bảo trì và mở rộng, hãy tuân thủ các nguyên tắc và thực tiễn tốt nhất sau:
 
@@ -630,7 +665,7 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   Tất cả các `Command` và `Query` handlers nên trả về một đối tượng `Result<T>` (hoặc `Result<Unit>` cho các thao tác không trả về dữ liệu) để chỉ rõ thành công hay thất bại và cung cấp thông tin lỗi chi tiết.
     *   Các `Controller` nên kiểm tra `Result.IsSuccess` và trả về các `ActionResult` phù hợp (ví dụ: `Ok(result.Value)`, `BadRequest(result.Error)`, `NotFound(result.Error)`). Điều này giúp chuẩn hóa việc xử lý phản hồi API và tránh việc throw exceptions không cần thiết.
 
-## 15. Tài liệu liên quan
+## 16. Tài liệu liên quan
 
 -   [Kiến trúc tổng quan](./architecture.md)
 -   [Hướng dẫn API](./api-reference.md)
