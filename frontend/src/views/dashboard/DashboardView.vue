@@ -1,9 +1,14 @@
 <template>
   <v-container fluid>
-    <v-row>
+    <v-row >
       <v-col cols="12" md="4">
-        <FamilyAutocomplete v-model="selectedFamilyId" label="Lọc theo gia đình" clearable hide-details
-          prepend-inner-icon="mdi-filter-variant" />
+        <FamilyAutocomplete
+          v-model="selectedFamilyId"
+          label="Lọc theo gia đình"
+          clearable
+          hide-details
+          prepend-inner-icon="mdi-filter-variant"
+        />
       </v-col>
     </v-row>
 
@@ -14,23 +19,20 @@
       </v-col>
     </v-row>
 
-    <!-- Middle Section: Recent Activity & Upcoming Birthdays -->
+    <!-- Middle Section: Recent Activity & Upcoming Events -->
     <v-row>
       <v-col cols="12" md="6">
         <RecentActivity />
       </v-col>
       <v-col cols="12" md="6">
-        <UpcomingBirthdays />
+        <UpcomingEvents />
       </v-col>
     </v-row>
 
-    <!-- Bottom Section: Family Tree Overview & System Status -->
+    <!-- Bottom Section: Family Tree Overview -->
     <v-row>
-      <v-col cols="12" md="6">
-        <FamilyTreeOverview />
-      </v-col>
-      <v-col cols="12" md="6">
-        <SystemStatus />
+      <v-col cols="12">
+        <FamilyTreeOverview :family-id="selectedFamilyId" />
       </v-col>
     </v-row>
   </v-container>
@@ -39,22 +41,17 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { useDashboardStore } from '@/stores/dashboard.store';
-// import { useFamilyStore } from '@/stores/family.store'; // Removed
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
-import UpcomingBirthdays from '@/components/dashboard/UpcomingBirthdays.vue';
+import UpcomingEvents from '@/components/dashboard/UpcomingEvents.vue'; // Changed import
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
-import SystemStatus from '@/components/dashboard/SystemStatus.vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue'; // New import
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const dashboardStore = useDashboardStore();
-// const familyStore = useFamilyStore(); // Removed
 
 const selectedFamilyId = ref<string | null>(null);
 
 onMounted(async () => {
-  // await familyStore.searchLookup({}, 1, 100); // Removed
-  // Fetch all dashboard data when the component is mounted, initially without a filter
   dashboardStore.fetchAllDashboardData();
 });
 

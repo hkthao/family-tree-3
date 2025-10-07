@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { ok, err } from '@/types/common/result';
 import type { Result } from '@/types/common/result';
-import type { DashboardData, DashboardStats, RecentActivityItem, UpcomingBirthday, SystemInfo } from '@/types/dashboard';
+import type { DashboardData, DashboardStats, RecentActivityItem, UpcomingEvent } from '@/types/dashboard';
+import { useEventStore } from '@/stores/event.store';
 
 // Mock API Service (replace with actual API service later)
 const mockDashboardApi = {
@@ -20,49 +21,29 @@ const mockDashboardApi = {
   fetchRecentActivity: async (familyId?: string): Promise<Result<RecentActivityItem[]>> => {
     await new Promise(resolve => setTimeout(resolve, 600));
     console.log('Fetching recent activity for family:', familyId);
-    return ok([
-      { id: '1', type: 'member', description: 'Added John Doe', timestamp: new Date().toISOString() },
-      { id: '2', type: 'relationship', description: 'Linked Jane Doe to John Doe', timestamp: new Date(Date.now() - 3600000).toISOString() },
-      { id: '3', type: 'family', description: 'Created Smith Family', timestamp: new Date(Date.now() - 7200000).toISOString() },
-      { id: '4', type: 'member', description: 'Updated profile of Alice Smith', timestamp: new Date(Date.now() - 10800000).toISOString() },
-      { id: '5', type: 'relationship', description: 'Added child to Bob Johnson', timestamp: new Date(Date.now() - 14400000).toISOString() },
-    ]);
-  },
+    const allActivities: RecentActivityItem[] = [
+      { id: '1', type: 'member', description: 'Added John Doe', timestamp: new Date().toISOString(), familyId: 'family1' },
+      { id: '2', type: 'relationship', description: 'Linked Jane Doe to John Doe', timestamp: new Date(Date.now() - 3600000).toISOString(), familyId: 'family1' },
+      { id: '3', type: 'family', description: 'Created Smith Family', timestamp: new Date(Date.now() - 7200000).toISOString(), familyId: 'family2' },
+      { id: '4', type: 'member', description: 'Updated profile of Alice Smith', timestamp: new Date(Date.now() - 10800000).toISOString(), familyId: 'family1' },
+      { id: '5', type: 'relationship', description: 'Added child to Bob Johnson', timestamp: new Date(Date.now() - 14400000).toISOString(), familyId: 'family2' },
+    ];
 
-  fetchUpcomingBirthdays: async (familyId?: string): Promise<Result<UpcomingBirthday[]>> => {
-    await new Promise(resolve => setTimeout(resolve, 700));
-    console.log('Fetching upcoming birthdays for family:', familyId);
-    const today = new Date();
-    const nextMonth = new Date();
-    nextMonth.setMonth(today.getMonth() + 1);
+    if (familyId) {
+      return ok(allActivities.filter(item => item.familyId === familyId));
+    }
 
-    return ok([
-      { id: 'm1', name: 'Alice Smith', dateOfBirth: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5).toISOString(), age: 30, avatar: 'https://randomuser.me/api/portraits/women/1.jpg' },
-      { id: 'm2', name: 'Bob Johnson', dateOfBirth: new Date(today.getFullYear(), today.getMonth() + 1, today.getDate() - 2).toISOString(), age: 45, avatar: 'https://randomuser.me/api/portraits/men/1.jpg' },
-      { id: 'm3', name: 'Charlie Brown', dateOfBirth: new Date(today.getFullYear(), today.getMonth() + 1, today.getDate() + 10).toISOString(), age: 22, avatar: 'https://randomuser.me/api/portraits/men/2.jpg' },
-    ]);
-  },
-
-  fetchSystemInfo: async (familyId?: string): Promise<Result<SystemInfo>> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    console.log('Fetching system info for family:', familyId);
-    const isOnline = Math.random() > 0.1; // 90% chance of being online
-    return ok({
-      apiStatus: isOnline ? 'online' : 'offline',
-      appVersion: '1.0.0-beta',
-      lastSync: new Date(Date.now() - 60000).toISOString(),
-      serverTime: new Date().toISOString(),
-      requestSuccessRate: Math.floor(Math.random() * 20) + 80, // 80-100%
-    });
+    return ok(allActivities);
   },
 };
 
 export const useDashboardStore = defineStore('dashboard', () => {
+  const eventStore = useEventStore(); // Initialize event store
+
   const dashboardData = ref<DashboardData>({
     stats: null,
     recentActivity: [],
-    upcomingBirthdays: [],
-    systemInfo: null,
+    upcomingEvents: [], // Changed from upcomingBirthdays
   });
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -101,35 +82,25 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   };
 
-  const fetchUpcomingBirthdays = async (familyId?: string) => {
+  const fetchUpcomingEvents = async (familyId?: string) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await mockDashboardApi.fetchUpcomingBirthdays(familyId);
-      if (response.ok) {
-        dashboardData.value.upcomingBirthdays = response.value;
-      } else {
-        error.value = response.error?.message || 'Failed to fetch upcoming birthdays.';
-      }
-    } catch (err: any) {
-      error.value = err.message || 'An unexpected error occurred while fetching upcoming birthdays.';
-    } finally {
-      loading.value = false;
-    }
-  };
+      // Set filter for upcoming events (e.g., startDate from today)
+      eventStore.filter = {
+        ...eventStore.filter,
+        familyId: familyId,
+        startDate: new Date(), // Set startDate as a Date object
+      };
+      await eventStore._loadItems(); // Use internal loadItems for filtering
 
-  const fetchSystemInfo = async (familyId?: string) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const response = await mockDashboardApi.fetchSystemInfo(familyId);
-      if (response.ok) {
-        dashboardData.value.systemInfo = response.value;
+      if (!eventStore.error) {
+        dashboardData.value.upcomingEvents = eventStore.items as UpcomingEvent[];
       } else {
-        error.value = response.error?.message || 'Failed to fetch system info.';
+        error.value = eventStore.error || 'Failed to fetch upcoming events.';
       }
     } catch (err: any) {
-      error.value = err.message || 'An unexpected error occurred while fetching system info.';
+      error.value = err.message || 'An unexpected error occurred while fetching upcoming events.';
     } finally {
       loading.value = false;
     }
@@ -142,8 +113,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await Promise.all([
         fetchDashboardStats(familyId),
         fetchRecentActivity(familyId),
-        fetchUpcomingBirthdays(familyId),
-        fetchSystemInfo(familyId),
+        fetchUpcomingEvents(familyId),
       ]);
     } catch (err: any) {
       error.value = err.message || 'An unexpected error occurred while fetching all dashboard data.';
@@ -158,8 +128,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     error,
     fetchDashboardStats,
     fetchRecentActivity,
-    fetchUpcomingBirthdays,
-    fetchSystemInfo,
+    fetchUpcomingEvents,
     fetchAllDashboardData,
   };
 });

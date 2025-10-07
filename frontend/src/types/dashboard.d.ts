@@ -10,27 +10,15 @@ export interface RecentActivityItem {
   type: 'member' | 'relationship' | 'family';
   description: string;
   timestamp: string;
+  familyId?: string; // Added for filtering
 }
 
-export interface UpcomingBirthday {
-  id: string;
-  name: string;
-  dateOfBirth: string;
-  age?: number;
-  avatar?: string; // Added for avatars
-}
-
-export interface SystemInfo {
-  apiStatus: 'online' | 'offline' | 'unknown';
-  appVersion: string;
-  lastSync?: string; // Added
-  serverTime?: string; // Added
-  requestSuccessRate?: number; // Added for pie chart
+export interface UpcomingEvent extends Event { // Extend existing Event type
+  // Add any dashboard-specific properties if needed
 }
 
 export interface DashboardData {
   stats: DashboardStats | null;
   recentActivity: RecentActivityItem[];
-  upcomingBirthdays: UpcomingBirthday[];
-  systemInfo: SystemInfo | null;
+  upcomingEvents: UpcomingEvent[]; // Changed from upcomingBirthdays
 }
