@@ -42,7 +42,7 @@ public class GetFamiliesQueryHandler : IRequestHandler<GetFamiliesQuery, Result<
             if (currentUserProfile == null)
             {
                 // If user profile doesn't exist, they have no access to any families
-                return Result<IReadOnlyList<FamilyListDto>>.Success(new List<FamilyListDto>());
+                return Result<IReadOnlyList<FamilyListDto>>.Success([]);
             }
 
             // Apply user access specification

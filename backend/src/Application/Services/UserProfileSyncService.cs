@@ -2,6 +2,8 @@ using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
+using backend.Application.UserProfiles.Specifications;
+using Ardalis.Specification.EntityFrameworkCore;
 
 namespace backend.Application.Services;
 
@@ -28,7 +30,7 @@ public class UserProfileSyncService : IUserProfileSyncService
             return;
         }
 
-        var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.Auth0UserId == auth0UserId, cancellationToken);
+        var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(auth0UserId)).FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)
         {
@@ -39,9 +41,23 @@ public class UserProfileSyncService : IUserProfileSyncService
                 Email = email ?? "", // Email might be null if not provided by Auth0
                 Name = name ?? "",   // Name might be null if not provided by Auth0
             };
-            _context.UserProfiles.Add(userProfile);
-            await _context.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Created new user profile for Auth0 user {Auth0UserId}.", auth0UserId);
+            try
+            {
+                _context.UserProfiles.Add(userProfile);
+                await _context.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Created new user profile for Auth0 user {Auth0UserId}.", auth0UserId);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning(ex, "A database update exception occurred while creating a user profile. This might be due to a race condition. Attempting to re-fetch the user.");
+                // Attempt to re-fetch the user to handle potential race conditions where the user was created by another request.
+                userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(auth0UserId)).FirstOrDefaultAsync(cancellationToken);
+                if (userProfile == null)
+                {
+                    _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {Auth0UserId}. The original exception will be re-thrown.", auth0UserId);
+                    throw; // Re-throw if the user still doesn't exist, as it was not a duplicate entry issue.
+                }
+            }
         }
         else
         {

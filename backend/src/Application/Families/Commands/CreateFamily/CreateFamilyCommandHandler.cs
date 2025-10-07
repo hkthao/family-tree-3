@@ -1,22 +1,39 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using backend.Application.Common.Models; // Added for Result<T>
+using backend.Application.Common.Models;
+using backend.Domain.Enums;
+using backend.Application.UserProfiles.Specifications;
+using Ardalis.Specification.EntityFrameworkCore;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
-public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Result<Guid>> // Changed return type
+public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IUser _user;
 
-    public CreateFamilyCommandHandler(IApplicationDbContext context)
+    public CreateFamilyCommandHandler(IApplicationDbContext context, IUser user)
     {
         _context = context;
+        _user = user;
     }
 
-    public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken) // Changed return type
+    public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
         try
         {
+            var currentUserId = _user.Id;
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Result<Guid>.Failure("Current user ID not found.", "Authentication");
+            }
+
+            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(currentUserId)).FirstOrDefaultAsync(cancellationToken);
+            if (userProfile == null)
+            {
+                return Result<Guid>.Failure("User profile not found.", "NotFound");
+            }
+
             var entity = new Family
             {
                 Name = request.Name,
@@ -28,10 +45,20 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
 
             _context.Families.Add(entity);
 
-            // Comment: Write-side invariant: Family is added to the database context.
             await _context.SaveChangesAsync(cancellationToken);
 
-            return Result<Guid>.Success(entity.Id); // Wrapped in Result.Success
+            // Assign the creating user as a Manager of the new family
+            var familyUser = new FamilyUser
+            {
+                FamilyId = entity.Id,
+                UserProfileId = userProfile.Id,
+                Role = FamilyRole.Manager
+            };
+
+            _context.FamilyUsers.Add(familyUser);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result<Guid>.Success(entity.Id);
         }
         catch (DbUpdateException ex)
         {
