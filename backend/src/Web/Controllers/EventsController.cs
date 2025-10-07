@@ -93,4 +93,26 @@ public class EventsController : ControllerBase
         }
         return BadRequest(result.Error);
     }
+
+    /// <summary>
+    /// Retrieves a list of upcoming events for the current user.
+    /// </summary>
+    /// <param name="familyId">Optional: Filter events by FamilyId.</param>
+    /// <returns>A list of upcoming events.</returns>
+    [HttpGet("upcoming")]
+    public async Task<ActionResult<List<EventDto>>> GetUpcomingEvents([FromQuery] Guid? familyId = null)
+    {
+        var query = new backend.Application.Events.Queries.GetUpcomingEvents.GetUpcomingEventsQuery
+        {
+            FamilyId = familyId,
+            StartDate = DateTime.UtcNow.Date,
+            EndDate = DateTime.UtcNow.Date.AddDays(30)
+        };
+        var result = await _mediator.Send(query);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
 }

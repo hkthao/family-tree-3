@@ -179,4 +179,35 @@ export class MockEventService implements IEventService {
       });
     }
   }
+
+  async getUpcomingEvents(familyId?: string): Promise<Result<Event[], ApiError>> {
+    try {
+      const today = new Date();
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+      let upcoming = this.events.filter(event => {
+        const eventStartDate = event.startDate ? new Date(event.startDate) : null;
+        return eventStartDate && eventStartDate >= today && eventStartDate <= thirtyDaysFromNow;
+      });
+
+      if (familyId) {
+        upcoming = upcoming.filter(event => event.familyId === familyId);
+      }
+
+      upcoming.sort((a, b) => {
+        const dateA = a.startDate ? new Date(a.startDate).getTime() : 0;
+        const dateB = b.startDate ? new Date(b.startDate).getTime() : 0;
+        return dateA - dateB;
+      });
+
+      const result = await simulateLatency(upcoming);
+      return ok(result);
+    } catch (e) {
+      return err({
+        message: 'Failed to fetch upcoming events from mock service.',
+        details: e as Error,
+      });
+    }
+  }
 }

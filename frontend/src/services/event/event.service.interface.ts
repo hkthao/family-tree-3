@@ -9,4 +9,5 @@ export interface IEventService extends ICrudService<Event> {
     page?: number,
     itemsPerPage?: number,
   ): Promise<Result<Paginated<Event>, ApiError>>;
+  getUpcomingEvents(familyId?: string): Promise<Result<Event[], ApiError>>;
 }

@@ -129,5 +129,19 @@ export const useEventStore = defineStore('event', {
         return []
       }
     },
+
+    async fetchUpcomingEvents(familyId?: string): Promise<Event[]> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.event.getUpcomingEvents(familyId);
+      this.loading = false;
+      if (result.ok) {
+        return result.value;
+      } else {
+        this.error = result.error.message || 'Failed to fetch upcoming events.';
+        console.error(result.error);
+        return [];
+      }
+    },
   },
 });

@@ -24,6 +24,10 @@
       <v-col cols="12" md="6">
         <RecentActivity :family-id="selectedFamilyId || undefined" />
       </v-col>
+
+      <v-col cols="12" md="6">
+        <UpcomingEvents :family-id="selectedFamilyId || undefined" />
+      </v-col>
     </v-row>
 
     <!-- Bottom Section: Family Tree Overview -->
@@ -42,6 +46,7 @@ import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
+import UpcomingEvents from '@/components/dashboard/UpcomingEvents.vue';
 
 const dashboardStore = useDashboardStore();
 

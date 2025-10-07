@@ -66,4 +66,11 @@ export class ApiEventService implements IEventService {
     params.append('ids', ids.join(','));
     return this.http.get<Event[]>(`${this.apiUrl}/by-ids?${params.toString()}`);
   }
+
+  async getUpcomingEvents(familyId?: string): Promise<Result<Event[], ApiError>> {
+    console.log('Fetching upcoming events from API');
+    const params = new URLSearchParams();
+    if (familyId) params.append('familyId', familyId);
+    return this.http.get<Event[]>(`${this.apiUrl}/upcoming?${params.toString()}`);
+  }
 }

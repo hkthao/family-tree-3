@@ -13,7 +13,7 @@
         {{ dashboardStore.error }}
       </v-alert>
       <v-list v-else dense>
-        <v-list-item v-for="(item, index) in (dashboardStore.dashboardData.upcomingEvents as AppEvent[])" :key="index">
+        <v-list-item v-for="(item, index) in dashboardStore.upcomingEvents" :key="index">
           <template v-slot:prepend>
             <v-icon color="blue">mdi-calendar-check</v-icon>
           </template>
@@ -22,7 +22,7 @@
             {{ item.startDate ? new Date(item.startDate).toLocaleDateString() : 'N/A' }} - {{ item.endDate ? new Date(item.endDate).toLocaleDateString() : 'N/A' }}
           </v-list-item-subtitle>
         </v-list-item>
-        <v-list-item v-if="dashboardStore.dashboardData.upcomingEvents.length === 0">
+        <v-list-item v-if="dashboardStore.upcomingEvents.length === 0">
           <v-list-item-title>Không có sự kiện sắp tới.</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -32,13 +32,24 @@
 
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores/dashboard.store';
-import { onMounted } from 'vue';
-import type { Event as AppEvent } from '@/types';
+import { onMounted, watch } from 'vue';
+
+const props = defineProps({
+  familyId: { type: String, default: null },
+});
 
 const dashboardStore = useDashboardStore();
 
+const fetchEvents = (familyId: string | null) => {
+  dashboardStore.fetchUpcomingEvents(familyId || undefined);
+};
+
 onMounted(() => {
- // dashboardStore.fetchUpcomingEvents();
+  fetchEvents(props.familyId);
+});
+
+watch(() => props.familyId, (newFamilyId) => {
+  fetchEvents(newFamilyId);
 });
 </script>
 
