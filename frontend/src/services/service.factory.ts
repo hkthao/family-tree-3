@@ -19,6 +19,9 @@ import { ApiUserActivityService } from './userActivity/api.userActivity.service'
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
 import { MockDashboardService } from './dashboard/mock.dashboard.service';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
+import type { IAIBiographyService } from './aiBiography/aiBiography.service.interface';
+import { MockAIBiographyService } from './aiBiography/mock.aiBiography.service';
+import { ApiAIBiographyService } from './aiBiography/api.aiBiography.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -30,6 +33,7 @@ export interface AppServices {
   userProfile: IUserProfileService;
   userActivity: IUserActivityService;
   dashboard: IDashboardService;
+  aiBiography: IAIBiographyService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -79,5 +83,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiDashboardService(apiClient)
         : testServices?.dashboard || new MockDashboardService(),
+    aiBiography:
+      mode === 'mock'
+        ? new MockAIBiographyService()
+        : mode === 'real'
+        ? new ApiAIBiographyService(apiClient)
+        : testServices?.aiBiography || new MockAIBiographyService(),
   };
 }

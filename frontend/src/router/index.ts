@@ -177,6 +177,13 @@ const router = createRouter({
           component: () => import('@/views/settings/UserSettingsPage.vue'),
           meta: { breadcrumb: 'userSettings.title', roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
         },
+        {
+          path: 'ai/biography/:memberId',
+          name: 'AIBiographyGenerator',
+          component: () => import('@/views/ai/AIBiographyGeneratorView.vue'),
+          props: true,
+          meta: { breadcrumb: 'aiBiography.generator.title', requiresAuth: true },
+        },
         ...sidebarRoutes,
       ],
     },
