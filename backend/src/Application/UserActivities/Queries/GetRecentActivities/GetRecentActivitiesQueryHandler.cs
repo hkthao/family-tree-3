@@ -42,7 +42,7 @@ public class GetRecentActivitiesQueryHandler : IRequestHandler<GetRecentActiviti
         // Only allow users to view their own activities
         // Admins can view all activities (if needed, this logic would be here)
         // For now, strictly filter by current user's profile ID
-        var spec = new UserActivityByUserSpec(currentUserProfile.Id, request.Limit, request.TargetType, request.TargetId, request.FamilyId);
+        var spec = new UserActivityByUserSpec(currentUserProfile.Id, request.Limit, request.TargetType, request.TargetId, request.GroupId);
 
         var userActivities = await _context.UserActivities
             .WithSpecification(spec)

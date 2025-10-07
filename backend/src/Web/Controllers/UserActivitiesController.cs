@@ -31,14 +31,14 @@ public class UserActivitiesController : ControllerBase
         [FromQuery] int limit = 20,
         [FromQuery] TargetType? targetType = null,
         [FromQuery] string? targetId = null,
-        [FromQuery] Guid? familyId = null)
+        [FromQuery] Guid? groupId = null)
     {
         var query = new GetRecentActivitiesQuery
         {
             Limit = limit,
             TargetType = targetType,
             TargetId = targetId,
-            FamilyId = familyId
+            GroupId = groupId
         };
 
         var result = await _mediator.Send(query);

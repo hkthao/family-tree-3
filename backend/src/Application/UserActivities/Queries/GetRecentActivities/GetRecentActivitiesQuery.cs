@@ -25,7 +25,7 @@ public record GetRecentActivitiesQuery : IRequest<Result<List<UserActivityDto>>>
     public string? TargetId { get; init; }
 
     /// <summary>
-    /// Optional: Filter activities by FamilyId (requires UserActivity to have FamilyId or join).
+    /// Optional: Filter activities by GroupId (e.g., FamilyId).
     /// </summary>
-    public Guid? FamilyId { get; init; }
+    public Guid? GroupId { get; init; }
 }

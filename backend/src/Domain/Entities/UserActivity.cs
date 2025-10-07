@@ -34,6 +34,11 @@ public class UserActivity : BaseAuditableEntity
     public string? TargetId { get; set; }
 
     /// <summary>
+    /// Optional: The ID of the group (e.g., FamilyId) related to the activity.
+    /// </summary>
+    public Guid? GroupId { get; set; }
+
+    /// <summary>
     /// Optional metadata in JSON format for storing additional details about the action.
     /// </summary>
     public JsonDocument? Metadata { get; set; }

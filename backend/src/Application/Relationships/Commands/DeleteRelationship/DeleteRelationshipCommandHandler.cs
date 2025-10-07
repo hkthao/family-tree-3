@@ -59,7 +59,7 @@ public class DeleteRelationshipCommandHandler : IRequestHandler<DeleteRelationsh
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.DeleteRelationship,
             TargetType = TargetType.Member,
-            TargetId = request.Id.ToString(),
+            TargetId = sourceMember.Id.ToString(), 
             ActivitySummary = activitySummary
         }, cancellationToken);
 

@@ -10,6 +10,7 @@ public class UserActivityDto
     public UserActionType ActionType { get; set; }
     public TargetType TargetType { get; set; }
     public string TargetId { get; set; } = null!;
+    public Guid? GroupId { get; set; }
     public JsonDocument? Metadata { get; set; }
     public string ActivitySummary { get; set; } = null!;
     public DateTime Created { get; set; }

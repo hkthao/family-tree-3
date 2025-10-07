@@ -64,8 +64,6 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Res
             TargetType = TargetType.Event,
             TargetId = entity.Id.ToString(),
             ActivitySummary = $"Created event '{entity.Name}'."
-        }, cancellationToken);
-
-        return Result<Guid>.Success(entity.Id);
+        }, cancellationToken); return Result<Guid>.Success(entity.Id);
     }
 }

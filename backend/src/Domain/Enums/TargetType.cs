@@ -9,5 +9,5 @@ public enum TargetType
     Member = 1,
     UserProfile = 2,
     Event = 3,
-    // Add more target types as needed
+    Relationship= 4,
 }

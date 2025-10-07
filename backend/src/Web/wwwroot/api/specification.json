@@ -1508,7 +1508,7 @@
             "x-position": 3
           },
           {
-            "name": "familyId",
+            "name": "groupId",
             "in": "query",
             "schema": {
               "type": "string",
@@ -2428,6 +2428,11 @@
           "targetId": {
             "type": "string"
           },
+          "groupId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
           "metadata": {
             "nullable": true,
             "oneOf": [
@@ -2490,13 +2495,15 @@
           "Family",
           "Member",
           "UserProfile",
-          "Event"
+          "Event",
+          "Relationship"
         ],
         "enum": [
           0,
           1,
           2,
-          3
+          3,
+          4
         ]
       },
       "JsonDocument": {
