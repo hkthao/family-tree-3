@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { ok, err } from '@/types/common/result';
 import type { Result } from '@/types/common/result';
 import type { DashboardData, DashboardStats, RecentActivityItem, UpcomingEvent } from '@/types/dashboard';
+import type { Event as AppEvent } from '@/types';
 import { useEventStore } from '@/stores/event.store';
 
 // Mock API Service (replace with actual API service later)

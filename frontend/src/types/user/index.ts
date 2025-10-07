@@ -13,3 +13,10 @@ export interface UserMenuItem {
   icon: string;
   to?: string;
 }
+
+export interface UserProfile {
+    id: string;
+    auth0UserId: string;
+    email: string;
+    name: string;
+}

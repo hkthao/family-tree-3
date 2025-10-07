@@ -13,13 +13,13 @@
         {{ dashboardStore.error }}
       </v-alert>
       <v-list v-else dense>
-        <v-list-item v-for="item in dashboardStore.dashboardData.upcomingEvents" :key="item.id">
+        <v-list-item v-for="(item, index) in (dashboardStore.dashboardData.upcomingEvents as AppEvent[])" :key="index">
           <template v-slot:prepend>
             <v-icon color="blue">mdi-calendar-check</v-icon>
           </template>
           <v-list-item-title>{{ item.name }}</v-list-item-title>
           <v-list-item-subtitle>
-            {{ new Date(item.startDate).toLocaleDateString() }} - {{ new Date(item.endDate).toLocaleDateString() }}
+            {{ item.startDate ? new Date(item.startDate).toLocaleDateString() : 'N/A' }} - {{ item.endDate ? new Date(item.endDate).toLocaleDateString() : 'N/A' }}
           </v-list-item-subtitle>
         </v-list-item>
         <v-list-item v-if="dashboardStore.dashboardData.upcomingEvents.length === 0">
@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores/dashboard.store';
 import { onMounted } from 'vue';
+import type { Event as AppEvent } from '@/types';
 
 const dashboardStore = useDashboardStore();
 

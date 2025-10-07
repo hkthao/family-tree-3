@@ -23,3 +23,9 @@ export interface ConfirmDeleteDialogProps {
   title: string;
   message: string;
 }
+
+export interface FamilyUser {
+    familyId: string;
+    userProfileId: string;
+    role: string;
+}

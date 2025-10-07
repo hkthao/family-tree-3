@@ -133,7 +133,7 @@ const renderChart = (members: Member[], relationships: Relationship[]) => {
     .setCardDim({ w: 150, h: 200 })
     .setOnCardUpdate(Card());
 
-  const rootMember = memberStore.items.find(m => m.isRoot);
+  const rootMember = memberStore.items.find((m: Member) => m.isRoot);
   if (rootMember) {
     chart.updateMainId(rootMember.id);
     chart.updateTree({
