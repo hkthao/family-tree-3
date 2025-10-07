@@ -30,6 +30,7 @@ namespace backend.Infrastructure.Migrations
                     Visibility = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     TotalMembers = table.Column<int>(type: "int", nullable: false),
+                    TotalGenerations = table.Column<int>(type: "int", nullable: false),
                     Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedBy = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -187,8 +188,6 @@ namespace backend.Infrastructure.Migrations
                     TargetId = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     GroupId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    Metadata = table.Column<string>(type: "json", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     ActivitySummary = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
@@ -205,6 +204,41 @@ namespace backend.Infrastructure.Migrations
                         name: "FK_UserActivities_UserProfiles_UserProfileId",
                         column: x => x.UserProfileId,
                         principalTable: "UserProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "AIBiographies",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    MemberId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Style = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Provider = table.Column<int>(type: "int", nullable: false),
+                    UserPrompt = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    GeneratedFromDB = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    TokensUsed = table.Column<int>(type: "int", nullable: false),
+                    Metadata = table.Column<string>(type: "json", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AIBiographies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AIBiographies_Members_MemberId",
+                        column: x => x.MemberId,
+                        principalTable: "Members",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
@@ -264,6 +298,11 @@ namespace backend.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AIBiographies_MemberId",
+                table: "AIBiographies",
+                column: "MemberId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EventMember_RelatedMembersId",
                 table: "EventMember",
                 column: "RelatedMembersId");
@@ -308,6 +347,9 @@ namespace backend.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AIBiographies");
+
             migrationBuilder.DropTable(
                 name: "EventMember");
 

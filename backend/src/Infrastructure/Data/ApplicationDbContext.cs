@@ -63,8 +63,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .WithMany(up => up.FamilyUsers)
             .HasForeignKey(fu => fu.UserProfileId);
 
-        builder.Entity<UserActivity>()
-            .Property(ua => ua.Metadata)
+        builder.Ignore<JsonDocument>();
+
+        builder.Entity<AIBiography>()
+            .Property(b => b.Metadata)
             .HasColumnType("json")
             .HasConversion(
                 v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions.Default),

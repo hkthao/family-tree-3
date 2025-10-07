@@ -40,6 +40,9 @@ builder.Services.AddTransient<IAIContentGenerator>(sp =>
 // Register AI Usage Tracker
 builder.Services.AddSingleton<IAIUsageTracker, AIUsageTracker>();
 
+// Add Memory Cache services
+builder.Services.AddMemoryCache();
+
 // Configure Auth0Config
 builder.Services.Configure<Auth0Config>(builder.Configuration.GetSection("Auth0"));
 builder.Services.AddSingleton<IAuth0Config>(sp => sp.GetRequiredService<IOptions<Auth0Config>>().Value);

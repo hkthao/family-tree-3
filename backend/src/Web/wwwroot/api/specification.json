@@ -7,6 +7,120 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/AI/biography/{memberId}": {
+      "post": {
+        "tags": [
+          "AI"
+        ],
+        "operationId": "AI_GenerateBiography",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateBiographyCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiographyResultDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/AI/biography/last-prompt/{memberId}": {
+      "get": {
+        "tags": [
+          "AI"
+        ],
+        "operationId": "AI_GetLastUserPrompt",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/AI/biography/providers": {
+      "get": {
+        "tags": [
+          "AI"
+        ],
+        "operationId": "AI_GetAIProviders",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AIProviderDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Auth/login": {
       "post": {
         "tags": [
@@ -1648,6 +1762,113 @@
   },
   "components": {
     "schemas": {
+      "BiographyResultDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/AIProviderType"
+          },
+          "tokensUsed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userPrompt": {
+            "type": "string"
+          }
+        }
+      },
+      "AIProviderType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "None",
+          "Gemini",
+          "OpenAI",
+          "LocalAI"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "GenerateBiographyCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "style": {
+            "$ref": "#/components/schemas/BiographyStyle"
+          },
+          "useDBData": {
+            "type": "boolean"
+          },
+          "userPrompt": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "type": "string"
+          }
+        }
+      },
+      "BiographyStyle": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Emotional",
+          "Historical",
+          "Storytelling",
+          "Formal",
+          "Informal"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "AIProviderDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "providerType": {
+            "$ref": "#/components/schemas/AIProviderType"
+          },
+          "name": {
+            "type": "string"
+          },
+          "isEnabled": {
+            "type": "boolean"
+          },
+          "dailyUsageLimit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentDailyUsage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxTokensPerRequest": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "AuthResult": {
         "type": "object",
         "additionalProperties": false,

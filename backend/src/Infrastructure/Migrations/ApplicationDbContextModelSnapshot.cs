@@ -34,6 +34,57 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("EventMember");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.AIBiography", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("GeneratedFromDB")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("json");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Style")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TokensUsed")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserPrompt")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("AIBiographies");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
                     b.Property<Guid>("Id")
@@ -285,9 +336,6 @@ namespace backend.Infrastructure.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Metadata")
-                        .HasColumnType("json");
-
                     b.Property<string>("TargetId")
                         .HasColumnType("longtext");
 
@@ -358,6 +406,17 @@ namespace backend.Infrastructure.Migrations
                         .HasForeignKey("RelatedMembersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.AIBiography", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Member", "Member")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
