@@ -6,3 +6,6 @@ export * from './family';
 export * from './timeline';
 export * from './vendor';
 export * from './dashboard.d';
+export * from './userActivity/recentActivity';
+export * from './userActivity/userActionType';
+export * from './userActivity/targetType';

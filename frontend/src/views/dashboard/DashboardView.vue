@@ -22,7 +22,7 @@
     <!-- Middle Section: Recent Activity & Upcoming Events -->
     <v-row>
       <v-col cols="12" md="6">
-        <RecentActivity />
+        <RecentActivity :family-id="selectedFamilyId || undefined" />
       </v-col>
       <v-col cols="12" md="6">
         <UpcomingEvents />
