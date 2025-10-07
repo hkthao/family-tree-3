@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
 public class UpdateRelationshipCommandValidator : AbstractValidator<UpdateRelationshipCommand>

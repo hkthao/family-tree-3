@@ -10,6 +10,9 @@ import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
 import { MockRelationshipService } from './relationship/mock.relationship.service';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
+import type { IUserProfileService } from './userProfile/userProfile.service.interface';
+import { MockUserProfileService } from './userProfile/mock.userProfile.service';
+import { UserProfileApiService } from './userProfile/api.userProfile.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -18,6 +21,7 @@ export interface AppServices {
   member: IMemberService; 
   event: IEventService;
   relationship: IRelationshipService;
+  userProfile: IUserProfileService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -49,5 +53,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiRelationshipService(apiClient)
         : testServices?.relationship || new MockRelationshipService(),
+    userProfile:
+      mode === 'mock'
+        ? new MockUserProfileService()
+        : mode === 'real'
+        ? new UserProfileApiService(apiClient)
+        : testServices?.userProfile || new MockUserProfileService(),
   };
 }

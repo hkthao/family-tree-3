@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia';
-import type { UserProfile } from '@/types/user';
+import type { UserProfile } from '@/types';
 
 interface UserProfileState {
-    userProfiles: UserProfile[];
+    items: UserProfile[];
     loading: boolean;
     error: string | null;
 }
 
 export const useUserProfileStore = defineStore('userProfile', {
     state: (): UserProfileState => ({
-        userProfiles: [],
+        items: [],
         loading: false,
         error: null,
     }),
@@ -18,12 +18,12 @@ export const useUserProfileStore = defineStore('userProfile', {
             this.loading = true;
             this.error = null;
             try {
-                // TODO: Implement API call to fetch user profiles
-                // For now, we'll use mock data.
-                this.userProfiles = [
-                    { id: '1', auth0UserId: 'auth0|1', email: 'user1@example.com', name: 'User One' },
-                    { id: '2', auth0UserId: 'auth0|2', email: 'user2@example.com', name: 'User Two' },
-                ];
+                const response = await this.services.userProfile.getAllUserProfiles();
+                if (response.ok) {
+                    this.items = response.value!;
+                } else {
+                    this.error = response.error?.message || 'Failed to fetch user profiles.';
+                }
             } catch (error) {
                 this.error = (error as Error).message;
             } finally {
@@ -32,6 +32,6 @@ export const useUserProfileStore = defineStore('userProfile', {
         },
     },
     getters: {
-        allUserProfiles: (state) => state.userProfiles,
+        allUserProfiles: (state) => state.items,
     },
 });

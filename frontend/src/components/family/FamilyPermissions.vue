@@ -40,7 +40,7 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue']);
 
 const userProfileStore = useUserProfileStore();
-const { userProfiles } = storeToRefs(userProfileStore);
+const { items: userProfiles } = storeToRefs(userProfileStore);
 
 onMounted(() => {
   userProfileStore.fetchUserProfiles();

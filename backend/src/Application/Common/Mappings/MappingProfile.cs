@@ -8,7 +8,8 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Members.Queries;
-using backend.Application.Relationships.Queries; // Added
+using backend.Application.Relationships.Queries;
+using backend.Application.UserProfiles.Queries; // Added
 
 namespace backend.Application.Common.Mappings;
 
@@ -32,5 +33,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.SourceMember, opt => opt.MapFrom(src => src.SourceMember))
             .ForMember(dest => dest.TargetMember, opt => opt.MapFrom(src => src.TargetMember));
         CreateMap<Member, RelationshipMemberDto>();
+        CreateMap<UserProfile, UserProfileDto>();
     }
 }
