@@ -39,6 +39,8 @@
       :label="$t('family.form.descriptionLabel')"
       variant="outlined"
     ></v-textarea>
+
+    <FamilyPermissions v-if="!props.readOnly" v-model="familyUsers" />
   </v-form>
 </template>
 
@@ -46,13 +48,15 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import type { Family } from '@/types';
+import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
 
 import { AvatarInput, AvatarDisplay } from '@/components/common';
+import FamilyPermissions from './FamilyPermissions.vue';
 
 const props = defineProps<{
   initialFamilyData?: Family;
+  initialFamilyUsers?: FamilyUser[];
   readOnly?: boolean;
 }>();
 const emit = defineEmits(['submit', 'cancel']);
@@ -70,6 +74,8 @@ const familyForm = ref<Family | Omit<Family, 'id'>>(
     visibility: FamilyVisibility.Public,
   },
 );
+
+const familyUsers = ref<FamilyUser[]>(props.initialFamilyUsers || []);
 
 const visibilityItems = computed(() => [
   {

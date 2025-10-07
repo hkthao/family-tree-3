@@ -60,6 +60,8 @@
   "common.cancel": "Cancel",
   "common.save": "Save",
   "family.form.rules.nameRequired": "Name is required.",
+  "family.permissions.managers": "Managers",
+  "family.permissions.viewers": "Viewers",
   "family.detail.title": "Family Details",
   "family.detail.name": "Name:",
   "family.detail.description": "Description:",
