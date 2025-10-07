@@ -2,6 +2,7 @@ using System.Reflection;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace backend.Infrastructure.Data;
 
@@ -63,7 +64,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         builder.Entity<UserActivity>()
             .Property(ua => ua.Metadata)
-            .HasColumnType("json");
+            .HasColumnType("json")
+            .HasConversion(
+                v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
+                v => v == null ? null : JsonDocument.Parse(v, new JsonDocumentOptions()));
 
         base.OnModelCreating(builder);
     }

@@ -1464,6 +1464,83 @@
         ]
       }
     },
+    "/api/activities/recent": {
+      "get": {
+        "tags": [
+          "UserActivities"
+        ],
+        "operationId": "UserActivities_GetRecentActivities",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            },
+            "x-position": 1
+          },
+          {
+            "name": "targetType",
+            "in": "query",
+            "schema": {
+              "oneOf": [
+                {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/TargetType"
+                    }
+                  ]
+                }
+              ]
+            },
+            "x-position": 2
+          },
+          {
+            "name": "targetId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "familyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 4
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserActivityDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/UserProfiles": {
       "get": {
         "tags": [
@@ -2330,6 +2407,109 @@
             }
           }
         ]
+      },
+      "UserActivityDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "userProfileId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "actionType": {
+            "$ref": "#/components/schemas/UserActionType"
+          },
+          "targetType": {
+            "$ref": "#/components/schemas/TargetType"
+          },
+          "targetId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "metadata": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JsonDocument"
+              }
+            ]
+          },
+          "activitySummary": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserActionType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Login",
+          "Logout",
+          "CreateFamily",
+          "UpdateFamily",
+          "DeleteFamily",
+          "CreateMember",
+          "UpdateMember",
+          "DeleteMember",
+          "CreateEvent",
+          "UpdateEvent",
+          "DeleteEvent",
+          "CreateRelationship",
+          "UpdateRelationship",
+          "DeleteRelationship",
+          "ChangeRole"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ]
+      },
+      "TargetType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Family",
+          "Member",
+          "UserProfile",
+          "Event"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "JsonDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isDisposable": {
+            "type": "boolean"
+          },
+          "rootElement": {}
+        }
       },
       "UserProfileDto": {
         "type": "object",
