@@ -1,23 +1,38 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // Added for Result
+using backend.Application.Common.Models;
+using backend.Application.Families.Specifications;
+using Ardalis.Specification.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IAuthorizationService _authorizationService;
 
-    public UpdateFamilyCommandHandler(IApplicationDbContext context)
+    public UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
     {
         _context = context;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result> Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var entity = await _context.Families
-                .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
+            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+            if (currentUserProfile == null)
+            {
+                return Result.Failure("User profile not found.", "NotFound");
+            }
+
+            if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
+            {
+                return Result.Failure("User does not have permission to update this family.", "Forbidden");
+            }
+
+            var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
 
             if (entity == null)
             {
@@ -30,19 +45,16 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
             entity.AvatarUrl = request.AvatarUrl;
             entity.Visibility = request.Visibility;
 
-            // Comment: Write-side invariant: Family is updated in the database context.
             await _context.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }
         catch (DbUpdateException ex)
         {
-            // Log the exception details here if a logger is available
             return Result.Failure($"Database error occurred while updating family: {ex.Message}", "Database");
         }
         catch (Exception ex)
         {
-            // Log the exception details here if a logger is available
             return Result.Failure($"An unexpected error occurred while updating family: {ex.Message}", "Exception");
         }
     }
