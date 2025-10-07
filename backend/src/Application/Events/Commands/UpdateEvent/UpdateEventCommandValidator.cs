@@ -4,12 +4,18 @@ public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
 {
     public UpdateEventCommandValidator()
     {
+        RuleFor(v => v.Id)
+            .NotEmpty();
+
         RuleFor(v => v.Name)
             .MaximumLength(200)
             .NotEmpty();
 
         RuleFor(v => v.Description)
             .MaximumLength(1000);
+
+        RuleFor(v => v.StartDate)
+            .NotEmpty();
 
         RuleFor(v => v.Location)
             .MaximumLength(200);

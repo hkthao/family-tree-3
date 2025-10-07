@@ -4,6 +4,9 @@ public class CreateMemberCommandValidator : AbstractValidator<CreateMemberComman
 {
     public CreateMemberCommandValidator()
     {
+        RuleFor(v => v.FamilyId)
+            .NotEmpty();
+
         RuleFor(v => v.FirstName)
             .MaximumLength(100)
             .NotEmpty();

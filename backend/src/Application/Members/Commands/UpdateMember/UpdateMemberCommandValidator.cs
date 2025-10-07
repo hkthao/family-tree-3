@@ -4,6 +4,9 @@ public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberComman
 {
     public UpdateMemberCommandValidator()
     {
+        RuleFor(v => v.Id)
+            .NotEmpty();
+
         RuleFor(v => v.FirstName)
             .MaximumLength(100)
             .NotEmpty();

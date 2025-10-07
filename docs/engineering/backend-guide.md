@@ -408,7 +408,76 @@ public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Resul
 }
 ```
 
-## 9. Database Migration
+## 9. Validation
+
+Dự án sử dụng **FluentValidation** để xác thực các `Command` và `Query` trước khi chúng được xử lý bởi các `Handler`. Cơ chế này được tích hợp vào pipeline của MediatR thông qua một `ValidationBehaviour`.
+
+### 9.1. Cách hoạt động
+
+1.  **Tạo Validator**: Đối với mỗi `Command` hoặc `Query` cần xác thực, một class validator tương ứng kế thừa từ `AbstractValidator<T>` sẽ được tạo. Ví dụ, `CreateFamilyCommandValidator` cho `CreateFamilyCommand`.
+2.  **Đăng ký tự động**: Tất cả các validator trong `Application` assembly sẽ được tự động đăng ký với DI container nhờ vào `services.AddValidatorsFromAssembly(...)` trong `Application/DependencyInjection.cs`.
+3.  **Pipeline `ValidationBehaviour`**: `ValidationBehaviour` sẽ chặn tất cả các request, tìm validator tương ứng, và thực thi nó. Nếu có lỗi, nó sẽ ném ra một `ValidationException`.
+4.  **Xử lý lỗi toàn cục**: `CustomExceptionHandler` sẽ bắt `ValidationException` và trả về một response `400 Bad Request` với danh sách các lỗi.
+
+### 9.2. Các Validator hiện có
+
+#### Family Commands
+
+-   **`CreateFamilyCommandValidator`**:
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+-   **`UpdateFamilyCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+-   **`DeleteFamilyCommandValidator`**:
+    -   `Id`: Không được để trống.
+
+#### Member Commands
+
+-   **`CreateMemberCommandValidator`**:
+    -   `FamilyId`: Không được để trống.
+    -   `FirstName`: Không được để trống, tối đa 100 ký tự.
+    -   `LastName`: Không được để trống, tối đa 100 ký tự.
+-   **`UpdateMemberCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `FamilyId`: Không được để trống.
+    -   `FirstName`: Không được để trống, tối đa 100 ký tự.
+    -   `LastName`: Không được để trống, tối đa 100 ký tự.
+-   **`DeleteMemberCommandValidator`**:
+    -   `Id`: Không được để trống.
+
+#### Event Commands
+
+-   **`CreateEventCommandValidator`**:
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+    -   `StartDate`: Không được để trống.
+    -   `Description`: Tối đa 1000 ký tự.
+    -   `Location`: Tối đa 200 ký tự.
+    -   `Color`: Tối đa 20 ký tự.
+-   **`UpdateEventCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+    -   `StartDate`: Không được để trống.
+    -   `Description`: Tối đa 1000 ký tự.
+    -   `Location`: Tối đa 200 ký tự.
+    -   `Color`: Tối đa 20 ký tự.
+-   **`DeleteEventCommandValidator`**:
+    -   `Id`: Không được để trống.
+
+#### Relationship Commands
+
+-   **`CreateRelationshipCommandValidator`**:
+    -   `SourceMemberId`: Không được để trống.
+    -   `TargetMemberId`: Không được để trống.
+    -   `Type`: Không được để trống.
+-   **`UpdateRelationshipCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `SourceMemberId`: Không được để trống.
+    -   `TargetMemberId`: Không được để trống.
+    -   `Type`: Không được để trống.
+-   **`DeleteRelationshipCommandValidator`**:
+    -   `Id`: Không được để trống.
+
+## 10. Database Migration
 
 Sử dụng **Entity Framework Core Migrations** với công cụ `dotnet-ef` để quản lý schema của cơ sở dữ liệu. Migrations cho phép bạn định nghĩa cấu trúc database thông qua code (Code-First approach) và dễ dàng cập nhật schema khi có thay đổi trong mô hình dữ liệu.
 
@@ -448,7 +517,7 @@ dotnet ef database update --project src/Infrastructure --startup-project src/Web
 *   Luôn chạy `dotnet ef database update` sau khi tạo migration mới để đảm bảo database của bạn được đồng bộ với code.
 *   Trong môi trường phát triển, khi sử dụng In-Memory Database, migrations sẽ không được áp dụng. `ApplicationDbContextInitialiser` sẽ tự động xử lý việc tạo database trong trường hợp này.
 
-## 10. Hướng dẫn Kiểm thử
+## 11. Hướng dẫn Kiểm thử
 
 Kiểm thử là một phần quan trọng của quá trình phát triển phần mềm, giúp đảm bảo chất lượng và độ tin cậy của ứng dụng. Dự án này áp dụng các loại kiểm thử chính sau:
 
@@ -502,7 +571,7 @@ Kiểm thử là một phần quan trọng của quá trình phát triển phầ
 
 *   **Ngưỡng Coverage**: Đặt mục tiêu coverage hợp lý (ví dụ: 80% cho logic nghiệp vụ quan trọng) nhưng không nên coi coverage là mục tiêu duy nhất. Chất lượng test quan trọng hơn số lượng.
 
-## 11. Logging & Monitoring
+## 12. Logging & Monitoring
 
 Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt động của ứng dụng, phát hiện lỗi và đánh giá hiệu suất.
 
@@ -524,12 +593,12 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   **Traces**: Theo dõi luồng của một request qua nhiều services và components, giúp xác định nguyên nhân gốc rễ của các vấn đề về hiệu suất hoặc lỗi trong hệ thống phân tán.
 *   **Công cụ tích hợp**: Dự kiến tích hợp với Prometheus (để lưu trữ metrics) và Grafana (để trực quan hóa metrics và traces).
 
-## 12. Coding Style
+## 13. Coding Style
 
 -   Sử dụng `dotnet format` để duy trì code style nhất quán.
 -   Tuân thủ [Microsoft C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions).
 
-## 13. Best Practices
+## 14. Best Practices
 
 Để duy trì chất lượng mã nguồn cao, dễ bảo trì và mở rộng, hãy tuân thủ các nguyên tắc và thực tiễn tốt nhất sau:
 
@@ -572,7 +641,7 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   Tất cả các `Command` và `Query` handlers nên trả về một đối tượng `Result<T>` (hoặc `Result<Unit>` cho các thao tác không trả về dữ liệu) để chỉ rõ thành công hay thất bại và cung cấp thông tin lỗi chi tiết.
     *   Các `Controller` nên kiểm tra `Result.IsSuccess` và trả về các `ActionResult` phù hợp (ví dụ: `Ok(result.Value)`, `BadRequest(result.Error)`, `NotFound(result.Error)`). Điều này giúp chuẩn hóa việc xử lý phản hồi API và tránh việc throw exceptions không cần thiết.
 
-## 14. Tài liệu liên quan
+## 15. Tài liệu liên quan
 
 -   [Kiến trúc tổng quan](./architecture.md)
 -   [Hướng dẫn API](./api-reference.md)

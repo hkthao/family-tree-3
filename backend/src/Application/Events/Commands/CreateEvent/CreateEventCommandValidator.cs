@@ -11,6 +11,9 @@ public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
         RuleFor(v => v.Description)
             .MaximumLength(1000);
 
+        RuleFor(v => v.StartDate)
+            .NotEmpty();
+
         RuleFor(v => v.Location)
             .MaximumLength(200);
 

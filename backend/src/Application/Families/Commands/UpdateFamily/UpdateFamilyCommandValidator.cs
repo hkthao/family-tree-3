@@ -4,6 +4,9 @@ public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyComman
 {
     public UpdateFamilyCommandValidator()
     {
+        RuleFor(v => v.Id)
+            .NotEmpty();
+
         RuleFor(v => v.Name)
             .MaximumLength(200)
             .NotEmpty();
