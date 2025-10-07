@@ -4,6 +4,9 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Application.UserProfiles.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
@@ -11,11 +14,13 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
 {
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
+    private readonly IMediator _mediator;
 
-    public CreateFamilyCommandHandler(IApplicationDbContext context, IUser user)
+    public CreateFamilyCommandHandler(IApplicationDbContext context, IUser user, IMediator mediator)
     {
         _context = context;
         _user = user;
+        _mediator = mediator;
     }
 
     public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
@@ -57,6 +62,16 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
 
             _context.FamilyUsers.Add(familyUser);
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Record activity
+            await _mediator.Send(new RecordActivityCommand
+            {
+                UserProfileId = userProfile.Id,
+                ActionType = UserActionType.CreateFamily,
+                TargetType = TargetType.Family,
+                TargetId = entity.Id,
+                ActivitySummary = $"Created family '{entity.Name}'."
+            }, cancellationToken);
 
             return Result<Guid>.Success(entity.Id);
         }

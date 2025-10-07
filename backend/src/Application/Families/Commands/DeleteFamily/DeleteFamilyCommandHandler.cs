@@ -2,6 +2,10 @@
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using backend.Domain.Enums;
+using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 
@@ -9,11 +13,13 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, R
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IMediator _mediator;
 
-    public DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
+    public DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
     {
         _context = context;
         _authorizationService = authorizationService;
+        _mediator = mediator;
     }
 
     public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
@@ -38,9 +44,21 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, R
                 return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
             }
 
+            var familyName = entity.Name; // Capture family name for activity summary
+
             _context.Families.Remove(entity);
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Record activity
+            await _mediator.Send(new RecordActivityCommand
+            {
+                UserProfileId = currentUserProfile.Id,
+                ActionType = UserActionType.DeleteFamily,
+                TargetType = TargetType.Family,
+                TargetId = entity.Id,
+                ActivitySummary = $"Deleted family '{familyName}'."
+            }, cancellationToken);
 
             return Result.Success();
         }

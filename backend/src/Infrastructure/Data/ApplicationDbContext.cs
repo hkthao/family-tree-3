@@ -15,7 +15,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Relationship> Relationships => Set<Relationship>();
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>(); // Added
     public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>(); // Added
-
+    public DbSet<UserActivity> UserActivities => Set<UserActivity>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -60,6 +60,10 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .HasOne(fu => fu.UserProfile)
             .WithMany(up => up.FamilyUsers)
             .HasForeignKey(fu => fu.UserProfileId);
+
+        builder.Entity<UserActivity>()
+            .Property(ua => ua.Metadata)
+            .HasColumnType("json");
 
         base.OnModelCreating(builder);
     }

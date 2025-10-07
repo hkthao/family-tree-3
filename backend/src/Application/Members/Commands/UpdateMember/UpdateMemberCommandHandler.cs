@@ -2,20 +2,40 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using backend.Domain.Enums;
+using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IMediator _mediator;
 
-    public UpdateMemberCommandHandler(IApplicationDbContext context)
+    public UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
     {
         _context = context;
+        _authorizationService = authorizationService;
+        _mediator = mediator;
     }
 
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
+        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+        if (currentUserProfile == null)
+        {
+            return Result<Guid>.Failure("User profile not found.", "NotFound");
+        }
+
+        // Authorization check (similar to CreateMemberCommandHandler)
+        if (!_authorizationService.IsAdmin() && !_authorizationService.CanManageFamily(request.FamilyId, currentUserProfile))
+        {
+            return Result<Guid>.Failure("Access denied. Only family managers can update members.", "Forbidden");
+        }
+
         var entity = await _context.Members
             .Include(m => m.Relationships)
             .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
@@ -24,6 +44,8 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, R
         {
             throw new NotFoundException(nameof(Member), request.Id);
         }
+
+        var oldFullName = entity.FullName; // Capture old name for activity summary
 
         entity.FirstName = request.FirstName;
         entity.LastName = request.LastName;
@@ -87,8 +109,17 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, R
             }
         }
 
-        // Comment: Write-side invariant: Member and Relationships are updated in the database context.
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Record activity
+        await _mediator.Send(new RecordActivityCommand
+        {
+            UserProfileId = currentUserProfile.Id,
+            ActionType = UserActionType.UpdateMember,
+            TargetType = TargetType.Member,
+            TargetId = entity.Id,
+            ActivitySummary = $"Updated member '{oldFullName}' to '{entity.FullName}'."
+        }, cancellationToken);
 
         return Result<Guid>.Success(entity.Id);
     }

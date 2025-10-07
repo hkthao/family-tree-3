@@ -269,6 +269,11 @@ Content-Type: application/json
 -   `GET /api/UserProfiles`: Lấy danh sách tất cả hồ sơ người dùng.
     *   **Phản hồi:** `Result<List<UserProfileDto>>`
 
+### 6.7. Quản lý Hoạt động Người dùng (`/api/activities`)
+
+-   `GET /api/activities/recent?limit=...&targetType=...&targetId=...&familyId=...`: Lấy danh sách các hoạt động gần đây của người dùng.
+    *   **Phản hồi:** `Result<List<UserActivityDto>>`
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -374,6 +379,21 @@ Content-Type: application/json
   "auth0UserId": "string",
   "email": "string",
   "name": "string"
+}
+```
+
+### 7.8. UserActivity
+
+```json
+{
+  "id": "string (uuid)",
+  "userProfileId": "string (uuid)",
+  "actionType": "string (enum: Login, CreateFamily, UpdateMember, etc.)",
+  "targetType": "string (enum: Family, Member, UserProfile, etc.)",
+  "targetId": "string (uuid)",
+  "metadata": "object (json, nullable)",
+  "activitySummary": "string",
+  "created": "string (date-time)"
 }
 ```
 ```

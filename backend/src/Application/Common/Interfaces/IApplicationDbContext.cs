@@ -10,5 +10,6 @@ public interface IApplicationDbContext
     DbSet<Relationship> Relationships { get; }
     DbSet<UserProfile> UserProfiles { get; } // Added
     DbSet<FamilyUser> FamilyUsers { get; } // Added
+    DbSet<UserActivity> UserActivities { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

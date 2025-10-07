@@ -11,12 +11,13 @@
 - [7. Xác thực & Phân quyền](#7-xác-thực--phân-quyền)
 - [8. Tương tác Dữ liệu với Entity Framework Core](#8-tương-tác-dữ-liệu-với-entity-framework-core-updated-after-refactor)
   - [8.1. Specification Pattern](#81-specification-pattern-updated-after-refactor)
-- [9. Database Migration](#9-database-migration)
-- [10. Hướng dẫn Kiểm thử](#10-hướng-dẫn-kiểm-thử)
-- [11. Logging & Monitoring](#11-logging--monitoring)
-- [12. Coding Style](#12-coding-style)
-- [13. Best Practices](#13-best-practices)
-- [14. Tài liệu liên quan](#14-tài-liệu-liên-quan)
+- [9. Validation](#9-validation)
+- [10. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)](#10-ghi-nhật-ký-hoạt-động-người-dùng-user-activity-logging)
+- [11. Hướng dẫn Kiểm thử](#11-hướng-dẫn-kiểm-thử)
+- [12. Logging & Monitoring](#12-logging--monitoring)
+- [13. Coding Style](#13-coding-style)
+- [14. Best Practices](#14-best-practices)
+- [15. Tài liệu liên quan](#15-tài-liệu-liên-quan)
 
 ---
 
@@ -38,7 +39,7 @@ Dự án được chia thành các project chính, tuân thủ theo nguyên tắ
 backend/
 ├── src/
 │   ├── Domain/         # Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), định nghĩa các quy tắc nghiệp vụ cốt lõi, và Domain Events. Đây là trái tim của ứng dụng, độc lập với các lớp khác.
-│   ├── Application/    # Chứa logic nghiệp vụ chính của ứng dụng (Use Cases), các DTOs (Data Transfer Objects), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các Commands/Queries/Handlers theo mô hình CQRS.
+│   ├── Application/    # Chứa logic nghiệp vụ chính của ứng dụng (Use Cases), các DTOs (Data Transfer Objects), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các Commands/Queries/Handlers theo mô hình CQRS. Bao gồm cả các UserActivities.
 │   ├── Infrastructure/ # Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer. Bao gồm truy cập cơ sở dữ liệu (Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
 │   └── Web/            # Là lớp trình bày (Presentation Layer), chứa các API Controllers, cấu hình ASP.NET Core, và là điểm vào của ứng dụng.
 └── tests/
@@ -190,9 +191,24 @@ public interface IApplicationDbContext
     DbSet<Family> Families { get; }
     DbSet<Member> Members { get; }
     DbSet<Event> Events { get; }
+    DbSet<Relationship> Relationships { get; }
+    DbSet<UserProfile> UserProfiles { get; }
+    DbSet<FamilyUser> FamilyUsers { get; }
+    DbSet<UserActivity> UserActivities { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
+```
+
+#### Cấu hình ánh xạ JsonDocument cho Metadata
+
+Thuộc tính `Metadata` của thực thể `UserActivity` được lưu trữ dưới dạng JSON trong cơ sở dữ liệu. Điều này được cấu hình trong `ApplicationDbContext` bằng cách sử dụng `HasColumnType("json")`.
+
+```csharp
+// Trong ApplicationDbContext.cs (phương thức OnModelCreating)
+builder.Entity<UserActivity>()
+    .Property(ua => ua.Metadata)
+    .HasColumnType("json");
 ```
 
 #### Sử dụng trong Handlers
@@ -477,99 +493,72 @@ Dự án sử dụng **FluentValidation** để xác thực các `Command` và `
 -   **`DeleteRelationshipCommandValidator`**:
     -   `Id`: Không được để trống.
 
-## 10. Database Migration
+## 10. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)
 
-Sử dụng **Entity Framework Core Migrations** với công cụ `dotnet-ef` để quản lý schema của cơ sở dữ liệu. Migrations cho phép bạn định nghĩa cấu trúc database thông qua code (Code-First approach) và dễ dàng cập nhật schema khi có thay đổi trong mô hình dữ liệu.
+Tính năng ghi nhật ký hoạt động người dùng được triển khai để theo dõi các hành động quan trọng của người dùng trong hệ thống, phục vụ mục đích kiểm toán và cung cấp thông tin cho nguồn cấp dữ liệu hoạt động của người dùng.
 
-#### 1. Tạo Migration ban đầu (Initial Migration)
+### 10.1. Thực thể `UserActivity`
 
-Khi bạn bắt đầu dự án hoặc sau khi định nghĩa các Entity đầu tiên, bạn cần tạo một migration ban đầu để tạo tất cả các bảng và cấu trúc database.
+Thực thể `UserActivity` (`backend/src/Domain/Entities/UserActivity.cs`) lưu trữ chi tiết về mỗi hành động của người dùng.
 
-```bash
-# Đảm bảo bạn đang ở thư mục gốc của project backend
-dotnet ef migrations add InitialCreate --project src/Infrastructure --startup-project src/Web
-```
+| Tên trường      | Kiểu dữ liệu | Mô tả                                                              |
+| :-------------- | :----------- | :----------------------------------------------------------------- |
+| `Id`            | `Guid`       | ID duy nhất của hoạt động.                                         |
+| `UserProfileId` | `Guid`       | ID của hồ sơ người dùng thực hiện hành động.                       |
+| `UserProfile`   | `UserProfile`| Thuộc tính điều hướng đến hồ sơ người dùng.                        |
+| `ActionType`    | `UserActionType`| Loại hành động được thực hiện (ví dụ: `Login`, `CreateFamily`).    |
+| `TargetType`    | `TargetType` | Loại tài nguyên bị ảnh hưởng (ví dụ: `Family`, `Member`).          |
+| `TargetId`      | `Guid`       | ID của tài nguyên bị ảnh hưởng.                                    |
+| `Metadata`      | `JsonDocument`| Dữ liệu tùy chọn dưới dạng JSON để lưu trữ chi tiết bổ sung.       |
+| `ActivitySummary`| `string`     | Tóm tắt hoạt động để hiển thị.                                     |
+| `Created`       | `DateTime`   | Thời điểm hoạt động được ghi lại.                                  |
 
-*   `InitialCreate`: Tên của migration. Bạn có thể đặt tên khác có ý nghĩa.
-*   `--project src/Infrastructure`: Chỉ định project chứa `DbContext` và các migration files.
-*   `--startup-project src/Web`: Chỉ định project khởi động (Web API) để `dotnet ef` có thể tìm thấy cấu hình và chuỗi kết nối.
+#### Enums liên quan
 
-#### 2. Tạo Migration cho các thay đổi sau này
+-   **`UserActionType`** (`backend/src/Domain/Enums/UserActionType.cs`): Định nghĩa các loại hành động:
+    -   `Login`, `Logout`
+    -   `CreateFamily`, `UpdateFamily`, `DeleteFamily`
+    -   `CreateMember`, `UpdateMember`, `DeleteMember`
+    -   `ChangeRole`
+-   **`TargetType`** (`backend/src/Domain/Enums/TargetType.cs`): Định nghĩa các loại tài nguyên:
+    -   `Family`, `Member`, `UserProfile`
 
-Khi bạn thay đổi các Entity (thêm thuộc tính, thay đổi quan hệ, v.v.), bạn cần tạo một migration mới để cập nhật schema database.
+### 10.2. Ghi lại Hoạt động (Record Activity)
 
-```bash
-# Đảm bảo bạn đang ở thư mục gốc của project backend
-dotnet ef migrations add AddNewFieldToMember --project src/Infrastructure --startup-project src/Web
-```
+Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` thông qua MediatR.
 
-#### 3. Cập nhật Database
+-   **`RecordActivityCommand`** (`backend/src/Application/UserActivities/Commands/RecordActivity/RecordActivityCommand.cs`):
+    -   Chứa các thông tin cần thiết để tạo một `UserActivity` mới.
+-   **`RecordActivityCommandHandler`** (`backend/src/Application/UserActivities/Commands/RecordActivity/RecordActivityCommandHandler.cs`):
+    -   Nhận `RecordActivityCommand`, tạo thực thể `UserActivity` và lưu vào cơ sở dữ liệu.
+    -   Việc lưu được thực hiện bất đồng bộ (`await _context.SaveChangesAsync()`) để không chặn luồng chính.
 
-Sau khi tạo migration, bạn cần áp dụng nó vào database. Lệnh này sẽ thực thi các thay đổi schema được định nghĩa trong migration.
+### 10.3. Truy vấn Hoạt động Gần đây (Get Recent Activities)
 
-```bash
-# Đảm bảo bạn đang ở thư mục gốc của project backend
-dotnet ef database update --project src/Infrastructure --startup-project src/Web
-```
+Để lấy danh sách các hoạt động gần đây, sử dụng `GetRecentActivitiesQuery`.
 
-**Lưu ý:**
+-   **`GetRecentActivitiesQuery`** (`backend/src/Application/UserActivities/Queries/GetRecentActivities/GetRecentActivitiesQuery.cs`):
+    -   Cho phép lọc theo `Limit`, `TargetType`, `TargetId`, `FamilyId`.
+-   **`GetRecentActivitiesQueryHandler`** (`backend/src/Application/UserActivities/Queries/GetRecentActivities/GetRecentActivitiesQueryHandler.cs`):
+    -   Sử dụng `UserActivityByUserSpec` để lọc và sắp xếp các hoạt động.
+    -   Thực thi kiểm soát truy cập: chỉ cho phép người dùng xem hoạt động của chính họ.
+-   **`UserActivityDto`** (`backend/src/Application/UserActivities/Queries/UserActivityDto.cs`):
+    -   DTO để truyền dữ liệu hoạt động người dùng.
 
-*   Luôn chạy `dotnet ef database update` sau khi tạo migration mới để đảm bảo database của bạn được đồng bộ với code.
-*   Trong môi trường phát triển, khi sử dụng In-Memory Database, migrations sẽ không được áp dụng. `ApplicationDbContextInitialiser` sẽ tự động xử lý việc tạo database trong trường hợp này.
+### 10.4. Specification `UserActivityByUserSpec`
+
+-   **`UserActivityByUserSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityByUserSpec.cs`):
+    -   Lọc hoạt động theo `UserProfileId` và các tiêu chí tùy chọn khác.
+    -   Sắp xếp theo `Created` giảm dần và giới hạn số lượng kết quả (`Take(limit)`) để tối ưu hiệu suất.
+
+### 10.5. API Endpoint
+
+-   **`UserActivitiesController`** (`backend/src/Web/Controllers/UserActivitiesController.cs`):
+    -   Cung cấp endpoint `GET /api/activities/recent` để truy vấn các hoạt động gần đây.
+    -   Hỗ trợ các tham số `limit`, `targetType`, `targetId`, `familyId` qua query string.
+    -   Yêu cầu xác thực (`[Authorize]`).
 
 ## 11. Hướng dẫn Kiểm thử
-
-Kiểm thử là một phần quan trọng của quá trình phát triển phần mềm, giúp đảm bảo chất lượng và độ tin cậy của ứng dụng. Dự án này áp dụng các loại kiểm thử chính sau:
-
-#### 1. Unit Tests
-
-*   **Mục đích**: Kiểm tra các đơn vị mã nguồn nhỏ nhất (ví dụ: một phương thức, một class) một cách độc lập, tách biệt khỏi các phụ thuộc bên ngoài (như database, hệ thống file, API).
-*   **Phạm vi**: Tập trung vào logic nghiệp vụ trong Application Layer và Domain Layer.
-*   **Project**: `backend/tests/Application.UnitTests`
-*   **Cách chạy**: 
-
-    ```bash
-    # Chạy tất cả Unit Tests
-    dotnet test backend/tests/Application.UnitTests
-    
-    # Hoặc chạy tất cả test trong toàn bộ solution
-    dotnet test
-    ```
-
-*   **Best Practice**: Sử dụng các mock framework (ví dụ: Moq) để giả lập các phụ thuộc, đảm bảo Unit Test chỉ kiểm tra đơn vị mã nguồn đang xét.
-
-#### 2. Integration Tests
-
-*   **Mục đích**: Kiểm tra sự tương tác giữa các thành phần khác nhau của hệ thống (ví dụ: Application Layer với Infrastructure Layer, hoặc API với Database). Integration Tests đảm bảo rằng các thành phần hoạt động cùng nhau một cách chính xác.
-*   **Phạm vi**: Tập trung vào Infrastructure Layer và các luồng end-to-end qua API.
-*   **Project**: `backend/tests/Infrastructure.IntegrationTests`
-*   **Cách chạy**: 
-
-    ```bash
-    # Chạy tất cả Integration Tests
-    dotnet test backend/tests/Infrastructure.IntegrationTests
-    
-    # Hoặc chạy tất cả test trong toàn bộ solution
-    dotnet test
-    ```
-
-*   **Best Practice**: Sử dụng In-Memory Database hoặc Testcontainers để tạo môi trường database độc lập cho mỗi lần chạy test, đảm bảo tính nhất quán và tốc độ.
-
-#### 3. Test Coverage
-
-*   **Mục đích**: Đo lường tỷ lệ phần trăm mã nguồn được thực thi bởi các bài kiểm thử. Test Coverage cao giúp tăng cường sự tự tin vào chất lượng mã nguồn.
-*   **Cách tạo báo cáo**: 
-
-    ```bash
-    # Chạy test và tạo báo cáo coverage
-    dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectionFile="$(SolutionDir)backend/tests/coverlet.runsettings"
-    
-    # Sau đó, bạn có thể sử dụng ReportGenerator để tạo báo cáo HTML
-    # dotnet tool install -g dotnet-reportgenerator-globaltool
-    # reportgenerator -reports:"path/to/coverage.xml" -targetdir:"coverage_report"
-    ```
-
-*   **Ngưỡng Coverage**: Đặt mục tiêu coverage hợp lý (ví dụ: 80% cho logic nghiệp vụ quan trọng) nhưng không nên coi coverage là mục tiêu duy nhất. Chất lượng test quan trọng hơn số lượng.
 
 ## 12. Logging & Monitoring
 

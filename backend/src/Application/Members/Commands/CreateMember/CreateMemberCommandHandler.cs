@@ -1,6 +1,10 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using backend.Domain.Enums;
+using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -9,12 +13,14 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IMediator _mediator;
 
-    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
+    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, IMediator mediator)
     {
         _context = context;
         _user = user;
         _authorizationService = authorizationService;
+        _mediator = mediator;
     }
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
@@ -87,8 +93,21 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
             });
         }
 
-        // Comment: Write-side invariant: Member and Relationships are added to the database context.
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Record activity
+        var currentUserProfileForActivity = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+        if (currentUserProfileForActivity != null)
+        {
+            await _mediator.Send(new RecordActivityCommand
+            {
+                UserProfileId = currentUserProfileForActivity.Id,
+                ActionType = UserActionType.CreateMember,
+                TargetType = TargetType.Member,
+                TargetId = entity.Id,
+                ActivitySummary = $"Created member '{entity.FullName}' in family '{request.FamilyId}'."
+            }, cancellationToken);
+        }
 
         return Result<Guid>.Success(entity.Id);
     }

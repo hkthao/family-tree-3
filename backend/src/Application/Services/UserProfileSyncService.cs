@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using backend.Application.UserProfiles.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.Services;
 

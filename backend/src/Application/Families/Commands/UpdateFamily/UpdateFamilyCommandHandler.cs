@@ -2,6 +2,10 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using backend.Domain.Enums;
+using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -9,11 +13,13 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
 {
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IMediator _mediator;
 
-    public UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
+    public UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
     {
         _context = context;
         _authorizationService = authorizationService;
+        _mediator = mediator;
     }
 
     public async Task<Result> Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
@@ -38,6 +44,8 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
                 return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
             }
 
+            var oldName = entity.Name; // Capture old name for activity summary
+
             entity.Name = request.Name;
             entity.Description = request.Description;
             entity.Address = request.Address;
@@ -45,6 +53,16 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
             entity.Visibility = request.Visibility;
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Record activity
+            await _mediator.Send(new RecordActivityCommand
+            {
+                UserProfileId = currentUserProfile.Id,
+                ActionType = UserActionType.UpdateFamily,
+                TargetType = TargetType.Family,
+                TargetId = entity.Id,
+                ActivitySummary = $"Updated family '{oldName}' to '{entity.Name}'."
+            }, cancellationToken);
 
             return Result.Success();
         }

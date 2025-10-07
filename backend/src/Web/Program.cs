@@ -52,22 +52,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
                 // Run the sync operation in a background task to not block the main request thread
-                _ = Task.Run(async () =>
-                {
-                    using (var scope = context.HttpContext.RequestServices.CreateScope())
-                    {
-                        var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<IUserProfileSyncService>();
-                        var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                        try
+                        _ = Task.Run(async () =>
                         {
-                            await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
-                        }
-                        catch (Exception ex)
-                        {
-                            scopedLogger.LogError(ex, "Error syncing user profile for Auth0 user {Auth0UserId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                        }
-                    }
-                });
+                            using (var scope = context.HttpContext.RequestServices.CreateScope())
+                            {
+                                var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<backend.Application.Common.Interfaces.IUserProfileSyncService>();
+                                var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                                try
+                                {
+                                    await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
+
+                                    // Record Login Activity
+                                    var userProfileId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                                    if (!string.IsNullOrEmpty(userProfileId))
+                                    {
+                                        var recordCommand = new backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand
+                                        {
+                                            UserProfileId = Guid.Parse(userProfileId),
+                                            ActionType = backend.Domain.Enums.UserActionType.Login,
+                                            TargetType = backend.Domain.Enums.TargetType.UserProfile,
+                                            TargetId = Guid.Parse(userProfileId),
+                                            ActivitySummary = "User logged in."
+                                        };
+                                        await mediator.Send(recordCommand);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    scopedLogger.LogError(ex, "Error syncing user profile or recording login activity for Auth0 user {Auth0UserId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                                }
+                            }
+                        });
                 return Task.CompletedTask;
             }
         };
