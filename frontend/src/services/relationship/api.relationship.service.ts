@@ -8,7 +8,7 @@ import {
 } from '@/types'; // Added Relationship
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class ApiRelationshipService implements IRelationshipService {
   private mapListDtoToRelationship(dto: Relationship): Relationship {

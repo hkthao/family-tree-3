@@ -2,7 +2,7 @@ import type { IEventService } from './event.service.interface';
 import type { Event, Paginated, Result, EventFilter } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class ApiEventService implements IEventService {
   constructor(private http: ApiClientMethods) {}

@@ -8,6 +8,6 @@ export interface IUserActivityService {
     limit?: number,
     targetType?: TargetType,
     targetId?: string,
-    familyId?: string,
+    groupId?: string,
   ): Promise<Result<RecentActivity[], ApiError>>;
 }

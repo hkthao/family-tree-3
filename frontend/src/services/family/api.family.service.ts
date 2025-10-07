@@ -8,7 +8,7 @@ import {
 } from '@/types';
 
 // Base URL for your API - configure this based on your environment
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: ApiClientMethods) {}
@@ -57,7 +57,7 @@ export class ApiFamilyService implements IFamilyService {
     if (filter.sortOrder) params.append('sortOrder', filter.sortOrder);
 
     return this.http.get<Paginated<Family>>(
-      `/api/family/search?${params.toString()}`,
+      `${this.apiUrl}/search?${params.toString()}`,
     );
   }
 

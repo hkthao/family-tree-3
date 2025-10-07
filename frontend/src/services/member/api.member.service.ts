@@ -8,9 +8,6 @@ import {
 import type { IMemberService } from './member.service.interface'; // Import MemberFilter
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
-// Base URL for your API - configure this based on your environment
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
 // Helper function to transform date strings to Date objects
 function transformMemberDates(member: any): Member {
   if (member.dateOfBirth && typeof member.dateOfBirth === 'string') {
@@ -34,6 +31,8 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   }
   return apiMember;
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class ApiMemberService implements IMemberService {
   constructor(private http: ApiClientMethods) {}

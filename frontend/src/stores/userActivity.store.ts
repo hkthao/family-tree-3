@@ -1,12 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
 import type { RecentActivity, TargetType } from '@/types';
-
-interface UserActivityState {
-  items: RecentActivity[];
-  loading: boolean;
-  error: string | null;
-}
 
 export const useUserActivityStore = defineStore('userActivity', {
   state: () => ({
@@ -15,11 +8,11 @@ export const useUserActivityStore = defineStore('userActivity', {
     error: null as string | null,
   }),
   actions: {
-    async fetchRecentActivities(limit?: number, targetType?: TargetType, targetId?: string, familyId?: string) {
+    async fetchRecentActivities(limit?: number, targetType?: TargetType, targetId?: string, groupId?: string) {
       this.loading = true;
       this.error = null;
       try {
-        const response = await this.services.userActivity.getRecentActivities(limit, targetType, targetId, familyId);
+        const response = await this.services.userActivity.getRecentActivities(limit, targetType, targetId, groupId);
         if (response.ok) {
           this.items = response.value;
         } else {

@@ -434,6 +434,7 @@ public class ApplicationDbContextInitialiser
                     TargetType = backend.Domain.Enums.TargetType.UserProfile,
                     TargetId = userProfile1Id.ToString(),
                     ActivitySummary = "User Test User One logged in.",
+                    GroupId= Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"),
                     Created = DateTime.UtcNow.AddDays(-5)
                 },
                 new backend.Domain.Entities.UserActivity
@@ -443,6 +444,7 @@ public class ApplicationDbContextInitialiser
                     TargetType = backend.Domain.Enums.TargetType.Family,
                     TargetId = royalFamilyId.ToString(),
                     ActivitySummary = "User Test User One created Royal Family.",
+                    GroupId= Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"),
                     Created = DateTime.UtcNow.AddDays(-4)
                 },
                 new backend.Domain.Entities.UserActivity
@@ -461,6 +463,7 @@ public class ApplicationDbContextInitialiser
                     TargetType = backend.Domain.Enums.TargetType.Member,
                     TargetId = williamId.ToString(),
                     ActivitySummary = "User Test User One created member Prince William.",
+                    GroupId= Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"),
                     Created = DateTime.UtcNow.AddDays(-2)
                 }
             });

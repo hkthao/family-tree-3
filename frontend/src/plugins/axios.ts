@@ -39,7 +39,7 @@ const createApiError = (error: AxiosError): ApiError => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api', // Default to /api if not set
+  //baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-type': 'application/json',
   },
