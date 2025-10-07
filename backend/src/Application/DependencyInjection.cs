@@ -17,6 +17,8 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
 
+        services.AddScoped<backend.Application.Common.Interfaces.IUserProfileSyncService, backend.Application.Services.UserProfileSyncService>();
+
         return services;
     }
 }

@@ -1,0 +1,8 @@
+using System.Security.Claims;
+
+namespace backend.Application.Common.Interfaces;
+
+public interface IUserProfileSyncService
+{
+    Task SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default);
+}

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using backend.Application;
 using backend.Infrastructure;
 using backend.Infrastructure.Data;
@@ -33,6 +34,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidAudience = auth0Audience, // Explicitly set the valid audience
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var userProfileSyncService = context.HttpContext.RequestServices.GetRequiredService<backend.Application.Common.Interfaces.IUserProfileSyncService>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+
+                // Run the sync operation in a background task to not block the main request thread
+                _ = Task.Run(async () =>
+                {
+                    using (var scope = context.HttpContext.RequestServices.CreateScope())
+                    {
+                        var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<backend.Application.Common.Interfaces.IUserProfileSyncService>();
+                        var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                        try
+                        {
+                            await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
+                        }
+                        catch (Exception ex)
+                        {
+                            scopedLogger.LogError(ex, "Error syncing user profile for Auth0 user {Auth0UserId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                        }
+                    }
+                });
+                return Task.CompletedTask;
+            }
         };
     });
 
