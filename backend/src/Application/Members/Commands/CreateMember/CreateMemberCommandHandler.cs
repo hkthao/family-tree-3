@@ -104,7 +104,7 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
                 UserProfileId = currentUserProfileForActivity.Id,
                 ActionType = UserActionType.CreateMember,
                 TargetType = TargetType.Member,
-                TargetId = entity.Id,
+                TargetId = entity.Id.ToString(),
                 ActivitySummary = $"Created member '{entity.FullName}' in family '{request.FamilyId}'."
             }, cancellationToken);
         }

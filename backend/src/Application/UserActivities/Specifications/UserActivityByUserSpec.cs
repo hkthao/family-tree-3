@@ -10,7 +10,7 @@ namespace backend.Application.UserActivities.Specifications;
 /// </summary>
 public class UserActivityByUserSpec : Specification<UserActivity>
 {
-    public UserActivityByUserSpec(Guid userProfileId, int limit, TargetType? targetType = null, Guid? targetId = null, Guid? familyId = null)
+    public UserActivityByUserSpec(Guid userProfileId, int limit, TargetType? targetType = null, string? targetId = null, Guid? familyId = null)
     {
         Query
             .Where(ua => ua.UserProfileId == userProfileId)
@@ -22,9 +22,9 @@ public class UserActivityByUserSpec : Specification<UserActivity>
             Query.Where(ua => ua.TargetType == targetType.Value);
         }
 
-        if (targetId.HasValue)
+        if (!string.IsNullOrEmpty(targetId))
         {
-            Query.Where(ua => ua.TargetId == targetId.Value);
+            Query.Where(ua => ua.TargetId == targetId);
         }
 
         // Note: Filtering by FamilyId would require joining with FamilyUser or having FamilyId directly on UserActivity.

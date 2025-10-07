@@ -30,7 +30,7 @@ public class UserActivitiesController : ControllerBase
     public async Task<ActionResult<List<UserActivityDto>>> GetRecentActivities(
         [FromQuery] int limit = 20,
         [FromQuery] TargetType? targetType = null,
-        [FromQuery] Guid? targetId = null,
+        [FromQuery] string? targetId = null,
         [FromQuery] Guid? familyId = null)
     {
         var query = new GetRecentActivitiesQuery

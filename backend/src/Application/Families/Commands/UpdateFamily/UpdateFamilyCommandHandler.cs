@@ -60,7 +60,7 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
                 UserProfileId = currentUserProfile.Id,
                 ActionType = UserActionType.UpdateFamily,
                 TargetType = TargetType.Family,
-                TargetId = entity.Id,
+                TargetId = entity.Id.ToString(),
                 ActivitySummary = $"Updated family '{oldName}' to '{entity.Name}'."
             }, cancellationToken);
 

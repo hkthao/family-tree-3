@@ -9,7 +9,7 @@ public class UserActivityDto
     public Guid UserProfileId { get; set; }
     public UserActionType ActionType { get; set; }
     public TargetType TargetType { get; set; }
-    public Guid TargetId { get; set; }
+    public string TargetId { get; set; } = null!;
     public JsonDocument? Metadata { get; set; }
     public string ActivitySummary { get; set; } = null!;
     public DateTime Created { get; set; }

@@ -53,7 +53,7 @@ public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommand, Res
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.DeleteEvent,
             TargetType = TargetType.Event,
-            TargetId = entity.Id,
+            TargetId = entity.Id.ToString(),
             ActivitySummary = $"Deleted event '{eventName}'."
         }, cancellationToken);
 

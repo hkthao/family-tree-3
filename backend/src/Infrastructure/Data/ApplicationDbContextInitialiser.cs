@@ -47,6 +47,35 @@ public class ApplicationDbContextInitialiser
     {
         // Default data
         // Seed, if necessary
+
+        // Seed UserProfiles
+        if (!_context.UserProfiles.Any())
+        {
+            var userProfile1Id = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var userProfile2Id = Guid.Parse("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22");
+
+            _context.UserProfiles.AddRange(new backend.Domain.Entities.UserProfile[]
+            {
+                new backend.Domain.Entities.UserProfile
+                {
+                    Id = userProfile1Id,
+                    Auth0UserId = "auth0|testuser1",
+                    Email = "testuser1@example.com",
+                    Name = "Test User One",
+                    Created = DateTime.UtcNow
+                },
+                new backend.Domain.Entities.UserProfile
+                {
+                    Id = userProfile2Id,
+                    Auth0UserId = "auth0|testuser2",
+                    Email = "testuser2@example.com",
+                    Name = "Test User Two",
+                    Created = DateTime.UtcNow
+                }
+            });
+            await _context.SaveChangesAsync();
+        }
+
         if (!_context.Families.Any())
         {
             Guid royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb");
@@ -385,6 +414,56 @@ public class ApplicationDbContextInitialiser
                 new backend.Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = lilibetMountbattenWindsorId, Type = backend.Domain.Enums.RelationshipType.Mother },
             });
 
+            await _context.SaveChangesAsync();
+        }
+
+        // Seed UserActivities
+        if (!_context.UserActivities.Any())
+        {
+            var userProfile1Id = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
+            var userProfile2Id = Guid.Parse("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22");
+            var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb");
+            var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef");
+
+            _context.UserActivities.AddRange(new backend.Domain.Entities.UserActivity[]
+            {
+                new backend.Domain.Entities.UserActivity
+                {
+                    UserProfileId = userProfile1Id,
+                    ActionType = backend.Domain.Enums.UserActionType.Login,
+                    TargetType = backend.Domain.Enums.TargetType.UserProfile,
+                    TargetId = userProfile1Id.ToString(),
+                    ActivitySummary = "User Test User One logged in.",
+                    Created = DateTime.UtcNow.AddDays(-5)
+                },
+                new backend.Domain.Entities.UserActivity
+                {
+                    UserProfileId = userProfile1Id,
+                    ActionType = backend.Domain.Enums.UserActionType.CreateFamily,
+                    TargetType = backend.Domain.Enums.TargetType.Family,
+                    TargetId = royalFamilyId.ToString(),
+                    ActivitySummary = "User Test User One created Royal Family.",
+                    Created = DateTime.UtcNow.AddDays(-4)
+                },
+                new backend.Domain.Entities.UserActivity
+                {
+                    UserProfileId = userProfile2Id,
+                    ActionType = backend.Domain.Enums.UserActionType.Login,
+                    TargetType = backend.Domain.Enums.TargetType.UserProfile,
+                    TargetId = userProfile2Id.ToString(),
+                    ActivitySummary = "User Test User Two logged in.",
+                    Created = DateTime.UtcNow.AddDays(-3)
+                },
+                new backend.Domain.Entities.UserActivity
+                {
+                    UserProfileId = userProfile1Id,
+                    ActionType = backend.Domain.Enums.UserActionType.CreateMember,
+                    TargetType = backend.Domain.Enums.TargetType.Member,
+                    TargetId = williamId.ToString(),
+                    ActivitySummary = "User Test User One created member Prince William.",
+                    Created = DateTime.UtcNow.AddDays(-2)
+                }
+            });
             await _context.SaveChangesAsync();
         }
     }

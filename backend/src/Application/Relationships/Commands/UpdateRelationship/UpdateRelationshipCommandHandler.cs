@@ -64,7 +64,7 @@ public class UpdateRelationshipCommandHandler : IRequestHandler<UpdateRelationsh
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.UpdateRelationship,
             TargetType = TargetType.Member,
-            TargetId = entity.Id,
+            TargetId = entity.Id.ToString(),
             ActivitySummary = $"Updated relationship {oldSourceMemberId}-{oldType}-{oldTargetMemberId} to {entity.SourceMemberId}-{entity.Type}-{entity.TargetMemberId}."
         }, cancellationToken);
 

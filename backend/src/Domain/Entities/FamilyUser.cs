@@ -1,5 +1,4 @@
 using backend.Domain.Enums;
-using System;
 
 namespace backend.Domain.Entities;
 

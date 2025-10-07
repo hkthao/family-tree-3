@@ -28,7 +28,7 @@ public record RecordActivityCommand : IRequest<Result<Guid>>
     /// <summary>
     /// The ID of the target resource (e.g., FamilyId, MemberId).
     /// </summary>
-    public Guid TargetId { get; init; }
+    public string? TargetId { get; init; }
 
     /// <summary>
     /// Optional metadata in JSON format for storing additional details about the action.

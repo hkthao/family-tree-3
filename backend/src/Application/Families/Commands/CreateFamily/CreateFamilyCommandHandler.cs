@@ -69,7 +69,7 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
                 UserProfileId = userProfile.Id,
                 ActionType = UserActionType.CreateFamily,
                 TargetType = TargetType.Family,
-                TargetId = entity.Id,
+                TargetId = entity.Id.ToString(),
                 ActivitySummary = $"Created family '{entity.Name}'."
             }, cancellationToken);
 

@@ -54,7 +54,7 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, R
                 UserProfileId = currentUserProfile.Id,
                 ActionType = UserActionType.DeleteMember,
                 TargetType = TargetType.Member,
-                TargetId = request.Id,
+                TargetId = request.Id.ToString(),
                 ActivitySummary = $"Deleted member '{memberFullName}' from family '{memberToDelete.FamilyId}'."
             }, cancellationToken);
 

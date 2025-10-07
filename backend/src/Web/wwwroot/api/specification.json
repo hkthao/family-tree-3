@@ -1503,7 +1503,6 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "format": "guid",
               "nullable": true
             },
             "x-position": 3
@@ -2427,8 +2426,7 @@
             "$ref": "#/components/schemas/TargetType"
           },
           "targetId": {
-            "type": "string",
-            "format": "guid"
+            "type": "string"
           },
           "metadata": {
             "nullable": true,

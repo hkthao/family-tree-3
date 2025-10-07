@@ -22,7 +22,7 @@ public record GetRecentActivitiesQuery : IRequest<Result<List<UserActivityDto>>>
     /// <summary>
     /// Optional: Filter activities by the ID of the target resource.
     /// </summary>
-    public Guid? TargetId { get; init; }
+    public string? TargetId { get; init; }
 
     /// <summary>
     /// Optional: Filter activities by FamilyId (requires UserActivity to have FamilyId or join).

@@ -117,7 +117,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, R
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.UpdateMember,
             TargetType = TargetType.Member,
-            TargetId = entity.Id,
+            TargetId = entity.Id.ToString(),
             ActivitySummary = $"Updated member '{oldFullName}' to '{entity.FullName}'."
         }, cancellationToken);
 

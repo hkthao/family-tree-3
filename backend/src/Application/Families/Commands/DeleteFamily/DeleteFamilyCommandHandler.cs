@@ -56,7 +56,7 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, R
                 UserProfileId = currentUserProfile.Id,
                 ActionType = UserActionType.DeleteFamily,
                 TargetType = TargetType.Family,
-                TargetId = entity.Id,
+                TargetId = entity.Id.ToString(),
                 ActivitySummary = $"Deleted family '{familyName}'."
             }, cancellationToken);
 

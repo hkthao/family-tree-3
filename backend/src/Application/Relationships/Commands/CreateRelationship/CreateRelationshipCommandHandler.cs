@@ -57,7 +57,7 @@ public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationsh
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.CreateRelationship,
             TargetType = TargetType.Member,
-            TargetId = entity.Id,
+            TargetId = entity.Id.ToString(),
             ActivitySummary = $"Created relationship between {sourceMember.FullName} and {request.TargetMemberId} (Type: {request.Type})."
         }, cancellationToken);
 

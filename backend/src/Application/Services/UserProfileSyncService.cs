@@ -26,19 +26,13 @@ public class UserProfileSyncService : IUserProfileSyncService
         var email = principal.FindFirst($"{_auth0Config.Namespace}email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
         var name = principal.FindFirst($"{_auth0Config.Namespace}name")?.Value ?? principal.FindFirst(ClaimTypes.Name)?.Value;
 
-        // TODO: Auth0 ID tokens might not contain 'email' and 'name' claims directly.
-        // These claims are typically available in the Access Token or via the /userinfo endpoint.
-        // If 'email' and 'name' are consistently null, consider:
-        // 1. Configuring Auth0 to include these claims in the ID token.
-        // 2. Making a call to the /userinfo endpoint to retrieve full profile data.
-
         if (string.IsNullOrEmpty(auth0UserId))
         {
             _logger.LogWarning("Auth0 User ID not found in claims. Cannot sync user profile.");
             return;
         }
 
-        var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(auth0UserId)).FirstOrDefaultAsync(cancellationToken);
+        var userProfile = await GetUserProfileByAuth0Id(auth0UserId);
 
         if (userProfile == null)
         {
@@ -59,10 +53,10 @@ public class UserProfileSyncService : IUserProfileSyncService
             {
                 _logger.LogWarning(ex, "A database update exception occurred while creating a user profile. This might be due to a race condition. Attempting to re-fetch the user.");
                 // Attempt to re-fetch the user to handle potential race conditions where the user was created by another request.
-                userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(auth0UserId)).FirstOrDefaultAsync(cancellationToken);
+                userProfile = await GetUserProfileByAuth0Id(auth0UserId);
                 if (userProfile == null)
                 {
-                    _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {Auth0UserId}. The original exception will be re-thrown.", auth0UserId);
+                    _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {Auth0UserId}. This should not happen.", auth0UserId);
                     throw; // Re-throw if the user still doesn't exist, as it was not a duplicate entry issue.
                 }
             }
@@ -89,5 +83,10 @@ public class UserProfileSyncService : IUserProfileSyncService
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<UserProfile?> GetUserProfileByAuth0Id(string auth0UserId)
+    {
+        return await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(auth0UserId)).FirstOrDefaultAsync();
     }
 }

@@ -68,15 +68,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                                     var userProfileId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                                     if (!string.IsNullOrEmpty(userProfileId))
                                     {
-                                        var recordCommand = new backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand
+                                        var userProfile = await scopedUserProfileSyncService.GetUserProfileByAuth0Id(userProfileId);
+                                        if (userProfile != null)
                                         {
-                                            UserProfileId = Guid.Parse(userProfileId),
-                                            ActionType = backend.Domain.Enums.UserActionType.Login,
-                                            TargetType = backend.Domain.Enums.TargetType.UserProfile,
-                                            TargetId = Guid.Parse(userProfileId),
-                                            ActivitySummary = "User logged in."
-                                        };
-                                        await mediator.Send(recordCommand);
+                                            var recordCommand = new backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand
+                                            {
+                                                UserProfileId = userProfile.Id,
+                                                ActionType = backend.Domain.Enums.UserActionType.Login,
+                                                TargetType = backend.Domain.Enums.TargetType.UserProfile,
+                                                TargetId = userProfile.Id.ToString(), // TargetId is string
+                                                ActivitySummary = "User logged in."
+                                            };
+                                            await mediator.Send(recordCommand);
+                                        }
                                     }
                                 }
                                 catch (Exception ex)

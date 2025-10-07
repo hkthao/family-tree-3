@@ -67,7 +67,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, Res
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.UpdateEvent,
             TargetType = TargetType.Event,
-            TargetId = entity.Id,
+            TargetId = entity.Id.ToString(),
             ActivitySummary = $"Updated event '{oldName}' to '{entity.Name}'."
         }, cancellationToken);
 

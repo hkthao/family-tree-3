@@ -1,4 +1,3 @@
-using backend.Domain.Common;
 using backend.Domain.Enums;
 using System.Text.Json;
 
@@ -32,7 +31,7 @@ public class UserActivity : BaseAuditableEntity
     /// <summary>
     /// The ID of the target resource (e.g., FamilyId, MemberId).
     /// </summary>
-    public Guid TargetId { get; set; }
+    public string? TargetId { get; set; }
 
     /// <summary>
     /// Optional metadata in JSON format for storing additional details about the action.
