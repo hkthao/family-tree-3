@@ -2,6 +2,8 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
@@ -12,12 +14,14 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
 
-    public UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
+    public UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
     {
         _context = context;
         _authorizationService = authorizationService;
         _mediator = mediator;
+        _familyTreeService = familyTreeService;
     }
 
     public async Task<Result> Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
@@ -51,6 +55,9 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
             entity.Visibility = request.Visibility;
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Update family stats
+            await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
 
             // Record activity
             await _mediator.Send(new RecordActivityCommand

@@ -12,13 +12,15 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
     private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
 
-    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, IMediator mediator)
+    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
     {
         _context = context;
         _user = user;
         _authorizationService = authorizationService;
         _mediator = mediator;
+        _familyTreeService = familyTreeService;
     }
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
@@ -29,11 +31,7 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
         }
 
         // If the user has the 'Admin' role, bypass family-specific access checks
-        if (_authorizationService.IsAdmin())
-        {
-            // Admin can create members in any family, no further checks needed
-        }
-        else
+        if (!_authorizationService.IsAdmin())
         {
             // For non-admin users, apply family-specific access checks
             var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
@@ -80,18 +78,10 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
 
         _context.Members.Add(entity);
 
-        foreach (var relDto in request.Relationships)
-        {
-            entity.Relationships.Add(new Relationship
-            {
-                SourceMemberId = entity.Id,
-                TargetMemberId = relDto.TargetMemberId,
-                Type = relDto.Type,
-                Order = relDto.Order
-            });
-        }
-
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Update family stats
+        await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
 
         // Record activity
         var currentUserProfileForActivity = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);

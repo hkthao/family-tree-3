@@ -1,7 +1,9 @@
-﻿using backend.Application.Common.Interfaces;
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
@@ -12,12 +14,14 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, R
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
 
-    public DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
+    public DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
     {
         _context = context;
         _authorizationService = authorizationService;
         _mediator = mediator;
+        _familyTreeService = familyTreeService;
     }
 
     public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
@@ -47,6 +51,9 @@ public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, R
             _context.Families.Remove(entity);
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Update family stats
+            await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
 
             // Record activity
             await _mediator.Send(new RecordActivityCommand

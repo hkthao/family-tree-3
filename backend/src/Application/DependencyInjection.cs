@@ -18,6 +18,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<backend.Application.Common.Interfaces.IUserProfileSyncService, backend.Application.Services.UserProfileSyncService>();
+        services.AddScoped<backend.Application.Common.Interfaces.IFamilyTreeService, backend.Application.Services.FamilyTreeService>();
 
         return services;
     }

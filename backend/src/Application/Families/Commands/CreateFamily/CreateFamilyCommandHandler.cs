@@ -4,6 +4,8 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Application.UserProfiles.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Families.Commands.CreateFamily;
@@ -13,12 +15,14 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
 
-    public CreateFamilyCommandHandler(IApplicationDbContext context, IUser user, IMediator mediator)
+    public CreateFamilyCommandHandler(IApplicationDbContext context, IUser user, IMediator mediator, IFamilyTreeService familyTreeService)
     {
         _context = context;
         _user = user;
         _mediator = mediator;
+        _familyTreeService = familyTreeService;
     }
 
     public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
@@ -60,6 +64,9 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
 
             _context.FamilyUsers.Add(familyUser);
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Update family stats
+            await _familyTreeService.UpdateFamilyStats(entity.Id, cancellationToken);
 
             // Record activity
             await _mediator.Send(new RecordActivityCommand

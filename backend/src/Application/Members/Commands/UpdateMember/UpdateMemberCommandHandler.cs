@@ -2,6 +2,8 @@ using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
@@ -12,12 +14,14 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, R
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
 
-    public UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
+    public UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
     {
         _context = context;
         _authorizationService = authorizationService;
         _mediator = mediator;
+        _familyTreeService = familyTreeService;
     }
 
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
@@ -70,44 +74,10 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, R
             }
         }
 
-        // Manage Relationships
-        var existingRelationships = entity.Relationships.ToList();
-        var incomingRelationships = request.Relationships.ToList();
-
-        // Remove relationships explicitly marked for deletion
-        foreach (var deletedRelId in request.DeletedRelationshipIds)
-        {
-            var relToRemove = existingRelationships.FirstOrDefault(er => er.Id == deletedRelId);
-            if (relToRemove != null)
-            {
-                _context.Relationships.Remove(relToRemove);
-            }
-        }
-
-        // Add or update relationships from the incoming list
-        foreach (var incomingRel in incomingRelationships)
-        {
-            var existingRel = existingRelationships.FirstOrDefault(er => er.Id == incomingRel.Id);
-
-            if (existingRel == null) // New relationship
-            {
-                _context.Relationships.Add(new Relationship
-                {
-                    SourceMemberId = entity.Id,
-                    TargetMemberId = incomingRel.TargetMemberId,
-                    Type = incomingRel.Type,
-                    Order = incomingRel.Order
-                });
-            }
-            else // Update existing relationship
-            {
-                existingRel.TargetMemberId = incomingRel.TargetMemberId;
-                existingRel.Type = incomingRel.Type;
-                existingRel.Order = incomingRel.Order;
-            }
-        }
-
         await _context.SaveChangesAsync(cancellationToken);
+
+        // Update family stats
+        await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
 
         // Record activity
         await _mediator.Send(new RecordActivityCommand

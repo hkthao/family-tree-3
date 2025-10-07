@@ -2333,35 +2333,6 @@
           },
           "isRoot": {
             "type": "boolean"
-          },
-          "relationships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RelationshipInput"
-            }
-          }
-        }
-      },
-      "RelationshipInput": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid",
-            "nullable": true
-          },
-          "targetMemberId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "type": {
-            "$ref": "#/components/schemas/RelationshipType"
-          },
-          "order": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
           }
         }
       },
@@ -2377,13 +2348,6 @@
               "id": {
                 "type": "string",
                 "format": "guid"
-              },
-              "deletedRelationshipIds": {
-                "type": "array",
-                "items": {
-                  "type": "string",
-                  "format": "guid"
-                }
               }
             }
           }
@@ -2458,7 +2422,7 @@
       "CreateRelationshipCommand": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/RelationshipInput2"
+            "$ref": "#/components/schemas/RelationshipInput"
           },
           {
             "type": "object",
@@ -2466,7 +2430,7 @@
           }
         ]
       },
-      "RelationshipInput2": {
+      "RelationshipInput": {
         "type": "object",
         "x-abstract": true,
         "additionalProperties": false,
@@ -2492,7 +2456,7 @@
       "UpdateRelationshipCommand": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/RelationshipInput2"
+            "$ref": "#/components/schemas/RelationshipInput"
           },
           {
             "type": "object",

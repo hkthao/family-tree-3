@@ -1,5 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
@@ -10,12 +12,14 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, R
     private readonly IApplicationDbContext _context;
     private readonly IAuthorizationService _authorizationService;
     private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
 
-    public DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
+    public DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
     {
         _context = context;
         _authorizationService = authorizationService;
         _mediator = mediator;
+        _familyTreeService = familyTreeService;
     }
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
@@ -42,9 +46,13 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, R
             }
 
             var memberFullName = memberToDelete.FullName; // Capture full name for activity summary
+            var familyId = memberToDelete.FamilyId; // Capture familyId before deletion
 
             _context.Members.Remove(memberToDelete);
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Update family stats
+            await _familyTreeService.UpdateFamilyStats(familyId, cancellationToken);
 
             // Record activity
             await _mediator.Send(new RecordActivityCommand
@@ -53,7 +61,7 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, R
                 ActionType = UserActionType.DeleteMember,
                 TargetType = TargetType.Member,
                 TargetId = request.Id.ToString(),
-                ActivitySummary = $"Deleted member '{memberFullName}' from family '{memberToDelete.FamilyId}'."
+                ActivitySummary = $"Deleted member '{memberFullName}' from family '{familyId}'."
             }, cancellationToken);
 
             return Result.Success();

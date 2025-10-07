@@ -16,6 +16,7 @@ public class Family : BaseAuditableEntity
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = "Private"; // e.g., Private, Public
     public int TotalMembers { get; set; }
+    public int TotalGenerations { get; set; }
 
     /// <summary>
     /// Navigation property for users associated with this family.
