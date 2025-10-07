@@ -122,28 +122,89 @@ sequenceDiagram
 
 ## 3. Phân quyền (Authorization)
 
-### 3.1. Cơ chế RBAC
+Hệ thống áp dụng một cơ chế phân quyền mạnh mẽ, kết hợp giữa **Role-Based Access Control (RBAC)** truyền thống và **phân quyền theo ngữ cảnh (Context-based Authorization)**, đặc biệt là phân quyền theo từng gia đình (Family-specific roles). Điều này đảm bảo rằng người dùng chỉ có thể truy cập và thao tác trên dữ liệu mà họ có quyền, dựa trên vai trò của họ trong hệ thống và trong từng gia đình cụ thể.
 
-Hệ thống sử dụng **Role-Based Access Control (RBAC)** để quản lý quyền truy cập. RBAC là một phương pháp quản lý quyền hạn dựa trên vai trò của người dùng trong hệ thống. Thay vì gán quyền trực tiếp cho từng người dùng, quyền hạn được gán cho các vai trò, và người dùng sẽ được gán các vai trò phù hợp.
-
-#### Các khái niệm chính
+### 3.1. Các khái niệm chính về Phân quyền
 
 *   **Người dùng (Users)**: Các cá nhân hoặc hệ thống tương tác với ứng dụng.
-*   **Vai trò (Roles)**: Các chức danh hoặc nhóm chức năng trong hệ thống (ví dụ: `Admin`, `FamilyAdmin`, `Member`). Mỗi vai trò đại diện cho một tập hợp các quyền hạn nhất định.
-*   **Quyền hạn (Permissions)**: Các hành động cụ thể mà người dùng có thể thực hiện (ví dụ: `family:create`, `member:edit`, `event:delete`).
+*   **Vai trò (Roles)**: Các chức danh hoặc nhóm chức năng trong hệ thống. Hệ thống định nghĩa hai loại vai trò chính:
+    *   **Vai trò toàn cục (Global Roles)**: Áp dụng cho toàn bộ hệ thống (ví dụ: `Administrator`).
+    *   **Vai trò theo gia đình (Family Roles)**: Áp dụng cho người dùng trong ngữ cảnh của một gia đình cụ thể (ví dụ: `Manager`, `Viewer` trong một `Family`).
+*   **Quyền hạn (Permissions)**: Các hành động cụ thể mà người dùng có thể thực hiện (ví dụ: `family:create`, `member:edit`, `event:delete`). Quyền hạn được gán cho các vai trò.
 
-#### Cách thức hoạt động
+### 3.2. Triển khai Phân quyền theo Gia đình
 
-1.  **Gán quyền cho vai trò**: Các quyền hạn được gán cho các vai trò (ví dụ: vai trò `Admin` có tất cả các quyền, vai trò `FamilyAdmin` có quyền quản lý dòng họ của mình).
-2.  **Gán vai trò cho người dùng**: Khi người dùng đăng ký hoặc được tạo, họ sẽ được gán một hoặc nhiều vai trò.
-3.  **Kiểm tra quyền**: Khi người dùng cố gắng truy cập một tài nguyên hoặc thực hiện một hành động, hệ thống sẽ kiểm tra xem người dùng đó có vai trò cần thiết để thực hiện hành động đó hay không.
+Hệ thống sử dụng thực thể `FamilyUser` để định nghĩa mối quan hệ giữa một `UserProfile` và một `Family`, đồng thời gán một `FamilyRole` cụ thể cho mối quan hệ đó. Điều này cho phép một người dùng có các vai trò khác nhau trong các gia đình khác nhau.
 
-#### Triển khai trong hệ thống
+#### Enum `FamilyRole`
 
-*   **Roles**: Các vai trò được định nghĩa trong `backend/src/Domain/Constants/Roles.cs` (ví dụ: `Administrator`).
-*   **Claims trong JWT**: Vai trò của người dùng được mã hóa thành claims trong JWT. Backend sẽ đọc các claims này để kiểm tra quyền.
+`FamilyRole` là một enum được định nghĩa trong `backend/src/Domain/Enums/FamilyRole.cs`, xác định các cấp độ quyền hạn của người dùng trong một gia đình:
 
-### 3.2. Bảo vệ Endpoint (Backend)
+```csharp
+namespace backend.Domain.Enums;
+
+public enum FamilyRole
+{
+    /// <summary>
+    /// User has full management rights over the family.
+    /// </summary>
+    Manager = 0,
+
+    /// <summary>
+    /// User can view family data but cannot modify it.
+    /// </summary>
+    Viewer = 1,
+}
+```
+
+*   **`Manager`**: Người dùng có vai trò này có toàn quyền quản lý gia đình, bao gồm thêm/sửa/xóa thành viên, sự kiện, mối quan hệ, và quản lý các thành viên khác trong gia đình.
+*   **`Viewer`**: Người dùng có vai trò này chỉ có thể xem dữ liệu của gia đình nhưng không thể thực hiện bất kỳ thay đổi nào.
+
+#### Dịch vụ Ủy quyền (`IAuthorizationService`)
+
+`IAuthorizationService` là một interface quan trọng (`backend/src/Application/Common/Interfaces/IAuthorizationService.cs`) cung cấp các phương thức để kiểm tra quyền hạn của người dùng một cách tập trung và nhất quán trong toàn bộ ứng dụng Backend. Các phương thức này giúp xác định xem người dùng hiện tại có quyền thực hiện một hành động cụ thể hay truy cập một tài nguyên nhất định hay không.
+
+```csharp
+namespace backend.Application.Common.Interfaces;
+
+public interface IAuthorizationService
+{
+    /// <summary>
+    /// Checks if the current user is an Admin.
+    /// </summary>
+    bool IsAdmin();
+
+    /// <summary>
+    /// Retrieves the current user's UserProfile, including their family associations.
+    /// </summary>
+    Task<UserProfile?> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Checks if the current user has access (Manager or Viewer) to a specific family.
+    /// </summary>
+    bool CanAccessFamily(Guid familyId, UserProfile userProfile);
+
+    /// <summary>
+    /// Checks if the current user has management rights (Manager role) for a specific family.
+    /// </summary>
+    bool CanManageFamily(Guid familyId, UserProfile userProfile);
+
+    /// <summary>
+    /// Checks if the current user has a specific role within a family.
+    /// </summary>
+    bool HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole);
+}
+```
+
+**Mô tả các phương thức:**
+
+*   `IsAdmin()`: Kiểm tra xem người dùng hiện tại có vai trò `Administrator` toàn cục hay không.
+*   `GetCurrentUserProfileAsync()`: Lấy thông tin `UserProfile` của người dùng hiện tại, bao gồm cả các gia đình mà họ liên kết và vai trò của họ trong đó.
+*   `CanAccessFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem `userProfile` có quyền truy cập (ít nhất là `Viewer`) vào `familyId` đã cho hay không.
+*   `CanManageFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem `userProfile` có quyền quản lý (vai trò `Manager`) đối với `familyId` đã cho hay không.
+*   `HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)`: Kiểm tra xem `userProfile` có vai trò `requiredRole` hoặc cao hơn trong `familyId` đã cho hay không.
+
+### 3.3. Bảo vệ Endpoint (Backend)
 
 Trong ASP.NET Core, việc bảo vệ các endpoint API được thực hiện bằng cách sử dụng attribute `[Authorize]` trên các Controller hoặc trên từng action method cụ thể. Điều này cho phép bạn định nghĩa các yêu cầu xác thực và phân quyền cho từng phần của API.
 
@@ -174,9 +235,9 @@ Trong ASP.NET Core, việc bảo vệ các endpoint API được thực hiện b
     }
     ```
 
-#### Phân quyền theo vai trò (Role-based Authorization)
+#### Phân quyền theo vai trò toàn cục (Global Role-based Authorization)
 
-Sử dụng `Roles` parameter trong `[Authorize]` để chỉ định những vai trò nào được phép truy cập.
+Sử dụng `Roles` parameter trong `[Authorize]` để chỉ định những vai trò toàn cục nào được phép truy cập.
 
 ```csharp
 // backend/src/Web/Controllers/AdminController.cs
@@ -190,24 +251,22 @@ public class AdminController : ApiControllerBase
     {
         // ...
     }
-
-    [HttpPost("family/{id}/assign-admin")]
-    [Authorize(Roles = Roles.Administrator + "," + Roles.FamilyAdmin)] // Admin hoặc FamilyAdmin
-    public async Task<ActionResult> AssignFamilyAdmin(Guid id, [FromBody] AssignFamilyAdminCommand command)
-    {
-        // ...
-    }
 }
 ```
 
 #### Phân quyền dựa trên chính sách (Policy-based Authorization)
 
-Sử dụng `Policy` parameter trong `[Authorize]` để áp dụng các chính sách phân quyền phức tạp hơn, được định nghĩa trong `Program.cs`.
+Sử dụng `Policy` parameter trong `[Authorize]` để áp dụng các chính sách phân quyền phức tạp hơn, được định nghĩa trong `Program.cs`. Các chính sách này có thể tích hợp `IAuthorizationService` để kiểm tra quyền theo ngữ cảnh.
 
 ```csharp
 // backend/src/Web/Program.cs (trong AddAuthorization)
 builder.Services.AddAuthorization(options =>
-    options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+{
+    options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator));
+    // Ví dụ về chính sách kiểm tra quyền quản lý gia đình
+    options.AddPolicy(Policies.CanManageFamily, policy =>
+        policy.Requirements.Add(new FamilyRoleRequirement(FamilyRole.Manager)));
+});
 
 // Sử dụng trong Controller
 [HttpPost]
@@ -216,11 +275,19 @@ public async Task<IActionResult> PurgeData([FromBody] PurgeDataCommand command)
 {
     // ...
 }
+
+// Sử dụng chính sách kiểm tra quyền quản lý gia đình
+[HttpPut("{familyId}/members/{memberId}")]
+[Authorize(Policy = Policies.CanManageFamily)] // Chỉ người dùng có quyền quản lý gia đình mới được truy cập
+public async Task<IActionResult> UpdateMemberInFamily(Guid familyId, Guid memberId, [FromBody] UpdateMemberCommand command)
+{
+    // ...
+}
 ```
 
-### 3.3. Kiểm tra quyền (Frontend)
+### 3.4. Kiểm tra quyền (Frontend)
 
-Frontend cần kiểm tra vai trò hoặc quyền của người dùng để điều chỉnh giao diện người dùng (UI) và trải nghiệm người dùng (UX). Điều này bao gồm việc ẩn/hiện các nút, menu, hoặc các phần tử UI khác mà người dùng không có quyền truy cập.
+Frontend cần kiểm tra vai trò hoặc quyền của người dùng để điều chỉnh giao diện người dùng (UI) và trải nghiệm người dùng (UX). Điều này bao gồm việc ẩn/hiện các nút, menu, hoặc các phần tử UI khác mà người dùng không có quyền truy cập. Thông tin về vai trò và quyền hạn của người dùng sẽ được Backend cung cấp (thường là một phần của JWT Payload hoặc một endpoint riêng).
 
 #### Ví dụ trong Vue component (sử dụng Pinia Store)
 
@@ -228,11 +295,16 @@ Frontend cần kiểm tra vai trò hoặc quyền của người dùng để đi
 // frontend/src/stores/auth.store.ts (ví dụ về một auth store)
 import { defineStore } from 'pinia';
 
+interface UserFamilyRole {
+  familyId: string;
+  role: 'Manager' | 'Viewer';
+}
+
 interface UserProfile {
   id: string;
   email: string;
-  roles: string[]; // Danh sách các vai trò của người dùng
-  permissions: string[]; // Danh sách các quyền cụ thể của người dùng
+  globalRoles: string[]; // Danh sách các vai trò toàn cục của người dùng
+  familyRoles: UserFamilyRole[]; // Danh sách các vai trò theo gia đình của người dùng
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -252,38 +324,45 @@ export const useAuthStore = defineStore('auth', {
     },
   },
   getters: {
-    isAdmin: (state) => state.user?.roles.includes('Administrator'),
-    canEditFamily: (state) => state.user?.permissions.includes('family:edit'),
+    isAdmin: (state) => state.user?.globalRoles.includes('Administrator'),
+    canManageFamily: (state) => (familyId: string) => {
+      return state.user?.familyRoles.some(fr => fr.familyId === familyId && fr.role === 'Manager');
+    },
+    canViewFamily: (state) => (familyId: string) => {
+      return state.user?.familyRoles.some(fr => fr.familyId === familyId && (fr.role === 'Manager' || fr.role === 'Viewer'));
+    },
   },
 });
 
-// frontend/src/components/AdminPanel.vue
+// frontend/src/components/FamilyManagementPanel.vue
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth.store';
 import { computed } from 'vue';
 
 const authStore = useAuthStore();
+const currentFamilyId = 'some-family-uuid'; // Lấy từ route hoặc context
+
 const isAdmin = computed(() => authStore.isAdmin);
-const canEditFamily = computed(() => authStore.canEditFamily);
+const canManageCurrentFamily = computed(() => authStore.canManageFamily(currentFamilyId));
 </script>
 
 <template>
-  <div v-if="isAdmin">
-    <h2>Bảng điều khiển Admin</h2>
-    <button v-if="canEditFamily">Chỉnh sửa thông tin dòng họ</button>
-    <!-- Các chức năng khác dành cho Admin -->
+  <div v-if="isAdmin || canManageCurrentFamily">
+    <h2>Bảng điều khiển Quản lý Gia đình</h2>
+    <button v-if="canManageCurrentFamily">Thêm thành viên mới</button>
+    <!-- Các chức năng quản lý khác -->
   </div>
   <div v-else>
-    <p>Bạn không có quyền truy cập vào bảng điều khiển Admin.</p>
+    <p>Bạn không có quyền quản lý gia đình này.</p>
   </div>
 </template>
 ```
 
 **Giải thích:**
 
-*   Frontend nhận thông tin về vai trò và quyền hạn của người dùng từ Backend (thường là một phần của JWT Payload hoặc một endpoint riêng).
+*   Frontend nhận thông tin về vai trò toàn cục và vai trò theo gia đình của người dùng từ Backend.
 *   Thông tin này được lưu trữ trong một Pinia store (ví dụ: `auth.store.ts`).
-*   Các `computed property` trong Vue component được sử dụng để kiểm tra quyền hạn và điều chỉnh hiển thị UI một cách linh hoạt.
+*   Các `computed property` và `getter` trong Vue component được sử dụng để kiểm tra quyền hạn và điều chỉnh hiển thị UI một cách linh hoạt, cho phép kiểm tra cả vai trò toàn cục và vai trò cụ thể theo gia đình.
 
 ## 4. Các biện pháp bảo mật khác
 

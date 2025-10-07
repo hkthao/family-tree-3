@@ -200,7 +200,74 @@ dotnet ef database update --project src/Infrastructure --startup-project src/Web
 *   Để biết hướng dẫn chi tiết hơn về cách quản lý database migrations, bao gồm cả việc tạo migration ban đầu, vui lòng tham khảo [Hướng dẫn Backend](./backend-guide.md#9-database-migration).
 *   Khi chạy Backend ở chế độ Development, `ApplicationDbContextInitialiser` sẽ tự động gọi `database update` nếu database là relational và chưa được cập nhật.
 
-## 5. Seeding a Database
+## 5. Sử dụng Dịch vụ Phân quyền (Authorization Service)
+
+Hệ thống cung cấp một dịch vụ phân quyền tập trung (`IAuthorizationService`) để kiểm tra quyền hạn của người dùng trong các ngữ cảnh khác nhau, bao gồm cả vai trò toàn cục và vai trò cụ thể theo gia đình. Các nhà phát triển nên sử dụng dịch vụ này để thực hiện các kiểm tra quyền trong logic nghiệp vụ và các endpoint API.
+
+### 5.1. Inject `IAuthorizationService`
+
+Bạn có thể inject `IAuthorizationService` vào các service, handler hoặc controller của mình thông qua Dependency Injection.
+
+```csharp
+// Ví dụ trong một Application Service hoặc Controller
+public class FamilyService : IFamilyService
+{
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IApplicationDbContext _context;
+
+    public FamilyService(IAuthorizationService authorizationService, IApplicationDbContext context)
+    {
+        _authorizationService = authorizationService;
+        _context = context;
+    }
+
+    public async Task<Result<bool>> UpdateFamily(Guid familyId, UpdateFamilyCommand command, CancellationToken cancellationToken)
+    {
+        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+        if (currentUserProfile == null)
+        {
+            return Result<bool>.Failure("User profile not found.", 404);
+        }
+
+        // Kiểm tra quyền quản lý gia đình
+        if (!_authorizationService.CanManageFamily(familyId, currentUserProfile))
+        {
+            return Result<bool>.Failure("User does not have permission to manage this family.", 403);
+        }
+
+        // Thực hiện logic cập nhật gia đình...
+        var family = await _context.Families.FindAsync(familyId);
+        if (family == null)
+        {
+            return Result<bool>.Failure("Family not found.", 404);
+        }
+
+        family.Name = command.Name;
+        // ... cập nhật các thuộc tính khác
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return Result<bool>.Success(true);
+    }
+}
+```
+
+### 5.2. Các phương thức kiểm tra quyền
+
+`IAuthorizationService` cung cấp các phương thức sau để kiểm tra quyền:
+
+*   `IsAdmin()`: Kiểm tra xem người dùng hiện tại có vai trò `Administrator` toàn cục hay không.
+*   `GetCurrentUserProfileAsync()`: Lấy thông tin `UserProfile` của người dùng hiện tại.
+*   `CanAccessFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem người dùng có quyền truy cập (ít nhất là `Viewer`) vào một gia đình cụ thể hay không.
+*   `CanManageFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem người dùng có quyền quản lý (vai trò `Manager`) đối với một gia đình cụ thể hay không.
+*   `HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)`: Kiểm tra xem người dùng có vai trò `requiredRole` hoặc cao hơn trong một gia đình cụ thể hay không.
+
+### 5.3. Lưu ý khi phát triển
+
+*   **Luôn kiểm tra quyền**: Đảm bảo rằng mọi hành động nhạy cảm hoặc truy cập dữ liệu đều được kiểm tra quyền một cách thích hợp.
+*   **Sử dụng `FamilyRole`**: Khi làm việc với các chức năng liên quan đến gia đình, hãy sử dụng `FamilyRole` enum để định nghĩa và kiểm tra các cấp độ quyền hạn.
+*   **Tách biệt trách nhiệm**: Giữ logic kiểm tra quyền trong `IAuthorizationService` hoặc các chính sách ủy quyền để đảm bảo tính nhất quán và dễ bảo trì.
+
+## 6. Seeding a Database
 
 Dự án được cấu hình để tự động seed dữ liệu mẫu khi Backend khởi động ở chế độ Development, nếu database chưa có dữ liệu. Cơ chế này được triển khai trong `ApplicationDbContextInitialiser`.
 

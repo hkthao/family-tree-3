@@ -70,7 +70,11 @@ public class FamilyController : ApiControllerBase
 
 Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nếu một request không có hoặc có JWT không hợp lệ, API sẽ trả về lỗi `401 Unauthorized` hoặc `403 Forbidden`.
 
-## 3. Phân trang (Pagination)
+## 3. Phân quyền (Authorization)
+
+Hệ thống sử dụng cơ chế phân quyền chi tiết dựa trên vai trò của người dùng trong từng gia đình (Family-specific roles) và vai trò toàn cục (Global roles). Các vai trò này được quản lý thông qua `FamilyRole` enum và được kiểm tra bởi `IAuthorizationService` ở Backend để đảm bảo người dùng chỉ có thể thực hiện các hành động được phép.
+
+### 3.1. Cơ chế RBAC
 
 Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/members`) đều hỗ trợ phân trang qua các query parameter sau:
 

@@ -24,6 +24,13 @@ Tài liệu này mô tả chi tiết về mô hình dữ liệu, schema của da
 
 ```mermaid
 erDiagram
+    USER_PROFILE {
+        string Id PK "ID duy nhất"
+        string Auth0UserId "ID người dùng từ Auth0"
+        string Email "Email người dùng"
+        string Name "Tên hiển thị"
+    }
+
     FAMILY {
         string Id PK "ID duy nhất"
         string Name "Tên gia đình"
@@ -32,6 +39,12 @@ erDiagram
         string Address "Địa chỉ"
         string Visibility "Chế độ hiển thị (Public/Private)"
         int TotalMembers "Tổng số thành viên"
+    }
+
+    FAMILY_USER {
+        string FamilyId PK,FK "ID gia đình"
+        string UserProfileId PK,FK "ID hồ sơ người dùng"
+        int Role "Vai trò của người dùng trong gia đình (Enum int)"
     }
 
     MEMBER {
@@ -75,6 +88,8 @@ erDiagram
         string MemberId PK,FK "ID thành viên"
     }
 
+    USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
+    FAMILY ||--o{ FAMILY_USER : "có người dùng"
     FAMILY ||--o{ MEMBER : "có"
     FAMILY ||--o{ EVENT : "có"
     MEMBER ||--o{ RELATIONSHIP : "có quan hệ"
@@ -85,7 +100,44 @@ erDiagram
 ```
 ## 3. Mô tả các bảng
 
-### 3.1. Bảng `Families` (updated after refactor)
+### 3.1. Bảng `UserProfiles`
+
+Lưu trữ thông tin hồ sơ người dùng, được liên kết với các tài khoản từ nhà cung cấp xác thực bên ngoài.
+
+| Tên cột       | Kiểu dữ liệu | Ràng buộc | Mô tả                                  |
+| :------------ | :----------- | :-------- | :------------------------------------- |
+| `Id`          | `varchar(36)`| PK        | ID duy nhất của hồ sơ người dùng       |
+| `Auth0UserId` | `varchar(255)`| NOT NULL  | ID người dùng từ nhà cung cấp xác thực (ví dụ: Auth0) |
+| `Email`       | `varchar(255)`| NOT NULL  | Địa chỉ email của người dùng           |
+| `Name`        | `varchar(255)`| NOT NULL  | Tên hiển thị của người dùng            |
+
+- **Mối quan hệ**: Một `UserProfile` có thể có nhiều `FamilyUser` (vai trò trong các gia đình).
+
+### 3.2. Bảng `FamilyUsers`
+
+Lưu trữ mối quan hệ nhiều-nhiều giữa `Family` và `UserProfile`, bao gồm vai trò của người dùng trong gia đình đó.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                                  |
+| :-------------- | :----------- | :-------- | :------------------------------------- |
+| `FamilyId`      | `varchar(36)`| PK, FK    | ID của gia đình                        |
+| `UserProfileId` | `varchar(36)`| PK, FK    | ID của hồ sơ người dùng                |
+| `Role`          | `int`        | NOT NULL  | Vai trò của người dùng trong gia đình (0: Manager, 1: Viewer) |
+
+- **Foreign Keys**:
+  - `FamilyId`: tham chiếu đến `Families(Id)`.
+  - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
+- **Mối quan hệ**: Một `FamilyUser` liên kết một `Family` với một `UserProfile` và định nghĩa `Role` của `UserProfile` đó trong `Family`.
+
+### 3.3. Enum `FamilyRole`
+
+Định nghĩa các vai trò mà một người dùng có thể có trong một gia đình.
+
+| Giá trị | Mô tả                                  |
+| :------ | :------------------------------------- |
+| `0`     | `Manager`: Người dùng có toàn quyền quản lý gia đình. |
+| `1`     | `Viewer`: Người dùng có thể xem dữ liệu gia đình nhưng không thể sửa đổi. |
+
+### 3.4. Bảng `Families` (updated after refactor)
 
 Lưu trữ thông tin về các gia đình hoặc dòng họ.
 
@@ -186,6 +238,35 @@ Các bảng được map sang các class Entity trong `Domain` layer. EF Core s�
 
 ```csharp
 // trong ApplicationDbContext.cs (phương thức OnModelCreating)
+
+modelBuilder.Entity<UserProfile>(builder =>
+{
+    builder.Property(u => u.Auth0UserId).HasMaxLength(255).IsRequired();
+    builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
+    builder.Property(u => u.Name).HasMaxLength(255).IsRequired();
+
+    builder.HasMany(u => u.FamilyUsers)
+           .WithOne(fu => fu.UserProfile)
+           .HasForeignKey(fu => fu.UserProfileId)
+           .OnDelete(DeleteBehavior.Cascade);
+});
+
+modelBuilder.Entity<FamilyUser>(builder =>
+{
+    builder.HasKey(fu => new { fu.FamilyId, fu.UserProfileId });
+
+    builder.Property(fu => fu.Role).IsRequired(); // Stored as int
+
+    builder.HasOne(fu => fu.Family)
+           .WithMany(f => f.FamilyUsers)
+           .HasForeignKey(fu => fu.FamilyId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+    builder.HasOne(fu => fu.UserProfile)
+           .WithMany(u => u.FamilyUsers)
+           .HasForeignKey(fu => fu.UserProfileId)
+           .OnDelete(DeleteBehavior.Cascade);
+});
 
 modelBuilder.Entity<Family>(builder =>
 {
