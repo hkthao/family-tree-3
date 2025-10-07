@@ -34,6 +34,11 @@
       {{ item.totalMembers }}
     </template>
 
+    <!-- totalGenerations column -->
+    <template #item.totalGenerations="{ item }">
+      {{ item.totalGenerations }}
+    </template>
+
     <!-- visibility column -->
     <template #item.visibility="{ item }">
       <v-chip :color="item.visibility && item.visibility.toLowerCase() === 'public'
@@ -107,6 +112,12 @@ const headers = computed<DataTableHeader[]>(() => [
   {
     title: t('family.management.headers.totalMembers'),
     key: 'totalMembers',
+    width: '120px',
+    align: 'center',
+  },
+  {
+    title: t('family.management.headers.totalGenerations'),
+    key: 'totalGenerations',
     width: '120px',
     align: 'center',
   },

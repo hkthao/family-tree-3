@@ -41,6 +41,7 @@
   "family.management.headers.avatar": "Avatar",
   "family.management.headers.name": "Name",
   "family.management.headers.totalMembers": "Total Members",
+  "family.management.headers.totalGenerations": "Total Generations",
   "family.management.headers.visibility": "Visibility",
   "family.management.headers.actions": "Actions",
   "family.management.messages.updateSuccess": "Family updated successfully!",

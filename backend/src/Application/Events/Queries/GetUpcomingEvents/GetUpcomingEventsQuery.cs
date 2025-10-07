@@ -1,6 +1,4 @@
-using MediatR;
 using backend.Application.Common.Models;
-using backend.Application.Events.Queries;
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
 

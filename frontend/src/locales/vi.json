@@ -42,6 +42,7 @@
   "family.management.headers.avatar": "Ảnh đại diện",
   "family.management.headers.name": "Tên",
   "family.management.headers.totalMembers": "Tổng số thành viên",
+  "family.management.headers.totalGenerations": "Tổng số thế hệ",
   "family.management.headers.visibility": "Chế độ",
   "family.management.headers.actions": "Hành động",
   "family.management.messages.updateSuccess": "Cập nhật gia đình thành công!",

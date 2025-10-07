@@ -1,7 +1,5 @@
-using MediatR;
 using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.Events.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
 

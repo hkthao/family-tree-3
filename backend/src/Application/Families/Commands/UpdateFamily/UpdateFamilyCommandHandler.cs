@@ -2,8 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
@@ -34,9 +32,12 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
                 return Result.Failure("User profile not found.", "NotFound");
             }
 
-            if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
+            if (!_authorizationService.IsAdmin())
             {
-                return Result.Failure("User does not have permission to update this family.", "Forbidden");
+                if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
+                {
+                    return Result.Failure("User does not have permission to update this family.", "Forbidden");
+                }
             }
 
             var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
@@ -45,6 +46,7 @@ public class UpdateFamilyCommandHandler : IRequestHandler<UpdateFamilyCommand, R
             {
                 return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
             }
+
 
             var oldName = entity.Name; // Capture old name for activity summary
 

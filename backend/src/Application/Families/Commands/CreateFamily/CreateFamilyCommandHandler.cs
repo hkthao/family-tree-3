@@ -4,8 +4,6 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Application.UserProfiles.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Families.Commands.CreateFamily;

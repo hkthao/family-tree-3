@@ -1928,6 +1928,11 @@
                 "type": "integer",
                 "format": "int32"
               },
+              "totalGenerations": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
               "visibility": {
                 "type": "string",
                 "nullable": true
