@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,8 @@ public static class DependencyInjection
         services.AddScoped<ApplicationDbContextInitialiser>();
 
         services.AddAuthorization();
+
+        services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
 
         return services;
     }

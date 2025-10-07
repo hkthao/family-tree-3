@@ -1,9 +1,6 @@
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Specifications;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -11,11 +8,13 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
 {
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
+    private readonly IAuthorizationService _authorizationService;
 
-    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user)
+    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
     {
         _context = context;
         _user = user;
+        _authorizationService = authorizationService;
     }
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
@@ -25,20 +24,26 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
             return Result<Guid>.Failure("User is not authenticated.");
         }
 
-        var currentUserProfile = await _context.UserProfiles
-            .WithSpecification(new UserProfileByAuth0IdSpec(_user.Id))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (currentUserProfile == null)
+        // If the user has the 'Admin' role, bypass family-specific access checks
+        if (_authorizationService.IsAdmin())
         {
-            return Result<Guid>.Failure("User profile not found.");
+            // Admin can create members in any family, no further checks needed
         }
-
-        // Check if the user has Manager role for the family
-        var familyUser = currentUserProfile.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == request.FamilyId);
-        if (familyUser == null || familyUser.Role != FamilyRole.Manager)
+        else
         {
-            return Result<Guid>.Failure("Access denied. Only family managers can create members.");
+            // For non-admin users, apply family-specific access checks
+            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+
+            if (currentUserProfile == null)
+            {
+                return Result<Guid>.Failure("User profile not found.");
+            }
+
+            // Check if the user has Manager role for the family
+            if (!_authorizationService.CanManageFamily(request.FamilyId, currentUserProfile))
+            {
+                return Result<Guid>.Failure("Access denied. Only family managers can create members.");
+            }
         }
 
         var entity = new Member
