@@ -48,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnTokenValidated = context =>
             {
-                var userProfileSyncService = context.HttpContext.RequestServices.GetRequiredService<backend.Application.Common.Interfaces.IUserProfileSyncService>();
+                var userProfileSyncService = context.HttpContext.RequestServices.GetRequiredService<IUserProfileSyncService>();
                 var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
                 // Run the sync operation in a background task to not block the main request thread
@@ -56,7 +56,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 {
                     using (var scope = context.HttpContext.RequestServices.CreateScope())
                     {
-                        var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<backend.Application.Common.Interfaces.IUserProfileSyncService>();
+                        var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<IUserProfileSyncService>();
                         var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                         try
                         {

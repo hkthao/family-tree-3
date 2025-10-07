@@ -14,11 +14,11 @@ public class UserProfileSyncService : IUserProfileSyncService
     private readonly ILogger<UserProfileSyncService> _logger;
     private readonly IAuth0Config _auth0Config;
 
-    public UserProfileSyncService(IApplicationDbContext context, ILogger<UserProfileSyncService> logger, IOptions<IAuth0Config> auth0Config)
+    public UserProfileSyncService(IApplicationDbContext context, ILogger<UserProfileSyncService> logger, IAuth0Config auth0Config)
     {
         _context = context;
         _logger = logger;
-        _auth0Config = auth0Config.Value;
+        _auth0Config = auth0Config;
     }
 
     public async Task SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
