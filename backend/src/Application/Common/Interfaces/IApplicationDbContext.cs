@@ -1,4 +1,5 @@
 using backend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Common.Interfaces;
 
@@ -8,5 +9,7 @@ public interface IApplicationDbContext
     DbSet<Member> Members { get; }
     DbSet<Event> Events { get; }
     DbSet<Relationship> Relationships { get; }
+    DbSet<UserProfile> UserProfiles { get; } // Added
+    DbSet<FamilyUser> FamilyUsers { get; } // Added
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -16,4 +16,9 @@ public class Family : BaseAuditableEntity
     public string? AvatarUrl { get; set; }
     public string Visibility { get; set; } = "Private"; // e.g., Private, Public
     public int TotalMembers { get; set; }
+
+    /// <summary>
+    /// Navigation property for users associated with this family.
+    /// </summary>
+    public ICollection<FamilyUser> FamilyUsers { get; set; } = new HashSet<FamilyUser>();
 }

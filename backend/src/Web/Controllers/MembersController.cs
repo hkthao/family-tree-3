@@ -66,7 +66,11 @@ public class MembersController : ControllerBase
     public async Task<ActionResult<Guid>> CreateMember([FromBody] CreateMemberCommand command)
     {
         var result = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetMemberById), new { id = result }, result);
+        if (result.IsSuccess)
+        {
+            return CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpPut("{id}")]
@@ -76,14 +80,22 @@ public class MembersController : ControllerBase
         {
             return BadRequest();
         }
-        await _mediator.Send(command);
-        return NoContent();
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMember(Guid id)
     {
-        await _mediator.Send(new DeleteMemberCommand(id));
-        return NoContent();
+        var result = await _mediator.Send(new DeleteMemberCommand(id));
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return BadRequest(result.Error);
     }
 }

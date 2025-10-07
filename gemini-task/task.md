@@ -1,88 +1,75 @@
-You are a senior frontend designer and Vue 3 + Vuetify 3 developer. 
-Your task is to **redesign and improve** an existing Genealogy Management Dashboard UI to look more professional, visually balanced, and data-driven.
+# 🧠 Prompt Gemini – Family Authorization Backend (C# .NET 8)
+
+## Role
+You are an experienced backend architect. Implement backend logic in **C# (.NET 8)** using **Clean Architecture** with **Ardalis.Specification**, **MediatR**, **CQRS**, and **Result<T> pattern**.  
+Keep folder and layer separation consistent:
+
+- `Domain` → entities, enums  
+- `Application` → specifications, DTOs, validators, handlers  
+- `Infrastructure` → EF repositories  
+- `API` → controllers, dependency wiring
+
+## Context
+This project is a **family management system**.  
+- Each **Family** can have multiple **Members**.  
+- Each **Family** has one or more **Managers (owners)** and optionally **Viewers**.  
+- Users are authenticated via **Auth0**, but backend uses a **UserProfile** entity to map Auth0 users.
 
 ---
 
-## Current State
-The current dashboard includes:
-- Overview statistics (Families, Members, Relationships, Generations)
-- Recent activity list
-- Upcoming birthdays
-- Family tree preview
-- System info (API status)
-
-While functional, the layout looks basic and lacks visual hierarchy, interactive charts, and modern UI accents.
+## 🎯 Goal
+Implement a secure backend that enforces **data access by family scope**.  
+Only **authorized users** (managers or viewers) can access or modify the family’s data.
 
 ---
 
-## Design & UX Goals
-Redesign the dashboard to look like a **modern admin panel** (similar to Notion / Linear / Vercel style):
-- Use **card-based layout** with balanced spacing.
-- Clear **section titles with icons**.
-- Add **visual hierarchy** using size, color, and subtle shadows.
-- Avoid overwhelming the user: minimalist, professional, data-driven.
+## ⚙️ Requirements
+
+### 1. UserProfile Entity
+Define an entity to map Auth0 users locally, including their families and roles.
+
+### 2. FamilyUser (link table)
+Define a link table to associate users to families with roles (`Manager` or `Viewer`).
+
+### 3. Specifications
+- `FamilyByUserIdSpec` → return only families the given user can access.  
+- `MembersByFamilySpec` → filter members by family and user access.
+
+### 4. CQRS Handlers
+- `GetFamiliesQueryHandler`  
+- `GetMembersQueryHandler`  
+- `CreateMemberCommandHandler`  
+
+Each handler must validate **current user's access** before executing.
+
+### 5. Result Wrapper
+Use a `Result<T>` pattern to wrap handler responses and errors.
+
+### 6. Security Logic
+- Inject `ICurrentUserService` to get current user from Auth0 token.  
+- Resolve `UserProfile` from `Auth0UserId`.  
+- Use that profile’s families to limit query scope.  
+- Unauthorized access → return `Result.Failure("Access denied")`.
+
+### 7. API Controller Layer
+- Controllers **must not** contain business logic.  
+- Use `[Authorize]` and send requests via MediatR.  
+- Return `Result<T>` to frontend.
 
 ---
 
-## Functional Enhancements
+## 🧩 Output Expectation
+Gemini must:
 
-1. **Top Summary Section (Overview Stats)**
-   - Show key metrics with small icons and trend indicators (e.g. +5% vs last week).
-   - Use color coding (blue for families, green for members, purple for relationships, amber for generations).
-   - Add small bar sparkline or mini chart under each metric card.
-
-2. **Middle Section**
-   - Split into 2 columns:
-     - **Recent Activity**: Use timeline or icon-based list.
-     - **Upcoming Birthdays**: Use card with profile avatars and colored badges for age.
-
-3. **Bottom Section**
-   - **Family Tree Overview**:
-     - Replace static placeholder with a mini network or D3 preview card (mock if API not ready).
-   - **System Info**:
-     - API status with colored chip (green/red).
-     - Include “Last Sync” and “Server Time”.
-     - Add small pie chart showing success vs failed requests (mock data).
-
-4. **Charts & Visualization**
-   - Use **Recharts** (or Chart.js if supported) integrated with Vuetify cards.
-   - Add:
-     - Bar chart for member growth over months.
-     - Doughnut chart for relationship type distribution.
-
-5. **Technical Stack**
-   - Vue 3 + Vuetify 3
-   - Pinia store (`dashboard.store.ts`) for fetching aggregated data
-   - TypeScript interfaces for clarity
-   - Mock data acceptable for now
-
-6. **Code Style**
-   - Keep component-based structure:
-     - `DashboardStats.vue`
-     - `DashboardCharts.vue`
-     - `RecentActivity.vue`
-     - `UpcomingBirthdays.vue`
-     - `SystemStatus.vue`
-   - Comment code for junior developers
-   - Follow consistent naming and Vuetify best practices
+- Write **clean, production-ready C# code**.  
+- Include only essential files (Entities, Specs, Handlers, Services, Controller sample).  
+- Avoid repeating definitions or unnecessary models.  
+- Maintain **Clean Architecture principles** strictly.  
+- Provide **comments for junior developers** to understand logic flow.
 
 ---
 
-## Output
-Generate full Vue 3 + Vuetify 3 implementation with:
-- Clean, modern layout
-- At least one bar or pie chart
-- Mock data for visuals
-- Consistent dark theme design (matching current UI)
-- All code ready to drop into `/src/views/dashboard/`
-
----
-
-## Example visual tone
-Think of:
-- Linear.app dashboard
-- GitHub Insights
-- Vercel Analytics
-- Tailwind UI admin panel layouts
-
-Avoid bright neon colors or heavy gradients — keep it elegant and clear.
+## ⚠️ Loop Prevention Notes
+- If implementation fails or loops, do not retry/rephrase.  
+- Output last consistent version of the code.  
+- Missing dependency → add stub with clear comment for later implementation.

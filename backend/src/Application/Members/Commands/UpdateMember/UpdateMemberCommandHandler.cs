@@ -1,10 +1,11 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
+public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context;
 
@@ -13,7 +14,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
         _context = context;
     }
 
-    public async Task Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.Members
             .Include(m => m.Relationships)
@@ -88,5 +89,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
 
         // Comment: Write-side invariant: Member and Relationships are updated in the database context.
         await _context.SaveChangesAsync(cancellationToken);
+
+        return Result<Guid>.Success(entity.Id);
     }
 }

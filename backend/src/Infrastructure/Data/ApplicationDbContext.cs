@@ -13,6 +13,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Relationship> Relationships => Set<Relationship>();
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>(); // Added
+    public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>(); // Added
 
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -44,6 +46,20 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .HasForeignKey(e => e.FamilyId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Configure FamilyUser many-to-many relationship
+        builder.Entity<FamilyUser>()
+            .HasKey(fu => new { fu.FamilyId, fu.UserProfileId });
+
+        builder.Entity<FamilyUser>()
+            .HasOne(fu => fu.Family)
+            .WithMany(f => f.FamilyUsers)
+            .HasForeignKey(fu => fu.FamilyId);
+
+        builder.Entity<FamilyUser>()
+            .HasOne(fu => fu.UserProfile)
+            .WithMany(up => up.FamilyUsers)
+            .HasForeignKey(fu => fu.UserProfileId);
 
         base.OnModelCreating(builder);
     }
