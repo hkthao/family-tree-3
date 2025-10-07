@@ -38,7 +38,7 @@ import type { Event as AppEvent } from '@/types';
 const dashboardStore = useDashboardStore();
 
 onMounted(() => {
-  dashboardStore.fetchUpcomingEvents();
+ // dashboardStore.fetchUpcomingEvents();
 });
 </script>
 

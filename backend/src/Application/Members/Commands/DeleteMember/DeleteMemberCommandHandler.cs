@@ -1,7 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 

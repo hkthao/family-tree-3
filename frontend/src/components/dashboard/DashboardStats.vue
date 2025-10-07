@@ -42,12 +42,23 @@
 
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores/dashboard.store';
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
+
+const props = defineProps({
+  familyId: { type: String, default: null },
+});
 
 const dashboardStore = useDashboardStore();
+const fetchStats = (familyId: string | null) => {
+  dashboardStore.fetchDashboardStats(familyId || undefined);
+};
 
 onMounted(() => {
-  dashboardStore.fetchDashboardStats();
+  fetchStats(props.familyId);
+});
+
+watch(() => props.familyId, (newFamilyId) => {
+  fetchStats(newFamilyId);
 });
 </script>
 

@@ -15,17 +15,14 @@
     <!-- Top Summary Section -->
     <v-row>
       <v-col cols="12">
-        <DashboardStats />
+        <DashboardStats :family-id="selectedFamilyId || undefined" />
       </v-col>
     </v-row>
 
-    <!-- Middle Section: Recent Activity & Upcoming Events -->
+    <!-- Middle Section: Recent Activity -->
     <v-row>
       <v-col cols="12" md="6">
         <RecentActivity :family-id="selectedFamilyId || undefined" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <UpcomingEvents />
       </v-col>
     </v-row>
 
@@ -43,7 +40,6 @@ import { onMounted, ref, watch } from 'vue';
 import { useDashboardStore } from '@/stores/dashboard.store';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
-import UpcomingEvents from '@/components/dashboard/UpcomingEvents.vue'; // Changed import
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 

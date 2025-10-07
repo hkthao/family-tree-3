@@ -2,8 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UserActivities.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UserActivities.Queries.GetRecentActivities;
 
@@ -42,7 +40,7 @@ public class GetRecentActivitiesQueryHandler : IRequestHandler<GetRecentActiviti
         var query = _context.UserActivities.AsNoTracking();
 
         // Apply specifications
-        query = query.WithSpecification(new UserActivityByProfileIdSpec(currentUserProfile.Id));
+        // query = query.WithSpecification(new UserActivityByProfileIdSpec(currentUserProfile.Id));
         query = query.WithSpecification(new UserActivityByTargetSpec(request.TargetType, request.TargetId));
         query = query.WithSpecification(new UserActivityByGroupSpec(request.GroupId));
         query = query.WithSpecification(new UserActivityOrderingAndPaginationSpec(request.Limit));

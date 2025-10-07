@@ -16,6 +16,9 @@ import { UserProfileApiService } from './userProfile/api.userProfile.service';
 import type { IUserActivityService } from './userActivity/userActivity.service.interface';
 import { MockUserActivityService } from './userActivity/mock.userActivity.service';
 import { ApiUserActivityService } from './userActivity/api.userActivity.service';
+import type { IDashboardService } from './dashboard/dashboard.service.interface';
+import { MockDashboardService } from './dashboard/mock.dashboard.service';
+import { ApiDashboardService } from './dashboard/api.dashboard.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -26,6 +29,7 @@ export interface AppServices {
   relationship: IRelationshipService;
   userProfile: IUserProfileService;
   userActivity: IUserActivityService;
+  dashboard: IDashboardService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -69,5 +73,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiUserActivityService(apiClient)
         : testServices?.userActivity || new MockUserActivityService(),
+    dashboard:
+      mode === 'mock'
+        ? new MockDashboardService()
+        : mode === 'real'
+        ? new ApiDashboardService(apiClient)
+        : testServices?.dashboard || new MockDashboardService(),
   };
 }

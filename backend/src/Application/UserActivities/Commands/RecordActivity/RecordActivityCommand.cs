@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using System.Text.Json;

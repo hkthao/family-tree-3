@@ -96,6 +96,43 @@
         ]
       }
     },
+    "/api/Dashboard/stats": {
+      "get": {
+        "tags": [
+          "Dashboard"
+        ],
+        "operationId": "Dashboard_GetDashboardStats",
+        "parameters": [
+          {
+            "name": "familyId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "guid",
+              "nullable": true
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Events": {
       "get": {
         "tags": [
@@ -1632,6 +1669,28 @@
           },
           "username": {
             "type": "string"
+          }
+        }
+      },
+      "DashboardStatsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalFamilies": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalMembers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalRelationships": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalGenerations": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

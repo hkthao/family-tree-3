@@ -2,8 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
 

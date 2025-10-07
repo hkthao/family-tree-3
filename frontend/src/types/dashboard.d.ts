@@ -21,6 +21,4 @@ export interface UpcomingEvent extends AppEvent { // Extend existing Event type
 
 export interface DashboardData {
   stats: DashboardStats | null;
-  recentActivity: RecentActivityItem[];
-  upcomingEvents: UpcomingEvent[]; // Changed from upcomingBirthdays
 }
