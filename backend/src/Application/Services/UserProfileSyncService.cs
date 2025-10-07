@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using backend.Application.UserProfiles.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.Services;
 
@@ -11,18 +12,26 @@ public class UserProfileSyncService : IUserProfileSyncService
 {
     private readonly IApplicationDbContext _context;
     private readonly ILogger<UserProfileSyncService> _logger;
+    private readonly IAuth0Config _auth0Config;
 
-    public UserProfileSyncService(IApplicationDbContext context, ILogger<UserProfileSyncService> logger)
+    public UserProfileSyncService(IApplicationDbContext context, ILogger<UserProfileSyncService> logger, IOptions<IAuth0Config> auth0Config)
     {
         _context = context;
         _logger = logger;
+        _auth0Config = auth0Config.Value;
     }
 
     public async Task SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
     {
         var auth0UserId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        var email = principal.FindFirst(ClaimTypes.Email)?.Value;
-        var name = principal.FindFirst(ClaimTypes.Name)?.Value;
+        var email = principal.FindFirst($"{_auth0Config.Namespace}email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
+        var name = principal.FindFirst($"{_auth0Config.Namespace}name")?.Value ?? principal.FindFirst(ClaimTypes.Name)?.Value;
+
+        // TODO: Auth0 ID tokens might not contain 'email' and 'name' claims directly.
+        // These claims are typically available in the Access Token or via the /userinfo endpoint.
+        // If 'email' and 'name' are consistently null, consider:
+        // 1. Configuring Auth0 to include these claims in the ID token.
+        // 2. Making a call to the /userinfo endpoint to retrieve full profile data.
 
         if (string.IsNullOrEmpty(auth0UserId))
         {

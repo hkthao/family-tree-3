@@ -4,6 +4,9 @@ using backend.Infrastructure;
 using backend.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using backend.Infrastructure.Auth;
+using Microsoft.Extensions.Options;
+using backend.Application.Common.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,15 +14,21 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+// Configure Auth0Config
+builder.Services.Configure<Auth0Config>(builder.Configuration.GetSection("Auth0"));
+builder.Services.AddSingleton<IAuth0Config>(sp => sp.GetRequiredService<IOptions<Auth0Config>>().Value);
+
 // Read Auth0 configuration from environment variables
 var auth0Domain = builder.Configuration["Auth0:Domain"];
 var auth0Audience = builder.Configuration["Auth0:Audience"];
+var auth0Namespace = builder.Configuration["Auth0:Namespace"];
 
 // Log Auth0 configuration for debugging
 builder.Logging.AddConsole(); // Ensure console logging is enabled
 var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Auth0Config");
 logger.LogInformation("Auth0 Domain: {Auth0Domain}", auth0Domain);
 logger.LogInformation("Auth0 Audience: {Auth0Audience}", auth0Audience);
+logger.LogInformation("Auth0 Namespace: {Auth0Namespace}", auth0Namespace);
 
 // Configure Auth0 Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

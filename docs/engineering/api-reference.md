@@ -264,6 +264,11 @@ Content-Type: application/json
 -   `DELETE /api/relationships/{id}`: Xóa quan hệ.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
 
+### 6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)
+
+-   `GET /api/UserProfiles`: Lấy danh sách tất cả hồ sơ người dùng.
+    *   **Phản hồi:** `Result<List<UserProfileDto>>`
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -358,6 +363,17 @@ Content-Type: application/json
   "members": [
     // ... Member objects ...
   ]
+}
+```
+
+### 7.7. UserProfile
+
+```json
+{
+  "id": "string (uuid)",
+  "auth0UserId": "string",
+  "email": "string",
+  "name": "string"
 }
 ```
 ```
