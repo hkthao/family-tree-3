@@ -11,8 +11,8 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251006140253_RemoveIdentity")]
-    partial class RemoveIdentity
+    [Migration("20251007093308_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -136,6 +136,27 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("Families");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
+                {
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("UserProfileId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("FamilyId", "UserProfileId");
+
+                    b.HasIndex("UserProfileId");
+
+                    b.ToTable("FamilyUsers");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
                 {
                     b.Property<Guid>("Id")
@@ -236,6 +257,94 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("Relationships");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.UserActivity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("ActionType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ActivitySummary")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("json");
+
+                    b.Property<string>("TargetId")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("TargetType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserProfileId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserProfileId");
+
+                    b.ToTable("UserActivities");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.UserProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Auth0UserId")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Auth0UserId")
+                        .IsUnique();
+
+                    b.ToTable("UserProfiles");
+                });
+
             modelBuilder.Entity("EventMember", b =>
                 {
                     b.HasOne("backend.Domain.Entities.Event", null)
@@ -257,6 +366,25 @@ namespace backend.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("FamilyId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Family", "Family")
+                        .WithMany("FamilyUsers")
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Domain.Entities.UserProfile", "UserProfile")
+                        .WithMany("FamilyUsers")
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Family");
+
+                    b.Navigation("UserProfile");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
@@ -287,9 +415,30 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("TargetMember");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.UserActivity", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.UserProfile", "UserProfile")
+                        .WithMany()
+                        .HasForeignKey("UserProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserProfile");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.Family", b =>
+                {
+                    b.Navigation("FamilyUsers");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
                 {
                     b.Navigation("Relationships");
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.UserProfile", b =>
+                {
+                    b.Navigation("FamilyUsers");
                 });
 #pragma warning restore 612, 618
         }

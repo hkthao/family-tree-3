@@ -273,6 +273,9 @@ namespace backend.Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext");
 
+                    b.Property<Guid?>("GroupId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)");
 

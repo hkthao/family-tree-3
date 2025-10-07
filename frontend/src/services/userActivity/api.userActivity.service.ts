@@ -13,13 +13,13 @@ export class ApiUserActivityService implements IUserActivityService {
     limit?: number,
     targetType?: TargetType,
     targetId?: string,
-    familyId?: string,
+    groupId?: string,
   ): Promise<Result<RecentActivity[], ApiError>> {
     const params = new URLSearchParams();
     if (limit) params.append('limit', limit.toString());
     if (targetType !== undefined) params.append('targetType', targetType.toString());
     if (targetId) params.append('targetId', targetId);
-    if (familyId) params.append('familyId', familyId);
+    if (groupId) params.append('groupId', groupId);
 
     return this.http.get<RecentActivity[]>(`${this.apiUrl}/recent?${params.toString()}`);
   }
