@@ -39,13 +39,15 @@ public class GetRecentActivitiesQueryHandler : IRequestHandler<GetRecentActiviti
             return Result<List<UserActivityDto>>.Failure("User profile not found.", "NotFound");
         }
 
-        // Only allow users to view their own activities
-        // Admins can view all activities (if needed, this logic would be here)
-        // For now, strictly filter by current user's profile ID
-        var spec = new UserActivityByUserSpec(currentUserProfile.Id, request.Limit, request.TargetType, request.TargetId, request.GroupId);
+        var query = _context.UserActivities.AsNoTracking();
 
-        var userActivities = await _context.UserActivities
-            .WithSpecification(spec)
+        // Apply specifications
+        query = query.WithSpecification(new UserActivityByProfileIdSpec(currentUserProfile.Id));
+        query = query.WithSpecification(new UserActivityByTargetSpec(request.TargetType, request.TargetId));
+        query = query.WithSpecification(new UserActivityByGroupSpec(request.GroupId));
+        query = query.WithSpecification(new UserActivityOrderingAndPaginationSpec(request.Limit));
+
+        var userActivities = await query
             .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
