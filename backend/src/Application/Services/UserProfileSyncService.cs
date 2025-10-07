@@ -20,7 +20,7 @@ public class UserProfileSyncService : IUserProfileSyncService
         _auth0Config = auth0Config;
     }
 
-    public async Task SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
+    public async Task<bool> SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default)
     {
         var auth0UserId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = principal.FindFirst($"{_auth0Config.Namespace}email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
@@ -29,10 +29,11 @@ public class UserProfileSyncService : IUserProfileSyncService
         if (string.IsNullOrEmpty(auth0UserId))
         {
             _logger.LogWarning("Auth0 User ID not found in claims. Cannot sync user profile.");
-            return;
+            return false;
         }
 
         var userProfile = await GetUserProfileByAuth0Id(auth0UserId);
+        bool newUserCreated = false;
 
         if (userProfile == null)
         {
@@ -48,6 +49,7 @@ public class UserProfileSyncService : IUserProfileSyncService
                 _context.UserProfiles.Add(userProfile);
                 await _context.SaveChangesAsync(cancellationToken);
                 _logger.LogInformation("Created new user profile for Auth0 user {Auth0UserId}.", auth0UserId);
+                newUserCreated = true;
             }
             catch (DbUpdateException ex)
             {
@@ -83,6 +85,7 @@ public class UserProfileSyncService : IUserProfileSyncService
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+        return newUserCreated;
     }
 
     public async Task<UserProfile?> GetUserProfileByAuth0Id(string auth0UserId)

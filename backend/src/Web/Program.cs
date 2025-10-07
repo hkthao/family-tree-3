@@ -62,26 +62,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                                 try
                                 {
-                                    await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
+                                    var newUserCreated = await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
 
-                                    // Record Login Activity
-                                    var userProfileId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                                    if (!string.IsNullOrEmpty(userProfileId))
-                                    {
-                                        var userProfile = await scopedUserProfileSyncService.GetUserProfileByAuth0Id(userProfileId);
-                                        if (userProfile != null)
-                                        {
-                                            var recordCommand = new backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand
-                                            {
-                                                UserProfileId = userProfile.Id,
-                                                ActionType = backend.Domain.Enums.UserActionType.Login,
-                                                TargetType = backend.Domain.Enums.TargetType.UserProfile,
-                                                TargetId = userProfile.Id.ToString(), // TargetId is string
-                                                ActivitySummary = "User logged in."
-                                            };
-                                            await mediator.Send(recordCommand);
-                                        }
-                                    }
+                                    // Record Login Activity only if a new user was created
+                                    // if (newUserCreated)
+                                    // {
+                                    //     var userProfile = await scopedUserProfileSyncService.GetUserProfileByAuth0Id(context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
+                                    //     if (userProfile != null)
+                                    //     {
+                                    //         var recordCommand = new backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand
+                                    //         {
+                                    //             UserProfileId = userProfile.Id,
+                                    //             ActionType = backend.Domain.Enums.UserActionType.Login,
+                                    //             TargetType = backend.Domain.Enums.TargetType.UserProfile,
+                                    //             TargetId = userProfile.Id.ToString(),
+                                    //             ActivitySummary = "User logged in for the first time."
+                                    //         };
+                                    //         await mediator.Send(recordCommand);
+                                    //     }
+                                    // }
                                 }
                                 catch (Exception ex)
                                 {
