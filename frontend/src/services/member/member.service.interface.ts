@@ -1,5 +1,5 @@
 import type { Member, Result, MemberFilter, Paginated } from "@/types";
-import type { ApiError } from "@/utils/api";
+import type { ApiError } from "@/plugins/axios";
 import type { ICrudService } from "../common/crud.service.interface";
 
 export interface IMemberService extends ICrudService<Member> { // Extend ICrudService

@@ -1,5 +1,5 @@
 import type { Family, FamilyFilter, Result, Paginated } from "@/types";
-import type { ApiError } from "@/utils/api";
+import type { ApiError } from "@/plugins/axios";
 import type { ICrudService } from "../common/crud.service.interface";
 
 export interface IFamilyService extends ICrudService<Family> {

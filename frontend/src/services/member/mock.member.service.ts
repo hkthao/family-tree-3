@@ -1,6 +1,6 @@
 import fixedMockFamilies from "@/data/mock/families.json"
 import { err, type Member, Gender, ok, type Result, type MemberFilter, type Paginated } from "@/types";
-import type { ApiError } from "@/utils/api";
+import type { ApiError } from "@/plugins/axios";
 import { simulateLatency } from "@/utils/mockUtils";
 import type { IMemberService } from "./member.service.interface";
 

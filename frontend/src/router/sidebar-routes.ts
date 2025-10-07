@@ -3,6 +3,12 @@ import type { RouteRecordRaw } from 'vue-router';
 
 export const sidebarRoutes: RouteRecordRaw[] = [
   {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/dashboard/DashboardView.vue'),
+    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'dashboard.title', icon: 'mdi-view-dashboard' },
+  },
+  {
     path: '/family/tree',
     name: 'FamilyTree',
     component: FamilyTreeView,
