@@ -2,12 +2,12 @@
   <v-card class="pa-4" elevation="2" height="100%">
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-chart-timeline</v-icon>
-      <span class="ml-2">Hoạt động gần đây</span>
+      <span class="ml-2">{{ t('dashboard.recentActivity.title') }}</span>
     </v-card-title>
     <v-card-text class="scrollable-card-content">
       <div v-if="userActivityStore.loading">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <p class="mt-2">Đang tải hoạt động gần đây...</p>
+        <p class="mt-2">{{ t('dashboard.recentActivity.loading') }}</p>
       </div>
       <v-alert v-else-if="userActivityStore.error" type="error" dense dismissible class="mb-4">
         {{ userActivityStore.error }}
@@ -35,7 +35,7 @@
               <div class="text-caption"></div>
             </template>
             <div>
-              <div class="font-weight-normal">Không có hoạt động gần đây.</div>
+              <div class="font-weight-normal">{{ t('dashboard.recentActivity.noData') }}</div>
             </div>
           </v-timeline-item>
         </template>
@@ -48,6 +48,9 @@
 import { useUserActivityStore } from '@/stores/userActivity.store';
 import { onMounted, watch } from 'vue';
 import { TargetType } from '@/types';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   familyId: { type: String, default: null },

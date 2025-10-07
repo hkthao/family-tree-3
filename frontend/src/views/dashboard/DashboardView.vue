@@ -4,7 +4,7 @@
       <v-col cols="12" md="4">
         <FamilyAutocomplete
           v-model="selectedFamilyId"
-          label="Lọc theo gia đình"
+          :label="t('dashboard.filterByFamily')"
           clearable
           hide-details
           prepend-inner-icon="mdi-filter-variant"
@@ -41,12 +41,15 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useDashboardStore } from '@/stores/dashboard.store';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
 import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents.vue';
+
+const { t } = useI18n();
 
 const dashboardStore = useDashboardStore();
 

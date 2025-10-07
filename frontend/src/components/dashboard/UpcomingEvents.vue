@@ -2,12 +2,12 @@
   <v-card class="pa-4" elevation="2" height="100%">
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-calendar-clock</v-icon>
-      <span class="ml-2">Sự kiện sắp tới</span>
+      <span class="ml-2">{{ t('dashboard.upcomingEvents.title') }}</span>
     </v-card-title>
     <v-card-text class="scrollable-card-content">
       <div v-if="dashboardStore.loading">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <p class="mt-2">Đang tải sự kiện sắp tới...</p>
+        <p class="mt-2">{{ t('dashboard.upcomingEvents.loading') }}</p>
       </div>
       <v-alert v-else-if="dashboardStore.error" type="error" dense dismissible class="mb-4">
         {{ dashboardStore.error }}
@@ -23,7 +23,7 @@
           </v-list-item-subtitle>
         </v-list-item>
         <v-list-item v-if="dashboardStore.upcomingEvents.length === 0">
-          <v-list-item-title>Không có sự kiện sắp tới.</v-list-item-title>
+          <v-list-item-title>{{ t('dashboard.upcomingEvents.noData') }}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-card-text>
@@ -33,6 +33,9 @@
 <script setup lang="ts">
 import { useDashboardStore } from '@/stores/dashboard.store';
 import { onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
   familyId: { type: String, default: null },
@@ -52,10 +55,3 @@ watch(() => props.familyId, (newFamilyId) => {
   fetchEvents(newFamilyId);
 });
 </script>
-
-<style scoped>
-.scrollable-card-content {
-  max-height: 400px; /* Adjust as needed */
-  overflow-y: auto;
-}
-</style>
