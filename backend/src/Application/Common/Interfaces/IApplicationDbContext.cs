@@ -11,5 +11,6 @@ public interface IApplicationDbContext
     DbSet<UserProfile> UserProfiles { get; } // Added
     DbSet<FamilyUser> FamilyUsers { get; } // Added
     DbSet<UserActivity> UserActivities { get; }
+    DbSet<AIBiography> AIBiographies { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

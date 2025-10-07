@@ -277,6 +277,16 @@ Content-Type: application/json
 -   `GET /api/activities/recent?limit=...&targetType=...&targetId=...&familyId=...`: Lấy danh sách các hoạt động gần đây của người dùng.
     *   **Phản hồi:** `Result<List<UserActivityDto>>`
 
+### 6.8. Quản lý AI (`/api/ai`)
+
+-   `POST /api/ai/biography/{memberId}`: Sinh tiểu sử cho thành viên bằng AI.
+    *   **Request Body:** `{ "style": "string (enum: Emotional, Historical)", "useDBData": "boolean", "userPrompt": "string (nullable)", "language": "string" }`
+    *   **Phản hồi:** `Result<BiographyResultDto>`
+-   `GET /api/ai/biography/last-prompt/{memberId}`: Lấy prompt người dùng gần nhất cho thành viên.
+    *   **Phản hồi:** `Result<string?>`
+-   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI hiện có và trạng thái sử dụng.
+    *   **Phản hồi:** `Result<List<AIProviderDto>>`
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -397,6 +407,31 @@ Content-Type: application/json
   "metadata": "object (json, nullable)",
   "activitySummary": "string",
   "created": "string (date-time)"
+}
+```
+
+### 7.9. BiographyResult
+
+```json
+{
+  "content": "string",
+  "provider": "string (enum: Gemini, OpenAI, LocalAI)",
+  "tokensUsed": "number",
+  "generatedAt": "string (date-time)",
+  "userPrompt": "string"
+}
+```
+
+### 7.10. AIProvider
+
+```json
+{
+  "providerType": "string (enum: Gemini, OpenAI, LocalAI)",
+  "name": "string",
+  "isEnabled": "boolean",
+  "dailyUsageLimit": "number",
+  "currentDailyUsage": "number",
+  "maxTokensPerRequest": "number"
 }
 ```
 ```

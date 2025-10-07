@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>(); // Added
     public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>(); // Added
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
+    public DbSet<AIBiography> AIBiographies => Set<AIBiography>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -593,6 +593,83 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
     -   Hỗ trợ các tham số `limit`, `targetType`, `targetId`, `familyId` qua query string.
     -   Yêu cầu xác thực (`[Authorize]`).
 
+## 11. Module AI (AI Module)
+
+Module AI được thiết kế để hỗ trợ sinh tiểu sử (biography) cho các thành viên trong gia đình bằng cách sử dụng các nhà cung cấp AI khác nhau. Module này tuân thủ các nguyên tắc Clean Architecture, cho phép dễ dàng mở rộng và thay đổi nhà cung cấp AI.
+
+### 11.1. Thực thể `AIBiography`
+
+Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu trữ thông tin về tiểu sử được sinh bởi AI.
+
+| Tên trường       | Kiểu dữ liệu | Mô tả                                                              |
+| :--------------- | :----------- | :----------------------------------------------------------------- |
+| `Id`             | `Guid`       | ID duy nhất của tiểu sử.                                           |
+| `MemberId`       | `Guid`       | ID của thành viên mà tiểu sử được sinh ra.                         |
+| `Member`         | `Member`     | Thuộc tính điều hướng đến thành viên.                              |
+| `Style`          | `BiographyStyle`| Kiểu giọng văn của tiểu sử (ví dụ: cảm động, lịch sử).             |
+| `Content`        | `string`     | Nội dung tiểu sử được sinh ra.                                     |
+| `Provider`       | `AIProviderType`| Nhà cung cấp AI được sử dụng.                                     |
+| `UserPrompt`     | `string`     | Prompt gốc mà người dùng đã nhập (hoặc prompt tự động sinh).       |
+| `GeneratedFromDB`| `bool`       | True nếu tiểu sử được sinh từ dữ liệu DB, false nếu từ UserPrompt. |
+| `TokensUsed`     | `int`        | Số lượng token đã sử dụng để sinh tiểu sử.                         |
+| `Metadata`       | `JsonDocument`| Dữ liệu tùy chọn dưới dạng JSON về quá trình sinh.                 |
+| `CreatedAt`      | `DateTime`   | Thời điểm tiểu sử được sinh ra.                                    |
+
+#### Enums liên quan
+
+-   **`BiographyStyle`** (`backend/src/Domain/Enums/BiographyStyle.cs`): Định nghĩa các kiểu giọng văn:
+    -   `Emotional`, `Historical`, `Storytelling`, `Formal`, `Informal`.
+-   **`AIProviderType`** (`backend/src/Domain/Enums/AIProviderType.cs`): Định nghĩa các nhà cung cấp AI:
+    -   `None`, `Gemini`, `OpenAI`, `LocalAI`.
+
+### 11.2. Giao diện và DTOs
+
+-   **`IAIContentGenerator`** (`backend/src/Application/Common/Interfaces/IAIContentGenerator.cs`):
+    -   Giao diện cho các dịch vụ sinh nội dung AI. Có phương thức `GenerateContentAsync`.
+-   **`IAIUsageTracker`** (`backend/src/Application/Common/Interfaces/IAIUsageTracker.cs`):
+    -   Giao diện để theo dõi và quản lý việc sử dụng AI (giới hạn token, giới hạn lượt gọi hàng ngày).
+-   **`AIRequest`** (`backend/src/Application/AI/Common/AIRequest.cs`):
+    -   Chứa thông tin yêu cầu gửi đến AI provider (UserPrompt, Style, Language, MaxTokens, v.v.).
+-   **`AIResult`** (`backend/src/Application/AI/Common/AIResult.cs`):
+    -   Chứa kết quả trả về từ AI provider (Content, TokensUsed, Provider, GeneratedAt, ErrorMessage).
+-   **`BiographyResultDto`** (`backend/src/Application/AI/Common/BiographyResultDto.cs`):
+    -   DTO cho phản hồi API khi sinh tiểu sử.
+-   **`AIProviderDto`** (`backend/src/Application/AI/Queries/AIProviderDto.cs`):
+    -   DTO cho thông tin nhà cung cấp AI và trạng thái sử dụng.
+
+### 11.3. Commands và Queries
+
+-   **`GenerateBiographyCommand`** (`backend/src/Application/AI/Commands/GenerateBiography/GenerateBiographyCommand.cs`):
+    -   Lệnh để yêu cầu sinh tiểu sử. Handler sẽ tổng hợp prompt từ DB nếu không có UserPrompt.
+-   **`GenerateBiographyCommandHandler`** (`backend/src/Application/AI/Commands/GenerateBiography/GenerateBiographyCommandHandler.cs`):
+    -   Xử lý lệnh `GenerateBiographyCommand`, gọi `IAIUsageTracker` và `IAIContentGenerator`.
+-   **`GetLastUserPromptQuery`** (`backend/src/Application/AI/Queries/GetLastUserPrompt/GetLastUserPromptQuery.cs`):
+    -   Truy vấn để lấy prompt người dùng gần nhất cho một thành viên.
+-   **`GetLastUserPromptQueryHandler`** (`backend/src/Application/AI/Queries/GetLastUserPrompt/GetLastUserPromptQueryHandler.cs`):
+    -   Xử lý truy vấn `GetLastUserPromptQuery`.
+-   **`GetAIProvidersQuery`** (`backend/src/Application/AI/Queries/GetAIProviders/GetAIProvidersQuery.cs`):
+    -   Truy vấn để lấy danh sách các nhà cung cấp AI và trạng thái sử dụng.
+-   **`GetAIProvidersQueryHandler`** (`backend/src/Application/AI/Queries/GetAIProviders/GetAIProvidersQueryHandler.cs`):
+    -   Xử lý truy vấn `GetAIProvidersQuery`.
+
+### 11.4. Triển khai Infrastructure
+
+-   **`AIConfig`** (`backend/src/Infrastructure/AI/AIConfig.cs`):
+    -   Lớp cấu hình đọc từ `appsettings.json` để định nghĩa nhà cung cấp AI mặc định, API Keys, giới hạn token, v.v.
+-   **`IAISettings`** (`backend/src/Application/Common/Interfaces/IAISettings.cs`):
+    -   Giao diện cấu hình AI được định nghĩa trong Application Layer để tuân thủ Clean Architecture.
+-   **Các `AIContentGenerator`** (`GeminiAIContentGenerator`, `OpenAIAIContentGenerator`, `LocalAIContentGenerator`):
+    -   Triển khai `IAIContentGenerator` cho từng nhà cung cấp AI cụ thể.
+-   **`AIUsageTracker`** (`backend/src/Infrastructure/AI/AIUsageTracker.cs`):
+    -   Triển khai `IAIUsageTracker` để theo dõi và giới hạn việc sử dụng AI (sử dụng `MemoryCache` để lưu trữ tạm thời).
+
+### 11.5. API Endpoints
+
+-   **`AIController`** (`backend/src/Web/Controllers/AIController.cs`):
+    -   `POST /api/ai/biography/{memberId}`: Sinh tiểu sử.
+    -   `GET /api/ai/biography/last-prompt/{memberId}`: Lấy prompt cuối cùng.
+    -   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI.
+
 ## 12. Hướng dẫn Kiểm thử
 
 ## 13. Logging & Monitoring

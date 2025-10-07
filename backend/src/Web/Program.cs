@@ -7,12 +7,38 @@ using Microsoft.IdentityModel.Tokens;
 using backend.Infrastructure.Auth;
 using Microsoft.Extensions.Options;
 using backend.Application.Common.Interfaces;
+using backend.Infrastructure.AI;
+using backend.Domain.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Configure AIConfig
+builder.Services.Configure<AIConfig>(builder.Configuration.GetSection("AI"));
+builder.Services.AddSingleton<IAISettings>(sp => sp.GetRequiredService<IOptions<AIConfig>>().Value);
+
+// Register AI Content Generators
+builder.Services.AddTransient<GeminiAIContentGenerator>();
+builder.Services.AddTransient<OpenAIAIContentGenerator>();
+builder.Services.AddTransient<LocalAIContentGenerator>();
+
+builder.Services.AddTransient<IAIContentGenerator>(sp =>
+{
+    var aiConfig = sp.GetRequiredService<IOptions<AIConfig>>().Value;
+    return aiConfig.Provider switch
+    {
+        AIProviderType.Gemini => sp.GetRequiredService<GeminiAIContentGenerator>(),
+        AIProviderType.OpenAI => sp.GetRequiredService<OpenAIAIContentGenerator>(),
+        AIProviderType.LocalAI => sp.GetRequiredService<LocalAIContentGenerator>(),
+        _ => throw new InvalidOperationException($"No AI content generator configured for provider: {aiConfig.Provider}")
+    };
+});
+
+// Register AI Usage Tracker
+builder.Services.AddSingleton<IAIUsageTracker, AIUsageTracker>();
 
 // Configure Auth0Config
 builder.Services.Configure<Auth0Config>(builder.Configuration.GetSection("Auth0"));
