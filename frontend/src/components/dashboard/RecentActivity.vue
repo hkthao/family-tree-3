@@ -1,10 +1,10 @@
 <template>
-  <v-card class="pa-4" elevation="2">
+  <v-card class="pa-4" elevation="2" height="100%">
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-chart-timeline</v-icon>
       <span class="ml-2">Hoạt động gần đây</span>
     </v-card-title>
-    <v-card-text>
+    <v-card-text class="scrollable-card-content">
       <div v-if="dashboardStore.loading">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
         <p class="mt-2">Đang tải hoạt động gần đây...</p>
@@ -54,5 +54,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Add any specific styles for RecentActivity here */
+.scrollable-card-content {
+  max-height: 400px; /* Adjust as needed */
+  overflow-y: auto;
+}
 </style>

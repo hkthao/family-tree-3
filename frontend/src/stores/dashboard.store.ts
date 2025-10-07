@@ -6,22 +6,20 @@ import type { DashboardData, DashboardStats, RecentActivityItem, UpcomingBirthda
 
 // Mock API Service (replace with actual API service later)
 const mockDashboardApi = {
-  fetchStats: async (): Promise<Result<DashboardStats>> => {
+  fetchStats: async (familyId?: string): Promise<Result<DashboardStats>> => {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    console.log('Fetching stats for family:', familyId);
     return ok({
       totalFamilies: 12,
       totalMembers: 150,
       totalRelationships: 300,
       totalGenerations: 7,
-      familyTrend: { changePercentage: 5.2, isPositiveTrend: true },
-      memberTrend: { changePercentage: -1.5, isPositiveTrend: false },
-      relationshipTrend: { changePercentage: 10.1, isPositiveTrend: true },
-      generationTrend: { changePercentage: 0.5, isPositiveTrend: true },
     });
   },
 
-  fetchRecentActivity: async (): Promise<Result<RecentActivityItem[]>> => {
+  fetchRecentActivity: async (familyId?: string): Promise<Result<RecentActivityItem[]>> => {
     await new Promise(resolve => setTimeout(resolve, 600));
+    console.log('Fetching recent activity for family:', familyId);
     return ok([
       { id: '1', type: 'member', description: 'Added John Doe', timestamp: new Date().toISOString() },
       { id: '2', type: 'relationship', description: 'Linked Jane Doe to John Doe', timestamp: new Date(Date.now() - 3600000).toISOString() },
@@ -31,8 +29,9 @@ const mockDashboardApi = {
     ]);
   },
 
-  fetchUpcomingBirthdays: async (): Promise<Result<UpcomingBirthday[]>> => {
+  fetchUpcomingBirthdays: async (familyId?: string): Promise<Result<UpcomingBirthday[]>> => {
     await new Promise(resolve => setTimeout(resolve, 700));
+    console.log('Fetching upcoming birthdays for family:', familyId);
     const today = new Date();
     const nextMonth = new Date();
     nextMonth.setMonth(today.getMonth() + 1);
@@ -44,8 +43,9 @@ const mockDashboardApi = {
     ]);
   },
 
-  fetchSystemInfo: async (): Promise<Result<SystemInfo>> => {
+  fetchSystemInfo: async (familyId?: string): Promise<Result<SystemInfo>> => {
     await new Promise(resolve => setTimeout(resolve, 300));
+    console.log('Fetching system info for family:', familyId);
     const isOnline = Math.random() > 0.1; // 90% chance of being online
     return ok({
       apiStatus: isOnline ? 'online' : 'offline',
@@ -67,11 +67,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  const fetchDashboardStats = async () => {
+  const fetchDashboardStats = async (familyId?: string) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await mockDashboardApi.fetchStats();
+      const response = await mockDashboardApi.fetchStats(familyId);
       if (response.ok) {
         dashboardData.value.stats = response.value;
       } else {
@@ -84,11 +84,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   };
 
-  const fetchRecentActivity = async () => {
+  const fetchRecentActivity = async (familyId?: string) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await mockDashboardApi.fetchRecentActivity();
+      const response = await mockDashboardApi.fetchRecentActivity(familyId);
       if (response.ok) {
         dashboardData.value.recentActivity = response.value;
       } else {
@@ -101,11 +101,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   };
 
-  const fetchUpcomingBirthdays = async () => {
+  const fetchUpcomingBirthdays = async (familyId?: string) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await mockDashboardApi.fetchUpcomingBirthdays();
+      const response = await mockDashboardApi.fetchUpcomingBirthdays(familyId);
       if (response.ok) {
         dashboardData.value.upcomingBirthdays = response.value;
       } else {
@@ -118,11 +118,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   };
 
-  const fetchSystemInfo = async () => {
+  const fetchSystemInfo = async (familyId?: string) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await mockDashboardApi.fetchSystemInfo();
+      const response = await mockDashboardApi.fetchSystemInfo(familyId);
       if (response.ok) {
         dashboardData.value.systemInfo = response.value;
       } else {
@@ -135,15 +135,15 @@ export const useDashboardStore = defineStore('dashboard', () => {
     }
   };
 
-  const fetchAllDashboardData = async () => {
+  const fetchAllDashboardData = async (familyId?: string) => {
     loading.value = true;
     error.value = null;
     try {
       await Promise.all([
-        fetchDashboardStats(),
-        fetchRecentActivity(),
-        fetchUpcomingBirthdays(),
-        fetchSystemInfo(),
+        fetchDashboardStats(familyId),
+        fetchRecentActivity(familyId),
+        fetchUpcomingBirthdays(familyId),
+        fetchSystemInfo(familyId),
       ]);
     } catch (err: any) {
       error.value = err.message || 'An unexpected error occurred while fetching all dashboard data.';

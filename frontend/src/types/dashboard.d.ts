@@ -1,17 +1,8 @@
-export interface TrendData {
-  changePercentage: number;
-  isPositiveTrend: boolean;
-}
-
 export interface DashboardStats {
   totalFamilies: number;
   totalMembers: number;
   totalRelationships: number;
   totalGenerations?: number;
-  familyTrend?: TrendData;
-  memberTrend?: TrendData;
-  relationshipTrend?: TrendData;
-  generationTrend?: TrendData;
 }
 
 export interface RecentActivityItem {
