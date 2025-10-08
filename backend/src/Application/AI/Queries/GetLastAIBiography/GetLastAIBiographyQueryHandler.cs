@@ -1,5 +1,4 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using AutoMapper;
 using backend.Application.AI.Common;
 using backend.Application.AI.Specifications;
 using backend.Application.Common.Interfaces;
