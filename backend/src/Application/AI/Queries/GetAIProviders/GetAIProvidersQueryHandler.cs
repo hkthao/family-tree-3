@@ -15,12 +15,12 @@ public class GetAIProvidersQueryHandler : IRequestHandler<GetAIProvidersQuery, R
     private readonly IAuth0Config _auth0Config; // To get the namespace for custom claims
     private readonly IAISettings _aiSettings;
 
-    public GetAIProvidersQueryHandler(IAIUsageTracker aiUsageTracker, IAuthorizationService authorizationService, IOptions<IAuth0Config> auth0Config, IOptions<IAISettings> aiSettings)
+    public GetAIProvidersQueryHandler(IAIUsageTracker aiUsageTracker, IAuthorizationService authorizationService, IAuth0Config auth0Config, IAISettings aiSettings)
     {
         _aiUsageTracker = aiUsageTracker;
         _authorizationService = authorizationService;
-        _auth0Config = auth0Config.Value;
-        _aiSettings = aiSettings.Value;
+        _auth0Config = auth0Config;
+        _aiSettings = aiSettings;
     }
 
     public async Task<Result<List<AIProviderDto>>> Handle(GetAIProvidersQuery request, CancellationToken cancellationToken)

@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAIBiographyStore } from '@/stores/aiBiography.store';
 import { BiographyStyle } from '@/types';
@@ -87,22 +87,6 @@ import AIBiographyProviderSelect from './AIBiographyProviderSelect.vue';
 
 const { t } = useI18n();
 const aiBiographyStore = useAIBiographyStore();
-
-// Expose memberId prop to the store
-const props = defineProps({
-  memberId: { type: String, required: true },
-});
-
-// Update store's memberId when prop changes
-watch(() => props.memberId, (newId: string) => {
-  aiBiographyStore.memberId = newId;
-  aiBiographyStore.fetchLastUserPrompt(newId);
-});
-
-onMounted(() => {
-  aiBiographyStore.memberId = props.memberId;
-  aiBiographyStore.fetchLastUserPrompt(props.memberId);
-});
 
 const biographyStyles = computed(() => [
   { text: t('aiBiography.styles.emotional'), value: BiographyStyle.Emotional },
