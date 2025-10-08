@@ -1,11 +1,11 @@
 <template>
-  <v-card class="pa-4" elevation="2" height="100%">
+  <v-card class="pa-4 d-flex flex-column" elevation="2" height="100%">
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-pencil-box-multiple-outline</v-icon>
       <span class="ml-2">{{ t('aiBiography.input.title') }}</span>
     </v-card-title>
 
-    <v-card-text>
+    <v-card-text class="flex-1">
       <v-row>
         <v-col>
           <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
@@ -35,11 +35,8 @@
 
       <div v-if="!aiBiographyStore.generatedFromDB">
         <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
-          :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable
-          :hide-details="true"></v-textarea>
-
-        <v-switch :hide-details="true" v-model="aiBiographyStore.savePromptForLater"
-          :label="t('aiBiography.input.savePromptLabel')" color="primary"></v-switch>
+          :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable counter
+          :rules="[rules.userPromptLength]"></v-textarea>
       </div>
     </v-card-text>
 
@@ -73,4 +70,8 @@ const biographyStyles = computed(() => [
   { text: t('aiBiography.styles.formal'), value: BiographyStyle.Formal },
   { text: t('aiBiography.styles.informal'), value: BiographyStyle.Informal },
 ]);
+
+const rules = {
+  userPromptLength: (value: string) => (value && value.length <= 1000) || t('aiBiography.input.validation.userPromptLength'),
+};
 </script>

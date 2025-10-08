@@ -50,6 +50,7 @@
   "aiBiography.errors.fetchLastPromptFailed": "Không thể tải gợi ý đã lưu.",
   "aiBiography.errors.fetchProvidersFailed": "Không thể tải danh sách nền tảng AI.",
   "aiBiography.errors.saveFailed": "Không thể lưu tiểu sử. Vui lòng thử lại.",
+  "aiBiography.input.validation.userPromptLength": "Gợi ý không được vượt quá 1000 ký tự.",
   "aiBiography.styles.emotional": "Giàu cảm xúc",
   "aiBiography.styles.historical": "Lịch sử",
   "aiBiography.styles.storytelling": "Kể chuyện",

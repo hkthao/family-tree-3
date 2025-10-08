@@ -15,7 +15,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     generatedFromDB: true,
     userPrompt: null as string | null,
     language: 'Vietnamese',
-    savePromptForLater: false,
     maxTokens: 500,
     temperature: 0.7,
     selectedProvider: AIProviderType.None as AIProviderType,
@@ -127,7 +126,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.biographyResult = null;
       this.style = BiographyStyle.Emotional;
       this.generatedFromDB = true;
-      this.savePromptForLater = false;
     },
 
     async saveBiography(memberId: string, content: string) {
