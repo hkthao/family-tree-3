@@ -23,11 +23,13 @@
       <AIBiographyProviderSelect class="mb-4" />
 
       <v-text-field v-model.number="aiBiographyStore.maxTokens" :label="t('aiBiography.input.tokenLimitLabel')"
-        type="number" variant="outlined" density="compact" ></v-text-field>
+        type="number" variant="outlined" density="compact"></v-text-field>
 
       <v-slider v-model="aiBiographyStore.temperature" :label="t('aiBiography.input.temperatureLabel')" :min="0"
         :max="1" :step="0.1" thumb-label></v-slider>
+    </v-card-text>
 
+    <v-card-actions>
       <v-btn color="primary" class="mr-2" :loading="aiBiographyStore.loading"
         @click="aiBiographyStore.generateBiography()">
         {{ t('aiBiography.input.generateButton') }}
@@ -38,7 +40,7 @@
       <v-btn color="info" @click="aiBiographyStore.useSavedPrompt(aiBiographyStore.memberId!)">
         {{ t('aiBiography.input.useSavedPromptButton') }}
       </v-btn>
-    </v-card-text>
+    </v-card-actions>
   </v-card>
 </template>
 

@@ -13,30 +13,31 @@
         {{ aiBiographyStore.error }}
       </v-alert>
       <div v-else-if="aiBiographyStore.biographyResult">
-        <v-textarea
-          v-model="editableContent"
-          :label="t('aiBiography.output.biographyContentLabel')"
-          rows="10"
-          variant="outlined"
-          class="mb-4"
-        ></v-textarea>
-        <v-chip class="mr-2" size="small">
-          {{ t('aiBiography.output.provider') }}: {{ aiBiographyStore.biographyResult.provider }}
-        </v-chip>
-        <v-chip size="small">
-          {{ t('aiBiography.output.tokensUsed') }}: {{ aiBiographyStore.biographyResult.tokensUsed }}
-        </v-chip>
-        <v-btn color="primary" class="mt-4" @click="saveBiography">
-          {{ t('aiBiography.output.saveButton') }}
-        </v-btn>
-        <v-btn color="secondary" class="mt-4 ml-2" @click="regenerateBiography">
-          {{ t('aiBiography.output.regenerateButton') }}
-        </v-btn>
+        <v-textarea v-model="editableContent" :label="t('aiBiography.output.biographyContentLabel')" rows="10"
+          variant="outlined"></v-textarea>
+        <div>
+          <v-chip class="mr-2" size="small">
+            {{ t('aiBiography.output.provider') }}: {{ aiBiographyStore.biographyResult.provider }}
+          </v-chip>
+          <v-chip size="small">
+            {{ t('aiBiography.output.tokensUsed') }}: {{ aiBiographyStore.biographyResult.tokensUsed }}
+          </v-chip>
+        </div>
+
       </div>
       <div v-else>
         <p>{{ t('aiBiography.output.noBiographyYet') }}</p>
       </div>
     </v-card-text>
+
+    <v-card-actions>
+      <v-btn color="primary" @click="saveBiography">
+        {{ t('aiBiography.output.saveButton') }}
+      </v-btn>
+      <v-btn color="secondary" class="ml-2" @click="regenerateBiography">
+        {{ t('aiBiography.output.regenerateButton') }}
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
