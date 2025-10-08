@@ -80,7 +80,7 @@ import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
 import { Gender } from '@/types';
 
-import { DateInputField, GenderSelect, FamilyAutocomplete, MemberAutocomplete, AvatarInput, AvatarDisplay } from '@/components/common';
+import { DateInputField, GenderSelect, FamilyAutocomplete, AvatarInput, AvatarDisplay } from '@/components/common';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -136,7 +136,7 @@ const getFormData = () => {
   return memberForm.value;
 };
 
-const emit = defineEmits(['close']);
+
 
 defineExpose({
   validate,

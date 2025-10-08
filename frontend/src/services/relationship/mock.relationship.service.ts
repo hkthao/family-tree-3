@@ -33,11 +33,7 @@ export class MockRelationshipService implements IRelationshipService {
     return ok(undefined);
   }
 
-  async loadItems(
-    filters: RelationshipFilter,
-    page: number,
-    itemsPerPage: number,
-  ): Promise<Result<Paginated<Relationship>, any>> {
+  async loadItems(): Promise<Result<Paginated<Relationship>, any>> {
     const paginated: Paginated<Relationship> = {
       items: this.relationships,
       totalItems: this.relationships.length,

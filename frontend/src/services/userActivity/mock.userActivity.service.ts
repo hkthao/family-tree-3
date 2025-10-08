@@ -38,7 +38,6 @@ export class MockUserActivityService implements IUserActivityService {
     limit?: number,
     targetType?: TargetType,
     targetId?: string,
-    familyId?: string,
   ): Promise<Result<RecentActivity[]>> {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
 

@@ -32,3 +32,16 @@ export interface BiographyResultDto {
   generatedFromDB: boolean;
   style: BiographyStyle;
 }
+
+export interface AIBiography {
+  id: string;
+  memberId: string;
+  style: BiographyStyle;
+  content: string;
+  provider: AIProviderType;
+  userPrompt: string;
+  generatedFromDB: boolean;
+  tokensUsed: number;
+  metadata?: any;
+  created: string;
+}

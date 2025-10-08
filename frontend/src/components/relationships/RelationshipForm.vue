@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { useRelationshipStore } from '@/stores/relationship.store';
@@ -56,7 +56,7 @@ const props = defineProps<{
   readOnly?: boolean;
   initialRelationshipData?: Relationship;
 }>();
-const emit = defineEmits(['save', 'cancel']);
+
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();

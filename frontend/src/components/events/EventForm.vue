@@ -163,7 +163,7 @@ const getFormData = () => {
   return eventForm.value;
 };
 
-const emit = defineEmits(['close']);
+
 
 defineExpose({
   validate,

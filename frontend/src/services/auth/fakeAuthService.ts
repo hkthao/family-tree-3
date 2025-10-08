@@ -1,5 +1,5 @@
 import type { AuthService } from './authService';
-import type { Credentials, User } from '@/types';
+import type { User } from '@/types';
 import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
 import type { AppState } from '@/types/auth';
 

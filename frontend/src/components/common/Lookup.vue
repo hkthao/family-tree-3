@@ -200,10 +200,7 @@ const loadItems = async ({
   }
 };
 
-// Search items
-const _loadItems = () => {
-  loadItems({ page: 1, itemsPerPage: 10, sortBy: [] }); // Reset pagination on search
-};
+
 
 // Dialog control
 const openDialog = async () => {

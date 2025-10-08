@@ -20,10 +20,5 @@ import TreeChart from '@/components/family/TreeChart.vue'; // Corrected import p
 interface FamilyTreeOverviewProps {
   familyId: string | null;
 }
-
-const props = defineProps<FamilyTreeOverviewProps>();
+defineProps<FamilyTreeOverviewProps>();
 </script>
-
-<style scoped>
-/* Add any specific styles for FamilyTreeOverview here */
-</style>

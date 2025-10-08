@@ -21,7 +21,7 @@ export function ServicesPlugin() {
 
 // This is for global registration in main.ts
 export default {
-  install(app: App) {
+  install() {
     // No app-level installation needed for Pinia plugins, they are passed directly to Pinia
   },
 };

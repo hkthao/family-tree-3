@@ -30,7 +30,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async login(credentials: Credentials) {
+    async login() {
       this.loading = true;
       this.error = null;
       try {

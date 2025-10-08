@@ -32,7 +32,6 @@ export class MockCrudService<T extends { id: string }> {
   }
 
   async loadItems(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     filter: any,
     page: number,
     itemsPerPage: number,

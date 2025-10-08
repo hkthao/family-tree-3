@@ -19,21 +19,21 @@ import AIBiographyInputPanel from '@/components/aiBiography/AIBiographyInputPane
 import AIBiographyResultPanel from '@/components/aiBiography/AIBiographyResultPanel.vue';
 import { useAIBiographyStore } from '@/stores/aiBiography.store';
 
-const { t } = useI18n();
+
 const route = useRoute();
 const aiBiographyStore = useAIBiographyStore();
 
 onMounted(() => {
   if (route.params.memberId) {
     aiBiographyStore.memberId = route.params.memberId as string;
-    aiBiographyStore.fetchLastUserPrompt(aiBiographyStore.memberId);
+    aiBiographyStore.fetchLastAIBiography(aiBiographyStore.memberId);
   }
 });
 
 watch(() => route.params.memberId, (newMemberId) => {
   if (newMemberId) {
     aiBiographyStore.memberId = newMemberId as string;
-    aiBiographyStore.fetchLastUserPrompt(aiBiographyStore.memberId);
+    aiBiographyStore.fetchLastAIBiography(aiBiographyStore.memberId);
   }
 });
 </script>

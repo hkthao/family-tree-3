@@ -36,7 +36,6 @@ import RelationshipForm from '@/components/relationships/RelationshipForm.vue';
 
 const props = defineProps<{ id: string }>();
 const router = useRouter();
-const route = useRoute();
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
 const notificationStore = useNotificationStore();

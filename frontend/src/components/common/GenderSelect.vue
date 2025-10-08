@@ -27,7 +27,7 @@ const { modelValue, label, rules, readOnly, clearable } = defineProps<{
 
 const updateModelValue = defineEmits(['update:modelValue']);
 
-const { t } = useI18n();
+
 
 const genderOptions = GENDER_OPTIONS; // Used GENDER_OPTIONS
 </script>

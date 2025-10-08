@@ -1,7 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { setupStoreForTesting } from './sharedStoreTestUtils';
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import { ok, err } from '@/types';
 
 /**
  * Defines a standard suite of CRUD tests for a Pinia store.

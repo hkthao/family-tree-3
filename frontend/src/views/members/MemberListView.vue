@@ -32,8 +32,7 @@ import type { MemberFilter, Member } from '@/types';
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
-const { loading, currentPage } = storeToRefs(memberStore);
-const currentFilters = ref<MemberFilter>({});
+const { loading } = storeToRefs(memberStore);
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 

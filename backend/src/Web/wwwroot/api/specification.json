@@ -44,12 +44,12 @@
         ]
       }
     },
-    "/api/AI/biography/last-prompt/{memberId}": {
+    "/api/AI/biography/last/{memberId}": {
       "get": {
         "tags": [
           "AI"
         ],
-        "operationId": "AI_GetLastUserPrompt",
+        "operationId": "AI_GetLastAIBiography",
         "parameters": [
           {
             "name": "memberId",
@@ -68,7 +68,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/AIBiographyDto"
                 }
               }
             }
@@ -1868,6 +1868,61 @@
           4
         ]
       },
+      "AIBiographyDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "style": {
+            "$ref": "#/components/schemas/BiographyStyle"
+          },
+          "content": {
+            "type": "string"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/AIProviderType"
+          },
+          "userPrompt": {
+            "type": "string"
+          },
+          "generatedFromDB": {
+            "type": "boolean"
+          },
+          "tokensUsed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metadata": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/JsonDocument"
+              }
+            ]
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "JsonDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isDisposable": {
+            "type": "boolean"
+          },
+          "rootElement": {}
+        }
+      },
       "AIProviderDto": {
         "type": "object",
         "additionalProperties": false,
@@ -2849,16 +2904,6 @@
           3,
           4
         ]
-      },
-      "JsonDocument": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "isDisposable": {
-            "type": "boolean"
-          },
-          "rootElement": {}
-        }
       },
       "UserProfileDto": {
         "type": "object",

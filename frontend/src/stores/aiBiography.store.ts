@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto } from '@/types';
+import type { BiographyResultDto, AIProviderDto, AIBiography } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 
@@ -8,7 +8,8 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     loading: false,
     error: null as string | null,
     biographyResult: null as BiographyResultDto | null,
-    lastUserPrompt: null as string | null,
+    lastAIBiography: null as AIBiography | null,
+
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
     style: BiographyStyle.Emotional as BiographyStyle,
@@ -43,9 +44,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
 
         if (result.ok) {
           this.biographyResult = result.value;
-          if (this.savePromptForLater && this.userPrompt) {
-            localStorage.setItem(`lastUserPrompt_${this.memberId}`, this.userPrompt);
-          }
         } else {
           this.error = result.error?.message || i18n.global.t('aiBiography.errors.generationFailed');
         }
@@ -56,14 +54,14 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       }
     },
 
-    async fetchLastUserPrompt(id: string) {
+    async fetchLastAIBiography(id: string) {
       this.loading = true;
       this.error = null;
-      this.lastUserPrompt = null;
+      this.lastAIBiography = null;
       try {
-        const result = await this.services.aiBiography.getLastUserPrompt(id);
+        const result = await this.services.aiBiography.getLastAIBiography(id);
         if (result.ok) {
-          this.lastUserPrompt = result.value || null;
+          this.lastAIBiography = result.value || null;
         } else {
           this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
         }
@@ -107,10 +105,9 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.savePromptForLater = false;
     },
 
-    useSavedPrompt(id: string) {
-      const savedPrompt = localStorage.getItem(`lastUserPrompt_${id}`);
-      if (savedPrompt) {
-        this.userPrompt = savedPrompt;
+    useLastUsedPrompt() {
+      if (this.lastAIBiography?.userPrompt) {
+        this.userPrompt = this.lastAIBiography.userPrompt;
       }
     },
     async saveBiography(memberId: string, content: string) {

@@ -1,5 +1,5 @@
 using backend.Application.AI.Commands.GenerateBiography;
-using backend.Application.AI.Queries.GetLastUserPrompt;
+using backend.Application.AI.Queries.GetLastAIBiography;
 using backend.Application.AI.Queries.GetAIProviders;
 using backend.Application.AI.Common;
 using Microsoft.AspNetCore.Authorization;
@@ -41,14 +41,14 @@ public class AIController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves the last user prompt used for a specific member.
+    /// Retrieves the last AI-generated biography for a specific member.
     /// </summary>
     /// <param name="memberId">The ID of the member.</param>
-    /// <returns>The last user prompt string.</returns>
-    [HttpGet("biography/last-prompt/{memberId}")]
-    public async Task<ActionResult<string?>> GetLastUserPrompt(Guid memberId)
+    /// <returns>The last AI-generated biography.</returns>
+    [HttpGet("biography/last/{memberId}")]
+    public async Task<ActionResult<AIBiographyDto?>> GetLastAIBiography(Guid memberId)
     {
-        var result = await _mediator.Send(new GetLastUserPromptQuery { MemberId = memberId });
+        var result = await _mediator.Send(new GetLastAIBiographyQuery { MemberId = memberId });
         if (result.IsSuccess)
         {
             return Ok(result.Value);

@@ -51,9 +51,7 @@
       <v-btn color="grey" class="mr-2" @click="aiBiographyStore.clearForm()">
         {{ t('aiBiography.input.clearButton') }}
       </v-btn>
-      <v-btn color="info" @click="aiBiographyStore.useSavedPrompt(aiBiographyStore.memberId!)">
-        {{ t('aiBiography.input.useSavedPromptButton') }}
-      </v-btn>
+
     </v-card-actions>
   </v-card>
 </template>

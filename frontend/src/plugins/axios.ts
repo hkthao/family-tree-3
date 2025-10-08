@@ -10,7 +10,6 @@ import { type Result, ok, err } from '@/types';
 export interface ApiError {
   message: string;
   statusCode?: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any;
 }
 
