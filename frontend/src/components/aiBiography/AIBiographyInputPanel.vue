@@ -4,7 +4,7 @@
       <v-icon left>mdi-pencil-box-multiple-outline</v-icon>
       <span class="ml-2">{{ t('aiBiography.input.title') }}</span>
     </v-card-title>
-    
+
     <v-card-text>
       <v-row>
         <v-col>

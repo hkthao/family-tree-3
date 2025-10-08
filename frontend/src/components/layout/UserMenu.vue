@@ -83,7 +83,7 @@ import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;
 
-const props = defineProps({
+defineProps({
   placement: {
     type: String as () => 'bottom' | 'bottom-end' | 'bottom-start',
     default: 'bottom-end',

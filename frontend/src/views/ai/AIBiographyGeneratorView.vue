@@ -12,9 +12,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { useI18n } from 'vue-i18n';
+
 import AIBiographyInputPanel from '@/components/aiBiography/AIBiographyInputPanel.vue';
 import AIBiographyResultPanel from '@/components/aiBiography/AIBiographyResultPanel.vue';
 import { useAIBiographyStore } from '@/stores/aiBiography.store';
@@ -26,13 +26,6 @@ const aiBiographyStore = useAIBiographyStore();
 onMounted(() => {
   if (route.params.memberId) {
     aiBiographyStore.memberId = route.params.memberId as string;
-    aiBiographyStore.fetchLastAIBiography(aiBiographyStore.memberId);
-  }
-});
-
-watch(() => route.params.memberId, (newMemberId) => {
-  if (newMemberId) {
-    aiBiographyStore.memberId = newMemberId as string;
     aiBiographyStore.fetchLastAIBiography(aiBiographyStore.memberId);
   }
 });

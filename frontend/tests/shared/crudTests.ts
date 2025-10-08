@@ -32,7 +32,7 @@ export function defineCrudTests<
       const store = setupStoreForTesting(useStore, serviceName, mockService);
       await store._loadItems();
       const initialTotal = store.totalItems;
-      const { id, ...newEntity } = entitySample;
+      const newEntity = entitySample;
 
       await store.addItem(newEntity);
 
@@ -46,7 +46,7 @@ export function defineCrudTests<
       const store = setupStoreForTesting(useStore, serviceName, mockService);
       await store._loadItems();
       const initialTotal = store.totalItems;
-      const { id, ...newEntity } = entitySample;
+      const newEntity = entitySample;
       await store.addItem(newEntity);
       expect(store.error).not.toBeNull();
       expect(store.totalItems).toBe(initialTotal);

@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
 import { useRelationshipStore } from '@/stores/relationship.store';

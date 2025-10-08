@@ -1,4 +1,3 @@
-import type { App } from 'vue';
 import type { PiniaPluginContext } from 'pinia';
 import { createServices, type ServiceMode, type AppServices } from '@/services/service.factory'; // Import the factory
 import i18n from './i18n'; // Import i18n

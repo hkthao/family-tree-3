@@ -8,7 +8,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     loading: false,
     error: null as string | null,
     biographyResult: null as BiographyResultDto | null,
-    lastAIBiography: null as AIBiography | null,
 
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
@@ -45,28 +44,48 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         if (result.ok) {
           this.biographyResult = result.value;
         } else {
-          this.error = result.error?.message || i18n.global.t('aiBiography.errors.generationFailed');
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.generationFailed');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
       } finally {
         this.loading = false;
       }
     },
 
-    async fetchLastAIBiography(id: string) {
+    async fetchLastAIBiography(memberId: string) {
       this.loading = true;
       this.error = null;
-      this.lastAIBiography = null;
       try {
-        const result = await this.services.aiBiography.getLastAIBiography(id);
+        const result =
+          await this.services.aiBiography.getLastAIBiography(memberId);
         if (result.ok) {
-          this.lastAIBiography = result.value || null;
+          if (result.value) {
+            this.memberId = result.value.memberId;
+            this.useDBData = result.value.useDBData;
+            this.style = result.value.style;
+            this.userPrompt = result.value.userPrompt;
+            this.language = result.value.language;
+            this.selectedProvider = result.value.provider;
+            this.biographyResult = {
+              content: result.value.content,
+              provider: result.value.provider,
+              tokensUsed: result.value.tokensUsed,
+              userPrompt: result.value.userPrompt,
+              style: result.value.style,
+            } as BiographyResultDto;
+          }
         } else {
-          this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -77,21 +96,27 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.error = null;
       this.aiProviders = [];
       try {
-        const result = await (this as any).services.aiBiography.getAIProviders();
+        const result = await (
+          this as any
+        ).services.aiBiography.getAIProviders();
         if (result.ok) {
           this.aiProviders = result.value;
           // Set selectedProvider to the first enabled provider, or default to Gemini
           if (this.aiProviders.length > 0) {
-            const enabledProvider = this.aiProviders.find(p => p.isEnabled);
-            this.selectedProvider = enabledProvider?.providerType || AIProviderType.Gemini;
+            const enabledProvider = this.aiProviders.find((p) => p.isEnabled);
+            this.selectedProvider =
+              enabledProvider?.providerType || AIProviderType.Gemini;
           } else {
             this.selectedProvider = AIProviderType.Gemini;
           }
         } else {
-          this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchProvidersFailed');
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.fetchProvidersFailed');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -105,11 +130,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.savePromptForLater = false;
     },
 
-    useLastUsedPrompt() {
-      if (this.lastAIBiography?.userPrompt) {
-        this.userPrompt = this.lastAIBiography.userPrompt;
-      }
-    },
     async saveBiography(memberId: string, content: string) {
       if (!memberId || !content) {
         this.error = i18n.global.t('aiBiography.errors.saveFailed');
@@ -133,10 +153,13 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         if (result.ok) {
           console.log('Biography saved successfully:', result.value);
         } else {
-          this.error = result.error?.message || i18n.global.t('aiBiography.errors.saveFailed');
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.saveFailed');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
       } finally {
         this.loading = false;
       }

@@ -40,8 +40,9 @@ export interface AIBiography {
   content: string;
   provider: AIProviderType;
   userPrompt: string;
-  generatedFromDB: boolean;
+  useDBData: boolean;
   tokensUsed: number;
   metadata?: any;
   created: string;
+  language: string;
 }

@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
+
 import { Gender } from '@/types'; // Added back
 import { GENDER_OPTIONS } from '@/constants/genders'; // Added
 
