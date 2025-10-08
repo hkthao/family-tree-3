@@ -4,8 +4,8 @@
       <v-icon left>mdi-pencil-box-multiple-outline</v-icon>
       <span class="ml-2">{{ t('aiBiography.input.title') }}</span>
     </v-card-title>
+    
     <v-card-text>
-
       <v-row>
         <v-col>
           <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
@@ -38,8 +38,8 @@
           :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable
           :hide-details="true"></v-textarea>
 
-        <v-switch v-model="aiBiographyStore.savePromptForLater" :label="t('aiBiography.input.savePromptLabel')"
-          color="primary" hide-details></v-switch>
+        <v-switch :hide-details="true" v-model="aiBiographyStore.savePromptForLater"
+          :label="t('aiBiography.input.savePromptLabel')" color="primary"></v-switch>
       </div>
     </v-card-text>
 

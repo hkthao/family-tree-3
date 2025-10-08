@@ -1,7 +1,6 @@
 using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Enums;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.AI.Queries.GetAIProviders;
 

@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.AI.Commands.SaveAIBiography;
 
 public class SaveAIBiographyCommandValidator : AbstractValidator<SaveAIBiographyCommand>
@@ -14,7 +12,6 @@ public class SaveAIBiographyCommandValidator : AbstractValidator<SaveAIBiography
             .MaximumLength(4000).WithMessage("Content must not exceed 4000 characters."); // Assuming a reasonable max length
 
         RuleFor(v => v.UserPrompt)
-            .NotEmpty().WithMessage("UserPrompt is required.")
             .MaximumLength(1000).WithMessage("UserPrompt must not exceed 1000 characters."); // Assuming a reasonable max length
 
         RuleFor(v => v.TokensUsed)

@@ -1,12 +1,7 @@
-using MediatR;
 using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Application.AI.Common;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
-using Microsoft.Extensions.Options;
 using backend.Domain.Events;
 
 namespace backend.Application.AI.Commands.GenerateBiography;

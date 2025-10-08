@@ -1,9 +1,5 @@
-using MediatR;
 using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using backend.Application.UserProfiles.Specifications;
-using Ardalis.Specification.EntityFrameworkCore;
 
 namespace backend.Application.AI.Queries.GetLastUserPrompt;
 

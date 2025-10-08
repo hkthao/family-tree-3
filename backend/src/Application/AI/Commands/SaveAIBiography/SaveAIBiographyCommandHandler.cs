@@ -1,8 +1,6 @@
-using MediatR;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.AI.Commands.SaveAIBiography;
 

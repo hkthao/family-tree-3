@@ -1,6 +1,4 @@
-using MediatR;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 
 namespace backend.Application.AI.Queries.GetAIProviders;
 
