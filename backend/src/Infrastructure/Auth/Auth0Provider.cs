@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Identity.Commands.UpdateUserProfile;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Auth;
@@ -103,6 +104,33 @@ public class Auth0Provider : IAuthProvider
         {
             _logger.LogError(ex, "Error in {Source}", source);
             return Task.FromResult(Result<string>.Failure(ex.Message, errorSource: source));
+        }
+    }
+
+    public Task<Result> UpdateUserProfileAsync(string userId, UpdateUserProfileCommand request)
+    {
+        const string source = "Auth0Provider.UpdateUserProfileAsync";
+        try
+        {
+            var user = _users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null)
+            {
+                return Task.FromResult(Result.Failure("User not found", errorSource: source));
+            }
+
+            if (request.Name != null) user.Username = request.Name;
+            if (request.Email != null) user.Email = request.Email;
+            // For picture and user_metadata, a real Auth0 API call would be made here.
+            // For this mock, we'll just log that they would be updated.
+            if (request.Picture != null) _logger.LogInformation("Mock: User {UserId} picture would be updated to {Picture}", userId, request.Picture);
+            if (request.UserMetadata != null) _logger.LogInformation("Mock: User {UserId} user_metadata would be updated to {Metadata}", userId, request.UserMetadata);
+
+            return Task.FromResult(Result.Success());
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in {Source} for user ID {UserId}", source, userId);
+            return Task.FromResult(Result.Failure(ex.Message, errorSource: source));
         }
     }
 }

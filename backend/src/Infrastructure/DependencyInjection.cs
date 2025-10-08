@@ -13,7 +13,17 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
 
-        services.AddSingleton<IAuthProvider, Auth0Provider>();
+        // Register IAuthProvider based on configuration
+        var authProviderType = configuration["AuthProvider"];
+        switch (authProviderType)
+        {
+            case "Auth0":
+                services.AddSingleton<IAuthProvider, Auth0Provider>();
+                break;
+            // Add other providers here as needed
+            default:
+                throw new InvalidOperationException($"Auth provider '{authProviderType}' is not supported.");
+        }
 
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))
         {
