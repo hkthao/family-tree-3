@@ -1,13 +1,6 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12">
-        <h1 class="text-h4 mb-2">{{ t('aiBiography.generator.title') }}</h1>
-        <p class="text-subtitle-1 text-grey-darken-1">{{ t('aiBiography.generator.description') }}</p>
-      </v-col>
-    </v-row>
-
-    <v-row>
       <v-col cols="12" md="6">
         <AIBiographyInputPanel :member-id="memberId" />
       </v-col>
