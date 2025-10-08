@@ -9,3 +9,4 @@ export * from './dashboard.d';
 export * from './userActivity/recentActivity';
 export * from './userActivity/userActionType';
 export * from './userActivity/targetType';
+export * from './ai';

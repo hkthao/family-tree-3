@@ -59,7 +59,7 @@ const transformData = (members: Member[], relationships: Relationship[]): { node
 
     switch (rel.type) {
       case RelationshipType.Husband:
-      case RelationshipType.Wife:
+      case RelationshipType.Wife: {
         // Ensure spouse links are added only once for a couple
         const linkKey1 = `${sourceId}-${targetId}`;
         const linkKey2 = `${targetId}-${sourceId}`;
@@ -68,10 +68,12 @@ const transformData = (members: Member[], relationships: Relationship[]): { node
           spouseLinks.add(linkKey1);
         }
         break;
+      }
       case RelationshipType.Father:
-      case RelationshipType.Mother:
+      case RelationshipType.Mother: {
         links.push({ source: sourceId, target: targetId, type: 'parent-child' });
         break;
+      }
     }
   });
 

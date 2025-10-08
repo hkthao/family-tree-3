@@ -40,6 +40,7 @@ import { computed, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useAIBiographyStore } from '@/stores/aiBiography.store';
+import type { AIProviderDto } from '@/types';
 
 const { t } = useI18n();
 
@@ -47,7 +48,7 @@ const aiBiographyStore = useAIBiographyStore();
 const { aiProviders, loading, error } = storeToRefs(aiBiographyStore);
 
 const providers = computed(() => {
-  return aiProviders.value.map(p => ({
+  return aiProviders.value.map((p: AIProviderDto) => ({
     name: p.name,
     providerType: p.providerType,
     isEnabled: p.isEnabled

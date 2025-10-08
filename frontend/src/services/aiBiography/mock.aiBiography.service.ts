@@ -1,7 +1,7 @@
 import type { IAIBiographyService } from './aiBiography.service.interface';
 import type { Result } from '@/types/common/result';
 import type { BiographyResultDto, AIProviderDto } from '@/types';
-import { ok, err } from '@/types/common/result';
+import { ok } from '@/types/common/result';
 import { simulateLatency } from '@/utils/mockUtils';
 import { AIProviderType, BiographyStyle } from '@/types';
 
@@ -24,6 +24,7 @@ export class MockAIBiographyService implements IAIBiographyService {
       tokensUsed: Math.round(tokensUsed),
       generatedAt: new Date(),
       userPrompt: userPrompt || 'Generated from DB data',
+      style: style,
     };
     return simulateLatency(ok(result));
   }

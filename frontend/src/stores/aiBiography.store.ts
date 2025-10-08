@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { BiographyResultDto, AIProviderDto, BiographyStyle } from '@/types';
+import type { BiographyResultDto, AIProviderDto } from '@/types';
+import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 
 export const useAIBiographyStore = defineStore('aiBiography', () => {
@@ -21,6 +22,7 @@ export const useAIBiographyStore = defineStore('aiBiography', () => {
   const savePromptForLater = ref(false);
   const maxTokens = ref(500); // Default token limit
   const temperature = ref(0.7); // Default temperature
+  const selectedProvider = ref<AIProviderType>(AIProviderType.Gemini); // Default provider
 
   const generateBiography = async () => {
     if (!memberId.value) {
@@ -121,6 +123,7 @@ export const useAIBiographyStore = defineStore('aiBiography', () => {
     savePromptForLater,
     maxTokens,
     temperature,
+    selectedProvider,
     generateBiography,
     fetchLastUserPrompt,
     fetchAIProviders,

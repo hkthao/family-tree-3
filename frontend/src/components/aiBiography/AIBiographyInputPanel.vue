@@ -79,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAIBiographyStore } from '@/stores/aiBiography.store';
 import { BiographyStyle } from '@/types';
@@ -94,7 +94,7 @@ const props = defineProps({
 });
 
 // Update store's memberId when prop changes
-watch(() => props.memberId, (newId) => {
+watch(() => props.memberId, (newId: string) => {
   aiBiographyStore.memberId = newId;
   aiBiographyStore.fetchLastUserPrompt(newId);
 });
