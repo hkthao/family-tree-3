@@ -290,6 +290,14 @@ Content-Type: application/json
 -   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI hiện có và trạng thái sử dụng.
     *   **Phản hồi:** `Result<List<AIProviderDto>>`
 
+### 6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)
+
+-   `GET /api/UserPreferences`: Lấy tùy chọn của người dùng hiện tại.
+    *   **Phản hồi:** `Result<UserPreferenceDto>`
+-   `PUT /api/UserPreferences`: Cập nhật tùy chọn của người dùng hiện tại.
+    *   **Request Body:** `SaveUserPreferencesCommand` (ví dụ: `{ "theme": "Light", "language": "Vietnamese", "emailNotificationsEnabled": "true", "smsNotificationsEnabled": "false", "inAppNotificationsEnabled": "true" }`)
+    *   **Phản hồi:** `Result`
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -452,6 +460,18 @@ Content-Type: application/json
   "dailyUsageLimit": "number",
   "currentDailyUsage": "number",
   "maxTokensPerRequest": "number"
+}
+```
+
+### 7.12. UserPreferenceDto
+
+```json
+{
+  "theme": "string (enum: Light, Dark)",
+  "language": "string (enum: English, Vietnamese)",
+  "emailNotificationsEnabled": "boolean",
+  "smsNotificationsEnabled": "boolean",
+  "inAppNotificationsEnabled": "boolean"
 }
 ```
 ```

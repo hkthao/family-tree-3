@@ -10,5 +10,7 @@ public class UserPreference : BaseAuditableEntity
 
     public Theme Theme { get; set; } = Theme.Light;
     public Language Language { get; set; } = Language.English;
-    public bool NotificationsEnabled { get; set; } = true;
+    public bool EmailNotificationsEnabled { get; set; } = true;
+    public bool SmsNotificationsEnabled { get; set; } = false;
+    public bool InAppNotificationsEnabled { get; set; } = true;
 }

@@ -1757,6 +1757,66 @@
         ]
       }
     },
+    "/api/UserPreferences": {
+      "get": {
+        "tags": [
+          "UserPreferences"
+        ],
+        "operationId": "UserPreferences_GetUserPreferences",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPreferenceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "UserPreferences"
+        ],
+        "operationId": "UserPreferences_SaveUserPreferences",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveUserPreferencesCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/UserProfiles": {
       "get": {
         "tags": [
@@ -2953,23 +3013,50 @@
           4
         ]
       },
-      "UserProfileDto": {
+      "UserPreferenceDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "id": {
-            "type": "string"
+          "theme": {
+            "$ref": "#/components/schemas/Theme"
           },
-          "auth0UserId": {
-            "type": "string"
+          "language": {
+            "$ref": "#/components/schemas/Language"
           },
-          "email": {
-            "type": "string"
+          "emailNotificationsEnabled": {
+            "type": "boolean"
           },
-          "name": {
-            "type": "string"
+          "smsNotificationsEnabled": {
+            "type": "boolean"
+          },
+          "inAppNotificationsEnabled": {
+            "type": "boolean"
           }
         }
+      },
+      "Theme": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Light",
+          "Dark"
+        ],
+        "enum": [
+          0,
+          1
+        ]
+      },
+      "Language": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "English",
+          "Vietnamese"
+        ],
+        "enum": [
+          0,
+          1
+        ]
       },
       "Result": {
         "type": "object",
@@ -2985,6 +3072,45 @@
           "errorSource": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "SaveUserPreferencesCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "theme": {
+            "$ref": "#/components/schemas/Theme"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "emailNotificationsEnabled": {
+            "type": "boolean"
+          },
+          "smsNotificationsEnabled": {
+            "type": "boolean"
+          },
+          "inAppNotificationsEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "auth0UserId": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
@@ -3011,6 +3137,18 @@
             "type": "object",
             "nullable": true,
             "additionalProperties": {}
+          },
+          "emailNotificationsEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "smsNotificationsEnabled": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "inAppNotificationsEnabled": {
+            "type": "boolean",
+            "nullable": true
           }
         }
       }

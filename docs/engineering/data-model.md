@@ -101,6 +101,17 @@ erDiagram
         datetime Created "Thời gian tạo"
     }
 
+    USER_PREFERENCE {
+        string UserProfileId PK,FK "ID hồ sơ người dùng"
+        int Theme "Chủ đề giao diện (Enum int)"
+        int Language "Ngôn ngữ (Enum int)"
+        boolean EmailNotificationsEnabled "Bật/tắt thông báo Email"
+        boolean SmsNotificationsEnabled "Bật/tắt thông báo SMS"
+        boolean InAppNotificationsEnabled "Bật/tắt thông báo trong ứng dụng"
+        datetime Created "Thời gian tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+    }
+
     USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
     FAMILY ||--o{ FAMILY_USER : "có người dùng"
     FAMILY ||--o{ MEMBER : "có"
@@ -111,6 +122,7 @@ erDiagram
     RELATIONSHIP ||--o| MEMBER : "nguồn là"
     RELATIONSHIP ||--o| MEMBER : "đích là"
     MEMBER ||--o{ AI_BIOGRAPHY : "có tiểu sử AI"
+    USER_PROFILE ||--o| USER_PREFERENCE : "có tùy chọn"
 ```
 ## 3. Mô tả các bảng
 
@@ -248,6 +260,25 @@ Lưu trữ các tiểu sử được tạo bởi AI cho các thành viên.
 - **Foreign Keys**:
   - `MemberId`: tham chiếu đến `Members(Id)`.
 - **Mối quan hệ**: Một `Member` có thể có nhiều `AIBiography`.
+
+### 3.6. Bảng `UserPreferences`
+
+Lưu trữ tùy chọn cá nhân của người dùng.
+
+| Tên cột                 | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :---------------------- | :----------- | :-------- | :---------------------- |
+| `UserProfileId`         | `varchar(36)`| PK, FK    | ID của hồ sơ người dùng |
+| `Theme`                 | `int`        | NOT NULL  | Chủ đề giao diện (Light, Dark) |
+| `Language`              | `int`        | NOT NULL  | Ngôn ngữ (English, Vietnamese) |
+| `EmailNotificationsEnabled`| `boolean`    | NOT NULL  | Bật/tắt thông báo Email |
+| `SmsNotificationsEnabled`  | `boolean`    | NOT NULL  | Bật/tắt thông báo SMS   |
+| `InAppNotificationsEnabled`| `boolean`    | NOT NULL  | Bật/tắt thông báo trong ứng dụng |
+| `Created`               | `datetime`   | NOT NULL  | Thời gian tạo            |
+| `LastModified`          | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
+
+- **Foreign Keys**:
+  - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
+- **Mối quan hệ**: Một `UserProfile` có một `UserPreference`.
 
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu (updated after refactor)
 

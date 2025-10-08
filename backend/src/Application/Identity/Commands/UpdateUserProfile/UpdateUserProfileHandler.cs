@@ -3,6 +3,7 @@ using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Specifications;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Identity.Commands.UpdateUserProfile;
 

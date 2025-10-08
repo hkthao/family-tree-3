@@ -94,3 +94,7 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
   - Thêm tooltips cho các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao.
 - **Dọn dẹp mã nguồn:**
   - Xóa bỏ các import và biến không sử dụng trong các tệp frontend để cải thiện chất lượng mã nguồn và loại bỏ cảnh báo linting.
+- **Quản lý Tùy chọn Người dùng:**
+  - Backend: Triển khai API riêng biệt để lưu trữ và truy xuất tùy chọn cá nhân của người dùng (chủ đề, ngôn ngữ, cài đặt thông báo qua email/SMS/ứng dụng).
+  - Database: Thêm thực thể `UserPreference` và các enum `Theme`, `Language` để lưu trữ các tùy chọn này, đồng thời cập nhật schema database thông qua migration.
+  - Cập nhật tài liệu liên quan để phản ánh các thay đổi về API và mô hình dữ liệu.
