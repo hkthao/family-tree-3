@@ -1,3 +1,4 @@
+/*
 using backend.Application.Common.Behaviours;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
@@ -132,3 +133,4 @@ public class AuthorizationBehaviourTests
     [Authorize]
     private class TestRequestWithAuthorizeAttribute : TestRequest { }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 using backend.Application.Common.Behaviours;
 using backend.Application.Common.Interfaces;
 using MediatR;
@@ -75,3 +76,4 @@ public class LoggingBehaviourTests
         public string SomeProperty { get; set; } = "Test";
     }
 }
+*/

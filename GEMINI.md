@@ -83,3 +83,14 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
 *   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.
 *   **Seed Data:** Có script để populate database với dữ liệu mẫu (`infra/seeds`).
+
+## 7. Các thay đổi gần đây
+
+- **Cập nhật tính năng AI Biography:**
+  - Backend: Chuyển đổi endpoint lấy tiểu sử AI gần nhất từ trả về chuỗi sang đối tượng DTO đầy đủ, cập nhật API và sử dụng AutoMapper cho việc ánh xạ DTO.
+  - Frontend: Cập nhật giao diện người dùng để hiển thị dữ liệu tiểu sử AI đầy đủ, bao gồm tên nhà cung cấp AI và thêm validation cho độ dài prompt.
+- **Cải thiện trải nghiệm người dùng:**
+  - Thêm tooltips cho tất cả các nút hành động (chỉnh sửa, xóa, thêm mới) trong các danh sách (Thành viên, Gia đình, Sự kiện, Quan hệ).
+  - Thêm tooltips cho các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao.
+- **Dọn dẹp mã nguồn:**
+  - Xóa bỏ các import và biến không sử dụng trong các tệp frontend để cải thiện chất lượng mã nguồn và loại bỏ cảnh báo linting.

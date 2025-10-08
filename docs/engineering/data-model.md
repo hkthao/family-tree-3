@@ -77,7 +77,7 @@ erDiagram
 
     RELATIONSHIP {
         string Id PK "ID duy nhất"
-        string SourceMemberId FK "ID thành viên nguồn"
+        string SourceMemberId FK "ID thành viên nguồn" 
         string TargetMemberId FK "ID thành viên đích"
         int Type "Loại quan hệ (Enum int)"
         int Order "Thứ tự (nếu có)"
@@ -86,6 +86,19 @@ erDiagram
     EVENT_MEMBER {
         string EventId PK,FK "ID sự kiện"
         string MemberId PK,FK "ID thành viên"
+    }
+
+    AI_BIOGRAPHY {
+        string Id PK "ID duy nhất"
+        string MemberId FK "ID thành viên liên quan"
+        int Style "Phong cách tiểu sử (Enum int)"
+        string Content "Nội dung tiểu sử"
+        int Provider "Nhà cung cấp AI (Enum int)"
+        string UserPrompt "Gợi ý ban đầu của người dùng"
+        boolean GeneratedFromDB "Có được tạo từ dữ liệu DB không"
+        int TokensUsed "Số lượng token đã sử dụng"
+        json Metadata "Metadata bổ sung (JSON)"
+        datetime Created "Thời gian tạo"
     }
 
     USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
@@ -97,6 +110,7 @@ erDiagram
     EVENT ||--o{ EVENT_MEMBER : "liên quan đến"
     RELATIONSHIP ||--o| MEMBER : "nguồn là"
     RELATIONSHIP ||--o| MEMBER : "đích là"
+    MEMBER ||--o{ AI_BIOGRAPHY : "có tiểu sử AI"
 ```
 ## 3. Mô tả các bảng
 
@@ -213,6 +227,27 @@ Lưu trữ các mối quan hệ giữa các thành viên (ví dụ: cha, mẹ, v
   - `SourceMemberId`: tham chiếu đến `Members(Id)`.
   - `TargetMemberId`: tham chiếu đến `Members(Id)`.
 - **Mối quan hệ**: Một `Member` có thể là `SourceMember` hoặc `TargetMember` trong nhiều `Relationship`.
+
+### 3.5. Bảng `AIBiographies`
+
+Lưu trữ các tiểu sử được tạo bởi AI cho các thành viên.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :-------------- | :----------- | :-------- | :---------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của tiểu sử AI |
+| `MemberId`      | `varchar(36)`| FK, NOT NULL | ID của thành viên liên quan |
+| `Style`         | `int`        | NOT NULL  | Phong cách tiểu sử (ví dụ: Emotional, Historical) |
+| `Content`       | `longtext`   | NOT NULL  | Nội dung tiểu sử         |
+| `Provider`      | `int`        | NOT NULL  | Nhà cung cấp AI (ví dụ: Gemini, OpenAI) |
+| `UserPrompt`    | `longtext`   | NOT NULL  | Gợi ý ban đầu của người dùng |
+| `GeneratedFromDB`| `boolean`    | NOT NULL  | Có được tạo từ dữ liệu DB không |
+| `TokensUsed`    | `int`        | NOT NULL  | Số lượng token đã sử dụng |
+| `Metadata`      | `json`       | NULL      | Metadata bổ sung (JSON) |
+| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo            |
+
+- **Foreign Keys**:
+  - `MemberId`: tham chiếu đến `Members(Id)`.
+- **Mối quan hệ**: Một `Member` có thể có nhiều `AIBiography`.
 
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu (updated after refactor)
 

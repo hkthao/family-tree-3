@@ -27,6 +27,7 @@ Tài liệu này hướng dẫn cách cài đặt môi trường, build, và dep
 -   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn) cho việc phát triển Backend.
 -   **Node.js 20+**: Phiên bản 20.x (hoặc mới hơn) cho việc phát triển Frontend.
 -   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations cho database nghiệp vụ. Bạn có thể cài đặt bằng lệnh: `dotnet tool install --global dotnet-ef`.
+-   **AutoMapper**: Thư viện để ánh xạ đối tượng (object mapping) giữa các lớp (ví dụ: Entity sang DTO).
 
 ## 2. Cài đặt và Chạy dự án
 
@@ -266,6 +267,56 @@ public class FamilyService : IFamilyService
 *   **Luôn kiểm tra quyền**: Đảm bảo rằng mọi hành động nhạy cảm hoặc truy cập dữ liệu đều được kiểm tra quyền một cách thích hợp.
 *   **Sử dụng `FamilyRole`**: Khi làm việc với các chức năng liên quan đến gia đình, hãy sử dụng `FamilyRole` enum để định nghĩa và kiểm tra các cấp độ quyền hạn.
 *   **Tách biệt trách nhiệm**: Giữ logic kiểm tra quyền trong `IAuthorizationService` hoặc các chính sách ủy quyền để đảm bảo tính nhất quán và dễ bảo trì.
+
+### 5.4. Sử dụng AutoMapper cho DTO Mapping
+
+Dự án sử dụng AutoMapper để tự động ánh xạ dữ liệu giữa các đối tượng (ví dụ: từ Entity sang DTO và ngược lại). Điều này giúp giảm thiểu mã lặp lại và giữ cho các lớp rõ ràng hơn.
+
+#### Cấu hình Mapping
+
+Các cấu hình mapping được định nghĩa trong các lớp kế thừa từ `Profile` của AutoMapper, ví dụ như `MappingProfile.cs` trong thư mục `Application/Common/Mappings`.
+
+```csharp
+// backend/src/Application/Common/Mappings/MappingProfile.cs
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        CreateMap<Family, FamilyDto>();
+        CreateMap<Member, MemberDto>();
+        // ... các mappings khác
+    }
+}
+```
+
+#### Inject và Sử dụng `IMapper`
+
+Bạn có thể inject `IMapper` vào các service, handler hoặc controller của mình và sử dụng nó để thực hiện ánh xạ.
+
+```csharp
+// Ví dụ trong một Application Handler
+public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDto>>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<FamilyDto>> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
+    {
+        var family = await _context.Families.FindAsync(request.Id);
+        if (family == null)
+        {
+            return Result<FamilyDto>.Failure("Family not found.", 404);
+        }
+        return Result<FamilyDto>.Success(_mapper.Map<FamilyDto>(family));
+    }
+}
+```
 
 ## 6. Seeding a Database
 

@@ -279,11 +279,14 @@ Content-Type: application/json
 
 ### 6.8. Quản lý AI (`/api/ai`)
 
--   `POST /api/ai/biography/{memberId}`: Sinh tiểu sử cho thành viên bằng AI.
-    *   **Request Body:** `{ "style": "string (enum: Emotional, Historical)", "generatedFromDB": "boolean", "userPrompt": "string (nullable)", "language": "string" }`
+-   `POST /api/ai/biography`: Sinh tiểu sử cho thành viên bằng AI.
+    *   **Request Body:** `GenerateBiographyCommand` (ví dụ: `{ "memberId": "uuid", "style": "Emotional", "useDBData": "true", "userPrompt": "string (nullable)", "language": "string" }`)
     *   **Phản hồi:** `Result<BiographyResultDto>`
--   `GET /api/ai/biography/last-prompt/{memberId}`: Lấy prompt người dùng gần nhất cho thành viên.
-    *   **Phản hồi:** `Result<string?>`
+-   `GET /api/ai/biography/last/{memberId}`: Lấy tiểu sử AI gần nhất cho thành viên.
+    *   **Phản hồi:** `Result<AIBiographyDto?>`
+-   `POST /api/ai/biography/save`: Lưu tiểu sử AI đã tạo cho thành viên.
+    *   **Request Body:** `SaveAIBiographyCommand` (ví dụ: `{ "memberId": "uuid", "style": "Emotional", "content": "string", "provider": "Gemini", "userPrompt": "string", "generatedFromDB": "boolean", "tokensUsed": "number" }`)
+    *   **Phản hồi:** `Result<Guid>` (ID của tiểu sử AI vừa lưu)
 -   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI hiện có và trạng thái sử dụng.
     *   **Phản hồi:** `Result<List<AIProviderDto>>`
 
@@ -410,7 +413,24 @@ Content-Type: application/json
 }
 ```
 
-### 7.9. BiographyResult
+### 7.9. AIBiographyDto
+
+```json
+{
+  "id": "string (uuid)",
+  "memberId": "string (uuid)",
+  "style": "string (enum: Emotional, Historical, Storytelling, Formal, Informal)",
+  "content": "string",
+  "provider": "string (enum: Gemini, OpenAI, LocalAI)",
+  "userPrompt": "string",
+  "generatedFromDB": "boolean",
+  "tokensUsed": "number",
+  "metadata": "object (json, nullable)",
+  "created": "string (date-time)"
+}
+```
+
+### 7.10. BiographyResultDto
 
 ```json
 {
@@ -422,7 +442,7 @@ Content-Type: application/json
 }
 ```
 
-### 7.10. AIProvider
+### 7.11. AIProvider
 
 ```json
 {
