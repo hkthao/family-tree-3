@@ -1,133 +1,110 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
 import type { BiographyResultDto, AIProviderDto } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 
-export const useAIBiographyStore = defineStore('aiBiography', () => {
-  const services = (window as any)._pinia.store.services; // Access services from global Pinia instance
+export const useAIBiographyStore = defineStore('aiBiography', {
+  state: () => ({
+    loading: false,
+    error: null as string | null,
+    biographyResult: null as BiographyResultDto | null,
+    lastUserPrompt: null as string | null,
+    aiProviders: [] as AIProviderDto[],
+    memberId: null as string | null,
+    style: BiographyStyle.Emotional as BiographyStyle,
+    useDBData: true,
+    userPrompt: null as string | null,
+    language: 'Vietnamese',
+    savePromptForLater: false,
+    maxTokens: 500,
+    temperature: 0.7,
+    selectedProvider: AIProviderType.Gemini as AIProviderType,
+  }),
 
-  const loading = ref(false);
-  const error = ref<string | null>(null);
-  const biographyResult = ref<BiographyResultDto | null>(null);
-  const lastUserPrompt = ref<string | null>(null);
-  const aiProviders = ref<AIProviderDto[]>([]);
+  actions: {
+    async generateBiography() {
+      if (!this.memberId) {
+        this.error = i18n.global.t('aiBiography.errors.memberIdRequired');
+        return;
+      }
 
-  // Input parameters for generation
-  const memberId = ref<string | null>(null);
-  const style = ref<BiographyStyle>(BiographyStyle.Emotional); // Default style
-  const useDBData = ref(true);
-  const userPrompt = ref<string | null>(null);
-  const language = ref('Vietnamese');
-  const savePromptForLater = ref(false);
-  const maxTokens = ref(500); // Default token limit
-  const temperature = ref(0.7); // Default temperature
-  const selectedProvider = ref<AIProviderType>(AIProviderType.Gemini); // Default provider
+      this.loading = true;
+      this.error = null;
+      this.biographyResult = null;
 
-  const generateBiography = async () => {
-    if (!memberId.value) {
-      error.value = i18n.global.t('aiBiography.errors.memberIdRequired');
-      return;
-    }
+      try {
+        const result = await (this as any).services.aiBiography.generateBiography(
+          this.memberId,
+          this.style,
+          this.useDBData,
+          this.userPrompt || undefined,
+          this.language,
+        );
 
-    loading.value = true;
-    error.value = null;
-    biographyResult.value = null;
-
-    try {
-      const result = await services.aiBiography.generateBiography(
-        memberId.value,
-        style.value,
-        useDBData.value,
-        userPrompt.value || undefined,
-        language.value,
-      );
-
-      if (result.ok) {
-        biographyResult.value = result.value;
-        if (savePromptForLater.value && userPrompt.value) {
-          localStorage.setItem(`lastUserPrompt_${memberId.value}`, userPrompt.value);
+        if (result.ok) {
+          this.biographyResult = result.value;
+          if (this.savePromptForLater && this.userPrompt) {
+            localStorage.setItem(`lastUserPrompt_${this.memberId}`, this.userPrompt);
+          }
+        } else {
+          this.error = result.error?.message || i18n.global.t('aiBiography.errors.generationFailed');
         }
-      } else {
-        error.value = result.error?.message || i18n.global.t('aiBiography.errors.generationFailed');
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
       }
-    } catch (err: any) {
-      error.value = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-    } finally {
-      loading.value = false;
-    }
-  };
+    },
 
-  const fetchLastUserPrompt = async (id: string) => {
-    loading.value = true;
-    error.value = null;
-    lastUserPrompt.value = null;
-    try {
-      const result = await services.aiBiography.getLastUserPrompt(id);
-      if (result.ok) {
-        lastUserPrompt.value = result.value || null;
-      } else {
-        error.value = result.error?.message || i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
+    async fetchLastUserPrompt(id: string) {
+      this.loading = true;
+      this.error = null;
+      this.lastUserPrompt = null;
+      try {
+        const result = await (this as any).services.aiBiography.getLastUserPrompt(id);
+        if (result.ok) {
+          this.lastUserPrompt = result.value || null;
+        } else {
+          this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
       }
-    } catch (err: any) {
-      error.value = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-    } finally {
-      loading.value = false;
-    }
-  };
+    },
 
-  const fetchAIProviders = async () => {
-    loading.value = true;
-    error.value = null;
-    aiProviders.value = [];
-    try {
-      const result = await services.aiBiography.getAIProviders();
-      if (result.ok) {
-        aiProviders.value = result.value;
-      } else {
-        error.value = result.error?.message || i18n.global.t('aiBiography.errors.fetchProvidersFailed');
+    async fetchAIProviders() {
+      this.loading = true;
+      this.error = null;
+      this.aiProviders = [];
+      try {
+        const result = await (this as any).services.aiBiography.getAIProviders();
+        if (result.ok) {
+          this.aiProviders = result.value;
+        } else {
+          this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchProvidersFailed');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
       }
-    } catch (err: any) {
-      error.value = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-    } finally {
-      loading.value = false;
-    }
-  };
+    },
 
-  const clearForm = () => {
-    userPrompt.value = null;
-    biographyResult.value = null;
-    style.value = BiographyStyle.Emotional;
-    useDBData.value = true;
-    savePromptForLater.value = false;
-  };
+    clearForm() {
+      this.userPrompt = null;
+      this.biographyResult = null;
+      this.style = BiographyStyle.Emotional;
+      this.useDBData = true;
+      this.savePromptForLater = false;
+    },
 
-  const useSavedPrompt = (id: string) => {
-    const savedPrompt = localStorage.getItem(`lastUserPrompt_${id}`);
-    if (savedPrompt) {
-      userPrompt.value = savedPrompt;
-    }
-  };
-
-  return {
-    loading,
-    error,
-    biographyResult,
-    lastUserPrompt,
-    aiProviders,
-    memberId,
-    style,
-    useDBData,
-    userPrompt,
-    language,
-    savePromptForLater,
-    maxTokens,
-    temperature,
-    selectedProvider,
-    generateBiography,
-    fetchLastUserPrompt,
-    fetchAIProviders,
-    clearForm,
-    useSavedPrompt,
-  };
+    useSavedPrompt(id: string) {
+      const savedPrompt = localStorage.getItem(`lastUserPrompt_${id}`);
+      if (savedPrompt) {
+        this.userPrompt = savedPrompt;
+      }
+    },
+  },
 });
