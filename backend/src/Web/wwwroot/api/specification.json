@@ -7,24 +7,12 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/AI/biography/{memberId}": {
+    "/api/AI/biography": {
       "post": {
         "tags": [
           "AI"
         ],
         "operationId": "AI_GenerateBiography",
-        "parameters": [
-          {
-            "name": "memberId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 1
-          }
-        ],
         "requestBody": {
           "x-name": "command",
           "content": {
@@ -35,7 +23,7 @@
             }
           },
           "required": true,
-          "x-position": 2
+          "x-position": 1
         },
         "responses": {
           "200": {

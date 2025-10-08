@@ -26,14 +26,14 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
         IAIUsageTracker aiUsageTracker,
         IUser user,
         IAuthorizationService authorizationService,
-        IOptions<IAISettings> aiSettings)
+        IAISettings aiSettings)
     {
         _context = context;
         _aiContentGenerator = aiContentGenerator;
         _aiUsageTracker = aiUsageTracker;
         _user = user;
         _authorizationService = authorizationService;
-        _aiSettings = aiSettings.Value;
+        _aiSettings = aiSettings;
     }
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)

@@ -6,14 +6,11 @@ export enum AIProviderType {
 }
 
 export enum BiographyStyle {
-  Professional = 'Professional',
-  Emotional = 'Emotional',
-  Humorous = 'Humorous',
-  Factual = 'Factual',
-  Historical = 'Historical',
-  Storytelling = 'Storytelling',
-  Formal = 'Formal',
-  Informal = 'Informal',
+  Emotional = 0,
+  Historical = 1,
+  Storytelling = 2,
+  Formal = 3,
+  Informal = 4,
 }
 
 export interface AIProviderDto {

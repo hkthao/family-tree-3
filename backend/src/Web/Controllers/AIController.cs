@@ -5,6 +5,7 @@ using backend.Application.AI.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.AI.Queries;
+using Microsoft.Extensions.Logging; // Add this
 
 namespace backend.Web.Controllers;
 
@@ -14,10 +15,12 @@ namespace backend.Web.Controllers;
 public class AIController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ILogger<AIController> _logger; // Add this
 
-    public AIController(IMediator mediator)
+    public AIController(IMediator mediator, ILogger<AIController> logger) // Modify constructor
     {
         _mediator = mediator;
+        _logger = logger; // Assign logger
     }
 
     /// <summary>
@@ -29,6 +32,14 @@ public class AIController : ControllerBase
     [HttpPost("biography")]
     public async Task<ActionResult<BiographyResultDto>> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
+        _logger.LogInformation("GenerateBiography received command: {@Command}", command); // Add this line
+
+        if (command == null) // Add a null check for command
+        {
+            _logger.LogError("GenerateBiography command is null.");
+            return BadRequest("Command cannot be null.");
+        }
+
         var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {
