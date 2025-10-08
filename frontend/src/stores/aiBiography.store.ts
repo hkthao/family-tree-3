@@ -106,5 +106,36 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         this.userPrompt = savedPrompt;
       }
     },
+    async saveBiography(memberId: string, content: string) {
+      if (!memberId || !content) {
+        this.error = i18n.global.t('aiBiography.errors.saveFailed');
+        return;
+      }
+
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const result = await (this as any).services.aiBiography.saveBiography({
+          memberId: memberId,
+          style: this.style,
+          content: content,
+          provider: this.biographyResult?.provider || AIProviderType.Gemini,
+          userPrompt: this.userPrompt || '',
+          generatedFromDB: this.biographyResult?.generatedFromDB || false,
+          tokensUsed: this.biographyResult?.tokensUsed || 0,
+        });
+
+        if (result.ok) {
+          console.log('Biography saved successfully:', result.value);
+        } else {
+          this.error = result.error?.message || i18n.global.t('aiBiography.errors.saveFailed');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

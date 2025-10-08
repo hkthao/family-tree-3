@@ -5,28 +5,42 @@
       <span class="ml-2">{{ t('aiBiography.input.title') }}</span>
     </v-card-title>
     <v-card-text>
-      <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
-        :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable></v-textarea>
-
-      <v-switch v-model="aiBiographyStore.savePromptForLater" :label="t('aiBiography.input.savePromptLabel')"
-        color="primary" hide-details></v-switch>
 
       <v-radio-group v-model="aiBiographyStore.useDBData" inline>
         <v-radio :label="t('aiBiography.input.autoMode')" :value="true"></v-radio>
         <v-radio :label="t('aiBiography.input.manualMode')" :value="false"></v-radio>
       </v-radio-group>
 
-      <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
-        item-title="text" item-value="value" variant="outlined" density="compact" :hide-details="true"
-        class="mb-4"></v-select>
+      <v-row>
+        <v-col>
+          <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
+            item-title="text" item-value="value" variant="outlined" density="compact" :hide-details="true"
+            class="mb-4"></v-select>
+        </v-col>
+        <v-col>
+          <AIBiographyProviderSelect class="mb-4" />
+        </v-col>
+      </v-row>
 
-      <AIBiographyProviderSelect class="mb-4" />
+      <v-row>
+        <v-col>
+          <v-text-field v-model.number="aiBiographyStore.maxTokens" :label="t('aiBiography.input.tokenLimitLabel')"
+            type="number" variant="outlined" density="compact"></v-text-field>
+        </v-col>
+        <v-col>
+          <v-slider v-model="aiBiographyStore.temperature" :label="t('aiBiography.input.temperatureLabel')" :min="0"
+            :max="1" :step="0.1" thumb-label></v-slider>
+        </v-col>
+      </v-row>
 
-      <v-text-field v-model.number="aiBiographyStore.maxTokens" :label="t('aiBiography.input.tokenLimitLabel')"
-        type="number" variant="outlined" density="compact"></v-text-field>
+      <div v-if="!aiBiographyStore.useDBData">
+        <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
+          :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable
+          :hide-details="true"></v-textarea>
 
-      <v-slider v-model="aiBiographyStore.temperature" :label="t('aiBiography.input.temperatureLabel')" :min="0"
-        :max="1" :step="0.1" thumb-label></v-slider>
+        <v-switch v-model="aiBiographyStore.savePromptForLater" :label="t('aiBiography.input.savePromptLabel')"
+          color="primary" hide-details></v-switch>
+      </div>
     </v-card-text>
 
     <v-card-actions>

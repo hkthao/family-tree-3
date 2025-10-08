@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.AI.Queries;
 using Microsoft.Extensions.Logging; // Add this
+using backend.Application.AI.Commands.SaveAIBiography; // Add this
 
 namespace backend.Web.Controllers;
 
@@ -15,7 +16,7 @@ namespace backend.Web.Controllers;
 public class AIController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly ILogger<AIController> _logger; // Add this
+    private readonly ILogger<AIController> _logger; // Re-add this
 
     public AIController(IMediator mediator, ILogger<AIController> logger) // Modify constructor
     {
@@ -26,20 +27,11 @@ public class AIController : ControllerBase
     /// <summary>
     /// Generates a biography for a member using AI.
     /// </summary>
-    /// <param name="memberId">The ID of the member.</param>
     /// <param name="command">The command to generate the biography.</param>
     /// <returns>The generated biography content and metadata.</returns>
     [HttpPost("biography")]
     public async Task<ActionResult<BiographyResultDto>> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
-        _logger.LogInformation("GenerateBiography received command: {@Command}", command); // Add this line
-
-        if (command == null) // Add a null check for command
-        {
-            _logger.LogError("GenerateBiography command is null.");
-            return BadRequest("Command cannot be null.");
-        }
-
         var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {
@@ -72,6 +64,30 @@ public class AIController : ControllerBase
     public async Task<ActionResult<List<AIProviderDto>>> GetAIProviders()
     {
         var result = await _mediator.Send(new GetAIProvidersQuery());
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Saves an AI-generated biography for a member.
+    /// </summary>
+    /// <param name="command">The command to save the biography.</param>
+    /// <returns>The ID of the saved biography.</returns>
+    [HttpPost("biography/save")]
+    public async Task<ActionResult<Guid>> SaveBiography([FromBody] SaveAIBiographyCommand command)
+    {
+        _logger.LogInformation("SaveBiography received command: {@Command}", command);
+
+        if (command == null)
+        {
+            _logger.LogError("SaveBiography command is null.");
+            return BadRequest("Command cannot be null.");
+        }
+
+        var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {
             return Ok(result.Value);

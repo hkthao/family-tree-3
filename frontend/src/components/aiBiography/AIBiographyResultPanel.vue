@@ -30,7 +30,7 @@
       </div>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions v-if="aiBiographyStore.biographyResult">
       <v-btn color="primary" @click="saveBiography">
         {{ t('aiBiography.output.saveButton') }}
       </v-btn>
@@ -58,8 +58,9 @@ watch(() => aiBiographyStore.biographyResult, (newResult) => {
 }, { immediate: true });
 
 const saveBiography = () => {
-  // TODO: Implement actual save logic to member profile
-  console.log('Saving biography:', editableContent.value);
+  if (aiBiographyStore.memberId && editableContent.value) {
+    aiBiographyStore.saveBiography(aiBiographyStore.memberId, editableContent.value);
+  }
 };
 
 const regenerateBiography = () => {

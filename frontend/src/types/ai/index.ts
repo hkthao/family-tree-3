@@ -1,8 +1,9 @@
 
 export enum AIProviderType {
-  OpenAI = 'OpenAI',
-  Gemini = 'Gemini',
-  Mock = 'Mock',
+  None = 0,
+  Gemini = 1,
+  OpenAI = 2,
+  LocalAI = 3,
 }
 
 export enum BiographyStyle {
