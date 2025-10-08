@@ -29,5 +29,6 @@ export interface BiographyResultDto {
   tokensUsed: number;
   generatedAt: Date;
   userPrompt: string;
+  generatedFromDB: boolean;
   style: BiographyStyle;
 }

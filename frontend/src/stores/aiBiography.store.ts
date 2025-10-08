@@ -18,7 +18,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     savePromptForLater: false,
     maxTokens: 500,
     temperature: 0.7,
-    selectedProvider: AIProviderType.Gemini as AIProviderType,
+    selectedProvider: AIProviderType.None as AIProviderType,
   }),
 
   actions: {
@@ -79,9 +79,16 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.error = null;
       this.aiProviders = [];
       try {
-        const result = await this.services.aiBiography.getAIProviders();
+        const result = await (this as any).services.aiBiography.getAIProviders();
         if (result.ok) {
           this.aiProviders = result.value;
+          // Set selectedProvider to the first enabled provider, or default to Gemini
+          if (this.aiProviders.length > 0) {
+            const enabledProvider = this.aiProviders.find(p => p.isEnabled);
+            this.selectedProvider = enabledProvider?.providerType || AIProviderType.Gemini;
+          } else {
+            this.selectedProvider = AIProviderType.Gemini;
+          }
         } else {
           this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchProvidersFailed');
         }
