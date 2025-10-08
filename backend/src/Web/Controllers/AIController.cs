@@ -26,14 +26,9 @@ public class AIController : ControllerBase
     /// <param name="memberId">The ID of the member.</param>
     /// <param name="command">The command to generate the biography.</param>
     /// <returns>The generated biography content and metadata.</returns>
-    [HttpPost("biography/{memberId}")]
-    public async Task<ActionResult<BiographyResultDto>> GenerateBiography(Guid memberId, GenerateBiographyCommand command)
+    [HttpPost("biography")]
+    public async Task<ActionResult<BiographyResultDto>> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
-        if (memberId != command.MemberId)
-        {
-            return BadRequest();
-        }
-
         var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {

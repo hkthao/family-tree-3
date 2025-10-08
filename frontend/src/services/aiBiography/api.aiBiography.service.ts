@@ -23,7 +23,7 @@ export class ApiAIBiographyService implements IAIBiographyService {
       userPrompt,
       language,
     };
-    return this.http.post<BiographyResultDto>(`${this.apiUrl}/biography/${memberId}`, payload);
+    return this.http.post<BiographyResultDto>(`${this.apiUrl}/biography`, payload);
   }
 
   async getLastUserPrompt(memberId: string): Promise<Result<string | undefined, ApiError>> {
