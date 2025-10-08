@@ -46,6 +46,9 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
+      <v-btn icon size="small" variant="text" @click="$emit('ai-biography', item)">
+        <v-icon>mdi-robot</v-icon>
+      </v-btn>
       <v-btn icon size="small" variant="text" @click="editMember(item)">
         <v-icon>mdi-pencil</v-icon>
       </v-btn>
@@ -94,6 +97,7 @@ const emit = defineEmits([
   'edit',
   'delete',
   'create',
+  'ai-biography',
 ]);
 const { t } = useI18n();
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -138,7 +142,7 @@ const headers = computed<DataTableHeader[]>(() => [
     title: t('member.list.headers.actions'),
     key: 'actions',
     sortable: false,
-    width: '120px',
+    width: '180px',
     align: 'center',
   },
 ]);

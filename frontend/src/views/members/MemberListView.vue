@@ -3,7 +3,7 @@
 
   <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
     @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
-    @delete="confirmDelete" @create="navigateToCreateView" />
+    @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" />
 
   <!-- Confirm Delete Dialog -->
   <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
@@ -49,6 +49,10 @@ const navigateToCreateView = () => {
 
 const navigateToEditMember = (member: Member) => {
   router.push(`/members/edit/${member.id}`);
+};
+
+const navigateToAIBiography = (member: Member) => {
+  router.push(`/ai/biography/${member.id}`);
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
