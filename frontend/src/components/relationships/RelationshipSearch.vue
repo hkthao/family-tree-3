@@ -4,7 +4,11 @@
       {{ t('relationship.search.title') }}
       <v-spacer></v-spacer>
       <v-btn variant="text" icon size="small" @click="expanded = !expanded">
-        <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+        <v-tooltip :text="expanded ? t('common.collapse') : t('common.expand')">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props">{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+          </template>
+        </v-tooltip>
       </v-btn>
     </v-card-title>
     <v-expand-transition>

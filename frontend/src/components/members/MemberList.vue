@@ -6,7 +6,11 @@
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn color="primary" icon @click="$emit('create')">
-          <v-icon>mdi-plus</v-icon>
+          <v-tooltip :text="t('member.list.action.create')">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props">mdi-plus</v-icon>
+            </template>
+          </v-tooltip>
         </v-btn>
       </v-toolbar>
     </template>
@@ -46,15 +50,27 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-btn icon size="small" variant="text" @click="$emit('ai-biography', item)">
-        <v-icon>mdi-robot</v-icon>
-      </v-btn>
-      <v-btn icon size="small" variant="text" @click="editMember(item)">
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
-      <v-btn icon size="small" variant="text" @click="confirmDelete(item)">
-        <v-icon>mdi-delete</v-icon>
-      </v-btn>
+      <v-tooltip :text="t('member.list.action.aiBiography')">
+        <template v-slot:activator="{ props }">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('ai-biography', item)">
+            <v-icon>mdi-robot</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
+      <v-tooltip :text="t('member.list.action.edit')">
+        <template v-slot:activator="{ props }">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
+      <v-tooltip :text="t('member.list.action.delete')">
+        <template v-slot:activator="{ props }">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
     </template>
 
     <!-- Loading state -->

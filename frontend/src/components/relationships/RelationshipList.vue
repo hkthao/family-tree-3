@@ -19,8 +19,16 @@
           {{ getRelationshipTypeTitle(item.type) }}
         </template>
         <template v-slot:item.actions="{ item }">
-          <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-          <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
+          <v-tooltip :text="t('relationship.list.action.edit')">
+            <template v-slot:activator="{ props }">
+              <v-icon small class="mr-2" v-bind="props" @click="editItem(item)">mdi-pencil</v-icon>
+            </template>
+          </v-tooltip>
+          <v-tooltip :text="t('relationship.list.action.delete')">
+            <template v-slot:activator="{ props }">
+              <v-icon small v-bind="props" @click="deleteItem(item)">mdi-delete</v-icon>
+            </template>
+          </v-tooltip>
         </template>
       </v-data-table>
     </v-card-text>

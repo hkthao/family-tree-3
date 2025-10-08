@@ -7,7 +7,11 @@
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn color="primary" icon @click="$emit('create')">
-          <v-icon>mdi-plus</v-icon>
+          <v-tooltip :text="t('family.list.action.create')">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props">mdi-plus</v-icon>
+            </template>
+          </v-tooltip>
         </v-btn>
       </v-toolbar>
     </template>
@@ -55,12 +59,20 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-btn icon size="small" variant="text" @click="$emit('edit', item)">
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
-      <v-btn icon size="small" variant="text" @click="$emit('delete', item)">
-        <v-icon>mdi-delete</v-icon>
-      </v-btn>
+      <v-tooltip :text="t('family.list.action.edit')">
+        <template v-slot:activator="{ props }">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('edit', item)">
+            <v-icon>mdi-pencil</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
+      <v-tooltip :text="t('family.list.action.delete')">
+        <template v-slot:activator="{ props }">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)">
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+        </template>
+      </v-tooltip>
     </template>
 
     <!-- Loading state -->
