@@ -11,7 +11,7 @@ public class GenerateBiographyCommand : IRequest<Result<BiographyResultDto>>
 {
     public Guid MemberId { get; set; }
     public BiographyStyle Style { get; set; }
-    public bool UseDBData { get; set; } = false;
+    public bool GeneratedFromDB { get; set; } = false;
     public string? UserPrompt { get; set; }
     public string Language { get; set; } = "Vietnamese";
 }

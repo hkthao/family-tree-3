@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, AIBiography } from '@/types';
+import type { BiographyResultDto, AIProviderDto } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 
@@ -12,7 +12,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
     style: BiographyStyle.Emotional as BiographyStyle,
-    useDBData: true,
+    generatedFromDB: true,
     userPrompt: null as string | null,
     language: 'Vietnamese',
     savePromptForLater: false,
@@ -36,7 +36,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         const result = await this.services.aiBiography.generateBiography(
           this.memberId,
           this.style,
-          this.useDBData,
+          this.generatedFromDB,
           this.userPrompt || undefined,
           this.language,
         );
@@ -65,7 +65,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         if (result.ok) {
           if (result.value) {
             this.memberId = result.value.memberId;
-            this.useDBData = result.value.useDBData;
+            this.generatedFromDB = result.value.generatedFromDB;
             this.style = result.value.style;
             this.userPrompt = result.value.userPrompt;
             this.language = result.value.language;
@@ -126,7 +126,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.userPrompt = null;
       this.biographyResult = null;
       this.style = BiographyStyle.Emotional;
-      this.useDBData = true;
+      this.generatedFromDB = true;
       this.savePromptForLater = false;
     },
 

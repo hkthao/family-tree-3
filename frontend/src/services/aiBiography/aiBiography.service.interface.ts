@@ -7,7 +7,7 @@ export interface IAIBiographyService {
   generateBiography(
     memberId: string,
     style: BiographyStyle,
-    useDBData: boolean,
+    generatedFromDB: boolean,
     userPrompt?: string,
     language?: string,
   ): Promise<Result<BiographyResultDto, ApiError>>;

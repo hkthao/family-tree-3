@@ -12,14 +12,14 @@ export class ApiAIBiographyService implements IAIBiographyService {
   async generateBiography(
     memberId: string,
     style: BiographyStyle,
-    useDBData: boolean,
+    generatedFromDB: boolean,
     userPrompt?: string,
     language?: string,
   ): Promise<Result<BiographyResultDto, ApiError>> {
     const payload = {
       memberId,
       style,
-      useDBData,
+      generatedFromDB,
       userPrompt,
       language,
     };

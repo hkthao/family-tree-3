@@ -28,12 +28,12 @@
         </v-col>
       </v-row>
 
-      <v-radio-group v-model="aiBiographyStore.useDBData" inline>
+      <v-radio-group v-model="aiBiographyStore.generatedFromDB" inline>
         <v-radio :label="t('aiBiography.input.autoMode')" :value="true"></v-radio>
         <v-radio :label="t('aiBiography.input.manualMode')" :value="false"></v-radio>
       </v-radio-group>
 
-      <div v-if="!aiBiographyStore.useDBData">
+      <div v-if="!aiBiographyStore.generatedFromDB">
         <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
           :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable
           :hide-details="true"></v-textarea>

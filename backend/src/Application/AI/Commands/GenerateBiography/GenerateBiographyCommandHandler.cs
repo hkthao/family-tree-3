@@ -85,7 +85,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
             Style = request.Style,
             Language = request.Language,
             MaxTokens = _aiSettings.MaxTokensPerRequest, // Use configurable max tokens
-            UseDBData = generatedFromDB,
+            GeneratedFromDB = generatedFromDB,
             MemberId = request.MemberId
         };
 

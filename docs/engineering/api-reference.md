@@ -280,7 +280,7 @@ Content-Type: application/json
 ### 6.8. Quản lý AI (`/api/ai`)
 
 -   `POST /api/ai/biography/{memberId}`: Sinh tiểu sử cho thành viên bằng AI.
-    *   **Request Body:** `{ "style": "string (enum: Emotional, Historical)", "useDBData": "boolean", "userPrompt": "string (nullable)", "language": "string" }`
+    *   **Request Body:** `{ "style": "string (enum: Emotional, Historical)", "generatedFromDB": "boolean", "userPrompt": "string (nullable)", "language": "string" }`
     *   **Phản hồi:** `Result<BiographyResultDto>`
 -   `GET /api/ai/biography/last-prompt/{memberId}`: Lấy prompt người dùng gần nhất cho thành viên.
     *   **Phản hồi:** `Result<string?>`

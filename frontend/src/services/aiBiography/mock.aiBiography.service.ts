@@ -9,11 +9,11 @@ export class MockAIBiographyService implements IAIBiographyService {
   async generateBiography(
     memberId: string,
     style: BiographyStyle,
-    useDBData: boolean,
+    generatedFromDB: boolean,
     userPrompt?: string,
     language?: string,
   ): Promise<Result<BiographyResultDto>> {
-    console.log('Generating mock biography:', { memberId, style, useDBData, userPrompt, language });
+    console.log('Generating mock biography:', { memberId, style, generatedFromDB, userPrompt, language });
     const generatedContent = `This is a mock biography for member ${memberId} in ${BiographyStyle[style]} style. ` +
                              `Prompt: ${userPrompt || 'Generated from DB data'}. Language: ${language}.`;
     const tokensUsed = generatedContent.length / 5; // Mock token count

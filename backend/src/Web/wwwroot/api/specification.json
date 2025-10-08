@@ -1838,7 +1838,7 @@
           "style": {
             "$ref": "#/components/schemas/BiographyStyle"
           },
-          "useDBData": {
+          "generatedFromDB": {
             "type": "boolean"
           },
           "userPrompt": {

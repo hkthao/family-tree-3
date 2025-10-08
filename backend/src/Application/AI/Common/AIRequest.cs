@@ -11,6 +11,6 @@ public class AIRequest
     public BiographyStyle Style { get; set; }
     public string Language { get; set; } = "Vietnamese";
     public int MaxTokens { get; set; } = 500;
-    public bool UseDBData { get; set; } = false;
+    public bool GeneratedFromDB { get; set; } = false;
     public Guid MemberId { get; set; }
 }
