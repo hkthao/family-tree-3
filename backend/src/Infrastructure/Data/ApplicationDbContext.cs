@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>(); // Added
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<AIBiography> AIBiographies => Set<AIBiography>();
+    public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -62,6 +63,16 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .HasOne(fu => fu.UserProfile)
             .WithMany(up => up.FamilyUsers)
             .HasForeignKey(fu => fu.UserProfileId);
+
+        // Configure UserPreference one-to-one relationship with UserProfile
+        builder.Entity<UserPreference>()
+            .HasKey(up => up.UserProfileId);
+
+        builder.Entity<UserPreference>()
+            .HasOne(up => up.UserProfile)
+            .WithOne()
+            .HasForeignKey<UserPreference>(up => up.UserProfileId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Ignore<JsonDocument>();
 

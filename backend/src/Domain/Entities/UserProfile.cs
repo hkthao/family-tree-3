@@ -24,4 +24,9 @@ public class UserProfile : BaseAuditableEntity
     /// Navigation property for families the user is associated with.
     /// </summary>
     public ICollection<FamilyUser> FamilyUsers { get; set; } = new HashSet<FamilyUser>();
+
+    /// <summary>
+    /// Navigation property for user preferences.
+    /// </summary>
+    public UserPreference? UserPreference { get; set; }
 }
