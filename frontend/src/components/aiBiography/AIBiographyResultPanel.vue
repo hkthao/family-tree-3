@@ -1,10 +1,10 @@
 <template>
-  <v-card class="pa-4" elevation="2" height="100%">
+  <v-card class="pa-4 d-flex flex-column" elevation="2" height="100%">
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-text-box-outline</v-icon>
       <span class="ml-2">{{ t('aiBiography.output.title') }}</span>
     </v-card-title>
-    <v-card-text>
+    <v-card-text class="flex-1">
       <div v-if="aiBiographyStore.loading">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
         <p class="mt-2">{{ t('aiBiography.output.loading') }}</p>
@@ -13,7 +13,7 @@
         {{ aiBiographyStore.error }}
       </v-alert>
       <div v-else-if="aiBiographyStore.biographyResult">
-        <v-textarea v-model="editableContent" :label="t('aiBiography.output.biographyContentLabel')" rows="10"
+        <v-textarea v-model="editableContent" :label="t('aiBiography.output.biographyContentLabel')"  auto-grow
           variant="outlined"></v-textarea>
         <div>
           <v-chip class="mr-2" size="small">
