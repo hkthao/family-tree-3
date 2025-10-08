@@ -6,11 +6,6 @@
     </v-card-title>
     <v-card-text>
 
-      <v-radio-group v-model="aiBiographyStore.useDBData" inline>
-        <v-radio :label="t('aiBiography.input.autoMode')" :value="true"></v-radio>
-        <v-radio :label="t('aiBiography.input.manualMode')" :value="false"></v-radio>
-      </v-radio-group>
-
       <v-row>
         <v-col>
           <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
@@ -32,6 +27,11 @@
             :max="1" :step="0.1" thumb-label></v-slider>
         </v-col>
       </v-row>
+
+      <v-radio-group v-model="aiBiographyStore.useDBData" inline>
+        <v-radio :label="t('aiBiography.input.autoMode')" :value="true"></v-radio>
+        <v-radio :label="t('aiBiography.input.manualMode')" :value="false"></v-radio>
+      </v-radio-group>
 
       <div v-if="!aiBiographyStore.useDBData">
         <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
