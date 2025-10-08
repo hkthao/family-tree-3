@@ -33,7 +33,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.biographyResult = null;
 
       try {
-        const result = await (this as any).services.aiBiography.generateBiography(
+        const result = await this.services.aiBiography.generateBiography(
           this.memberId,
           this.style,
           this.useDBData,
@@ -61,7 +61,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.error = null;
       this.lastUserPrompt = null;
       try {
-        const result = await (this as any).services.aiBiography.getLastUserPrompt(id);
+        const result = await this.services.aiBiography.getLastUserPrompt(id);
         if (result.ok) {
           this.lastUserPrompt = result.value || null;
         } else {
@@ -79,7 +79,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.error = null;
       this.aiProviders = [];
       try {
-        const result = await (this as any).services.aiBiography.getAIProviders();
+        const result = await this.services.aiBiography.getAIProviders();
         if (result.ok) {
           this.aiProviders = result.value;
         } else {
