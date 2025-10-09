@@ -6,9 +6,9 @@ import type { ApiError } from '@/plugins/axios';
 
 export class MockUserProfileService implements IUserProfileService {
   private userProfiles: UserProfile[] = [
-    { id: '1', auth0UserId: 'auth0|1', email: 'john.doe@example.com', name: 'John Doe' },
-    { id: '2', auth0UserId: 'auth0|2', email: 'jane.smith@example.com', name: 'Jane Smith' },
-    { id: '3', auth0UserId: 'auth0|3', email: 'peter.jones@example.com', name: 'Peter Jones' },
+    { id: '1', externalId: 'auth0|1', email: 'john.doe@example.com', name: 'John Doe' },
+    { id: '2', externalId: 'auth0|2', email: 'jane.smith@example.com', name: 'Jane Smith' },
+    { id: '3', externalId: 'auth0|3', email: 'peter.jones@example.com', name: 'Peter Jones' },
   ];
 
   async getAllUserProfiles(): Promise<Result<UserProfile[]>> {
@@ -26,9 +26,9 @@ export class MockUserProfileService implements IUserProfileService {
     }
   }
 
-  async getUserProfileByAuth0Id(auth0UserId: string): Promise<Result<UserProfile>> {
+  async getUserProfileByExternalId(externalId: string): Promise<Result<UserProfile>> {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-    const profile = this.userProfiles.find(p => p.auth0UserId === auth0UserId);
+    const profile = this.userProfiles.find(p => p.externalId === externalId);
     if (profile) {
       return ok(profile);
     } else {

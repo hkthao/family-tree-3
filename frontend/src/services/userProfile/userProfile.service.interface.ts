@@ -5,6 +5,6 @@ import type { ApiError } from '@/plugins/axios';
 export interface IUserProfileService {
   getAllUserProfiles(): Promise<Result<UserProfile[], ApiError>>;
   getUserProfile(id: string): Promise<Result<UserProfile, ApiError>>;
-  getUserProfileByAuth0Id(auth0UserId: string): Promise<Result<UserProfile, ApiError>>;
+  getUserProfileByExternalId(externalId: string): Promise<Result<UserProfile, ApiError>>;
   updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>>;
 }

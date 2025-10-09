@@ -73,7 +73,7 @@ const saveProfile = async () => {
     if (valid && authStore.user) {
       const updatedProfile: UserProfile = {
         id: authStore.user.id,
-        auth0UserId: authStore.user.auth0UserId,
+        externalId: authStore.user.externalId,
         email: profileForm.value.email,
         name: profileForm.value.fullName,
         avatar: profileForm.value.avatar === null ? undefined : profileForm.value.avatar,

@@ -28,11 +28,11 @@ export const useUserProfileStore = defineStore('userProfile', {
       }
     },
 
-    async fetchUserProfileByAuth0Id(auth0UserId: string) {
+    async fetchUserProfileByExternalId(externalId: string) {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.services.userProfile.getUserProfileByAuth0Id(auth0UserId);
+        const result = await this.services.userProfile.getUserProfileByExternalId(externalId);
         if (result.ok) {
           this.userProfile = result.value;
         } else {

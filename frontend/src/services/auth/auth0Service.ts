@@ -37,7 +37,7 @@ export const auth0Service: AuthService = {
     if (auth0User) {
       return {
         id: auth0User.sub || '',
-        auth0UserId: auth0User.sub || '',
+        externalId: auth0User.sub || '',
         name: auth0User.name || auth0User.nickname || '',
         email: auth0User.email || '',
         avatar: auth0User.picture || undefined,

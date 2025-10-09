@@ -5,6 +5,7 @@ using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.UserProfiles.Queries.GetUserProfileById;
+using backend.Application.UserProfiles.Queries.GetUserProfileByExternalId;
 
 namespace backend.Web.Controllers;
 
