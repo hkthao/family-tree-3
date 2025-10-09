@@ -72,7 +72,7 @@ const saveProfile = async () => {
     const { valid } = await profileFormRef.value.validate();
     if (valid && authStore.user) {
       const updatedProfile: UserProfile = {
-        id: authStore.user.id,
+        id: userProfileStore.userProfile.id, // Use internal UserProfile ID
         externalId: authStore.user.externalId,
         email: profileForm.value.email,
         name: profileForm.value.fullName,
