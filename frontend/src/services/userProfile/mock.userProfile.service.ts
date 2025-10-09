@@ -2,6 +2,7 @@ import type { Result } from '@/types/common/result';
 import type { UserProfile } from '@/types';
 import type { IUserProfileService } from './userProfile.service.interface';
 import { ok } from '@/types/common/result';
+import type { ApiError } from '@/plugins/axios';
 
 export class MockUserProfileService implements IUserProfileService {
   private userProfiles: UserProfile[] = [
@@ -13,5 +14,22 @@ export class MockUserProfileService implements IUserProfileService {
   async getAllUserProfiles(): Promise<Result<UserProfile[]>> {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
     return ok(this.userProfiles);
+  }
+
+  async getUserProfile(id: string): Promise<Result<UserProfile>> {
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    const profile = this.userProfiles.find(p => p.id === id);
+      return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+  }
+
+  async updateUserProfile(profile: UserProfile): Promise<Result<UserProfile>> {
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    const index = this.userProfiles.findIndex(p => p.id === profile.id);
+    if (index !== -1) {
+      this.userProfiles[index] = profile;
+      return ok(profile);
+    } else {
+      return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+    }
   }
 }

@@ -1,37 +1,75 @@
 import { defineStore } from 'pinia';
 import type { UserProfile } from '@/types';
-
-interface UserProfileState {
-    items: UserProfile[];
-    loading: boolean;
-    error: string | null;
-}
+import i18n from '@/plugins/i18n';
 
 export const useUserProfileStore = defineStore('userProfile', {
-    state: (): UserProfileState => ({
-        items: [],
-        loading: false,
-        error: null,
-    }),
-    actions: {
-        async fetchUserProfiles() {
-            this.loading = true;
-            this.error = null;
-            try {
-                const response = await this.services.userProfile.getAllUserProfiles();
-                if (response.ok) {
-                    this.items = response.value!;
-                } else {
-                    this.error = response.error?.message || 'Failed to fetch user profiles.';
-                }
-            } catch (error) {
-                this.error = (error as Error).message;
-            } finally {
-                this.loading = false;
-            }
-        },
+  state: () => ({
+    loading: false,
+    error: null as string | null,
+    userProfile: null as UserProfile | null,
+    allUserProfiles: [] as UserProfile[],
+  }),
+
+  actions: {
+    async fetchUserProfile(id: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.userProfile.getUserProfile(id);
+        if (result.ok) {
+          this.userProfile = result.value;
+        } else {
+          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchError');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
     },
-    getters: {
-        allUserProfiles: (state) => state.items,
+
+    async fetchAllUserProfiles() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.userProfile.getAllUserProfiles();
+        if (result.ok) {
+          this.allUserProfiles = result.value;
+        } else {
+          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchAllError');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
     },
+
+    async updateUserProfile(profile: UserProfile): Promise<boolean> {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.userProfile.updateUserProfile(profile);
+        if (result.ok) {
+          this.userProfile = result.value;
+          return true;
+        } else {
+          this.error = result.error?.message || i18n.global.t('userSettings.profile.saveError');
+          return false;
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+        return false;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    reset() {
+      this.userProfile = null;
+      this.allUserProfiles = [];
+      this.loading = false;
+      this.error = null;
+    },
+  },
 });

@@ -8,9 +8,9 @@ class FakeAuthService implements AuthService {
   private currentToken: string | null = null;
 
   constructor() {
-    // Simulate a logged-in user for development
     this.currentUser = {
       id: 'fake-user-123',
+      auth0UserId: 'auth0|fake-user-123',
       name: 'Fake User',
       email: 'fake@example.com',
       avatar: 'https://i.pravatar.cc/150?u=fake@example.com',
@@ -29,6 +29,7 @@ class FakeAuthService implements AuthService {
     // In a real scenario, this would trigger a redirect.
     this.currentUser = {
       id: 'fake-user-123',
+      auth0UserId: 'auth0|fake-user-123',
       name: 'Fake User',
       email: 'fake@example.com',
       avatar: 'https://i.pravatar.cc/150?u=fake@example.com',
@@ -49,6 +50,7 @@ class FakeAuthService implements AuthService {
     // Simulate successful registration
     this.currentUser = {
       id: 'new-fake-user',
+      auth0UserId: 'auth0|new-fake-user',
       name: data.name || 'New Fake User',
       email: data.email,
       avatar: 'https://i.pravatar.cc/150?u=new@example.com',

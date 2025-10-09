@@ -33,10 +33,13 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { AvatarInput } from '@/components/common';
+import { useUserProfileStore } from '@/stores/userProfile.store';
+import type { UserProfile } from '@/types';
 
 const { t } = useI18n();
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
+const userProfileStore = useUserProfileStore();
 
 const profileForm = ref({
   fullName: '',
@@ -51,28 +54,48 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || t('validation.email'),
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.user) {
-    profileForm.value.fullName = authStore.user.name;
-    profileForm.value.email = authStore.user.email;
-    profileForm.value.avatar = authStore.user.avatar || null;
+    await userProfileStore.fetchUserProfile(authStore.user.id);
+    if (userProfileStore.userProfile) {
+      profileForm.value.fullName = userProfileStore.userProfile.name;
+      profileForm.value.email = userProfileStore.userProfile.email;
+      profileForm.value.avatar = userProfileStore.userProfile.avatar || null;
+    } else if (userProfileStore.error) {
+      notificationStore.showSnackbar(userProfileStore.error, 'error');
+    }
   }
 });
 
 const saveProfile = async () => {
   if (profileFormRef.value) {
     const { valid } = await profileFormRef.value.validate();
-    if (valid) {
-      // Simulate API call
-      console.log('Saving profile:', profileForm.value);
+    if (valid && authStore.user) {
+      const updatedProfile: UserProfile = {
+        id: authStore.user.id,
+        auth0UserId: authStore.user.auth0UserId,
+        email: profileForm.value.email,
+        name: profileForm.value.fullName,
+        avatar: profileForm.value.avatar === null ? undefined : profileForm.value.avatar,
+      };
+
+      const success = await userProfileStore.updateUserProfile(updatedProfile);
+
+      if (success && userProfileStore.userProfile) {
+        authStore.user = userProfileStore.userProfile; // Update authStore user with new data
+        notificationStore.showSnackbar(
+          t('userSettings.profile.saveSuccess'),
+          'success',
+        );
+      } else {
+        notificationStore.showSnackbar(
+          userProfileStore.error || t('userSettings.profile.saveError'),
+          'error',
+        );
+      }
+    } else if (!valid) {
       notificationStore.showSnackbar(
-        t('userSettings.profile.saveSuccess'),
-        'success',
-      );
-      // In a real app, you would dispatch an action to update the user in authStore
-    } else {
-      notificationStore.showSnackbar(
-        t('userSettings.profile.saveError'),
+        t('userSettings.profile.validationError'),
         'error',
       );
     }

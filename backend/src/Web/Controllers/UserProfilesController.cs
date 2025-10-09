@@ -4,6 +4,7 @@ using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using backend.Application.UserProfiles.Queries.GetUserProfileById;
 
 namespace backend.Web.Controllers;
 
@@ -29,6 +30,17 @@ public class UserProfilesController : ControllerBase
             return Ok(result.Value);
         }
         return BadRequest(result.Error);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserProfileDto>> GetUserProfileById(string id)
+    {
+        var result = await _mediator.Send(new GetUserProfileByIdQuery { Id = id });
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return NotFound(result.Error);
     }
 
     /// <summary>
