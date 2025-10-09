@@ -8,13 +8,13 @@ namespace backend.Application.Files.CleanupUnusedFiles;
 public class CleanupUnusedFilesCommandHandler : IRequestHandler<CleanupUnusedFilesCommand, Result<int>>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IFileStorage _fileStorage;
     private readonly IDateTime _dateTime;
 
-    public CleanupUnusedFilesCommandHandler(IApplicationDbContext context, IFileStorageService fileStorageService, IDateTime dateTime)
+    public CleanupUnusedFilesCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IDateTime dateTime)
     {
         _context = context;
-        _fileStorageService = fileStorageService;
+        _fileStorage = fileStorage;
         _dateTime = dateTime;
     }
 
@@ -36,7 +36,7 @@ public class CleanupUnusedFilesCommandHandler : IRequestHandler<CleanupUnusedFil
         foreach (var file in unusedFiles)
         {
             // Attempt to delete from actual storage
-            var deleteResult = await _fileStorageService.DeleteFileAsync(file.Url, cancellationToken);
+            var deleteResult = await _fileStorage.DeleteFileAsync(file.Url, cancellationToken);
             if (deleteResult.IsSuccess)
             {
                 // Remove metadata from DB only if successfully deleted from storage

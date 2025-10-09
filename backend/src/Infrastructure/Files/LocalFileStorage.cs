@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace backend.Infrastructure.Files;
 
-public class LocalFileStorage : IFileStorageService
+public class LocalFileStorage : IFileStorage
 {
     private readonly IStorageSettings _storageSettings;
     private readonly IWebHostEnvironment _env; // To get wwwroot path

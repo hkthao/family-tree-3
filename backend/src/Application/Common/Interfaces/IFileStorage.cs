@@ -5,7 +5,7 @@ namespace backend.Application.Common.Interfaces;
 /// <summary>
 /// Defines the interface for file storage operations.
 /// </summary>
-public interface IFileStorageService
+public interface IFileStorage
 {
     /// <summary>
     /// Uploads a file to the configured storage provider.

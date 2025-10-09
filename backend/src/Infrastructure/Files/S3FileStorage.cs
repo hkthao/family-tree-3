@@ -5,7 +5,7 @@ using backend.Application.Common.Models;
 
 namespace backend.Infrastructure.Files;
 
-public class S3FileStorage : IFileStorageService
+public class S3FileStorage : IFileStorage
 {
     private readonly IAmazonS3 _s3Client;
     private readonly IStorageSettings _storageSettings;

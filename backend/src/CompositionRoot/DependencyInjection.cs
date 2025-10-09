@@ -56,8 +56,8 @@ public static class DependencyInjection
         services.Configure<StorageSettings>(configuration.GetSection("Storage"));
         services.AddSingleton<IStorageSettings>(sp => sp.GetRequiredService<IOptions<StorageSettings>>().Value);
 
-        // Register IFileStorageService based on configuration
-        services.AddTransient<IFileStorageService>(sp =>
+        // Register IFileStorage based on configuration
+        services.AddTransient<IFileStorage>(sp =>
         {
             var storageSettings = sp.GetRequiredService<IStorageSettings>();
             var env = sp.GetRequiredService<IWebHostEnvironment>();

@@ -109,7 +109,7 @@ builder.Services
 
 **Giải thích:**
 
-*   `AddCompositionRootServices()`: Đăng ký tất cả các services từ Application Layer và Infrastructure Layer. Bao gồm `MediatR`, `FluentValidation`, `IApplicationDbContext` (với Entity Framework Core), `IIdentityService`, `IFileStorageService` và các Repository.
+*   `AddCompositionRootServices()`: Đăng ký tất cả các services từ Application Layer và Infrastructure Layer. Bao gồm `MediatR`, `FluentValidation`, `IApplicationDbContext` (với Entity Framework Core), `IIdentityService`, `IFileStorage` và các Repository.
 
 #### Vòng đời của Services (Service Lifetimes)
 

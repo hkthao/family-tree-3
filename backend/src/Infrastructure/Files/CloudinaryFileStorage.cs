@@ -5,7 +5,7 @@ using CloudinaryDotNet.Actions;
 
 namespace backend.Infrastructure.Files;
 
-public class CloudinaryFileStorage : IFileStorageService
+public class CloudinaryFileStorage : IFileStorage
 {
     private readonly Cloudinary _cloudinary;
     private readonly IStorageSettings _storageSettings;

@@ -8,12 +8,12 @@ namespace backend.Application.Files.DeleteFile;
 public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Result>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IFileStorage _fileStorage;
 
-    public DeleteFileCommandHandler(IApplicationDbContext context, IFileStorageService fileStorageService)
+    public DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage)
     {
         _context = context;
-        _fileStorageService = fileStorageService;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
@@ -27,7 +27,7 @@ public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Resul
         }
 
         // Delete the actual file from storage
-        var deleteResult = await _fileStorageService.DeleteFileAsync(fileMetadata.Url, cancellationToken);
+        var deleteResult = await _fileStorage.DeleteFileAsync(fileMetadata.Url, cancellationToken);
         if (!deleteResult.IsSuccess)
         {
             return Result.Failure(deleteResult.Error ?? "Failed to delete file from storage.", deleteResult.ErrorSource ?? "FileStorage");

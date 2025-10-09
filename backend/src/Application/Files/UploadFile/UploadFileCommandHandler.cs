@@ -9,15 +9,15 @@ namespace backend.Application.Files.UploadFile;
 
 public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Result<string>>
 {
-    private readonly IFileStorageService _fileStorageService;
+    private readonly IFileStorage _fileStorage;
     private readonly IStorageSettings _storageSettings;
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IDateTime _dateTime;
 
-    public UploadFileCommandHandler(IFileStorageService fileStorageService, IStorageSettings storageSettings, IApplicationDbContext context, IUser user, IDateTime dateTime)
+    public UploadFileCommandHandler(IFileStorage fileStorage, IStorageSettings storageSettings, IApplicationDbContext context, IUser user, IDateTime dateTime)
     {
-        _fileStorageService = fileStorageService;
+        _fileStorage = fileStorage;
         _storageSettings = storageSettings;
         _context = context;
         _user = user;
@@ -53,7 +53,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         // 4. Upload file
         await using (request.FileStream)
         {
-            var uploadResult = await _fileStorageService.UploadFileAsync(request.FileStream, uniqueFileName, request.ContentType, cancellationToken);
+            var uploadResult = await _fileStorage.UploadFileAsync(request.FileStream, uniqueFileName, request.ContentType, cancellationToken);
             if (!uploadResult.IsSuccess)
             {
                 return Result<string>.Failure(uploadResult.Error ?? "File upload failed.", uploadResult.ErrorSource ?? "FileStorage");
