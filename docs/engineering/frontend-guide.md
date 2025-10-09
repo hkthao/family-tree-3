@@ -33,7 +33,7 @@ frontend/
 │   ├── locales/        # Chứa các file dịch (i18n) cho các ngôn ngữ khác nhau.
 │   ├── plugins/        # Chứa các plugin của Vue hoặc các thư viện bên thứ ba được khởi tạo (ví dụ: `vuetify.ts`, `pinia.ts`, `axios.ts`).
 │   ├── router/         # Chứa cấu hình routing của Vue Router, định nghĩa các đường dẫn và component tương ứng.
-│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`).
+│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`). Các service này trả về kết quả theo `Result Pattern` để xử lý lỗi và thành công một cách nhất quán.
 │   ├── stores/         # Chứa các Pinia store để quản lý trạng thái toàn cục của ứng dụng (ví dụ: `auth.store.ts`, `family.store.ts`).
 │   ├── styles/         # Chứa các style chung, biến CSS, hoặc các file SCSS/CSS được import toàn cục.
 │   ├── types/          # Chứa định nghĩa các TypeScript type và interface cho dữ liệu (ví dụ: `Family.ts`, `Member.ts`).
@@ -86,10 +86,10 @@ export const useFamilyStore = defineStore('family', {
       try {
         // Gọi API để lấy danh sách dòng họ
         const result = await familyService.getAll();
-        if (result.isSuccess) {
+        if (result.ok) {
           this.families = result.value; // Cập nhật state nếu thành công
         } else {
-          this.error = result.error; // Lưu lỗi nếu thất bại
+          this.error = result.error?.message || "Đã xảy ra lỗi khi lấy danh sách dòng họ."; // Lưu lỗi nếu thất bại
         }
       } catch (error: any) {
         this.error = error.message || "Đã xảy ra lỗi không xác định.";
@@ -106,15 +106,15 @@ export const useFamilyStore = defineStore('family', {
       const familyService = useFamilyService();
       try {
         const result = await familyService.create(newFamily);
-        if (result.isSuccess) {
+        if (result.ok) {
           // Thêm dòng họ mới vào state sau khi tạo thành công
           // Lưu ý: API thường trả về đối tượng hoàn chỉnh với ID
           this.families.push({ ...newFamily, id: result.value }); 
         } else {
-          this.error = result.error;
+          this.error = result.error?.message || "Đã xảy ra lỗi khi thêm dòng họ.";
         }
       } catch (error: any) {
-        this.error = error.message || "Đã xảy ra lỗi khi thêm dòng họ.";
+        this.error = error.message || "Đã xảy ra lỗi không xác định.";
         console.error("Failed to add family:", error);
       } finally {
         this.loading = false;
@@ -264,7 +264,7 @@ Các thao tác bất đồng bộ trong Frontend chủ yếu liên quan đến v
           const response = await axios.get<Result<PaginatedList<Family>>>(apiUrl, { params: filter });
           return response.data;
         } catch (error: any) {
-          return Result.Fail<PaginatedList<Family>>(error.message || "Lỗi khi lấy danh sách dòng họ.");
+          return Result.Fail(error.message || "Lỗi khi lấy danh sách dòng họ.");
         }
       };
 
@@ -273,7 +273,7 @@ Các thao tác bất đồng bộ trong Frontend chủ yếu liên quan đến v
           const response = await axios.post<Result<string>>(apiUrl, family);
           return response.data;
         } catch (error: any) {
-          return Result.Fail<string>(error.message || "Lỗi khi tạo dòng họ.");
+          return Result.Fail(error.message || "Lỗi khi tạo dòng họ.");
         }
       };
 
@@ -295,18 +295,18 @@ Các thao tác bất đồng bộ trong Frontend chủ yếu liên quan đến v
       this.error = null;
       try {
         const result = await familyService.getAll();
-        if (result.isSuccess) {
+        if (result.ok) {
           this.families = result.value.items;
         } else {
-          this.error = result.error; // Hiển thị lỗi từ Backend
+          this.error = result.error?.message || "Đã xảy ra lỗi khi lấy danh sách dòng họ."; // Hiển thị lỗi từ Backend
         }
       } catch (error: any) {
         this.error = "Lỗi kết nối API: " + error.message; // Lỗi mạng hoặc lỗi không xác định
         console.error("Failed to fetch families:", error);
       } finally {
         this.loading = false;
-      }
-    },
+      },
+    ```
     ```
 
 #### 3. Vite Proxy

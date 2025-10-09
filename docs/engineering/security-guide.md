@@ -83,7 +83,7 @@ Việc lưu trữ JWT một cách an toàn là rất quan trọng để ngăn ch
 
 Hệ thống được thiết kế với một lớp trừu tượng cho dịch vụ xác thực, cho phép dễ dàng thay đổi nhà cung cấp (Identity Provider - IdP) như Auth0, Keycloak, Firebase Auth mà không ảnh hưởng đến logic nghiệp vụ cốt lõi của Backend.
 
-*   **Backend**: Chỉ tương tác với các interface xác thực chung (ví dụ: `IAuthProvider`). Điều này có nghĩa là Backend không cần biết chi tiết về cách Auth0 hoạt động, chỉ cần biết cách nhận và xác thực JWT hợp lệ.
+*   **Backend**: Chỉ tương tác với các interface xác thực chung (ví dụ: `IAuthProvider`). Backend sử dụng `ExternalId` (ID người dùng từ nhà cung cấp xác thực) để liên kết với `UserProfile` nội bộ.
 *   **Frontend**: Sử dụng SDK của nhà cung cấp (ví dụ: Auth0 SDK) để quản lý luồng đăng nhập/đăng ký và lấy token. Frontend sẽ gửi token này đến Backend.
 
 **Lợi ích**: Tăng tính linh hoạt, giảm sự phụ thuộc vào một nhà cung cấp cụ thể, giúp dễ dàng chuyển đổi hoặc hỗ trợ nhiều IdP trong tương lai.
@@ -199,7 +199,7 @@ public interface IAuthorizationService
 **Mô tả các phương thức:**
 
 *   `IsAdmin()`: Kiểm tra xem người dùng hiện tại có vai trò `Administrator` toàn cục hay không.
-*   `GetCurrentUserProfileAsync()`: Lấy thông tin `UserProfile` của người dùng hiện tại, bao gồm cả các gia đình mà họ liên kết và vai trò của họ trong đó.
+*   `GetCurrentUserProfileAsync()`: Lấy thông tin `UserProfile` của người dùng hiện tại, bao gồm cả `ExternalId` và các gia đình mà họ liên kết và vai trò của họ trong đó.
 *   `CanAccessFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem `userProfile` có quyền truy cập (ít nhất là `Viewer`) vào `familyId` đã cho hay không.
 *   `CanManageFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem `userProfile` có quyền quản lý (vai trò `Manager`) đối với `familyId` đã cho hay không.
 *   `HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)`: Kiểm tra xem `userProfile` có vai trò `requiredRole` hoặc cao hơn trong `familyId` đã cho hay không.

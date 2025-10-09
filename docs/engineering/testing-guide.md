@@ -114,7 +114,7 @@ Các bài kiểm thử Backend được viết bằng xUnit và sử dụng Moq 
 
     ```bash
     # Chạy từ thư mục gốc của project
-    dotnet test backend/tests/Infrastructure.IntegrationTests
+    dotnet test backend/tests/Infrastructure.IntegrationTests --startup-project backend/src/Web
     ```
 
 *   **Chạy test theo Namespace**: Để chạy các test trong một namespace cụ thể (ví dụ: `backend.Application.UnitTests.Families`):
