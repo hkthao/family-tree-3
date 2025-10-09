@@ -41,6 +41,7 @@ backend/
 │   ├── Domain/         # Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), định nghĩa các quy tắc nghiệp vụ cốt lõi, và Domain Events. Đây là trái tim của ứng dụng, độc lập với các lớp khác.
 │   ├── Application/    # Chứa logic nghiệp vụ chính của ứng dụng (Use Cases), các DTOs (Data Transfer Objects), các giao diện (Interfaces) cho các dịch vụ bên ngoài, và các Commands/Queries/Handlers theo mô hình CQRS. Bao gồm cả các UserActivities và FamilyTreeService.
 │   ├── Infrastructure/ # Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer. Bao gồm truy cập cơ sở dữ liệu (Entity Framework Core), dịch vụ Identity, và các dịch vụ bên ngoài khác.
+│   ├── CompositionRoot/ # Nơi cấu hình Dependency Injection, kết nối các lớp Application và Infrastructure.
 │   └── Web/            # Là lớp trình bày (Presentation Layer), chứa các API Controllers, cấu hình ASP.NET Core, và là điểm vào của ứng dụng.
 └── tests/
     ├── Application.UnitTests/ # Chứa các Unit Tests cho Application Layer.
@@ -56,16 +57,19 @@ sequenceDiagram
     participant Controller (Web)
     participant MediatR (Application)
     participant Handler (Application)
-    participant Repository (Infrastructure)
+    participant CompositionRoot
+    participant Infrastructure
     participant Database
 
     Client->>Controller: Gửi HTTP Request (ví dụ: GET /api/families)
     Controller->>MediatR: Gửi Command/Query (ví dụ: GetFamiliesQuery)
     MediatR->>Handler: Điều phối đến Handler tương ứng (ví dụ: GetFamiliesQueryHandler)
-    Handler->>Repository: Gọi phương thức truy vấn dữ liệu (ví dụ: _context.Families.ToListAsync())
-    Repository->>Database: Thực thi câu lệnh SQL (qua Entity Framework Core)
-    Database-->>Repository: Trả về dữ liệu thô từ DB
-    Repository-->>Handler: Trả về domain model (ví dụ: List<Family>)
+    Handler->>CompositionRoot: Yêu cầu IApplicationDbContext
+    CompositionRoot->>Infrastructure: Cung cấp ApplicationDbContext
+    Infrastructure->>Database: Thực thi câu lệnh SQL (qua Entity Framework Core)
+    Database-->>Infrastructure: Trả về dữ liệu thô từ DB
+    Infrastructure-->>CompositionRoot: Trả về Domain Model
+    CompositionRoot-->>Handler: Cung cấp Domain Model
     Handler-->>Controller: Trả về DTO (ví dụ: List<FamilyDto>)
     Controller-->>Client: Trả về HTTP Response (JSON)
 ```
@@ -75,15 +79,16 @@ sequenceDiagram
 1.  **Client gửi HTTP Request**: Người dùng tương tác với Frontend, Frontend gửi một yêu cầu HTTP (GET, POST, PUT, DELETE) đến Backend API.
 2.  **Controller (Web Layer) nhận Request**: Controller trong lớp `Web` nhận yêu cầu, thực hiện các kiểm tra ban đầu (ví dụ: validation của request model) và chuyển đổi request thành một `Command` hoặc `Query`.
 3.  **MediatR (Application Layer) gửi Command/Query**: Controller sử dụng `MediatR` để gửi `Command` hoặc `Query` đến Application Layer. `MediatR` đóng vai trò là một mediator, giúp tách rời Controller khỏi việc biết Handler cụ thể nào sẽ xử lý yêu cầu.
-4.  **Handler (Application Layer) xử lý Command/Query**: `MediatR` tìm và điều phối yêu cầu đến `Handler` tương ứng. `Handler` chứa logic nghiệp vụ chính, sử dụng các dịch vụ và Repository để thực hiện công việc.
-    *   **Command Handler**: Xử lý các yêu cầu thay đổi trạng thái (tạo, cập nhật, xóa). Nó thường tương tác với Repository để lưu trữ dữ liệu và sử dụng Unit of Work để đảm bảo tính nhất quán của transaction.
-    *   **Query Handler**: Xử lý các yêu cầu truy vấn dữ liệu. Nó thường tương tác với Repository để lấy dữ liệu và ánh xạ dữ liệu đó sang DTO trước khi trả về.
-5.  **Repository (Infrastructure Layer) truy cập dữ liệu**: `Handler` gọi các phương thức trên interface Repository (được định nghĩa trong Domain hoặc Application Layer). Triển khai cụ thể của Repository (trong Infrastructure Layer) sẽ tương tác với cơ sở dữ liệu (sử dụng Entity Framework Core).
-6.  **Database thực thi**: Entity Framework Core chuyển đổi các thao tác của Repository thành các câu lệnh SQL và thực thi trên cơ sở dữ liệu MySQL.
-7.  **Database trả về dữ liệu**: Cơ sở dữ liệu trả về kết quả cho Repository.
-8.  **Repository trả về Domain Model**: Repository chuyển đổi dữ liệu thô từ DB thành các Domain Model (Entities) và trả về cho Handler.
-9.  **Handler trả về DTO**: Handler ánh xạ Domain Model sang DTO và trả về cho Controller.
-10. **Controller trả về HTTP Response**: Controller nhận DTO từ Handler, định dạng thành JSON và gửi lại cho Client dưới dạng HTTP Response.
+4.  **Handler (Application Layer) xử lý Command/Query**: `MediatR` tìm và điều phối yêu cầu đến `Handler` tương ứng. `Handler` chứa logic nghiệp vụ chính, sử dụng các dịch vụ và `IApplicationDbContext` để thực hiện công việc.
+    *   **Command Handler**: Xử lý các yêu cầu thay đổi trạng thái (tạo, cập nhật, xóa). Nó thường tương tác với `IApplicationDbContext` để lưu trữ dữ liệu và sử dụng Unit of Work để đảm bảo tính nhất quán của transaction.
+    *   **Query Handler**: Xử lý các yêu cầu truy vấn dữ liệu. Nó thường tương tác với `IApplicationDbContext` để lấy dữ liệu và ánh xạ dữ liệu đó sang DTO trước khi trả về.
+5.  **Composition Root (Dependency Injection)**: Tại đây, `IApplicationDbContext` (được định nghĩa trong Application Layer) được cung cấp triển khai cụ thể là `ApplicationDbContext` (từ Infrastructure Layer) thông qua Dependency Injection.
+6.  **Infrastructure Layer truy cập dữ liệu**: `ApplicationDbContext` (trong Infrastructure Layer) tương tác với cơ sở dữ liệu (sử dụng Entity Framework Core).
+7.  **Database thực thi**: Entity Framework Core chuyển đổi các thao tác của `ApplicationDbContext` thành các câu lệnh SQL và thực thi trên cơ sở dữ liệu MySQL.
+8.  **Database trả về dữ liệu**: Cơ sở dữ liệu trả về kết quả cho `ApplicationDbContext`.
+9.  **`ApplicationDbContext` trả về Domain Model**: `ApplicationDbContext` chuyển đổi dữ liệu thô từ DB thành các Domain Model (Entities) và trả về cho Handler.
+10. **Handler trả về DTO**: Handler ánh xạ Domain Model sang DTO và trả về cho Controller.
+11. **Controller trả về HTTP Response**: Controller nhận DTO từ Handler, định dạng thành JSON và gửi lại cho Client dưới dạng HTTP Response.
 
 ## 5. Dependency Injection
 
@@ -91,7 +96,7 @@ Sử dụng built-in DI container của ASP.NET Core để quản lý vòng đ�
 
 #### Cách đăng ký Services
 
-Các services được đăng ký trong các phương thức mở rộng (extension methods) `Add[Layer]Services()` của mỗi project (Application, Infrastructure, Web) và được gọi trong `Program.cs` của project `Web`.
+Các services được đăng ký trong các phương thức mở rộng (extension methods) `Add[Layer]Services()` của mỗi project (Application, Infrastructure) và được gọi trong `AddCompositionRootServices()` của project `CompositionRoot`. Cuối cùng, `Program.cs` của project `Web` sẽ gọi `AddCompositionRootServices()`.
 
 **Ví dụ (`Web/Program.cs`):**
 
@@ -99,16 +104,12 @@ Các services được đăng ký trong các phương thức mở rộng (extens
 // backend/src/Web/Program.cs
 
 builder.Services
-    .AddApplicationServices()    // Đăng ký services từ Application Layer
-    .AddInfrastructureServices(builder.Configuration) // Đăng ký services từ Infrastructure Layer
-    .AddWebServices();           // Đăng ký services từ Web Layer
+    .AddCompositionRootServices(builder.Configuration); // Đăng ký tất cả services từ CompositionRoot
 ```
 
 **Giải thích:**
 
-*   `AddApplicationServices()`: Đăng ký tất cả các services, Handlers, Validators, và AutoMapper profiles từ Application Layer. Ví dụ: `MediatR`, `FluentValidation`.
-*   `AddInfrastructureServices()`: Đăng ký các triển khai cụ thể của các interfaces từ Application Layer, như `IApplicationDbContext` (với Entity Framework Core), `IIdentityService`, và các Repository.
-*   `AddWebServices()`: Đăng ký các services dành riêng cho Web Layer, như `IUser` (để lấy thông tin người dùng hiện tại), `HttpContextAccessor`, và cấu hình Swagger/OpenAPI.
+*   `AddCompositionRootServices()`: Đăng ký tất cả các services từ Application Layer và Infrastructure Layer. Bao gồm `MediatR`, `FluentValidation`, `IApplicationDbContext` (với Entity Framework Core), `IIdentityService`, `IFileStorageService` và các Repository.
 
 #### Vòng đời của Services (Service Lifetimes)
 
@@ -164,14 +165,14 @@ ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP
 ## 7. Xác thực & Phân quyền
 
 -   **Cơ chế**: Sử dụng **JWT Bearer Token**.
--   **Provider hiện tại**: **Auth0**. Tuy nhiên, hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách triển khai một `IAuthService` mới.
+-   **Provider hiện tại**: **Auth0**. Tuy nhiên, hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách triển khai một `IAuthService` mới và sử dụng `ExternalId` để định danh người dùng.
 -   **Luồng JWT**: Client lấy token từ Auth0 và gửi trong header `Authorization` của mỗi request.
 
 Để biết thêm chi tiết về luồng xác thực, cấu hình và các cân nhắc bảo mật, vui lòng tham khảo phần [Xác thực & Phân quyền trong Kiến trúc tổng quan](./architecture.md#6-xác-thực--phân-quyền-authentication--authorization).
 
-## 8. Tương tác Dữ liệu với Entity Framework Core (updated after refactor)
+## 8. Tương tác Dữ liệu với Entity Framework Core
 
-Trong dự án này, chúng ta sử dụng **Entity Framework Core (EF Core)** để tương tác với cơ sở dữ liệu. Thay vì sử dụng các triển khai Repository Pattern tường minh (explicit Repository Pattern) với các lớp Repository riêng biệt, chúng ta tương tác trực tiếp với `DbContext` thông qua interface `IApplicationDbContext` trong Application Layer. Cách tiếp cận này tận dụng các tính năng sẵn có của EF Core như `DbSet<TEntity>` để hoạt động như một Repository hiệu quả.
+Trong dự án này, chúng ta sử dụng **Entity Framework Core (EF Core)** để tương tác với cơ sở dữ liệu. Thay vì sử dụng các triển khai Repository Pattern tường minh (explicit Repository Pattern) với các lớp Repository riêng biệt, chúng ta tương tác trực tiếp với `DbContext` thông qua interface `IApplicationDbContext` trong Application Layer. Cách tiếp cận này tận dụng các tính năng sẵn có của EF Core như `DbSet<TEntity>` để hoạt động như một Repository hiệu quả. **Do tính chất thực dụng, Application Layer có tham chiếu đến `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` để tận dụng các extension methods tiện lợi.**
 
 #### Mục đích
 
@@ -186,6 +187,8 @@ Trong dự án này, chúng ta sử dụng **Entity Framework Core (EF Core)** �
 **Ví dụ (`Application/Common/Interfaces/IApplicationDbContext.cs`):**
 
 ```csharp
+using Microsoft.EntityFrameworkCore;
+
 public interface IApplicationDbContext
 {
     DbSet<Family> Families { get; }
@@ -307,7 +310,7 @@ context.Database.EnsureDeleted();
 context.Dispose();
 ```
 
-## 8.1. Specification Pattern (updated after refactor)
+## 8.1. Specification Pattern
 
 Specification Pattern là một mẫu thiết kế giúp đóng gói logic nghiệp vụ để lọc hoặc truy vấn dữ liệu. Thay vì nhúng các điều kiện lọc trực tiếp vào các Query Handlers, chúng ta có thể định nghĩa chúng dưới dạng các "specification" có thể tái sử dụng. Điều này giúp giữ cho Query Handlers gọn gàng, dễ đọc và dễ kiểm thử hơn.
 
@@ -320,7 +323,7 @@ Specification Pattern là một mẫu thiết kế giúp đóng gói logic nghi�
 
 #### Triển khai trong dự án
 
-Trong dự án này, chúng ta sử dụng thư viện `Ardalis.Specification` để triển khai Specification Pattern. Thư viện này cung cấp một cách mạnh mẽ để định nghĩa các tiêu chí truy vấn, bao gồm lọc, sắp xếp, phân trang và bao gồm các mối quan hệ.
+Trong dự án này, chúng ta sử dụng thư viện `Ardalis.Specification` và `Ardalis.Specification.EntityFrameworkCore` để triển khai Specification Pattern. Thư viện này cung cấp một cách mạnh mẽ để định nghĩa các tiêu chí truy vấn, bao gồm lọc, sắp xếp, phân trang và bao gồm các mối quan hệ.
 
 Thay vì một `Specification` tổng hợp, chúng ta tạo các `Specification` nhỏ hơn, tập trung vào một tiêu chí lọc hoặc sắp xếp cụ thể. Các `Specification` này sau đó được áp dụng trực tiếp trong `Query Handler`.
 
@@ -734,7 +737,7 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
 
 *   **Validation đầu vào**: Luôn xác thực dữ liệu đầu vào ở biên của ứng dụng (ví dụ: trong các Command/Query Validators sử dụng FluentValidation) để đảm bảo dữ liệu hợp lệ trước khi xử lý logic nghiệp vụ.
 
-*   **Tách biệt mối quan tâm (Separation of Concerns)**: Tuân thủ chặt chẽ Clean Architecture bằng cách đảm bảo mỗi lớp chỉ có một trách nhiệm duy nhất và không phụ thuộc vào các lớp bên ngoài nó.
+*   **Tách biệt mối quan tâm (Separation of Concerns)**: Tuân thủ chặt chẽ Clean Architecture bằng cách đảm bảo mỗi lớp chỉ có một trách nhiệm duy nhất và không phụ thuộc vào các lớp bên ngoài nó. **Lưu ý: Do tính chất thực dụng, Application Layer có tham chiếu đến `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` để tận dụng các extension methods tiện lợi, đây là một sự đánh đổi để đơn giản hóa code trong khi vẫn giữ được phần lớn lợi ích của Clean Architecture.**
 
 *   **Sử dụng DTOs (Data Transfer Objects)**: Luôn ánh xạ Domain Entities sang DTOs khi trả về dữ liệu cho client hoặc khi nhận dữ liệu từ client. Điều này giúp bảo vệ Domain Model khỏi việc bị lộ ra ngoài và cho phép tùy chỉnh cấu trúc dữ liệu cho từng trường hợp sử dụng.
 

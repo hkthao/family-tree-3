@@ -63,9 +63,9 @@ graph TD
 ```
 
 -   **Web API (Web Layer)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các dịch vụ nghiệp vụ (Business Services) trong Application Layer, và trả về phản hồi.
--   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `Repository Pattern` để tương tác với dữ liệu và sử dụng `Result Pattern` để trả về kết quả thống nhất.** (updated after refactor)
+-   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `IApplicationDbContext` để tương tác với dữ liệu và sử dụng `Result Pattern` để trả về kết quả thống nhất. Do tính chất thực dụng, Application Layer có tham chiếu đến `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` để tận dụng các extension methods tiện lợi.**
 -   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
--   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), và các dịch vụ bên ngoài khác.
+-   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), các dịch vụ lưu trữ tệp (Local, Cloudinary, S3), và các dịch vụ bên ngoài khác.
 
 ## 4. Sơ đồ mã nguồn (Code Diagram - C4) (updated after refactor)
 
@@ -77,29 +77,35 @@ graph TD
         A[Controller] -->|Gửi Command/Query| B(MediatR)
     end
 
-    subgraph "Application Layer"
-        B -->|Dispatch| C{Command/Query Handler}
-        C -->|Tương tác| D(IApplicationDbContext)
-        D -->|Truy cập dữ liệu| E(Entity Framework Core)
+    subgraph "Composition Root"
+        B -->|Đăng ký và Giải quyết| CR(Dependency Injection)
     end
 
-    subgraph "Domain Layer"
-        E --> F(Entities)
+    subgraph "Application Layer"
+        CR --> C{Command/Query Handler}
+        C -->|Tương tác| D(IApplicationDbContext)
     end
 
     subgraph "Infrastructure Layer"
-        D --> G(ApplicationDbContext)
+        CR --> G(ApplicationDbContext)
+        D --> G
+    end
+
+    subgraph "Domain Layer"
+        C --> F(Entities)
+        G --> F
     end
 ```
 
 -   **Controller**: Nhận yêu cầu từ Frontend, tạo `Command` hoặc `Query` và gửi đến `MediatR`.
 -   **MediatR**: Thư viện giúp điều phối `Command` hoặc `Query` đến `Handler` tương ứng.
+-   **Composition Root (Dependency Injection)**: Nơi cấu hình và đăng ký tất cả các dịch vụ (services) và các thành phần (components) của ứng dụng. Đây là nơi duy nhất mà các layer khác nhau được kết nối với nhau thông qua Dependency Injection.
 -   **Command/Query Handler**: Chứa logic nghiệp vụ để xử lý `Command` hoặc `Query`.
     -   `CommandHandler` thực hiện thay đổi dữ liệu thông qua `IApplicationDbContext`.
     -   `QueryHandler` truy vấn dữ liệu thông qua `IApplicationDbContext`.
--   **IApplicationDbContext**: Interface định nghĩa các DbSet và phương thức lưu thay đổi, được triển khai bởi `ApplicationDbContext` trong Infrastructure Layer.
--   **Entity Framework Core**: ORM được sử dụng để tương tác với cơ sở dữ liệu.
+-   **IApplicationDbContext**: Interface định nghĩa các `DbSet` và phương thức lưu thay đổi, được triển khai bởi `ApplicationDbContext` trong Infrastructure Layer. **Do tính chất thực dụng, `IApplicationDbContext` sử dụng các kiểu dữ liệu và extension methods của `Microsoft.EntityFrameworkCore` để đơn giản hóa việc tương tác với cơ sở dữ liệu.**
 -   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer.
+-   **ApplicationDbContext**: Triển khai cụ thể của `IApplicationDbContext` trong Infrastructure Layer, sử dụng Entity Framework Core để tương tác với cơ sở dữ liệu.
 
 
 ### 🔄 CQRS (Command, Query, Handler)
@@ -300,21 +306,50 @@ Hệ thống sử dụng **Auth0** làm nhà cung cấp xác thực và quản l
           }
         }
         ```
-    *   **Cấu hình trong `Program.cs`**: 
+    *   **Cấu hình trong `CompositionRoot/DependencyInjection.cs`**: 
         ```csharp
         // Configure Auth0 Authentication
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = auth0Domain;
-                options.Audience = auth0Audience;
+                options.Authority = configuration["Auth0:Domain"];
+                options.Audience = configuration["Auth0:Audience"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = auth0Audience, // Explicitly set the valid audience
+                    ValidAudience = configuration["Auth0:Audience"],
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true
+                };
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = context =>
+                    {
+                        var userProfileSyncService = context.HttpContext.RequestServices.GetRequiredService<IUserProfileSyncService>();
+                        var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
+                        var logger = loggerFactory.CreateLogger("Auth0Config");
+
+                        _ = Task.Run(async () =>
+                        {
+                            using (var scope = context.HttpContext.RequestServices.CreateScope())
+                            {
+                                var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<IUserProfileSyncService>();
+                                var scopedLogger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Auth0Config");
+                                var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+
+                                try
+                                {
+                                    var newUserCreated = await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
+                                }
+                                catch (Exception ex)
+                                {
+                                    scopedLogger.LogError(ex, "Error syncing user profile for external ID: {ExternalId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                                }
+                            }
+                        });
+                        return Task.CompletedTask;
+                    }
                 };
             });
         ```
@@ -333,7 +368,7 @@ Hệ thống sử dụng **Auth0** làm nhà cung cấp xác thực và quản l
 
 #### Khả năng thay thế
 
-Kiến trúc cho phép thay thế Auth0 bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật triển khai `IAuthProvider` và cấu hình liên quan.
+Kiến trúc cho phép thay thế Auth0 bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật triển khai `IAuthProvider` và cấu hình liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 

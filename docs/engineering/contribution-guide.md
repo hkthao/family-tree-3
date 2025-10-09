@@ -83,11 +83,12 @@ This fix updates the CORS policy in Program.cs to allow requests from the fronte
 1.  **Đảm bảo code của bạn được định dạng và lint**: Trước khi tạo PR, hãy chắc chắn rằng code của bạn đã được định dạng theo chuẩn của dự án và không có lỗi linting. Sử dụng các lệnh `dotnet format` cho Backend và `npm run lint` cho Frontend.
 
     *   **Backend**: `dotnet format backend/ --verify-no-changes`
+    *   **Backend (bao gồm CompositionRoot)**: `dotnet format backend/src/CompositionRoot/ --verify-no-changes`
     *   **Frontend**: `npm run lint --prefix frontend`
 
 2.  **Tất cả các test phải qua**: Mọi Unit Tests và Integration Tests phải chạy thành công. Điều này đảm bảo rằng các thay đổi của bạn không phá vỡ các chức năng hiện có.
 
-    *   **Chạy tất cả test**: `dotnet test`
+    *   **Chạy tất cả test**: `dotnet test backend/`
 
 3.  **Test coverage phải đạt ngưỡng yêu cầu (>=80%)**: Các thay đổi của bạn, đặc biệt là các tính năng hoặc logic nghiệp vụ mới, phải có đủ test coverage. Mục tiêu là duy trì ít nhất 80% test coverage cho các phần quan trọng của ứng dụng. Bạn có thể kiểm tra coverage bằng cách chạy test với công cụ coverage.
 
