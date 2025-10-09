@@ -1,5 +1,5 @@
-using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
@@ -45,7 +45,7 @@ public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQu
         var totalRelationships = await _context.Relationships.Where(r => familiesQuery.Select(f => f.Id).Contains(r.SourceMember.FamilyId)).CountAsync(cancellationToken);
 
         // Placeholder for total generations - this would require more complex tree traversal logic
-        var totalGenerations = 0; 
+        var totalGenerations = 0;
 
         var stats = new DashboardStatsDto
         {

@@ -1,6 +1,6 @@
+using System.Text.Json;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.UserActivities.Commands.RecordActivity;
 

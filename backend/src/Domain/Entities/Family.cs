@@ -7,7 +7,7 @@ public class Family : BaseAuditableEntity
 {
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
-    
+
     /// <summary>
     /// Dia chi
     /// </summary>

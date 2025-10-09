@@ -1,12 +1,12 @@
-using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Common.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles;
-using backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
-using backend.Application.Identity.UserProfiles.Queries.GetUserProfileByExternalId;
 using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
+using backend.Application.Identity.UserProfiles.Queries.GetUserProfileByExternalId;
+using backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
 

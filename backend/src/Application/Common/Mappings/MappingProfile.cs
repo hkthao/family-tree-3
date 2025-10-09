@@ -1,17 +1,17 @@
+using backend.Application.AI.Common;
 using backend.Application.Events;
-using backend.Domain.Entities;
+using backend.Application.Events.Queries.GetEventById;
+using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Families;
-using backend.Application.Members.Queries.GetMembers;
-using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
-using backend.Application.Events.Queries.GetEvents;
-using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Members.Queries;
+using backend.Application.Members.Queries.GetMemberById;
+using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
-using backend.Application.AI.Common;
 using backend.Application.UserPreferences.Queries;
+using backend.Domain.Entities;
 
 namespace backend.Application.Identity.UserProfiles.Queries;
 public class MappingProfile : Profile

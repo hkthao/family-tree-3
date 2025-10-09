@@ -1,9 +1,9 @@
 
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
 using backend.Domain.Enums;
-using Ardalis.Specification.EntityFrameworkCore;
 
 namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
 

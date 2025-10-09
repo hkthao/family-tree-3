@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Common.Mappings;
+using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries.GetRelationships;
@@ -55,7 +55,7 @@ public class GetRelationshipsQueryHandler : IRequestHandler<GetRelationshipsQuer
             };
         }
         else
-        { 
+        {
             query = query.OrderBy(r => r.Id); // Default sort
         }
 

@@ -1,8 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Application.UserActivities.Commands.RecordActivity;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 

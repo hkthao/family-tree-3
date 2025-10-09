@@ -1,7 +1,9 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.VectorStore;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
+using backend.Infrastructure.VectorStore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,6 +50,14 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
+
+        // Register Vector Store
+        services.Configure<VectorStoreSettings>(configuration.GetSection("VectorStore"));
+        services.AddSingleton<IVectorStoreSettings, VectorStoreSettings>();
+        services.AddTransient<PineconeVectorStore>();
+
+        services.AddSingleton<IVectorStoreFactory, VectorStoreFactory>();
+        services.AddTransient<IVectorStore>(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
 
         return services;
     }

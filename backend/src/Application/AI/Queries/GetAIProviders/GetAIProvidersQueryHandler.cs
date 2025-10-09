@@ -1,5 +1,5 @@
-using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
 namespace backend.Application.AI.Queries.GetAIProviders;

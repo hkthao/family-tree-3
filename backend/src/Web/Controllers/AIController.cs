@@ -1,11 +1,11 @@
 using backend.Application.AI.Commands.GenerateBiography;
-using backend.Application.AI.Queries.GetLastAIBiography;
-using backend.Application.AI.Queries.GetAIProviders;
+using backend.Application.AI.Commands.SaveAIBiography; // Add this
 using backend.Application.AI.Common;
+using backend.Application.AI.Queries;
+using backend.Application.AI.Queries.GetAIProviders;
+using backend.Application.AI.Queries.GetLastAIBiography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.AI.Queries;
-using backend.Application.AI.Commands.SaveAIBiography; // Add this
 
 namespace backend.Web.Controllers;
 

@@ -1,9 +1,9 @@
+using System.Security.Claims;
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
-using backend.Application.UserProfiles.Specifications;
-using Ardalis.Specification.EntityFrameworkCore;
 
 namespace backend.Application.Services;
 

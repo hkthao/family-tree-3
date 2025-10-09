@@ -97,7 +97,7 @@ public class FamilyController : ControllerBase
     [HttpGet("by-ids")]
     public async Task<ActionResult<List<FamilyDto>>> GetFamiliesByIds([FromQuery] string ids)
     {
-        if(string.IsNullOrEmpty(ids ))
+        if (string.IsNullOrEmpty(ids))
             return Ok(Result<List<FamilyDto>>.Success(new List<FamilyDto>()).Value);
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();

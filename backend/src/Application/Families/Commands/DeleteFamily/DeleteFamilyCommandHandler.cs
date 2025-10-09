@@ -1,9 +1,9 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using Ardalis.Specification.EntityFrameworkCore;
-using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 

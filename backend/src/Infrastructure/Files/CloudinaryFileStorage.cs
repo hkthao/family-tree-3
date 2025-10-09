@@ -124,7 +124,7 @@ public class CloudinaryFileStorage : IFileStorage
         if (contentType.StartsWith("image"))
         {
             return ResourceType.Image;
-        } 
+        }
         else if (contentType.StartsWith("video"))
         {
             return ResourceType.Video;

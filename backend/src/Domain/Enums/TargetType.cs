@@ -9,5 +9,5 @@ public enum TargetType
     Member = 1,
     UserProfile = 2,
     Event = 3,
-    Relationship= 4,
+    Relationship = 4,
 }

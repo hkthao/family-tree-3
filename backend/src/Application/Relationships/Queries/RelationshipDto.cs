@@ -2,7 +2,7 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries;
 
-public class RelationshipDto 
+public class RelationshipDto
 {
     public Guid Id { get; set; }
     public Guid SourceMemberId { get; set; }

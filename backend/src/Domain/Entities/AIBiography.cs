@@ -1,6 +1,6 @@
+using System.Text.Json;
 using backend.Domain.Common;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Domain.Entities;
 

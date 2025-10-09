@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using backend.Application.Common.Dtos;
+using backend.Domain.Enums;
 
 namespace backend.Application.Events.Queries.GetEventById;
 

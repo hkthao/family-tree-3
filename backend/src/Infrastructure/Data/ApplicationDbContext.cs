@@ -1,8 +1,8 @@
 using System.Reflection;
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 
 namespace backend.Infrastructure.Data;
 

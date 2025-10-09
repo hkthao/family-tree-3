@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
@@ -57,7 +57,7 @@ public class DeleteRelationshipCommandHandler : IRequestHandler<DeleteRelationsh
             UserProfileId = currentUserProfile.Id,
             ActionType = UserActionType.DeleteRelationship,
             TargetType = TargetType.Member,
-            TargetId = sourceMember.Id.ToString(), 
+            TargetId = sourceMember.Id.ToString(),
             ActivitySummary = activitySummary
         }, cancellationToken);
 

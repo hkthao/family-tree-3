@@ -2,7 +2,7 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events;
 
-public class EventDto 
+public class EventDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

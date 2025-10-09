@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using backend.Application.Common.Behaviours;
+﻿using backend.Application.Common.Behaviours;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Application;
 
@@ -9,7 +9,8 @@ public static class DependencyInjection
     {
         services.AddAutoMapper(System.Reflection.Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
-        services.AddMediatR(cfg => {
+        services.AddMediatR(cfg =>
+        {
             cfg.RegisterServicesFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
             cfg.AddOpenBehavior(typeof(UnhandledExceptionBehaviour<,>));
             cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));

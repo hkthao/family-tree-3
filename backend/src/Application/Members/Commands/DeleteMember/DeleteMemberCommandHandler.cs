@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 

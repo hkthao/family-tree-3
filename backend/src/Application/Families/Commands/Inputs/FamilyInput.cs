@@ -1,6 +1,6 @@
 namespace backend.Application.Families.Commands.Inputs;
 
-public  record class FamilyInput
+public record class FamilyInput
 {
     public string Name { get; init; } = null!;
     public string? Description { get; init; }

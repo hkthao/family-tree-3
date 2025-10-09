@@ -1,6 +1,6 @@
+using System.Text.RegularExpressions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using System.Text.RegularExpressions;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 

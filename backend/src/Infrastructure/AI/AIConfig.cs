@@ -1,5 +1,5 @@
-using backend.Domain.Enums;
 using backend.Application.Common.Interfaces;
+using backend.Domain.Enums;
 
 namespace backend.Infrastructure.AI;
 

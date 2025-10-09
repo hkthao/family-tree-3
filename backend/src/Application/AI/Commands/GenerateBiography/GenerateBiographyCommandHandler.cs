@@ -1,7 +1,7 @@
-using backend.Application.Common.Models;
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using backend.Application.AI.Common;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Domain.Entities;
 using backend.Domain.Events;
 
 namespace backend.Application.AI.Commands.GenerateBiography;

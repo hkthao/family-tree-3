@@ -1,8 +1,8 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Common.Mappings;
-using backend.Application.Events.Specifications; // Added
 using Ardalis.Specification.EntityFrameworkCore; // Added
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
+using backend.Application.Common.Models;
+using backend.Application.Events.Specifications; // Added
 
 namespace backend.Application.Events.Queries.SearchEvents;
 

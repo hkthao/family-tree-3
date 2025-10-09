@@ -1,7 +1,7 @@
-using backend.Application.Common.Models;
-using backend.Application.Common.Interfaces;
-using backend.Application.Events.Specifications;
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
 

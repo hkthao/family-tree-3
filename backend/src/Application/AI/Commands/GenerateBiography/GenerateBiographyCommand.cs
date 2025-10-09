@@ -1,6 +1,6 @@
+using backend.Application.AI.Common;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
-using backend.Application.AI.Common;
 
 namespace backend.Application.AI.Commands.GenerateBiography;
 

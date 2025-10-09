@@ -1,9 +1,9 @@
+using System.Collections.Concurrent;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Collections.Concurrent;
 
 namespace backend.Infrastructure.AI;
 

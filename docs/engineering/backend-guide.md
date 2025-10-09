@@ -796,7 +796,80 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
     -   `GET /api/ai/biography/last-prompt/{memberId}`: Lấy prompt cuối cùng.
     -   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI.
 
-## 12. Hướng dẫn Kiểm thử
+## 12. Module Vector Database
+
+Module Vector Database được thiết kế để lưu trữ và truy vấn các vector nhúng (embeddings) cho các tác vụ liên quan đến AI, chẳng hạn như tìm kiếm ngữ nghĩa hoặc RAG (Retrieval-Augmented Generation) cho chatbot. Module này tuân thủ các nguyên tắc Clean Architecture, cho phép dễ dàng mở rộng và thay đổi nhà cung cấp Vector Database.
+
+### 12.1. Interface `IVectorStore`
+
+`IVectorStore` (`backend/src/Application/VectorStore/IVectorStore.cs`) là interface chung định nghĩa các hoạt động cơ bản của một Vector Database:
+
+```csharp
+public interface IVectorStore
+{
+    Task<Result> UpsertDocumentsAsync(IEnumerable<VectorDocument> documents, CancellationToken cancellationToken = default);
+    Task<Result<IEnumerable<VectorDocument>>> QueryAsync(VectorQuery query, CancellationToken cancellationToken = default);
+    Task<Result> DeleteAsync(IEnumerable<string> documentIds, CancellationToken cancellationToken = default);
+}
+```
+
+-   `UpsertDocumentsAsync`: Thêm hoặc cập nhật các tài liệu vector.
+-   `QueryAsync`: Tìm kiếm các tài liệu vector tương tự dựa trên một vector truy vấn.
+-   `DeleteAsync`: Xóa các tài liệu vector dựa trên ID.
+
+### 12.2. DTOs
+
+-   **`VectorDocument`** (`backend/src/Application/VectorStore/VectorDocument.cs`): Đại diện cho một tài liệu được lưu trữ trong Vector Database.
+    -   `Id` (string): ID duy nhất của tài liệu.
+    -   `Content` (string): Nội dung văn bản của tài liệu.
+    -   `Vector` (float[]): Vector nhúng của tài liệu.
+    -   `Metadata` (Dictionary<string, string>, nullable): Các siêu dữ liệu bổ sung.
+-   **`VectorQuery`** (`backend/src/Application/VectorStore/VectorQuery.cs`): Đại diện cho một truy vấn tìm kiếm vector.
+    -   `Vector` (float[]): Vector truy vấn.
+    -   `TopK` (int): Số lượng kết quả hàng đầu muốn lấy.
+    -   `Filter` (Dictionary<string, string>, nullable): Các tiêu chí lọc bổ sung.
+
+### 12.3. Cơ chế chọn Provider (Factory Pattern)
+
+Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector Database phù hợp dựa trên cấu hình trong `appsettings.json`.
+
+-   **`IVectorStoreFactory`** (`backend/src/Application/VectorStore/IVectorStoreFactory.cs`): Interface định nghĩa phương thức tạo `IVectorStore`.
+-   **`VectorStoreFactory`** (`backend/src/Infrastructure/VectorStore/VectorStoreFactory.cs`): Triển khai `IVectorStoreFactory`, chịu trách nhiệm khởi tạo `IVectorStore` cụ thể (Pinecone, Qdrant) dựa trên giá trị `VectorStore:Provider` trong cấu hình.
+
+### 12.4. Triển khai các Provider
+
+-   **Pinecone (`PineconeVectorStore`)**: Triển khai `IVectorStore` sử dụng thư viện `Pinecone.NET` để tương tác với dịch vụ Pinecone.
+    -   **Cấu hình**: Yêu cầu `VectorStore:Pinecone:ApiKey`, `VectorStore:Pinecone:Environment`, `VectorStore:Pinecone:IndexName` trong `appsettings.json`.
+-   **Qdrant (`QdrantVectorStore`)**: Triển khai `IVectorStore` sử dụng thư viện `Qdrant.Client` để tương tác với dịch vụ Qdrant (có thể chạy cục bộ).
+    -   **Cấu hình**: Yêu cầu `VectorStore:Qdrant:Host`, `VectorStore:Qdrant:Port`, `VectorStore:Qdrant:ApiKey` (tùy chọn), `VectorStore:Qdrant:CollectionName` trong `appsettings.json`.
+
+### 12.5. Cấu hình `appsettings.json`
+
+```json
+"VectorStore": {
+  "Provider": "Pinecone", // Hoặc "Qdrant"
+  "Pinecone": {
+    "ApiKey": "YOUR_PINECONE_API_KEY",
+    "Environment": "YOUR_PINECONE_ENVIRONMENT",
+    "IndexName": "YOUR_PINECONE_INDEX_NAME"
+  },
+  "Qdrant": {
+    "Host": "localhost",
+    "Port": 6334,
+    "ApiKey": "YOUR_QDRANT_API_KEY", // Tùy chọn
+    "CollectionName": "YOUR_QDRANT_COLLECTION_NAME"
+  }
+}
+```
+
+### 12.6. Đăng ký Dependency Injection
+
+Các dịch vụ liên quan đến Vector Database được đăng ký trong `backend/src/Infrastructure/DependencyInjection.cs`:
+
+-   `VectorStoreSettings`: Cấu hình đọc từ `appsettings.json`.
+-   `PineconeVectorStore`, `QdrantVectorStore`: Đăng ký dưới dạng `Transient`.
+-   `IVectorStoreFactory`: Đăng ký dưới dạng `Singleton`.
+-   `IVectorStore`: Đăng ký dưới dạng `Transient`, được giải quyết thông qua `IVectorStoreFactory`.
 
 ## 13. Logging & Monitoring
 

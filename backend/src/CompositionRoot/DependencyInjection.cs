@@ -1,20 +1,20 @@
+using System.Security.Claims;
 using backend.Application;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Domain.Enums;
 using backend.Infrastructure;
+using backend.Infrastructure.AI;
+using backend.Infrastructure.Auth;
+using backend.Infrastructure.Data;
+using backend.Infrastructure.Files;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Application.Common.Models;
-using backend.Application.Common.Interfaces;
-using backend.Infrastructure.AI;
-using backend.Domain.Enums;
-using Microsoft.Extensions.Options;
-using backend.Infrastructure.Files;
-using Microsoft.AspNetCore.Hosting;
-using backend.Infrastructure.Auth;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
-using backend.Infrastructure.Data;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace backend.CompositionRoot;
 
