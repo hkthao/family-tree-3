@@ -64,10 +64,12 @@ import { useTheme } from 'vuetify';
 import { useUserSettingsStore } from '@/stores/userSettings.store';
 import { getThemeOptions } from '@/constants/theme.constants';
 import { getLanguageOptions } from '@/constants/language.constants';
+import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
 const theme = useTheme();
 const userSettingsStore = useUserSettingsStore();
+const notificationStore = useNotificationStore();
 
 const preferencesForm = ref({
   theme: userSettingsStore.preferences.theme,
@@ -105,9 +107,9 @@ const savePreferences = async () => {
   // Save settings via store action
   try {
     await userSettingsStore.saveUserSettings();
-    // Snackbar is handled by the store action
+    notificationStore.showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
   } catch (error) {
-    // Error snackbar is handled by the store action
+    notificationStore.showSnackbar(t('userSettings.preferences.saveError'), 'error');
   }
 };
 </script>

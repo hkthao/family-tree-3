@@ -41,9 +41,7 @@ export const useUserSettingsStore = defineStore('userSettings', {
       this.error = null;
       try {
         const result = await this.services.userPreference.saveUserPreferences(this.preferences);
-        if (result.ok) {
-        
-        } else {
+        if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('userSettings.preferences.saveError');
         }
       } catch (err: any) {

@@ -133,7 +133,6 @@ describe('auth.store', () => {
   });
 
   describe('login', () => {
-    const credentials = { email: 'test@example.com', password: 'password' };
 
     it('should login successfully', async () => {
       const store = useAuthStore();
