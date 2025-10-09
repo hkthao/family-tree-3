@@ -14,6 +14,7 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => !!state.user,
     isAdmin: (state) => state.user?.roles?.includes('Admin'),
     isFamilyManager: (state) => state.user?.roles?.includes('FamilyManager'),
+    getAccessToken: (state) => state.token,
   },
   actions: {
     async initAuth() {
