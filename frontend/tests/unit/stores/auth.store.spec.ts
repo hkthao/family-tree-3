@@ -36,7 +36,7 @@ describe('auth.store', () => {
     const store = useAuthStore();
     store.user = {
       id: '1',
-      auth0UserId: 'auth0|1',
+      externalId: 'auth0|1',
       name: 'test',
       email: 'test@example.com',
       roles: [],
@@ -54,7 +54,7 @@ describe('auth.store', () => {
     const store = useAuthStore();
     store.user = {
       id: '1',
-      auth0UserId: 'auth0|1',
+      externalId: 'auth0|1',
       email: 'test@example.com',
       roles: ['Admin'],
     } as User;
@@ -65,7 +65,7 @@ describe('auth.store', () => {
     const store = useAuthStore();
     store.user = {
       id: '1',
-      auth0UserId: 'auth0|1',
+      externalId: 'auth0|1',
       email: 'test@example.com',
       roles: ['User'],
     } as User;
@@ -76,7 +76,7 @@ describe('auth.store', () => {
     const store = useAuthStore();
     store.user = {
       id: '1',
-      auth0UserId: 'auth0|1',
+      externalId: 'auth0|1',
       email: 'test@example.com',
       roles: ['FamilyManager'],
     } as User;
@@ -87,7 +87,7 @@ describe('auth.store', () => {
     const store = useAuthStore();
     store.user = {
       id: '1',
-      auth0UserId: 'auth0|1',
+      externalId: 'auth0|1',
       email: 'test@example.com',
       roles: ['User'],
     } as User;
@@ -101,7 +101,7 @@ describe('auth.store', () => {
       const store = useAuthStore();
       const mockUser = {
         id: '1',
-        auth0UserId: 'auth0|1',
+        externalId: 'auth0|1',
         email: 'test@example.com',
         name: 'test',
         roles: [],
@@ -144,7 +144,7 @@ describe('auth.store', () => {
       const store = useAuthStore();
       const mockUser = {
         id: '1',
-        auth0UserId: 'auth0|1',
+        externalId: 'auth0|1',
         email: 'test@example.com',
         name: 'test',
         roles: [],
@@ -200,7 +200,7 @@ describe('auth.store', () => {
       const store = useAuthStore();
       store.user = {
         id: '1',
-        auth0UserId: 'auth0|1',
+        externalId: 'auth0|1',
         name: 'test',
         email: 'test@example.com',
         roles: [],
@@ -222,7 +222,7 @@ describe('auth.store', () => {
       const store = useAuthStore();
       store.user = {
         id: '1',
-        auth0UserId: 'auth0|1',
+        externalId: 'auth0|1',
         name: 'test',
         email: 'test@example.com',
         roles: [],
@@ -239,7 +239,7 @@ describe('auth.store', () => {
       // User and token should remain if logout failed to clear them
       expect(store.user).toEqual({
         id: '1',
-        auth0UserId: 'auth0|1',
+        externalId: 'auth0|1',
         name: 'test',
         email: 'test@example.com',
         roles: [],
@@ -260,7 +260,7 @@ describe('auth.store', () => {
       const store = useAuthStore();
       const mockUser = {
         id: '2',
-        auth0UserId: 'auth0|2',
+        externalId: 'auth0|2',
         name: 'test',
         email: 'new@example.com',
         roles: [],

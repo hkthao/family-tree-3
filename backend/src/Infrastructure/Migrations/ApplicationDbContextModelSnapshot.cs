@@ -398,11 +398,6 @@ namespace backend.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
-                    b.Property<string>("Auth0UserId")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)");
 
@@ -410,6 +405,11 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
@@ -430,7 +430,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Auth0UserId")
+                    b.HasIndex("ExternalId")
                         .IsUnique();
 
                     b.HasIndex("UserPreferenceUserProfileId");

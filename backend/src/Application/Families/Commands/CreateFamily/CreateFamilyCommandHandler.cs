@@ -33,7 +33,7 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
                 return Result<Guid>.Failure("Current user ID not found.", "Authentication");
             }
 
-            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(currentUserId)).FirstOrDefaultAsync(cancellationToken);
+            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByExternalIdSpecification(currentUserId)).FirstOrDefaultAsync(cancellationToken);
             if (userProfile == null)
             {
                 return Result<Guid>.Failure("User profile not found.", "NotFound");

@@ -45,30 +45,6 @@ namespace backend.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "UserProfiles",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Auth0UserId = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserProfiles", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
                 {
@@ -147,65 +123,6 @@ namespace backend.Infrastructure.Migrations
                         principalTable: "Families",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "FamilyUsers",
-                columns: table => new
-                {
-                    FamilyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UserProfileId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    Role = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FamilyUsers", x => new { x.FamilyId, x.UserProfileId });
-                    table.ForeignKey(
-                        name: "FK_FamilyUsers_Families_FamilyId",
-                        column: x => x.FamilyId,
-                        principalTable: "Families",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_FamilyUsers_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "UserActivities",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    UserProfileId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    ActionType = table.Column<int>(type: "int", nullable: false),
-                    TargetType = table.Column<int>(type: "int", nullable: false),
-                    TargetId = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    GroupId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    ActivitySummary = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserActivities", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserActivities_UserProfiles_UserProfileId",
-                        column: x => x.UserProfileId,
-                        principalTable: "UserProfiles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -297,6 +214,107 @@ namespace backend.Infrastructure.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "FamilyUsers",
+                columns: table => new
+                {
+                    FamilyId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserProfileId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FamilyUsers", x => new { x.FamilyId, x.UserProfileId });
+                    table.ForeignKey(
+                        name: "FK_FamilyUsers_Families_FamilyId",
+                        column: x => x.FamilyId,
+                        principalTable: "Families",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "UserActivities",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserProfileId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ActionType = table.Column<int>(type: "int", nullable: false),
+                    TargetType = table.Column<int>(type: "int", nullable: false),
+                    TargetId = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    GroupId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    ActivitySummary = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserActivities", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "UserPreferences",
+                columns: table => new
+                {
+                    UserProfileId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Theme = table.Column<int>(type: "int", nullable: false),
+                    Language = table.Column<int>(type: "int", nullable: false),
+                    EmailNotificationsEnabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    SmsNotificationsEnabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    InAppNotificationsEnabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPreferences", x => x.UserProfileId);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "UserProfiles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    ExternalId = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    UserPreferenceUserProfileId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserProfiles_UserPreferences_UserPreferenceUserProfileId",
+                        column: x => x.UserPreferenceUserProfileId,
+                        principalTable: "UserPreferences",
+                        principalColumn: "UserProfileId");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_AIBiographies_MemberId",
                 table: "AIBiographies",
@@ -338,15 +356,48 @@ namespace backend.Infrastructure.Migrations
                 column: "UserProfileId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserProfiles_Auth0UserId",
+                name: "IX_UserProfiles_ExternalId",
                 table: "UserProfiles",
-                column: "Auth0UserId",
+                column: "ExternalId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserProfiles_UserPreferenceUserProfileId",
+                table: "UserProfiles",
+                column: "UserPreferenceUserProfileId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_FamilyUsers_UserProfiles_UserProfileId",
+                table: "FamilyUsers",
+                column: "UserProfileId",
+                principalTable: "UserProfiles",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_UserActivities_UserProfiles_UserProfileId",
+                table: "UserActivities",
+                column: "UserProfileId",
+                principalTable: "UserProfiles",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_UserPreferences_UserProfiles_UserProfileId",
+                table: "UserPreferences",
+                column: "UserProfileId",
+                principalTable: "UserProfiles",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_UserPreferences_UserProfiles_UserProfileId",
+                table: "UserPreferences");
+
             migrationBuilder.DropTable(
                 name: "AIBiographies");
 
@@ -369,10 +420,13 @@ namespace backend.Infrastructure.Migrations
                 name: "Members");
 
             migrationBuilder.DropTable(
+                name: "Families");
+
+            migrationBuilder.DropTable(
                 name: "UserProfiles");
 
             migrationBuilder.DropTable(
-                name: "Families");
+                name: "UserPreferences");
         }
     }
 }

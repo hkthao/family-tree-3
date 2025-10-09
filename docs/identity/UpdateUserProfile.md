@@ -23,7 +23,7 @@ public interface IAuthProvider
 }
 ```
 
--   `userId`: ID của người dùng cần cập nhật (thường là `Auth0UserId` hoặc tương đương).
+-   `userId`: ID của người dùng cần cập nhật (thường là `ExternalId` hoặc tương đương).
 -   `request`: Đối tượng `UserProfileUpdateRequest` chứa các thông tin cần cập nhật.
 -   `Result`: Đối tượng `Result` chuẩn của hệ thống, cho biết thao tác thành công hay thất bại.
 

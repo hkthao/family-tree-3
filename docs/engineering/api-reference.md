@@ -400,7 +400,7 @@ Content-Type: application/json
 ```json
 {
   "id": "string (uuid)",
-  "auth0UserId": "string",
+  "externalId": "string",
   "email": "string",
   "name": "string"
 }

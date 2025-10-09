@@ -26,7 +26,7 @@ Tài liệu này mô tả chi tiết về mô hình dữ liệu, schema của da
 erDiagram
     USER_PROFILE {
         string Id PK "ID duy nhất"
-        string Auth0UserId "ID người dùng từ Auth0"
+        string ExternalId "ID người dùng từ Auth0"
         string Email "Email người dùng"
         string Name "Tên hiển thị"
     }
@@ -133,7 +133,7 @@ Lưu trữ thông tin hồ sơ người dùng, được liên kết với các t
 | Tên cột       | Kiểu dữ liệu | Ràng buộc | Mô tả                                  |
 | :------------ | :----------- | :-------- | :------------------------------------- |
 | `Id`          | `varchar(36)`| PK        | ID duy nhất của hồ sơ người dùng       |
-| `Auth0UserId` | `varchar(255)`| NOT NULL  | ID người dùng từ nhà cung cấp xác thực (ví dụ: Auth0) |
+| `ExternalId` | `varchar(255)`| NOT NULL  | ID người dùng từ nhà cung cấp xác thực (ví dụ: Auth0) |
 | `Email`       | `varchar(255)`| NOT NULL  | Địa chỉ email của người dùng           |
 | `Name`        | `varchar(255)`| NOT NULL  | Tên hiển thị của người dùng            |
 
@@ -307,7 +307,7 @@ Các bảng được map sang các class Entity trong `Domain` layer. EF Core s�
 
 modelBuilder.Entity<UserProfile>(builder =>
 {
-    builder.Property(u => u.Auth0UserId).HasMaxLength(255).IsRequired();
+    builder.Property(u => u.ExternalId).HasMaxLength(255).IsRequired();
     builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
     builder.Property(u => u.Name).HasMaxLength(255).IsRequired();
 

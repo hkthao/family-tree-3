@@ -59,7 +59,7 @@ public class ApplicationDbContextInitialiser
                 new backend.Domain.Entities.UserProfile
                 {
                     Id = userProfile1Id,
-                    Auth0UserId = "auth0|testuser1",
+                    ExternalId = "auth0|testuser1",
                     Email = "testuser1@example.com",
                     Name = "Test User One",
                     Created = DateTime.UtcNow
@@ -67,7 +67,7 @@ public class ApplicationDbContextInitialiser
                 new backend.Domain.Entities.UserProfile
                 {
                     Id = userProfile2Id,
-                    Auth0UserId = "auth0|testuser2",
+                    ExternalId = "auth0|testuser2",
                     Email = "testuser2@example.com",
                     Name = "Test User Two",
                     Created = DateTime.UtcNow

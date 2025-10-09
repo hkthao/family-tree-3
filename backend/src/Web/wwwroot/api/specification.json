@@ -1845,7 +1845,43 @@
         ]
       }
     },
-    "/api/UserProfiles/{auth0UserId}": {
+    "/api/UserProfiles/byExternalId/{externalId}": {
+      "get": {
+        "tags": [
+          "UserProfiles"
+        ],
+        "operationId": "UserProfiles_GetUserProfileByExternalId",
+        "parameters": [
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/UserProfiles/{id}": {
       "get": {
         "tags": [
           "UserProfiles"
@@ -1853,11 +1889,12 @@
         "operationId": "UserProfiles_GetUserProfileById",
         "parameters": [
           {
-            "name": "auth0UserId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -3139,7 +3176,7 @@
           "id": {
             "type": "string"
           },
-          "auth0UserId": {
+          "externalId": {
             "type": "string"
           },
           "email": {

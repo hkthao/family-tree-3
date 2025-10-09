@@ -113,7 +113,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                                 }
                                 catch (Exception ex)
                                 {
-                                    scopedLogger.LogError(ex, "Error syncing user profile or recording login activity for Auth0 user {Auth0UserId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                                    scopedLogger.LogError(ex, "Error syncing user profile or recording login activity for Auth0 user {ExternalId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
                                 }
                             }
                         });

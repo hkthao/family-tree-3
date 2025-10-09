@@ -8,11 +8,11 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 {
     public void Configure(EntityTypeBuilder<UserProfile> builder)
     {
-        builder.Property(up => up.Auth0UserId)
+        builder.Property(up => up.ExternalId)
             .HasMaxLength(256)
             .IsRequired();
 
-        builder.HasIndex(up => up.Auth0UserId)
+        builder.HasIndex(up => up.ExternalId)
             .IsUnique();
 
         builder.Property(up => up.Email)

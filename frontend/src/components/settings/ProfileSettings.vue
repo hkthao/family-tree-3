@@ -56,7 +56,7 @@ const rules = {
 
 onMounted(async () => {
   if (authStore.user) {
-    await userProfileStore.fetchUserProfile(authStore.user.id);
+    await userProfileStore.fetchUserProfileByExternalId(authStore.user.externalId);
     if (userProfileStore.userProfile) {
       profileForm.value.fullName = userProfileStore.userProfile.name;
       profileForm.value.email = userProfileStore.userProfile.email;
