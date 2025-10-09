@@ -35,7 +35,7 @@ public class UserProfilesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserProfileDto>> GetUserProfileById(string id)
     {
-        var result = await _mediator.Send(new GetUserProfileByIdQuery { Id = id });
+        var result = await _mediator.Send(new GetUserProfileByAuth0IdQuery { Id = id });
         if (result.IsSuccess)
         {
             return Ok(result.Value);

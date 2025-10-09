@@ -7,18 +7,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UserProfiles.Queries.GetUserProfileById;
 
-public class GetUserProfileByIdQueryHandler : IRequestHandler<GetUserProfileByIdQuery, Result<UserProfileDto>>
+public class GetUserProfileByAuth0IdQueryHandler : IRequestHandler<GetUserProfileByAuth0IdQuery, Result<UserProfileDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetUserProfileByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetUserProfileByAuth0IdQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<Result<UserProfileDto>> Handle(GetUserProfileByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserProfileDto>> Handle(GetUserProfileByAuth0IdQuery request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(request.Id, out var userProfileGuid))
         {
