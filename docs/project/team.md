@@ -33,6 +33,6 @@ Phân công trách nhiệm rõ ràng giúp đảm bảo mọi khía cạnh của
 
 *   **AI Assistant (AI Gemini)**: 
     *   Hỗ trợ duy trì tính nhất quán và cập nhật của tài liệu dự án.
-    *   Hỗ trợ các nhiệm vụ phát triển phần mềm như sửa lỗi, thêm tính năng, refactor code.
+    *   Hỗ trợ các nhiệm vụ phát triển phần mềm như sửa lỗi, thêm tính năng, refactor code (bao gồm refactor kiến trúc Clean Architecture, triển khai API tải lên tệp, và đổi tên `auth0UserId` thành `externalId`).
     *   Đảm bảo tuân thủ các quy ước và best practices của dự án.
     *   Cung cấp thông tin và phân tích kỹ thuật khi cần thiết.

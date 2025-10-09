@@ -98,3 +98,30 @@ Việc lập kế hoạch sprint giúp:
 -   Gemini (AI Assistant)
 -   Developer A (Backend)
 -   Developer B (Frontend)
+
+## 6. Sprint 5 (2025-10-09 - 2025-10-23)
+
+**Mục tiêu:** Cải thiện kiến trúc backend, triển khai tính năng tải lên tệp an toàn và khắc phục các lỗi liên quan đến xác thực và hiển thị thông tin người dùng.
+
+**Tính năng mới:**
+-   [x] US_010: Tải lên và quản lý tệp đính kèm
+
+**Cải tiến & Sửa lỗi:**
+*   **Refactor Kiến trúc Backend**: 
+    -   Tạo project `CompositionRoot` để thiết lập Dependency Injection tập trung, loại bỏ sự phụ thuộc trực tiếp của Web Layer vào Infrastructure Layer.
+    -   Loại bỏ sự phụ thuộc của Domain Layer vào `MediatR`.
+    -   Tái thêm các dependency `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` vào Application Layer (giải pháp thực dụng).
+*   **Tách biệt UserProfile khỏi Auth0**: 
+    -   Đổi tên `Auth0UserId` thành `ExternalId` trong entity `UserProfile` và DTO ở Backend.
+    -   Cập nhật các query, handler và controller liên quan để sử dụng `ExternalId` và endpoint `byExternalId`.
+    -   Cập nhật các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) ở Frontend để sử dụng `externalId` nhằm tách biệt khỏi nhà cung cấp xác thực cụ thể.
+*   **Thông báo Snackbar**: 
+    -   Triển khai thông báo snackbar cho các thao tác lưu tùy chọn người dùng thành công/thất bại trong `PreferencesSettings.vue`.
+    -   Điều chỉnh vị trí snackbar hiển thị ở giữa dưới cùng.
+*   **Xử lý Callback Auth0**: Khắc phục lỗi reload liên tục sau khi xử lý callback từ Auth0 bằng cách thay thế URL.
+*   **Tải thông tin User Profile**: Đảm bảo `ProfileSettings.vue` tải và hiển thị thông tin hồ sơ người dùng chính xác khi component được mount.
+
+**Thành viên tham gia:**
+-   Gemini (AI Assistant)
+-   Developer A (Backend)
+-   Developer B (Frontend)

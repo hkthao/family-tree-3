@@ -48,8 +48,8 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_REL_04    | Chỉnh sửa mối quan hệ thành công       | Relationship Management| High     | Manual/Automated  |
 | TC_REL_05    | Xóa mối quan hệ thành công             | Relationship Management| High     | Manual/Automated  |
 | TC_REL_06    | Tìm kiếm mối quan hệ                   | Relationship Management| Medium   | Manual/Automated  |
-| TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual (Future Feature)            |
-| TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual (Future Feature)            |
+| TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual            |
+| TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual            |
 
 ## 3. Chi tiết Test Cases
 
@@ -364,7 +364,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Priority**: Medium
 -   **Type**: Manual/Automated
 
-### 3.7. Module: File đính kèm (Attachments) (Future Feature)
+### 3.7. Module: File đính kèm (Attachments)
 
 #### TC_ATTACH_01: Tải lên file đính kèm thành công
 -   **Mục tiêu**: Xác minh người dùng có thể tải lên một file đính kèm hợp lệ cho một thành viên.

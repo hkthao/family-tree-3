@@ -37,6 +37,8 @@ Trong giai đoạn ngắn hạn, chúng tôi tập trung vào việc hoàn thi�
 *   **Quản lý Quan hệ**: (Đã hoàn thành)
     *   Thêm, sửa, xóa, xem danh sách và chi tiết các mối quan hệ giữa các thành viên.
     *   Hỗ trợ tìm kiếm và lọc mối quan hệ.
+*   **Tải lên và quản lý tệp đính kèm**: (Đã hoàn thành)
+    *   Cho phép người dùng tải lên và quản lý các tệp (hình ảnh, tài liệu) liên quan đến các thành viên hoặc gia đình.
 
 ## 3. Mục tiêu Trung hạn (3-6 tháng)
 

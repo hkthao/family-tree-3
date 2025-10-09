@@ -128,7 +128,19 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Tệp đính kèm có thể được xem trực tiếp trong ứng dụng hoặc tải xuống.
     -   Có cơ chế quản lý tệp đính kèm (xóa, đổi tên).
 
-#### US_010: Báo cáo thống kê & Kỷ lục gia đình
+#### US_010: Tải lên và quản lý tệp đính kèm
+-   **User Story**: Là người dùng, tôi muốn tải lên và quản lý các tệp (hình ảnh, tài liệu) liên quan đến các thành viên hoặc gia đình để lưu trữ thông tin bổ sung.
+-   **Priority**: High
+-   **Estimate**: 5 ngày
+-   **Acceptance Criteria**:
+    -   Hệ thống cung cấp giao diện để người dùng chọn và tải lên các tệp (JPG, JPEG, PNG, PDF, DOCX).
+    -   Kích thước tệp tối đa là 5MB.
+    -   Tên tệp được làm sạch và thêm ID duy nhất để tránh trùng lặp.
+    -   Sau khi tải lên thành công, hệ thống trả về URL công khai của tệp.
+    -   Hệ thống hiển thị thông báo lỗi rõ ràng nếu tệp không hợp lệ (sai định dạng, quá kích thước).
+    -   Backend sử dụng cấu hình để chọn nhà cung cấp lưu trữ (Local, Cloudinary, S3).
+
+#### US_011: Báo cáo thống kê & Kỷ lục gia đình
 -   **User Story**: Là người dùng, tôi muốn xem và tạo các báo cáo thống kê về cây gia phả, bao gồm các kỷ lục gia đình, để có cái nhìn sâu sắc và phân tích dữ liệu.
 -   **Priority**: Medium
 -   **Estimate**: TBD
@@ -138,7 +150,7 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Người dùng có thể tạo các báo cáo tùy chỉnh dựa trên các tiêu chí lọc khác nhau.
     -   Các báo cáo có thể được trình bày dưới dạng bảng, biểu đồ trực quan.
 
-#### US_011: In cây gia phả
+#### US_012: In cây gia phả
 -   **User Story**: Là người dùng, tôi muốn in cây gia phả để có bản sao vật lý hoặc chia sẻ ngoại tuyến.
 -   **Priority**: Low
 -   **Estimate**: TBD

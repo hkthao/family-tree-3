@@ -29,7 +29,37 @@
 
 ---
 
-## 3. Phiên bản 0.2.0 (2025-10-04)
+## 3. Phiên bản 0.3.0 (2025-10-09)
+
+### Tính năng mới
+
+-   **API Tải lên tệp an toàn**: Triển khai API tải lên tệp với các nhà cung cấp lưu trữ có thể chuyển đổi (Local, Cloudinary, AWS S3), tuân thủ Clean Architecture và các yêu cầu bảo mật.
+
+### Cải tiến & Sửa lỗi
+
+-   **Refactor Kiến trúc Backend**: 
+    -   Tạo project `CompositionRoot` để thiết lập Dependency Injection tập trung, loại bỏ sự phụ thuộc trực tiếp của Web Layer vào Infrastructure Layer.
+    -   Loại bỏ sự phụ thuộc của Domain Layer vào `MediatR`.
+    -   Tái thêm các dependency `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` vào Application Layer (giải pháp thực dụng).
+-   **Tách biệt UserProfile khỏi Auth0**: 
+    -   Đổi tên `Auth0UserId` thành `ExternalId` trong entity `UserProfile` và DTO ở Backend.
+    -   Cập nhật các query, handler và controller liên quan để sử dụng `ExternalId` và endpoint `byExternalId`.
+    -   Cập nhật các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) ở Frontend để sử dụng `externalId`.
+-   **Thông báo Snackbar**: 
+    -   Triển khai thông báo snackbar cho các thao tác lưu tùy chọn người dùng thành công/thất bại trong `PreferencesSettings.vue`.
+    -   Điều chỉnh vị trí snackbar hiển thị ở giữa dưới cùng.
+-   **Xử lý Callback Auth0**: Khắc phục lỗi reload liên tục sau khi xử lý callback từ Auth0 bằng cách thay thế URL.
+-   **Tải thông tin User Profile**: Đảm bảo `ProfileSettings.vue` tải và hiển thị thông tin hồ sơ người dùng chính xác khi component được mount.
+-   **Dọn dẹp cấu hình**: Xóa bỏ các comment trong `appsettings.json`.
+
+### Các vấn đề đã biết
+
+-   Chức năng tìm kiếm vẫn chưa được tối ưu.
+-   Cây gia phả có thể hiển thị chậm với số lượng lớn thành viên.
+
+---
+
+## 4. Phiên bản 0.2.0 (2025-10-04)
 
 ### Cải tiến & Sửa lỗi
 
