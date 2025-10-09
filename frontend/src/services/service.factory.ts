@@ -25,6 +25,9 @@ import { ApiAIBiographyService } from './aiBiography/api.aiBiography.service';
 import type { IUserPreferenceService } from './userPreference/userPreference.service.interface';
 import { MockUserPreferenceService } from './userPreference/mock.userPreference.service';
 import { ApiUserPreferenceService } from './userPreference/api.userPreference.service';
+import type { IFileUploadService } from './fileUpload/fileUpload.service.interface';
+import { MockFileUploadService } from './fileUpload/mock.fileUpload.service';
+import { FileUploadApiService } from './fileUpload/api.fileUpload.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -38,6 +41,7 @@ export interface AppServices {
   dashboard: IDashboardService;
   aiBiography: IAIBiographyService;
   userPreference: IUserPreferenceService;
+  fileUpload: IFileUploadService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -99,5 +103,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiUserPreferenceService(apiClient)
         : testServices?.userPreference || new MockUserPreferenceService(),
+    fileUpload:
+      mode === 'mock'
+        ? new MockFileUploadService()
+        : mode === 'real'
+        ? new FileUploadApiService(apiClient)
+        : testServices?.fileUpload || new MockFileUploadService(),
   };
 }

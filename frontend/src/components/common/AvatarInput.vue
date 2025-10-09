@@ -31,6 +31,8 @@
           prepend-icon="mdi-camera"
           show-size
           class="mt-4"
+          :loading="fileUploadStore.loading"
+          :disabled="fileUploadStore.loading"
           @change="onFileSelected"
         ></v-file-input>
 
@@ -70,6 +72,8 @@ import { useI18n } from 'vue-i18n';
 import AvatarDisplay from './AvatarDisplay.vue';
 import { Cropper } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
+import { useFileUploadStore } from '@/stores/fileUpload.store';
+import { useNotificationStore } from '@/stores/notification.store';
 
 const props = defineProps({
   modelValue: { type: String as PropType<string | null | undefined>, default: null },
@@ -79,6 +83,8 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
+const fileUploadStore = useFileUploadStore();
+const notificationStore = useNotificationStore();
 
 const tab = ref('url');
 const imageUrl = ref(props.modelValue || '');
@@ -115,39 +121,30 @@ const onFileSelected = (event: Event) => {
   }
 };
 
-const cropImage = () => {
+const cropImage = async () => {
   if (cropperRef.value) {
     const { canvas } = cropperRef.value.getResult();
     if (canvas) {
-      // Resize and export to base64
-      const resizedCanvas = document.createElement('canvas');
-      const ctx = resizedCanvas.getContext('2d');
-      const maxWidth = 256; // Max width for resized image
-      const maxHeight = 256; // Max height for resized image
+      // Convert canvas to Blob, then to File
+      canvas.toBlob(async (blob) => {
+        if (blob) {
+          const croppedFile = new File([blob], `avatar_${Date.now()}.jpeg`, { type: 'image/jpeg' });
+          
+          const success = await fileUploadStore.uploadFile(croppedFile);
 
-      let width = canvas.width;
-      let height = canvas.height;
-
-      if (width > height) {
-        if (width > maxWidth) {
-          height *= maxWidth / width;
-          width = maxWidth;
+          if (success && fileUploadStore.uploadedUrl) {
+            emit('update:modelValue', fileUploadStore.uploadedUrl);
+            notificationStore.showSnackbar(t('avatarInput.uploadInput.success'), 'success');
+          } else {
+            notificationStore.showSnackbar(
+              fileUploadStore.error || t('avatarInput.uploadInput.error'),
+              'error',
+            );
+          }
+          cropperDialog.value = false;
+          selectedFile.value = []; // Clear selected file input
         }
-      } else {
-        if (height > maxHeight) {
-          width *= maxHeight / height;
-          height = maxHeight;
-        }
-      }
-
-      resizedCanvas.width = width;
-      resizedCanvas.height = height;
-      ctx?.drawImage(canvas, 0, 0, width, height);
-
-      const base64Image = resizedCanvas.toDataURL('image/jpeg', 0.9); // Export as JPEG with 90% quality
-      emit('update:modelValue', base64Image);
-      cropperDialog.value = false;
-      selectedFile.value = []; // Clear selected file input
+      }, 'image/jpeg', 0.9);
     }
   }
 };

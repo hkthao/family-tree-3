@@ -44,17 +44,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
-import { useTheme } from 'vuetify';
 import { useUserSettingsStore } from '@/stores/userSettings.store';
 import { getThemeOptions } from '@/constants/theme.constants';
 import { getLanguageOptions } from '@/constants/language.constants';
 import { useNotificationStore } from '@/stores/notification.store';
 
 const { t } = useI18n();
-const theme = useTheme();
 const userSettingsStore = useUserSettingsStore();
 const notificationStore = useNotificationStore();
 
@@ -68,17 +66,6 @@ const preferencesForm = ref({
 
 const languageOptions = computed(() => getLanguageOptions(t));
 const themeOptions = computed(() => getThemeOptions(t));
-
-watch(
-  () => userSettingsStore.preferences.theme,
-  (newTheme) => {
-    const option = themeOptions.value.find((option) => option.value === newTheme);
-    if (option) {
-      theme.change(option.code)
-    }
-  },
-  { immediate: true },
-); // Immediate to set theme on initial load
 
 const savePreferences = async () => {
   // Update store state

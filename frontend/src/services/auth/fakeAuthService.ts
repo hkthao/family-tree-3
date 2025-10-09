@@ -7,6 +7,7 @@ class FakeAuthService implements AuthService {
   private currentUser: User | null = null;
   private currentToken: string | null = null;
 
+  constructor() {
     this.currentUser = {
       id: 'fake-user-123',
       externalId: 'auth0|fake-user-123',
