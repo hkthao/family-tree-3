@@ -20,16 +20,21 @@ public class GetUserProfileByIdQueryHandler : IRequestHandler<GetUserProfileById
 
     public async Task<Result<UserProfileDto>> Handle(GetUserProfileByIdQuery request, CancellationToken cancellationToken)
     {
+        if (!Guid.TryParse(request.Id, out var userProfileGuid))
+        {
+            return Result<UserProfileDto>.Failure("Invalid user profile ID format.", "BadRequest");
+        }
+
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(up => up.Id == userProfileGuid, cancellationToken);
 
         if (userProfile == null)
         {
-            return Result.Failure<UserProfileDto>("User profile not found.", "NotFound");
+            return Result<UserProfileDto>.Failure("User profile not found.", "NotFound");
         }
 
         var userProfileDto = _mapper.Map<UserProfileDto>(userProfile);
-        return Result.Success(userProfileDto);
+        return Result<UserProfileDto>.Success(userProfileDto);
     }
 }
