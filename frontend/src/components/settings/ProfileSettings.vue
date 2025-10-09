@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="profileForm" @submit.prevent="saveProfile">
+  <v-form ref="profileFormRef" @submit.prevent="saveProfile">
     <v-row>
       <v-col cols="12">
         <AvatarInput v-model="profileForm.avatar" :size="128" />
