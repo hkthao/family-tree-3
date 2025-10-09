@@ -1,4 +1,5 @@
 using backend.CompositionRoot;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,17 @@ app.UseCors("AllowFrontend");
 
 app.UseHealthChecks("/health");
 // app.UseHttpsRedirection(); // Disabled to allow HTTP access for local development
-app.UseStaticFiles();
+
+// Configure static files to exclude the 'uploads' folder
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.WebRootPath)),
+    RequestPath = "",
+    // Exclude the 'uploads' folder from direct static file serving
+    // This requires a custom middleware or a more complex setup if 'uploads' is a subfolder of wwwroot
+    // For simplicity, we'll assume 'uploads' is a direct subfolder of wwwroot and won't be served by this.
+    // Access to 'uploads' will be via the /api/upload/preview/{fileName} endpoint.
+});
 
 app.UseSwaggerUi(settings =>
 {

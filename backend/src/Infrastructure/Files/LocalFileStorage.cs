@@ -32,9 +32,8 @@ public class LocalFileStorage : IFileStorageService
                 await fileStream.CopyToAsync(outputStream, cancellationToken);
             }
 
-            // Construct the absolute URL using BaseUrl from settings
-            var relativePath = Path.Combine(_storageSettings.LocalStoragePath, fileName).Replace("\\", "/");
-            var absoluteUrl = $"{_storageSettings.BaseUrl}/{relativePath}";
+            // Construct the API preview URL
+            var absoluteUrl = $"{_storageSettings.BaseUrl}/api/upload/preview/{fileName}";
 
             return Result<string>.Success(absoluteUrl);
         }
