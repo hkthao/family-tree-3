@@ -1,4 +1,4 @@
-namespace backend.Application.UserProfiles.Queries;
+namespace backend.Application.Identity.UserProfiles.Queries;
 
 public class UserProfileDto
 {

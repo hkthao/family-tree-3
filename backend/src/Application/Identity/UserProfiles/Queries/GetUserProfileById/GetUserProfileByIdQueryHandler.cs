@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
-namespace backend.Application.UserProfiles.Queries.GetUserProfileById;
+namespace backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
 
 public class GetUserProfileByIdQueryHandler : IRequestHandler<GetUserProfileByIdQuery, Result<UserProfileDto>>
 {

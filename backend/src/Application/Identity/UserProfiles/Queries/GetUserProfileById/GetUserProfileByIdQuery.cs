@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.UserProfiles.Queries.GetUserProfileById;
+namespace backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
 
 public record GetUserProfileByIdQuery : IRequest<Result<UserProfileDto>>
 {
