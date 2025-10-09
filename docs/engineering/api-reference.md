@@ -302,6 +302,14 @@ Content-Type: application/json
     *   **Request Body:** `SaveUserPreferencesCommand` (ví dụ: `{ "theme": "Light", "language": "Vietnamese", "emailNotificationsEnabled": "true", "smsNotificationsEnabled": "false", "inAppNotificationsEnabled": "true" }`)
     *   **Phản hồi:** `Result`
 
+### 6.10. Quản lý Tải lên Tệp (`/api/upload`)
+
+-   `POST /api/upload`: Tải lên một tệp (hình ảnh, tài liệu) lên hệ thống lưu trữ đã cấu hình.
+    *   **Request Body:** `multipart/form-data` (chứa `IFormFile`)
+    *   **Phản hồi:** `Result<string>` (URL công khai của tệp đã tải lên)
+-   `GET /api/upload/preview/{fileName}`: Lấy nội dung của một tệp đã tải lên để xem trước. Yêu cầu xác thực.
+    *   **Phản hồi:** `FileContentResult` (nội dung tệp với `Content-Type` phù hợp)
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -468,15 +476,23 @@ Content-Type: application/json
 }
 ```
 
-### 7.12. UserPreferenceDto
+### 7.13. FileMetadata
 
 ```json
 {
-  "theme": "string (enum: Light, Dark)",
-  "language": "string (enum: English, Vietnamese)",
-  "emailNotificationsEnabled": "boolean",
-  "smsNotificationsEnabled": "boolean",
-  "inAppNotificationsEnabled": "boolean"
+  "id": "string (uuid)",
+  "fileName": "string",
+  "url": "string",
+  "storageProvider": "string (enum: Local, Cloudinary, S3, AzureBlob)",
+  "contentType": "string",
+  "fileSize": "number",
+  "uploadedBy": "string (uuid)",
+  "usedByEntity": "string (nullable)",
+  "usedById": "string (uuid, nullable)",
+  "isActive": "boolean",
+  "created": "string (date-time)",
+  "lastModified": "string (date-time, nullable)"
 }
 ```
+
 ```

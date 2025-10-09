@@ -112,6 +112,21 @@ erDiagram
         datetime LastModified "Thời gian cập nhật cuối cùng"
     }
 
+    FILE_METADATA {
+        string Id PK "ID duy nhất"
+        string FileName "Tên file"
+        string Url "URL của file"
+        int StorageProvider "Nhà cung cấp lưu trữ (Enum int)"
+        string ContentType "Loại nội dung"
+        long FileSize "Kích thước file (bytes)"
+        string UploadedBy FK "ID người dùng tải lên"
+        string UsedByEntity "Tên entity sử dụng file (nullable)"
+        string UsedById "ID của entity sử dụng file (nullable)"
+        boolean IsActive "Trạng thái hoạt động"
+        datetime Created "Thời gian tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+    }
+
     USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
     FAMILY ||--o{ FAMILY_USER : "có người dùng"
     FAMILY ||--o{ MEMBER : "có"
@@ -123,6 +138,9 @@ erDiagram
     RELATIONSHIP ||--o| MEMBER : "đích là"
     MEMBER ||--o{ AI_BIOGRAPHY : "có tiểu sử AI"
     USER_PROFILE ||--o| USER_PREFERENCE : "có tùy chọn"
+    USER_PROFILE ||--o{ FILE_METADATA : "tải lên"
+    MEMBER ||--o{ FILE_METADATA : "sử dụng"
+    FAMILY ||--o{ FILE_METADATA : "sử dụng"
 ```
 ## 3. Mô tả các bảng
 
@@ -280,6 +298,29 @@ Lưu trữ tùy chọn cá nhân của người dùng.
   - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `UserProfile` có một `UserPreference`.
 
+### 3.7. Bảng `FileMetadata`
+
+Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao gồm thông tin về vị trí lưu trữ, người tải lên và trạng thái sử dụng.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                                  |
+| :-------------- | :----------- | :-------- | :------------------------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của metadata tệp           |
+| `FileName`      | `varchar(255)`| NOT NULL  | Tên gốc của tệp                         |
+| `Url`           | `varchar(2048)`| NOT NULL  | URL truy cập tệp (có thể là URL API)   |
+| `StorageProvider`| `int`        | NOT NULL  | Nhà cung cấp lưu trữ (Local, Cloudinary, S3) |
+| `ContentType`   | `varchar(100)`| NOT NULL  | Loại nội dung của tệp (ví dụ: image/jpeg) |
+| `FileSize`      | `bigint`     | NOT NULL  | Kích thước tệp theo byte               |
+| `UploadedBy`    | `varchar(36)`| NOT NULL  | ID của người dùng đã tải lên tệp       |
+| `UsedByEntity`  | `varchar(100)`| NULL      | Tên entity sử dụng tệp (ví dụ: UserProfile) |
+| `UsedById`      | `varchar(36)`| NULL      | ID của entity sử dụng tệp              |
+| `IsActive`      | `boolean`    | NOT NULL  | Trạng thái hoạt động (true: đang dùng, false: không dùng) |
+| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo metadata                 |
+| `LastModified`  | `datetime`   | NULL      | Thời gian cập nhật cuối cùng           |
+
+- **Foreign Keys**:
+  - `UploadedBy`: tham chiếu đến `UserProfiles(Id)`.
+- **Mối quan hệ**: Một `UserProfile` có thể tải lên nhiều `FileMetadata`.
+
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu (updated after refactor)
 
 Để đảm bảo tính chính xác và nhất quán của dữ liệu, hệ thống áp dụng các ràng buộc và quy tắc toàn vẹn dữ liệu sau:
@@ -397,6 +438,39 @@ modelBuilder.Entity<Relationship>(builder =>
            .HasForeignKey(r => r.TargetMemberId)
            .OnDelete(DeleteBehavior.Restrict)
            .IsRequired();
+});
+
+modelBuilder.Entity<UserPreference>(builder =>
+{
+    builder.HasKey(up => up.UserProfileId);
+
+    builder.HasOne(up => up.UserProfile)
+           .WithOne()
+           .HasForeignKey<UserPreference>(up => up.UserProfileId)
+           .OnDelete(DeleteBehavior.Cascade);
+
+    builder.Property(up => up.Theme).IsRequired();
+    builder.Property(up => up.Language).IsRequired();
+    builder.Property(up => up.EmailNotificationsEnabled).IsRequired();
+    builder.Property(up => up.SmsNotificationsEnabled).IsRequired();
+    builder.Property(up => up.InAppNotificationsEnabled).IsRequired();
+});
+
+modelBuilder.Entity<FileMetadata>(builder =>
+{
+    builder.Property(fm => fm.FileName).HasMaxLength(255).IsRequired();
+    builder.Property(fm => fm.Url).HasMaxLength(2048).IsRequired();
+    builder.Property(fm => fm.StorageProvider).IsRequired();
+    builder.Property(fm => fm.ContentType).HasMaxLength(100).IsRequired();
+    builder.Property(fm => fm.FileSize).IsRequired();
+    builder.Property(fm => fm.UploadedBy).HasMaxLength(36).IsRequired();
+    builder.Property(fm => fm.UsedByEntity).HasMaxLength(100);
+    builder.Property(fm => fm.IsActive).IsRequired();
+
+    builder.HasOne<UserProfile>()
+           .WithMany()
+           .HasForeignKey(fm => fm.UploadedBy)
+           .OnDelete(DeleteBehavior.Restrict);
 });
 
 // Cấu hình bảng trung gian cho mối quan hệ nhiều-nhiều giữa Event và Member

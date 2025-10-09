@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
 using System.Text.RegularExpressions;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
