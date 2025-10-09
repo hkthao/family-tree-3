@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { useAuthService } from '@/services/auth/authService';
 import type { User } from '@/types';
+import { useUserProfileStore } from './userProfile.store';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -20,8 +21,30 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       try {
         const authService = useAuthService();
-        this.user = await authService.getUser();
+        const authUser = await authService.getUser(); // This will be the Auth0 user data
         this.token = await authService.getAccessToken();
+
+        if (authUser) {
+          const userProfileStore = useUserProfileStore();
+          await userProfileStore.fetchUserProfileByExternalId(authUser.externalId);
+
+          if (userProfileStore.userProfile) {
+            this.user = {
+              ...authUser,
+              id: userProfileStore.userProfile.id, // Use internal UserProfile ID
+              name: userProfileStore.userProfile.name, // Update name from profile
+              email: userProfileStore.userProfile.email, // Update email from profile
+              avatar: userProfileStore.userProfile.avatar || undefined, // Update avatar from profile
+            };
+          } else {
+            // Handle case where user profile is not found in our DB
+            console.error('User profile not found in DB for external ID:', authUser.externalId);
+            this.error = 'User profile not found.';
+            this.user = null;
+          }
+        } else {
+          this.user = null;
+        }
       } catch (err: any) {
         this.error = err.message || 'Failed to initialize authentication.';
         console.error(err);
