@@ -12,12 +12,23 @@
 - [8. Tương tác Dữ liệu với Entity Framework Core](#8-tương-tác-dữ-liệu-với-entity-framework-core-updated-after-refactor)
   - [8.1. Specification Pattern](#81-specification-pattern-updated-after-refactor)
 - [9. Validation](#9-validation)
-- [10. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)](#10-ghi-nhật-ký-hoạt-động-người-dùng-user-activity-logging)
-- [11. Hướng dẫn Kiểm thử](#11-hướng-dẫn-kiểm-thử)
-- [12. Logging & Monitoring](#12-logging--monitoring)
-- [13. Coding Style](#13-coding-style)
-- [14. Best Practices](#14-best-practices)
-- [15. Tài liệu liên quan](#15-tài-liệu-liên-quan)
+- [10. Quản lý Cây Gia Phả (Family Tree Management)](#10-quản-lý-cây-gia-phả-family-tree-management)
+- [11. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)](#11-ghi-nhật-ký-hoạt-động-người-dùng-user-activity-logging)
+- [12. Module AI (AI Module)](#12-module-ai-ai-module)
+- [13. Module Vector Database](#13-module-vector-database)
+  - [13.0. Tổng quan](#130-tổng-quan)
+  - [13.1. Interface `IVectorStore`](#131-interface-ivectorstore)
+  - [13.2. Cách sử dụng `IVectorStore`](#132-cách-sử-dụng-ivectorstore)
+  - [13.3. Mở rộng Module (Thêm Provider mới)](#133-mở-rộng-module-thêm-provider-mới)
+  - [13.4. DTOs](#134-dtos)
+  - [13.5. Cơ chế chọn Provider (Factory Pattern)](#135-cơ-chế-chọn-provider-factory-pattern)
+  - [13.6. Triển khai các Provider](#136-triển-khai-các-provider)
+  - [13.7. Cấu hình `appsettings.json`](#137-cấu-hình-appsettingsjson)
+  - [13.8. Đăng ký Dependency Injection](#138-đăng-ký-dependency-injection)
+- [14. Logging & Monitoring](#14-logging--monitoring)
+- [15. Coding Style](#15-coding-style)
+- [16. Best Practices](#16-best-practices)
+- [17. Tài liệu liên quan](#17-tài-liệu-liên-quan)
 
 ---
 
@@ -798,6 +809,8 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 
 ## 12. Module Vector Database
 
+### 12.0. Tổng quan
+
 Module Vector Database được thiết kế để lưu trữ và truy vấn các vector nhúng (embeddings) cho các tác vụ liên quan đến AI, chẳng hạn như tìm kiếm ngữ nghĩa hoặc RAG (Retrieval-Augmented Generation) cho chatbot. Module này tuân thủ các nguyên tắc Clean Architecture, cho phép dễ dàng mở rộng và thay đổi nhà cung cấp Vector Database.
 
 ### 12.1. Interface `IVectorStore`
@@ -812,6 +825,83 @@ public interface IVectorStore
     Task<Result> DeleteAsync(IEnumerable<string> documentIds, CancellationToken cancellationToken = default);
 }
 ```
+
+-   `UpsertDocumentsAsync`: Thêm hoặc cập nhật các tài liệu vector vào Vector Database.
+-   `QueryAsync`: Tìm kiếm các tài liệu vector tương tự dựa trên một vector truy vấn.
+-   `DeleteAsync`: Xóa các tài liệu vector dựa trên ID.
+
+### 12.2. Cách sử dụng `IVectorStore`
+
+`IVectorStore` được inject vào các service hoặc command/query handler thông qua Dependency Injection. Sau đó, bạn có thể gọi các phương thức `UpsertDocumentsAsync`, `QueryAsync`, hoặc `DeleteAsync` để tương tác với Vector Database.
+
+**Ví dụ trong một Command Handler:**
+
+```csharp
+public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentCommand, Result>
+{
+    private readonly IVectorStore _vectorStore;
+    private readonly IEmbeddingGenerator _embeddingGenerator; // Giả định có một dịch vụ sinh embedding
+
+    public ProcessDocumentCommandHandler(IVectorStore vectorStore, IEmbeddingGenerator embeddingGenerator)
+    {
+        _vectorStore = vectorStore;
+        _embeddingGenerator = embeddingGenerator;
+    }
+
+    public async Task<Result> Handle(ProcessDocumentCommand request, CancellationToken cancellationToken)
+    {
+        // 1. Sinh embedding cho nội dung tài liệu
+        var embeddingResult = await _embeddingGenerator.GenerateEmbeddingAsync(request.Content, cancellationToken);
+        if (!embeddingResult.IsSuccess)
+        {
+            return Result.Failure(embeddingResult.Error);
+        }
+
+        // 2. Tạo VectorDocument
+        var document = new VectorDocument
+        {
+            Id = request.DocumentId.ToString(),
+            Content = request.Content,
+            Vector = embeddingResult.Value,
+            Metadata = new Dictionary<string, string>
+            {
+                { "familyId", request.FamilyId.ToString() },
+                { "documentType", request.DocumentType }
+            }
+        };
+
+        // 3. Upsert tài liệu vào VectorStore
+        var upsertResult = await _vectorStore.UpsertDocumentsAsync(new[] { document }, cancellationToken);
+        if (!upsertResult.IsSuccess)
+        {
+            return Result.Failure(upsertResult.Error);
+        }
+
+        return Result.Success();
+    }
+}
+```
+
+### 12.3. Mở rộng Module (Thêm Provider mới)
+
+Để thêm một nhà cung cấp Vector Database mới (ví dụ: Milvus, Weaviate), bạn cần thực hiện các bước sau:
+
+1.  **Tạo triển khai `IVectorStore` mới:**
+    *   Tạo một lớp mới (ví dụ: `MilvusVectorStore.cs`) trong thư mục `backend/src/Infrastructure/VectorStore/`.
+    *   Lớp này phải triển khai interface `IVectorStore` và chứa logic tương tác với API của nhà cung cấp Vector Database mới.
+
+2.  **Cập nhật `VectorStoreSettings`:**
+    *   Thêm các thuộc tính cấu hình cần thiết cho nhà cung cấp mới vào lớp `VectorStoreSettings` (`backend/src/Infrastructure/VectorStore/VectorStoreSettings.cs`).
+
+3.  **Cập nhật `VectorStoreFactory`:**
+    *   Chỉnh sửa lớp `VectorStoreFactory` (`backend/src/Infrastructure/VectorStore/VectorStoreFactory.cs`) để xử lý nhà cung cấp mới.
+    *   Thêm một `case` mới vào phương thức `CreateVectorStore` để khởi tạo `MilvusVectorStore` khi `VectorStore:Provider` trong cấu hình là "Milvus".
+
+4.  **Cập nhật cấu hình `appsettings.json`:**
+    *   Thêm phần cấu hình cho nhà cung cấp mới vào `appsettings.json` (hoặc `appsettings.Development.json`).
+
+5.  **Cập nhật tài liệu:**
+    *   Cập nhật phần "Triển khai các Provider" và "Cấu hình `appsettings.json`" trong tài liệu này để phản ánh nhà cung cấp mới.
 
 -   `UpsertDocumentsAsync`: Thêm hoặc cập nhật các tài liệu vector.
 -   `QueryAsync`: Tìm kiếm các tài liệu vector tương tự dựa trên một vector truy vấn.
@@ -871,7 +961,7 @@ Các dịch vụ liên quan đến Vector Database được đăng ký trong `ba
 -   `IVectorStoreFactory`: Đăng ký dưới dạng `Singleton`.
 -   `IVectorStore`: Đăng ký dưới dạng `Transient`, được giải quyết thông qua `IVectorStoreFactory`.
 
-## 13. Logging & Monitoring
+## 14. Logging & Monitoring
 
 Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt động của ứng dụng, phát hiện lỗi và đánh giá hiệu suất.
 
@@ -893,12 +983,12 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   **Traces**: Theo dõi luồng của một request qua nhiều services và components, giúp xác định nguyên nhân gốc rễ của các vấn đề về hiệu suất hoặc lỗi trong hệ thống phân tán.
 *   **Công cụ tích hợp**: Dự kiến tích hợp với Prometheus (để lưu trữ metrics) và Grafana (để trực quan hóa metrics và traces).
 
-## 14. Coding Style
+## 15. Coding Style
 
 -   Sử dụng `dotnet format` để duy trì code style nhất quán.
 -   Tuân thủ [Microsoft C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions).
 
-## 15. Best Practices
+## 16. Best Practices
 
 Để duy trì chất lượng mã nguồn cao, dễ bảo trì và mở rộng, hãy tuân thủ các nguyên tắc và thực tiễn tốt nhất sau:
 
@@ -941,7 +1031,7 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   Tất cả các `Command` và `Query` handlers nên trả về một đối tượng `Result<T>` (hoặc `Result<Unit>` cho các thao tác không trả về dữ liệu) để chỉ rõ thành công hay thất bại và cung cấp thông tin lỗi chi tiết.
     *   Các `Controller` nên kiểm tra `Result.IsSuccess` và trả về các `ActionResult` phù hợp (ví dụ: `Ok(result.Value)`, `BadRequest(result.Error)`, `NotFound(result.Error)`). Điều này giúp chuẩn hóa việc xử lý phản hồi API và tránh việc throw exceptions không cần thiết.
 
-## 16. Tài liệu liên quan
+## 17. Tài liệu liên quan
 
 -   [Kiến trúc tổng quan](./architecture.md)
 -   [Hướng dẫn API](./api-reference.md)
