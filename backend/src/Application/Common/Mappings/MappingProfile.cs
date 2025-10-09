@@ -12,6 +12,7 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserProfiles.Queries;
 using backend.Application.UserActivities.Queries; // Added
 using backend.Application.AI.Common;
+using backend.Application.UserPreferences.Queries;
 
 namespace backend.Application.Common.Mappings;
 
@@ -38,5 +39,6 @@ public class MappingProfile : Profile
         CreateMap<UserProfile, UserProfileDto>();
         CreateMap<UserActivity, UserActivityDto>();
         CreateMap<AIBiography, AIBiographyDto>();
+        CreateMap<UserPreference, UserPreferenceDto>();
     }
 }

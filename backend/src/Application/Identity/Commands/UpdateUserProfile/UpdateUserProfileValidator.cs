@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Domain.Enums;
-
 namespace backend.Application.Identity.Commands.UpdateUserProfile;
 
 public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>

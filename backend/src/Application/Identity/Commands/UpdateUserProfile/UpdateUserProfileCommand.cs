@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 
 namespace backend.Application.Identity.Commands.UpdateUserProfile;
 

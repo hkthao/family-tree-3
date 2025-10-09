@@ -5,13 +5,9 @@
         <VListSubheader>{{
           t('userSettings.preferences.theme')
           }}</VListSubheader>
-        <v-radio-group v-model="preferencesForm.theme" inline hide-details>
-          <v-radio
-            v-for="option in themeOptions"
-            :key="option.value"
-            :label="option.text"
-            :value="option.value"
-          ></v-radio>
+        <v-radio-group v-model="preferencesForm.theme" inline :hide-details="true">
+          <v-radio v-for="option in themeOptions" :key="option.value" :label="option.text"
+            :value="option.value"></v-radio>
         </v-radio-group>
       </v-col>
     </v-row>
@@ -21,8 +17,8 @@
         <VListSubheader>{{
           t('userSettings.preferences.language')
           }}</VListSubheader>
-        <v-select v-model="preferencesForm.language" :items="languageOptions"
-          :label="t('userSettings.preferences.language')" item-title="text" item-value="value" hide-details></v-select>
+        <v-select v-model="preferencesForm.language" :items="languageOptions" :hide-details="true"
+          :label="t('userSettings.preferences.language')" item-title="text" item-value="value"></v-select>
       </v-col>
     </v-row>
 
@@ -31,21 +27,12 @@
         <VListSubheader>{{
           t('userSettings.preferences.notifications')
           }}</VListSubheader>
-        <v-checkbox
-          v-model="preferencesForm.emailNotificationsEnabled"
-          :label="t('userSettings.preferences.notificationsEmail')"
-          hide-details
-        ></v-checkbox>
-        <v-checkbox
-          v-model="preferencesForm.smsNotificationsEnabled"
-          :label="t('userSettings.preferences.notificationsSMS')"
-          hide-details
-        ></v-checkbox>
-        <v-checkbox
-          v-model="preferencesForm.inAppNotificationsEnabled"
-          :label="t('userSettings.preferences.notificationsInApp')"
-          hide-details
-        ></v-checkbox>
+        <v-checkbox v-model="preferencesForm.emailNotificationsEnabled"
+          :label="t('userSettings.preferences.notificationsEmail')" hide-details></v-checkbox>
+        <v-checkbox v-model="preferencesForm.smsNotificationsEnabled"
+          :label="t('userSettings.preferences.notificationsSMS')" hide-details></v-checkbox>
+        <v-checkbox v-model="preferencesForm.inAppNotificationsEnabled"
+          :label="t('userSettings.preferences.notificationsInApp')" hide-details></v-checkbox>
       </v-col>
     </v-row>
     <v-row>
@@ -57,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from 'vuetify';
@@ -87,7 +74,7 @@ watch(
   (newTheme) => {
     const option = themeOptions.value.find((option) => option.value === newTheme);
     if (option) {
-         theme.change(option.code)
+      theme.change(option.code)
     }
   },
   { immediate: true },
@@ -95,7 +82,6 @@ watch(
 
 const savePreferences = async () => {
   // Update store state
-  userSettingsStore.setTheme(preferencesForm.value.theme);
   userSettingsStore.preferences.emailNotificationsEnabled =
     preferencesForm.value.emailNotificationsEnabled;
   userSettingsStore.preferences.smsNotificationsEnabled =
@@ -103,13 +89,15 @@ const savePreferences = async () => {
   userSettingsStore.preferences.inAppNotificationsEnabled =
     preferencesForm.value.inAppNotificationsEnabled;
   userSettingsStore.setLanguage(preferencesForm.value.language);
-
-  // Save settings via store action
-  try {
-    await userSettingsStore.saveUserSettings();
+  userSettingsStore.setTheme(preferencesForm.value.theme);
+  await userSettingsStore.saveUserSettings();
+  if (userSettingsStore.error)
+    notificationStore.showSnackbar(userSettingsStore.error, 'error');
+  else
     notificationStore.showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
-  } catch (error) {
-    notificationStore.showSnackbar(t('userSettings.preferences.saveError'), 'error');
-  }
 };
+
+onMounted(async () => {
+  await userSettingsStore.fetchUserSettings()
+})
 </script>
