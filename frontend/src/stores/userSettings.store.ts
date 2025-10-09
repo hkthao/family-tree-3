@@ -36,16 +36,19 @@ export const useUserSettingsStore = defineStore('userSettings', {
       }
     },
 
-    async saveUserSettings() {
+    async saveUserSettings(): Promise<boolean> {
       this.loading = true;
       this.error = null;
       try {
         const result = await this.services.userPreference.saveUserPreferences(this.preferences);
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('userSettings.preferences.saveError');
+          return false;
         }
+        return true;
       } catch (err: any) {
         this.error = err.message || i18n.global.t('userSettings.preferences.unexpectedError');
+        return false;
       } finally {
         this.loading = false;
       }

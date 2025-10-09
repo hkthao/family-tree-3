@@ -90,14 +90,22 @@ const savePreferences = async () => {
     preferencesForm.value.inAppNotificationsEnabled;
   userSettingsStore.setLanguage(preferencesForm.value.language);
   userSettingsStore.setTheme(preferencesForm.value.theme);
-  await userSettingsStore.saveUserSettings();
-  if (userSettingsStore.error)
-    notificationStore.showSnackbar(userSettingsStore.error, 'error');
-  else
+  const success = await userSettingsStore.saveUserSettings();
+  if (success) {
     notificationStore.showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
+  } else {
+    notificationStore.showSnackbar(userSettingsStore.error || t('userSettings.preferences.saveError'), 'error');
+  }
 };
 
 onMounted(async () => {
-  await userSettingsStore.fetchUserSettings()
-})
+  await userSettingsStore.fetchUserSettings();
+  preferencesForm.value = {
+    theme: userSettingsStore.preferences.theme,
+    emailNotificationsEnabled: userSettingsStore.preferences.emailNotificationsEnabled,
+    smsNotificationsEnabled: userSettingsStore.preferences.smsNotificationsEnabled,
+    inAppNotificationsEnabled: userSettingsStore.preferences.inAppNotificationsEnabled,
+    language: userSettingsStore.preferences.language,
+  };
+});
 </script>
