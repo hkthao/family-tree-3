@@ -23,7 +23,7 @@ public interface IAuthProvider
 }
 ```
 
--   `userId`: ID của người dùng cần cập nhật (thường là `ExternalId` hoặc tương đương).
+-   `userId`: ID của người dùng cần cập nhật (thường là `ExternalId`).
 -   `request`: Đối tượng `UserProfileUpdateRequest` chứa các thông tin cần cập nhật.
 -   `Result`: Đối tượng `Result` chuẩn của hệ thống, cho biết thao tác thành công hay thất bại.
 
@@ -42,11 +42,11 @@ public class UserProfileUpdateRequest
 }
 ```
 
-### 2.3. Triển khai `Auth0Provider`
+### 2.3. Triển khai `ExternalAuthProvider`
 
-`Auth0Provider` (trong `backend/src/Infrastructure/Auth/Auth0Provider.cs`) triển khai `IAuthProvider` và tương tác với **Auth0 Management API** để cập nhật hồ sơ người dùng. Hiện tại, đây là một mock implementation để phục vụ mục đích phát triển và kiểm thử.
+`ExternalAuthProvider` (trong `backend/src/Infrastructure/Auth/Auth0Provider.cs`) triển khai `IAuthProvider` và tương tác với **External Auth Provider's Management API** để cập nhật hồ sơ người dùng. Hiện tại, đây là một mock implementation để phục vụ mục đích phát triển và kiểm thử.
 
-#### Các trường được hỗ trợ cập nhật (qua Auth0 Management API):
+#### Các trường được hỗ trợ cập nhật (qua External Auth Provider's Management API):
 
 -   `name`: Tên hiển thị của người dùng.
 -   `picture`: URL ảnh đại diện.
@@ -74,17 +74,17 @@ public class UserProfileUpdateRequest
     -   Gọi `_authProvider.UpdateUserProfileAsync(userId, request)` để thực hiện cập nhật thông qua nhà cung cấp xác thực đã cấu hình.
     -   Trả về `Result` thành công hoặc thất bại.
 
-## 4. Cấu hình Nhà cung cấp Xác thực
+#### Cấu hình Nhà cung cấp Xác thực
 
 Việc lựa chọn nhà cung cấp xác thực được cấu hình trong `appsettings.json`:
 
 ```json
 {
-  "AuthProvider": "Auth0"
+  "AuthProvider": "External"
 }
 ```
 
--   `AuthProvider`: Tên của nhà cung cấp xác thực sẽ được sử dụng (ví dụ: `Auth0`).
+-   `AuthProvider`: Tên của nhà cung cấp xác thực sẽ được sử dụng (ví dụ: `External`).
 
 Trong `backend/src/Infrastructure/DependencyInjection.cs`, một **Factory Pattern** được sử dụng để đăng ký triển khai `IAuthProvider` phù hợp dựa trên giá trị này.
 
@@ -100,8 +100,8 @@ public static class DependencyInjection
         var authProviderType = configuration["AuthProvider"];
         switch (authProviderType)
         {
-            case "Auth0":
-                services.AddSingleton<IAuthProvider, Auth0Provider>();
+            case "External":
+                services.AddSingleton<IAuthProvider, Auth0Provider>(); // Auth0Provider is an example implementation
                 break;
             // Add other providers here as needed
             default:

@@ -26,7 +26,7 @@ Tài liệu này mô tả chi tiết về mô hình dữ liệu, schema của da
 erDiagram
     USER_PROFILE {
         string Id PK "ID duy nhất"
-        string ExternalId "ID người dùng từ Auth0"
+        string ExternalId "ID người dùng từ nhà cung cấp xác thực"
         string Email "Email người dùng"
         string Name "Tên hiển thị"
     }

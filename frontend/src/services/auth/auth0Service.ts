@@ -32,8 +32,6 @@ export const auth0Service: AuthService = {
   getUser: async () => {
     const client = await initAuth0();
     const auth0User = await client.getUser();
-    console.log(auth0User);
-    
     if (auth0User) {
       return {
         id: auth0User.sub || '',

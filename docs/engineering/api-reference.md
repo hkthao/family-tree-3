@@ -271,6 +271,10 @@ Content-Type: application/json
 
 -   `GET /api/UserProfiles`: Lấy danh sách tất cả hồ sơ người dùng.
     *   **Phản hồi:** `Result<List<UserProfileDto>>`
+-   `GET /api/UserProfiles/{id}`: Lấy thông tin hồ sơ người dùng theo ID nội bộ (GUID).
+    *   **Phản hồi:** `Result<UserProfileDto>`
+-   `GET /api/UserProfiles/byExternalId/{externalId}`: Lấy thông tin hồ sơ người dùng theo External ID (ví dụ: Auth0 User ID).
+    *   **Phản hồi:** `Result<UserProfileDto>`
 
 ### 6.7. Quản lý Hoạt động Người dùng (`/api/activities`)
 
@@ -402,7 +406,8 @@ Content-Type: application/json
   "id": "string (uuid)",
   "externalId": "string",
   "email": "string",
-  "name": "string"
+  "name": "string",
+  "avatar": "string (url, nullable)"
 }
 ```
 

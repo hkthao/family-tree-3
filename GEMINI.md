@@ -89,6 +89,9 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 - **Cập nhật tính năng AI Biography:**
   - Backend: Chuyển đổi endpoint lấy tiểu sử AI gần nhất từ trả về chuỗi sang đối tượng DTO đầy đủ, cập nhật API và sử dụng AutoMapper cho việc ánh xạ DTO.
   - Frontend: Cập nhật giao diện người dùng để hiển thị dữ liệu tiểu sử AI đầy đủ, bao gồm tên nhà cung cấp AI và thêm validation cho độ dài prompt.
+- **Refactor `auth0UserId` thành `externalId`:**
+  - Backend: Đổi tên thuộc tính `Auth0UserId` thành `ExternalId` trong `UserProfile` entity và DTO. Cập nhật các query, handler và controller liên quan để sử dụng `ExternalId` và endpoint `byExternalId`.
+  - Frontend: Cập nhật các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) để sử dụng `externalId` thay cho `auth0UserId` nhằm tách biệt khỏi nhà cung cấp xác thực cụ thể.
 - **Cải thiện trải nghiệm người dùng:**
   - Thêm tooltips cho tất cả các nút hành động (chỉnh sửa, xóa, thêm mới) trong các danh sách (Thành viên, Gia đình, Sự kiện, Quan hệ).
   - Thêm tooltips cho các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao.
