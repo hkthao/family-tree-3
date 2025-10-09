@@ -24,3 +24,11 @@ Chào mừng bạn đến với tài liệu của dự án Cây Gia Phả. Tài 
 -   [Ghi chú phát hành](./project/release-notes.md): Lịch sử các phiên bản và thay đổi.
 -   [Lộ trình Phát triển](./project/roadmap.md): Định hướng phát triển sản phẩm.
 -   [Đội ngũ Phát triển](./project/team.md): Thông tin về các thành viên trong đội.
+
+## Các thay đổi gần đây
+
+-   **Tích hợp Auth0 thực tế:** Thay thế triển khai Auth0 giả lập bằng tích hợp thực tế với Auth0 Management API để quản lý hồ sơ người dùng.
+-   **Quản lý Hồ sơ Người dùng tập trung:** Tái cấu trúc frontend để quản lý thông tin hồ sơ người dùng tập trung trong `userProfileStore`, giảm sự phụ thuộc của các component UI vào `authStore`.
+-   **API Hồ sơ Người dùng hiện tại:** Thêm endpoint backend mới `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại một cách an toàn.
+-   **Trường Avatar cho Hồ sơ Người dùng:** Bổ sung trường `Avatar` vào thực thể `UserProfile` và cập nhật các chức năng liên quan ở cả backend và frontend.
+-   **Xử lý kết quả nhất quán:** Triển khai `Result` wrapper cho `GetCurrentUserProfileQueryHandler` để đảm bảo xử lý kết quả nhất quán.

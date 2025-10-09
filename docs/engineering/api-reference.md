@@ -269,6 +269,9 @@ Content-Type: application/json
 
 ### 6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)
 
+-   `GET /api/UserProfiles/me`: Lấy thông tin hồ sơ của người dùng hiện tại.
+    *   **Mô tả:** Endpoint này không yêu cầu ID người dùng trong URL; ID được lấy từ ngữ cảnh xác thực của server.
+    *   **Phản hồi:** `Result<UserProfileDto>`
 -   `GET /api/UserProfiles`: Lấy danh sách tất cả hồ sơ người dùng.
     *   **Phản hồi:** `Result<List<UserProfileDto>>`
 -   `GET /api/UserProfiles/{id}`: Lấy thông tin hồ sơ người dùng theo ID nội bộ (GUID).
@@ -415,7 +418,10 @@ Content-Type: application/json
   "externalId": "string",
   "email": "string",
   "name": "string",
-  "avatar": "string (url, nullable)"
+  "avatar": "string (url, nullable)",
+  "roles": [
+    "string"
+  ]
 }
 ```
 

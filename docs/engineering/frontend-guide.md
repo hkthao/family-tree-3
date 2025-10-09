@@ -47,6 +47,13 @@ frontend/
 
 **Pinia** là thư viện quản lý trạng thái (state management) được khuyến nghị cho các ứng dụng Vue 3. Nó cung cấp một cách tiếp cận đơn giản, mạnh mẽ và có thể mở rộng để quản lý trạng thái toàn cục của ứng dụng. Các store của Pinia được định nghĩa trong thư mục `src/stores`.
 
+#### Quản lý Hồ sơ Người dùng với `userProfileStore`
+
+`userProfileStore` (`frontend/src/stores/userProfile.store.ts`) hiện là nguồn đáng tin cậy duy nhất (single source of truth) cho thông tin hồ sơ của người dùng hiện tại. Các component UI cần hiển thị thông tin người dùng (như tên, email, avatar, vai trò) nên lấy dữ liệu từ store này thay vì `authStore`.
+
+-   **`fetchCurrentUserProfile()`**: Action này sẽ gọi API backend `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại, bao gồm cả các vai trò của họ.
+-   **`userProfile`**: State chứa đối tượng `UserProfile` của người dùng hiện tại.
+
 #### Cấu trúc Store
 
 Mỗi store được định nghĩa bằng `defineStore()` và bao gồm:

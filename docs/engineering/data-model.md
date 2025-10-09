@@ -144,16 +144,20 @@ erDiagram
 ```
 ## 3. Mô tả các bảng
 
-### 3.1. Bảng `UserProfiles`
+### UserProfile
 
-Lưu trữ thông tin hồ sơ người dùng, được liên kết với các tài khoản từ nhà cung cấp xác thực bên ngoài.
+Thực thể `UserProfile` lưu trữ thông tin hồ sơ của người dùng, được ánh xạ từ nhà cung cấp xác thực bên ngoài (ví dụ: Auth0).
 
-| Tên cột       | Kiểu dữ liệu | Ràng buộc | Mô tả                                  |
-| :------------ | :----------- | :-------- | :------------------------------------- |
-| `Id`          | `varchar(36)`| PK        | ID duy nhất của hồ sơ người dùng       |
-| `ExternalId` | `varchar(255)`| NOT NULL  | ID người dùng từ nhà cung cấp xác thực (ví dụ: Auth0) |
-| `Email`       | `varchar(255)`| NOT NULL  | Địa chỉ email của người dùng           |
-| `Name`        | `varchar(255)`| NOT NULL  | Tên hiển thị của người dùng            |
+| Tên trường       | Kiểu dữ liệu | Mô tả                                                              |
+| :--------------- | :----------- | :----------------------------------------------------------------- |
+| `Id`             | `Guid`       | ID nội bộ duy nhất của hồ sơ người dùng.                          |
+| `ExternalId`     | `string`     | ID của người dùng từ nhà cung cấp xác thực bên ngoài.             |
+| `Email`          | `string`     | Địa chỉ email của người dùng.                                      |
+| `Name`           | `string`     | Tên hiển thị của người dùng.                                       |
+| `Avatar`         | `string` (nullable) | URL của ảnh đại diện người dùng.                                   |
+| `FamilyUsers`    | `ICollection<FamilyUser>` | Thuộc tính điều hướng đến các gia đình mà người dùng liên kết. |
+| `UserPreference` | `UserPreference` | Thuộc tính điều hướng đến tùy chọn cá nhân của người dùng.         |
+
 
 - **Mối quan hệ**: Một `UserProfile` có thể có nhiều `FamilyUser` (vai trò trong các gia đình).
 
