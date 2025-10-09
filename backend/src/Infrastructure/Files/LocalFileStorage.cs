@@ -42,4 +42,27 @@ public class LocalFileStorage : IFileStorageService
             return Result<string>.Failure($"Local file upload failed: {ex.Message}", "LocalFileStorage");
         }
     }
+
+    public Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Extract file name from the URL
+            var uri = new Uri(url);
+            var fileName = Path.GetFileName(uri.LocalPath);
+
+            var filePath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath, fileName);
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+                return Task.FromResult(Result.Success());
+            }
+            return Task.FromResult(Result.Failure("File not found locally.", "LocalFileStorage"));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(Result.Failure($"Local file deletion failed: {ex.Message}", "LocalFileStorage"));
+        }
+    }
 }

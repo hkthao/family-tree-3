@@ -1,7 +1,9 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Options;
+using MediatR;
 using System.Text.RegularExpressions;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
 
 namespace backend.Application.Files.UploadFile;
 
@@ -9,11 +11,17 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
 {
     private readonly IFileStorageService _fileStorageService;
     private readonly IStorageSettings _storageSettings;
+    private readonly IApplicationDbContext _context;
+    private readonly IUser _user;
+    private readonly IDateTime _dateTime;
 
-    public UploadFileCommandHandler(IFileStorageService fileStorageService, IStorageSettings storageSettings)
+    public UploadFileCommandHandler(IFileStorageService fileStorageService, IStorageSettings storageSettings, IApplicationDbContext context, IUser user, IDateTime dateTime)
     {
         _fileStorageService = fileStorageService;
         _storageSettings = storageSettings;
+        _context = context;
+        _user = user;
+        _dateTime = dateTime;
     }
 
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
@@ -54,6 +62,24 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             {
                 return Result<string>.Failure("File upload succeeded but returned a null URL.", "FileStorage");
             }
+
+            // 5. Save file metadata to DB
+            var fileMetadata = new FileMetadata
+            {
+                FileName = uniqueFileName,
+                Url = uploadResult.Value,
+                StorageProvider = Enum.Parse<StorageProvider>(_storageSettings.Provider, true),
+                ContentType = request.ContentType,
+                FileSize = request.Length,
+                UploadedBy = _user.Id ?? "",
+                IsActive = true,
+                Created = _dateTime.Now,
+                LastModified = _dateTime.Now
+            };
+
+            _context.FileMetadata.Add(fileMetadata);
+            await _context.SaveChangesAsync(cancellationToken);
+
             return Result<string>.Success(uploadResult.Value);
         }
     }

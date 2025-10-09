@@ -19,6 +19,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<AIBiography> AIBiographies => Set<AIBiography>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
+    public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

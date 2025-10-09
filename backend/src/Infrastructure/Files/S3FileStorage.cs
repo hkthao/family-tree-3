@@ -43,4 +43,28 @@ public class S3FileStorage : IFileStorageService
             return Result<string>.Failure($"S3 upload failed: {ex.Message}", "S3FileStorage");
         }
     }
+
+    public async Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            // Extract file name from the URL
+            var uri = new Uri(url);
+            var fileName = Path.GetFileName(uri.LocalPath);
+
+            var deleteObjectRequest = new DeleteObjectRequest
+            {
+                BucketName = _storageSettings.S3.BucketName,
+                Key = fileName
+            };
+
+            await _s3Client.DeleteObjectAsync(deleteObjectRequest, cancellationToken);
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"S3 deletion failed: {ex.Message}", "S3FileStorage");
+        }
+    }
 }

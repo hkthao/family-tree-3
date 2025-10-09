@@ -14,5 +14,6 @@ public interface IApplicationDbContext
     DbSet<UserActivity> UserActivities { get; }
     DbSet<AIBiography> AIBiographies { get; }
     DbSet<UserPreference> UserPreferences { get; }
+    DbSet<FileMetadata> FileMetadata { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

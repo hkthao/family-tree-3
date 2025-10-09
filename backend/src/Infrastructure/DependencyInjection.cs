@@ -41,6 +41,7 @@ public static class DependencyInjection
 
         // --- Common Services (always registered) ---
         services.AddSingleton(TimeProvider.System);
+        services.AddSingleton<IDateTime, DateTimeService>();
 
         services.AddScoped<ApplicationDbContextInitialiser>();
 

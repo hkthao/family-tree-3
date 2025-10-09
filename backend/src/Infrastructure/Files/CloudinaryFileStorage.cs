@@ -75,6 +75,50 @@ public class CloudinaryFileStorage : IFileStorageService
         }
     }
 
+    public async Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var publicId = GetPublicIdFromUrl(url);
+            if (string.IsNullOrEmpty(publicId))
+            {
+                return Result.Failure("Could not extract Public ID from URL.", "Cloudinary");
+            }
+
+            var deletionParams = new DeletionParams(publicId);
+            var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
+
+            if (deletionResult.Error != null)
+            {
+                return Result.Failure(deletionResult.Error.Message, "Cloudinary");
+            }
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"Cloudinary deletion failed: {ex.Message}", "Cloudinary");
+        }
+    }
+
+    private string GetPublicIdFromUrl(string url)
+    {
+        // Example: https://res.cloudinary.com/cloud_name/image/upload/v12345/folder/public_id.jpg
+        // We need to extract 'folder/public_id'
+        var uri = new Uri(url);
+        var segments = uri.Segments;
+        if (segments.Length < 3) return null!;
+
+        var publicIdWithExtension = segments[^1]; // last segment
+        var folder = segments[^2].TrimEnd('/'); // second to last segment
+
+        var publicId = Path.GetFileNameWithoutExtension(publicIdWithExtension);
+
+        if (folder == "upload") return publicId; // If no specific folder was used
+
+        return $"{folder}/{publicId}";
+    }
+
     private ResourceType GetResourceType(string contentType)
     {
         if (contentType.StartsWith("image"))
