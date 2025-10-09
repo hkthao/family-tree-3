@@ -7,4 +7,5 @@ export interface IUserProfileService {
   getUserProfile(id: string): Promise<Result<UserProfile, ApiError>>;
   getUserProfileByExternalId(externalId: string): Promise<Result<UserProfile, ApiError>>;
   updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>>;
+  getCurrentUserProfile(): Promise<Result<UserProfile, ApiError>>;
 }

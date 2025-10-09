@@ -6,6 +6,7 @@ using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles;
 using backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
 using backend.Application.Identity.UserProfiles.Queries.GetUserProfileByExternalId;
+using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 
 namespace backend.Web.Controllers;
 
@@ -20,6 +21,17 @@ public class UserProfilesController : ControllerBase
     public UserProfilesController(IMediator mediator)
     {
         _mediator = mediator;
+    }
+
+    [HttpGet("me")]
+    public async Task<ActionResult<UserProfileDto>> GetCurrentUserProfile()
+    {
+        var result = await _mediator.Send(new GetCurrentUserProfileQuery());
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return NotFound(result.Error);
     }
 
     [HttpGet]

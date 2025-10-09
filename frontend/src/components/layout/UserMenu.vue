@@ -76,9 +76,10 @@
 
 <script setup lang="ts">
 import { userMenuItems } from '@/data/userMenuItems';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth.store';
+import { useUserProfileStore } from '@/stores/userProfile.store';
 import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;
@@ -96,8 +97,13 @@ const menuOpen = ref(false);
 const confirmLogoutDialog = ref(false);
 
 const authStore = useAuthStore();
-const currentUser = computed(() => authStore.user);
+const userProfileStore = useUserProfileStore();
+const currentUser = computed(() => userProfileStore.userProfile);
 const router = useRouter();
+
+onMounted(() => {
+  userProfileStore.fetchCurrentUserProfile();
+});
 
 const handleMenuItemClick = (route?: string) => {
   if (route) {

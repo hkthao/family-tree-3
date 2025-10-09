@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import type { UserProfile } from '@/types';
 import i18n from '@/plugins/i18n';
 
+import { useAuthStore } from './auth.store';
+
 export const useUserProfileStore = defineStore('userProfile', {
   state: () => ({
     loading: false,
@@ -11,6 +13,23 @@ export const useUserProfileStore = defineStore('userProfile', {
   }),
 
   actions: {
+    async fetchCurrentUserProfile() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.userProfile.getCurrentUserProfile();
+        if (result.ok) {
+          this.userProfile = result.value;
+        } else {
+          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchError');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async fetchUserProfile(id: string) {
       this.loading = true;
       this.error = null;

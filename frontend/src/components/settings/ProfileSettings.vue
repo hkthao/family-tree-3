@@ -55,33 +55,23 @@ const rules = {
 };
 
 onMounted(async () => {
-  if (authStore.user) {
-    await userProfileStore.fetchUserProfileByExternalId(authStore.user.externalId);
-    if (userProfileStore.userProfile) {
-      profileForm.value.fullName = userProfileStore.userProfile.name;
-      profileForm.value.email = userProfileStore.userProfile.email;
-      profileForm.value.avatar = userProfileStore.userProfile.avatar || null;
-    } else if (userProfileStore.error) {
-      notificationStore.showSnackbar(userProfileStore.error, 'error');
-    }
+  await userProfileStore.fetchCurrentUserProfile();
+  if (userProfileStore.userProfile) {
+    profileForm.value.fullName = userProfileStore.userProfile.name;
+    profileForm.value.email = userProfileStore.userProfile.email;
+    profileForm.value.avatar = userProfileStore.userProfile.avatar || null;
+  } else if (userProfileStore.error) {
+    notificationStore.showSnackbar(userProfileStore.error, 'error');
   }
 });
 
 const saveProfile = async () => {
   if (profileFormRef.value) {
     const { valid } = await profileFormRef.value.validate();
-    if (valid && authStore.user) {
-      if (!userProfileStore.userProfile?.id) {
-        notificationStore.showSnackbar(
-          t('userSettings.profile.cannotUpdate'),
-          'error',
-        );
-        return;
-      }
-
+    if (valid && userProfileStore.userProfile) {
       const updatedProfile: UserProfile = {
         id: userProfileStore.userProfile.id,
-        externalId: authStore.user.externalId,
+        externalId: userProfileStore.userProfile.externalId,
         email: profileForm.value.email,
         name: profileForm.value.fullName,
         avatar: profileForm.value.avatar === null ? undefined : profileForm.value.avatar,

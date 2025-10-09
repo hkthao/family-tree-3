@@ -7,4 +7,5 @@ public class UserProfileDto
     public string Email { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string? Avatar { get; set; }
+    public List<string> Roles { get; set; } = new();
 }

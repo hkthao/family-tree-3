@@ -1042,6 +1042,31 @@
         ]
       }
     },
+    "/api/UserProfiles/me": {
+      "get": {
+        "tags": [
+          "UserProfiles"
+        ],
+        "operationId": "UserProfiles_GetCurrentUserProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/UserProfiles": {
       "get": {
         "tags": [
@@ -2673,6 +2698,12 @@
           "avatar": {
             "type": "string",
             "nullable": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

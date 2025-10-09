@@ -9,7 +9,6 @@ using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Members.Queries;
 using backend.Application.Relationships.Queries;
-using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.AI.Common;
 using backend.Application.UserPreferences.Queries;
