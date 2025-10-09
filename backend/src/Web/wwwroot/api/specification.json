@@ -1845,6 +1845,42 @@
         ]
       }
     },
+    "/api/UserProfiles/{auth0UserId}": {
+      "get": {
+        "tags": [
+          "UserProfiles"
+        ],
+        "operationId": "UserProfiles_GetUserProfileById",
+        "parameters": [
+          {
+            "name": "auth0UserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/UserProfiles/{userId}": {
       "put": {
         "tags": [
@@ -3111,6 +3147,10 @@
           },
           "name": {
             "type": "string"
+          },
+          "avatar": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

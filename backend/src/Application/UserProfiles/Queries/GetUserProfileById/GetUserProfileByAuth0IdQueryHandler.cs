@@ -20,14 +20,9 @@ public class GetUserProfileByAuth0IdQueryHandler : IRequestHandler<GetUserProfil
 
     public async Task<Result<UserProfileDto>> Handle(GetUserProfileByAuth0IdQuery request, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(request.Id, out var userProfileGuid))
-        {
-            return Result<UserProfileDto>.Failure("Invalid user profile ID format.", "BadRequest");
-        }
-
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.Id == userProfileGuid, cancellationToken);
+            .FirstOrDefaultAsync(up => up.Auth0UserId == request.Auth0UserId, cancellationToken);
 
         if (userProfile == null)
         {

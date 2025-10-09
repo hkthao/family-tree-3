@@ -32,14 +32,12 @@ public class UserProfilesController : ControllerBase
         return BadRequest(result.Error);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UserProfileDto>> GetUserProfileById(string id)
+    [HttpGet("{auth0UserId}")]
+    public async Task<ActionResult<UserProfileDto>> GetUserProfileById(string auth0UserId)
     {
-        var result = await _mediator.Send(new GetUserProfileByAuth0IdQuery { Id = id });
+        var result = await _mediator.Send(new GetUserProfileByAuth0IdQuery { Auth0UserId = auth0UserId });
         if (result.IsSuccess)
-        {
             return Ok(result.Value);
-        }
         return NotFound(result.Error);
     }
 
