@@ -1,6 +1,4 @@
 using backend.Application.Common.Models;
-using MediatR;
-using System.IO;
 
 namespace backend.Application.Files.UploadFile;
 

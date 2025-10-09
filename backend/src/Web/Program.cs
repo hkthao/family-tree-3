@@ -1,166 +1,9 @@
-using System.Security.Claims;
-using backend.Application;
-using backend.Infrastructure;
-using backend.Infrastructure.Data;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using backend.Infrastructure.Auth;
-using Microsoft.Extensions.Options;
-using backend.Application.Common.Interfaces;
-using backend.Infrastructure.AI;
-using backend.Domain.Enums;
-using backend.Application.Common.Models;
-using backend.Infrastructure.Files;
+using backend.CompositionRoot;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// Configure AIConfig
-builder.Services.Configure<AIConfig>(builder.Configuration.GetSection("AI"));
-builder.Services.AddSingleton<IAISettings>(sp => sp.GetRequiredService<IOptions<AIConfig>>().Value);
-
-// Register AI Content Generators
-builder.Services.AddTransient<GeminiAIContentGenerator>();
-builder.Services.AddTransient<OpenAIAIContentGenerator>();
-builder.Services.AddTransient<LocalAIContentGenerator>();
-
-builder.Services.AddTransient<IAIContentGenerator>(sp =>
-{
-    var aiConfig = sp.GetRequiredService<IOptions<AIConfig>>().Value;
-    return aiConfig.Provider switch
-    {
-        AIProviderType.Gemini => sp.GetRequiredService<GeminiAIContentGenerator>(),
-        AIProviderType.OpenAI => sp.GetRequiredService<OpenAIAIContentGenerator>(),
-        AIProviderType.LocalAI => sp.GetRequiredService<LocalAIContentGenerator>(),
-        _ => throw new InvalidOperationException($"No AI content generator configured for provider: {aiConfig.Provider}")
-    };
-});
-
-// Register AI Usage Tracker
-builder.Services.AddSingleton<IAIUsageTracker, AIUsageTracker>();
-
-// Add Memory Cache services
-builder.Services.AddMemoryCache();
-
-// Configure StorageSettings
-builder.Services.Configure<StorageSettings>(builder.Configuration.GetSection("Storage"));
-
-// Register IFileStorageService based on configuration
-builder.Services.AddTransient<IFileStorageService>(sp =>
-{
-    var storageSettings = sp.GetRequiredService<IOptions<StorageSettings>>().Value;
-    var env = sp.GetRequiredService<IWebHostEnvironment>();
-
-    return storageSettings.Provider switch
-    {
-        "Local" => new LocalFileStorage(sp.GetRequiredService<IOptions<StorageSettings>>(), env),
-        "Cloudinary" => new CloudinaryFileStorage(sp.GetRequiredService<IOptions<StorageSettings>>()),
-        "S3" => new S3FileStorage(sp.GetRequiredService<IOptions<StorageSettings>>()),
-        _ => throw new InvalidOperationException($"No file storage provider configured for: {storageSettings.Provider}")
-    };
-});
-
-// Configure Auth0Config
-builder.Services.Configure<Auth0Config>(builder.Configuration.GetSection("Auth0"));
-builder.Services.AddSingleton<IAuth0Config>(sp => sp.GetRequiredService<IOptions<Auth0Config>>().Value);
-
-// Read Auth0 configuration from environment variables
-var auth0Domain = builder.Configuration["Auth0:Domain"];
-var auth0Audience = builder.Configuration["Auth0:Audience"];
-var auth0Namespace = builder.Configuration["Auth0:Namespace"];
-
-// Log Auth0 configuration for debugging
-builder.Logging.AddConsole(); // Ensure console logging is enabled
-var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Auth0Config");
-logger.LogInformation("Auth0 Domain: {Auth0Domain}", auth0Domain);
-logger.LogInformation("Auth0 Audience: {Auth0Audience}", auth0Audience);
-logger.LogInformation("Auth0 Namespace: {Auth0Namespace}", auth0Namespace);
-
-// Configure Auth0 Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = auth0Domain;
-        options.Audience = auth0Audience;
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidAudience = auth0Audience, // Explicitly set the valid audience
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true
-        };
-        options.Events = new JwtBearerEvents
-        {
-            OnTokenValidated = context =>
-            {
-                var userProfileSyncService = context.HttpContext.RequestServices.GetRequiredService<IUserProfileSyncService>();
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-
-                // Run the sync operation in a background task to not block the main request thread
-                        _ = Task.Run(async () =>
-                        {
-                            using (var scope = context.HttpContext.RequestServices.CreateScope())
-                            {
-                                var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<backend.Application.Common.Interfaces.IUserProfileSyncService>();
-                                var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-                                try
-                                {
-                                    var newUserCreated = await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
-
-                                    // Record Login Activity only if a new user was created
-                                    // if (newUserCreated)
-                                    // {
-                                    //     var userProfile = await scopedUserProfileSyncService.GetUserProfileByAuth0Id(context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-                                    //     if (userProfile != null)
-                                    //     {
-                                    //         var recordCommand = new backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand
-                                    //         {
-                                    //             UserProfileId = userProfile.Id,
-                                    //             ActionType = backend.Domain.Enums.UserActionType.Login,
-                                    //             TargetType = backend.Domain.Enums.TargetType.UserProfile,
-                                    //             TargetId = userProfile.Id.ToString(),
-                                    //             ActivitySummary = "User logged in for the first time."
-                                    //         };
-                                    //         await mediator.Send(recordCommand);
-                                    //     }
-                                    // }
-                                }
-                                catch (Exception ex)
-                                {
-                                    scopedLogger.LogError(ex, "Error syncing user profile or recording login activity for Auth0 user {ExternalId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                                }
-                            }
-                        });
-                return Task.CompletedTask;
-            }
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    // Example policies, adjust as needed
-    options.AddPolicy("read:messages", policy => policy.RequireClaim("permissions", "read:messages"));
-    options.AddPolicy("write:messages", policy => policy.RequireClaim("permissions", "write:messages"));
-});
-
-// Add CORS services
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        builder =>
-        {
-            builder.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://localhost:5001") // Frontend development server URL
-                   .AllowAnyHeader()
-                   .AllowAnyMethod();
-        });
-});
-
+builder.Services.AddCompositionRootServices(builder.Configuration);
 builder.AddWebServices();
 
 // Add controllers service
@@ -174,7 +17,7 @@ if (app.Environment.IsDevelopment())
     // Initialise and seed database
     using (var scope = app.Services.CreateScope())
     {
-        var initialiser = scope.ServiceProvider.GetRequiredService<ApplicationDbContextInitialiser>();
+        var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
         await initialiser.InitialiseAsync();
         await initialiser.SeedAsync();
     }
@@ -205,11 +48,10 @@ app.UseExceptionHandler(options => { });
 
 app.Map("/", () => Results.Redirect("/api"));
 
-// app.MapEndpoints(); // Removed this line
-
 // Map controllers
 app.MapControllers();
 
 app.Run();
 
 public partial class Program { }
+

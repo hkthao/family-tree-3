@@ -1,4 +1,5 @@
 using backend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Common.Interfaces;
 

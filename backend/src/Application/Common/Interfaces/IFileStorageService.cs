@@ -1,7 +1,4 @@
 using backend.Application.Common.Models;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.Common.Interfaces;
 

@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
 using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 
