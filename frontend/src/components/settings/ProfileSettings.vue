@@ -71,8 +71,16 @@ const saveProfile = async () => {
   if (profileFormRef.value) {
     const { valid } = await profileFormRef.value.validate();
     if (valid && authStore.user) {
+      if (!userProfileStore.userProfile?.id) {
+        notificationStore.showSnackbar(
+          t('userSettings.profile.cannotUpdate'),
+          'error',
+        );
+        return;
+      }
+
       const updatedProfile: UserProfile = {
-        id: userProfileStore.userProfile.id, // Use internal UserProfile ID
+        id: userProfileStore.userProfile.id,
         externalId: authStore.user.externalId,
         email: profileForm.value.email,
         name: profileForm.value.fullName,
@@ -80,9 +88,7 @@ const saveProfile = async () => {
       };
 
       const success = await userProfileStore.updateUserProfile(updatedProfile);
-
-      if (success && userProfileStore.userProfile) {
-        authStore.user = userProfileStore.userProfile; // Update authStore user with new data
+      if (success) {
         notificationStore.showSnackbar(
           t('userSettings.profile.saveSuccess'),
           'success',

@@ -362,6 +362,7 @@
   "userSettings.profile.email": "Email",
   "userSettings.profile.saveSuccess": "Profile updated successfully!",
   "userSettings.profile.saveError": "Error saving profile.",
+  "userSettings.profile.cannotUpdate": "Could not update profile. Please try again later.",
   "userSettings.preferences.theme": "Theme",
   "userSettings.preferences.themeLight": "Light",
   "userSettings.preferences.themeDark": "Dark",

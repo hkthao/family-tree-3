@@ -28,8 +28,12 @@ public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfile
         // }
 
         // Retrieve UserProfile from DB to get ExternalId
+        if (!Guid.TryParse(request.Id, out var userId))
+        {
+            return Result.Failure("Invalid user ID format.", "BadRequest");
+        }
         var userProfile = await _context.UserProfiles
-            .FirstOrDefaultAsync(up => up.Id == request.Id, cancellationToken);
+            .FirstOrDefaultAsync(up => up.Id == userId, cancellationToken);
 
         if (userProfile == null)
         {
@@ -37,11 +41,15 @@ public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfile
         }
 
         // Call the AuthProvider to update the user profile using ExternalId
-        var authProviderResult = await _authProvider.UpdateUserProfileAsync(userProfile.ExternalId, request);
-        if (!authProviderResult.IsSuccess)
-        {
-            return authProviderResult;
-        }
+        // var authProviderResult = await _authProvider.UpdateUserProfileAsync(userProfile.ExternalId, request);
+        // if (authProviderResult == null)
+        // {
+        //     return Result.Failure("An error occurred while updating the user profile.", "InternalServerError");
+        // }
+        // if (!authProviderResult.IsSuccess)
+        // {
+        //     return authProviderResult;
+        // }
 
         // Update existing UserProfile in local DB
         if (request.Name != null) userProfile.Name = request.Name;
