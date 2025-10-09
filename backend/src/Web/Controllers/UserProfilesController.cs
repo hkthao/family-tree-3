@@ -49,9 +49,7 @@ public class UserProfilesController : ControllerBase
     {
         var result = await _mediator.Send(new GetUserProfileByIdQuery { Id = id });
         if (result.IsSuccess)
-        {
             return Ok(result.Value);
-        }
         return NotFound(result.Error);
     }
 
