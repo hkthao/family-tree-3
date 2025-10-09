@@ -5,24 +5,24 @@ using backend.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.UserProfiles.Queries.GetUserProfileByAuth0UserId;
+namespace backend.Application.UserProfiles.Queries.GetUserProfileByExternalId;
 
-public class GetUserProfileByAuth0UserIdQueryHandler : IRequestHandler<GetUserProfileByAuth0UserIdQuery, Result<UserProfileDto>>
+public class GetUserProfileByExternalIdQueryHandler : IRequestHandler<GetUserProfileByExternalIdQuery, Result<UserProfileDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetUserProfileByAuth0UserIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetUserProfileByExternalIdQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<Result<UserProfileDto>> Handle(GetUserProfileByAuth0UserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserProfileDto>> Handle(GetUserProfileByExternalIdQuery request, CancellationToken cancellationToken)
     {
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.Auth0UserId == request.Auth0UserId, cancellationToken);
+            .FirstOrDefaultAsync(up => up.ExternalId == request.ExternalId, cancellationToken);
 
         if (userProfile == null)
         {

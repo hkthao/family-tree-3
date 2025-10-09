@@ -8,7 +8,7 @@ public class UserProfile : BaseAuditableEntity
     /// <summary>
     /// The unique identifier for the user from the external authentication provider.
     /// </summary>
-    public string Auth0UserId { get; set; } = null!;
+    public string ExternalId { get; set; } = null!;
 
     /// <summary>
     /// The user's email address.

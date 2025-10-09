@@ -11,7 +11,7 @@ public class UserProfileByAuth0IdSpec : Specification<UserProfile>, ISingleResul
     public UserProfileByAuth0IdSpec(string auth0UserId)
     {
         Query
-            .Where(up => up.Auth0UserId == auth0UserId)
+            .Where(up => up.ExternalId == auth0UserId)
             .Include(up => up.FamilyUsers);
     }
 }

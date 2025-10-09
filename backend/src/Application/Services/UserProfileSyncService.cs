@@ -32,7 +32,7 @@ public class UserProfileSyncService : IUserProfileSyncService
             return false;
         }
 
-        var userProfile = await GetUserProfileByAuth0Id(auth0UserId);
+        var userProfile = await GetUserProfileByExternalId(auth0UserId);
         bool newUserCreated = false;
 
         if (userProfile == null)
@@ -40,7 +40,7 @@ public class UserProfileSyncService : IUserProfileSyncService
             // Create new UserProfile
             userProfile = new UserProfile
             {
-                Auth0UserId = auth0UserId,
+                ExternalId = auth0UserId,
                 Email = email ?? "", // Email might be null if not provided by Auth0
                 Name = name ?? "",   // Name might be null if not provided by Auth0
             };
@@ -55,7 +55,7 @@ public class UserProfileSyncService : IUserProfileSyncService
             {
                 _logger.LogWarning(ex, "A database update exception occurred while creating a user profile. This might be due to a race condition. Attempting to re-fetch the user.");
                 // Attempt to re-fetch the user to handle potential race conditions where the user was created by another request.
-                userProfile = await GetUserProfileByAuth0Id(auth0UserId);
+                userProfile = await GetUserProfileByExternalId(auth0UserId);
                 if (userProfile == null)
                 {
                     _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {Auth0UserId}. This should not happen.", auth0UserId);
@@ -88,8 +88,8 @@ public class UserProfileSyncService : IUserProfileSyncService
         return newUserCreated;
     }
 
-    public async Task<UserProfile?> GetUserProfileByAuth0Id(string auth0UserId)
+    public async Task<UserProfile?> GetUserProfileByExternalId(string externalId)
     {
-        return await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(auth0UserId)).FirstOrDefaultAsync();
+        return await _context.UserProfiles.WithSpecification(new UserProfileByAuth0UserIdSpecification(externalId)).FirstOrDefaultAsync();
     }
 }

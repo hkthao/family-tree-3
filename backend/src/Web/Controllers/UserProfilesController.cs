@@ -32,10 +32,10 @@ public class UserProfilesController : ControllerBase
         return BadRequest(result.Error);
     }
 
-    [HttpGet("byAuth0Id/{auth0UserId}")]
-    public async Task<ActionResult<UserProfileDto>> GetUserProfileByAuth0Id(string auth0UserId)
+    [HttpGet("byExternalId/{externalId}")]
+    public async Task<ActionResult<UserProfileDto>> GetUserProfileByExternalId(string externalId)
     {
-        var result = await _mediator.Send(new GetUserProfileByAuth0IdQuery { Auth0UserId = auth0UserId });
+        var result = await _mediator.Send(new GetUserProfileByExternalIdQuery { ExternalId = externalId });
         if (result.IsSuccess)
         {
             return Ok(result.Value);

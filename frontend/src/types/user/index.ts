@@ -1,6 +1,6 @@
 export interface User {
   id: string;
-  auth0UserId: string;
+  externalId: string;
   name: string;
   email: string;
   roles?: string[];
@@ -17,7 +17,7 @@ export interface UserMenuItem {
 
 export interface UserProfile {
     id: string;
-    auth0UserId: string;
+    externalId: string;
     email: string;
     name: string;
     avatar?: string;

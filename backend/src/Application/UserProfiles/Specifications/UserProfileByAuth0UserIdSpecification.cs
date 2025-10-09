@@ -7,6 +7,6 @@ public class UserProfileByAuth0UserIdSpecification : SingleResultSpecification<U
 {
     public UserProfileByAuth0UserIdSpecification(string auth0UserId)
     {
-        Query.Where(up => up.Auth0UserId == auth0UserId);
+        Query.Where(up => up.ExternalId == auth0UserId);
     }
 }

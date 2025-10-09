@@ -44,7 +44,7 @@ public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfile
             // Create new UserProfile
             userProfile = new UserProfile
             {
-                Auth0UserId = request.Id,
+                ExternalId = request.Id,
                 Email = request.Email ?? "", // Assuming email is always provided or can be null
                 Name = request.Name ?? "",   // Assuming name is always provided or can be null
             };

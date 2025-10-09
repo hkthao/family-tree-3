@@ -5,5 +5,5 @@ namespace backend.Application.Common.Interfaces;
 public interface IUserProfileSyncService
 {
     Task<bool> SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default);
-    Task<backend.Domain.Entities.UserProfile?> GetUserProfileByAuth0Id(string auth0UserId);
+    Task<backend.Domain.Entities.UserProfile?> GetUserProfileByExternalId(string externalId);
 }
