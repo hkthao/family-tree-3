@@ -18,7 +18,7 @@ import { createServices } from '@/services/service.factory';
 import type { IMemberService } from '@/services/member/member.service.interface';
 import { ok, err, type Member, type MemberFilter, type Paginated, type Result } from '@/types';
 import { simulateLatency } from '@/utils/mockUtils';
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 
 class MockMemberServiceForTest implements IMemberService {
   private _items: Member[] = [];

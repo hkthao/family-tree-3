@@ -1,5 +1,5 @@
 
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 import { simulateLatency } from '@/utils/mockUtils';
 import { err, ok, type Result, type Paginated } from '@/types';
 

@@ -56,5 +56,13 @@ export class MockEventService
     this.items = JSON.parse(JSON.stringify(fixedMockEvents));
     super.reset();
   }
+
+  async getUpcomingEvents(familyId?: string) {
+    let events = this.items;
+    if (familyId) {
+      events = events.filter((event) => event.familyId === familyId);
+    }
+    return ok(await simulateLatency(events));
+  }
 }
 

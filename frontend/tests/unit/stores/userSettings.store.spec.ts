@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { useUserSettingsStore } from '@/stores/userSettings.store';
 import i18n from '@/plugins/i18n';
 import { createPinia, setActivePinia } from 'pinia';
+import { Theme, Language } from '@/types';
 
 // Mock i18n
 vi.mock('@/plugins/i18n', () => ({
@@ -29,56 +30,54 @@ describe('UserSettings Store', () => {
   });
 
   it('should have correct initial state', () => {
-    expect(store.theme).toBe('dark');
-    expect(store.notifications).toEqual({
-      email: true,
-      sms: false,
-      inApp: true,
-    });
-    expect(store.language).toBe('en');
+    expect(store.preferences.theme).toBe(Theme.Light);
+    expect(store.preferences.emailNotificationsEnabled).toBe(true);
+    expect(store.preferences.smsNotificationsEnabled).toBe(false);
+    expect(store.preferences.inAppNotificationsEnabled).toBe(true);
+    expect(store.preferences.language).toBe(Language.English);
     expect(store.loading).toBe(false);
     expect(store.error).toBeNull();
   });
 
   it('should set the theme correctly', () => {
-    store.setTheme('light');
-    expect(store.theme).toBe('light');
-    store.setTheme('dark');
-    expect(store.theme).toBe('dark');
+    store.setTheme(Theme.Light);
+    expect(store.preferences.theme).toBe(Theme.Light);
+    store.setTheme(Theme.Dark);
+    expect(store.preferences.theme).toBe(Theme.Dark);
   });
 
   it('should toggle notifications correctly', () => {
-    expect(store.notifications.email).toBe(true);
-    store.toggleNotification('email');
-    expect(store.notifications.email).toBe(false);
-    store.toggleNotification('email');
-    expect(store.notifications.email).toBe(true);
+    expect(store.preferences.emailNotificationsEnabled).toBe(true);
+    store.toggleEmailNotifications();
+    expect(store.preferences.emailNotificationsEnabled).toBe(false);
+    store.toggleEmailNotifications();
+    expect(store.preferences.emailNotificationsEnabled).toBe(true);
 
-    expect(store.notifications.sms).toBe(false);
-    store.toggleNotification('sms');
-    expect(store.notifications.sms).toBe(true);
+    expect(store.preferences.smsNotificationsEnabled).toBe(false);
+    store.toggleSmsNotifications();
+    expect(store.preferences.smsNotificationsEnabled).toBe(true);
 
-    expect(store.notifications.inApp).toBe(true);
-    store.toggleNotification('inApp');
-    expect(store.notifications.inApp).toBe(false);
+    expect(store.preferences.inAppNotificationsEnabled).toBe(true);
+    store.toggleInAppNotifications();
+    expect(store.preferences.inAppNotificationsEnabled).toBe(false);
   });
 
   it('should set the language correctly and update i18n', () => {
-    store.setLanguage('vi');
-    expect(store.language).toBe('vi');
+    store.setLanguage(Language.Vietnamese);
+    expect(store.preferences.language).toBe(Language.Vietnamese);
     expect(i18n.global.locale.value).toBe('vi');
 
-    store.setLanguage('en');
-    expect(store.language).toBe('en');
+    store.setLanguage(Language.English);
+    expect(store.preferences.language).toBe(Language.English);
     expect(i18n.global.locale.value).toBe('en');
   });
 
-  describe('saveSettings', () => {
+  describe('saveUserSettings', () => {
     it('should save settings successfully', async () => {
       // Mock Math.random to ensure success
       vi.spyOn(Math, 'random').mockReturnValue(0.5); // > 0.2 for success
 
-      const promise = store.saveSettings();
+      const promise = store.saveUserSettings();
       expect(store.loading).toBe(true);
       expect(store.error).toBeNull();
 
@@ -93,7 +92,7 @@ describe('UserSettings Store', () => {
       // Mock Math.random to ensure failure
       vi.spyOn(Math, 'random').mockReturnValue(0.1); // < 0.2 for failure
 
-      const promise = store.saveSettings();
+      const promise = store.saveUserSettings();
       expect(store.loading).toBe(true);
       expect(store.error).toBeNull();
 

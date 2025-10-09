@@ -58,7 +58,7 @@ const notificationStore = useNotificationStore();
 
 const handleLogin = async () => {
   const authStore = useAuthStore();
-  await authStore.login({ email: email.value, password: password.value });
+  await authStore.login();
 
   if (authStore.isAuthenticated) {
     notificationStore.showSnackbar(t('login.success'), 'success');

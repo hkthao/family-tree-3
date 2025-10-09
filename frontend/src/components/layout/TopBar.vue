@@ -1,21 +1,8 @@
 <template>
-  <v-app-bar app flat  >
-    <v-app-bar-nav-icon
-      @click.stop="$emit('toggle-drawer')"
-    ></v-app-bar-nav-icon>
-    <v-text-field
-      density="comfortable"
-      variant="solo"
-      prepend-inner-icon="mdi-magnify"
-      :label="t('topbar.search')"
-      single-line
-      hide-details
-      class="mx-4"
-      @keydown.meta.k.prevent="focusSearch"
-      ref="searchField"
-      rounded
-      flat
-    >
+  <v-app-bar app flat>
+    <v-app-bar-nav-icon @click.stop="$emit('toggle-drawer')"></v-app-bar-nav-icon>
+    <v-text-field density="comfortable" variant="solo" prepend-inner-icon="mdi-magnify" :label="t('topbar.search')"
+      single-line hide-details class="mx-4" @keydown.meta.k.prevent="focusSearch" ref="searchField" rounded flat>
     </v-text-field>
 
     <v-spacer></v-spacer>
@@ -31,9 +18,7 @@
     </v-btn>
 
     <div class="mx-2">
-      <UserMenu
-        @navigate="handleNavigation"
-      />
+      <UserMenu @navigate="handleNavigation" />
     </div>
   </v-app-bar>
 </template>
@@ -47,6 +32,8 @@ import type { VTextField } from 'vuetify/components';
 import type { User } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores/userSettings.store';
+import { Theme } from '@/types';
+import { getThemeOptions } from '@/constants/theme.constants';
 
 const { t } = useI18n();
 const theme = useTheme();
@@ -63,16 +50,20 @@ defineProps({
 
 defineEmits(['toggle-drawer']);
 
-function toggleTheme() {
-  const newTheme = theme.global.current.value.dark ? 'light' : 'dark';
+const getThemeCode = (theme: Theme) => {
+  return getThemeOptions(t).find((option) => option.value === theme)!.code;
+}
+
+const toggleTheme = () => {
+  const newTheme = theme.global.current.value.dark ? Theme.Light : Theme.Dark;
   userSettingsStore.setTheme(newTheme);
 }
 
-watch(() => userSettingsStore.theme, (newTheme) => {
-  theme.change(newTheme);
-}, { immediate: true }); // Immediate to set theme on initial load
+watch(() => userSettingsStore.preferences.theme, (newTheme) => {
+  theme.change(getThemeCode(newTheme))
+}, { immediate: true });
 
-function focusSearch() {
+const focusSearch = () => {
   if (searchField.value) {
     searchField.value.focus();
   }

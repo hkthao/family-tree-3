@@ -13,7 +13,7 @@ import { createServices } from '@/services/service.factory';
 import type { IFamilyService } from '@/services/family/family.service.interface';
 import type { IMemberService } from '@/services/member/member.service.interface';
 import { simulateLatency } from '@/utils/mockUtils';
-import type { ApiError } from '@/utils/api';
+import type { ApiError } from '@/plugins/axios';
 import type { IEventService } from '@/services/event/event.service.interface';
 import events from '@/data/mock/events.json';
 import families from '@/data/mock/families.json';
@@ -296,6 +296,14 @@ class MockEventServiceForTest implements IEventService {
 
   async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
     const events = this._events.filter((e) => ids.includes(e.id));
+    return ok(await simulateLatency(events));
+  }
+
+  async getUpcomingEvents(familyId?: string): Promise<Result<Event[], ApiError>> {
+    let events = this._events;
+    if (familyId) {
+      events = events.filter((event) => event.familyId === familyId);
+    }
     return ok(await simulateLatency(events));
   }
 }

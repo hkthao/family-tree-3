@@ -4,15 +4,13 @@
       <v-col cols="12">
         <VListSubheader>{{
           t('userSettings.preferences.theme')
-        }}</VListSubheader>
+          }}</VListSubheader>
         <v-radio-group v-model="preferencesForm.theme" inline hide-details>
           <v-radio
-            :label="t('userSettings.preferences.themeLight')"
-            value="light"
-          ></v-radio>
-          <v-radio
-            :label="t('userSettings.preferences.themeDark')"
-            value="dark"
+            v-for="option in themeOptions"
+            :key="option.value"
+            :label="option.text"
+            :value="option.value"
           ></v-radio>
         </v-radio-group>
       </v-col>
@@ -22,15 +20,9 @@
       <v-col cols="12">
         <VListSubheader>{{
           t('userSettings.preferences.language')
-        }}</VListSubheader>
-        <v-select
-          v-model="preferencesForm.language"
-          :items="languageOptions"
-          :label="t('userSettings.preferences.language')"
-          item-title="text"
-          item-value="value"
-          hide-details
-        ></v-select>
+          }}</VListSubheader>
+        <v-select v-model="preferencesForm.language" :items="languageOptions"
+          :label="t('userSettings.preferences.language')" item-title="text" item-value="value" hide-details></v-select>
       </v-col>
     </v-row>
 
@@ -38,19 +30,19 @@
       <v-col cols="12">
         <VListSubheader>{{
           t('userSettings.preferences.notifications')
-        }}</VListSubheader>
+          }}</VListSubheader>
         <v-checkbox
-          v-model="preferencesForm.notifications.email"
+          v-model="preferencesForm.emailNotificationsEnabled"
           :label="t('userSettings.preferences.notificationsEmail')"
           hide-details
         ></v-checkbox>
         <v-checkbox
-          v-model="preferencesForm.notifications.sms"
+          v-model="preferencesForm.smsNotificationsEnabled"
           :label="t('userSettings.preferences.notificationsSMS')"
           hide-details
         ></v-checkbox>
         <v-checkbox
-          v-model="preferencesForm.notifications.inApp"
+          v-model="preferencesForm.inAppNotificationsEnabled"
           :label="t('userSettings.preferences.notificationsInApp')"
           hide-details
         ></v-checkbox>
@@ -65,40 +57,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from 'vuetify';
 import { useUserSettingsStore } from '@/stores/userSettings.store';
+import { getThemeOptions } from '@/constants/theme.constants';
+import { getLanguageOptions } from '@/constants/language.constants';
 
 const { t } = useI18n();
 const theme = useTheme();
 const userSettingsStore = useUserSettingsStore();
 
 const preferencesForm = ref({
-  theme: userSettingsStore.theme,
-  notifications: {
-    email: userSettingsStore.notifications.email,
-    sms: userSettingsStore.notifications.sms,
-    inApp: userSettingsStore.notifications.inApp,
-  },
-  language: userSettingsStore.language,
+  theme: userSettingsStore.preferences.theme,
+  emailNotificationsEnabled: userSettingsStore.preferences.emailNotificationsEnabled,
+  smsNotificationsEnabled: userSettingsStore.preferences.smsNotificationsEnabled,
+  inAppNotificationsEnabled: userSettingsStore.preferences.inAppNotificationsEnabled,
+  language: userSettingsStore.preferences.language,
 });
 
-const languageOptions = computed(() => [
-  { text: t('userSettings.preferences.languageEnglish'), value: 'en' },
-  { text: t('userSettings.preferences.languageVietnamese'), value: 'vi' },
-]);
-
-onMounted(() => {
-  preferencesForm.value.theme = userSettingsStore.theme;
-  preferencesForm.value.language = userSettingsStore.language;
-});
+const languageOptions = computed(() => getLanguageOptions(t));
+const themeOptions = computed(() => getThemeOptions(t));
 
 watch(
-  () => userSettingsStore.theme,
+  () => userSettingsStore.preferences.theme,
   (newTheme) => {
-    theme.change(newTheme) ;
+    const option = themeOptions.value.find((option) => option.value === newTheme);
+    if (option) {
+         theme.change(option.code)
+    }
   },
   { immediate: true },
 ); // Immediate to set theme on initial load
@@ -106,16 +94,17 @@ watch(
 const savePreferences = async () => {
   // Update store state
   userSettingsStore.setTheme(preferencesForm.value.theme);
-  userSettingsStore.notifications.email =
-    preferencesForm.value.notifications.email;
-  userSettingsStore.notifications.sms = preferencesForm.value.notifications.sms;
-  userSettingsStore.notifications.inApp =
-    preferencesForm.value.notifications.inApp;
+  userSettingsStore.preferences.emailNotificationsEnabled =
+    preferencesForm.value.emailNotificationsEnabled;
+  userSettingsStore.preferences.smsNotificationsEnabled =
+    preferencesForm.value.smsNotificationsEnabled;
+  userSettingsStore.preferences.inAppNotificationsEnabled =
+    preferencesForm.value.inAppNotificationsEnabled;
   userSettingsStore.setLanguage(preferencesForm.value.language);
 
   // Save settings via store action
   try {
-    await userSettingsStore.saveSettings();
+    await userSettingsStore.saveUserSettings();
     // Snackbar is handled by the store action
   } catch (error) {
     // Error snackbar is handled by the store action

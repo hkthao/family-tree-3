@@ -36,15 +36,16 @@ export class MockAIBiographyService implements IAIBiographyService {
   async getLastAIBiography(memberId: string): Promise<Result<AIBiography | undefined>> {
     console.log('Fetching last mock AI biography for member:', memberId);
     const mockBiography: AIBiography = {
-      id: 'bio-123',
-      memberId: memberId,
+      id: '1',
+      memberId: 'member1',
       style: BiographyStyle.Storytelling,
-      content: 'This is a mock biography content.',
+      content: 'This is a mock biography.',
       provider: AIProviderType.Gemini,
-      userPrompt: 'This is a mock user prompt.',
+      userPrompt: 'Tell me a story.',
       generatedFromDB: false,
-      tokensUsed: 120,
+      tokensUsed: 100,
       created: new Date().toISOString(),
+      language: 'en', // Added missing language property
     };
     return simulateLatency(ok(mockBiography));
   }

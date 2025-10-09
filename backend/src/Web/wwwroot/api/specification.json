@@ -3137,18 +3137,6 @@
             "type": "object",
             "nullable": true,
             "additionalProperties": {}
-          },
-          "emailNotificationsEnabled": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "smsNotificationsEnabled": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "inAppNotificationsEnabled": {
-            "type": "boolean",
-            "nullable": true
           }
         }
       }

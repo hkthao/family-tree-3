@@ -3,8 +3,6 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
 using backend.Domain.Entities;
 using Ardalis.Specification.EntityFrameworkCore;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 

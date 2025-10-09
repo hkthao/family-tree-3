@@ -148,29 +148,29 @@ describe('auth.store', () => {
       mockLogin.mockResolvedValue(mockUser);
       mockGetAccessToken.mockResolvedValue(mockToken);
 
-      await store.login(credentials);
+      await store.login();
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.user).toEqual(mockUser);
-      expect(store.token).toBe(mockToken);
-      expect(mockLogin).toHaveBeenCalledWith(credentials);
-      expect(mockGetAccessToken).toHaveBeenCalledTimes(1);
+      // User and token are set by initAuth after redirect, not directly by login()
+      expect(store.user).toBeNull();
+      expect(store.token).toBeNull();
+      expect(mockLogin).toHaveBeenCalledWith({ appState: { target: '/' } });
+      expect(mockGetAccessToken).not.toHaveBeenCalled(); // Not called directly by login
     });
 
     it('should handle login failure (invalid credentials)', async () => {
       const store = useAuthStore();
 
-      mockLogin.mockResolvedValue(null);
-      mockGetAccessToken.mockResolvedValue(null);
+      mockLogin.mockRejectedValue(new Error('Login failed.'));
 
-      await store.login(credentials);
+      await store.login();
 
       expect(store.loading).toBe(false);
-      expect(store.error).toBe('Invalid credentials or login failed.');
+      expect(store.error).toBe('Login failed.');
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
-      expect(mockLogin).toHaveBeenCalledWith(credentials);
+      expect(mockLogin).toHaveBeenCalledWith({ appState: { target: '/' } });
     });
 
     it('should handle login failure (service error)', async () => {
@@ -179,13 +179,13 @@ describe('auth.store', () => {
 
       mockLogin.mockRejectedValue(new Error(errorMessage));
 
-      await store.login(credentials);
+      await store.login();
 
       expect(store.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
-      expect(mockLogin).toHaveBeenCalledWith(credentials);
+      expect(mockLogin).toHaveBeenCalledWith({ appState: { target: '/' } });
     });
   });
 
