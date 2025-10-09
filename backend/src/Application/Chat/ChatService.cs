@@ -1,0 +1,82 @@
+using backend.Application.Common.Interfaces;
+using backend.Application.VectorStore;
+
+namespace backend.Application.Chat;
+
+public class ChatService : IChatService
+{
+    private readonly IVectorStore _vectorStore;
+    private readonly IEmbeddingGenerator _embeddingGenerator;
+    private readonly ILLMProviderFactory _llmProviderFactory;
+
+    public ChatService(
+        IVectorStore vectorStore,
+        IEmbeddingGenerator embeddingGenerator,
+        ILLMProviderFactory llmProviderFactory)
+    {
+        _vectorStore = vectorStore;
+        _embeddingGenerator = embeddingGenerator;
+        _llmProviderFactory = llmProviderFactory;
+    }
+
+    public async Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null)
+    {
+        // Generate embeddings for the user message
+        var embeddingResult = await _embeddingGenerator.GenerateEmbeddingAsync(userMessage);
+        if (!embeddingResult.IsSuccess)
+        {
+            return new ChatResponse { Response = "Error generating embeddings." };
+        }
+
+        // Query VectorStore for semantically relevant context
+        var vectorQuery = new VectorQuery
+        {
+            Vector = embeddingResult.Value!,
+            TopK = 5 // Retrieve top 5 relevant documents
+        };
+        var queryResult = await _vectorStore.QueryAsync(vectorQuery);
+
+        var context = new List<string>();
+        if (queryResult.IsSuccess && queryResult.Value != null)
+        {
+            context = queryResult.Value.Select(d => d.Content).ToList();
+        }
+
+        return await SendMessageWithContextAsync(userMessage, context, sessionId);
+    }
+
+    public async Task<ChatResponse> SendMessageWithContextAsync(string userMessage, IEnumerable<string> context, string? sessionId = null)
+    {
+        // Construct a structured prompt
+        var promptBuilder = new System.Text.StringBuilder();
+        promptBuilder.AppendLine("You are a helpful family knowledge assistant.");
+        promptBuilder.AppendLine("Use the context below to answer user questions naturally.");
+        promptBuilder.AppendLine();
+        promptBuilder.AppendLine("Context:");
+        if (context != null && context.Any())
+        {
+            foreach (var item in context)
+            {
+                promptBuilder.AppendLine(item);
+            }
+        }
+        else
+        {
+            promptBuilder.AppendLine("No specific context available.");
+        }
+        promptBuilder.AppendLine();
+        promptBuilder.AppendLine($"User question: {userMessage}");
+
+        var prompt = promptBuilder.ToString();
+
+        // Call the LLM provider
+        var llmProvider = _llmProviderFactory.GetProvider();
+        var llmResponse = await llmProvider.GenerateResponseAsync(prompt);
+
+        return new ChatResponse
+        {
+            Response = llmResponse,
+            Context = context?.ToList() ?? new List<string>()
+        };
+    }
+}
