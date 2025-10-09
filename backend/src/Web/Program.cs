@@ -9,6 +9,8 @@ using Microsoft.Extensions.Options;
 using backend.Application.Common.Interfaces;
 using backend.Infrastructure.AI;
 using backend.Domain.Enums;
+using backend.Application.Common.Models;
+using backend.Infrastructure.Files;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +44,24 @@ builder.Services.AddSingleton<IAIUsageTracker, AIUsageTracker>();
 
 // Add Memory Cache services
 builder.Services.AddMemoryCache();
+
+// Configure StorageSettings
+builder.Services.Configure<StorageSettings>(builder.Configuration.GetSection("Storage"));
+
+// Register IFileStorageService based on configuration
+builder.Services.AddTransient<IFileStorageService>(sp =>
+{
+    var storageSettings = sp.GetRequiredService<IOptions<StorageSettings>>().Value;
+    var env = sp.GetRequiredService<IWebHostEnvironment>();
+
+    return storageSettings.Provider switch
+    {
+        "Local" => new LocalFileStorage(sp.GetRequiredService<IOptions<StorageSettings>>(), env),
+        "Cloudinary" => new CloudinaryFileStorage(sp.GetRequiredService<IOptions<StorageSettings>>()),
+        "S3" => new S3FileStorage(sp.GetRequiredService<IOptions<StorageSettings>>()),
+        _ => throw new InvalidOperationException($"No file storage provider configured for: {storageSettings.Provider}")
+    };
+});
 
 // Configure Auth0Config
 builder.Services.Configure<Auth0Config>(builder.Configuration.GetSection("Auth0"));
