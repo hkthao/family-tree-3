@@ -2,8 +2,6 @@ using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using Microsoft.AspNetCore.Hosting;
 using backend.Application.Common.Interfaces;
 
 namespace backend.Web.Controllers;

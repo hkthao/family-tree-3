@@ -1741,6 +1741,43 @@
         ]
       }
     },
+    "/api/Upload/preview/{fileName}": {
+      "get": {
+        "tags": [
+          "Upload"
+        ],
+        "operationId": "Upload_GetUploadedFile",
+        "parameters": [
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/activities/recent": {
       "get": {
         "tags": [
