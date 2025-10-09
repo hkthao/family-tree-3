@@ -2,8 +2,6 @@ import { defineStore } from 'pinia';
 import type { UserProfile } from '@/types';
 import i18n from '@/plugins/i18n';
 
-import { useAuthStore } from './auth.store';
-
 export const useUserProfileStore = defineStore('userProfile', {
   state: () => ({
     loading: false,

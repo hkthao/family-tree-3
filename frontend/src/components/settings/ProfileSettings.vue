@@ -30,14 +30,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { AvatarInput } from '@/components/common';
 import { useUserProfileStore } from '@/stores/userProfile.store';
 import type { UserProfile } from '@/types';
 
 const { t } = useI18n();
-const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 const userProfileStore = useUserProfileStore();
 

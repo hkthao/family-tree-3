@@ -1,20 +1,8 @@
 <template>
-  <v-menu
-    offset-y
-    :placement="placement"
-    :close-on-content-click="false"
-    v-model="menuOpen"
-  >
+  <v-menu offset-y :placement="placement" :close-on-content-click="false" v-model="menuOpen">
     <template v-slot:activator="{ props: activatorProps }">
-              <AvatarDisplay
-                :src="currentUser?.avatar"
-                :size="36"
-                class="cursor-pointer"
-                :aria-label="$t('userMenu.ariaLabel')"
-                aria-haspopup="true"
-                :aria-expanded="menuOpen"
-                v-bind="activatorProps"
-              />
+      <AvatarDisplay :src="currentUser?.avatar" :size="36" class="cursor-pointer" :aria-label="$t('userMenu.ariaLabel')"
+        aria-haspopup="true" :aria-expanded="menuOpen" v-bind="activatorProps" />
     </template>
 
     <v-sheet class="user-menu-sheet rounded-lg elevation-3 pa-3">
@@ -32,14 +20,8 @@
 
       <!-- Menu Items -->
       <v-list dense nav>
-        <v-list-item
-          v-for="item in menuItems"
-          :key="item.key"
-          :to="item.to"
-          :prepend-icon="item.icon"
-          @click="handleMenuItemClick(item.to)"
-          class="user-menu-item"
-        >
+        <v-list-item v-for="item in menuItems" :key="item.key" :to="item.to" :prepend-icon="item.icon"
+          @click="handleMenuItemClick(item.to)" class="user-menu-item">
           <v-list-item-title>{{ $t(item.labelKey) }}</v-list-item-title>
           <v-tooltip activator="parent" location="right">{{ $t(item.labelKey) }}</v-tooltip>
         </v-list-item>
@@ -48,12 +30,7 @@
       <v-divider class="my-2"></v-divider>
 
       <!-- Logout -->
-      <v-list-item
-        prepend-icon="mdi-logout"
-        color="error"
-        @click="confirmLogoutDialog = true"
-        class="user-menu-item"
-      >
+      <v-list-item prepend-icon="mdi-logout" color="error" @click="confirmLogoutDialog = true" class="user-menu-item">
         <v-list-item-title>{{ $t('userMenu.logout') }}</v-list-item-title>
         <v-tooltip activator="parent" location="right">{{ $t('userMenu.logout') }}</v-tooltip>
       </v-list-item>
@@ -119,11 +96,11 @@ const handleLogoutConfirm = async () => {
 };</script>
 
 <style scoped>
-
 .user-menu-header {
   display: flex;
   align-items: center;
-  justify-content: center; /* Added for centering */
+  justify-content: center;
+  /* Added for centering */
   gap: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
