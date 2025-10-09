@@ -19,7 +19,21 @@ export class MockUserProfileService implements IUserProfileService {
   async getUserProfile(id: string): Promise<Result<UserProfile>> {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
     const profile = this.userProfiles.find(p => p.id === id);
+    if (profile) {
+      return ok(profile);
+    } else {
       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+    }
+  }
+
+  async getUserProfileByAuth0Id(auth0UserId: string): Promise<Result<UserProfile>> {
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+    const profile = this.userProfiles.find(p => p.auth0UserId === auth0UserId);
+    if (profile) {
+      return ok(profile);
+    } else {
+      return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+    }
   }
 
   async updateUserProfile(profile: UserProfile): Promise<Result<UserProfile>> {

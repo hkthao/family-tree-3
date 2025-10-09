@@ -18,6 +18,10 @@ export class UserProfileApiService implements IUserProfileService {
     return this.http.get<UserProfile>(`${this.apiUrl}/${id}`);
   }
 
+  public async getUserProfileByAuth0Id(auth0UserId: string): Promise<Result<UserProfile, ApiError>> {
+    return this.http.get<UserProfile>(`${this.apiUrl}/byAuth0Id/${auth0UserId}`);
+  }
+
   public async updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>> {
     return this.http.put<UserProfile>(`${this.apiUrl}/${profile.id}`, profile);
   }

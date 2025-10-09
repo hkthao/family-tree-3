@@ -5,20 +5,20 @@ using backend.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.UserProfiles.Queries.GetUserProfileById;
+namespace backend.Application.UserProfiles.Queries.GetUserProfileByAuth0UserId;
 
-public class GetUserProfileByAuth0IdQueryHandler : IRequestHandler<GetUserProfileByAuth0IdQuery, Result<UserProfileDto>>
+public class GetUserProfileByAuth0UserIdQueryHandler : IRequestHandler<GetUserProfileByAuth0UserIdQuery, Result<UserProfileDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetUserProfileByAuth0IdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetUserProfileByAuth0UserIdQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<Result<UserProfileDto>> Handle(GetUserProfileByAuth0IdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<UserProfileDto>> Handle(GetUserProfileByAuth0UserIdQuery request, CancellationToken cancellationToken)
     {
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
