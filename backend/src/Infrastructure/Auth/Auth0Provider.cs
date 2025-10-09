@@ -64,9 +64,9 @@ namespace backend.Infrastructure.Auth
                 {
                     userUpdateRequest.Email = request.Email;
                 }
-                if (request.Picture != null)
+                if (request.Avatar != null)
                 {
-                    userUpdateRequest.Picture = request.Picture;
+                    userUpdateRequest.Picture = request.Avatar;
                 }
                 if (request.UserMetadata != null)
                 {

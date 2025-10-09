@@ -21,6 +21,11 @@ public class UserProfile : BaseAuditableEntity
     public string Name { get; set; } = null!;
 
     /// <summary>
+    /// The URL of the user's avatar.
+    /// </summary>
+    public string? Avatar { get; set; }
+
+    /// <summary>
     /// Navigation property for families the user is associated with.
     /// </summary>
     public ICollection<FamilyUser> FamilyUsers { get; set; } = new HashSet<FamilyUser>();

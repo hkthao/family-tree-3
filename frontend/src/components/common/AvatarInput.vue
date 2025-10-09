@@ -96,7 +96,6 @@ const cropperRotate = ref(0);
 const isImageCropped = ref(false); // To enable/disable save button
 
 const currentAvatarSrc = computed(() => {
-  console.log('currentAvatarSrc:', props.modelValue, typeof props.modelValue);
   return props.modelValue || '/images/default-avatar.png';
 });
 

@@ -2735,7 +2735,7 @@
             "type": "string",
             "nullable": true
           },
-          "picture": {
+          "avatar": {
             "type": "string",
             "nullable": true
           },

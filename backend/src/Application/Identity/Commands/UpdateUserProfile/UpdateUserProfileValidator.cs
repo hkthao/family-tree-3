@@ -13,8 +13,8 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
         RuleFor(v => v.Email)
             .EmailAddress().WithMessage("Email must be a valid email address.");
 
-        RuleFor(v => v.Picture)
-            .Must(BeAValidUrl).WithMessage("Picture URL must be a valid URL.");
+        RuleFor(v => v.Avatar)
+            .Must(BeAValidUrl).WithMessage("Avatar URL must be a valid URL.");
     }
 
     private bool BeAValidUrl(string? url)
