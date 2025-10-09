@@ -2,18 +2,17 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Files;
 
 public class CloudinaryFileStorage : IFileStorageService
 {
     private readonly Cloudinary _cloudinary;
-    private readonly StorageSettings _storageSettings;
+    private readonly IStorageSettings _storageSettings;
 
-    public CloudinaryFileStorage(IOptions<StorageSettings> storageSettings)
+    public CloudinaryFileStorage(IStorageSettings storageSettings)
     {
-        _storageSettings = storageSettings.Value;
+        _storageSettings = storageSettings;
         var account = new Account(
             _storageSettings.Cloudinary.CloudName,
             _storageSettings.Cloudinary.ApiKey,

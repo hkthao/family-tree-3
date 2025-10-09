@@ -1,18 +1,17 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Files;
 
 public class LocalFileStorage : IFileStorageService
 {
-    private readonly StorageSettings _storageSettings;
+    private readonly IStorageSettings _storageSettings;
     private readonly IWebHostEnvironment _env; // To get wwwroot path
 
-    public LocalFileStorage(IOptions<StorageSettings> storageSettings, IWebHostEnvironment env)
+    public LocalFileStorage(IStorageSettings storageSettings, IWebHostEnvironment env)
     {
-        _storageSettings = storageSettings.Value;
+        _storageSettings = storageSettings;
         _env = env;
     }
 
@@ -33,9 +32,11 @@ public class LocalFileStorage : IFileStorageService
                 await fileStream.CopyToAsync(outputStream, cancellationToken);
             }
 
-            // Return a URL relative to the web root
+            // Construct the absolute URL using BaseUrl from settings
             var relativePath = Path.Combine(_storageSettings.LocalStoragePath, fileName).Replace("\\", "/");
-            return Result<string>.Success($"/{relativePath}");
+            var absoluteUrl = $"{_storageSettings.BaseUrl}/{relativePath}";
+
+            return Result<string>.Success(absoluteUrl);
         }
         catch (Exception ex)
         {

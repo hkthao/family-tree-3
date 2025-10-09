@@ -54,18 +54,19 @@ public static class DependencyInjection
 
         // Configure StorageSettings
         services.Configure<StorageSettings>(configuration.GetSection("Storage"));
+        services.AddSingleton<IStorageSettings>(sp => sp.GetRequiredService<IOptions<StorageSettings>>().Value);
 
         // Register IFileStorageService based on configuration
         services.AddTransient<IFileStorageService>(sp =>
         {
-            var storageSettings = sp.GetRequiredService<IOptions<StorageSettings>>().Value;
+            var storageSettings = sp.GetRequiredService<IStorageSettings>();
             var env = sp.GetRequiredService<IWebHostEnvironment>();
 
             return storageSettings.Provider switch
             {
-                "Local" => new LocalFileStorage(sp.GetRequiredService<IOptions<StorageSettings>>(), env),
-                "Cloudinary" => new CloudinaryFileStorage(sp.GetRequiredService<IOptions<StorageSettings>>()),
-                "S3" => new S3FileStorage(sp.GetRequiredService<IOptions<StorageSettings>>()),
+                "Local" => new LocalFileStorage(storageSettings, env),
+                "Cloudinary" => new CloudinaryFileStorage(storageSettings),
+                "S3" => new S3FileStorage(storageSettings),
                 _ => throw new InvalidOperationException($"No file storage provider configured for: {storageSettings.Provider}")
             };
         });

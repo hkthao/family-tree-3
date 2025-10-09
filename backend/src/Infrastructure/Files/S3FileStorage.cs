@@ -2,18 +2,17 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Files;
 
 public class S3FileStorage : IFileStorageService
 {
     private readonly IAmazonS3 _s3Client;
-    private readonly StorageSettings _storageSettings;
+    private readonly IStorageSettings _storageSettings;
 
-    public S3FileStorage(IOptions<StorageSettings> storageSettings)
+    public S3FileStorage(IStorageSettings storageSettings)
     {
-        _storageSettings = storageSettings.Value;
+        _storageSettings = storageSettings;
         _s3Client = new AmazonS3Client(
             _storageSettings.S3.AccessKey,
             _storageSettings.S3.SecretKey,

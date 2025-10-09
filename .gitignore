@@ -450,3 +450,4 @@ yarn.lock
 
 # Backend development appsettings (untracked for local configuration)
 backend/src/Web/appsettings.Development.json
+backend/src/Web/wwwroot/uploads/

@@ -53,11 +53,22 @@ axiosInstance.interceptors.request.use(async (config) => {
 });
 
 async function safeApiCall<T>(
-  apiCall: Promise<AxiosResponse<T>>,
+  apiCall: Promise<AxiosResponse<any>>,
 ): Promise<Result<T, ApiError>> {
   try {
     const response = await apiCall;
-    return ok(response.data);
+    // Check if the response data is already a Result object from the backend
+    if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+      const backendResult = response.data as Result<T, ApiError>;
+      if (backendResult.isSuccess) {
+        return ok(backendResult.value as T);
+      } else {
+        return err(backendResult.error as ApiError);
+      }
+    } else {
+      // Otherwise, assume the data is the direct payload
+      return ok(response.data as T);
+    }
   } catch (error) {
     if (axios.isAxiosError(error)) {
       return err(createApiError(error));

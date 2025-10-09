@@ -8,12 +8,12 @@ namespace backend.Application.Files.UploadFile;
 public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Result<string>>
 {
     private readonly IFileStorageService _fileStorageService;
-    private readonly StorageSettings _storageSettings;
+    private readonly IStorageSettings _storageSettings;
 
-    public UploadFileCommandHandler(IFileStorageService fileStorageService, IOptions<StorageSettings> storageSettings)
+    public UploadFileCommandHandler(IFileStorageService fileStorageService, IStorageSettings storageSettings)
     {
         _fileStorageService = fileStorageService;
-        _storageSettings = storageSettings.Value;
+        _storageSettings = storageSettings;
     }
 
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
