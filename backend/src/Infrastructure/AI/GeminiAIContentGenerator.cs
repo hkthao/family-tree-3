@@ -4,7 +4,6 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace backend.Infrastructure.AI;
 

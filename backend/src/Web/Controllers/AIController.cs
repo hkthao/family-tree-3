@@ -5,7 +5,6 @@ using backend.Application.AI.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.AI.Queries;
-using Microsoft.Extensions.Logging; // Add this
 using backend.Application.AI.Commands.SaveAIBiography; // Add this
 
 namespace backend.Web.Controllers;
