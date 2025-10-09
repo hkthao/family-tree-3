@@ -22,41 +22,31 @@ public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfile
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {
         // Security check: Only allow users to update their own profile
-        if (_user.Id != request.Id)
+        // if (_user.Id != request.ExternalId)
+        // {
+        //     return Result.Failure("Unauthorized: You can only update your own profile.", "Forbidden");
+        // }
+
+        // Retrieve UserProfile from DB to get ExternalId
+        var userProfile = await _context.UserProfiles
+            .FirstOrDefaultAsync(up => up.Id == request.Id, cancellationToken);
+
+        if (userProfile == null)
         {
-            return Result.Failure("Unauthorized: You can only update your own profile.", "Forbidden");
+            return Result.Failure("User profile not found.", "NotFound");
         }
 
-        // Call the AuthProvider to update the user profile
-        var authProviderResult = await _authProvider.UpdateUserProfileAsync(request.Id, request);
+        // Call the AuthProvider to update the user profile using ExternalId
+        var authProviderResult = await _authProvider.UpdateUserProfileAsync(userProfile.ExternalId, request);
         if (!authProviderResult.IsSuccess)
         {
             return authProviderResult;
         }
 
-        // Update or create UserProfile in local DB
-        var userProfile = await _context.UserProfiles
-            .WithSpecification(new UserProfileByAuth0IdSpec(request.Id))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (userProfile == null)
-        {
-            // Create new UserProfile
-            userProfile = new UserProfile
-            {
-                ExternalId = request.Id,
-                Email = request.Email ?? "", // Assuming email is always provided or can be null
-                Name = request.Name ?? "",   // Assuming name is always provided or can be null
-            };
-            _context.UserProfiles.Add(userProfile);
-        }
-        else
-        {
-            // Update existing UserProfile
-            if (request.Name != null) userProfile.Name = request.Name;
-            if (request.Email != null) userProfile.Email = request.Email;
-            // Other fields like Picture or UserMetadata are managed by Auth0 directly
-        }
+        // Update existing UserProfile in local DB
+        if (request.Name != null) userProfile.Name = request.Name;
+        if (request.Email != null) userProfile.Email = request.Email;
+        // Other fields like Picture or UserMetadata are managed by Auth0 directly
 
         await _context.SaveChangesAsync(cancellationToken);
 
