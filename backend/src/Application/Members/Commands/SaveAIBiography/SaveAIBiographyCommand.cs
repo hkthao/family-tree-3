@@ -1,7 +1,7 @@
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
-namespace backend.Application.AI.Commands.SaveAIBiography;
+namespace backend.Application.Members.Commands.SaveAIBiography;
 
 public class SaveAIBiographyCommand : IRequest<Result<Guid>>
 {

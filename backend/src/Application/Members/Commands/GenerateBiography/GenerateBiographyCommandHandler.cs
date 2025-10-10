@@ -6,7 +6,7 @@ using backend.Domain.Entities;
 using backend.Domain.Events;
 using Microsoft.Extensions.Options;
 
-namespace backend.Application.AI.Commands.GenerateBiography;
+namespace backend.Application.Members.Commands.GenerateBiography;
 
 public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
 {

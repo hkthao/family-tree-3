@@ -1,5 +1,5 @@
-using backend.Application.AI.Commands.GenerateBiography;
-using backend.Application.AI.Commands.SaveAIBiography; // Add this
+using backend.Application.Members.Commands.GenerateBiography;
+using backend.Application.Members.Commands.SaveAIBiography; // Add this
 using backend.Application.AI.Common;
 using backend.Application.AI.Queries.GetLastAIBiography;
 using Microsoft.AspNetCore.Authorization;

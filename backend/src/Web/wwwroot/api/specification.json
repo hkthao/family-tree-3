@@ -81,34 +81,6 @@
         ]
       }
     },
-    "/api/AI/biography/providers": {
-      "get": {
-        "tags": [
-          "AI"
-        ],
-        "operationId": "AI_GetAIProviders",
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AIProviderDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      }
-    },
     "/api/AI/biography/save": {
       "post": {
         "tags": [
@@ -2256,33 +2228,6 @@
             "type": "boolean"
           },
           "rootElement": {}
-        }
-      },
-      "AIProviderDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "providerType": {
-            "$ref": "#/components/schemas/AIProviderType"
-          },
-          "name": {
-            "type": "string"
-          },
-          "isEnabled": {
-            "type": "boolean"
-          },
-          "dailyUsageLimit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "currentDailyUsage": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "maxTokensPerRequest": {
-            "type": "integer",
-            "format": "int32"
-          }
         }
       },
       "SaveAIBiographyCommand": {

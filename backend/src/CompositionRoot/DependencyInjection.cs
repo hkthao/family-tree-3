@@ -34,7 +34,7 @@ public static class DependencyInjection
         services.AddTransient<GeminiAIContentGenerator>();
         services.AddTransient<OpenAIAIContentGenerator>();
         services.AddTransient<LocalAIContentGenerator>();
-        services.AddSingleton<IAIContentGeneratorFactory, AIContentGeneratorFactory>();
+        services.AddScoped<IAIContentGeneratorFactory, AIContentGeneratorFactory>();
         services.AddScoped(sp => sp.GetRequiredService<IAIContentGeneratorFactory>().GetContentGenerator());
 
         // Register AI Usage Tracker

@@ -1,4 +1,4 @@
-namespace backend.Application.AI.Commands.SaveAIBiography;
+namespace backend.Application.Members.Commands.SaveAIBiography;
 
 public class SaveAIBiographyCommandValidator : AbstractValidator<SaveAIBiographyCommand>
 {

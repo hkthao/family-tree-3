@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 
-namespace backend.Application.AI.Commands.SaveAIBiography;
+namespace backend.Application.Members.Commands.SaveAIBiography;
 
 public class SaveAIBiographyCommandHandler : IRequestHandler<SaveAIBiographyCommand, Result<Guid>>
 {
