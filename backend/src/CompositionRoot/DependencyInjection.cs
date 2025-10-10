@@ -2,13 +2,8 @@ using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
-using backend.Infrastructure;
 using backend.Infrastructure.AI;
 using backend.Application.AI.ContentGenerators;
-using backend.Application.AI.Chat;
-using backend.Application.AI.Embeddings;
-using backend.Application.AI.VectorStore;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
@@ -20,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using backend.Infrastructure.AI.ContentGenerators;
+using backend.Infrastructure;
 
 namespace backend.CompositionRoot;
 

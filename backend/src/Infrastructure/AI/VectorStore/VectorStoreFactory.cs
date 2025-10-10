@@ -8,17 +8,17 @@ namespace backend.Infrastructure.AI.VectorStore;
 public class VectorStoreFactory : IVectorStoreFactory
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IOptions<EmbeddingSettings> _embeddingSettings;
+    private readonly IOptions<VectorStoreSettings> _vectorStoreSettings;
 
-    public VectorStoreFactory(IServiceProvider serviceProvider, IOptions<EmbeddingSettings> embeddingSettings)
+    public VectorStoreFactory(IServiceProvider serviceProvider, IOptions<VectorStoreSettings> vectorStoreSettings)
     {
         _serviceProvider = serviceProvider;
-        _embeddingSettings = embeddingSettings;
+        _vectorStoreSettings = vectorStoreSettings;
     }
 
     public IVectorStore CreateVectorStore()
     {
-        var provider = _embeddingSettings.Value.VectorStoreProvider.ToString();
+        var provider = _vectorStoreSettings.Value.VectorStoreProvider.ToString();
 
         return provider switch
         {

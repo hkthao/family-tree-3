@@ -1,26 +1,27 @@
-using backend.Application.AI.VectorStore;
-using backend.Application.AI.Embeddings;
 using backend.Application.Common.Models;
+using backend.Application.AI.VectorStore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
+using backend.Application.AI.Embeddings;
+using backend.Application.Common.Models.AISettings;
 
 namespace backend.Infrastructure.AI.VectorStore;
 
 public class PineconeVectorStore : IVectorStore
 {
     private readonly ILogger<PineconeVectorStore> _logger;
-    private readonly IOptions<EmbeddingSettings> _embeddingSettings;
+    private readonly IOptions<VectorStoreSettings> _vectorStoreSettings;
     private readonly PineconeClient _pineconeClient;
     private readonly IndexClient _index;
     private readonly string _indexName;
 
-    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<EmbeddingSettings> embeddingSettings)
+    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
     {
         _logger = logger;
-        _embeddingSettings = embeddingSettings;
+        _vectorStoreSettings = vectorStoreSettings;
 
-        var pineconeSettings = _embeddingSettings.Value.Pinecone;
+        var pineconeSettings = _vectorStoreSettings.Value.Pinecone;
 
         if (pineconeSettings == null)
         {
@@ -32,7 +33,7 @@ public class PineconeVectorStore : IVectorStore
 
         if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(_indexName))
         {
-            _logger.LogError("Pinecone configuration is missing or invalid. Check EmbeddingSettings:Pinecone:ApiKey, EmbeddingSettings:Pinecone:Environment, and EmbeddingSettings:Pinecone:IndexName in settings.");
+            _logger.LogError("Pinecone configuration is missing or invalid. Check VectorStoreSettings:Pinecone:ApiKey, VectorStoreSettings:Pinecone:Environment, and VectorStoreSettings:Pinecone:IndexName in settings.");
             throw new InvalidOperationException("Pinecone configuration is missing or invalid.");
         }
 

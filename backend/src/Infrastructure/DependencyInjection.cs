@@ -68,8 +68,11 @@ public static class DependencyInjection
         // Register AI Content Generator
         services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
 
-        // Register Vector Store
+        // Register Embedding Settings
         services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));
+
+        // Register Vector Store
+        services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
         services.AddTransient<PineconeVectorStore>();
 
         services.AddSingleton<IVectorStoreFactory, VectorStoreFactory>();
