@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Chat;
 
-public class LocalAIProvider : ILLMProvider
+public class LocalAIProvider : IChatProvider
 {
     private readonly LocalAISettings _localAISettings;
 
-    public LocalAIProvider(IOptions<ChatSettings> chatSettings)
+    public LocalAIProvider(IOptions<AIChatSettings> chatSettings)
     {
         _localAISettings = chatSettings.Value.Providers["LocalAI"] as LocalAISettings ?? throw new InvalidOperationException("LocalAI settings not found.");
     }

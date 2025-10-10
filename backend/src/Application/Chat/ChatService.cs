@@ -7,16 +7,16 @@ public class ChatService : IChatService
 {
     private readonly IVectorStore _vectorStore;
     private readonly IEmbeddingGenerator _embeddingGenerator;
-    private readonly ILLMProviderFactory _llmProviderFactory;
+    private readonly IChatProviderFactory _chatProviderFactory;
 
     public ChatService(
         IVectorStore vectorStore,
         IEmbeddingGenerator embeddingGenerator,
-        ILLMProviderFactory llmProviderFactory)
+        IChatProviderFactory chatProviderFactory)
     {
         _vectorStore = vectorStore;
         _embeddingGenerator = embeddingGenerator;
-        _llmProviderFactory = llmProviderFactory;
+        _chatProviderFactory = chatProviderFactory;
     }
 
     public async Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null)
@@ -70,12 +70,12 @@ public class ChatService : IChatService
         var prompt = promptBuilder.ToString();
 
         // Call the LLM provider
-        var llmProvider = _llmProviderFactory.GetProvider();
-        var llmResponse = await llmProvider.GenerateResponseAsync(prompt);
+        var chatProvider = _chatProviderFactory.GetProvider();
+        var response = await chatProvider.GenerateResponseAsync(userMessage);
 
         return new ChatResponse
         {
-            Response = llmResponse,
+            Response = response,
             Context = context?.ToList() ?? new List<string>()
         };
     }

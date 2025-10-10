@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Chat;
 
-public class OpenAIProvider : ILLMProvider
+public class OpenAIProvider : IChatProvider
 {
     private readonly OpenAISettings _openAISettings;
 
-    public OpenAIProvider(IOptions<ChatSettings> chatSettings)
+    public OpenAIProvider(IOptions<AIChatSettings> chatSettings)
     {
         _openAISettings = chatSettings.Value.Providers["OpenAI"] as OpenAISettings ?? throw new InvalidOperationException("OpenAI settings not found.");
     }

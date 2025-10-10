@@ -54,11 +54,11 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
 
         // Register Chat Module
-        services.Configure<ChatSettings>(configuration.GetSection(ChatSettings.SectionName));
-        services.AddTransient<ILLMProvider, GeminiProvider>();
-        services.AddTransient<ILLMProvider, OpenAIProvider>();
-        services.AddTransient<ILLMProvider, LocalAIProvider>();
-        services.AddSingleton<ILLMProviderFactory, LLMProviderFactory>();
+        services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));
+        services.AddTransient<IChatProvider, GeminiProvider>();
+        services.AddTransient<IChatProvider, OpenAIProvider>();
+        services.AddTransient<IChatProvider, LocalAIProvider>();
+        services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
         services.AddScoped<IChatService, backend.Application.Chat.ChatService>();
         services.AddScoped<IEmbeddingGenerator, backend.Infrastructure.AI.EmbeddingGenerator>();
 
