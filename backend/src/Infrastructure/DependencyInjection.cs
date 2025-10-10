@@ -75,8 +75,8 @@ public static class DependencyInjection
         services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
         services.AddTransient<PineconeVectorStore>();
 
-        services.AddSingleton<IVectorStoreFactory, VectorStoreFactory>();
-        services.AddTransient(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
+        services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
+        services.AddScoped<IVectorStore>(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
 
         return services;
     }

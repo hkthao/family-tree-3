@@ -3,8 +3,6 @@ using backend.Application.AI.VectorStore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
-using backend.Application.AI.Embeddings;
-using backend.Application.Common.Models.AISettings;
 
 namespace backend.Infrastructure.AI.VectorStore;
 
