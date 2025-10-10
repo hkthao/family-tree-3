@@ -1,4 +1,5 @@
 using backend.Application.AI.Common;
+using backend.Application.AI.ContentGenerators;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.Chat.Queries;
-using backend.Application.Chat;
+using backend.Application.AI.Chat;
+using backend.Application.AI.Chat.Queries;
 
 namespace backend.Web.Controllers;
 

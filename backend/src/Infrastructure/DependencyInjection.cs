@@ -1,14 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.VectorStore;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
-using backend.Infrastructure.VectorStore;
-using backend.Infrastructure.Chat;
-using backend.Application.AI;
+using backend.Infrastructure.AI.Chat;
+using backend.Infrastructure.AI.VectorStore;
+using backend.Application.AI.ContentGenerators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using backend.Application.AI.Embeddings;
+using backend.Application.AI.VectorStore;
+using backend.Infrastructure.AI.Embeddings;
+using backend.Application.AI.Chat;
 
 namespace backend.Infrastructure;
 
@@ -59,8 +62,8 @@ public static class DependencyInjection
         services.AddTransient<IChatProvider, OpenAIProvider>();
         services.AddTransient<IChatProvider, LocalAIProvider>();
         services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
-        services.AddScoped<IChatService, backend.Application.Chat.ChatService>();
-        services.AddScoped<IEmbeddingGenerator, backend.Infrastructure.AI.EmbeddingGenerator>();
+        services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IEmbeddingGenerator, EmbeddingGenerator>();
 
         // Register AI Content Generator
         services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
@@ -70,7 +73,7 @@ public static class DependencyInjection
         services.AddTransient<PineconeVectorStore>();
 
         services.AddSingleton<IVectorStoreFactory, VectorStoreFactory>();
-        services.AddTransient<IVectorStore>(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
+        services.AddTransient(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
 
         return services;
     }

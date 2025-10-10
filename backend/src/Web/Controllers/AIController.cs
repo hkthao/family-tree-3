@@ -1,8 +1,6 @@
 using backend.Application.AI.Commands.GenerateBiography;
 using backend.Application.AI.Commands.SaveAIBiography; // Add this
 using backend.Application.AI.Common;
-using backend.Application.AI.Queries;
-using backend.Application.AI.Queries.GetAIProviders;
 using backend.Application.AI.Queries.GetLastAIBiography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,20 +53,7 @@ public class AIController : ControllerBase
         return BadRequest(result.Error);
     }
 
-    /// <summary>
-    /// Retrieves a list of available AI providers and their current usage status.
-    /// </summary>
-    /// <returns>A list of AI providers with their status and usage.</returns>
-    [HttpGet("biography/providers")]
-    public async Task<ActionResult<List<AIProviderDto>>> GetAIProviders()
-    {
-        var result = await _mediator.Send(new GetAIProvidersQuery());
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
-    }
+
 
     /// <summary>
     /// Saves an AI-generated biography for a member.

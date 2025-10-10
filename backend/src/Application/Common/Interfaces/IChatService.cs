@@ -1,4 +1,4 @@
-using backend.Application.Chat;
+using backend.Application.AI.Chat;
 
 namespace backend.Application.Common.Interfaces;
 
