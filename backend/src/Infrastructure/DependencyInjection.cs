@@ -5,6 +5,7 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.VectorStore;
 using backend.Infrastructure.Chat;
+using backend.Application.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +54,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
 
         // Register Chat Module
-        services.Configure<ChatSettings>(configuration.GetSection("Chat"));
+        services.Configure<ChatSettings>(configuration.GetSection(ChatSettings.SectionName));
         services.AddTransient<ILLMProvider, GeminiProvider>();
         services.AddTransient<ILLMProvider, OpenAIProvider>();
         services.AddTransient<ILLMProvider, LocalAIProvider>();
@@ -61,9 +62,11 @@ public static class DependencyInjection
         services.AddScoped<IChatService, backend.Application.Chat.ChatService>();
         services.AddScoped<IEmbeddingGenerator, backend.Infrastructure.AI.EmbeddingGenerator>();
 
+        // Register AI Content Generator
+        services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
+
         // Register Vector Store
-        services.Configure<VectorStoreSettings>(configuration.GetSection("VectorStore"));
-        services.AddSingleton<IVectorStoreSettings, VectorStoreSettings>();
+        services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));
         services.AddTransient<PineconeVectorStore>();
 
         services.AddSingleton<IVectorStoreFactory, VectorStoreFactory>();

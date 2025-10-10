@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Events;
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.AI.Commands.GenerateBiography;
 
@@ -13,7 +14,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
     private readonly IAIUsageTracker _aiUsageTracker;
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IAISettings _aiSettings;
+    private readonly IOptions<AIContentGeneratorSettings> _aiContentGeneratorSettings;
 
     public GenerateBiographyCommandHandler(
         IApplicationDbContext context,
@@ -21,14 +22,14 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
         IAIUsageTracker aiUsageTracker,
         IUser user,
         IAuthorizationService authorizationService,
-        IAISettings aiSettings)
+        IOptions<AIContentGeneratorSettings> aiContentGeneratorSettings)
     {
         _context = context;
         _aiContentGenerator = aiContentGenerator;
         _aiUsageTracker = aiUsageTracker;
         _user = user;
         _authorizationService = authorizationService;
-        _aiSettings = aiSettings;
+        _aiContentGeneratorSettings = aiContentGeneratorSettings;
     }
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
@@ -84,7 +85,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
             UserPrompt = finalPrompt,
             Style = request.Style,
             Language = request.Language,
-            MaxTokens = _aiSettings.MaxTokensPerRequest, // Use configurable max tokens
+            MaxTokens = _aiContentGeneratorSettings.Value.MaxTokensPerRequest, // Use configurable max tokens
             GeneratedFromDB = generatedFromDB,
             MemberId = request.MemberId
         };

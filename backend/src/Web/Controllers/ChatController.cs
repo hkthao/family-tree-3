@@ -1,4 +1,3 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.Chat.Queries;
 using backend.Application.Chat;

@@ -4,25 +4,28 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using backend.Application.AI;
+using backend.Application.Common.Models.AISettings;
 
 namespace backend.Infrastructure.AI;
 
 public class GeminiAIContentGenerator : IAIContentGenerator
 {
     private readonly ILogger<GeminiAIContentGenerator> _logger;
-    private readonly AIConfig _aiConfig;
+    private readonly AIContentGeneratorSettings _aiContentGeneratorSettings;
 
     public AIProviderType ProviderType => AIProviderType.Gemini;
 
-    public GeminiAIContentGenerator(ILogger<GeminiAIContentGenerator> logger, IOptions<AIConfig> aiConfig)
+    public GeminiAIContentGenerator(ILogger<GeminiAIContentGenerator> logger, IOptions<AIContentGeneratorSettings> aiContentGeneratorSettings)
     {
         _logger = logger;
-        _aiConfig = aiConfig.Value;
+        _aiContentGeneratorSettings = aiContentGeneratorSettings.Value;
     }
 
     public async Task<Result<AIResult>> GenerateContentAsync(AIRequest request, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_aiConfig.Gemini?.ApiKey))
+        var geminiSettings = _aiContentGeneratorSettings.Providers["Gemini"] as GeminiSettings;
+        if (geminiSettings == null || string.IsNullOrEmpty(geminiSettings.ApiKey))
         {
             return Result<AIResult>.Failure("Gemini API Key is not configured.", "ConfigurationError");
         }

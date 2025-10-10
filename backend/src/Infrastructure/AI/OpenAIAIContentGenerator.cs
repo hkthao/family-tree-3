@@ -4,25 +4,28 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using backend.Application.AI;
+using backend.Application.Common.Models.AISettings;
 
 namespace backend.Infrastructure.AI;
 
 public class OpenAIAIContentGenerator : IAIContentGenerator
 {
     private readonly ILogger<OpenAIAIContentGenerator> _logger;
-    private readonly AIConfig _aiConfig;
+    private readonly AIContentGeneratorSettings _aiContentGeneratorSettings;
 
     public AIProviderType ProviderType => AIProviderType.OpenAI;
 
-    public OpenAIAIContentGenerator(ILogger<OpenAIAIContentGenerator> logger, IOptions<AIConfig> aiConfig)
+    public OpenAIAIContentGenerator(ILogger<OpenAIAIContentGenerator> logger, IOptions<AIContentGeneratorSettings> aiContentGeneratorSettings)
     {
         _logger = logger;
-        _aiConfig = aiConfig.Value;
+        _aiContentGeneratorSettings = aiContentGeneratorSettings.Value;
     }
 
     public async Task<Result<AIResult>> GenerateContentAsync(AIRequest request, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_aiConfig.OpenAI?.ApiKey))
+        var openAISettings = _aiContentGeneratorSettings.Providers["OpenAI"] as OpenAISettings;
+        if (openAISettings == null || string.IsNullOrEmpty(openAISettings.ApiKey))
         {
             return Result<AIResult>.Failure("OpenAI API Key is not configured.", "ConfigurationError");
         }

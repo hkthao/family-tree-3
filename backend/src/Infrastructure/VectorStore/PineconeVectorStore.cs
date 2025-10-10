@@ -1,6 +1,7 @@
 using backend.Application.Common.Models;
 using backend.Application.VectorStore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Pinecone;
 
 namespace backend.Infrastructure.VectorStore;
@@ -8,22 +9,29 @@ namespace backend.Infrastructure.VectorStore;
 public class PineconeVectorStore : IVectorStore
 {
     private readonly ILogger<PineconeVectorStore> _logger;
-    private readonly IVectorStoreSettings _settings;
+    private readonly IOptions<EmbeddingSettings> _embeddingSettings;
     private readonly PineconeClient _pineconeClient;
     private readonly IndexClient _index;
     private readonly string _indexName;
 
-    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IVectorStoreSettings settings)
+    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<EmbeddingSettings> embeddingSettings)
     {
         _logger = logger;
-        _settings = settings;
+        _embeddingSettings = embeddingSettings;
 
-        var apiKey = _settings.Pinecone.ApiKey;
-        _indexName = _settings.Pinecone.IndexName;
+        var pineconeSettings = _embeddingSettings.Value.Pinecone;
+
+        if (pineconeSettings == null)
+        {
+            throw new InvalidOperationException("Pinecone settings not found or invalid.");
+        }
+
+        var apiKey = pineconeSettings.ApiKey;
+        _indexName = pineconeSettings.IndexName;
 
         if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(_indexName))
         {
-            _logger.LogError("Pinecone configuration is missing or invalid. Check VectorStore:Pinecone:ApiKey, VectorStore:Pinecone:Environment, and VectorStore:Pinecone:IndexName in settings.");
+            _logger.LogError("Pinecone configuration is missing or invalid. Check EmbeddingSettings:Pinecone:ApiKey, EmbeddingSettings:Pinecone:Environment, and EmbeddingSettings:Pinecone:IndexName in settings.");
             throw new InvalidOperationException("Pinecone configuration is missing or invalid.");
         }
 

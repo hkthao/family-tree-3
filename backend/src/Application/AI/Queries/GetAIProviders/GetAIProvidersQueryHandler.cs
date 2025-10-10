@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.AI.Queries.GetAIProviders;
 
@@ -12,14 +13,14 @@ public class GetAIProvidersQueryHandler : IRequestHandler<GetAIProvidersQuery, R
     private readonly IAIUsageTracker _aiUsageTracker;
     private readonly IAuthorizationService _authorizationService;
     private readonly IAuth0Config _auth0Config; // To get the namespace for custom claims
-    private readonly IAISettings _aiSettings;
+    private readonly IOptions<AIContentGeneratorSettings> _aiContentGeneratorSettings;
 
-    public GetAIProvidersQueryHandler(IAIUsageTracker aiUsageTracker, IAuthorizationService authorizationService, IAuth0Config auth0Config, IAISettings aiSettings)
+    public GetAIProvidersQueryHandler(IAIUsageTracker aiUsageTracker, IAuthorizationService authorizationService, IAuth0Config auth0Config, IOptions<AIContentGeneratorSettings> aiContentGeneratorSettings)
     {
         _aiUsageTracker = aiUsageTracker;
         _authorizationService = authorizationService;
         _auth0Config = auth0Config;
-        _aiSettings = aiSettings;
+        _aiContentGeneratorSettings = aiContentGeneratorSettings;
     }
 
     public async Task<Result<List<AIProviderDto>>> Handle(GetAIProvidersQuery request, CancellationToken cancellationToken)
@@ -33,44 +34,44 @@ public class GetAIProvidersQueryHandler : IRequestHandler<GetAIProvidersQuery, R
         var providers = new List<AIProviderDto>();
 
         // Gemini Provider
-        if (_aiSettings.Provider == AIProviderType.Gemini)
+        if (_aiContentGeneratorSettings.Value.Provider == AIProviderType.Gemini)
         {
             providers.Add(new AIProviderDto
             {
                 ProviderType = AIProviderType.Gemini,
                 Name = "Google Gemini",
                 IsEnabled = true,
-                DailyUsageLimit = _aiSettings.DailyUsageLimit,
+                DailyUsageLimit = _aiContentGeneratorSettings.Value.DailyUsageLimit,
                 CurrentDailyUsage = (await _aiUsageTracker.GetDailyUsageCountAsync(Guid.Empty, cancellationToken)).Value, // TODO: Get actual user ID
-                MaxTokensPerRequest = _aiSettings.MaxTokensPerRequest
+                MaxTokensPerRequest = _aiContentGeneratorSettings.Value.MaxTokensPerRequest
             });
         }
 
         // OpenAI Provider
-        if (_aiSettings.Provider == AIProviderType.OpenAI)
+        if (_aiContentGeneratorSettings.Value.Provider == AIProviderType.OpenAI)
         {
             providers.Add(new AIProviderDto
             {
                 ProviderType = AIProviderType.OpenAI,
                 Name = "OpenAI",
                 IsEnabled = true,
-                DailyUsageLimit = _aiSettings.DailyUsageLimit,
+                DailyUsageLimit = _aiContentGeneratorSettings.Value.DailyUsageLimit,
                 CurrentDailyUsage = (await _aiUsageTracker.GetDailyUsageCountAsync(Guid.Empty, cancellationToken)).Value, // TODO: Get actual user ID
-                MaxTokensPerRequest = _aiSettings.MaxTokensPerRequest
+                MaxTokensPerRequest = _aiContentGeneratorSettings.Value.MaxTokensPerRequest
             });
         }
 
         // LocalAI Provider
-        if (_aiSettings.Provider == AIProviderType.LocalAI)
+        if (_aiContentGeneratorSettings.Value.Provider == AIProviderType.LocalAI)
         {
             providers.Add(new AIProviderDto
             {
                 ProviderType = AIProviderType.LocalAI,
                 Name = "Local AI",
                 IsEnabled = true,
-                DailyUsageLimit = _aiSettings.DailyUsageLimit,
+                DailyUsageLimit = _aiContentGeneratorSettings.Value.DailyUsageLimit,
                 CurrentDailyUsage = (await _aiUsageTracker.GetDailyUsageCountAsync(Guid.Empty, cancellationToken)).Value, // TODO: Get actual user ID
-                MaxTokensPerRequest = _aiSettings.MaxTokensPerRequest
+                MaxTokensPerRequest = _aiContentGeneratorSettings.Value.MaxTokensPerRequest
             });
         }
 

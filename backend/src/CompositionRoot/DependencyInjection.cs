@@ -5,6 +5,7 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Infrastructure;
 using backend.Infrastructure.AI;
+using backend.Application.AI;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
@@ -25,10 +26,6 @@ public static class DependencyInjection
         services.AddApplicationServices();
         services.AddInfrastructureServices(configuration);
 
-        // Configure AIConfig
-        services.Configure<AIConfig>(configuration.GetSection("AI"));
-        services.AddSingleton<IAISettings>(sp => sp.GetRequiredService<IOptions<AIConfig>>().Value);
-
         // Register AI Content Generators
         services.AddTransient<GeminiAIContentGenerator>();
         services.AddTransient<OpenAIAIContentGenerator>();
@@ -36,13 +33,13 @@ public static class DependencyInjection
 
         services.AddTransient<IAIContentGenerator>(sp =>
         {
-            var aiConfig = sp.GetRequiredService<IOptions<AIConfig>>().Value;
-            return aiConfig.Provider switch
+            var aiContentGeneratorSettings = sp.GetRequiredService<IOptions<AIContentGeneratorSettings>>().Value;
+            return aiContentGeneratorSettings.Provider switch
             {
                 AIProviderType.Gemini => sp.GetRequiredService<GeminiAIContentGenerator>(),
                 AIProviderType.OpenAI => sp.GetRequiredService<OpenAIAIContentGenerator>(),
                 AIProviderType.LocalAI => sp.GetRequiredService<LocalAIContentGenerator>(),
-                _ => throw new InvalidOperationException($"No AI content generator configured for provider: {aiConfig.Provider}")
+                _ => throw new InvalidOperationException($"No AI content generator configured for provider: {aiContentGeneratorSettings.Provider}")
             };
         });
 

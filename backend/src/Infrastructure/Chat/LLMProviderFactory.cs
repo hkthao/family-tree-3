@@ -16,7 +16,7 @@ public class LLMProviderFactory : ILLMProviderFactory
 
     public ILLMProvider GetProvider()
     {
-        var providerName = _chatSettings.Value.Provider;
+        var providerName = _chatSettings.Value.Provider.ToString();
         var provider = _providers.FirstOrDefault(p => p.GetType().Name.StartsWith(providerName, StringComparison.OrdinalIgnoreCase));
 
         if (provider == null)

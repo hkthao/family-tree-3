@@ -4,25 +4,28 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using backend.Application.AI;
+using backend.Application.Common.Models.AISettings;
 
 namespace backend.Infrastructure.AI;
 
 public class LocalAIContentGenerator : IAIContentGenerator
 {
     private readonly ILogger<LocalAIContentGenerator> _logger;
-    private readonly AIConfig _aiConfig;
+    private readonly AIContentGeneratorSettings _aiContentGeneratorSettings;
 
     public AIProviderType ProviderType => AIProviderType.LocalAI;
 
-    public LocalAIContentGenerator(ILogger<LocalAIContentGenerator> logger, IOptions<AIConfig> aiConfig)
+    public LocalAIContentGenerator(ILogger<LocalAIContentGenerator> logger, IOptions<AIContentGeneratorSettings> aiContentGeneratorSettings)
     {
         _logger = logger;
-        _aiConfig = aiConfig.Value;
+        _aiContentGeneratorSettings = aiContentGeneratorSettings.Value;
     }
 
     public async Task<Result<AIResult>> GenerateContentAsync(AIRequest request, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_aiConfig.LocalAI?.Endpoint))
+        var localAISettings = _aiContentGeneratorSettings.Providers["LocalAI"] as LocalAISettings;
+        if (localAISettings == null || string.IsNullOrEmpty(localAISettings.Endpoint))
         {
             return Result<AIResult>.Failure("LocalAI Endpoint is not configured.", "ConfigurationError");
         }

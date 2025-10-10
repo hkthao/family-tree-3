@@ -1,5 +1,4 @@
 using System.Text.Json;
-using backend.Domain.Common;
 using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
