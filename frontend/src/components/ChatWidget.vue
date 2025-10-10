@@ -28,7 +28,7 @@
               </v-avatar>
             </template>
             <v-card density="compact" :color="message.direction === 'outgoing' ? 'primary' : 'grey lighten-2'"
-              :dark="message.direction === 'outgoing'" class="message-bubble">
+              :dark="message.direction === 'outgoing'" class="message-bubble ">
               <v-card-text class="py-2">
                 {{ message.content }}
                 <div class="message-timestamp text-caption text-right mt-1">
@@ -147,7 +147,7 @@ onMounted(() => {
 
 .message-item {
   display: flex;
-  margin-bottom: 0px;
+  margin-bottom: 4px;
 }
 
 .message-outgoing {
@@ -159,27 +159,36 @@ onMounted(() => {
 }
 
 .message-bubble {
-  max-width: 85%;
   border-radius: 20px;
-  padding: 0;
+  padding: 4px;
 }
 
 .message-outgoing .message-bubble {
-  border-bottom-right-radius: 2px;
+  border-top-right-radius: 2px;
+
 }
 
 .message-incoming .message-bubble {
-  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+
 }
 
 .message-timestamp {
   font-size: 0.75em;
   opacity: 0.7;
+  min-width: max-content;
+  padding-right: 5px;
 }
 
 .chat-input-container {
-  padding: 10px;
   background-color: #fff;
   border-top: 1px solid #eee;
+}
+</style>
+
+<style>
+.message-item .v-list-item__append,
+.message-item .v-list-item__prepend {
+  align-self: start;
 }
 </style>

@@ -7,6 +7,8 @@
       <router-view />
     </v-main>
 
+    <ChatWidget />
+
     <v-snackbar
       v-model="notificationStore.snackbar.show"
       :timeout="notificationStore.snackbar.timeout"
@@ -22,6 +24,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { Sidebar, TopBar } from '@/components/layout';
 import AppBreadcrumbs from '@/components/common/AppBreadcrumbs.vue';
+import ChatWidget from '@/components/ChatWidget.vue';
 import { useAuthStore } from '@/stores/auth.store';
 import { useNotificationStore } from '@/stores/notification.store';
 
