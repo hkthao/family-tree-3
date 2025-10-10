@@ -384,5 +384,8 @@
   "login.welcomeMessage": "Welcome to Family Tree! 👋",
   "login.newOnPlatform": "New on our platform?",
   "login.createAccount": "Create an account",
-  "member.search.search": "Search"
+  "member.search.search": "Search",
+  "chat.title": "AI Assistant",
+  "chat.inputPlaceholder": "Type a message...",
+  "chat.initialMessage": "Hello, how can I help you?"
 }
