@@ -34,8 +34,8 @@ public class FamilyTreeService : IFamilyTreeService
 
         foreach (var member in members)
         {
-            graph[member.Id] = new List<Guid>();
-            parents[member.Id] = new List<Guid>();
+            graph[member.Id] = [];
+            parents[member.Id] = [];
         }
 
         foreach (var rel in relationships)
@@ -70,7 +70,7 @@ public class FamilyTreeService : IFamilyTreeService
         int maxGenerations = 0;
         foreach (var root in rootMembers)
         {
-            maxGenerations = Math.Max(maxGenerations, GetGenerations(root.Id, graph, new HashSet<Guid>()));
+            maxGenerations = Math.Max(maxGenerations, GetGenerations(root.Id, graph, []));
         }
 
         return maxGenerations;

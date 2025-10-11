@@ -8,5 +8,5 @@ public class AIProviderConfig
     public AIProviderType Provider { get; set; }
     public int MaxTokensPerRequest { get; set; }
     public int DailyUsageLimit { get; set; }
-    public Dictionary<string, IAIProviderSettings> Providers { get; set; } = new Dictionary<string, IAIProviderSettings>();
+    public Dictionary<string, IAIProviderSettings> Providers { get; set; } = [];
 }

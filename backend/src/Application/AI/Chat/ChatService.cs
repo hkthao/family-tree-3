@@ -77,7 +77,7 @@ public class ChatService : IChatService
         return new ChatResponse
         {
             Response = response,
-            Context = context?.ToList() ?? new List<string>()
+            Context = context?.ToList() ?? []
         };
     }
 }

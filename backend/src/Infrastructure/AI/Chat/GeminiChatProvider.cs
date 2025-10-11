@@ -4,11 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.AI.Chat;
 
-public class GeminiProvider : IChatProvider
+public class GeminiChatProvider : IChatProvider
 {
     private readonly GeminiSettings _geminiSettings;
 
-    public GeminiProvider(IOptions<AIChatSettings> chatSettings)
+    public GeminiChatProvider(IOptions<AIChatSettings> chatSettings)
     {
         _geminiSettings = chatSettings.Value.Providers["Gemini"] as GeminiSettings ?? throw new InvalidOperationException("Gemini settings not found.");
     }

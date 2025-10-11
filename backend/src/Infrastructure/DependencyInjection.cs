@@ -58,9 +58,9 @@ public static class DependencyInjection
 
         // Register Chat Module
         services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));
-        services.AddTransient<IChatProvider, GeminiProvider>();
-        services.AddTransient<IChatProvider, OpenAIProvider>();
-        services.AddTransient<IChatProvider, LocalAIProvider>();
+        services.AddTransient<IChatProvider, GeminiChatProvider>();
+        services.AddTransient<IChatProvider, OpenAIChatProvider>();
+        services.AddTransient<IChatProvider, LocalChatProvider>();
         services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IEmbeddingGenerator, EmbeddingGenerator>();

@@ -12,5 +12,5 @@ public class EmbeddingSettings
     public int MaxTokensPerRequest { get; set; }
     public int DailyUsageLimit { get; set; }
 
-    public Dictionary<string, IAIProviderSettings> Providers { get; set; } = new Dictionary<string, IAIProviderSettings>();
+    public Dictionary<string, IAIProviderSettings> Providers { get; set; } = [];
 }

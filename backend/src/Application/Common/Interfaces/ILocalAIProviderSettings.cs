@@ -1,6 +1,6 @@
 namespace backend.Application.Common.Interfaces;
 
-public interface ILocalAIProviderSettings
+public interface ILocalChatProviderSettings
 {
     string Endpoint { get; set; }
 }
