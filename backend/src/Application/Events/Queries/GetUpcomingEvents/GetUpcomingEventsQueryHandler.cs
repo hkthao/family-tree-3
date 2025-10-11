@@ -26,7 +26,7 @@ namespace backend.Application.Events.Queries.GetUpcomingEvents
                 return Result<List<EventDto>>.Failure("User profile not found.", "NotFound");
             }
 
-            IQueryable<backend.Domain.Entities.Event> eventsQuery = _context.Events;
+            IQueryable<Domain.Entities.Event> eventsQuery = _context.Events;
 
             if (!_authorizationService.IsAdmin())
             {

@@ -1,25 +1,26 @@
 using System.Security.Claims;
 using backend.Application.Common.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Auth
 {
     public class Auth0ClaimProvider : IExternalClaimProvider
     {
-        private readonly IAuth0Config _auth0Config;
+        private readonly Auth0Config _authConfig;
 
-        public Auth0ClaimProvider(IAuth0Config auth0Config)
+        public Auth0ClaimProvider(IOptions<AuthConfig> authConfig)
         {
-            _auth0Config = auth0Config;
+            _authConfig = authConfig.Value.Auth0 ?? throw new ArgumentNullException("AuthConfig.Auth0 cannot be null.");
         }
 
         public string? GetEmail(ClaimsPrincipal principal)
         {
-            return principal.FindFirst($"{_auth0Config.Namespace}email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
+            return principal.FindFirst($"{_authConfig.Namespace}email")?.Value ?? principal.FindFirst(ClaimTypes.Email)?.Value;
         }
 
         public string? GetName(ClaimsPrincipal principal)
         {
-            return principal.FindFirst($"{_auth0Config.Namespace}name")?.Value ?? principal.FindFirst(ClaimTypes.Name)?.Value;
+            return principal.FindFirst($"{_authConfig.Namespace}name")?.Value ?? principal.FindFirst(ClaimTypes.Name)?.Value;
         }
 
         public string? GetExternalId(ClaimsPrincipal principal)

@@ -19,9 +19,8 @@ namespace backend.Application
                 cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
             });
 
-            services.AddScoped<backend.Application.Common.Interfaces.IFamilyTreeService, backend.Application.Services.FamilyTreeService>();
-
-            services.Configure<backend.Application.Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(backend.Application.Common.Models.EmbeddingSettings)));
+            services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
+            services.Configure<Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(Common.Models.EmbeddingSettings)));
 
             return services;
         }

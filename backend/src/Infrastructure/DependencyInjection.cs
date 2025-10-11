@@ -70,7 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IEmbeddingProvider, OpenAIEmbeddingProvider>();
         services.AddScoped<IEmbeddingProvider, CohereEmbeddingProvider>();
         services.AddScoped<IEmbeddingProvider, LocalEmbeddingProvider>();
-                    services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
+        services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
         // Register Vector Store
         services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
         services.AddTransient<PineconeVectorStore>();

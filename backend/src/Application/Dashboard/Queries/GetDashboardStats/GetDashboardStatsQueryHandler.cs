@@ -22,7 +22,7 @@ namespace backend.Application.Dashboard.Queries.GetDashboardStats
                 return Result<DashboardStatsDto>.Failure("User profile not found.", "NotFound");
             }
 
-            IQueryable<backend.Domain.Entities.Family> familiesQuery = _context.Families;
+            IQueryable<Domain.Entities.Family> familiesQuery = _context.Families;
 
             if (!_authorizationService.IsAdmin())
             {

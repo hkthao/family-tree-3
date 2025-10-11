@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using backend.Domain.Enums;
 using backend.Infrastructure;
+using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 
 namespace backend.CompositionRoot;
 
@@ -23,14 +24,9 @@ public static class DependencyInjection
         services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
-        // Add Memory Cache services
-        services.AddMemoryCache();
-
         // Configure StorageSettings
         services.Configure<StorageSettings>(configuration.GetSection("Storage"));
-
         services.AddScoped<IFileStorageFactory, FileStorageFactory>();
-
         // Register IFileStorage based on configuration
         services.AddTransient(sp =>
         {
@@ -40,20 +36,19 @@ public static class DependencyInjection
         });
 
         // Configure Auth0Config
-        services.Configure<Auth0Config>(configuration.GetSection("Auth0"));
-        services.AddSingleton<IAuth0Config>(sp => sp.GetRequiredService<IOptions<Auth0Config>>().Value);
+        services.Configure<AuthConfig>(configuration.GetSection("Auth"));
 
         // Configure Auth0 Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = $"https://{configuration["Auth0:Domain"]}";
-                options.Audience = configuration["Auth0:Audience"];
+               options.Authority = $"https://{configuration["Auth:Authority"]}";
+                options.Audience = configuration["Auth:Audience"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = configuration["Auth0:Audience"],
+                    ValidAudience = configuration["Auth:Audience"],
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true
                 };
@@ -72,7 +67,7 @@ public static class DependencyInjection
 
                                 try
                                 {
-                                    var command = new backend.Application.Identity.UserProfiles.Commands.SyncUserProfile.SyncUserProfileCommand
+                                    var command = new SyncUserProfileCommand
                                     {
                                         UserPrincipal = context.Principal!
                                     };
