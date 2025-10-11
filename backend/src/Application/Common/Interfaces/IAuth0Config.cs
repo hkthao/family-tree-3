@@ -1,8 +1,9 @@
-namespace backend.Application.Common.Interfaces;
-
-public interface IAuth0Config
+namespace backend.Application.Common.Interfaces
 {
-    string? Domain { get; set; }
-    string? Audience { get; set; }
-    string? Namespace { get; set; }
+    public interface IAuth0Config
+    {
+        string? Domain { get; set; }
+        string? Audience { get; set; }
+        string? Namespace { get; set; }
+    }
 }

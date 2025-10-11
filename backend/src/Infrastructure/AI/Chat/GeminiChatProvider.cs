@@ -2,20 +2,21 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AISettings;
 using Microsoft.Extensions.Options;
 
-namespace backend.Infrastructure.AI.Chat;
-
-public class GeminiChatProvider : IChatProvider
+namespace backend.Infrastructure.AI.Chat
 {
-    private readonly GeminiSettings _geminiSettings;
-
-    public GeminiChatProvider(IOptions<AIChatSettings> chatSettings)
+    public class GeminiChatProvider : IChatProvider
     {
-        _geminiSettings = chatSettings.Value.Providers["Gemini"] as GeminiSettings ?? throw new InvalidOperationException("Gemini settings not found.");
-    }
+        private readonly GeminiSettings _geminiSettings;
 
-    public async Task<string> GenerateResponseAsync(string prompt)
-    {
-        // Dummy implementation for Gemini, now with access to _geminiSettings.ApiKey and _geminiSettings.Model
-        return await Task.FromResult($"Gemini responded to: {prompt} using model {_geminiSettings.Model} with API Key {_geminiSettings.ApiKey}");
+        public GeminiChatProvider(IOptions<AIChatSettings> chatSettings)
+        {
+            _geminiSettings = chatSettings.Value.Providers["Gemini"] as GeminiSettings ?? throw new InvalidOperationException("Gemini settings not found.");
+        }
+
+        public async Task<string> GenerateResponseAsync(string prompt)
+        {
+            // Dummy implementation for Gemini, now with access to _geminiSettings.ApiKey and _geminiSettings.Model
+            return await Task.FromResult($"Gemini responded to: {prompt} using model {_geminiSettings.Model} with API Key {_geminiSettings.ApiKey}");
+        }
     }
 }

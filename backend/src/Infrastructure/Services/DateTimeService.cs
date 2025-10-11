@@ -1,8 +1,9 @@
 using backend.Application.Common.Interfaces;
 
-namespace backend.Infrastructure.Services;
-
-public class DateTimeService : IDateTime
+namespace backend.Infrastructure.Services
 {
-    public DateTime Now => DateTime.UtcNow;
+    public class DateTimeService : IDateTime
+    {
+        public DateTime Now => DateTime.UtcNow;
+    }
 }

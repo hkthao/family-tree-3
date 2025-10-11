@@ -1,6 +1,7 @@
-namespace backend.Application.Common.Interfaces;
-
-public interface IChatProviderFactory
+namespace backend.Application.Common.Interfaces
 {
-    IChatProvider GetProvider();
+    public interface IChatProviderFactory
+    {
+        IChatProvider GetProvider();
+    }
 }

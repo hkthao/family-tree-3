@@ -1,16 +1,17 @@
-namespace backend.Application.Relationships.Commands.CreateRelationship;
-
-public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelationshipCommand>
+namespace backend.Application.Relationships.Commands.CreateRelationship
 {
-    public CreateRelationshipCommandValidator()
+    public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelationshipCommand>
     {
-        RuleFor(v => v.SourceMemberId)
-            .NotEmpty();
+        public CreateRelationshipCommandValidator()
+        {
+            RuleFor(v => v.SourceMemberId)
+                .NotEmpty();
 
-        RuleFor(v => v.TargetMemberId)
-            .NotEmpty();
+            RuleFor(v => v.TargetMemberId)
+                .NotEmpty();
 
-        RuleFor(v => v.Type)
-            .NotEmpty();
+            RuleFor(v => v.Type)
+                .NotEmpty();
+        }
     }
 }

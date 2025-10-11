@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications;
-
-public class MemberByIdSpecification : Specification<Member>, ISingleResultSpecification<Member>
+namespace backend.Application.Members.Specifications
 {
-    public MemberByIdSpecification(Guid id)
+    public class MemberByIdSpecification : Specification<Member>, ISingleResultSpecification<Member>
     {
-        Query.Where(m => m.Id == id);
+        public MemberByIdSpecification(Guid id)
+        {
+            Query.Where(m => m.Id == id);
+        }
     }
 }

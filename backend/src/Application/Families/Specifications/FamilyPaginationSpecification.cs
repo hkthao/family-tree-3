@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Families.Specifications;
-
-public class FamilyPaginationSpecification : Specification<Family>
+namespace backend.Application.Families.Specifications
 {
-    public FamilyPaginationSpecification(int skip, int take)
+    public class FamilyPaginationSpecification : Specification<Family>
     {
-        Query.Skip(skip).Take(take);
+        public FamilyPaginationSpecification(int skip, int take)
+        {
+            Query.Skip(skip).Take(take);
+        }
     }
 }

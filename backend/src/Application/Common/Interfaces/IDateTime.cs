@@ -1,6 +1,7 @@
-namespace backend.Application.Common.Interfaces;
-
-public interface IDateTime
+namespace backend.Application.Common.Interfaces
 {
-    DateTime Now { get; }
+    public interface IDateTime
+    {
+        DateTime Now { get; }
+    }
 }

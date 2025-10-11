@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.UserProfiles.Specifications;
-
-public class UserProfileByExternalIdSpecification : SingleResultSpecification<UserProfile>
+namespace backend.Application.UserProfiles.Specifications
 {
-    public UserProfileByExternalIdSpecification(string externalId)
+    public class UserProfileByExternalIdSpecification : SingleResultSpecification<UserProfile>
     {
-        Query.Where(up => up.ExternalId == externalId);
+        public UserProfileByExternalIdSpecification(string externalId)
+        {
+            Query.Where(up => up.ExternalId == externalId);
+        }
     }
 }

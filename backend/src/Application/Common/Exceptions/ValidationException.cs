@@ -1,22 +1,23 @@
 ﻿using FluentValidation.Results;
 
-namespace backend.Application.Common.Exceptions;
-
-public class ValidationException : Exception
+namespace backend.Application.Common.Exceptions
 {
-    public ValidationException()
-        : base("One or more validation failures have occurred.")
+    public class ValidationException : Exception
     {
-        Errors = new Dictionary<string, string[]>();
-    }
+        public ValidationException()
+            : base("One or more validation failures have occurred.")
+        {
+            Errors = new Dictionary<string, string[]>();
+        }
 
-    public ValidationException(IEnumerable<ValidationFailure> failures)
-        : this()
-    {
-        Errors = failures
-            .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
-            .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
-    }
+        public ValidationException(IEnumerable<ValidationFailure> failures)
+            : this()
+        {
+            Errors = failures
+                .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
+                .ToDictionary(failureGroup => failureGroup.Key, failureGroup => failureGroup.ToArray());
+        }
 
-    public IDictionary<string, string[]> Errors { get; }
+        public IDictionary<string, string[]> Errors { get; }
+    }
 }

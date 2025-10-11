@@ -1,15 +1,16 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications;
-
-public class MemberByFamilyIdSpecification : Specification<Member>
+namespace backend.Application.Members.Specifications
 {
-    public MemberByFamilyIdSpecification(Guid? familyId)
+    public class MemberByFamilyIdSpecification : Specification<Member>
     {
-        if (familyId.HasValue)
+        public MemberByFamilyIdSpecification(Guid? familyId)
         {
-            Query.Where(m => m.FamilyId == familyId.Value);
+            if (familyId.HasValue)
+            {
+                Query.Where(m => m.FamilyId == familyId.Value);
+            }
         }
     }
 }

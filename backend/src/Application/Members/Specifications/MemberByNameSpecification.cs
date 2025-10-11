@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications;
-
-public class MemberByNameSpecification : Specification<Member>
+namespace backend.Application.Members.Specifications
 {
-    public MemberByNameSpecification(string name)
+    public class MemberByNameSpecification : Specification<Member>
     {
-        Query.Where(m => m.FirstName.Contains(name) || m.LastName.Contains(name));
+        public MemberByNameSpecification(string name)
+        {
+            Query.Where(m => m.FirstName.Contains(name) || m.LastName.Contains(name));
+        }
     }
 }

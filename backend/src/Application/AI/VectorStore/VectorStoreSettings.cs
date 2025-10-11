@@ -1,12 +1,13 @@
 using backend.Application.Common.Models.AISettings;
 using backend.Domain.Enums;
 
-namespace backend.Application.AI.VectorStore;
-
-public class VectorStoreSettings
+namespace backend.Application.AI.VectorStore
 {
-    public const string SectionName = "VectorStoreSettings";
+    public class VectorStoreSettings
+    {
+        public const string SectionName = "VectorStoreSettings";
 
-    public VectorStoreProviderType VectorStoreProvider { get; set; }
-    public PineconeSettings Pinecone { get; set; } = null!;
+        public VectorStoreProviderType VectorStoreProvider { get; set; }
+        public PineconeSettings Pinecone { get; set; } = null!;
+    }
 }

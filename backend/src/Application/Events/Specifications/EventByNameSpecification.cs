@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Events.Specifications;
-
-public class EventByNameSpecification : Specification<Event>
+namespace backend.Application.Events.Specifications
 {
-    public EventByNameSpecification(string name)
+    public class EventByNameSpecification : Specification<Event>
     {
-        Query.Where(e => e.Name.Contains(name));
+        public EventByNameSpecification(string name)
+        {
+            Query.Where(e => e.Name.Contains(name));
+        }
     }
 }

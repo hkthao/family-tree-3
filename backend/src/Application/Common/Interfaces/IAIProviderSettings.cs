@@ -1,7 +1,8 @@
-namespace backend.Application.Common.Interfaces;
-
-public interface IAIProviderSettings
+namespace backend.Application.Common.Interfaces
 {
-    string ApiKey { get; set; }
-    string Model { get; set; }
+    public interface IAIProviderSettings
+    {
+        string ApiKey { get; set; }
+        string Model { get; set; }
+    }
 }

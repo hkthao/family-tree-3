@@ -1,25 +1,26 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
-namespace backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles;
-
-public class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfilesQuery, Result<List<UserProfileDto>>>
+namespace backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetAllUserProfilesQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public class GetAllUserProfilesQueryHandler : IRequestHandler<GetAllUserProfilesQuery, Result<List<UserProfileDto>>>
     {
-        _context = context;
-        _mapper = mapper;
-    }
+        private readonly IApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-    public async Task<Result<List<UserProfileDto>>> Handle(GetAllUserProfilesQuery request, CancellationToken cancellationToken)
-    {
-        var userProfiles = await _context.UserProfiles
-            .ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+        public GetAllUserProfilesQueryHandler(IApplicationDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
-        return Result<List<UserProfileDto>>.Success(userProfiles);
+        public async Task<Result<List<UserProfileDto>>> Handle(GetAllUserProfilesQuery request, CancellationToken cancellationToken)
+        {
+            var userProfiles = await _context.UserProfiles
+                .ProjectTo<UserProfileDto>(_mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
+
+            return Result<List<UserProfileDto>>.Success(userProfiles);
+        }
     }
 }

@@ -1,9 +1,10 @@
 using System.Security.Claims;
 
-namespace backend.Application.Common.Interfaces;
-
-public interface IUserProfileSyncService
+namespace backend.Application.Common.Interfaces
 {
-    Task<bool> SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default);
-    Task<backend.Domain.Entities.UserProfile?> GetUserProfileByExternalId(string externalId);
+    public interface IUserProfileSyncService
+    {
+        Task<bool> SyncUserProfileAsync(ClaimsPrincipal principal, CancellationToken cancellationToken = default);
+        Task<backend.Domain.Entities.UserProfile?> GetUserProfileByExternalId(string externalId);
+    }
 }

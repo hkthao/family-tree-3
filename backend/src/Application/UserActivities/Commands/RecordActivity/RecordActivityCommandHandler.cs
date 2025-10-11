@@ -3,71 +3,72 @@ using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
-namespace backend.Application.UserActivities.Commands.RecordActivity;
-
-/// <summary>
-/// Handler for recording a user activity.
-/// </summary>
-public class RecordActivityCommandHandler : IRequestHandler<RecordActivityCommand, Result<Guid>>
+namespace backend.Application.UserActivities.Commands.RecordActivity
 {
-    private readonly IApplicationDbContext _context;
-
-    public RecordActivityCommandHandler(IApplicationDbContext context)
+    /// <summary>
+    /// Handler for recording a user activity.
+    /// </summary>
+    public class RecordActivityCommandHandler : IRequestHandler<RecordActivityCommand, Result<Guid>>
     {
-        _context = context;
-    }
+        private readonly IApplicationDbContext _context;
 
-    public async Task<Result<Guid>> Handle(RecordActivityCommand request, CancellationToken cancellationToken)
-    {
-        Guid? groupId = null;
-
-        if (request.TargetId != null)
+        public RecordActivityCommandHandler(IApplicationDbContext context)
         {
-            switch (request.TargetType)
-            {
-                case TargetType.Family:
-                    groupId = Guid.Parse(request.TargetId);
-                    break;
-                case TargetType.Member:
-                    var member = await _context.Members.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
-                    groupId = member?.FamilyId;
-                    break;
-                case TargetType.Event:
-                    var @event = await _context.Events.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
-                    groupId = @event?.FamilyId;
-                    break;
-                case TargetType.Relationship:
-                    var relationship = await _context.Relationships.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
-                    if (relationship != null)
-                    {
-                        var sourceMember = await _context.Members.FindAsync(relationship.SourceMemberId, cancellationToken);
-                        groupId = sourceMember?.FamilyId;
-                    }
-                    break;
-                case TargetType.UserProfile:
-                    groupId = null;
-                    break;
-            }
+            _context = context;
         }
 
-        var entity = new UserActivity
+        public async Task<Result<Guid>> Handle(RecordActivityCommand request, CancellationToken cancellationToken)
         {
-            UserProfileId = request.UserProfileId,
-            ActionType = request.ActionType,
-            TargetType = request.TargetType,
-            TargetId = request.TargetId,
-            GroupId = groupId,
-            Metadata = request.Metadata,
-            ActivitySummary = request.ActivitySummary,
-        };
+            Guid? groupId = null;
 
-        _context.UserActivities.Add(entity);
+            if (request.TargetId != null)
+            {
+                switch (request.TargetType)
+                {
+                    case TargetType.Family:
+                        groupId = Guid.Parse(request.TargetId);
+                        break;
+                    case TargetType.Member:
+                        var member = await _context.Members.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
+                        groupId = member?.FamilyId;
+                        break;
+                    case TargetType.Event:
+                        var @event = await _context.Events.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
+                        groupId = @event?.FamilyId;
+                        break;
+                    case TargetType.Relationship:
+                        var relationship = await _context.Relationships.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
+                        if (relationship != null)
+                        {
+                            var sourceMember = await _context.Members.FindAsync(relationship.SourceMemberId, cancellationToken);
+                            groupId = sourceMember?.FamilyId;
+                        }
+                        break;
+                    case TargetType.UserProfile:
+                        groupId = null;
+                        break;
+                }
+            }
 
-        // SaveChangesAsync is awaited to ensure the activity is recorded.
-        // For true fire-and-forget, this could be wrapped in a background task,
-        // but for audit purposes, we generally want to ensure it's persisted.
-        await _context.SaveChangesAsync(cancellationToken);
+            var entity = new UserActivity
+            {
+                UserProfileId = request.UserProfileId,
+                ActionType = request.ActionType,
+                TargetType = request.TargetType,
+                TargetId = request.TargetId,
+                GroupId = groupId,
+                Metadata = request.Metadata,
+                ActivitySummary = request.ActivitySummary,
+            };
 
-        return Result<Guid>.Success(entity.Id);
+            _context.UserActivities.Add(entity);
+
+            // SaveChangesAsync is awaited to ensure the activity is recorded.
+            // For true fire-and-forget, this could be wrapped in a background task,
+            // but for audit purposes, we generally want to ensure it's persisted.
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result<Guid>.Success(entity.Id);
+        }
     }
 }

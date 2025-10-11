@@ -1,8 +1,9 @@
-namespace backend.Application.Common.Interfaces;
-
-public interface IVectorStoreProviderSettings
+namespace backend.Application.Common.Interfaces
 {
-    string ApiKey { get; set; }
-    string Environment { get; set; }
-    string IndexName { get; set; }
+    public interface IVectorStoreProviderSettings
+    {
+        string ApiKey { get; set; }
+        string Environment { get; set; }
+        string IndexName { get; set; }
+    }
 }

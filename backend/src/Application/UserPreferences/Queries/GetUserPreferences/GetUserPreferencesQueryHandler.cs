@@ -5,52 +5,53 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
 using backend.Domain.Enums;
 
-namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
-
-public class GetUserPreferencesQueryHandler : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
+namespace backend.Application.UserPreferences.Queries.GetUserPreferences
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IMapper _mapper;
-
-    public GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper)
+    public class GetUserPreferencesQueryHandler : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
     {
-        _context = context;
-        _user = user;
-        _mapper = mapper;
-    }
+        private readonly IApplicationDbContext _context;
+        private readonly IUser _user;
+        private readonly IMapper _mapper;
 
-    public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
-    {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
+        public GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper)
         {
-            return Result<UserPreferenceDto>.Failure("User is not authenticated.", "Authentication");
+            _context = context;
+            _user = user;
+            _mapper = mapper;
         }
 
-        var userProfile = await _context.UserProfiles
-            .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByAuth0IdSpec(currentUserId))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (userProfile == null)
+        public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
         {
-            return Result<UserPreferenceDto>.Failure("User profile not found.", "NotFound");
-        }
-
-        if (userProfile.UserPreference == null)
-        {
-            // Return default preferences if none exist
-            return Result<UserPreferenceDto>.Success(new UserPreferenceDto
+            var currentUserId = _user.Id;
+            if (string.IsNullOrEmpty(currentUserId))
             {
-                Theme = Theme.Light,
-                Language = Language.English,
-                EmailNotificationsEnabled = true,
-                SmsNotificationsEnabled = false,
-                InAppNotificationsEnabled = true,
-            });
-        }
+                return Result<UserPreferenceDto>.Failure("User is not authenticated.", "Authentication");
+            }
 
-        return Result<UserPreferenceDto>.Success(_mapper.Map<UserPreferenceDto>(userProfile.UserPreference));
+            var userProfile = await _context.UserProfiles
+                .Include(up => up.UserPreference)
+                .WithSpecification(new UserProfileByAuth0IdSpec(currentUserId))
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (userProfile == null)
+            {
+                return Result<UserPreferenceDto>.Failure("User profile not found.", "NotFound");
+            }
+
+            if (userProfile.UserPreference == null)
+            {
+                // Return default preferences if none exist
+                return Result<UserPreferenceDto>.Success(new UserPreferenceDto
+                {
+                    Theme = Theme.Light,
+                    Language = Language.English,
+                    EmailNotificationsEnabled = true,
+                    SmsNotificationsEnabled = false,
+                    InAppNotificationsEnabled = true,
+                });
+            }
+
+            return Result<UserPreferenceDto>.Success(_mapper.Map<UserPreferenceDto>(userProfile.UserPreference));
+        }
     }
 }

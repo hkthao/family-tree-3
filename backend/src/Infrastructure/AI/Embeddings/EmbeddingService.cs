@@ -5,61 +5,62 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using backend.Application.AI.Embeddings;
 
-namespace backend.Infrastructure.AI.Embeddings;
-
-public class EmbeddingService : IEmbeddingService
+namespace backend.Infrastructure.AI.Embeddings
 {
-    private readonly EmbeddingSettings _embeddingSettings;
-    private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
-    private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly ILogger<EmbeddingService> _logger;
-
-    public EmbeddingService(
-        IOptions<EmbeddingSettings> embeddingSettings,
-        IEmbeddingProviderFactory embeddingProviderFactory,
-        IVectorStoreFactory vectorStoreFactory,
-        ILogger<EmbeddingService> logger)
+    public class EmbeddingService : IEmbeddingService
     {
-        _embeddingSettings = embeddingSettings.Value;
-        _embeddingProviderFactory = embeddingProviderFactory;
-        _vectorStoreFactory = vectorStoreFactory;
-        _logger = logger;
-    }
+        private readonly EmbeddingSettings _embeddingSettings;
+        private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
+        private readonly IVectorStoreFactory _vectorStoreFactory;
+        private readonly ILogger<EmbeddingService> _logger;
 
-    public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
-    {
-        var providerResult = _embeddingProviderFactory.GetProvider(_embeddingSettings.Provider.ToString());
-
-        if (!providerResult.IsSuccess)
+        public EmbeddingService(
+            IOptions<EmbeddingSettings> embeddingSettings,
+            IEmbeddingProviderFactory embeddingProviderFactory,
+            IVectorStoreFactory vectorStoreFactory,
+            ILogger<EmbeddingService> logger)
         {
-            _logger.LogError("Failed to get embedding provider: {Error}", providerResult.Error);
-            return Result<float[]>.Failure(providerResult.Error ?? "Unknown error getting embedding provider.");
+            _embeddingSettings = embeddingSettings.Value;
+            _embeddingProviderFactory = embeddingProviderFactory;
+            _vectorStoreFactory = vectorStoreFactory;
+            _logger = logger;
         }
 
-        var provider = providerResult.Value!;
-
-        _logger.LogInformation("Using embedding provider: {ProviderName}", _embeddingSettings.Provider.ToString());
-
-        // Truncate text if it exceeds the provider's max length
-        if (text.Length > provider.MaxTextLength)
+        public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
         {
-            _logger.LogWarning("Text length ({TextLength}) exceeds maximum allowed ({MaxTextLength}) for provider {ProviderName}. Truncating.", text.Length, provider.MaxTextLength, provider.ProviderName);
-            text = text[..provider.MaxTextLength];
+            var providerResult = _embeddingProviderFactory.GetProvider(_embeddingSettings.Provider.ToString());
+
+            if (!providerResult.IsSuccess)
+            {
+                _logger.LogError("Failed to get embedding provider: {Error}", providerResult.Error);
+                return Result<float[]>.Failure(providerResult.Error ?? "Unknown error getting embedding provider.");
+            }
+
+            var provider = providerResult.Value!;
+
+            _logger.LogInformation("Using embedding provider: {ProviderName}", _embeddingSettings.Provider.ToString());
+
+            // Truncate text if it exceeds the provider's max length
+            if (text.Length > provider.MaxTextLength)
+            {
+                _logger.LogWarning("Text length ({TextLength}) exceeds maximum allowed ({MaxTextLength}) for provider {ProviderName}. Truncating.", text.Length, provider.MaxTextLength, provider.ProviderName);
+                text = text[..provider.MaxTextLength];
+            }
+
+            return await provider.GenerateEmbeddingAsync(text, cancellationToken);
         }
 
-        return await provider.GenerateEmbeddingAsync(text, cancellationToken);
-    }
+        // Example method for upserting/querying vectors, demonstrating VectorStoreFactory usage
+        public async Task<Result> UpsertVectorAsync(string id, float[] vector, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+        {
+            var vectorStore = _vectorStoreFactory.CreateVectorStore();
+            return await vectorStore.UpsertVectorAsync(id, vector, metadata, cancellationToken);
+        }
 
-    // Example method for upserting/querying vectors, demonstrating VectorStoreFactory usage
-    public async Task<Result> UpsertVectorAsync(string id, float[] vector, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
-    {
-        var vectorStore = _vectorStoreFactory.CreateVectorStore();
-        return await vectorStore.UpsertVectorAsync(id, vector, metadata, cancellationToken);
-    }
-
-    public async Task<Result<List<string>>> QueryNearestVectorsAsync(float[] vector, int topK, CancellationToken cancellationToken = default)
-    {
-        var vectorStore = _vectorStoreFactory.CreateVectorStore();
-        return await vectorStore.QueryNearestVectorsAsync(vector, topK, cancellationToken);
+        public async Task<Result<List<string>>> QueryNearestVectorsAsync(float[] vector, int topK, CancellationToken cancellationToken = default)
+        {
+            var vectorStore = _vectorStoreFactory.CreateVectorStore();
+            return await vectorStore.QueryNearestVectorsAsync(vector, topK, cancellationToken);
+        }
     }
 }

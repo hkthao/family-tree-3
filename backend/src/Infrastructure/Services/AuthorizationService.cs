@@ -5,55 +5,56 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Infrastructure.Services;
-
-public class AuthorizationService : IAuthorizationService
+namespace backend.Infrastructure.Services
 {
-    private readonly IUser _user;
-    private readonly IApplicationDbContext _context;
-
-    public AuthorizationService(IUser user, IApplicationDbContext context)
+    public class AuthorizationService : IAuthorizationService
     {
-        _user = user;
-        _context = context;
-    }
+        private readonly IUser _user;
+        private readonly IApplicationDbContext _context;
 
-    public bool IsAdmin()
-    {
-        return _user.Roles != null && _user.Roles.Contains("Admin");
-    }
-
-    public async Task<UserProfile?> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrEmpty(_user.Id))
+        public AuthorizationService(IUser user, IApplicationDbContext context)
         {
-            return null;
+            _user = user;
+            _context = context;
         }
 
-        return await _context.UserProfiles
-            .WithSpecification(new UserProfileByAuth0IdSpec(_user.Id))
-            .FirstOrDefaultAsync(cancellationToken);
-    }
+        public bool IsAdmin()
+        {
+            return _user.Roles != null && _user.Roles.Contains("Admin");
+        }
 
-    public bool CanAccessFamily(Guid familyId, UserProfile userProfile)
-    {
-        return userProfile.FamilyUsers.Any(fu => fu.FamilyId == familyId);
-    }
+        public async Task<UserProfile?> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrEmpty(_user.Id))
+            {
+                return null;
+            }
 
-    public bool CanManageFamily(Guid familyId, UserProfile userProfile)
-    {
-        return userProfile.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.Role == FamilyRole.Manager);
-    }
+            return await _context.UserProfiles
+                .WithSpecification(new UserProfileByAuth0IdSpec(_user.Id))
+                .FirstOrDefaultAsync(cancellationToken);
+        }
 
-    public bool HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)
-    {
-        var familyUser = userProfile.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId);
-        if (familyUser == null) return false;
+        public bool CanAccessFamily(Guid familyId, UserProfile userProfile)
+        {
+            return userProfile.FamilyUsers.Any(fu => fu.FamilyId == familyId);
+        }
 
-        // Admin role has full access, so it's always true if requiredRole is less than or equal to Admin
-        // This logic might need adjustment based on exact role hierarchy
-        if (IsAdmin()) return true; // Admin bypasses family-specific role checks
+        public bool CanManageFamily(Guid familyId, UserProfile userProfile)
+        {
+            return userProfile.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.Role == FamilyRole.Manager);
+        }
 
-        return familyUser.Role <= requiredRole; // Assuming enum values are ordered by privilege
+        public bool HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)
+        {
+            var familyUser = userProfile.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId);
+            if (familyUser == null) return false;
+
+            // Admin role has full access, so it's always true if requiredRole is less than or equal to Admin
+            // This logic might need adjustment based on exact role hierarchy
+            if (IsAdmin()) return true; // Admin bypasses family-specific role checks
+
+            return familyUser.Role <= requiredRole; // Assuming enum values are ordered by privilege
+        }
     }
 }

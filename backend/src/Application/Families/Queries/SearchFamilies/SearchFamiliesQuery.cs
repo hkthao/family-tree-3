@@ -1,9 +1,10 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Families.Queries.SearchFamilies;
-
-public record SearchFamiliesQuery : PaginatedQuery, IRequest<Result<PaginatedList<FamilyDto>>>
+namespace backend.Application.Families.Queries.SearchFamilies
 {
-    public string? SearchQuery { get; init; }
-    public string? Visibility { get; init; }
+    public record SearchFamiliesQuery : PaginatedQuery, IRequest<Result<PaginatedList<FamilyDto>>>
+    {
+        public string? SearchQuery { get; init; }
+        public string? Visibility { get; init; }
+    }
 }

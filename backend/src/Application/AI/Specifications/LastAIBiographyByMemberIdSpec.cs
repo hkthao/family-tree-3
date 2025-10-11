@@ -1,14 +1,15 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.AI.Specifications;
-
-public class LastAIBiographyByMemberIdSpec : Specification<AIBiography>, ISingleResultSpecification<AIBiography>
+namespace backend.Application.AI.Specifications
 {
-    public LastAIBiographyByMemberIdSpec(Guid memberId)
+    public class LastAIBiographyByMemberIdSpec : Specification<AIBiography>, ISingleResultSpecification<AIBiography>
     {
-        Query
-            .Where(b => b.MemberId == memberId)
-            .OrderByDescending(b => b.Created);
+        public LastAIBiographyByMemberIdSpec(Guid memberId)
+        {
+            Query
+                .Where(b => b.MemberId == memberId)
+                .OrderByDescending(b => b.Created);
+        }
     }
 }

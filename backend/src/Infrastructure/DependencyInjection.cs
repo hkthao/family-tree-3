@@ -14,75 +14,76 @@ using backend.Infrastructure.AI.Embeddings;
 using backend.Application.AI.Chat;
 using backend.Application.Common.Models;
 
-namespace backend.Infrastructure;
-
-public static class DependencyInjection
+namespace backend.Infrastructure
 {
-    public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static class DependencyInjection
     {
-
-        // Register IAuthProvider based on configuration
-        var authProviderType = configuration["AuthProvider"];
-        switch (authProviderType)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            case "Auth0":
-                services.AddSingleton<IAuthProvider, Auth0Provider>();
-                break;
-            // Add other providers here as needed
-            default:
-                throw new InvalidOperationException($"Auth provider '{authProviderType}' is not supported.");
+
+            // Register IAuthProvider based on configuration
+            var authProviderType = configuration["AuthProvider"];
+            switch (authProviderType)
+            {
+                case "Auth0":
+                    services.AddSingleton<IAuthProvider, Auth0Provider>();
+                    break;
+                // Add other providers here as needed
+                default:
+                    throw new InvalidOperationException($"Auth provider '{authProviderType}' is not supported.");
+            }
+
+            if (configuration.GetValue<bool>("UseInMemoryDatabase"))
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseInMemoryDatabase("FamilyTreeDb"));
+            }
+            else
+            {
+                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            }
+
+            services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+
+            // --- Common Services (always registered) ---
+            services.AddSingleton(TimeProvider.System);
+            services.AddSingleton<IDateTime, DateTimeService>();
+
+            services.AddScoped<ApplicationDbContextInitialiser>();
+
+            services.AddAuthorization();
+
+            services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
+
+            // Register Chat Module
+            services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));
+            services.AddTransient<IChatProvider, GeminiChatProvider>();
+            services.AddTransient<IChatProvider, OpenAIChatProvider>();
+            services.AddTransient<IChatProvider, LocalChatProvider>();
+            services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
+            services.AddScoped<IChatService, ChatService>();
+
+            // Register AI Content Generator
+            services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
+
+            // Register Embedding Settings and Providers
+            services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));
+            services.AddScoped<IEmbeddingProvider, OpenAIEmbeddingProvider>();
+            services.AddScoped<IEmbeddingProvider, CohereEmbeddingProvider>();
+            services.AddScoped<IEmbeddingProvider, LocalEmbeddingProvider>();
+            services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
+            services.AddScoped<IEmbeddingService, EmbeddingService>();
+
+            // Register Vector Store
+            services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
+            services.AddTransient<PineconeVectorStore>();
+
+            services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
+            services.AddScoped(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
+
+            return services;
         }
-
-        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
-        {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("FamilyTreeDb"));
-        }
-        else
-        {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-        }
-
-        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-
-        // --- Common Services (always registered) ---
-        services.AddSingleton(TimeProvider.System);
-        services.AddSingleton<IDateTime, DateTimeService>();
-
-        services.AddScoped<ApplicationDbContextInitialiser>();
-
-        services.AddAuthorization();
-
-        services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
-
-        // Register Chat Module
-        services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));
-        services.AddTransient<IChatProvider, GeminiChatProvider>();
-        services.AddTransient<IChatProvider, OpenAIChatProvider>();
-        services.AddTransient<IChatProvider, LocalChatProvider>();
-        services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
-        services.AddScoped<IChatService, ChatService>();
-
-        // Register AI Content Generator
-        services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
-
-        // Register Embedding Settings and Providers
-        services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));
-        services.AddScoped<IEmbeddingProvider, OpenAIEmbeddingProvider>();
-        services.AddScoped<IEmbeddingProvider, CohereEmbeddingProvider>();
-        services.AddScoped<IEmbeddingProvider, LocalEmbeddingProvider>();
-        services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
-        services.AddScoped<IEmbeddingService, EmbeddingService>();
-
-        // Register Vector Store
-        services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
-        services.AddTransient<PineconeVectorStore>();
-
-        services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
-        services.AddScoped(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
-
-        return services;
     }
 }

@@ -1,6 +1,7 @@
-namespace backend.Application.Common.Interfaces;
-
-public interface IChatProvider
+namespace backend.Application.Common.Interfaces
 {
-    Task<string> GenerateResponseAsync(string prompt);
+    public interface IChatProvider
+    {
+        Task<string> GenerateResponseAsync(string prompt);
+    }
 }

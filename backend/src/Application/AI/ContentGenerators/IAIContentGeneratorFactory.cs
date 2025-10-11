@@ -1,8 +1,9 @@
 using backend.Application.Common.Interfaces;
 
-namespace backend.Application.AI.ContentGenerators;
-
-public interface IAIContentGeneratorFactory
+namespace backend.Application.AI.ContentGenerators
 {
-    IAIContentGenerator GetContentGenerator();
+    public interface IAIContentGeneratorFactory
+    {
+        IAIContentGenerator GetContentGenerator();
+    }
 }

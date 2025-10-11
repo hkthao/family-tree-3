@@ -1,18 +1,19 @@
 using backend.Domain.Entities;
 
-namespace backend.Application.Common.Interfaces;
-
-public interface IApplicationDbContext
+namespace backend.Application.Common.Interfaces
 {
-    DbSet<Family> Families { get; }
-    DbSet<Member> Members { get; }
-    DbSet<Event> Events { get; }
-    DbSet<Relationship> Relationships { get; }
-    DbSet<UserProfile> UserProfiles { get; } // Added
-    DbSet<FamilyUser> FamilyUsers { get; } // Added
-    DbSet<UserActivity> UserActivities { get; }
-    DbSet<AIBiography> AIBiographies { get; }
-    DbSet<UserPreference> UserPreferences { get; }
-    DbSet<FileMetadata> FileMetadata { get; }
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    public interface IApplicationDbContext
+    {
+        DbSet<Family> Families { get; }
+        DbSet<Member> Members { get; }
+        DbSet<Event> Events { get; }
+        DbSet<Relationship> Relationships { get; }
+        DbSet<UserProfile> UserProfiles { get; } // Added
+        DbSet<FamilyUser> FamilyUsers { get; } // Added
+        DbSet<UserActivity> UserActivities { get; }
+        DbSet<AIBiography> AIBiographies { get; }
+        DbSet<UserPreference> UserPreferences { get; }
+        DbSet<FileMetadata> FileMetadata { get; }
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    }
 }

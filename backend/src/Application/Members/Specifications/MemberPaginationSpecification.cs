@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications;
-
-public class MemberPaginationSpecification : Specification<Member>
+namespace backend.Application.Members.Specifications
 {
-    public MemberPaginationSpecification(int skip, int take)
+    public class MemberPaginationSpecification : Specification<Member>
     {
-        Query.Skip(skip).Take(take);
+        public MemberPaginationSpecification(int skip, int take)
+        {
+            Query.Skip(skip).Take(take);
+        }
     }
 }

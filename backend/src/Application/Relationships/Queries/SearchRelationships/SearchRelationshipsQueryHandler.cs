@@ -4,36 +4,37 @@ using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Specifications;
 
-namespace backend.Application.Relationships.Queries.SearchRelationships;
-
-public class SearchRelationshipsQueryHandler : IRequestHandler<SearchRelationshipsQuery, Result<PaginatedList<RelationshipListDto>>>
+namespace backend.Application.Relationships.Queries.SearchRelationships
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchRelationshipsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public class SearchRelationshipsQueryHandler : IRequestHandler<SearchRelationshipsQuery, Result<PaginatedList<RelationshipListDto>>>
     {
-        _context = context;
-        _mapper = mapper;
-    }
+        private readonly IApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-    public async Task<Result<PaginatedList<RelationshipListDto>>> Handle(SearchRelationshipsQuery request, CancellationToken cancellationToken)
-    {
-        var query = _context.Relationships.AsQueryable();
+        public SearchRelationshipsQueryHandler(IApplicationDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
-        // Apply individual specifications
-        query = query.WithSpecification(new RelationshipBySourceMemberIdSpecification(request.SourceMemberId));
-        query = query.WithSpecification(new RelationshipByTargetMemberIdSpecification(request.TargetMemberId));
-        query = query.WithSpecification(new RelationshipByTypeSpecification(request.Type));
-        query = query.WithSpecification(new RelationshipIncludeSpecifications());
+        public async Task<Result<PaginatedList<RelationshipListDto>>> Handle(SearchRelationshipsQuery request, CancellationToken cancellationToken)
+        {
+            var query = _context.Relationships.AsQueryable();
 
-        // Apply ordering specification
-        query = query.WithSpecification(new RelationshipOrderingSpecification(request.SortBy, request.SortOrder));
+            // Apply individual specifications
+            query = query.WithSpecification(new RelationshipBySourceMemberIdSpecification(request.SourceMemberId));
+            query = query.WithSpecification(new RelationshipByTargetMemberIdSpecification(request.TargetMemberId));
+            query = query.WithSpecification(new RelationshipByTypeSpecification(request.Type));
+            query = query.WithSpecification(new RelationshipIncludeSpecifications());
 
-        var paginatedList = await query
-            .ProjectTo<RelationshipListDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.Page, request.ItemsPerPage);
+            // Apply ordering specification
+            query = query.WithSpecification(new RelationshipOrderingSpecification(request.SortBy, request.SortOrder));
 
-        return Result<PaginatedList<RelationshipListDto>>.Success(paginatedList);
+            var paginatedList = await query
+                .ProjectTo<RelationshipListDto>(_mapper.ConfigurationProvider)
+                .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+            return Result<PaginatedList<RelationshipListDto>>.Success(paginatedList);
+        }
     }
 }

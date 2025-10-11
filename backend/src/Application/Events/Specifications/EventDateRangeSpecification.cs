@@ -1,20 +1,21 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Events.Specifications;
-
-public class EventDateRangeSpecification : Specification<Event>
+namespace backend.Application.Events.Specifications
 {
-    public EventDateRangeSpecification(DateTime? startDate, DateTime? endDate)
+    public class EventDateRangeSpecification : Specification<Event>
     {
-        if (startDate.HasValue)
+        public EventDateRangeSpecification(DateTime? startDate, DateTime? endDate)
         {
-            Query.Where(e => e.StartDate >= startDate.Value);
-        }
+            if (startDate.HasValue)
+            {
+                Query.Where(e => e.StartDate >= startDate.Value);
+            }
 
-        if (endDate.HasValue)
-        {
-            Query.Where(e => e.StartDate <= endDate.Value);
+            if (endDate.HasValue)
+            {
+                Query.Where(e => e.StartDate <= endDate.Value);
+            }
         }
     }
 }

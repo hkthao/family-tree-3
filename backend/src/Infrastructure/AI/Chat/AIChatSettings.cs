@@ -1,8 +1,9 @@
 using backend.Application.Common.Models.AISettings;
 
-namespace backend.Infrastructure.AI.Chat;
-
-public class AIChatSettings : AIProviderConfig
+namespace backend.Infrastructure.AI.Chat
 {
-    public const string SectionName = "AIChatSettings";
+    public class AIChatSettings : AIProviderConfig
+    {
+        public const string SectionName = "AIChatSettings";
+    }
 }

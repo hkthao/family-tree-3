@@ -1,26 +1,27 @@
-namespace backend.Application.Events.Commands.UpdateEvent;
-
-public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
+namespace backend.Application.Events.Commands.UpdateEvent
 {
-    public UpdateEventCommandValidator()
+    public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>
     {
-        RuleFor(v => v.Id)
-            .NotEmpty();
+        public UpdateEventCommandValidator()
+        {
+            RuleFor(v => v.Id)
+                .NotEmpty();
 
-        RuleFor(v => v.Name)
-            .MaximumLength(200)
-            .NotEmpty();
+            RuleFor(v => v.Name)
+                .MaximumLength(200)
+                .NotEmpty();
 
-        RuleFor(v => v.Description)
-            .MaximumLength(1000);
+            RuleFor(v => v.Description)
+                .MaximumLength(1000);
 
-        RuleFor(v => v.StartDate)
-            .NotEmpty();
+            RuleFor(v => v.StartDate)
+                .NotEmpty();
 
-        RuleFor(v => v.Location)
-            .MaximumLength(200);
+            RuleFor(v => v.Location)
+                .MaximumLength(200);
 
-        RuleFor(v => v.Color)
-            .MaximumLength(20);
+            RuleFor(v => v.Color)
+                .MaximumLength(20);
+        }
     }
 }

@@ -1,8 +1,9 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Families.Queries.GetFamilies;
-
-public record class GetFamiliesQuery : PaginatedQuery, IRequest<Result<IReadOnlyList<FamilyListDto>>>
+namespace backend.Application.Families.Queries.GetFamilies
 {
-    public string? SearchTerm { get; init; }
+    public record class GetFamiliesQuery : PaginatedQuery, IRequest<Result<IReadOnlyList<FamilyListDto>>>
+    {
+        public string? SearchTerm { get; init; }
+    }
 }

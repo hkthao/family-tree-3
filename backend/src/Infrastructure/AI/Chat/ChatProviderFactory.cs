@@ -1,29 +1,30 @@
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace backend.Infrastructure.AI.Chat;
-
-public class ChatProviderFactory : IChatProviderFactory
+namespace backend.Infrastructure.AI.Chat
 {
-    private readonly IOptions<AIChatSettings> _chatSettings;
-    private readonly IEnumerable<IChatProvider> _providers;
-
-    public ChatProviderFactory(IOptions<AIChatSettings> chatSettings, IEnumerable<IChatProvider> providers)
+    public class ChatProviderFactory : IChatProviderFactory
     {
-        _chatSettings = chatSettings;
-        _providers = providers;
-    }
+        private readonly IOptions<AIChatSettings> _chatSettings;
+        private readonly IEnumerable<IChatProvider> _providers;
 
-    public IChatProvider GetProvider()
-    {
-        var providerName = _chatSettings.Value.Provider.ToString();
-        var provider = _providers.FirstOrDefault(p => p.GetType().Name.StartsWith(providerName, StringComparison.OrdinalIgnoreCase));
-
-        if (provider == null)
+        public ChatProviderFactory(IOptions<AIChatSettings> chatSettings, IEnumerable<IChatProvider> providers)
         {
-            throw new InvalidOperationException($"No LLM provider found for: {providerName}");
+            _chatSettings = chatSettings;
+            _providers = providers;
         }
 
-        return provider;
+        public IChatProvider GetProvider()
+        {
+            var providerName = _chatSettings.Value.Provider.ToString();
+            var provider = _providers.FirstOrDefault(p => p.GetType().Name.StartsWith(providerName, StringComparison.OrdinalIgnoreCase));
+
+            if (provider == null)
+            {
+                throw new InvalidOperationException($"No LLM provider found for: {providerName}");
+            }
+
+            return provider;
+        }
     }
 }

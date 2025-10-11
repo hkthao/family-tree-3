@@ -1,10 +1,11 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.AI.Embeddings;
-
-public interface IEmbeddingProvider
+namespace backend.Application.AI.Embeddings
 {
-    string ProviderName { get; }
-    int MaxTextLength { get; }
-    Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default);
+    public interface IEmbeddingProvider
+    {
+        string ProviderName { get; }
+        int MaxTextLength { get; }
+        Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default);
+    }
 }

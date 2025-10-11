@@ -4,37 +4,38 @@ using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications; // Added
 
-namespace backend.Application.Events.Queries.SearchEvents;
-
-public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
+namespace backend.Application.Events.Queries.SearchEvents
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
     {
-        _context = context;
-        _mapper = mapper;
-    }
+        private readonly IApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-    public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
-    {
-        var query = _context.Events.AsQueryable();
+        public SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
 
-        // Apply individual specifications
-        query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));
-        query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
-        query = query.WithSpecification(new EventTypeSpecification(request.Type));
-        query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
-        query = query.WithSpecification(new EventByMemberIdSpecification(request.MemberId));
+        public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
+        {
+            var query = _context.Events.AsQueryable();
 
-        // Apply ordering specification
-        query = query.WithSpecification(new EventOrderingSpecification(request.SortBy, request.SortOrder));
+            // Apply individual specifications
+            query = query.WithSpecification(new EventSearchTermSpecification(request.SearchQuery));
+            query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
+            query = query.WithSpecification(new EventTypeSpecification(request.Type));
+            query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
+            query = query.WithSpecification(new EventByMemberIdSpecification(request.MemberId));
 
-        var paginatedList = await query
-            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.Page, request.ItemsPerPage);
+            // Apply ordering specification
+            query = query.WithSpecification(new EventOrderingSpecification(request.SortBy, request.SortOrder));
 
-        return Result<PaginatedList<EventDto>>.Success(paginatedList);
+            var paginatedList = await query
+                .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
+                .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+            return Result<PaginatedList<EventDto>>.Success(paginatedList);
+        }
     }
 }

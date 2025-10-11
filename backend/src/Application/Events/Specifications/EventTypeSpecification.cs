@@ -2,17 +2,18 @@ using Ardalis.Specification;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
-namespace backend.Application.Events.Specifications;
-
-public class EventTypeSpecification : Specification<Event>
+namespace backend.Application.Events.Specifications
 {
-    public EventTypeSpecification(string? type)
+    public class EventTypeSpecification : Specification<Event>
     {
-        if (!string.IsNullOrEmpty(type))
+        public EventTypeSpecification(string? type)
         {
-            if (Enum.TryParse<EventType>(type, true, out var eventType))
+            if (!string.IsNullOrEmpty(type))
             {
-                Query.Where(e => e.Type == eventType);
+                if (Enum.TryParse<EventType>(type, true, out var eventType))
+                {
+                    Query.Where(e => e.Type == eventType);
+                }
             }
         }
     }

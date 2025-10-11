@@ -2,20 +2,21 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AISettings;
 using Microsoft.Extensions.Options;
 
-namespace backend.Infrastructure.AI.Chat;
-
-public class LocalChatProvider : IChatProvider
+namespace backend.Infrastructure.AI.Chat
 {
-    private readonly LocalAISettings _localAISettings;
-
-    public LocalChatProvider(IOptions<AIChatSettings> chatSettings)
+    public class LocalChatProvider : IChatProvider
     {
-        _localAISettings = chatSettings.Value.Providers["LocalAI"] as LocalAISettings ?? throw new InvalidOperationException("LocalAI settings not found.");
-    }
+        private readonly LocalAISettings _localAISettings;
 
-    public async Task<string> GenerateResponseAsync(string prompt)
-    {
-        // Dummy implementation for LocalAI, now with access to _localAISettings.Endpoint
-        return await Task.FromResult($"LocalAI responded to: {prompt} using endpoint {_localAISettings.Endpoint}");
+        public LocalChatProvider(IOptions<AIChatSettings> chatSettings)
+        {
+            _localAISettings = chatSettings.Value.Providers["LocalAI"] as LocalAISettings ?? throw new InvalidOperationException("LocalAI settings not found.");
+        }
+
+        public async Task<string> GenerateResponseAsync(string prompt)
+        {
+            // Dummy implementation for LocalAI, now with access to _localAISettings.Endpoint
+            return await Task.FromResult($"LocalAI responded to: {prompt} using endpoint {_localAISettings.Endpoint}");
+        }
     }
 }

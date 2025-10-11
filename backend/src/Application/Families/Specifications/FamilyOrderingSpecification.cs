@@ -1,42 +1,43 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Families.Specifications;
-
-public class FamilyOrderingSpecification : Specification<Family>
+namespace backend.Application.Families.Specifications
 {
-    public FamilyOrderingSpecification(string? sortBy, string? sortOrder)
+    public class FamilyOrderingSpecification : Specification<Family>
     {
-        if (!string.IsNullOrEmpty(sortBy))
+        public FamilyOrderingSpecification(string? sortBy, string? sortOrder)
         {
-            switch (sortBy.ToLower())
+            if (!string.IsNullOrEmpty(sortBy))
             {
-                case "name":
-                    if (sortOrder == "desc")
-                        Query.OrderByDescending(family => family.Name);
-                    else
-                        Query.OrderBy(family => family.Name);
-                    break;
-                case "totalmembers":
-                    if (sortOrder == "desc")
-                        Query.OrderByDescending(family => family.TotalMembers);
-                    else
-                        Query.OrderBy(family => family.TotalMembers);
-                    break;
-                case "created":
-                    if (sortOrder == "desc")
-                        Query.OrderByDescending(family => family.Created);
-                    else
-                        Query.OrderBy(family => family.Created);
-                    break;
-                default:
-                    Query.OrderBy(family => family.Name); // Default sort by name
-                    break;
+                switch (sortBy.ToLower())
+                {
+                    case "name":
+                        if (sortOrder == "desc")
+                            Query.OrderByDescending(family => family.Name);
+                        else
+                            Query.OrderBy(family => family.Name);
+                        break;
+                    case "totalmembers":
+                        if (sortOrder == "desc")
+                            Query.OrderByDescending(family => family.TotalMembers);
+                        else
+                            Query.OrderBy(family => family.TotalMembers);
+                        break;
+                    case "created":
+                        if (sortOrder == "desc")
+                            Query.OrderByDescending(family => family.Created);
+                        else
+                            Query.OrderBy(family => family.Created);
+                        break;
+                    default:
+                        Query.OrderBy(family => family.Name); // Default sort by name
+                        break;
+                }
             }
-        }
-        else
-        {
-            Query.OrderBy(family => family.Name); // Default order by
+            else
+            {
+                Query.OrderBy(family => family.Name); // Default order by
+            }
         }
     }
 }

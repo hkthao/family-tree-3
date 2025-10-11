@@ -2,35 +2,36 @@ using backend.Application.AI.Embeddings;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace backend.Infrastructure.AI.Embeddings;
-
-public class CohereEmbeddingProvider : IEmbeddingProvider
+namespace backend.Infrastructure.AI.Embeddings
 {
-    private readonly EmbeddingSettings _settings;
-
-    public string ProviderName => "Cohere";
-    public int MaxTextLength => _settings.Cohere.MaxTextLength;
-
-    public CohereEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings)
+    public class CohereEmbeddingProvider : IEmbeddingProvider
     {
-        _settings = embeddingSettings.Value;
-    }
+        private readonly EmbeddingSettings _settings;
 
-    public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(_settings.Cohere.ApiKey))
+        public string ProviderName => "Cohere";
+        public int MaxTextLength => _settings.Cohere.MaxTextLength;
+
+        public CohereEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings)
         {
-            return Result<float[]>.Failure("Cohere API key is not configured.");
+            _settings = embeddingSettings.Value;
         }
 
-        if (text.Length > MaxTextLength)
+        public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
         {
-            text = text[..MaxTextLength];
-        }
+            if (string.IsNullOrWhiteSpace(_settings.Cohere.ApiKey))
+            {
+                return Result<float[]>.Failure("Cohere API key is not configured.");
+            }
 
-        // TODO: Implement actual Cohere API call to generate embedding
-        // For now, return a dummy embedding for demonstration
-        await Task.Delay(100, cancellationToken); // Simulate API call delay
-        return Result<float[]>.Success(new float[] { 0.4f, 0.5f, 0.6f });
+            if (text.Length > MaxTextLength)
+            {
+                text = text[..MaxTextLength];
+            }
+
+            // TODO: Implement actual Cohere API call to generate embedding
+            // For now, return a dummy embedding for demonstration
+            await Task.Delay(100, cancellationToken); // Simulate API call delay
+            return Result<float[]>.Success(new float[] { 0.4f, 0.5f, 0.6f });
+        }
     }
 }

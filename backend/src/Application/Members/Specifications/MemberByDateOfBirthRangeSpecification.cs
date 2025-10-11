@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications;
-
-public class MemberByDateOfBirthRangeSpecification : Specification<Member>
+namespace backend.Application.Members.Specifications
 {
-    public MemberByDateOfBirthRangeSpecification(DateTime startDate, DateTime endDate)
+    public class MemberByDateOfBirthRangeSpecification : Specification<Member>
     {
-        Query.Where(m => m.DateOfBirth >= startDate && m.DateOfBirth <= endDate);
+        public MemberByDateOfBirthRangeSpecification(DateTime startDate, DateTime endDate)
+        {
+            Query.Where(m => m.DateOfBirth >= startDate && m.DateOfBirth <= endDate);
+        }
     }
 }

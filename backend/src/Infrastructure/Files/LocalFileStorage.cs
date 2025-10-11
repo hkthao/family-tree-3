@@ -2,67 +2,68 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.AspNetCore.Hosting;
 
-namespace backend.Infrastructure.Files;
-
-public class LocalFileStorage : IFileStorage
+namespace backend.Infrastructure.Files
 {
-    private readonly IStorageSettings _storageSettings;
-    private readonly IWebHostEnvironment _env; // To get wwwroot path
-
-    public LocalFileStorage(IStorageSettings storageSettings, IWebHostEnvironment env)
+    public class LocalFileStorage : IFileStorage
     {
-        _storageSettings = storageSettings;
-        _env = env;
-    }
+        private readonly IStorageSettings _storageSettings;
+        private readonly IWebHostEnvironment _env; // To get wwwroot path
 
-    public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
-    {
-        try
+        public LocalFileStorage(IStorageSettings storageSettings, IWebHostEnvironment env)
         {
-            var uploadPath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath);
-            if (!Directory.Exists(uploadPath))
-            {
-                Directory.CreateDirectory(uploadPath);
-            }
-
-            var filePath = Path.Combine(uploadPath, fileName);
-
-            await using (var outputStream = new FileStream(filePath, FileMode.Create))
-            {
-                await fileStream.CopyToAsync(outputStream, cancellationToken);
-            }
-
-            // Construct the API preview URL
-            var absoluteUrl = $"{_storageSettings.BaseUrl}/api/upload/preview/{fileName}";
-
-            return Result<string>.Success(absoluteUrl);
+            _storageSettings = storageSettings;
+            _env = env;
         }
-        catch (Exception ex)
+
+        public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
         {
-            return Result<string>.Failure($"Local file upload failed: {ex.Message}", "LocalFileStorage");
-        }
-    }
-
-    public Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
-    {
-        try
-        {
-            // Extract file name from the URL
-            var uri = new Uri(url);
-            var fileName = Path.GetFileName(uri.LocalPath);
-
-            var filePath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath, fileName);
-
-            if (System.IO.File.Exists(filePath))
+            try
             {
-                System.IO.File.Delete(filePath);
-                return Task.FromResult(Result.Success());
+                var uploadPath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath);
+                if (!Directory.Exists(uploadPath))
+                {
+                    Directory.CreateDirectory(uploadPath);
+                }
+
+                var filePath = Path.Combine(uploadPath, fileName);
+
+                await using (var outputStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await fileStream.CopyToAsync(outputStream, cancellationToken);
+                }
+
+                // Construct the API preview URL
+                var absoluteUrl = $"{_storageSettings.BaseUrl}/api/upload/preview/{fileName}";
+
+                return Result<string>.Success(absoluteUrl);
             }
-            return Task.FromResult(Result.Failure("File not found locally.", "LocalFileStorage"));
+            catch (Exception ex)
+            {
+                return Result<string>.Failure($"Local file upload failed: {ex.Message}", "LocalFileStorage");
+            }
         }
-        catch (Exception ex)
+
+        public Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
         {
-            return Task.FromResult(Result.Failure($"Local file deletion failed: {ex.Message}", "LocalFileStorage"));
+            try
+            {
+                // Extract file name from the URL
+                var uri = new Uri(url);
+                var fileName = Path.GetFileName(uri.LocalPath);
+
+                var filePath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath, fileName);
+
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                    return Task.FromResult(Result.Success());
+                }
+                return Task.FromResult(Result.Failure("File not found locally.", "LocalFileStorage"));
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult(Result.Failure($"Local file deletion failed: {ex.Message}", "LocalFileStorage"));
+            }
         }
     }
 }

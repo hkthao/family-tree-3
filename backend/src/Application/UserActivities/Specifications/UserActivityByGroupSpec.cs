@@ -1,18 +1,19 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.UserActivities.Specifications;
-
-/// <summary>
-/// Specification to filter user activities by GroupId (e.g., FamilyId).
-/// </summary>
-public class UserActivityByGroupSpec : Specification<UserActivity>
+namespace backend.Application.UserActivities.Specifications
 {
-    public UserActivityByGroupSpec(Guid? groupId)
+    /// <summary>
+    /// Specification to filter user activities by GroupId (e.g., FamilyId).
+    /// </summary>
+    public class UserActivityByGroupSpec : Specification<UserActivity>
     {
-        if (groupId.HasValue)
+        public UserActivityByGroupSpec(Guid? groupId)
         {
-            Query.Where(ua => ua.GroupId == groupId.Value);
+            if (groupId.HasValue)
+            {
+                Query.Where(ua => ua.GroupId == groupId.Value);
+            }
         }
     }
 }

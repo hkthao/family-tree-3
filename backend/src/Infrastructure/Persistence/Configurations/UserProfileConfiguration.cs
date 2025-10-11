@@ -2,31 +2,32 @@ using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace backend.Infrastructure.Persistence.Configurations;
-
-public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
+namespace backend.Infrastructure.Persistence.Configurations
 {
-    public void Configure(EntityTypeBuilder<UserProfile> builder)
+    public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
     {
-        builder.Property(up => up.ExternalId)
-            .HasMaxLength(256)
-            .IsRequired();
+        public void Configure(EntityTypeBuilder<UserProfile> builder)
+        {
+            builder.Property(up => up.ExternalId)
+                .HasMaxLength(256)
+                .IsRequired();
 
-        builder.HasIndex(up => up.ExternalId)
-            .IsUnique();
+            builder.HasIndex(up => up.ExternalId)
+                .IsUnique();
 
-        builder.Property(up => up.Email)
-            .HasMaxLength(256)
-            .IsRequired();
+            builder.Property(up => up.Email)
+                .HasMaxLength(256)
+                .IsRequired();
 
-        builder.Property(up => up.Name)
-            .HasMaxLength(256)
-            .IsRequired();
+            builder.Property(up => up.Name)
+                .HasMaxLength(256)
+                .IsRequired();
 
-        // Configure the one-to-many relationship with FamilyUser
-        builder.HasMany(up => up.FamilyUsers)
-            .WithOne(fu => fu.UserProfile)
-            .HasForeignKey(fu => fu.UserProfileId)
-            .OnDelete(DeleteBehavior.Cascade); // If a user profile is deleted, their family associations are also deleted
+            // Configure the one-to-many relationship with FamilyUser
+            builder.HasMany(up => up.FamilyUsers)
+                .WithOne(fu => fu.UserProfile)
+                .HasForeignKey(fu => fu.UserProfileId)
+                .OnDelete(DeleteBehavior.Cascade); // If a user profile is deleted, their family associations are also deleted
+        }
     }
 }

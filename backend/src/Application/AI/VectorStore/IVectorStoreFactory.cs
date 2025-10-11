@@ -1,6 +1,7 @@
-namespace backend.Application.AI.VectorStore;
-
-public interface IVectorStoreFactory
+namespace backend.Application.AI.VectorStore
 {
-    IVectorStore CreateVectorStore();
+    public interface IVectorStoreFactory
+    {
+        IVectorStore CreateVectorStore();
+    }
 }

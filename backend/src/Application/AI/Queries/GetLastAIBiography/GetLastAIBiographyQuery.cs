@@ -1,9 +1,10 @@
 using backend.Application.AI.Common;
 using backend.Application.Common.Models;
 
-namespace backend.Application.AI.Queries.GetLastAIBiography;
-
-public class GetLastAIBiographyQuery : IRequest<Result<AIBiographyDto?>>
+namespace backend.Application.AI.Queries.GetLastAIBiography
 {
-    public Guid MemberId { get; init; }
+    public class GetLastAIBiographyQuery : IRequest<Result<AIBiographyDto?>>
+    {
+        public Guid MemberId { get; init; }
+    }
 }
