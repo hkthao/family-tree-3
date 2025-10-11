@@ -3,6 +3,7 @@ using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace backend.Web.Controllers;
 
@@ -13,13 +14,13 @@ public class UploadController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IWebHostEnvironment _env;
-    private readonly IStorageSettings _storageSettings;
+    private readonly IOptions<StorageSettings> _storageSettingsOptions;
 
-    public UploadController(IMediator mediator, IWebHostEnvironment env, IStorageSettings storageSettings)
+    public UploadController(IMediator mediator, IWebHostEnvironment env, IOptions<StorageSettings> storageSettingsOptions)
     {
         _mediator = mediator;
         _env = env;
-        _storageSettings = storageSettings;
+        _storageSettingsOptions = storageSettingsOptions;
     }
 
     /// <summary>
@@ -58,7 +59,7 @@ public class UploadController : ControllerBase
     {
         // Sanitize fileName to prevent path traversal
         var sanitizedFileName = Path.GetFileName(fileName);
-        var filePath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath, sanitizedFileName);
+        var filePath = Path.Combine(_env.WebRootPath, _storageSettingsOptions.Value.Local.LocalStoragePath, sanitizedFileName);
 
         if (!System.IO.File.Exists(filePath))
         {

@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using backend.Domain.Enums;
 using backend.Infrastructure.AI.ContentGenerators;
 using backend.Infrastructure;
 
@@ -41,21 +42,15 @@ public static class DependencyInjection
 
         // Configure StorageSettings
         services.Configure<StorageSettings>(configuration.GetSection("Storage"));
-        services.AddSingleton<IStorageSettings>(sp => sp.GetRequiredService<IOptions<StorageSettings>>().Value);
+
+        services.AddScoped<IFileStorageFactory, FileStorageFactory>();
 
         // Register IFileStorage based on configuration
         services.AddTransient<IFileStorage>(sp =>
         {
-            var storageSettings = sp.GetRequiredService<IStorageSettings>();
-            var env = sp.GetRequiredService<IWebHostEnvironment>();
-
-            return storageSettings.Provider switch
-            {
-                "Local" => new LocalFileStorage(storageSettings, env),
-                "Cloudinary" => new CloudinaryFileStorage(storageSettings),
-                "S3" => new S3FileStorage(storageSettings),
-                _ => throw new InvalidOperationException($"No file storage provider configured for: {storageSettings.Provider}")
-            };
+            var factory = sp.GetRequiredService<IFileStorageFactory>();
+            var storageSettings = sp.GetRequiredService<IOptions<StorageSettings>>().Value;
+            return factory.CreateFileStorage(Enum.Parse<StorageProvider>(storageSettings.Provider, true));
         });
 
         // Configure Auth0Config

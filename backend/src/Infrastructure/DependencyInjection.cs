@@ -13,6 +13,7 @@ using backend.Application.AI.VectorStore;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Application.AI.Chat;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AISettings;
 
 namespace backend.Infrastructure
 {
@@ -67,6 +68,12 @@ namespace backend.Infrastructure
 
             // Register AI Content Generator
             services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
+
+            services.Configure<GeminiSettings>(configuration.GetSection(nameof(GeminiSettings)));
+            services.Configure<OpenAISettings>(configuration.GetSection(nameof(OpenAISettings)));
+            services.Configure<LocalAISettings>(configuration.GetSection(nameof(LocalAISettings)));
+            services.Configure<PineconeSettings>(configuration.GetSection(nameof(PineconeSettings)));
+            services.Configure<StorageSettings>(configuration.GetSection(nameof(StorageSettings)));
 
             // Register Embedding Settings and Providers
             services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));

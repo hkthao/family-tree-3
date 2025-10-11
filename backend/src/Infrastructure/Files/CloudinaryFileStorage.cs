@@ -8,18 +8,17 @@ namespace backend.Infrastructure.Files
     public class CloudinaryFileStorage : IFileStorage
     {
         private readonly Cloudinary _cloudinary;
-        private readonly IStorageSettings _storageSettings;
+        private readonly StorageSettings _storageSettings;
 
-        public CloudinaryFileStorage(IStorageSettings storageSettings)
-        {
-            _storageSettings = storageSettings;
-            var account = new Account(
-                _storageSettings.Cloudinary.CloudName,
-                _storageSettings.Cloudinary.ApiKey,
-                _storageSettings.Cloudinary.ApiSecret);
-            _cloudinary = new Cloudinary(account);
-        }
-
+            public CloudinaryFileStorage(StorageSettings storageSettings)
+            {
+                _storageSettings = storageSettings;
+                var account = new Account(
+                    _storageSettings.Cloudinary.CloudName,
+                    _storageSettings.Cloudinary.ApiKey,
+                    _storageSettings.Cloudinary.ApiSecret);
+                _cloudinary = new Cloudinary(account);
+            }
         public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
         {
             try

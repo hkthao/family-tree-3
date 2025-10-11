@@ -1,8 +1,6 @@
-using backend.Application.Common.Interfaces;
-
 namespace backend.Application.Common.Models.AISettings
 {
-    public class PineconeSettings : IVectorStoreProviderSettings
+    public class PineconeSettings
     {
         public string ApiKey { get; set; } = null!;
         public string Environment { get; set; } = null!;

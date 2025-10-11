@@ -6,10 +6,10 @@ namespace backend.Infrastructure.Files
 {
     public class LocalFileStorage : IFileStorage
     {
-        private readonly IStorageSettings _storageSettings;
+        private readonly StorageSettings _storageSettings;
         private readonly IWebHostEnvironment _env; // To get wwwroot path
 
-        public LocalFileStorage(IStorageSettings storageSettings, IWebHostEnvironment env)
+        public LocalFileStorage(StorageSettings storageSettings, IWebHostEnvironment env)
         {
             _storageSettings = storageSettings;
             _env = env;
@@ -19,7 +19,7 @@ namespace backend.Infrastructure.Files
         {
             try
             {
-                var uploadPath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath);
+                var uploadPath = Path.Combine(_env.WebRootPath, _storageSettings.Local.LocalStoragePath);
                 if (!Directory.Exists(uploadPath))
                 {
                     Directory.CreateDirectory(uploadPath);
@@ -33,9 +33,7 @@ namespace backend.Infrastructure.Files
                 }
 
                 // Construct the API preview URL
-                var absoluteUrl = $"{_storageSettings.BaseUrl}/api/upload/preview/{fileName}";
-
-                return Result<string>.Success(absoluteUrl);
+                var absoluteUrl = $"{_storageSettings.Local.BaseUrl}/api/upload/preview/{fileName}"; return Result<string>.Success(absoluteUrl);
             }
             catch (Exception ex)
             {
@@ -51,11 +49,11 @@ namespace backend.Infrastructure.Files
                 var uri = new Uri(url);
                 var fileName = Path.GetFileName(uri.LocalPath);
 
-                var filePath = Path.Combine(_env.WebRootPath, _storageSettings.LocalStoragePath, fileName);
+                var filePath = Path.Combine(_env.WebRootPath, _storageSettings.Local.LocalStoragePath, fileName);
 
-                if (System.IO.File.Exists(filePath))
+                if (File.Exists(filePath))
                 {
-                    System.IO.File.Delete(filePath);
+                    File.Delete(filePath);
                     return Task.FromResult(Result.Success());
                 }
                 return Task.FromResult(Result.Failure("File not found locally.", "LocalFileStorage"));
