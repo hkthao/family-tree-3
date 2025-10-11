@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.AI.Chat;
 
 namespace backend.Application.AI.Chat.Queries;
 

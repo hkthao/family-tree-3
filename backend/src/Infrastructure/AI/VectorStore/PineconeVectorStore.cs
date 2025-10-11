@@ -49,7 +49,7 @@ public class PineconeVectorStore : IVectorStore
             {
                 Id = d.Id,
                 Values = new ReadOnlyMemory<float>([.. d.Vector]),
-                Metadata = d.Metadata != null ? new Pinecone.Metadata(d.Metadata.ToDictionary(k => k.Key, v => (Pinecone.MetadataValue?)v.Value)) : null
+                Metadata = d.Metadata != null ? new Metadata(d.Metadata.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
             }).ToList();
 
             var upsertRequest = new UpsertRequest { Vectors = vectors };
@@ -65,7 +65,33 @@ public class PineconeVectorStore : IVectorStore
         }
     }
 
-        public async Task<Result<IEnumerable<VectorDocument>>> QueryAsync(VectorQuery query, CancellationToken cancellationToken = default)
+    public async Task<Result> UpsertVectorAsync(string id, float[] vector, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var index = _index;
+
+            var pineconeVector = new Vector
+            {
+                Id = id,
+                Values = new ReadOnlyMemory<float>([.. vector]),
+                Metadata = metadata != null ? new Metadata(metadata.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
+            };
+
+            var upsertRequest = new UpsertRequest { Vectors = [pineconeVector] };
+            await index.UpsertAsync(upsertRequest, null, cancellationToken);
+
+            _logger.LogInformation("Successfully upserted vector with ID {Id} to Pinecone index {IndexName}.", id, _indexName);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error upserting vector with ID {Id} to Pinecone index {IndexName}.", id, _indexName);
+            return Result.Failure(ex.Message, "PineconeError");
+        }
+    }
+
+    public async Task<Result<IEnumerable<VectorDocument>>> QueryAsync(VectorQuery query, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -77,7 +103,7 @@ public class PineconeVectorStore : IVectorStore
                 TopK = (uint)query.TopK,
                 IncludeValues = true,
                 IncludeMetadata = true,
-                Filter = query.Filter != null ? new Pinecone.Metadata(query.Filter.ToDictionary(k => k.Key, v => (Pinecone.MetadataValue?)v.Value)) : null
+                Filter = query.Filter != null ? new Metadata(query.Filter.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
             };
 
             var queryResponse = await index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
@@ -96,6 +122,34 @@ public class PineconeVectorStore : IVectorStore
         {
             _logger.LogError(ex, "Error querying Pinecone index {IndexName}.", _indexName);
             return Result<IEnumerable<VectorDocument>>.Failure(ex.Message, "PineconeError");
+        }
+    }
+
+    public async Task<Result<List<string>>> QueryNearestVectorsAsync(float[] vector, int topK, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var index = _index;
+
+            var queryRequest = new QueryRequest
+            {
+                Vector = new ReadOnlyMemory<float>([.. vector]),
+                TopK = (uint)topK,
+                IncludeValues = false, // We only need IDs for this method
+                IncludeMetadata = false
+            };
+
+            var queryResponse = await index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
+
+            var results = queryResponse.Matches?.Select(m => m.Id).ToList();
+
+            _logger.LogInformation("Successfully queried Pinecone index {IndexName} for nearest vectors with TopK {TopK}. Found {Count} matches.", _indexName, topK, results?.Count ?? 0);
+            return Result<List<string>>.Success(results ?? []);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error querying nearest vectors from Pinecone index {IndexName}.", _indexName);
+            return Result<List<string>>.Failure(ex.Message, "PineconeError");
         }
     }
 

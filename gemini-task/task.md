@@ -1,37 +1,35 @@
-# Prompt: Refactor AI Settings Architecture
+# Prompt: Implement Embedding Backend with Provider Abstraction
 
 ## Context
-Hiện tại hệ thống có nhiều lớp cấu hình tương tự nhau:
-- `EmbeddingSettings`
-- `ChatAISettings`
-- `AIContentGeneratorSettings`
+Xây dựng feature Embedding trong ASP.NET Core backend:
+- Sinh embedding từ **đa provider**: OpenAI, Cohere, Local model
+- Backend có sẵn **VectorStoreFactory / PineconeService**, không cần implement lại
+- Dự án cá nhân: giới hạn token usage
+- Clean Architecture + CQRS + ResultWrapper + Ardalis Specification
 
-Mỗi lớp đều có cấu trúc gồm `Provider` (OpenAI, Gemini, v.v.) và các nhóm cấu hình con (ví dụ: `OpenAISettings`, `GeminiSettings`).  
-Tuy nhiên, cách tổ chức hiện tại đang lặp lại nhiều, khó mở rộng và rối khi thêm provider mới.
+## Requirements
 
-## Task
-Refactor toàn bộ các lớp *Settings* liên quan đến AI sao cho:
-1. **Đơn giản & tái sử dụng cao** — tránh lặp lại giữa các Settings khác nhau.
-2. **Mở rộng linh hoạt** — dễ thêm provider mới (như Claude, Mistral...).
-3. **Hỗ trợ IConfiguration binding** (từ `appsettings.json`) tự động.
-4. **Giữ nguyên backward compatibility** cho các module đang dùng hiện tại.
+### 1️⃣ Configuration
+- Có `EmbeddingSettings` tổng hợp nhiều provider và provider hiện tại
+- Cấu hình qua `appsettings.json`
+- Dễ mở rộng thêm provider mới
 
-## Implementation Hints
-- Tạo interface tổng quát `IAIProviderSettings` (ApiKey, Model...).
-- Dùng generic class:  
-  ```csharp
-  public class AIProviderConfig<TProviderSettings> where TProviderSettings : IAIProviderSettings
-````
+### 2️⃣ Provider Abstraction
+- Tạo interface `IEmbeddingProvider` cho từng provider
+- Implement OpenAI, Cohere, Local provider
+- Local provider hỗ trợ test offline
+- `EmbeddingService` orchestrate: chọn provider dựa trên config, gọi `GenerateEmbeddingAsync`
 
-* Cho phép kế thừa trong các setting cụ thể:
+### 3️⃣ Vector Store Integration
+- `EmbeddingService` dùng **VectorStoreFactory / PineconeService** hiện có để upsert vector hoặc query nearest vectors
+- Không cần tạo lại Pinecone service
 
-  ```csharp
-  public class EmbeddingSettings : AIProviderConfig<IOpenAISettings> { }
-  ```
-* Đảm bảo `SectionName` có thể được cấu hình riêng cho từng module.
-* Tích hợp hợp lý vào `IOptions<EmbeddingSettings>`.
+### 4️⃣ Constraints
+- Giới hạn độ dài text để tiết kiệm token
+- Không log API key
+- Có cơ chế mock hoặc local fallback để test offline
+- Clean Architecture: tách rõ Application / Infrastructure / API, không để business logic trong controller
 
-## Deliverables
-
-* Code refactor hoàn chỉnh.
-* Mẫu `appsettings.json` mới tương thích.
+### 5️⃣ Deliverables
+- Tạo tất cả service, provider, interface cần thiết cho backend (không bao gồm Pinecone service)
+- Đăng ký DI cho các service

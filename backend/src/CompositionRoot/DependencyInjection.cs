@@ -23,7 +23,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCompositionRootServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddApplicationServices();
+        services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
         // Register AI Content Generators

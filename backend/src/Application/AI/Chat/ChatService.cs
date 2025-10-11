@@ -1,29 +1,28 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.AI.VectorStore;
-using backend.Application.AI.Chat;
 
 namespace backend.Application.AI.Chat;
 
 public class ChatService : IChatService
 {
     private readonly IVectorStore _vectorStore;
-    private readonly IEmbeddingGenerator _embeddingGenerator;
+    private readonly IEmbeddingService _embeddingService;
     private readonly IChatProviderFactory _chatProviderFactory;
 
     public ChatService(
         IVectorStore vectorStore,
-        IEmbeddingGenerator embeddingGenerator,
+        IEmbeddingService embeddingService,
         IChatProviderFactory chatProviderFactory)
     {
         _vectorStore = vectorStore;
-        _embeddingGenerator = embeddingGenerator;
+        _embeddingService = embeddingService;
         _chatProviderFactory = chatProviderFactory;
     }
 
     public async Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null)
     {
         // Generate embeddings for the user message
-        var embeddingResult = await _embeddingGenerator.GenerateEmbeddingAsync(userMessage);
+        var embeddingResult = await _embeddingService.GenerateEmbeddingAsync(userMessage);
         if (!embeddingResult.IsSuccess)
         {
             return new ChatResponse { Response = "Error generating embeddings." };

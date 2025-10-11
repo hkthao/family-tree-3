@@ -1,11 +1,12 @@
 ﻿using backend.Application.Common.Behaviours;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddAutoMapper(System.Reflection.Assembly.GetExecutingAssembly());
         services.AddValidatorsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
@@ -20,6 +21,8 @@ public static class DependencyInjection
 
         services.AddScoped<backend.Application.Common.Interfaces.IUserProfileSyncService, backend.Application.Services.UserProfileSyncService>();
         services.AddScoped<backend.Application.Common.Interfaces.IFamilyTreeService, backend.Application.Services.FamilyTreeService>();
+
+        services.Configure<backend.Application.Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(backend.Application.Common.Models.EmbeddingSettings)));
 
         return services;
     }
