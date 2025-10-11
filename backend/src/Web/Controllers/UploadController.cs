@@ -1,6 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile;
+using backend.Application.Files.Queries.GetUploadedFile;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,14 +15,10 @@ namespace backend.Web.Controllers;
 public class UploadController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IWebHostEnvironment _env;
-    private readonly IOptions<StorageSettings> _storageSettingsOptions;
 
-    public UploadController(IMediator mediator, IWebHostEnvironment env, IOptions<StorageSettings> storageSettingsOptions)
+    public UploadController(IMediator mediator)
     {
         _mediator = mediator;
-        _env = env;
-        _storageSettingsOptions = storageSettingsOptions;
     }
 
     /// <summary>
@@ -55,37 +53,21 @@ public class UploadController : ControllerBase
     /// <param name="fileName">The name of the file to retrieve.</param>
     /// <returns>The file content or a 404 Not Found.</returns>
     [HttpGet("preview/{fileName}")]
-    public IActionResult GetUploadedFile(string fileName)
+    public async Task<IActionResult> GetUploadedFile(string fileName)
     {
-        // Sanitize fileName to prevent path traversal
-        var sanitizedFileName = Path.GetFileName(fileName);
-        var filePath = Path.Combine(_env.WebRootPath, _storageSettingsOptions.Value.Local.LocalStoragePath, sanitizedFileName);
+        var query = new GetUploadedFileQuery { FileName = fileName };
+        var result = await _mediator.Send(query);
 
-        if (!System.IO.File.Exists(filePath))
+        if (result.IsSuccess && result.Value != null)
+        {
+            return File(result.Value.Content, result.Value.ContentType);
+        }
+
+        if (result.ErrorSource == "NotFound")
         {
             return NotFound();
         }
 
-        // Determine content type
-        var contentType = "application/octet-stream"; // Default
-        var ext = Path.GetExtension(filePath).ToLowerInvariant();
-        switch (ext)
-        {
-            case ".jpg":
-            case ".jpeg":
-                contentType = "image/jpeg";
-                break;
-            case ".png":
-                contentType = "image/png";
-                break;
-            case ".pdf":
-                contentType = "application/pdf";
-                break;
-            case ".docx":
-                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-                break;
-        }
-
-        return PhysicalFile(filePath, contentType);
+        return BadRequest(result.Error);
     }
 }

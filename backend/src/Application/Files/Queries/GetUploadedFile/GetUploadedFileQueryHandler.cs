@@ -1,0 +1,55 @@
+using backend.Application.Common.Models;
+using Microsoft.Extensions.Options;
+
+namespace backend.Application.Files.Queries.GetUploadedFile
+{
+    public class GetUploadedFileQueryHandler : IRequestHandler<GetUploadedFileQuery, Result<FileContentDto>>
+    {
+        private readonly StorageSettings _storageSettings;
+
+        public GetUploadedFileQueryHandler(IOptions<StorageSettings> storageSettingsOptions)
+        {
+            _storageSettings = storageSettingsOptions.Value;
+        }
+
+        public Task<Result<FileContentDto>> Handle(GetUploadedFileQuery request, CancellationToken cancellationToken)
+        {
+            // Sanitize fileName to prevent path traversal
+            var sanitizedFileName = Path.GetFileName(request.FileName);
+            var filePath = Path.Combine(_storageSettings.Local.LocalStoragePath, sanitizedFileName);
+
+            if (!File.Exists(filePath))
+            {
+                return Task.FromResult(Result<FileContentDto>.Failure("File not found.", "NotFound"));
+            }
+
+            // Determine content type
+            var contentType = "application/octet-stream"; // Default
+            var ext = Path.GetExtension(filePath).ToLowerInvariant();
+            switch (ext)
+            {
+                case ".jpg":
+                case ".jpeg":
+                    contentType = "image/jpeg";
+                    break;
+                case ".png":
+                    contentType = "image/png";
+                    break;
+                case ".pdf":
+                    contentType = "application/pdf";
+                    break;
+                case ".docx":
+                    contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                    break;
+            }
+
+            var fileContent = File.ReadAllBytes(filePath);
+
+            return Task.FromResult(Result<FileContentDto>.Success(new FileContentDto
+            {
+                Content = fileContent,
+                ContentType = contentType
+            }));
+        }
+    }
+}

@@ -1,25 +1,22 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.AspNetCore.Hosting;
 
 namespace backend.Infrastructure.Files
 {
     public class LocalFileStorage : IFileStorage
     {
         private readonly StorageSettings _storageSettings;
-        private readonly IWebHostEnvironment _env; // To get wwwroot path
 
-        public LocalFileStorage(StorageSettings storageSettings, IWebHostEnvironment env)
+        public LocalFileStorage(StorageSettings storageSettings)
         {
             _storageSettings = storageSettings;
-            _env = env;
         }
 
         public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
         {
             try
             {
-                var uploadPath = Path.Combine(_env.WebRootPath, _storageSettings.Local.LocalStoragePath);
+                var uploadPath = Path.Combine(_storageSettings.Local.LocalStoragePath);
                 if (!Directory.Exists(uploadPath))
                 {
                     Directory.CreateDirectory(uploadPath);
@@ -49,7 +46,7 @@ namespace backend.Infrastructure.Files
                 var uri = new Uri(url);
                 var fileName = Path.GetFileName(uri.LocalPath);
 
-                var filePath = Path.Combine(_env.WebRootPath, _storageSettings.Local.LocalStoragePath, fileName);
+                var filePath = Path.Combine(_storageSettings.Local.LocalStoragePath, fileName);
 
                 if (File.Exists(filePath))
                 {
