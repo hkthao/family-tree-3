@@ -1,11 +1,10 @@
-namespace backend.Application.Relationships.Commands.DeleteRelationship
+namespace backend.Application.Relationships.Commands.DeleteRelationship;
+
+public class DeleteRelationshipCommandValidator : AbstractValidator<DeleteRelationshipCommand>
 {
-    public class DeleteRelationshipCommandValidator : AbstractValidator<DeleteRelationshipCommand>
+    public DeleteRelationshipCommandValidator()
     {
-        public DeleteRelationshipCommandValidator()
-        {
-            RuleFor(v => v.Id)
-                .NotEmpty();
-        }
+        RuleFor(v => v.Id)
+            .NotEmpty();
     }
 }

@@ -1,11 +1,10 @@
-namespace backend.Application.Members.Commands.DeleteMember
+namespace backend.Application.Members.Commands.DeleteMember;
+
+public class DeleteMemberCommandValidator : AbstractValidator<DeleteMemberCommand>
 {
-    public class DeleteMemberCommandValidator : AbstractValidator<DeleteMemberCommand>
+    public DeleteMemberCommandValidator()
     {
-        public DeleteMemberCommandValidator()
-        {
-            RuleFor(v => v.Id)
-                .NotEmpty();
-        }
+        RuleFor(v => v.Id)
+            .NotEmpty();
     }
 }

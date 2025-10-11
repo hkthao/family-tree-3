@@ -1,9 +1,8 @@
 using backend.Domain.Enums;
 
-namespace backend.Application.Common.Interfaces
+namespace backend.Application.Common.Interfaces;
+
+public interface IChatProviderFactory
 {
-    public interface IChatProviderFactory
-    {
-        IChatProvider CreateChatProvider(ChatAIProvider provider);
-    }
+    IChatProvider CreateChatProvider(ChatAIProvider provider);
 }

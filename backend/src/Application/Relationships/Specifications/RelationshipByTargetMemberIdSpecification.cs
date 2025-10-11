@@ -1,16 +1,15 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Relationships.Specifications
+namespace backend.Application.Relationships.Specifications;
+
+public class RelationshipByTargetMemberIdSpecification : Specification<Relationship>
 {
-    public class RelationshipByTargetMemberIdSpecification : Specification<Relationship>
+    public RelationshipByTargetMemberIdSpecification(Guid? targetMemberId)
     {
-        public RelationshipByTargetMemberIdSpecification(Guid? targetMemberId)
+        if (targetMemberId.HasValue)
         {
-            if (targetMemberId.HasValue)
-            {
-                Query.Where(r => r.TargetMemberId == targetMemberId.Value);
-            }
+            Query.Where(r => r.TargetMemberId == targetMemberId.Value);
         }
     }
 }

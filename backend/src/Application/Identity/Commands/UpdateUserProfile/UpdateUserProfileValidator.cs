@@ -1,26 +1,25 @@
-namespace backend.Application.Identity.Commands.UpdateUserProfile
+namespace backend.Application.Identity.Commands.UpdateUserProfile;
+
+public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>
 {
-    public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>
+    public UpdateUserProfileCommandValidator()
     {
-        public UpdateUserProfileCommandValidator()
-        {
-            RuleFor(v => v.Id)
-                .NotEmpty().WithMessage("User ID is required.");
+        RuleFor(v => v.Id)
+            .NotEmpty().WithMessage("User ID is required.");
 
-            RuleFor(v => v.Name)
-                .MaximumLength(250).WithMessage("Name must not exceed 250 characters.");
+        RuleFor(v => v.Name)
+            .MaximumLength(250).WithMessage("Name must not exceed 250 characters.");
 
-            RuleFor(v => v.Email)
-                .EmailAddress().WithMessage("Email must be a valid email address.");
+        RuleFor(v => v.Email)
+            .EmailAddress().WithMessage("Email must be a valid email address.");
 
-            RuleFor(v => v.Avatar)
-                .Must(BeAValidUrl).WithMessage("Avatar URL must be a valid URL.");
-        }
+        RuleFor(v => v.Avatar)
+            .Must(BeAValidUrl).WithMessage("Avatar URL must be a valid URL.");
+    }
 
-        private bool BeAValidUrl(string? url)
-        {
-            if (string.IsNullOrEmpty(url)) return true;
-            return Uri.TryCreate(url, UriKind.Absolute, out _);
-        }
+    private bool BeAValidUrl(string? url)
+    {
+        if (string.IsNullOrEmpty(url)) return true;
+        return Uri.TryCreate(url, UriKind.Absolute, out _);
     }
 }
