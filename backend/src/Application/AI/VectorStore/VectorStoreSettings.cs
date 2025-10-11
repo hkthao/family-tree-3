@@ -1,13 +1,11 @@
 using backend.Application.Common.Models.AISettings;
-using backend.Domain.Enums;
 
 namespace backend.Application.AI.VectorStore
 {
     public class VectorStoreSettings
     {
         public const string SectionName = "VectorStoreSettings";
-        public int MaxTextLength { get; set; }
-        public VectorStoreProviderType VectorStoreProvider { get; set; }
+        public string Provider { get; set; } = "";
         public PineconeSettings Pinecone { get; set; } = null!;
     }
 }

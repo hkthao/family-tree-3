@@ -13,6 +13,7 @@ using backend.Infrastructure.AI.Embeddings;
 using backend.Application.AI.Chat;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AISettings;
+using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure
 {
@@ -57,11 +58,16 @@ namespace backend.Infrastructure
 
             services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
 
+            services.AddHttpClient(); // Register HttpClient
+
             // Register Chat Module
             services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));
-            services.AddTransient<IChatProvider, GeminiChatProvider>();
-            services.AddTransient<IChatProvider, OpenAIChatProvider>();
-            services.AddTransient<IChatProvider, LocalChatProvider>();
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<AIChatSettings>>().Value); // Register AIChatSettings as singleton
+
+            services.AddTransient<GeminiChatProvider>(); // Register concrete providers
+            services.AddTransient<OpenAIChatProvider>();
+            services.AddTransient<LocalChatProvider>();
+
             services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
             services.AddScoped<IChatService, ChatService>();
 
@@ -82,9 +88,7 @@ namespace backend.Infrastructure
             // Register Vector Store
             services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
             services.AddTransient<PineconeVectorStore>();
-
             services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
-            //services.AddScoped(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
 
             return services;
         }

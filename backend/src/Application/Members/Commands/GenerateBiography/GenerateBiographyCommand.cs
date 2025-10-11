@@ -1,6 +1,5 @@
 using backend.Application.AI.Common;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 
 namespace backend.Application.Members.Commands.GenerateBiography
 {
@@ -10,9 +9,5 @@ namespace backend.Application.Members.Commands.GenerateBiography
     public class GenerateBiographyCommand : IRequest<Result<BiographyResultDto>>
     {
         public Guid MemberId { get; set; }
-        public BiographyStyle Style { get; set; }
-        public bool GeneratedFromDB { get; set; } = false;
-        public string? UserPrompt { get; set; }
-        public string Language { get; set; } = "Vietnamese";
     }
 }

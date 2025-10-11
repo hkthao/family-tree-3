@@ -1,45 +1,53 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.AI.VectorStore;
+using Microsoft.Extensions.Options;
+using backend.Domain.Enums;
 
 namespace backend.Application.AI.Chat
 {
     public class ChatService : IChatService
     {
-        private readonly IVectorStore _vectorStore;
-        private readonly IEmbeddingService _embeddingService;
+        private readonly IVectorStoreFactory _vectorStoreFactory;
+        private readonly IOptions<VectorStoreSettings> _settings;
 
         public ChatService(
-            IVectorStore vectorStore,
-            IEmbeddingService embeddingService)
+            IVectorStoreFactory vectorStoreFactory,
+            IOptions<VectorStoreSettings> settings
+            )
         {
-            _vectorStore = vectorStore;
-            _embeddingService = embeddingService;
+            _vectorStoreFactory = vectorStoreFactory;
+            _settings = settings;
         }
 
         public async Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null)
         {
+
+            return await Task.FromResult(new ChatResponse());
             // Generate embeddings for the user message
-            var embeddingResult = await _embeddingService.GenerateEmbeddingAsync(userMessage);
-            if (!embeddingResult.IsSuccess)
-            {
-                return new ChatResponse { Response = "Error generating embeddings." };
-            }
+            // var embeddingResult = await _embeddingService.GenerateEmbeddingAsync(userMessage);
+            // if (!embeddingResult.IsSuccess)
+            // {
+            //     return new ChatResponse { Response = "Error generating embeddings." };
+            // }
 
-            // Query VectorStore for semantically relevant context
-            var vectorQuery = new VectorQuery
-            {
-                Vector = embeddingResult.Value!,
-                TopK = 5 // Retrieve top 5 relevant documents
-            };
-            var queryResult = await _vectorStore.QueryAsync(vectorQuery);
+            // // Get the appropriate vector store
+            // var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_settings.Value.Provider, true));
 
-            var context = new List<string>();
-            if (queryResult.IsSuccess && queryResult.Value != null)
-            {
-                context = queryResult.Value.Select(d => d.Content).ToList();
-            }
+            // // Query VectorStore for semantically relevant context
+            // var vectorQuery = new VectorQuery
+            // {
+            //     Vector = embeddingResult.Value!,
+            //     TopK = 5 // Retrieve top 5 relevant documents
+            // };
+            // var queryResult = await vectorStore.QueryAsync(vectorQuery);
 
-            return await SendMessageWithContextAsync(userMessage, context, sessionId);
+            // var context = new List<string>();
+            // if (queryResult.IsSuccess && queryResult.Value != null)
+            // {
+            //     context = queryResult.Value.Select(d => d.Content).ToList();
+            // }
+
+            // return await SendMessageWithContextAsync(userMessage, context, sessionId);
         }
 
         public async Task<ChatResponse> SendMessageWithContextAsync(string userMessage, IEnumerable<string> context, string? sessionId = null)
@@ -73,8 +81,7 @@ namespace backend.Application.AI.Chat
             // var response = await chatProvider.GenerateResponseAsync(userMessage);
 
             // return new ChatResponse
-            // {
-            //     Response = response,
+            // {n            //     Response = response,
             //     Context = context?.ToList() ?? []
             // };
         }
