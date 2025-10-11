@@ -1,10 +1,8 @@
 using backend.Application.AI.Common;
-using backend.Application.AI.ContentGenerators;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Events;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.Members.Commands.GenerateBiography
 {
@@ -12,25 +10,19 @@ namespace backend.Application.Members.Commands.GenerateBiography
     {
         private readonly IApplicationDbContext _context;
         private readonly IAIContentGenerator _aiContentGenerator;
-        private readonly IAIUsageTracker _aiUsageTracker;
         private readonly IUser _user;
         private readonly IAuthorizationService _authorizationService;
-        private readonly IOptions<AIContentGeneratorSettings> _aiContentGeneratorSettings;
 
         public GenerateBiographyCommandHandler(
             IApplicationDbContext context,
             IAIContentGenerator aiContentGenerator,
-            IAIUsageTracker aiUsageTracker,
             IUser user,
-            IAuthorizationService authorizationService,
-            IOptions<AIContentGeneratorSettings> aiContentGeneratorSettings)
+            IAuthorizationService authorizationService)
         {
             _context = context;
             _aiContentGenerator = aiContentGenerator;
-            _aiUsageTracker = aiUsageTracker;
             _user = user;
             _authorizationService = authorizationService;
-            _aiContentGeneratorSettings = aiContentGeneratorSettings;
         }
 
         public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
@@ -59,13 +51,6 @@ namespace backend.Application.Members.Commands.GenerateBiography
                 return Result<BiographyResultDto>.Failure("Access denied. Only family managers or admins can generate biographies.", "Forbidden");
             }
 
-            // Check usage limits
-            var usageCheckResult = await _aiUsageTracker.CheckAndRecordUsageAsync(currentUserProfile.Id, 0, cancellationToken); // Tokens used will be updated after generation
-            if (!usageCheckResult.IsSuccess)
-            {
-                return Result<BiographyResultDto>.Failure(usageCheckResult.Error ?? "Unknown error", usageCheckResult.ErrorSource ?? "Unknown");
-            }
-
             string finalPrompt;
             bool generatedFromDB = false;
 
@@ -86,7 +71,6 @@ namespace backend.Application.Members.Commands.GenerateBiography
                 UserPrompt = finalPrompt,
                 Style = request.Style,
                 Language = request.Language,
-                MaxTokens = _aiContentGeneratorSettings.Value.MaxTokensPerRequest, // Use configurable max tokens
                 GeneratedFromDB = generatedFromDB,
                 MemberId = request.MemberId
             };
@@ -98,9 +82,6 @@ namespace backend.Application.Members.Commands.GenerateBiography
             {
                 return Result<BiographyResultDto>.Failure(aiResult.Error ?? "Unknown AI generation error", aiResult.ErrorSource ?? "Unknown");
             }
-
-            // Update usage with actual tokens used
-            await _aiUsageTracker.CheckAndRecordUsageAsync(currentUserProfile.Id, aiResult.Value!.TokensUsed, cancellationToken); // Record actual tokens
 
             // Save biography to DB
             var biography = new AIBiography

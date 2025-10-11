@@ -4,7 +4,6 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.VectorStore;
-using backend.Application.AI.ContentGenerators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,8 +66,6 @@ namespace backend.Infrastructure
             services.AddScoped<IChatService, ChatService>();
 
             // Register AI Content Generator
-            services.Configure<AIContentGeneratorSettings>(configuration.GetSection(AIContentGeneratorSettings.SectionName));
-
             services.Configure<GeminiSettings>(configuration.GetSection(nameof(GeminiSettings)));
             services.Configure<OpenAISettings>(configuration.GetSection(nameof(OpenAISettings)));
             services.Configure<LocalAISettings>(configuration.GetSection(nameof(LocalAISettings)));
@@ -81,7 +78,6 @@ namespace backend.Infrastructure
             services.AddScoped<IEmbeddingProvider, CohereEmbeddingProvider>();
             services.AddScoped<IEmbeddingProvider, LocalEmbeddingProvider>();
             services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
-            services.AddScoped<IEmbeddingService, EmbeddingService>();
 
             // Register Vector Store
             services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));

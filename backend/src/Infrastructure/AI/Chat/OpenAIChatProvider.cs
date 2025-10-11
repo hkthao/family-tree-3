@@ -1,22 +1,22 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models.AISettings;
-using Microsoft.Extensions.Options;
+using backend.Application.Common.Models;
 
 namespace backend.Infrastructure.AI.Chat
 {
     public class OpenAIChatProvider : IChatProvider
     {
-        private readonly OpenAISettings _openAISettings;
+        private readonly HttpClient _httpClient;
+        private readonly AIChatSettings _chatSettings;
 
-        public OpenAIChatProvider(IOptions<AIChatSettings> chatSettings)
+        public OpenAIChatProvider(HttpClient httpClient, AIChatSettings chatSettings)
         {
-            _openAISettings = chatSettings.Value.Providers["OpenAI"] as OpenAISettings ?? throw new InvalidOperationException("OpenAI settings not found.");
+            _httpClient = httpClient;
+            _chatSettings = chatSettings;
         }
 
         public async Task<string> GenerateResponseAsync(string prompt)
         {
-            // Dummy implementation for OpenAI, now with access to _openAISettings.ApiKey and _openAISettings.Model
-            return await Task.FromResult($"OpenAI responded to: {prompt} using model {_openAISettings.Model} with API Key {_openAISettings.ApiKey}");
+            return await Task.FromResult($"OpenAI responded to: {prompt} using model {_chatSettings.OpenAI.Model} with API Key {_chatSettings.OpenAI.ApiKey}");
         }
     }
 }

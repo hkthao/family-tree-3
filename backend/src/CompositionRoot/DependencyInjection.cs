@@ -2,20 +2,16 @@ using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Infrastructure.AI;
-using backend.Application.AI.ContentGenerators;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using backend.Domain.Enums;
-using backend.Infrastructure.AI.ContentGenerators;
 using backend.Infrastructure;
 
 namespace backend.CompositionRoot;
@@ -27,16 +23,6 @@ public static class DependencyInjection
         services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
-        // Register AI Content Generators
-        services.AddTransient<GeminiAIContentGenerator>();
-        services.AddTransient<OpenAIAIContentGenerator>();
-        services.AddTransient<LocalAIContentGenerator>();
-        services.AddScoped<IAIContentGeneratorFactory, AIContentGeneratorFactory>();
-        services.AddScoped(sp => sp.GetRequiredService<IAIContentGeneratorFactory>().GetContentGenerator());
-
-        // Register AI Usage Tracker
-        services.AddSingleton<IAIUsageTracker, AIUsageTracker>();
-
         // Add Memory Cache services
         services.AddMemoryCache();
 
@@ -46,7 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IFileStorageFactory, FileStorageFactory>();
 
         // Register IFileStorage based on configuration
-        services.AddTransient<IFileStorage>(sp =>
+        services.AddTransient(sp =>
         {
             var factory = sp.GetRequiredService<IFileStorageFactory>();
             var storageSettings = sp.GetRequiredService<IOptions<StorageSettings>>().Value;

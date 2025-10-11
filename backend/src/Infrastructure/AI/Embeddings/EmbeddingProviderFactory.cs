@@ -1,25 +1,27 @@
 using backend.Application.AI.Embeddings;
-using backend.Application.Common.Models;
+using backend.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.AI.Embeddings
 {
     public class EmbeddingProviderFactory : IEmbeddingProviderFactory
     {
-        private readonly IEnumerable<IEmbeddingProvider> _providers;
+        private readonly IServiceProvider _serviceProvider;
 
-        public EmbeddingProviderFactory(IEnumerable<IEmbeddingProvider> providers)
+        public EmbeddingProviderFactory(IServiceProvider serviceProvider)
         {
-            _providers = providers;
+            _serviceProvider = serviceProvider;
         }
 
-        public Result<IEmbeddingProvider> GetProvider(string providerName)
+        public IEmbeddingProvider CreateProvider(EmbeddingProvider provider)
         {
-            var provider = _providers.FirstOrDefault(p => p.ProviderName.Equals(providerName, StringComparison.OrdinalIgnoreCase));
-            if (provider == null)
+            return provider switch
             {
-                return Result<IEmbeddingProvider>.Failure($"No embedding provider found for: {providerName}");
-            }
-            return Result<IEmbeddingProvider>.Success(provider);
+                EmbeddingProvider.Local => _serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
+                EmbeddingProvider.Cohere => _serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
+                EmbeddingProvider.OpenAI => _serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
+                _ => throw new InvalidOperationException($"No file Embedding provider configured for: {provider}")
+            };
         }
     }
 }

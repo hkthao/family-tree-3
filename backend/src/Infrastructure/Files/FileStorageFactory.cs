@@ -1,28 +1,25 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Domain.Enums;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.Files
 {
     public class FileStorageFactory : IFileStorageFactory
     {
-        private readonly IOptions<StorageSettings> _storageSettingsOptions;
+        private readonly IServiceProvider _serviceProvider;
 
-        public FileStorageFactory(IOptions<StorageSettings> storageSettingsOptions)
+        public FileStorageFactory(IServiceProvider serviceProvider)
         {
-            _storageSettingsOptions = storageSettingsOptions;
+            _serviceProvider = serviceProvider;
         }
 
         public IFileStorage CreateFileStorage(StorageProvider provider)
         {
-            var storageSettings = _storageSettingsOptions.Value;
-
             return provider switch
             {
-                StorageProvider.Local => new LocalFileStorage(storageSettings),
-                StorageProvider.Cloudinary => new CloudinaryFileStorage(storageSettings),
-                StorageProvider.S3 => new S3FileStorage(storageSettings),
+                StorageProvider.Local => _serviceProvider.GetRequiredService<LocalFileStorage>(),
+                StorageProvider.Cloudinary => _serviceProvider.GetRequiredService<CloudinaryFileStorage>(),
+                StorageProvider.S3 => _serviceProvider.GetRequiredService<S3FileStorage>(),
                 _ => throw new InvalidOperationException($"No file storage provider configured for: {provider}")
             };
         }

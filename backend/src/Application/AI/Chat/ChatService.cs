@@ -7,16 +7,13 @@ namespace backend.Application.AI.Chat
     {
         private readonly IVectorStore _vectorStore;
         private readonly IEmbeddingService _embeddingService;
-        private readonly IChatProviderFactory _chatProviderFactory;
 
         public ChatService(
             IVectorStore vectorStore,
-            IEmbeddingService embeddingService,
-            IChatProviderFactory chatProviderFactory)
+            IEmbeddingService embeddingService)
         {
             _vectorStore = vectorStore;
             _embeddingService = embeddingService;
-            _chatProviderFactory = chatProviderFactory;
         }
 
         public async Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null)
@@ -69,15 +66,17 @@ namespace backend.Application.AI.Chat
 
             var prompt = promptBuilder.ToString();
 
-            // Call the LLM provider
-            var chatProvider = _chatProviderFactory.GetProvider();
-            var response = await chatProvider.GenerateResponseAsync(userMessage);
+            return await Task.FromResult(new ChatResponse());
 
-            return new ChatResponse
-            {
-                Response = response,
-                Context = context?.ToList() ?? []
-            };
+            // Call the LLM provider
+            // var chatProvider = _chatProviderFactory.CreateChatProvider();
+            // var response = await chatProvider.GenerateResponseAsync(userMessage);
+
+            // return new ChatResponse
+            // {
+            //     Response = response,
+            //     Context = context?.ToList() ?? []
+            // };
         }
     }
 }

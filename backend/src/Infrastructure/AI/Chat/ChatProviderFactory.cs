@@ -1,30 +1,29 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.AI.Chat
 {
     public class ChatProviderFactory : IChatProviderFactory
     {
-        private readonly IOptions<AIChatSettings> _chatSettings;
-        private readonly IEnumerable<IChatProvider> _providers;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ChatProviderFactory(IOptions<AIChatSettings> chatSettings, IEnumerable<IChatProvider> providers)
+        public ChatProviderFactory(IServiceProvider serviceProvider)
         {
-            _chatSettings = chatSettings;
-            _providers = providers;
+            _serviceProvider = serviceProvider;
         }
 
-        public IChatProvider GetProvider()
+        public IChatProvider CreateChatProvider(ChatAIProvider provider)
         {
-            var providerName = _chatSettings.Value.Provider.ToString();
-            var provider = _providers.FirstOrDefault(p => p.GetType().Name.StartsWith(providerName, StringComparison.OrdinalIgnoreCase));
-
-            if (provider == null)
+            return provider switch
             {
-                throw new InvalidOperationException($"No LLM provider found for: {providerName}");
-            }
-
-            return provider;
+                ChatAIProvider.Local => _serviceProvider.GetRequiredService<LocalChatProvider>(),
+                ChatAIProvider.Gemini => _serviceProvider.GetRequiredService<GeminiChatProvider>(),
+                ChatAIProvider.OpenAI => _serviceProvider.GetRequiredService<OpenAIChatProvider>(),
+                _ => throw new InvalidOperationException($"No file chat AI provider configured for: {provider}")
+            };
         }
     }
 }
