@@ -1,9 +1,10 @@
 ﻿
-namespace backend.Application.Common.Interfaces;
-
-public interface IUser
+namespace backend.Application.Common.Interfaces
 {
-    string? Id { get; }
-    List<string>? Roles { get; }
+    public interface IUser
+    {
+        string? Id { get; }
+        List<string>? Roles { get; }
 
+    }
 }

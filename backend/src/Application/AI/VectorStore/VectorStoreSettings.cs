@@ -1,10 +1,11 @@
 using backend.Application.Common.Models.AISettings;
 
-namespace backend.Application.AI.VectorStore;
-
-public class VectorStoreSettings
+namespace backend.Application.AI.VectorStore
 {
-    public const string SectionName = "VectorStoreSettings";
-    public string Provider { get; set; } = "";
-    public PineconeSettings Pinecone { get; set; } = null!;
+    public class VectorStoreSettings
+    {
+        public const string SectionName = "VectorStoreSettings";
+        public string Provider { get; set; } = "";
+        public PineconeSettings Pinecone { get; set; } = null!;
+    }
 }

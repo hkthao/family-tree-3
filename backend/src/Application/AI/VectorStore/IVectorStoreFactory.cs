@@ -1,8 +1,9 @@
 using backend.Domain.Enums;
 
-namespace backend.Application.AI.VectorStore;
-
-public interface IVectorStoreFactory
+namespace backend.Application.AI.VectorStore
 {
-    IVectorStore CreateVectorStore(VectorStoreProviderType provider);
+    public interface IVectorStoreFactory
+    {
+        IVectorStore CreateVectorStore(VectorStoreProviderType provider);
+    }
 }

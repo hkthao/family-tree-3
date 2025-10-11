@@ -1,15 +1,16 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Events.Specifications;
-
-public class EventSearchTermSpecification : Specification<Event>
+namespace backend.Application.Events.Specifications
 {
-    public EventSearchTermSpecification(string? searchTerm)
+    public class EventSearchTermSpecification : Specification<Event>
     {
-        if (!string.IsNullOrEmpty(searchTerm))
+        public EventSearchTermSpecification(string? searchTerm)
         {
-            Query.Where(e => e.Name.Contains(searchTerm) || (e.Description != null && e.Description.Contains(searchTerm)));
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                Query.Where(e => e.Name.Contains(searchTerm) || (e.Description != null && e.Description.Contains(searchTerm)));
+            }
         }
     }
 }

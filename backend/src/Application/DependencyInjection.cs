@@ -2,28 +2,28 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace backend.Application;
-
-public static class DependencyInjection
+namespace backend.Application
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
+    public static class DependencyInjection
     {
-        services.AddAutoMapper(System.Reflection.Assembly.GetExecutingAssembly());
-        services.AddValidatorsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
-        services.AddMediatR(cfg =>
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            cfg.RegisterServicesFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
-            cfg.AddOpenBehavior(typeof(UnhandledExceptionBehaviour<,>));
-            cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
-            cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
-            cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
-        });
+            services.AddAutoMapper(System.Reflection.Assembly.GetExecutingAssembly());
+            services.AddValidatorsFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
+            services.AddMediatR(cfg =>
+            {
+                cfg.RegisterServicesFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
+                cfg.AddOpenBehavior(typeof(UnhandledExceptionBehaviour<,>));
+                cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
+                cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+                cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
+            });
 
-        services.AddScoped<backend.Application.Common.Interfaces.IUserProfileSyncService, backend.Application.Services.UserProfileSyncService>();
-        services.AddScoped<backend.Application.Common.Interfaces.IFamilyTreeService, backend.Application.Services.FamilyTreeService>();
+            services.AddScoped<backend.Application.Common.Interfaces.IFamilyTreeService, backend.Application.Services.FamilyTreeService>();
 
-        services.Configure<backend.Application.Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(backend.Application.Common.Models.EmbeddingSettings)));
+            services.Configure<backend.Application.Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(backend.Application.Common.Models.EmbeddingSettings)));
 
-        return services;
+            return services;
+        }
     }
 }

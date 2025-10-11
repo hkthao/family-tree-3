@@ -1,42 +1,43 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Relationships.Specifications;
-
-public class RelationshipOrderingSpecification : Specification<Relationship>
+namespace backend.Application.Relationships.Specifications
 {
-    public RelationshipOrderingSpecification(string? sortBy, string? sortOrder)
+    public class RelationshipOrderingSpecification : Specification<Relationship>
     {
-        if (!string.IsNullOrEmpty(sortBy))
+        public RelationshipOrderingSpecification(string? sortBy, string? sortOrder)
         {
-            switch (sortBy.ToLower())
+            if (!string.IsNullOrEmpty(sortBy))
             {
-                case "sourcememberfullname":
-                    if (sortOrder == "desc")
-                        Query.OrderByDescending(r => r.SourceMember!.LastName).ThenByDescending(r => r.SourceMember!.FirstName);
-                    else
-                        Query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName);
-                    break;
-                case "targetmemberfullname":
-                    if (sortOrder == "desc")
-                        Query.OrderByDescending(r => r.TargetMember!.LastName).ThenByDescending(r => r.TargetMember!.FirstName);
-                    else
-                        Query.OrderBy(r => r.TargetMember!.LastName).ThenBy(r => r.TargetMember!.FirstName);
-                    break;
-                case "type":
-                    if (sortOrder == "desc")
-                        Query.OrderByDescending(r => r.Type);
-                    else
-                        Query.OrderBy(r => r.Type);
-                    break;
-                default:
-                    Query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName); // Default sort
-                    break;
+                switch (sortBy.ToLower())
+                {
+                    case "sourcememberfullname":
+                        if (sortOrder == "desc")
+                            Query.OrderByDescending(r => r.SourceMember!.LastName).ThenByDescending(r => r.SourceMember!.FirstName);
+                        else
+                            Query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName);
+                        break;
+                    case "targetmemberfullname":
+                        if (sortOrder == "desc")
+                            Query.OrderByDescending(r => r.TargetMember!.LastName).ThenByDescending(r => r.TargetMember!.FirstName);
+                        else
+                            Query.OrderBy(r => r.TargetMember!.LastName).ThenBy(r => r.TargetMember!.FirstName);
+                        break;
+                    case "type":
+                        if (sortOrder == "desc")
+                            Query.OrderByDescending(r => r.Type);
+                        else
+                            Query.OrderBy(r => r.Type);
+                        break;
+                    default:
+                        Query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName); // Default sort
+                        break;
+                }
             }
-        }
-        else
-        {
-            Query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName); // Default sort if no sortBy is provided
+            else
+            {
+                Query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName); // Default sort if no sortBy is provided
+            }
         }
     }
 }

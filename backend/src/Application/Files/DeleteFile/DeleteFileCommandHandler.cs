@@ -1,40 +1,41 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
-namespace backend.Application.Files.DeleteFile;
-
-public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Result>
+namespace backend.Application.Files.DeleteFile
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileStorage _fileStorage;
-
-    public DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage)
+    public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Result>
     {
-        _context = context;
-        _fileStorage = fileStorage;
-    }
+        private readonly IApplicationDbContext _context;
+        private readonly IFileStorage _fileStorage;
 
-    public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
-    {
-        var fileMetadata = await _context.FileMetadata
-            .FirstOrDefaultAsync(fm => fm.Id == request.FileId, cancellationToken);
-
-        if (fileMetadata == null)
+        public DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage)
         {
-            return Result.Failure("File metadata not found.", "NotFound");
+            _context = context;
+            _fileStorage = fileStorage;
         }
 
-        // Delete the actual file from storage
-        var deleteResult = await _fileStorage.DeleteFileAsync(fileMetadata.Url, cancellationToken);
-        if (!deleteResult.IsSuccess)
+        public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
         {
-            return Result.Failure(deleteResult.Error ?? "Failed to delete file from storage.", deleteResult.ErrorSource ?? "FileStorage");
+            var fileMetadata = await _context.FileMetadata
+                .FirstOrDefaultAsync(fm => fm.Id == request.FileId, cancellationToken);
+
+            if (fileMetadata == null)
+            {
+                return Result.Failure("File metadata not found.", "NotFound");
+            }
+
+            // Delete the actual file from storage
+            var deleteResult = await _fileStorage.DeleteFileAsync(fileMetadata.Url, cancellationToken);
+            if (!deleteResult.IsSuccess)
+            {
+                return Result.Failure(deleteResult.Error ?? "Failed to delete file from storage.", deleteResult.ErrorSource ?? "FileStorage");
+            }
+
+            // Remove metadata record from DB
+            _context.FileMetadata.Remove(fileMetadata);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return Result.Success();
         }
-
-        // Remove metadata record from DB
-        _context.FileMetadata.Remove(fileMetadata);
-        await _context.SaveChangesAsync(cancellationToken);
-
-        return Result.Success();
     }
 }

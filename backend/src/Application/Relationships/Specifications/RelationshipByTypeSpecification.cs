@@ -2,17 +2,18 @@ using Ardalis.Specification;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
-namespace backend.Application.Relationships.Specifications;
-
-public class RelationshipByTypeSpecification : Specification<Relationship>
+namespace backend.Application.Relationships.Specifications
 {
-    public RelationshipByTypeSpecification(string? type)
+    public class RelationshipByTypeSpecification : Specification<Relationship>
     {
-        if (!string.IsNullOrEmpty(type))
+        public RelationshipByTypeSpecification(string? type)
         {
-            if (Enum.TryParse<RelationshipType>(type, true, out var relationshipType))
+            if (!string.IsNullOrEmpty(type))
             {
-                Query.Where(r => r.Type == relationshipType);
+                if (Enum.TryParse<RelationshipType>(type, true, out var relationshipType))
+                {
+                    Query.Where(r => r.Type == relationshipType);
+                }
             }
         }
     }

@@ -1,21 +1,22 @@
-namespace backend.Application.Members.Commands.UpdateMember;
-
-public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberCommand>
+namespace backend.Application.Members.Commands.UpdateMember
 {
-    public UpdateMemberCommandValidator()
+    public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberCommand>
     {
-        RuleFor(v => v.Id)
-            .NotEmpty();
+        public UpdateMemberCommandValidator()
+        {
+            RuleFor(v => v.Id)
+                .NotEmpty();
 
-        RuleFor(v => v.FirstName)
-            .MaximumLength(100)
-            .NotEmpty();
+            RuleFor(v => v.FirstName)
+                .MaximumLength(100)
+                .NotEmpty();
 
-        RuleFor(v => v.LastName)
-            .MaximumLength(100)
-            .NotEmpty();
+            RuleFor(v => v.LastName)
+                .MaximumLength(100)
+                .NotEmpty();
 
-        RuleFor(v => v.FamilyId)
-            .NotEmpty();
+            RuleFor(v => v.FamilyId)
+                .NotEmpty();
+        }
     }
 }

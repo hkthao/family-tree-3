@@ -1,15 +1,16 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Families.Specifications;
-
-public class FamilyVisibilitySpecification : Specification<Family>
+namespace backend.Application.Families.Specifications
 {
-    public FamilyVisibilitySpecification(string? visibility)
+    public class FamilyVisibilitySpecification : Specification<Family>
     {
-        if (!string.IsNullOrEmpty(visibility))
+        public FamilyVisibilitySpecification(string? visibility)
         {
-            Query.Where(f => f.Visibility == visibility);
+            if (!string.IsNullOrEmpty(visibility))
+            {
+                Query.Where(f => f.Visibility == visibility);
+            }
         }
     }
 }

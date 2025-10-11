@@ -1,16 +1,17 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Families.Specifications;
-
-/// <summary>
-/// Specification to retrieve families that a specific user has access to (either as Manager or Viewer).
-/// </summary>
-public class FamilyByUserIdSpec : Specification<Family>
+namespace backend.Application.Families.Specifications
 {
-    public FamilyByUserIdSpec(Guid userProfileId)
+    /// <summary>
+    /// Specification to retrieve families that a specific user has access to (either as Manager or Viewer).
+    /// </summary>
+    public class FamilyByUserIdSpec : Specification<Family>
     {
-        Query
-            .Where(f => f.FamilyUsers.Any(fu => fu.UserProfileId == userProfileId));
+        public FamilyByUserIdSpec(Guid userProfileId)
+        {
+            Query
+                .Where(f => f.FamilyUsers.Any(fu => fu.UserProfileId == userProfileId));
+        }
     }
 }

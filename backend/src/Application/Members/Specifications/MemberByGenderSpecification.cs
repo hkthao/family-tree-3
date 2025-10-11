@@ -1,15 +1,16 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications;
-
-public class MemberByGenderSpecification : Specification<Member>
+namespace backend.Application.Members.Specifications
 {
-    public MemberByGenderSpecification(string? gender)
+    public class MemberByGenderSpecification : Specification<Member>
     {
-        if (!string.IsNullOrEmpty(gender))
+        public MemberByGenderSpecification(string? gender)
         {
-            Query.Where(m => m.Gender == gender);
+            if (!string.IsNullOrEmpty(gender))
+            {
+                Query.Where(m => m.Gender == gender);
+            }
         }
     }
 }

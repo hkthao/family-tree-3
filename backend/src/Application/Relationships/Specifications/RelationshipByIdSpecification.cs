@@ -1,12 +1,13 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Relationships.Specifications;
-
-public class RelationshipByIdSpecification : Specification<Relationship>
+namespace backend.Application.Relationships.Specifications
 {
-    public RelationshipByIdSpecification(Guid id)
+    public class RelationshipByIdSpecification : Specification<Relationship>
     {
-        Query.Where(r => r.Id == id);
+        public RelationshipByIdSpecification(Guid id)
+        {
+            Query.Where(r => r.Id == id);
+        }
     }
 }

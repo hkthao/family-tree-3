@@ -1,15 +1,16 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Events.Specifications;
-
-public class EventByFamilyIdSpecification : Specification<Event>
+namespace backend.Application.Events.Specifications
 {
-    public EventByFamilyIdSpecification(Guid? familyId)
+    public class EventByFamilyIdSpecification : Specification<Event>
     {
-        if (familyId.HasValue)
+        public EventByFamilyIdSpecification(Guid? familyId)
         {
-            Query.Where(e => e.FamilyId == familyId.Value);
+            if (familyId.HasValue)
+            {
+                Query.Where(e => e.FamilyId == familyId.Value);
+            }
         }
     }
 }

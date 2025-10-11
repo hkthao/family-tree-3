@@ -1,14 +1,15 @@
-﻿namespace backend.Application.Families.Commands.UpdateFamily;
-
-public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyCommand>
+﻿namespace backend.Application.Families.Commands.UpdateFamily
 {
-    public UpdateFamilyCommandValidator()
+    public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyCommand>
     {
-        RuleFor(v => v.Id)
-            .NotEmpty();
+        public UpdateFamilyCommandValidator()
+        {
+            RuleFor(v => v.Id)
+                .NotEmpty();
 
-        RuleFor(v => v.Name)
-            .MaximumLength(200)
-            .NotEmpty();
+            RuleFor(v => v.Name)
+                .MaximumLength(200)
+                .NotEmpty();
+        }
     }
 }

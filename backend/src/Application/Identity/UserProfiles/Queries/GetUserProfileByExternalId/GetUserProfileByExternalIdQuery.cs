@@ -1,8 +1,9 @@
 using backend.Application.Common.Models;
 
-namespace backend.Application.Identity.UserProfiles.Queries.GetUserProfileByExternalId;
-
-public record GetUserProfileByExternalIdQuery : IRequest<Result<UserProfileDto>>
+namespace backend.Application.Identity.UserProfiles.Queries.GetUserProfileByExternalId
 {
-    public string ExternalId { get; init; } = null!;
+    public record GetUserProfileByExternalIdQuery : IRequest<Result<UserProfileDto>>
+    {
+        public string ExternalId { get; init; } = null!;
+    }
 }

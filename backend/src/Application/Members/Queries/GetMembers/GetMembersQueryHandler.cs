@@ -3,79 +3,80 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Specifications;
 
-namespace backend.Application.Members.Queries.GetMembers;
-
-public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
+namespace backend.Application.Members.Queries.GetMembers
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-
-    public GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService)
+    public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
     {
-        _context = context;
-        _mapper = mapper;
-        _user = user;
-        _authorizationService = authorizationService;
-    }
+        private readonly IApplicationDbContext _context;
+        private readonly IMapper _mapper;
+        private readonly IUser _user;
+        private readonly IAuthorizationService _authorizationService;
 
-    public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(_user.Id))
+        public GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService)
         {
-            return Result<IReadOnlyList<MemberListDto>>.Failure("User is not authenticated.");
+            _context = context;
+            _mapper = mapper;
+            _user = user;
+            _authorizationService = authorizationService;
         }
 
-        var query = _context.Members.AsQueryable();
-
-        // If the user has the 'Admin' role, bypass family-specific access checks
-        if (_authorizationService.IsAdmin())
+        public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
         {
-            // Admin has access to all members, no further filtering by user profile needed
-            // If a specific FamilyId is requested, still apply that filter
-            if (request.FamilyId != Guid.Empty)
+            if (string.IsNullOrEmpty(_user.Id))
             {
-                query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
-            }
-        }
-        else
-        {
-            // For non-admin users, apply family-specific access checks
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-
-            if (currentUserProfile == null)
-            {
-                return Result<IReadOnlyList<MemberListDto>>.Success(new List<MemberListDto>());
+                return Result<IReadOnlyList<MemberListDto>>.Failure("User is not authenticated.");
             }
 
-            // Get IDs of families the user has access to
-            var accessibleFamilyIds = currentUserProfile.FamilyUsers.Select(fu => fu.FamilyId).ToList();
+            var query = _context.Members.AsQueryable();
 
-            // Apply family access filter if a specific FamilyId is requested
-            if (request.FamilyId.HasValue && request.FamilyId.Value != Guid.Empty)
+            // If the user has the 'Admin' role, bypass family-specific access checks
+            if (_authorizationService.IsAdmin())
             {
-                // Check if the requested FamilyId is among the user's accessible families
-                if (!accessibleFamilyIds.Contains(request.FamilyId.Value!))
+                // Admin has access to all members, no further filtering by user profile needed
+                // If a specific FamilyId is requested, still apply that filter
+                if (request.FamilyId != Guid.Empty)
                 {
-                    return Result<IReadOnlyList<MemberListDto>>.Failure("Access denied to the requested family.");
+                    query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
                 }
-                query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId.Value));
             }
             else
             {
-                // If no specific FamilyId is requested, filter by all families the user has access to
-                query = query.Where(m => accessibleFamilyIds.Contains(m.FamilyId));
+                // For non-admin users, apply family-specific access checks
+                var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+
+                if (currentUserProfile == null)
+                {
+                    return Result<IReadOnlyList<MemberListDto>>.Success(new List<MemberListDto>());
+                }
+
+                // Get IDs of families the user has access to
+                var accessibleFamilyIds = currentUserProfile.FamilyUsers.Select(fu => fu.FamilyId).ToList();
+
+                // Apply family access filter if a specific FamilyId is requested
+                if (request.FamilyId.HasValue && request.FamilyId.Value != Guid.Empty)
+                {
+                    // Check if the requested FamilyId is among the user's accessible families
+                    if (!accessibleFamilyIds.Contains(request.FamilyId.Value!))
+                    {
+                        return Result<IReadOnlyList<MemberListDto>>.Failure("Access denied to the requested family.");
+                    }
+                    query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId.Value));
+                }
+                else
+                {
+                    // If no specific FamilyId is requested, filter by all families the user has access to
+                    query = query.Where(m => accessibleFamilyIds.Contains(m.FamilyId));
+                }
             }
+
+            // Apply other specifications
+            query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchTerm));
+
+            var memberList = await query
+                .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
+
+            return Result<IReadOnlyList<MemberListDto>>.Success(memberList);
         }
-
-        // Apply other specifications
-        query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchTerm));
-
-        var memberList = await query
-            .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
-
-        return Result<IReadOnlyList<MemberListDto>>.Success(memberList);
     }
 }

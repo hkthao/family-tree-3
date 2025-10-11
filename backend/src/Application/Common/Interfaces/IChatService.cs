@@ -1,9 +1,10 @@
 using backend.Application.AI.Chat;
 
-namespace backend.Application.Common.Interfaces;
-
-public interface IChatService
+namespace backend.Application.Common.Interfaces
 {
-    Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null);
-    Task<ChatResponse> SendMessageWithContextAsync(string userMessage, IEnumerable<string> context, string? sessionId = null);
+    public interface IChatService
+    {
+        Task<ChatResponse> SendMessageAsync(string userMessage, string? sessionId = null);
+        Task<ChatResponse> SendMessageWithContextAsync(string userMessage, IEnumerable<string> context, string? sessionId = null);
+    }
 }

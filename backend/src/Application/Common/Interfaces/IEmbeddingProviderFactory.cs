@@ -1,9 +1,10 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Enums;
 
-namespace backend.Application.AI.Embeddings;
-
-public interface IEmbeddingProviderFactory
+namespace backend.Application.AI.Embeddings
 {
-    IEmbeddingProvider CreateProvider(EmbeddingProvider provider);
+    public interface IEmbeddingProviderFactory
+    {
+        IEmbeddingProvider CreateProvider(EmbeddingProvider provider);
+    }
 }

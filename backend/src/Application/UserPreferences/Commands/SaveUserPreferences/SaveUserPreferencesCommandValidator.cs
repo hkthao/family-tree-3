@@ -1,13 +1,14 @@
-namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
-
-public class SaveUserPreferencesCommandValidator : AbstractValidator<SaveUserPreferencesCommand>
+namespace backend.Application.UserPreferences.Commands.SaveUserPreferences
 {
-    public SaveUserPreferencesCommandValidator()
+    public class SaveUserPreferencesCommandValidator : AbstractValidator<SaveUserPreferencesCommand>
     {
-        RuleFor(v => v.Theme)
-            .IsInEnum().WithMessage("Invalid Theme value.");
+        public SaveUserPreferencesCommandValidator()
+        {
+            RuleFor(v => v.Theme)
+                .IsInEnum().WithMessage("Invalid Theme value.");
 
-        RuleFor(v => v.Language)
-            .IsInEnum().WithMessage("Invalid Language value.");
+            RuleFor(v => v.Language)
+                .IsInEnum().WithMessage("Invalid Language value.");
+        }
     }
 }

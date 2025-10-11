@@ -1,10 +1,11 @@
-namespace backend.Application.Families.Commands.DeleteFamily;
-
-public class DeleteFamilyCommandValidator : AbstractValidator<DeleteFamilyCommand>
+namespace backend.Application.Families.Commands.DeleteFamily
 {
-    public DeleteFamilyCommandValidator()
+    public class DeleteFamilyCommandValidator : AbstractValidator<DeleteFamilyCommand>
     {
-        RuleFor(v => v.Id)
-            .NotEmpty();
+        public DeleteFamilyCommandValidator()
+        {
+            RuleFor(v => v.Id)
+                .NotEmpty();
+        }
     }
 }

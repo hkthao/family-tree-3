@@ -2,23 +2,24 @@ using Ardalis.Specification;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
-namespace backend.Application.UserActivities.Specifications;
-
-/// <summary>
-/// Specification to filter user activities by TargetType and TargetId.
-/// </summary>
-public class UserActivityByTargetSpec : Specification<UserActivity>
+namespace backend.Application.UserActivities.Specifications
 {
-    public UserActivityByTargetSpec(TargetType? targetType, string? targetId)
+    /// <summary>
+    /// Specification to filter user activities by TargetType and TargetId.
+    /// </summary>
+    public class UserActivityByTargetSpec : Specification<UserActivity>
     {
-        if (targetType.HasValue)
+        public UserActivityByTargetSpec(TargetType? targetType, string? targetId)
         {
-            Query.Where(ua => ua.TargetType == targetType.Value);
-        }
+            if (targetType.HasValue)
+            {
+                Query.Where(ua => ua.TargetType == targetType.Value);
+            }
 
-        if (!string.IsNullOrEmpty(targetId))
-        {
-            Query.Where(ua => ua.TargetId == targetId);
+            if (!string.IsNullOrEmpty(targetId))
+            {
+                Query.Where(ua => ua.TargetId == targetId);
+            }
         }
     }
 }

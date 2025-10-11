@@ -1,15 +1,16 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.UserActivities.Specifications;
-
-/// <summary>
-/// Specification to filter user activities by UserProfileId.
-/// </summary>
-public class UserActivityByProfileIdSpec : Specification<UserActivity>
+namespace backend.Application.UserActivities.Specifications
 {
-    public UserActivityByProfileIdSpec(Guid userProfileId)
+    /// <summary>
+    /// Specification to filter user activities by UserProfileId.
+    /// </summary>
+    public class UserActivityByProfileIdSpec : Specification<UserActivity>
     {
-        Query.Where(ua => ua.UserProfileId == userProfileId);
+        public UserActivityByProfileIdSpec(Guid userProfileId)
+        {
+            Query.Where(ua => ua.UserProfileId == userProfileId);
+        }
     }
 }
