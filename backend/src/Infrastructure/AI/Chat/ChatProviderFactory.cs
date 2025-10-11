@@ -1,8 +1,6 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.AI.Chat
 {

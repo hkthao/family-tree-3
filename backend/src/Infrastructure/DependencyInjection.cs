@@ -84,7 +84,7 @@ namespace backend.Infrastructure
             services.AddTransient<PineconeVectorStore>();
 
             services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
-            services.AddScoped(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
+            //services.AddScoped(sp => sp.GetRequiredService<IVectorStoreFactory>().CreateVectorStore());
 
             return services;
         }

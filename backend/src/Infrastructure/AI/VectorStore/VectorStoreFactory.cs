@@ -1,31 +1,26 @@
 using backend.Application.AI.VectorStore;
+using backend.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.AI.VectorStore
 {
     public class VectorStoreFactory : IVectorStoreFactory
     {
-        private readonly IOptions<VectorStoreSettings> _vectorStoreSettings;
-        private readonly IEnumerable<IVectorStore> _providers;
-
-        public VectorStoreFactory(IOptions<VectorStoreSettings> vectorStoreSettings, IEnumerable<IVectorStore> providers)
+        private readonly IServiceProvider _serviceProvider;
+        public VectorStoreFactory(IServiceProvider serviceProvider)
         {
-            _vectorStoreSettings = vectorStoreSettings;
-            _providers = providers;
+            _serviceProvider = serviceProvider;
         }
 
-        public IVectorStore CreateVectorStore()
+        public IVectorStore CreateVectorStore(VectorStoreProviderType provider)
         {
-            var providerType = _vectorStoreSettings.Value.VectorStoreProvider;
-
-            var provider = _providers.FirstOrDefault(p => p.GetType().Name.StartsWith(providerType.ToString(), StringComparison.OrdinalIgnoreCase));
-
-            if (provider == null)
+            return provider switch
             {
-                throw new InvalidOperationException($"No vector store provider found for: {providerType}");
-            }
-
-            return provider;
+                VectorStoreProviderType.Pinecone => _serviceProvider.GetRequiredService<PineconeVectorStore>(),
+                _ => throw new InvalidOperationException($"No vector store provider configured for: {provider}")
+            };
         }
+
     }
 }
