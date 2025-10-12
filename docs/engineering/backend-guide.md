@@ -877,7 +877,7 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 | :--------- | :----------- | :---- |
 | `Id`       | `string` (GUID) | ID duy nhất của chunk. |
 | `Content`  | `string`     | Nội dung văn bản của chunk. |
-| `Metadata` | `Dictionary<string, string>` (nullable) | Các siêu dữ liệu bổ sung (ví dụ: `fileName`, `createdAt`). |
+| `Metadata` | `Dictionary<string, string>` | Các siêu dữ liệu bổ sung, bao gồm: `fileName`, `fileId`, `familyId`, `page`, `category`, `createdBy`, `createdAt`. |
 
 ### 13.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)
 
@@ -896,13 +896,13 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 
 ### 13.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)
 
-`ProcessFileCommand` (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommand.cs`) là một Command trong mô hình CQRS, mang thông tin về tệp cần xử lý (Stream và tên tệp).
+`ProcessFileCommand` (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommand.cs`) là một Command trong mô hình CQRS, mang thông tin về tệp cần xử lý (Stream, tên tệp) và các metadata bổ sung (`FileId`, `FamilyId`, `Category`, `CreatedBy`).
 
-*   **`ProcessFileCommandValidator`**: Sử dụng FluentValidation để xác thực `ProcessFileCommand`, kiểm tra xem tệp có hợp lệ không (không rỗng, đúng định dạng PDF/TXT).
+*   **`ProcessFileCommandValidator`**: Sử dụng FluentValidation để xác thực `ProcessFileCommand`, kiểm tra xem tệp có hợp lệ không (không rỗng, đúng định dạng PDF/TXT) và các metadata cần thiết có được cung cấp đầy đủ không.
 *   **`ProcessFileCommandHandler`**: (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommandHandler.cs`) là Handler cho `ProcessFileCommand`. Nó điều phối quá trình:
     1.  Sử dụng `IFileTextExtractorFactory` để lấy `IFileTextExtractor` phù hợp.
     2.  Trích xuất văn bản từ tệp.
-    3.  Sử dụng `ChunkingPolicy` để làm sạch và chia văn bản thành các chunk.
+    3.  Sử dụng `ChunkingPolicy` để làm sạch và chia văn bản thành các chunk, đồng thời gắn các metadata đã nhận vào từng chunk.
     4.  Trả về `Result<List<TextChunk>>`.
 
 ### 13.6. API Endpoint (`ChunkController`)
@@ -910,7 +910,7 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 `ChunkController` (`backend/src/Web/Controllers/ChunkController.cs`) cung cấp endpoint API để người dùng tải lên tệp.
 
 *   **Route**: `POST /api/chunk/upload`
-*   **Chức năng**: Nhận `IFormFile`, tạo và gửi `ProcessFileCommand` thông qua `IMediator`, và trả về kết quả là một danh sách các `TextChunk`.
+*   **Chức năng**: Nhận `IFormFile` và các tham số metadata (`fileId`, `familyId`, `category`, `createdBy`) từ form data, tạo và gửi `ProcessFileCommand` thông qua `IMediator`, và trả về kết quả là một danh sách các `TextChunk`.
 
 ## 14. Logging & Monitoring
 

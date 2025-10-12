@@ -27,7 +27,7 @@ Chào mừng bạn đến với tài liệu của dự án Cây Gia Phả. Tài 
 
 ## Các thay đổi gần đây
 
--   **Xử lý dữ liệu và Chia Chunk**: Triển khai module xử lý và chia nhỏ nội dung từ các tệp PDF/TXT thành các `TextChunk` để chuẩn bị cho việc tạo embeddings và tích hợp chatbot.
+-   **Xử lý dữ liệu và Chia Chunk**: Triển khai module xử lý và chia nhỏ nội dung từ các tệp PDF/TXT thành các `TextChunk` với đầy đủ metadata (fileId, familyId, category, createdBy) để chuẩn bị cho việc tạo embeddings và tích hợp chatbot.
 -   **Quản lý Hồ sơ Người dùng tập trung:** Tái cấu trúc frontend để quản lý thông tin hồ sơ người dùng tập trung trong `userProfileStore`, giảm sự phụ thuộc của các component UI vào `authStore`.
 -   **API Hồ sơ Người dùng hiện tại:** Thêm endpoint backend mới `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại một cách an toàn.
 -   **Trường Avatar cho Hồ sơ Người dùng:** Bổ sung trường `Avatar` vào thực thể `UserProfile` và cập nhật các chức năng liên quan ở cả backend và frontend.

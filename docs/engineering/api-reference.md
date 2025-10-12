@@ -342,7 +342,7 @@ Content-Type: application/json
 ### 6.11. Xử lý Dữ liệu và Chia Chunk (`/api/chunk`)
 
 -   `POST /api/chunk/upload`: Tải lên một tệp (PDF hoặc TXT) để trích xuất văn bản, làm sạch và chia thành các chunk.
-    *   **Request Body:** `multipart/form-data` (chứa `IFormFile file`)
+    *   **Request Body:** `multipart/form-data` (chứa `IFormFile file`, `string fileId`, `string familyId`, `string category`, `string createdBy`)
     *   **Phản hồi:** `Result<List<TextChunk>>`
 
 ## 7. Mô hình Dữ liệu (Response Models)
@@ -539,7 +539,15 @@ Content-Type: application/json
 {
   "id": "string (uuid)",
   "content": "string",
-  "metadata": { "fileName": "string", "createdAt": "string (date-time)" }
+  "metadata": { 
+    "fileName": "string", 
+    "fileId": "string", 
+    "familyId": "string", 
+    "page": "string", 
+    "category": "string", 
+    "createdBy": "string", 
+    "createdAt": "string (date-time)" 
+  }
 }
 ```
 
