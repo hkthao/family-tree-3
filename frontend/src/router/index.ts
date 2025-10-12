@@ -184,6 +184,12 @@ const router = createRouter({
           props: true,
           meta: { breadcrumb: 'aiBiography.generator.title', requiresAuth: true },
         },
+        {
+          path: 'admin/chunks',
+          name: 'ChunkAdmin',
+          component: () => import('@/views/ChunkAdmin.vue'),
+          meta: { breadcrumb: 'chunk.admin.title', requiresAuth: true, roles: ['Admin'] },
+        },
         ...sidebarRoutes,
       ],
     },

@@ -11,3 +11,4 @@ export * from './userActivity/userActionType';
 export * from './userActivity/targetType';
 export * from './ai';
 export * from './userPreference';
+export * from './chunk';
