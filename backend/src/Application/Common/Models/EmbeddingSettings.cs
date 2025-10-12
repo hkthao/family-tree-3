@@ -1,9 +1,8 @@
-using backend.Application.Common.Models.AISettings;
-
 namespace backend.Application.Common.Models;
 
-public class EmbeddingSettings : AIProviderConfig
+public class EmbeddingSettings
 {
+    public string Provider { get; set; } = "";
     public const string SectionName = "EmbeddingSettings";
     public OpenAIEmbeddingSettings OpenAI { get; set; } = new();
     public CohereEmbeddingSettings Cohere { get; set; } = new();
@@ -26,6 +25,7 @@ public class CohereEmbeddingSettings
 
 public class LocalEmbeddingSettings
 {
-    public string ModelPath { get; set; } = string.Empty;
-    public int MaxTextLength { get; set; } = 512; // Example max length for a local model
+    public string ApiUrl { get; set; } = "http://localhost:11434/api/embed"; // Correct Ollama embeddings API URL
+    public string Model { get; set; } = "llama2"; // Default Ollama model
+    public int MaxTextLength { get; set; } = 512; // Max tokens for local model
 }
