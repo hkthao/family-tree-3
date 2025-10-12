@@ -9,7 +9,7 @@
               <v-col cols="12">
                 <ChunkUpload @file-selected="handleFileSelected" />
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="fileId"
                   :label="$t('chunkUpload.fileIdLabel')"
@@ -17,13 +17,13 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="familyId"
                   :label="$t('chunkUpload.familyIdLabel')"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="category"
                   :label="$t('chunkUpload.categoryLabel')"
@@ -31,7 +31,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="createdBy"
                   :label="$t('chunkUpload.createdByLabel')"
@@ -39,7 +39,7 @@
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" md="3">
+              <v-col cols="12" md="6">
                 <v-btn color="primary" :disabled="!isFormValid || chunkStore.loading" @click="upload">
                   {{ $t('chunkUpload.uploadButton') }}
                 </v-btn>
