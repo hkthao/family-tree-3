@@ -107,23 +107,29 @@ const resetForm = () => {
   // createdBy.value = ''; // Keep createdBy as it's auto-filled
 };
 
-const handleChunkApprovalChange = async (chunkId: string, approved: boolean) => {
+const handleChunkApprovalChange = (chunkId: string, approved: boolean) => {
   chunkStore.setChunkApproval(chunkId, approved);
-  if (approved) {
-    const chunkToApprove = chunkStore.chunks.find(c => c.id === chunkId);
-    if (chunkToApprove) {
-      await chunkStore.approveChunks([chunkToApprove]);
-      if (!chunkStore.error) {
-        notificationStore.showSnackbar(t('chunkAdmin.approveSuccess', { count: 1 }), 'success');
-      }
-    }
-  }
   notificationStore.showSnackbar(t('chunkAdmin.chunkApprovalChange', { chunkId, status: approved ? t('common.approved') : t('common.rejected') }), 'info');
 };
 
-const handleApproveSelected = (chunkIds: string[]) => {
+const handleApproveSelected = async (chunkIds: string[]) => {
+  // First, update local approval status for selected chunks
   chunkIds.forEach(id => chunkStore.setChunkApproval(id, true));
-  notificationStore.showSnackbar(t('chunkAdmin.approveSelectedSuccess', { count: chunkIds.length }), 'success');
+
+  // Filter out the actual TextChunk objects that are now approved
+  const chunksToApprove = chunkStore.chunks.filter(chunk => chunkIds.includes(chunk.id) && chunk.approved);
+
+  if (chunksToApprove.length > 0) {
+    await chunkStore.approveChunks(chunksToApprove);
+    if (!chunkStore.error) {
+      notificationStore.showSnackbar(t('chunkAdmin.approveSelectedSuccess', { count: chunksToApprove.length }), 'success');
+    } else {
+      // If there's an error from approveChunks, show it
+      notificationStore.showSnackbar(chunkStore.error, 'error');
+    }
+  } else {
+    notificationStore.showSnackbar(t('chunkAdmin.noChunksToApprove'), 'warning'); // Add a new i18n key
+  }
 };
 
 const handleRejectSelected = (chunkIds: string[]) => {

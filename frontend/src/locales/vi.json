@@ -438,6 +438,7 @@
   "chunkAdmin.chunkApprovalChange": "Chunk {chunkId} đã được {status}.",
   "chunkAdmin.approveSelectedSuccess": "Đã phê duyệt {count} chunk đã chọn.",
   "chunkAdmin.approveSuccess": "Đã phê duyệt {count} chunk thành công.",
+  "chunkAdmin.noChunksToApprove": "Chưa chọn chunk nào để phê duyệt.",
   "common.approved": "phê duyệt",
   "common.rejected": "từ chối",
   "chunkUpload.title": "Tải lên tài liệu",

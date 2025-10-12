@@ -416,6 +416,7 @@
   "chunkAdmin.chunkApprovalChange": "Chunk {chunkId} has been {status}.",
   "chunkAdmin.approveSelectedSuccess": "Approved {count} selected chunks.",
   "chunkAdmin.approveSuccess": "Successfully approved {count} chunks.",
+  "chunkAdmin.noChunksToApprove": "No chunks selected for approval.",
   "common.approved": "approved",
   "common.rejected": "rejected"
 }
