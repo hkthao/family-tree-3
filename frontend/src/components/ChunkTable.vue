@@ -5,7 +5,11 @@
       <v-data-table :headers="headers" :items="chunks" :items-per-page="10" item-value="id" show-select
         v-model="selectedChunks">
         <template v-slot:item.contentPreview="{ item }">
-          {{ item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '') }}
+          <v-tooltip :text="item.content" location="top">
+            <template v-slot:activator="{ props }">
+              <span v-bind="props">{{ item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '') }}</span>
+            </template>
+          </v-tooltip>
         </template>
         <template v-slot:item.metadata.fileName="{ item }">
           {{ item.metadata.fileName }}
