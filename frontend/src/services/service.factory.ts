@@ -28,6 +28,9 @@ import { ApiUserPreferenceService } from './userPreference/api.userPreference.se
 import type { IFileUploadService } from './fileUpload/fileUpload.service.interface';
 import { MockFileUploadService } from './fileUpload/mock.fileUpload.service';
 import { FileUploadApiService } from './fileUpload/api.fileUpload.service';
+import type { IChatService } from './chat/chat.service.interface';
+import { ApiChatService } from './chat/api.chat.service';
+import { MockChatService } from './chat/mock.chat.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -42,6 +45,7 @@ export interface AppServices {
   aiBiography: IAIBiographyService;
   userPreference: IUserPreferenceService;
   fileUpload: IFileUploadService;
+  chat: IChatService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -109,5 +113,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new FileUploadApiService(apiClient)
         : testServices?.fileUpload || new MockFileUploadService(),
+    chat:
+      mode === 'mock'
+        ? new MockChatService()
+        : mode === 'real'
+        ? new ApiChatService(apiClient)
+        : testServices?.chat || new MockChatService(),
   };
 }

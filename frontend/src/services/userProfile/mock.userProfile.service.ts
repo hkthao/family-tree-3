@@ -5,6 +5,9 @@ import { ok } from '@/types/common/result';
 import type { ApiError } from '@/plugins/axios';
 
 export class MockUserProfileService implements IUserProfileService {
+  getCurrentUserProfile(): Promise<Result<UserProfile, ApiError>> {
+    throw new Error('Method not implemented.');
+  }
   private userProfiles: UserProfile[] = [
     { id: '1', externalId: 'auth0|1', email: 'john.doe@example.com', name: 'John Doe' },
     { id: '2', externalId: 'auth0|2', email: 'jane.smith@example.com', name: 'Jane Smith' },
