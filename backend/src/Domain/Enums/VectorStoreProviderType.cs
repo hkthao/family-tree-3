@@ -4,5 +4,6 @@ public enum VectorStoreProviderType
 {
     None = 0,
     Pinecone = 1,
+    InMemory = 2
     // Add more vector store providers as needed
 }

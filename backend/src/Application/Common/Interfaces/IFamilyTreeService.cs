@@ -1,9 +1,8 @@
-namespace backend.Application.Common.Interfaces
+namespace backend.Application.Common.Interfaces;
+
+public interface IFamilyTreeService
 {
-    public interface IFamilyTreeService
-    {
-        Task<int> CalculateTotalMembers(Guid familyId, CancellationToken cancellationToken = default);
-        Task<int> CalculateTotalGenerations(Guid familyId, CancellationToken cancellationToken = default);
-        Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default);
-    }
+    Task<int> CalculateTotalMembers(Guid familyId, CancellationToken cancellationToken = default);
+    Task<int> CalculateTotalGenerations(Guid familyId, CancellationToken cancellationToken = default);
+    Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default);
 }

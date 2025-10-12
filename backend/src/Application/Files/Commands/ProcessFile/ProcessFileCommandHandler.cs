@@ -5,36 +5,35 @@ using backend.Domain.Entities;
 using backend.Domain.Services;
 using System.Text.RegularExpressions;
 
-namespace backend.Application.Files.Commands.ProcessFile
+namespace backend.Application.Files.Commands.ProcessFile;
+
+public class ProcessFileCommandHandler : IRequestHandler<ProcessFileCommand, Result<List<TextChunk>>>
 {
-    public class ProcessFileCommandHandler : IRequestHandler<ProcessFileCommand, Result<List<TextChunk>>>
+    private readonly IFileTextExtractorFactory _extractorFactory;
+    private readonly ChunkingPolicy _chunkingPolicy;
+
+    public ProcessFileCommandHandler(IFileTextExtractorFactory extractorFactory, ChunkingPolicy chunkingPolicy)
     {
-        private readonly IFileTextExtractorFactory _extractorFactory;
-        private readonly ChunkingPolicy _chunkingPolicy;
+        _extractorFactory = extractorFactory;
+        _chunkingPolicy = chunkingPolicy;
+    }
 
-        public ProcessFileCommandHandler(IFileTextExtractorFactory extractorFactory, ChunkingPolicy chunkingPolicy)
+    public async Task<Result<List<TextChunk>>> Handle(ProcessFileCommand request, CancellationToken cancellationToken)
+    {
+        string fileExtension = Path.GetExtension(request.FileName).ToLowerInvariant();
+        IFileTextExtractor extractor;
+        try
         {
-            _extractorFactory = extractorFactory;
-            _chunkingPolicy = chunkingPolicy;
+            extractor = _extractorFactory.GetExtractor(fileExtension);
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<List<TextChunk>>.Failure(ex.Message, "Validation");
         }
 
-        public async Task<Result<List<TextChunk>>> Handle(ProcessFileCommand request, CancellationToken cancellationToken)
-        {
-            string fileExtension = Path.GetExtension(request.FileName).ToLowerInvariant();
-            IFileTextExtractor extractor;
-            try
-            {
-                extractor = _extractorFactory.GetExtractor(fileExtension);
-            }
-            catch (ArgumentException ex)
-            {
-                return Result<List<TextChunk>>.Failure(ex.Message, "Validation");
-            }
+        string textContent = await extractor.ExtractTextAsync(request.FileStream);
 
-            string textContent = await extractor.ExtractTextAsync(request.FileStream);
-
-            var chunks = _chunkingPolicy.ChunkText(textContent, request.FileName, request.FileId, request.FamilyId, request.Category, request.CreatedBy);
-            return Result<List<TextChunk>>.Success(chunks);
-        }
+        var chunks = _chunkingPolicy.ChunkText(textContent, request.FileName, request.FileId, request.FamilyId, request.Category, request.CreatedBy);
+        return Result<List<TextChunk>>.Success(chunks);
     }
 }

@@ -1,35 +1,108 @@
-# Prompt: Implement Embedding Backend with Provider Abstraction
+## 💬 Prompt Gemini CLI: Multi-Provider Embedding + Vector Store
 
-## Context
-Xây dựng feature Embedding trong ASP.NET Core backend:
-- Sinh embedding từ **đa provider**: OpenAI, Cohere, Local model
-- Backend có sẵn **VectorStoreFactory / PineconeService**, không cần implement lại
-- Dự án cá nhân: giới hạn token usage
-- Clean Architecture + CQRS + ResultWrapper + Ardalis Specification
+````
+You are an expert C# backend engineer working with Clean Architecture, DDD, and CQRS. 
+The project already has a sample embedding provider `CohereEmbeddingProvider` implementing `IEmbeddingProvider`. 
+Vector store is designed as a plugin system similar to embedding providers.
 
-## Requirements
+🎯 Task:
+Implement a **complete multi-provider embedding pipeline** for TextChunk entities and vector store, fully following Clean Architecture and existing project style.
 
-### 1️⃣ Configuration
-- Có `EmbeddingSettings` tổng hợp nhiều provider và provider hiện tại
-- Cấu hình qua `appsettings.json`
-- Dễ mở rộng thêm provider mới
+---
 
-### 2️⃣ Provider Abstraction
-- Tạo interface `IEmbeddingProvider` cho từng provider
-- Implement OpenAI, Cohere, Local provider
-- Local provider hỗ trợ test offline
-- `EmbeddingService` orchestrate: chọn provider dựa trên config, gọi `GenerateEmbeddingAsync`
+### Requirements:
 
-### 3️⃣ Vector Store Integration
-- `EmbeddingService` dùng **VectorStoreFactory / PineconeService** hiện có để upsert vector hoặc query nearest vectors
-- Không cần tạo lại Pinecone service
+1️⃣ Multi-Provider Embedding
+- Use interface `IEmbeddingProvider`:
+  ```csharp
+  public interface IEmbeddingProvider
+  {
+      string ProviderName { get; }
+      int MaxTextLength { get; }
+      Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default);
+  }
+````
 
-### 4️⃣ Constraints
-- Giới hạn độ dài text để tiết kiệm token
-- Không log API key
-- Có cơ chế mock hoặc local fallback để test offline
-- Clean Architecture: tách rõ Application / Infrastructure / API, không để business logic trong controller
+* Implementations may include:
 
-### 5️⃣ Deliverables
-- Tạo tất cả service, provider, interface cần thiết cho backend (không bao gồm Pinecone service)
-- Đăng ký DI cho các service
+  * CohereEmbeddingProvider (already exists)
+  * OpenAIEmbeddingProvider
+  * LocalEmbeddingProvider
+* Must support provider selection dynamically (by ProviderName) at runtime.
+
+2️⃣ Command / Handler
+
+* Implement `EmbedChunksCommand : IRequest` with fields:
+
+  * List<TextChunk> Chunks
+  * string ProviderName
+* Implement `EmbedChunksCommandHandler`:
+
+  * Accepts `EmbedChunksCommand`
+  * Picks the right provider dynamically
+  * Calls `GenerateEmbeddingAsync` for each chunk
+  * Stores embedding in chunk object
+  * Upserts chunk to **Vector Store plugin** (see below)
+
+3️⃣ Vector Store Plugin
+
+* Define interface `IVectorStore`:
+
+  ```csharp
+  public interface IVectorStore
+  {
+      Task UpsertAsync(TextChunk chunk, CancellationToken cancellationToken = default);
+      Task<List<TextChunk>> QueryAsync(string queryText, int topK, Dictionary<string,string> metadataFilter, CancellationToken cancellationToken = default);
+  }
+  ```
+* Implement at least a dummy/in-memory vector store for testing
+* Must support metadata filter: fileId, familyId, category
+
+4️⃣ TextChunk
+
+* Already exists in Domain Layer with Metadata dictionary
+* Should store `float[] Embedding` property
+
+5️⃣ Coding Style
+
+* Follow existing project style
+* Use async/await, C# 10+
+* Proper DI in constructors
+* Keep code modular: each provider and vector store is plugable
+* Include comments explaining how to add a new provider or vector store
+
+6️⃣ Deliverables
+
+* `EmbedChunksCommand.cs`
+* `EmbedChunksCommandHandler.cs`
+* Multi-provider embedding system (Cohere, OpenAI, Local)
+* Vector store interface + dummy implementation
+* Example usage showing:
+
+  * Selecting a provider
+  * Generating embeddings for chunks
+  * Upserting to vector store
+* Unit tests or sample test code for at least one provider
+
+---
+
+⚡ Notes
+
+* Pipeline must allow **future providers/vector stores** to be plugged in without changing command handler logic
+* Metadata in TextChunk must be preserved and used in vector store queries
+* Return only production-ready C# code, following Clean Architecture
+
+```
+
+---
+
+### 🔍 Giải thích prompt
+
+| Phần | Mục tiêu |
+|------|-----------|
+| Multi-Provider Embedding | Cho phép runtime switch giữa Cohere / OpenAI / Local |
+| Command + Handler | CQRS orchestration, không cần service “to đùng” |
+| Vector Store Plugin | Cho phép swap store (Pinecone, in-memory, file-based) |
+| Metadata | Giữ scope / filter query chính xác |
+| Clean Architecture | Sẵn sàng plug vào dự án hiện tại |
+

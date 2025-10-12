@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.Services
 {
-    public class FileTextExtractorFactory : Application.Common.Interfaces.IFileTextExtractorFactory
+    public class FileTextExtractorFactory : IFileTextExtractorFactory
     {
         private readonly IServiceProvider _serviceProvider;
 

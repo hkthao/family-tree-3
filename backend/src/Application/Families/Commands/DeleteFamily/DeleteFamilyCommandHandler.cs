@@ -5,76 +5,75 @@ using backend.Application.Families.Specifications;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 
-namespace backend.Application.Families.Commands.DeleteFamily
+namespace backend.Application.Families.Commands.DeleteFamily;
+
+public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, Result>
 {
-    public class DeleteFamilyCommandHandler : IRequestHandler<DeleteFamilyCommand, Result>
+    private readonly IApplicationDbContext _context;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IMediator _mediator;
+    private readonly IFamilyTreeService _familyTreeService;
+
+    public DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
     {
-        private readonly IApplicationDbContext _context;
-        private readonly IAuthorizationService _authorizationService;
-        private readonly IMediator _mediator;
-        private readonly IFamilyTreeService _familyTreeService;
+        _context = context;
+        _authorizationService = authorizationService;
+        _mediator = mediator;
+        _familyTreeService = familyTreeService;
+    }
 
-        public DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
+    public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
+    {
+        try
         {
-            _context = context;
-            _authorizationService = authorizationService;
-            _mediator = mediator;
-            _familyTreeService = familyTreeService;
+            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+            if (currentUserProfile == null)
+            {
+                return Result.Failure("User profile not found.", "NotFound");
+            }
+            if (!_authorizationService.IsAdmin())
+            {
+                if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
+                {
+                    return Result.Failure("User does not have permission to delete this family.", "Forbidden");
+                }
+            }
+
+            var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
+
+            if (entity == null)
+            {
+                return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
+            }
+
+            var familyName = entity.Name; // Capture family name for activity summary
+
+            _context.Families.Remove(entity);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // Update family stats
+            await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
+
+            // Record activity
+            await _mediator.Send(new RecordActivityCommand
+            {
+                UserProfileId = currentUserProfile.Id,
+                ActionType = UserActionType.DeleteFamily,
+                TargetType = TargetType.Family,
+                TargetId = entity.Id.ToString(),
+                ActivitySummary = $"Deleted family '{familyName}'."
+            }, cancellationToken);
+
+            return Result.Success();
         }
-
-        public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
+        catch (DbUpdateException ex)
         {
-            try
-            {
-                var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-                if (currentUserProfile == null)
-                {
-                    return Result.Failure("User profile not found.", "NotFound");
-                }
-                if (!_authorizationService.IsAdmin())
-                {
-                    if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
-                    {
-                        return Result.Failure("User does not have permission to delete this family.", "Forbidden");
-                    }
-                }
-
-                var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
-
-                if (entity == null)
-                {
-                    return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
-                }
-
-                var familyName = entity.Name; // Capture family name for activity summary
-
-                _context.Families.Remove(entity);
-
-                await _context.SaveChangesAsync(cancellationToken);
-
-                // Update family stats
-                await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
-
-                // Record activity
-                await _mediator.Send(new RecordActivityCommand
-                {
-                    UserProfileId = currentUserProfile.Id,
-                    ActionType = UserActionType.DeleteFamily,
-                    TargetType = TargetType.Family,
-                    TargetId = entity.Id.ToString(),
-                    ActivitySummary = $"Deleted family '{familyName}'."
-                }, cancellationToken);
-
-                return Result.Success();
-            }
-            catch (DbUpdateException ex)
-            {
-                return Result.Failure($"Database error occurred while deleting family: {ex.Message}", "Database");
-            }
-            catch (Exception ex)
-            {
-                return Result.Failure($"An unexpected error occurred while deleting family: {ex.Message}", "Exception");
-            }
+            return Result.Failure($"Database error occurred while deleting family: {ex.Message}", "Database");
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure($"An unexpected error occurred while deleting family: {ex.Message}", "Exception");
         }
     }
 }

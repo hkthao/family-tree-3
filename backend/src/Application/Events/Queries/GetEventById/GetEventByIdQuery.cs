@@ -1,6 +1,5 @@
 using backend.Application.Common.Models; // Added
 
-namespace backend.Application.Events.Queries.GetEventById
-{
-    public record GetEventByIdQuery(Guid Id) : IRequest<Result<EventDetailDto>>;
-}
+namespace backend.Application.Events.Queries.GetEventById;
+
+public record GetEventByIdQuery(Guid Id) : IRequest<Result<EventDetailDto>>;

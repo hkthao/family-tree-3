@@ -1,9 +1,8 @@
 using System;
 
-namespace backend.Application.Common.Interfaces
+namespace backend.Application.Common.Interfaces;
+
+public interface IFileTextExtractorFactory
 {
-    public interface IFileTextExtractorFactory
-    {
-        IFileTextExtractor GetExtractor(string fileExtension);
-    }
+    IFileTextExtractor GetExtractor(string fileExtension);
 }

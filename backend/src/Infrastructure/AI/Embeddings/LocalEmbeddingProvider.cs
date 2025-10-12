@@ -1,30 +1,30 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Options;
 
-namespace backend.Infrastructure.AI.Embeddings;
-
-public class LocalEmbeddingProvider : IEmbeddingProvider
+namespace backend.Infrastructure.AI.Embeddings
 {
-    private readonly EmbeddingSettings _settings;
-
-    public string ProviderName => "Local";
-    public int MaxTextLength => _settings.Local.MaxTextLength;
-
-    public LocalEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings)
+    public class LocalEmbeddingProvider : IEmbeddingProvider
     {
-        _settings = embeddingSettings.Value;
-    }
+        public string ProviderName => "Local";
+        public int MaxTextLength => 1000; // Arbitrary length for local testing
 
-    public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
-    {
-        if (text.Length > MaxTextLength)
+        public Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
         {
-            text = text[..MaxTextLength];
-        }
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return Task.FromResult(Result<float[]>.Failure("Text for embedding cannot be empty."));
+            }
 
-        // Simulate local model processing
-        await Task.Delay(50, cancellationToken); // Simulate some processing time
-        return Result<float[]>.Success(new float[] { 0.7f, 0.8f, 0.9f });
+            // Generate a dummy embedding for local testing
+            // In a real scenario, this would call a local model or return a fixed vector
+            float[] dummyEmbedding = new float[1536]; // Common embedding dimension
+            Random rand = new Random();
+            for (int i = 0; i < dummyEmbedding.Length; i++)
+            {
+                dummyEmbedding[i] = (float)rand.NextDouble();
+            }
+
+            return Task.FromResult(Result<float[]>.Success(dummyEmbedding));
+        }
     }
 }

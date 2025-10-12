@@ -1,11 +1,10 @@
-namespace backend.Application.Events.Commands.DeleteEvent
+namespace backend.Application.Events.Commands.DeleteEvent;
+
+public class DeleteEventCommandValidator : AbstractValidator<DeleteEventCommand>
 {
-    public class DeleteEventCommandValidator : AbstractValidator<DeleteEventCommand>
+    public DeleteEventCommandValidator()
     {
-        public DeleteEventCommandValidator()
-        {
-            RuleFor(v => v.Id)
-                .NotEmpty();
-        }
+        RuleFor(v => v.Id)
+            .NotEmpty();
     }
 }

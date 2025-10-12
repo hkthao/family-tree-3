@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
 using System.Text;
 
 namespace backend.Infrastructure.Services

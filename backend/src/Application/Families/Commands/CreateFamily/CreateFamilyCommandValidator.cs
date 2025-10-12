@@ -1,12 +1,11 @@
-﻿namespace backend.Application.Families.Commands.CreateFamily
+﻿namespace backend.Application.Families.Commands.CreateFamily;
+
+public class CreateFamilyCommandValidator : AbstractValidator<CreateFamilyCommand>
 {
-    public class CreateFamilyCommandValidator : AbstractValidator<CreateFamilyCommand>
+    public CreateFamilyCommandValidator()
     {
-        public CreateFamilyCommandValidator()
-        {
-            RuleFor(v => v.Name)
-                .NotEmpty().WithMessage("Tên dòng họ không được để trống.")
-                .MaximumLength(200).WithMessage("Tên dòng họ không được vượt quá 200 ký tự.");
-        }
+        RuleFor(v => v.Name)
+            .NotEmpty().WithMessage("Tên dòng họ không được để trống.")
+            .MaximumLength(200).WithMessage("Tên dòng họ không được vượt quá 200 ký tự.");
     }
 }

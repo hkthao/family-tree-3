@@ -1,4 +1,4 @@
-using backend.Application.AI.VectorStore;
+using backend.Application.Common.Interfaces;
 using backend.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +17,7 @@ public class VectorStoreFactory : IVectorStoreFactory
         return provider switch
         {
             VectorStoreProviderType.Pinecone => _serviceProvider.GetRequiredService<PineconeVectorStore>(),
+            VectorStoreProviderType.InMemory => _serviceProvider.GetRequiredService<InMemoryVectorStore>(),
             _ => throw new InvalidOperationException($"No vector store provider configured for: {provider}")
         };
     }

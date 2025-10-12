@@ -1,25 +1,29 @@
-using backend.Application.Common.Models;
-using backend.Application.AI.VectorStore;
+using backend.Application.Common.Interfaces;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
+using backend.Application.AI.VectorStore;
 
 namespace backend.Infrastructure.AI.VectorStore;
 
 public class PineconeVectorStore : IVectorStore
 {
     private readonly ILogger<PineconeVectorStore> _logger;
-    private readonly IOptions<VectorStoreSettings> _vectorStoreSettings;
+    private readonly VectorStoreSettings _vectorStoreSettings;
     private readonly PineconeClient _pineconeClient;
     private readonly IndexClient _index;
     private readonly string _indexName;
+    private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
 
-    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
+    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings, IEmbeddingProviderFactory embeddingProviderFactory)
     {
         _logger = logger;
-        _vectorStoreSettings = vectorStoreSettings;
+        _vectorStoreSettings = vectorStoreSettings.Value;
+        _embeddingProviderFactory = embeddingProviderFactory;
 
-        var pineconeSettings = _vectorStoreSettings.Value.Pinecone;
+        var pineconeSettings = _vectorStoreSettings.Pinecone;
 
         if (pineconeSettings == null)
         {
@@ -39,136 +43,82 @@ public class PineconeVectorStore : IVectorStore
         _index = _pineconeClient.Index(_indexName);
     }
 
-    public async Task<Result> UpsertDocumentsAsync(IEnumerable<VectorDocument> documents, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(TextChunk chunk, CancellationToken cancellationToken = default)
     {
+        if (chunk.Embedding == null || chunk.Embedding.Length == 0)
+        {
+            _logger.LogWarning("Attempted to upsert chunk {ChunkId} without embedding. Skipping.", chunk.Id);
+            return;
+        }
+
         try
         {
-            var index = _index;
-
-            var vectors = documents.Select(d => new Vector
+            var vector = new Vector
             {
-                Id = d.Id,
-                Values = new ReadOnlyMemory<float>([.. d.Vector]),
-                Metadata = d.Metadata != null ? new Metadata(d.Metadata.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
-            }).ToList();
-
-            var upsertRequest = new UpsertRequest { Vectors = vectors };
-            await index.UpsertAsync(upsertRequest, null, cancellationToken);
-
-            _logger.LogInformation("Successfully upserted {Count} documents to Pinecone index {IndexName}.", documents.Count(), _indexName);
-            return Result.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error upserting documents to Pinecone index {IndexName}.", _indexName);
-            return Result.Failure(ex.Message, "PineconeError");
-        }
-    }
-
-    public async Task<Result> UpsertVectorAsync(string id, float[] vector, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var index = _index;
-
-            var pineconeVector = new Vector
-            {
-                Id = id,
-                Values = new ReadOnlyMemory<float>([.. vector]),
-                Metadata = metadata != null ? new Metadata(metadata.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
+                Id = chunk.Id,
+                Values = new ReadOnlyMemory<float>([.. chunk.Embedding]),
+                Metadata = chunk.Metadata != null ? new Metadata(chunk.Metadata.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
             };
 
-            var upsertRequest = new UpsertRequest { Vectors = [pineconeVector] };
-            await index.UpsertAsync(upsertRequest, null, cancellationToken);
+            var upsertRequest = new UpsertRequest { Vectors = [vector] };
+            await _index.UpsertAsync(upsertRequest, null, cancellationToken);
 
-            _logger.LogInformation("Successfully upserted vector with ID {Id} to Pinecone index {IndexName}.", id, _indexName);
-            return Result.Success();
+            _logger.LogInformation("Successfully upserted chunk {ChunkId} to Pinecone index {IndexName}.", chunk.Id, _indexName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error upserting vector with ID {Id} to Pinecone index {IndexName}.", id, _indexName);
-            return Result.Failure(ex.Message, "PineconeError");
+            _logger.LogError(ex, "Error upserting chunk {ChunkId} to Pinecone index {IndexName}.", chunk.Id, _indexName);
+            throw; // Re-throw to be handled by higher layers
         }
     }
 
-    public async Task<Result<IEnumerable<VectorDocument>>> QueryAsync(VectorQuery query, CancellationToken cancellationToken = default)
+    public async Task<List<TextChunk>> QueryAsync(string queryText, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            throw new ArgumentException("Query text cannot be empty.");
+        }
+
+        // 1. Generate embedding for the query text
+        var embeddingProvider = _embeddingProviderFactory.GetProvider(_vectorStoreSettings.EmbeddingProviderName); // Assuming EmbeddingProviderName is configured
+        var queryEmbeddingResult = await embeddingProvider.GenerateEmbeddingAsync(queryText, cancellationToken);
+
+        if (!queryEmbeddingResult.IsSuccess)
+        {
+            _logger.LogError("Failed to generate embedding for query: {Error}", queryEmbeddingResult.Error);
+            throw new InvalidOperationException($"Failed to generate embedding for query: {queryEmbeddingResult.Error}");
+        }
+
         try
         {
-            var index = _index;
+            var pineconeFilter = metadataFilter != null ? new Metadata(metadataFilter.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null;
 
             var queryRequest = new QueryRequest
             {
-                Vector = new ReadOnlyMemory<float>([.. query.Vector]),
-                TopK = (uint)query.TopK,
+                Vector = new ReadOnlyMemory<float>([.. queryEmbeddingResult.Value]),
+                TopK = (uint)topK,
                 IncludeValues = true,
                 IncludeMetadata = true,
-                Filter = query.Filter != null ? new Metadata(query.Filter.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
+                Filter = pineconeFilter
             };
 
-            var queryResponse = await index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
+            var queryResponse = await _index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
 
-            var results = queryResponse.Matches?.Select(m => new VectorDocument
+            var results = queryResponse.Matches?.Select(m => new TextChunk
             {
                 Id = m.Id,
-                Vector = m.Values.HasValue ? m.Values.Value.ToArray() : [],
-                Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : null
-            });
+                Content = m.Metadata?.FirstOrDefault(md => md.Key == "content").Value?.ToString() ?? string.Empty, // Assuming content is stored in metadata
+                Embedding = m.Values.HasValue ? m.Values.Value.ToArray() : [],
+                Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>()
+            }).ToList() ?? new List<TextChunk>();
 
-            _logger.LogInformation("Successfully queried Pinecone index {IndexName} with TopK {TopK}. Found {Count} matches.", _indexName, query.TopK, results?.Count() ?? 0);
-            return Result<IEnumerable<VectorDocument>>.Success(results ?? []);
+            _logger.LogInformation("Successfully queried Pinecone index {IndexName} with TopK {TopK}. Found {Count} matches.", _indexName, topK, results.Count);
+            return results;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error querying Pinecone index {IndexName}.", _indexName);
-            return Result<IEnumerable<VectorDocument>>.Failure(ex.Message, "PineconeError");
-        }
-    }
-
-    public async Task<Result<List<string>>> QueryNearestVectorsAsync(float[] vector, int topK, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var index = _index;
-
-            var queryRequest = new QueryRequest
-            {
-                Vector = new ReadOnlyMemory<float>([.. vector]),
-                TopK = (uint)topK,
-                IncludeValues = false, // We only need IDs for this method
-                IncludeMetadata = false
-            };
-
-            var queryResponse = await index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
-
-            var results = queryResponse.Matches?.Select(m => m.Id).ToList();
-
-            _logger.LogInformation("Successfully queried Pinecone index {IndexName} for nearest vectors with TopK {TopK}. Found {Count} matches.", _indexName, topK, results?.Count ?? 0);
-            return Result<List<string>>.Success(results ?? []);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error querying nearest vectors from Pinecone index {IndexName}.", _indexName);
-            return Result<List<string>>.Failure(ex.Message, "PineconeError");
-        }
-    }
-
-    public async Task<Result> DeleteAsync(IEnumerable<string> documentIds, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var index = _index;
-
-            var deleteRequest = new DeleteRequest { Ids = [.. documentIds], DeleteAll = false };
-            await index.DeleteAsync(deleteRequest, null, cancellationToken);
-
-            _logger.LogInformation("Successfully deleted {Count} documents from Pinecone index {IndexName}.", documentIds.Count(), _indexName);
-            return Result.Success();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting documents from Pinecone index {IndexName}.", _indexName);
-            return Result.Failure(ex.Message, "PineconeError");
+            throw; // Re-throw to be handled by higher layers
         }
     }
 }

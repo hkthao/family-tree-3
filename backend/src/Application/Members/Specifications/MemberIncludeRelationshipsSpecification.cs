@@ -1,13 +1,12 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Members.Specifications
+namespace backend.Application.Members.Specifications;
+
+public class MemberIncludeRelationshipsSpecification : Specification<Member>
 {
-    public class MemberIncludeRelationshipsSpecification : Specification<Member>
+    public MemberIncludeRelationshipsSpecification()
     {
-        public MemberIncludeRelationshipsSpecification()
-        {
-            Query.Include(m => m.Relationships);
-        }
+        Query.Include(m => m.Relationships);
     }
 }

@@ -1,13 +1,12 @@
 using Ardalis.Specification;
 using backend.Domain.Entities;
 
-namespace backend.Application.Events.Specifications
+namespace backend.Application.Events.Specifications;
+
+public class EventByIdSpecification : Specification<Event>, ISingleResultSpecification<Event>
 {
-    public class EventByIdSpecification : Specification<Event>, ISingleResultSpecification<Event>
+    public EventByIdSpecification(Guid id)
     {
-        public EventByIdSpecification(Guid id)
-        {
-            Query.Where(e => e.Id == id);
-        }
+        Query.Where(e => e.Id == id);
     }
 }

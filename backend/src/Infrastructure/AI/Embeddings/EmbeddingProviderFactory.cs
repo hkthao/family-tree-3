@@ -1,27 +1,26 @@
-using backend.Application.AI.Embeddings;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace backend.Infrastructure.AI.Embeddings;
-
-public class EmbeddingProviderFactory : IEmbeddingProviderFactory
+namespace backend.Infrastructure.AI.Embeddings
 {
-    private readonly IServiceProvider _serviceProvider;
-
-    public EmbeddingProviderFactory(IServiceProvider serviceProvider)
+    public class EmbeddingProviderFactory : IEmbeddingProviderFactory
     {
-        _serviceProvider = serviceProvider;
-    }
+        private readonly IServiceProvider _serviceProvider;
 
-    public IEmbeddingProvider CreateProvider(EmbeddingProvider provider)
-    {
-        return provider switch
+        public EmbeddingProviderFactory(IServiceProvider serviceProvider)
         {
-            EmbeddingProvider.Local => _serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
-            EmbeddingProvider.Cohere => _serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
-            EmbeddingProvider.OpenAI => _serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
-            _ => throw new InvalidOperationException($"No file Embedding provider configured for: {provider}")
-        };
+            _serviceProvider = serviceProvider;
+        }
+
+        public IEmbeddingProvider GetProvider(string providerName)
+        {
+            return providerName.ToLowerInvariant() switch
+            {
+                "openai" => _serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
+                "cohere" => _serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
+                "local" => _serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
+                _ => throw new ArgumentException($"Unsupported embedding provider: {providerName}")
+            };
+        }
     }
 }

@@ -1,9 +1,8 @@
 using backend.Domain.Enums;
 
-namespace backend.Application.Common.Interfaces
+namespace backend.Application.Common.Interfaces;
+
+public interface IFileStorageFactory
 {
-    public interface IFileStorageFactory
-    {
-        IFileStorage CreateFileStorage(StorageProvider provider);
-    }
+    IFileStorage CreateFileStorage(StorageProvider provider);
 }

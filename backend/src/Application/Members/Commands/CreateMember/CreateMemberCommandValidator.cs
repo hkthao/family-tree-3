@@ -1,19 +1,18 @@
-namespace backend.Application.Members.Commands.CreateMember
+namespace backend.Application.Members.Commands.CreateMember;
+
+public class CreateMemberCommandValidator : AbstractValidator<CreateMemberCommand>
 {
-    public class CreateMemberCommandValidator : AbstractValidator<CreateMemberCommand>
+    public CreateMemberCommandValidator()
     {
-        public CreateMemberCommandValidator()
-        {
-            RuleFor(v => v.FamilyId)
-                .NotEmpty();
+        RuleFor(v => v.FamilyId)
+            .NotEmpty();
 
-            RuleFor(v => v.FirstName)
-                .MaximumLength(100)
-                .NotEmpty();
+        RuleFor(v => v.FirstName)
+            .MaximumLength(100)
+            .NotEmpty();
 
-            RuleFor(v => v.LastName)
-                .MaximumLength(100)
-                .NotEmpty();
-        }
+        RuleFor(v => v.LastName)
+            .MaximumLength(100)
+            .NotEmpty();
     }
 }

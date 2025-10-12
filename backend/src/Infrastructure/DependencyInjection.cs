@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.AI.Chat;
-using backend.Infrastructure.AI.VectorStore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Application.AI.Embeddings;
 using backend.Application.AI.VectorStore;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Application.AI.Chat;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AISettings;
 using Microsoft.Extensions.Options;
+using backend.Infrastructure.AI.VectorStore;
 
 namespace backend.Infrastructure;
 
@@ -73,12 +71,9 @@ public static class DependencyInjection
         services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
         // Register Vector Store
         services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
+        services.AddTransient<InMemoryVectorStore>();
         services.AddTransient<PineconeVectorStore>();
         services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
-
-        services.AddTransient<PdfTextExtractor>();
-        services.AddTransient<TxtTextExtractor>();
-        services.AddScoped<Application.Common.Interfaces.IFileTextExtractorFactory, Services.FileTextExtractorFactory>();
 
         return services;
     }
