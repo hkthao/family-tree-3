@@ -28,9 +28,12 @@ public class OpenAIEmbeddingProvider : IEmbeddingProvider
             text = text[..MaxTextLength];
         }
 
-        // TODO: Implement actual OpenAI API call to generate embedding
-        // For now, return a dummy embedding for demonstration
+        var embedding = new float[1024];
+        for (int i = 0; i < 1024; i++)
+        {
+            embedding[i] = (float)Random.Shared.NextDouble();
+        }
         await Task.Delay(100, cancellationToken); // Simulate API call delay
-        return Result<float[]>.Success(new float[] { 0.1f, 0.2f, 0.3f });
+        return Result<float[]>.Success(embedding);
     }
 }

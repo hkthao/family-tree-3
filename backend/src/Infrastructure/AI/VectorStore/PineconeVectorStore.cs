@@ -37,8 +37,8 @@ public class PineconeVectorStore : IVectorStore
             throw new InvalidOperationException("Pinecone configuration is missing or invalid.");
         }
 
-        _pineconeClient = new PineconeClient(apiKey, new ClientOptions { BaseUrl = host });
-        _index = _pineconeClient.Index(_indexName);
+        _pineconeClient = new PineconeClient(apiKey);
+        _index = _pineconeClient.Index(_indexName, host);
     }
 
     public async Task UpsertAsync(TextChunk chunk, CancellationToken cancellationToken = default)
@@ -51,11 +51,18 @@ public class PineconeVectorStore : IVectorStore
 
         try
         {
+            var metadata = chunk.Metadata.Where(e => e.Value != null);
+            foreach (var metadataItem in metadata)
+            {
+                _logger.LogWarning($"{metadataItem.Key} - {metadataItem.Value}");
+            }
+
+            var keyValuePair = metadata.Select(x => new KeyValuePair<string, MetadataValue>(x.Key, new MetadataValue(x.Value))).AsEnumerable();
             var vector = new Vector
             {
                 Id = chunk.Id,
                 Values = new ReadOnlyMemory<float>([.. chunk.Embedding]),
-                Metadata = chunk.Metadata != null ? new Metadata(chunk.Metadata.ToDictionary(k => k.Key, v => (MetadataValue?)(v.Value == null ? string.Empty : v.Value))) : null
+                Metadata = new Metadata(keyValuePair!)
             };
 
             var upsertRequest = new UpsertRequest { Vectors = [vector] };
