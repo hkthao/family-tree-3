@@ -4,7 +4,7 @@ using backend.Domain.Enums;
 using Microsoft.Extensions.Options;
 using backend.Application.AI.VectorStore;
 
-namespace backend.Application.AI.Commands.EmbedChunks;
+namespace backend.Application.AI.Chunk.EmbedChunks;
 
 public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Result>
 {
@@ -18,37 +18,38 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
         _vectorStoreFactory = vectorStoreFactory;
         _vectorStoreSettings = vectorStoreSettingsOptions.Value;
     }
-    
-            public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
+
+    public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
+    {
+        if (request.Chunks == null || !request.Chunks.Any())
+        {
+            return Result.Failure("No chunks provided for embedding.");
+        }
+
+        IEmbeddingProvider embeddingProvider;
+        try
+        {
+            embeddingProvider = _embeddingProviderFactory.GetProvider(request.ProviderName);
+        }
+        catch (ArgumentException ex)
+        {
+            return Result.Failure(ex.Message);
+        }
+
+        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
+
+        foreach (var chunk in request.Chunks)
+        {
+            var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(chunk.Content, cancellationToken);
+            if (!embeddingResult.IsSuccess)
             {
-                if (request.Chunks == null || !request.Chunks.Any())
-                {
-                    return Result.Failure("No chunks provided for embedding.");
-                }
-    
-                IEmbeddingProvider embeddingProvider;
-                try
-                {
-                    embeddingProvider = _embeddingProviderFactory.GetProvider(request.ProviderName);
-                }
-                catch (ArgumentException ex)
-                {                return Result.Failure(ex.Message);
-                }
-    
-                IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
-    
-                foreach (var chunk in request.Chunks)
-                {
-                    var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(chunk.Content, cancellationToken);
-                    if (!embeddingResult.IsSuccess)
-                    {
-                        return Result.Failure($"Failed to generate embedding for chunk {chunk.Id}: {embeddingResult.Error}");
-                    }
-                    chunk.Embedding = embeddingResult.Value;
-    
-                    await vectorStore.UpsertAsync(chunk, cancellationToken);
-                }
-    
-                return Result.Success();
+                return Result.Failure($"Failed to generate embedding for chunk {chunk.Id}: {embeddingResult.Error}");
             }
+            chunk.Embedding = embeddingResult.Value;
+
+            await vectorStore.UpsertAsync(chunk, cancellationToken);
+        }
+
+        return Result.Success();
+    }
 }

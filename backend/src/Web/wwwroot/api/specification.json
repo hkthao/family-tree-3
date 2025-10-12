@@ -216,6 +216,54 @@
         }
       }
     },
+    "/api/Chunk/approve": {
+      "post": {
+        "tags": [
+          "Chunk"
+        ],
+        "operationId": "Chunk_ApproveChunks",
+        "parameters": [
+          {
+            "name": "providerName",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 2
+          }
+        ],
+        "requestBody": {
+          "x-name": "chunks",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TextChunk"
+                }
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Dashboard/stats": {
       "get": {
         "tags": [
@@ -2264,6 +2312,14 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
+            }
+          },
+          "embedding": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "number",
+              "format": "float"
             }
           }
         }

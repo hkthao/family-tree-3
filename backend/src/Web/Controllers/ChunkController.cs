@@ -1,4 +1,5 @@
 using backend.Application.AI.Chunk.ProcessFile;
+using backend.Application.AI.Chunk.EmbedChunks;
 using backend.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,6 +47,29 @@ namespace backend.Web.Controllers
                 {
                     return BadRequest(result.Error);
                 }
+            }
+        }
+
+        [HttpPost("approve")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> ApproveChunks([FromBody] List<TextChunk> chunks, [FromQuery] string providerName)
+        {
+            var command = new EmbedChunksCommand
+            {
+                Chunks = chunks,
+                ProviderName = providerName
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(result.Error);
             }
         }
     }
