@@ -10,5 +10,5 @@ export interface TextChunk {
     createdBy: string;
     createdAt: string;
   };
-  approved?: boolean; // Add an approved status for UI interaction
+  approved: boolean;
 }

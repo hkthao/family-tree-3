@@ -400,6 +400,7 @@
   "chunkUpload.createdByLabel": "Created By (User ID)",
   "chunkUpload.createdByRequired": "Created By is required",
   "chunkUpload.uploadButton": "Upload",
+  "chunkUpload.resetButton": "Reset",
   "chunkTable.title": "Chunk Preview",
   "chunkTable.headers.id": "Chunk ID",
   "chunkTable.headers.contentPreview": "Content Preview",

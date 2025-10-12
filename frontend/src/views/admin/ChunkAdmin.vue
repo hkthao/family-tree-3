@@ -10,47 +10,30 @@
                 <ChunkUpload @file-selected="handleFileSelected" />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="fileId"
-                  :label="$t('chunkUpload.fileIdLabel')"
-                  :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]"
-                  required
-                ></v-text-field>
+                <v-text-field v-model="fileId" :label="$t('chunkUpload.fileIdLabel')"
+                  :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]" required></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="familyId"
-                  :label="$t('chunkUpload.familyIdLabel')"
-                ></v-text-field>
+                <v-text-field v-model="familyId" :label="$t('chunkUpload.familyIdLabel')"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="category"
-                  :label="$t('chunkUpload.categoryLabel')"
-                  :rules="[v => !!v || $t('chunkUpload.categoryRequired')]"
-                  required
-                ></v-text-field>
+                <v-text-field v-model="category" :label="$t('chunkUpload.categoryLabel')"
+                  :rules="[v => !!v || $t('chunkUpload.categoryRequired')]" required></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="createdBy"
-                  :label="$t('chunkUpload.createdByLabel')"
-                  :rules="[v => !!v || $t('chunkUpload.createdByRequired')]"
-                  required
-                ></v-text-field>
+                <v-text-field v-model="createdBy" :label="$t('chunkUpload.createdByLabel')"
+                  :rules="[v => !!v || $t('chunkUpload.createdByRequired')]" required></v-text-field>
               </v-col>
-              <v-col cols="12" md="6">
-                <v-btn color="primary" :disabled="!isFormValid || chunkStore.loading" @click="upload">
+              <v-col cols="12">
+                <v-btn class="mr-2" color="primary" :disabled="!isFormValid || chunkStore.loading" @click="upload">
                   {{ $t('chunkUpload.uploadButton') }}
+                </v-btn>
+                <v-btn color="secondary" :disabled="chunkStore.loading" @click="resetForm">
+                  {{ $t('chunkUpload.resetButton') }}
                 </v-btn>
               </v-col>
             </v-row>
-            <v-progress-linear
-              v-if="chunkStore.loading"
-              indeterminate
-              color="primary"
-              class="mb-3"
-            ></v-progress-linear>
+            <v-progress-linear v-if="chunkStore.loading" indeterminate color="primary" class="mb-3"></v-progress-linear>
           </v-card-text>
         </v-card>
       </v-col>
@@ -58,12 +41,8 @@
 
     <v-row v-if="chunkStore.chunks.length > 0">
       <v-col cols="12">
-        <ChunkTable
-          :chunks="chunkStore.chunks"
-          @chunk-approval-changed="handleChunkApprovalChange"
-          @approve-selected="handleApproveSelected"
-          @reject-selected="handleRejectSelected"
-        />
+        <ChunkTable :chunks="chunkStore.chunks" @chunk-approval-changed="handleChunkApprovalChange"
+          @approve-selected="handleApproveSelected" @reject-selected="handleRejectSelected" />
       </v-col>
     </v-row>
   </v-container>
@@ -116,6 +95,14 @@ const upload = async () => {
       notificationStore.showSnackbar(t('chunkAdmin.uploadSuccess', { count: chunkStore.chunks.length }), 'success');
     }
   }
+};
+
+const resetForm = () => {
+  selectedFile.value = null;
+  fileId.value = '';
+  familyId.value = '';
+  category.value = '';
+  // createdBy.value = ''; // Keep createdBy as it's auto-filled
 };
 
 const handleChunkApprovalChange = (chunkId: string, approved: boolean) => {

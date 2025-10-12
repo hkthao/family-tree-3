@@ -48,8 +48,8 @@ const headers = [
   { title: t('chunkTable.headers.id'), key: 'id' },
   { title: t('chunkTable.headers.contentPreview'), key: 'contentPreview' },
   { title: t('chunkTable.headers.fileName'), key: 'metadata.fileName' },
-  { title: t('chunkTable.headers.page'), key: 'metadata.page' },
-  { title: t('chunkTable.headers.approved'), key: 'approved' },
+  { title: t('chunkTable.headers.page'), key: 'metadata.page', align: 'center' },
+  { title: t('chunkTable.headers.approved'), key: 'approved', align: 'center' },
 ];
 
 const selectedChunks = ref<string[]>([]);

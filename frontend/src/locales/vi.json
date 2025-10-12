@@ -452,6 +452,7 @@
   "chunkUpload.createdByLabel": "Người tạo (ID người dùng)",
   "chunkUpload.createdByRequired": "Người tạo là bắt buộc",
   "chunkUpload.uploadButton": "Tải lên",
+  "chunkUpload.resetButton": "Làm lại",
   "chunkTable.title": "Xem trước Chunk",
   "chunkTable.headers.id": "ID Chunk",
   "chunkTable.headers.contentPreview": "Xem trước Nội dung",
