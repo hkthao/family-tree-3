@@ -2,15 +2,8 @@
   <v-card class="pa-4">
     <v-card-title class="text-h5">{{ $t('chunkTable.title') }}</v-card-title>
     <v-card-text>
-      <v-data-table
-        :headers="headers"
-        :items="chunks"
-        :items-per-page="10"
-        class="elevation-1"
-        item-value="id"
-        show-select
-        v-model="selectedChunks"
-      >
+      <v-data-table :headers="headers" :items="chunks" :items-per-page="10"  item-value="id"
+        show-select v-model="selectedChunks">
         <template v-slot:item.contentPreview="{ item }">
           {{ item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '') }}
         </template>
@@ -21,11 +14,8 @@
           {{ item.metadata.page }}
         </template>
         <template v-slot:item.approved="{ item }">
-          <v-checkbox
-            v-model="item.approved"
-            @update:model-value="onApprovalChange(item.id, item.approved)"
-            hide-details
-          ></v-checkbox>
+          <v-checkbox v-model="item.approved" @update:model-value="onApprovalChange(item.id, item.approved)"
+            hide-details></v-checkbox>
         </template>
       </v-data-table>
     </v-card-text>
@@ -44,7 +34,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import TextChunk from '@/types/chunk/text-chunk';
+import type { TextChunk } from '@/types';
 
 interface Props {
   chunks: TextChunk[];
