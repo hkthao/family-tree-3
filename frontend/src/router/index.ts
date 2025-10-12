@@ -188,7 +188,7 @@ const router = createRouter({
           path: 'admin/chunks',
           name: 'ChunkAdmin',
           component: () => import('@/views/admin/ChunkAdmin.vue'),
-          meta: { breadcrumb: 'chunk.admin.title', requiresAuth: true, roles: ['Admin'] },
+          meta: { breadcrumb: 'chunkAdmin.title', requiresAuth: true, roles: ['Admin'] },
         },
         ...sidebarRoutes,
       ],

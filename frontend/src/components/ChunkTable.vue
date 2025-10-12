@@ -2,8 +2,8 @@
   <v-card class="pa-4">
     <v-card-title class="text-h5">{{ $t('chunkTable.title') }}</v-card-title>
     <v-card-text>
-      <v-data-table :headers="headers" :items="chunks" :items-per-page="10"  item-value="id"
-        show-select v-model="selectedChunks">
+      <v-data-table :headers="headers" :items="chunks" :items-per-page="10" item-value="id" show-select
+        v-model="selectedChunks">
         <template v-slot:item.contentPreview="{ item }">
           {{ item.content.substring(0, 100) + (item.content.length > 100 ? '...' : '') }}
         </template>
@@ -34,7 +34,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import type { VDataTable } from 'vuetify/components';
 import type { TextChunk } from '@/types';
+import type { DataTableHeader } from 'vuetify';
+
 
 interface Props {
   chunks: TextChunk[];
@@ -44,7 +47,7 @@ const props = defineProps<Props>();
 const emit = defineEmits(['chunk-approval-changed', 'approve-selected', 'reject-selected']);
 const { t } = useI18n();
 
-const headers = [
+const headers: DataTableHeader[] = [
   { title: t('chunkTable.headers.id'), key: 'id' },
   { title: t('chunkTable.headers.contentPreview'), key: 'contentPreview' },
   { title: t('chunkTable.headers.fileName'), key: 'metadata.fileName' },

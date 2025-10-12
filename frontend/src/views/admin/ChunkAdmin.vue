@@ -11,18 +11,20 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field v-model="fileId" :label="$t('chunkUpload.fileIdLabel')"
-                  :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]" required></v-text-field>
+                  :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]" required :hide-details="true"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field v-model="familyId" :label="$t('chunkUpload.familyIdLabel')"></v-text-field>
+                <v-text-field v-model="familyId" :label="$t('chunkUpload.familyIdLabel')"
+                  :hide-details="true"></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field v-model="category" :label="$t('chunkUpload.categoryLabel')"
+                <v-text-field v-model="category" :label="$t('chunkUpload.categoryLabel')" :hide-details="true"
                   :rules="[v => !!v || $t('chunkUpload.categoryRequired')]" required></v-text-field>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field v-model="createdBy" :label="$t('chunkUpload.createdByLabel')"
-                  :rules="[v => !!v || $t('chunkUpload.createdByRequired')]" required></v-text-field>
+                <v-text-field v-model="createdBy" :label="$t('chunkUpload.createdByLabel')" :readonly="true"
+                  :hide-details="true" :rules="[v => !!v || $t('chunkUpload.createdByRequired')]"
+                  required></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-btn class="mr-2" color="primary" :disabled="!isFormValid || chunkStore.loading" @click="upload">
