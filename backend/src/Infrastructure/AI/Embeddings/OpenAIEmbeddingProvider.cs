@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -10,14 +11,16 @@ public class OpenAIEmbeddingProvider : IEmbeddingProvider
 {
     private readonly EmbeddingSettings _settings;
     private readonly HttpClient _httpClient;
+    private readonly ILogger<OpenAIEmbeddingProvider> _logger;
 
     public string ProviderName => "OpenAI";
     public int MaxTextLength => _settings.OpenAI.MaxTextLength;
 
-    public OpenAIEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings, HttpClient httpClient)
+    public OpenAIEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings, HttpClient httpClient, ILogger<OpenAIEmbeddingProvider> logger)
     {
         _settings = embeddingSettings.Value;
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
@@ -43,6 +46,7 @@ public class OpenAIEmbeddingProvider : IEmbeddingProvider
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, System.Text.Encoding.UTF8, "application/json");
 
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _settings.OpenAI.ApiKey);
             var response = await _httpClient.PostAsync("https://api.openai.com/v1/embeddings", content, cancellationToken);
             response.EnsureSuccessStatusCode();
 

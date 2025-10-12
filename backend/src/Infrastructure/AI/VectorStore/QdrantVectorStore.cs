@@ -39,10 +39,10 @@ public class QdrantVectorStore : IVectorStore
             throw new InvalidOperationException("Qdrant configuration is missing or invalid.");
         }
 
-        _qdrantClient = new QdrantClient(host: host, apiKey: apiKey);
+        _qdrantClient = new QdrantClient(host: host, apiKey: apiKey, https: true);
 
         // Ensure collection exists
-        Task.Run(async () => await EnsureCollectionExistsAsync()).Wait();
+        Task.Run(EnsureCollectionExistsAsync).Wait();
     }
 
     private async Task EnsureCollectionExistsAsync()
@@ -159,7 +159,8 @@ public class QdrantVectorStore : IVectorStore
                 Field = new FieldCondition
                 {
                     Key = filter.Key,
-                    Match = new Match {
+                    Match = new Match
+                    {
                         Text = filter.Value
                     }
                 }
