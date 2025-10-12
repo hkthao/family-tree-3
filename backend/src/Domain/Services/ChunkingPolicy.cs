@@ -52,11 +52,11 @@ namespace backend.Domain.Services
                         Content = currentChunkContent.ToString().Trim(),
                         Metadata = new Dictionary<string, string>
                         {
-                            { "fileName", fileName },
-                            { "fileId", fileId },
-                            { "familyId", familyId },
-                            { "category", category },
-                            { "createdBy", createdBy },
+                            { "fileName", fileName ?? string.Empty },
+                            { "fileId", fileId ?? string.Empty },
+                            { "familyId", familyId ?? string.Empty },
+                            { "category", category ?? string.Empty },
+                            { "createdBy", createdBy ?? string.Empty },
                             { "createdAt", DateTime.UtcNow.ToString("o") }, // ISO 8601 format
                             { "page", "1" } // Placeholder for page number, to be improved with PDF extraction
                         }

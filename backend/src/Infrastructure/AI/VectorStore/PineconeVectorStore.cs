@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
@@ -30,14 +29,15 @@ public class PineconeVectorStore : IVectorStore
 
         var apiKey = pineconeSettings.ApiKey;
         _indexName = pineconeSettings.IndexName;
+        var host = pineconeSettings.Host;
 
-        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(_indexName))
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(_indexName) || string.IsNullOrEmpty(host))
         {
-            _logger.LogError("Pinecone configuration is missing or invalid. Check VectorStoreSettings:Pinecone:ApiKey, VectorStoreSettings:Pinecone:Environment, and VectorStoreSettings:Pinecone:IndexName in settings.");
+            _logger.LogError("Pinecone configuration is missing or invalid. Check VectorStoreSettings:Pinecone:ApiKey, VectorStoreSettings:Pinecone:Environment, VectorStoreSettings:Pinecone:IndexName, and VectorStoreSettings:Pinecone:Host in settings.");
             throw new InvalidOperationException("Pinecone configuration is missing or invalid.");
         }
 
-        _pineconeClient = new PineconeClient(apiKey);
+        _pineconeClient = new PineconeClient(apiKey, new ClientOptions { BaseUrl = host });
         _index = _pineconeClient.Index(_indexName);
     }
 
@@ -55,7 +55,7 @@ public class PineconeVectorStore : IVectorStore
             {
                 Id = chunk.Id,
                 Values = new ReadOnlyMemory<float>([.. chunk.Embedding]),
-                Metadata = chunk.Metadata != null ? new Metadata(chunk.Metadata.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null
+                Metadata = chunk.Metadata != null ? new Metadata(chunk.Metadata.ToDictionary(k => k.Key, v => (MetadataValue?)(v.Value == null ? string.Empty : v.Value))) : null
             };
 
             var upsertRequest = new UpsertRequest { Vectors = [vector] };
