@@ -9,7 +9,7 @@ namespace backend.Domain.Services
         private const int MinChunkWords = 300;
         private const int MaxChunkWords = 400;
 
-        public List<TextChunk> ChunkText(string text, string fileName)
+        public List<TextChunk> ChunkText(string text, string fileName, string fileId, string familyId, string category, string createdBy)
         {
             string cleanedText = CleanText(text);
             List<TextChunk> chunks = new List<TextChunk>();
@@ -53,7 +53,12 @@ namespace backend.Domain.Services
                         Metadata = new Dictionary<string, string>
                         {
                             { "fileName", fileName },
-                            { "createdAt", DateTime.UtcNow.ToString("o") } // ISO 8601 format
+                            { "fileId", fileId },
+                            { "familyId", familyId },
+                            { "category", category },
+                            { "createdBy", createdBy },
+                            { "createdAt", DateTime.UtcNow.ToString("o") }, // ISO 8601 format
+                            { "page", "1" } // Placeholder for page number, to be improved with PDF extraction
                         }
                     });
                     currentWordIndex += chunkWordCount;

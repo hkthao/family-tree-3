@@ -1,12 +1,6 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12">
-        <h1 class="text-h4 mb-4">Quản lý Chunk tài liệu</h1>
-      </v-col>
-    </v-row>
-
-    <v-row>
       <v-col cols="12" md="6">
         <ChunkUpload />
       </v-col>
@@ -15,8 +9,10 @@
           <v-card-title class="text-h5">Trạng thái Chunk</v-card-title>
           <v-card-text>
             <v-alert v-if="chunkStore.loading" type="info" dense class="mb-3">Đang xử lý tệp...</v-alert>
-            <v-alert v-if="chunkStore.error" type="error" dense dismissible class="mb-3">{{ chunkStore.error }}</v-alert>
-            <v-alert v-if="chunkStore.chunks.length > 0 && !chunkStore.loading && !chunkStore.error" type="success" dense class="mb-3">
+            <v-alert v-if="chunkStore.error" type="error" dense dismissible class="mb-3">{{ chunkStore.error
+            }}</v-alert>
+            <v-alert v-if="chunkStore.chunks.length > 0 && !chunkStore.loading && !chunkStore.error" type="success"
+              dense class="mb-3">
               Đã tải lên và xử lý {{ chunkStore.chunks.length }} chunk thành công.
             </v-alert>
           </v-card-text>
@@ -26,12 +22,8 @@
 
     <v-row v-if="chunkStore.chunks.length > 0">
       <v-col cols="12">
-        <ChunkTable
-          :chunks="chunkStore.chunks"
-          @chunk-approval-changed="handleChunkApprovalChange"
-          @approve-selected="handleApproveSelected"
-          @reject-selected="handleRejectSelected"
-        />
+        <ChunkTable :chunks="chunkStore.chunks" @chunk-approval-changed="handleChunkApprovalChange"
+          @approve-selected="handleApproveSelected" @reject-selected="handleRejectSelected" />
       </v-col>
     </v-row>
 
@@ -46,7 +38,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { useChunkStore, TextChunk } from '@/stores/chunk.store';
+import { useChunkStore } from '@/stores/chunk.store';
 import ChunkUpload from '@/components/ChunkUpload.vue';
 import ChunkTable from '@/components/ChunkTable.vue';
 

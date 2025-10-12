@@ -33,7 +33,7 @@ namespace backend.Application.Files.Commands.ProcessFile
 
             string textContent = await extractor.ExtractTextAsync(request.FileStream);
 
-            var chunks = _chunkingPolicy.ChunkText(textContent, request.FileName);
+            var chunks = _chunkingPolicy.ChunkText(textContent, request.FileName, request.FileId, request.FamilyId, request.Category, request.CreatedBy);
             return Result<List<TextChunk>>.Success(chunks);
         }
     }

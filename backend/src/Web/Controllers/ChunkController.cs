@@ -19,12 +19,24 @@ namespace backend.Web.Controllers
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(List<TextChunk>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<List<TextChunk>>> Upload(IFormFile file)
+        public async Task<ActionResult<List<TextChunk>>> Upload(
+            IFormFile file,
+            [FromForm] string fileId,
+            [FromForm] string familyId,
+            [FromForm] string category,
+            [FromForm] string createdBy)
         {
-            using (var stream = file.OpenReadStream())
-            {
-                var command = new ProcessFileCommand { FileStream = stream, FileName = file.FileName };
-                var result = await _mediator.Send(command);
+                            using (var stream = file.OpenReadStream())
+                            {
+                                var command = new ProcessFileCommand
+                                {
+                                    FileStream = stream,
+                                    FileName = file.FileName,
+                                    FileId = fileId,
+                                    FamilyId = familyId,
+                                    Category = category,
+                                    CreatedBy = createdBy
+                                };                var result = await _mediator.Send(command);
 
                 if (result.IsSuccess)
                 {

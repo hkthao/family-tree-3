@@ -15,6 +15,18 @@ namespace backend.Application.Files.Commands.ProcessFile
 
             RuleFor(x => x.FileName)
                 .Must(BeAValidFileType).WithMessage("Unsupported file type. Only PDF and TXT are allowed.");
+
+            RuleFor(x => x.FileId)
+                .NotEmpty().WithMessage("File ID cannot be empty.");
+
+            RuleFor(x => x.FamilyId)
+                .NotEmpty().WithMessage("Family ID cannot be empty.");
+
+            RuleFor(x => x.Category)
+                .NotEmpty().WithMessage("Category cannot be empty.");
+
+            RuleFor(x => x.CreatedBy)
+                .NotEmpty().WithMessage("CreatedBy cannot be empty.");
         }
 
         private bool BeAValidFileType(string fileName)

@@ -151,6 +151,71 @@
         }
       }
     },
+    "/api/Chunk/upload": {
+      "post": {
+        "tags": [
+          "Chunk"
+        ],
+        "operationId": "Chunk_Upload",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "nullable": true
+                  },
+                  "fileId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "familyId": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "category": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "createdBy": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TextChunk"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Dashboard/stats": {
       "get": {
         "tags": [
@@ -2180,6 +2245,53 @@
             "type": "string"
           },
           "sessionId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "TextChunk": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "additionalProperties": {
+          "nullable": true
+        },
+        "properties": {
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "detail": {
+            "type": "string",
+            "nullable": true
+          },
+          "instance": {
             "type": "string",
             "nullable": true
           }
