@@ -27,17 +27,17 @@ namespace backend.Web.Controllers
             [FromForm] string category,
             [FromForm] string createdBy)
         {
-                            using (var stream = file.OpenReadStream())
-                            {
-                                var command = new ProcessFileCommand
-                                {
-                                    FileStream = stream,
-                                    FileName = file.FileName,
-                                    FileId = fileId,
-                                    FamilyId = familyId,
-                                    Category = category,
-                                    CreatedBy = createdBy
-                                };                var result = await _mediator.Send(command);
+            using (var stream = file.OpenReadStream())
+            {
+                var command = new ProcessFileCommand
+                {
+                    FileStream = stream,
+                    FileName = file.FileName,
+                    FileId = fileId,
+                    FamilyId = familyId,
+                    Category = category,
+                    CreatedBy = createdBy
+                }; var result = await _mediator.Send(command);
 
                 if (result.IsSuccess)
                 {
@@ -53,12 +53,11 @@ namespace backend.Web.Controllers
         [HttpPost("approve")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> ApproveChunks([FromBody] List<TextChunk> chunks, [FromQuery] string providerName)
+        public async Task<ActionResult> ApproveChunks([FromBody] List<TextChunk> chunks)
         {
             var command = new EmbedChunksCommand
             {
-                Chunks = chunks,
-                ProviderName = providerName
+                Chunks = chunks
             };
 
             var result = await _mediator.Send(command);

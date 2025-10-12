@@ -77,6 +77,9 @@ public static class DependencyInjection
 
         services.AddScoped<IFileTextExtractorFactory, FileTextExtractorFactory>();
 
+        services.AddTransient<PdfTextExtractor>();
+        services.AddTransient<TxtTextExtractor>();
+
         return services;
     }
 }

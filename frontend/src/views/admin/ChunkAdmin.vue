@@ -107,8 +107,17 @@ const resetForm = () => {
   // createdBy.value = ''; // Keep createdBy as it's auto-filled
 };
 
-const handleChunkApprovalChange = (chunkId: string, approved: boolean) => {
+const handleChunkApprovalChange = async (chunkId: string, approved: boolean) => {
   chunkStore.setChunkApproval(chunkId, approved);
+  if (approved) {
+    const chunkToApprove = chunkStore.chunks.find(c => c.id === chunkId);
+    if (chunkToApprove) {
+      await chunkStore.approveChunks([chunkToApprove]);
+      if (!chunkStore.error) {
+        notificationStore.showSnackbar(t('chunkAdmin.approveSuccess', { count: 1 }), 'success');
+      }
+    }
+  }
   notificationStore.showSnackbar(t('chunkAdmin.chunkApprovalChange', { chunkId, status: approved ? t('common.approved') : t('common.rejected') }), 'info');
 };
 

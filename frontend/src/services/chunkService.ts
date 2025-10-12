@@ -32,7 +32,7 @@ export const chunkService = {
     return response.data;
   },
 
-  async approveChunks(chunksToApprove: TextChunk[], providerName: string): Promise<void> {
-    await axios.post(`${API_BASE_URL}/chunk/approve?providerName=${providerName}`, chunksToApprove);
+  async approveChunks(chunksToApprove: TextChunk[]): Promise<void> {
+    await axios.post(`${API_BASE_URL}/chunk/approve`, chunksToApprove);
   },
 };

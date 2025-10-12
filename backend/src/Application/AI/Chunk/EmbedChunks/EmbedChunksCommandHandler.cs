@@ -11,12 +11,14 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
     private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
     private readonly IVectorStoreFactory _vectorStoreFactory;
     private readonly VectorStoreSettings _vectorStoreSettings;
+    private readonly EmbeddingSettings _embeddingSettings;
 
-    public EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IOptions<VectorStoreSettings> vectorStoreSettingsOptions)
+    public EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IOptions<VectorStoreSettings> vectorStoreSettingsOptions, IOptions<EmbeddingSettings> embeddingSettingsOptions)
     {
         _embeddingProviderFactory = embeddingProviderFactory;
         _vectorStoreFactory = vectorStoreFactory;
         _vectorStoreSettings = vectorStoreSettingsOptions.Value;
+        _embeddingSettings = embeddingSettingsOptions.Value;
     }
 
     public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
@@ -29,7 +31,7 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
         IEmbeddingProvider embeddingProvider;
         try
         {
-            embeddingProvider = _embeddingProviderFactory.GetProvider(request.ProviderName);
+            embeddingProvider = _embeddingProviderFactory.GetProvider(_embeddingSettings.Provider.ToString());
         }
         catch (ArgumentException ex)
         {

@@ -56,11 +56,11 @@ export const useChunkStore = defineStore('chunk', {
       this.chunks = [];
     },
 
-    async approveChunks(chunksToApprove: TextChunk[], providerName: string): Promise<void> {
+    async approveChunks(chunksToApprove: TextChunk[]): Promise<void> {
       this.loading = true;
       this.error = null;
       try {
-        await chunkService.approveChunks(chunksToApprove, providerName);
+        await chunkService.approveChunks(chunksToApprove);
         // Optionally, clear approved chunks from the store or update their status
         // For now, we'll just clear all chunks after successful approval
         this.clearChunks();

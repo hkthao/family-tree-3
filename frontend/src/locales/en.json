@@ -415,7 +415,7 @@
   "chunkAdmin.uploadSuccess": "Successfully uploaded and processed {count} chunks.",
   "chunkAdmin.chunkApprovalChange": "Chunk {chunkId} has been {status}.",
   "chunkAdmin.approveSelectedSuccess": "Approved {count} selected chunks.",
-  "chunkAdmin.rejectSelectedSuccess": "Rejected {count} selected chunks.",
+  "chunkAdmin.approveSuccess": "Successfully approved {count} chunks.",
   "common.approved": "approved",
   "common.rejected": "rejected"
 }

@@ -222,16 +222,6 @@
           "Chunk"
         ],
         "operationId": "Chunk_ApproveChunks",
-        "parameters": [
-          {
-            "name": "providerName",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            },
-            "x-position": 2
-          }
-        ],
         "requestBody": {
           "x-name": "chunks",
           "content": {
