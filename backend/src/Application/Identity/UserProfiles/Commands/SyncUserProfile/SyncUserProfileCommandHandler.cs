@@ -1,9 +1,12 @@
+using System.Security.Claims;
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Domain.Enums;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using backend.Application.UserProfiles.Specifications; // Added for IRequestHandler
+using backend.Application.UserProfiles.Specifications;
+
 
 namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile
 {
@@ -11,28 +14,25 @@ namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile
     {
         private readonly IApplicationDbContext _context;
         private readonly ILogger<SyncUserProfileCommandHandler> _logger;
-        private readonly IExternalClaimProvider _externalClaimProvider;
 
         public SyncUserProfileCommandHandler(
             IApplicationDbContext context,
-            ILogger<SyncUserProfileCommandHandler> logger,
-            IExternalClaimProvider externalClaimProvider)
+            ILogger<SyncUserProfileCommandHandler> logger)
         {
             _context = context;
             _logger = logger;
-            _externalClaimProvider = externalClaimProvider;
         }
 
         public async Task<Result<bool>> Handle(SyncUserProfileCommand request, CancellationToken cancellationToken)
         {
-            var externalId = _externalClaimProvider.GetExternalId(request.UserPrincipal);
-            var email = _externalClaimProvider.GetEmail(request.UserPrincipal);
-            var name = _externalClaimProvider.GetName(request.UserPrincipal);
+            var externalId = request.UserPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = request.UserPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = request.UserPrincipal.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrEmpty(externalId))
             {
-                _logger.LogWarning("External User ID not found in claims. Cannot sync user profile.");
-                return Result<bool>.Failure("External User ID not found in claims.", "Authentication");
+                _logger.LogWarning("External ID (sub claim) not found in claims. Cannot sync user profile.");
+                return Result<bool>.Failure("External ID (sub claim) not found in claims.", "Authentication");
             }
 
             var userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
@@ -50,6 +50,16 @@ namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile
                 try
                 {
                     _context.UserProfiles.Add(userProfile);
+                    
+                    // Create default user preferences
+                    var userPreference = new UserPreference
+                    {
+                        UserProfile = userProfile,
+                        Theme = Theme.Light, // Default theme
+                        Language = Language.English // Default language
+                    };
+                    _context.UserPreferences.Add(userPreference);
+
                     await _context.SaveChangesAsync(cancellationToken);
                     _logger.LogInformation("Created new user profile for external user {ExternalId}.", externalId);
                     newUserCreated = true;
