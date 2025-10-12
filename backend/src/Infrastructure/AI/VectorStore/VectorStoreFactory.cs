@@ -18,6 +18,7 @@ public class VectorStoreFactory : IVectorStoreFactory
         {
             VectorStoreProviderType.Pinecone => _serviceProvider.GetRequiredService<PineconeVectorStore>(),
             VectorStoreProviderType.InMemory => _serviceProvider.GetRequiredService<InMemoryVectorStore>(),
+            VectorStoreProviderType.Qdrant => _serviceProvider.GetRequiredService<QdrantVectorStore>(),
             _ => throw new InvalidOperationException($"No vector store provider configured for: {provider}")
         };
     }

@@ -73,6 +73,7 @@ public static class DependencyInjection
         services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
         services.AddTransient<InMemoryVectorStore>();
         services.AddTransient<PineconeVectorStore>();
+        services.AddTransient<QdrantVectorStore>();
         services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
 
         services.AddScoped<IFileTextExtractorFactory, FileTextExtractorFactory>();
