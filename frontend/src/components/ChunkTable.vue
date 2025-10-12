@@ -1,6 +1,6 @@
 <template>
   <v-card class="pa-4">
-    <v-card-title class="text-h5">Xem trước Chunk</v-card-title>
+    <v-card-title class="text-h5">{{ $t('chunkTable.title') }}</v-card-title>
     <v-card-text>
       <v-data-table
         :headers="headers"
@@ -32,10 +32,10 @@
     <v-card-actions v-if="chunks.length > 0">
       <v-spacer></v-spacer>
       <v-btn color="error" :disabled="selectedChunks.length === 0" @click="rejectSelected">
-        Từ chối đã chọn
+        {{ $t('chunkTable.rejectSelectedButton') }}
       </v-btn>
       <v-btn color="success" :disabled="selectedChunks.length === 0" @click="approveSelected">
-        Phê duyệt đã chọn
+        {{ $t('chunkTable.approveSelectedButton') }}
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import TextChunk from '@/types/chunk/text-chunk';
 
 interface Props {
@@ -51,13 +52,14 @@ interface Props {
 
 const props = defineProps<Props>();
 const emit = defineEmits(['chunk-approval-changed', 'approve-selected', 'reject-selected']);
+const { t } = useI18n();
 
 const headers = [
-  { title: 'ID Chunk', key: 'id' },
-  { title: 'Xem trước Nội dung', key: 'contentPreview' },
-  { title: 'Tên tệp', key: 'metadata.fileName' },
-  { title: 'Trang', key: 'metadata.page' },
-  { title: 'Phê duyệt', key: 'approved' },
+  { title: t('chunkTable.headers.id'), key: 'id' },
+  { title: t('chunkTable.headers.contentPreview'), key: 'contentPreview' },
+  { title: t('chunkTable.headers.fileName'), key: 'metadata.fileName' },
+  { title: t('chunkTable.headers.page'), key: 'metadata.page' },
+  { title: t('chunkTable.headers.approved'), key: 'approved' },
 ];
 
 const selectedChunks = ref<string[]>([]);

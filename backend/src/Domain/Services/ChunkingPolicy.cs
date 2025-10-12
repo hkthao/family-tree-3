@@ -75,8 +75,6 @@ namespace backend.Domain.Services
 
         private string CleanText(string text)
         {
-            // Remove non-printable characters except common whitespace
-            text = Regex.Replace(text, @"[^ -~\t\n\r-]", "");
             // Normalize line endings
             text = text.Replace("\r\n", "\n").Replace("\r", "\n");
             // Replace multiple newlines with at most two (to preserve paragraph breaks)

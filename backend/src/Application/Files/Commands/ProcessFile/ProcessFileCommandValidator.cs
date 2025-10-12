@@ -20,7 +20,7 @@ namespace backend.Application.Files.Commands.ProcessFile
                 .NotEmpty().WithMessage("File ID cannot be empty.");
 
             RuleFor(x => x.FamilyId)
-                .NotEmpty().WithMessage("Family ID cannot be empty.");
+                .MaximumLength(36).WithMessage("Family ID must not exceed 36 characters."); // Assuming GUID format
 
             RuleFor(x => x.Category)
                 .NotEmpty().WithMessage("Category cannot be empty.");
