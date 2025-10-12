@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles;

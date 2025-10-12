@@ -1,7 +1,5 @@
-using backend.Application.Common.Models;
 using backend.Application.Files.Commands.ProcessFile;
 using backend.Domain.Entities;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers
