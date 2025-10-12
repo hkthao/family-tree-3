@@ -98,8 +98,9 @@ export const useChatStore = defineStore('chat', {
           );
           if (chatIndex !== -1) {
             this.chatList[chatIndex].lastMessage = botResponse.response;
-            this.chatList[chatIndex].updatedAt =
-              new Date().toLocaleTimeString();
+            this.chatList[chatIndex].updatedAt = botResponse.createdAt
+              ? new Date(botResponse.createdAt).toLocaleTimeString()
+              : new Date().toLocaleTimeString();
           }
         } else {
           this.error = result.error?.message || 'Failed to send message.';

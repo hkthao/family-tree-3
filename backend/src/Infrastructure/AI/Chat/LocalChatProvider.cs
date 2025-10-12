@@ -39,7 +39,8 @@ public class LocalChatProvider : IChatProvider
                 messages = new[]
                 {
                     new { role = "user", content = prompt }
-                }
+                },
+                stream = false
             };
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, System.Text.Encoding.UTF8, "application/json");

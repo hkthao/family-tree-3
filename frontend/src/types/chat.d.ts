@@ -1,6 +1,9 @@
 interface ChatResponse {
   response: string;
   context: string[];
+  sessionId?: string;
+  model?: string;
+  createdAt?: string;
 }
 
 interface MessageItem {
