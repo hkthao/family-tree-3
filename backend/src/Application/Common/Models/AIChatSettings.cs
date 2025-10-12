@@ -18,7 +18,8 @@ public class GeminiSettings
 
 public class LocalAISettings
 {
-    public string Endpoint { get; set; } = null!;
+    public string ApiUrl { get; set; } = "http://localhost:11434/api/chat"; // Default Ollama chat API URL
+    public string Model { get; set; } = "llama2"; // Default Ollama chat model
 }
 
 public class OpenAISettings
