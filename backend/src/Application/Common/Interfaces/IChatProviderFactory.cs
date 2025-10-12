@@ -4,5 +4,5 @@ namespace backend.Application.Common.Interfaces;
 
 public interface IChatProviderFactory
 {
-    IChatProvider CreateChatProvider(ChatAIProvider provider);
+    IChatProvider GetProvider(ChatAIProvider provider);
 }

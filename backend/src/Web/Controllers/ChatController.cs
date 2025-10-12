@@ -19,8 +19,16 @@ public class ChatController : ControllerBase
     public async Task<ActionResult<ChatResponse>> ChatWithAssistant([FromBody] ChatRequest request)
     {
         var query = new ChatWithAssistantQuery(request.Message, request.SessionId);
-        var response = await _mediator.Send(query);
-        return Ok(response);
+        var result = await _mediator.Send(query);
+
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        else
+        {
+            return BadRequest(result.Error);
+        }
     }
 }
 

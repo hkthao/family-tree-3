@@ -54,7 +54,7 @@ public static class DependencyInjection
         services.AddTransient<LocalChatProvider>();
 
         services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
-        services.AddScoped<IChatService, ChatService>();
+
 
         // Register AI Content Generator
         services.Configure<GeminiSettings>(configuration.GetSection(nameof(GeminiSettings)));

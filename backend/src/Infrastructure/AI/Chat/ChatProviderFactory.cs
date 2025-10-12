@@ -13,7 +13,7 @@ public class ChatProviderFactory : IChatProviderFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IChatProvider CreateChatProvider(ChatAIProvider provider)
+    public IChatProvider GetProvider(ChatAIProvider provider)
     {
         return provider switch
         {
