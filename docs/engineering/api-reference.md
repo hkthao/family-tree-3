@@ -13,9 +13,21 @@
 - [6.3. Quản lý Sự kiện (`/api/events`)](#63-quản-lý-sự-kiện-apievents)
 - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
 - [6.5. Quản lý Quan hệ (`/api/relationships`)](#65-quản-lý-quan-hệ-apirelationships)
+- [6.11. Xử lý Dữ liệu và Chia Chunk (`/api/chunk`)](#611-xử-lý-dữ-liệu-và-chia-chunk-apichunk)
 - [7. Mô hình Dữ liệu (Response Models)](#7-mô-hình-dữ-liệu-response-models)
   - [7.1. Family](#71-family)
   - [7.2. Member](#72-member)
+  - [7.5. Relationship](#75-relationship)
+  - [7.6. RelationshipListDto](#76-relationshiplistdto)
+  - [7.3. Event](#73-event)
+  - [7.4. SearchResultsDto](#74-searchresultsdto)
+  - [7.7. UserProfile](#77-userprofile)
+  - [7.8. UserActivity](#78-useractivity)
+  - [7.9. AIBiographyDto](#79-aibiographydto)
+  - [7.10. BiographyResultDto](#710-biographyresultdto)
+  - [7.11. AIProvider](#711-aiprovider)
+  - [7.13. FileMetadata](#713-filemetadata)
+  - [7.14. TextChunk](#714-textchunk)
 
 ---
 
@@ -327,6 +339,12 @@ Content-Type: application/json
 -   `GET /api/upload/preview/{fileName}`: Lấy nội dung của một tệp đã tải lên để xem trước. Yêu cầu xác thực.
     *   **Phản hồi:** `FileContentResult` (nội dung tệp với `Content-Type` phù hợp)
 
+### 6.11. Xử lý Dữ liệu và Chia Chunk (`/api/chunk`)
+
+-   `POST /api/chunk/upload`: Tải lên một tệp (PDF hoặc TXT) để trích xuất văn bản, làm sạch và chia thành các chunk.
+    *   **Request Body:** `multipart/form-data` (chứa `IFormFile file`)
+    *   **Phản hồi:** `Result<List<TextChunk>>`
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -512,6 +530,16 @@ Content-Type: application/json
   "isActive": "boolean",
   "created": "string (date-time)",
   "lastModified": "string (date-time, nullable)"
+}
+```
+
+### 7.14. TextChunk
+
+```json
+{
+  "id": "string (uuid)",
+  "content": "string",
+  "metadata": { "fileName": "string", "createdAt": "string (date-time)" }
 }
 ```
 

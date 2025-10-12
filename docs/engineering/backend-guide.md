@@ -15,16 +15,13 @@
 - [10. Quản lý Cây Gia Phả (Family Tree Management)](#10-quản-lý-cây-gia-phả-family-tree-management)
 - [11. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)](#11-ghi-nhật-ký-hoạt-động-người-dùng-user-activity-logging)
 - [12. Module AI (AI Module)](#12-module-ai-ai-module)
-- [13. Module Vector Database](#13-module-vector-database)
-  - [13.0. Tổng quan](#130-tổng-quan)
-  - [13.1. Interface `IVectorStore`](#131-interface-ivectorstore)
-  - [13.2. Cách sử dụng `IVectorStore`](#132-cách-sử-dụng-ivectorstore)
-  - [13.3. Mở rộng Module (Thêm Provider mới)](#133-mở-rộng-module-thêm-provider-mới)
-  - [13.4. DTOs](#134-dtos)
-  - [13.5. Cơ chế chọn Provider (Factory Pattern)](#135-cơ-chế-chọn-provider-factory-pattern)
-  - [13.6. Triển khai các Provider](#136-triển-khai-các-provider)
-  - [13.7. Cấu hình `appsettings.json`](#137-cấu-hình-appsettingsjson)
-  - [13.8. Đăng ký Dependency Injection](#138-đăng-ký-dependency-injection)
+- [13. Module Xử lý Dữ liệu và Chia Chunk (Data Processing & Chunking Module)](#13-module-xử-lý-dữ-liệu-và-chia-chunk-data-processing--chunking-module)
+  - [13.1. Thực thể `TextChunk`](#131-thực-thể-textchunk)
+  - [13.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)](#132-trích-xuất-văn-bản-từ-tệp-ifiletextextractor)
+  - [13.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)](#133-factory-cho-trích-xuất-tệp-ifiletextextractorfactory)
+  - [13.4. Chính sách Chia Chunk (`ChunkingPolicy`)](#134-chính-sách-chia-chunk-chunkingpolicy)
+  - [13.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)](#135-lệnh-xử-lý-tệp-processfilecommand)
+  - [13.6. API Endpoint (`ChunkController`)](#136-api-endpoint-chunkcontroller)
 - [14. Logging & Monitoring](#14-logging--monitoring)
 - [15. Coding Style](#15-coding-style)
 - [16. Best Practices](#16-best-practices)
@@ -867,6 +864,53 @@ Các dịch vụ liên quan đến Vector Database được đăng ký trong `ba
 -   `PineconeVectorStore`, `QdrantVectorStore`: Đăng ký dưới dạng `Transient`.
 -   `IVectorStoreFactory`: Đăng ký dưới dạng `Singleton`.
 -   `IVectorStore`: Đăng ký dưới dạng `Transient`, được giải quyết thông qua `IVectorStoreFactory`.
+
+## 13. Module Xử lý Dữ liệu và Chia Chunk (Data Processing & Chunking Module)
+
+Module này chịu trách nhiệm đọc, làm sạch và chia nhỏ nội dung từ các tệp (PDF, TXT) được người dùng tải lên thành các `TextChunk` nhỏ hơn. Các chunk này sau đó có thể được sử dụng để tạo embeddings và lưu trữ trong Vector Database cho các tác vụ liên quan đến AI (ví dụ: chatbot).
+
+### 13.1. Thực thể `TextChunk`
+
+Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại diện cho một đoạn văn bản đã được xử lý, sẵn sàng cho việc tạo embedding.
+
+| Tên trường | Kiểu dữ liệu | Mô tả |
+| :--------- | :----------- | :---- |
+| `Id`       | `string` (GUID) | ID duy nhất của chunk. |
+| `Content`  | `string`     | Nội dung văn bản của chunk. |
+| `Metadata` | `Dictionary<string, string>` (nullable) | Các siêu dữ liệu bổ sung (ví dụ: `fileName`, `createdAt`). |
+
+### 13.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)
+
+`IFileTextExtractor` (`backend/src/Application/Common/Interfaces/IFileTextExtractor.cs`) là một interface định nghĩa phương thức trích xuất văn bản từ một `Stream` của tệp. Các triển khai cụ thể sẽ xử lý các loại tệp khác nhau.
+
+*   **`PdfTextExtractor`** (`backend/src/Infrastructure/Services/PdfTextExtractor.cs`): Triển khai cho tệp PDF, sử dụng thư viện `UglyToad.PdfPig`.
+*   **`TxtTextExtractor`** (`backend/src/Infrastructure/Services/TxtTextExtractor.cs`): Triển khai cho tệp TXT.
+
+### 13.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)
+
+`IFileTextExtractorFactory` (`backend/src/Application/Common/Interfaces/IFileTextExtractorFactory.cs`) là một factory interface để lấy đúng `IFileTextExtractor` dựa trên phần mở rộng của tệp. `FileTextExtractorFactory` (`backend/src/Infrastructure/Services/FileTextExtractorFactory.cs`) là triển khai của factory này.
+
+### 13.4. Chính sách Chia Chunk (`ChunkingPolicy`)
+
+`ChunkingPolicy` (`backend/src/Domain/Services/ChunkingPolicy.cs`) là một Domain Service chứa logic nghiệp vụ để làm sạch văn bản và chia nó thành các `TextChunk` có kích thước tối ưu (ví dụ: 300-400 từ). Nó cũng thêm các metadata cần thiết vào mỗi chunk.
+
+### 13.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)
+
+`ProcessFileCommand` (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommand.cs`) là một Command trong mô hình CQRS, mang thông tin về tệp cần xử lý (Stream và tên tệp).
+
+*   **`ProcessFileCommandValidator`**: Sử dụng FluentValidation để xác thực `ProcessFileCommand`, kiểm tra xem tệp có hợp lệ không (không rỗng, đúng định dạng PDF/TXT).
+*   **`ProcessFileCommandHandler`**: (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommandHandler.cs`) là Handler cho `ProcessFileCommand`. Nó điều phối quá trình:
+    1.  Sử dụng `IFileTextExtractorFactory` để lấy `IFileTextExtractor` phù hợp.
+    2.  Trích xuất văn bản từ tệp.
+    3.  Sử dụng `ChunkingPolicy` để làm sạch và chia văn bản thành các chunk.
+    4.  Trả về `Result<List<TextChunk>>`.
+
+### 13.6. API Endpoint (`ChunkController`)
+
+`ChunkController` (`backend/src/Web/Controllers/ChunkController.cs`) cung cấp endpoint API để người dùng tải lên tệp.
+
+*   **Route**: `POST /api/chunk/upload`
+*   **Chức năng**: Nhận `IFormFile`, tạo và gửi `ProcessFileCommand` thông qua `IMediator`, và trả về kết quả là một danh sách các `TextChunk`.
 
 ## 14. Logging & Monitoring
 

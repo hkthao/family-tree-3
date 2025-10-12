@@ -84,16 +84,20 @@ graph TD
     subgraph "Application Layer"
         CR --> C{Command/Query Handler}
         C -->|Tương tác| D(IApplicationDbContext)
+        C -->|Sử dụng| E(IFileTextExtractorFactory)
+        C -->|Sử dụng| F(ChunkingPolicy)
     end
 
     subgraph "Infrastructure Layer"
         CR --> G(ApplicationDbContext)
         D --> G
+        E --> H(PdfTextExtractor/TxtTextExtractor)
     end
 
     subgraph "Domain Layer"
-        C --> F(Entities)
-        G --> F
+        C --> I(Entities)
+        G --> I
+        F --> I
     end
 ```
 
@@ -103,9 +107,13 @@ graph TD
 -   **Command/Query Handler**: Chứa logic nghiệp vụ để xử lý `Command` hoặc `Query`.
     -   `CommandHandler` thực hiện thay đổi dữ liệu thông qua `IApplicationDbContext`.
     -   `QueryHandler` truy vấn dữ liệu thông qua `IApplicationDbContext`.
+    -   **Mới**: `ProcessFileCommandHandler` sử dụng `IFileTextExtractorFactory` để lấy trình trích xuất văn bản và `ChunkingPolicy` để chia nhỏ văn bản.
 -   **IApplicationDbContext**: Interface định nghĩa các `DbSet` và phương thức lưu thay đổi, được triển khai bởi `ApplicationDbContext` trong Infrastructure Layer. **Do tính chất thực dụng, `IApplicationDbContext` sử dụng các kiểu dữ liệu và extension methods của `Microsoft.EntityFrameworkCore` để đơn giản hóa việc tương tác với cơ sở dữ liệu.**
--   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer.
+-   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer. **Mới**: Bao gồm `TextChunk`.
 -   **ApplicationDbContext**: Triển khai cụ thể của `IApplicationDbContext` trong Infrastructure Layer, sử dụng Entity Framework Core để tương tác với cơ sở dữ liệu.
+-   **IFileTextExtractorFactory**: Interface trong Application Layer để lấy đúng trình trích xuất văn bản.
+-   **PdfTextExtractor/TxtTextExtractor**: Triển khai cụ thể của `IFileTextExtractor` trong Infrastructure Layer để trích xuất văn bản từ PDF/TXT.
+-   **ChunkingPolicy**: Domain Service chứa logic làm sạch và chia nhỏ văn bản thành các chunk.
 
 
 ### 🔄 CQRS (Command, Query, Handler)
