@@ -24,8 +24,9 @@ public static class DependencyInjection
         services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
+
         // Configure StorageSettings
-        services.Configure<StorageSettings>(configuration.GetSection("Storage"));
+        services.Configure<StorageSettings>(configuration.GetSection(nameof(StorageSettings)));
         services.AddScoped<IFileStorageFactory, FileStorageFactory>();
         // Register IFileStorage based on configuration
         services.AddTransient(sp =>
@@ -37,18 +38,19 @@ public static class DependencyInjection
 
         // Configure Auth0Config
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
         // Configure Auth0 Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = $"https://{configuration["Authority"]}";
-                options.Audience = configuration["Audience"];
+                options.Authority = $"https://{jwtSettings?.Authority}";
+                options.Audience = jwtSettings?.Audience;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = configuration["Audience"],
+                    ValidAudience = jwtSettings?.Audience,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true
                 };
@@ -84,7 +86,8 @@ public static class DependencyInjection
                             }
                         });
                         return Task.CompletedTask;
-                    }
+                    },
+                    
                 };
             });
 
