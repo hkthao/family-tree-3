@@ -4,11 +4,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const emit = defineEmits(['file-selected']);
+const emit = defineEmits(['file-selected', 'file-cleared']);
+const props = defineProps({
+  clearFile: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 const selectedFile = ref<File | null>(null);
 
@@ -30,4 +36,11 @@ const onFileChange = (event: Event) => {
     emit('file-selected', null);
   }
 };
+
+watch(() => props.clearFile, (newVal) => {
+  if (newVal) {
+    selectedFile.value = null;
+    emit('file-cleared');
+  }
+});
 </script>

@@ -7,7 +7,7 @@
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <ChunkUpload @file-selected="handleFileSelected" />
+                <ChunkUpload @file-selected="handleFileSelected" :clear-file="clearChunkUpload" @file-cleared="handleFileCleared" />
               </v-col>
               <v-col cols="12" md="6">
                 <v-text-field v-model="fileId" :label="$t('chunkUpload.fileIdLabel')"
@@ -69,10 +69,15 @@ const fileId = ref('');
 const familyId = ref('');
 const category = ref('');
 const createdBy = ref('');
+const clearChunkUpload = ref(false);
 
 const handleFileSelected = (file: File) => {
   selectedFile.value = file;
   fileId.value = crypto.randomUUID(); // Generate a new UUID when file is selected
+};
+
+const handleFileCleared = () => {
+  clearChunkUpload.value = false;
 };
 
 const isFormValid = computed(() => {
@@ -104,6 +109,7 @@ const resetForm = () => {
   fileId.value = '';
   familyId.value = '';
   category.value = '';
+  clearChunkUpload.value = true;
   // createdBy.value = ''; // Keep createdBy as it's auto-filled
 };
 
