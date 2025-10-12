@@ -1,11 +1,9 @@
 using backend.Application.Common.Models;
-using MediatR;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Services;
-using System.Text.RegularExpressions;
 
-namespace backend.Application.Files.Commands.ProcessFile;
+namespace backend.Application.AI.Chunk.ProcessFile;
 
 public class ProcessFileCommandHandler : IRequestHandler<ProcessFileCommand, Result<List<TextChunk>>>
 {

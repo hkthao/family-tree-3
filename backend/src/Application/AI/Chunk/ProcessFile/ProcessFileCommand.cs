@@ -1,8 +1,7 @@
 using backend.Application.Common.Models;
-using MediatR;
 using backend.Domain.Entities;
 
-namespace backend.Application.Files.Commands.ProcessFile;
+namespace backend.Application.AI.Chunk.ProcessFile;
 
 public class ProcessFileCommand : IRequest<Result<List<TextChunk>>>
 {

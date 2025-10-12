@@ -14,8 +14,13 @@ namespace backend.Infrastructure.AI.VectorStore
             return Task.CompletedTask;
         }
 
-        public Task<List<TextChunk>> QueryAsync(string queryText, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+        public Task<List<TextChunk>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
         {
+            if (queryEmbedding == null || queryEmbedding.Length == 0)
+            {
+                throw new ArgumentException("Query embedding cannot be empty.");
+            }
+
             // This is a dummy implementation for in-memory store.
             // In a real scenario, this would involve vector similarity search.
             var results = _store.Values.Where(chunk =>

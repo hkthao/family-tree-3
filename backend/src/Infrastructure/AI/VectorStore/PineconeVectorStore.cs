@@ -15,13 +15,11 @@ public class PineconeVectorStore : IVectorStore
     private readonly PineconeClient _pineconeClient;
     private readonly IndexClient _index;
     private readonly string _indexName;
-    private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
 
-    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings, IEmbeddingProviderFactory embeddingProviderFactory)
+    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
     {
         _logger = logger;
         _vectorStoreSettings = vectorStoreSettings.Value;
-        _embeddingProviderFactory = embeddingProviderFactory;
 
         var pineconeSettings = _vectorStoreSettings.Pinecone;
 
@@ -72,21 +70,11 @@ public class PineconeVectorStore : IVectorStore
         }
     }
 
-    public async Task<List<TextChunk>> QueryAsync(string queryText, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    public async Task<List<TextChunk>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(queryText))
+        if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
-            throw new ArgumentException("Query text cannot be empty.");
-        }
-
-        // 1. Generate embedding for the query text
-        var embeddingProvider = _embeddingProviderFactory.GetProvider(_vectorStoreSettings.EmbeddingProviderName); // Assuming EmbeddingProviderName is configured
-        var queryEmbeddingResult = await embeddingProvider.GenerateEmbeddingAsync(queryText, cancellationToken);
-
-        if (!queryEmbeddingResult.IsSuccess)
-        {
-            _logger.LogError("Failed to generate embedding for query: {Error}", queryEmbeddingResult.Error);
-            throw new InvalidOperationException($"Failed to generate embedding for query: {queryEmbeddingResult.Error}");
+            throw new ArgumentException("Query embedding cannot be empty.");
         }
 
         try
@@ -95,7 +83,7 @@ public class PineconeVectorStore : IVectorStore
 
             var queryRequest = new QueryRequest
             {
-                Vector = new ReadOnlyMemory<float>([.. queryEmbeddingResult.Value]),
+                Vector = new ReadOnlyMemory<float>([.. queryEmbedding]),
                 TopK = (uint)topK,
                 IncludeValues = true,
                 IncludeMetadata = true,

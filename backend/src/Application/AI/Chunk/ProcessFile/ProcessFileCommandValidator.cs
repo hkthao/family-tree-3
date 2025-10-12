@@ -1,7 +1,4 @@
-using FluentValidation;
-using System.IO;
-
-namespace backend.Application.Files.Commands.ProcessFile;
+namespace backend.Application.AI.Chunk.ProcessFile;
 
 public class ProcessFileCommandValidator : AbstractValidator<ProcessFileCommand>
 {

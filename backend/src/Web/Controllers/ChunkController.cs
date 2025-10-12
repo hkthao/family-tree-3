@@ -1,4 +1,4 @@
-using backend.Application.Files.Commands.ProcessFile;
+using backend.Application.AI.Chunk.ProcessFile;
 using backend.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
