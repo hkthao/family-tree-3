@@ -4,6 +4,8 @@ using backend.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using Microsoft.AspNetCore.Authentication;
+using backend.Infrastructure.Auth;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -41,6 +43,8 @@ public static class DependencyInjection
 
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
+
+        builder.Services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
         // Add Authentication and Authorization
         // builder.Services.AddAuthentication(options =>

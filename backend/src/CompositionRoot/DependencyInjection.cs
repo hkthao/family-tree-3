@@ -36,19 +36,19 @@ public static class DependencyInjection
         });
 
         // Configure Auth0Config
-        services.Configure<AuthConfig>(configuration.GetSection("Auth"));
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
         // Configure Auth0 Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-               options.Authority = $"https://{configuration["Auth:Authority"]}";
-                options.Audience = configuration["Auth:Audience"];
+                options.Authority = $"https://{configuration["Authority"]}";
+                options.Audience = configuration["Audience"];
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = configuration["Auth:Audience"],
+                    ValidAudience = configuration["Audience"],
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true
                 };
