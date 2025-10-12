@@ -61,9 +61,9 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```bash
     docker-compose -f infra/docker-compose.yml up -d mysql
     ```
-2.  **Cấu hình Backend**: 
+2.  **Cấu hình Backend**:
     *   **Database**: Chỉnh sửa `backend/src/Web/appsettings.Development.json` để đảm bảo `UseInMemoryDatabase` là `false` và chuỗi kết nối `DefaultConnection` trỏ đến `localhost`.
-    *   **Auth0**: Cấu hình Auth0 Domain và Audience trong `backend/src/Web/Properties/launchSettings.json` cho profile `backend.Web`.
+    *   **Xác thực (Authentication)**: Cấu hình `JwtSettings` trong `backend/src/Web/appsettings.Development.json`.
 
     ```json
     // backend/src/Web/appsettings.Development.json
@@ -72,26 +72,23 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
         "DefaultConnection": "Server=localhost;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;"
       },
       "UseInMemoryDatabase": false,
+      "JwtSettings": {
+        "Authority": "YOUR_AUTH0_DOMAIN", // Thay bằng Authority của bạn (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
+        "Audience": "YOUR_AUTH0_AUDIENCE", // Thay bằng Audience của bạn (ví dụ: http://localhost:5000)
+        "Namespace": "https://familytree.com/" // Namespace cho các custom claims
+      },
+      "StorageSettings": {
+        "Provider": "Local",
+        "MaxFileSizeMB": 5,
+        "Local": {
+          "LocalStoragePath": "uploads",
+          "BaseUrl": "http://localhost:8080"
+        },
+        // ... các cấu hình khác cho Cloudinary, S3 nếu có
+      }
       // ... các cấu hình khác
     }
     ```
-
-    ```json
-    // backend/src/Web/Properties/launchSettings.json
-    {
-      "profiles": {
-        "backend.Web": {
-          // ...
-          "environmentVariables": {
-            "ASPNETCORE_ENVIRONMENT": "Development",
-            "Auth0:Domain": "YOUR_AUTH0_DOMAIN", // Thay bằng Auth0 Domain của bạn
-            "Auth0:Audience": "YOUR_AUTH0_AUDIENCE" // Thay bằng Auth0 Audience của bạn
-          }
-        }
-      }
-    }
-    ```
-
 3.  **Chạy backend**: 
     ```bash
     cd backend
@@ -109,26 +106,25 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```bash
     npm install
     ```
-3.  **Cấu hình Frontend**: 
-    *   **Biến môi trường**: Tạo file `.env.development` trong thư mục `frontend` dựa trên `frontend/.env.example`. File này chứa các biến môi trường cho Auth0 và API Base URL.
+3.  **Cấu hình Frontend**:
+    *   **Biến môi trường**: Tạo file `.env.development` trong thư mục `frontend` dựa trên `frontend/.env.example`. File này chứa các biến môi trường cho JWT Authentication và API Base URL.
         ```
         # frontend/.env.example
         VITE_USE_MOCK=false
-        VITE_AUTH0_DOMAIN="YOUR_AUTH0_DOMAIN"
-        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID"
-        VITE_AUTH0_AUDIENCE="YOUR_AUTH0_AUDIENCE"
+        VITE_JWT_AUTHORITY="YOUR_JWT_AUTHORITY" # Authority của JWT (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
+        VITE_JWT_AUDIENCE="YOUR_JWT_AUDIENCE"   # Audience của JWT (ví dụ: http://localhost:5000)
+        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID" # Client ID của ứng dụng Auth0 (nếu sử dụng Auth0)
         VITE_API_BASE_URL="/api"
         ```
         Bạn cần tạo file `frontend/.env.development` và điền các giá trị thực tế của bạn. Ví dụ:
         ```
         # frontend/.env.development
         VITE_USE_MOCK=false
-        VITE_AUTH0_DOMAIN="https://dev-g76tq00gicwdzk3z.us.auth0.com"
+        VITE_JWT_AUTHORITY="https://dev-g76tq00gicwdzk3z.us.auth0.com"
+        VITE_JWT_AUDIENCE="http://localhost:5000"
         VITE_AUTH0_CLIENT_ID="v4jSe5QR4Uj6ddoBBMHNtaDNHwv8UzQN"
-        VITE_AUTH0_AUDIENCE="http://localhost:5000"
         VITE_API_BASE_URL="/api"
-        ```
-    *   **Vite Proxy**: Đảm bảo `frontend/vite.config.ts` được cấu hình đúng để proxy các yêu cầu API đến Backend đang chạy. Ví dụ:
+        ```    *   **Vite Proxy**: Đảm bảo `frontend/vite.config.ts` được cấu hình đúng để proxy các yêu cầu API đến Backend đang chạy. Ví dụ:
 
     ```typescript
     // frontend/vite.config.ts
@@ -176,7 +172,7 @@ docker-compose -f infra/docker-compose.yml up -d
 
 Dự án sử dụng Entity Framework Core Migrations để quản lý schema database. Các lệnh này cần được chạy từ thư mục gốc của project `backend`.
 
-**Lưu ý quan trọng:** Kể từ khi loại bỏ ASP.NET Core Identity, việc quản lý người dùng và vai trò (user/role) không còn được thực hiện qua database cục bộ nữa mà hoàn toàn do Auth0 đảm nhiệm. Database chỉ chứa dữ liệu nghiệp vụ của ứng dụng.
+**Lưu ý quan trọng:** Kể từ khi loại bỏ ASP.NET Core Identity, việc quản lý người dùng và vai trò (user/role) không còn được thực hiện qua database cục bộ nữa mà hoàn toàn do nhà cung cấp JWT (ví dụ: Auth0) đảm nhiệm. Database chỉ chứa dữ liệu nghiệp vụ của ứng dụng.
 
 ### 4.1. Tạo migration mới
 

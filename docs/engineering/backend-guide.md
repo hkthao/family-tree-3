@@ -176,7 +176,7 @@ ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP
 ## 7. Xác thực & Phân quyền
 
 -   **Cơ chế**: Sử dụng **JWT Bearer Token**.
--   **Provider hiện tại**: **Auth0**. Hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách triển khai một `IAuthProvider` mới và sử dụng `ExternalId` để định danh người dùng.
+-   **Provider hiện tại**: Nhà cung cấp JWT (ví dụ: Auth0). Hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` mới.
 -   **Triển khai Auth0Provider**: `backend/src/Infrastructure/Auth/Auth0Provider.cs` là triển khai của `IAuthProvider` sử dụng Auth0 Management API để quản lý người dùng (ví dụ: cập nhật hồ sơ).
 -   **Cấu hình Auth0**: Các thông tin cấu hình Auth0 (Domain, Audience, ClientId, ClientSecret) được đọc từ `appsettings.json`.
 
@@ -193,99 +193,6 @@ ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP
 -   **Luồng JWT**: Client lấy token từ Auth0 và gửi trong header `Authorization` của mỗi request.
 
 Để biết thêm chi tiết về luồng xác thực, cấu hình và các cân nhắc bảo mật, vui lòng tham khảo phần [Xác thực & Phân quyền trong Kiến trúc tổng quan](./architecture.md#6-xác-thực--phân-quyền-authentication--authorization).
-
-### 7.1. Cập nhật Hồ sơ Người dùng (User Profile Update)
-
-Tài liệu này mô tả cách hệ thống xử lý việc cập nhật thông tin hồ sơ người dùng, với kiến trúc linh hoạt cho phép tích hợp nhiều nhà cung cấp xác thực (Auth Provider).
-
-#### Tổng quan
-
-Tính năng cập nhật hồ sơ người dùng cho phép người dùng thay đổi các thông tin cá nhân như tên, ảnh đại diện (avatar URL), và email (tùy thuộc vào cấu hình và quyền hạn). Kiến trúc được thiết kế để dễ dàng mở rộng hoặc thay thế nhà cung cấp xác thực mà không ảnh hưởng đến logic nghiệp vụ cốt lõi.
-
-#### Kiến trúc
-
-Hệ thống sử dụng **Strategy Pattern** để chọn nhà cung cấp xác thực phù hợp dựa trên cấu hình. `IAuthProvider` là interface chung định nghĩa các hoạt động xác thực và quản lý người dùng, trong khi các lớp cụ thể như `Auth0Provider` triển khai interface này cho từng nhà cung cấp.
-
-##### Interface `IAuthProvider`
-
-Interface này được định nghĩa trong `backend/src/Application/Common/Interfaces/IAuthProvider.cs` và bao gồm phương thức `UpdateUserProfileAsync`:
-
-```csharp
-// backend/src/Application/Common/Interfaces/IAuthProvider.cs
-public interface IAuthProvider
-{
-    // ... các phương thức khác ...
-    Task<Result> UpdateUserProfileAsync(string userId, UpdateUserProfileCommand request);
-}
-```
-
--   `userId`: ID của người dùng cần cập nhật (thường là `ExternalId`).
--   `request`: Đối tượng `UpdateUserProfileCommand` chứa các thông tin cần cập nhật.
--   `Result`: Đối tượng `Result` chuẩn của hệ thống, cho biết thao tác thành công hay thất bại.
-
-##### `UpdateUserProfileCommand` DTO
-
-Đối tượng này định nghĩa các trường thông tin có thể được cập nhật, nằm trong `backend/src/Application/Identity/Commands/UpdateUserProfile/UpdateUserProfileCommand.cs`:
-
-```csharp
-// backend/src/Application/Identity/Commands/UpdateUserProfile/UpdateUserProfileCommand.cs
-public class UpdateUserProfileCommand : IRequest<Result>
-{
-    public string Id { get; set; } = null!;
-    public string? Name { get; set; }
-    public string? Avatar { get; set; }
-    public string? Email { get; set; }
-    public Dictionary<string, object>? UserMetadata { get; set; }
-}
-```
-
-##### Triển khai `Auth0Provider`
-
-`Auth0Provider` (trong `backend/src/Infrastructure/Auth/Auth0Provider.cs`) là triển khai thực tế của `IAuthProvider` và tương tác với **Auth0 Management API** để cập nhật hồ sơ người dùng.
-
-#### Các trường được hỗ trợ cập nhật (qua Auth0 Management API):
-
--   `name`: Tên hiển thị của người dùng (ánh xạ tới `FullName` và `NickName` trong Auth0).
--   `avatar`: URL ảnh đại diện (ánh xạ tới `Picture` trong Auth0).
--   `email`: Địa chỉ email (cần kiểm tra quyền và trạng thái xác minh).
--   `user_metadata`: Dữ liệu tùy chỉnh của người dùng.
-
-#### Xử lý lỗi và Bảo mật (trong triển khai thực tế):
-
--   **Rate Limit (HTTP 429)**: Auth0 Management API có giới hạn tần suất gọi. Triển khai thực tế cần có cơ chế retry với exponential backoff.
--   **Token Expiration**: Đảm bảo access token cho Management API luôn hợp lệ.
--   **Unauthorized (401)**: Xử lý khi không có quyền truy cập Management API.
-
-#### Luồng cập nhật Hồ sơ Người dùng
-
-1.  **Frontend gửi yêu cầu**: Frontend gửi một yêu cầu cập nhật hồ sơ người dùng đến Backend API (ví dụ: `PUT /api/UserProfiles/{userId}`).
-2.  **Backend API nhận yêu cầu**: Controller nhận yêu cầu và gửi `UpdateUserProfileCommand` đến MediatR.
-3.  **`UpdateUserProfileCommand`**: Chứa `userId` của người dùng cần cập nhật và `UpdateUserProfileCommand`.
-4.  **`UpdateUserProfileCommandValidator`**: Sử dụng FluentValidation để xác thực dữ liệu đầu vào:
-    -   `Id`: Không được trống.
-    -   `Name`: Không quá 250 ký tự.
-    -   `Email`: Phải là định dạng email hợp lệ.
-    -   `Avatar`: Phải là URL hợp lệ.
-5.  **`UpdateUserProfileCommandHandler`**: Xử lý logic cập nhật:
-    -   **Kiểm tra quyền**: So sánh `userId` trong URL với `command.Id` trong body để đảm bảo người dùng chỉ cập nhật hồ sơ của chính họ. (Kiểm tra này được thực hiện trong Controller).
-    -   Gọi `_authProvider.UpdateUserProfileAsync(userId, request)` để thực hiện cập nhật thông qua nhà cung cấp xác thực đã cấu hình.
-    -   Cập nhật các trường `Name`, `Email`, `Avatar` trong thực thể `UserProfile` cục bộ.
-    -   Trả về `Result` thành công hoặc thất bại.
-
-#### Bảo mật và Kiểm soát Truy cập
-
--   **Chỉ cập nhật hồ sơ của chính mình**: `UserProfilesController` thực hiện kiểm tra nghiêm ngặt để đảm bảo `userId` trong URL khớp với `command.Id` trong request body, ngăn người dùng cập nhật hồ sơ của người khác.
--   **Giới hạn tần suất**: (Chưa triển khai trong mock, nhưng cần có trong triển khai thực tế) Có thể sử dụng middleware hoặc dịch vụ riêng để giới hạn số lần cập nhật trong một khoảng thời gian nhất định.
--   **Xác minh Email**: (Chưa triển khai trong mock) Trong triển khai thực tế, việc thay đổi email có thể yêu cầu xác minh lại email để đảm bảo bảo mật.
--   **Xác thực đầu vào**: `UpdateUserProfileCommandValidator` đảm bảo dữ liệu đầu vào hợp lệ trước khi xử lý.
-
-#### Mở rộng với các Nhà cung cấp Xác thực khác
-
-Để thêm một nhà cung cấp xác thực mới (ví dụ: Firebase, Azure AD):
-
-1.  Tạo một lớp mới (ví dụ: `FirebaseProvider.cs`) triển khai interface `IAuthProvider`.
-2.  Triển khai logic tương tác với API của nhà cung cấp đó trong lớp mới.
-3.  Thêm một `case` mới vào `switch` statement trong `DependencyInjection.cs` để đăng ký `FirebaseProvider` khi `AuthProvider` trong cấu hình là `Firebase`.
 
 #### Các lỗi Phổ biến và Mẫu Phản hồi
 

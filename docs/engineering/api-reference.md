@@ -40,6 +40,20 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
     Authorization: Bearer <YOUR_JWT_TOKEN>
     ```
 
+### 2.1. Cấu hình JWT và Xác thực Backend
+
+Backend được cấu hình để xác thực JWT dựa trên các thiết lập trong `JwtSettings` (được đọc từ `appsettings.json` hoặc `appsettings.Development.json`). Các thông số quan trọng bao gồm `Authority` (URL của nhà phát hành token) và `Audience` (đối tượng mà token được cấp cho).
+
+Khi Backend nhận được một JWT, nó sẽ thực hiện các bước xác thực sau:
+
+1.  **Xác minh chữ ký**: Đảm bảo token không bị giả mạo.
+2.  **Kiểm tra thời hạn**: Đảm bảo token chưa hết hạn.
+3.  **Kiểm tra `Issuer` (Authority)**: Đảm bảo token được phát hành bởi `Authority` đã cấu hình.
+4.  **Kiểm tra `Audience`**: Đảm bảo token được cấp cho `Audience` đã cấu hình.
+5.  **Xử lý Claims**: Sau khi xác thực thành công, các claims trong token sẽ được xử lý và ánh xạ thành `ClaimsPrincipal` của người dùng trong ứng dụng.
+
+Để biết thêm chi tiết về cấu hình Backend, vui lòng tham khảo [Hướng dẫn Phát triển Backend](./backend-guide.md#7-xác-thực--phân-quyền).
+
 ### 🔄 Áp dụng xác thực trên Endpoint
 
 *(Updated to match current refactor: Authentication enforcement)*

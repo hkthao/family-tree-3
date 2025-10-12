@@ -41,10 +41,10 @@
     -   Tạo project `CompositionRoot` để thiết lập Dependency Injection tập trung, loại bỏ sự phụ thuộc trực tiếp của Web Layer vào Infrastructure Layer.
     -   Loại bỏ sự phụ thuộc của Domain Layer vào `MediatR`.
     -   Tái thêm các dependency `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` vào Application Layer (giải pháp thực dụng).
--   **Tách biệt UserProfile khỏi Auth0**: 
+-   **Tách biệt UserProfile khỏi nhà cung cấp xác thực**: 
     -   Đổi tên `Auth0UserId` thành `ExternalId` trong entity `UserProfile` và DTO ở Backend.
     -   Cập nhật các query, handler và controller liên quan để sử dụng `ExternalId` và endpoint `byExternalId`.
-    -   Cập nhật các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) ở Frontend để sử dụng `externalId`.
+    -   Cập nhật các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) ở Frontend để sử dụng `externalId` nhằm tách biệt khỏi nhà cung cấp xác thực cụ thể (ví dụ: Auth0).
 -   **Thông báo Snackbar**: 
     -   Triển khai thông báo snackbar cho các thao tác lưu tùy chọn người dùng thành công/thất bại trong `PreferencesSettings.vue`.
     -   Điều chỉnh vị trí snackbar hiển thị ở giữa dưới cùng.

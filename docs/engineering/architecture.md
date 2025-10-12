@@ -277,7 +277,7 @@ export default defineConfig({
 
 ## 6. Xác thực & Phân quyền (Authentication & Authorization)
 
-Hệ thống sử dụng **Auth0** làm nhà cung cấp xác thực và quản lý người dùng duy nhất, kết hợp với **JWT Bearer Token** để bảo vệ các API endpoint.
+Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cung cấp xác thực và quản lý người dùng, kết hợp với **JWT Bearer Token** để bảo vệ các API endpoint.
 
 #### Luồng hoạt động
 
@@ -286,89 +286,37 @@ Hệ thống sử dụng **Auth0** làm nhà cung cấp xác thực và quản l
 3.  **Backend xác thực Token:** Backend nhận Access Token, giải mã và xác thực chữ ký của token, kiểm tra các claims (thông tin người dùng, quyền hạn) và thời hạn hiệu lực của token dựa trên cấu hình Auth0.
 4.  **Phân quyền:** Sau khi xác thực thành công, Backend sử dụng thông tin từ Access Token (đặc biệt là các custom claim về `roles` từ Auth0 Action) để kiểm tra quyền hạn của người dùng đối với tài nguyên hoặc hành động được yêu cầu.
 
-#### Cấu hình Auth0
+#### Cấu hình JWT
 
 *   **Cấu hình Backend**: 
-    *   Backend đọc cấu hình Auth0 từ các biến môi trường `Auth0:Domain` và `Auth0:Audience`.
-    *   **Cấu hình cục bộ (Local Development)**: Đối với môi trường phát triển cục bộ, bạn có thể đặt các biến này trong `backend/src/Web/Properties/launchSettings.json`.
+    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong `appsettings.json` (hoặc `appsettings.Development.json` cho môi trường phát triển).
+    *   **Cấu hình cục bộ (Local Development)**: Đối với môi trường phát triển cục bộ, bạn có thể đặt các biến này trong `backend/src/Web/appsettings.Development.json`.
         ```json
-        // backend/src/Web/Properties/launchSettings.json
+        // backend/src/Web/appsettings.Development.json
         {
-          "profiles": {
-            "backend.Web": {
-              // ...
-              "environmentVariables": {
-                "ASPNETCORE_ENVIRONMENT": "Development",
-                "Auth0:Domain": "YOUR_AUTH0_DOMAIN", // Thay bằng Auth0 Domain của bạn
-                "Auth0:Audience": "YOUR_AUTH0_AUDIENCE" // Thay bằng Auth0 Audience của bạn
-              }
-            }
+          "JwtSettings": {
+            "Authority": "YOUR_JWT_AUTHORITY", // Authority của nhà cung cấp JWT (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
+            "Audience": "YOUR_JWT_AUDIENCE",   // Audience của ứng dụng (ví dụ: http://localhost:5000)
+            "Namespace": "https://familytree.com/" // Namespace cho các custom claims (nếu có)
           }
         }
         ```
-    *   **Cấu hình trong `CompositionRoot/DependencyInjection.cs`**: 
-        ```csharp
-        // Configure Auth0 Authentication
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.Authority = configuration["Auth0:Domain"];
-                options.Audience = configuration["Auth0:Audience"];
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidAudience = configuration["Auth0:Audience"],
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = context =>
-                    {
-                        var userProfileSyncService = context.HttpContext.RequestServices.GetRequiredService<IUserProfileSyncService>();
-                        var loggerFactory = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>();
-                        var logger = loggerFactory.CreateLogger("Auth0Config");
-
-                        _ = Task.Run(async () =>
-                        {
-                            using (var scope = context.HttpContext.RequestServices.CreateScope())
-                            {
-                                var scopedUserProfileSyncService = scope.ServiceProvider.GetRequiredService<IUserProfileSyncService>();
-                                var scopedLogger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Auth0Config");
-                                var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
-
-                                try
-                                {
-                                    var newUserCreated = await scopedUserProfileSyncService.SyncUserProfileAsync(context.Principal!);
-                                }
-                                catch (Exception ex)
-                                {
-                                    scopedLogger.LogError(ex, "Error syncing user profile for external ID: {ExternalId}.", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-                                }
-                            }
-                        });
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-        ```
 *   **Cấu hình Frontend**: 
-    *   Frontend đọc cấu hình Auth0 từ các biến môi trường trong file `.env.development` (hoặc `.env.production`).
+    *   Frontend đọc cấu hình JWT từ các biến môi trường trong file `.env.development` (hoặc `.env.production`).
     *   **Biến môi trường**: 
         ```
         # frontend/.env.development
-        VITE_AUTH0_DOMAIN="YOUR_AUTH0_DOMAIN"
-        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID"
-        VITE_AUTH0_AUDIENCE="YOUR_AUTH0_AUDIENCE"
+        VITE_JWT_AUTHORITY="YOUR_JWT_AUTHORITY"
+        VITE_JWT_AUDIENCE="YOUR_JWT_AUDIENCE"
+        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID" # Chỉ cần nếu sử dụng Auth0
         ```
-*   **Cấu hình Auth0 Dashboard**: 
-    *   **API**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `YOUR_AUTH0_AUDIENCE` (ví dụ: `http://localhost:5000`).
+*   **Cấu hình nhà cung cấp JWT (ví dụ: Auth0 Dashboard)**: 
+    *   **API**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `YOUR_JWT_AUDIENCE` (ví dụ: `http://localhost:5000`).
     *   **Actions**: Cấu hình một Auth0 Action để thêm `roles` vào JWT token dưới dạng custom claim (ví dụ: `https://familytree.com/roles`).
 
 #### Khả năng thay thế
 
-Kiến trúc cho phép thay thế Auth0 bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật triển khai `IAuthProvider` và cấu hình liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán.
+Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 

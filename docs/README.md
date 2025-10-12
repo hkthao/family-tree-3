@@ -27,7 +27,7 @@ Chào mừng bạn đến với tài liệu của dự án Cây Gia Phả. Tài 
 
 ## Các thay đổi gần đây
 
--   **Tích hợp Auth0 thực tế:** Thay thế triển khai Auth0 giả lập bằng tích hợp thực tế với Auth0 Management API để quản lý hồ sơ người dùng.
+-   **Cấu hình xác thực linh hoạt**: Chuyển đổi từ cấu hình Auth0 cứng sang sử dụng `JwtSettings` chung, cho phép dễ dàng thay thế nhà cung cấp JWT (ví dụ: Auth0, Keycloak).
 -   **Quản lý Hồ sơ Người dùng tập trung:** Tái cấu trúc frontend để quản lý thông tin hồ sơ người dùng tập trung trong `userProfileStore`, giảm sự phụ thuộc của các component UI vào `authStore`.
 -   **API Hồ sơ Người dùng hiện tại:** Thêm endpoint backend mới `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại một cách an toàn.
 -   **Trường Avatar cho Hồ sơ Người dùng:** Bổ sung trường `Avatar` vào thực thể `UserProfile` và cập nhật các chức năng liên quan ở cả backend và frontend.

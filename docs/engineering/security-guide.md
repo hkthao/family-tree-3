@@ -79,11 +79,11 @@ Việc lưu trữ JWT một cách an toàn là rất quan trọng để ngăn ch
     *   Cookie cũng nên được đánh dấu `Secure` (chỉ gửi qua HTTPS) và `SameSite=Lax` hoặc `Strict` để chống CSRF.
     *   Refresh Token có thời gian sống dài hơn Access Token và được sử dụng để lấy Access Token mới khi Access Token hết hạn.
 
-### 2.3. Tích hợp Auth0 (Provider-agnostic)
+### 2.3. Tích hợp Nhà cung cấp JWT (Provider-agnostic)
 
 Hệ thống được thiết kế với một lớp trừu tượng cho dịch vụ xác thực, cho phép dễ dàng thay đổi nhà cung cấp (Identity Provider - IdP) như Auth0, Keycloak, Firebase Auth mà không ảnh hưởng đến logic nghiệp vụ cốt lõi của Backend.
 
-*   **Backend**: Chỉ tương tác với các interface xác thực chung (ví dụ: `IAuthProvider`). Backend sử dụng `ExternalId` (ID người dùng từ nhà cung cấp xác thực) để liên kết với `UserProfile` nội bộ.
+*   **Backend**: Backend đọc cấu hình JWT từ `JwtSettings` và sử dụng `IClaimsTransformation` để xử lý các claims từ token. Backend sử dụng `ExternalId` (ID người dùng từ nhà cung cấp xác thực) để liên kết với `UserProfile` nội bộ.
 *   **Frontend**: Sử dụng SDK của nhà cung cấp (ví dụ: Auth0 SDK) để quản lý luồng đăng nhập/đăng ký và lấy token. Frontend sẽ gửi token này đến Backend.
 
 **Lợi ích**: Tăng tính linh hoạt, giảm sự phụ thuộc vào một nhà cung cấp cụ thể, giúp dễ dàng chuyển đổi hoặc hỗ trợ nhiều IdP trong tương lai.
@@ -96,21 +96,21 @@ Luồng đăng nhập và đăng xuất được thiết kế để đảm bảo
 sequenceDiagram
     participant User
     participant Frontend
-    participant Auth0 (hoặc IdP khác)
+    participant IdP (Nhà cung cấp JWT)
     participant Backend
 
     User->>Frontend: Yêu cầu Đăng nhập (ví dụ: click nút Login)
-    Frontend->>Auth0: Chuyển hướng đến trang Đăng nhập của Auth0 (hoặc hiển thị widget)
-    Auth0->>User: Hiển thị form Đăng nhập/Đăng ký
-    User->>Auth0: Nhập thông tin đăng nhập (email/password, social login)
-    Auth0-->>Frontend: Trả về JWT (Access Token, ID Token, Refresh Token) sau khi xác thực thành công
+    Frontend->>IdP: Chuyển hướng đến trang Đăng nhập của IdP (hoặc hiển thị widget)
+    IdP->>User: Hiển thị form Đăng nhập/Đăng ký
+    User->>IdP: Nhập thông tin đăng nhập (email/password, social login)
+    IdP-->>Frontend: Trả về JWT (Access Token, ID Token, Refresh Token) sau khi xác thực thành công
     Frontend->>Frontend: Lưu trữ Token an toàn (Access Token trong bộ nhớ, Refresh Token trong HttpOnly Cookie)
     Frontend->>Backend: Gửi Access Token trong Header Authorization cho các yêu cầu API
     Backend->>Backend: Xác thực Access Token (kiểm tra chữ ký, thời hạn, claims)
     Backend-->>Frontend: Phản hồi thành công (dữ liệu người dùng, v.v.)
 
     User->>Frontend: Yêu cầu Đăng xuất (ví dụ: click nút Logout)
-    Frontend->>Auth0: Xóa session tại IdP (nếu có, để đăng xuất hoàn toàn)
+    Frontend->>IdP: Xóa session tại IdP (nếu có, để đăng xuất hoàn toàn)
     Frontend->>Frontend: Xóa tất cả Token đã lưu (Access Token, Refresh Token)
     Frontend-->>User: Chuyển hướng về trang chủ hoặc trang đăng nhập
 ```
