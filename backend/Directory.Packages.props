@@ -7,6 +7,7 @@
     <MicrosoftExtensionsVersion>8.0.0</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="4.5.0" />
     <PackageVersion Include="Ardalis.Specification" Version="9.3.1" />
     <PackageVersion Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />

@@ -30,7 +30,8 @@
     <PackageReference Include="Pinecone.Client" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
     <PackageReference Include="AWSSDK.SecurityToken" />
-    <PackageReference Include="Qdrant.Client" />
+    <PackageReference Include="UglyToad.PdfPig" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
 
   </ItemGroup>
 

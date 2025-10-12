@@ -76,6 +76,10 @@ public static class DependencyInjection
         services.AddTransient<PineconeVectorStore>();
         services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
 
+        services.AddTransient<PdfTextExtractor>();
+        services.AddTransient<TxtTextExtractor>();
+        services.AddScoped<Application.Common.Interfaces.IFileTextExtractorFactory, Services.FileTextExtractorFactory>();
+
         return services;
     }
 }
