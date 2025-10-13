@@ -1,11 +1,20 @@
 <template>
-  <v-file-input v-model="selectedFile" :label="$t('chunkUpload.fileInputLabel')" accept=".pdf,.txt,.md"
-    prepend-icon="mdi-paperclip" show-size counter :rules="fileRules" @change="onFileChange"></v-file-input>
+  <VFileUpload
+    v-model="selectedFile"
+    :label="$t('chunkUpload.fileInputLabel')"
+    :accept="acceptTypes"
+    prepend-icon="mdi-paperclip"
+    show-size
+    counter
+    :rules="fileRules"
+    @update:modelValue="onFileChange"
+  />
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { VFileUpload } from 'vuetify/labs/VFileUpload';
 
 const { t } = useI18n();
 const emit = defineEmits(['file-selected', 'file-cleared']);
@@ -16,11 +25,14 @@ const props = defineProps({
   },
 });
 
-const selectedFile = ref<File | null>(null);
+const selectedFile = ref<File | undefined>(undefined);
+
+const acceptTypes = computed(() => '.pdf,.txt,.md');
 
 const fileRules = [
-  (value: File) => !!value || t('chunkUpload.fileRequired'),
-  (value: File) => {
+  (value: File | undefined) => !!value || t('chunkUpload.fileRequired'),
+  (value: File | undefined) => {
+    if (!value) return t('chunkUpload.fileRequired');
     const allowedTypes = ['application/pdf', 'text/plain', 'text/markdown'];
     const allowedExtensions = ['.pdf', '.txt', '.md'];
     const fileExtension = value?.name ? '.' + value.name.split('.').pop()?.toLowerCase() : '';
@@ -28,20 +40,14 @@ const fileRules = [
   },
 ];
 
-const onFileChange = (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files.length > 0) {
-    selectedFile.value = input.files[0];
-    emit('file-selected', selectedFile.value);
-  } else {
-    selectedFile.value = null;
-    emit('file-selected', null);
-  }
+const onFileChange = (files: File[]) => {
+  selectedFile.value = files.length > 0 ? files[0] : undefined;
+  emit('file-selected', selectedFile.value);
 };
 
 watch(() => props.clearFile, (newVal) => {
   if (newVal) {
-    selectedFile.value = null;
+    selectedFile.value = undefined;
     emit('file-cleared');
   }
 });
