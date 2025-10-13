@@ -70,11 +70,10 @@ public class QdrantVectorStore : IVectorStore
         {
             var points = new List<PointStruct>
             {
-                new PointStruct
-                {
+                new() {
                     Id = new PointId { Uuid = chunk.Id },
                     Vectors = new Vectors {
-                        Vector = new Qdrant.Client.Grpc.Vector { Data = { chunk.Embedding.Select(e => (float)e) } }
+                        Vector = new Vector { Data = { chunk.Embedding.Select(e => (float)e) } }
                     },
                     Payload = {
                         { "content", chunk.Content },
@@ -127,6 +126,7 @@ public class QdrantVectorStore : IVectorStore
                     Id = foundPoint.Id.Uuid,
                     Content = payload.TryGetValue("content", out var contentValue) ? contentValue.StringValue ?? string.Empty : string.Empty,
                     Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (float)e).ToArray() ?? [],
+                    Score = foundPoint.Score,
                     Metadata = payload.ToDictionary(
                         p => p.Key,
                         p => p.Value.StringValue ?? string.Empty

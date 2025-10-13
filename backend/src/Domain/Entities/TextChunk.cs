@@ -6,5 +6,6 @@ namespace backend.Domain.Entities
         public string Content { get; set; } = null!;
         public Dictionary<string, string> Metadata { get; set; } = new Dictionary<string, string>();
         public float[]? Embedding { get; set; }
+        public float Score { get; set; }
     }
 }

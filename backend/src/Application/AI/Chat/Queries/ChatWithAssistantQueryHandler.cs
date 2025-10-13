@@ -39,7 +39,6 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
         try
         {
             string finalPromptContent;
-            bool isFallback = false;
 
             // Define the system prompt
             var systemPrompt = new ChatMessage
@@ -64,14 +63,14 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
 
             // 2. Search in vector store
             var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
-            var searchResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, new Dictionary<string, string>(), cancellationToken);
+            var silimarityResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, [], cancellationToken);
+            var searchResults = silimarityResults.Where(s=>s.Score > 0.75).ToList();
 
             // 3. Check if relevant context exists
             if (searchResults == null || searchResults.Count == 0)
             {
                 _logger.LogInformation("No relevant context found for user message: {UserMessage}. Using fallback prompt.", request.UserMessage);
                 finalPromptContent = "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu. Bạn có câu hỏi nào khác về phần mềm không?"; // Fallback for no context
-                isFallback = true;
             }
             else
             {
@@ -95,7 +94,7 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             {
                 Response = responseContent,
                 SessionId = request.SessionId,
-                Model = isFallback ? "Fallback" : _chatSettings.Provider.ToString(),
+                Model = _chatSettings.Provider.ToString(),
                 CreatedAt = DateTime.UtcNow
             };
             return Result<ChatResponse>.Success(chatResponse);

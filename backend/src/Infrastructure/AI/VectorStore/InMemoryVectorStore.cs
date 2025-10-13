@@ -35,6 +35,13 @@ namespace backend.Infrastructure.AI.VectorStore
                     }
                 }
                 return matches;
+            }).Select(chunk => new TextChunk
+            {
+                Id = chunk.Id,
+                Content = chunk.Content,
+                Metadata = chunk.Metadata,
+                Embedding = chunk.Embedding,
+                Score = 1.0f // Dummy score for in-memory store
             }).Take(topK).ToList();
 
             return Task.FromResult(results);

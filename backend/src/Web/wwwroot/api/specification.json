@@ -2323,6 +2323,10 @@
               "type": "number",
               "format": "float"
             }
+          },
+          "score": {
+            "type": "number",
+            "format": "float"
           }
         }
       },

@@ -104,8 +104,9 @@ public class PineconeVectorStore : IVectorStore
                 Id = m.Id,
                 Content = m.Metadata?.FirstOrDefault(md => md.Key == "content").Value?.ToString() ?? string.Empty, // Assuming content is stored in metadata
                 Embedding = m.Values.HasValue ? m.Values.Value.ToArray() : [],
+                Score = m.Score ?? 0,
                 Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>()
-            }).ToList() ?? new List<TextChunk>();
+            }).ToList() ?? [];
 
             _logger.LogInformation("Successfully queried Pinecone index {IndexName} with TopK {TopK}. Found {Count} matches.", _indexName, topK, results.Count);
             return results;
