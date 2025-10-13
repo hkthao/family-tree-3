@@ -190,6 +190,7 @@ onMounted(() => {
 }
 
 .message-content {
-  white-space: pre-wrap; /* Preserve whitespace and line breaks */
+  white-space: pre-wrap;
+  /* Preserve whitespace and line breaks */
 }
 </style>

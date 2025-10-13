@@ -37,7 +37,8 @@ public class LocalChatProvider : IChatProvider
             {
                 model = _chatSettings.Local.Model,
                 messages,
-                stream = false
+                stream = false,
+                max_tokens = 300
             };
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, System.Text.Encoding.UTF8, "application/json");
