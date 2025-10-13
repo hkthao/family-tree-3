@@ -43,9 +43,7 @@ import { useI18n } from 'vue-i18n';
 import { useChunkStore } from '@/stores/chunk.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useNotificationStore } from '@/stores/notification.store';
-import ChunkUpload from '@/components/ChunkUpload.vue';
-import ChunkTable from '@/components/ChunkTable.vue';
-import ChunkMetadataForm from '@/components/ChunkMetadataForm.vue';
+import { ChunkUpload, ChunkTable, ChunkMetadataForm } from '@/components/chunks';
 
 const chunkStore = useChunkStore();
 const authStore = useAuthStore();
