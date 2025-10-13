@@ -18,6 +18,7 @@ namespace backend.Infrastructure.AI.TextExtractors
             {
                 ".pdf" => _serviceProvider.GetRequiredService<PdfTextExtractor>(),
                 ".txt" => _serviceProvider.GetRequiredService<TxtTextExtractor>(),
+                ".md" => _serviceProvider.GetRequiredService<MdTextExtractor>(),
                 _ => throw new ArgumentException("Unsupported file type.")
             };
         }

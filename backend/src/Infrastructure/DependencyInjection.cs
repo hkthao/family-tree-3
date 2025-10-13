@@ -80,6 +80,7 @@ public static class DependencyInjection
 
         services.AddTransient<PdfTextExtractor>();
         services.AddTransient<TxtTextExtractor>();
+        services.AddTransient<MdTextExtractor>();
 
         return services;
     }
