@@ -9,20 +9,34 @@
         :hide-details="true"></v-text-field>
     </v-col>
     <v-col cols="12" md="6">
-      <v-text-field v-model="internalCategory" :label="$t('chunkUpload.categoryLabel')"
-        :rules="[v => !!v || $t('chunkUpload.categoryRequired')]" :hide-details="true" clearable>
-        <v-menu activator="parent" :close-on-content-click="false" :open-on-click="false" :open-on-focus="false"
-          :open-on-hover="false" v-model="showSuggestions">
+      <v-text-field
+        v-model="internalCategory"
+        :label="$t('chunkUpload.categoryLabel')"
+        :rules="[v => !!v || $t('chunkUpload.categoryRequired')]"
+        :hide-details="true"
+        clearable
+      >
+        <v-menu
+          activator="parent"
+          :close-on-content-click="true"
+          v-model="showSuggestions"
+        >
           <v-list v-if="filteredCategories.length > 0">
-            <v-list-item v-for="(category, index) in filteredCategories" :key="index" @click="selectCategory(category)">
+            <v-list-item
+              v-for="(category, index) in filteredCategories"
+              :key="index"
+              @click="selectCategory(category)"
+            >
               <v-list-item-title>{{ category }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
       </v-text-field>
-    </v-col> <v-col cols="12" md="6">
+    </v-col>
+    <v-col cols="12" md="6">
       <v-text-field v-model="internalCreatedBy" :label="$t('chunkUpload.createdByLabel')" :readonly="true"
-        :hide-details="true" :rules="[v => !!v || $t('chunkUpload.createdByRequired')]" required></v-text-field>
+        :hide-details="true" :rules="[v => !!v || $t('chunkUpload.createdByRequired')]"
+        required></v-text-field>
     </v-col>
   </v-row>
 </template>
@@ -80,20 +94,28 @@ const selectCategory = (category: string) => {
 
 watch(() => props.fileId, (newVal) => {
   internalFileId.value = newVal;
-  emit('update:fileId', newVal);
-
 });
 watch(() => props.familyId, (newVal) => {
   internalFamilyId.value = newVal;
-  emit('update:familyId', newVal);
 });
 watch(() => props.category, (newVal) => {
   internalCategory.value = newVal;
-  emit('update:category', newVal);
-
 });
 watch(() => props.createdBy, (newVal) => {
   internalCreatedBy.value = newVal;
+});
+
+watch(internalFileId, (newVal) => {
+  emit('update:fileId', newVal);
+});
+watch(internalFamilyId, (newVal) => {
+  emit('update:familyId', newVal);
+});
+watch(internalCategory, (newVal) => {
+  emit('update:category', newVal);
+  showSuggestions.value = !!newVal && filteredCategories.value.length > 0;
+});
+watch(internalCreatedBy, (newVal) => {
   emit('update:createdBy', newVal);
 });
 

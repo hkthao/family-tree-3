@@ -1,32 +1,15 @@
 <template>
-  <VFileUpload
-    v-model="selectedFile"
-    :label="$t('chunkUpload.fileInputLabel')"
-    :accept="acceptTypes"
-    prepend-icon="mdi-paperclip"
-    density="compact"
-    show-size
-    counter
-    :rules="fileRules"
-    @update:modelValue="onFileChange"
-  />
+  <v-file-upload :label="$t('chunkUpload.fileInputLabel')" :accept="acceptTypes" density="compact" :rules="fileRules"
+    @update:modelValue="onFileChange" clearable />
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { VFileUpload } from 'vuetify/labs/VFileUpload';
 
 const { t } = useI18n();
 const emit = defineEmits(['file-selected', 'file-cleared']);
-const props = defineProps({
-  clearFile: {
-    type: Boolean,
-    default: false,
-  },
-});
 
-const selectedFile = ref<File | undefined>(undefined);
 
 const acceptTypes = computed(() => '.pdf,.txt,.md');
 
@@ -41,15 +24,8 @@ const fileRules = [
   },
 ];
 
-const onFileChange = (files: File[]) => {
-  selectedFile.value = files.length > 0 ? files[0] : undefined;
-  emit('file-selected', selectedFile.value);
+const onFileChange = (file: File[]) => {
+  emit('file-selected', file);
 };
 
-watch(() => props.clearFile, (newVal) => {
-  if (newVal) {
-    selectedFile.value = undefined;
-    emit('file-cleared');
-  }
-});
 </script>

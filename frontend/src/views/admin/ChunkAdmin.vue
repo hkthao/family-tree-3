@@ -7,16 +7,11 @@
           <v-card-text>
             <v-row>
               <v-col cols="12">
-                <ChunkUpload @file-selected="handleFileSelected" :clear-file="clearChunkUpload" @file-cleared="handleFileCleared" />
+                <ChunkUpload @file-selected="handleFileSelected" />
               </v-col>
               <v-col cols="12">
-                <ChunkMetadataForm
-                  v-model:fileId="fileId"
-                  v-model:familyId="familyId"
-                  v-model:category="category"
-                  v-model:createdBy="createdBy"
-                  ref="chunkMetadataFormRef"
-                />
+                <ChunkMetadataForm v-model:fileId="fileId" v-model:familyId="familyId" v-model:category="category"
+                  v-model:createdBy="createdBy" ref="chunkMetadataFormRef" />
               </v-col>
               <v-col cols="12">
                 <v-btn class="mr-2" color="primary" :disabled="!isFormValid || chunkStore.loading" @click="upload">
@@ -62,17 +57,12 @@ const fileId = ref('');
 const familyId = ref('');
 const category = ref('');
 const createdBy = ref('');
-const clearChunkUpload = ref(false);
 
 const chunkMetadataFormRef = ref<InstanceType<typeof ChunkMetadataForm> | null>(null);
 
 const handleFileSelected = (file: File) => {
   selectedFile.value = file;
   fileId.value = crypto.randomUUID(); // Generate a new UUID when file is selected
-};
-
-const handleFileCleared = () => {
-  clearChunkUpload.value = false;
 };
 
 const isFormValid = computed(() => {
@@ -102,8 +92,6 @@ const resetForm = () => {
   fileId.value = '';
   familyId.value = '';
   category.value = '';
-  clearChunkUpload.value = true;
-  // createdBy.value = ''; // Keep createdBy as it's auto-filled
 };
 
 const handleChunkApprovalChange = (chunkId: string, approved: boolean) => {
