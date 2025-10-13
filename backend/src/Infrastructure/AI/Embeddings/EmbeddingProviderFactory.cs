@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using backend.Domain.Enums;
 
 namespace backend.Infrastructure.AI.Embeddings
 {
@@ -12,14 +13,14 @@ namespace backend.Infrastructure.AI.Embeddings
             _serviceProvider = serviceProvider;
         }
 
-        public IEmbeddingProvider GetProvider(string providerName)
+        public IEmbeddingProvider GetProvider(EmbeddingAIProvider provider)
         {
-            return providerName.ToLowerInvariant() switch
+            return provider switch
             {
-                "openai" => _serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
-                "cohere" => _serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
-                "local" => _serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
-                _ => throw new ArgumentException($"Unsupported embedding provider: {providerName}")
+                EmbeddingAIProvider.OpenAI => _serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
+                EmbeddingAIProvider.Cohere => _serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
+                EmbeddingAIProvider.Local => _serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
+                _ => throw new ArgumentException($"Unsupported embedding provider: {provider}")
             };
         }
     }
