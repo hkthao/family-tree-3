@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserProfileCommand>

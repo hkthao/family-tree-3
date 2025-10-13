@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Members.Commands.GenerateBiography;
 
 public class GenerateBiographyCommandValidator : AbstractValidator<GenerateBiographyCommand>

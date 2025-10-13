@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Members.Commands.DeleteMember;
 
 public class DeleteMemberCommandValidator : AbstractValidator<DeleteMemberCommand>

@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Files.DeleteFile;
 
 public class DeleteFileCommandValidator : AbstractValidator<DeleteFileCommand>

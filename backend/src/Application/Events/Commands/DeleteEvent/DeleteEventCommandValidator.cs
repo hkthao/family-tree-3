@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Events.Commands.DeleteEvent;
 
 public class DeleteEventCommandValidator : AbstractValidator<DeleteEventCommand>

@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Events.Commands.CreateEvent;
 
 public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>

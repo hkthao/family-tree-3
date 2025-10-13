@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Domain.Enums;
-
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
 public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelationshipCommand>

@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Application.Common.Interfaces;
-
 namespace backend.Application.AI.Commands.EmbedChunks;
 
 public class EmbedChunksCommandValidator : AbstractValidator<EmbedChunksCommand>

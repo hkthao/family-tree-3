@@ -31,7 +31,7 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
         IEmbeddingProvider embeddingProvider;
         try
         {
-            embeddingProvider = _embeddingProviderFactory.GetProvider(_embeddingSettings.Provider.ToString());
+            embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(_embeddingSettings.Provider));
         }
         catch (ArgumentException ex)
         {

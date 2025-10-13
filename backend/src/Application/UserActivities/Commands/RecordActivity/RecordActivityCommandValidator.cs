@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Domain.Enums;
-
 namespace backend.Application.UserActivities.Commands.RecordActivity;
 
 public class RecordActivityCommandValidator : AbstractValidator<RecordActivityCommand>

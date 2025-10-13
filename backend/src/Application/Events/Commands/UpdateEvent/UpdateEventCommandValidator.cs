@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Application.Events.Commands.CreateEvent;
-
 namespace backend.Application.Events.Commands.UpdateEvent;
 
 public class UpdateEventCommandValidator : AbstractValidator<UpdateEventCommand>

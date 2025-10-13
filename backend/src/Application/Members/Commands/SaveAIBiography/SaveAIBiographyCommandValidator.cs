@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Domain.Enums;
-
 namespace backend.Application.Members.Commands.SaveAIBiography;
 
 public class SaveAIBiographyCommandValidator : AbstractValidator<SaveAIBiographyCommand>

@@ -1,6 +1,3 @@
-using FluentValidation;
-using System.Security.Claims;
-
 namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 
 public class SyncUserProfileCommandValidator : AbstractValidator<SyncUserProfileCommand>

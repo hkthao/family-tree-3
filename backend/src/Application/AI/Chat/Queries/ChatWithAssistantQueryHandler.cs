@@ -2,7 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Application.AI.VectorStore;
-using backend.Infrastructure.AI.Embeddings;
 
 namespace backend.Application.AI.Chat.Queries;
 
@@ -39,12 +38,10 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             var embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(_embeddingSettings.Provider));
             var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(request.UserMessage, cancellationToken);
 
-            if (embeddingResult.IsFailure)
-            {
+            if (!embeddingResult.IsSuccess)
                 return Result<ChatResponse>.Failure($"Failed to generate embedding: {embeddingResult.Error}");
-            }
 
-            var userEmbedding = embeddingResult.Value;
+            var userEmbedding = embeddingResult.Value!;
 
             // 2. Search in vector store
             var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
