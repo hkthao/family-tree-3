@@ -445,7 +445,7 @@
   "chunkUpload.title": "Tải lên tài liệu",
   "chunkUpload.fileInputLabel": "Chọn tệp PDF hoặc TXT",
   "chunkUpload.fileRequired": "Tệp là bắt buộc",
-  "chunkUpload.fileTypeInvalid": "Chỉ chấp nhận tệp PDF hoặc TXT.",
+  "chunkUpload.fileTypeInvalid": "Chỉ chấp nhận tệp PDF, TXT hoặc MD.",
   "chunkUpload.fileIdLabel": "ID Tệp (Duy nhất)",
   "chunkUpload.fileIdRequired": "ID Tệp là bắt buộc",
   "chunkUpload.familyIdLabel": "ID Gia đình",

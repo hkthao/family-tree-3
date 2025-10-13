@@ -22,7 +22,9 @@ const fileRules = [
   (value: File) => !!value || t('chunkUpload.fileRequired'),
   (value: File) => {
     const allowedTypes = ['application/pdf', 'text/plain', 'text/markdown'];
-    return allowedTypes.includes(value?.type) || t('chunkUpload.fileTypeInvalid');
+    const allowedExtensions = ['.pdf', '.txt', '.md'];
+    const fileExtension = value?.name ? '.' + value.name.split('.').pop()?.toLowerCase() : '';
+    return (allowedTypes.includes(value?.type) || allowedExtensions.includes(fileExtension)) || t('chunkUpload.fileTypeInvalid');
   },
 ];
 
