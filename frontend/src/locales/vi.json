@@ -75,6 +75,7 @@
   "admin.invite": "Mời thành viên",
   "admin.multiTree": "Multi-tree & Ghép nối",
   "admin.duplicates": "Phát hiện trùng lặp",
+  "admin.chunks": "Quản lý Chunk",
   "search.smart": "Tìm kiếm thông minh",
   "search.relationship": "Tìm kiếm mối quan hệ",
   "ai.faceTag": "Nhận diện khuôn mặt (tagging)",

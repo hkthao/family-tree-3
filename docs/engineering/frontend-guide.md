@@ -28,7 +28,7 @@ frontend/
 │   ├── components/     # Chứa các Vue component có thể tái sử dụng trên nhiều trang hoặc trong các component lớn hơn (ví dụ: `BaseButton.vue`, `FamilyCard.vue`).
 │   ├── composables/    # Chứa các hàm Composable (Vue 3 Composition API) để tái sử dụng logic có trạng thái (stateful logic) giữa các component (ví dụ: `useAuth.ts`, `usePagination.ts`).
 │   ├── constants/      # Chứa các hằng số được sử dụng trong toàn bộ ứng dụng (ví dụ: `API_ENDPOINTS.ts`, `APP_CONFIG.ts`).
-│   ├── data/           # Chứa dữ liệu mock được sử dụng trong môi trường phát triển hoặc cho các service mock.
+│   ├── data/           # Chứa dữ liệu mock được sử dụng trong môi trường phát triển hoặc cho các service mock, ví dụ: `menuItems.ts`.
 │   ├── layouts/        # Chứa các layout chính của ứng dụng (ví dụ: `DefaultLayout.vue`, `AuthLayout.vue`).
 │   ├── locales/        # Chứa các file dịch (i18n) cho các ngôn ngữ khác nhau.
 │   ├── plugins/        # Chứa các plugin của Vue hoặc các thư viện bên thứ ba được khởi tạo (ví dụ: `vuetify.ts`, `pinia.ts`, `axios.ts`).
@@ -49,10 +49,11 @@ frontend/
 
 #### Quản lý Hồ sơ Người dùng với `userProfileStore`
 
-`userProfileStore` (`frontend/src/stores/userProfile.store.ts`) hiện là nguồn đáng tin cậy duy nhất (single source of truth) cho thông tin hồ sơ của người dùng hiện tại. Các component UI cần hiển thị thông tin người dùng (như tên, email, avatar, vai trò) nên lấy dữ liệu từ store này thay vì `authStore`.
+`userProfileStore` (`frontend/src/stores/userProfile.store.ts`) hiện là nguồn đáng tin cậy duy nhất (single source of truth) cho thông tin hồ sơ của người dùng hiện tại. Các component UI cần hiển thị thông tin người dùng (như tên, email, avatar, vai trò) nên lấy dữ liệu từ store này thay vì `authStore`. `userProfileStore` cũng quản lý các tùy chọn cá nhân của người dùng (chủ đề, ngôn ngữ, cài đặt thông báo).
 
 -   **`fetchCurrentUserProfile()`**: Action này sẽ gọi API backend `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại, bao gồm cả các vai trò của họ.
 -   **`userProfile`**: State chứa đối tượng `UserProfile` của người dùng hiện tại.
+-   **`userPreferences`**: State chứa đối tượng `UserPreference` của người dùng hiện tại.
 
 #### Cấu trúc Store
 
@@ -320,7 +321,7 @@ Các thao tác bất đồng bộ trong Frontend chủ yếu liên quan đến v
 
 *   Trong môi trường phát triển cục bộ, Frontend sử dụng **Vite Proxy** để chuyển tiếp các yêu cầu API từ đường dẫn `/api` (ví dụ: `http://localhost:5173/api/family`) đến địa chỉ của Backend (ví dụ: `http://localhost:8080/family`).
 *   Điều này giúp giải quyết vấn đề CORS (Cross-Origin Resource Sharing) trong quá trình phát triển, vì trình duyệt sẽ coi các yêu cầu đến `/api` là cùng một origin với Frontend.
-*   Để biết thêm chi tiết về cấu hình Vite Proxy, vui lòng tham khảo phần [Vite Proxy trong Kiến trúc tổng quan](./architecture.md#vite-proxy-trong-môi-trường-phát-triển).
+*   Để biết thêm chi tiết về cấu hình Vite Proxy, vui lòng tham khảo phần [Vite Proxy trong Kiến trúc tổng quan](./architecture.md#5-sơ-đồ-triển-khai-deployment-view).
 
 #### 4. Mocking
 

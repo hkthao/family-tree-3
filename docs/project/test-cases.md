@@ -50,6 +50,9 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_REL_06    | Tìm kiếm mối quan hệ                   | Relationship Management| Medium   | Manual/Automated  |
 | TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual            |
 | TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual            |
+| TC_USERPREF_01 | Cập nhật tùy chọn người dùng thành công | User Preferences       | High     | Manual/Automated  |
+| TC_AIBIO_01    | Tạo tiểu sử AI thành công             | AI Biography           | High     | Manual/Automated  |
+| TC_CHUNK_01    | Tải lên và xử lý file thành công       | Document Chunking      | High     | Manual/Automated  |
 
 ## 3. Chi tiết Test Cases
 
@@ -364,7 +367,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Priority**: Medium
 -   **Type**: Manual/Automated
 
-### 3.7. Module: File đính kèm (Attachments)
+### 3.6. Module: File đính kèm (Attachments)
 
 #### TC_ATTACH_01: Tải lên file đính kèm thành công
 -   **Mục tiêu**: Xác minh người dùng có thể tải lên một file đính kèm hợp lệ cho một thành viên.
@@ -407,3 +410,74 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Severity**: Medium
 -   **Priority**: Medium
 -   **Type**: Manual
+
+### 3.7. Module: Quản lý Tùy chọn Người dùng (User Preference Management)
+
+#### TC_USERPREF_01: Cập nhật tùy chọn người dùng thành công
+-   **Mục tiêu**: Xác minh người dùng có thể cập nhật các tùy chọn cá nhân (chủ đề, ngôn ngữ, cài đặt thông báo) thành công.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang "Cài đặt người dùng" -> tab "Tùy chọn".
+    3.  Thay đổi một hoặc nhiều tùy chọn (ví dụ: chọn chủ đề "Tối", ngôn ngữ "Tiếng Anh", bật "Thông báo qua Email").
+    4.  Nhấn nút "Lưu".
+-   **Kết quả mong đợi**: 
+    *   Các tùy chọn được lưu thành công và áp dụng ngay lập tức (ví dụ: giao diện chuyển sang chủ đề tối, ngôn ngữ thay đổi).
+    *   Hệ thống hiển thị thông báo thành công (ví dụ: "Lưu tùy chọn thành công!").
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated
+
+### 3.8. Module: AI Biography
+
+#### TC_AIBIO_01: Tạo tiểu sử AI thành công
+-   **Mục tiêu**: Xác minh người dùng có thể tạo tiểu sử cho một thành viên bằng AI và lưu nó.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một thành viên với thông tin cơ bản (tên, ngày sinh, v.v.).
+    *   Ứng dụng Frontend và Backend đang chạy.
+    *   Dịch vụ AI đã được cấu hình và hoạt động.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang chi tiết của một thành viên.
+    3.  Nhấn nút "Tạo tiểu sử AI" hoặc tương tự.
+    4.  Chọn kiểu giọng văn (ví dụ: "Lịch sử").
+    5.  Nhập một prompt tùy chỉnh (nếu cần) hoặc sử dụng chế độ tự động.
+    6.  Nhấn nút "Tạo tiểu sử".
+    7.  Sau khi tiểu sử được tạo, nhấn nút "Lưu vào hồ sơ".
+-   **Kết quả mong đợi**: 
+    *   Tiểu sử được AI tạo ra và hiển thị trên giao diện.
+    *   Tiểu sử được lưu thành công vào hồ sơ thành viên.
+    *   Hệ thống hiển thị thông báo thành công.
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated
+
+### 3.9. Module: Xử lý Dữ liệu và Chia Chunk (Document Chunking)
+
+#### TC_CHUNK_01: Tải lên và xử lý file thành công
+-   **Mục tiêu**: Xác minh người dùng có thể tải lên một tệp (PDF/TXT) và hệ thống xử lý, chia nhỏ nó thành các chunk.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một dòng họ tồn tại.
+    *   Ứng dụng Frontend và Backend đang chạy.
+    *   Có sẵn một tệp PDF hoặc TXT hợp lệ để tải lên.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang quản lý chunk (ví dụ: `/admin/chunks`).
+    3.  Nhấn nút "Tải lên tài liệu".
+    4.  Chọn một tệp PDF hoặc TXT hợp lệ.
+    5.  Điền các thông tin metadata cần thiết (File ID, Family ID, Category, Created By).
+    6.  Nhấn nút "Tải lên".
+-   **Kết quả mong đợi**: 
+    *   Tệp được tải lên thành công.
+    *   Hệ thống xử lý tệp và hiển thị danh sách các chunk đã được tạo.
+    *   Hệ thống hiển thị thông báo thành công (ví dụ: "Đã tải lên và xử lý X chunk thành công.").
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated

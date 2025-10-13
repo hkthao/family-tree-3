@@ -29,6 +29,7 @@ erDiagram
         string ExternalId "ID người dùng từ nhà cung cấp xác thực"
         string Email "Email người dùng"
         string Name "Tên hiển thị"
+        string Avatar "URL ảnh đại diện"
     }
 
     FAMILY {
@@ -39,6 +40,7 @@ erDiagram
         string Address "Địa chỉ"
         string Visibility "Chế độ hiển thị (Public/Private)"
         int TotalMembers "Tổng số thành viên"
+        int TotalGenerations "Tổng số thế hệ"
     }
 
     FAMILY_USER {
@@ -108,8 +110,6 @@ erDiagram
         boolean EmailNotificationsEnabled "Bật/tắt thông báo Email"
         boolean SmsNotificationsEnabled "Bật/tắt thông báo SMS"
         boolean InAppNotificationsEnabled "Bật/tắt thông báo trong ứng dụng"
-        datetime Created "Thời gian tạo"
-        datetime LastModified "Thời gian cập nhật cuối cùng"
     }
 
     FILE_METADATA {
@@ -127,6 +127,12 @@ erDiagram
         datetime LastModified "Thời gian cập nhật cuối cùng"
     }
 
+    TEXT_CHUNK {
+        string Id PK "ID duy nhất"
+        string Content "Nội dung văn bản"
+        json Metadata "Metadata bổ sung (JSON)"
+    }
+
     USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
     FAMILY ||--o{ FAMILY_USER : "có người dùng"
     FAMILY ||--o{ MEMBER : "có"
@@ -141,6 +147,7 @@ erDiagram
     USER_PROFILE ||--o{ FILE_METADATA : "tải lên"
     MEMBER ||--o{ FILE_METADATA : "sử dụng"
     FAMILY ||--o{ FILE_METADATA : "sử dụng"
+    FILE_METADATA ||--o{ TEXT_CHUNK : "có các chunk"
 ```
 ## 3. Mô tả các bảng
 
@@ -198,6 +205,7 @@ Lưu trữ thông tin về các gia đình hoặc dòng họ.
 | `Address`     | `longtext`   | NULL      | Địa chỉ của gia đình   |
 | `Visibility`  | `varchar(20)`| NOT NULL  | Chế độ hiển thị (Public, Private) |
 | `TotalMembers`| `int`        | NOT NULL  | Tổng số thành viên trong gia đình |
+| `TotalGenerations`| `int`        | NOT NULL  | Tổng số thế hệ trong cây gia phả của gia đình. |
 
 - **Mối quan hệ**: Một `Family` có thể có nhiều `Member` và nhiều `Event`.
 
@@ -295,8 +303,6 @@ Lưu trữ tùy chọn cá nhân của người dùng.
 | `EmailNotificationsEnabled`| `boolean`    | NOT NULL  | Bật/tắt thông báo Email |
 | `SmsNotificationsEnabled`  | `boolean`    | NOT NULL  | Bật/tắt thông báo SMS   |
 | `InAppNotificationsEnabled`| `boolean`    | NOT NULL  | Bật/tắt thông báo trong ứng dụng |
-| `Created`               | `datetime`   | NOT NULL  | Thời gian tạo            |
-| `LastModified`          | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
 
 - **Foreign Keys**:
   - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
@@ -314,7 +320,7 @@ Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao g�
 | `StorageProvider`| `int`        | NOT NULL  | Nhà cung cấp lưu trữ (Local, Cloudinary, S3) |
 | `ContentType`   | `varchar(100)`| NOT NULL  | Loại nội dung của tệp (ví dụ: image/jpeg) |
 | `FileSize`      | `bigint`     | NOT NULL  | Kích thước tệp theo byte               |
-| `UploadedBy`    | `varchar(36)`| NOT NULL  | ID của người dùng đã tải lên tệp       |
+| `UploadedBy`    | `varchar(36)`| FK, NOT NULL | ID của người dùng đã tải lên tệp       |
 | `UsedByEntity`  | `varchar(100)`| NULL      | Tên entity sử dụng tệp (ví dụ: UserProfile) |
 | `UsedById`      | `varchar(36)`| NULL      | ID của entity sử dụng tệp              |
 | `IsActive`      | `boolean`    | NOT NULL  | Trạng thái hoạt động (true: đang dùng, false: không dùng) |
@@ -324,6 +330,27 @@ Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao g�
 - **Foreign Keys**:
   - `UploadedBy`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `UserProfile` có thể tải lên nhiều `FileMetadata`.
+
+### 3.8. Bảng `TextChunks`
+
+Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các tệp tài liệu.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                                  |
+| :-------------- | :----------- | :-------- | :------------------------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của chunk                   |
+| `Content`       | `longtext`   | NOT NULL  | Nội dung văn bản của chunk             |
+| `Metadata`      | `json`       | NULL      | Metadata bổ sung (JSON)                |
+| `FileId`        | `varchar(36)`| FK, NOT NULL | ID của tệp gốc                         |
+| `FamilyId`      | `varchar(36)`| FK, NOT NULL | ID của gia đình liên quan              |
+| `Category`      | `varchar(100)`| NOT NULL  | Danh mục của chunk (ví dụ: Biography)  |
+| `CreatedBy`     | `varchar(36)`| FK, NOT NULL | ID của người dùng tạo chunk            |
+| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo chunk                    |
+
+- **Foreign Keys**:
+  - `FileId`: tham chiếu đến `FileMetadata(Id)`.
+  - `FamilyId`: tham chiếu đến `Families(Id)`.
+  - `CreatedBy`: tham chiếu đến `UserProfiles(Id)`.
+- **Mối quan hệ**: Một `FileMetadata` có thể có nhiều `TextChunk`.
 
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu (updated after refactor)
 
@@ -355,6 +382,7 @@ modelBuilder.Entity<UserProfile>(builder =>
     builder.Property(u => u.ExternalId).HasMaxLength(255).IsRequired();
     builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
     builder.Property(u => u.Name).HasMaxLength(255).IsRequired();
+    builder.Property(u => u.Avatar).HasMaxLength(2048); // URL có thể dài
 
     builder.HasMany(u => u.FamilyUsers)
            .WithOne(fu => fu.UserProfile)
@@ -387,6 +415,7 @@ modelBuilder.Entity<Family>(builder =>
     builder.Property(f => f.Address); // longtext
     builder.Property(f => f.Visibility).HasConversion<string>().HasMaxLength(20).IsRequired();
     builder.Property(f => f.TotalMembers).IsRequired();
+    builder.Property(f => f.TotalGenerations).IsRequired();
 });
 
 modelBuilder.Entity<Member>(builder =>
@@ -489,6 +518,31 @@ modelBuilder.Entity<EventMember>(builder =>
     builder.HasOne(em => em.Member)
            .WithMany(m => m.EventMembers)
            .HasForeignKey(em => m.MemberId);
+});
+
+modelBuilder.Entity<TextChunk>(builder =>
+{
+    builder.Property(tc => tc.Content).IsRequired();
+    builder.Property(tc => tc.Metadata).HasColumnType("json");
+    builder.Property(tc => tc.FileId).IsRequired();
+    builder.Property(tc => tc.FamilyId).IsRequired();
+    builder.Property(tc => tc.Category).HasMaxLength(100).IsRequired();
+    builder.Property(tc => tc.CreatedBy).IsRequired();
+
+    builder.HasOne<FileMetadata>()
+           .WithMany()
+           .HasForeignKey(tc => tc.FileId)
+           .OnDelete(DeleteBehavior.Restrict);
+
+    builder.HasOne<Family>()
+           .WithMany()
+           .HasForeignKey(tc => tc.FamilyId)
+           .OnDelete(DeleteBehavior.Restrict);
+
+    builder.HasOne<UserProfile>()
+           .WithMany()
+           .HasForeignKey(tc => tc.CreatedBy)
+           .OnDelete(DeleteBehavior.Restrict);
 });
 ```
 

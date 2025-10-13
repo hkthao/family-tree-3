@@ -24,6 +24,18 @@ Trong giai đoạn ngắn hạn, chúng tôi tập trung vào việc hoàn thi�
 *   **Quản lý sự kiện**: (Đã hoàn thành)
     *   Thêm, sửa, xóa các sự kiện quan trọng của gia đình (sinh, kết hôn, mất, họp mặt).
     *   Xem dòng thời gian các sự kiện.
+*   **Quản lý Quan hệ**: (Đã hoàn thành)
+    *   Thêm, sửa, xóa, xem danh sách và chi tiết các mối quan hệ giữa các thành viên.
+    *   Hỗ trợ tìm kiếm và lọc mối quan hệ.
+*   **Tải lên và quản lý tệp đính kèm**: (Đã hoàn thành)
+    *   Cho phép người dùng tải lên và quản lý các tệp (hình ảnh, tài liệu) liên quan đến các thành viên hoặc gia đình.
+*   **Quản lý Tùy chọn Người dùng**: (Đã hoàn thành)
+    *   Triển khai API riêng biệt để lưu trữ và truy xuất tùy chọn cá nhân của người dùng (chủ đề, ngôn ngữ, cài đặt thông báo qua email/SMS/ứng dụng).
+*   **Cải thiện trải nghiệm người dùng**: (Đã hoàn thành)
+    *   Thêm tooltips cho tất cả các nút hành động (chỉnh sửa, xóa, thêm mới) trong các danh sách (Thành viên, Gia đình, Sự kiện, Quan hệ).
+    *   Thêm tooltips cho các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao.
+*   **Dọn dẹp mã nguồn Frontend**: (Đã hoàn thành)
+    *   Xóa bỏ các import và biến không sử dụng trong các tệp frontend để cải thiện chất lượng mã nguồn và loại bỏ cảnh báo linting.
 *   **Cải thiện cây gia phả**: 
     *   Thêm các kiểu hiển thị mới cho cây gia phả (ví dụ: sơ đồ dọc, ngang).
     *   Chức năng phóng to/thu nhỏ và di chuyển trên cây gia phả.
@@ -34,11 +46,6 @@ Trong giai đoạn ngắn hạn, chúng tôi tập trung vào việc hoàn thi�
 *   **Xử lý lỗi và thông báo**: 
     *   Triển khai `Result Pattern` nhất quán ở Backend.
     *   Hiển thị thông báo lỗi thân thiện và rõ ràng ở Frontend.
-*   **Quản lý Quan hệ**: (Đã hoàn thành)
-    *   Thêm, sửa, xóa, xem danh sách và chi tiết các mối quan hệ giữa các thành viên.
-    *   Hỗ trợ tìm kiếm và lọc mối quan hệ.
-*   **Tải lên và quản lý tệp đính kèm**: (Đã hoàn thành)
-    *   Cho phép người dùng tải lên và quản lý các tệp (hình ảnh, tài liệu) liên quan đến các thành viên hoặc gia đình.
 
 ## 3. Mục tiêu Trung hạn (3-6 tháng)
 
@@ -52,7 +59,8 @@ Trong giai đoạn trung hạn, chúng tôi sẽ mở rộng các tính năng c�
     *   Hỗ trợ chuẩn GEDCOM (Genealogical Data Communication) để xuất và nhập dữ liệu gia phả, cho phép người dùng dễ dàng di chuyển dữ liệu giữa các hệ thống khác nhau.
     *   Xuất dữ liệu sang các định dạng phổ biến khác như PDF, CSV.
 *   **Tích hợp AI (Giai đoạn 1)**: 
-    *   Gợi ý nội dung tiểu sử dựa trên dữ liệu thành viên đã có sẵn.
+    *   Gợi ý nội dung tiểu sử dựa trên dữ liệu thành viên đã có sẵn (Đã hoàn thành).
+    *   Xử lý và chia nhỏ nội dung từ các tệp PDF/TXT thành các `TextChunk` (Đã hoàn thành).
     *   Nhận diện khuôn mặt từ ảnh để tự động gắn thẻ thành viên.
 
 ## 4. Mục tiêu Dài hạn (6-12 tháng)
@@ -66,7 +74,7 @@ Trong giai đoạn dài hạn, chúng tôi hướng tới việc mở rộng h�
     *   Cho phép người dùng chia sẻ thông tin gia phả (có kiểm soát quyền riêng tư) lên các nền tảng mạng xã hội.
     *   Tích hợp đăng nhập nhanh bằng tài khoản mạng xã hội (Google, Facebook).
 *   **Hỗ trợ đa ngôn ngữ**: 
-    *   Mở rộng ứng dụng để hỗ trợ nhiều ngôn ngữ khác nhau, bắt đầu với tiếng Việt và tiếng Anh.
+    *   Mở rộng ứng dụng để hỗ trợ nhiều ngôn ngữ khác nhau, bắt đầu với tiếng Việt và tiếng Anh (Đã hoàn thành).
     *   Cung cấp giao diện để người dùng dễ dàng chuyển đổi ngôn ngữ.
 *   **Tích hợp AI (Giai đoạn 2)**: 
     *   Tìm kiếm thành viên bằng khuôn mặt từ ảnh.

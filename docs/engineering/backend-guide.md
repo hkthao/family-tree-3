@@ -15,7 +15,7 @@
 - [10. Quản lý Cây Gia Phả (Family Tree Management)](#10-quản-lý-cây-gia-phả-family-tree-management)
 - [11. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)](#11-ghi-nhật-ký-hoạt-động-người-dùng-user-activity-logging)
 - [12. Module AI (AI Module)](#12-module-ai-ai-module)
-- [13. Module Xử lý Dữ liệu và Chia Chunk (Data Processing & Chunking Module)](#13-module-xử-lý-dữ-liệu-và-chia-chunk-data-processing--chunking-module)
+- [13. Module Xử lý Dữ liệu và Tải lên Chunk (Data Processing & Chunking Module)](#13-module-xử-lý-dữ-liệu-và-tải-lên-chunk-data-processing--chunking-module)
   - [13.1. Thực thể `TextChunk`](#131-thực-thể-textchunk)
   - [13.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)](#132-trích-xuất-văn-bản-từ-tệp-ifiletextextractor)
   - [13.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)](#133-factory-cho-trích-xuất-tệp-ifiletextextractorfactory)
@@ -170,11 +170,11 @@ ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP
 
     **Lưu ý:** `UseAuthentication` phải được gọi trước `UseAuthorization` trong pipeline.
 
-## 7. Xác thực & Phân quyền
+### 7. Xác thực & Phân quyền
 
 -   **Cơ chế**: Sử dụng **JWT Bearer Token**.
 -   **Provider hiện tại**: Nhà cung cấp JWT (ví dụ: Auth0). Hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` mới.
--   **Triển khai Auth0Provider**: `backend/src/Infrastructure/Auth/Auth0Provider.cs` là triển khai của `IAuthProvider` sử dụng Auth0 Management API để quản lý người dùng (ví dụ: cập nhật hồ sơ).
+-   **Triển khai IAuthProvider**: `backend/src/Infrastructure/Auth/Auth0Provider.cs` là một triển khai của `IAuthProvider` sử dụng Auth0 Management API để quản lý người dùng (ví dụ: cập nhật hồ sơ). Các triển khai khác có thể được thêm vào cho các nhà cung cấp xác thực khác.
 -   **Cấu hình Auth0**: Các thông tin cấu hình Auth0 (Domain, Audience, ClientId, ClientSecret) được đọc từ `appsettings.json`.
 
     ```json
@@ -228,6 +228,7 @@ public interface IApplicationDbContext
     DbSet<UserProfile> UserProfiles { get; }
     DbSet<FamilyUser> FamilyUsers { get; }
     DbSet<UserActivity> UserActivities { get; }
+    DbSet<UserPreference> UserPreferences { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
@@ -235,10 +236,11 @@ public interface IApplicationDbContext
 
 #### Cập nhật thực thể `UserProfile`
 
-Thực thể `UserProfile` hiện bao gồm trường `Avatar` để lưu trữ URL ảnh đại diện của người dùng.
+Thực thể `UserProfile` hiện bao gồm trường `ExternalId` để lưu trữ ID từ nhà cung cấp xác thực bên ngoài và trường `Avatar` để lưu trữ URL ảnh đại diện của người dùng.
 
 | Tên trường       | Kiểu dữ liệu | Mô tả                                      |
 | :--------------- | :----------- | :----------------------------------------- |
+| `ExternalId`     | `string`     | ID từ nhà cung cấp xác thực bên ngoài (ví dụ: Auth0 User ID). |
 | `Avatar`         | `string` (nullable) | URL của ảnh đại diện người dùng.         |
 
 #### Cấu hình ánh xạ JsonDocument cho Metadata
@@ -865,7 +867,7 @@ Các dịch vụ liên quan đến Vector Database được đăng ký trong `ba
 -   `IVectorStoreFactory`: Đăng ký dưới dạng `Singleton`.
 -   `IVectorStore`: Đăng ký dưới dạng `Transient`, được giải quyết thông qua `IVectorStoreFactory`.
 
-## 13. Module Xử lý Dữ liệu và Chia Chunk (Data Processing & Chunking Module)
+## 13. Module Xử lý Dữ liệu và Tải lên Chunk (Data Processing & Chunking Module)
 
 Module này chịu trách nhiệm đọc, làm sạch và chia nhỏ nội dung từ các tệp (PDF, TXT) được người dùng tải lên thành các `TextChunk` nhỏ hơn. Các chunk này sau đó có thể được sử dụng để tạo embeddings và lưu trữ trong Vector Database cho các tác vụ liên quan đến AI (ví dụ: chatbot).
 

@@ -227,7 +227,7 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Hiển thị danh sách các mối quan hệ với thông tin chi tiết (thành viên nguồn, thành viên đích, loại).
     -   Hỗ trợ phân trang và tìm kiếm/lọc.
 
-## 3. In Progress (updated after refactor: All items moved to Done)
+## 3. In Progress
 
 Phần này liệt kê các User Story đang trong quá trình phát triển tích cực. Hiện tại không có User Story nào đang trong quá trình phát triển.
 
@@ -246,6 +246,15 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Hệ thống xác thực thành công với thông tin hợp lệ và trả về JWT.
     -   Sau khi đăng nhập thành công, người dùng được chuyển hướng đến trang tổng quan hoặc trang chính của ứng dụng.
     -   Xử lý lỗi rõ ràng khi thông tin đăng nhập không hợp lệ.
+
+#### US_026: Refactor `auth0UserId` thành `externalId`
+-   **User Story**: Là nhà phát triển, tôi muốn refactor `auth0UserId` thành `externalId` để tách biệt khỏi nhà cung cấp xác thực cụ thể.
+-   **Priority**: High
+-   **Estimate**: 2 ngày
+-   **Acceptance Criteria**:
+    -   Thuộc tính `Auth0UserId` được đổi tên thành `ExternalId` trong `UserProfile` entity và DTO ở Backend.
+    -   Các query, handler và controller liên quan được cập nhật để sử dụng `ExternalId` và endpoint `byExternalId`.
+    -   Các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) ở Frontend được cập nhật để sử dụng `externalId`.
 
 ### 4.2. Module: Quản lý Thành viên & Dòng họ
 
@@ -279,7 +288,40 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Có chức năng phân trang và tìm kiếm/lọc danh sách dòng họ.
     -   Người dùng có thể nhấp vào một dòng họ để xem chi tiết.
 
-### 4.3. Module: Quản lý Thành viên (updated after refactor)
+#### US_027: Quản lý Hồ sơ Người dùng tập trung
+-   **User Story**: Là nhà phát triển, tôi muốn tái cấu trúc frontend để quản lý thông tin hồ sơ người dùng tập trung trong `userProfileStore`.
+-   **Priority**: High
+-   **Estimate**: 1 ngày
+-   **Acceptance Criteria**:
+    -   `userProfileStore` trở thành nguồn đáng tin cậy duy nhất cho thông tin hồ sơ người dùng.
+    -   Các component UI lấy dữ liệu hồ sơ người dùng từ `userProfileStore` thay vì `authStore`.
+    -   Giảm sự phụ thuộc của các component UI vào `authStore`.
+
+#### US_028: API Hồ sơ Người dùng hiện tại
+-   **User Story**: Là nhà phát triển, tôi muốn có endpoint backend mới `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại một cách an toàn.
+-   **Priority**: High
+-   **Estimate**: 1 ngày
+-   **Acceptance Criteria**:
+    -   Endpoint `GET /api/UserProfiles/me` trả về `UserProfileDto` của người dùng hiện tại.
+    -   Endpoint này không yêu cầu ID người dùng trong URL; ID được lấy từ ngữ cảnh xác thực của server.
+
+#### US_029: Trường Avatar cho Hồ sơ Người dùng
+-   **User Story**: Là người dùng, tôi muốn có thể tải lên và hiển thị ảnh đại diện cho hồ sơ của mình.
+-   **Priority**: Medium
+-   **Estimate**: 1 ngày
+-   **Acceptance Criteria**:
+    -   Bổ sung trường `Avatar` vào thực thể `UserProfile` và DTO ở Backend.
+    -   Cập nhật các chức năng liên quan ở cả Backend và Frontend để hỗ trợ trường `Avatar`.
+
+#### US_030: Xử lý kết quả nhất quán
+-   **User Story**: Là nhà phát triển, tôi muốn triển khai `Result` wrapper cho `GetCurrentUserProfileQueryHandler` để đảm bảo xử lý kết quả nhất quán.
+-   **Priority**: Medium
+-   **Estimate**: 0.5 ngày
+-   **Acceptance Criteria**:
+    -   `GetCurrentUserProfileQueryHandler` trả về `Result<UserProfileDto>`.
+    -   Đảm bảo xử lý lỗi và thành công nhất quán theo `Result Pattern`.
+
+### 4.3. Module: Quản lý Thành viên
 
 #### US_015: Thêm thành viên
 -   **User Story**: Là người dùng, tôi muốn thêm thành viên mới vào cây gia phả để mở rộng lịch sử gia đình.
@@ -310,3 +352,60 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Người dùng có thể tìm kiếm theo tên, ngày sinh, ngày mất, nơi sinh, nơi mất, giới tính, nghề nghiệp, hoặc kết hợp các tiêu chí này.
     -   Kết quả tìm kiếm phải hiển thị trong danh sách hoặc làm nổi bật/điều hướng đến thành viên trên cây gia phả.
     -   Tìm kiếm phải hỗ trợ tìm kiếm gần đúng (fuzzy search) hoặc tìm kiếm một phần từ khóa.
+
+### 4.4. Module: AI & Dữ liệu
+
+#### US_031: Quản lý Tùy chọn Người dùng
+-   **User Story**: Là người dùng, tôi muốn lưu trữ và truy xuất tùy chọn cá nhân của mình (chủ đề, ngôn ngữ, cài đặt thông báo) để cá nhân hóa trải nghiệm ứng dụng.
+-   **Priority**: High
+-   **Estimate**: 2 ngày
+-   **Acceptance Criteria**:
+    -   Triển khai API riêng biệt để lưu trữ và truy xuất tùy chọn cá nhân của người dùng.
+    -   Thêm thực thể `UserPreference` và các enum `Theme`, `Language` để lưu trữ các tùy chọn này.
+    -   Cập nhật schema database thông qua migration.
+    -   Frontend có thể hiển thị và cho phép người dùng chỉnh sửa các tùy chọn này.
+
+#### US_032: Cập nhật tính năng AI Biography
+-   **User Story**: Là người dùng, tôi muốn tính năng AI Biography hiển thị thông tin đầy đủ hơn và có validation cho prompt.
+-   **Priority**: High
+-   **Estimate**: 1 ngày
+-   **Acceptance Criteria**:
+    -   Endpoint lấy tiểu sử AI gần nhất trả về đối tượng DTO đầy đủ (bao gồm tên nhà cung cấp AI).
+    -   Cập nhật API và sử dụng AutoMapper cho việc ánh xạ DTO.
+    -   Cập nhật giao diện người dùng để hiển thị dữ liệu tiểu sử AI đầy đủ.
+    -   Thêm validation cho độ dài prompt của người dùng.
+
+#### US_033: Xử lý dữ liệu và Chia Chunk
+-   **User Story**: Là người dùng, tôi muốn tải lên các tệp tài liệu (PDF/TXT) và hệ thống tự động xử lý, chia nhỏ nội dung thành các `TextChunk` để chuẩn bị cho việc tích hợp AI.
+-   **Priority**: High
+-   **Estimate**: 3 ngày
+-   **Acceptance Criteria**:
+    -   Triển khai module xử lý và chia nhỏ nội dung từ các tệp PDF/TXT thành các `TextChunk`.
+    -   Mỗi `TextChunk` có đầy đủ metadata (fileId, familyId, category, createdBy).
+    -   API cho phép tải lên tệp và trả về danh sách các `TextChunk` đã xử lý.
+
+### 4.5. Module: Cải thiện trải nghiệm người dùng
+
+#### US_034: Thêm Tooltips cho các nút hành động
+-   **User Story**: Là người dùng, tôi muốn thấy tooltips khi di chuột qua các nút hành động (chỉnh sửa, xóa, thêm mới) để hiểu rõ chức năng của chúng.
+-   **Priority**: Medium
+-   **Estimate**: 0.5 ngày
+-   **Acceptance Criteria**:
+    -   Tất cả các nút hành động trong các danh sách (Thành viên, Gia đình, Sự kiện, Quan hệ) đều có tooltips.
+    -   Tooltips hiển thị mô tả ngắn gọn về chức năng của nút.
+
+#### US_035: Thêm Tooltips cho các nút thu gọn/mở rộng
+-   **User Story**: Là người dùng, tôi muốn thấy tooltips khi di chuột qua các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao để hiểu rõ chức năng của chúng.
+-   **Priority**: Low
+-   **Estimate**: 0.25 ngày
+-   **Acceptance Criteria**:
+    -   Các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao đều có tooltips.
+    -   Tooltips hiển thị mô tả ngắn gọn về chức năng của nút.
+
+#### US_036: Dọn dẹp mã nguồn Frontend
+-   **User Story**: Là nhà phát triển, tôi muốn dọn dẹp mã nguồn frontend bằng cách xóa bỏ các import và biến không sử dụng để cải thiện chất lượng mã nguồn.
+-   **Priority**: Low
+-   **Estimate**: 0.5 ngày
+-   **Acceptance Criteria**:
+    -   Tất cả các import và biến không sử dụng trong các tệp frontend được loại bỏ.
+    -   Không có cảnh báo linting liên quan đến các import và biến không sử dụng.

@@ -100,7 +100,8 @@ Các bài kiểm thử Backend được viết bằng xUnit và sử dụng Moq 
 
     ```bash
     # Chạy từ thư mục gốc của project
-    dotnet test backend/backend.sln
+    dotnet test backend/tests/Application.UnitTests/
+    dotnet test backend/tests/Infrastructure.IntegrationTests/ --startup-project backend/src/Web
     ```
 
 *   **Chạy Unit Tests (theo project)**:
@@ -121,7 +122,7 @@ Các bài kiểm thử Backend được viết bằng xUnit và sử dụng Moq 
 
     ```bash
     # Chạy từ thư mục gốc của project
-    dotnet test backend/backend.sln --filter "FullyQualifiedName~backend.Application.UnitTests.Families"
+    dotnet test backend/tests/Application.UnitTests/ --filter "FullyQualifiedName~backend.Application.UnitTests.Families"
     ```
 
 *   **Mock Database trong Integration Tests**: Trong Integration Tests, chúng ta sử dụng In-Memory Database (ví dụ: `Microsoft.EntityFrameworkCore.InMemory`) hoặc Testcontainers (để tạo database thật trong Docker) để cô lập database thật, đảm bảo môi trường test sạch và độc lập.
@@ -162,7 +163,8 @@ Code Coverage là một chỉ số đo lường tỷ lệ phần trăm mã ngu�
 
     ```bash
     # Chạy test và thu thập coverage, xuất ra định dạng Cobertura XML
-    dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./backend/artifacts/coverage/coverage.cobertura.xml
+    dotnet test backend/tests/Application.UnitTests/ /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./backend/artifacts/coverage/Application.UnitTests.cobertura.xml
+    dotnet test backend/tests/Infrastructure.IntegrationTests/ --startup-project backend/src/Web /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=./backend/artifacts/coverage/Infrastructure.IntegrationTests.cobertura.xml
     ```
 
 *   **Tạo báo cáo HTML**: Sử dụng `ReportGenerator` để chuyển đổi file XML thành báo cáo HTML dễ đọc.

@@ -175,7 +175,7 @@ public interface IAuthorizationService
     bool IsAdmin();
 
     /// <summary>
-    /// Retrieves the current user's UserProfile, including their family associations.
+    /// Retrieves the current user's UserProfile, including their family associations and ExternalId.
     /// </summary>
     Task<UserProfile?> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default);
 

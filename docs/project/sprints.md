@@ -125,3 +125,31 @@ Việc lập kế hoạch sprint giúp:
 -   Gemini (AI Assistant)
 -   Developer A (Backend)
 -   Developer B (Frontend)
+
+## 7. Sprint 6 (2025-10-24 - 2025-11-07)
+
+**Mục tiêu:** Triển khai tính năng quản lý tùy chọn người dùng, cải thiện tính năng AI Biography và xử lý dữ liệu/chia chunk.
+
+**User Stories đã hoàn thành:**
+-   [x] US_031: Quản lý Tùy chọn Người dùng
+-   [x] US_032: Cập nhật tính năng AI Biography
+-   [x] US_033: Xử lý dữ liệu và Chia Chunk
+-   [x] US_034: Thêm Tooltips cho các nút hành động
+-   [x] US_035: Thêm Tooltips cho các nút thu gọn/mở rộng
+-   [x] US_036: Dọn dẹp mã nguồn Frontend
+
+**Mô tả chi tiết:**
+*   **Backend**: 
+    -   Triển khai API cho việc lưu trữ và truy xuất tùy chọn người dùng. 
+    -   Cập nhật API AI Biography để trả về DTO đầy đủ. 
+    -   Triển khai module xử lý và chia nhỏ nội dung từ các tệp PDF/TXT thành các `TextChunk`.
+*   **Frontend**: 
+    -   Xây dựng giao diện người dùng cho việc quản lý tùy chọn cá nhân. 
+    -   Cập nhật giao diện AI Biography để hiển thị thông tin đầy đủ và thêm validation cho prompt. 
+    -   Thêm tooltips cho các nút hành động và các nút thu gọn/mở rộng. 
+    -   Dọn dẹp mã nguồn Frontend.
+
+**Thành viên tham gia:**
+-   Gemini (AI Assistant)
+-   Developer A (Backend)
+-   Developer B (Frontend)

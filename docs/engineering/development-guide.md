@@ -14,6 +14,7 @@
   - [4.1. Tạo migration mới](#41-tạo-migration-mới)
   - [4.2. Áp dụng migration](#42-áp-dụng-migration)
 - [5. Seeding a Database](#5-seeding-a-database)
+- [6. Sử dụng Dịch vụ Phân quyền (Authorization Service)](#6-sử-dụng-dịch-vụ-phân-quyền-authorization-service)
 
 ---
 
@@ -27,6 +28,7 @@ Tài liệu này hướng dẫn cách cài đặt môi trường, build, và dep
 -   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn) cho việc phát triển Backend.
 -   **Node.js 20+**: Phiên bản 20.x (hoặc mới hơn) cho việc phát triển Frontend.
 -   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations cho database nghiệp vụ. Bạn có thể cài đặt bằng lệnh: `dotnet tool install --global dotnet-ef`.
+-   **AutoMapper**: Thư viện để ánh xạ đối tượng (object mapping) giữa các lớp (ví dụ: Entity sang DTO).
 -   **AutoMapper**: Thư viện để ánh xạ đối tượng (object mapping) giữa các lớp (ví dụ: Entity sang DTO).
 
 ## 2. Cài đặt và Chạy dự án
@@ -76,6 +78,10 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
         "Authority": "YOUR_AUTH0_DOMAIN", // Thay bằng Authority của bạn (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
         "Audience": "YOUR_AUTH0_AUDIENCE", // Thay bằng Audience của bạn (ví dụ: http://localhost:5000)
         "Namespace": "https://familytree.com/" // Namespace cho các custom claims
+      },
+      "UserPreferenceSettings": {
+        "DefaultTheme": "Light",
+        "DefaultLanguage": "Vietnamese"
       },
       "StorageSettings": {
         "Provider": "Local",
@@ -197,7 +203,7 @@ dotnet ef database update --project src/Infrastructure --startup-project src/Web
 *   Để biết hướng dẫn chi tiết hơn về cách quản lý database migrations, bao gồm cả việc tạo migration ban đầu, vui lòng tham khảo [Hướng dẫn Backend](./backend-guide.md#9-database-migration).
 *   Khi chạy Backend ở chế độ Development, `ApplicationDbContextInitialiser` sẽ tự động gọi `database update` nếu database là relational và chưa được cập nhật.
 
-## 5. Sử dụng Dịch vụ Phân quyền (Authorization Service)
+## 6. Sử dụng Dịch vụ Phân quyền (Authorization Service)
 
 Hệ thống cung cấp một dịch vụ phân quyền tập trung (`IAuthorizationService`) để kiểm tra quyền hạn của người dùng trong các ngữ cảnh khác nhau, bao gồm cả vai trò toàn cục và vai trò cụ thể theo gia đình. Các nhà phát triển nên sử dụng dịch vụ này để thực hiện các kiểm tra quyền trong logic nghiệp vụ và các endpoint API.
 
@@ -221,9 +227,9 @@ public class FamilyService : IFamilyService
     public async Task<Result<bool>> UpdateFamily(Guid familyId, UpdateFamilyCommand command, CancellationToken cancellationToken)
     {
         var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
+        if (currentUserProfile == null || string.IsNullOrEmpty(currentUserProfile.ExternalId))
         {
-            return Result<bool>.Failure("User profile not found.", 404);
+            return Result<bool>.Failure("User profile or ExternalId not found.", 404);
         }
 
         // Kiểm tra quyền quản lý gia đình
@@ -253,7 +259,7 @@ public class FamilyService : IFamilyService
 `IAuthorizationService` cung cấp các phương thức sau để kiểm tra quyền:
 
 *   `IsAdmin()`: Kiểm tra xem người dùng hiện tại có vai trò `Administrator` toàn cục hay không.
-*   `GetCurrentUserProfileAsync()`: Lấy thông tin `UserProfile` của người dùng hiện tại.
+*   `GetCurrentUserProfileAsync()`: Lấy thông tin `UserProfile` của người dùng hiện tại, bao gồm cả `ExternalId`.
 *   `CanAccessFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem người dùng có quyền truy cập (ít nhất là `Viewer`) vào một gia đình cụ thể hay không.
 *   `CanManageFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem người dùng có quyền quản lý (vai trò `Manager`) đối với một gia đình cụ thể hay không.
 *   `HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)`: Kiểm tra xem người dùng có vai trò `requiredRole` hoặc cao hơn trong một gia đình cụ thể hay không.
@@ -314,7 +320,7 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Res
 }
 ```
 
-## 6. Seeding a Database
+## 5. Seeding a Database
 
 Dự án được cấu hình để tự động seed dữ liệu mẫu khi Backend khởi động ở chế độ Development, nếu database chưa có dữ liệu. Cơ chế này được triển khai trong `ApplicationDbContextInitialiser`.
 

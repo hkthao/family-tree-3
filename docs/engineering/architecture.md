@@ -66,6 +66,7 @@ graph TD
 -   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `IApplicationDbContext` để tương tác với dữ liệu và sử dụng `Result Pattern` để trả về kết quả thống nhất. Do tính chất thực dụng, Application Layer có tham chiếu đến `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` để tận dụng các extension methods tiện lợi.**
 -   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
 -   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), các dịch vụ lưu trữ tệp (Local, Cloudinary, S3), và các dịch vụ bên ngoài khác.
+-   **User Preference Management**: Module này quản lý các tùy chọn cá nhân của người dùng như chủ đề, ngôn ngữ, cài đặt thông báo. Nó bao gồm các API để lưu trữ và truy xuất các tùy chọn này, sử dụng thực thể `UserPreference` và các enum `Theme`, `Language`.
 
 ## 4. Sơ đồ mã nguồn (Code Diagram - C4) (updated after refactor)
 
@@ -86,18 +87,21 @@ graph TD
         C -->|Tương tác| D(IApplicationDbContext)
         C -->|Sử dụng| E(IFileTextExtractorFactory)
         C -->|Sử dụng| F(ChunkingPolicy)
+        C -->|Sử dụng| UP(IUserPreferenceService)
     end
 
     subgraph "Infrastructure Layer"
         CR --> G(ApplicationDbContext)
         D --> G
         E --> H(PdfTextExtractor/TxtTextExtractor)
+        UP --> G
     end
 
     subgraph "Domain Layer"
         C --> I(Entities)
         G --> I
         F --> I
+        UP --> I(UserPreference Entity)
     end
 ```
 
@@ -109,11 +113,12 @@ graph TD
     -   `QueryHandler` truy vấn dữ liệu thông qua `IApplicationDbContext`.
     -   **Mới**: `ProcessFileCommandHandler` sử dụng `IFileTextExtractorFactory` để lấy trình trích xuất văn bản và `ChunkingPolicy` để chia nhỏ văn bản.
 -   **IApplicationDbContext**: Interface định nghĩa các `DbSet` và phương thức lưu thay đổi, được triển khai bởi `ApplicationDbContext` trong Infrastructure Layer. **Do tính chất thực dụng, `IApplicationDbContext` sử dụng các kiểu dữ liệu và extension methods của `Microsoft.EntityFrameworkCore` để đơn giản hóa việc tương tác với cơ sở dữ liệu.**
--   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer. **Mới**: Bao gồm `TextChunk`.
+-   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer. **Mới**: Bao gồm `TextChunk` và `UserPreference`.
 -   **ApplicationDbContext**: Triển khai cụ thể của `IApplicationDbContext` trong Infrastructure Layer, sử dụng Entity Framework Core để tương tác với cơ sở dữ liệu.
 -   **IFileTextExtractorFactory**: Interface trong Application Layer để lấy đúng trình trích xuất văn bản.
 -   **PdfTextExtractor/TxtTextExtractor**: Triển khai cụ thể của `IFileTextExtractor` trong Infrastructure Layer để trích xuất văn bản từ PDF/TXT.
 -   **ChunkingPolicy**: Domain Service chứa logic làm sạch và chia nhỏ văn bản thành các chunk.
+-   **IUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
 
 
 ### 🔄 CQRS (Command, Query, Handler)
@@ -324,7 +329,7 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 
 #### Khả năng thay thế
 
-Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán.
+Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài (trước đây là `Auth0UserId`).
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 

@@ -2272,6 +2272,18 @@
             "items": {
               "type": "string"
             }
+          },
+          "sessionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
