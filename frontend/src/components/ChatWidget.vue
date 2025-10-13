@@ -29,8 +29,8 @@
             </template>
             <v-card density="compact" :color="message.direction === 'outgoing' ? 'primary' : 'grey lighten-2'"
               :dark="message.direction === 'outgoing'" class="message-bubble ">
-              <v-card-text class="py-2">
-                {{ message.content }}
+              <v-card-text class="py-2 message-content">
+                <div v-html="formattedContent(message.content)"></div>
                 <div class="message-timestamp text-caption text-right mt-1">
                   {{ message.timestamp }}
                 </div>
@@ -100,6 +100,10 @@ const scrollToBottom = () => {
   if (messagesContainer) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
+};
+
+const formattedContent = (content: string) => {
+  return content.replace(/\n/g, '<br>');
 };
 
 onMounted(() => {
@@ -184,11 +188,8 @@ onMounted(() => {
   background-color: #fff;
   border-top: 1px solid #eee;
 }
-</style>
 
-<style>
-.message-item .v-list-item__append,
-.message-item .v-list-item__prepend {
-  align-self: start;
+.message-content {
+  white-space: pre-wrap; /* Preserve whitespace and line breaks */
 }
 </style>
