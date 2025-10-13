@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace backend.Infrastructure.Services
+namespace backend.Infrastructure.AI.TextExtractors
 {
     public class FileTextExtractorFactory : IFileTextExtractorFactory
     {

@@ -7,11 +7,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using backend.Application.AI.VectorStore;
 using backend.Infrastructure.AI.Embeddings;
-using backend.Application.AI.Chat;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AISettings;
 using Microsoft.Extensions.Options;
 using backend.Infrastructure.AI.VectorStore;
+using backend.Infrastructure.AI.TextExtractors;
 
 namespace backend.Infrastructure;
 

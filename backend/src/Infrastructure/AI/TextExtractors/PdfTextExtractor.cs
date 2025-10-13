@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 using UglyToad.PdfPig;
 using System.Text;
 
-namespace backend.Infrastructure.Services
+namespace backend.Infrastructure.AI.TextExtractors
 {
     public class PdfTextExtractor : IFileTextExtractor
     {

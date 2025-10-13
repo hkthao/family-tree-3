@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Domain.Entities;
 using backend.Application.Common.Models;
 

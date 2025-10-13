@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using System.Text;
 
-namespace backend.Infrastructure.Services
+namespace backend.Infrastructure.AI.TextExtractors
 {
     public class TxtTextExtractor : IFileTextExtractor
     {
