@@ -42,15 +42,10 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             ChatResponse? chatResponse = null;
            var systemPrompt = new ChatMessage
             {
-                Role = "system",
-                Content = @"
-            Bạn là trợ lý AI của FamilyTree. BẮT BUỘC trả lời bằng TIẾNG VIỆT.
-            - Chỉ trả lời các câu hỏi liên quan tới chức năng phần mềm, hướng dẫn sử dụng, cấu hình và troubleshooting.
-            - Câu trả lời phải ngắn gọn, dễ hiểu, thân thiện, ví dụ có thể dùng bullet hoặc số nếu hướng dẫn nhiều bước.
-            - Nếu câu hỏi ngoài phạm vi, trả về '(Không có dữ liệu liên quan)' và kèm lời gợi ý các câu hỏi hữu ích về phần mềm.
-            - Tránh trả lời các câu chào hỏi, small talk hoặc câu hỏi phi kỹ thuật.
-            - Khi có context từ database, chỉ dùng những chunk relevant (similarity >= 0.75) để trả lời.
-            "
+                Role = "assistant",
+                Content = @"Bạn là trợ lý AI của FamilyTree. BẮT BUỘC trả lời bằng TIẾNG VIỆT.
+                - Chỉ trả lời các câu hỏi liên quan tới chức năng phần mềm, hướng dẫn sử dụng, cấu hình và troubleshooting.
+                - Câu trả lời phải ngắn gọn, dễ hiểu, thân thiện, ví dụ có thể dùng bullet hoặc số nếu hướng dẫn nhiều bước."
             };
 
             // Proceed with RAG flow
