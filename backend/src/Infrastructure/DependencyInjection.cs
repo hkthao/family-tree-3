@@ -65,12 +65,14 @@ public static class DependencyInjection
 
         // Register Embedding Settings and Providers
         services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmbeddingSettings>>().Value);
         services.AddTransient<OpenAIEmbeddingProvider>();
         services.AddTransient<CohereEmbeddingProvider>();
         services.AddTransient<LocalEmbeddingProvider>();
         services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
         // Register Vector Store
         services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<VectorStoreSettings>>().Value);
         services.AddTransient<InMemoryVectorStore>();
         services.AddTransient<PineconeVectorStore>();
         services.AddTransient<QdrantVectorStore>();
