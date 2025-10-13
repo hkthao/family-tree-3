@@ -4,6 +4,7 @@
     :label="$t('chunkUpload.fileInputLabel')"
     :accept="acceptTypes"
     prepend-icon="mdi-paperclip"
+    density="compact"
     show-size
     counter
     :rules="fileRules"

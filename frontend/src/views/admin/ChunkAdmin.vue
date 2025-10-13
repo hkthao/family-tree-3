@@ -9,22 +9,14 @@
               <v-col cols="12">
                 <ChunkUpload @file-selected="handleFileSelected" :clear-file="clearChunkUpload" @file-cleared="handleFileCleared" />
               </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field v-model="fileId" :label="$t('chunkUpload.fileIdLabel')"
-                  :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]" required :hide-details="true"></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field v-model="familyId" :label="$t('chunkUpload.familyIdLabel')"
-                  :hide-details="true"></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field v-model="category" :label="$t('chunkUpload.categoryLabel')" :hide-details="true"
-                  :rules="[v => !!v || $t('chunkUpload.categoryRequired')]" required></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-text-field v-model="createdBy" :label="$t('chunkUpload.createdByLabel')" :readonly="true"
-                  :hide-details="true" :rules="[v => !!v || $t('chunkUpload.createdByRequired')]"
-                  required></v-text-field>
+              <v-col cols="12">
+                <ChunkMetadataForm
+                  v-model:fileId="fileId"
+                  v-model:familyId="familyId"
+                  v-model:category="category"
+                  v-model:createdBy="createdBy"
+                  ref="chunkMetadataFormRef"
+                />
               </v-col>
               <v-col cols="12">
                 <v-btn class="mr-2" color="primary" :disabled="!isFormValid || chunkStore.loading" @click="upload">
@@ -58,18 +50,21 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import ChunkUpload from '@/components/ChunkUpload.vue';
 import ChunkTable from '@/components/ChunkTable.vue';
+import ChunkMetadataForm from '@/components/ChunkMetadataForm.vue';
 
 const chunkStore = useChunkStore();
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 const { t } = useI18n();
 
-const selectedFile = ref<File | null>(null);
+const selectedFile = ref<File | undefined>(undefined);
 const fileId = ref('');
 const familyId = ref('');
 const category = ref('');
 const createdBy = ref('');
 const clearChunkUpload = ref(false);
+
+const chunkMetadataFormRef = ref<InstanceType<typeof ChunkMetadataForm> | null>(null);
 
 const handleFileSelected = (file: File) => {
   selectedFile.value = file;
@@ -83,9 +78,7 @@ const handleFileCleared = () => {
 const isFormValid = computed(() => {
   return (
     !!selectedFile.value &&
-    !!fileId.value &&
-    !!category.value &&
-    !!createdBy.value
+    chunkMetadataFormRef.value?.validate()
   );
 });
 
@@ -105,7 +98,7 @@ const upload = async () => {
 };
 
 const resetForm = () => {
-  selectedFile.value = null;
+  selectedFile.value = undefined;
   fileId.value = '';
   familyId.value = '';
   category.value = '';
@@ -133,8 +126,6 @@ const handleApproveSelected = async (chunkIds: string[]) => {
       // If there's an error from approveChunks, show it
       notificationStore.showSnackbar(chunkStore.error, 'error');
     }
-  } else {
-    notificationStore.showSnackbar(t('chunkAdmin.noChunksToApprove'), 'warning'); // Add a new i18n key
   }
 };
 
@@ -146,7 +137,7 @@ const handleRejectSelected = (chunkIds: string[]) => {
 // Clear form after successful upload
 watch(() => chunkStore.chunks, (newChunks) => {
   if (newChunks.length > 0 && !chunkStore.error) {
-    selectedFile.value = null;
+    selectedFile.value = undefined;
     fileId.value = '';
     familyId.value = '';
     category.value = '';
