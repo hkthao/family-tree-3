@@ -1,28 +1,29 @@
 gemini --prompt "
-You are a documentation auditor and technical writer.
+You are an expert C# backend developer and AI assistant engineer.
 
-Context:
-The project repository has recently added many new features, architectural changes, and refactors, but the documentation in the 'docs/' folder is outdated. Your task is to review all Markdown (.md) files in that folder and update them so they accurately reflect the current implementation of the project.
+Task:
+Review the C# class 'ChatWithAssistantQueryHandler' that handles user chat requests with AI. 
+Currently, it always calls the AI provider regardless of whether relevant context exists in VectorStore. 
+We want to improve the logic so that:
 
-Objectives:
-1. Review every .md file inside the 'docs/' folder and subfolders.
-2. Compare the existing documentation with the actual project structure, code, and recent features.
-3. Update the documents to match the **current state of the repository**, including:
-   - new modules, services, APIs, commands, or workflows;
-   - updated architecture or dependency changes;
-   - newly added configurations, environment variables, or integrations.
-4. Keep the **overall structure and hierarchy of each document intact** (do not rewrite everything from scratch).
-5. Improve clarity and consistency: make the language simple and clear enough for **junior developers, testers, or new team members** to understand easily.
-6. Ensure all examples, code snippets, and diagrams (if any) are correct and runnable.
-7. Maintain existing Markdown formatting and section order unless changes are necessary for accuracy.
+1. If the user message is general chat / greeting / small talk, or there is no relevant context in VectorStore:
+   - Do not attempt to retrieve context for RAG.
+   - Call the AI provider with a special fallback prompt.
+   - The fallback prompt should be friendly, concise, and safe (do not invent technical data).
+   - Examples: greetings, thanks, short casual conversation.
 
-Style Guidelines:
-- Use concise and friendly explanations.
-- Use consistent technical terms.
-- Keep the tone professional but approachable.
-- When updating, use English technical writing best practices.
-- If you detect ambiguity or missing context, add short explanatory notes (e.g., “Note: …”) to guide readers.
+2. If relevant context exists:
+   - Continue using current RAG logic (combine context chunks with user message).
 
-Deliverable:
-Output the **updated Markdown text** for each file, keeping filenames unchanged.
-" --source ./docs
+3. Optional: implement simple intent detection (greeting / small talk / question) to decide when to fallback.
+
+Requirements:
+- Produce a **C# implementation** inside 'ChatWithAssistantQueryHandler'.
+- Keep the current Clean Architecture, CQRS, MediatR, ResultWrapper patterns.
+- Ensure proper logging of fallback events.
+- Write clear, maintainable, extensible code.
+- Include comments explaining fallback logic and intent detection.
+
+Output:
+Return the **full improved C# handler code**, ready to replace the existing class.
+" --source ./backend/Application/AI/Chat/Queries/ChatWithAssistantQueryHandler.cs

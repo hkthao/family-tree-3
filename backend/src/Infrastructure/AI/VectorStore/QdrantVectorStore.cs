@@ -125,8 +125,8 @@ public class QdrantVectorStore : IVectorStore
                 results.Add(new TextChunk
                 {
                     Id = foundPoint.Id.Uuid,
-                    Content = payload.GetValueOrDefault("content")?.StringValue ?? string.Empty,
-                    Embedding = [.. foundPoint.Vectors.Vector.Data.Select(e => (float)e)],
+                    Content = payload.TryGetValue("content", out var contentValue) ? contentValue.StringValue ?? string.Empty : string.Empty,
+                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (float)e).ToArray() ?? [],
                     Metadata = payload.ToDictionary(
                         p => p.Key,
                         p => p.Value.StringValue ?? string.Empty

@@ -2,6 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Application.AI.VectorStore;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Chat.Queries;
 
@@ -13,6 +14,7 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
     private readonly AIChatSettings _chatSettings;
     private readonly EmbeddingSettings _embeddingSettings;
     private readonly VectorStoreSettings _vectorStoreSettings;
+    private readonly ILogger<ChatWithAssistantQueryHandler> _logger;
 
     public ChatWithAssistantQueryHandler(
         IChatProviderFactory chatProviderFactory,
@@ -20,7 +22,8 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
         IVectorStoreFactory vectorStoreFactory,
         AIChatSettings chatSettings,
         EmbeddingSettings embeddingSettings,
-        VectorStoreSettings vectorStoreSettings)
+        VectorStoreSettings vectorStoreSettings,
+        ILogger<ChatWithAssistantQueryHandler> logger)
     {
         _chatProviderFactory = chatProviderFactory;
         _embeddingProviderFactory = embeddingProviderFactory;
@@ -28,32 +31,47 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
         _chatSettings = chatSettings;
         _embeddingSettings = embeddingSettings;
         _vectorStoreSettings = vectorStoreSettings;
+        _logger = logger;
     }
 
     public async Task<Result<ChatResponse>> Handle(ChatWithAssistantQuery request, CancellationToken cancellationToken)
     {
         try
         {
+            string finalPrompt;
+
+            // Proceed with RAG flow
             // 1. Generate embedding for the user's prompt
             var embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(_embeddingSettings.Provider));
             var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(request.UserMessage, cancellationToken);
 
-            if (!embeddingResult.IsSuccess)
+            if (!embeddingResult.IsSuccess || embeddingResult.Value == null)
                 return Result<ChatResponse>.Failure($"Failed to generate embedding: {embeddingResult.Error}");
 
             var userEmbedding = embeddingResult.Value!;
 
             // 2. Search in vector store
             var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
-            var searchResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, new Dictionary<string, string>(), cancellationToken);
+            var searchResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, [], cancellationToken);
 
-            // 3. Construct augmented prompt
-            var context = string.Join("\n\n", searchResults.Select(c => c.Content));
-            var augmentedPrompt = $"Context: {context}\n\nUser: {request.UserMessage}";
+            // 3. Check if relevant context exists
+            if (searchResults == null || searchResults.Count == 0)
+            {
+                _logger.LogInformation("No relevant context found for user message: {UserMessage}. Using fallback prompt.", request.UserMessage);
+                finalPrompt = "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu. Bạn có câu hỏi nào khác về phần mềm không?"; // Fallback for no context
+            }
+            else
+            {
+                // 4. Construct augmented prompt
+                var context = string.Join("\n\n", searchResults.Select(c => c.Content));
+                finalPrompt = $"Context: {context}\n\nUser: {request.UserMessage}";
+            }
 
-            // 4. Get chat response
+            _logger.LogInformation("Final prompt: {finalPrompt}", finalPrompt);
+
+            // 5. Get chat response using the determined prompt
             var chatProvider = _chatProviderFactory.GetProvider(Enum.Parse<ChatAIProvider>(_chatSettings.Provider));
-            var responseContent = await chatProvider.GenerateResponseAsync(augmentedPrompt);
+            var responseContent = await chatProvider.GenerateResponseAsync(finalPrompt);
 
             var chatResponse = new ChatResponse
             {
@@ -69,4 +87,5 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             return Result<ChatResponse>.Failure($"Failed to generate chat response: {ex.Message}");
         }
     }
+
 }
