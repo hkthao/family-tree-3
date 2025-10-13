@@ -38,18 +38,15 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
     {
         try
         {
-            string finalPromptContent;
+            bool isFallback = false;
+            ChatResponse? chatResponse = null;
 
             // Define the system prompt
             var systemPrompt = new ChatMessage
             {
                 Role = "system",
-                Content = @"Bạn là trợ lý AI của hệ thống FamilyTree.
-                            Chỉ trả lời các câu hỏi liên quan tới chức năng phần mềm, hướng dẫn sử dụng, cấu hình, và troubleshooting.
-                            Các câu hỏi ngoài phạm vi phần mềm (chào hỏi, small talk, câu cá nhân, phi kỹ thuật) thì trả về '(Không có dữ liệu liên quan)'.
-                            Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu."
+                Content = @"Bạn là trợ lý AI của hệ thống FamilyTree. Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu."
             };
-
 
             // Proceed with RAG flow
             // 1. Generate embedding for the user's prompt
@@ -64,39 +61,46 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             // 2. Search in vector store
             var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
             var silimarityResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, [], cancellationToken);
-            var searchResults = silimarityResults.Where(s=>s.Score > 0.75).ToList();
-
+            var searchResults = silimarityResults.Where(s => s.Score > _chatSettings.ScoreThreshold).OrderByDescending(r => r.Score).ToList();
+           
             // 3. Check if relevant context exists
             if (searchResults == null || searchResults.Count == 0)
             {
+                isFallback = true;
                 _logger.LogInformation("No relevant context found for user message: {UserMessage}. Using fallback prompt.", request.UserMessage);
-                finalPromptContent = "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu. Bạn có câu hỏi nào khác về phần mềm không?"; // Fallback for no context
+
+                chatResponse = new ChatResponse
+                {
+                    Response = "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu. Bạn có câu hỏi nào khác về phần mềm không?",
+                    SessionId = request.SessionId,
+                    Model = isFallback ? "Fallback" : _chatSettings.Provider.ToString(),
+                    CreatedAt = DateTime.UtcNow
+                };
+                return Result<ChatResponse>.Success(chatResponse);
             }
             else
             {
                 // 4. Construct augmented prompt
                 var context = string.Join("\n\n", searchResults.Select(c => c.Content));
-                finalPromptContent = $"Context: {context}\n\nUser: {request.UserMessage}";
+                var finalPromptContent = $"Context: {context}\n\nUser: {request.UserMessage}";
+                // Construct messages list for the chat provider
+                var messages = new List<ChatMessage>{
+                    systemPrompt,
+                    new() { Role = "user", Content = finalPromptContent }
+                };
+
+                // 5. Get chat response using the determined prompt
+                var chatProvider = _chatProviderFactory.GetProvider(Enum.Parse<ChatAIProvider>(_chatSettings.Provider));
+                var responseContent = await chatProvider.GenerateResponseAsync(messages);
+
+                chatResponse = new ChatResponse
+                {
+                    Response = responseContent,
+                    SessionId = request.SessionId,
+                    Model = isFallback ? "Fallback" : _chatSettings.Provider.ToString(),
+                    CreatedAt = DateTime.UtcNow
+                };
             }
-
-            // Construct messages list for the chat provider
-            var messages = new List<ChatMessage>
-            {
-                systemPrompt,
-                new() { Role = "user", Content = finalPromptContent }
-            };
-
-            // 5. Get chat response using the determined prompt
-            var chatProvider = _chatProviderFactory.GetProvider(Enum.Parse<ChatAIProvider>(_chatSettings.Provider));
-            var responseContent = await chatProvider.GenerateResponseAsync(messages);
-
-            var chatResponse = new ChatResponse
-            {
-                Response = responseContent,
-                SessionId = request.SessionId,
-                Model = _chatSettings.Provider.ToString(),
-                CreatedAt = DateTime.UtcNow
-            };
             return Result<ChatResponse>.Success(chatResponse);
         }
         catch (Exception ex)

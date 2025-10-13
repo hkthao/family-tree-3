@@ -5,6 +5,7 @@ public class AIChatSettings
 {
     public const string SectionName = "AIChatSettings";
     public string Provider { get; set; } = "";
+    public float ScoreThreshold { get; set; } = 0f;
     public GeminiSettings Gemini { get; set; } = new();
     public LocalAISettings Local { get; set; } = new();
     public OpenAISettings OpenAI { get; set; } = new();
