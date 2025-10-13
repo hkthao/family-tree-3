@@ -1,3 +1,5 @@
+using FluentValidation;
+
 namespace backend.Application.Families.Commands.DeleteFamily;
 
 public class DeleteFamilyCommandValidator : AbstractValidator<DeleteFamilyCommand>
@@ -5,6 +7,6 @@ public class DeleteFamilyCommandValidator : AbstractValidator<DeleteFamilyComman
     public DeleteFamilyCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty();
+            .NotEmpty().WithMessage("Id cannot be empty.");
     }
 }

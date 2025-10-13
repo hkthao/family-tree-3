@@ -1,3 +1,6 @@
+using FluentValidation;
+using backend.Domain.Enums;
+
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
 public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelationshipCommand>
@@ -5,12 +8,13 @@ public class CreateRelationshipCommandValidator : AbstractValidator<CreateRelati
     public CreateRelationshipCommandValidator()
     {
         RuleFor(v => v.SourceMemberId)
-            .NotEmpty();
+            .NotEmpty().WithMessage("SourceMemberId cannot be empty.");
 
         RuleFor(v => v.TargetMemberId)
-            .NotEmpty();
+            .NotEmpty().WithMessage("TargetMemberId cannot be empty.")
+            .NotEqual(v => v.SourceMemberId).WithMessage("SourceMemberId and TargetMemberId cannot be the same.");
 
         RuleFor(v => v.Type)
-            .NotEmpty();
+            .IsInEnum().WithMessage("Invalid RelationshipType value.");
     }
 }

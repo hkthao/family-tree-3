@@ -1,3 +1,6 @@
+using FluentValidation;
+using backend.Domain.Enums;
+
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 
 public class SaveUserPreferencesCommandValidator : AbstractValidator<SaveUserPreferencesCommand>

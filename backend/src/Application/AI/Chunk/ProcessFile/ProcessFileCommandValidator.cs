@@ -1,36 +1,28 @@
+using FluentValidation;
+
 namespace backend.Application.AI.Chunk.ProcessFile;
 
 public class ProcessFileCommandValidator : AbstractValidator<ProcessFileCommand>
 {
     public ProcessFileCommandValidator()
     {
-        RuleFor(x => x.FileStream)
-            .NotNull().WithMessage("File stream cannot be null.");
+        RuleFor(v => v.FileStream)
+            .NotNull().WithMessage("FileStream cannot be null.");
 
-        RuleFor(x => x.FileName)
-            .NotEmpty().WithMessage("File name cannot be empty.");
+        RuleFor(v => v.FileName)
+            .NotNull().WithMessage("FileName cannot be null.")
+            .NotEmpty().WithMessage("FileName cannot be empty.");
 
-        RuleFor(x => x.FileName)
-            .Must(BeAValidFileType).WithMessage("Unsupported file type. Only PDF and TXT are allowed.");
+        RuleFor(v => v.FileId)
+            .NotNull().WithMessage("FileId cannot be null.")
+            .NotEmpty().WithMessage("FileId cannot be empty.");
 
-        RuleFor(x => x.FileId)
-            .NotEmpty().WithMessage("File ID cannot be empty.");
-
-        RuleFor(x => x.FamilyId)
-            .MaximumLength(36).WithMessage("Family ID must not exceed 36 characters."); // Assuming GUID format
-
-        RuleFor(x => x.Category)
+        RuleFor(v => v.Category)
+            .NotNull().WithMessage("Category cannot be null.")
             .NotEmpty().WithMessage("Category cannot be empty.");
 
-        RuleFor(x => x.CreatedBy)
+        RuleFor(v => v.CreatedBy)
+            .NotNull().WithMessage("CreatedBy cannot be null.")
             .NotEmpty().WithMessage("CreatedBy cannot be empty.");
-    }
-
-    private bool BeAValidFileType(string fileName)
-    {
-        if (string.IsNullOrEmpty(fileName)) return false;
-        var allowedExtensions = new[] { ".pdf", ".txt" };
-        var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
-        return allowedExtensions.Contains(fileExtension);
     }
 }

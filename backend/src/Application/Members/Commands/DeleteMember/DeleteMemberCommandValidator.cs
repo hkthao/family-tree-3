@@ -1,3 +1,5 @@
+using FluentValidation;
+
 namespace backend.Application.Members.Commands.DeleteMember;
 
 public class DeleteMemberCommandValidator : AbstractValidator<DeleteMemberCommand>
@@ -5,6 +7,6 @@ public class DeleteMemberCommandValidator : AbstractValidator<DeleteMemberComman
     public DeleteMemberCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty();
+            .NotEmpty().WithMessage("Id cannot be empty.");
     }
 }

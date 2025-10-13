@@ -1,3 +1,6 @@
+using FluentValidation;
+using backend.Domain.Enums;
+
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
 public class UpdateRelationshipCommandValidator : AbstractValidator<UpdateRelationshipCommand>
@@ -5,15 +8,16 @@ public class UpdateRelationshipCommandValidator : AbstractValidator<UpdateRelati
     public UpdateRelationshipCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty();
+            .NotEmpty().WithMessage("Id cannot be empty.");
 
         RuleFor(v => v.SourceMemberId)
-            .NotEmpty();
+            .NotEmpty().WithMessage("SourceMemberId cannot be empty.");
 
         RuleFor(v => v.TargetMemberId)
-            .NotEmpty();
+            .NotEmpty().WithMessage("TargetMemberId cannot be empty.")
+            .NotEqual(v => v.SourceMemberId).WithMessage("SourceMemberId and TargetMemberId cannot be the same.");
 
         RuleFor(v => v.Type)
-            .NotEmpty();
+            .IsInEnum().WithMessage("Invalid RelationshipType value.");
     }
 }

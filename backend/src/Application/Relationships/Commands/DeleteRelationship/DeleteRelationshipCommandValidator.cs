@@ -1,3 +1,5 @@
+using FluentValidation;
+
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
 public class DeleteRelationshipCommandValidator : AbstractValidator<DeleteRelationshipCommand>
@@ -5,6 +7,6 @@ public class DeleteRelationshipCommandValidator : AbstractValidator<DeleteRelati
     public DeleteRelationshipCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty();
+            .NotEmpty().WithMessage("Id cannot be empty.");
     }
 }

@@ -1,3 +1,6 @@
+using FluentValidation;
+using backend.Domain.Enums;
+
 namespace backend.Application.Members.Commands.SaveAIBiography;
 
 public class SaveAIBiographyCommandValidator : AbstractValidator<SaveAIBiographyCommand>
@@ -5,16 +8,23 @@ public class SaveAIBiographyCommandValidator : AbstractValidator<SaveAIBiography
     public SaveAIBiographyCommandValidator()
     {
         RuleFor(v => v.MemberId)
-            .NotEmpty().WithMessage("MemberId is required.");
+            .NotEmpty().WithMessage("MemberId cannot be empty.");
+
+        RuleFor(v => v.Style)
+            .IsInEnum().WithMessage("Invalid BiographyStyle value.");
 
         RuleFor(v => v.Content)
-            .NotEmpty().WithMessage("Content is required.")
-            .MaximumLength(4000).WithMessage("Content must not exceed 4000 characters."); // Assuming a reasonable max length
+            .NotNull().WithMessage("Content cannot be null.")
+            .NotEmpty().WithMessage("Content cannot be empty.");
+
+        RuleFor(v => v.Provider)
+            .IsInEnum().WithMessage("Invalid AIProviderType value.");
 
         RuleFor(v => v.UserPrompt)
-            .MaximumLength(1000).WithMessage("UserPrompt must not exceed 1000 characters."); // Assuming a reasonable max length
+            .NotNull().WithMessage("UserPrompt cannot be null.")
+            .NotEmpty().WithMessage("UserPrompt cannot be empty.");
 
         RuleFor(v => v.TokensUsed)
-            .GreaterThanOrEqualTo(0).WithMessage("TokensUsed must be a non-negative number.");
+            .GreaterThanOrEqualTo(0).WithMessage("TokensUsed cannot be negative.");
     }
 }
