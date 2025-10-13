@@ -1,5 +1,5 @@
 <template>
-  <v-file-input v-model="selectedFile" :label="$t('chunkUpload.fileInputLabel')" accept=".pdf,.txt"
+  <v-file-input v-model="selectedFile" :label="$t('chunkUpload.fileInputLabel')" accept=".pdf,.txt,.md"
     prepend-icon="mdi-paperclip" show-size counter :rules="fileRules" @change="onFileChange"></v-file-input>
 </template>
 
@@ -21,7 +21,7 @@ const selectedFile = ref<File | null>(null);
 const fileRules = [
   (value: File) => !!value || t('chunkUpload.fileRequired'),
   (value: File) => {
-    const allowedTypes = ['application/pdf', 'text/plain'];
+    const allowedTypes = ['application/pdf', 'text/plain', 'text/markdown'];
     return allowedTypes.includes(value?.type) || t('chunkUpload.fileTypeInvalid');
   },
 ];
