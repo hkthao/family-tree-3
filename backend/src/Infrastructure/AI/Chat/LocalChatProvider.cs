@@ -18,7 +18,7 @@ public class LocalChatProvider : IChatProvider
         _logger = logger;
     }
 
-    public async Task<string> GenerateResponseAsync(string prompt)
+    public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {
         if (string.IsNullOrWhiteSpace(_chatSettings.Local.ApiUrl))
         {
@@ -36,10 +36,7 @@ public class LocalChatProvider : IChatProvider
             var requestBody = new
             {
                 model = _chatSettings.Local.Model,
-                messages = new[]
-                {
-                    new { role = "user", content = prompt }
-                },
+                messages,
                 stream = false
             };
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);

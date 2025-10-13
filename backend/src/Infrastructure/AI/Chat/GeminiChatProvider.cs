@@ -17,9 +17,11 @@ public class GeminiChatProvider : IChatProvider
         _logger = logger;
     }
 
-    public async Task<string> GenerateResponseAsync(string prompt)
+    public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {
-        // Dummy implementation for Gemini, now with access to _geminiSettings.ApiKey and _geminiSettings.Model
-        return await Task.FromResult($"Gemini responded to: {prompt} using model {_chatSettings.Gemini.Model} with API Key {_chatSettings.Gemini.ApiKey}");
+        // Dummy implementation for Gemini
+        var concatenatedMessages = string.Join("\n", messages.Select(m => $"{m.Role}: {m.Content}"));
+        _logger.LogInformation("Gemini received messages: {Messages}", concatenatedMessages);
+        return await Task.FromResult($"Gemini responded to: {concatenatedMessages} using model {_chatSettings.Gemini.Model} with API Key {_chatSettings.Gemini.ApiKey}");
     }
 }

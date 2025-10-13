@@ -14,8 +14,10 @@ public class OpenAIChatProvider : IChatProvider
         _chatSettings = chatSettings;
     }
 
-    public async Task<string> GenerateResponseAsync(string prompt)
+    public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {
-        return await Task.FromResult($"OpenAI responded to: {prompt} using model {_chatSettings.OpenAI.Model} with API Key {_chatSettings.OpenAI.ApiKey}");
+        // Dummy implementation for OpenAI
+        var concatenatedMessages = string.Join("\n", messages.Select(m => $"{m.Role}: {m.Content}"));
+        return await Task.FromResult($"OpenAI responded to: {concatenatedMessages} using model {_chatSettings.OpenAI.Model} with API Key {_chatSettings.OpenAI.ApiKey}");
     }
 }
