@@ -22,7 +22,7 @@
                 </v-btn>
               </v-col>
             </v-row>
-            <v-progress-linear v-if="chunkStore.loading" indeterminate color="primary" class="mb-3"></v-progress-linear>
+            <v-progress-linear v-if="chunkStore.loading" indeterminate color="primary" class="my-3"></v-progress-linear>
           </v-card-text>
         </v-card>
       </v-col>
@@ -98,20 +98,20 @@ const handleChunkApprovalChange = (chunkId: string, approved: boolean) => {
 };
 
 const handleApproveSelected = async (chunkIds: string[]) => {
-  // First, update local approval status for selected chunks
-  chunkIds.forEach(id => chunkStore.setChunkApproval(id, true));
-
-  // Filter out the actual TextChunk objects that are now approved
-  const chunksToApprove = chunkStore.chunks.filter(chunk => chunkIds.includes(chunk.id) && chunk.approved);
+  const chunksToApprove = chunkStore.chunks.filter(chunk => chunkIds.includes(chunk.id));
 
   if (chunksToApprove.length > 0) {
     await chunkStore.approveChunks(chunksToApprove);
     if (!chunkStore.error) {
+      // Update local approval status only after successful API call
+      chunkIds.forEach(id => chunkStore.setChunkApproval(id, true));
       notificationStore.showSnackbar(t('chunkAdmin.approveSelectedSuccess', { count: chunksToApprove.length }), 'success');
     } else {
       // If there's an error from approveChunks, show it
       notificationStore.showSnackbar(chunkStore.error, 'error');
     }
+  } else {
+    notificationStore.showSnackbar(t('chunkAdmin.noChunksToApprove'), 'warning'); // Add a new i18n key
   }
 };
 
