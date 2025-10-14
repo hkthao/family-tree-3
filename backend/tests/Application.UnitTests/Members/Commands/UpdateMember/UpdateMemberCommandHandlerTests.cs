@@ -4,20 +4,15 @@ using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using backend.Infrastructure.Data;
-using backend.Application.Members.Inputs;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandlerTests : IDisposable
+public class UpdateMemberCommandHandlerTests : TestBase, IDisposable
 {
     private readonly UpdateMemberCommandHandler _handler;
-    private readonly ApplicationDbContext _context;
-
     public UpdateMemberCommandHandlerTests()
     {
-        _context = TestDbContextFactory.Create();
-        _handler = new UpdateMemberCommandHandler(_context);
+        _handler = new UpdateMemberCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockFamilyTreeService.Object);
     }
 
     [Fact]
@@ -35,8 +30,6 @@ public class UpdateMemberCommandHandlerTests : IDisposable
             FirstName = "Updated",
             LastName = "Name",
             Gender = "Female",
-            Relationships = new List<RelationshipInput>(),
-            DeletedRelationshipIds = new List<Guid>()
         };
 
         // Act
@@ -54,17 +47,12 @@ public class UpdateMemberCommandHandlerTests : IDisposable
     {
         // Arrange
         var invalidId = Guid.NewGuid();
-        var command = new UpdateMemberCommand { Id = invalidId, Relationships = new List<RelationshipInput>(), DeletedRelationshipIds = new List<Guid>() };
+        var command = new UpdateMemberCommand { Id = invalidId };
 
         // Act
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();
-    }
-
-    public void Dispose()
-    {
-        TestDbContextFactory.Destroy(_context);
     }
 }

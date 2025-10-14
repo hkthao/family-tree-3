@@ -1,19 +1,39 @@
+using AutoMapper;
+using backend.Application.Common.Interfaces;
+using backend.Application.Identity.UserProfiles.Queries;
 using backend.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
+using Moq;
 
-namespace backend.tests.Application.UnitTests.Common;
+namespace backend.Application.UnitTests.Common;
 
-public abstract class TestBase
+public abstract class TestBase : IDisposable
 {
-    protected ApplicationDbContext CreateDbContext()
+    protected readonly ApplicationDbContext _context;
+    protected readonly IMapper _mapper;
+    protected readonly Mock<IUser> _mockUser;
+    protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    protected readonly Mock<IMediator> _mockMediator;
+    protected readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
+
+    protected TestBase()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
+        _context = TestDbContextFactory.Create();
 
-        var context = new ApplicationDbContext(options);
-        context.Database.EnsureCreated(); // Ensure the in-memory database is created
+        var configurationProvider = new MapperConfiguration(cfg =>
+        {
+            cfg.AddMaps(typeof(MappingProfile).Assembly);
+        });
+        _mapper = configurationProvider.CreateMapper();
 
-        return context;
+        _mockUser = new Mock<IUser>();
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockMediator = new Mock<IMediator>();
+        _mockFamilyTreeService = new Mock<IFamilyTreeService>();
+    }
+
+    public void Dispose()
+    {
+        TestDbContextFactory.Destroy(_context);
     }
 }
