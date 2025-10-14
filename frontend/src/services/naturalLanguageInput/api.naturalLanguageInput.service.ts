@@ -21,15 +21,15 @@ export class ApiNaturalLanguageInputService implements INaturalLanguageInputServ
 
       const generatedData = apiResponse.value;
 
-      // Ensure dates are correctly parsed for Member if it's a member
-      if (generatedData.dataType === 'Member' && generatedData.member) {
-        if (generatedData.member.dateOfBirth) {
-          generatedData.member.dateOfBirth = new Date(generatedData.member.dateOfBirth);
+      // Ensure dates are correctly parsed for Members
+      generatedData.members.forEach(member => {
+        if (member.dateOfBirth) {
+          member.dateOfBirth = new Date(member.dateOfBirth);
         }
-        if (generatedData.member.dateOfDeath) {
-          generatedData.member.dateOfDeath = new Date(generatedData.member.dateOfDeath);
+        if (member.dateOfDeath) {
+          member.dateOfDeath = new Date(member.dateOfDeath);
         }
-      }
+      });
 
       return ok(generatedData);
     } catch (error: any) {

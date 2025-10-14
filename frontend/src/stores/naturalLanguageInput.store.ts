@@ -52,23 +52,33 @@ export const useNaturalLanguageInputStore = defineStore('naturalLanguageInput', 
       }
 
       try {
-        let saveResult;
-        if (this.generatedData.dataType === 'Family' && this.generatedData.family) {
-          saveResult = await this.services.family.add(this.generatedData.family);
-        } else if (this.generatedData.dataType === 'Member' && this.generatedData.member) {
-          saveResult = await this.services.member.add(this.generatedData.member);
-        } else {
-          notificationStore.showSnackbar('Unknown data type or missing data, cannot save.', 'error');
-          this.isLoading = false;
-          return;
+        let hasErrors = false;
+
+        for (const family of this.generatedData.families) {
+          const saveResult = await this.services.family.add(family);
+          if (!saveResult.ok) {
+            hasErrors = true;
+            this.error = saveResult.error?.message || saveResult.error?.toString() || 'Unknown error';
+            notificationStore.showSnackbar(`Error saving family ${family.name}: ` + this.error, 'error');
+          }
         }
 
-        if (saveResult.ok) {
-          notificationStore.showSnackbar(`${this.generatedData.dataType} data saved successfully!`, 'success');
+        for (const member of this.generatedData.members) {
+          const saveResult = await this.services.member.add(member);
+          if (!saveResult.ok) {
+            hasErrors = true;
+            this.error = saveResult.error?.message || saveResult.error?.toString() || 'Unknown error';
+            notificationStore.showSnackbar(`Error saving member ${member.fullName}: ` + this.error, 'error');
+          }
+        }
+
+        if (!hasErrors) {
+          notificationStore.showSnackbar('All generated data saved successfully!', 'success');
           this.clearGeneratedData();
-        } else {
-          this.error = saveResult.error?.message || saveResult.error?.toString() || 'Unknown error';
-          notificationStore.showSnackbar(`Error saving ${this.generatedData.dataType} data: ` + this.error, 'error');
+        } else if (!this.error) {
+          // If there were errors but this.error wasn't set (e.g., first error was overwritten)
+          this.error = 'Some data could not be saved.';
+          notificationStore.showSnackbar(this.error, 'warning');
         }
       } catch (e: any) {
         this.error = e.message;

@@ -30,11 +30,14 @@ const isLoading = computed(() => naturalLanguageInputStore.isLoading);
 
 const formattedJson = computed(() => {
   if (generatedData.value) {
-    if (generatedData.value.dataType === 'Family' && generatedData.value.family) {
-      return JSON.stringify(generatedData.value.family, null, 2);
-    } else if (generatedData.value.dataType === 'Member' && generatedData.value.member) {
-      return JSON.stringify(generatedData.value.member, null, 2);
+    const dataToDisplay: any = {};
+    if (generatedData.value.families.length > 0) {
+      dataToDisplay.families = generatedData.value.families;
     }
+    if (generatedData.value.members.length > 0) {
+      dataToDisplay.members = generatedData.value.members;
+    }
+    return JSON.stringify(dataToDisplay, null, 2);
   }
   return '';
 });

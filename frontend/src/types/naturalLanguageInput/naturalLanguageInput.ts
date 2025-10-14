@@ -5,7 +5,7 @@ export interface GenerateDataRequest {
 }
 
 export interface GeneratedDataResponse {
-  dataType: 'Family' | 'Member' | 'Unknown';
-  family?: Family;
-  member?: Member;
+  dataType: 'Families' | 'Members' | 'Mixed' | 'Unknown';
+  families: Family[];
+  members: Member[];
 }
