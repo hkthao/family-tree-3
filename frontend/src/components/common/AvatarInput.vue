@@ -5,15 +5,11 @@
       <AvatarDisplay :src="currentAvatarSrc" :size="props.size" />
     </div>
 
-    <!-- Upload Area -->
-    <v-card class="pa-4 text-center upload-area" :class="{ 'on-drag-over': isDragOver }" flat outlined
-      @click="triggerFileInput" @dragover.prevent="onDragOver" @dragleave.prevent="onDragLeave" @drop.prevent="onDrop">
-      <v-icon size="48" class="mb-2">mdi-cloud-upload-outline</v-icon>
-      <div class="text-subtitle-1">{{ t('avatarInput.uploadArea.clickOrDrag') }}</div>
-      <div class="text-caption text-medium-emphasis">{{ t('avatarInput.uploadArea.supportedFormats') }}</div>
-      <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileSelected" />
-    </v-card>
-
+    <!-- Upload Area using VFileUpload -->
+    <VFileUpload v-model="selectedFile" :label="t('avatarInput.uploadArea.clickOrDrag')"
+      :hint="t('avatarInput.uploadArea.supportedFormats')" accept="image/*" show-size counter
+      :loading="fileUploadStore.loading" :disabled="fileUploadStore.loading" prepend-icon="mdi-cloud-upload-outline"
+      @update:modelValue="onFileSelected" density="compact" />
     <!-- Cropper Dialog -->
     <v-dialog v-model="cropperDialog" max-width="800px" persistent>
       <v-card>
@@ -73,6 +69,7 @@ import { Cropper, type CropperResult } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { useFileUploadStore } from '@/stores/fileUpload.store';
 import { useNotificationStore } from '@/stores/notification.store';
+import { VFileUpload } from 'vuetify/labs/VFileUpload';
 
 const props = defineProps({
   modelValue: { type: String as PropType<string | null | undefined>, default: null },
@@ -85,8 +82,7 @@ const { t } = useI18n();
 const fileUploadStore = useFileUploadStore();
 const notificationStore = useNotificationStore();
 
-const fileInput = ref<HTMLInputElement | null>(null);
-const isDragOver = ref(false);
+const selectedFile = ref<File[]>([]);
 const cropperDialog = ref(false);
 const imageForCropper = ref(''); // Base64 string for the cropper
 const cropperRef = ref<InstanceType<typeof Cropper> | null>(null);
@@ -99,34 +95,10 @@ const currentAvatarSrc = computed(() => {
   return props.modelValue || '/images/default-avatar.png';
 });
 
-// --- File Selection & Drag/Drop ---
-const triggerFileInput = () => {
-  fileInput.value?.click();
-};
-
-const onDragOver = () => {
-  isDragOver.value = true;
-};
-
-const onDragLeave = () => {
-  isDragOver.value = false;
-};
-
-const onDrop = (event: DragEvent) => {
-  isDragOver.value = false;
-  if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-    processFile(event.dataTransfer.files[0]);
-  }
-};
-
-const onFileSelected = (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (input.files && input.files[0]) {
-    processFile(input.files[0]);
-  }
-  // Clear the file input value to allow selecting the same file again
-  if (fileInput.value) {
-    fileInput.value.value = '';
+// --- File Selection ---
+const onFileSelected = (files: File[]) => {
+  if (files && files.length > 0) {
+    processFile(files[0]);
   }
 };
 
@@ -178,6 +150,7 @@ const cancelCrop = () => {
   imageForCropper.value = '';
   croppedImagePreview.value = '';
   isImageCropped.value = false;
+  selectedFile.value = []; // Clear selected file
   fileUploadStore.reset(); // Clear any loading/error state
 };
 
@@ -212,17 +185,7 @@ const uploadCroppedImage = async () => {
   margin: 0 auto;
 }
 
-.upload-area {
-  cursor: pointer;
-  border: 2px dashed #ccc;
-  transition: border-color 0.3s ease;
-}
-
-.upload-area.on-drag-over {
-  border-color: #2196f3;
-  /* Vuetify blue */
-  background-color: rgba(33, 150, 243, 0.1);
-}
+/* Removed custom upload-area styles as VFileUpload handles styling */
 
 .cropper-wrapper {
   max-height: 400px;
