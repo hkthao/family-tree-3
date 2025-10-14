@@ -112,6 +112,6 @@ public class GetUserProfileByIdQueryHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"User profile with ID {nonExistentUserProfileId} not found.");
+        result.Error.Should().Contain("User profile not found.");
     }
 }

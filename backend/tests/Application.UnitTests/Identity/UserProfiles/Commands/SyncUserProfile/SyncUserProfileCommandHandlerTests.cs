@@ -158,6 +158,6 @@ public class SyncUserProfileCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("ExternalId cannot be null or empty.");
+        result.Error.Should().Contain("External ID (sub claim) not found in claims.");
     }
 }

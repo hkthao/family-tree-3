@@ -112,6 +112,6 @@ public class GetUserProfileByExternalIdQueryHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"User profile with ExternalId {nonExistentExternalId} not found.");
+        result.Error.Should().Contain("User profile not found.");
     }
 }
