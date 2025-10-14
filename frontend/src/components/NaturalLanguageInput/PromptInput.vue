@@ -31,7 +31,7 @@ import { ref } from 'vue';
 import { useNaturalLanguageInputStore } from '@/stores/naturalLanguageInput.store';
 
 const naturalLanguageInputStore = useNaturalLanguageInputStore();
-const prompt = ref(`Tạo một gia đình tên Nguyễn ở Hà Nội`);
+const prompt = ref(`Tạo một gia đình tên Nguyễn ở Hà Nội và thêm thành viên tên Trần Văn A, sinh năm 1990 vào gia đình đó.`);
 
 const isLoading = naturalLanguageInputStore.isLoading; // Reactive loading state
 

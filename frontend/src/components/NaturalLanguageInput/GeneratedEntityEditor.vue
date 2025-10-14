@@ -1,9 +1,19 @@
 <template>
-  <v-chip :color="isFamily ? 'blue' : 'green'" label>{{ isFamily ? 'Family' : 'Member' }}</v-chip>
-  <FamilyForm v-if="isFamily" :initial-family-data="editableEntity as Family" :read-only="false"
-    @submit="(val) => updateEntity(val as Family)" />
-  <MemberForm v-else :initial-member-data="editableEntity as Member" :read-only="false"
-    @submit="(val: Member) => updateEntity(val)" />
+  <v-expansion-panel elevation="0" class="p-0 m-0">
+    <v-expansion-panel-title>
+      <div class="d-flex align-center justify-space-between">
+        <span class="text-h6">{{ panelTitle }}</span>
+        <v-spacer></v-spacer>
+        <v-chip :color="isFamily ? 'blue' : 'green'" label class="ms-2">{{ isFamily ? 'Family' : 'Member' }}</v-chip>
+      </div>
+    </v-expansion-panel-title>
+    <v-expansion-panel-text class="no-padding">
+      <FamilyForm v-if="isFamily" :initial-family-data="editableEntity as Family" :read-only="false"
+        @submit="(val) => updateEntity(val as Family)" />
+      <MemberForm v-else :initial-member-data="editableEntity as Member" :read-only="false"
+        @submit="(val: Member) => updateEntity(val)" />
+    </v-expansion-panel-text>
+  </v-expansion-panel>
 </template>
 
 <script setup lang="ts">
@@ -18,13 +28,21 @@ const props = defineProps({
   index: { type: Number, required: true },
 });
 
-const emit = defineEmits(['update:entity']);
+const emit = defineEmits(['update:entity', 'remove:entity']);
 
 const { t } = useI18n();
 
 const isFamily = computed(() => 'name' in props.entity && 'visibility' in props.entity);
 
 const editableEntity = ref<Family | Member>(props.entity);
+
+const panelTitle = computed(() => {
+  if (isFamily.value) {
+    return `Family: ${(editableEntity.value as Family).name || 'New Family'}`;
+  } else {
+    return `Member: ${(editableEntity.value as Member).fullName || (editableEntity.value as Member).firstName || 'New Member'}`;
+  }
+});
 
 watch(() => props.entity, (newVal) => {
   editableEntity.value = newVal;
@@ -33,8 +51,16 @@ watch(() => props.entity, (newVal) => {
 const updateEntity = (updatedVal: Family | Member) => {
   emit('update:entity', { index: props.index, entity: updatedVal, type: isFamily.value ? 'Family' : 'Member' });
 };
+
+const removeEntity = () => {
+  emit('remove:entity', { index: props.index, type: isFamily.value ? 'Family' : 'Member' });
+};
 </script>
 
 <style scoped>
+.no-padding {
+  padding: 0 !important;
+}
+
 /* Add any specific styles here if needed */
 </style>
