@@ -12,6 +12,7 @@ using backend.Application.Common.Models.AISettings;
 using Microsoft.Extensions.Options;
 using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.AI.TextExtractors;
+using backend.Infrastructure.Files;
 
 namespace backend.Infrastructure;
 
@@ -83,6 +84,12 @@ public static class DependencyInjection
         services.AddTransient<PdfTextExtractor>();
         services.AddTransient<TxtTextExtractor>();
         services.AddTransient<MdTextExtractor>();
+
+        // Register File Storage
+        services.AddTransient<LocalFileStorage>();
+        services.AddTransient<S3FileStorage>();
+        services.AddTransient<CloudinaryFileStorage>();
+        services.AddSingleton<IFileStorageFactory, FileStorageFactory>();
 
         return services;
     }

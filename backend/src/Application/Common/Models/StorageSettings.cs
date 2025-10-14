@@ -2,6 +2,7 @@ namespace backend.Application.Common.Models;
 
 public class StorageSettings
 {
+    public const string SectionName  = "StorageSettings";
     public long MaxFileSizeMB { get; set; } = 5;
     public string Provider { get; set; } = "Local";
     public CloudinarySettings Cloudinary { get; set; } = new CloudinarySettings();
