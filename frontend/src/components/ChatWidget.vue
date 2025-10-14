@@ -1,8 +1,13 @@
 <template>
-  <div class="chat-widget-container">
+  <div class="chat-widget-container" v-if="widgetVisible">
     <v-fab-transition>
-      <Vue3Lottie class="chat-bot-btn" @click="toggleChat" v-if="!chatOpen" :animationData="ChatbotAnimation"
-        :height="150" :width="150" />
+      <div class="chat-minimized-container" v-if="!chatOpen">
+        <Vue3Lottie class="chat-bot-btn" @click="toggleChat" :animationData="ChatbotAnimation" :height="150"
+          :width="150" />
+        <v-btn icon variant="text" color="primary" size="small" class="dismiss-btn" @click="dismissWidget">
+          <v-icon>mdi-close-circle</v-icon>
+        </v-btn>
+      </div>
     </v-fab-transition>
 
     <v-card v-if="chatOpen" class="chat-window elevation-12">
@@ -10,6 +15,9 @@
         <v-toolbar-title>{{ t('chat.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-btn icon @click="toggleChat">
+          <v-icon>mdi-minus</v-icon>
+        </v-btn>
+        <v-btn icon @click="dismissWidget">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -64,6 +72,7 @@ import ChatbotAnimation from '@/assets/json/chatbot.json';
 const { t } = useI18n();
 
 const chatOpen = ref(false);
+const widgetVisible = ref(true); // New state to control overall widget visibility
 const chatStore = useChatStore();
 const authStore = useAuthStore();
 const userProfileStore = useUserProfileStore();
@@ -81,6 +90,11 @@ const toggleChat = () => {
       scrollToBottom();
     });
   }
+};
+
+const dismissWidget = () => {
+  widgetVisible.value = false;
+  chatOpen.value = false; // Ensure chat window is also closed when widget is dismissed
 };
 
 const sendMessage = async () => {
@@ -126,6 +140,21 @@ onMounted(() => {
   bottom: 0px;
   right: 0px;
   z-index: 1000;
+}
+
+.chat-minimized-container {
+  position: relative;
+  width: 150px;
+  /* Adjust to match Lottie animation size */
+  height: 150px;
+  /* Adjust to match Lottie animation size */
+}
+
+.dismiss-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1001;
 }
 
 .chat-window {
