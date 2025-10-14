@@ -2,14 +2,8 @@ using backend.Application.UnitTests.Common;
 using Xunit;
 using FluentAssertions;
 using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Events.Commands.DeleteEvent;
-using backend.Application.Common.Exceptions;
 using backend.Domain.Entities;
-using backend.Application.Common.Models;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;
 

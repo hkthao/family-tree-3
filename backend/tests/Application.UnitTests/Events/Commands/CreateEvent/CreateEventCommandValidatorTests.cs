@@ -1,7 +1,6 @@
 using backend.Application.Events.Commands.CreateEvent;
 using FluentValidation.TestHelper;
 using Xunit;
-using System; // Thêm using cho DateTime và Guid
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 
