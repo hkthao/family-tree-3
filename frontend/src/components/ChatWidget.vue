@@ -1,10 +1,10 @@
 <template>
   <div class="chat-widget-container" v-if="widgetVisible">
     <v-fab-transition>
-      <div class="chat-minimized-container" v-if="!chatOpen">
+      <div v-if="!chatOpen">
         <Vue3Lottie class="chat-bot-btn" @click="toggleChat" :animationData="ChatbotAnimation" :height="150"
           :width="150" />
-        <v-btn icon variant="text" color="primary" size="small" class="dismiss-btn" @click="dismissWidget">
+        <v-btn icon variant="text" size="small" class="dismiss-btn" @click="dismissWidget">
           <v-icon>mdi-close-circle</v-icon>
         </v-btn>
       </div>
@@ -17,7 +17,7 @@
         <v-btn icon @click="toggleChat">
           <v-icon>mdi-minus</v-icon>
         </v-btn>
-        <v-btn icon @click="dismissWidget">
+        <v-btn icon @click="toggleChat">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-toolbar>
@@ -142,19 +142,12 @@ onMounted(() => {
   z-index: 1000;
 }
 
-.chat-minimized-container {
-  position: relative;
-  width: 150px;
-  /* Adjust to match Lottie animation size */
-  height: 150px;
-  /* Adjust to match Lottie animation size */
-}
-
 .dismiss-btn {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 1001;
+  color: #62AD9C;
 }
 
 .chat-window {
