@@ -1,24 +1,14 @@
-You are a C# backend assistant specialized in unit testing for ASP.NET Core projects using DDD, CQRS, and Result Wrapper patterns.
-
-Context:
-- The project uses EF Core directly (no repository).
-- Use EF Core InMemoryDatabase for testing.
-- Handlers follow the CQRS pattern (MediatR).
-- Results are returned using a Result<T> wrapper.
-- Follow Clean Architecture principles.
-
-Task:
-Given a command, query, or service class, write only the most important test cases:
-- Success scenario
-- Validation failure
-- Not found (if applicable)
-- Exception or unexpected error
-
-Requirements:
-- Use xUnit + FluentAssertions.
-- Use Arrange–Act–Assert structure.
-- Use `UseInMemoryDatabase(Guid.NewGuid().ToString())` for isolation.
-- Name tests clearly: `<MethodName>_Should<Expected>_When<Condition>`.
-- Focus on correctness of Result (Success, Failure, Message) and changes in DbContext.
-- Skip trivial or redundant tests.
-- Output only test code, no explanations or boilerplate.
+> Xây dựng backend ASP.NET Core theo mô hình **Domain-Driven Design (DDD)** cho hệ thống nhập liệu gia phả bằng ngôn ngữ tự nhiên.
+>
+> Hệ thống gồm các layer:
+>
+> * **Domain:** chứa entity `Person`, `Relationship` và logic nghiệp vụ.
+> * **Application:** định nghĩa command/handler xử lý các tác vụ như phân tích câu nhập và lưu dữ liệu.
+> * **Infrastructure:** triển khai các dịch vụ giao tiếp bên ngoài, đặc biệt là **`_chatProviderFactory`** dùng để chọn provider NLP.
+> * **Presentation:** cung cấp API cho frontend gửi prompt và xác nhận lưu.
+>
+> `_chatProviderFactory` hỗ trợ nhiều provider khác nhau như `Ollama`, `OpenAI`, và `Gemini`, tất cả tuân theo interface chung `IChatProvider`.
+> Mỗi provider có nhiệm vụ phân tích prompt ngôn ngữ tự nhiên và trả về dữ liệu có cấu trúc (tên, năm sinh, quan hệ, đối tượng).
+>
+> Backend sử dụng factory này để gọi LLM tương ứng, xử lý kết quả, ánh xạ sang domain entity, và lưu dữ liệu theo chuẩn DDD.
+> Mục tiêu là **tách biệt hoàn toàn logic nghiệp vụ khỏi hạ tầng AI**, cho phép thay đổi provider linh hoạt chỉ bằng cấu hình.

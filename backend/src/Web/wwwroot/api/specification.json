@@ -7,6 +7,38 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/NaturalLanguageInput/generate-data": {
+      "post": {
+        "tags": [
+          "NaturalLanguageInput"
+        ],
+        "operationId": "NaturalLanguageInput_GenerateData",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDataCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/AI/biography": {
       "post": {
         "tags": [
@@ -2071,6 +2103,15 @@
   },
   "components": {
     "schemas": {
+      "GenerateDataCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "prompt": {
+            "type": "string"
+          }
+        }
+      },
       "BiographyResultDto": {
         "type": "object",
         "additionalProperties": false,
