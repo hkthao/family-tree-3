@@ -1,52 +1,28 @@
 
-using AutoMapper;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Mappings;
+using FluentAssertions;
+using Xunit;
+using backend.Application.UnitTests.Common;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;
-using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using backend.Infrastructure.Data;
 
-namespace backend.Application.UnitTests.Families.Queries;
+namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 
-public class GetFamiliesQueryHandlerTests
+public class GetFamiliesQueryHandlerTests : TestBase
 {
     private readonly GetFamiliesQueryHandler _handler;
-    private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
 
     public GetFamiliesQueryHandlerTests()
     {
-        // Setup in-memory database
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-            .Options;
-
-        _context = new ApplicationDbContext(options);
-
-        // Setup AutoMapper
-        var configurationProvider = new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>();
-        });
-        _mapper = configurationProvider.CreateMapper();
-
-        _handler = new GetFamiliesQueryHandler(_context, _mapper);
+        _handler = new GetFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
     [Fact]
     public async Task Handle_Should_Return_All_Families()
     {
         // Arrange
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
+
         var families = new List<Family>
         {
             new Family { Id = Guid.NewGuid(), Name = "Family 1" },
@@ -59,20 +35,22 @@ public class GetFamiliesQueryHandlerTests
         var result = await _handler.Handle(new GetFamiliesQuery(), CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(2);
-        result.Should().ContainEquivalentOf(new { Id = families[0].Id, Name = "Family 1" });
-        result.Should().ContainEquivalentOf(new { Id = families[1].Id, Name = "Family 2" });
+        result.Value.Should().HaveCount(2);
+        result.Value.Should().ContainEquivalentOf(new { Id = families[0].Id, Name = "Family 1" });
+        result.Value.Should().ContainEquivalentOf(new { Id = families[1].Id, Name = "Family 2" });
     }
 
     [Fact]
     public async Task Handle_Should_Return_EmptyList_When_NoFamiliesExist()
     {
-        // Arrange - no families added to context
+        // Arrange
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
         // Act
         var result = await _handler.Handle(new GetFamiliesQuery(), CancellationToken.None);
 
         // Assert
-        result.Should().BeEmpty();
+        result.Value.Should().BeEmpty();
     }
 }

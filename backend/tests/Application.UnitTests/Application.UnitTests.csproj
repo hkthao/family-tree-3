@@ -29,9 +29,4 @@
         <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
         <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
     </ItemGroup>
-
-    <ItemGroup>
-        <Compile Remove="Families\Queries\GetFamilies\GetFamiliesQueryHandlerTests.cs" />
-    </ItemGroup>
-
 </Project>

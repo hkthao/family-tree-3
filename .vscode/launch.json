@@ -25,6 +25,20 @@
             "url": "http://localhost:80",
             "webRoot": "${workspaceFolder}/frontend",
             "preLaunchTask": "npm: dev - frontend"
+        },
+        {
+            "name": ".NET Core Launch (test current file)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "dotnet",
+            "args": [
+                "test",
+                "${workspaceFolder}/backend/tests/Application.UnitTests/Application.UnitTests.csproj"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
         }
     ]
 }

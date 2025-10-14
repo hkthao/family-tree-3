@@ -1,30 +1,16 @@
-using AutoMapper;
 using backend.Application.Common.Exceptions;
 using backend.Application.Families.Queries.GetFamilyById;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using backend.Infrastructure.Data;
-using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
-public class GetFamilyByIdQueryHandlerTests : IDisposable
+public class GetFamilyByIdQueryHandlerTests : TestBase, IDisposable
 {
     private readonly GetFamilyByIdQueryHandler _handler;
-    private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
     public GetFamilyByIdQueryHandlerTests()
     {
-        _context = TestDbContextFactory.Create();
-
-        var configurationProvider = new MapperConfiguration(cfg =>
-        {
-            cfg.AddMaps(typeof(MappingProfile).Assembly);
-        });
-        _mapper = configurationProvider.CreateMapper();
-
         _handler = new GetFamilyByIdQueryHandler(_context, _mapper);
     }
 
@@ -49,16 +35,9 @@ public class GetFamilyByIdQueryHandlerTests : IDisposable
     {
         // Arrange
         var command = new GetFamilyByIdQuery(Guid.NewGuid());
-
         // Act
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
-
         // Assert
         await act.Should().ThrowAsync<NotFoundException>();
-    }
-
-    public void Dispose()
-    {
-        TestDbContextFactory.Destroy(_context);
     }
 }
