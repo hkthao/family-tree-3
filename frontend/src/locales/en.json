@@ -419,5 +419,6 @@
   "chunkAdmin.approveSuccess": "Successfully approved {count} chunks.",
   "chunkAdmin.noChunksToApprove": "No chunks selected for approval.",
   "common.approved": "approved",
-  "common.rejected": "rejected"
+  "common.rejected": "rejected",
+  "naturalLanguageInput.title": "Natural Language Input"
 }

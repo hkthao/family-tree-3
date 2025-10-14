@@ -123,8 +123,8 @@ onMounted(() => {
 <style scoped>
 .chat-widget-container {
   position: fixed;
-  bottom: 15px;
-  right: 15px;
+  bottom: 0px;
+  right: 0px;
   z-index: 1000;
 }
 

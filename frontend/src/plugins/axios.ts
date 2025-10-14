@@ -59,11 +59,10 @@ async function safeApiCall<T>(
     const response = await apiCall;
     // Check if the response data is already a Result object from the backend
     if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
-      const backendResult = response.data as Result<T, ApiError>;
-      if (backendResult.isSuccess) {
-        return ok(backendResult.value as T);
+      if (response.data.isSuccess) {
+        return ok(response.data.value as T);
       } else {
-        return err(backendResult.error as ApiError);
+        return err(response.data.error as ApiError);
       }
     } else {
       // Otherwise, assume the data is the direct payload

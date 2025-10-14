@@ -1,7 +1,7 @@
 import type { ChatResponse, MessageItem, ChatListItem } from '@/types/chat';
 import type { Result } from '@/types/common/result';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { IChatService } from './chat/chat.service.interface';
+import type { IChatService } from './chat.service.interface';
 
 interface ChatRequest {
   message: string;

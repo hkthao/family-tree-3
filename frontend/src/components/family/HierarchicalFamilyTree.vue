@@ -76,7 +76,7 @@ const transformData = (members: Member[], relationships: Relationship[]) => {
     const targetPerson = personMap.get(String(rel.targetMemberId));
 
     if (!sourcePerson || !targetPerson) {
-      console.warn('Could not find person for relationship:', rel);
+      // console.warn('Could not find person for relationship:', rel);
       return; // Skip if a person in the relationship doesn't exist in the member list
     }
 

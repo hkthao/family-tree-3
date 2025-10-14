@@ -1,5 +1,5 @@
 <template>
-  <div class="avatar-input-container">
+  <div class="avatar-input-container mb-4">
     <!-- Current Avatar Display -->
     <div class="d-flex justify-center mb-4">
       <AvatarDisplay :src="currentAvatarSrc" :size="props.size" />
