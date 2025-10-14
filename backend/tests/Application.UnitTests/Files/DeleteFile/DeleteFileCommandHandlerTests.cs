@@ -83,11 +83,11 @@ public class DeleteFileCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", FilePath = "path/to/test.jpg", UploadedBy = userProfileId, UploadedAt = DateTime.UtcNow };
+        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userProfileId.ToString()};
         _context.FileMetadata.Add(fileToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var command = new DeleteFileCommand(fileToDelete.Id);
+        var command = new DeleteFileCommand { FileId = fileToDelete.Id };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -96,7 +96,7 @@ public class DeleteFileCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         var deletedFile = await _context.FileMetadata.FindAsync(fileToDelete.Id);
         deletedFile.Should().BeNull();
-        _mockFileStorageService.Verify(s => s.DeleteFileAsync(fileToDelete.FilePath, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFileStorageService.Verify(s => s.DeleteFileAsync(fileToDelete.Url, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public class DeleteFileCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         var nonExistentFileId = Guid.NewGuid();
-        var command = new DeleteFileCommand(nonExistentFileId);
+        var command = new DeleteFileCommand { FileId = nonExistentFileId };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -135,11 +135,11 @@ public class DeleteFileCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var fileToDelete = new UploadedFile { Id = Guid.NewGuid(), FileName = "test.jpg", FilePath = "path/to/test.jpg", UploadedBy = Guid.NewGuid(), UploadedAt = DateTime.UtcNow }; // Uploaded by a different user
-        _context.UploadedFiles.Add(fileToDelete);
+        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = Guid.NewGuid().ToString() }; // Uploaded by a different user
+        _context.FileMetadata.Add(fileToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var command = new DeleteFileCommand(fileToDelete.Id);
+        var command = new DeleteFileCommand { FileId = fileToDelete.Id };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

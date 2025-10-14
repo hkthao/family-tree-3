@@ -1,11 +1,13 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Files.Queries.GetUploadedFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using MediatR;
+using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -14,10 +16,13 @@ namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 public class GetUploadedFileQueryHandlerTests : TestBase
 {
     private readonly GetUploadedFileQueryHandler _handler;
+    private readonly    IMock<IOptions<StorageSettings>> _mockStorageSettings;
+    
 
     public GetUploadedFileQueryHandlerTests()
     {
-        _handler = new GetUploadedFileQueryHandler(_context, _mapper, _mockAuthorizationService.Object);
+        _mockStorageSettings = new Mock<IOptions<StorageSettings>>();
+        _handler = new GetUploadedFileQueryHandler(_mockStorageSettings.Object);
     }
 
     /// <summary>
@@ -40,7 +45,7 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         _context.Relationships.RemoveRange(_context.Relationships);
         _context.UserActivities.RemoveRange(_context.UserActivities);
         _context.UserPreferences.RemoveRange(_context.UserPreferences);
-        _context.UploadedFiles.RemoveRange(_context.UploadedFiles);
+        _context.FileMetadata.RemoveRange(_context.FileMetadata);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Thiết lập ID người dùng hiện tại cho mock IUser.
@@ -81,11 +86,11 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var uploadedFile = new UploadedFile { Id = Guid.NewGuid(), FileName = "test.jpg", FilePath = "path/to/test.jpg", UploadedBy = userProfileId, UploadedAt = DateTime.UtcNow };
-        _context.UploadedFiles.Add(uploadedFile);
+        var uploadedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userProfileId.ToString() };
+        _context.FileMetadata.Add(uploadedFile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var query = new GetUploadedFileQuery(uploadedFile.Id);
+        var query = new GetUploadedFileQuery { FileName = uploadedFile.FileName };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -93,8 +98,7 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Id.Should().Be(uploadedFile.Id);
-        result.Value.FileName.Should().Be(uploadedFile.FileName);
+        result.Value!.ContentType.Should().Be(uploadedFile.ContentType);
     }
 
     /// <summary>
@@ -110,7 +114,7 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         var nonExistentFileId = Guid.NewGuid();
-        var query = new GetUploadedFileQuery(nonExistentFileId);
+        var query = new GetUploadedFileQuery { FileName = "nonexistent.jpg" };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

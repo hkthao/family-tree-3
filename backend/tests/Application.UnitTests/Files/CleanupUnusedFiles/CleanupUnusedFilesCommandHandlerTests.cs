@@ -21,7 +21,7 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
     {
         _mockFileStorageService = new Mock<IFileStorage>();
         _mockDateTime = new Mock<IDateTime>();
-        _handler = new CleanupUnusedFilesCommandHandler(_context, _mockFileStorageService.Object,_mockDateTime.Object);
+        _handler = new CleanupUnusedFilesCommandHandler(_context, _mockFileStorageService.Object, _mockDateTime.Object);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         // Thêm một tệp không được sử dụng.
-        var unusedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "unused.jpg", FilePath = "path/to/unused.jpg", UploadedBy = userProfileId, UploadedAt = DateTime.UtcNow };
+        var unusedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "unused.jpg", Url = "path/to/unused.jpg", UploadedBy = userProfileId.ToString() };
         _context.FileMetadata.Add(unusedFile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -97,7 +97,7 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         _context.FileMetadata.Should().BeEmpty();
-        _mockFileStorageService.Verify(s => s.DeleteFileAsync(unusedFile.FilePath, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFileStorageService.Verify(s => s.DeleteFileAsync(unusedFile.Url, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -113,9 +113,9 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         // Thêm một tệp đang được sử dụng (ví dụ: làm avatar cho một thành viên).
-        var usedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "used.jpg", FilePath = "path/to/used.jpg", UploadedBy = userProfileId, UploadedAt = DateTime.UtcNow };
+        var usedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "used.jpg", Url = "path/to/used.jpg", UploadedBy = userProfileId.ToString() };
         _context.FileMetadata.Add(usedFile);
-        _context.Members.Add(new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Test", LastName = "Member", AvatarUrl = usedFile.FilePath });
+        _context.Members.Add(new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Test", LastName = "Member", AvatarUrl = usedFile.Url });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Act

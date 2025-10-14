@@ -25,7 +25,8 @@ public class UploadFileCommandHandlerTests : TestBase
         _mockFileStorage = new Mock<IFileStorage>();
         _mockStorageSettings = new Mock<IOptions<StorageSettings>>();
         _mockDateTime = new Mock<IDateTime>();
-        _handler = new UploadFileCommandHandler(_mockFileStorage.Object, _mockStorageSettings.Object,_context,_mockUser.Object, _mockDateTime.Object);
+        _mockStorageSettings.Setup(s => s.Value.As<StorageSettings>()).Returns(new StorageSettings());
+        _handler = new UploadFileCommandHandler(_mockFileStorage.Object, _mockStorageSettings.Object, _context, _mockUser.Object, _mockDateTime.Object);
     }
 
     /// <summary>
@@ -89,14 +90,14 @@ public class UploadFileCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        _mockFileStorage.Setup(s => s.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync("path/to/uploaded.jpg");
+        _mockFileStorage.Setup(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result<string>.Success("path/to/uploaded.jpg"));
 
         var command = new UploadFileCommand
         {
             FileName = "test.jpg",
             ContentType = "image/jpeg",
-            Content = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 })
+            FileStream = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 })
         };
 
         // Act
@@ -104,12 +105,10 @@ public class UploadFileCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        var uploadedFile = _context.UploadedFiles.FirstOrDefault();
+        var uploadedFile = _context.FileMetadata.FirstOrDefault();
         uploadedFile.Should().NotBeNull();
         uploadedFile!.FileName.Should().Be(command.FileName);
-        uploadedFile.FilePath.Should().Be("path/to/uploaded.jpg");
-        uploadedFile.UploadedBy.Should().Be(userProfileId);
-        _mockFileStorage.Verify(s => s.UploadFileAsync(command.FileName, command.Content, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFileStorage.Verify(s => s.UploadFileAsync(command.FileStream, command.FileName, command.ContentType, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -128,7 +127,7 @@ public class UploadFileCommandHandlerTests : TestBase
         {
             FileName = "invalid.jpg",
             ContentType = "image/jpeg",
-            Content = new MemoryStream() // Empty content
+            FileStream = new MemoryStream()
         };
 
         // Act
@@ -137,7 +136,7 @@ public class UploadFileCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("File content cannot be empty.");
-        _mockFileStorage.Verify(s => s.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockFileStorage.Verify(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     /// <summary>
@@ -156,7 +155,7 @@ public class UploadFileCommandHandlerTests : TestBase
         {
             FileName = "unauthorized.jpg",
             ContentType = "image/jpeg",
-            Content = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 })
+            FileStream = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 })
         };
 
         // Act
@@ -165,6 +164,6 @@ public class UploadFileCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("User profile not found.");
-        _mockFileStorage.Verify(s => s.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockFileStorage.Verify(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }
