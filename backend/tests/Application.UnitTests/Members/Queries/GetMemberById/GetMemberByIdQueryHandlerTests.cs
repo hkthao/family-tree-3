@@ -1,13 +1,8 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Members.Queries.GetMemberById;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 

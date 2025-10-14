@@ -1,4 +1,3 @@
-using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
 using backend.Application.Families.Commands.CreateFamily;

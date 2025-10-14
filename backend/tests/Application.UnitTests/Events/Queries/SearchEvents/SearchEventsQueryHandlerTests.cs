@@ -1,14 +1,8 @@
 using backend.Application.UnitTests.Common;
 using Xunit;
 using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Events.Queries.SearchEvents;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Events.Queries.SearchEvents;
 

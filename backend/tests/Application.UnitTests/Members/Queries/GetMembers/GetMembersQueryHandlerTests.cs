@@ -3,12 +3,6 @@ using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using backend.Domain.Enums;
 

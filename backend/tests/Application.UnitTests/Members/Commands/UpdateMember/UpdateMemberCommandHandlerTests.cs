@@ -5,10 +5,6 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;

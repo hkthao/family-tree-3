@@ -4,12 +4,6 @@ using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore; // Added for ToListAsync
 using Moq; // Added for It.IsAny
 using backend.Domain.Enums; // Added for FamilyRole
 

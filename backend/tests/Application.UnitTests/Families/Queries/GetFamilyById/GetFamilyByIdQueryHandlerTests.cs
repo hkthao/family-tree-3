@@ -3,9 +3,6 @@ using backend.Application.Families.Queries.GetFamilyById;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 

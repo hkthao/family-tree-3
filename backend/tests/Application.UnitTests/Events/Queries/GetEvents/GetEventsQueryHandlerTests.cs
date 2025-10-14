@@ -2,13 +2,7 @@ using backend.Application.Events.Queries.GetEvents;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.UnitTests.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace backend.Application.UnitTests.Events.Queries.GetEvents;
 

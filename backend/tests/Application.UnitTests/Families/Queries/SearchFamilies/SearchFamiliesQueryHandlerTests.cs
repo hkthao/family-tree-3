@@ -1,15 +1,8 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Families.Queries.SearchFamilies;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Families.Queries.SearchFamilies;
 

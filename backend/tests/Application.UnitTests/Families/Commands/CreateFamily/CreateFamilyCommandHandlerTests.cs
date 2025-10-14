@@ -2,13 +2,8 @@ using backend.Application.UnitTests.Common;
 using Xunit;
 using FluentAssertions;
 using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Domain.Entities;
-using backend.Application.Common.Models;
-using backend.Application.UserProfiles.Specifications;
 using Microsoft.EntityFrameworkCore; // For FirstOrDefaultAsync
 using backend.Domain.Enums;
 
