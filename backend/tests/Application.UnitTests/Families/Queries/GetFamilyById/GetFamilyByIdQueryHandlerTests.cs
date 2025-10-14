@@ -66,10 +66,11 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         var nonExistentFamilyId = Guid.NewGuid();
 
         // Act (Thực hiện hành động cần kiểm tra)
-        Func<Task> act = async () => await _handler.Handle(new GetFamilyByIdQuery(nonExistentFamilyId), CancellationToken.None);
+        var result = await _handler.Handle(new GetFamilyByIdQuery(nonExistentFamilyId), CancellationToken.None);
 
         // Assert (Kiểm tra kết quả)
-        // Đảm bảo một NotFoundException được ném ra.
-        await act.Should().ThrowAsync<NotFoundException>();
+        // Đảm bảo lệnh thất bại và thông báo lỗi chứa chuỗi "Family with ID {nonExistentFamilyId} not found.".
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Contain($"Family with ID {nonExistentFamilyId} not found.");
     }
 }
