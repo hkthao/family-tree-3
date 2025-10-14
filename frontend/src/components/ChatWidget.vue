@@ -1,10 +1,7 @@
 <template>
   <div class="chat-widget-container">
     <v-fab-transition>
-      <v-btn v-if="!chatOpen" color="primary" fab large fixed bottom right rounded class="mb-6 mr-6"
-        @click="toggleChat">
-        <v-icon>mdi-chat</v-icon>
-      </v-btn>
+        <Vue3Lottie class="chat-bot-btn" @click="toggleChat" v-if="!chatOpen" :animationData="ChatbotAnimation" :height="150" :width="150" />
     </v-fab-transition>
 
     <v-card v-if="chatOpen" class="chat-window elevation-12">
@@ -23,9 +20,7 @@
               'message-incoming': message.direction === 'incoming',
             }">
             <template v-slot:prepend v-if="message.direction === 'incoming'">
-              <v-avatar :size="32">
-                <v-icon color="primary">mdi-robot</v-icon>
-              </v-avatar>
+              <Vue3Lottie :animationData="ChatbotAnimation" :height="32" :width="32" />
             </template>
             <v-card density="compact" :color="message.direction === 'outgoing' ? 'primary' : 'grey lighten-2'"
               :dark="message.direction === 'outgoing'" class="message-bubble ">
@@ -60,6 +55,8 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useUserProfileStore } from '@/stores/userProfile.store';
 import { useI18n } from 'vue-i18n';
 import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
+import { Vue3Lottie } from 'vue3-lottie';
+import ChatbotAnimation from '@/assets/json/chatbot.json';
 
 const { t } = useI18n();
 
@@ -123,8 +120,8 @@ onMounted(() => {
 <style scoped>
 .chat-widget-container {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 15px;
+  right: 15px;
   z-index: 1000;
 }
 
@@ -192,5 +189,9 @@ onMounted(() => {
 .message-content {
   white-space: pre-wrap;
   /* Preserve whitespace and line breaks */
+}
+
+.chat-bot-btn{
+  cursor: pointer;
 }
 </style>
