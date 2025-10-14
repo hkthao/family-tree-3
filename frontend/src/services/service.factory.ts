@@ -31,6 +31,8 @@ import { FileUploadApiService } from './fileUpload/api.fileUpload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
 import { MockChatService } from './chat/mock.chat.service';
+import type { INaturalLanguageInputService } from './naturalLanguageInput/naturalLanguageInput.service.interface';
+import { ApiNaturalLanguageInputService } from './naturalLanguageInput/api.naturalLanguageInput.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -46,6 +48,7 @@ export interface AppServices {
   userPreference: IUserPreferenceService;
   fileUpload: IFileUploadService;
   chat: IChatService;
+  naturalLanguageInput: INaturalLanguageInputService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -119,5 +122,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiChatService(apiClient)
         : testServices?.chat || new MockChatService(),
+    naturalLanguageInput:
+      mode === 'mock'
+        ? new ApiNaturalLanguageInputService(apiClient) // Assuming mock is not needed for now, using API service
+        : mode === 'real'
+        ? new ApiNaturalLanguageInputService(apiClient)
+        : testServices?.naturalLanguageInput || new ApiNaturalLanguageInputService(apiClient),
   };
 }
