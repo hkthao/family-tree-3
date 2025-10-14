@@ -1,7 +1,8 @@
 <template>
   <div class="chat-widget-container">
     <v-fab-transition>
-        <Vue3Lottie class="chat-bot-btn" @click="toggleChat" v-if="!chatOpen" :animationData="ChatbotAnimation" :height="150" :width="150" />
+      <Vue3Lottie class="chat-bot-btn" @click="toggleChat" v-if="!chatOpen" :animationData="ChatbotAnimation"
+        :height="150" :width="150" />
     </v-fab-transition>
 
     <v-card v-if="chatOpen" class="chat-window elevation-12">
@@ -20,7 +21,9 @@
               'message-incoming': message.direction === 'incoming',
             }">
             <template v-slot:prepend v-if="message.direction === 'incoming'">
-              <Vue3Lottie :animationData="ChatbotAnimation" :height="32" :width="32" />
+              <v-avatar :size="32">
+                <v-icon color="primary">mdi-robot</v-icon>
+              </v-avatar>
             </template>
             <v-card density="compact" :color="message.direction === 'outgoing' ? 'primary' : 'grey lighten-2'"
               :dark="message.direction === 'outgoing'" class="message-bubble ">
@@ -71,7 +74,7 @@ const currentUserId = computed(() => authStore.user?.id || 'guest');
 const toggleChat = () => {
   chatOpen.value = !chatOpen.value;
   if (chatOpen.value && !chatStore.selectedChatId) {
-    chatStore.selectChat('ai-assistant');
+    chatStore.selectChat('ai-assistant', t);
   }
   if (chatOpen.value) {
     nextTick(() => {
@@ -191,7 +194,14 @@ onMounted(() => {
   /* Preserve whitespace and line breaks */
 }
 
-.chat-bot-btn{
+.chat-bot-btn {
   cursor: pointer;
+}
+</style>
+
+<style>
+.chat-widget-container .v-list-item__prepend,
+.chat-widget-container .v-list-item__append {
+  align-self: start !important
 }
 </style>

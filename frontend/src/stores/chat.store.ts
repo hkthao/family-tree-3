@@ -11,16 +11,7 @@ interface ChatState {
 
 export const useChatStore = defineStore('chat', {
   state: (): ChatState => ({
-    chatList: [
-      {
-        id: 'ai-assistant',
-        name: 'AI Assistant',
-        avatar:
-          'https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Default&eyebrowType=Default&mouthType=Default&skinColor=Light',
-        lastMessage: 'Hello, how can I help you?',
-        updatedAt: '10:00 AM',
-      },
-    ],
+    chatList: [],
     selectedChatId: null,
     messages: {},
     isLoading: false,
@@ -48,11 +39,20 @@ export const useChatStore = defineStore('chat', {
       }
     },
 
-    selectChat(chatId: string) {
+    selectChat(chatId: string, t: (key: string) => string) {
       this.selectedChatId = chatId;
       if (!this.messages[chatId]) {
         this.messages[chatId] = [];
-        // In a real app, you'd fetch historical messages for this chat here
+        // If it's the AI assistant chat and no messages exist, add an initial greeting
+        if (chatId === 'ai-assistant' && this.messages[chatId].length === 0) {
+          this.messages[chatId].push({
+            id: Date.now().toString() + '_initial',
+            senderId: 'ai-assistant',
+            content: t('chat.initialMessage'),
+            timestamp: new Date().toLocaleTimeString(),
+            direction: 'incoming',
+          });
+        }
       }
     },
 
