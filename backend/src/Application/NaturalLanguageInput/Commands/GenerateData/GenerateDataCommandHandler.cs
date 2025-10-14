@@ -41,6 +41,7 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         };
 
         string jsonString = await chatProvider.GenerateResponseAsync(chatMessages);
+        jsonString = jsonString.Trim(); // Trim whitespace
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
