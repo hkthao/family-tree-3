@@ -1,5 +1,19 @@
 # Kiến thức cơ bản về AI trong dự án Cây Gia Phả
 
+## Mục lục
+
+- [1. Tổng quan](#1-tổng-quan)
+- [2. Các tính năng AI chính](#2-các-tính-năng-ai-chính)
+  - [2.1. Tạo tiểu sử tự động (AI Biography Generation)](#21-tạo-tiểu-sử-tự-động-ai-biography-generation)
+  - [2.2. Trích xuất thông tin từ tài liệu (Information Extraction from Documents)](#22-trích-xuất-thông-tin-từ-tài-liệu-information-extraction-from-documents)
+  - [2.3. Xử lý dữ liệu và Chia Chunk (Data Processing và Chunking)](#23-xử-lý-dữ-liệu-và-chia-chunk-data-processing-và-chunking)
+  - [2.4. Gợi ý mối quan hệ và kết nối (Relationship and Connection Suggestions)](#24-gợi-ý-mối-quan-hệ-và-kết-nối-relationship-and-connection-suggestions)
+- [3. Quản lý và cấu hình AI](#3-quản-lý-và-cấu-hình-ai)
+- [4. Phát triển và mở rộng](#4-phát-triển-và-mở-rộng)
+- [5. Tương lai](#5-tương-lai)
+
+---
+
 ## 1. Tổng quan
 
 Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và sử dụng trong dự án Cây Gia Phả để cung cấp các tính năng thông minh và nâng cao trải nghiệm người dùng.
@@ -18,6 +32,8 @@ Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và 
 *   **Công nghệ:** Sử dụng các kỹ thuật Xử lý ngôn ngữ tự nhiên (NLP) và Nhận dạng ký tự quang học (OCR) cho các tài liệu hình ảnh/PDF.
 *   **Cách hoạt động:** Người dùng tải lên tài liệu, hệ thống AI sẽ quét và phân tích nội dung để tìm kiếm các thực thể (tên, ngày tháng, địa điểm, mối quan hệ) và đề xuất cập nhật dữ liệu.
 
+    *Lưu ý: Tính năng này hiện đang trong giai đoạn phát triển và sẽ được triển khai trong các phiên bản tương lai.*
+
 ### 2.3. Xử lý dữ liệu và Chia Chunk (Data Processing and Chunking)
 
 *   **Mô tả:** Triển khai module xử lý và chia nhỏ nội dung từ các tệp PDF/TXT thành các `TextChunk` với đầy đủ metadata (fileId, familyId, category, createdBy) để chuẩn bị cho việc tạo embeddings và tích hợp chatbot.
@@ -28,6 +44,8 @@ Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và 
 
 *   **Mô tả:** AI phân tích dữ liệu gia phả hiện có để gợi ý các mối quan hệ tiềm năng hoặc các kết nối giữa các thành viên mà người dùng có thể chưa biết hoặc chưa thêm vào.
 *   **Công nghệ:** Sử dụng thuật toán đồ thị và học máy để phát hiện các mẫu và mối liên hệ.
+
+    *Lưu ý: Tính năng này hiện đang trong giai đoạn phát triển và sẽ được triển khai trong các phiên bản tương lai.*
 
 ## 3. Quản lý và cấu hình AI
 

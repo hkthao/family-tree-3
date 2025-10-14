@@ -33,7 +33,7 @@ frontend/
 │   ├── locales/        # Chứa các file dịch (i18n) cho các ngôn ngữ khác nhau.
 │   ├── plugins/        # Chứa các plugin của Vue hoặc các thư viện bên thứ ba được khởi tạo (ví dụ: `vuetify.ts`, `pinia.ts`, `axios.ts`).
 │   ├── router/         # Chứa cấu hình routing của Vue Router, định nghĩa các đường dẫn và component tương ứng.
-│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`). Các service này trả về kết quả theo `Result Pattern` để xử lý lỗi và thành công một cách nhất quán.
+│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`, `chatService.ts`). Các service này trả về kết quả theo `Result Pattern` để xử lý lỗi và thành công một cách nhất quán.
 │   ├── stores/         # Chứa các Pinia store để quản lý trạng thái toàn cục của ứng dụng (ví dụ: `auth.store.ts`, `family.store.ts`).
 │   ├── styles/         # Chứa các style chung, biến CSS, hoặc các file SCSS/CSS được import toàn cục.
 │   ├── types/          # Chứa định nghĩa các TypeScript type và interface cho dữ liệu (ví dụ: `Family.ts`, `Member.ts`).

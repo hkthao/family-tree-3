@@ -6,7 +6,7 @@ Chào mừng bạn đến với tài liệu của dự án Cây Gia Phả. Tài 
 
 ### 1. Tài liệu Kỹ thuật (Engineering Docs)
 
--   [Kiến trúc tổng quan](./engineering/architecture.md): Mô tả kiến trúc C4, các thành phần chính và luồng hoạt động của hệ thống.
+-   [Kiến trúc tổng quan](./engineering/architecture.md): Mô tả kiến trúc tổng quan (Clean Architecture), các thành phần chính và luồng hoạt động của hệ thống.
 -   [Hướng dẫn phát triển](./engineering/development-guide.md): Hướng dẫn cài đặt môi trường, build, và deploy dự án.
 -   [Frontend](./engineering/frontend-guide.md): Chi tiết về cấu trúc dự án Frontend, state management, và coding style.
 -   [Backend](./engineering/backend-guide.md): Chi tiết về cấu trúc dự án Backend, các pattern sử dụng, và coding style.
@@ -15,6 +15,7 @@ Chào mừng bạn đến với tài liệu của dự án Cây Gia Phả. Tài 
 -   [Kiểm thử & QA](./engineering/testing-guide.md): Hướng dẫn về chiến lược kiểm thử, các loại test, và quy trình QA.
 -   [Bảo mật](./engineering/security-guide.md): Các vấn đề bảo mật và phương pháp kiểm soát truy cập.
 -   [Hướng dẫn đóng góp](./engineering/contribution-guide.md): Quy tắc và quy trình để đóng góp vào dự án.
+-   [Cơ sở tri thức AI](./engineering/ai_knowledge_base.md): Mô tả cách tích hợp và sử dụng các tính năng AI trong dự án.
 
 ### 2. Tài liệu Dự án (Project Docs)
 

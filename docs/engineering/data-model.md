@@ -151,7 +151,7 @@ erDiagram
 ```
 ## 3. Mô tả các bảng
 
-### UserProfile
+### 3.1. Bảng UserProfile
 
 Thực thể `UserProfile` lưu trữ thông tin hồ sơ của người dùng, được ánh xạ từ nhà cung cấp xác thực bên ngoài (ví dụ: Auth0).
 
@@ -192,7 +192,7 @@ Lưu trữ mối quan hệ nhiều-nhiều giữa `Family` và `UserProfile`, ba
 | `0`     | `Manager`: Người dùng có toàn quyền quản lý gia đình. |
 | `1`     | `Viewer`: Người dùng có thể xem dữ liệu gia đình nhưng không thể sửa đổi. |
 
-### 3.4. Bảng `Families` (updated after refactor)
+### 3.4. Bảng `Families`
 
 Lưu trữ thông tin về các gia đình hoặc dòng họ.
 
@@ -209,7 +209,7 @@ Lưu trữ thông tin về các gia đình hoặc dòng họ.
 
 - **Mối quan hệ**: Một `Family` có thể có nhiều `Member` và nhiều `Event`.
 
-### 3.2. Bảng `Members` (updated after refactor)
+### 3.5. Bảng `Members`
 
 Lưu trữ thông tin chi tiết của từng thành viên. Các mối quan hệ giữa các thành viên được quản lý thông qua bảng `Relationships`.
 
@@ -233,7 +233,7 @@ Lưu trữ thông tin chi tiết của từng thành viên. Các mối quan hệ
   - `FamilyId`: tham chiếu đến `Families(Id)`.
 - **Mối quan hệ**: Một `Member` thuộc về một `Family`. Các mối quan hệ giữa các thành viên (cha, mẹ, vợ/chồng, v.v.) được định nghĩa và lưu trữ trong bảng `Relationships`.
 
-### 3.3. Bảng `Events` (updated after refactor)
+### 3.6. Bảng `Events`
 
 Lưu trữ thông tin về các sự kiện quan trọng của gia đình.
 
@@ -253,7 +253,7 @@ Lưu trữ thông tin về các sự kiện quan trọng của gia đình.
   - `FamilyId`: tham chiếu đến `Families(Id)`.
 - **Mối quan hệ**: Một `Event` có thể liên quan đến một `Family`.
 
-### 3.4. Bảng `Relationships` (updated after refactor)
+### 3.7. Bảng `Relationships`
 
 Lưu trữ các mối quan hệ giữa các thành viên (ví dụ: cha, mẹ, vợ/chồng, con cái).
 
@@ -270,7 +270,7 @@ Lưu trữ các mối quan hệ giữa các thành viên (ví dụ: cha, mẹ, v
   - `TargetMemberId`: tham chiếu đến `Members(Id)`.
 - **Mối quan hệ**: Một `Member` có thể là `SourceMember` hoặc `TargetMember` trong nhiều `Relationship`.
 
-### 3.5. Bảng `AIBiographies`
+### 3.8. Bảng `AIBiographies`
 
 Lưu trữ các tiểu sử được tạo bởi AI cho các thành viên.
 
@@ -291,7 +291,7 @@ Lưu trữ các tiểu sử được tạo bởi AI cho các thành viên.
   - `MemberId`: tham chiếu đến `Members(Id)`.
 - **Mối quan hệ**: Một `Member` có thể có nhiều `AIBiography`.
 
-### 3.6. Bảng `UserPreferences`
+### 3.9. Bảng `UserPreferences`
 
 Lưu trữ tùy chọn cá nhân của người dùng.
 
@@ -308,7 +308,7 @@ Lưu trữ tùy chọn cá nhân của người dùng.
   - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `UserProfile` có một `UserPreference`.
 
-### 3.7. Bảng `FileMetadata`
+### 3.10. Bảng `FileMetadata`
 
 Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao gồm thông tin về vị trí lưu trữ, người tải lên và trạng thái sử dụng.
 
@@ -331,7 +331,7 @@ Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao g�
   - `UploadedBy`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `UserProfile` có thể tải lên nhiều `FileMetadata`.
 
-### 3.8. Bảng `TextChunks`
+### 3.11. Bảng `TextChunks`
 
 Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các tệp tài liệu.
 
@@ -352,7 +352,7 @@ Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các t�
   - `CreatedBy`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `FileMetadata` có thể có nhiều `TextChunk`.
 
-## 4. Toàn vẹn và Ràng buộc Dữ liệu (updated after refactor)
+## 4. Toàn vẹn và Ràng buộc Dữ liệu
 
 Để đảm bảo tính chính xác và nhất quán của dữ liệu, hệ thống áp dụng các ràng buộc và quy tắc toàn vẹn dữ liệu sau:
 
@@ -370,7 +370,7 @@ Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các t�
 
 ## 5. Hướng dẫn Mapping
 
-### 5.1. Backend (Entity Framework Core) (updated after refactor)
+### 5.1. Backend (Entity Framework Core)
 
 Các bảng được map sang các class Entity trong `Domain` layer. EF Core sử dụng Fluent API trong `ApplicationDbContext` để cấu hình chi tiết các mối quan hệ và thuộc tính của Entity.
 

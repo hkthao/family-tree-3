@@ -9,23 +9,46 @@
 - [5. Dependency Injection](#5-dependency-injection)
 - [6. Middleware](#6-middleware)
 - [7. Xác thực & Phân quyền](#7-xác-thực--phân-quyền)
-- [8. Tương tác Dữ liệu với Entity Framework Core](#8-tương-tác-dữ-liệu-với-entity-framework-core-updated-after-refactor)
-  - [8.1. Specification Pattern](#81-specification-pattern-updated-after-refactor)
+- [8. Tương tác Dữ liệu với Entity Framework Core](#8-tương-tác-dữ-liệu-với-entity-framework-core)
+  - [8.1. Specification Pattern](#81-specification-pattern)
 - [9. Validation](#9-validation)
+  - [9.1. Cách hoạt động](#91-cách-hoạt-động)
+  - [9.2. Các Validator hiện có](#92-các-validator-hiện-có)
 - [10. Quản lý Cây Gia Phả (Family Tree Management)](#10-quản-lý-cây-gia-phả-family-tree-management)
+  - [10.1. Dịch vụ `FamilyTreeService`](#101-dịch-vụ-familytreeservice)
+  - [10.2. Tích hợp vào các Command Handlers](#102-tích-hợp-vào-các-command-handlers)
 - [11. Ghi nhật ký Hoạt động Người dùng (User Activity Logging)](#11-ghi-nhật-ký-hoạt-động-người-dùng-user-activity-logging)
+  - [11.1. Thực thể `UserActivity`](#111-thực-thể-useractivity)
+  - [11.2. Ghi lại Hoạt động (Record Activity)](#112-ghi-lại-hoạt-động-record-activity)
+  - [11.3. Truy vấn Hoạt động Gần đây (Get Recent Activities)](#113-truy-vấn-hoạt-động-gần-đây-get-recent-activities)
+  - [11.4. Specification `UserActivityByUserSpec`](#114-specification-useractivitybyuserspec)
+  - [11.5. API Endpoint](#115-api-endpoint)
 - [12. Module AI (AI Module)](#12-module-ai-ai-module)
-- [13. Module Xử lý Dữ liệu và Tải lên Chunk (Data Processing & Chunking Module)](#13-module-xử-lý-dữ-liệu-và-tải-lên-chunk-data-processing--chunking-module)
-  - [13.1. Thực thể `TextChunk`](#131-thực-thể-textchunk)
-  - [13.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)](#132-trích-xuất-văn-bản-từ-tệp-ifiletextextractor)
-  - [13.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)](#133-factory-cho-trích-xuất-tệp-ifiletextextractorfactory)
-  - [13.4. Chính sách Chia Chunk (`ChunkingPolicy`)](#134-chính-sách-chia-chunk-chunkingpolicy)
-  - [13.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)](#135-lệnh-xử-lý-tệp-processfilecommand)
-  - [13.6. API Endpoint (`ChunkController`)](#136-api-endpoint-chunkcontroller)
-- [14. Logging & Monitoring](#14-logging--monitoring)
-- [15. Coding Style](#15-coding-style)
-- [16. Best Practices](#16-best-practices)
-- [17. Tài liệu liên quan](#17-tài-liệu-liên-quan)
+  - [12.1. Thực thể `AIBiography`](#121-thực-thể-aibiography)
+  - [12.2. Giao diện và DTOs](#122-giao-diện-và-dtos)
+  - [12.3. Commands và Queries](#123-commands-và-queries)
+  - [12.4. Triển khai Infrastructure](#124-triển-khai-infrastructure)
+  - [12.5. API Endpoints](#125-api-endpoints)
+- [13. Module Vector Database](#13-module-vector-database)
+  - [13.1. Interface `IVectorStore`](#131-interface-ivectorstore)
+  - [13.2. Cách sử dụng `IVectorStore`](#132-cách-sử-dụng-ivectorstore)
+  - [13.3. Mở rộng Module (Thêm Provider mới)](#133-mở-rộng-module-thêm-provider-mới)
+  - [13.4. DTOs](#134-dtos)
+  - [13.5. Cơ chế chọn Provider (Factory Pattern)](#135-cơ-chế-chọn-provider-factory-pattern)
+  - [13.6. Triển khai các Provider](#136-triển-khai-các-provider)
+  - [13.7. Cấu hình `appsettings.json`](#137-cấu-hình-appsettingsjson)
+  - [13.8. Đăng ký Dependency Injection](#138-đăng-ký-dependency-injection)
+- [14. Module Xử lý Dữ liệu và Tải lên Chunk (Data Processing & Chunking Module)](#14-module-xử-lý-dữ-liệu-và-tải-lên-chunk-data-processing--chunking-module)
+  - [14.1. Thực thể `TextChunk`](#141-thực-thể-textchunk)
+  - [14.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)](#142-trích-xuất-văn-bản-từ-tệp-ifiletextextractor)
+  - [14.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)](#143-factory-cho-trích-xuất-tệp-ifiletextextractorfactory)
+  - [14.4. Chính sách Chia Chunk (`ChunkingPolicy`)](#144-chính-sách-chia-chunk-chunkingpolicy)
+  - [14.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)](#145-lệnh-xử-lý-tệp-processfilecommand)
+  - [14.6. API Endpoint (`ChunkController`)](#146-api-endpoint-chunkcontroller)
+- [15. Logging & Monitoring](#15-logging--monitoring)
+- [16. Coding Style](#16-coding-style)
+- [17. Best Practices](#17-best-practices)
+- [18. Tài liệu liên quan](#18-tài-liệu-liên-quan)
 
 ---
 
@@ -657,7 +680,7 @@ Dự án sử dụng **FluentValidation** để xác thực các `Command` và `
 
 Tính năng ghi nhật ký hoạt động người dùng được triển khai để theo dõi các hành động quan trọng của người dùng trong hệ thống, phục vụ mục đích kiểm toán và cung cấp thông tin cho nguồn cấp dữ liệu hoạt động của người dùng.
 
-### 10.1. Thực thể `UserActivity`
+### 11.1. Thực thể `UserActivity`
 
 Thực thể `UserActivity` (`backend/src/Domain/Entities/UserActivity.cs`) lưu trữ chi tiết về mỗi hành động của người dùng.
 
@@ -683,7 +706,7 @@ Thực thể `UserActivity` (`backend/src/Domain/Entities/UserActivity.cs`) lưu
 -   **`TargetType`** (`backend/src/Domain/Enums/TargetType.cs`): Định nghĩa các loại tài nguyên:
     -   `Family`, `Member`, `UserProfile`
 
-### 10.2. Ghi lại Hoạt động (Record Activity)
+### 11.2. Ghi lại Hoạt động (Record Activity)
 
 Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` thông qua MediatR.
 
@@ -693,7 +716,7 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
     -   Nhận `RecordActivityCommand`, tạo thực thể `UserActivity` và lưu vào cơ sở dữ liệu.
     -   Việc lưu được thực hiện bất đồng bộ (`await _context.SaveChangesAsync()`) để không chặn luồng chính.
 
-### 10.3. Truy vấn Hoạt động Gần đây (Get Recent Activities)
+### 11.3. Truy vấn Hoạt động Gần đây (Get Recent Activities)
 
 Để lấy danh sách các hoạt động gần đây, sử dụng `GetRecentActivitiesQuery`.
 
@@ -705,13 +728,13 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
 -   **`UserActivityDto`** (`backend/src/Application/UserActivities/Queries/UserActivityDto.cs`):
     -   DTO để truyền dữ liệu hoạt động người dùng.
 
-### 10.4. Specification `UserActivityByUserSpec`
+### 11.4. Specification `UserActivityByUserSpec`
 
 -   **`UserActivityByUserSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityByUserSpec.cs`):
     -   Lọc hoạt động theo `UserProfileId` và các tiêu chí tùy chọn khác.
     -   Sắp xếp theo `Created` giảm dần và giới hạn số lượng kết quả (`Take(limit)`) để tối ưu hiệu suất.
 
-### 10.5. API Endpoint
+### 11.5. API Endpoint
 
 -   **`UserActivitiesController`** (`backend/src/Web/Controllers/UserActivitiesController.cs`):
     -   Cung cấp endpoint `GET /api/activities/recent` để truy vấn các hoạt động gần đây.
@@ -722,7 +745,7 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
 
 Module AI được thiết kế để hỗ trợ sinh tiểu sử (biography) cho các thành viên trong gia đình bằng cách sử dụng các nhà cung cấp AI khác nhau. Module này tuân thủ các nguyên tắc Clean Architecture, cho phép dễ dàng mở rộng và thay đổi nhà cung cấp AI.
 
-### 11.1. Thực thể `AIBiography`
+### 12.1. Thực thể `AIBiography`
 
 Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu trữ thông tin về tiểu sử được sinh bởi AI.
 
@@ -747,7 +770,7 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 -   **`AIProviderType`** (`backend/src/Domain/Enums/AIProviderType.cs`): Định nghĩa các nhà cung cấp AI:
     -   `None`, `Gemini`, `OpenAI`, `LocalAI`.
 
-### 11.2. Giao diện và DTOs
+### 12.2. Giao diện và DTOs
 
 -   **`IAIContentGenerator`** (`backend/src/Application/Common/Interfaces/IAIContentGenerator.cs`):
     -   Giao diện cho các dịch vụ sinh nội dung AI. Có phương thức `GenerateContentAsync`.
@@ -762,7 +785,7 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 -   **`AIProviderDto`** (`backend/src/Application/AI/Queries/AIProviderDto.cs`):
     -   DTO cho thông tin nhà cung cấp AI và trạng thái sử dụng.
 
-### 11.3. Commands và Queries
+### 12.3. Commands và Queries
 
 -   **`GenerateBiographyCommand`** (`backend/src/Application/AI/Commands/GenerateBiography/GenerateBiographyCommand.cs`):
     -   Lệnh để yêu cầu sinh tiểu sử. Handler sẽ tổng hợp prompt từ DB nếu không có UserPrompt.
@@ -777,7 +800,7 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 -   **`GetAIProvidersQueryHandler`** (`backend/src/Application/AI/Queries/GetAIProviders/GetAIProvidersQueryHandler.cs`):
     -   Xử lý truy vấn `GetAIProvidersQuery`.
 
-### 11.4. Triển khai Infrastructure
+### 12.4. Triển khai Infrastructure
 
 -   **`AIConfig`** (`backend/src/Infrastructure/AI/AIConfig.cs`):
     -   Lớp cấu hình đọc từ `appsettings.json` để định nghĩa nhà cung cấp AI mặc định, API Keys, giới hạn token, v.v.
@@ -788,7 +811,7 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 -   **`AIUsageTracker`** (`backend/src/Infrastructure/AI/AIUsageTracker.cs`):
     -   Triển khai `IAIUsageTracker` để theo dõi và giới hạn việc sử dụng AI (sử dụng `MemoryCache` để lưu trữ tạm thời).
 
-### 11.5. API Endpoints
+### 12.5. API Endpoints
 
 -   **`AIController`** (`backend/src/Web/Controllers/AIController.cs`):
     -   `POST /api/ai/biography/{memberId}`: Sinh tiểu sử.
@@ -797,11 +820,11 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 
 ## 12. Module Vector Database
 
-### 12.0. Tổng quan
+### 13.1. Tổng quan
 
 Module Vector Database được thiết kế để lưu trữ và truy vấn các vector nhúng (embeddings) cho các tác vụ liên quan đến AI, chẳng hạn như tìm kiếm ngữ nghĩa hoặc RAG (Retrieval-Augmented Generation) cho chatbot. Module này tuân thủ các nguyên tắc Clean Architecture, cho phép dễ dàng mở rộng và thay đổi nhà cung cấp Vector Database.
 
-### 12.1. Interface `IVectorStore`
+### 13.2. Interface `IVectorStore`
 
 `IVectorStore` (`backend/src/Application/VectorStore/IVectorStore.cs`) là interface chung định nghĩa các hoạt động cơ bản của một Vector Database:
 
@@ -818,7 +841,7 @@ public interface IVectorStore
 -   `QueryAsync`: Tìm kiếm các tài liệu vector tương tự dựa trên một vector truy vấn.
 -   `DeleteAsync`: Xóa các tài liệu vector dựa trên ID.
 
-### 12.2. Cách sử dụng `IVectorStore`
+### 13.3. Cách sử dụng `IVectorStore`
 
 `IVectorStore` được inject vào các service hoặc command/query handler thông qua Dependency Injection. Sau đó, bạn có thể gọi các phương thức `UpsertDocumentsAsync`, `QueryAsync`, hoặc `DeleteAsync` để tương tác với Vector Database.
 
@@ -870,7 +893,7 @@ public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentComm
 }
 ```
 
-### 12.3. Mở rộng Module (Thêm Provider mới)
+### 13.4. Mở rộng Module (Thêm Provider mới)
 
 Để thêm một nhà cung cấp Vector Database mới (ví dụ: Milvus, Weaviate), bạn cần thực hiện các bước sau:
 
@@ -895,7 +918,7 @@ public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentComm
 -   `QueryAsync`: Tìm kiếm các tài liệu vector tương tự dựa trên một vector truy vấn.
 -   `DeleteAsync`: Xóa các tài liệu vector dựa trên ID.
 
-### 12.2. DTOs
+### 13.5. DTOs
 
 -   **`VectorDocument`** (`backend/src/Application/VectorStore/VectorDocument.cs`): Đại diện cho một tài liệu được lưu trữ trong Vector Database.
     -   `Id` (string): ID duy nhất của tài liệu.
@@ -907,21 +930,21 @@ public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentComm
     -   `TopK` (int): Số lượng kết quả hàng đầu muốn lấy.
     -   `Filter` (Dictionary<string, string>, nullable): Các tiêu chí lọc bổ sung.
 
-### 12.3. Cơ chế chọn Provider (Factory Pattern)
+### 13.6. Cơ chế chọn Provider (Factory Pattern)
 
 Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector Database phù hợp dựa trên cấu hình trong `appsettings.json`.
 
 -   **`IVectorStoreFactory`** (`backend/src/Application/VectorStore/IVectorStoreFactory.cs`): Interface định nghĩa phương thức tạo `IVectorStore`.
 -   **`VectorStoreFactory`** (`backend/src/Infrastructure/VectorStore/VectorStoreFactory.cs`): Triển khai `IVectorStoreFactory`, chịu trách nhiệm khởi tạo `IVectorStore` cụ thể (Pinecone, Qdrant) dựa trên giá trị `VectorStore:Provider` trong cấu hình.
 
-### 12.4. Triển khai các Provider
+### 13.7. Triển khai các Provider
 
 -   **Pinecone (`PineconeVectorStore`)**: Triển khai `IVectorStore` sử dụng thư viện `Pinecone.NET` để tương tác với dịch vụ Pinecone.
     -   **Cấu hình**: Yêu cầu `VectorStore:Pinecone:ApiKey`, `VectorStore:Pinecone:Environment`, `VectorStore:Pinecone:IndexName` trong `appsettings.json`.
 -   **Qdrant (`QdrantVectorStore`)**: Triển khai `IVectorStore` sử dụng thư viện `Qdrant.Client` để tương tác với dịch vụ Qdrant (có thể chạy cục bộ).
     -   **Cấu hình**: Yêu cầu `VectorStore:Qdrant:Host`, `VectorStore:Qdrant:Port`, `VectorStore:Qdrant:ApiKey` (tùy chọn), `VectorStore:Qdrant:CollectionName` trong `appsettings.json`.
 
-### 12.5. Cấu hình `appsettings.json`
+### 13.8. Cấu hình `appsettings.json`
 
 ```json
 "VectorStore": {
@@ -940,7 +963,7 @@ Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector
 }
 ```
 
-### 12.6. Đăng ký Dependency Injection
+### 13.9. Đăng ký Dependency Injection
 
 Các dịch vụ liên quan đến Vector Database được đăng ký trong `backend/src/Infrastructure/DependencyInjection.cs`:
 
@@ -953,7 +976,7 @@ Các dịch vụ liên quan đến Vector Database được đăng ký trong `ba
 
 Module này chịu trách nhiệm đọc, làm sạch và chia nhỏ nội dung từ các tệp (PDF, TXT) được người dùng tải lên thành các `TextChunk` nhỏ hơn. Các chunk này sau đó có thể được sử dụng để tạo embeddings và lưu trữ trong Vector Database cho các tác vụ liên quan đến AI (ví dụ: chatbot).
 
-### 13.1. Thực thể `TextChunk`
+### 14.1. Thực thể `TextChunk`
 
 Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại diện cho một đoạn văn bản đã được xử lý, sẵn sàng cho việc tạo embedding.
 
@@ -963,22 +986,22 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 | `Content`  | `string`     | Nội dung văn bản của chunk. |
 | `Metadata` | `Dictionary<string, string>` | Các siêu dữ liệu bổ sung, bao gồm: `fileName`, `fileId`, `familyId`, `page`, `category`, `createdBy`, `createdAt`. |
 
-### 13.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)
+### 14.2. Trích xuất Văn bản từ Tệp (`IFileTextExtractor`)
 
 `IFileTextExtractor` (`backend/src/Application/Common/Interfaces/IFileTextExtractor.cs`) là một interface định nghĩa phương thức trích xuất văn bản từ một `Stream` của tệp. Các triển khai cụ thể sẽ xử lý các loại tệp khác nhau.
 
 *   **`PdfTextExtractor`** (`backend/src/Infrastructure/Services/PdfTextExtractor.cs`): Triển khai cho tệp PDF, sử dụng thư viện `UglyToad.PdfPig`.
 *   **`TxtTextExtractor`** (`backend/src/Infrastructure/Services/TxtTextExtractor.cs`): Triển khai cho tệp TXT.
 
-### 13.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)
+### 14.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)
 
 `IFileTextExtractorFactory` (`backend/src/Application/Common/Interfaces/IFileTextExtractorFactory.cs`) là một factory interface để lấy đúng `IFileTextExtractor` dựa trên phần mở rộng của tệp. `FileTextExtractorFactory` (`backend/src/Infrastructure/Services/FileTextExtractorFactory.cs`) là triển khai của factory này.
 
-### 13.4. Chính sách Chia Chunk (`ChunkingPolicy`)
+### 14.4. Chính sách Chia Chunk (`ChunkingPolicy`)
 
 `ChunkingPolicy` (`backend/src/Domain/Services/ChunkingPolicy.cs`) là một Domain Service chứa logic nghiệp vụ để làm sạch văn bản và chia nó thành các `TextChunk` có kích thước tối ưu (ví dụ: 300-400 từ). Nó cũng thêm các metadata cần thiết vào mỗi chunk.
 
-### 13.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)
+### 14.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)
 
 `ProcessFileCommand` (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommand.cs`) là một Command trong mô hình CQRS, mang thông tin về tệp cần xử lý (Stream, tên tệp) và các metadata bổ sung (`FileId`, `FamilyId`, `Category`, `CreatedBy`).
 
@@ -989,14 +1012,14 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
     3.  Sử dụng `ChunkingPolicy` để làm sạch và chia văn bản thành các chunk, đồng thời gắn các metadata đã nhận vào từng chunk.
     4.  Trả về `Result<List<TextChunk>>`.
 
-### 13.6. API Endpoint (`ChunkController`)
+### 14.6. API Endpoint (`ChunkController`)
 
 `ChunkController` (`backend/src/Web/Controllers/ChunkController.cs`) cung cấp endpoint API để người dùng tải lên tệp.
 
 *   **Route**: `POST /api/chunk/upload`
 *   **Chức năng**: Nhận `IFormFile` và các tham số metadata (`fileId`, `familyId`, `category`, `createdBy`) từ form data, tạo và gửi `ProcessFileCommand` thông qua `IMediator`, và trả về kết quả là một danh sách các `TextChunk`.
 
-## 14. Logging & Monitoring
+## 15. Logging & Monitoring
 
 Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt động của ứng dụng, phát hiện lỗi và đánh giá hiệu suất.
 
@@ -1018,12 +1041,12 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   **Traces**: Theo dõi luồng của một request qua nhiều services và components, giúp xác định nguyên nhân gốc rễ của các vấn đề về hiệu suất hoặc lỗi trong hệ thống phân tán.
 *   **Công cụ tích hợp**: Dự kiến tích hợp với Prometheus (để lưu trữ metrics) và Grafana (để trực quan hóa metrics và traces).
 
-## 15. Coding Style
+## 16. Coding Style
 
 -   Sử dụng `dotnet format` để duy trì code style nhất quán.
 -   Tuân thủ [Microsoft C# Coding Conventions](https://docs.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/coding-conventions).
 
-## 16. Best Practices
+## 17. Best Practices
 
 Để duy trì chất lượng mã nguồn cao, dễ bảo trì và mở rộng, hãy tuân thủ các nguyên tắc và thực tiễn tốt nhất sau:
 
@@ -1066,7 +1089,7 @@ Logging và Monitoring là các khía cạnh quan trọng để theo dõi hoạt
     *   Tất cả các `Command` và `Query` handlers nên trả về một đối tượng `Result<T>` (hoặc `Result<Unit>` cho các thao tác không trả về dữ liệu) để chỉ rõ thành công hay thất bại và cung cấp thông tin lỗi chi tiết.
     *   Các `Controller` nên kiểm tra `Result.IsSuccess` và trả về các `ActionResult` phù hợp (ví dụ: `Ok(result.Value)`, `BadRequest(result.Error)`, `NotFound(result.Error)`). Điều này giúp chuẩn hóa việc xử lý phản hồi API và tránh việc throw exceptions không cần thiết.
 
-## 17. Tài liệu liên quan
+## 18. Tài liệu liên quan
 
 -   [Kiến trúc tổng quan](./architecture.md)
 -   [Hướng dẫn API](./api-reference.md)

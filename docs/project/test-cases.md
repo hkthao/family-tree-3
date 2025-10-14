@@ -7,10 +7,14 @@
 - [3. Chi tiết Test Cases](#3-chi-tiết-test-cases)
   - [3.1. Module: Đăng nhập (Authentication)](#31-module-đăng-nhập-authentication)
   - [3.2. Module: Quản lý Thành viên (Member Management)](#32-module-quản-lý-thành-viên-member-management)
-  - [3.3. Module: Cây Gia Phả (Family Tree)](#33-module-cây-gia-phả-family-tree)
+  - [3.3. Module: Quản lý Sự kiện (Event Management)](#33-module-quản-lý-sự-kiện-event-management)
   - [3.4. Module: Quản lý Dòng họ (Family Management)](#34-module-quản-lý-dòng-họ-family-management)
   - [3.5. Module: Quản lý Quan hệ (Relationship Management)](#35-module-quản-lý-quan-hệ-relationship-management)
   - [3.6. Module: File đính kèm (Attachments)](#36-module-file-đính-kèm-attachments)
+  - [3.7. Module: Quản lý Tùy chọn Người dùng (User Preference Management)](#37-module-quản-lý-tùy-chọn-người-dùng-user-preference-management)
+  - [3.8. Module: AI Biography](#38-module-ai-biography)
+  - [3.9. Module: Xử lý Dữ liệu và Chia Chunk (Document Chunking)](#39-module-xử-lý-dữ-liệu-và-chia-chunk-document-chunking)
+  - [3.10. Module: Cây Gia Phả (Family Tree)](#310-module-cây-gia-phả-family-tree)
 
 ---
 
@@ -38,16 +42,14 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_MEMBER_02 | Thêm thành viên thất bại (thiếu họ tên) | Member Management      | High     | Manual/Automated  |
 | TC_MEMBER_03 | Chỉnh sửa thông tin thành viên thành công| Member Management      | High     | Manual/Automated  |
 | TC_EVENT_04  | Tìm kiếm sự kiện thành công            | Event Management       | High     | Manual/Automated  |
-| TC_TREE_01   | Hiển thị cây gia phả đúng cấu trúc     | Family Tree            | High     | Manual/Automated (Future Feature)  |
-| TC_TREE_02   | Tương tác Zoom và Pan trên cây         | Family Tree            | Medium   | Manual (Future Feature)            |
+| TC_TREE_01   | Hiển thị cây gia phả đúng cấu trúc     | Family Tree            | High     | Manual/Automated  |
+| TC_TREE_02   | Tương tác Zoom và Pan trên cây         | Family Tree            | Medium   | Manual            |
 | TC_FAMILY_01 | Tạo dòng họ mới thành công             | Family Management      | High     | Manual/Automated  |
 | TC_FAMILY_02 | Chỉnh sửa thông tin dòng họ            | Family Management      | High     | Manual/Automated  |
 | TC_REL_01    | Thêm mối quan hệ cha-con thành công    | Relationship Management| High     | Manual/Automated  |
 | TC_REL_02    | Xóa mối quan hệ                        | Relationship Management| Medium   | Manual/Automated  |
 | TC_REL_03    | Thêm mối quan hệ thành công            | Relationship Management| High     | Manual/Automated  |
 | TC_REL_04    | Chỉnh sửa mối quan hệ thành công       | Relationship Management| High     | Manual/Automated  |
-| TC_REL_05    | Xóa mối quan hệ thành công             | Relationship Management| High     | Manual/Automated  |
-| TC_REL_06    | Tìm kiếm mối quan hệ                   | Relationship Management| Medium   | Manual/Automated  |
 | TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual            |
 | TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual            |
 | TC_USERPREF_01 | Cập nhật tùy chọn người dùng thành công | User Preferences       | High     | Manual/Automated  |
@@ -205,44 +207,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Priority**: High
 -   **Type**: Manual/Automated
 
-### 3.3. Module: Quản lý Sự kiện (Event Management)
 
-#### TC_TREE_01: Hiển thị cây gia phả đúng cấu trúc
--   **Mục tiêu**: Xác minh cây gia phả được hiển thị chính xác theo các mối quan hệ đã định nghĩa trong hệ thống.
--   **Điều kiện tiên quyết (Preconditions)**:
-    *   Người dùng đã đăng nhập vào hệ thống.
-    *   Đã có ít nhất một dòng họ với một số thành viên và mối quan hệ (cha-mẹ, vợ-chồng) được tạo sẵn.
-    *   Ứng dụng Frontend và Backend đang chạy.
--   **Các bước thực hiện**:
-    1.  Đăng nhập vào hệ thống.
-    2.  Truy cập trang "Cây Gia Phả" hoặc chọn một dòng họ để xem cây gia phả.
-    3.  Quan sát cấu trúc hiển thị của cây gia phả.
--   **Kết quả mong đợi**: 
-    *   Cây gia phả hiển thị đúng cấu trúc phả hệ, các thế hệ và mối quan hệ (cha-mẹ, vợ-chồng, con cái) được thể hiện rõ ràng và chính xác.
-    *   Các thành viên được kết nối bằng các đường liên kết thể hiện mối quan hệ.
--   **Thực tế**: (Để trống)
--   **Severity**: High
--   **Priority**: High
--   **Type**: Manual/Automated
-
-#### TC_TREE_02: Tương tác Zoom và Pan trên cây
--   **Mục tiêu**: Xác minh người dùng có thể tương tác (phóng to, thu nhỏ, kéo) trên cây gia phả một cách mượt mà và chính xác.
--   **Điều kiện tiên quyết (Preconditions)**:
-    *   Người dùng đã đăng nhập vào hệ thống.
-    *   Đã có ít nhất một dòng họ với cây gia phả được hiển thị trên trang.
-    *   Ứng dụng Frontend và Backend đang chạy.
--   **Các bước thực hiện**:
-    1.  Đăng nhập vào hệ thống và truy cập trang "Cây Gia Phả".
-    2.  Sử dụng con lăn chuột (scroll wheel) hoặc các nút điều khiển trên giao diện để phóng to (zoom in) và thu nhỏ (zoom out) cây gia phả.
-    3.  Nhấn giữ chuột trái và kéo (drag) để di chuyển khung nhìn (pan) trên cây gia phả.
--   **Kết quả mong đợi**: 
-    *   Cây gia phả phóng to/thu nhỏ và di chuyển mượt mà theo thao tác của người dùng.
-    *   Các thành viên và mối quan hệ vẫn hiển thị rõ ràng sau khi phóng to/thu nhỏ.
-    *   Không có lỗi hoặc giật lag xảy ra trong quá trình tương tác.
--   **Thực tế**: (Để trống)
--   **Severity**: Medium
--   **Priority**: Medium
--   **Type**: Manual
 
 ### 3.4. Module: Quản lý Dòng họ (Family Management)
 
@@ -481,3 +446,42 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Severity**: High
 -   **Priority**: High
 -   **Type**: Manual/Automated
+
+### 3.10. Module: Cây Gia Phả (Family Tree)
+
+#### TC_TREE_01: Hiển thị cây gia phả đúng cấu trúc
+-   **Mục tiêu**: Xác minh cây gia phả được hiển thị chính xác theo các mối quan hệ đã định nghĩa trong hệ thống.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một dòng họ với một số thành viên và mối quan hệ (cha-mẹ, vợ-chồng) được tạo sẵn.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang "Cây Gia Phả" hoặc chọn một dòng họ để xem cây gia phả.
+    3.  Quan sát cấu trúc hiển thị của cây gia phả.
+-   **Kết quả mong đợi**: 
+    *   Cây gia phả hiển thị đúng cấu trúc phả hệ, các thế hệ và mối quan hệ (cha-mẹ, vợ-chồng, con cái) được thể hiện rõ ràng và chính xác.
+    *   Các thành viên được kết nối bằng các đường liên kết thể hiện mối quan hệ.
+-   **Thực tế**: (Để trống)
+-   **Severity**: High
+-   **Priority**: High
+-   **Type**: Manual/Automated
+
+#### TC_TREE_02: Tương tác Zoom và Pan trên cây
+-   **Mục tiêu**: Xác minh người dùng có thể tương tác (phóng to, thu nhỏ, kéo) trên cây gia phả một cách mượt mà và chính xác.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Đã có ít nhất một dòng họ với cây gia phả được hiển thị trên trang.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống và truy cập trang "Cây Gia Phả".
+    2.  Sử dụng con lăn chuột (scroll wheel) hoặc các nút điều khiển trên giao diện để phóng to (zoom in) và thu nhỏ (zoom out) cây gia phả.
+    3.  Nhấn giữ chuột trái và kéo (drag) để di chuyển khung nhìn (pan) trên cây gia phả.
+-   **Kết quả mong đợi**: 
+    *   Cây gia phả phóng to/thu nhỏ và di chuyển mượt mà theo thao tác của người dùng.
+    *   Các thành viên và mối quan hệ vẫn hiển thị rõ ràng sau khi phóng to/thu nhỏ.
+    *   Không có lỗi hoặc giật lag xảy ra trong quá trình tương tác.
+-   **Thực tế**: (Để trống)
+-   **Severity**: Medium
+-   **Priority**: Medium
+-   **Type**: Manual

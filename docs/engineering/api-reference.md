@@ -10,17 +10,22 @@
 - [6. Các Endpoint chính](#6-các-endpoint-chính)
   - [6.1. Quản lý Dòng họ (`/api/families`)](#61-quản-lý-dòng-họ-apifamilies)
   - [6.2. Quản lý Thành viên (`/api/members`)](#62-quản-lý-thành-viên-apimembers)
-- [6.3. Quản lý Sự kiện (`/api/events`)](#63-quản-lý-sự-kiện-apievents)
-- [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
-- [6.5. Quản lý Quan hệ (`/api/relationships`)](#65-quản-lý-quan-hệ-apirelationships)
-- [6.11. Xử lý Dữ liệu và Tải lên Chunk (`/api/chunk/upload`)](#611-xử-lý-dữ-liệu-và-tải-lên-chunk-apichunkupload)
+  - [6.3. Quản lý Sự kiện (`/api/events`)](#63-quản-lý-sự-kiện-apievents)
+  - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
+  - [6.5. Quản lý Quan hệ (`/api/relationships`)](#65-quản-lý-quan-hệ-apirelationships)
+  - [6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
+  - [6.7. Quản lý Hoạt động Người dùng (`/api/activities`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
+  - [6.8. Quản lý AI (`/api/ai`)](#68-quản-lý-ai-api-ai)
+  - [6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)](#69-quản-lý-tùy-chọn-người-dùng-apiuserpreferences)
+  - [6.10. Quản lý Tải lên Tệp (`/api/upload`)](#610-quản-lý-tải-lên-tệp-apiupload)
+  - [6.11. Xử lý Dữ liệu và Tải lên Chunk (`/api/chunk/upload`)](#611-xử-lý-dữ-liệu-và-tải-lên-chunk-apichunkupload)
 - [7. Mô hình Dữ liệu (Response Models)](#7-mô-hình-dữ-liệu-response-models)
   - [7.1. Family](#71-family)
   - [7.2. Member](#72-member)
-  - [7.5. Relationship](#75-relationship)
-  - [7.6. RelationshipListDto](#76-relationshiplistdto)
   - [7.3. Event](#73-event)
   - [7.4. SearchResultsDto](#74-searchresultsdto)
+  - [7.5. Relationship](#75-relationship)
+  - [7.6. RelationshipListDto](#76-relationshiplistdto)
   - [7.7. UserProfile](#77-userprofile)
   - [7.8. UserActivity](#78-useractivity)
   - [7.9. AIBiographyDto](#79-aibiographydto)
@@ -97,11 +102,7 @@ public class FamilyController : ApiControllerBase
 
 Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nếu một request không có hoặc có JWT không hợp lệ, API sẽ trả về lỗi `401 Unauthorized` hoặc `403 Forbidden`.
 
-## 3. Phân quyền (Authorization)
-
-Hệ thống sử dụng cơ chế phân quyền chi tiết dựa trên vai trò của người dùng trong từng gia đình (Family-specific roles) và vai trò toàn cục (Global roles). Các vai trò này được quản lý thông qua `FamilyRole` enum và được kiểm tra bởi `IAuthorizationService` ở Backend để đảm bảo người dùng chỉ có thể thực hiện các hành động được phép.
-
-### 3.1. Cơ chế RBAC
+## 3. Phân trang (Pagination)
 
 Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/members`) đều hỗ trợ phân trang qua các query parameter sau:
 
@@ -218,7 +219,7 @@ Content-Type: application/json
 
 ## 6. Các Endpoint chính
 
-### 6.1. Quản lý Dòng họ (`/api/Family`) (updated after refactor)
+### 6.1. Quản lý Dòng họ (`/api/families`)
 
 -   `GET /api/Family`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
     *   **Phản hồi:** `Result<PaginatedList<Family>>`
@@ -385,31 +386,7 @@ Content-Type: application/json
 }
 ```
 
-### 7.5. Relationship
 
-```json
-{
-  "id": "string (uuid)",
-  "sourceMemberId": "string (uuid)",
-  "targetMemberId": "string (uuid)",
-  "type": "string (Parent/Child/Spouse/Sibling)",
-  "order": "number (nullable)"
-}
-```
-
-### 7.6. RelationshipListDto
-
-```json
-{
-  "id": "string (uuid)",
-  "sourceMemberId": "string (uuid)",
-  "targetMemberId": "string (uuid)",
-  "type": "string (Parent/Child/Spouse/Sibling)",
-  "order": "number (nullable)",
-  "sourceMemberFullName": "string",
-  "targetMemberFullName": "string"
-}
-```
 
 ### 7.3. Event
 
@@ -438,6 +415,32 @@ Content-Type: application/json
   "members": [
     // ... Member objects ...
   ]
+}
+```
+
+### 7.5. Relationship
+
+```json
+{
+  "id": "string (uuid)",
+  "sourceMemberId": "string (uuid)",
+  "targetMemberId": "string (uuid)",
+  "type": "string (Parent/Child/Spouse/Sibling)",
+  "order": "number (nullable)"
+}
+```
+
+### 7.6. RelationshipListDto
+
+```json
+{
+  "id": "string (uuid)",
+  "sourceMemberId": "string (uuid)",
+  "targetMemberId": "string (uuid)",
+  "type": "string (Parent/Child/Spouse/Sibling)",
+  "order": "number (nullable)",
+  "sourceMemberFullName": "string",
+  "targetMemberFullName": "string"
 }
 ```
 

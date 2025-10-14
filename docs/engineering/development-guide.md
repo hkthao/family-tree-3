@@ -15,6 +15,10 @@
   - [4.2. Áp dụng migration](#42-áp-dụng-migration)
 - [5. Seeding a Database](#5-seeding-a-database)
 - [6. Sử dụng Dịch vụ Phân quyền (Authorization Service)](#6-sử-dụng-dịch-vụ-phân-quyền-authorization-service)
+  - [6.1. Inject `IAuthorizationService`](#61-inject-iauthorizationservice)
+  - [6.2. Các phương thức kiểm tra quyền](#62-các-phương-thức-kiểm-tra-quyền)
+  - [6.3. Lưu ý khi phát triển](#63-lưu-ý-khi-phát-triển)
+- [7. Sử dụng AutoMapper cho DTO Mapping](#7-sử-dụng-automapper-cho-dto-mapping)
 
 ---
 
@@ -28,8 +32,6 @@ Tài liệu này hướng dẫn cách cài đặt môi trường, build, và dep
 -   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn) cho việc phát triển Backend.
 -   **Node.js 20+**: Phiên bản 20.x (hoặc mới hơn) cho việc phát triển Frontend.
 -   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations cho database nghiệp vụ. Bạn có thể cài đặt bằng lệnh: `dotnet tool install --global dotnet-ef`.
--   **AutoMapper**: Thư viện để ánh xạ đối tượng (object mapping) giữa các lớp (ví dụ: Entity sang DTO).
--   **AutoMapper**: Thư viện để ánh xạ đối tượng (object mapping) giữa các lớp (ví dụ: Entity sang DTO).
 
 ## 2. Cài đặt và Chạy dự án
 
@@ -226,11 +228,25 @@ dotnet ef database update --project src/Infrastructure --startup-project src/Web
 *   Để biết hướng dẫn chi tiết hơn về cách quản lý database migrations, bao gồm cả việc tạo migration ban đầu, vui lòng tham khảo [Hướng dẫn Backend](./backend-guide.md#9-database-migration).
 *   Khi chạy Backend ở chế độ Development, `ApplicationDbContextInitialiser` sẽ tự động gọi `database update` nếu database là relational và chưa được cập nhật.
 
+## 5. Seeding a Database
+
+Dự án được cấu hình để tự động seed dữ liệu mẫu khi Backend khởi động ở chế độ Development, nếu database chưa có dữ liệu. Cơ chế này được triển khai trong `ApplicationDbContextInitialiser`.
+
+#### Luồng hoạt động
+
+1.  Đảm bảo `ASPNETCORE_ENVIRONMENT` được đặt là `Development`.
+2.  Đảm bảo `UseInMemoryDatabase` trong `appsettings.Development.json` được đặt là `false` (nếu bạn muốn seed vào MySQL) hoặc `true` (nếu bạn muốn seed vào In-Memory DB).
+3.  Khởi động Backend (ví dụ: `dotnet run --project src/Web`).
+
+Backend sẽ kiểm tra xem database đã có dữ liệu chưa (ví dụ: bảng `Families` có trống không). Nếu trống, nó sẽ chạy phương thức `SeedAsync()` trong `ApplicationDbContextInitialiser` để điền dữ liệu mẫu (ví dụ: dữ liệu về Royal Family).
+
+**Lưu ý:** Nếu bạn đã có dữ liệu trong database, quá trình seeding sẽ bị bỏ qua để tránh ghi đè dữ liệu hiện có.
+
 ## 6. Sử dụng Dịch vụ Phân quyền (Authorization Service)
 
 Hệ thống cung cấp một dịch vụ phân quyền tập trung (`IAuthorizationService`) để kiểm tra quyền hạn của người dùng trong các ngữ cảnh khác nhau, bao gồm cả vai trò toàn cục và vai trò cụ thể theo gia đình. Các nhà phát triển nên sử dụng dịch vụ này để thực hiện các kiểm tra quyền trong logic nghiệp vụ và các endpoint API.
 
-### 5.1. Inject `IAuthorizationService`
+### 6.1. Inject `IAuthorizationService`
 
 Bạn có thể inject `IAuthorizationService` vào các service, handler hoặc controller của mình thông qua Dependency Injection.
 
@@ -277,7 +293,7 @@ public class FamilyService : IFamilyService
 }
 ```
 
-### 5.2. Các phương thức kiểm tra quyền
+### 6.2. Các phương thức kiểm tra quyền
 
 `IAuthorizationService` cung cấp các phương thức sau để kiểm tra quyền:
 
@@ -287,13 +303,17 @@ public class FamilyService : IFamilyService
 *   `CanManageFamily(Guid familyId, UserProfile userProfile)`: Kiểm tra xem người dùng có quyền quản lý (vai trò `Manager`) đối với một gia đình cụ thể hay không.
 *   `HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)`: Kiểm tra xem người dùng có vai trò `requiredRole` hoặc cao hơn trong một gia đình cụ thể hay không.
 
-### 5.3. Lưu ý khi phát triển
+### 6.3. Lưu ý khi phát triển
 
 *   **Luôn kiểm tra quyền**: Đảm bảo rằng mọi hành động nhạy cảm hoặc truy cập dữ liệu đều được kiểm tra quyền một cách thích hợp.
 *   **Sử dụng `FamilyRole`**: Khi làm việc với các chức năng liên quan đến gia đình, hãy sử dụng `FamilyRole` enum để định nghĩa và kiểm tra các cấp độ quyền hạn.
 *   **Tách biệt trách nhiệm**: Giữ logic kiểm tra quyền trong `IAuthorizationService` hoặc các chính sách ủy quyền để đảm bảo tính nhất quán và dễ bảo trì.
 
-### 5.4. Sử dụng AutoMapper cho DTO Mapping
+
+
+
+
+## 7. Sử dụng AutoMapper cho DTO Mapping
 
 Dự án sử dụng AutoMapper để tự động ánh xạ dữ liệu giữa các đối tượng (ví dụ: từ Entity sang DTO và ngược lại). Điều này giúp giảm thiểu mã lặp lại và giữ cho các lớp rõ ràng hơn.
 
@@ -342,17 +362,3 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Res
     }
 }
 ```
-
-## 5. Seeding a Database
-
-Dự án được cấu hình để tự động seed dữ liệu mẫu khi Backend khởi động ở chế độ Development, nếu database chưa có dữ liệu. Cơ chế này được triển khai trong `ApplicationDbContextInitialiser`.
-
-#### Luồng hoạt động
-
-1.  Đảm bảo `ASPNETCORE_ENVIRONMENT` được đặt là `Development`.
-2.  Đảm bảo `UseInMemoryDatabase` trong `appsettings.Development.json` được đặt là `false` (nếu bạn muốn seed vào MySQL) hoặc `true` (nếu bạn muốn seed vào In-Memory DB).
-3.  Khởi động Backend (ví dụ: `dotnet run --project src/Web`).
-
-Backend sẽ kiểm tra xem database đã có dữ liệu chưa (ví dụ: bảng `Families` có trống không). Nếu trống, nó sẽ chạy phương thức `SeedAsync()` trong `ApplicationDbContextInitialiser` để điền dữ liệu mẫu (ví dụ: dữ liệu về Royal Family).
-
-**Lưu ý:** Nếu bạn đã có dữ liệu trong database, quá trình seeding sẽ bị bỏ qua để tránh ghi đè dữ liệu hiện có.

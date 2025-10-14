@@ -9,11 +9,12 @@
   - [2.3. Module: Dữ liệu & Báo cáo](#23-module-dữ-liệu--báo-cáo)
   - [2.4. Module: AI & Tích hợp](#24-module-ai--tích-hợp)
 - [3. In Progress](#3-in-progress)
-  - [3.1. Module: Quản lý Thành viên](#31-module-quản-lý-thành-viên)
 - [4. Done](#4-done)
   - [4.1. Module: Xác thực](#41-module-xác-thực)
-  - [4.2. Module: Quản lý Thành viên](#42-module-quản-lý-thành-viên)
-
+  - [4.2. Module: Quản lý Thành viên & Dòng họ](#42-module-quản-lý-thành-viên--dòng-họ)
+  - [4.3. Module: AI & Dữ liệu](#43-module-ai--dữ-liệu)
+  - [4.4. Module: Cải thiện trải nghiệm người dùng](#44-module-cải-thiện-trải-nghiệm-người-dùng)
+  - [4.5. Module: Quản lý Quan hệ](#45-module-quản-lý-quan-hệ)
 ---
 
 ## 1. Giới thiệu
@@ -128,17 +129,6 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Tệp đính kèm có thể được xem trực tiếp trong ứng dụng hoặc tải xuống.
     -   Có cơ chế quản lý tệp đính kèm (xóa, đổi tên).
 
-#### US_010: Tải lên và quản lý tệp đính kèm
--   **User Story**: Là người dùng, tôi muốn tải lên và quản lý các tệp (hình ảnh, tài liệu) liên quan đến các thành viên hoặc gia đình để lưu trữ thông tin bổ sung.
--   **Priority**: High
--   **Estimate**: 5 ngày
--   **Acceptance Criteria**:
-    -   Hệ thống cung cấp giao diện để người dùng chọn và tải lên các tệp (JPG, JPEG, PNG, PDF, DOCX).
-    -   Kích thước tệp tối đa là 5MB.
-    -   Tên tệp được làm sạch và thêm ID duy nhất để tránh trùng lặp.
-    -   Sau khi tải lên thành công, hệ thống trả về URL công khai của tệp.
-    -   Hệ thống hiển thị thông báo lỗi rõ ràng nếu tệp không hợp lệ (sai định dạng, quá kích thước).
-    -   Backend sử dụng cấu hình để chọn nhà cung cấp lưu trữ (Local, Cloudinary, S3).
 
 #### US_011: Báo cáo thống kê & Kỷ lục gia đình
 -   **User Story**: Là người dùng, tôi muốn xem và tạo các báo cáo thống kê về cây gia phả, bao gồm các kỷ lục gia đình, để có cái nhìn sâu sắc và phân tích dữ liệu.
@@ -162,14 +152,6 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
 
 ### 2.4. Module: AI & Tích hợp
 
-#### US_012: Gợi ý tiểu sử bằng AI
--   **User Story**: Là người dùng, tôi muốn AI có thể gợi ý nội dung tiểu sử dựa trên dữ liệu thành viên đã có sẵn.
--   **Priority**: Low
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Khi người dùng chọn một thành viên, hệ thống có thể tạo ra một bản nháp tiểu sử dựa trên dữ liệu có sẵn (tên, ngày sinh, nơi sinh, nghề nghiệp, các sự kiện liên quan).
-    -   Gợi ý tiểu sử bao gồm các thông tin cơ bản và các sự kiện quan trọng trong cuộc đời thành viên.
-    -   Người dùng có thể chỉnh sửa bản nháp tiểu sử được gợi ý trước khi lưu vào hồ sơ thành viên.
 
 #### US_013: Nhận diện khuôn mặt bằng AI để tự động gắn thẻ
 -   **User Story**: Là người dùng, tôi muốn AI nhận diện khuôn mặt từ ảnh cũ để tự động gắn thẻ thành viên.
@@ -191,41 +173,6 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Hệ thống trả về danh sách các thành viên có khả năng trùng khớp cao nhất, kèm theo tỷ lệ tự tin.
     -   Người dùng có thể xem thông tin chi tiết của các thành viên được tìm thấy.
 
-### 2.5. Module: Quản lý Quan hệ
-
-#### US_022: Thêm mối quan hệ
--   **User Story**: Là người dùng, tôi muốn thêm một mối quan hệ mới giữa hai thành viên để xây dựng cây gia phả.
--   **Priority**: High
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Có giao diện để chọn thành viên nguồn, thành viên đích và loại mối quan hệ.
-    -   Hệ thống lưu trữ mối quan hệ mới vào database.
-    -   Sau khi tạo thành công, mối quan hệ mới hiển thị trong danh sách quan hệ và trên cây gia phả.
-
-#### US_023: Chỉnh sửa mối quan hệ
--   **User Story**: Là người dùng, tôi muốn chỉnh sửa thông tin của một mối quan hệ hiện có.
--   **Priority**: High
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Người dùng có thể chọn một mối quan hệ và truy cập biểu mẫu chỉnh sửa.
-    -   Các trường trong biểu mẫu chỉnh sửa được điền sẵn dữ liệu hiện tại.
-    -   Các thay đổi được lưu và phản ánh ngay lập tức.
-
-#### US_024: Xóa mối quan hệ
--   **User Story**: Là người dùng, tôi muốn xóa một mối quan hệ không còn phù hợp.
--   **Priority**: High
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Người dùng có thể chọn một mối quan hệ và xác nhận xóa.
-    -   Mối quan hệ bị xóa khỏi hệ thống và không còn hiển thị.
-
-#### US_025: Xem danh sách mối quan hệ
--   **User Story**: Là người dùng, tôi muốn xem danh sách tất cả các mối quan hệ.
--   **Priority**: Medium
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Hiển thị danh sách các mối quan hệ với thông tin chi tiết (thành viên nguồn, thành viên đích, loại).
-    -   Hỗ trợ phân trang và tìm kiếm/lọc.
 
 ## 3. In Progress
 
@@ -321,8 +268,6 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   `GetCurrentUserProfileQueryHandler` trả về `Result<UserProfileDto>`.
     -   Đảm bảo xử lý lỗi và thành công nhất quán theo `Result Pattern`.
 
-### 4.3. Module: Quản lý Thành viên
-
 #### US_015: Thêm thành viên
 -   **User Story**: Là người dùng, tôi muốn thêm thành viên mới vào cây gia phả để mở rộng lịch sử gia đình.
 -   **Priority**: High
@@ -353,7 +298,8 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Kết quả tìm kiếm phải hiển thị trong danh sách hoặc làm nổi bật/điều hướng đến thành viên trên cây gia phả.
     -   Tìm kiếm phải hỗ trợ tìm kiếm gần đúng (fuzzy search) hoặc tìm kiếm một phần từ khóa.
 
-### 4.4. Module: AI & Dữ liệu
+
+### 4.3. Module: AI & Dữ liệu
 
 #### US_031: Quản lý Tùy chọn Người dùng
 -   **User Story**: Là người dùng, tôi muốn lưu trữ và truy xuất tùy chọn cá nhân của mình (chủ đề, ngôn ngữ, cài đặt thông báo) để cá nhân hóa trải nghiệm ứng dụng.
@@ -375,6 +321,15 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Cập nhật giao diện người dùng để hiển thị dữ liệu tiểu sử AI đầy đủ.
     -   Thêm validation cho độ dài prompt của người dùng.
 
+#### US_012: Gợi ý tiểu sử bằng AI
+-   **User Story**: Là người dùng, tôi muốn AI có thể gợi ý nội dung tiểu sử dựa trên dữ liệu thành viên đã có sẵn.
+-   **Priority**: Low
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Khi người dùng chọn một thành viên, hệ thống có thể tạo ra một bản nháp tiểu sử dựa trên dữ liệu có sẵn (tên, ngày sinh, nơi sinh, nghề nghiệp, các sự kiện liên quan).
+    -   Gợi ý tiểu sử bao gồm các thông tin cơ bản và các sự kiện quan trọng trong cuộc đời thành viên.
+    -   Người dùng có thể chỉnh sửa bản nháp tiểu sử được gợi ý trước khi lưu vào hồ sơ thành viên.
+
 #### US_033: Xử lý dữ liệu và Chia Chunk
 -   **User Story**: Là người dùng, tôi muốn tải lên các tệp tài liệu (PDF/TXT) và hệ thống tự động xử lý, chia nhỏ nội dung thành các `TextChunk` để chuẩn bị cho việc tích hợp AI.
 -   **Priority**: High
@@ -384,7 +339,19 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Mỗi `TextChunk` có đầy đủ metadata (fileId, familyId, category, createdBy).
     -   API cho phép tải lên tệp và trả về danh sách các `TextChunk` đã xử lý.
 
-### 4.5. Module: Cải thiện trải nghiệm người dùng
+#### US_010: Tải lên và quản lý tệp đính kèm
+-   **User Story**: Là người dùng, tôi muốn tải lên và quản lý các tệp (hình ảnh, tài liệu) liên quan đến các thành viên hoặc gia đình để lưu trữ thông tin bổ sung.
+-   **Priority**: High
+-   **Estimate**: 5 ngày
+-   **Acceptance Criteria**:
+    -   Hệ thống cung cấp giao diện để người dùng chọn và tải lên các tệp (JPG, JPEG, PNG, PDF, DOCX).
+    -   Kích thước tệp tối đa là 5MB.
+    -   Tên tệp được làm sạch và thêm ID duy nhất để tránh trùng lặp.
+    -   Sau khi tải lên thành công, hệ thống trả về URL công khai của tệp.
+    -   Hệ thống hiển thị thông báo lỗi rõ ràng nếu tệp không hợp lệ (sai định dạng, quá kích thước).
+    -   Backend sử dụng cấu hình để chọn nhà cung cấp lưu trữ (Local, Cloudinary, S3).
+
+### 4.4. Module: Cải thiện trải nghiệm người dùng
 
 #### US_034: Thêm Tooltips cho các nút hành động
 -   **User Story**: Là người dùng, tôi muốn thấy tooltips khi di chuột qua các nút hành động (chỉnh sửa, xóa, thêm mới) để hiểu rõ chức năng của chúng.
@@ -409,3 +376,39 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
 -   **Acceptance Criteria**:
     -   Tất cả các import và biến không sử dụng trong các tệp frontend được loại bỏ.
     -   Không có cảnh báo linting liên quan đến các import và biến không sử dụng.
+
+### 4.5. Module: Quản lý Quan hệ
+
+#### US_022: Thêm mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn thêm một mối quan hệ mới giữa hai thành viên để xây dựng cây gia phả.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Có giao diện để chọn thành viên nguồn, thành viên đích và loại mối quan hệ.
+    -   Hệ thống lưu trữ mối quan hệ mới vào database.
+    -   Sau khi tạo thành công, mối quan hệ mới hiển thị trong danh sách quan hệ và trên cây gia phả.
+
+#### US_023: Chỉnh sửa mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn chỉnh sửa thông tin của một mối quan hệ hiện có.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Người dùng có thể chọn một mối quan hệ và truy cập biểu mẫu chỉnh sửa.
+    -   Các trường trong biểu mẫu chỉnh sửa được điền sẵn dữ liệu hiện tại.
+    -   Các thay đổi được lưu và phản ánh ngay lập tức.
+
+#### US_024: Xóa mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn xóa một mối quan hệ không còn phù hợp.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Người dùng có thể chọn một mối quan hệ và xác nhận xóa.
+    -   Mối quan hệ bị xóa khỏi hệ thống và không còn hiển thị.
+
+#### US_025: Xem danh sách mối quan hệ
+-   **User Story**: Là người dùng, tôi muốn xem danh sách tất cả các mối quan hệ.
+-   **Priority**: Medium
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Hiển thị danh sách các mối quan hệ với thông tin chi tiết (thành viên nguồn, thành viên đích, loại).
+    -   Hỗ trợ phân trang và tìm kiếm/lọc.
