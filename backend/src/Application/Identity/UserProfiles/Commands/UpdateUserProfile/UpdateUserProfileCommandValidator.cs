@@ -21,7 +21,12 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
 
         RuleFor(v => v.Avatar)
             .MaximumLength(2048).WithMessage("Avatar URL must not exceed 2048 characters.")
-            .Matches(@"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").When(v => !string.IsNullOrEmpty(v.Avatar))
-            .WithMessage("Avatar URL must be a valid URL.");
+            .Must(BeAValidUrl).When(v => !string.IsNullOrEmpty(v.Avatar)).WithMessage("Avatar URL must be a valid URL.");
+    }
+
+    private bool BeAValidUrl(string? url)
+    {
+        if (string.IsNullOrEmpty(url)) return true;
+        return Uri.TryCreate(url, UriKind.Absolute, out _);
     }
 }
