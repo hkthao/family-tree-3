@@ -24,8 +24,8 @@ public class GenerateDataCommandHandler : IRequestHandler<GenerateDataCommand, R
 
         var systemPrompt = @"You are an AI assistant that generates JSON data for family tree entities (Family or Member) based on natural language descriptions.
 The output should always be a single JSON object containing two arrays: 'families' and 'members'.
-Each object in the 'families' array should have 'name', 'description', 'address', and 'visibility' (Public, Private, Shared).
-Each object in the 'members' array should have 'fullName', 'gender' (Male, Female, Other), 'dateOfBirth', 'dateOfDeath', 'placeOfBirth', 'placeOfDeath', 'occupation', and 'biography'.
+Each object in the 'families' array should have 'name', 'description' (extract from prompt if detailed), 'address', and 'visibility' (Public, Private, Shared).
+Each object in the 'members' array should have 'fullName', 'gender' (Male, Female, Other), 'dateOfBirth', 'dateOfDeath', 'placeOfBirth', 'placeOfDeath', 'occupation', and 'biography' (extract from prompt if detailed).
 Infer the entity type (Family or Member) from the prompt. If the prompt describes multiple entities, include them in the respective arrays.
 If the prompt is ambiguous or lacks sufficient detail, ask for clarification or provide a best-effort JSON with placeholders.
 Example for multiple entities: 'Tạo một gia đình tên Nguyễn ở Hà Nội và thêm thành viên tên Trần Văn A, sinh năm 1990 vào gia đình đó.'
