@@ -29,20 +29,18 @@ const generatedData = computed(() => naturalLanguageInputStore.generatedData);
 const isLoading = computed(() => naturalLanguageInputStore.isLoading);
 
 const formattedJson = computed(() => {
-  if (generatedData.value && generatedData.value.jsonData) {
-    try {
-      return JSON.stringify(JSON.parse(generatedData.value.jsonData), null, 2);
-    } catch (e) {
-      return generatedData.value.jsonData; // Return as is if not valid JSON
+  if (generatedData.value) {
+    if (generatedData.value.dataType === 'Family' && generatedData.value.family) {
+      return JSON.stringify(generatedData.value.family, null, 2);
+    } else if (generatedData.value.dataType === 'Member' && generatedData.value.member) {
+      return JSON.stringify(generatedData.value.member, null, 2);
     }
   }
   return '';
 });
 
 const confirm = () => {
-  if (generatedData.value) {
-    naturalLanguageInputStore.saveData(JSON.parse(generatedData.value.jsonData), generatedData.value.dataType);
-  }
+  naturalLanguageInputStore.saveData();
 };
 
 const cancel = () => {

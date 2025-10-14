@@ -1,12 +1,15 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families;
+using backend.Application.Members.Queries;
+using backend.Application.NaturalLanguageInput.Queries;
 using backend.Domain.Enums;
 using MediatR;
 using System.Text.Json;
 
 namespace Application.NaturalLanguageInput.Commands.GenerateData;
 
-public class GenerateDataCommandHandler : IRequestHandler<GenerateDataCommand, Result<string>>
+public class GenerateDataCommandHandler : IRequestHandler<GenerateDataCommand, Result<GeneratedEntityDto>>
 {
     private readonly IChatProviderFactory _chatProviderFactory;
 
@@ -15,13 +18,10 @@ public class GenerateDataCommandHandler : IRequestHandler<GenerateDataCommand, R
         _chatProviderFactory = chatProviderFactory;
     }
 
-    public async Task<Result<string>> Handle(GenerateDataCommand request, CancellationToken cancellationToken)
+    public async Task<Result<GeneratedEntityDto>> Handle(GenerateDataCommand request, CancellationToken cancellationToken)
     {
-        // For now, we'll use a default AI provider. In a real scenario, this might be configurable.
-        var chatProvider = _chatProviderFactory.GetProvider(backend.Domain.Enums.ChatAIProvider.Local);
+        var chatProvider = _chatProviderFactory.GetProvider(ChatAIProvider.Local);
 
-        // Construct a prompt for the AI to generate JSON for family/member data
-        // This prompt needs to be carefully engineered to guide the AI
         var systemPrompt = @"You are an AI assistant that generates JSON data for family tree entities (Family or Member) based on natural language descriptions.
 The output should always be a JSON object.
 For a 'Family' entity, the JSON should have 'name', 'description', 'address', and 'visibility' (Public, Private, Shared).
@@ -36,28 +36,47 @@ Always respond with ONLY the JSON object. Do not include any conversational text
 
         var userPrompt = request.Prompt;
 
-        var chatMessages = new List<backend.Application.Common.Models.ChatMessage>
+        var chatMessages = new List<ChatMessage>
         {
-            new backend.Application.Common.Models.ChatMessage { Role = "system", Content = systemPrompt },
-            new backend.Application.Common.Models.ChatMessage { Role = "user", Content = userPrompt }
+            new() { Role = "system", Content = systemPrompt },
+            new() { Role = "user", Content = userPrompt }
         };
 
         string jsonString = await chatProvider.GenerateResponseAsync(chatMessages);
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<string>.Failure("AI did not return a response.");
+            return Result<GeneratedEntityDto>.Failure("AI did not return a response.");
         }
 
-        // Basic validation to ensure it's valid JSON
         try
         {
-            JsonDocument.Parse(jsonString);
-            return Result<string>.Success(jsonString);
+            using JsonDocument doc = JsonDocument.Parse(jsonString);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("name", out _) && root.TryGetProperty("visibility", out _))
+            {
+                var familyDto = JsonSerializer.Deserialize<FamilyDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (familyDto != null) {
+                    return Result<GeneratedEntityDto>.Success(new GeneratedEntityDto { DataType = "Family", Family = familyDto });
+                }
+            }
+            else if (root.TryGetProperty("fullName", out _) && root.TryGetProperty("gender", out _))
+            {
+                var memberDto = JsonSerializer.Deserialize<MemberDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                if (memberDto != null) {
+                    return Result<GeneratedEntityDto>.Success(new GeneratedEntityDto { DataType = "Member", Member = memberDto });
+                }
+            }
+            return Result<GeneratedEntityDto>.Failure("AI generated JSON that does not match Family or Member schema.");
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
-            return Result<string>.Failure("AI generated invalid JSON. Please try again or refine your prompt.");
+            return Result<GeneratedEntityDto>.Failure($"AI generated invalid JSON: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return Result<GeneratedEntityDto>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
         }
     }
 }

@@ -1,8 +1,11 @@
+import type { Family, Member } from '@/types';
+
 export interface GenerateDataRequest {
   prompt: string;
 }
 
 export interface GeneratedDataResponse {
-  jsonData: string;
-  dataType: string;
+  dataType: 'Family' | 'Member' | 'Unknown';
+  family?: Family;
+  member?: Member;
 }

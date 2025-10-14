@@ -13,28 +13,25 @@ export class ApiNaturalLanguageInputService implements INaturalLanguageInputServ
   async generateData(prompt: string): Promise<Result<GeneratedDataResponse, ApiError>> {
     try {
       const requestBody: GenerateDataRequest = { prompt };
-      const apiResponse = await this.http.post<string>(`${this.apiUrl}/generate-data`, requestBody);
+      const apiResponse = await this.http.post<GeneratedDataResponse>(`${this.apiUrl}/generate-data`, requestBody);
       
       if (!apiResponse.ok) {
         return err(apiResponse.error);
       }
 
-      const jsonData = apiResponse.value;
-      let dataType = 'Unknown';
+      const generatedData = apiResponse.value;
 
-      try {
-        const parsedJson = JSON.parse(jsonData);
-        if (parsedJson.name && parsedJson.visibility) {
-          dataType = 'Family';
-        } else if (parsedJson.fullName && parsedJson.gender) {
-          dataType = 'Member';
+      // Ensure dates are correctly parsed for Member if it's a member
+      if (generatedData.dataType === 'Member' && generatedData.member) {
+        if (generatedData.member.dateOfBirth) {
+          generatedData.member.dateOfBirth = new Date(generatedData.member.dateOfBirth);
         }
-      } catch (parseError) {
-        console.error('Error parsing generated JSON:', parseError);
-        // If parsing fails, dataType remains 'Unknown'
+        if (generatedData.member.dateOfDeath) {
+          generatedData.member.dateOfDeath = new Date(generatedData.member.dateOfDeath);
+        }
       }
 
-      return ok({ jsonData, dataType });
+      return ok(generatedData);
     } catch (error: any) {
       console.error('Error generating data:', error);
       return err(error.response?.data || error.message);

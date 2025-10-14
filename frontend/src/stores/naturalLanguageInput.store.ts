@@ -40,38 +40,36 @@ export const useNaturalLanguageInputStore = defineStore('naturalLanguageInput', 
     },
 
     // This action will be called after user confirms the data
-    async saveData(data: any, dataType: string) {
+    async saveData() {
       this.isLoading = true;
       this.error = null;
       const notificationStore = useNotificationStore();
 
+      if (!this.generatedData) {
+        notificationStore.showSnackbar('No data to save.', 'error');
+        this.isLoading = false;
+        return;
+      }
+
       try {
-        // let saveResult;
-        if (dataType === 'Family') {
-          // Assuming a family service exists with a create method
-          // saveResult = await this.services.family.add(data);
-          notificationStore.showSnackbar('Family data saved successfully (mock)!', 'success');
-          console.log('Saving Family data:', data);
-        } else if (dataType === 'Member') {
-          // Assuming a member service exists with a create method
-          // saveResult = await this.services.member.add(data);
-          notificationStore.showSnackbar('Member data saved successfully (mock)!', 'success');
-          console.log('Saving Member data:', data);
+        let saveResult;
+        if (this.generatedData.dataType === 'Family' && this.generatedData.family) {
+          saveResult = await this.services.family.add(this.generatedData.family);
+        } else if (this.generatedData.dataType === 'Member' && this.generatedData.member) {
+          saveResult = await this.services.member.add(this.generatedData.member);
         } else {
-          notificationStore.showSnackbar('Unknown data type, cannot save.', 'error');
+          notificationStore.showSnackbar('Unknown data type or missing data, cannot save.', 'error');
           this.isLoading = false;
           return;
         }
 
-        // In a real implementation, check saveResult.ok
-        // if (saveResult.ok) {
-        //   notificationStore.showSnackbar(`${dataType} data saved successfully!`, 'success');
-        //   this.clearGeneratedData();
-        // } else {
-        //   this.error = saveResult.error;
-        //   notificationStore.showSnackbar(`Error saving ${dataType} data: ` + saveResult.error, 'error');
-        // }
-        this.clearGeneratedData(); // Clear after mock save
+        if (saveResult.ok) {
+          notificationStore.showSnackbar(`${this.generatedData.dataType} data saved successfully!`, 'success');
+          this.clearGeneratedData();
+        } else {
+          this.error = saveResult.error?.message || saveResult.error?.toString() || 'Unknown error';
+          notificationStore.showSnackbar(`Error saving ${this.generatedData.dataType} data: ` + this.error, 'error');
+        }
       } catch (e: any) {
         this.error = e.message;
         notificationStore.showSnackbar('An unexpected error occurred during save.', 'error');
