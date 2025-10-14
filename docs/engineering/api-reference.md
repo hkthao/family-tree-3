@@ -318,9 +318,7 @@ Content-Type: application/json
     *   **Phản hồi:** `Result<BiographyResultDto>`
 -   `GET /api/ai/biography/last/{memberId}`: Lấy tiểu sử AI gần nhất cho thành viên.
     *   **Phản hồi:** `Result<AIBiographyDto?>`
--   `POST /api/ai/biography/save`: Lưu tiểu sử AI đã tạo cho thành viên.
-    *   **Request Body:** `SaveAIBiographyCommand` (ví dụ: `{ "memberId": "uuid", "style": "Emotional", "content": "string", "provider": "Gemini", "userPrompt": "string", "generatedFromDB": "boolean", "tokensUsed": "number" }`)
-    *   **Phản hồi:** `Result<Guid>` (ID của tiểu sử AI vừa lưu)
+
 -   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI hiện có và trạng thái sử dụng.
     *   **Phản hồi:** `Result<List<AIProviderDto>>`
 

@@ -49,7 +49,7 @@ Một commit message phải có cấu trúc như sau:
     *   `style`: Thay đổi không ảnh hưởng đến ý nghĩa của code (ví dụ: định dạng, dấu chấm phẩy bị thiếu).
     *   `refactor`: Thay đổi code không sửa lỗi cũng không thêm tính năng.
     *   `perf`: Thay đổi code cải thiện hiệu suất.
-    *   `test`: Thêm hoặc sửa các bài kiểm thử.
+    *   `test`: Thêm hoặc sửa các bài kiểm thử (bao gồm cả kiểm thử trình xác thực).
     *   `build`: Thay đổi ảnh hưởng đến hệ thống build hoặc các phụ thuộc bên ngoài (ví dụ: gulp, broccoli, npm).
     *   `ci`: Thay đổi đối với các file cấu hình và script CI (ví dụ: Travis, Circle, BrowserStack, SauceLabs).
     *   `chore`: Các thay đổi khác không thuộc các loại trên (ví dụ: cập nhật thư viện, thay đổi cấu hình).

@@ -91,6 +91,29 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
           "BaseUrl": "http://localhost:8080"
         },
         // ... các cấu hình khác cho Cloudinary, S3 nếu có
+      },
+      "AI": {
+        "DefaultProvider": "Gemini",
+        "Gemini": {
+          "ApiKey": "YOUR_GEMINI_API_KEY"
+        },
+        "OpenAI": {
+          "ApiKey": "YOUR_OPENAI_API_KEY"
+        }
+      },
+      "VectorStore": {
+        "Provider": "Pinecone", // Hoặc "Qdrant"
+        "Pinecone": {
+          "ApiKey": "YOUR_PINECONE_API_KEY",
+          "Environment": "YOUR_PINECONE_ENVIRONMENT",
+          "IndexName": "YOUR_PINECONE_INDEX_NAME"
+        },
+        "Qdrant": {
+          "Host": "localhost",
+          "Port": 6334,
+          "ApiKey": "YOUR_QDRANT_API_KEY", // Tùy chọn
+          "CollectionName": "YOUR_QDRANT_COLLECTION_NAME"
+        }
       }
       // ... các cấu hình khác
     }

@@ -531,19 +531,101 @@ Dự án sử dụng **FluentValidation** để xác thực các `Command` và `
 -   **`DeleteEventCommandValidator`**:
     -   `Id`: Không được để trống.
 
+### 9.2. Các Validator hiện có
+
+#### Family Commands
+
+-   **`CreateFamilyCommandValidator`**:
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+-   **`UpdateFamilyCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+-   **`DeleteFamilyCommandValidator`**:
+    -   `Id`: Không được để trống.
+
+#### Member Commands
+
+-   **`CreateMemberCommandValidator`**:
+    -   `FamilyId`: Không được để trống.
+    -   `FirstName`: Không được để trống, tối đa 100 ký tự.
+    -   `LastName`: Không được để trống, tối đa 100 ký tự.
+-   **`UpdateMemberCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `FamilyId`: Không được để trống.
+    -   `FirstName`: Không được để trống, tối đa 100 ký tự.
+    -   `LastName`: Không được để trống, tối đa 100 ký tự.
+-   **`DeleteMemberCommandValidator`**:
+    -   `Id`: Không được để trống.
+
+#### Event Commands
+
+-   **`CreateEventCommandValidator`**:
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+    -   `StartDate`: Không được để trống.
+    -   `Description`: Tối đa 1000 ký tự.
+    -   `Location`: Tối đa 200 ký tự.
+    -   `Color`: Tối đa 20 ký tự.
+-   **`UpdateEventCommandValidator`**:
+    -   `Id`: Không được để trống.
+    -   `Name`: Không được để trống, tối đa 200 ký tự.
+    -   `StartDate`: Không được để trống.
+    -   `Description`: Tối đa 1000 ký tự.
+    -   `Location`: Tối đa 200 ký tự.
+    -   `Color`: Tối đa 20 ký tự.
+-   **`DeleteEventCommandValidator`**:
+    -   `Id`: Không được để trống.
+
 #### Relationship Commands
 
 -   **`CreateRelationshipCommandValidator`**:
     -   `SourceMemberId`: Không được để trống.
     -   `TargetMemberId`: Không được để trống.
-    -   `Type`: Không được để trống.
+    -   `TargetMemberId`: Không được trùng với `SourceMemberId`.
+    -   `Type`: Phải là một giá trị hợp lệ trong enum `RelationshipType`.
 -   **`UpdateRelationshipCommandValidator`**:
     -   `Id`: Không được để trống.
     -   `SourceMemberId`: Không được để trống.
     -   `TargetMemberId`: Không được để trống.
-    -   `Type`: Không được để trống.
+    -   `TargetMemberId`: Không được trùng với `SourceMemberId`.
+    -   `Type`: Phải là một giá trị hợp lệ trong enum `RelationshipType`.
 -   **`DeleteRelationshipCommandValidator`**:
     -   `Id`: Không được để trống.
+
+#### File Commands
+
+-   **`DeleteFileCommandValidator`**:
+    -   `FileId`: Không được để trống.
+-   **`CleanupUnusedFilesCommandValidator`**:
+    -   `OlderThan`: Phải là một `TimeSpan` dương (lớn hơn 0 giây).
+-   **`UploadFileCommandValidator`**:
+    -   `FileStream`: Không được null.
+    -   `FileName`: Không được null hoặc rỗng.
+    -   `ContentType`: Không được null hoặc rỗng.
+    -   `Length`: Phải lớn hơn 0.
+
+#### Identity Commands
+
+-   **`UpdateUserProfileCommandValidator`**:
+    -   `Id`: Không được null hoặc rỗng.
+    -   `Name`: Không được null hoặc rỗng, tối đa 256 ký tự.
+    -   `Email`: Không được null hoặc rỗng, phải là định dạng email hợp lệ, tối đa 256 ký tự.
+    -   `Avatar`: Tối đa 2048 ký tự, phải là URL hợp lệ nếu có.
+-   **`SyncUserProfileCommandValidator`**:
+    -   `UserPrincipal`: Không được null.
+
+#### UserActivity Commands
+
+-   **`RecordActivityCommandValidator`**:
+    -   `UserProfileId`: Không được để trống.
+    -   `ActionType`: Phải là một giá trị hợp lệ trong enum `ActionType`.
+    -   `TargetType`: Phải là một giá trị hợp lệ trong enum `TargetType`.
+    -   `ActivitySummary`: Không được null hoặc rỗng.
+
+#### UserPreference Commands
+
+-   **`SaveUserPreferencesCommandValidator`**:
+    -   `Theme`: Phải là một giá trị hợp lệ trong enum `Theme`.
+    -   `Language`: Phải là một giá trị hợp lệ trong enum `Language`.
 
 ## 10. Quản lý Cây Gia Phả (Family Tree Management)
 
