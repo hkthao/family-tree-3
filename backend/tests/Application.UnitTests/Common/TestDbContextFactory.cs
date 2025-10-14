@@ -5,7 +5,7 @@ namespace backend.Application.UnitTests.Common;
 
 public static class TestDbContextFactory
 {
-    public static ApplicationDbContext Create(bool seedData = true)
+    public static ApplicationDbContext Create(bool seedData = false)
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
