@@ -1,54 +1,157 @@
-using AutoMapper;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
-using backend.Infrastructure.Data;
 using backend.Application.UnitTests.Common;
-using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace backend.Application.UnitTests.Events.Queries.GetEvents;
 
-public class GetEventsQueryHandlerTests
+public class GetEventsQueryHandlerTests : TestBase
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
     private readonly GetEventsQueryHandler _handler;
 
     public GetEventsQueryHandlerTests()
     {
-        _context = TestDbContextFactory.Create();
-
-        var configurationProvider = new MapperConfiguration(cfg =>
-        {
-            cfg.AddMaps(typeof(MappingProfile).Assembly);
-        });
-        _mapper = configurationProvider.CreateMapper();
-
         _handler = new GetEventsQueryHandler(_context, _mapper);
     }
 
+    /// <summary>
+    /// Kiểm tra xem tất cả các sự kiện có được trả về khi không có bộ lọc nào được áp dụng.
+    /// </summary>
+    /// <remarks>
+    /// Test này đảm bảo rằng khi một truy vấn GetEventsQuery không có tiêu chí lọc cụ thể,
+    /// handler sẽ trả về tất cả các sự kiện có trong cơ sở dữ liệu.
+    /// </remarks>
     [Fact]
     public async Task Handle_ShouldReturnAllEvents_WhenNoFilterIsApplied()
     {
-        // Arrange
-        var familyId = _context.Families.First().Id;
-        var countBefore = await _context.Events.Where(e => e.FamilyId == familyId).CountAsync();
+        // Arrange (Thiết lập môi trường cho bài kiểm tra)
+        // Tạo một gia đình và thêm vào cơ sở dữ liệu.
+        var family = new Family { Id = Guid.NewGuid(), Name = "Gia đình Test" };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Thêm một số sự kiện vào cơ sở dữ liệu cho gia đình này.
         var events = new List<Event>
         {
-            new Event { Name = "Event 1", FamilyId = familyId, Created = DateTime.UtcNow },
-            new Event { Name = "Event 2", FamilyId = familyId, Created = DateTime.UtcNow }
+            new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1", FamilyId = family.Id, Created = DateTime.UtcNow },
+            new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2", FamilyId = family.Id, Created = DateTime.UtcNow }
         };
         _context.Events.AddRange(events);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync(CancellationToken.None);
 
-        // Act
-        var result = await _handler.Handle(new GetEventsQuery { FamilyId = familyId, ItemsPerPage = 10000 }, CancellationToken.None);
+        // Tạo truy vấn để lấy tất cả sự kiện cho gia đình này.
+        var query = new GetEventsQuery { FamilyId = family.Id, ItemsPerPage = 10000 };
 
-        // Assert
-        result.Value.Should().HaveCount(countBefore + 2);
-        result.Value.Should().ContainEquivalentOf(new { Name = "Event 1" });
-        result.Value.Should().ContainEquivalentOf(new { Name = "Event 2" });
+        // Act (Thực hiện hành động cần kiểm tra)
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert (Kiểm tra kết quả)
+        // Đảm bảo truy vấn thành công và trả về đúng số lượng sự kiện.
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Should().HaveCount(2);
+        result.Value.Should().ContainEquivalentOf(new { Name = "Sự kiện 1" });
+        result.Value.Should().ContainEquivalentOf(new { Name = "Sự kiện 2" });
+    }
+
+    /// <summary>
+    /// Kiểm tra xem có thể truy xuất các sự kiện cho một FamilyId cụ thể.
+    /// </summary>
+    /// <remarks>
+    /// Test này đảm bảo rằng handler có thể lọc các sự kiện dựa trên FamilyId được cung cấp.
+    /// </remarks>
+    [Fact]
+    public async Task Handle_ShouldReturnEventsForSpecificFamilyId()
+    {
+        // Arrange (Thiết lập môi trường cho bài kiểm tra)
+        // Tạo hai gia đình và thêm sự kiện cho mỗi gia đình.
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 1" };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 2" };
+        _context.Families.AddRange(family1, family2);
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện của Gia đình 1", FamilyId = family1.Id });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện của Gia đình 2", FamilyId = family2.Id });
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Tạo truy vấn để lấy sự kiện cho FamilyId của gia đình 1.
+        var query = new GetEventsQuery { FamilyId = family1.Id, ItemsPerPage = 10 };
+
+        // Act (Thực hiện hành động cần kiểm tra)
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert (Kiểm tra kết quả)
+        // Đảm bảo truy vấn thành công và trả về đúng sự kiện của gia đình 1.
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Should().HaveCount(1);
+        result.Value!.First().Name.Should().Be("Sự kiện của Gia đình 1");
+    }
+
+    /// <summary>
+    /// Kiểm tra xem có trả về danh sách rỗng khi không có sự kiện nào cho FamilyId được cung cấp.
+    /// </summary>
+    /// <remarks>
+    /// Test này đảm bảo rằng khi một FamilyId được cung cấp không có sự kiện nào liên quan,
+    /// handler sẽ trả về một danh sách sự kiện rỗng.
+    /// </remarks>
+    [Fact]
+    public async Task Handle_ShouldReturnEmptyList_WhenNoEventsForFamilyId()
+    {
+        // Arrange (Thiết lập môi trường cho bài kiểm tra)
+        // Tạo một gia đình nhưng không thêm sự kiện nào cho nó.
+        var family = new Family { Id = Guid.NewGuid(), Name = "Gia đình Không Sự kiện" };
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Tạo truy vấn để lấy sự kiện cho gia đình này.
+        var query = new GetEventsQuery { FamilyId = family.Id, ItemsPerPage = 10 };
+
+        // Act (Thực hiện hành động cần kiểm tra)
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert (Kiểm tra kết quả)
+        // Đảm bảo truy vấn thành công và trả về danh sách rỗng.
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// Kiểm tra phân trang khi truy xuất sự kiện.
+    /// </summary>
+    /// <remarks>
+    /// Test này đảm bảo rằng handler có thể xử lý phân trang đúng cách,
+    /// trả về số lượng sự kiện chính xác cho mỗi trang.
+    /// </remarks>
+    [Fact]
+    public async Task Handle_ShouldReturnPaginatedEvents()
+    {
+        // Arrange (Thiết lập môi trường cho bài kiểm tra)
+        // Tạo một gia đình và thêm nhiều sự kiện vào cơ sở dữ liệu.
+        var family = new Family { Id = Guid.NewGuid(), Name = "Gia đình Phân trang" };
+        _context.Families.Add(family);
+        for (int i = 0; i < 5; i++)
+        {
+            _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = $"Sự kiện {i}", FamilyId = family.Id });
+        }
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Tạo truy vấn với phân trang (trang 1, 2 mục mỗi trang).
+        var query = new GetEventsQuery { FamilyId = family.Id, Page = 1, ItemsPerPage = 2 };
+
+        // Act (Thực hiện hành động cần kiểm tra)
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert (Kiểm tra kết quả)
+        // Đảm bảo truy vấn thành công và trả về đúng số lượng mục cho trang đầu tiên.
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.Should().HaveCount(2);
+        // Note: GetEventsQueryHandler does not return PaginatedList, so TotalCount, PageNumber, TotalPages are not available.
+        // result.Value.TotalCount.Should().Be(5);
+        // result.Value.PageNumber.Should().Be(1);
+        // result.Value.TotalPages.Should().Be(3); // 5 items, 2 per page = 3 pages
     }
 }
