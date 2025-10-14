@@ -3,6 +3,10 @@ using backend.Application.Families.Commands.DeleteFamily;
 using backend.Domain.Entities;
 using backend.Infrastructure.Data; // For ApplicationDbContext
 using backend.Application.UnitTests.Common; // For TestDbContextFactory
+using Moq; // Added for Mock
+using backend.Application.Common.Interfaces; // Added for IAuthorizationService, IFamilyTreeService
+using MediatR;
+using FluentAssertions; // Added for IMediator
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 
@@ -10,11 +14,22 @@ public class DeleteFamilyCommandHandlerTests : IDisposable
 {
     private readonly ApplicationDbContext _context;
     private readonly DeleteFamilyCommandHandler _handler;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IMediator> _mockMediator;
+    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     public DeleteFamilyCommandHandlerTests()
     {
         _context = TestDbContextFactory.Create();
-        _handler = new DeleteFamilyCommandHandler(_context);
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockMediator = new Mock<IMediator>();
+        _mockFamilyTreeService = new Mock<IFamilyTreeService>();
+
+        _handler = new DeleteFamilyCommandHandler(
+            _context,
+            _mockAuthorizationService.Object,
+            _mockMediator.Object,
+            _mockFamilyTreeService.Object);
     }
 
     public void Dispose()
@@ -37,10 +52,10 @@ public class DeleteFamilyCommandHandlerTests : IDisposable
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.True(result.IsSuccess);
+        result.IsSuccess.Should().BeTrue();
 
         var deletedFamily = await _context.Families.FindAsync(familyId);
-        Assert.Null(deletedFamily); // Verify family is deleted
+        deletedFamily.Should().BeNull(); // Verify family is deleted
     }
 
     [Fact]
@@ -54,10 +69,10 @@ public class DeleteFamilyCommandHandlerTests : IDisposable
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        Assert.False(result.IsSuccess);
-        Assert.NotNull(result.Error);
-        Assert.Equal("NotFound", result.ErrorSource);
-        Assert.Contains($"Family with ID {familyId} not found.", result.Error);
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Contain($"Family with ID {familyId} not found.");
     }
 
     [Fact]

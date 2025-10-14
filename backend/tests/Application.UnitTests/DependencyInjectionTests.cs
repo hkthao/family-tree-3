@@ -1,10 +1,11 @@
-using AutoMapper;
+using Xunit;
 using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
-using Xunit;
+using Microsoft.Extensions.Configuration;
+using AutoMapper; // Added for IMapper
 
 namespace backend.Application.UnitTests;
 
@@ -15,11 +16,12 @@ public class DependencyInjectionTests
     {
         // Arrange
         var services = new ServiceCollection();
+        var configuration = new Mock<IConfiguration>();
         var hostApplicationBuilderMock = new Mock<IHostApplicationBuilder>();
         hostApplicationBuilderMock.Setup(b => b.Services).Returns(services);
 
         // Act
-        services.AddApplicationServices();
+        services.AddApplicationServices(configuration.Object);
 
         // Assert
         services.Should().NotBeNull();

@@ -1,9 +1,9 @@
 using AutoMapper;
-using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
 using backend.Application.Members.Queries.GetMemberById;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Members;
 

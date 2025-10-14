@@ -5,6 +5,9 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
+using Moq; // Added for Mock
+using backend.Application.Common.Interfaces; // Added for IAuthorizationService, IFamilyTreeService
+using MediatR; // Added for IMediator
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
@@ -12,11 +15,22 @@ public class UpdateFamilyCommandHandlerTests : IDisposable
 {
     private readonly UpdateFamilyCommandHandler _handler;
     private readonly ApplicationDbContext _context;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IMediator> _mockMediator;
+    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     public UpdateFamilyCommandHandlerTests()
     {
         _context = TestDbContextFactory.Create();
-        _handler = new UpdateFamilyCommandHandler(_context);
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockMediator = new Mock<IMediator>();
+        _mockFamilyTreeService = new Mock<IFamilyTreeService>();
+
+        _handler = new UpdateFamilyCommandHandler(
+            _context,
+            _mockAuthorizationService.Object,
+            _mockMediator.Object,
+            _mockFamilyTreeService.Object);
     }
 
     [Fact]

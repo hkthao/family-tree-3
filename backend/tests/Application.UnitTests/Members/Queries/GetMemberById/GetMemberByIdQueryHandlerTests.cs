@@ -1,11 +1,11 @@
 using AutoMapper;
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Mappings;
 using backend.Application.Members.Queries.GetMemberById;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Members.Queries.GetMemberById;
 
@@ -40,9 +40,10 @@ public class GetMemberByIdQueryHandlerTests : IDisposable
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(memberId);
-        result.FirstName.Should().Be(member!.FirstName);
-        result.LastName.Should().Be(member.LastName);
+        result.Value.Should().NotBeNull();
+        result.Value!.Id.Should().Be(memberId);
+        result.Value.Should().Be(member!.FirstName);
+        result.Value.Should().Be(member.LastName);
     }
 
     [Fact]

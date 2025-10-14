@@ -6,7 +6,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 using backend.Infrastructure.Data;
 using backend.Application.UnitTests.Common;
-using backend.Application.Common.Mappings;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Events.Queries.GetEvents;
 
@@ -44,11 +44,11 @@ public class GetEventsQueryHandlerTests
         _context.SaveChanges();
 
         // Act
-        var result = await _handler.Handle(new GetEventsQuery { FamilyId = familyId, PageSize = 10000 }, CancellationToken.None);
+        var result = await _handler.Handle(new GetEventsQuery { FamilyId = familyId, ItemsPerPage = 10000 }, CancellationToken.None);
 
         // Assert
-        result.Should().HaveCount(countBefore + 2);
-        result.Should().ContainEquivalentOf(new { Name = "Event 1" });
-        result.Should().ContainEquivalentOf(new { Name = "Event 2" });
+        result.Value.Should().HaveCount(countBefore + 2);
+        result.Value.Should().ContainEquivalentOf(new { Name = "Event 1" });
+        result.Value.Should().ContainEquivalentOf(new { Name = "Event 2" });
     }
 }

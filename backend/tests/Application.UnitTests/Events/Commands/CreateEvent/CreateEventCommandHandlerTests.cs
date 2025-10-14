@@ -3,8 +3,11 @@ using backend.Application.Events.Commands.CreateEvent;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using backend.Application.Common.Mappings;
 using backend.Infrastructure.Data;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
+using Moq; // Added for Mock
+using backend.Application.Common.Interfaces; // Added for IAuthorizationService
+using MediatR; // Added for IMediator
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 
@@ -13,6 +16,8 @@ public class CreateEventCommandHandlerTests : IDisposable
     private readonly CreateEventCommandHandler _handler;
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IMediator> _mockMediator;
 
     public CreateEventCommandHandlerTests()
     {
@@ -24,7 +29,13 @@ public class CreateEventCommandHandlerTests : IDisposable
         });
         _mapper = configurationProvider.CreateMapper();
 
-        _handler = new CreateEventCommandHandler(_context);
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockMediator = new Mock<IMediator>();
+
+        _handler = new CreateEventCommandHandler(
+            _context,
+            _mockAuthorizationService.Object,
+            _mockMediator.Object);
     }
 
     [Fact]

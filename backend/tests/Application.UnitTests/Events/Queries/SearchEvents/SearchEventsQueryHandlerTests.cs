@@ -4,8 +4,8 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
-using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Events.Queries.SearchEvents;
 
@@ -39,14 +39,14 @@ public class SearchEventsQueryHandlerTests : IDisposable
         );
         await _context.SaveChangesAsync();
 
-        var query = new SearchEventsQuery { Keyword = "Party" };
+        var query = new SearchEventsQuery { SearchQuery = "Party" };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Items.Should().HaveCount(1);
-        result.Items.Should().Contain(x => x.Name == "Birthday Party");
+        result.Value.Items.Should().HaveCount(1);
+        result.Value.Items.Should().Contain(x => x.Name == "Birthday Party");
     }
 
     public void Dispose()

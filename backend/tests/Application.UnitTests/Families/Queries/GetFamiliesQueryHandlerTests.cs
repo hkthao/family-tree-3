@@ -4,7 +4,7 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
-using backend.Application.Common.Mappings;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 

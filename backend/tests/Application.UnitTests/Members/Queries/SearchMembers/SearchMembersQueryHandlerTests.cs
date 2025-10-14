@@ -4,8 +4,8 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
-using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Members.Queries.SearchMembers;
 
@@ -39,15 +39,15 @@ public class SearchMembersQueryHandlerTests : IDisposable
         );
         await _context.SaveChangesAsync();
 
-        var query = new SearchMembersQuery { Keyword = "Doe" };
+        var query = new SearchMembersQuery { SearchQuery = "Doe" };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Items.Should().HaveCount(2);
-        result.Items.Should().Contain(x => x.FirstName == "John");
-        result.Items.Should().Contain(x => x.FirstName == "Jane");
+        result.Value!.Items.Should().HaveCount(2);
+        result.Value.Items.Should().Contain(x => x.FullName.Contains("John"));
+        result.Value.Items.Should().Contain(x => x.FullName.Contains("Jane"));
     }
 
     public void Dispose()

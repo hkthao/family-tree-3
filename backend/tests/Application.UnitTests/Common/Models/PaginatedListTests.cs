@@ -16,7 +16,7 @@ public class PaginatedListTests
         var paginatedList = new PaginatedList<string>(items, count, pageNumber, pageSize);
 
         Assert.Equal(items, paginatedList.Items);
-        Assert.Equal(pageNumber, paginatedList.PageNumber);
+        Assert.Equal(pageNumber, paginatedList.Page);
         Assert.Equal(4, paginatedList.TotalPages);
         Assert.Equal(count, paginatedList.TotalItems);
     }

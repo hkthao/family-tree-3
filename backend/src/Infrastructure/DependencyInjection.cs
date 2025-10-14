@@ -63,6 +63,7 @@ public static class DependencyInjection
         services.Configure<LocalAISettings>(configuration.GetSection(nameof(LocalAISettings)));
         services.Configure<PineconeSettings>(configuration.GetSection(nameof(PineconeSettings)));
         services.Configure<StorageSettings>(configuration.GetSection(nameof(StorageSettings)));
+        services.AddSingleton(sp => sp.GetRequiredService<IOptions<StorageSettings>>().Value);
 
         // Register Embedding Settings and Providers
         services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));

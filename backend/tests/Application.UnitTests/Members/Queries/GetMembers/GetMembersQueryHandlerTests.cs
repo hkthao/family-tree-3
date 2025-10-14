@@ -1,11 +1,11 @@
 using AutoMapper;
-using backend.Application.Common.Mappings;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Members.Queries.GetMembers;
 

@@ -1,11 +1,11 @@
 using AutoMapper;
 using backend.Application.Common.Exceptions;
-using backend.Application.Common.Mappings;
 using backend.Application.Families.Queries.GetFamilyById;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
@@ -40,8 +40,8 @@ public class GetFamilyByIdQueryHandlerTests : IDisposable
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(familyId);
-        result.Name.Should().Be(family!.Name);
+        result.Value!.Id.Should().Be(familyId);
+        result.Value!.Name.Should().Be(family!.Name);
     }
 
     [Fact]

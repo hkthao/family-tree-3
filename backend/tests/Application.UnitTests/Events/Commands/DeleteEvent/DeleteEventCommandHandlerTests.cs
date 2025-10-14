@@ -5,6 +5,9 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
+using Moq; // Added for Mock
+using backend.Application.Common.Interfaces; // Added for IAuthorizationService
+using MediatR; // Added for IMediator
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;
 
@@ -12,11 +15,19 @@ public class DeleteEventCommandHandlerTests : IDisposable
 {
     private readonly DeleteEventCommandHandler _handler;
     private readonly ApplicationDbContext _context;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IMediator> _mockMediator;
 
     public DeleteEventCommandHandlerTests()
     {
         _context = TestDbContextFactory.Create();
-        _handler = new DeleteEventCommandHandler(_context);
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockMediator = new Mock<IMediator>();
+
+        _handler = new DeleteEventCommandHandler(
+            _context,
+            _mockAuthorizationService.Object,
+            _mockMediator.Object);
     }
 
     [Fact]

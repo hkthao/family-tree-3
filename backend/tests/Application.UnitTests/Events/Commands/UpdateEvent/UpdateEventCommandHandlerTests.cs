@@ -4,8 +4,11 @@ using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Infrastructure.Data;
-using backend.Application.Common.Mappings;
 using backend.Domain.Entities;
+using backend.Application.Identity.UserProfiles.Queries; // Added for MappingProfile
+using Moq; // Added for Mock
+using backend.Application.Common.Interfaces; // Added for IAuthorizationService
+using MediatR; // Added for IMediator
 
 namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 
@@ -14,6 +17,8 @@ public class UpdateEventCommandHandlerTests : IDisposable
     private readonly UpdateEventCommandHandler _handler;
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
+    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+    private readonly Mock<IMediator> _mockMediator;
 
     public UpdateEventCommandHandlerTests()
     {
@@ -25,7 +30,13 @@ public class UpdateEventCommandHandlerTests : IDisposable
         });
         _mapper = configurationProvider.CreateMapper();
 
-        _handler = new UpdateEventCommandHandler(_context);
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
+        _mockMediator = new Mock<IMediator>();
+
+        _handler = new UpdateEventCommandHandler(
+            _context,
+            _mockAuthorizationService.Object,
+            _mockMediator.Object);
     }
 
     [Fact]
@@ -50,7 +61,7 @@ public class UpdateEventCommandHandlerTests : IDisposable
         var updatedEvent = await _context.Events.FindAsync(existingEvent.Id);
         updatedEvent.Should().NotBeNull();
         updatedEvent!.Name.Should().Be("New Name");
-        updatedEvent.Description.Should().Be("New Description");
+        updatedEvent!.Description.Should().Be("New Description");
     }
 
     public void Dispose()
