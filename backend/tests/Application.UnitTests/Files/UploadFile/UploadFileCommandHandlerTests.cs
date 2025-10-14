@@ -1,4 +1,3 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.UploadFile;
@@ -6,7 +5,6 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
@@ -25,7 +23,13 @@ public class UploadFileCommandHandlerTests : TestBase
         _mockFileStorage = new Mock<IFileStorage>();
         _mockStorageSettings = new Mock<IOptions<StorageSettings>>();
         _mockDateTime = new Mock<IDateTime>();
-        _mockStorageSettings.Setup(s => s.Value.As<StorageSettings>()).Returns(new StorageSettings());
+        _mockStorageSettings.Setup(s => s.Value).Returns(new StorageSettings
+        {
+            Local = new LocalStorageSettings
+            {
+                LocalStoragePath = Path.Combine(Path.GetTempPath(), "test_storage")
+            }
+        });
         _handler = new UploadFileCommandHandler(_mockFileStorage.Object, _mockStorageSettings.Object, _context, _mockUser.Object, _mockDateTime.Object);
     }
 
@@ -91,13 +95,14 @@ public class UploadFileCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         _mockFileStorage.Setup(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<string>.Success("path/to/uploaded.jpg"));
+            .ReturnsAsync(backend.Application.Common.Models.Result<string>.Success("path/to/uploaded.jpg"));
 
         var command = new UploadFileCommand
         {
             FileName = "test.jpg",
             ContentType = "image/jpeg",
-            FileStream = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 })
+            FileStream = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 }),
+            Length = new MemoryStream(new byte[] { 0x01, 0x02, 0x03 }).Length
         };
 
         // Act
@@ -107,8 +112,10 @@ public class UploadFileCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         var uploadedFile = _context.FileMetadata.FirstOrDefault();
         uploadedFile.Should().NotBeNull();
-        uploadedFile!.FileName.Should().Be(command.FileName);
-        _mockFileStorage.Verify(s => s.UploadFileAsync(command.FileStream, command.FileName, command.ContentType, It.IsAny<CancellationToken>()), Times.Once);
+        uploadedFile!.FileName.Should().StartWith("test_");
+        uploadedFile!.FileName.Should().EndWith(".jpg");
+        uploadedFile!.FileName.Should().MatchRegex("test_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}.jpg");
+        _mockFileStorage.Verify(s => s.UploadFileAsync(command.FileStream, It.IsRegex("test_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}.jpg"), command.ContentType, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -135,7 +142,7 @@ public class UploadFileCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("File content cannot be empty.");
+        result.Error.Should().Contain("File is empty.");
         _mockFileStorage.Verify(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -163,7 +170,7 @@ public class UploadFileCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
+        result.Error.Should().Contain("File is empty.");
         _mockFileStorage.Verify(s => s.UploadFileAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

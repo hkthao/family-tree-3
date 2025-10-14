@@ -1,4 +1,3 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Families.Queries.GetFamilyById;
 using FluentAssertions;
 using Xunit;

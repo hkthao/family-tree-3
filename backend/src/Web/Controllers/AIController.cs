@@ -1,5 +1,4 @@
 using backend.Application.Members.Commands.GenerateBiography;
-using backend.Application.Members.Commands.SaveAIBiography; // Add this
 using backend.Application.AI.Common;
 using backend.Application.AI.Queries.GetLastAIBiography;
 using Microsoft.AspNetCore.Authorization;
@@ -52,30 +51,5 @@ public class AIController : ControllerBase
         }
         return BadRequest(result.Error);
     }
-
-
-
-    /// <summary>
-    /// Saves an AI-generated biography for a member.
-    /// </summary>
-    /// <param name="command">The command to save the biography.</param>
-    /// <returns>The ID of the saved biography.</returns>
-    [HttpPost("biography/save")]
-    public async Task<ActionResult<Guid>> SaveBiography([FromBody] SaveAIBiographyCommand command)
-    {
-        _logger.LogInformation("SaveBiography received command: {@Command}", command);
-
-        if (command == null)
-        {
-            _logger.LogError("SaveBiography command is null.");
-            return BadRequest("Command cannot be null.");
-        }
-
-        var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
-    }
+   
 }

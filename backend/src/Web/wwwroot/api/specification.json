@@ -81,44 +81,6 @@
         ]
       }
     },
-    "/api/AI/biography/save": {
-      "post": {
-        "tags": [
-          "AI"
-        ],
-        "operationId": "AI_SaveBiography",
-        "requestBody": {
-          "x-name": "command",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveAIBiographyCommand"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "format": "guid"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      }
-    },
     "/api/Chat": {
       "post": {
         "tags": [
@@ -2229,35 +2191,6 @@
             "type": "boolean"
           },
           "rootElement": {}
-        }
-      },
-      "SaveAIBiographyCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "memberId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "style": {
-            "$ref": "#/components/schemas/BiographyStyle"
-          },
-          "content": {
-            "type": "string"
-          },
-          "provider": {
-            "$ref": "#/components/schemas/AIProviderType"
-          },
-          "userPrompt": {
-            "type": "string"
-          },
-          "generatedFromDB": {
-            "type": "boolean"
-          },
-          "tokensUsed": {
-            "type": "integer",
-            "format": "int32"
-          }
         }
       },
       "ChatResponse": {

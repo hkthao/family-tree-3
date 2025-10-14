@@ -1,11 +1,8 @@
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using Xunit;
 

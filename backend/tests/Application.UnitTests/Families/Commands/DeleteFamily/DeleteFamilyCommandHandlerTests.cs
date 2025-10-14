@@ -1,16 +1,10 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.DeleteFamily;
 using FluentAssertions;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using backend.Domain.Enums;
-using backend.Application.Common.Models;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 

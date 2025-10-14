@@ -1,11 +1,9 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Files.DeleteFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using Xunit;
 
@@ -19,7 +17,7 @@ public class DeleteFileCommandHandlerTests : TestBase
     public DeleteFileCommandHandlerTests()
     {
         _mockFileStorageService = new Mock<IFileStorage>();
-        _handler = new DeleteFileCommandHandler(_context, _mockFileStorageService.Object);
+        _handler = new DeleteFileCommandHandler(_context, _mockFileStorageService.Object, _mockUser.Object);
     }
 
     /// <summary>
@@ -83,9 +81,12 @@ public class DeleteFileCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userProfileId.ToString()};
+        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userId, ContentType = "image/jpeg"};
         _context.FileMetadata.Add(fileToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockFileStorageService.Setup(s => s.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(backend.Application.Common.Models.Result.Success());
 
         var command = new DeleteFileCommand { FileId = fileToDelete.Id };
 
@@ -119,7 +120,7 @@ public class DeleteFileCommandHandlerTests : TestBase
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("File not found.");
+        result.Error.Should().Contain("File metadata not found.");
         _mockFileStorageService.Verify(s => s.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
@@ -135,9 +136,12 @@ public class DeleteFileCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = Guid.NewGuid().ToString() }; // Uploaded by a different user
+        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = Guid.NewGuid().ToString(), ContentType = "image/jpeg" }; // Uploaded by a different user
         _context.FileMetadata.Add(fileToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockFileStorageService.Setup(s => s.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(backend.Application.Common.Models.Result.Failure("Simulated storage deletion failure."));
 
         var command = new DeleteFileCommand { FileId = fileToDelete.Id };
 

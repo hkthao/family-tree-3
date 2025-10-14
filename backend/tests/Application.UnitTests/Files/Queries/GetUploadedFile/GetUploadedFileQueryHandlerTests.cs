@@ -1,12 +1,9 @@
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.Queries.GetUploadedFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
@@ -16,12 +13,19 @@ namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 public class GetUploadedFileQueryHandlerTests : TestBase
 {
     private readonly GetUploadedFileQueryHandler _handler;
-    private readonly    IMock<IOptions<StorageSettings>> _mockStorageSettings;
+    private readonly Mock<IOptions<StorageSettings>> _mockStorageSettings;
     
 
     public GetUploadedFileQueryHandlerTests()
     {
         _mockStorageSettings = new Mock<IOptions<StorageSettings>>();
+        _mockStorageSettings.Setup(s => s.Value).Returns(new StorageSettings
+        {
+            Local = new LocalStorageSettings
+            {
+                LocalStoragePath = Path.Combine(Path.GetTempPath(), "test_storage")
+            }
+        });
         _handler = new GetUploadedFileQueryHandler(_mockStorageSettings.Object);
     }
 
@@ -86,9 +90,15 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var uploadedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userProfileId.ToString() };
+        var uploadedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userProfileId.ToString(), ContentType = "image/jpeg" };
         _context.FileMetadata.Add(uploadedFile);
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Create a dummy file in the mocked storage path
+        var localStoragePath = _mockStorageSettings.Object.Value.Local.LocalStoragePath;
+        Directory.CreateDirectory(localStoragePath);
+        var filePath = Path.Combine(localStoragePath, uploadedFile.FileName);
+        await File.WriteAllBytesAsync(filePath, new byte[] { 0x01, 0x02, 0x03 });
 
         var query = new GetUploadedFileQuery { FileName = uploadedFile.FileName };
 
@@ -99,6 +109,10 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.ContentType.Should().Be(uploadedFile.ContentType);
+
+        // Clean up the dummy file and directory
+        File.Delete(filePath);
+        Directory.Delete(localStoragePath);
     }
 
     /// <summary>

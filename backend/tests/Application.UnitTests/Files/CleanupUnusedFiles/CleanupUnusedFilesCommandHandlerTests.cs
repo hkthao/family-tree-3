@@ -1,11 +1,9 @@
-using backend.Application.Common.Exceptions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Files.CleanupUnusedFiles;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using Xunit;
 
@@ -21,6 +19,7 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
     {
         _mockFileStorageService = new Mock<IFileStorage>();
         _mockDateTime = new Mock<IDateTime>();
+        _mockDateTime.Setup(dt => dt.Now).Returns(DateTime.UtcNow);
         _handler = new CleanupUnusedFilesCommandHandler(_context, _mockFileStorageService.Object, _mockDateTime.Object);
     }
 
@@ -86,12 +85,15 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         // Thêm một tệp không được sử dụng.
-        var unusedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "unused.jpg", Url = "path/to/unused.jpg", UploadedBy = userProfileId.ToString() };
+        var unusedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "unused.jpg", Url = "path/to/unused.jpg", UploadedBy = userProfileId.ToString(), ContentType = "image/jpeg", IsActive = false, Created = DateTime.UtcNow.Subtract(TimeSpan.FromDays(60)) };
         _context.FileMetadata.Add(unusedFile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
+        _mockFileStorageService.Setup(s => s.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(backend.Application.Common.Models.Result.Success());
+
         // Act
-        var command = new CleanupUnusedFilesCommand();
+        var command = new CleanupUnusedFilesCommand { OlderThan = TimeSpan.FromDays(30) };
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
@@ -113,13 +115,13 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         // Thêm một tệp đang được sử dụng (ví dụ: làm avatar cho một thành viên).
-        var usedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "used.jpg", Url = "path/to/used.jpg", UploadedBy = userProfileId.ToString() };
+        var usedFile = new FileMetadata { Id = Guid.NewGuid(), FileName = "used.jpg", Url = "path/to/used.jpg", UploadedBy = userProfileId.ToString(), ContentType = "image/jpeg" };
         _context.FileMetadata.Add(usedFile);
         _context.Members.Add(new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Test", LastName = "Member", AvatarUrl = usedFile.Url });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Act
-        var command = new CleanupUnusedFilesCommand();
+        var command = new CleanupUnusedFilesCommand { OlderThan = TimeSpan.FromDays(30) };
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert

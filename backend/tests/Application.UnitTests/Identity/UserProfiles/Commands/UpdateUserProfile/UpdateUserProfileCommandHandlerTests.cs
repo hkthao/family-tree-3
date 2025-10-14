@@ -1,12 +1,9 @@
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
 using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using Xunit;
 
