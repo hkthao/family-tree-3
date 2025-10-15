@@ -25,7 +25,7 @@ public class CreateMembersCommandHandler : IRequestHandler<CreateMembersCommand,
             ValidationResult validationResult = await _aiMemberDtoValidator.ValidateAsync(memberDto, cancellationToken);
             if (!validationResult.IsValid)
             {
-                memberDto.ValidationErrors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                memberDto.ValidationErrors = [.. validationResult.Errors.Select(e => e.ErrorMessage)];
                 continue; // Skip this member if validation fails
             }
 
@@ -57,7 +57,7 @@ public class CreateMembersCommandHandler : IRequestHandler<CreateMembersCommand,
             else
             {
                 // If individual member creation fails, add error to memberDto for feedback
-                memberDto.ValidationErrors = memberDto.ValidationErrors ?? [];
+                memberDto.ValidationErrors ??= [];
                 if (createResult.Error != null)
                 {
                     memberDto.ValidationErrors.Add(createResult.Error);

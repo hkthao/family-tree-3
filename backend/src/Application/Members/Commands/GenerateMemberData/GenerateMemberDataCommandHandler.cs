@@ -76,8 +76,9 @@ Always respond with ONLY the JSON object. Do not include any conversational text
                 // Resolve FamilyId from FamilyName
                 if (!string.IsNullOrWhiteSpace(memberDto.FamilyName))
                 {
+                    var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
                     var families = await _context.Families
-                        .Where(f => f.Name == memberDto.FamilyName)
+                        .Where(f => f.Name == memberDto.FamilyName && f.FamilyUsers.Any(u => u.Role == FamilyRole.Manager && u.UserProfileId == currentUserProfile!.Id))
                         .ToListAsync(cancellationToken);
 
                     var accessibleFamilies = new List<Family>();
