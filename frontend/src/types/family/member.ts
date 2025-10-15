@@ -18,6 +18,7 @@ export interface Member {
 
   biography?: string; // New
   isRoot?: boolean;
+  validationErrors?: string[];
 }
 
 export interface MemberFilter {

@@ -63,6 +63,19 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
+    async addItems(newItems: Omit<Member, 'id'>[]): Promise<void> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.member.addItems(newItems);
+      if (result.ok) {
+        await this._loadItems(); // Re-fetch to update pagination and filters
+      } else {
+        this.error = i18n.global.t('member.errors.add');
+        console.error(result.error);
+      }
+      this.loading = false;
+    },
+
     async updateItem(updatedItem: Member): Promise<void> {
       this.loading = true;
       this.error = null;

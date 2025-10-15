@@ -13,6 +13,7 @@ export class ApiNaturalLanguageInputService implements INaturalLanguageInputServ
 
   private naturalLanguageInputApiUrl = `${API_BASE_URL}/NaturalLanguageInput`;
   private familyApiUrl = `${API_BASE_URL}/Family`;
+  private membersApiUrl = `${API_BASE_URL}/Members`;
 
   async generateFamilyData(prompt: string): Promise<Result<Family[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };
@@ -21,7 +22,7 @@ export class ApiNaturalLanguageInputService implements INaturalLanguageInputServ
 
   async generateMemberData(prompt: string): Promise<Result<Member[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };
-    return this.http.post<Member[]>(`${this.naturalLanguageInputApiUrl}/generate-member-data`, requestBody);
+    return this.http.post<Member[]>(`${this.membersApiUrl}/generate-member-data`, requestBody);
   }
 
   async generateEventData(prompt: string): Promise<Result<Event[], ApiError>> {

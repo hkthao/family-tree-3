@@ -3,13 +3,16 @@
 
   <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
     @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
-    @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" />
+    @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" />
 
   <!-- Confirm Delete Dialog -->
   <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
     fullName: memberToDelete?.fullName || '',
   })
     " @confirm="handleDeleteConfirm" @cancel="handleDeleteCancel" />
+
+  <!-- AI Input Dialog -->
+  <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
 
   <!-- Global Snackbar -->
   <v-snackbar v-if="notificationStore.snackbar" v-model="notificationStore.snackbar.show"
@@ -23,7 +26,7 @@ import { onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { MemberSearch, MemberList } from '@/components/members';
+import { MemberSearch, MemberList, NLMemberPopup } from '@/components/members';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
@@ -35,6 +38,7 @@ const memberStore = useMemberStore();
 const { loading } = storeToRefs(memberStore);
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
+const aiInputDialog = ref(false);
 
 const notificationStore = useNotificationStore();
 
@@ -101,6 +105,14 @@ const handleDeleteConfirm = async () => {
 const handleDeleteCancel = () => {
   deleteConfirmDialog.value = false;
   memberToDelete.value = undefined;
+};
+
+const openAiInputDialog = () => {
+  aiInputDialog.value = true;
+};
+
+const handleAiSaved = () => {
+  memberStore._loadItems(); // Refresh the member list after saving
 };
 
 onMounted(() => {

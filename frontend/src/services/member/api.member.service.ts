@@ -79,6 +79,11 @@ export class ApiMemberService implements IMemberService {
     return result;
   }
 
+  async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const apiMembers = newItems.map(prepareMemberForApi);
+    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, { members: apiMembers });
+  }
+
   async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
     // Renamed from updateMember
     const apiMember = prepareMemberForApi(updatedItem);

@@ -16,4 +16,5 @@ public class MemberDto
     public string? Biography { get; set; }
     public Guid FamilyId { get; set; }
     public bool IsRoot { get; set; }
+    public List<string>? ValidationErrors { get; set; }
 }
