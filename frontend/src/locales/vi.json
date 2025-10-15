@@ -176,6 +176,7 @@
   "member.list.headers.actions": "Hành động",
   "member.list.confirmDelete": "Bạn có chắc muốn xoá {fullName} không?",
   "member.list.action.aiBiography": "Tạo tiểu sử AI",
+  "member.list.action.aiCreate": "Tạo thành viên bằng AI",
   "member.list.action.edit": "Chỉnh sửa thành viên",
   "member.list.action.delete": "Xóa thành viên",  "member.search.title": "Tìm kiếm Nâng cao",
   "member.search.fullName": "Họ và Tên",

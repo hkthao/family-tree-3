@@ -1,8 +1,10 @@
 using backend.Application.Common.Models;
 using backend.Application.Members.Commands.CreateMember;
+using backend.Application.Members.Commands.CreateMembers;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.Members.Commands.GenerateMemberData;
 using backend.Application.Members.Commands.UpdateMember;
+using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByIds;
@@ -70,17 +72,6 @@ public class MembersController : ControllerBase
         if (result.IsSuccess)
         {
             return CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value);
-        }
-        return BadRequest(result.Error);
-    }
-
-    [HttpPost("generate-member-data")]
-    public async Task<ActionResult<List<MemberDto>>> GenerateMemberData([FromBody] GenerateMemberDataCommand command)
-    {
-        var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
         }
         return BadRequest(result.Error);
     }

@@ -6,9 +6,6 @@ public class MemberDtoValidator : AbstractValidator<MemberDto>
 {
     public MemberDtoValidator()
     {
-        RuleFor(x => x.FullName)
-            .NotEmpty().WithMessage("Full name is required.");
-
         RuleFor(x => x.FirstName)
             .NotEmpty().WithMessage("First name is required.");
 

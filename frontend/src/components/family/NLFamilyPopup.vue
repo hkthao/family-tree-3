@@ -4,7 +4,7 @@
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>
         <v-form ref="form">
-          <v-textarea v-model="prompt" :label="t('aiInput.promptLabel')" rows="3" outlined clearable counter
+          <v-textarea v-model="prompt" :label="t('aiInput.promptLabelFamily')" rows="3" outlined clearable counter
             :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
         </v-form>
         <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">

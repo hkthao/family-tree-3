@@ -8,7 +8,7 @@ import {
 } from '@/types';
 
 // Base URL for your API - configure this based on your environment
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: ApiClientMethods) {}
@@ -30,13 +30,12 @@ export class ApiFamilyService implements IFamilyService {
     return this.http.post<Family>(this.apiUrl, newItem);
   }
 
-  async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
-    // Renamed from addFamily
-    return this.http.post<Family>(this.apiUrl, newItem);
-  }
-
-  async addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>> {
-    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, { families: newItems });
+  async addItems(
+    newItems: Omit<Family, 'id'>[],
+  ): Promise<Result<string[], ApiError>> {
+    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, {
+      families: newItems,
+    });
   }
 
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {

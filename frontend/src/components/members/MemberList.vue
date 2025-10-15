@@ -121,6 +121,7 @@ const emit = defineEmits([
   'delete',
   'create',
   'ai-biography',
+  'ai-create',
 ]);
 const { t } = useI18n();
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
