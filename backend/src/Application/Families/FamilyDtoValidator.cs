@@ -8,7 +8,6 @@ public class FamilyDtoValidator : AbstractValidator<FamilyDto>
             .NotEmpty().WithMessage("Name is required.");
 
         RuleFor(x => x.Visibility)
-            .NotNull().WithMessage("Visibility is required.")
-            .IsInEnum().WithMessage("Visibility must be a valid value (Public, Private, Shared).");
+            .NotNull().WithMessage("Visibility is required.");
     }
 }

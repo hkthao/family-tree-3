@@ -24,6 +24,7 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
         var systemPrompt = @"You are an AI assistant that generates JSON data for family entities based on natural language descriptions.
 The output should always be a single JSON object containing one array: 'families'.
 Each object in the 'families' array should have 'name', 'description' (extract from prompt if detailed), 'address', 'visibility' (Public, Private, Shared), 'avatarUrl', 'totalMembers', and 'totalGenerations'.
+If 'visibility' is not explicitly mentioned in the prompt, default it to 'Public'.
 Infer the entity type (Family) from the prompt. If the prompt describes multiple entities, include them in the respective arrays.
 If details are missing, use placeholders (""Unknown"" or null) instead of leaving fields empty.
 Example: 'Tạo một gia đình tên Nguyễn ở Hà Nội. Gia đình có 15 thành viên và 4 thế hệ. Ảnh đại diện là https://example.com/avatar.png.'
@@ -58,7 +59,7 @@ Always respond with ONLY the JSON object. Do not include any conversational text
             foreach (var family in aiResponse.Families)
             {
                 if (string.IsNullOrWhiteSpace(family.Visibility))
-                    family.Visibility = FamilyVisibility.Public.ToString();
+                    family.Visibility = "Public";
 
                 ValidationResult validationResult = await _familyDtoValidator.ValidateAsync(family, cancellationToken);
                 if (!validationResult.IsValid)
