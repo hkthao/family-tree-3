@@ -502,5 +502,6 @@
   "aiInput.generateError": "Lỗi khi tạo dữ liệu {entity}. Vui lòng thử lại.",
   "aiInput.promptRequired": "Mô tả là bắt buộc.",
   "aiInput.promptLength": "Mô tả không được vượt quá {length} ký tự.",
+  "aiInput.validationErrorsFound": "Dữ liệu được tạo có thông tin bị thiếu hoặc không hợp lệ. Vui lòng kiểm tra các lỗi bên dưới.",
   "family.list.action.aiCreate": "Tạo gia đình bằng AI"
 }

@@ -15,6 +15,12 @@
           <v-alert type="info" class="mb-4">{{ t('aiInput.previewMessage') }}</v-alert>
           <div v-for="(family, familyIndex) in generatedData" :key="familyIndex" class="mb-6 pa-4 border rounded">
             <h4 class="text-h6 mb-2">{{ t('aiInput.family') }} #{{ familyIndex + 1 }}</h4>
+            <v-alert v-if="family.validationErrors && family.validationErrors.length" type="warning" class="mb-2">
+              <p>{{ t('aiInput.validationErrorsFound') }}</p>
+              <ul>
+                <li v-for="(error, errorIndex) in family.validationErrors" :key="errorIndex">{{ error }}</li>
+              </ul>
+            </v-alert>
             <v-divider class="mb-2"></v-divider>
             <div v-for="key in displayKeys" :key="key">
               <p class="text-body-2">
@@ -29,7 +35,7 @@
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
           }}</v-btn>
-        <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading" @click="save">{{
+        <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors" @click="save">{{
           t('aiInput.saveButton') }}</v-btn>
       </v-card-actions>
       <v-progress-linear
@@ -44,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNaturalLanguageInputStore } from '@/stores/naturalLanguageInput.store';
 import { useFamilyStore } from '@/stores/family.store';
@@ -79,6 +85,10 @@ const displayKeys = [
   'visibility',
   'avatarUrl',
 ];
+
+const hasValidationErrors = computed(() => {
+  return generatedData.value?.some(family => family.validationErrors && family.validationErrors.length > 0) || false;
+});
 
 const formatValue = (value: any, key: string) => {
   if (value === null || value === '') {

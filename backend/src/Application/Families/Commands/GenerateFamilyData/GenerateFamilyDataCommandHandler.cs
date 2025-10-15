@@ -50,23 +50,21 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<FamilyResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Families == null || !aiResponse.Families.Any()) {
-                return Result<List<FamilyDto>>.Failure("AI generated empty or unparseable JSON response.");
+            if (aiResponse == null || aiResponse.Families == null || !aiResponse.Families.Any())
+            {
+                return Result<List<FamilyDto>>.Success(new List<FamilyDto>()); // Return empty list if no families generated
             }
 
-            var allValidationErrors = new List<string>();
             foreach (var family in aiResponse.Families)
             {
+                if (string.IsNullOrWhiteSpace(family.Visibility))
+                    family.Visibility = FamilyVisibility.Public.ToString();
+
                 ValidationResult validationResult = await _familyDtoValidator.ValidateAsync(family, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    allValidationErrors.Add($"Family '{family.Name ?? "Unknown"}' is missing information: {string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage))}");
+                    family.ValidationErrors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
                 }
-            }
-
-            if (allValidationErrors.Any())
-            {
-                return Result<List<FamilyDto>>.Failure(string.Join("; ", allValidationErrors));
             }
 
             return Result<List<FamilyDto>>.Success(aiResponse.Families);

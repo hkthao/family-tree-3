@@ -9,6 +9,7 @@ export interface Family {
   visibility?: FamilyVisibility;
   totalMembers?: number;
   totalGenerations?: number;
+  validationErrors?: string[];
 }
 
 export interface FamilyFilter {

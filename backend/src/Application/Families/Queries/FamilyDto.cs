@@ -12,4 +12,5 @@ public class FamilyDto : BaseAuditableDto
     public int? TotalGenerations { get; set; } = null;
     public string? Visibility { get; set; }
     public string? AvatarUrl { get; set; }
+    public List<string>? ValidationErrors { get; set; }
 }
