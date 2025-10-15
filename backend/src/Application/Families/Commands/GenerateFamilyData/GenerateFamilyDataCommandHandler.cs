@@ -3,16 +3,20 @@ using backend.Application.Common.Models;
 using backend.Application.Families;
 using backend.Domain.Enums;
 using System.Text.Json;
+using FluentValidation;
+using FluentValidation.Results;
 
-namespace Application.NaturalLanguageInput.Commands.GenerateData;
+namespace backend.Application.Families.Commands.GenerateFamilyData;
 
 public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDataCommand, Result<List<FamilyDto>>>
 {
     private readonly IChatProviderFactory _chatProviderFactory;
+    private readonly IValidator<FamilyDto> _familyDtoValidator;
 
-    public GenerateFamilyDataCommandHandler(IChatProviderFactory chatProviderFactory)
+    public GenerateFamilyDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<FamilyDto> familyDtoValidator)
     {
         _chatProviderFactory = chatProviderFactory;
+        _familyDtoValidator = familyDtoValidator;
     }
 
     public async Task<Result<List<FamilyDto>>> Handle(GenerateFamilyDataCommand request, CancellationToken cancellationToken)
@@ -21,11 +25,11 @@ public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDa
 
         var systemPrompt = @"You are an AI assistant that generates JSON data for family entities based on natural language descriptions.
 The output should always be a single JSON object containing one array: 'families'.
-Each object in the 'families' array should have 'name', 'description' (extract from prompt if detailed), 'address', and 'visibility' (Public, Private, Shared).
+Each object in the 'families' array should have 'name', 'description' (extract from prompt if detailed), 'address', 'visibility' (Public, Private, Shared), 'avatarUrl', 'totalMembers', and 'totalGenerations'.
 Infer the entity type (Family) from the prompt. If the prompt describes multiple entities, include them in the respective arrays.
 If details are missing, use placeholders (""Unknown"" or null) instead of leaving fields empty.
-Example: 'Tạo một gia đình tên Nguyễn ở Hà Nội.'
-Output: { ""families"": [{ ""name"": ""Gia đình Nguyễn"", ""address"": ""Hà Nội"", ""visibility"": ""Public"" }] }
+Example: 'Tạo một gia đình tên Nguyễn ở Hà Nội. Gia đình có 15 thành viên và 4 thế hệ. Ảnh đại diện là https://example.com/avatar.png.'
+Output: { ""families"": [{ ""name"": ""Gia đình Nguyễn"", ""address"": ""Hà Nội"", ""visibility"": ""Public"", ""totalMembers"": 15, ""totalGenerations"": 4, ""avatarUrl"": ""https://example.com/avatar.png"" }] }
 Always respond with ONLY the JSON object. Do not include any conversational text.";
 
         var userPrompt = request.Prompt;
@@ -48,8 +52,23 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<FamilyResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Families == null) {
+            if (aiResponse == null || aiResponse.Families == null || !aiResponse.Families.Any()) {
                 return Result<List<FamilyDto>>.Failure("AI generated empty or unparseable JSON response.");
+            }
+
+            var allValidationErrors = new List<string>();
+            foreach (var family in aiResponse.Families)
+            {
+                ValidationResult validationResult = await _familyDtoValidator.ValidateAsync(family, cancellationToken);
+                if (!validationResult.IsValid)
+                {
+                    allValidationErrors.Add($"Family '{family.Name ?? "Unknown"}' is missing information: {string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage))}");
+                }
+            }
+
+            if (allValidationErrors.Any())
+            {
+                return Result<List<FamilyDto>>.Failure(string.Join("; ", allValidationErrors));
             }
 
             return Result<List<FamilyDto>>.Success(aiResponse.Families);

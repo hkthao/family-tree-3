@@ -1,6 +1,6 @@
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { GeneratedDataResponse, GenerateDataRequest } from '@/types';
-import { ok, err, type Result } from '@/types/common';
+import type { GenerateDataRequest } from '@/types';
+import { type Result } from '@/types/common';
 import type { INaturalLanguageInputService } from './naturalLanguageInput.service.interface';
 import type { Family } from '@/types/family';
 import type { Member } from '@/types/family/member';
@@ -11,20 +11,21 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ApiNaturalLanguageInputService implements INaturalLanguageInputService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/NaturalLanguageInput`;
+  private naturalLanguageInputApiUrl = `${API_BASE_URL}/NaturalLanguageInput`;
+  private familyApiUrl = `${API_BASE_URL}/Family`;
 
   async generateFamilyData(prompt: string): Promise<Result<Family[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };
-    return this.http.post<Family[]>(`${this.apiUrl}/generate-family-data`, requestBody);
+    return this.http.post<Family[]>(`${this.familyApiUrl}/generate-family-data`, requestBody);
   }
 
   async generateMemberData(prompt: string): Promise<Result<Member[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };
-    return this.http.post<Member[]>(`${this.apiUrl}/generate-member-data`, requestBody);
+    return this.http.post<Member[]>(`${this.naturalLanguageInputApiUrl}/generate-member-data`, requestBody);
   }
 
   async generateEventData(prompt: string): Promise<Result<Event[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };
-    return this.http.post<Event[]>(`${this.apiUrl}/generate-event-data`, requestBody);
+    return this.http.post<Event[]>(`${this.naturalLanguageInputApiUrl}/generate-event-data`, requestBody);
   }
 }

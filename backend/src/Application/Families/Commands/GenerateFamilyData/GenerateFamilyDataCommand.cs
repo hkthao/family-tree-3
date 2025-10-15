@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
 using backend.Application.Families;
 
-namespace Application.NaturalLanguageInput.Commands.GenerateData;
+namespace backend.Application.Families.Commands.GenerateFamilyData;
 
 public record GenerateFamilyDataCommand(string Prompt) : IRequest<Result<List<FamilyDto>>>;

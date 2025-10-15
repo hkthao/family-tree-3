@@ -14,11 +14,6 @@ public class NaturalLanguageInputController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("generate-family-data")]
-    public async Task<ActionResult<string>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
-    {
-        return Ok(await _mediator.Send(command));
-    }
 
     [HttpPost("generate-member-data")]
     public async Task<ActionResult<string>> GenerateMemberData([FromBody] GenerateMemberDataCommand command)

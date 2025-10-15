@@ -2,6 +2,7 @@ using backend.Application.Common.Models;
 using backend.Application.Families;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
+using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
@@ -64,6 +65,17 @@ public class FamilyController : ControllerBase
         if (result.IsSuccess)
         {
             return CreatedAtAction(nameof(GetFamilyById), new { id = result.Value }, result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    [HttpPost("generate-family-data")]
+    public async Task<ActionResult<List<FamilyDto>>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
+    {
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
         }
         return BadRequest(result.Error);
     }
