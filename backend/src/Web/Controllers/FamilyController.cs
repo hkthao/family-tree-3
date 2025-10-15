@@ -1,5 +1,6 @@
 using backend.Application.Common.Models;
 using backend.Application.Families;
+using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.Families.Commands.GenerateFamilyData;
@@ -65,6 +66,17 @@ public class FamilyController : ControllerBase
         if (result.IsSuccess)
         {
             return CreatedAtAction(nameof(GetFamilyById), new { id = result.Value }, result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<List<Guid>>> CreateFamilies([FromBody] CreateFamiliesCommand command)
+    {
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
         }
         return BadRequest(result.Error);
     }

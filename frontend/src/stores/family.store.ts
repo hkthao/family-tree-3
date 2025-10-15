@@ -62,6 +62,19 @@ export const useFamilyStore = defineStore('family', {
       this.loading = false;
     },
 
+    async addItems(newItems: Omit<Family, 'id'>[]): Promise<void> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.family.addItems(newItems);
+      if (result.ok) {
+        await this._loadItems(); // Re-fetch to update pagination and filters
+      } else {
+        this.error = i18n.global.t('family.errors.add');
+        console.error(result.error);
+      }
+      this.loading = false;
+    },
+
     async updateItem(updatedItem: Family): Promise<void> {
       this.loading = true;
       this.error = null;

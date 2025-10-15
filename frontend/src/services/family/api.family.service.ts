@@ -30,6 +30,15 @@ export class ApiFamilyService implements IFamilyService {
     return this.http.post<Family>(this.apiUrl, newItem);
   }
 
+  async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
+    // Renamed from addFamily
+    return this.http.post<Family>(this.apiUrl, newItem);
+  }
+
+  async addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>> {
+    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, { families: newItems });
+  }
+
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     // Renamed from updateFamily
     return this.http.put<Family>(

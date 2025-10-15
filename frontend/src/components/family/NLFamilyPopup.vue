@@ -147,9 +147,7 @@ const save = async () => {
   if (!generatedData.value || !generatedData.value.length) return;
 
   try {
-    for (const family of generatedData.value) {
-      await familyStore.addItem(family);
-    }
+    await familyStore.addItems(generatedData.value);
     notificationStore.showSnackbar(
       t('aiInput.saveSuccess'),
       'success',
