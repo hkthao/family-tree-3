@@ -440,6 +440,8 @@
   "chunkAdmin.approveSelectedSuccess": "Đã phê duyệt {count} chunk đã chọn.",
   "chunkAdmin.approveSuccess": "Đã phê duyệt {count} chunk thành công.",
   "chunkAdmin.noChunksToApprove": "Chưa chọn chunk nào để phê duyệt.",
+  "chunkAdmin.uploadError": "Lỗi khi tải lên tệp.",
+  "chunkAdmin.approveError": "Lỗi khi phê duyệt chunk.",
   "common.approved": "phê duyệt",
   "common.rejected": "từ chối",
   "chunkUpload.title": "Tải lên tài liệu",
@@ -481,5 +483,18 @@
   "member.placeOfBirth": "Nơi sinh",
   "member.placeOfDeath": "Nơi mất",
   "member.occupation": "Nghề nghiệp",
-  "member.biography": "Tiểu sử"
+  "member.biography": "Tiểu sử",
+  "aiInput.title": "Nhập liệu AI",
+  "aiInput.promptLabel": "Nhập mô tả của bạn (ví dụ: 'Tạo gia đình Nguyễn ở Hà Nội với thành viên Trần Văn A sinh năm 1990')",
+  "aiInput.generateButton": "Tạo dữ liệu",
+  "aiInput.previewMessage": "Đây là bản xem trước dữ liệu được tạo. Vui lòng kiểm tra trước khi lưu.",
+  "aiInput.families": "Gia đình",
+  "aiInput.members": "Thành viên",
+  "aiInput.events": "Sự kiện",
+  "aiInput.cancelButton": "Hủy bỏ",
+  "aiInput.saveButton": "Lưu",
+  "aiInput.saveSuccess": "Dữ liệu đã được lưu thành công!",
+  "aiInput.saveError": "Lỗi khi lưu dữ liệu được tạo.",
+  "aiInput.generateError": "Lỗi khi tạo dữ liệu {entity}. Vui lòng thử lại.",
+  "family.list.action.aiCreate": "Tạo gia đình bằng AI"
 }

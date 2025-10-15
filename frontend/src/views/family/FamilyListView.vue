@@ -1,13 +1,15 @@
 <template>
   <FamilySearch @update:filters="handleFilterUpdate" />
   <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
-    :items-per-page="itemsPerPage"  @update:options="handleListOptionsUpdate"
+    :items-per-page="itemsPerPage" @update:options="handleListOptionsUpdate"
     @update:itemsPerPage="itemsPerPage = $event" @view="navigateToViewFamily" @edit="navigateToEditFamily"
-    @delete="confirmDelete" @create="navigateToAddFamily" />
+    @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
   <!-- Confirm Delete Dialog -->
   <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
     :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })" @confirm="handleDeleteConfirm"
     @cancel="handleDeleteCancel" />
+  <!-- AI Input Dialog -->
+  <NLFamilyPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @save="handleAiSave" />
   <!-- Snackbar -->
   <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
     {{ notificationStore.snackbar.message }}
@@ -20,16 +22,20 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { FamilySearch, FamilyList } from '@/components/family';
+import { useMemberStore } from '@/stores/member.store';
+import { useEventStore } from '@/stores/event.store';
+import { FamilySearch, FamilyList, NLFamilyPopup } from '@/components/family';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { FamilyFilter, Family } from '@/types';
+import type { FamilyFilter, Family, GeneratedDataResponse } from '@/types';
 
 const { t } = useI18n();
 const router = useRouter();
 
 const familyStore = useFamilyStore();
+const memberStore = useMemberStore();
+const eventStore = useEventStore();
 const { items } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
 
@@ -38,6 +44,7 @@ const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const deleteConfirmDialog = ref(false);
 const familyToDelete = ref<Family | undefined>(undefined);
+const aiInputDialog = ref(false);
 
 const handleFilterUpdate = (filters: FamilyFilter) => {
   currentFilters.value = filters;
@@ -94,5 +101,41 @@ const handleDeleteConfirm = async () => {
 const handleDeleteCancel = () => {
   deleteConfirmDialog.value = false;
   familyToDelete.value = undefined;
+};
+
+const openAiInputDialog = () => {
+  aiInputDialog.value = true;
+};
+
+const handleAiSave = async (generatedData: GeneratedDataResponse) => {
+  try {
+    if (generatedData.families.length > 0) {
+      for (const family of generatedData.families) {
+        await familyStore.addItem(family);
+      }
+    }
+    if (generatedData.members.length > 0) {
+      for (const member of generatedData.members) {
+        await memberStore.addItem(member);
+      }
+    }
+    if (generatedData.events.length > 0) {
+      for (const event of generatedData.events) {
+        await eventStore.addItem(event);
+      }
+    }
+    notificationStore.showSnackbar(
+      t('aiInput.saveSuccess'),
+      'success',
+    );
+  } catch (error) {
+    console.error('Error saving generated data:', error);
+    notificationStore.showSnackbar(
+      t('aiInput.saveError'),
+      'error',
+    );
+  } finally {
+    familyStore._loadItems(); // Refresh the family list after saving
+  }
 };
 </script>

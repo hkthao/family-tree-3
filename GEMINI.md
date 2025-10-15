@@ -84,20 +84,26 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 *   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.
 *   **Seed Data:** Có script để populate database với dữ liệu mẫu (`infra/seeds`).
 
-## 7. Các thay đổi gần đây
+## 8. Frontend Conventions
 
-- **Cập nhật tính năng AI Biography:**
-  - Backend: Chuyển đổi endpoint lấy tiểu sử AI gần nhất từ trả về chuỗi sang đối tượng DTO đầy đủ, cập nhật API và sử dụng AutoMapper cho việc ánh xạ DTO.
-  - Frontend: Cập nhật giao diện người dùng để hiển thị dữ liệu tiểu sử AI đầy đủ, bao gồm tên nhà cung cấp AI và thêm validation cho độ dài prompt.
-- **Refactor `auth0UserId` thành `externalId`:**
-  - Backend: Đổi tên thuộc tính `Auth0UserId` thành `ExternalId` trong `UserProfile` entity và DTO. Cập nhật các query, handler và controller liên quan để sử dụng `ExternalId` và endpoint `byExternalId`.
-  - Frontend: Cập nhật các interface `User` và `UserProfile`, các service (`auth0Service`, `userProfileService`), và các store (`auth.store`, `userProfile.store`) để sử dụng `externalId` thay cho `auth0UserId` nhằm tách biệt khỏi nhà cung cấp xác thực cụ thể.
-- **Cải thiện trải nghiệm người dùng:**
-  - Thêm tooltips cho tất cả các nút hành động (chỉnh sửa, xóa, thêm mới) trong các danh sách (Thành viên, Gia đình, Sự kiện, Quan hệ).
-  - Thêm tooltips cho các nút thu gọn/mở rộng trong các bộ lọc tìm kiếm nâng cao.
-- **Dọn dẹp mã nguồn:**
-  - Xóa bỏ các import và biến không sử dụng trong các tệp frontend để cải thiện chất lượng mã nguồn và loại bỏ cảnh báo linting.
-- **Quản lý Tùy chọn Người dùng:**
-  - Backend: Triển khai API riêng biệt để lưu trữ và truy xuất tùy chọn cá nhân của người dùng (chủ đề, ngôn ngữ, cài đặt thông báo qua email/SMS/ứng dụng).
-  - Database: Thêm thực thể `UserPreference` và các enum `Theme`, `Language` để lưu trữ các tùy chọn này, đồng thời cập nhật schema database thông qua migration.
-  - Cập nhật tài liệu liên quan để phản ánh các thay đổi về API và mô hình dữ liệu.
+### 8.1. Cấu trúc Service
+
+*   Mỗi service nên có một thư mục riêng trong `frontend/src/services/` (ví dụ: `frontend/src/services/family/`).
+*   Trong thư mục service, sẽ có các tệp sau:
+    *   `[tên_service].service.interface.ts`: Định nghĩa interface cho service (ví dụ: `IFamilyService`).
+    *   `api.[tên_service].service.ts`: Triển khai service sử dụng API thật (ví dụ: `ApiFamilyService`).
+    *   `mock.[tên_service].service.ts`: Triển khai service sử dụng dữ liệu giả (mock data) cho mục đích phát triển/kiểm thử (ví dụ: `MockFamilyService`).
+*   Tất cả các service API nên nhận `ApiClientMethods` làm dependency trong constructor.
+*   Các phương thức service nên trả về kiểu `Result<T, ApiError>` để xử lý lỗi nhất quán.
+
+### 8.2. Cấu trúc Store (Pinia)
+
+*   Các store nên được định nghĩa theo kiểu Options API của Pinia (sử dụng `state`, `getters`, `actions` làm thuộc tính của đối tượng truyền vào `defineStore`).
+*   Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `frontend/src/plugins/services.plugin.ts`.
+*   Thông báo lỗi nên được dịch hóa bằng `i18n.global.t()` (ví dụ: `i18n.global.t('family.errors.load')`).
+*   Các hành động (actions) trong store nên cập nhật trạng thái `loading` và `error` một cách nhất quán.
+
+### 8.3. Import Paths
+
+*   Khi import các component, service, store hoặc type, luôn sử dụng alias `@/` (ví dụ: `@/stores/family.store`).
+*   Khi import một component cụ thể từ một thư mục, hãy chỉ định rõ tệp `.vue` (ví dụ: `import NaturalLanguageInputModal from '@/components/NaturalLanguageInput/NaturalLanguageInputModal.vue';`). Tránh import thư mục trực tiếp (ví dụ: `import { NaturalLanguageInputModal } from '@/components/NaturalLanguageInput';`).

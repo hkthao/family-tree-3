@@ -4,3 +4,4 @@ export { default as FamilySearch } from './FamilySearch.vue';
 export { default as ForceDirectedFamilyTree } from './ForceDirectedFamilyTree.vue';
 export { default as TreeChart } from './TreeChart.vue';
 export { default as HierarchicalFamilyTree } from './HierarchicalFamilyTree.vue';
+export { default as NLFamilyPopup } from './NLFamilyPopup.vue';

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { TextChunk } from '@/types';
-import { chunkService } from '@/services/chunkService';
+import i18n from '@/plugins/i18n';
 
 interface ChunkState {
   chunks: TextChunk[];
@@ -28,16 +28,19 @@ export const useChunkStore = defineStore('chunk', {
       this.loading = true;
       this.error = null;
       try {
-        const responseData = await chunkService.uploadFile(file, metadata);
-
-        // Initialize chunks with approved status
-        this.chunks = responseData.map((chunk) => ({
-          ...chunk,
-          approved: true,
-        }));
+        const result = await this.services.chunk.uploadFile(file, metadata);
+        if (result.ok) {
+          // Initialize chunks with approved status
+          this.chunks = result.value.map((chunk) => ({
+            ...chunk,
+            approved: true,
+          }));
+        } else {
+          this.error = i18n.global.t('chunkAdmin.uploadError');
+          console.error(result.error);
+        }
       } catch (err: any) {
-        this.error =
-          err.response?.data?.error || err.message || 'Failed to upload file.';
+        this.error = err.message || i18n.global.t('chunkAdmin.uploadError');
         console.error('Upload error:', err);
       } finally {
         this.loading = false;
@@ -60,13 +63,17 @@ export const useChunkStore = defineStore('chunk', {
       this.loading = true;
       this.error = null;
       try {
-        await chunkService.approveChunks(chunksToApprove);
-        // Optionally, clear approved chunks from the store or update their status
-        // For now, we'll just clear all chunks after successful approval
-        this.clearChunks();
+        const result = await this.services.chunk.approveChunks(chunksToApprove);
+        if (result.ok) {
+          // Optionally, clear approved chunks from the store or update their status
+          // For now, we'll just clear all chunks after successful approval
+          this.clearChunks();
+        } else {
+          this.error = i18n.global.t('chunkAdmin.approveError');
+          console.error(result.error);
+        }
       } catch (err: any) {
-        this.error =
-          err.response?.data?.error || err.message || 'Failed to approve chunks.';
+        this.error = err.message || i18n.global.t('chunkAdmin.approveError');
         console.error('Approve chunks error:', err);
       } finally {
         this.loading = false;
