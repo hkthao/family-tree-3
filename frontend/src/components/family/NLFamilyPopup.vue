@@ -34,17 +34,12 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
-          }}</v-btn>
-        <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors" @click="save">{{
-          t('aiInput.saveButton') }}</v-btn>
+        }}</v-btn>
+        <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors"
+          @click="save">{{
+            t('aiInput.saveButton') }}</v-btn>
       </v-card-actions>
-      <v-progress-linear
-        v-if="loading"
-        indeterminate
-        color="primary"
-        height="4"
-        class="mb-0"
-      ></v-progress-linear>
+      <v-progress-linear v-if="loading" indeterminate color="primary" height="4" class="mb-0"></v-progress-linear>
     </v-card>
   </v-dialog>
 </template>

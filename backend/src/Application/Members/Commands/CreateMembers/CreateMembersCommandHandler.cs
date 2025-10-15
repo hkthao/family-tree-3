@@ -7,12 +7,12 @@ namespace backend.Application.Members.Commands.CreateMembers;
 
 public class CreateMembersCommandHandler : IRequestHandler<CreateMembersCommand, Result<List<Guid>>>
 {
-    private readonly IValidator<MemberDto> _memberDtoValidator;
+    private readonly IValidator<AIMemberDto> _aiMemberDtoValidator;
     private readonly IMediator _mediator;
 
-    public CreateMembersCommandHandler(IValidator<MemberDto> memberDtoValidator, IMediator mediator)
+    public CreateMembersCommandHandler(IValidator<AIMemberDto> aiMemberDtoValidator, IMediator mediator)
     {
-        _memberDtoValidator = memberDtoValidator;
+        _aiMemberDtoValidator = aiMemberDtoValidator;
         _mediator = mediator;
     }
 
@@ -22,7 +22,7 @@ public class CreateMembersCommandHandler : IRequestHandler<CreateMembersCommand,
 
         foreach (var memberDto in request.Members)
         {
-            ValidationResult validationResult = await _memberDtoValidator.ValidateAsync(memberDto, cancellationToken);
+            ValidationResult validationResult = await _aiMemberDtoValidator.ValidateAsync(memberDto, cancellationToken);
             if (!validationResult.IsValid)
             {
                 memberDto.ValidationErrors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
@@ -57,7 +57,7 @@ public class CreateMembersCommandHandler : IRequestHandler<CreateMembersCommand,
             else
             {
                 // If individual member creation fails, add error to memberDto for feedback
-                memberDto.ValidationErrors = memberDto.ValidationErrors ?? new List<string>();
+                memberDto.ValidationErrors = memberDto.ValidationErrors ?? [];
                 if (createResult.Error != null)
                 {
                     memberDto.ValidationErrors.Add(createResult.Error);

@@ -7,7 +7,7 @@ namespace backend.Application.NaturalLanguageInput.Queries;
 public class GeneratedEntityDto
 {
     public string DataType { get; set; } = "Unknown"; // e.g., "Families", "Members", "Mixed"
-    public List<FamilyDto> Families { get; set; } = new List<FamilyDto>();
-    public List<MemberDto> Members { get; set; } = new List<MemberDto>();
-    public List<EventDto> Events { get; set; } = new List<EventDto>();
+    public List<FamilyDto> Families { get; set; } = [];
+    public List<MemberDto> Members { get; set; } = [];
+    public List<EventDto> Events { get; set; } = [];
 }

@@ -2,21 +2,18 @@
   <v-row class="align-center mb-1" justify="space-between">
     <v-col cols="12" md="auto" class="text-md-right">
       <v-btn-toggle v-model="chartMode" mandatory variant="outlined" density="compact">
-        <v-btn size="small"  value="hierarchical">
+        <v-btn size="small" value="hierarchical">
           <v-icon start>mdi-file-tree</v-icon>
           {{ t('family.tree.view.hierarchical') }}
         </v-btn>
-        <v-btn size="small"  value="force-directed">
+        <v-btn size="small" value="force-directed">
           <v-icon start>mdi-share-variant</v-icon>
           {{ t('family.tree.view.network') }}
         </v-btn>
       </v-btn-toggle>
     </v-col>
   </v-row>
-  <HierarchicalFamilyTree
-    v-if="chartMode === 'hierarchical'"
-    :family-id="props.familyId"
-  />
+  <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" />
 </template>
 

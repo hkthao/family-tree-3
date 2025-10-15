@@ -51,9 +51,9 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<FamilyResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Families == null || !aiResponse.Families.Any())
+            if (aiResponse == null || aiResponse.Families == null || aiResponse.Families.Count == 0)
             {
-                return Result<List<FamilyDto>>.Success(new List<FamilyDto>()); // Return empty list if no families generated
+                return Result<List<FamilyDto>>.Success([]); // Return empty list if no families generated
             }
 
             foreach (var family in aiResponse.Families)

@@ -25,7 +25,7 @@ public class CleanupUnusedFilesCommandHandler : IRequestHandler<CleanupUnusedFil
             .Where(fm => !fm.IsActive && fm.UsedById == null && fm.Created < cutoffDate)
             .ToListAsync(cancellationToken);
 
-        if (!unusedFiles.Any())
+        if (unusedFiles.Count == 0)
         {
             return Result<int>.Success(0);
         }

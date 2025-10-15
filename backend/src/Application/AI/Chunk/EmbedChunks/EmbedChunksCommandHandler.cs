@@ -23,7 +23,7 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
 
     public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
     {
-        if (request.Chunks == null || !request.Chunks.Any())
+        if (request.Chunks == null || request.Chunks.Count == 0)
         {
             return Result.Failure("No chunks provided for embedding.");
         }

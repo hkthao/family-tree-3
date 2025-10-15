@@ -3,4 +3,4 @@ using backend.Application.Members.Queries;
 
 namespace backend.Application.Members.Commands.CreateMembers;
 
-public record CreateMembersCommand(List<MemberDto> Members) : IRequest<Result<List<Guid>>>;
+public record CreateMembersCommand(List<AIMemberDto> Members) : IRequest<Result<List<Guid>>>;

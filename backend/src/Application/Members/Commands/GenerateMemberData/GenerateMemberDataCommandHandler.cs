@@ -4,32 +4,40 @@ using backend.Application.Members.Queries;
 using backend.Domain.Enums;
 using System.Text.Json;
 using FluentValidation.Results;
+using backend.Domain.Entities;
 
 namespace backend.Application.Members.Commands.GenerateMemberData;
 
-public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDataCommand, Result<List<MemberDto>>>
+public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDataCommand, Result<List<AIMemberDto>>>
 {
     private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly IValidator<MemberDto> _memberDtoValidator;
+    private readonly IValidator<AIMemberDto> _aiMemberDtoValidator;
+    private readonly IApplicationDbContext _context;
+    private readonly IUser _user;
+    private readonly IAuthorizationService _authorizationService;
 
-    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<MemberDto> memberDtoValidator)
+    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
     {
         _chatProviderFactory = chatProviderFactory;
-        _memberDtoValidator = memberDtoValidator;
+        _aiMemberDtoValidator = aiMemberDtoValidator;
+        _context = context;
+        _user = user;
+        _authorizationService = authorizationService;
     }
 
-    public async Task<Result<List<MemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
+    public async Task<Result<List<AIMemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
     {
         var chatProvider = _chatProviderFactory.GetProvider(ChatAIProvider.Local);
 
         var systemPrompt = @"You are an AI assistant that generates JSON data for member entities based on natural language descriptions.
 The output should always be a single JSON object containing one array: 'members'.
-Each object in the 'members' array should have 'fullName', 'gender' (Male, Female, Other), 'dateOfBirth' (YYYY-MM-DD), 'dateOfDeath' (YYYY-MM-DD), 'placeOfBirth', 'placeOfDeath', 'occupation', 'biography', and 'familyId'.
+Each object in the 'members' array should have 'firstName', 'lastName', 'nickname', 'gender' (Male, Female, Other), 'dateOfBirth' (YYYY-MM-DD), 'dateOfDeath' (YYYY-MM-DD), 'placeOfBirth', 'placeOfDeath', 'occupation', 'biography', 'avatarUrl', and 'familyName'.
 If 'gender' is not explicitly mentioned in the prompt, default it to 'Other'.
+If only a year is provided for 'dateOfBirth' or 'dateOfDeath', default the date to 'YYYY-01-01'.
 Infer the entity type (Member) from the prompt. If the prompt describes multiple entities, include them in the respective arrays.
 If details are missing, use placeholders (""Unknown"" or null) instead of leaving fields empty.
-Example: 'Thêm thành viên tên Trần Văn A, sinh năm 1990, giới tính Nam, thuộc gia đình Nguyễn.'
-Output: { ""members"": [{ ""fullName"": ""Trần Văn A"", ""dateOfBirth"": ""1990-01-01"", ""gender"": ""Male"", ""familyId"": ""<guid-of-nguyen-family>"", ""occupation"": ""Unknown"" }] }
+Example: 'Thêm thành viên tên Trần Văn A, sinh năm 1990, giới tính Nam, thuộc gia đình Nguyễn. Nơi sinh: Hà Nội. Nghề nghiệp: Kỹ sư. Tiểu sử: Một kỹ sư tài năng và đam mê công nghệ. Ảnh đại diện: https://example.com/avatar.png. Biệt danh: A Kỹ sư.'
+Output: { ""members"": [{ ""firstName"": ""Văn A"", ""lastName"": ""Trần"", ""nickname"": ""A Kỹ sư"", ""gender"": ""Male"", ""dateOfBirth"": ""1990-01-01"", ""placeOfBirth"": ""Hà Nội"", ""occupation"": ""Kỹ sư"", ""biography"": ""Một kỹ sư tài năng và đam mê công nghệ."", ""avatarUrl"": ""https://example.com/avatar.png"", ""familyName"": ""Nguyễn"" }] }
 Always respond with ONLY the JSON object. Do not include any conversational text.";
 
         var userPrompt = request.Prompt;
@@ -45,44 +53,75 @@ Always respond with ONLY the JSON object. Do not include any conversational text
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<List<MemberDto>>.Failure("AI did not return a response.");
+            return Result<List<AIMemberDto>>.Failure("AI did not return a response.");
         }
 
         try
         {
-            var aiResponse = JsonSerializer.Deserialize<MemberResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var aiResponse = JsonSerializer.Deserialize<AIResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Members == null || !aiResponse.Members.Any())
+            if (aiResponse == null || aiResponse.Members == null || aiResponse.Members.Count == 0)
             {
-                return Result<List<MemberDto>>.Success(new List<MemberDto>()); // Return empty list if no members generated
+                return Result<List<AIMemberDto>>.Success([]); // Return empty list if no members generated
             }
 
-            foreach (var member in aiResponse.Members)
+            foreach (var memberDto in aiResponse.Members)
             {
-                if (string.IsNullOrWhiteSpace(member.Gender))
-                    member.Gender = Gender.Other.ToString();
+                memberDto.ValidationErrors ??= [];
 
-                ValidationResult validationResult = await _memberDtoValidator.ValidateAsync(member, cancellationToken);
+                // Default Gender if missing
+                if (string.IsNullOrWhiteSpace(memberDto.Gender))
+                    memberDto.Gender = Gender.Other.ToString();
+
+                // Resolve FamilyId from FamilyName
+                if (!string.IsNullOrWhiteSpace(memberDto.FamilyName))
+                {
+                    var families = await _context.Families
+                        .Where(f => f.Name == memberDto.FamilyName)
+                        .ToListAsync(cancellationToken);
+
+                    var accessibleFamilies = new List<Family>();
+                    foreach (var family in families)
+                    {
+                        if (_user.Roles != null && _user.Roles.Contains("Administrator"))
+                            accessibleFamilies.Add(family);
+                    }
+
+                    if (accessibleFamilies.Count == 1)
+                    {
+                        memberDto.FamilyId = accessibleFamilies.First().Id;
+                    }
+                    else if (accessibleFamilies.Count == 0)
+                    {
+                        memberDto.ValidationErrors.Add($"Family '{memberDto.FamilyName}' not found or you do not have permission to manage it.");
+                    }
+                    else
+                    {
+                        memberDto.ValidationErrors.Add($"Multiple families found with name '{memberDto.FamilyName}'. Please specify.");
+                    }
+                }
+
+                // Validate AIMemberDto
+                ValidationResult validationResult = await _aiMemberDtoValidator.ValidateAsync(memberDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    member.ValidationErrors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                    memberDto.ValidationErrors.AddRange(validationResult.Errors.Select(e => e.ErrorMessage));
                 }
             }
 
-            return Result<List<MemberDto>>.Success(aiResponse.Members);
+            return Result<List<AIMemberDto>>.Success(aiResponse.Members);
         }
         catch (JsonException ex)
         {
-            return Result<List<MemberDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<AIMemberDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result<List<MemberDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<AIMemberDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
         }
     }
-
-    private class MemberResponseData
+    private class AIResponseData
     {
-        public List<MemberDto>? Members { get; set; }
+        public List<AIMemberDto>? Members { get; set; }
     }
 }

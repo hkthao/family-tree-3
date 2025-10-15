@@ -55,14 +55,14 @@ public class FamilyTreeService : IFamilyTreeService
         }
 
         // Find all root members (members with no parents in the family)
-        var rootMembers = members.Where(m => !parents.ContainsKey(m.Id) || !parents[m.Id].Any()).ToList();
+        var rootMembers = members.Where(m => !parents.ContainsKey(m.Id) || parents[m.Id].Count == 0).ToList();
 
-        if (!rootMembers.Any() && members.Any()) // If no explicit roots, consider members with no parents in the relationships as roots
+        if (rootMembers.Count == 0 && members.Count != 0) // If no explicit roots, consider members with no parents in the relationships as roots
         {
             rootMembers = members.Where(m => !relationships.Any(r => r.TargetMemberId == m.Id && (r.Type == RelationshipType.Father || r.Type == RelationshipType.Mother))).ToList();
         }
 
-        if (!rootMembers.Any() && members.Any()) // Fallback: if still no roots, just pick the first member
+        if (rootMembers.Count == 0 && members.Count != 0) // Fallback: if still no roots, just pick the first member
         {
             rootMembers.Add(members.First());
         }
@@ -81,7 +81,7 @@ public class FamilyTreeService : IFamilyTreeService
         if (visited.Contains(memberId)) return 0; // Avoid infinite loops in case of circular relationships
         visited.Add(memberId);
 
-        if (!graph.ContainsKey(memberId) || !graph[memberId].Any())
+        if (!graph.ContainsKey(memberId) || graph[memberId].Count == 0)
         {
             return 1; // Base case: leaf member is 1 generation
         }

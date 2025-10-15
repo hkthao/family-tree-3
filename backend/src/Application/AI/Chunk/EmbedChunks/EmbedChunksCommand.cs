@@ -5,5 +5,5 @@ namespace backend.Application.AI.Chunk.EmbedChunks;
 
 public class EmbedChunksCommand : IRequest<Result>
 {
-    public List<TextChunk> Chunks { get; set; } = new List<TextChunk>();
+    public List<TextChunk> Chunks { get; set; } = [];
 }
