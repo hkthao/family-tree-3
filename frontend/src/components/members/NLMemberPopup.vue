@@ -77,7 +77,9 @@ const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
 
 const displayKeys = [
-  'fullName',
+  'firstName',
+  'lastName',
+  'nickname',
   'gender',
   'dateOfBirth',
   'dateOfDeath',
