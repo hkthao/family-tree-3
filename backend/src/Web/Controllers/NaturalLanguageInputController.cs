@@ -1,5 +1,4 @@
 using Application.NaturalLanguageInput.Commands.GenerateData;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
@@ -15,8 +14,20 @@ public class NaturalLanguageInputController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("generate-data")]
-    public async Task<ActionResult<string>> GenerateData([FromBody] GenerateDataCommand command)
+    [HttpPost("generate-family-data")]
+    public async Task<ActionResult<string>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+
+    [HttpPost("generate-member-data")]
+    public async Task<ActionResult<string>> GenerateMemberData([FromBody] GenerateMemberDataCommand command)
+    {
+        return Ok(await _mediator.Send(command));
+    }
+
+    [HttpPost("generate-event-data")]
+    public async Task<ActionResult<string>> GenerateEventData([FromBody] GenerateEventDataCommand command)
     {
         return Ok(await _mediator.Send(command));
     }
