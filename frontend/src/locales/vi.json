@@ -496,5 +496,7 @@
   "aiInput.saveSuccess": "Dữ liệu đã được lưu thành công!",
   "aiInput.saveError": "Lỗi khi lưu dữ liệu được tạo.",
   "aiInput.generateError": "Lỗi khi tạo dữ liệu {entity}. Vui lòng thử lại.",
+  "aiInput.promptRequired": "Mô tả là bắt buộc.",
+  "aiInput.promptLength": "Mô tả không được vượt quá {length} ký tự.",
   "family.list.action.aiCreate": "Tạo gia đình bằng AI"
 }
