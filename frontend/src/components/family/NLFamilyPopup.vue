@@ -16,10 +16,10 @@
           <div v-for="(family, familyIndex) in generatedData" :key="familyIndex" class="mb-6 pa-4 border rounded">
             <h4 class="text-h6 mb-2">{{ t('aiInput.family') }} #{{ familyIndex + 1 }}</h4>
             <v-divider class="mb-2"></v-divider>
-            <div v-for="(value, key) in family" :key="key">
+            <div v-for="key in displayKeys" :key="key">
               <p class="text-body-2">
                 <strong>{{ t(`family.${key}`) || key }}:</strong>
-                {{ value === null || value === '' ? t('common.unknown') : value }}
+                {{ formatValue(family[key as keyof Family], key) }}
               </p>
             </div>
           </div>
@@ -70,7 +70,25 @@ const generatedData = ref<Family[] | null>(null);
 const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
 
+const displayKeys = [
+  'name',
+  'description',
+  'address',
+  'totalMembers',
+  'totalGenerations',
+  'visibility',
+  'avatarUrl',
+];
 
+const formatValue = (value: any, key: string) => {
+  if (value === null || value === '') {
+    return t('common.unknown');
+  }
+  if (key === 'visibility') {
+    return t(`family.management.visibility.${value.toLowerCase()}`);
+  }
+  return value;
+};
 
 const rules = {
   required: (value: string) => !!value || t('aiInput.promptRequired'),
