@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 
 public class GenerateFamilyDataCommandValidator : AbstractValidator<GenerateFamilyDataCommand>

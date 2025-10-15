@@ -111,12 +111,16 @@ const generateData = async () => {
   if (!valid) return;
 
   loading.value = true;
+  naturalLanguageInputStore.error = null; // Clear previous errors
   try {
     const result = await naturalLanguageInputStore.generateFamilyData(prompt.value);
     if (result) {
       generatedData.value = result;
     } else {
       generatedData.value = null;
+      if (naturalLanguageInputStore.error) {
+        notificationStore.showSnackbar(naturalLanguageInputStore.error, 'error');
+      }
     }
   } catch (error) {
     console.error('Error generating data:', error);
@@ -152,6 +156,7 @@ const save = async () => {
 };
 
 const cancel = () => {
+  naturalLanguageInputStore.error = null; // Clear error on cancel
   emit('update:modelValue', false);
 };
 </script>

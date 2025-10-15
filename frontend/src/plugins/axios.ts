@@ -16,21 +16,27 @@ export interface ApiError {
 // Helper function to create an ApiError from an AxiosError
 const createApiError = (error: AxiosError): ApiError => {
   if (error.response) {
-    // The request was made and the server responded with a status code
-    // that falls out of the range of 2xx
+    let errorMessage = error.message;
+    if (error.response.data) {
+      if (typeof error.response.data === 'string') {
+        errorMessage = error.response.data;
+      } else if ((error.response.data as any).message) {
+        errorMessage = (error.response.data as any).message;
+      } else if ((error.response.data as any).details) {
+        errorMessage = (error.response.data as any).details;
+      }
+    }
     return {
-      message: (error.response?.data as any)?.message || error.message,
-      statusCode: error.response?.status,
-      details: error.response?.data,
+      message: errorMessage,
+      statusCode: error.response.status,
+      details: error.response.data,
     };
   } else if (error.request) {
-    // The request was made but no response was received
     return {
       message: 'No response received from server.',
       details: error.request,
     };
   } else {
-    // Something happened in setting up the request that triggered an Error
     return {
       message: error.message,
     };

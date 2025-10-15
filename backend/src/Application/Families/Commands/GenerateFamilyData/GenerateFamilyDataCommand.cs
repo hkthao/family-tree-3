@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Families;
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 

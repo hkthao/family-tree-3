@@ -1,7 +1,3 @@
-using FluentValidation;
-using backend.Application.Families.Queries;
-using backend.Domain.Enums;
-
 namespace backend.Application.Families;
 
 public class FamilyDtoValidator : AbstractValidator<FamilyDto>
