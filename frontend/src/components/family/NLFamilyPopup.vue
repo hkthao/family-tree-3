@@ -4,8 +4,8 @@
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>
         <v-form ref="form">
-          <v-textarea v-model="prompt" :label="t('aiInput.promptLabel')" rows="3" outlined clearable
-            :rules="[rules.required, rules.length(500)]"></v-textarea>
+          <v-textarea v-model="prompt" :label="t('aiInput.promptLabel')" rows="3" outlined clearable counter
+            :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
         </v-form>
         <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
           {{ t('aiInput.generateButton') }}
@@ -13,34 +13,38 @@
 
         <div v-if="generatedData && generatedData.length">
           <v-alert type="info" class="mb-4">{{ t('aiInput.previewMessage') }}</v-alert>
-          <v-data-table :headers="headers" :items="generatedData" item-value="name" class="elevation-1"
-            density="compact">
-            <template #item.data="{ item }">
-              <v-list density="compact">
-                <v-list-item v-for="(value, key) in item" :key="key">
-                  <v-list-item-title>{{ key }}: {{ value }}</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </template>
-          </v-data-table>
+          <div v-for="(family, familyIndex) in generatedData" :key="familyIndex" class="mb-6 pa-4 border rounded">
+            <h4 class="text-h6 mb-2">{{ t('aiInput.family') }} #{{ familyIndex + 1 }}</h4>
+            <v-divider class="mb-2"></v-divider>
+            <div v-for="(value, key) in family" :key="key">
+              <p class="text-body-2">
+                <strong>{{ t(`family.${key}`) || key }}:</strong>
+                {{ value === null || value === '' ? t('common.unknown') : value }}
+              </p>
+            </div>
+          </div>
         </div>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
-        }}</v-btn>
+          }}</v-btn>
         <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading" @click="save">{{
           t('aiInput.saveButton') }}</v-btn>
       </v-card-actions>
-      <v-overlay :model-value="loading" class="align-center justify-center" contained>
-        <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
-      </v-overlay>
+      <v-progress-linear
+        v-if="loading"
+        indeterminate
+        color="primary"
+        height="4"
+        class="mb-0"
+      ></v-progress-linear>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNaturalLanguageInputStore } from '@/stores/naturalLanguageInput.store';
 import { useFamilyStore } from '@/stores/family.store';
@@ -61,15 +65,12 @@ const naturalLanguageInputStore = useNaturalLanguageInputStore();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-const prompt = ref('');
+const prompt = ref(`Tạo gia đình Nguyễn tại Hà Nội. Gia đình này nổi tiếng về truyền thống học vấn và là dòng dõi học giả. Họ có trụ sở chính ở quận Hoàn Kiếm. Số điện thoại liên hệ là 0123456789, email liên hệ: nguyensfamily@example.com. Trang web chính thức là www.nguyensfamily.vn. Gia đình được thành lập từ năm 1800. Có một huy hiệu gia đình màu xanh với hình sách. Thêm các tag liên quan: học giả, Hà Nội, Việt Nam. Hình ảnh đại diện: https://www.w3schools.com/w3images/avatar5.png. Số thành viên hiện tại là 15, với 4 thế hệ.`);
 const generatedData = ref<Family[] | null>(null);
 const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
 
-const headers = computed(() => [
-  { title: t('common.key'), key: 'key', sortable: false },
-  { title: t('common.value'), key: 'value', sortable: false },
-]);
+
 
 const rules = {
   required: (value: string) => !!value || t('aiInput.promptRequired'),
