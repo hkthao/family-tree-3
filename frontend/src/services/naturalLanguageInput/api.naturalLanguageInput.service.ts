@@ -15,7 +15,7 @@ export class ApiNaturalLanguageInputService implements INaturalLanguageInputServ
   private naturalLanguageInputApiUrl = `${API_BASE_URL}/NaturalLanguageInput`;
   private familyApiUrl = `${API_BASE_URL}/Family`;
   private membersApiUrl = `${API_BASE_URL}/Members`;
-  private relationshipApiUrl = `${API_BASE_URL}/Relationship`; // Added relationshipApiUrl
+  private relationshipApiUrl = `${API_BASE_URL}/Relationships`; // Corrected to plural
 
   async generateFamilyData(prompt: string): Promise<Result<Family[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };

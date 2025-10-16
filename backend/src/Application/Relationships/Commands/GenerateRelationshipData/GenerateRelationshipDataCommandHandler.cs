@@ -4,6 +4,8 @@ using System.Text.Json;
 using FluentValidation.Results;
 using backend.Domain.Enums;
 using backend.Application.Common.Interfaces;
+using Microsoft.Extensions.Logging;
+using System.Text.Json.Serialization;
 
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 
@@ -13,20 +15,22 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
     private readonly IValidator<AIRelationshipDto> _aiRelationshipDtoValidator;
     private readonly IApplicationDbContext _context;
     private readonly FamilyAuthorizationService _familyAuthorizationService;
+    private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger; // Added logger
 
-    public GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService)
+    public GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger) // Added logger
     {
         _chatProviderFactory = chatProviderFactory;
         _aiRelationshipDtoValidator = aiRelationshipDtoValidator;
         _context = context;
         _familyAuthorizationService = familyAuthorizationService;
+        _logger = logger; // Assigned logger
     }
 
     public async Task<Result<List<AIRelationshipDto>>> Handle(GenerateRelationshipDataCommand request, CancellationToken cancellationToken)
     {
         var chatProvider = _chatProviderFactory.GetProvider(ChatAIProvider.Local); // Assuming Local for now
 
-        string systemPrompt = "You are an AI assistant that generates JSON data for relationship entities based on natural language descriptions. The output must always be a single JSON object containing one array: \"relationships\". Each object in the \"relationships\" array should have the following fields: - \"sourceMemberName\" (full name) - \"targetMemberName\" (full name) - \"type\" (e.g., Spouse, Parent, Child, Sibling) - \"startDate\" (YYYY-MM-DD) - \"endDate\" (YYYY-MM-DD) - \"description\". If details are missing, use placeholders (\"Unknown\" or null) instead of leaving fields empty. Infer the entity type (Relationship) from the prompt. If the prompt describes multiple entities, include them in the respective arrays. Example input: Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B. Example output: { \"relationships\": [ { \"sourceMemberName\": \"Nguyễn Văn A\", \"targetMemberName\": \"Trần Thị B\", \"type\" : \"Spouse\", \"description\": \"Married couple\" } ] }. Always respond with ONLY the JSON object. Do not include any conversational text.";
+        string systemPrompt = "You are an AI assistant that generates JSON data for relationship entities based on natural language descriptions. The output must always be a single JSON object containing one array: \"relationships\". Each object in the \"relationships\" array should have the following fields: - \"sourceMemberName\" (full name) - \"targetMemberName\" (full name) - \"type\" (MUST be one of: Father, Mother, Wife, Husband - case-sensitive) - \"startDate\" (YYYY-MM-DD) - \"endDate\" (YYYY-MM-DD) - \"description\". If details are missing, use placeholders (\"Unknown\" or null) instead of leaving fields empty. Infer the entity type (Relationship) from the prompt. If the prompt describes multiple entities, include them in the respective arrays. Example input: Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B. Example output: { \"relationships\": [ { \"sourceMemberName\": \"Nguyễn Văn A\", \"targetMemberName\": \"Trần Thị B\", \"type\" : \"Husband\", \"description\": \"Married couple\" } ] }. Always respond with ONLY the JSON object. Do not include any conversational text.";
 
         var userPrompt = request.Prompt;
 
@@ -38,20 +42,25 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
 
         string jsonString = await chatProvider.GenerateResponseAsync(chatMessages);
         jsonString = jsonString.Trim(); // Trim whitespace
+        _logger.LogInformation("AI generated JSON response: {JsonString}", jsonString); // Log AI response
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
+            _logger.LogWarning("AI did not return a response for prompt: {Prompt}", request.Prompt); // Log warning
             return Result<List<AIRelationshipDto>>.Failure("AI did not return a response.");
         }
 
         try
         {
-            var aiResponse = JsonSerializer.Deserialize<AIResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var aiResponse = JsonSerializer.Deserialize<AIResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true, Converters = { new JsonStringEnumConverter() } });
 
             if (aiResponse == null || aiResponse.Relationships == null || aiResponse.Relationships.Count == 0)
             {
+                _logger.LogInformation("No relationships generated by AI for prompt: {Prompt}", request.Prompt); // Log information
                 return Result<List<AIRelationshipDto>>.Success([]); // Return empty list if no relationships generated
             }
+
+            _logger.LogInformation("Successfully generated {Count} relationships from AI for prompt: {Prompt}", aiResponse.Relationships.Count, request.Prompt); // Log success
 
             foreach (var relationshipDto in aiResponse.Relationships)
             {
@@ -60,8 +69,13 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
                 // Resolve SourceMemberId from SourceMemberName
                 if (!string.IsNullOrWhiteSpace(relationshipDto.SourceMemberName))
                 {
+                    // Split FullName into LastName and FirstName
+                    var nameParts = relationshipDto.SourceMemberName.Split(' ', 2); // Split into at most 2 parts
+                    string lastName = nameParts.Length > 0 ? nameParts[0] : string.Empty;
+                    string firstName = nameParts.Length > 1 ? nameParts[1] : string.Empty;
+
                     var sourceMember = await _context.Members
-                        .Where(m => m.FullName == relationshipDto.SourceMemberName)
+                        .Where(m => m.LastName == lastName && m.FirstName == firstName)
                         .FirstOrDefaultAsync(cancellationToken);
 
                     if (sourceMember != null)
@@ -85,8 +99,13 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
                 // Resolve TargetMemberId from TargetMemberName
                 if (!string.IsNullOrWhiteSpace(relationshipDto.TargetMemberName))
                 {
+                    // Split FullName into LastName and FirstName
+                    var nameParts = relationshipDto.TargetMemberName.Split(' ', 2); // Split into at most 2 parts
+                    string lastName = nameParts.Length > 0 ? nameParts[0] : string.Empty;
+                    string firstName = nameParts.Length > 1 ? nameParts[1] : string.Empty;
+
                     var targetMember = await _context.Members
-                        .Where(m => m.FullName == relationshipDto.TargetMemberName)
+                        .Where(m => m.LastName == lastName && m.FirstName == firstName)
                         .FirstOrDefaultAsync(cancellationToken);
 
                     if (targetMember != null)

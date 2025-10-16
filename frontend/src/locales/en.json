@@ -322,6 +322,9 @@
       }
     }
   },
+  "relationship.list.headers.type": "Relationship Type",
+  "relationship.list.headers.sourceMemberFullName": "Source Member Full Name",
+  "relationship.list.headers.targetMemberFullName": "Target Member Full Name",
   "common.name": "Name",
   "common.noData": "No data available",
   "familyTree.fullName": "Full Name",

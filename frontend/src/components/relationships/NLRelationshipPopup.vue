@@ -164,6 +164,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B.`;
+  prompt.value = `Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B, kết hôn vào ngày 2000-01-15. Mối quan hệ này được mô tả là một cặp vợ chồng hạnh phúc.`;
 };
 </script>

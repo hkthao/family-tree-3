@@ -344,6 +344,8 @@
   "relationship.list.headers.sourceMember": "Thành viên Nguồn",
   "relationship.list.headers.targetMember": "Thành viên Đích",
   "relationship.list.headers.type": "Loại Quan hệ",
+  "relationship.list.headers.sourceMemberFullName": "Thành viên Nguồn",
+  "relationship.list.headers.targetMemberFullName": "Thành viên Đích",
   "relationship.form.editTitle": "Chỉnh sửa Quan hệ",
   "relationship.form.addTitle": "Thêm Quan hệ Mới",
   "relationship.form.sourceMember": "Thành viên Nguồn",

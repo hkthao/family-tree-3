@@ -1,5 +1,6 @@
 import type { IEventService } from './event.service.interface';
-import type { Event, Paginated, Result, EventFilter } from '@/types/event/event';
+import type { Event, EventFilter } from '@/types/event/event';
+import type { Paginated, Result } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
