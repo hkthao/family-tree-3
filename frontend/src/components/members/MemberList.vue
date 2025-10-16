@@ -145,6 +145,12 @@ const headers = computed<DataTableHeader[]>(() => [
     align: 'start',
   },
   {
+    title: t('member.list.headers.code'),
+    key: 'code',
+    width: '120px',
+    align: 'start',
+  },
+  {
     title: t('member.list.headers.family'),
     key: 'family',
     width: 'auto',

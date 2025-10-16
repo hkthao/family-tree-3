@@ -97,6 +97,7 @@
   "family.management.visibility.shared": "Shared",
   "family.management.headers.avatar": "Avatar",
   "family.management.headers.name": "Name",
+  "family.management.headers.code": "Code",
   "family.management.headers.totalMembers": "Total Members",
   "family.management.headers.totalGenerations": "Total Generations",
   "family.management.headers.visibility": "Visibility",

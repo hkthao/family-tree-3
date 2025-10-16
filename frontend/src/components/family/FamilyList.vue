@@ -40,6 +40,11 @@
       </div>
     </template>
 
+    <!-- code column -->
+    <template #item.code="{ item }">
+      {{ item.code }}
+    </template>
+
     <!-- totalMembers column -->
     <template #item.totalMembers="{ item }">
       {{ item.totalMembers }}
@@ -127,6 +132,12 @@ const headers = computed<DataTableHeader[]>(() => [
     title: t('family.management.headers.name'),
     key: 'name',
     width: 'auto',
+    align: 'start',
+  },
+  {
+    title: t('family.management.headers.code'),
+    key: 'code',
+    width: '120px',
     align: 'start',
   },
   {
