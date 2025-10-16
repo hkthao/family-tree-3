@@ -8,8 +8,4 @@ namespace backend.Application.AI.Common;
 public class BiographyResultDto
 {
     public string Content { get; set; } = null!;
-    public AIProviderType Provider { get; set; }
-    public int TokensUsed { get; set; }
-    public DateTime GeneratedAt { get; set; }
-    public string UserPrompt { get; set; } = null!;
 }

@@ -1,10 +1,10 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <AIBiographyInputPanel />
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="12">
         <AIBiographyResultPanel />
       </v-col>
     </v-row>

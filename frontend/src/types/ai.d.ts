@@ -24,12 +24,6 @@ export interface AIProviderDto {
 
 export interface BiographyResultDto {
   content: string;
-  provider: AIProviderType;
-  tokensUsed: number;
-  generatedAt: Date;
-  userPrompt: string;
-  generatedFromDB: boolean;
-  style: BiographyStyle;
 }
 
 export interface AIBiography {

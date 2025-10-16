@@ -37,7 +37,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
           this.style,
           this.generatedFromDB,
           this.userPrompt || undefined,
-          this.language,
         );
 
         if (result.ok) {
@@ -71,10 +70,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
             this.selectedProvider = result.value.provider;
             this.biographyResult = {
               content: result.value.content,
-              provider: result.value.provider,
-              tokensUsed: result.value.tokensUsed,
-              userPrompt: result.value.userPrompt,
-              style: result.value.style,
             } as BiographyResultDto;
           }
         } else {
@@ -142,10 +137,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
           memberId: memberId,
           style: this.style,
           content: content,
-          provider: this.biographyResult?.provider || AIProviderType.Gemini,
-          userPrompt: this.userPrompt || '',
-          generatedFromDB: this.biographyResult?.generatedFromDB || false,
-          tokensUsed: this.biographyResult?.tokensUsed || 0,
         });
 
         if (result.ok) {

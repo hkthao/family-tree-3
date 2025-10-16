@@ -15,14 +15,7 @@
       <div v-else-if="aiBiographyStore.biographyResult">
         <v-textarea v-model="editableContent" :label="t('aiBiography.output.biographyContentLabel')"  auto-grow
           variant="outlined"></v-textarea>
-        <div>
-          <v-chip class="mr-2" size="small">
-            {{ t('aiBiography.output.provider') }}: {{ providerName }}
-          </v-chip>
-          <v-chip size="small">
-            {{ t('aiBiography.output.tokensUsed') }}: {{ aiBiographyStore.biographyResult.tokensUsed }}
-          </v-chip>
-        </div>
+        <!-- Removed provider and tokensUsed display -->
 
       </div>
       <div v-else>
@@ -42,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAIBiographyStore } from '@/stores/aiBiography.store';
 
@@ -67,10 +60,5 @@ const regenerateBiography = () => {
   aiBiographyStore.generateBiography();
 };
 
-const providerName = computed(() => {
-  const provider = aiBiographyStore.aiProviders.find(
-    (p) => p.providerType === aiBiographyStore.biographyResult?.provider,
-  );
-  return provider ? provider.name : 'Unknown';
-});
+
 </script>

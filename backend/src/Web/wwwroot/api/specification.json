@@ -2441,8 +2441,33 @@
           "memberId": {
             "type": "string",
             "format": "guid"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "tone": {
+            "$ref": "#/components/schemas/BiographyTone"
+          },
+          "useSystemData": {
+            "type": "boolean"
           }
         }
+      },
+      "BiographyTone": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Emotional",
+          "Historical",
+          "Storytelling",
+          "Neutral"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
       },
       "AIBiographyDto": {
         "type": "object",
@@ -3266,13 +3291,35 @@
           "Father",
           "Mother",
           "Wife",
-          "Husband"
+          "Husband",
+          "Child",
+          "Parent",
+          "Sibling",
+          "Grandfather",
+          "Grandmother",
+          "Grandchild",
+          "Uncle",
+          "Aunt",
+          "NephewNiece",
+          "Cousin",
+          "Spouse"
         ],
         "enum": [
           0,
           1,
           2,
-          3
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
         ]
       },
       "MemberDetailDto": {

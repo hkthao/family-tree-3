@@ -5,16 +5,24 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using Moq;
 using backend.Domain.Enums;
+using backend.Application.AI.Common;
+using backend.Application.Common.Interfaces; // Added for IChatProviderFactory and IChatProvider
 
 namespace backend.Application.UnitTests.Members.Commands.GenerateBiography;
 
 public class GenerateBiographyCommandHandlerTests : TestBase
 {
     private readonly GenerateBiographyCommandHandler _handler;
+    private readonly Mock<IChatProviderFactory> _mockChatProviderFactory; // Added
+    private readonly Mock<IChatProvider> _mockChatProvider; // Added
 
     public GenerateBiographyCommandHandlerTests()
     {
-        _handler = new GenerateBiographyCommandHandler(_context, _mockUser.Object, _mockAuthorizationService.Object);
+        _mockChatProviderFactory = new Mock<IChatProviderFactory>(); // Added
+        _mockChatProvider = new Mock<IChatProvider>(); // Added
+        _mockChatProviderFactory.Setup(x => x.GetProvider(It.IsAny<ChatAIProvider>())).Returns(_mockChatProvider.Object); // Added
+
+        _handler = new GenerateBiographyCommandHandler(_context, _mockUser.Object, _mockAuthorizationService.Object, _mockChatProviderFactory.Object); // Updated
     }
 
     private async Task ClearDatabaseAndSetupUser(string userId, Guid userProfileId, Guid familyId, bool isAdmin, bool canManageFamily, bool userProfileExists = true)
@@ -76,7 +84,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
 
         // Assert (Kiểm tra kết quả)
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("AI biography generation is currently not supported.");
+        result.Error.Should().Contain("AI did not return a biography."); // Updated expected error message
     }
 
     /// <summary>

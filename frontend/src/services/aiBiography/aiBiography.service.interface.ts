@@ -1,5 +1,5 @@
 import type { Result } from '@/types';
-import type { BiographyResultDto, AIProviderDto, AIProviderType, AIBiography } from '@/types';
+import type { BiographyResultDto, AIProviderDto, AIBiography } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { BiographyStyle } from '@/types';
 
@@ -17,9 +17,5 @@ export interface IAIBiographyService {
     memberId: string;
     style: BiographyStyle;
     content: string;
-    provider: AIProviderType;
-    userPrompt: string;
-    generatedFromDB: boolean;
-    tokensUsed: number;
   }): Promise<Result<string, ApiError>>; // Returns ID of saved biography
 }

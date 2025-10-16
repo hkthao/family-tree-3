@@ -1,6 +1,6 @@
 import type { IAIBiographyService } from './aiBiography.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { Result, BiographyResultDto, AIProviderDto, BiographyStyle, AIProviderType, AIBiography } from '@/types';
+import type { Result, BiographyResultDto, AIProviderDto, BiographyStyle, AIBiography } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -38,10 +38,6 @@ export class ApiAIBiographyService implements IAIBiographyService {
     memberId: string;
     style: BiographyStyle;
     content: string;
-    provider: AIProviderType;
-    userPrompt: string;
-    generatedFromDB: boolean;
-    tokensUsed: number;
   }): Promise<Result<string, ApiError>> {
     return this.http.post<string>(`${this.apiUrl}/biography/save`, command);
   }
