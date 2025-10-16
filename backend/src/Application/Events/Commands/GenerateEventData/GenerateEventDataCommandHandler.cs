@@ -14,19 +14,13 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
     private readonly IChatProviderFactory _chatProviderFactory;
     private readonly IValidator<AIEventDto> _aiEventDtoValidator;
     private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ILogger<GenerateEventDataCommandHandler> _logger;
     private readonly FamilyAuthorizationService _familyAuthorizationService;
 
-    public GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateEventDataCommandHandler> logger, FamilyAuthorizationService familyAuthorizationService)
+    public GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService)
     {
         _chatProviderFactory = chatProviderFactory;
         _aiEventDtoValidator = aiEventDtoValidator;
         _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-        _logger = logger;
         _familyAuthorizationService = familyAuthorizationService;
     }
 
@@ -80,14 +74,15 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
                     {
                         var family = families.First();
                         var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(family.Id, cancellationToken);
-                                                if (authResult.IsSuccess)
-                                                {
-                                                    eventDto.FamilyId = family.Id;
-                                                }
-                                                else if (authResult.Error != null)
-                                                {
-                                                    eventDto.ValidationErrors.Add(authResult.Error!);
-                                                }                    }
+                        if (authResult.IsSuccess)
+                        {
+                            eventDto.FamilyId = family.Id;
+                        }
+                        else if (authResult.Error != null)
+                        {
+                            eventDto.ValidationErrors.Add(authResult.Error!);
+                        }
+                    }
                     else if (families.Count == 0)
                     {
                         eventDto.ValidationErrors.Add($"Family '{eventDto.FamilyName}' not found or you do not have permission to manage it.");

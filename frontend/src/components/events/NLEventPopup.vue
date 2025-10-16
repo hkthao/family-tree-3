@@ -175,6 +175,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Thêm sự kiện tên Đám cưới của Trần Văn A và Nguyễn Thị B, ngày 2000-01-01, tại Hà Nội, thuộc gia đình Nguyễn. Thành viên liên quan: Trần Văn A, Nguyễn Thị B.`;
+  prompt.value = `Thêm sự kiện tên "Lễ kỷ niệm 50 năm thành lập gia đình Nguyễn", loại "Other", bắt đầu vào ngày "2025-10-26" và kết thúc vào ngày "2025-10-27", tại "Trung tâm hội nghị Quốc gia, Hà Nội". Mô tả: "Sự kiện trọng đại kỷ niệm nửa thế kỷ hình thành và phát triển của gia đình Nguyễn, với sự tham gia của đông đảo thành viên và khách quý.". Thuộc gia đình "Nguyễn". Thành viên liên quan: "Trần Văn A", "Nguyễn Thị B".`;
 };
 </script>

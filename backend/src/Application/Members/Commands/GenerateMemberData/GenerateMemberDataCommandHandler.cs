@@ -14,19 +14,13 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
     private readonly IChatProviderFactory _chatProviderFactory;
     private readonly IValidator<AIMemberDto> _aiMemberDtoValidator;
     private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly ILogger<GenerateMemberDataCommandHandler> _logger;
     private readonly FamilyAuthorizationService _familyAuthorizationService;
 
-    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateMemberDataCommandHandler> logger, FamilyAuthorizationService familyAuthorizationService)
+    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService)
     {
         _chatProviderFactory = chatProviderFactory;
         _aiMemberDtoValidator = aiMemberDtoValidator;
         _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-        _logger = logger;
         _familyAuthorizationService = familyAuthorizationService;
     }
 
