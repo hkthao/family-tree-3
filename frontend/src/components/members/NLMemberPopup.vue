@@ -74,7 +74,7 @@ const naturalLanguageInputStore = useNaturalLanguageInputStore();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
-const prompt = ref(`Tạo thành viên Trần Văn A, sinh năm 1990, giới tính Nam, thuộc gia đình Family 1. Nơi sinh: Hà Nội. Nghề nghiệp: Kỹ sư. Tiểu sử: Một kỹ sư tài năng và đam mê công nghệ.`);
+const prompt = ref(``);
 const generatedData = ref<Member[] | null>(null);
 const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
