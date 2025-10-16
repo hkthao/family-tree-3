@@ -169,7 +169,7 @@ export class MockEventService implements IEventService {
   async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
     try {
       const events = await simulateLatency(
-        this.events.filter((e) => ids.includes(e.id)),
+        this.events.filter((e) => e.id !== undefined && ids.includes(e.id as string)),
       );
       return ok(events);
     } catch (e) {

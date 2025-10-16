@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common/result';
+import type { Result } from '@/types';
 import type { UserProfile } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 

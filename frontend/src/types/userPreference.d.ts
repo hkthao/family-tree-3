@@ -1,4 +1,4 @@
-import { Theme, Language } from '@/types/common';
+import { Theme, Language } from '@/types';
 
 export interface UserPreference {
   userProfileId: string;

@@ -1,4 +1,12 @@
-import type { RelationshipType } from '@/types/common';
+import type { RelationshipType } from '@/types';
+import type { Member } from '@/types'; // Assuming Member is imported from '@/types'
+
+export interface RelationshipMember {
+  dateOfBirth?: Date;
+  fullName: string;
+  gender?: string;
+  avatarUrl?: string;
+}
 
 export interface Relationship {
   id?: string;
@@ -9,7 +17,7 @@ export interface Relationship {
   targetMemberName?: string;
   targetMemberCode?: string;
   targetMemberId: string;
-  targetMemberFullName?: string; // Added
+  targetMemberFullName?: string;
   type: RelationshipType;
   order?: number;
   startDate?: string;
@@ -19,6 +27,6 @@ export interface Relationship {
   familyCode?: string;
   familyId?: string;
   validationErrors?: string[];
-  sourceMember?: Member;
-  targetMember?: Member;
+  sourceMember?: RelationshipMember;
+  targetMember?: RelationshipMember;
 }

@@ -1,7 +1,5 @@
 import type { IDashboardService } from './dashboard.service.interface';
-import type { Result } from '@/types/common/result';
-import type { DashboardStats } from '@/types';
-import { ok } from '@/types/common/result';
+import { ok, type Result, type DashboardStats } from '@/types';
 
 export class MockDashboardService implements IDashboardService {
   async fetchStats(familyId?: string): Promise<Result<DashboardStats>> {

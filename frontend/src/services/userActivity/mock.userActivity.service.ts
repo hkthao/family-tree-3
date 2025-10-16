@@ -1,7 +1,7 @@
-import type { Result } from '@/types/common/result';
+import { ok, type Result } from '@/types';
 import type { RecentActivity, TargetType } from '@/types';
 import type { IUserActivityService } from './userActivity.service.interface';
-import { ok } from '@/types/common/result';
+
 
 export class MockUserActivityService implements IUserActivityService {
   private activities: RecentActivity[] = [

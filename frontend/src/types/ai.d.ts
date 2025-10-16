@@ -1,4 +1,3 @@
-
 export enum AIProviderType {
   None = 0,
   Gemini = 1,

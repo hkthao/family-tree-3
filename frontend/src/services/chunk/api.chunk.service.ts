@@ -1,6 +1,6 @@
 import type { IChunkService } from './chunk.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import { ok, err, type Result } from '@/types/common';
+import { ok, err, type Result } from '@/types';
 import type { TextChunk } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;

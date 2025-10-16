@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { MessageItem, ChatListItem } from '@/types/chat';
+import type { MessageItem, ChatListItem } from '@/types';
 
 interface ChatState {
   chatList: ChatListItem[];

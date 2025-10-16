@@ -53,7 +53,7 @@ import { useI18n } from 'vue-i18n';
 import { useNaturalLanguageInputStore } from '@/stores/naturalLanguageInput.store';
 import { useEventStore } from '@/stores/event.store'; // Assuming an event store exists
 import { useNotificationStore } from '@/stores/notification.store';
-import type { Event } from '@/types/event/event';
+import type { Event } from '@/types';
 
 const props = defineProps({
   modelValue: Boolean,

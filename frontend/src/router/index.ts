@@ -4,7 +4,7 @@ import { sidebarRoutes } from './sidebar-routes';
 import { canAccessMenu } from '@/utils/menu-permissions';
 import { useAuthStore } from '@/stores/auth.store';
 import { useAuthService } from '@/services/auth/authService';
-import type { AppState } from '@/types/auth';
+import type { AppState } from '@/types';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common';
+import type { Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { TextChunk } from '@/types';
 

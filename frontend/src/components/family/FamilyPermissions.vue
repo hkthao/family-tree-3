@@ -16,7 +16,7 @@ import { onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserProfileStore } from '@/stores/userProfile.store';
 import { storeToRefs } from 'pinia';
-import type { FamilyUser } from '@/types/family';
+import type { FamilyUser } from '@/types';
 
 const { t } = useI18n();
 

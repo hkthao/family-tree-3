@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common/result';
+import type { Result } from '@/types';
 import type { RecentActivity } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { TargetType } from '@/types';

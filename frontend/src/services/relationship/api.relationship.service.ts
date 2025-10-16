@@ -1,12 +1,7 @@
 import type { IRelationshipService } from './relationship.service.interface';
-import {
-  type Relationship,
-  type Paginated,
-  type Result,
-  type RelationshipFilter,
-  ok,
-} from '@/types'; // Added Relationship
+import type { Relationship, RelationshipFilter } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
+import { ok, type Paginated, type Result } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 

@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common/result';
+import type { Result } from '@/types';
 import type { UserProfile } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { IUserProfileService } from './userProfile.service.interface';

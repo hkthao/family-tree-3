@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common/result';
+import type { Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 
 export interface IFileUploadService {

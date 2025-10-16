@@ -1,7 +1,7 @@
 import type { AuthService } from './authService';
 import type { User } from '@/types';
 import type { RedirectLoginOptions } from '@auth0/auth0-spa-js';
-import type { AppState } from '@/types/auth';
+import type { AppState } from '@/types';
 
 class FakeAuthService implements AuthService {
   private currentUser: User | null = null;

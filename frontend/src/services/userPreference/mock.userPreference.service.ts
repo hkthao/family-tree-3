@@ -1,6 +1,6 @@
 import type { IUserPreferenceService } from './userPreference.service.interface';
 import type { Result, UserPreference } from '@/types';
-import { ok } from '@/types/common/result';
+import { ok } from '@/types';
 import { simulateLatency } from '@/utils/mockUtils';
 import { Theme, Language } from '@/types';
 

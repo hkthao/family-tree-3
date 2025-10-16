@@ -8,6 +8,7 @@ import { type Result, ok, err } from '@/types';
 
 // Define a custom error type for API errors
 export interface ApiError {
+  name: string; // Added
   message: string;
   statusCode?: number;
   details?: any;
@@ -27,17 +28,20 @@ const createApiError = (error: AxiosError): ApiError => {
       }
     }
     return {
+      name: 'ApiError', // Added
       message: errorMessage,
       statusCode: error.response.status,
       details: error.response.data,
     };
   } else if (error.request) {
     return {
+      name: 'ApiError', // Added
       message: 'No response received from server.',
       details: error.request,
     };
   } else {
     return {
+      name: 'ApiError', // Added
       message: error.message,
     };
   }
@@ -64,7 +68,11 @@ async function safeApiCall<T>(
   try {
     const response = await apiCall;
     // Check if the response data is already a Result object from the backend
-    if (response.data && typeof response.data === 'object' && 'isSuccess' in response.data) {
+    if (
+      response.data &&
+      typeof response.data === 'object' &&
+      'isSuccess' in response.data
+    ) {
       if (response.data.isSuccess) {
         return ok(response.data.value as T);
       } else {
@@ -79,6 +87,7 @@ async function safeApiCall<T>(
       return err(createApiError(error));
     } else {
       return err({
+        name: 'ApiError',
         message: 'An unexpected error occurred.',
         details: error as Error,
       });

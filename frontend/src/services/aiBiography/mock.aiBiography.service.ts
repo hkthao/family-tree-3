@@ -1,6 +1,5 @@
 import type { IAIBiographyService } from './aiBiography.service.interface';
-import type { Result } from '@/types/common/result';
-import { ok } from '@/types/common/result';
+import { ok, type Result } from '@/types';
 import { simulateLatency } from '@/utils/mockUtils';
 import { AIProviderType, BiographyStyle } from '@/types';
 import type { AIBiography, BiographyResultDto, AIProviderDto } from '@/types';

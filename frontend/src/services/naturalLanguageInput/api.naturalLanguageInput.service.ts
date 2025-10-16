@@ -1,11 +1,7 @@
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { GenerateDataRequest } from '@/types';
-import { type Result } from '@/types/common';
+import { type Event, type Family, type Member, type Relationship, type Result } from '@/types';
 import type { INaturalLanguageInputService } from './naturalLanguageInput.service.interface';
-import type { Family } from '@/types/family';
-import type { Member } from '@/types/family/member';
-import type { Event } from '@/types/event';
-import type { Relationship } from '@/types/relationship'; // Added Relationship
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 

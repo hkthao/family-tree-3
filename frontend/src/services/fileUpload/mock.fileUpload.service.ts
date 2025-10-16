@@ -1,5 +1,4 @@
-import type { Result } from '@/types/common/result';
-import { ok } from '@/types/common/result';
+import { ok, type Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { IFileUploadService } from './fileUpload.service.interface';
 import { simulateLatency } from '@/utils/mockUtils';

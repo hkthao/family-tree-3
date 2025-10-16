@@ -1,5 +1,5 @@
 import type { IEventService } from './event.service.interface';
-import type { Event, EventFilter } from '@/types/event/event';
+import type { Event, EventFilter } from '@/types';
 import type { Paginated, Result } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 

@@ -20,9 +20,9 @@ import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
 import { useMemberStore } from '@/stores/member.store';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import type { Member, Relationship } from '@/types';
-import { Gender } from '@/types';
-import { RelationshipType } from '@/types/common/relationshipType';
+import type { Member } from '@/types';
+import type { Relationship } from '@/types';
+import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 // Define the type for the data used in the family chart cards

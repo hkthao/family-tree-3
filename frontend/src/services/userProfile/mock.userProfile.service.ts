@@ -1,7 +1,7 @@
-import type { Result } from '@/types/common/result';
+import { ok, type Result } from '@/types';
 import type { UserProfile } from '@/types';
 import type { IUserProfileService } from './userProfile.service.interface';
-import { ok } from '@/types/common/result';
+
 import type { ApiError } from '@/plugins/axios';
 
 export class MockUserProfileService implements IUserProfileService {

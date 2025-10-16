@@ -1,6 +1,5 @@
 import type { IRelationshipService } from './relationship.service.interface';
-import type { Relationship, Paginated, Result } from '@/types';
-import { ok, err } from '@/types';
+import { err, ok, type Result, type Paginated, type Relationship, type RelationshipFilter } from '@/types';
 
 export class MockRelationshipService implements IRelationshipService {
   private relationships: Relationship[] = [];
@@ -43,6 +42,6 @@ export class MockRelationshipService implements IRelationshipService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Relationship[], any>> {
-    return ok(this.relationships.filter(r => ids.includes(r.id)));
+    return ok(this.relationships.filter((r) => r.id !== undefined && ids.includes(r.id as string)));
   }
 }

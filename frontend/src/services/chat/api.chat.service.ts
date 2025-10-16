@@ -1,5 +1,4 @@
-import type { ChatResponse, MessageItem, ChatListItem } from '@/types/chat';
-import type { Result } from '@/types/common/result';
+import type { ChatResponse, MessageItem, ChatListItem, Result } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { IChatService } from './chat.service.interface';
 

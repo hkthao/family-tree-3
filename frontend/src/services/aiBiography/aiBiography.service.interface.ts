@@ -1,4 +1,4 @@
-import type { Result } from '@/types/common/result';
+import type { Result } from '@/types';
 import type { BiographyResultDto, AIProviderDto, AIProviderType, AIBiography } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { BiographyStyle } from '@/types';

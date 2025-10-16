@@ -1,6 +1,4 @@
-import type { Family } from '@/types/family';
-import type { Member } from '@/types/family/member';
-import type { Event } from '@/types/event';
+import type { Event, Family, Member } from '@/types';
 
 export interface GeneratedDataResponse {
   dataType: string;
