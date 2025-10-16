@@ -42,7 +42,7 @@ export class ApiRelationshipService implements IRelationshipService {
   }
 
   async add(
-    newItem: Omit<Relationship, 'id'>,
+    newItem: Relationship,
   ): Promise<Result<Relationship, ApiError>> {
     return this.http.post<Relationship>(this.apiUrl, newItem);
   }

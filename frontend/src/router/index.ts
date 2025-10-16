@@ -190,12 +190,6 @@ const router = createRouter({
           component: () => import('@/views/admin/ChunkAdmin.vue'),
           meta: { breadcrumb: 'chunkAdmin.title', requiresAuth: true, roles: ['Admin'] },
         },
-        {
-          path: 'natural-language-input',
-          name: 'NaturalLanguageInput',
-          component: () => import('@/views/NaturalLanguageInputView.vue'),
-          meta: { breadcrumb: 'naturalLanguageInput.title', requiresAuth: true },
-        },
         ...sidebarRoutes,
       ],
     },

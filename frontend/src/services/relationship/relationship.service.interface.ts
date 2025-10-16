@@ -3,6 +3,7 @@ import type { ApiError } from '@/plugins/axios';
 import type { ICrudService } from '../common/crud.service.interface';
 
 export interface IRelationshipService extends ICrudService<Relationship> {
+  add(newItem: Relationship): Promise<Result<Relationship, ApiError>>; // Override add method
   loadItems(
     filters: RelationshipFilter,
     page: number,

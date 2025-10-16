@@ -7,8 +7,8 @@ import { ref, onMounted, watch, onUnmounted } from 'vue';
 import * as d3 from 'd3';
 import { useMemberStore } from '@/stores/member.store';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import type { Member, Relationship } from '@/types';
-import { Gender, RelationshipType } from '@/types';
+import { RelationshipType, type Member, type Relationship } from '@/types';
+import type { Gender } from '@/types';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
