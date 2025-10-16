@@ -315,6 +315,11 @@
       "husband": "Husband",
       "spouse": "Spouse",
       "parent_child": "Parent-Child"
+    },
+    "list": {
+      "action": {
+        "aiCreate": "Create relationship with AI"
+      }
     }
   },
   "common.name": "Name",

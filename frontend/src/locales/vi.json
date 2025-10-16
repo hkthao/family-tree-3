@@ -333,6 +333,11 @@
       "husband": "Chồng",
       "spouse": "Vợ/Chồng",
       "parent_child": "Cha-Con"
+    },
+    "list": {
+      "action": {
+        "aiCreate": "Tạo mối quan hệ bằng AI"
+      }
     }
   },
   "relationship.list.title": "Quản lý Quan hệ",
