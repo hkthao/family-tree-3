@@ -28,10 +28,11 @@ interface SearchResult {
   confidence: number; // Matching confidence (0.0 - 1.0)
 }
 
-// Placeholder for Member type if not already defined
-interface Member {
-  id: string;
-  fullName: string;
-  avatarUrl?: string;
-  // ... other relevant member properties
+
+export {
+SearchResult,
+FaceMapping,
+DetectedFace,
+FaceStatus,
+BoundingBox,
 }

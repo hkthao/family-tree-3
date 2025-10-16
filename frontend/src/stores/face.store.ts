@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Result } from '@/types/result.d.ts'; // Import Result directly
-import type { DetectedFace, FaceMapping, SearchResult, Member } from '@/types/face.d.ts';
+import type { DetectedFace, SearchResult } from '@/types';
 import i18n from '@/plugins/i18n'; // For localization
 
 interface FaceState {

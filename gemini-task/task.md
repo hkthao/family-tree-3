@@ -99,7 +99,7 @@ Người dùng muốn tôi thiết kế tính năng "Quản lý khuôn mặt" ch
 
      1 import { defineStore } from 'pinia';
      2 import type { DetectedFace, FaceMapping, SearchResult,
-       Member } from '@/types/face.d.ts';
+       Member } from '@/types';
      3 import { ApiError, Result } from '@/types'; // Assuming 
        Result and ApiError are defined globally or in common 
        types

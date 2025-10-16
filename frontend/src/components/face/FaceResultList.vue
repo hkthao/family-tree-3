@@ -28,7 +28,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import type { SearchResult } from '@/types/face.d.ts';
+import type { SearchResult } from '@/types';
 
 const { t } = useI18n();
 const router = useRouter();

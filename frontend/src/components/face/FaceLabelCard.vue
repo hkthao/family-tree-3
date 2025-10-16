@@ -78,7 +78,7 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
-import type { DetectedFace, Member } from '@/types/face.d.ts';
+import type { DetectedFace, Member } from '@/types';
 
 const { t } = useI18n();
 const faceStore = useFaceStore();

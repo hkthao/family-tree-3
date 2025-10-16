@@ -39,11 +39,9 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { DetectedFace } from '@/types/face.d.ts';
-import { useFaceStore } from '@/stores/face.store';
+import type { DetectedFace } from '@/types';
 
 const { t } = useI18n();
-const faceStore = useFaceStore();
 
 const props = defineProps({
   faces: { type: Array as () => DetectedFace[], default: () => [] },

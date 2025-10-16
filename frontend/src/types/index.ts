@@ -4,6 +4,7 @@ export * from './text-chunk.d';
 export * from './family-visibility.d';
 export * from './family.d';
 export * from './member.d';
+export * from './face.d';
 export * from './dashboard.d';
 export * from './pagination.d';
 export * from './relationshipType.d';
