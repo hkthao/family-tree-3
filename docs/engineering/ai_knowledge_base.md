@@ -47,6 +47,17 @@ Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và 
 
     *Lưu ý: Tính năng này hiện đang trong giai đoạn phát triển và sẽ được triển khai trong các phiên bản tương lai.*
 
+### 2.5. Quản lý khuôn mặt (Face Management)
+
+*   **Mô tả:** Hệ thống cho phép người dùng tải lên ảnh nhóm, phát hiện nhiều khuôn mặt, gán nhãn khuôn mặt với tên thành viên và lưu trữ để nhận dạng sau này. Tính năng này cũng hỗ trợ tìm kiếm thành viên bằng cách tải lên một ảnh khuôn mặt.
+*   **Công nghệ:** Sử dụng các mô hình học sâu cho phát hiện và nhận dạng khuôn mặt, lưu trữ embeddings khuôn mặt.
+*   **Cách hoạt động:**
+    1.  **Tải ảnh lên & Phát hiện:** Người dùng tải lên ảnh, hệ thống AI phát hiện các khuôn mặt và tạo hộp giới hạn.
+    2.  **Gán nhãn khuôn mặt:** Người dùng gán nhãn cho các khuôn mặt được phát hiện với các thành viên hiện có hoặc tạo thành viên mới.
+    3.  **Tìm kiếm khuôn mặt:** Người dùng tải lên một ảnh khuôn mặt, hệ thống tìm kiếm các thành viên phù hợp trong cơ sở dữ liệu.
+
+    *Lưu ý: Tính năng này hiện đang trong giai đoạn phát triển và sẽ được triển khai trong các phiên bản tương lai.*
+
 ## 3. Quản lý và cấu hình AI
 
 *   **Nhà cung cấp AI:** Hệ thống hỗ trợ nhiều nhà cung cấp AI khác nhau (ví dụ: OpenAI, Google Gemini, mô hình cục bộ) và cho phép cấu hình linh hoạt.
@@ -59,4 +70,4 @@ Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và 
 
 ## 5. Tương lai
 
-Các tính năng AI tiềm năng trong tương lai bao gồm nhận diện khuôn mặt trong ảnh, phân tích cảm xúc từ nhật ký, và tạo cây gia phả tự động từ các nguồn dữ liệu lớn.
+Các tính năng AI tiềm năng trong tương lai bao gồm phân tích cảm xúc từ nhật ký, và tạo cây gia phả tự động từ các nguồn dữ liệu lớn.

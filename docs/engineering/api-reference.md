@@ -345,6 +345,24 @@ Content-Type: application/json
     *   **Request Body:** `multipart/form-data` (chứa `IFormFile file`, `string fileId`, `string familyId`, `string category`, `string createdBy`)
     *   **Phản hồi:** `Result<List<TextChunk>>`
 
+### 6.12. Quản lý Chatbot (`/api/chat`)
+
+-   `POST /api/chat`: Gửi tin nhắn đến chatbot AI và nhận phản hồi.
+    *   **Request Body:** `ChatRequest` (ví dụ: `{ "message": "Xin chào", "sessionId": "uuid (nullable)" }`)
+    *   **Phản hồi:** `Result<ChatResponse>`
+
+### 6.13. Quản lý Bảng điều khiển (`/api/dashboard`)
+
+-   `GET /api/dashboard/stats`: Lấy các số liệu thống kê cho bảng điều khiển.
+    *   **Query Parameters:** `familyId` (Guid, optional): Lọc số liệu thống kê theo ID dòng họ.
+    *   **Phản hồi:** `Result<DashboardStatsDto>`
+
+### 6.14. Xử lý Ngôn ngữ Tự nhiên (`/api/NaturalLanguageInput`)
+
+-   `POST /api/NaturalLanguageInput/generate-event-data`: Tạo dữ liệu sự kiện từ mô tả ngôn ngữ tự nhiên.
+    *   **Request Body:** `GenerateEventDataCommand` (ví dụ: `{ "prompt": "Tạo một sự kiện sinh nhật cho Nguyễn Văn A vào ngày 1/1/2000" }`)
+    *   **Phản hồi:** `Result<List<EventDto>>`
+
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
@@ -564,6 +582,37 @@ Content-Type: application/json
     "createdBy": "string", 
     "createdAt": "string (date-time)" 
   }
+}
+```
+
+### 7.15. ChatResponse
+
+```json
+{
+  "response": "string",
+  "context": "array of string",
+  "sessionId": "string (uuid, nullable)",
+  "model": "string (nullable)",
+  "createdAt": "string (date-time)"
+}
+```
+
+### 7.16. DashboardStatsDto
+
+```json
+{
+  "totalFamilies": "number",
+  "totalMembers": "number",
+  "totalRelationships": "number",
+  "totalGenerations": "number"
+}
+```
+
+### 7.17. GenerateEventDataCommand
+
+```json
+{
+  "prompt": "string"
 }
 ```
 

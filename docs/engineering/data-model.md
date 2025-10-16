@@ -130,7 +130,7 @@ erDiagram
     TEXT_CHUNK {
         string Id PK "ID duy nhất"
         string Content "Nội dung văn bản"
-        json Metadata "Metadata bổ sung (JSON)"
+        json Metadata "Metadata bổ sung (JSON, bao gồm fileId, familyId, category, createdBy, createdAt)"
     }
 
     USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
@@ -339,14 +339,9 @@ Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các t�
 | :-------------- | :----------- | :-------- | :------------------------------------- |
 | `Id`            | `varchar(36)`| PK        | ID duy nhất của chunk                   |
 | `Content`       | `longtext`   | NOT NULL  | Nội dung văn bản của chunk             |
-| `Metadata`      | `json`       | NULL      | Metadata bổ sung (JSON)                |
-| `FileId`        | `varchar(36)`| FK, NOT NULL | ID của tệp gốc                         |
-| `FamilyId`      | `varchar(36)`| FK, NOT NULL | ID của gia đình liên quan              |
-| `Category`      | `varchar(100)`| NOT NULL  | Danh mục của chunk (ví dụ: Biography)  |
-| `CreatedBy`     | `varchar(36)`| FK, NOT NULL | ID của người dùng tạo chunk            |
-| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo chunk                    |
+| `Metadata`      | `json`       | NULL      | Metadata bổ sung (JSON, bao gồm `fileId`, `familyId`, `category`, `createdBy`, `createdAt`) |
 
-- **Foreign Keys**:
+- **Foreign Keys**: (Các khóa ngoại này được quản lý thông qua `Metadata`)
   - `FileId`: tham chiếu đến `FileMetadata(Id)`.
   - `FamilyId`: tham chiếu đến `Families(Id)`.
   - `CreatedBy`: tham chiếu đến `UserProfiles(Id)`.
@@ -372,142 +367,70 @@ Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các t�
 
 ### 5.1. Backend (Entity Framework Core)
 
-Các bảng được map sang các class Entity trong `Domain` layer. EF Core sử dụng Fluent API trong `ApplicationDbContext` để cấu hình chi tiết các mối quan hệ và thuộc tính của Entity.
+Các bảng được map sang các class Entity trong `Domain` layer. EF Core sử dụng Fluent API trong `ApplicationDbContext` để cấu hình chi tiết các mối quan hệ và thuộc tính của Entity. Các cấu hình này được áp dụng thông qua `builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());` trong phương thức `OnModelCreating` của `ApplicationDbContext`, nghĩa là các cấu hình được định nghĩa trong các lớp riêng biệt (ví dụ: `UserProfileConfiguration.cs`, `FamilyConfiguration.cs`) trong cùng assembly.
 
 ```csharp
 // trong ApplicationDbContext.cs (phương thức OnModelCreating)
 
-modelBuilder.Entity<UserProfile>(builder =>
-{
-    builder.Property(u => u.ExternalId).HasMaxLength(255).IsRequired();
-    builder.Property(u => u.Email).HasMaxLength(255).IsRequired();
-    builder.Property(u => u.Name).HasMaxLength(255).IsRequired();
-    builder.Property(u => u.Avatar).HasMaxLength(2048); // URL có thể dài
+builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
-    builder.HasMany(u => u.FamilyUsers)
-           .WithOne(fu => fu.UserProfile)
-           .HasForeignKey(fu => fu.UserProfileId)
-           .OnDelete(DeleteBehavior.Cascade);
-});
+// Các cấu hình chung hoặc các cấu hình không có file riêng
 
-modelBuilder.Entity<FamilyUser>(builder =>
-{
-    builder.HasKey(fu => new { fu.FamilyId, fu.UserProfileId });
+builder.Entity<Family>()
+    .Property(f => f.Code)
+    .IsRequired()
+    .HasMaxLength(50);
 
-    builder.Property(fu => fu.Role).IsRequired(); // Stored as int
+builder.Entity<Family>()
+    .HasIndex(f => f.Code)
+    .IsUnique();
 
-    builder.HasOne(fu => fu.Family)
-           .WithMany(f => f.FamilyUsers)
-           .HasForeignKey(fu => fu.FamilyId)
-           .OnDelete(DeleteBehavior.Cascade);
+builder.Entity<Member>()
+    .Property(m => m.Code)
+    .IsRequired()
+    .HasMaxLength(50);
 
-    builder.HasOne(fu => fu.UserProfile)
-           .WithMany(u => u.FamilyUsers)
-           .HasForeignKey(fu => fu.UserProfileId)
-           .OnDelete(DeleteBehavior.Cascade);
-});
+builder.Entity<Member>()
+    .HasIndex(m => m.Code)
+    .IsUnique();
 
-modelBuilder.Entity<Family>(builder =>
-{
-    builder.Property(f => f.Name).HasMaxLength(100).IsRequired();
-    builder.Property(f => f.Description).HasMaxLength(1000);
-    builder.Property(f => f.AvatarUrl); // longtext
-    builder.Property(f => f.Address); // longtext
-    builder.Property(f => f.Visibility).HasConversion<string>().HasMaxLength(20).IsRequired();
-    builder.Property(f => f.TotalMembers).IsRequired();
-    builder.Property(f => f.TotalGenerations).IsRequired();
-});
+builder.Entity<Event>()
+    .Property(e => e.Code)
+    .IsRequired()
+    .HasMaxLength(50);
 
-modelBuilder.Entity<Member>(builder =>
-{
-    builder.Property(m => m.FirstName).HasMaxLength(250).IsRequired();
-    builder.Property(m => m.LastName).HasMaxLength(250).IsRequired();
-    builder.Property(m => m.FullName).HasMaxLength(100).IsRequired();
-    builder.Property(m => m.Gender).HasConversion<string>().HasMaxLength(10);
-    builder.Property(m => m.AvatarUrl); // longtext
-    builder.Property(m => m.Nickname).HasMaxLength(100);
-    builder.Property(m => m.PlaceOfBirth).HasMaxLength(200);
-    builder.Property(m => m.PlaceOfDeath).HasMaxLength(200);
-    builder.Property(m => m.Occupation).HasMaxLength(100);
+builder.Entity<Event>()
+    .HasIndex(e => e.Code)
+    .IsUnique();
 
-    // Mối quan hệ với Family
-    builder.HasOne(m => m.Family)
-           .WithMany(f => f.Members)
-           .HasForeignKey(m => m.FamilyId)
-           .IsRequired();
-});
+builder.Entity<Member>()
+    .HasOne<Family>()
+    .WithMany()
+    .HasForeignKey(m => m.FamilyId)
+    .IsRequired()
+    .OnDelete(DeleteBehavior.Restrict);
 
-modelBuilder.Entity<Event>(builder =>
-{
-    builder.Property(e => e.Name).HasMaxLength(200).IsRequired();
-    builder.Property(e => e.Description).HasMaxLength(1000);
-    builder.Property(e => e.Location).HasMaxLength(200);
-    builder.Property(e => e.Type).IsRequired(); // Stored as int
-    builder.Property(e => e.Color).HasMaxLength(20);
+builder.Entity<Relationship>()
+    .HasOne(r => r.SourceMember)
+    .WithMany(m => m.Relationships)
+    .HasForeignKey(r => r.SourceMemberId)
+    .OnDelete(DeleteBehavior.Restrict);
 
-    // Mối quan hệ với Family
-    builder.HasOne(e => e.Family)
-           .WithMany(f => f.Events)
-           .HasForeignKey(e => e.FamilyId)
-           .IsRequired(false); // Sự kiện có thể không thuộc về một Family cụ thể
-});
+builder.Entity<Relationship>()
+    .HasOne(r => r.TargetMember)
+    .WithMany()
+    .HasForeignKey(r => r.TargetMemberId)
+    .OnDelete(DeleteBehavior.Restrict);
 
-// Cấu hình bảng Relationships
-modelBuilder.Entity<Relationship>(builder =>
-{
-    builder.HasKey(r => r.Id);
-
-    builder.Property(r => r.Type).IsRequired(); // Stored as int
-    builder.Property(r => r.Order);
-
-    builder.HasOne(r => r.SourceMember)
-           .WithMany()
-           .HasForeignKey(r => r.SourceMemberId)
-           .OnDelete(DeleteBehavior.Restrict)
-           .IsRequired();
-
-    builder.HasOne(r => r.TargetMember)
-           .WithMany()
-           .HasForeignKey(r => r.TargetMemberId)
-           .OnDelete(DeleteBehavior.Restrict)
-           .IsRequired();
-});
-
-modelBuilder.Entity<UserPreference>(builder =>
-{
-    builder.HasKey(up => up.UserProfileId);
-
-    builder.HasOne(up => up.UserProfile)
-           .WithOne()
-           .HasForeignKey<UserPreference>(up => up.UserProfileId)
-           .OnDelete(DeleteBehavior.Cascade);
-
-    builder.Property(up => up.Theme).IsRequired();
-    builder.Property(up => up.Language).IsRequired();
-    builder.Property(up => up.EmailNotificationsEnabled).IsRequired();
-    builder.Property(up => up.SmsNotificationsEnabled).IsRequired();
-    builder.Property(up => up.InAppNotificationsEnabled).IsRequired();
-});
-
-modelBuilder.Entity<FileMetadata>(builder =>
-{
-    builder.Property(fm => fm.FileName).HasMaxLength(255).IsRequired();
-    builder.Property(fm => fm.Url).HasMaxLength(2048).IsRequired();
-    builder.Property(fm => fm.StorageProvider).IsRequired();
-    builder.Property(fm => fm.ContentType).HasMaxLength(100).IsRequired();
-    builder.Property(fm => fm.FileSize).IsRequired();
-    builder.Property(fm => fm.UploadedBy).HasMaxLength(36).IsRequired();
-    builder.Property(fm => fm.UsedByEntity).HasMaxLength(100);
-    builder.Property(fm => fm.IsActive).IsRequired();
-
-    builder.HasOne<UserProfile>()
-           .WithMany()
-           .HasForeignKey(fm => fm.UploadedBy)
-           .OnDelete(DeleteBehavior.Restrict);
-});
+builder.Entity<Event>()
+    .HasOne<Family>()
+    .WithMany()
+    .HasForeignKey(e => e.FamilyId)
+    .IsRequired(false)
+    .OnDelete(DeleteBehavior.Restrict);
 
 // Cấu hình bảng trung gian cho mối quan hệ nhiều-nhiều giữa Event và Member
-modelBuilder.Entity<EventMember>(builder =>
+builder.Entity<EventMember>(builder =>
 {
     builder.HasKey(em => new { em.EventId, em.MemberId });
 
@@ -520,30 +443,53 @@ modelBuilder.Entity<EventMember>(builder =>
            .HasForeignKey(em => m.MemberId);
 });
 
-modelBuilder.Entity<TextChunk>(builder =>
-{
-    builder.Property(tc => tc.Content).IsRequired();
-    builder.Property(tc => tc.Metadata).HasColumnType("json");
-    builder.Property(tc => tc.FileId).IsRequired();
-    builder.Property(tc => tc.FamilyId).IsRequired();
-    builder.Property(tc => tc.Category).HasMaxLength(100).IsRequired();
-    builder.Property(tc => tc.CreatedBy).IsRequired();
+// Cấu hình UserPreference one-to-one relationship với UserProfile
+builder.Entity<UserPreference>()
+    .HasKey(up => up.UserProfileId);
 
-    builder.HasOne<FileMetadata>()
-           .WithMany()
-           .HasForeignKey(tc => tc.FileId)
-           .OnDelete(DeleteBehavior.Restrict);
+builder.Entity<UserPreference>()
+    .HasOne(up => up.UserProfile)
+    .WithOne()
+    .HasForeignKey<UserPreference>(up => up.UserProfileId)
+    .OnDelete(DeleteBehavior.Cascade);
 
-    builder.HasOne<Family>()
-           .WithMany()
-           .HasForeignKey(tc => tc.FamilyId)
-           .OnDelete(DeleteBehavior.Restrict);
+// Cấu hình FileMetadata
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.FileName).HasMaxLength(255).IsRequired();
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.Url).HasMaxLength(2048).IsRequired();
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.StorageProvider).IsRequired();
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.ContentType).HasMaxLength(100).IsRequired();
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.FileSize).IsRequired();
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.UploadedBy).HasMaxLength(36).IsRequired();
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.UsedByEntity).HasMaxLength(100);
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.UsedById).HasMaxLength(36);
+builder.Entity<FileMetadata>()
+    .Property(fm => fm.IsActive).IsRequired();
 
-    builder.HasOne<UserProfile>()
-           .WithMany()
-           .HasForeignKey(tc => tc.CreatedBy)
-           .OnDelete(DeleteBehavior.Restrict);
-});
+builder.HasOne<UserProfile>()
+       .WithMany()
+       .HasForeignKey(fm => fm.UploadedBy)
+       .OnDelete(DeleteBehavior.Restrict);
+
+// Cấu hình TextChunk
+builder.Entity<TextChunk>()
+    .Property(tc => tc.Content).IsRequired();
+builder.Entity<TextChunk>()
+    .Property(tc => tc.Metadata).HasColumnType("json"); // Metadata là JSON
+builder.Entity<TextChunk>()
+    .Property(tc => tc.Embedding).HasColumnType("json"); // Embedding là JSON array
+
+// Các mối quan hệ của TextChunk được quản lý thông qua Metadata
+// builder.Ignore<JsonDocument>(); // JsonDocument được sử dụng cho UserActivity, không phải TextChunk
+
+base.OnModelCreating(builder);
 ```
 
 ### 5.2. Frontend (Vue.js)
@@ -552,26 +498,34 @@ Trong Frontend, dữ liệu từ API được map sang các interface/type trong
 
 ```typescript
 // src/types/family/family.ts
+import { FamilyVisibility } from "./family-visibility.d.ts";
+
 export interface Family {
   id: string;
   name: string;
+  code?: string;
   description?: string;
   avatarUrl?: string;
   address?: string;
-  visibility?: 'Public' | 'Private';
+  visibility?: FamilyVisibility;
   totalMembers?: number;
+  totalGenerations?: number;
+  validationErrors?: string[];
 }
 
-// src/types/family/member.ts
+// src/types/member/member.ts
+import { Gender } from '@/types';
+
 export interface Member {
   id: string;
   lastName: string;
   firstName: string;
   fullName?: string;
+  code?: string;
   familyId: string;
-  gender?: 'Male' | 'Female' | 'Other';
-  dateOfBirth?: Date | null;
-  dateOfDeath?: Date | null;
+  gender?: Gender;
+  dateOfBirth?: Date;
+  dateOfDeath?: Date;
   birthDeathYears?: string;
   avatarUrl?: string;
   nickname?: string;
@@ -579,20 +533,25 @@ export interface Member {
   placeOfDeath?: string;
   occupation?: string;
   biography?: string;
+  isRoot?: boolean;
+  validationErrors?: string[];
 }
 
 // src/types/event/event.ts
+import { EventType } from './event-type.d.ts';
+
 export interface Event {
-  id: string;
+  id?: string;
   name: string;
   description?: string;
-  startDate: Date;
+  startDate: Date | null;
   endDate?: Date | null;
   location?: string;
-  familyId?: string | null;
-  type: 'Birth' | 'Marriage' | 'Death' | 'Other';
+  familyId: string | null;
+  relatedMembers?: string[];
+  type: EventType;
   color?: string;
-  relatedMembers?: string[]; // Chỉ chứa IDs của các thành viên liên quan
+  validationErrors?: string[];
 }
 ```
 

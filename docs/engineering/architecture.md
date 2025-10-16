@@ -20,14 +20,14 @@ Sơ đồ này cho thấy cái nhìn tổng quan nhất về hệ thống, bao g
 ```mermaid
 graph TD
     A[Người dùng] -->|Sử dụng| B(Hệ thống Cây Gia Phả)
-    B -->|Gửi email| C(Dịch vụ Email)
-    B -->|Lưu trữ dữ liệu| D(Cơ sở dữ liệu MySQL)
+    B -->|Lưu trữ dữ liệu| C(Cơ sở dữ liệu MySQL)
 ```
 
 -   **Người dùng**: Người quản lý gia phả, thành viên gia đình.
 -   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta.
--   **Dịch vụ Email**: Hệ thống bên ngoài để gửi thông báo.
 -   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu của hệ thống.
+
+*Lưu ý: Dịch vụ Email hiện chưa được triển khai trong hệ thống. Đây là một tính năng tiềm năng trong tương lai để gửi thông báo cho người dùng.*
 
 ## 2. Sơ đồ container (Container Diagram - C2)
 
@@ -41,7 +41,6 @@ graph TD
     end
 
     D[Người dùng] -->|HTTPS| A
-    B -->|SMTP| E(Dịch vụ Email)
 ```
 
 -   **Frontend**: Ứng dụng Single Page Application (SPA) bằng Vue.js, chạy trên trình duyệt của người dùng.

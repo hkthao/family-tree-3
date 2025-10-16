@@ -341,26 +341,28 @@ Việc định nghĩa rõ ràng cấu trúc dữ liệu nhận được từ API
 #### Ví dụ về Member Interface
 
 ```typescript
-// frontend/src/types/family/member.ts
+// frontend/src/types/member/member.ts
+import { Gender } from '@/types';
+
 export interface Member {
   id: string;
-  lastName: string; // Họ
-  firstName: string; // Tên
-  fullName?: string; // Họ và tên đầy đủ (có thể được tính toán ở Backend)
+  lastName: string;
+  firstName: string;
+  fullName?: string;
+  code?: string;
   familyId: string;
-  gender?: 'Male' | 'Female' | 'Other';
-  dateOfBirth?: Date | null; // Ngày sinh (có thể là null)
-  dateOfDeath?: Date | null; // Ngày mất (có thể là null)
-  birthDeathYears?: string; // Chuỗi hiển thị năm sinh - năm mất
-  avatarUrl?: string; // URL ảnh đại diện
-  nickname?: string; // Biệt danh
-  placeOfBirth?: string; // Nơi sinh
-  placeOfDeath?: string; // Nơi mất
-  occupation?: string; // Nghề nghiệp
-  fatherId?: string | null; // ID của cha (có thể là null)
-  motherId?: string | null; // ID của mẹ (có thể là null)
-  spouseId?: string | null; // ID của vợ/chồng (có thể là null)
-  biography?: string; // Tiểu sử
+  gender?: Gender;
+  dateOfBirth?: Date;
+  dateOfDeath?: Date;
+  birthDeathYears?: string;
+  avatarUrl?: string;
+  nickname?: string;
+  placeOfBirth?: string;
+  placeOfDeath?: string;
+  occupation?: string;
+  biography?: string;
+  isRoot?: boolean;
+  validationErrors?: string[];
 }
 ```
 

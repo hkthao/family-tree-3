@@ -728,12 +728,27 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
 -   **`UserActivityDto`** (`backend/src/Application/UserActivities/Queries/UserActivityDto.cs`):
     -   DTO để truyền dữ liệu hoạt động người dùng.
 
-### 11.4. Specification `UserActivityByUserSpec`
+### 11.4. Các Specification cho Hoạt động Người dùng
 
--   **`UserActivityByUserSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityByUserSpec.cs`):
-    -   Lọc hoạt động theo `UserProfileId` và các tiêu chí tùy chọn khác.
-    -   Sắp xếp theo `Created` giảm dần và giới hạn số lượng kết quả (`Take(limit)`) để tối ưu hiệu suất.
+Để truy vấn và lọc các hoạt động người dùng một cách hiệu quả, chúng ta sử dụng các Specification sau:
 
+-   **`UserActivityByGroupSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityByGroupSpec.cs`):
+    -   Lọc hoạt động theo `GroupId` (ví dụ: `FamilyId`).
+    -   **Mô tả:** Áp dụng điều kiện `WHERE ua.GroupId == groupId.Value` nếu `groupId` có giá trị.
+
+-   **`UserActivityByProfileIdSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityByProfileIdSpec.cs`):
+    -   Lọc hoạt động theo `UserProfileId`.
+    -   **Mô tả:** Áp dụng điều kiện `WHERE ua.UserProfileId == userProfileId`.
+
+-   **`UserActivityByTargetSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityByTargetSpec.cs`):
+    -   Lọc hoạt động theo `TargetType` và `TargetId`.
+    -   **Mô tả:** Áp dụng điều kiện `WHERE ua.TargetType == targetType.Value` nếu `targetType` có giá trị, và `WHERE ua.TargetId == targetId` nếu `targetId` không rỗng.
+
+-   **`UserActivityOrderingAndPaginationSpec`** (`backend/src/Application/UserActivities/Specifications/UserActivityOrderingAndPaginationSpec.cs`):
+    -   Sắp xếp hoạt động theo thời gian tạo giảm dần và giới hạn số lượng kết quả.
+    -   **Mô tả:** Áp dụng `OrderByDescending(ua => ua.Created)` và `Take(limit)`.
+
+**Lưu ý:** Trong `GetRecentActivitiesQueryHandler`, các specification này được kết hợp để tạo ra truy vấn cuối cùng. `UserActivityByProfileIdSpec` hiện đang được comment out trong handler, nhưng vẫn có thể được sử dụng nếu cần lọc hoạt động theo người dùng cụ thể.
 ### 11.5. API Endpoint
 
 -   **`UserActivitiesController`** (`backend/src/Web/Controllers/UserActivitiesController.cs`):
@@ -826,7 +841,7 @@ Module Vector Database được thiết kế để lưu trữ và truy vấn cá
 
 ### 13.2. Interface `IVectorStore`
 
-`IVectorStore` (`backend/src/Application/VectorStore/IVectorStore.cs`) là interface chung định nghĩa các hoạt động cơ bản của một Vector Database:
+`IVectorStore` (`backend/src/Application/Common/Interfaces/IVectorStore.cs`) là interface chung định nghĩa các hoạt động cơ bản của một Vector Database:
 
 ```csharp
 public interface IVectorStore
@@ -898,14 +913,14 @@ public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentComm
 Để thêm một nhà cung cấp Vector Database mới (ví dụ: Milvus, Weaviate), bạn cần thực hiện các bước sau:
 
 1.  **Tạo triển khai `IVectorStore` mới:**
-    *   Tạo một lớp mới (ví dụ: `MilvusVectorStore.cs`) trong thư mục `backend/src/Infrastructure/VectorStore/`.
+    *   Tạo một lớp mới (ví dụ: `MilvusVectorStore.cs`) trong thư mục `backend/src/Infrastructure/AI/VectorStore/`.
     *   Lớp này phải triển khai interface `IVectorStore` và chứa logic tương tác với API của nhà cung cấp Vector Database mới.
 
 2.  **Cập nhật `VectorStoreSettings`:**
-    *   Thêm các thuộc tính cấu hình cần thiết cho nhà cung cấp mới vào lớp `VectorStoreSettings` (`backend/src/Infrastructure/VectorStore/VectorStoreSettings.cs`).
+    *   Thêm các thuộc tính cấu hình cần thiết cho nhà cung cấp mới vào lớp `VectorStoreSettings` (`backend/src/Application/AI/VectorStore/VectorStoreSettings.cs`).
 
 3.  **Cập nhật `VectorStoreFactory`:**
-    *   Chỉnh sửa lớp `VectorStoreFactory` (`backend/src/Infrastructure/VectorStore/VectorStoreFactory.cs`) để xử lý nhà cung cấp mới.
+    *   Chỉnh sửa lớp `VectorStoreFactory` (`backend/src/Infrastructure/AI/VectorStore/VectorStoreFactory.cs`) để xử lý nhà cung cấp mới.
     *   Thêm một `case` mới vào phương thức `CreateVectorStore` để khởi tạo `MilvusVectorStore` khi `VectorStore:Provider` trong cấu hình là "Milvus".
 
 4.  **Cập nhật cấu hình `appsettings.json`:**
@@ -920,12 +935,12 @@ public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentComm
 
 ### 13.5. DTOs
 
--   **`VectorDocument`** (`backend/src/Application/VectorStore/VectorDocument.cs`): Đại diện cho một tài liệu được lưu trữ trong Vector Database.
+-   **`VectorDocument`** (`backend/src/Application/AI/VectorStore/VectorDocument.cs`): Đại diện cho một tài liệu được lưu trữ trong Vector Database.
     -   `Id` (string): ID duy nhất của tài liệu.
     -   `Content` (string): Nội dung văn bản của tài liệu.
     -   `Vector` (float[]): Vector nhúng của tài liệu.
     -   `Metadata` (Dictionary<string, string>, nullable): Các siêu dữ liệu bổ sung.
--   **`VectorQuery`** (`backend/src/Application/VectorStore/VectorQuery.cs`): Đại diện cho một truy vấn tìm kiếm vector.
+-   **`VectorQuery`** (`backend/src/Application/AI/VectorStore/VectorQuery.cs`): Đại diện cho một truy vấn tìm kiếm vector.
     -   `Vector` (float[]): Vector truy vấn.
     -   `TopK` (int): Số lượng kết quả hàng đầu muốn lấy.
     -   `Filter` (Dictionary<string, string>, nullable): Các tiêu chí lọc bổ sung.
@@ -934,8 +949,8 @@ public class ProcessDocumentCommandHandler : IRequestHandler<ProcessDocumentComm
 
 Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector Database phù hợp dựa trên cấu hình trong `appsettings.json`.
 
--   **`IVectorStoreFactory`** (`backend/src/Application/VectorStore/IVectorStoreFactory.cs`): Interface định nghĩa phương thức tạo `IVectorStore`.
--   **`VectorStoreFactory`** (`backend/src/Infrastructure/VectorStore/VectorStoreFactory.cs`): Triển khai `IVectorStoreFactory`, chịu trách nhiệm khởi tạo `IVectorStore` cụ thể (Pinecone, Qdrant) dựa trên giá trị `VectorStore:Provider` trong cấu hình.
+-   **`IVectorStoreFactory`** (`backend/src/Application/Common/Interfaces/IVectorStoreFactory.cs`): Interface định nghĩa phương thức tạo `IVectorStore`.
+-   **`VectorStoreFactory`** (`backend/src/Infrastructure/AI/VectorStore/VectorStoreFactory.cs`): Triển khai `IVectorStoreFactory`, chịu trách nhiệm khởi tạo `IVectorStore` cụ thể (Pinecone, Qdrant, InMemory) dựa trên giá trị `VectorStore:Provider` trong cấu hình.
 
 ### 13.7. Triển khai các Provider
 
@@ -943,12 +958,13 @@ Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector
     -   **Cấu hình**: Yêu cầu `VectorStore:Pinecone:ApiKey`, `VectorStore:Pinecone:Environment`, `VectorStore:Pinecone:IndexName` trong `appsettings.json`.
 -   **Qdrant (`QdrantVectorStore`)**: Triển khai `IVectorStore` sử dụng thư viện `Qdrant.Client` để tương tác với dịch vụ Qdrant (có thể chạy cục bộ).
     -   **Cấu hình**: Yêu cầu `VectorStore:Qdrant:Host`, `VectorStore:Qdrant:Port`, `VectorStore:Qdrant:ApiKey` (tùy chọn), `VectorStore:Qdrant:CollectionName` trong `appsettings.json`.
+-   **InMemory (`InMemoryVectorStore`)**: Triển khai `IVectorStore` để lưu trữ vector trong bộ nhớ. Thích hợp cho môi trường phát triển và kiểm thử.
 
 ### 13.8. Cấu hình `appsettings.json`
 
 ```json
 "VectorStore": {
-  "Provider": "Pinecone", // Hoặc "Qdrant"
+  "Provider": "Pinecone", // Hoặc "Qdrant", "InMemory"
   "Pinecone": {
     "ApiKey": "YOUR_PINECONE_API_KEY",
     "Environment": "YOUR_PINECONE_ENVIRONMENT",
@@ -968,7 +984,7 @@ Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector
 Các dịch vụ liên quan đến Vector Database được đăng ký trong `backend/src/Infrastructure/DependencyInjection.cs`:
 
 -   `VectorStoreSettings`: Cấu hình đọc từ `appsettings.json`.
--   `PineconeVectorStore`, `QdrantVectorStore`: Đăng ký dưới dạng `Transient`.
+-   `PineconeVectorStore`, `QdrantVectorStore`, `InMemoryVectorStore`: Đăng ký dưới dạng `Transient`.
 -   `IVectorStoreFactory`: Đăng ký dưới dạng `Singleton`.
 -   `IVectorStore`: Đăng ký dưới dạng `Transient`, được giải quyết thông qua `IVectorStoreFactory`.
 
@@ -990,8 +1006,9 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 
 `IFileTextExtractor` (`backend/src/Application/Common/Interfaces/IFileTextExtractor.cs`) là một interface định nghĩa phương thức trích xuất văn bản từ một `Stream` của tệp. Các triển khai cụ thể sẽ xử lý các loại tệp khác nhau.
 
-*   **`PdfTextExtractor`** (`backend/src/Infrastructure/Services/PdfTextExtractor.cs`): Triển khai cho tệp PDF, sử dụng thư viện `UglyToad.PdfPig`.
-*   **`TxtTextExtractor`** (`backend/src/Infrastructure/Services/TxtTextExtractor.cs`): Triển khai cho tệp TXT.
+*   **`PdfTextExtractor`** (`backend/src/Infrastructure/AI/TextExtractors/PdfTextExtractor.cs`): Triển khai cho tệp PDF, sử dụng thư viện `UglyToad.PdfPig`.
+*   **`TxtTextExtractor`** (`backend/src/Infrastructure/AI/TextExtractors/TxtTextExtractor.cs`): Triển khai cho tệp TXT.
+*   **`MdTextExtractor`** (`backend/src/Infrastructure/AI/TextExtractors/MdTextExtractor.cs`): Triển khai cho tệp Markdown.
 
 ### 14.3. Factory cho Trích xuất Tệp (`IFileTextExtractorFactory`)
 
@@ -1003,10 +1020,10 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 
 ### 14.5. Lệnh Xử lý Tệp (`ProcessFileCommand`)
 
-`ProcessFileCommand` (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommand.cs`) là một Command trong mô hình CQRS, mang thông tin về tệp cần xử lý (Stream, tên tệp) và các metadata bổ sung (`FileId`, `FamilyId`, `Category`, `CreatedBy`).
+`ProcessFileCommand` (`backend/src/Application/AI/Chunk/Commands/ProcessFile/ProcessFileCommand.cs`) là một Command trong mô hình CQRS, mang thông tin về tệp cần xử lý (Stream, tên tệp) và các metadata bổ sung (`FileId`, `FamilyId`, `Category`, `CreatedBy`).
 
-*   **`ProcessFileCommandValidator`**: Sử dụng FluentValidation để xác thực `ProcessFileCommand`, kiểm tra xem tệp có hợp lệ không (không rỗng, đúng định dạng PDF/TXT) và các metadata cần thiết có được cung cấp đầy đủ không.
-*   **`ProcessFileCommandHandler`**: (`backend/src/Application/Files/Commands/ProcessFile/ProcessFileCommandHandler.cs`) là Handler cho `ProcessFileCommand`. Nó điều phối quá trình:
+*   **`ProcessFileCommandValidator`**: Sử dụng FluentValidation để xác thực `ProcessFileCommand`, kiểm tra xem `FileStream`, `FileName`, `FileId`, `Category`, và `CreatedBy` không được null hoặc rỗng.
+*   **`ProcessFileCommandHandler`**: (`backend/src/Application/AI/Chunk/Commands/ProcessFile/ProcessFileCommandHandler.cs`) là Handler cho `ProcessFileCommand`. Nó điều phối quá trình:
     1.  Sử dụng `IFileTextExtractorFactory` để lấy `IFileTextExtractor` phù hợp.
     2.  Trích xuất văn bản từ tệp.
     3.  Sử dụng `ChunkingPolicy` để làm sạch và chia văn bản thành các chunk, đồng thời gắn các metadata đã nhận vào từng chunk.
@@ -1018,6 +1035,11 @@ Thực thể `TextChunk` (`backend/src/Domain/Entities/TextChunk.cs`) đại di�
 
 *   **Route**: `POST /api/chunk/upload`
 *   **Chức năng**: Nhận `IFormFile` và các tham số metadata (`fileId`, `familyId`, `category`, `createdBy`) từ form data, tạo và gửi `ProcessFileCommand` thông qua `IMediator`, và trả về kết quả là một danh sách các `TextChunk`.
+
+*   **Route**: `POST /api/chunk/approve`
+*   **Chức năng**: Nhận một danh sách các `TextChunk` đã được xử lý và nhúng chúng vào Vector Database.
+    *   **Request Body:** `EmbedChunksCommand` (ví dụ: `{ "chunks": [ { ...TextChunk... } ] }`)
+    *   **Phản hồi:** `Result`
 
 ## 15. Logging & Monitoring
 

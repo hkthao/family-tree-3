@@ -78,15 +78,6 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
 
 ### 2.2. Module: Quản lý Quan hệ
 
-#### US_005: Quản lý mối quan hệ phức tạp
--   **User Story**: Là người dùng, tôi muốn thêm các loại mối quan hệ khác nhau (con nuôi, anh/chị/em cùng cha khác mẹ) để phản ánh chính xác mối quan hệ phức tạp.
--   **Priority**: High
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Khi thêm/chỉnh sửa mối quan hệ, người dùng có thể chọn loại mối quan hệ từ một danh sách (ví dụ: ruột thịt, con nuôi, cha dượng/mẹ kế, anh/chị/em cùng cha khác mẹ, anh/chị/em cùng mẹ khác cha).
-    -   Các mối quan hệ phức tạp này phải hiển thị rõ ràng và chính xác trên cây gia phả.
-    -   Backend hỗ trợ lưu trữ và truy vấn các loại mối quan hệ này.
-
 #### US_006: Tìm kiếm mối quan hệ
 -   **User Story**: Là người dùng, tôi muốn tìm kiếm mối quan hệ giữa hai thành viên bất kỳ trong cây gia phả.
 -   **Priority**: Medium
@@ -109,37 +100,6 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Tệp xuất chứa tất cả thông tin thành viên và mối quan hệ đã nhập, bao gồm cả các sự kiện.
     -   Hệ thống xử lý chính xác dữ liệu khi nhập từ tệp GEDCOM, bao gồm việc tạo mới hoặc cập nhật thành viên/mối quan hệ.
 
-#### US_008: Xem dòng thời gian sự kiện
--   **User Story**: Là người dùng, tôi muốn xem dòng thời gian các sự kiện chính của gia đình (sinh, kết hôn, mất) được hiển thị theo năm sinh để có cái nhìn tổng quan.
--   **Priority**: Medium
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Dòng thời gian hiển thị các sự kiện chính (sinh, kết hôn, mất, v.v.) của các thành viên trong gia phả.
-    -   Các sự kiện được sắp xếp và hiển thị theo năm sinh của thành viên hoặc theo thời gian diễn ra sự kiện.
-    -   Mỗi sự kiện trên dòng thời gian liên kết đến thành viên liên quan và hiển thị thông tin tóm tắt.
-    -   Người dùng có thể lọc các sự kiện theo loại (ví dụ: chỉ xem sự kiện sinh) hoặc theo thành viên cụ thể.
-
-#### US_009: Đính kèm ghi chú/tài liệu
--   **User Story**: Là người dùng, tôi muốn thêm ghi chú hoặc tài liệu đính kèm (giấy khai sinh, ảnh cũ) vào từng thành viên để lưu giữ thông tin bổ sung.
--   **Priority**: Medium
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Mỗi thành viên có phần thêm ghi chú văn bản không giới hạn độ dài.
-    -   Người dùng có thể tải lên và đính kèm nhiều loại tệp (ảnh, PDF, tài liệu Word) vào hồ sơ thành viên.
-    -   Tệp đính kèm có thể được xem trực tiếp trong ứng dụng hoặc tải xuống.
-    -   Có cơ chế quản lý tệp đính kèm (xóa, đổi tên).
-
-
-#### US_011: Báo cáo thống kê & Kỷ lục gia đình
--   **User Story**: Là người dùng, tôi muốn xem và tạo các báo cáo thống kê về cây gia phả, bao gồm các kỷ lục gia đình, để có cái nhìn sâu sắc và phân tích dữ liệu.
--   **Priority**: Medium
--   **Estimate**: TBD
--   **Acceptance Criteria**:
-    -   Hệ thống cung cấp các số liệu thống kê cơ bản (tổng số thành viên, phân bố giới tính, độ tuổi trung bình, số lượng dòng họ).
-    -   Các kỷ lục gia đình (thành viên lớn tuổi nhất, gia đình lớn nhất, thành viên có nhiều con nhất) hiển thị rõ ràng.
-    -   Người dùng có thể tạo các báo cáo tùy chỉnh dựa trên các tiêu chí lọc khác nhau.
-    -   Các báo cáo có thể được trình bày dưới dạng bảng, biểu đồ trực quan.
-
 #### US_012: In cây gia phả
 -   **User Story**: Là người dùng, tôi muốn in cây gia phả để có bản sao vật lý hoặc chia sẻ ngoại tuyến.
 -   **Priority**: Low
@@ -151,7 +111,6 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Hệ thống tạo ra một bản xem trước in ấn chính xác.
 
 ### 2.4. Module: AI & Tích hợp
-
 
 #### US_013: Nhận diện khuôn mặt bằng AI để tự động gắn thẻ
 -   **User Story**: Là người dùng, tôi muốn AI nhận diện khuôn mặt từ ảnh cũ để tự động gắn thẻ thành viên.
@@ -351,6 +310,44 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Hệ thống hiển thị thông báo lỗi rõ ràng nếu tệp không hợp lệ (sai định dạng, quá kích thước).
     -   Backend sử dụng cấu hình để chọn nhà cung cấp lưu trữ (Local, Cloudinary, S3).
 
+#### US_005: Quản lý mối quan hệ phức tạp
+-   **User Story**: Là người dùng, tôi muốn thêm các loại mối quan hệ khác nhau (con nuôi, anh/chị/em cùng cha khác mẹ) để phản ánh chính xác mối quan hệ phức tạp.
+-   **Priority**: High
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Khi thêm/chỉnh sửa mối quan hệ, người dùng có thể chọn loại mối quan hệ từ một danh sách (ví dụ: ruột thịt, con nuôi, cha dượng/mẹ kế, anh/chị/em cùng cha khác mẹ, anh/chị/em cùng mẹ khác cha).
+    -   Các mối quan hệ phức tạp này phải hiển thị rõ ràng và chính xác trên cây gia phả.
+    -   Backend hỗ trợ lưu trữ và truy vấn các loại mối quan hệ này.
+
+#### US_008: Xem dòng thời gian sự kiện
+-   **User Story**: Là người dùng, tôi muốn xem dòng thời gian các sự kiện chính của gia đình (sinh, kết hôn, mất) được hiển thị theo năm sinh để có cái nhìn tổng quan.
+-   **Priority**: Medium
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Dòng thời gian hiển thị các sự kiện chính (sinh, kết hôn, mất, v.v.) của các thành viên trong gia phả.
+    -   Các sự kiện được sắp xếp và hiển thị theo năm sinh của thành viên hoặc theo thời gian diễn ra sự kiện.
+    -   Mỗi sự kiện trên dòng thời gian liên kết đến thành viên liên quan và hiển thị thông tin tóm tắt.
+    -   Người dùng có thể lọc các sự kiện theo loại (ví dụ: chỉ xem sự kiện sinh) hoặc theo thành viên cụ thể.
+
+#### US_009: Đính kèm ghi chú/tài liệu
+-   **User Story**: Là người dùng, tôi muốn thêm ghi chú hoặc tài liệu đính kèm (giấy khai sinh, ảnh cũ) vào từng thành viên để lưu giữ thông tin bổ sung.
+-   **Priority**: Medium
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Mỗi thành viên có phần thêm ghi chú văn bản không giới hạn độ dài.
+    -   Người dùng có thể tải lên và đính kèm nhiều loại tệp (ảnh, PDF, tài liệu Word) vào hồ sơ thành viên.
+    -   Tệp đính kèm có thể được xem trực tiếp trong ứng dụng hoặc tải xuống.
+    -   Có cơ chế quản lý tệp đính kèm (xóa, đổi tên).
+
+#### US_011: Báo cáo thống kê & Kỷ lục gia đình
+-   **User Story**: Là người dùng, tôi muốn xem và tạo các báo cáo thống kê về cây gia phả, bao gồm các kỷ lục gia đình, để có cái nhìn sâu sắc và phân tích dữ liệu.
+-   **Priority**: Medium
+-   **Estimate**: TBD
+-   **Acceptance Criteria**:
+    -   Hệ thống cung cấp các số liệu thống kê cơ bản (tổng số thành viên, phân bố giới tính, độ tuổi trung bình, số lượng dòng họ).
+    -   Các kỷ lục gia đình (thành viên lớn tuổi nhất, gia đình lớn nhất, thành viên có nhiều con nhất) hiển thị rõ ràng.
+    -   Người dùng có thể tạo các báo cáo tùy chỉnh dựa trên các tiêu chí lọc khác nhau.
+    -   Các báo cáo có thể được trình bày dưới dạng bảng, biểu đồ trực quan.
 ### 4.4. Module: Cải thiện trải nghiệm người dùng
 
 #### US_034: Thêm Tooltips cho các nút hành động
