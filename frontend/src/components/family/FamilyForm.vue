@@ -17,18 +17,15 @@
     </v-row>
     <v-text-field v-model="familyForm.address" :label="$t('family.form.addressLabel')"></v-text-field>
     <v-textarea v-model="familyForm.description" :label="$t('family.form.descriptionLabel')"></v-textarea>
-
-    <FamilyPermissions v-if="!props.readOnly" v-model="familyUsers" />
+    <FamilyPermissions :readOnly="props.readOnly" v-model="familyUsers" />
   </v-form>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-
 import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
-
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import FamilyPermissions from './FamilyPermissions.vue';
 
@@ -38,9 +35,7 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 const emit = defineEmits(['submit', 'cancel']);
-
 const { t } = useI18n();
-
 const form = ref<HTMLFormElement | null>(null);
 
 const familyForm = ref<Family | Omit<Family, 'id'>>(
@@ -54,7 +49,6 @@ const familyForm = ref<Family | Omit<Family, 'id'>>(
 );
 
 const familyUsers = ref<FamilyUser[]>(props.initialFamilyUsers || []);
-
 const visibilityItems = computed(() => [
   {
     title: t('family.form.visibility.private'),

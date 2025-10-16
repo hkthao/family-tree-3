@@ -1,27 +1,14 @@
 <template>
-  <div>
-    <v-autocomplete
-      v-model="managers"
-      :items="userProfiles"
-      item-title="name"
-      item-value="id"
-      chips
-      closable-chips
-      multiple
-      :label="t('family.permissions.managers')"
-    ></v-autocomplete>
-
-    <v-autocomplete
-      v-model="viewers"
-      :items="userProfiles"
-      item-title="name"
-      item-value="id"
-      chips
-      closable-chips
-      multiple
-      :label="t('family.permissions.viewers')"
-    ></v-autocomplete>
-  </div>
+  <v-row>
+    <v-col>
+      <v-autocomplete v-model="managers" :items="userProfiles" item-title="name" item-value="id" chips closable-chips
+        multiple :disabled="props.readOnly" :label="t('family.permissions.managers')"></v-autocomplete>
+    </v-col>
+    <v-col>
+      <v-autocomplete v-model="viewers" :items="userProfiles" item-title="name" item-value="id" chips closable-chips
+        multiple :disabled="props.readOnly" :label="t('family.permissions.viewers')"></v-autocomplete>
+    </v-col>
+  </v-row>
 </template>
 
 <script setup lang="ts">
@@ -35,6 +22,7 @@ const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: FamilyUser[];
+  readOnly?: boolean;
 }>();
 
 const emit = defineEmits(['update:modelValue']);
