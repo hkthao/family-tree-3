@@ -10,4 +10,5 @@ export interface IRelationshipService extends ICrudService<Relationship> {
     itemsPerPage: number,
   ): Promise<Result<Paginated<Relationship>, ApiError>>; // Changed to Paginated<Relationship>
   getByIds(ids: string[]): Promise<Result<Relationship[], ApiError>>; // Changed to Relationship[]
+  addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>>; // New method for bulk adding relationships
 }

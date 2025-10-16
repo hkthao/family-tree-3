@@ -4,6 +4,7 @@ using backend.Application.Members.Commands.CreateMembers;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.Members.Commands.GenerateMemberData;
 using backend.Application.Members.Commands.UpdateMember;
+using backend.Application.Members.Commands.UpdateMemberBiography; // Added
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
@@ -117,6 +118,21 @@ public class MembersController : ControllerBase
     public async Task<IActionResult> DeleteMember(Guid id)
     {
         var result = await _mediator.Send(new DeleteMemberCommand(id));
+        if (result.IsSuccess)
+        {
+            return NoContent();
+        }
+        return BadRequest(result.Error);
+    }
+
+    [HttpPut("{id}/biography")]
+    public async Task<IActionResult> UpdateMemberBiography(Guid id, [FromBody] UpdateMemberBiographyCommand command)
+    {
+        if (id != command.MemberId)
+        {
+            return BadRequest();
+        }
+        var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {
             return NoContent();

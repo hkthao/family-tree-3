@@ -37,7 +37,6 @@ public class MappingProfile : Profile
         CreateMap<Member, RelationshipMemberDto>();
         CreateMap<UserProfile, UserProfileDto>();
         CreateMap<UserActivity, UserActivityDto>();
-        CreateMap<AIBiography, AIBiographyDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
     }
 }

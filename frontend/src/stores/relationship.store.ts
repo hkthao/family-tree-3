@@ -140,24 +140,24 @@ export const useRelationshipStore = defineStore('relationship', {
       await this._loadItems();
     },
 
-    async addItems(newItems: Relationship[]): Promise<void> {
+    async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>> { // Changed return type
       this.loading = true;
       this.error = null;
       try {
-        const results = await Promise.all(
-          newItems.map(item => this.services.relationship.add(item))
-        );
+        const result = await this.services.relationship.addItems(newItems); // Changed
 
-        const hasErrors = results.some(result => !result.ok);
-        if (hasErrors) {
-          this.error = i18n.global.t('relationship.errors.add');
-          results.filter(result => !result.ok).forEach(result => console.error(result.error));
-        } else {
+        if (result.ok) {
           await this._loadItems();
+          return result; // Return the result from the service
+        } else {
+          this.error = i18n.global.t('relationship.errors.add');
+          console.error(result.error);
+          return result; // Return the error result
         }
       } catch (err: any) {
         this.error = err.message || i18n.global.t('relationship.errors.add');
         console.error(err);
+        return { ok: false, error: { message: this.error } } as Result<string[], ApiError>; // Return a failure result
       } finally {
         this.loading = false;
       }

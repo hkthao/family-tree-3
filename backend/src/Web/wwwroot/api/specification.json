@@ -76,43 +76,6 @@
         ]
       }
     },
-    "/api/AI/biography/last/{memberId}": {
-      "get": {
-        "tags": [
-          "AI"
-        ],
-        "operationId": "AI_GetLastAIBiography",
-        "parameters": [
-          {
-            "name": "memberId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "guid"
-            },
-            "x-position": 1
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AIBiographyDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      }
-    },
     "/api/Chat": {
       "post": {
         "tags": [
@@ -1585,6 +1548,56 @@
         ]
       }
     },
+    "/api/Members/{id}/biography": {
+      "put": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_UpdateMemberBiography",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMemberBiographyCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Relationships": {
       "get": {
         "tags": [
@@ -1963,6 +1976,47 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/RelationshipDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/Relationships/bulk-create": {
+      "post": {
+        "tags": [
+          "Relationships"
+        ],
+        "operationId": "Relationships_CreateRelationships",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRelationshipsCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "guid"
                   }
                 }
               }
@@ -2442,95 +2496,6 @@
           4,
           5
         ]
-      },
-      "AIBiographyDto": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "guid"
-          },
-          "memberId": {
-            "type": "string",
-            "format": "guid"
-          },
-          "style": {
-            "$ref": "#/components/schemas/BiographyStyle"
-          },
-          "content": {
-            "type": "string"
-          },
-          "provider": {
-            "$ref": "#/components/schemas/AIProviderType"
-          },
-          "userPrompt": {
-            "type": "string"
-          },
-          "generatedFromDB": {
-            "type": "boolean"
-          },
-          "tokensUsed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "metadata": {
-            "nullable": true,
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/JsonDocument"
-              }
-            ]
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "BiographyStyle": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "Emotional",
-          "Historical",
-          "Storytelling",
-          "Formal",
-          "Informal"
-        ],
-        "enum": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      "AIProviderType": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "None",
-          "Gemini",
-          "OpenAI",
-          "LocalAI"
-        ],
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ]
-      },
-      "JsonDocument": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "isDisposable": {
-            "type": "boolean"
-          },
-          "rootElement": {}
-        }
       },
       "ChatResponse": {
         "type": "object",
@@ -3584,6 +3549,19 @@
           }
         ]
       },
+      "UpdateMemberBiographyCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "biographyContent": {
+            "type": "string"
+          }
+        }
+      },
       "PaginatedListOfRelationshipListDto": {
         "type": "object",
         "additionalProperties": false,
@@ -3695,6 +3673,20 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -3704,6 +3696,18 @@
         "properties": {
           "prompt": {
             "type": "string"
+          }
+        }
+      },
+      "CreateRelationshipsCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "relationships": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RelationshipInput"
+            }
           }
         }
       },
@@ -3843,6 +3847,16 @@
           3,
           4
         ]
+      },
+      "JsonDocument": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "isDisposable": {
+            "type": "boolean"
+          },
+          "rootElement": {}
+        }
       },
       "UserPreferenceDto": {
         "type": "object",

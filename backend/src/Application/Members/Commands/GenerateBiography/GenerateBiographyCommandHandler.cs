@@ -62,7 +62,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
 
         var systemPromptBuilder = new StringBuilder();
         systemPromptBuilder.AppendLine("You are an AI assistant specialized in writing biographies for family tree members.");
-        systemPromptBuilder.AppendLine("Your goal is to create a compelling and informative biography, up to 500 words, based on the provided information and desired tone.");
+        systemPromptBuilder.AppendLine("Your goal is to create a compelling and informative biography, up to 1500 words, based on the provided information and desired tone.");
         systemPromptBuilder.AppendLine("Focus on key life events, relationships, and personal characteristics.");
         systemPromptBuilder.AppendLine("If specific details are missing, you can use general knowledge or infer plausible information, but clearly state any assumptions.");
         systemPromptBuilder.AppendLine("Always respond with ONLY the biography text. Do not include any conversational text or greetings.");
@@ -148,11 +148,11 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
             return Result<BiographyResultDto>.Failure("AI did not return a biography.", "NoContent");
         }
 
-        // Ensure biography is within 500 words (approximate)
+        // Ensure biography is within 1500 words (approximate)
         var words = biographyText.Split(new char[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-        if (words.Length > 500)
+        if (words.Length > 1500)
         {
-            biographyText = string.Join(" ", words.Take(500)) + "...";
+            biographyText = string.Join(" ", words.Take(1490)) + "...";
         }
 
         return Result<BiographyResultDto>.Success(new BiographyResultDto { Content = biographyText });

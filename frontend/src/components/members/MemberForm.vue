@@ -66,7 +66,9 @@
     <!-- Thông tin khác -->
     <v-row>
       <v-col cols="12">
-        <v-textarea v-model="memberForm.biography" :label="t('member.form.biography')"
+        <v-textarea
+        :auto-grow="true"
+        v-model="memberForm.biography" :label="t('member.form.biography')"
           :readonly="props.readOnly"></v-textarea>
       </v-col>
     </v-row>

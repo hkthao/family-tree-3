@@ -17,7 +17,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserProfile> UserProfiles => Set<UserProfile>(); // Added
     public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>(); // Added
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
-    public DbSet<AIBiography> AIBiographies => Set<AIBiography>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
 
@@ -103,13 +102,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Ignore<JsonDocument>();
-
-        builder.Entity<AIBiography>()
-            .Property(b => b.Metadata)
-            .HasColumnType("json")
-            .HasConversion(
-                v => v == null ? null : JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => v == null ? null : JsonDocument.Parse(v, new JsonDocumentOptions()));
 
         base.OnModelCreating(builder);
     }

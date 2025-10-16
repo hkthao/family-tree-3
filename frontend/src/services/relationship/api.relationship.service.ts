@@ -84,4 +84,9 @@ export class ApiRelationshipService implements IRelationshipService {
       `${this.apiUrl}/by-ids?${params.toString()}`,
     );
   }
+
+  async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const payload = { relationships: newItems };
+    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, payload);
+  }
 }

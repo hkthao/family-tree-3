@@ -6,5 +6,8 @@ public class GenerateBiographyCommandValidator : AbstractValidator<GenerateBiogr
     {
         RuleFor(v => v.MemberId)
             .NotEmpty().WithMessage("MemberId cannot be empty.");
+
+        RuleFor(v => v.Prompt)
+            .MaximumLength(1500).WithMessage("Prompt must not exceed 1500 characters.");
     }
 }

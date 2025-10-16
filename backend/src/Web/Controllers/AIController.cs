@@ -1,6 +1,5 @@
 using backend.Application.Members.Commands.GenerateBiography;
 using backend.Application.AI.Common;
-using backend.Application.AI.Queries.GetLastAIBiography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,21 +34,4 @@ public class AIController : ControllerBase
         }
         return BadRequest(result.Error);
     }
-
-    /// <summary>
-    /// Retrieves the last AI-generated biography for a specific member.
-    /// </summary>
-    /// <param name="memberId">The ID of the member.</param>
-    /// <returns>The last AI-generated biography.</returns>
-    [HttpGet("biography/last/{memberId}")]
-    public async Task<ActionResult<AIBiographyDto?>> GetLastAIBiography(Guid memberId)
-    {
-        var result = await _mediator.Send(new GetLastAIBiographyQuery { MemberId = memberId });
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
-    }
-   
 }

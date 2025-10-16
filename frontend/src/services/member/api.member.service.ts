@@ -142,4 +142,9 @@ export class ApiMemberService implements IMemberService {
     }
     return result;
   }
+
+  async updateMemberBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> {
+    const payload = { memberId, biographyContent };
+    return this.http.put<void>(`${this.apiUrl}/${memberId}/biography`, payload);
+  }
 }

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto } from '@/types';
+import type { BiographyResultDto, AIProviderDto, Member } from '@/types'; // Added Member
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 
@@ -11,6 +11,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
 
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
+    currentMember: null as Member | null, // Added
     style: BiographyStyle.Emotional as BiographyStyle,
     generatedFromDB: true,
     userPrompt: null as string | null,
@@ -21,6 +22,23 @@ export const useAIBiographyStore = defineStore('aiBiography', {
   }),
 
   actions: {
+    async fetchMemberDetails(memberId: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.member.getById(memberId);
+        if (result.ok) {
+          this.currentMember = result.value;
+        } else {
+          this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchMemberFailed');
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async generateBiography() {
       if (!this.memberId) {
         this.error = i18n.global.t('aiBiography.errors.memberIdRequired');
@@ -133,14 +151,14 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.error = null;
 
       try {
-        const result = await (this as any).services.aiBiography.saveBiography({
-          memberId: memberId,
-          style: this.style,
-          content: content,
-        });
+        const result = await this.services.member.updateMemberBiography(memberId, content); // Changed
 
         if (result.ok) {
           console.log('Biography saved successfully:', result.value);
+          // Optionally, update the currentMember's biography in the store
+          if (this.currentMember) {
+            this.currentMember.biography = content;
+          }
         } else {
           this.error =
             result.error?.message ||

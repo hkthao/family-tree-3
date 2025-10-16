@@ -1,5 +1,6 @@
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Commands.CreateRelationship;
+using backend.Application.Relationships.Commands.CreateRelationships; // Added
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Application.Relationships.Queries;
@@ -70,6 +71,17 @@ public class RelationshipsController : ControllerBase
 
     [HttpPost("generate-relationship-data")]
     public async Task<ActionResult<List<RelationshipDto>>> GenerateRelationshipData([FromBody] GenerateRelationshipDataCommand command)
+    {
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<List<Guid>>> CreateRelationships([FromBody] CreateRelationshipsCommand command)
     {
         var result = await _mediator.Send(command);
         if (result.IsSuccess)

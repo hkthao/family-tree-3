@@ -15,4 +15,6 @@ public class Relationship : BaseEntity
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public string? Description { get; set; }
+    public Guid FamilyId { get; set; } // Added
+    public Family Family { get; set; } = null!; // Added
 }
