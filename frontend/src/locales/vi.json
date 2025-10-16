@@ -531,5 +531,8 @@
   "aiInput.validationErrorsFound": "Dữ liệu được tạo có thông tin bị thiếu hoặc không hợp lệ. Vui lòng kiểm tra các lỗi bên dưới.",
   "family.list.action.aiCreate": "Tạo gia đình bằng AI",
   "aiInput.guidanceTitle": "Cách sử dụng Nhập liệu AI",
-  "aiInput.guidanceDescription": "Bạn có thể mô tả gia đình bạn muốn tạo bằng ngôn ngữ tự nhiên. AI sẽ tạo dữ liệu có cấu trúc dựa trên mô tả của bạn. Dưới đây là một ví dụ:"
+  "aiInput.guidanceDescription": "Bạn có thể mô tả gia đình bạn muốn tạo bằng ngôn ngữ tự nhiên. AI sẽ tạo dữ liệu có cấu trúc dựa trên mô tả của bạn. Dưới đây là một ví dụ:",
+  "aiInput.promptLabelRelationship": "Mô tả mối quan hệ bạn muốn tạo (ví dụ: 'Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B, trong đó Nguyễn Văn A là chồng của Trần Thị B')",
+  "aiInput.relationship": "Mối quan hệ",
+  "aiInput.relationships": "Các mối quan hệ"
 }

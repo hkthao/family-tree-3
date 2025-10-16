@@ -1936,6 +1936,46 @@
         ]
       }
     },
+    "/api/Relationships/generate-relationship-data": {
+      "post": {
+        "tags": [
+          "Relationships"
+        ],
+        "operationId": "Relationships_GenerateRelationshipData",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRelationshipDataCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RelationshipDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Upload": {
       "post": {
         "tags": [
@@ -3590,6 +3630,15 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          }
+        }
+      },
+      "GenerateRelationshipDataCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "prompt": {
+            "type": "string"
           }
         }
       },

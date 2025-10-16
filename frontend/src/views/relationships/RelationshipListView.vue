@@ -2,10 +2,6 @@
   <RelationshipSearch @update:filters="handleFilterUpdate" />
 
   <RelationshipList
-    :items="items"
-    :total-items="relationshipStore.totalItems"
-    :loading="loading"
-    :items-per-page="itemsPerPage"
     @update:options="handleListOptionsUpdate"
     @view="navigateToDetailView"
     @edit="navigateToEditRelationship"

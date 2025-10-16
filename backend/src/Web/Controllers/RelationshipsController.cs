@@ -6,6 +6,7 @@ using backend.Application.Relationships.Queries;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
+using backend.Application.Relationships.Commands.GenerateRelationshipData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -63,6 +64,17 @@ public class RelationshipsController : ControllerBase
         if (result.IsSuccess)
         {
             return CreatedAtAction(nameof(GetRelationshipById), new { id = result.Value }, result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    [HttpPost("generate-relationship-data")]
+    public async Task<ActionResult<List<RelationshipDto>>> GenerateRelationshipData([FromBody] GenerateRelationshipDataCommand command)
+    {
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
         }
         return BadRequest(result.Error);
     }

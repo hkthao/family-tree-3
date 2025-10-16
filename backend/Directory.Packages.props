@@ -7,6 +7,7 @@
     <MicrosoftExtensionsVersion>8.0.0</MicrosoftExtensionsVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Mapster" Version="7.4.0" />
     <PackageVersion Include="OpenAI-DotNet" Version="2.10.0" />
     <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="4.5.0" />

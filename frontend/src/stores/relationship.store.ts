@@ -139,5 +139,28 @@ export const useRelationshipStore = defineStore('relationship', {
       this.setItemsPerPage(5000); // Fetch all relationships for the tree
       await this._loadItems();
     },
+
+    async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<void> {
+      this.loading = true;
+      this.error = null;
+      try {
+        const results = await Promise.all(
+          newItems.map(item => this.services.relationship.add(item))
+        );
+
+        const hasErrors = results.some(result => !result.ok);
+        if (hasErrors) {
+          this.error = i18n.global.t('relationship.errors.add');
+          results.filter(result => !result.ok).forEach(result => console.error(result.error));
+        } else {
+          await this._loadItems();
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('relationship.errors.add');
+        console.error(err);
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

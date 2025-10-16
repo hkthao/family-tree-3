@@ -460,5 +460,8 @@
   "member.occupation": "Occupation",
   "member.biography": "Biography",
   "aiInput.guidanceTitle": "How to use AI Input",
-  "aiInput.guidanceDescription": "You can describe the family you want to create in natural language. The AI will then generate structured data based on your description. Here's an example:"
+  "aiInput.guidanceDescription": "You can describe the family you want to create in natural language. The AI will then generate structured data based on your description. Here's an example:",
+  "aiInput.promptLabelRelationship": "Describe the relationship you want to create (e.g., 'Create a relationship between John Doe and Jane Smith, where John is the husband of Jane')",
+  "aiInput.relationship": "Relationship",
+  "aiInput.relationships": "Relationships"
 }
