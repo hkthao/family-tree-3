@@ -10,6 +10,9 @@
         <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
           {{ t('aiInput.generateButton') }}
         </v-btn>
+        <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
+          {{ t('aiInput.fillSampleButton') }}
+        </v-btn>
 
         <div v-if="generatedData && generatedData.length">
           <v-alert type="info" class="mb-4">{{ t('aiInput.previewMessage') }}</v-alert>
@@ -172,5 +175,9 @@ const save = async () => {
 const cancel = () => {
   naturalLanguageInputStore.error = null; // Clear error on cancel
   emit('update:modelValue', false);
+};
+
+const fillSamplePrompt = () => {
+  prompt.value = `Tạo thành viên Nguyễn Văn An. Biệt danh: An Béo. Giới tính: Nam. Ngày sinh: 15/03/1985. Ngày mất: 20/11/2020. Nơi sinh: Hà Nội, Việt Nam. Nơi mất: Thành phố Hồ Chí Minh, Việt Nam. Nghề nghiệp: Kiến trúc sư. Tiểu sử: Nguyễn Văn An là một kiến trúc sư tài năng, nổi tiếng với các công trình xanh và bền vững. Anh đã có nhiều đóng góp cho sự phát triển kiến trúc đô thị Việt Nam. Thuộc gia đình: Gia đình Nguyễn. Ảnh đại diện: https://example.com/nguyenvanan.jpg`;
 };
 </script>
