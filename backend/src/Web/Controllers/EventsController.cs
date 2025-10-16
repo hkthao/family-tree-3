@@ -7,6 +7,7 @@ using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Events.Queries.SearchEvents; // Added
 using backend.Application.Events.Commands.GenerateEventData; // Added
+using backend.Application.Events.Commands.CreateEvents; // Added
 using backend.Application.Events.Queries; // Added
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -120,6 +121,17 @@ public class EventsController : ControllerBase
 
     [HttpPost("generate-event-data")]
     public async Task<ActionResult<List<AIEventDto>>> GenerateEventData([FromBody] GenerateEventDataCommand command)
+    {
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
+    }
+
+    [HttpPost("bulk-create")]
+    public async Task<ActionResult<List<Guid>>> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
         if (result.IsSuccess)

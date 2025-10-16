@@ -1,5 +1,5 @@
 import type { IEventService } from './event.service.interface';
-import type { Event, Paginated, Result, EventFilter } from '@/types';
+import type { Event, Paginated, Result, EventFilter } from '@/types/event/event';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
@@ -22,6 +22,11 @@ export class ApiEventService implements IEventService {
   async add(newItem: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
     console.log('Adding event via API');
     return this.http.post<Event>(this.apiUrl, newItem);
+  }
+
+  async addMultiple(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
+    console.log('Adding multiple events via API');
+    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, newItems);
   }
 
   async update(updatedItem: Event): Promise<Result<Event, ApiError>> {

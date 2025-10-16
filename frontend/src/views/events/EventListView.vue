@@ -9,7 +9,9 @@
     @edit="navigateToEditEvent"
     @delete="confirmDelete"
     @create="navigateToCreateView"
+    @ai-create="showNLEventPopup = true"
   />
+  <NLEventPopup v-model="showNLEventPopup" @saved="handleNLEventSaved" />
   <!-- Confirm Delete Dialog -->
   <ConfirmDeleteDialog
     :model-value="deleteConfirmDialog"
@@ -37,7 +39,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
-import { EventSearch, EventList } from '@/components/events';
+import { EventSearch, EventList, NLEventPopup } from '@/components/events';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -46,6 +48,8 @@ const { t } = useI18n();
 const router = useRouter();
 const eventStore = useEventStore();
 const notificationStore = useNotificationStore();
+
+const showNLEventPopup = ref(false);
 
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
@@ -127,6 +131,11 @@ const handleDeleteConfirm = async () => {
 const handleDeleteCancel = () => {
   deleteConfirmDialog.value = false;
   eventToDelete.value = undefined;
+};
+
+const handleNLEventSaved = async () => {
+  showNLEventPopup.value = false;
+  await loadEvents();
 };
 
 onMounted(() => {

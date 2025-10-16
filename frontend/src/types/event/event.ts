@@ -1,7 +1,7 @@
 import { EventType } from './event-type';
 
 export interface Event {
-  id: string;
+  id?: string;
   name: string;
   description?: string;
   startDate: Date | null;
@@ -11,6 +11,7 @@ export interface Event {
   relatedMembers?: string[];
   type: EventType;
   color?: string; // Added color property
+  validationErrors?: string[];
 }
 
 export interface EventFilter {

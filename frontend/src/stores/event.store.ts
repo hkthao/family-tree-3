@@ -1,6 +1,6 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { EventFilter, Event } from '@/types';
+import type { EventFilter, Event } from '@/types/event/event';
 import { defineStore } from 'pinia';
 
 export const useEventStore = defineStore('event', {
@@ -47,6 +47,37 @@ export const useEventStore = defineStore('event', {
         console.error(result.error);
       }
       this.loading = false;
+    },
+
+    async addItems(newItems: Event[]): Promise<void> {
+      this.loading = true;
+      this.error = null;
+      try {
+        const createCommands = newItems.map(item => ({
+          name: item.name,
+          type: item.type,
+          startDate: item.startDate,
+          endDate: item.endDate,
+          location: item.location,
+          description: item.description,
+          familyId: item.familyId,
+          relatedMembers: item.relatedMembers,
+        }));
+
+        // Assuming a bulk add method exists in the service
+        const result = await this.services.event.addMultiple(createCommands);
+        if (result.ok) {
+          await this._loadItems();
+        } else {
+          this.error = i18n.global.t('aiInput.saveError'); // Generic save error for now
+          console.error(result.error);
+        }
+      } catch (err: any) {
+        this.error = err.message || i18n.global.t('aiInput.saveError');
+        console.error(err);
+      } finally {
+        this.loading = false;
+      }
     },
 
     async updateItem(updatedItem: Event): Promise<void> {

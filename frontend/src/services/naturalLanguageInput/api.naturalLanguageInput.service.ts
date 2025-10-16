@@ -27,6 +27,6 @@ export class ApiNaturalLanguageInputService implements INaturalLanguageInputServ
 
   async generateEventData(prompt: string): Promise<Result<Event[], ApiError>> {
     const requestBody: GenerateDataRequest = { prompt };
-    return this.http.post<Event[]>(`${this.naturalLanguageInputApiUrl}/generate-event-data`, requestBody);
+    return this.http.post<Event[]>(`${API_BASE_URL}/Events/generate-event-data`, requestBody);
   }
 }
