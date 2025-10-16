@@ -8,7 +8,7 @@ import { type Result, ok, err } from '@/types';
 
 // Define a custom error type for API errors
 export interface ApiError {
-  name: string; // Added
+  name: string;
   message: string;
   statusCode?: number;
   details?: any;
@@ -28,20 +28,20 @@ const createApiError = (error: AxiosError): ApiError => {
       }
     }
     return {
-      name: 'ApiError', // Added
+      name: 'ApiError',
       message: errorMessage,
       statusCode: error.response.status,
       details: error.response.data,
     };
   } else if (error.request) {
     return {
-      name: 'ApiError', // Added
+      name: 'ApiError',
       message: 'No response received from server.',
       details: error.request,
     };
   } else {
     return {
-      name: 'ApiError', // Added
+      name: 'ApiError',
       message: error.message,
     };
   }

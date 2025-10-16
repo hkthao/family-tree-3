@@ -53,13 +53,13 @@ class MockMemberServiceForTest implements IMemberService {
       this._items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
-    return err({ message: 'Member not found', statusCode: 404 });
+    return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
   }
   async delete(id: string): Promise<Result<void, ApiError>> {
     const initialLength = this._items.length;
     this._items = this._items.filter((m) => m.id !== id);
     if (this._items.length === initialLength) {
-      return err({ message: 'Member not found', statusCode: 404 });
+      return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
     }
     return ok(await simulateLatency(undefined));
   }
@@ -95,6 +95,17 @@ class MockMemberServiceForTest implements IMemberService {
   async getByIds(ids: string[]): Promise<Result<Member[], ApiError>> {
     const members = this._items.filter(m => ids.includes(m.id));
     return ok(await simulateLatency(members));
+  }
+
+  async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const newIds: string[] = [];
+    newItems.forEach(newItem => {
+      const newId = (this._items.length + 1).toString();
+      const itemToAdd = { ...newItem, id: newId };
+      this._items.push(itemToAdd as Member);
+      newIds.push(newId);
+    });
+    return ok(await simulateLatency(newIds));
   }
 }
 

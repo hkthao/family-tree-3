@@ -25,7 +25,7 @@ export class MockUserProfileService implements IUserProfileService {
     if (profile) {
       return ok(profile);
     } else {
-      return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+      return { ok: false, error: { name: 'ApiError', message: 'Profile not found', statusCode: 404 } as ApiError };
     }
   }
 
@@ -35,7 +35,7 @@ export class MockUserProfileService implements IUserProfileService {
     if (profile) {
       return ok(profile);
     } else {
-      return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+      return { ok: false, error: { name: 'ApiError', message: 'Profile not found', statusCode: 404 } as ApiError };
     }
   }
 
@@ -46,7 +46,7 @@ export class MockUserProfileService implements IUserProfileService {
       this.userProfiles[index] = profile;
       return ok(profile);
     } else {
-      return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
+      return { ok: false, error: { name: 'ApiError', message: 'Profile not found', statusCode: 404 } as ApiError };
     }
   }
 }

@@ -1,4 +1,3 @@
-
 import type { ApiError } from '@/plugins/axios';
 import { simulateLatency } from '@/utils/mockUtils';
 import { err, ok, type Result, type Paginated } from '@/types';
@@ -90,7 +89,11 @@ export class MockCrudService<T extends { id: string }> {
       this.items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
-    return err({ message: 'Item not found', statusCode: 404 });
+    return err({
+      name: 'ApiError',
+      message: 'Item not found',
+      statusCode: 404,
+    });
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
@@ -100,7 +103,11 @@ export class MockCrudService<T extends { id: string }> {
     const initialLength = this.items.length;
     this.items = this.items.filter((i) => i.id !== id);
     if (this.items.length === initialLength) {
-      return err({ message: 'Item not found', statusCode: 404 });
+      return err({
+        name: 'ApiError',
+        message: 'Item not found',
+        statusCode: 404,
+      });
     }
     return ok(await simulateLatency(undefined));
   }

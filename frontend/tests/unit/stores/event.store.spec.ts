@@ -20,5 +20,5 @@ defineCrudTests(
   useEventStore,
   mockEventService,
   'event',
-  entitySample,
+  entitySample as Event & { id: string },
 );

@@ -14,6 +14,7 @@ export class MockEventService implements IEventService {
       return ok(events);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to fetch events from mock service.',
         details: e as Error,
       });
@@ -28,6 +29,7 @@ export class MockEventService implements IEventService {
       return ok(event);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: `Failed to get event with ID ${id} from mock service.`,
         details: e as Error,
       });
@@ -45,6 +47,7 @@ export class MockEventService implements IEventService {
       return ok(addedEvent);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to add event to mock service.',
         details: e as Error,
       });
@@ -59,11 +62,11 @@ export class MockEventService implements IEventService {
       if (index !== -1) {
         this.events[index] = updatedItem;
         const updatedEvent = await simulateLatency(updatedItem);
-        return ok(updatedEvent);
-      }
-      return err({ message: 'Event not found', statusCode: 404 });
-    } catch (e) {
+                  return ok(updatedEvent);
+                }
+                return err({ name: 'ApiError', message: 'Event not found', statusCode: 404 });    } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to update event in mock service.',
         details: e as Error,
       });
@@ -75,12 +78,13 @@ export class MockEventService implements IEventService {
       const initialLength = this.events.length;
       this.events = this.events.filter((event) => event.id !== id);
       if (this.events.length === initialLength) {
-        return err({ message: 'Event not found', statusCode: 404 });
+        return err({ name: 'ApiError', message: 'Event not found', statusCode: 404 });
       }
       await simulateLatency(undefined);
       return ok(undefined);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to delete event from mock service.',
         details: e as Error,
       });
@@ -160,6 +164,7 @@ export class MockEventService implements IEventService {
       return ok(paginatedResult);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to search events from mock service.',
         details: e as Error,
       });
@@ -174,6 +179,7 @@ export class MockEventService implements IEventService {
       return ok(events);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to get events by IDs from mock service.',
         details: e as Error,
       });
@@ -205,6 +211,7 @@ export class MockEventService implements IEventService {
       return ok(result);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to fetch upcoming events from mock service.',
         details: e as Error,
       });
@@ -226,6 +233,7 @@ export class MockEventService implements IEventService {
       return ok(newIds);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to add multiple events to mock service.',
         details: e as Error,
       });

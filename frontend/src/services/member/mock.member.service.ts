@@ -358,6 +358,7 @@ export class MockMemberService implements IMemberService {
       return ok(members);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to fetch members from mock service.',
         details: e as Error,
       });
@@ -376,6 +377,7 @@ export class MockMemberService implements IMemberService {
       return ok(members);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: `Failed to fetch members for family ID ${familyId} from mock service.`,
         details: e as Error,
       });
@@ -391,6 +393,7 @@ export class MockMemberService implements IMemberService {
       return ok(member ? transformMemberDates(member) : undefined);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: `Failed to get member with ID ${id} from mock service.`,
         details: e as Error,
       });
@@ -409,6 +412,7 @@ export class MockMemberService implements IMemberService {
       return ok(addedMember);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to add member to mock service.',
         details: e as Error,
       });
@@ -424,11 +428,11 @@ export class MockMemberService implements IMemberService {
         const updatedMember = await simulateLatency(
           transformMemberDates(updatedItem),
         );
-        return ok(updatedMember);
-      }
-      return err({ message: 'Member not found', statusCode: 404 });
-    } catch (e) {
+                  return ok(updatedMember);
+                }
+                return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });    } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to update member in mock service.',
         details: e as Error,
       });
@@ -441,12 +445,13 @@ export class MockMemberService implements IMemberService {
       const initialLength = this._members.length;
       this._members = this._members.filter((m) => m.id !== id);
       if (this._members.length === initialLength) {
-        return err({ message: 'Member not found', statusCode: 404 });
+        return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
       }
       await simulateLatency(undefined);
       return ok(undefined);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to delete member from mock service.',
         details: e as Error,
       });
@@ -497,6 +502,7 @@ export class MockMemberService implements IMemberService {
       return ok(paginatedResult);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to search members from mock service.',
         details: e as Error,
       });
@@ -513,6 +519,7 @@ export class MockMemberService implements IMemberService {
       return ok(members);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to get members by IDs from mock service.',
         details: e as Error,
       });
@@ -532,6 +539,7 @@ export class MockMemberService implements IMemberService {
       return ok(newIds);
     } catch (e) {
       return err({
+        name: 'ApiError',
         message: 'Failed to add multiple members to mock service.',
         details: e as Error,
       });

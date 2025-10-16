@@ -19,7 +19,7 @@
       <v-btn color="gray" @click="closeView">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="navigateToEditEvent(event.id)">
+      <v-btn color="primary" @click="navigateToEditEvent(event.id!)">
         {{ t('common.edit') }}
       </v-btn>
 

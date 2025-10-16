@@ -114,7 +114,7 @@ const confirmDelete = (event: Event) => {
 const handleDeleteConfirm = async () => {
   if (eventToDelete.value) {
     try {
-      await eventStore.deleteItem(eventToDelete.value.id);
+      await eventStore.deleteItem(eventToDelete.value.id!);
       notificationStore.showSnackbar(
         t('event.messages.deleteSuccess'),
         'success',

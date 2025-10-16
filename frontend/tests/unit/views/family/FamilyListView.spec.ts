@@ -53,13 +53,13 @@ class MockFamilyServiceForTest implements IFamilyService {
       this.items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
-    return err({ message: 'Family not found', statusCode: 404 });
+    return err({ name: 'ApiError', message: 'Family not found', statusCode: 404 });
   }
   async delete(id: string): Promise<Result<void, ApiError>> {
     const initialLength = this.items.length;
     this.items = this.items.filter((f) => f.id !== id);
     if (this.items.length === initialLength) {
-      return err({ message: 'Family not found', statusCode: 404 });
+      return err({ name: 'ApiError', message: 'Family not found', statusCode: 404 });
     }
     return ok(await simulateLatency(undefined));
   }
@@ -106,6 +106,17 @@ class MockFamilyServiceForTest implements IFamilyService {
     const families = this.items.filter((f) => ids.includes(f.id));
     return ok(await simulateLatency(families));
   }
+
+  async addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const newIds: string[] = [];
+    newItems.forEach(newItem => {
+      const newId = (this.items.length + 1).toString();
+      const itemToAdd = { ...newItem, id: newId };
+      this.items.push(itemToAdd as Family);
+      newIds.push(newId);
+    });
+    return ok(await simulateLatency(newIds));
+  }
 }
 
 class MockMemberServiceForTest implements IMemberService {
@@ -137,13 +148,13 @@ class MockMemberServiceForTest implements IMemberService {
       this.items[index] = updatedItem;
       return ok(await simulateLatency(updatedItem));
     }
-    return err({ message: 'Member not found', statusCode: 404 });
+    return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
   }
   async delete(id: string): Promise<Result<void, ApiError>> {
     const initialLength = this.items.length;
     this.items = this.items.filter((m) => m.id !== id);
     if (this.items.length === initialLength) {
-      return err({ message: 'Member not found', statusCode: 404 });
+      return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
     }
     return ok(await simulateLatency(undefined));
   }
@@ -181,6 +192,17 @@ class MockMemberServiceForTest implements IMemberService {
     const members = this.items.filter((m) => ids.includes(m.id));
     return ok(await simulateLatency(members));
   }
+
+  async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const newIds: string[] = [];
+    newItems.forEach(newItem => {
+      const newId = (this.items.length + 1).toString();
+      const itemToAdd = { ...newItem, id: newId };
+      this.items.push(itemToAdd as Member);
+      newIds.push(newId);
+    });
+    return ok(await simulateLatency(newIds));
+  }
 }
 
 class MockEventServiceForTest implements IEventService {
@@ -213,14 +235,14 @@ class MockEventServiceForTest implements IEventService {
       this._events[index] = updatedEvent;
       return ok(await simulateLatency(updatedEvent));
     }
-    return err({ message: 'Event not found', statusCode: 404 });
+    return err({ name: 'ApiError', message: 'Event not found', statusCode: 404 });
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     const initialLength = this._events.length;
     this._events = this._events.filter((event) => event.id !== id);
     if (this._events.length === initialLength) {
-      return err({ message: 'Event not found', statusCode: 404 });
+      return err({ name: 'ApiError', message: 'Event not found', statusCode: 404 });
     }
     return ok(undefined);
   }
@@ -295,7 +317,7 @@ class MockEventServiceForTest implements IEventService {
   }
 
   async getByIds(ids: string[]): Promise<Result<Event[], ApiError>> {
-    const events = this._events.filter((e) => ids.includes(e.id));
+    const events = this._events.filter((e) => e.id && ids.includes(e.id));
     return ok(await simulateLatency(events));
   }
 
@@ -305,6 +327,17 @@ class MockEventServiceForTest implements IEventService {
       events = events.filter((event) => event.familyId === familyId);
     }
     return ok(await simulateLatency(events));
+  }
+
+  async addMultiple(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const newIds: string[] = [];
+    newItems.forEach(newItem => {
+      const newId = (this._events.length + 1).toString();
+      const itemToAdd = { ...newItem, id: newId };
+      this._events.push(itemToAdd as Event);
+      newIds.push(newId);
+    });
+    return ok(await simulateLatency(newIds));
   }
 }
 

@@ -104,7 +104,7 @@ const confirmDelete = (relationship: Relationship) => {
 
 const handleDeleteConfirm = async () => {
   if (relationshipToDelete.value) {
-    const result = await relationshipStore.deleteItem(relationshipToDelete.value.id);
+    const result = await relationshipStore.deleteItem(relationshipToDelete.value.id!);
     if (result.ok) {
       notificationStore.showSnackbar(
         t('relationship.messages.deleteSuccess'),

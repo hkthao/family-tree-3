@@ -23,7 +23,7 @@
       <v-btn color="gray" @click="closeView">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="navigateToEditRelationship(relationship.id)">
+      <v-btn color="primary" @click="navigateToEditRelationship(relationship.id!)">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
