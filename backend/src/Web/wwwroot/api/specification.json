@@ -39,6 +39,143 @@
         }
       }
     },
+    "/api/Faces/detect": {
+      "post": {
+        "tags": [
+          "Faces"
+        ],
+        "operationId": "Faces_DetectFaces",
+        "parameters": [
+          {
+            "name": "returnCrop",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "ContentType": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "ContentDisposition": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "Headers": {
+                    "type": "array",
+                    "nullable": true,
+                    "items": {}
+                  },
+                  "Length": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "Name": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "FileName": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FaceDetectionResultDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Faces/detected/{imageId}": {
+      "get": {
+        "tags": [
+          "Faces"
+        ],
+        "operationId": "Faces_GetDetectedFaces",
+        "parameters": [
+          {
+            "name": "imageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "guid"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DetectedFaceDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Faces/label": {
+      "post": {
+        "tags": [
+          "Faces"
+        ],
+        "operationId": "Faces_LabelFace",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LabelFaceCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/AI/biography": {
       "post": {
         "tags": [
@@ -2446,6 +2583,90 @@
         "properties": {
           "prompt": {
             "type": "string"
+          }
+        }
+      },
+      "FaceDetectionResultDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "boundingBox": {
+            "$ref": "#/components/schemas/BoundingBoxDto"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "float"
+          },
+          "thumbnail": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BoundingBoxDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "width": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "height": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "DetectedFaceDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "boundingBox": {
+            "$ref": "#/components/schemas/BoundingBoxDto"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "float"
+          },
+          "thumbnail": {
+            "type": "string",
+            "nullable": true
+          },
+          "memberId": {
+            "type": "string",
+            "format": "guid",
+            "nullable": true
+          },
+          "memberName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LabelFaceCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "detectedFaceId": {
+            "type": "string"
+          },
+          "memberId": {
+            "type": "string",
+            "format": "guid"
           }
         }
       },

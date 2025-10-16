@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.Files;
+using FamilyTree.Application.Faces.Common.Interfaces;
+using FamilyTree.Infrastructure.Services;
 
 namespace backend.Infrastructure;
 
@@ -45,6 +47,13 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
 
         services.AddHttpClient(); // Register HttpClient
+
+        // Register Face Detection Service
+        services.AddScoped<IFaceDetectionService, FaceDetectionService>();
+        services.AddHttpClient<IFaceDetectionService, FaceDetectionService>(client =>
+        {
+            client.BaseAddress = new Uri(configuration["FaceDetectionService:BaseUrl"] ?? "http://localhost:8000");
+        });
 
         // Register Chat Module
         services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));

@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Members.Commands.UpdateMemberBiography;
 
 public class UpdateMemberBiographyCommandValidator : AbstractValidator<UpdateMemberBiographyCommand>

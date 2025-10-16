@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
+using FamilyTree.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Data;
@@ -19,6 +20,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
+    public DbSet<DetectedFace> DetectedFaces => Set<DetectedFace>();
+    public DbSet<MemberFace> MemberFaces => Set<MemberFace>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

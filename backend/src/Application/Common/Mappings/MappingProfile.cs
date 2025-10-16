@@ -1,4 +1,3 @@
-using backend.Application.AI.Common;
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
