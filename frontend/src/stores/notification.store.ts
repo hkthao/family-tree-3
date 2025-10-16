@@ -18,13 +18,13 @@ export const useNotificationStore = defineStore('notification', {
   }),
 
   actions: {
-    showNotification(message: string, color = 'success', timeout = 3000) {
+    showSnackbar(message: string, color = 'success', timeout = 3000) {
       this.snackbar.show = true;
       this.snackbar.message = message;
       this.snackbar.color = color;
       this.snackbar.timeout = timeout;
     },
-    resetNotification() {
+    resetSnackbar() {
       this.snackbar.show = false;
       this.snackbar.message = '';
       this.snackbar.color = '';

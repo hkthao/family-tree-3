@@ -39,7 +39,7 @@ onMounted(async () => {
 
 watch(() => notificationStore.snackbar.show, (newVal) => {
   if (!newVal) {
-    notificationStore.resetNotification();
+    notificationStore.resetSnackbar();
   }
 });
 </script>

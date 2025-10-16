@@ -178,6 +178,24 @@ const router = createRouter({
           meta: { breadcrumb: 'userSettings.title', roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
         },
         {
+          path: 'face/upload',
+          name: 'FaceUpload',
+          component: () => import('@/views/face/FaceUploadView.vue'),
+          meta: { breadcrumb: 'face.upload.title', requiresAuth: true },
+        },
+        {
+          path: 'face/labeling',
+          name: 'FaceLabeling',
+          component: () => import('@/views/face/FaceLabelingView.vue'),
+          meta: { breadcrumb: 'face.labeling.title', requiresAuth: true },
+        },
+        {
+          path: 'face/search',
+          name: 'FaceSearch',
+          component: () => import('@/views/face/FaceSearchView.vue'),
+          meta: { breadcrumb: 'face.search.title', requiresAuth: true },
+        },
+        {
           path: 'ai/biography/:memberId',
           name: 'AIBiographyGenerator',
           component: () => import('@/views/ai/AIBiographyGeneratorView.vue'),

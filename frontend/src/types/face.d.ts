@@ -1,0 +1,37 @@
+// Assuming Member type is already defined elsewhere, e.g., in '@/types/member.d.ts'
+// import { Member } from '@/types/member.d.ts';
+
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+type FaceStatus = 'recognized' | 'unrecognized' | 'newly-labeled';
+
+interface DetectedFace {
+  id: string; // Unique ID for the detected face instance
+  boundingBox: BoundingBox;
+  imageUrl: string; // URL to the cropped face image
+  memberId: string | null; // ID of the associated member, if recognized/labeled
+  status: FaceStatus; // For UI styling: 'recognized', 'unrecognized', 'newly-labeled'
+}
+
+interface FaceMapping {
+  faceId: string;
+  memberId: string;
+}
+
+interface SearchResult {
+  member: Member; // Full member object or a simplified version
+  confidence: number; // Matching confidence (0.0 - 1.0)
+}
+
+// Placeholder for Member type if not already defined
+interface Member {
+  id: string;
+  fullName: string;
+  avatarUrl?: string;
+  // ... other relevant member properties
+}

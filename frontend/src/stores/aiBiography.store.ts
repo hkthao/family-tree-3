@@ -135,7 +135,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
             this.currentMember.biography = content;
           }
           const notificationStore = useNotificationStore();
-          notificationStore.showNotification(i18n.global.t('aiBiography.success.save'), 'success');
+          notificationStore.showSnackbar(i18n.global.t('aiBiography.success.save'), 'success');
         } else {
           this.error =
             result.error?.message ||
