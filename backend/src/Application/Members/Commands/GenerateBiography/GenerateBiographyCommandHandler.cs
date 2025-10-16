@@ -66,6 +66,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
         systemPromptBuilder.AppendLine("Focus on key life events, relationships, and personal characteristics.");
         systemPromptBuilder.AppendLine("If specific details are missing, you can use general knowledge or infer plausible information, but clearly state any assumptions.");
         systemPromptBuilder.AppendLine("Always respond with ONLY the biography text. Do not include any conversational text or greetings.");
+        systemPromptBuilder.AppendLine("Always respond in Vietnamese."); // Added
 
         switch (request.Tone)
         {

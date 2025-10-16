@@ -1,10 +1,5 @@
 <template>
   <v-card class="pa-4 d-flex flex-column" elevation="2" height="100%">
-    <v-card-title class="d-flex align-center">
-      <v-icon left>mdi-pencil-box-multiple-outline</v-icon>
-      <span class="ml-2">{{ t('aiBiography.input.title') }}</span>
-    </v-card-title>
-
     <v-card-text class="flex-1">
       <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
         item-title="text" item-value="value" variant="outlined" density="compact" :hide-details="true"></v-select>

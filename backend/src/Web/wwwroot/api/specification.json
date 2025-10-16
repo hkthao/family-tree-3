@@ -2401,38 +2401,8 @@
         "properties": {
           "content": {
             "type": "string"
-          },
-          "provider": {
-            "$ref": "#/components/schemas/AIProviderType"
-          },
-          "tokensUsed": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "generatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "userPrompt": {
-            "type": "string"
           }
         }
-      },
-      "AIProviderType": {
-        "type": "integer",
-        "description": "",
-        "x-enumNames": [
-          "None",
-          "Gemini",
-          "OpenAI",
-          "LocalAI"
-        ],
-        "enum": [
-          0,
-          1,
-          2,
-          3
-        ]
       },
       "GenerateBiographyCommand": {
         "type": "object",
@@ -2460,13 +2430,17 @@
           "Emotional",
           "Historical",
           "Storytelling",
+          "Formal",
+          "Informal",
           "Neutral"
         ],
         "enum": [
           0,
           1,
           2,
-          3
+          3,
+          4,
+          5
         ]
       },
       "AIBiographyDto": {
@@ -2530,6 +2504,22 @@
           2,
           3,
           4
+        ]
+      },
+      "AIProviderType": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "None",
+          "Gemini",
+          "OpenAI",
+          "LocalAI"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
         ]
       },
       "JsonDocument": {
