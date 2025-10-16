@@ -5,6 +5,7 @@ using backend.Domain.Enums;
 using System.Text.Json;
 using FluentValidation.Results;
 using backend.Domain.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.Commands.GenerateMemberData;
 
@@ -15,14 +16,16 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
+    private readonly ILogger<GenerateMemberDataCommandHandler> _logger;
 
-    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
+    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateMemberDataCommandHandler> logger)
     {
         _chatProviderFactory = chatProviderFactory;
         _aiMemberDtoValidator = aiMemberDtoValidator;
         _context = context;
         _user = user;
         _authorizationService = authorizationService;
+        _logger = logger;
     }
 
     public async Task<Result<List<AIMemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
@@ -69,14 +72,21 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
                 {
                     var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
                     var families = await _context.Families
-                        .Where(f => f.Name == memberDto.FamilyName && f.FamilyUsers.Any(u => u.Role == FamilyRole.Manager && u.UserProfileId == currentUserProfile!.Id))
+                        .Include(x => x.FamilyUsers)
+                        .Where(f => f.Name == memberDto.FamilyName)
                         .ToListAsync(cancellationToken);
 
                     var accessibleFamilies = new List<Family>();
                     foreach (var family in families)
                     {
-                        if (_user.Roles != null && _user.Roles.Contains("Administrator"))
+                        if (_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString()))
+                        {
                             accessibleFamilies.Add(family);
+                        }
+                        else if (family.FamilyUsers.Any(u => u.Role == FamilyRole.Manager && u.UserProfileId == currentUserProfile!.Id))
+                        {
+                            accessibleFamilies.Add(family);
+                        }
                     }
 
                     if (accessibleFamilies.Count == 1)

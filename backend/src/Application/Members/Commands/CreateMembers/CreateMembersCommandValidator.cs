@@ -4,7 +4,7 @@ namespace backend.Application.Members.Commands.CreateMembers;
 
 public class CreateMembersCommandValidator : AbstractValidator<CreateMembersCommand>
 {
-    public CreateMembersCommandValidator(IValidator<MemberDto> memberDtoValidator)
+    public CreateMembersCommandValidator(IValidator<AIMemberDto> memberDtoValidator)
     {
         RuleFor(x => x.Members)
             .NotEmpty().WithMessage("At least one member is required.");

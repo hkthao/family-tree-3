@@ -9,9 +9,9 @@ public enum FamilyRole
     /// User has full management rights over the family.
     /// </summary>
     Manager = 0,
-
     /// <summary>
     /// User can view family data but cannot modify it.
     /// </summary>
     Viewer = 1,
+    Admin = 2,
 }

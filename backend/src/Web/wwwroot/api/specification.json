@@ -7,38 +7,6 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/NaturalLanguageInput/generate-member-data": {
-      "post": {
-        "tags": [
-          "NaturalLanguageInput"
-        ],
-        "operationId": "NaturalLanguageInput_GenerateMemberData",
-        "requestBody": {
-          "x-name": "command",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GenerateMemberDataCommand"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/NaturalLanguageInput/generate-event-data": {
       "post": {
         "tags": [
@@ -1455,6 +1423,87 @@
         ]
       }
     },
+    "/api/Members/generate-member-data": {
+      "post": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_GenerateMemberData",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateMemberDataCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/Members/bulk-create": {
+      "post": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_CreateMembers",
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMembersCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "guid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Relationships": {
       "get": {
         "tags": [
@@ -2216,15 +2265,6 @@
   },
   "components": {
     "schemas": {
-      "GenerateMemberDataCommand": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "prompt": {
-            "type": "string"
-          }
-        }
-      },
       "GenerateEventDataCommand": {
         "type": "object",
         "additionalProperties": false,
@@ -3111,6 +3151,112 @@
             "type": "boolean"
           }
         }
+      },
+      "MemberDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "guid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "nickname": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "dateOfDeath": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "placeOfBirth": {
+            "type": "string",
+            "nullable": true
+          },
+          "placeOfDeath": {
+            "type": "string",
+            "nullable": true
+          },
+          "occupation": {
+            "type": "string",
+            "nullable": true
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "biography": {
+            "type": "string",
+            "nullable": true
+          },
+          "familyId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "isRoot": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GenerateMemberDataCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "prompt": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateMembersCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AIMemberDto"
+            }
+          }
+        }
+      },
+      "AIMemberDto": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MemberDto"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "familyName": {
+                "type": "string",
+                "nullable": true
+              },
+              "validationErrors": {
+                "type": "array",
+                "nullable": true,
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
       },
       "UpdateMemberCommand": {
         "allOf": [

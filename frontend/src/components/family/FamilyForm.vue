@@ -1,44 +1,22 @@
 <template>
   <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <AvatarInput
-      v-if="!props.readOnly"
-      v-model="familyForm.avatarUrl"
-      :size="96"
-    />
+    <AvatarInput v-if="!props.readOnly" v-model="familyForm.avatarUrl" :size="96" />
     <div v-else class="d-flex justify-center mb-4">
       <AvatarDisplay :src="familyForm.avatarUrl" :size="96" />
     </div>
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model="familyForm.name"
-          :label="$t('family.form.nameLabel')"
-          :rules="[rules.required]"
-          required
-          variant="outlined"
-        ></v-text-field>
+        <v-text-field v-model="familyForm.name" :label="$t('family.form.nameLabel')" :rules="[rules.required]"
+          required></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select
-          v-model="familyForm.visibility"
-          :items="visibilityItems"
-          :label="$t('family.form.visibilityLabel')"
-          required
-          variant="outlined"
-        ></v-select>
+        <v-select v-model="familyForm.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
+          required></v-select>
       </v-col>
     </v-row>
-    <v-text-field
-      v-model="familyForm.address"
-      :label="$t('family.form.addressLabel')"
-      variant="outlined"
-    ></v-text-field>
-    <v-textarea
-      v-model="familyForm.description"
-      :label="$t('family.form.descriptionLabel')"
-      variant="outlined"
-    ></v-textarea>
+    <v-text-field v-model="familyForm.address" :label="$t('family.form.addressLabel')"></v-text-field>
+    <v-textarea v-model="familyForm.description" :label="$t('family.form.descriptionLabel')"></v-textarea>
 
     <FamilyPermissions v-if="!props.readOnly" v-model="familyUsers" />
   </v-form>
