@@ -38,6 +38,11 @@
       </a>
     </template>
 
+    <!-- Code column -->
+    <template #item.code="{ item }">
+      {{ item.code }}
+    </template>
+
     <!-- Family column -->
     <template #item.family="{ item }">
       <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id" />

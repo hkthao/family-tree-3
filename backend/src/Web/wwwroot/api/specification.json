@@ -2910,6 +2910,9 @@
               "fullName": {
                 "type": "string"
               },
+              "code": {
+                "type": "string"
+              },
               "avatarUrl": {
                 "type": "string",
                 "nullable": true

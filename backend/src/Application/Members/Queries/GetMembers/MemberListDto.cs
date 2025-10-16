@@ -7,6 +7,7 @@ public class MemberListDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
     public string FullName { get; set; } = null!;
+    public string Code { get; set; } = null!;
     public string? AvatarUrl { get; set; }
     public Guid FamilyId { get; set; }
     public bool IsRoot { get; set; }

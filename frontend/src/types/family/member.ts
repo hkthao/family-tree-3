@@ -5,6 +5,7 @@ export interface Member {
   lastName: string; // Last name
   firstName: string; // First name
   fullName?: string; // Full name (optional, often derived)
+  code?: string; // New: Unique code for the member
   familyId: string;
   gender?: Gender;
   dateOfBirth?: Date; // Renamed from 'birthDate'

@@ -166,6 +166,7 @@
   "member.management.addMember": "Add New Member",
   "member.list.headers.avatar": "Avatar",
   "member.list.headers.fullName": "Full Name",
+  "member.list.headers.code": "Code",
   "member.list.headers.family": "Family",
   "member.list.headers.dateOfBirth": "Date of Birth",
   "member.list.headers.gender": "Gender",

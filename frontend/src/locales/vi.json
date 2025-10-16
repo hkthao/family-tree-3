@@ -171,6 +171,7 @@
   "member.management.addMember": "Thêm Thành viên Mới",
   "member.list.headers.avatar": "Ảnh đại diện",
   "member.list.headers.fullName": "Họ và Tên",
+  "member.list.headers.code": "Mã",
   "member.list.headers.family": "Gia đình/Dòng họ",
   "member.list.headers.dateOfBirth": "Ngày sinh",
   "member.list.headers.gender": "Giới tính",
