@@ -1,10 +1,10 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Services; // Added
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries;
 using backend.Domain.Enums;
 using System.Text.Json;
 using FluentValidation.Results;
-using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.Commands.GenerateMemberData;
@@ -17,8 +17,9 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<GenerateMemberDataCommandHandler> _logger;
+    private readonly FamilyAuthorizationService _familyAuthorizationService;
 
-    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateMemberDataCommandHandler> logger)
+    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateMemberDataCommandHandler> logger, FamilyAuthorizationService familyAuthorizationService)
     {
         _chatProviderFactory = chatProviderFactory;
         _aiMemberDtoValidator = aiMemberDtoValidator;
@@ -26,6 +27,7 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
         _user = user;
         _authorizationService = authorizationService;
         _logger = logger;
+        _familyAuthorizationService = familyAuthorizationService;
     }
 
     public async Task<Result<List<AIMemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
@@ -70,30 +72,25 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
                 // Resolve FamilyId from FamilyName
                 if (!string.IsNullOrWhiteSpace(memberDto.FamilyName))
                 {
-                    var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
                     var families = await _context.Families
                         .Include(x => x.FamilyUsers)
                         .Where(f => f.Name == memberDto.FamilyName)
                         .ToListAsync(cancellationToken);
 
-                    var accessibleFamilies = new List<Family>();
-                    foreach (var family in families)
+                    if (families.Count == 1)
                     {
-                        if (_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString()))
+                        var family = families.First();
+                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(family.Id, cancellationToken);
+                        if (authResult.IsSuccess)
                         {
-                            accessibleFamilies.Add(family);
+                            memberDto.FamilyId = family.Id;
                         }
-                        else if (family.FamilyUsers.Any(u => u.Role == FamilyRole.Manager && u.UserProfileId == currentUserProfile!.Id))
+                        else if (authResult.Error != null)
                         {
-                            accessibleFamilies.Add(family);
+                            memberDto.ValidationErrors.Add(authResult.Error);
                         }
                     }
-
-                    if (accessibleFamilies.Count == 1)
-                    {
-                        memberDto.FamilyId = accessibleFamilies.First().Id;
-                    }
-                    else if (accessibleFamilies.Count == 0)
+                    else if (families.Count == 0)
                     {
                         memberDto.ValidationErrors.Add($"Family '{memberDto.FamilyName}' not found or you do not have permission to manage it.");
                     }
@@ -107,7 +104,7 @@ public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDa
                 ValidationResult validationResult = await _aiMemberDtoValidator.ValidateAsync(memberDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    memberDto.ValidationErrors.AddRange(validationResult.Errors.Select(e => e.ErrorMessage));
+                    memberDto.ValidationErrors.AddRange(validationResult.Errors.Where(e => e.ErrorMessage != null).Select(e => e.ErrorMessage!));
                 }
             }
 

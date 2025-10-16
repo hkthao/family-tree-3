@@ -1,12 +1,11 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Services; // Added
 using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
 using backend.Domain.Enums;
 using System.Text.Json;
 using FluentValidation.Results;
-using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Events.Commands.GenerateEventData;
 
@@ -18,8 +17,9 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<GenerateEventDataCommandHandler> _logger;
+    private readonly FamilyAuthorizationService _familyAuthorizationService;
 
-    public GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateEventDataCommandHandler> logger)
+    public GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, ILogger<GenerateEventDataCommandHandler> logger, FamilyAuthorizationService familyAuthorizationService)
     {
         _chatProviderFactory = chatProviderFactory;
         _aiEventDtoValidator = aiEventDtoValidator;
@@ -27,6 +27,7 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
         _user = user;
         _authorizationService = authorizationService;
         _logger = logger;
+        _familyAuthorizationService = familyAuthorizationService;
     }
 
     public async Task<Result<List<AIEventDto>>> Handle(GenerateEventDataCommand request, CancellationToken cancellationToken)
@@ -71,30 +72,23 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
                 // Resolve FamilyId from FamilyName
                 if (!string.IsNullOrWhiteSpace(eventDto.FamilyName))
                 {
-                    var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
                     var families = await _context.Families
-                        .Include(x => x.FamilyUsers)
                         .Where(f => f.Name == eventDto.FamilyName || f.Code == eventDto.FamilyName) // Map by name or code
                         .ToListAsync(cancellationToken);
 
-                    var accessibleFamilies = new List<Family>();
-                    foreach (var family in families)
+                    if (families.Count == 1)
                     {
-                        if (_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString()))
-                        {
-                            accessibleFamilies.Add(family);
-                        }
-                        else if (family.FamilyUsers.Any(u => u.Role == FamilyRole.Manager && u.UserProfileId == currentUserProfile!.Id))
-                        {
-                            accessibleFamilies.Add(family);
-                        }
-                    }
-
-                    if (accessibleFamilies.Count == 1)
-                    {
-                        eventDto.FamilyId = accessibleFamilies.First().Id;
-                    }
-                    else if (accessibleFamilies.Count == 0)
+                        var family = families.First();
+                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(family.Id, cancellationToken);
+                                                if (authResult.IsSuccess)
+                                                {
+                                                    eventDto.FamilyId = family.Id;
+                                                }
+                                                else if (authResult.Error != null)
+                                                {
+                                                    eventDto.ValidationErrors.Add(authResult.Error!);
+                                                }                    }
+                    else if (families.Count == 0)
                     {
                         eventDto.ValidationErrors.Add($"Family '{eventDto.FamilyName}' not found or you do not have permission to manage it.");
                     }
@@ -135,7 +129,7 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
                 ValidationResult validationResult = await _aiEventDtoValidator.ValidateAsync(eventDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    eventDto.ValidationErrors.AddRange(validationResult.Errors.Select(e => e.ErrorMessage));
+                    eventDto.ValidationErrors.AddRange(validationResult.Errors.Where(e => e.ErrorMessage != null).Select(e => e.ErrorMessage!));
                 }
             }
 

@@ -1,4 +1,3 @@
-using FluentValidation;
 using backend.Application.Events.Queries;
 using backend.Domain.Enums;
 

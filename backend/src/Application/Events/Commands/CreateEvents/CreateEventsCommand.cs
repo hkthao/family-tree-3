@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Events.Commands.CreateEvent;
 
 namespace backend.Application.Events.Commands.CreateEvents;
 
