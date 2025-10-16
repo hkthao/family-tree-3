@@ -337,8 +337,18 @@
     "list": {
       "action": {
         "aiCreate": "Tạo mối quan hệ bằng AI"
+      },
+      "headers": {
+        "sourceMemberFullName": "Thành viên Nguồn",
+        "targetMemberFullName": "Thành viên Đích",
+        "type": "Loại Quan hệ"
       }
-    }
+    },
+    "isThe": "là",
+    "of": "của",
+    "startDate": "Ngày bắt đầu",
+    "endDate": "Ngày kết thúc",
+    "description": "Mô tả"
   },
   "relationship.list.title": "Quản lý Quan hệ",
   "relationship.list.headers.sourceMember": "Thành viên Nguồn",

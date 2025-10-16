@@ -319,8 +319,18 @@
     "list": {
       "action": {
         "aiCreate": "Create relationship with AI"
+      },
+      "headers": {
+        "sourceMemberFullName": "Source Member Full Name",
+        "targetMemberFullName": "Target Member Full Name",
+        "type": "Relationship Type"
       }
-    }
+    },
+    "isThe": "is the",
+    "of": "of",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "description": "Description"
   },
   "relationship.list.headers.type": "Relationship Type",
   "relationship.list.headers.sourceMemberFullName": "Source Member Full Name",

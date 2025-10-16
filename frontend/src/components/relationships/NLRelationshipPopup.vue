@@ -16,23 +16,28 @@
 
         <div v-if="generatedData && generatedData.length">
           <v-alert type="info" class="mb-4">{{ t('aiInput.previewMessage') }}</v-alert>
-          <div v-for="(relationship, relationshipIndex) in generatedData" :key="relationshipIndex" class="mb-6 pa-4 border rounded">
-            <h4 class="text-h6 mb-2">{{ t('aiInput.relationship') }} #{{ relationshipIndex + 1 }}</h4>
-            <v-alert v-if="relationship.validationErrors && relationship.validationErrors.length" type="warning" class="mb-2">
-              <p>{{ t('aiInput.validationErrorsFound') }}</p>
-              <ul>
-                <li v-for="(error, errorIndex) in relationship.validationErrors" :key="errorIndex">{{ error }}</li>
-              </ul>
-            </v-alert>
-            <v-divider class="mb-2"></v-divider>
-            <div v-for="key in displayKeys" :key="key">
-              <p class="text-body-2">
-                <strong>{{ t(`relationship.list.headers.${key}`) || key }}:</strong>
-                {{ formatValue(relationship[key as keyof Relationship], key) }}
-              </p>
-            </div>
-          </div>
-        </div>
+                      <div v-for="(relationship, relationshipIndex) in generatedData" :key="relationshipIndex" class="mb-6 pa-4 border rounded">
+                        <h4 class="text-h6 mb-2">{{ t('aiInput.relationship') }} #{{ relationshipIndex + 1 }}</h4>
+                        <v-alert v-if="relationship.validationErrors && relationship.validationErrors.length" type="warning" class="mb-2">
+                          <p>{{ t('aiInput.validationErrorsFound') }}</p>
+                          <ul>
+                            <li v-for="(error, errorIndex) in relationship.validationErrors" :key="errorIndex">{{ error }}</li>
+                          </ul>
+                        </v-alert>
+                        <v-divider class="mb-2"></v-divider>
+                        <p class="text-body-2">
+                          {{ relationship.sourceMemberFullName }} {{ t('relationship.isThe') }} {{ getRelationshipTypeTitle(relationship.type) }} {{ t('relationship.of') }} {{ relationship.targetMemberFullName }}
+                        </p>
+                        <p v-if="relationship.startDate" class="text-body-2">
+                          <strong>{{ t('relationship.startDate') }}:</strong> {{ relationship.startDate }}
+                        </p>
+                        <p v-if="relationship.endDate" class="text-body-2">
+                          <strong>{{ t('relationship.endDate') }}:</strong> {{ relationship.endDate }}
+                        </p>
+                        <p v-if="relationship.description" class="text-body-2">
+                          <strong>{{ t('relationship.description') }}:</strong> {{ relationship.description }}
+                        </p>
+                      </div>        </div>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -164,6 +169,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B, kết hôn vào ngày 2000-01-15. Mối quan hệ này được mô tả là một cặp vợ chồng hạnh phúc.`;
+  prompt.value = `Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B, kết hôn vào ngày 2000-01-15. Mối quan hệ này được mô tả là một cặp vợ chồng hạnh phúc.\n\nTạo mối quan hệ giữa Nguyễn Văn A và Nguyễn Văn C. Nguyễn Văn A là cha của Nguyễn Văn C, sinh năm 2005. Nguyễn Văn C là con thứ nhất.`;
 };
 </script>

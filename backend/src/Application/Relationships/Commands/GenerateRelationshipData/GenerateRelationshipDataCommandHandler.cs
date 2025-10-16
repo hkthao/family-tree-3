@@ -6,6 +6,7 @@ using backend.Domain.Enums;
 using backend.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.Text.Json.Serialization;
+using System.Text.Json.Nodes;
 
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 
@@ -30,7 +31,7 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
     {
         var chatProvider = _chatProviderFactory.GetProvider(ChatAIProvider.Local); // Assuming Local for now
 
-        string systemPrompt = "You are an AI assistant that generates JSON data for relationship entities based on natural language descriptions. The output must always be a single JSON object containing one array: \"relationships\". Each object in the \"relationships\" array should have the following fields: - \"sourceMemberName\" (full name) - \"targetMemberName\" (full name) - \"type\" (MUST be one of: Father, Mother, Wife, Husband - case-sensitive) - \"startDate\" (YYYY-MM-DD) - \"endDate\" (YYYY-MM-DD) - \"description\". If details are missing, use placeholders (\"Unknown\" or null) instead of leaving fields empty. Infer the entity type (Relationship) from the prompt. If the prompt describes multiple entities, include them in the respective arrays. Example input: Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B. Example output: { \"relationships\": [ { \"sourceMemberName\": \"Nguyễn Văn A\", \"targetMemberName\": \"Trần Thị B\", \"type\" : \"Husband\", \"description\": \"Married couple\" } ] }. Always respond with ONLY the JSON object. Do not include any conversational text.";
+        string systemPrompt = "You are an AI assistant that generates JSON data for relationship entities based on natural language descriptions. The output MUST be a single JSON object, and ONLY the JSON object. Do NOT include any conversational text, explanations, or markdown formatting (e.g., ```json). The JSON object MUST start with '{' and end with '}'. Each object in the \"relationships\" array should have the following fields: - \"sourceMemberName\" (full name) - \"targetMemberName\" (full name) - \"type\" (MUST be one of: Father, Mother, Wife, Husband - case-sensitive) - \"order\" (Optional: integer representing birth order, e.g., 1 for first child, 2 for second child) - \"startDate\" (YYYY-MM-DD. If only year is provided, default to YYYY-01-01. If invalid, leave as null) - \"endDate\" (YYYY-MM-DD. If only year is provided, default to YYYY-01-01. If invalid, leave as null) - \"description\". If details are missing, use placeholders (\"Unknown\" or null) instead of leaving fields empty. Infer the entity type (Relationship) from the prompt. If the prompt describes multiple entities, include them in the respective arrays. Example input: Tạo mối quan hệ giữa Nguyễn Văn A và Trần Thị B. Nguyễn Văn A là chồng của Trần Thị B, kết hôn vào ngày 2000-01-15. Mối quan hệ này được mô tả là một cặp vợ chồng hạnh phúc. Tạo mối quan hệ giữa Nguyễn Văn A và Nguyễn Văn C. Nguyễn Văn A là cha của Nguyễn Văn C, sinh năm 2005. Nguyễn Văn C là con thứ nhất. Example output: { \"relationships\": [ { \"sourceMemberName\": \"Nguyễn Văn A\", \"targetMemberName\": \"Trần Thị B\", \"type\" : \"Husband\", \"startDate\": \"2000-01-15\", \"endDate\": null, \"description\": \"Happy married couple\" }, { \"sourceMemberName\": \"Nguyễn Văn A\", \"targetMemberName\": \"Nguyễn Văn C\", \"type\" : \"Father\", \"order\": 1, \"startDate\": \"2005-01-01\", \"endDate\": null, \"description\": \"Parent-child relationship\" } ] }.";
 
         var userPrompt = request.Prompt;
 
@@ -137,6 +138,7 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
         }
         catch (JsonException ex)
         {
+            _logger.LogError(ex, "AI generated invalid JSON. Details: {Message}", ex.Message);
             return Result<List<AIRelationshipDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
         }
         catch (Exception ex)
