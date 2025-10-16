@@ -1,0 +1,17 @@
+export enum RelationshipType {
+  Father = 'Father',
+  Mother = 'Mother',
+  Wife = 'Wife',
+  Husband = 'Husband',
+  Child = 'Child',
+  Sibling = 'Sibling',
+  Parent = 'Parent',
+  Spouse = 'Spouse',
+  Grandparent = 'Grandparent',
+  Grandchild = 'Grandchild',
+  AuntUncle = 'AuntUncle',
+  NieceNephew = 'NieceNephew',
+  Cousin = 'Cousin',
+  Partner = 'Partner',
+  Other = 'Other',
+}

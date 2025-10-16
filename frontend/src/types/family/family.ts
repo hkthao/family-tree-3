@@ -3,6 +3,7 @@ import { FamilyVisibility } from './family-visibility';
 export interface Family {
   id: string;
   name: string;
+  code?: string;
   description?: string;
   avatarUrl?: string;
   address?: string;

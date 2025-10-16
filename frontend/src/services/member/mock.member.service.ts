@@ -518,4 +518,23 @@ export class MockMemberService implements IMemberService {
       });
     }
   }
+
+  async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
+    try {
+      const newIds: string[] = [];
+      newItems.forEach(newItem => {
+        const newId = (this._members.length + 1).toString(); // Simple sequential ID
+        const memberToAdd = { ...newItem, id: newId };
+        this._members.push(memberToAdd);
+        newIds.push(memberToAdd.id);
+      });
+      await simulateLatency(undefined);
+      return ok(newIds);
+    } catch (e) {
+      return err({
+        message: 'Failed to add multiple members to mock service.',
+        details: e as Error,
+      });
+    }
+  }
 }

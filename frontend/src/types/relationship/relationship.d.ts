@@ -19,14 +19,6 @@ export interface Relationship {
   familyCode?: string;
   familyId?: string;
   validationErrors?: string[];
-}
-
-export interface CreateRelationshipPayload {
-  sourceMemberId: string;
-  targetMemberId: string;
-  type: RelationshipType;
-  order?: number;
-  startDate?: string;
-  endDate?: string;
-  description?: string;
+  sourceMember?: Member;
+  targetMember?: Member;
 }

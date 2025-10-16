@@ -38,7 +38,7 @@ export const useRelationshipStore = defineStore('relationship', {
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<Relationship, 'id'>): Promise<void> {
+    async addItem(newItem: Relationship): Promise<void> {
       this.loading = true;
       this.error = null;
       const result = await this.services.relationship.add(newItem);
@@ -140,7 +140,7 @@ export const useRelationshipStore = defineStore('relationship', {
       await this._loadItems();
     },
 
-    async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<void> {
+    async addItems(newItems: Relationship[]): Promise<void> {
       this.loading = true;
       this.error = null;
       try {

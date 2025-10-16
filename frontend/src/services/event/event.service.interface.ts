@@ -1,4 +1,5 @@
-import type { EventFilter, Paginated, Result, Event } from '@/types/event/event';
+import type { EventFilter, Event } from '@/types/event/event';
+import type { Paginated, Result } from '@/types/common';
 import type { ICrudService } from '../common/crud.service.interface';
 import type { ApiError } from '@/plugins/axios';
 

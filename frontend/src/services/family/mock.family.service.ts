@@ -105,4 +105,25 @@ export class MockFamilyService implements IFamilyService {
       return err({ message: 'Failed to get families by IDs from mock service.', details: e as Error });
     }
   }
+
+  async addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>> {
+    try {
+      const newIds: string[] = [];
+      newItems.forEach(newItem => {
+        const familyToAdd = {
+          ...newItem,
+          id: 'mock-id-' + Math.random().toString(36).substring(7),
+        };
+        this.families.push(familyToAdd);
+        newIds.push(familyToAdd.id);
+      });
+      await simulateLatency(undefined);
+      return ok(newIds);
+    } catch (e) {
+      return err({
+        message: 'Failed to add multiple families to mock service.',
+        details: e as Error,
+      });
+    }
+  }
 }

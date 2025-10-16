@@ -1,4 +1,4 @@
-import { RelationshipType } from '@/types';
+import { RelationshipType } from '@/types/common/relationshipType';
 import i18n from '@/plugins/i18n';
 
 export const RELATIONSHIP_TYPE_OPTIONS = [

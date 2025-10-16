@@ -210,4 +210,25 @@ export class MockEventService implements IEventService {
       });
     }
   }
+
+  async addMultiple(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
+    try {
+      const newIds: string[] = [];
+      newItems.forEach(newItem => {
+        const eventToAdd = {
+          ...newItem,
+          id: 'mock-id-' + Math.random().toString(36).substring(7),
+        };
+        this.events.push(eventToAdd);
+        newIds.push(eventToAdd.id);
+      });
+      await simulateLatency(undefined);
+      return ok(newIds);
+    } catch (e) {
+      return err({
+        message: 'Failed to add multiple events to mock service.',
+        details: e as Error,
+      });
+    }
+  }
 }
