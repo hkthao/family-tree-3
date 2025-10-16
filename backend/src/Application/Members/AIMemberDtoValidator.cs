@@ -14,7 +14,8 @@ public class AIMemberDtoValidator : AbstractValidator<AIMemberDto>
 
         RuleFor(x => x.Gender)
             .NotNull().WithMessage("Gender is required.")
-            .IsInEnum().WithMessage("Gender must be a valid value (Male, Female, Other).");
+            .Must(gender => new[] { "Male", "Female", "Other" }.Contains(gender, StringComparer.OrdinalIgnoreCase))
+            .WithMessage("Gender must be a valid value (Male, Female, Other).");
 
         RuleFor(x => x.DateOfBirth)
             .NotNull().WithMessage("Date of birth is required.");
