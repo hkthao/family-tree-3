@@ -2661,12 +2661,23 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "detectedFaceId": {
-            "type": "string"
-          },
           "memberId": {
             "type": "string",
             "format": "guid"
+          },
+          "faceId": {
+            "type": "string"
+          },
+          "boundingBox": {
+            "$ref": "#/components/schemas/BoundingBoxDto"
+          },
+          "confidence": {
+            "type": "number",
+            "format": "float"
+          },
+          "thumbnail": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

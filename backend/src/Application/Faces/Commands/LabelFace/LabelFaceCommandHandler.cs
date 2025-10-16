@@ -23,6 +23,8 @@ public class LabelFaceCommandHandler : IRequestHandler<LabelFaceCommand, Unit>
 
         _logger.LogInformation("Face {FaceId} labeled and stored in vector store (placeholder).", request.FaceId);
 
+        await Task.CompletedTask;
+
         return Unit.Value;
     }
 }

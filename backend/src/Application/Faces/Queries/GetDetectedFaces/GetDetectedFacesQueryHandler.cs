@@ -20,6 +20,8 @@ public class GetDetectedFacesQueryHandler : IRequestHandler<GetDetectedFacesQuer
         // This would involve querying the vector store for faces associated with the ImageId
         // and mapping them to DetectedFaceDto.
 
+        await Task.CompletedTask;
+
         return new List<DetectedFaceDto>();
     }
 }
