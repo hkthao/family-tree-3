@@ -6,6 +6,7 @@ public class FamilyDto : BaseAuditableDto
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
+    public string Code { get; set; } = null!;
     public string? Description { get; set; }
     public string? Address { get; set; }
     public int TotalMembers { get; set; } = 0;

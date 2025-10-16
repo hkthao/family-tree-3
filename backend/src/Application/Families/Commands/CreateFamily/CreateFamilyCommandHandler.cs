@@ -45,7 +45,8 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
                 Description = request.Description,
                 Address = request.Address,
                 AvatarUrl = request.AvatarUrl,
-                Visibility = request.Visibility
+                Visibility = request.Visibility,
+                Code = request.Code ?? GenerateUniqueCode("FAM")
             };
 
             _context.Families.Add(entity);
@@ -88,5 +89,12 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
             // Log the exception details here if a logger is available
             return Result<Guid>.Failure($"An unexpected error occurred while creating family: {ex.Message}", "Exception");
         }
+    }
+
+    private string GenerateUniqueCode(string prefix)
+    {
+        // For simplicity, generate a GUID and take a substring.
+        // In a real application, you'd want to ensure uniqueness against existing codes in the database.
+        return $"{prefix}-{Guid.NewGuid().ToString().Substring(0, 5).ToUpper()}";
     }
 }

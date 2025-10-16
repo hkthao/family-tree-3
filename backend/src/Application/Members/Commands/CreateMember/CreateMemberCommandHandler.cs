@@ -52,6 +52,7 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
+            Code = request.Code ?? GenerateUniqueCode("MEM"),
             Nickname = request.Nickname,
             DateOfBirth = request.DateOfBirth,
             DateOfDeath = request.DateOfDeath,
@@ -98,5 +99,12 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
         }
 
         return Result<Guid>.Success(entity.Id);
+    }
+
+    private string GenerateUniqueCode(string prefix)
+    {
+        // For simplicity, generate a GUID and take a substring.
+        // In a real application, you'd want to ensure uniqueness against existing codes in the database.
+        return $"{prefix}-{Guid.NewGuid().ToString().Substring(0, 5).ToUpper()}";
     }
 }

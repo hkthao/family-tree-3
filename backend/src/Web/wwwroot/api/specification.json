@@ -2528,6 +2528,9 @@
           "name": {
             "type": "string"
           },
+          "code": {
+            "type": "string"
+          },
           "description": {
             "type": "string",
             "nullable": true
@@ -2602,6 +2605,10 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string",
@@ -2697,6 +2704,9 @@
                 "format": "guid"
               },
               "name": {
+                "type": "string"
+              },
+              "code": {
                 "type": "string"
               },
               "description": {
@@ -2800,6 +2810,10 @@
         "properties": {
           "name": {
             "type": "string"
+          },
+          "code": {
+            "type": "string",
+            "nullable": true
           },
           "description": {
             "type": "string",
@@ -3105,6 +3119,10 @@
           "firstName": {
             "type": "string"
           },
+          "code": {
+            "type": "string",
+            "nullable": true
+          },
           "nickname": {
             "type": "string",
             "nullable": true
@@ -3164,6 +3182,9 @@
             "type": "string"
           },
           "lastName": {
+            "type": "string"
+          },
+          "code": {
             "type": "string"
           },
           "nickname": {

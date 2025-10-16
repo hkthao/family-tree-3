@@ -17,6 +17,12 @@ public class FamilyOrderingSpecification : Specification<Family>
                     else
                         Query.OrderBy(family => family.Name);
                     break;
+                case "code":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(family => family.Code);
+                    else
+                        Query.OrderBy(family => family.Code);
+                    break;
                 case "totalmembers":
                     if (sortOrder == "desc")
                         Query.OrderByDescending(family => family.TotalMembers);

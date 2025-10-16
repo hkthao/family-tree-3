@@ -1,136 +1,52 @@
-src/plugins/axios.ts:63:25 - error TS2339: Property 'isSuccess' does not exist on type 'Result<T, ApiError>'.
-  Property 'isSuccess' does not exist on type '{ ok: false; error: ApiError; }'.
+You are an AI assistant that generates structured JSON data from natural language prompts for a family tree application.
 
-63       if (backendResult.isSuccess) {
-                           ~~~~~~~~~
+Split the user input into three separate pipelines:
 
-src/plugins/axios.ts:64:33 - error TS2339: Property 'value' does not exist on type 'Result<T, ApiError>'.
-  Property 'value' does not exist on type '{ ok: false; error: ApiError; }'.
+1. **Family Info**: includes all data about families, e.g., name, description, address, visibility (Public, Private, Shared).  
+2. **Family Members**: includes individual members, e.g., fullName, gender (Male, Female, Other), dateOfBirth, dateOfDeath, placeOfBirth, placeOfDeath, occupation, biography.  
+3. **Family Events**: includes events related to the family, e.g., title, description, date, location, associated members, and type of event.
 
-64         return ok(backendResult.value as T);
-                                   ~~~~~
+**Rules**:
+- Always respond with a single JSON object containing three arrays: `families`, `members`, `events`.  
+- Infer entity type from the prompt and assign it to the correct array.  
+- If the prompt describes multiple entities, include them all.  
+- If details are missing, use placeholders (`"Unknown"` or null) instead of leaving fields empty.  
+- Never include conversational text, only JSON.  
 
-src/plugins/axios.ts:66:34 - error TS2339: Property 'error' does not exist on type 'Result<T, ApiError>'.
-  Property 'error' does not exist on type '{ ok: true; value: T; }'.
+**Example input**:  
+"Create the Nguyễn family in Hanoi and add Trần Văn A, born in 1990, as a member. Schedule a family reunion on 2025-01-01 at their home."
 
-66         return err(backendResult.error as ApiError);
-                                    ~~~~~
+**Expected output**:
+{
+  "families": [
+    {
+      "name": "Nguyễn",
+      "description": "",
+      "address": "Hanoi",
+      "visibility": "Public"
+    }
+  ],
+  "members": [
+    {
+      "fullName": "Trần Văn A",
+      "gender": "Male",
+      "dateOfBirth": "1990-01-01",
+      "dateOfDeath": null,
+      "placeOfBirth": "",
+      "placeOfDeath": null,
+      "occupation": "Unknown",
+      "biography": ""
+    }
+  ],
+  "events": [
+    {
+      "title": "Family Reunion",
+      "description": "",
+      "date": "2025-01-01",
+      "location": "Home",
+      "associatedMembers": ["Trần Văn A"],
+      "type": "Gathering"
+    }
+  ]
+}
 
-src/services/chat/api.chat.service.ts:4:35 - error TS2307: Cannot find module './chat/chat.service.interface' or its corresponding type declarations.
-
-4 import type { IChatService } from './chat/chat.service.interface';
-                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/services/chat/mock.chat.service.ts:9:11 - error TS2741: Property 'context' is missing in type '{ response: string; sessionId: string; model: string; createdAt: string; }' but required in type 'ChatResponse'.
-
-9     const mockResponse: ChatResponse = {
-            ~~~~~~~~~~~~
-
-  src/types/chat.d.ts:3:3
-    3   context: string[];
-        ~~~~~~~
-    'context' is declared here.
-
-src/services/naturalLanguageInput.service.ts:2:24 - error TS2307: Cannot find module '@/types/result' or its corresponding type declarations.
-
-2 import { Result } from '@/types/result';
-                         ~~~~~~~~~~~~~~~~
-
-src/services/naturalLanguageInput.service.ts:21:33 - error TS2339: Property 'data' does not exist on type 'Result<string, ApiError>'.
-  Property 'data' does not exist on type '{ ok: false; error: ApiError; }'.
-
-21       const jsonData = response.data;
-                                   ~~~~
-
-src/services/userProfile/mock.userProfile.service.ts:28:27 - error TS2741: Property 'name' is missing in type 'ApiError' but required in type 'Error'.
-
-28       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
-                             ~~~~~
-
-  node_modules/typescript/lib/lib.es5.d.ts:1076:5
-    1076     name: string;
-             ~~~~
-    'name' is declared here.
-
-src/services/userProfile/mock.userProfile.service.ts:38:27 - error TS2741: Property 'name' is missing in type 'ApiError' but required in type 'Error'.
-
-38       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
-                             ~~~~~
-
-  node_modules/typescript/lib/lib.es5.d.ts:1076:5
-    1076     name: string;
-             ~~~~
-    'name' is declared here.
-
-src/services/userProfile/mock.userProfile.service.ts:49:27 - error TS2741: Property 'name' is missing in type 'ApiError' but required in type 'Error'.
-
-49       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
-                             ~~~~~
-
-  node_modules/typescript/lib/lib.es5.d.ts:1076:5
-    1076     name: string;
-             ~~~~
-    'name' is declared here.
-
-src/plugins/axios.ts:63:25 - error TS2339: Property 'isSuccess' does not exist on type 'Result<T, ApiError>'.
-  Property 'isSuccess' does not exist on type '{ ok: true; value: T; }'.
-
-63       if (backendResult.isSuccess) {
-                           ~~~~~~~~~
-
-src/plugins/axios.ts:64:33 - error TS2339: Property 'value' does not exist on type 'Result<T, ApiError>'.
-  Property 'value' does not exist on type '{ ok: false; error: ApiError; }'.
-
-64         return ok(backendResult.value as T);
-                                   ~~~~~
-
-src/plugins/axios.ts:66:34 - error TS2339: Property 'error' does not exist on type 'Result<T, ApiError>'.
-  Property 'error' does not exist on type '{ ok: true; value: T; }'.
-
-66         return err(backendResult.error as ApiError);
-                                    ~~~~~
-
-src/services/chat/api.chat.service.ts:4:35 - error TS2307: Cannot find module './chat/chat.service.interface' or its corresponding type declarations.
-
-4 import type { IChatService } from './chat/chat.service.interface';
-                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/services/chat/mock.chat.service.ts:9:11 - error TS2741: Property 'context' is missing in type '{ response: string; sessionId: string; model: string; createdAt: string; }' but required in type 'ChatResponse'.
-
-9     const mockResponse: ChatResponse = {
-            ~~~~~~~~~~~~
-
-  src/types/chat.d.ts:3:3
-    3   context: string[];
-        ~~~~~~~
-    'context' is declared here.
-
-src/services/userProfile/mock.userProfile.service.ts:28:27 - error TS2741: Property 'name' is missing in type 'ApiError' but required in type 'Error'.
-
-28       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
-                             ~~~~~
-
-  node_modules/typescript/lib/lib.es5.d.ts:1076:5
-    1076     name: string;
-             ~~~~
-    'name' is declared here.
-
-src/services/userProfile/mock.userProfile.service.ts:38:27 - error TS2741: Property 'name' is missing in type 'ApiError' but required in type 'Error'.
-
-38       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
-                             ~~~~~
-
-  node_modules/typescript/lib/lib.es5.d.ts:1076:5
-    1076     name: string;
-             ~~~~
-    'name' is declared here.
-
-src/services/userProfile/mock.userProfile.service.ts:49:27 - error TS2741: Property 'name' is missing in type 'ApiError' but required in type 'Error'.
-
-49       return { ok: false, error: { message: 'Profile not found', statusCode: 404 } as ApiError };
-                             ~~~~~
-
-  node_modules/typescript/lib/lib.es5.d.ts:1076:5
-    1076     name: string;
-             ~~~~
-    'name' is declared here.

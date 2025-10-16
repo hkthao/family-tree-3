@@ -23,6 +23,12 @@ public class MemberOrderingSpecification : Specification<Member>
                     else
                         Query.OrderBy(member => member.LastName);
                     break;
+                case "code":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(member => member.Code);
+                    else
+                        Query.OrderBy(member => member.Code);
+                    break;
                 case "fullname":
                     if (sortOrder == "desc")
                     {

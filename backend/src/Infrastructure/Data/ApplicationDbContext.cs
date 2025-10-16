@@ -25,6 +25,33 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+        builder.Entity<Family>()
+            .Property(f => f.Code)
+            .IsRequired()
+            .HasMaxLength(50);
+
+        builder.Entity<Family>()
+            .HasIndex(f => f.Code)
+            .IsUnique();
+
+        builder.Entity<Member>()
+            .Property(m => m.Code)
+            .IsRequired()
+            .HasMaxLength(50);
+
+        builder.Entity<Member>()
+            .HasIndex(m => m.Code)
+            .IsUnique();
+
+        builder.Entity<Event>()
+            .Property(e => e.Code)
+            .IsRequired()
+            .HasMaxLength(50);
+
+        builder.Entity<Event>()
+            .HasIndex(e => e.Code)
+            .IsUnique();
+
         builder.Entity<Member>()
             .HasOne<Family>()
             .WithMany()

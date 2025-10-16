@@ -17,6 +17,12 @@ public class EventOrderingSpecification : Specification<Event>
                     else
                         Query.OrderBy(e => e.Name);
                     break;
+                case "code":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(e => e.Code);
+                    else
+                        Query.OrderBy(e => e.Code);
+                    break;
                 case "startdate":
                     if (sortOrder == "desc")
                         Query.OrderByDescending(e => e.StartDate);

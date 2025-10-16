@@ -83,6 +83,7 @@ public class ApplicationDbContextInitialiser
             {
                 Id = royalFamilyId,
                 Name = "Royal Family",
+                Code = "FAM-ROYAL",
                 Description = "The British Royal Family, a prominent family with a rich history.",
                 AvatarUrl = "https://i.pravatar.cc/150?img=3",
                 Address = "Buckingham Palace, London, UK",
@@ -98,6 +99,7 @@ public class ApplicationDbContextInitialiser
                 {
                     Id = Guid.NewGuid(),
                     Name = $"Family {i}",
+                    Code = $"FAM-{i:D3}",
                     Description = $"Description for Family {i}",
                     AvatarUrl = $"https://i.pravatar.cc/150?img=3",
                     Address = "Address" + i.ToString(),
@@ -129,25 +131,25 @@ public class ApplicationDbContextInitialiser
 
             var members = new List<Domain.Entities.Member>
             {
-                new Domain.Entities.Member { Id = williamId, FirstName = "Prince", LastName = "William", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1982, 6, 21), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = catherineId, FirstName = "Catherine", LastName = "Middleton", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1982, 1, 9), PlaceOfBirth = "Reading", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = georgeId, FirstName = "Prince", LastName = "George", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2013, 7, 22), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = elizabethIIId, FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1926, 4, 21), DateOfDeath = new DateTime(2022, 9, 8), PlaceOfBirth = "London", PlaceOfDeath = "Balmoral", Occupation = "Monarch" },
-                new Domain.Entities.Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2015, 5, 2), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = louisId, FirstName = "Prince", LastName = "Louis", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2018, 4, 23), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = harryId, FirstName = "Prince", LastName = "Harry", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1984, 9, 15), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = meghanId, FirstName = "Meghan", LastName = "Markle", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1981, 8, 4), PlaceOfBirth = "Los Angeles", Occupation = "Actress" },
-                new Domain.Entities.Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2019, 5, 6), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = lilibetMountbattenWindsorId, FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" },
-                new Domain.Entities.Member { Id = charlesIIIId, FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1948, 11, 14), PlaceOfBirth = "London", Occupation = "Monarch"},
-                new Domain.Entities.Member { Id = queenConsortId, FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1947, 7, 17), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = philipId, FirstName = "Prince", LastName = "Philip", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1921, 6, 10), DateOfDeath = new DateTime(2021, 4, 9), PlaceOfBirth = "Corfu", PlaceOfDeath = "Windsor", Occupation = "Royal Consort", IsRoot = true },
-                new Domain.Entities.Member { Id = dianaId, FirstName = "Princess", LastName = "Diana", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1961, 7, 1), DateOfDeath = new DateTime(1997, 8, 31), PlaceOfBirth = "Sandringham", PlaceOfDeath = "Paris", Occupation = "Princess" },
-                new Domain.Entities.Member { Id = andrewId, FirstName = "Prince", LastName = "Andrew", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1960, 2, 19), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = sarahId, FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1959, 10, 15), PlaceOfBirth = "London", Occupation = "Author" },
-                new Domain.Entities.Member { Id = eugenieId, FirstName = "Princess", LastName = "Eugenie", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1990, 3, 23), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = beatriceId, FirstName = "Princess", LastName = "Beatrice", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1988, 8, 8), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = lilibetSussexId, FirstName = "Princess", LastName = "Lilibet", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" }
+                new Domain.Entities.Member { Id = williamId, Code = "MEM-WM", FirstName = "Prince", LastName = "William", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1982, 6, 21), PlaceOfBirth = "London", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = catherineId, Code = "MEM-CT", FirstName = "Catherine", LastName = "Middleton", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1982, 1, 9), PlaceOfBirth = "Reading", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = georgeId, Code = "MEM-GG", FirstName = "Prince", LastName = "George", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2013, 7, 22), PlaceOfBirth = "London" },
+                new Domain.Entities.Member { Id = elizabethIIId, Code = "MEM-EL", FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1926, 4, 21), DateOfDeath = new DateTime(2022, 9, 8), PlaceOfBirth = "London", PlaceOfDeath = "Balmoral", Occupation = "Monarch" },
+                new Domain.Entities.Member { Id = charlotteId, Code = "MEM-CH", FirstName = "Princess", LastName = "Charlotte", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2015, 5, 2), PlaceOfBirth = "London" },
+                new Domain.Entities.Member { Id = louisId, Code = "MEM-LO", FirstName = "Prince", LastName = "Louis", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2018, 4, 23), PlaceOfBirth = "London" },
+                new Domain.Entities.Member { Id = harryId, Code = "MEM-HA", FirstName = "Prince", LastName = "Harry", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1984, 9, 15), PlaceOfBirth = "London", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = meghanId, Code = "MEM-MM", FirstName = "Meghan", LastName = "Markle", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1981, 8, 4), PlaceOfBirth = "Los Angeles", Occupation = "Actress" },
+                new Domain.Entities.Member { Id = archieId, Code = "MEM-AM", FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2019, 5, 6), PlaceOfBirth = "London" },
+                new Domain.Entities.Member { Id = lilibetMountbattenWindsorId, Code = "MEM-LM", FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" },
+                new Domain.Entities.Member { Id = charlesIIIId, Code = "MEM-KC", FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1948, 11, 14), PlaceOfBirth = "London", Occupation = "Monarch"},
+                new Domain.Entities.Member { Id = queenConsortId, Code = "MEM-QC", FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1947, 7, 17), PlaceOfBirth = "London", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = philipId, Code = "MEM-PP", FirstName = "Prince", LastName = "Philip", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1921, 6, 10), DateOfDeath = new DateTime(2021, 4, 9), PlaceOfBirth = "Corfu", PlaceOfDeath = "Windsor", Occupation = "Royal Consort", IsRoot = true },
+                new Domain.Entities.Member { Id = dianaId, Code = "MEM-PD", FirstName = "Princess", LastName = "Diana", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1961, 7, 1), DateOfDeath = new DateTime(1997, 8, 31), PlaceOfBirth = "Sandringham", PlaceOfDeath = "Paris", Occupation = "Princess" },
+                new Domain.Entities.Member { Id = andrewId, Code = "MEM-PA", FirstName = "Prince", LastName = "Andrew", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1960, 2, 19), PlaceOfBirth = "London", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = sarahId, Code = "MEM-SF", FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1959, 10, 15), PlaceOfBirth = "London", Occupation = "Author" },
+                new Domain.Entities.Member { Id = eugenieId, Code = "MEM-EU", FirstName = "Princess", LastName = "Eugenie", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1990, 3, 23), PlaceOfBirth = "London", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = beatriceId, Code = "MEM-BE", FirstName = "Princess", LastName = "Beatrice", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1988, 8, 8), PlaceOfBirth = "London", Occupation = "Royal" },
+                new Domain.Entities.Member { Id = lilibetSussexId, Code = "MEM-LS", FirstName = "Princess", LastName = "Lilibet", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" }
             };
             _context.Members.AddRange(members);
 
@@ -156,6 +158,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-PG",
                     Name = "Birth of Prince George",
                     Description = "The birth of Prince George of Wales.",
                     StartDate = new DateTime(2013, 7, 22),
@@ -167,6 +170,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-M-WC",
                     Name = "Marriage of William and Catherine",
                     Description = "The marriage of Prince William, Duke of Cambridge, and Catherine Middleton.",
                     StartDate = new DateTime(2011, 4, 29),
@@ -178,6 +182,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-D-QE",
                     Name = "Death of Queen Elizabeth II",
                     Description = "The death of Queen Elizabeth II.",
                     StartDate = new DateTime(2022, 9, 8),
@@ -189,6 +194,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-PC",
                     Name = "Birth of Princess Charlotte",
                     Description = "The birth of Princess Charlotte of Wales.",
                     StartDate = new DateTime(2015, 5, 2),
@@ -200,6 +206,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-PL",
                     Name = "Birth of Prince Louis",
                     Description = "The birth of Prince Louis of Wales.",
                     StartDate = new DateTime(2018, 4, 23),
@@ -211,6 +218,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-M-HM",
                     Name = "Marriage of Harry and Meghan",
                     Description = "The marriage of Prince Harry and Meghan Markle.",
                     StartDate = new DateTime(2018, 5, 19),
@@ -222,6 +230,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-AM",
                     Name = "Birth of Archie Mountbatten-Windsor",
                     Description = "The birth of Archie Mountbatten-Windsor.",
                     StartDate = new DateTime(2019, 5, 6),
@@ -233,6 +242,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-LM",
                     Name = "Birth of Lilibet Mountbatten-Windsor",
                     Description = "The birth of Lilibet Mountbatten-Windsor.",
                     StartDate = new DateTime(2021, 6, 4),
@@ -244,6 +254,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-QPJ",
                     Name = "Queen's Platinum Jubilee",
                     Description = "Celebration of Queen Elizabeth II's 70 years on the throne.",
                     StartDate = new DateTime(2022, 6, 2),
@@ -255,6 +266,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-C-KC",
                     Name = "Coronation of King Charles III",
                     Description = "The coronation of King Charles III and Queen Camilla.",
                     StartDate = new DateTime(2023, 5, 6),
@@ -266,6 +278,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-TTC",
                     Name = "Trooping the Colour 2023",
                     Description = "The King's official birthday parade.",
                     StartDate = new DateTime(2023, 6, 17),
@@ -276,6 +289,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-F-PP",
                     Name = "Prince Philip's Funeral",
                     Description = "The funeral of Prince Philip, Duke of Edinburgh.",
                     StartDate = new DateTime(2021, 4, 17),
@@ -287,6 +301,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-F-PD",
                     Name = "Princess Diana's Funeral",
                     Description = "The funeral of Diana, Princess of Wales.",
                     StartDate = new DateTime(1997, 9, 6),
@@ -298,6 +313,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-M-AS",
                     Name = "Royal Wedding of Prince Andrew and Sarah Ferguson",
                     Description = "The wedding of Prince Andrew and Sarah Ferguson.",
                     StartDate = new DateTime(1986, 7, 23),
@@ -309,6 +325,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-M-EJ",
                     Name = "Royal Wedding of Princess Eugenie and Jack Brooksbank",
                     Description = "The wedding of Princess Eugenie of York and Jack Brooksbank.",
                     StartDate = new DateTime(2018, 10, 12),
@@ -320,6 +337,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-M-BM",
                     Name = "Royal Wedding of Princess Beatrice and Edoardo Mapelli Mozzi",
                     Description = "The wedding of Princess Beatrice of York and Edoardo Mapelli Mozzi.",
                     StartDate = new DateTime(2020, 7, 17),
@@ -331,6 +349,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-PW",
                     Name = "Birth of Prince William",
                     Description = "The birth of Prince William, Prince of Wales.",
                     StartDate = new DateTime(1982, 6, 21),
@@ -342,6 +361,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-PH",
                     Name = "Birth of Prince Harry",
                     Description = "The birth of Prince Harry, Duke of Sussex.",
                     StartDate = new DateTime(1984, 9, 15),
@@ -353,6 +373,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-B-KC",
                     Name = "Birth of King Charles III",
                     Description = "The birth of King Charles III.",
                     StartDate = new DateTime(1948, 11, 14),
@@ -364,6 +385,7 @@ public class ApplicationDbContextInitialiser
                 new Domain.Entities.Event
                 {
                     Id = Guid.NewGuid(),
+                    Code = "EVT-C-QE",
                     Name = "Queen Elizabeth II's Coronation",
                     Description = "The coronation of Queen Elizabeth II.",
                     StartDate = new DateTime(1953, 6, 2),

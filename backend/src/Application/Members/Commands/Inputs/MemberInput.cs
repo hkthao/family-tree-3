@@ -4,6 +4,7 @@ public record MemberInput
 {
     public string LastName { get; init; } = null!;
     public string FirstName { get; init; } = null!;
+    public string? Code { get; init; }
     public string? Nickname { get; init; }
     public DateTime? DateOfBirth { get; init; }
     public DateTime? DateOfDeath { get; init; }

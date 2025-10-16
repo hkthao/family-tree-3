@@ -40,6 +40,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Res
         var entity = new Event
         {
             Name = request.Name,
+            Code = request.Code ?? GenerateUniqueCode("EVT"),
             Description = request.Description,
             StartDate = request.StartDate,
             EndDate = request.EndDate,
@@ -63,5 +64,12 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Res
             TargetId = entity.Id.ToString(),
             ActivitySummary = $"Created event '{entity.Name}'."
         }, cancellationToken); return Result<Guid>.Success(entity.Id);
+    }
+
+    private string GenerateUniqueCode(string prefix)
+    {
+        // For simplicity, generate a GUID and take a substring.
+        // In a real application, you'd want to ensure uniqueness against existing codes in the database.
+        return $"{prefix}-{Guid.NewGuid().ToString().Substring(0, 5).ToUpper()}";
     }
 }

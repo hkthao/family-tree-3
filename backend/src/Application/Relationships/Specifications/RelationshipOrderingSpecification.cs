@@ -23,6 +23,18 @@ public class RelationshipOrderingSpecification : Specification<Relationship>
                     else
                         Query.OrderBy(r => r.TargetMember!.LastName).ThenBy(r => r.TargetMember!.FirstName);
                     break;
+                case "sourcemembercode":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(r => r.SourceMember!.Code);
+                    else
+                        Query.OrderBy(r => r.SourceMember!.Code);
+                    break;
+                case "targetmembercode":
+                    if (sortOrder == "desc")
+                        Query.OrderByDescending(r => r.TargetMember!.Code);
+                    else
+                        Query.OrderBy(r => r.TargetMember!.Code);
+                    break;
                 case "type":
                     if (sortOrder == "desc")
                         Query.OrderByDescending(r => r.Type);
