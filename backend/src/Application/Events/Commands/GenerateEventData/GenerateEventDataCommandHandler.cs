@@ -5,7 +5,6 @@ using backend.Application.Events.Queries;
 using backend.Domain.Enums;
 using System.Text.Json;
 using FluentValidation.Results;
-using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.GenerateEventData;
 

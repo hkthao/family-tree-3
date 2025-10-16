@@ -5,7 +5,6 @@ using backend.Application.Members.Queries;
 using backend.Domain.Enums;
 using System.Text.Json;
 using FluentValidation.Results;
-using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.Commands.GenerateMemberData;
 

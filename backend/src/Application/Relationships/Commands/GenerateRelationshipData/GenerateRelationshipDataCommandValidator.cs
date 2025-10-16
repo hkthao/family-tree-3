@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 
 public class GenerateRelationshipDataCommandValidator : AbstractValidator<GenerateRelationshipDataCommand>
