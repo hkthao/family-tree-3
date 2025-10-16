@@ -80,25 +80,13 @@ const generatedData = ref<Relationship[] | null>(null);
 const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
 
-const displayKeys = [
-  'sourceMemberFullName',
-  'targetMemberFullName',
-  'type',
-];
+
 
 const hasValidationErrors = computed(() => {
   return generatedData.value?.some(relationship => relationship.validationErrors && relationship.validationErrors.length > 0) || false;
 });
 
-const formatValue = (value: any, key: string) => {
-  if (value === null || value === '') {
-    return t('common.unknown');
-  }
-  if (key === 'type') {
-    return getRelationshipTypeTitle(value);
-  }
-  return value;
-};
+
 
 const rules = {
   required: (value: string) => !!value || t('aiInput.promptRequired'),

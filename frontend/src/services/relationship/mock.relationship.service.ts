@@ -1,5 +1,5 @@
 import type { IRelationshipService } from './relationship.service.interface';
-import { err, ok, type Result, type Paginated, type Relationship, type RelationshipFilter } from '@/types';
+import { err, ok, type Result, type Paginated, type Relationship } from '@/types';
 
 export class MockRelationshipService implements IRelationshipService {
   private relationships: Relationship[] = [];

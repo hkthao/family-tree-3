@@ -33,7 +33,6 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
@@ -47,7 +46,6 @@ const { t } = useI18n();
 const router = useRouter();
 
 const relationshipStore = useRelationshipStore();
-const { items, loading } = storeToRefs(relationshipStore); // Removed currentPage as it's not directly used here
 const notificationStore = useNotificationStore();
 
 const currentFilters = ref<RelationshipFilter>({});

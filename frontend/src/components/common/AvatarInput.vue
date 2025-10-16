@@ -62,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, type PropType, nextTick } from 'vue';
+import { ref, computed, type PropType, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AvatarDisplay from './AvatarDisplay.vue';
 import { Cropper, type CropperResult } from 'vue-advanced-cropper';

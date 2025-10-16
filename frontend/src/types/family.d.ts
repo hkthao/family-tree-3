@@ -1,4 +1,4 @@
-import { FamilyVisibility } from './family-visibility';
+import { FamilyVisibility } from "./family-visibility.d.ts";
 
 export interface Family {
   id: string;
@@ -19,12 +19,6 @@ export interface FamilyFilter {
   familyId?: string;
   sortBy?: string; // Column name to sort by
   sortOrder?: 'asc' | 'desc'; // Sort order
-}
-
-export interface ConfirmDeleteDialogProps {
-  modelValue: boolean;
-  title: string;
-  message: string;
 }
 
 export interface FamilyUser {

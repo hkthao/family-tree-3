@@ -1,4 +1,4 @@
-import { EventType } from './event-type';
+import { EventType } from './event-type.d.ts';
 
 export interface Event {
   id?: string;

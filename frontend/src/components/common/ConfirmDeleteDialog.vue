@@ -15,10 +15,21 @@
 </template>
 
 <script setup lang="ts">
+interface Props {
+  modelValue: boolean;
+  title?: string;
+  message?: string;
+}
 
-import type { ConfirmDeleteDialogProps } from '@/types';
+withDefaults(defineProps<Props>(), {
+  modelValue: false,
+  title: undefined,
+  message: undefined,
+});
 
-defineProps<ConfirmDeleteDialogProps>();
-defineEmits(['confirm', 'cancel']);
-
+interface Emits {
+  (e: 'confirm'): void;
+  (e: 'cancel'): void;
+}
+defineEmits<Emits>();
 </script>
