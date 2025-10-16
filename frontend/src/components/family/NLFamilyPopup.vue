@@ -10,6 +10,9 @@
         <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
           {{ t('aiInput.generateButton') }}
         </v-btn>
+        <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
+          {{ t('aiInput.fillSampleButton') }}
+        </v-btn>
 
         <div v-if="generatedData && generatedData.length">
           <v-alert type="info" class="mb-4">{{ t('aiInput.previewMessage') }}</v-alert>
@@ -34,7 +37,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
-        }}</v-btn>
+          }}</v-btn>
         <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors"
           @click="save">{{
             t('aiInput.saveButton') }}</v-btn>
@@ -66,7 +69,7 @@ const naturalLanguageInputStore = useNaturalLanguageInputStore();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-const prompt = ref(`Tạo gia đình Nguyễn tại Hà Nội. Gia đình này nổi tiếng về truyền thống học vấn và là dòng dõi học giả. Họ có trụ sở chính ở quận Hoàn Kiếm. Số điện thoại liên hệ là 0123456789, email liên hệ: nguyensfamily@example.com. Trang web chính thức là www.nguyensfamily.vn. Gia đình được thành lập từ năm 1800. Có một huy hiệu gia đình màu xanh với hình sách. Thêm các tag liên quan: học giả, Hà Nội, Việt Nam. Hình ảnh đại diện: https://www.w3schools.com/w3images/avatar5.png. Số thành viên hiện tại là 15, với 4 thế hệ.`);
+const prompt = ref('');
 const generatedData = ref<Family[] | null>(null);
 const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
@@ -161,5 +164,9 @@ const save = async () => {
 const cancel = () => {
   naturalLanguageInputStore.error = null; // Clear error on cancel
   emit('update:modelValue', false);
+};
+
+const fillSamplePrompt = () => {
+  prompt.value = `Tạo gia đình Nguyễn tại Hà Nội. Gia đình này nổi tiếng về truyền thống học vấn và là dòng dõi học giả. Họ có trụ sở chính ở quận Hoàn Kiếm. Số điện thoại liên hệ là 0123456789, email liên hệ: nguyensfamily@example.com. Trang web chính thức là www.nguyensfamily.vn. Gia đình được thành lập từ năm 1800. Có một huy hiệu gia đình màu xanh với hình sách. Thêm các tag liên quan: học giả, Hà Nội, Việt Nam. Hình ảnh đại diện: https://www.w3schools.com/w3images/avatar5.png. Số thành viên hiện tại là 15, với 4 thế hệ`;
 };
 </script>

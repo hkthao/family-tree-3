@@ -494,8 +494,10 @@
   "member.familyId": "ID Gia đình",
   "member.avatarUrl": "URL ảnh đại diện",
   "aiInput.title": "Nhập liệu AI",
-  "aiInput.promptLabel": "Nhập mô tả gia đình của bạn (ví dụ: 'Tạo gia đình Nguyễn ở Hà Nội với chế độ công khai')",
+  "aiInput.promptLabel": "Gợi ý cho AI",
+  "aiInput.promptLabelFamily": "Mô tả gia đình bạn muốn tạo (ví dụ: 'Tạo gia đình Nguyễn ở Hà Nội với chế độ công khai')",
   "aiInput.generateButton": "Tạo dữ liệu",
+  "aiInput.fillSampleButton": "Điền mẫu",
   "aiInput.previewMessage": "Đây là bản xem trước dữ liệu được tạo. Vui lòng kiểm tra trước khi lưu.",
   "aiInput.families": "Gia đình",
   "aiInput.family": "Gia đình",
@@ -509,5 +511,7 @@
   "aiInput.promptRequired": "Mô tả là bắt buộc.",
   "aiInput.promptLength": "Mô tả không được vượt quá {length} ký tự.",
   "aiInput.validationErrorsFound": "Dữ liệu được tạo có thông tin bị thiếu hoặc không hợp lệ. Vui lòng kiểm tra các lỗi bên dưới.",
-  "family.list.action.aiCreate": "Tạo gia đình bằng AI"
+  "family.list.action.aiCreate": "Tạo gia đình bằng AI",
+  "aiInput.guidanceTitle": "Cách sử dụng Nhập liệu AI",
+  "aiInput.guidanceDescription": "Bạn có thể mô tả gia đình bạn muốn tạo bằng ngôn ngữ tự nhiên. AI sẽ tạo dữ liệu có cấu trúc dựa trên mô tả của bạn. Dưới đây là một ví dụ:"
 }

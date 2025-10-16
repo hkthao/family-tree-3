@@ -20,7 +20,8 @@
   "aiBiography.generator.title": "AI Biography Generator",
   "aiBiography.generator.description": "Generate or update biographies for family members using AI.",
   "aiBiography.input.title": "Input & Configuration",
-  "aiBiography.input.promptLabel": "Prompt",
+  "aiInput.input.promptLabel": "Prompt",
+  "aiInput.promptLabelFamily": "Describe the family you want to create (e.g., 'Create the Nguyen family in Hanoi with public visibility')",
   "aiBiography.input.promptPlaceholder": "Describe the style, language, or details you want the AI to include...",
   "aiBiography.input.savePromptLabel": "Save this prompt for later use",
   "aiBiography.input.autoMode": "Auto Mode (Generate from DB data)",
@@ -28,7 +29,8 @@
   "aiBiography.input.styleLabel": "Biography Style",
   "aiBiography.input.tokenLimitLabel": "Max Tokens",
   "aiBiography.input.temperatureLabel": "Temperature",
-  "aiBiography.input.generateButton": "Generate",
+  "aiInput.generateButton": "Generate",
+  "aiInput.fillSampleButton": "Fill Sample",
   "aiBiography.input.clearButton": "Clear",
   "aiBiography.input.useSavedPromptButton": "Use Saved Prompt",
   "aiBiography.input.providerLabel": "AI Provider",
@@ -438,5 +440,7 @@
   "member.placeOfBirth": "Place of Birth",
   "member.placeOfDeath": "Place of Death",
   "member.occupation": "Occupation",
-  "member.biography": "Biography"
+  "member.biography": "Biography",
+  "aiInput.guidanceTitle": "How to use AI Input",
+  "aiInput.guidanceDescription": "You can describe the family you want to create in natural language. The AI will then generate structured data based on your description. Here's an example:"
 }
