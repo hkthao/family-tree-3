@@ -26,7 +26,7 @@ const aiBiographyStore = useAIBiographyStore();
 onMounted(() => {
   if (route.params.memberId) {
     aiBiographyStore.memberId = route.params.memberId as string;
-    aiBiographyStore.fetchLastAIBiography(aiBiographyStore.memberId);
+
     aiBiographyStore.fetchMemberDetails(aiBiographyStore.memberId); // Added
   }
 });

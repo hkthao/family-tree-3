@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import type { BiographyResultDto, AIProviderDto, Member } from '@/types'; // Added Member
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
+import { useNotificationStore } from './notification.store'; // Added
 
 export const useAIBiographyStore = defineStore('aiBiography', {
   state: () => ({
@@ -28,7 +29,10 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       try {
         const result = await this.services.member.getById(memberId);
         if (result.ok) {
-          this.currentMember = result.value;
+          this.currentMember = result.value!;
+          if (this.currentMember.biography) {
+            this.biographyResult = { content: this.currentMember.biography };
+          }
         } else {
           this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchMemberFailed');
         }
@@ -72,36 +76,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       }
     },
 
-    async fetchLastAIBiography(memberId: string) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result =
-          await this.services.aiBiography.getLastAIBiography(memberId);
-        if (result.ok) {
-          if (result.value) {
-            this.memberId = result.value.memberId;
-            this.generatedFromDB = result.value.generatedFromDB;
-            this.style = result.value.style;
-            this.userPrompt = result.value.userPrompt;
-            this.language = result.value.language;
-            this.selectedProvider = result.value.provider;
-            this.biographyResult = {
-              content: result.value.content,
-            } as BiographyResultDto;
-          }
-        } else {
-          this.error =
-            result.error?.message ||
-            i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
-        }
-      } catch (err: any) {
-        this.error =
-          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
+
 
     async fetchAIProviders() {
       this.loading = true;
@@ -159,6 +134,8 @@ export const useAIBiographyStore = defineStore('aiBiography', {
           if (this.currentMember) {
             this.currentMember.biography = content;
           }
+          const notificationStore = useNotificationStore();
+          notificationStore.showNotification(i18n.global.t('aiBiography.success.save'), 'success');
         } else {
           this.error =
             result.error?.message ||

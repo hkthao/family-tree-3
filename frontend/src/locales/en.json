@@ -44,6 +44,7 @@
   "aiBiography.errors.fetchLastPromptFailed": "Failed to fetch last user prompt.",
   "aiBiography.errors.fetchProvidersFailed": "Failed to fetch AI providers.",
   "aiBiography.errors.fetchMemberFailed": "Failed to fetch member details.",
+  "aiBiography.success.save": "Biography saved successfully!",
   "aiBiography.styles.emotional": "Emotional",
   "aiBiography.styles.historical": "Historical",
   "aiBiography.styles.storytelling": "Storytelling",
