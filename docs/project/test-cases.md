@@ -53,6 +53,8 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 | TC_ATTACH_01 | Tải lên file đính kèm thành công       | Attachments            | Medium   | Manual            |
 | TC_ATTACH_02 | Xóa file đính kèm                      | Attachments            | Medium   | Manual            |
 | TC_USERPREF_01 | Cập nhật tùy chọn người dùng thành công | User Preferences       | High     | Manual/Automated  |
+| TC_USERPREF_02 | Cập nhật tùy chọn người dùng thất bại (dữ liệu không hợp lệ) | User Preferences       | Medium   | Manual/Automated  |
+| TC_USERPREF_03 | Kiểm tra tùy chọn người dùng mặc định | User Preferences       | Medium   | Manual/Automated  |
 | TC_AIBIO_01    | Tạo tiểu sử AI thành công             | AI Biography           | High     | Manual/Automated  |
 | TC_CHUNK_01    | Tải lên và xử lý file thành công       | Document Chunking      | High     | Manual/Automated  |
 
@@ -394,6 +396,42 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
 -   **Thực tế**: (Để trống)
 -   **Severity**: High
 -   **Priority**: High
+-   **Type**: Manual/Automated
+
+#### TC_USERPREF_02: Cập nhật tùy chọn người dùng thất bại (dữ liệu không hợp lệ)
+-   **Mục tiêu**: Xác minh hệ thống xử lý đúng khi người dùng cố gắng cập nhật tùy chọn với dữ liệu không hợp lệ (ví dụ: định dạng ngôn ngữ không đúng).
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang "Cài đặt người dùng" -> tab "Tùy chọn".
+    3.  Cố gắng nhập hoặc chọn một giá trị không hợp lệ cho một tùy chọn (ví dụ: nhập "XYZ" vào trường ngôn ngữ nếu nó là trường nhập tự do, hoặc chọn một chủ đề không tồn tại thông qua thao tác chỉnh sửa DOM).
+    4.  Nhấn nút "Lưu".
+-   **Kết quả mong đợi**: 
+    *   Hệ thống hiển thị thông báo lỗi validation hoặc lỗi chung (ví dụ: "Dữ liệu không hợp lệ.").
+    *   Các tùy chọn không được lưu.
+    *   Người dùng vẫn ở trang cài đặt.
+-   **Thực tế**: (Để trống)
+-   **Severity**: Medium
+-   **Priority**: Medium
+-   **Type**: Manual/Automated
+
+#### TC_USERPREF_03: Kiểm tra tùy chọn người dùng mặc định
+-   **Mục tiêu**: Xác minh rằng khi người dùng lần đầu truy cập hoặc không có tùy chọn nào được lưu, các giá trị mặc định được áp dụng đúng.
+-   **Điều kiện tiên quyết (Preconditions)**:
+    *   Người dùng đã đăng nhập vào hệ thống.
+    *   Người dùng chưa từng lưu bất kỳ tùy chọn nào hoặc tùy chọn đã được reset về mặc định.
+    *   Ứng dụng Frontend và Backend đang chạy.
+-   **Các bước thực hiện**:
+    1.  Đăng nhập vào hệ thống.
+    2.  Truy cập trang "Cài đặt người dùng" -> tab "Tùy chọn".
+    3.  Quan sát các giá trị được hiển thị cho chủ đề, ngôn ngữ và cài đặt thông báo.
+-   **Kết quả mong đợi**: 
+    *   Các tùy chọn hiển thị giá trị mặc định (ví dụ: chủ đề "Sáng", ngôn ngữ "Tiếng Việt", thông báo tắt).
+-   **Thực tế**: (Để trống)
+-   **Severity**: Medium
+-   **Priority**: Medium
 -   **Type**: Manual/Automated
 
 ### 3.8. Module: AI Biography
