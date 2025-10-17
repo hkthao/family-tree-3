@@ -9,6 +9,12 @@ import numpy as np
 from app.services.face_detector import MTCNNFaceDetector
 from app.models.face_detection import FaceDetectionResult, BoundingBox
 
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title="FaceDetectionService",
     description="A FastAPI service for face detection using MTCNN.",
@@ -23,13 +29,10 @@ async def detect_faces(
     file: UploadFile = File(...),
     return_crop: Optional[bool] = Query(False, description="Whether to return base64 encoded cropped face images"),
 ):
-    """
-    Detects faces in an uploaded image.
+    logger.info(f"Received request to detect faces. Filename: {file.filename}, ReturnCrop: {return_crop}")
 
-    - **file**: The image file to upload.
-    - **return_crop**: If True, returns base64 encoded cropped face images.
-    """
     if not file.content_type.startswith("image/"):
+        logger.warning(f"Invalid file type received: {file.content_type}")
         raise HTTPException(status_code=400, detail="Invalid file type. Only images are allowed.")
 
     try:
@@ -40,8 +43,11 @@ async def detect_faces(
 
         # Perform face detection
         detections = face_detector.detect_faces(image_np)
+        logger.info(f"Face detector returned {len(detections)} detections.")
+        logger.debug(f"Detections: {detections}") # Use debug for detailed output
 
         if not detections:
+            logger.info("No faces detected in the image.")
             raise HTTPException(status_code=404, detail="No faces detected in the image.")
 
         results: List[FaceDetectionResult] = []
@@ -60,17 +66,20 @@ async def detect_faces(
                 cropped_face.save(buffered, format="PNG")
                 thumbnail_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-            results.append(
-                FaceDetectionResult(
-                    id=face_id,
-                    bounding_box=bounding_box,
-                    confidence=float(confidence),
-                    thumbnail=thumbnail_base64,
-                )
+            face_result = FaceDetectionResult(
+                id=face_id,
+                bounding_box=bounding_box,
+                confidence=float(confidence),
+                thumbnail=thumbnail_base64,
             )
+            results.append(face_result)
+            logger.debug(f"Generated FaceDetectionResult: {face_result.json()}") # Log each result
+
+        logger.info(f"Returning {len(results)} face detection results.")
         return results
 
     except Exception as e:
+        logger.error(f"Face detection failed: {e}", exc_info=True) # Log exception details
         raise HTTPException(status_code=500, detail=f"Face detection failed: {e}")
 
 if __name__ == "__main__":

@@ -49,7 +49,7 @@ public static class DependencyInjection
         services.AddHttpClient(); // Register HttpClient
 
         // Register Face Detection Service
-        services.AddScoped<IFaceDetectionService, FaceDetectionService>();
+
         services.AddHttpClient<IFaceDetectionService, FaceDetectionService>(client =>
         {
             client.BaseAddress = new Uri(configuration["FaceDetectionService:BaseUrl"] ?? "http://localhost:8000");

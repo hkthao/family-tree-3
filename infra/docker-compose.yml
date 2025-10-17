@@ -42,5 +42,17 @@ services:
     depends_on:
       - backend
 
+  face-service:
+    build:
+      context: ../face-service # Context is the face-service directory
+      dockerfile: Dockerfile # Dockerfile is directly in face-service directory
+    container_name: family-tree-face-service
+    ports:
+      - "8000:8000" # Expose port 8000 for the FastAPI app
+    environment:
+      - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+    depends_on:
+      - backend # Assuming face-service might depend on backend for some reason, or remove if not needed
+
 volumes:
   mysql-data:

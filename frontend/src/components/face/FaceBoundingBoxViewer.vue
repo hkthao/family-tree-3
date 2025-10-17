@@ -40,7 +40,7 @@ const props = defineProps({
   imageSrc: { type: String, required: true },
   faces: { type: Array as () => DetectedFace[], default: () => [] },
   selectable: { type: Boolean, default: false },
-  selectedFaceId: { type: String, default: null },
+  selectedFaceId: { type: String as PropType<string | null>, default: null },
   loading: { type: Boolean, default: false },
 });
 
@@ -58,8 +58,8 @@ const onImageLoad = (event: Event) => {
   imageLoaded.value = true;
 };
 
-const getBoxStyle = (box: BoundingBox) => {
-  if (!imageLoaded.value || !imageContainer.value) return {};
+const getBoxStyle = (box: BoundingBox | null | undefined) => {
+  if (!box || !imageLoaded.value || !imageContainer.value) return {};
 
   const containerWidth = imageContainer.value.offsetWidth;
   const containerHeight = imageContainer.value.offsetHeight;
@@ -68,19 +68,28 @@ const getBoxStyle = (box: BoundingBox) => {
   const scaleX = containerWidth / naturalWidth.value;
   const scaleY = containerHeight / naturalHeight.value;
 
-  return {
+  const style = {
     left: `${box.x * scaleX}px`,
     top: `${box.y * scaleY}px`,
     width: `${box.width * scaleX}px`,
     height: `${box.height * scaleY}px`,
   };
+
+  console.log('BoundingBox:', box);
+  console.log('Scale factors:', { scaleX, scaleY });
+  console.log('Calculated style:', style);
+
+  return style;
 };
 
 // Mock function to get member name (replace with actual store/API call)
-const getMemberName = (memberId: string) => {
-  // In a real app, you'd fetch this from a member store or a lookup map
-  const member = faceStore.detectedFaces.find(f => f.memberId === memberId)?.member; // Assuming face has member info
-  return member?.fullName || `Member ${memberId.substring(0, 4)}`;
+const getMemberName = (memberId: string | null | undefined) => {
+  if (memberId) {
+    // In a real app, you'd fetch this from a member store or a lookup map
+    // For now, return a placeholder
+    return `Member ${memberId.substring(0, 4)}`;
+  }
+  return '';
 };
 
 // Watch for imageSrc changes to reset imageLoaded state

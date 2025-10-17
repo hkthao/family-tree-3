@@ -31,8 +31,17 @@ public class FaceDetectionService : IFaceDetectionService
 
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<List<FaceDetectionResultDto>>();
+        var jsonContent = await response.Content.ReadAsStringAsync();
+        jsonContent= jsonContent.Replace("bounding_box", "boundingBox");
+       // _logger.LogInformation($"Raw JSON from Python Face Detection Service: {jsonContent}");
 
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = null,
+            PropertyNameCaseInsensitive = true
+        };
+        var result = await System.Text.Json.JsonSerializer.DeserializeAsync<List<FaceDetectionResultDto>>(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent)), options);
+        //_logger.LogInformation($"Deserialized FaceDetectionResultDto in C#: {System.Text.Json.JsonSerializer.Serialize(result)}");
         _logger.LogInformation("Successfully received response from Python Face Detection Service.");
 
         return result ?? new List<FaceDetectionResultDto>();
