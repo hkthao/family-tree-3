@@ -39,11 +39,23 @@ public class SaveUserPreferencesCommandHandler : IRequestHandler<SaveUserPrefere
 
         if (userProfile.UserPreference == null)
         {
-            userProfile.UserPreference = new UserPreference
+            // Check if a UserPreference already exists for this UserProfileId (in case Include failed or was not sufficient)
+            var existingUserPreference = await _context.UserPreferences
+                .FirstOrDefaultAsync(up => up.UserProfileId == userProfile.Id, cancellationToken);
+
+            if (existingUserPreference == null)
             {
-                UserProfileId = userProfile.Id,
-            };
-            _context.UserPreferences.Add(userProfile.UserPreference);
+                userProfile.UserPreference = new UserPreference
+                {
+                    UserProfileId = userProfile.Id,
+                };
+                _context.UserPreferences.Add(userProfile.UserPreference);
+            }
+            else
+            {
+                // If an existing preference is found, use it instead of creating a new one
+                userProfile.UserPreference = existingUserPreference;
+            }
         }
 
         userProfile.UserPreference.Theme = request.Theme;
