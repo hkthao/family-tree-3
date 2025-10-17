@@ -22,7 +22,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     env_file:
-      - ../.env
+      - ../backend/.env
     depends_on:
       - mysql
 
@@ -33,11 +33,10 @@ services:
     container_name: family-tree-frontend
     ports:
       - "80:80"
-    volumes:
-      # Mount nginx.conf from infra/ relative to docker-compose.yml
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - backend
+    env_file:
+      - ../frontend/.env
 
   face-service:
     build:

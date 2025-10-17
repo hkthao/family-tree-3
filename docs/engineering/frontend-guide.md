@@ -319,7 +319,7 @@ Các thao tác bất đồng bộ trong Frontend chủ yếu liên quan đến v
 
 #### 3. Vite Proxy
 
-*   Trong môi trường phát triển cục bộ, Frontend sử dụng **Vite Proxy** để chuyển tiếp các yêu cầu API từ đường dẫn `/api` (ví dụ: `http://localhost:5173/api/family`) đến địa chỉ của Backend (ví dụ: `http://localhost:8080/family`).
+*   Trong môi trường phát triển cục bộ, Frontend sử dụng **Vite Proxy** để chuyển tiếp các yêu cầu API từ đường dẫn `/api` (ví dụ: `http://localhost:5173/api/family`) đến địa chỉ của Backend (ví dụ: `http://localhost:5000/family`).
 *   Điều này giúp giải quyết vấn đề CORS (Cross-Origin Resource Sharing) trong quá trình phát triển, vì trình duyệt sẽ coi các yêu cầu đến `/api` là cùng một origin với Frontend.
 *   Để biết thêm chi tiết về cấu hình Vite Proxy, vui lòng tham khảo phần [Vite Proxy trong Kiến trúc tổng quan](./architecture.md#5-sơ-đồ-triển-khai-deployment-view).
 

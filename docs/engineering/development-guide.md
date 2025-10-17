@@ -53,7 +53,7 @@ docker-compose -f infra/docker-compose.yml up --build
 Sau khi chạy lệnh trên và các services đã khởi động thành công, bạn có thể truy cập:
 
 -   **Frontend**: `http://localhost` (Nginx sẽ phục vụ Frontend)
--   **Backend API (Swagger)**: `http://localhost:8080/swagger` (Backend API chạy trên cổng 8080)
+-   **Backend API (Swagger)**: `http://localhost:5000/swagger` (Backend API chạy trên cổng 8080)
 
 **Lưu ý:** Lần đầu tiên chạy có thể mất một chút thời gian để tải xuống các image Docker và build ứng dụng.
 
@@ -90,7 +90,7 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
         "MaxFileSizeMB": 5,
         "Local": {
           "LocalStoragePath": "uploads",
-          "BaseUrl": "http://localhost:8080"
+          "BaseUrl": "http://localhost:5000"
         },
         // ... các cấu hình khác cho Cloudinary, S3 nếu có
       },

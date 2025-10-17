@@ -41,7 +41,7 @@
 
 - **Base URL**: `/api`
 - **Định dạng**: JSON
-- **Swagger UI**: Tài liệu tương tác có tại `http://localhost:8080/swagger`.
+- **Swagger UI**: Tài liệu tương tác có tại `http://localhost:5000/swagger`.
 
 ## 2. Xác thực (Authentication)
 
@@ -54,7 +54,7 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
 
     ```http
     GET /api/families/some-family-id
-    Host: localhost:8080
+    Host: localhost:5000
     Authorization: Bearer <YOUR_JWT_TOKEN>
     ```
 

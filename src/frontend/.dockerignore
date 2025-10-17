@@ -1,8 +1,6 @@
 # Exclude Node.js modules and build output
 node_modules/
 dist/
-# Exclude environment files
-.env
 # Exclude IDE files
 .vscode/
 .idea/

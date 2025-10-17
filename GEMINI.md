@@ -48,7 +48,7 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
     ```
 4.  **Truy cập ứng dụng:**
     *   **Frontend:** [http://localhost](http://localhost)
-    *   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+    *   **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ## 4. Cấu trúc Dự án
 

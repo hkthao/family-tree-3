@@ -60,7 +60,7 @@ dotnet ef database update --project src/backend/src/Infrastructure --startup-pro
 
 5.  **Truy cập ứng dụng:**
     -   **Frontend:** [http://localhost](http://localhost) (được phục vụ bởi Nginx)
-    -   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+    -   **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 Để có hướng dẫn chi tiết hơn, bao gồm cách chạy các dịch vụ riêng lẻ để phát triển, vui lòng tham khảo [Hướng dẫn Phát triển](./docs/engineering/development-guide.md).
 

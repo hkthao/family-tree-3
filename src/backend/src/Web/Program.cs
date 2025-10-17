@@ -10,6 +10,27 @@ builder.AddWebServices();
 // Add controllers service
 builder.Services.AddControllers();
 
+// Add CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policyBuilder =>
+        {
+            var corsOriginsString = builder.Configuration["CORS_ORIGINS"];
+            if (!string.IsNullOrEmpty(corsOriginsString))
+            {
+                var corsOrigins = corsOriginsString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                policyBuilder.WithOrigins(corsOrigins)
+                             .AllowAnyHeader()
+                             .AllowAnyMethod();
+            }
+            else
+            {
+                Console.WriteLine("CORS_ORIGINS environment variable not found or is empty.");
+            }
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
