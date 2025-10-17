@@ -65,7 +65,7 @@ const menu: MenuSection[] = [
       {
         titleKey: 'ai.faceTag',
         icon: 'mdi-face-recognition',
-        to: '/ai/face-tag',
+        to: '/face/labeling',
         roles: ['Admin', 'FamilyManager'],
       },
       {
