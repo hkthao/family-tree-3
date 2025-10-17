@@ -8,7 +8,20 @@
 
 ---
 
-## 1. Phiên bản 1.1.0 (2025-10-16)
+## 1. Phiên bản 1.1.1 (2025-10-17)
+
+### Cải tiến & Sửa lỗi
+
+-   Cấu hình CORS cho Backend sử dụng biến môi trường `CORS_ORIGINS` từ `src/backend/.env`.
+-   Tách biệt các tệp `.env` cho Backend (`src/backend/.env`) và Frontend (`src/frontend/.env`).
+-   Khắc phục lỗi "Duplicate entry" khi lưu `UserPreferences`.
+-   Cập nhật giao diện `UserPreference` của Frontend để khớp với Backend.
+-   Cấu hình AI chat và embedding service để sử dụng `host.docker.internal` khi chạy trong Docker Compose.
+-   Cập nhật tài liệu hướng dẫn phát triển, API, kiến trúc, và hướng dẫn backend để phản ánh các thay đổi cấu hình và tính năng mới.
+
+---
+
+## 2. Phiên bản 1.1.0 (2025-10-16)
 
 ### Tính năng mới
 

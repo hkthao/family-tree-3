@@ -53,76 +53,25 @@ docker-compose -f infra/docker-compose.yml up --build
 Sau khi chạy lệnh trên và các services đã khởi động thành công, bạn có thể truy cập:
 
 -   **Frontend**: `http://localhost` (Nginx sẽ phục vụ Frontend)
--   **Backend API (Swagger)**: `http://localhost:5000/swagger` (Backend API chạy trên cổng 8080)
+-   **Backend API (Swagger)**: `http://localhost:8080/swagger` (Backend API chạy trên cổng 8080)
 
-**Lưu ý:** Lần đầu tiên chạy có thể mất một chút thời gian để tải xuống các image Docker và build ứng dụng.
+**Lưu ý:**
+*   Lần đầu tiên chạy có thể mất một chút thời gian để tải xuống các image Docker và build ứng dụng.
+*   Các cấu hình nhạy cảm (ví dụ: chuỗi kết nối database, khóa API) được quản lý thông qua các tệp `.env` riêng biệt cho Backend và Frontend, không được commit vào Git. Vui lòng tham khảo `src/backend/.env` và `src/frontend/.env` để biết chi tiết.
 
 ### 2.3. Chạy riêng lẻ
 
 #### Backend
 
-1.  Đảm bảo bạn có một instance MySQL đang chạy. Bạn có thể sử dụng instance từ tệp `infra/docker-compose.yml`:
+1.  Đảm bảo bạn có một instance MySQL đang chạy. Bạn có thể sử dụng instance từ tệp `src/infra/docker-compose.yml`:
     ```bash
-    docker-compose -f infra/docker-compose.yml up -d mysql
+    docker-compose -f src/infra/docker-compose.yml up -d mysql
     ```
-2.  **Cấu hình Backend**:
-    *   **Database**: Chỉnh sửa `backend/src/Web/appsettings.Development.json` để đảm bảo `UseInMemoryDatabase` là `false` và chuỗi kết nối `DefaultConnection` trỏ đến `localhost`.
-    *   **Xác thực (Authentication)**: Cấu hình `JwtSettings` trong `backend/src/Web/appsettings.Development.json`.
+2.  **Cấu hình Backend**: Các cấu hình cho Backend (chuỗi kết nối database, JWT, AI, Vector Store, Storage, v.v.) được quản lý thông qua tệp `src/backend/.env`. Vui lòng tạo và cấu hình tệp này dựa trên các biến môi trường cần thiết.
 
-    ```json
-    // backend/src/Web/appsettings.Development.json
-    {
-      "ConnectionStrings": {
-        "DefaultConnection": "Server=localhost;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;"
-      },
-      "UseInMemoryDatabase": false,
-      "JwtSettings": {
-        "Authority": "YOUR_AUTH0_DOMAIN", // Thay bằng Authority của bạn (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
-        "Audience": "YOUR_AUTH0_AUDIENCE", // Thay bằng Audience của bạn (ví dụ: http://localhost:5000)
-        "Namespace": "https://familytree.com/" // Namespace cho các custom claims
-      },
-      "UserPreferenceSettings": {
-        "DefaultTheme": "Light",
-        "DefaultLanguage": "Vietnamese"
-      },
-      "StorageSettings": {
-        "Provider": "Local",
-        "MaxFileSizeMB": 5,
-        "Local": {
-          "LocalStoragePath": "uploads",
-          "BaseUrl": "http://localhost:5000"
-        },
-        // ... các cấu hình khác cho Cloudinary, S3 nếu có
-      },
-      "AI": {
-        "DefaultProvider": "Gemini",
-        "Gemini": {
-          "ApiKey": "YOUR_GEMINI_API_KEY"
-        },
-        "OpenAI": {
-          "ApiKey": "YOUR_OPENAI_API_KEY"
-        }
-      },
-      "VectorStore": {
-        "Provider": "Pinecone", // Hoặc "Qdrant"
-        "Pinecone": {
-          "ApiKey": "YOUR_PINECONE_API_KEY",
-          "Environment": "YOUR_PINECONE_ENVIRONMENT",
-          "IndexName": "YOUR_PINECONE_INDEX_NAME"
-        },
-        "Qdrant": {
-          "Host": "localhost",
-          "Port": 6334,
-          "ApiKey": "YOUR_QDRANT_API_KEY", // Tùy chọn
-          "CollectionName": "YOUR_QDRANT_COLLECTION_NAME"
-        }
-      }
-      // ... các cấu hình khác
-    }
-    ```
 3.  **Chạy backend**: 
     ```bash
-    cd backend
+    cd src/backend
     dotnet run --project src/Web
     ```
     Khi chạy backend ở chế độ Development, hệ thống sẽ tự động áp dụng các migrations và seed dữ liệu mẫu (nếu database trống).
@@ -131,47 +80,13 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
 
 1.  Điều hướng đến thư mục `frontend`:
     ```bash
-    cd frontend
+    cd src/frontend
     ```
 2.  Cài đặt các dependency:
     ```bash
     npm install
     ```
-3.  **Cấu hình Frontend**:
-    *   **Biến môi trường**: Tạo file `.env.development` trong thư mục `frontend` dựa trên `frontend/.env.example`. File này chứa các biến môi trường cho JWT Authentication và API Base URL.
-        ```
-        # frontend/.env.example
-        VITE_USE_MOCK=false
-        VITE_JWT_AUTHORITY="YOUR_JWT_AUTHORITY" # Authority của JWT (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
-        VITE_JWT_AUDIENCE="YOUR_JWT_AUDIENCE"   # Audience của JWT (ví dụ: http://localhost:5000)
-        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID" # Client ID của ứng dụng Auth0 (nếu sử dụng Auth0)
-        VITE_API_BASE_URL="/api"
-        ```
-        Bạn cần tạo file `frontend/.env.development` và điền các giá trị thực tế của bạn. Ví dụ:
-        ```
-        # frontend/.env.development
-        VITE_USE_MOCK=false
-        VITE_JWT_AUTHORITY="https://dev-g76tq00gicwdzk3z.us.auth0.com"
-        VITE_JWT_AUDIENCE="http://localhost:5000"
-        VITE_AUTH0_CLIENT_ID="v4jSe5QR4Uj6ddoBBMHNtaDNHwv8UzQN"
-        VITE_API_BASE_URL="/api"
-        ```    *   **Vite Proxy**: Đảm bảo `frontend/vite.config.ts` được cấu hình đúng để proxy các yêu cầu API đến Backend đang chạy. Ví dụ:
-
-    ```typescript
-    // frontend/vite.config.ts
-    export default defineConfig({
-      server: {
-        proxy: {
-          '/api': {
-            target: 'http://localhost:5000', // Hoặc cổng Backend đang chạy
-            changeOrigin: true,
-            rewrite: (path) => path.replace(/^\/api/, ''),
-            // secure: false, // Nếu Backend chạy HTTPS với chứng chỉ tự ký
-          },
-        },
-      },
-    });
-    ```
+3.  **Cấu hình Frontend**: Các biến môi trường cho Frontend (ví dụ: API Base URL, cấu hình Auth0) được quản lý thông qua tệp `src/frontend/.env`. Vui lòng tạo và cấu hình tệp này dựa trên các biến môi trường cần thiết.
 
 4.  Chạy Frontend ở chế độ phát triển:
     ```bash

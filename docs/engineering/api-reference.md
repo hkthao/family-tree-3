@@ -41,7 +41,7 @@
 
 - **Base URL**: `/api`
 - **Định dạng**: JSON
-- **Swagger UI**: Tài liệu tương tác có tại `http://localhost:5000/swagger`.
+- **Swagger UI**: Tài liệu tương tác có tại `http://localhost:8080/swagger`.
 
 ## 2. Xác thực (Authentication)
 
@@ -54,13 +54,13 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
 
     ```http
     GET /api/families/some-family-id
-    Host: localhost:5000
+    Host: localhost:8080
     Authorization: Bearer <YOUR_JWT_TOKEN>
     ```
 
 ### 2.1. Cấu hình JWT và Xác thực Backend
 
-Backend được cấu hình để xác thực JWT dựa trên các thiết lập trong `JwtSettings` (được đọc từ `appsettings.json` hoặc `appsettings.Development.json`). Các thông số quan trọng bao gồm `Authority` (URL của nhà phát hành token) và `Audience` (đối tượng mà token được cấp cho).
+Backend được cấu hình để xác thực JWT dựa trên các thiết lập trong `JwtSettings` (được đọc từ tệp `src/backend/.env`). Các thông số quan trọng bao gồm `Authority` (URL của nhà phát hành token) và `Audience` (đối tượng mà token được cấp cho).
 
 Khi Backend nhận được một JWT, nó sẽ thực hiện các bước xác thực sau:
 
@@ -329,7 +329,7 @@ Content-Type: application/json
     *   **Phản hồi:** `Result<UserPreferenceDto>`
 -   `PUT /api/UserPreferences`: Cập nhật tùy chọn của người dùng hiện tại.
     *   **Request Body:** `SaveUserPreferencesCommand` (ví dụ: `{ "theme": "Light", "language": "Vietnamese", "emailNotificationsEnabled": "true", "smsNotificationsEnabled": "false", "inAppNotificationsEnabled": "true" }`)
-    *   **Phản hồi:** `Result`
+    *   **Phản hồi:** `Result<UserPreferenceDto>` (trả về tùy chọn đã cập nhật)
 
 ### 6.10. Quản lý Tải lên Tệp (`/api/upload`)
 
@@ -539,12 +539,16 @@ Content-Type: application/json
 ```json
 {
   "id": "string (uuid)",
-  "userId": "string (uuid)",
+  "userProfileId": "string (uuid)",
   "theme": "string (enum: Light, Dark)",
   "language": "string (enum: English, Vietnamese)",
   "emailNotificationsEnabled": "boolean",
   "smsNotificationsEnabled": "boolean",
-  "inAppNotificationsEnabled": "boolean"
+  "inAppNotificationsEnabled": "boolean",
+  "created": "string (date-time)",
+  "createdBy": "string (nullable)",
+  "lastModified": "string (date-time, nullable)",
+  "lastModifiedBy": "string (nullable)"
 }
 ```
 

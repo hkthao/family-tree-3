@@ -23,6 +23,6 @@ Chào mừng bạn đến với tài liệu của dự án Cây Gia Phả. Tài 
 -   [Kế hoạch Sprint](./project/sprints.md): Kế hoạch cho các sprint phát triển.
 -   [Kịch bản Kiểm thử](./project/test-cases.md): Các kịch bản kiểm thử chi tiết.
 -   [Ghi chú phát hành](./project/release-notes.md): Lịch sử các phiên bản và thay đổi.
--   [Lộ trình Phát triển](./project/roadmap.md): Định hướng phát triển sản phẩm.
+
 -   [Đội ngũ Phát triển](./project/team.md): Thông tin về các thành viên trong đội.
 -   [Hướng dẫn sử dụng](./project/user_manual.md): Hướng dẫn chi tiết cách sử dụng các tính năng của ứng dụng.

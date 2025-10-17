@@ -297,12 +297,17 @@ Lưu trữ tùy chọn cá nhân của người dùng.
 
 | Tên cột                 | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
 | :---------------------- | :----------- | :-------- | :---------------------- |
+| `Id`                    | `Guid`       |           | ID duy nhất của tùy chọn người dùng (không phải khóa chính) |
 | `UserProfileId`         | `varchar(36)`| PK, FK    | ID của hồ sơ người dùng |
 | `Theme`                 | `int`        | NOT NULL  | Chủ đề giao diện (Light, Dark) |
 | `Language`              | `int`        | NOT NULL  | Ngôn ngữ (English, Vietnamese) |
 | `EmailNotificationsEnabled`| `boolean`    | NOT NULL  | Bật/tắt thông báo Email |
 | `SmsNotificationsEnabled`  | `boolean`    | NOT NULL  | Bật/tắt thông báo SMS   |
 | `InAppNotificationsEnabled`| `boolean`    | NOT NULL  | Bật/tắt thông báo trong ứng dụng |
+| `Created`               | `datetime`   | NOT NULL  | Thời gian tạo            |
+| `CreatedBy`             | `string`     | NULL      | Người tạo                |
+| `LastModified`          | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
+| `LastModifiedBy`        | `string`     | NULL      | Người cập nhật cuối cùng |
 
 - **Foreign Keys**:
   - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
@@ -486,8 +491,7 @@ builder.Entity<TextChunk>()
 builder.Entity<TextChunk>()
     .Property(tc => tc.Embedding).HasColumnType("json"); // Embedding là JSON array
 
-// Các mối quan hệ của TextChunk được quản lý thông qua Metadata
-// builder.Ignore<JsonDocument>(); // JsonDocument được sử dụng cho UserActivity, không phải TextChunk
+builder.Ignore<JsonDocument>(); // JsonDocument được sử dụng cho UserActivity
 
 base.OnModelCreating(builder);
 ```

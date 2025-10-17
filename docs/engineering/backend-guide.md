@@ -198,17 +198,7 @@ ASP.NET Core sử dụng một pipeline các middleware để xử lý các HTTP
 -   **Cơ chế**: Sử dụng **JWT Bearer Token**.
 -   **Provider hiện tại**: Nhà cung cấp JWT (ví dụ: Auth0). Hệ thống được thiết kế để dễ dàng thay thế bằng các provider khác (Keycloak, Firebase Auth) bằng cách cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` mới.
 -   **Triển khai IAuthProvider**: `backend/src/Infrastructure/Auth/Auth0Provider.cs` là một triển khai của `IAuthProvider` sử dụng Auth0 Management API để quản lý người dùng (ví dụ: cập nhật hồ sơ). Các triển khai khác có thể được thêm vào cho các nhà cung cấp xác thực khác.
--   **Cấu hình Auth0**: Các thông tin cấu hình Auth0 (Domain, Audience, ClientId, ClientSecret) được đọc từ `appsettings.json`.
-
-    ```json
-    "Auth0": {
-      "Domain": "YOUR_AUTH0_DOMAIN",
-      "Audience": "YOUR_AUTH0_AUDIENCE",
-      "ClientId": "YOUR_M2M_CLIENT_ID",
-      "ClientSecret": "YOUR_M2M_CLIENT_SECRET",
-      "Namespace": "https://familytree.com/"
-    }
-    ```
+-   **Cấu hình Auth0**: Các thông tin cấu hình Auth0 (Domain, Audience, ClientId, ClientSecret) được đọc từ tệp `src/backend/.env`.
 
 -   **Luồng JWT**: Client lấy token từ Auth0 và gửi trong header `Authorization` của mỗi request.
 
@@ -818,7 +808,7 @@ Thực thể `AIBiography` (`backend/src/Domain/Entities/AIBiography.cs`) lưu t
 ### 12.4. Triển khai Infrastructure
 
 -   **`AIConfig`** (`backend/src/Infrastructure/AI/AIConfig.cs`):
-    -   Lớp cấu hình đọc từ `appsettings.json` để định nghĩa nhà cung cấp AI mặc định, API Keys, giới hạn token, v.v.
+    -   Lớp cấu hình đọc từ tệp `src/backend/.env` để định nghĩa nhà cung cấp AI mặc định, API Keys, giới hạn token, v.v.
 -   **`IAISettings`** (`backend/src/Application/Common/Interfaces/IAISettings.cs`):
     -   Giao diện cấu hình AI được định nghĩa trong Application Layer để tuân thủ Clean Architecture.
 -   **Các `AIContentGenerator`** (`GeminiAIContentGenerator`, `OpenAIAIContentGenerator`, `LocalAIContentGenerator`):
@@ -960,30 +950,29 @@ Hệ thống sử dụng **Factory Pattern** để chọn nhà cung cấp Vector
     -   **Cấu hình**: Yêu cầu `VectorStore:Qdrant:Host`, `VectorStore:Qdrant:Port`, `VectorStore:Qdrant:ApiKey` (tùy chọn), `VectorStore:Qdrant:CollectionName` trong `appsettings.json`.
 -   **InMemory (`InMemoryVectorStore`)**: Triển khai `IVectorStore` để lưu trữ vector trong bộ nhớ. Thích hợp cho môi trường phát triển và kiểm thử.
 
-### 13.8. Cấu hình `appsettings.json`
+4.  **Cập nhật cấu hình `src/backend/.env`:**
+    *   Thêm phần cấu hình cho nhà cung cấp mới vào `src/backend/.env`.
 
-```json
-"VectorStore": {
-  "Provider": "Pinecone", // Hoặc "Qdrant", "InMemory"
-  "Pinecone": {
-    "ApiKey": "YOUR_PINECONE_API_KEY",
-    "Environment": "YOUR_PINECONE_ENVIRONMENT",
-    "IndexName": "YOUR_PINECONE_INDEX_NAME"
-  },
-  "Qdrant": {
-    "Host": "localhost",
-    "Port": 6334,
-    "ApiKey": "YOUR_QDRANT_API_KEY", // Tùy chọn
-    "CollectionName": "YOUR_QDRANT_COLLECTION_NAME"
-  }
-}
+### 13.7. Cấu hình `src/backend/.env`
+
+Các cấu hình cho Vector Store được quản lý thông qua tệp `src/backend/.env`. Dưới đây là ví dụ về cách cấu hình:
+
+```
+VectorStore__Provider="Pinecone" # Hoặc "Qdrant", "InMemory"
+VectorStore__Pinecone__ApiKey="YOUR_PINECONE_API_KEY"
+VectorStore__Pinecone__Environment="YOUR_PINECONE_ENVIRONMENT"
+VectorStore__Pinecone__IndexName="YOUR_PINECONE_INDEX_NAME"
+VectorStore__Qdrant__Host="localhost"
+VectorStore__Qdrant__Port=6334
+VectorStore__Qdrant__ApiKey="YOUR_QDRANT_API_KEY" # Tùy chọn
+VectorStore__Qdrant__CollectionName="YOUR_QDRANT_COLLECTION_NAME"
 ```
 
 ### 13.9. Đăng ký Dependency Injection
 
 Các dịch vụ liên quan đến Vector Database được đăng ký trong `backend/src/Infrastructure/DependencyInjection.cs`:
 
--   `VectorStoreSettings`: Cấu hình đọc từ `appsettings.json`.
+-   `VectorStoreSettings`: Cấu hình đọc từ tệp `src/backend/.env`.
 -   `PineconeVectorStore`, `QdrantVectorStore`, `InMemoryVectorStore`: Đăng ký dưới dạng `Transient`.
 -   `IVectorStoreFactory`: Đăng ký dưới dạng `Singleton`.
 -   `IVectorStore`: Đăng ký dưới dạng `Transient`, được giải quyết thông qua `IVectorStoreFactory`.

@@ -83,7 +83,7 @@ Việc lưu trữ JWT một cách an toàn là rất quan trọng để ngăn ch
 
 Hệ thống được thiết kế với một lớp trừu tượng cho dịch vụ xác thực, cho phép dễ dàng thay đổi nhà cung cấp (Identity Provider - IdP) như Auth0, Keycloak, Firebase Auth mà không ảnh hưởng đến logic nghiệp vụ cốt lõi của Backend.
 
-*   **Backend**: Backend đọc cấu hình JWT từ `JwtSettings` và sử dụng `IClaimsTransformation` để xử lý các claims từ token. Backend sử dụng `ExternalId` (ID người dùng từ nhà cung cấp xác thực) để liên kết với `UserProfile` nội bộ.
+*   **Backend**: Backend đọc cấu hình JWT từ `JwtSettings` (được cấu hình trong tệp `src/backend/.env`) và sử dụng `IClaimsTransformation` để xử lý các claims từ token. Backend sử dụng `ExternalId` (ID người dùng từ nhà cung cấp xác thực) để liên kết với `UserProfile` nội bộ.
 *   **Frontend**: Sử dụng SDK của nhà cung cấp (ví dụ: Auth0 SDK) để quản lý luồng đăng nhập/đăng ký và lấy token. Frontend sẽ gửi token này đến Backend.
 
 **Lợi ích**: Tăng tính linh hoạt, giảm sự phụ thuộc vào một nhà cung cấp cụ thể, giúp dễ dàng chuyển đổi hoặc hỗ trợ nhiều IdP trong tương lai.
@@ -390,11 +390,15 @@ Ngoài xác thực và phân quyền, dự án còn áp dụng nhiều biện ph
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend",
-            builder =>
+            policyBuilder =>
             {
-                builder.WithOrigins("http://localhost:5173", "https://your-production-frontend.com")
-                       .AllowAnyHeader()
-                       .AllowAnyMethod();
+                var corsOrigins = builder.Configuration["CORS_ORIGINS"];
+                if (!string.IsNullOrEmpty(corsOrigins))
+                {
+                    policyBuilder.WithOrigins(corsOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                }
             });
     });
 

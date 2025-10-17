@@ -61,7 +61,7 @@ Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và 
 ## 3. Quản lý và cấu hình AI
 
 *   **Nhà cung cấp AI:** Hệ thống hỗ trợ nhiều nhà cung cấp AI khác nhau (ví dụ: OpenAI, Google Gemini, mô hình cục bộ) và cho phép cấu hình linh hoạt.
-*   **Cấu hình:** Các cài đặt liên quan đến AI (API keys, tên mô hình, giới hạn token) được quản lý thông qua tệp cấu hình `appsettings.json` ở backend.
+*   **Cấu hình:** Các cài đặt liên quan đến AI (API keys, tên mô hình, giới hạn token) được quản lý thông qua tệp `src/backend/.env` ở backend.
 
 ## 4. Phát triển và mở rộng
 

@@ -33,10 +33,10 @@ frontend/
 │   ├── locales/        # Chứa các file dịch (i18n) cho các ngôn ngữ khác nhau.
 │   ├── plugins/        # Chứa các plugin của Vue hoặc các thư viện bên thứ ba được khởi tạo (ví dụ: `vuetify.ts`, `pinia.ts`, `axios.ts`).
 │   ├── router/         # Chứa cấu hình routing của Vue Router, định nghĩa các đường dẫn và component tương ứng.
-│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`, `chatService.ts`). Các service này trả về kết quả theo `Result Pattern` để xử lý lỗi và thành công một cách nhất quán.
-│   ├── stores/         # Chứa các Pinia store để quản lý trạng thái toàn cục của ứng dụng (ví dụ: `auth.store.ts`, `family.store.ts`).
+│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`, `api.ai.service.ts`). Các service này trả về kết quả theo `Result Pattern` để xử lý lỗi và thành công một cách nhất quán.
+│   ├── stores/         # Chứa các Pinia store để quản lý trạng thái toàn cục của ứng dụng (ví dụ: `auth.store.ts`, `userSettings.store.ts`).
 │   ├── styles/         # Chứa các style chung, biến CSS, hoặc các file SCSS/CSS được import toàn cục.
-│   ├── types/          # Chứa định nghĩa các TypeScript type và interface cho dữ liệu (ví dụ: `Family.ts`, `Member.ts`).
+│   ├── types/          # Chứa định nghĩa các TypeScript type và interface cho dữ liệu (ví dụ: `Family.d.ts`, `UserPreference.d.ts`).
 │   ├── utils/          # Chứa các hàm tiện ích (utility functions) không liên quan đến Vue component hoặc logic nghiệp vụ cụ thể (ví dụ: `dateUtils.ts`, `stringUtils.ts`).
 │   └── views/          # Chứa các page components, mỗi component đại diện cho một trang hoặc một route chính của ứng dụng (ví dụ: `FamilyListView.vue`, `MemberDetailView.vue`).
 ├── tests/              # Chứa các file test cho Frontend (Unit Tests, Component Tests).
@@ -47,13 +47,12 @@ frontend/
 
 **Pinia** là thư viện quản lý trạng thái (state management) được khuyến nghị cho các ứng dụng Vue 3. Nó cung cấp một cách tiếp cận đơn giản, mạnh mẽ và có thể mở rộng để quản lý trạng thái toàn cục của ứng dụng. Các store của Pinia được định nghĩa trong thư mục `src/stores`.
 
-#### Quản lý Hồ sơ Người dùng với `userProfileStore`
+#### Quản lý Cài đặt Người dùng với `userSettingsStore`
 
-`userProfileStore` (`frontend/src/stores/userProfile.store.ts`) hiện là nguồn đáng tin cậy duy nhất (single source of truth) cho thông tin hồ sơ của người dùng hiện tại. Các component UI cần hiển thị thông tin người dùng (như tên, email, avatar, vai trò) nên lấy dữ liệu từ store này thay vì `authStore`. `userProfileStore` cũng quản lý các tùy chọn cá nhân của người dùng (chủ đề, ngôn ngữ, cài đặt thông báo).
+`userSettingsStore` (`frontend/src/stores/userSettings.store.ts`) hiện là nguồn đáng tin cậy duy nhất (single source of truth) cho các cài đặt và tùy chọn cá nhân của người dùng hiện tại (chủ đề, ngôn ngữ, cài đặt thông báo). Các component UI cần hiển thị hoặc thay đổi cài đặt người dùng nên lấy dữ liệu từ store này.
 
--   **`fetchCurrentUserProfile()`**: Action này sẽ gọi API backend `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại, bao gồm cả các vai trò của họ.
--   **`userProfile`**: State chứa đối tượng `UserProfile` của người dùng hiện tại.
--   **`userPreferences`**: State chứa đối tượng `UserPreference` của người dùng hiện tại.
+-   **`fetchUserSettings()`**: Action này sẽ gọi API backend `GET /api/UserPreferences` để lấy các cài đặt của người dùng hiện tại.
+-   **`preferences`**: State chứa đối tượng `UserPreference` của người dùng hiện tại.
 
 #### Cấu trúc Store
 
@@ -319,14 +318,14 @@ Các thao tác bất đồng bộ trong Frontend chủ yếu liên quan đến v
 
 #### 3. Vite Proxy
 
-*   Trong môi trường phát triển cục bộ, Frontend sử dụng **Vite Proxy** để chuyển tiếp các yêu cầu API từ đường dẫn `/api` (ví dụ: `http://localhost:5173/api/family`) đến địa chỉ của Backend (ví dụ: `http://localhost:5000/family`).
+*   Trong môi trường phát triển cục bộ, Frontend sử dụng **Vite Proxy** để chuyển tiếp các yêu cầu API từ đường dẫn `/api` (ví dụ: `http://localhost:5173/api/family`) đến địa chỉ của Backend (ví dụ: `http://localhost:8080/family`).
 *   Điều này giúp giải quyết vấn đề CORS (Cross-Origin Resource Sharing) trong quá trình phát triển, vì trình duyệt sẽ coi các yêu cầu đến `/api` là cùng một origin với Frontend.
 *   Để biết thêm chi tiết về cấu hình Vite Proxy, vui lòng tham khảo phần [Vite Proxy trong Kiến trúc tổng quan](./architecture.md#5-sơ-đồ-triển-khai-deployment-view).
 
 #### 4. Mocking
 
 *   Trong môi trường development, các service có thể được mock để trả về dữ liệu giả lập từ `src/data`. Điều này hữu ích khi Backend chưa hoàn thiện hoặc khi cần phát triển Frontend độc lập.
-*   Việc bật/tắt mocking được điều khiển bởi biến môi trường `VITE_USE_MOCK` (ví dụ: trong `.env.development`).
+*   Việc bật/tắt mocking được điều khiển bởi biến môi trường `VITE_USE_MOCK` trong tệp `src/frontend/.env`.
 
 ## 7. Mapping Dữ liệu từ API
 
@@ -338,7 +337,7 @@ Việc định nghĩa rõ ràng cấu trúc dữ liệu nhận được từ API
 *   **Tự động hoàn thành (Autocompletion)**: Cung cấp gợi ý code và tự động hoàn thành trong IDE, tăng năng suất lập trình.
 *   **Dễ đọc và hiểu**: Giúp các nhà phát triển khác dễ dàng hiểu cấu trúc của dữ liệu mà không cần phải xem qua code Backend.
 
-#### Ví dụ về Member Interface
+#### Ví dụ về Member và UserPreference Interface
 
 ```typescript
 // frontend/src/types/member/member.ts
@@ -363,6 +362,25 @@ export interface Member {
   biography?: string;
   isRoot?: boolean;
   validationErrors?: string[];
+}
+```
+
+```typescript
+// frontend/src/types/userPreference.d.ts
+import { Theme, Language } from '@/types';
+
+export interface UserPreference {
+  id: string;
+  userProfileId: string;
+  theme: Theme;
+  language: Language;
+  emailNotificationsEnabled: boolean;
+  smsNotificationsEnabled: boolean;
+  inAppNotificationsEnabled: boolean;
+  created: string;
+  createdBy: string | null;
+  lastModified: string | null;
+  lastModifiedBy: string | null;
 }
 ```
 

@@ -142,7 +142,7 @@ graph TD
 
 ### 🔄 Vite Proxy trong môi trường phát triển
 
-Trong môi trường phát triển cục bộ, Frontend (chạy bằng Vite) sử dụng cơ chế proxy để chuyển tiếp các yêu cầu API từ `http://localhost:5173/api` đến Backend (ví dụ: `http://localhost:5000`). Điều này giúp tránh các vấn đề CORS và cho phép Frontend tương tác liền mạch với Backend đang chạy cục bộ hoặc trong Docker.
+Trong môi trường phát triển cục bộ, Frontend (chạy bằng Vite) sử dụng cơ chế proxy để chuyển tiếp các yêu cầu API từ `http://localhost:5173/api` đến Backend (ví dụ: `http://localhost:8080`). Điều này giúp tránh các vấn đề CORS và cho phép Frontend tương tác liền mạch với Backend đang chạy cục bộ hoặc trong Docker.
 
 **Lưu ý:** Backend đã tắt `app.UseHttpsRedirection()` trong `Program.cs` để cho phép truy cập HTTP trong môi trường phát triển cục bộ.
 
@@ -156,7 +156,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Địa chỉ Backend đang chạy
+        target: 'http://localhost:8080', // Địa chỉ Backend đang chạy
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         // secure: false, // Không cần thiết nếu Backend chạy HTTP
@@ -187,27 +187,9 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 #### Cấu hình JWT
 
 *   **Cấu hình Backend**: 
-    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong `appsettings.json` (hoặc `appsettings.Development.json` cho môi trường phát triển).
-    *   **Cấu hình cục bộ (Local Development)**: Đối với môi trường phát triển cục bộ, bạn có thể đặt các biến này trong `backend/src/Web/appsettings.Development.json`.
-        ```json
-        // backend/src/Web/appsettings.Development.json
-        {
-          "JwtSettings": {
-            "Authority": "YOUR_JWT_AUTHORITY", // Authority của nhà cung cấp JWT (ví dụ: https://dev-g76tq00gicwdzk3z.us.auth0.com)
-            "Audience": "YOUR_JWT_AUDIENCE",   // Audience của ứng dụng (ví dụ: http://localhost:5000)
-            "Namespace": "https://familytree.com/" // Namespace cho các custom claims (nếu có)
-          }
-        }
-        ```
+    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong tệp `src/backend/.env`.
 *   **Cấu hình Frontend**: 
-    *   Frontend đọc cấu hình JWT từ các biến môi trường trong file `.env.development` (hoặc `.env.production`).
-    *   **Biến môi trường**: 
-        ```
-        # frontend/.env.development
-        VITE_JWT_AUTHORITY="YOUR_JWT_AUTHORITY"
-        VITE_JWT_AUDIENCE="YOUR_JWT_AUDIENCE"
-        VITE_AUTH0_CLIENT_ID="YOUR_AUTH0_CLIENT_ID" # Chỉ cần nếu sử dụng Auth0
-        ```
+    *   Frontend đọc cấu hình JWT từ các biến môi trường trong tệp `src/frontend/.env`.
 *   **Cấu hình nhà cung cấp JWT (ví dụ: Auth0 Dashboard)**: 
     *   **API**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `YOUR_JWT_AUDIENCE` (ví dụ: `http://localhost:5000`).
     *   **Actions**: Cấu hình một Auth0 Action để thêm `roles` vào JWT token dưới dạng custom claim (ví dụ: `https://familytree.com/roles`).
