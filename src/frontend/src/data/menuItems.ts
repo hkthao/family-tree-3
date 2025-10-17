@@ -74,6 +74,12 @@ const menu: MenuSection[] = [
         to: '/search/face',
         roles: ['Admin', 'FamilyManager'],
       },
+      {
+        titleKey: 'face.upload',
+        icon: 'mdi-upload',
+        to: '/face/upload',
+        roles: ['Admin', 'FamilyManager'],
+      },
     ],
   },
 
