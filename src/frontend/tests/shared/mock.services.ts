@@ -1,7 +1,7 @@
 
 import { MockCrudService } from './base.mock.service';
 import type { Family, Member, Event } from '@/types';
-import { ok, type Result } from '@/types';
+import { err, ok, type Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { simulateLatency } from '@/utils/mockUtils';
 import fixedMockFamilies from '@/data/mock/families.json';
@@ -64,6 +64,15 @@ export class MockMemberService
       newIds.push(newId);
     });
     return ok(await simulateLatency(newIds));
+  }
+
+  async updateMemberBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> {
+    const index = this.items.findIndex((m) => m.id === memberId);
+    if (index !== -1) {
+      this.items[index].biography = biographyContent; // Assuming 'biography' property exists on Member
+      return ok(await simulateLatency(undefined));
+    }
+    return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
   }
 }
 

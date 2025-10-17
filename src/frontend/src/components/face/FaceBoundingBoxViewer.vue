@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, BoundingBox } from '@/types';
 import { useFaceStore } from '@/stores/face.store';

@@ -95,9 +95,9 @@ const newMemberName = ref('');
 
 // Mock data for available members (replace with actual data from a member store or API)
 const availableMembers = computed<Member[]>(() => [
-  { id: 'member123', fullName: 'John Doe', avatarUrl: 'https://randomuser.me/api/portraits/men/1.jpg' },
-  { id: 'member456', fullName: 'Jane Smith', avatarUrl: 'https://randomuser.me/api/portraits/women/2.jpg' },
-  { id: 'member789', fullName: 'Peter Jones', avatarUrl: 'https://randomuser.me/api/portraits/men/3.jpg' },
+  { id: 'member123', fullName: 'John Doe', firstName: 'John', lastName: 'Doe', familyId: 'mock-family-1', avatarUrl: 'https://randomuser.me/api/portraits/men/1.jpg' },
+  { id: 'member456', fullName: 'Jane Smith', firstName: 'Jane', lastName: 'Smith', familyId: 'mock-family-1', avatarUrl: 'https://randomuser.me/api/portraits/women/2.jpg' },
+  { id: 'member789', fullName: 'Peter Jones', firstName: 'Peter', lastName: 'Jones', familyId: 'mock-family-2', avatarUrl: 'https://randomuser.me/api/portraits/men/3.jpg' },
 ]);
 
 watch(() => props.face.memberId, (newMemberId) => {

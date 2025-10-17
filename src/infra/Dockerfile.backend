@@ -22,4 +22,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Set the entrypoint for the application
-ENTRYPOINT ["dotnet", "Web.dll"]
+ENTRYPOINT ["dotnet", "backend.Web.dll"]

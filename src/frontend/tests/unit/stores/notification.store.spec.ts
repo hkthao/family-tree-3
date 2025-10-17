@@ -30,7 +30,7 @@ describe('notification.store', () => {
     expect(store.snackbar.show).toBe(true);
 
     // Then, hide it
-    store.hideSnackbar();
+    store.resetSnackbar();
     expect(store.snackbar.show).toBe(false);
   });
 });

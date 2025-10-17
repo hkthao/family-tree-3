@@ -7,7 +7,7 @@
             <v-card-title class="text-h6">{{ aiBiographyStore.currentMember.fullName }}</v-card-title>
             <v-card-text>
               <p><strong>{{ t('member.form.dateOfBirth') }}:</strong> {{
-                formatDate(aiBiographyStore.currentMember.dateOfBirth) }}</p>
+                formatDate(aiBiographyStore.currentMember.dateOfBirth?.toISOString()) }}</p>
               <p><strong>{{ t('member.form.gender') }}:</strong> {{ aiBiographyStore.currentMember.gender ||
                 t('common.unknown') }}</p>
               <p><strong>{{ t('member.form.placeOfBirth') }}:</strong> {{ aiBiographyStore.currentMember.placeOfBirth ||

@@ -107,6 +107,15 @@ class MockMemberServiceForTest implements IMemberService {
     });
     return ok(await simulateLatency(newIds));
   }
+
+  async updateMemberBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> {
+    const index = this._items.findIndex((m) => m.id === memberId);
+    if (index !== -1) {
+      this._items[index].biography = biographyContent; // Assuming 'biography' property exists on Member
+      return ok(await simulateLatency(undefined));
+    }
+    return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
+  }
 }
 
 const mockedShowSnackbar = vi.fn();

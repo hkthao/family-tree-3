@@ -44,4 +44,14 @@ export class MockRelationshipService implements IRelationshipService {
   async getByIds(ids: string[]): Promise<Result<Relationship[], any>> {
     return ok(this.relationships.filter((r) => r.id !== undefined && ids.includes(r.id as string)));
   }
+
+  async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], any>> {
+    const newIds: string[] = [];
+    newItems.forEach(newItem => {
+      const newRelationship = { ...newItem, id: Math.random().toString() };
+      this.relationships.push(newRelationship);
+      newIds.push(newRelationship.id);
+    });
+    return ok(newIds);
+  }
 }

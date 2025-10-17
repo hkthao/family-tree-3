@@ -19,12 +19,6 @@ export class MockAIBiographyService implements IAIBiographyService {
 
     const result: BiographyResultDto = {
       content: generatedContent,
-      provider: AIProviderType.Gemini,
-      tokensUsed: Math.round(tokensUsed),
-      generatedFromDB:true,
-      generatedAt: new Date(),
-      userPrompt: userPrompt || 'Generated from DB data',
-      style: style,
     };
     return simulateLatency(ok(result));
   }

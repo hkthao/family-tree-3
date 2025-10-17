@@ -545,4 +545,22 @@ export class MockMemberService implements IMemberService {
       });
     }
   }
+
+  async updateMemberBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> {
+    try {
+      const index = this._members.findIndex((m) => m.id === memberId);
+      if (index !== -1) {
+        this._members[index].biography = biographyContent; // Assuming 'biography' property exists on Member
+        await simulateLatency(undefined);
+        return ok(undefined);
+      }
+      return err({ name: 'ApiError', message: 'Member not found', statusCode: 404 });
+    } catch (e) {
+      return err({
+        name: 'ApiError',
+        message: 'Failed to update member biography in mock service.',
+        details: e as Error,
+      });
+    }
+  }
 }
