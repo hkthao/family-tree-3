@@ -1,7 +1,7 @@
 
-using FamilyTree.Application.Faces.Commands;
+using backend.Application.Faces.Commands;
 
-namespace FamilyTree.Application.Faces.Queries;
+namespace backend.Application.Faces.Queries;
 public class DetectedFaceDto
 {
     public string Id { get; set; } = null!;

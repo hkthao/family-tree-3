@@ -1,11 +1,11 @@
 namespace FamilyTree.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
-using FamilyTree.Application.Faces.Commands.DetectFaces;
-using FamilyTree.Application.Faces.Commands;
-using FamilyTree.Application.Faces.Queries;
-using FamilyTree.Application.Faces.Queries.GetDetectedFaces;
-using FamilyTree.Application.Faces.Commands.LabelFace;
+using backend.Application.Faces.Commands.DetectFaces;
+using backend.Application.Faces.Commands;
+using backend.Application.Faces.Queries;
+using backend.Application.Faces.Queries.GetDetectedFaces;
+using backend.Application.Faces.Commands.LabelFace;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 

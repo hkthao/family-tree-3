@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace FamilyTree.Application.Faces.Commands.LabelFace;
+namespace backend.Application.Faces.Commands.LabelFace;
 public class LabelFaceCommandHandler : IRequestHandler<LabelFaceCommand, Unit>
 {
     private readonly ILogger<LabelFaceCommandHandler> _logger;

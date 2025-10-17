@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import type { DetectedFace, SearchResult } from '@/types';
+import type { Result } from '@/types';
 import i18n from '@/plugins/i18n'; // For localization
 
 interface FaceState {
@@ -34,23 +35,14 @@ export const useFaceStore = defineStore('face', {
       this.loading = true;
       this.error = null;
       try {
-        // Simulate API call
-        // const result: Result<DetectedFace[], Error> = await this.services.face.detect(imageFile);
-        // For now, simulate with mock data
-        const mockDetectedFaces: DetectedFace[] = [
-          { id: 'face1', boundingBox: { x: 10, y: 20, width: 50, height: 60 }, imageUrl: 'path/to/cropped/face1.jpg', memberId: null, status: 'unrecognized' },
-          { id: 'face2', boundingBox: { x: 70, y: 80, width: 45, height: 55 }, imageUrl: 'path/to/cropped/face2.jpg', memberId: 'member123', status: 'recognized' },
-          // ... more mock faces
-        ];
-        this.uploadedImage = URL.createObjectURL(imageFile); // Store URL for display
-        this.detectedFaces = mockDetectedFaces; // Replace with actual API result
+        const result = await this.services.face.detect(imageFile);
 
-        // if (result.ok) {
-        //   this.uploadedImage = URL.createObjectURL(imageFile);
-        //   this.detectedFaces = result.value.map(face => ({ ...face, status: face.memberId ? 'recognized' : 'unrecognized' }));
-        // } else {
-        //   this.error = result.error?.message || i18n.global.t('face.errors.detectionFailed');
-        // }
+        if (result.ok) {
+          this.uploadedImage = URL.createObjectURL(imageFile);
+          this.detectedFaces = result.value.map(face => ({ ...face, status: face.memberId ? 'recognized' : 'unrecognized' }));
+        } else {
+          this.error = result.error?.message || i18n.global.t('face.errors.detectionFailed');
+        }
       } catch (err: any) {
         this.error = err.message || i18n.global.t('face.errors.unexpectedError');
       } finally {

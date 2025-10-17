@@ -1,4 +1,4 @@
-namespace FamilyTree.Application.Faces.Commands.LabelFace;
+namespace backend.Application.Faces.Commands.LabelFace;
 public class LabelFaceCommand : IRequest<Unit>
 {
     public Guid MemberId { get; set; } // ID of the member to associate with

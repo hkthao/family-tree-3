@@ -1,4 +1,4 @@
-namespace FamilyTree.Application.Faces.Commands;
+namespace backend.Application.Faces.Commands;
 
 public class FaceDetectionResultDto
 {

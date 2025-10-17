@@ -1,7 +1,7 @@
-using FamilyTree.Application.Faces.Common.Interfaces;
+using backend.Application.Faces.Common.Interfaces;
 using backend.Application.Common.Interfaces;
 
-namespace FamilyTree.Application.Faces.Commands.DetectFaces;
+namespace backend.Application.Faces.Commands.DetectFaces;
 public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, List<FaceDetectionResultDto>>
 {
     private readonly IFaceDetectionService _faceDetectionService;

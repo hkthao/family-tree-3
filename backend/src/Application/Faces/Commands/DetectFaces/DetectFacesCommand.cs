@@ -1,4 +1,4 @@
-namespace FamilyTree.Application.Faces.Commands.DetectFaces;
+namespace backend.Application.Faces.Commands.DetectFaces;
 public class DetectFacesCommand : IRequest<List<FaceDetectionResultDto>>
 {
     public byte[] ImageBytes { get; set; } = null!;

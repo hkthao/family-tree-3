@@ -35,6 +35,9 @@ import type { INaturalLanguageInputService } from './naturalLanguageInput/natura
 import { ApiNaturalLanguageInputService } from './naturalLanguageInput/api.naturalLanguageInput.service';
 import type { IChunkService } from './chunk/chunk.service.interface';
 import { ApiChunkService } from './chunk/api.chunk.service';
+import type { IFaceService } from './face/face.service.interface';
+import { MockFaceService } from './face/mock.face.service';
+import { ApiFaceService } from './face/api.face.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -52,6 +55,7 @@ export interface AppServices {
   chat: IChatService;
   naturalLanguageInput: INaturalLanguageInputService;
   chunk: IChunkService;
+  face: IFaceService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -137,5 +141,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiChunkService(apiClient)
         : testServices?.chunk || new ApiChunkService(apiClient),
+    face:
+      mode === 'mock'
+        ? new MockFaceService()
+        : mode === 'real'
+        ? new ApiFaceService(apiClient)
+        : testServices?.face || new MockFaceService(),
   };
 }

@@ -13,7 +13,7 @@ using Microsoft.Extensions.Options;
 using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.Files;
-using FamilyTree.Application.Faces.Common.Interfaces;
+using backend.Application.Faces.Common.Interfaces;
 using FamilyTree.Infrastructure.Services;
 
 namespace backend.Infrastructure;

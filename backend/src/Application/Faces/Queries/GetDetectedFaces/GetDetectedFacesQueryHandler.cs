@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace FamilyTree.Application.Faces.Queries.GetDetectedFaces;
+namespace backend.Application.Faces.Queries.GetDetectedFaces;
 public class GetDetectedFacesQueryHandler : IRequestHandler<GetDetectedFacesQuery, List<DetectedFaceDto>>
 {
     private readonly ILogger<GetDetectedFacesQueryHandler> _logger;
