@@ -2,10 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy the entire backend directory into the container
-COPY backend/ ./backend/
-
-# Set the working directory to the backend solution
-WORKDIR /src/backend
+COPY . .
 
 # Restore dependencies
 RUN dotnet restore backend.sln --verbosity minimal
@@ -14,7 +11,7 @@ RUN dotnet restore backend.sln --verbosity minimal
 RUN dotnet build backend.sln -c Release --no-restore
 
 # Publish the application
-WORKDIR /src/backend/src/Web
+WORKDIR /src/src/Web
 RUN dotnet publish -c Release -o /app/publish
 
 # Final production stage
@@ -25,4 +22,4 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 # Set the entrypoint for the application
-ENTRYPOINT ["dotnet", "backend.Web.dll"]
+ENTRYPOINT ["dotnet", "Web.dll"]
