@@ -20,31 +20,31 @@ jobs:
         dotnet-version: 8.0.x
 
     - name: Restore Backend Dependencies
-      run: dotnet restore backend/backend.sln
+      run: dotnet restore src/backend/backend.sln
 
     - name: Build Backend
-      run: dotnet build backend/backend.sln --no-restore
+      run: dotnet build src/backend/backend.sln --no-restore
 
     - name: Fix Backend Formatting
-      run: dotnet format backend/ --include-generated
+      run: dotnet format src/backend/ --include-generated
 
     - name: Verify Backend Formatting
-      run: dotnet format backend/ --verify-no-changes --include-generated
+      run: dotnet format src/backend/ --verify-no-changes --include-generated
 
     - name: Test Backend
-      run: dotnet test backend/backend.sln /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ github.workspace }}/backend/artifacts/coverage/coverage.cobertura.xml --no-build --verbosity normal
+      run: dotnet test src/backend/backend.sln /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ github.workspace }}/src/backend/artifacts/coverage/coverage.cobertura.xml --no-build --verbosity normal
 
     - name: Install ReportGenerator
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
     - name: Generate Coverage Report
-      run: reportgenerator "-reports:${{ github.workspace }}/backend/artifacts/coverage/coverage.cobertura.xml" "-targetdir:${{ github.workspace }}/backend/coverage-report" -reporttypes:Html
+      run: reportgenerator "-reports:${{ github.workspace }}/src/backend/artifacts/coverage/coverage.cobertura.xml" "-targetdir:${{ github.workspace }}/src/backend/coverage-report" -reporttypes:Html
 
     - name: Upload Backend Coverage Report
       uses: actions/upload-artifact@v4
       with:
         name: backend-coverage-report
-        path: backend/coverage-report
+        path: src/backend/coverage-report
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -52,19 +52,19 @@ jobs:
         node-version: 20
 
     - name: Install Frontend Dependencies
-      run: npm install --prefix frontend
+      run: npm install --prefix src/frontend
 
     - name: Lint Frontend
-      run: npm run lint --prefix frontend
+      run: npm run lint --prefix src/frontend
 
     - name: Test Frontend
-      run: npm run test:coverage --prefix frontend
+      run: npm run test:coverage --prefix src/frontend
 
     - name: Upload frontend coverage report
       uses: actions/upload-artifact@v4
       with:
         name: frontend-coverage
-        path: frontend/tests/coverage/frontend/
+        path: src/frontend/tests/coverage/frontend/
 
   docker-build:
     needs: build-and-test
@@ -78,8 +78,8 @@ jobs:
     - name: Build backend Docker image
       uses: docker/build-push-action@v4
       with:
-        context: .
-        file: infra/Dockerfile.backend
+        context: ./src/backend
+        file: src/infra/Dockerfile.backend
         push: false
         tags: your-dockerhub-username/family-tree-backend:latest
         outputs: type=docker,dest=/tmp/backend-image.tar
@@ -87,8 +87,8 @@ jobs:
     - name: Build frontend Docker image
       uses: docker/build-push-action@v4
       with:
-        context: .
-        file: infra/Dockerfile.frontend
+        context: ./src/frontend
+        file: src/infra/Dockerfile.frontend
         push: false
         tags: your-dockerhub-username/family-tree-frontend:latest
         outputs: type=docker,dest=/tmp/frontend-image.tar

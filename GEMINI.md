@@ -52,9 +52,9 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 
 ## 4. Cấu trúc Dự án
 
-*   `backend/`: Chứa mã nguồn ASP.NET Core cho API backend, được tổ chức theo Clean Architecture (Domain, Application, Infrastructure, Web).
-*   `frontend/`: Chứa mã nguồn ứng dụng Vue.js frontend.
-*   `infra/`: Chứa các tệp cấu hình cho Docker (docker-compose.yml, Dockerfile.backend, Dockerfile.frontend), Nginx và seed data.
+*   `src/backend/`: Chứa mã nguồn ASP.NET Core cho API backend, được tổ chức theo Clean Architecture (Domain, Application, Infrastructure, Web).
+*   `src/frontend/`: Chứa mã nguồn ứng dụng Vue.js frontend.
+*   `src/infra/`: Chứa các tệp cấu hình cho Docker (docker-compose.yml, Dockerfile.backend, Dockerfile.frontend), Nginx và seed data.
 *   `docs/`: Chứa toàn bộ tài liệu dự án, được phân loại thành các thư mục con:
     *   `engineering/`: Tài liệu kỹ thuật (kiến trúc, hướng dẫn phát triển, API, mô hình dữ liệu, kiểm thử, bảo mật).
     *   `project/`: Tài liệu quản lý dự án (backlog, sprint, test cases, release notes, roadmap, team).
@@ -82,13 +82,13 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 *   **Chiến lược nhánh:** Sử dụng `main`, `develop`, `feature/`, `bugfix/`, `hotfix/`, `docs/`.
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
 *   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.
-*   **Seed Data:** Có script để populate database với dữ liệu mẫu (`infra/seeds`).
+*   **Seed Data:** Có script để populate database với dữ liệu mẫu (`src/infra/seeds`).
 
 ## 8. Frontend Conventions
 
 ### 8.1. Cấu trúc Service
 
-*   Mỗi service nên có một thư mục riêng trong `frontend/src/services/` (ví dụ: `frontend/src/services/family/`).
+*   Mỗi service nên có một thư mục riêng trong `src/frontend/src/services/` (ví dụ: `src/frontend/src/services/family/`).
 *   Trong thư mục service, sẽ có các tệp sau:
     *   `[tên_service].service.interface.ts`: Định nghĩa interface cho service (ví dụ: `IFamilyService`).
     *   `api.[tên_service].service.ts`: Triển khai service sử dụng API thật (ví dụ: `ApiFamilyService`).
@@ -99,7 +99,7 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 ### 8.2. Cấu trúc Store (Pinia)
 
 *   Các store nên được định nghĩa theo kiểu Options API của Pinia (sử dụng `state`, `getters`, `actions` làm thuộc tính của đối tượng truyền vào `defineStore`).
-*   Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `frontend/src/plugins/services.plugin.ts`.
+*   Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `src/frontend/src/plugins/services.plugin.ts`.
 *   Thông báo lỗi nên được dịch hóa bằng `i18n.global.t()` (ví dụ: `i18n.global.t('family.errors.load')`).
 *   Các hành động (actions) trong store nên cập nhật trạng thái `loading` và `error` một cách nhất quán.
 

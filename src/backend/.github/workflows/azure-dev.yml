@@ -37,7 +37,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          global-json-file: 'global.json'
+          global-json-file: 'src/backend/global.json'
 
       - name: Log in with Azure (Federated Credentials)
         run: |

@@ -421,7 +421,7 @@ $RECYCLE.BIN/
 *.swp
 .azure
 
-backend/coverage-report/
+src/backend/coverage-report/
 # Frontend specific
 dist
 dist-ssr
@@ -449,6 +449,6 @@ yarn.lock
 !frontend/.env.example
 
 # Backend development appsettings (untracked for local configuration)
-backend/src/Web/appsettings.Development.json
-backend/src/Web/wwwroot/uploads/
-backend/src/Web/appsettings.Development.json
+src/backend/src/Web/appsettings.Development.json
+src/backend/src/Web/wwwroot/uploads/
+src/backend/src/Web/appsettings.Development.json

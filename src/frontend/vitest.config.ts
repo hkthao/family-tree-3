@@ -13,7 +13,7 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
-        reportsDirectory: './tests/coverage/frontend',
+        reportsDirectory: '../tests/coverage/frontend',
         all: true,
         thresholds: {
           statements: 0,
