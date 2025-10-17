@@ -4,14 +4,14 @@ WORKDIR /app/frontend
 
 # Copy package.json and lock files first to leverage Docker cache.
 # This layer only changes if dependencies change.
-COPY frontend/package*.json ./
+COPY package*.json ./
 
 # Install dependencies - this layer is cached unless package files change.
 RUN npm install
 
 # Copy the rest of the application source code.
 # This layer changes if any source code changes.
-COPY frontend/ .
+COPY . .
 
 # Build the frontend application.
 RUN npm run build

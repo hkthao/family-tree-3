@@ -34,7 +34,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         _context.Events.RemoveRange(_context.Events);
         _context.Families.RemoveRange(_context.Families);
         _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        _context.AIBiographies.RemoveRange(_context.AIBiographies);
+
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Thiết lập ID người dùng hiện tại cho mock IUser.

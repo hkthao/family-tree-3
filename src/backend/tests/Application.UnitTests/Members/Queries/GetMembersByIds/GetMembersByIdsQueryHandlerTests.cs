@@ -22,7 +22,6 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         _context.Events.RemoveRange(_context.Events);
         _context.Families.RemoveRange(_context.Families);
         _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        _context.AIBiographies.RemoveRange(_context.AIBiographies);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });

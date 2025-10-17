@@ -15,15 +15,12 @@ services:
   backend:
     build:
       context: ../backend
-      dockerfile: ./Dockerfile.backend # Path to Dockerfile relative to the new context
-      args:
-        - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;
+      dockerfile: ../infra/Dockerfile.backend # Path to Dockerfile relative to the new context
     container_name: family-tree-backend
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=familytree_db;Uid=root;Pwd=root_password;
     env_file:
       - ../.env
     depends_on:
@@ -32,7 +29,7 @@ services:
   frontend:
     build:
       context: ../frontend
-      dockerfile: ./Dockerfile.frontend # Path to Dockerfile relative to the new context
+      dockerfile: ../infra/Dockerfile.frontend # Path to Dockerfile relative to the new context
     container_name: family-tree-frontend
     ports:
       - "80:80"
@@ -45,7 +42,7 @@ services:
   face-service:
     build:
       context: ../face-service # Context is the face-service directory
-      dockerfile: ./Dockerfile.face-service # Updated dockerfile path
+      dockerfile: ../infra/Dockerfile.face-service # Updated dockerfile path
     container_name: family-tree-face-service
     ports:
       - "8000:8000" # Expose port 8000 for the FastAPI app
