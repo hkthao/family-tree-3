@@ -67,7 +67,7 @@ async def detect_faces(
             cropped_face = image.crop((x, y, x + w, y + h))
 
             # Generate embedding for the cropped face
-            face_embedding = face_embedding_service.get_embedding(cropped_face)
+            face_embedding = face_embedding_service.get_facenet_embedding(cropped_face)
 
             if return_crop:
                 buffered = io.BytesIO()

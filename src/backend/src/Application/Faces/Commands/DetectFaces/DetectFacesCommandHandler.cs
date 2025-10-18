@@ -68,6 +68,7 @@ public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, Fac
                 {
                     var queryResults = await vectorStore.QueryAsync(faceResult.Embedding, 1, [], collectionName, cancellationToken);
                     var bestMatch = queryResults.FirstOrDefault();
+                    _logger.LogInformation("best match for face with score {Score}.", bestMatch?.Score);
                     if (bestMatch != null && bestMatch.Score > 0.8) // Consider a confidence score threshold
                     {
                         _logger.LogInformation("Found a match for face with score {Score}.", bestMatch.Score);

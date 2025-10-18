@@ -30,7 +30,7 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
 
         IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
         var collectionName = "family-face-embeddings";
-        var dim = 128;
+        var dim = 512;
 
         foreach (var faceLabel in request.FaceLabels)
         {
