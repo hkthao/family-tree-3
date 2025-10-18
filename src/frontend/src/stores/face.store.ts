@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import type { DetectedFace, SearchResult } from '@/types';
+import type { DetectedFace, SearchResult, FaceStatus, BoundingBox } from '@/types';
 import type { Result } from '@/types';
 import i18n from '@/plugins/i18n'; // For localization
 
 interface FaceState {
   uploadedImage: string | null; // Base64 or URL of the uploaded image
   detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
-  selectedFaceId: string | null; // ID of the currently selected face for labeling
+  selectedFaceId: string | undefined; // ID of the currently selected face for labeling
   faceSearchResults: SearchResult[]; // Results from face search
   loading: boolean;
   error: string | null;
@@ -16,7 +16,7 @@ export const useFaceStore = defineStore('face', {
   state: (): FaceState => ({
     uploadedImage: null,
     detectedFaces: [],
-    selectedFaceId: null,
+    selectedFaceId: undefined,
     faceSearchResults: [],
     loading: false,
     error: null,
@@ -39,7 +39,13 @@ export const useFaceStore = defineStore('face', {
 
         if (result.ok) {
           this.uploadedImage = URL.createObjectURL(imageFile);
-          this.detectedFaces = result.value.map(face => ({ ...face, status: face.memberId ? 'recognized' : 'unrecognized' }));
+          this.detectedFaces = result.value.map(face => ({
+            id: face.id,
+            boundingBox: face.boundingBox, // Use boundingBox directly from result if available
+            imageUrl: face.imageUrl, // Assuming imageUrl is part of the detected face result
+            memberId: face.memberId,
+            status: face.memberId ? 'recognized' : 'unrecognized',
+          }));
         } else {
           this.error = result.error?.message || i18n.global.t('face.errors.detectionFailed');
         }
@@ -51,35 +57,46 @@ export const useFaceStore = defineStore('face', {
     },
 
     // Action to select a face for labeling
-    selectFace(faceId: string | null): void {
+    selectFace(faceId: string | undefined): void {
       this.selectedFaceId = faceId;
     },
 
-    // Action to save face mapping to a member
-    async saveFaceMapping(faceId: string, memberId: string): Promise<void> {
+    // Action to label a detected face with a member ID locally
+    labelFace(faceId: string, memberId: string): void {
+      const faceIndex = this.detectedFaces.findIndex(f => f.id === faceId);
+      if (faceIndex !== -1) {
+        this.detectedFaces[faceIndex].memberId = memberId;
+        this.detectedFaces[faceIndex].status = 'labeled';
+      }
+    },
+
+    // Action to save all face labels to the backend
+    async saveFaceLabels(): Promise<void> {
       this.loading = true;
       this.error = null;
       try {
-        // Simulate API call
-        // const result: Result<void, Error> = await this.services.face.saveMapping(faceId, memberId);
-        // For now, update local state
-        const faceIndex = this.detectedFaces.findIndex(f => f.id === faceId);
-        if (faceIndex !== -1) {
-          this.detectedFaces[faceIndex].memberId = memberId;
-          this.detectedFaces[faceIndex].status = 'newly-labeled'; // Or 'recognized'
-        }
+        // Prepare data for API call
+        const faceLabels = this.detectedFaces.filter(face => face.memberId).map(face => ({
+          faceId: face.id,
+          memberId: face.memberId,
+          // Add other relevant data if needed, e.g., bounding box coordinates
+        }));
+
+        // TODO: Call the actual API to save face labels
+        // const result: Result<void, Error> = await this.services.face.saveLabels(faceLabels);
+
+        // Simulate API call success
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
 
         // if (result.ok) {
-        //   // Update the detected face in the state
-        //   const faceIndex = this.detectedFaces.findIndex(f => f.id === faceId);
-        //   if (faceIndex !== -1) {
-        //     this.detectedFaces[faceIndex].memberId = memberId;
-        //     this.detectedFaces[faceIndex].status = 'newly-labeled'; // Assuming API confirms
-        //   }
+        //   // Optionally update status of faces after successful save
+        //   this.detectedFaces.forEach(face => {
+        //     if (face.memberId) face.status = 'recognized';
+        //   });
         //   // Show success notification
-        //   // this.notificationStore.showSnackbar(i18n.global.t('face.success.saveMapping'), 'success');
+        //   // this.notificationStore.showSnackbar(i18n.global.t('face.success.saveLabels'), 'success');
         // } else {
-        //   this.error = result.error?.message || i18n.global.t('face.errors.saveMappingFailed');
+        //   this.error = result.error?.message || i18n.global.t('face.errors.saveLabelsFailed');
         // }
       } catch (err: any) {
         this.error = err.message || i18n.global.t('face.errors.unexpectedError');
@@ -119,7 +136,7 @@ export const useFaceStore = defineStore('face', {
     resetState(): void {
       this.uploadedImage = null;
       this.detectedFaces = [];
-      this.selectedFaceId = null;
+      this.selectedFaceId = undefined;
       this.faceSearchResults = [];
       this.loading = false;
       this.error = null;

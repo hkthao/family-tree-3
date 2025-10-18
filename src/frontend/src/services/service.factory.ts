@@ -1,3 +1,6 @@
+import type { IFaceMemberService } from './faceMember/faceMember.service.interface';
+import { MockFaceMemberService } from './faceMember/mock.faceMember.service';
+import { ApiFaceMemberService } from './faceMember/api.faceMember.service';
 import type { IFamilyService } from './family/family.service.interface';
 import { MockFamilyService } from './family/mock.family.service';
 import { ApiFamilyService } from './family/api.family.service';
@@ -56,6 +59,7 @@ export interface AppServices {
   naturalLanguageInput: INaturalLanguageInputService;
   chunk: IChunkService;
   face: IFaceService;
+  faceMember: IFaceMemberService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -147,5 +151,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiFaceService(apiClient)
         : testServices?.face || new MockFaceService(),
+    faceMember:
+      mode === 'mock'
+        ? new MockFaceMemberService()
+        : mode === 'real'
+        ? new ApiFaceMemberService(apiClient)
+        : testServices?.faceMember || new MockFaceMemberService(),
   };
 }

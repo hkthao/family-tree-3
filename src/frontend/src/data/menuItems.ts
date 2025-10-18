@@ -63,21 +63,9 @@ const menu: MenuSection[] = [
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
       {
-        titleKey: 'ai.faceTag',
+        titleKey: 'face.recognition',
         icon: 'mdi-face-recognition',
-        to: '/face/labeling',
-        roles: ['Admin', 'FamilyManager'],
-      },
-      {
-        titleKey: 'search.face',
-        icon: 'mdi-image-search',
-        to: '/search/face',
-        roles: ['Admin', 'FamilyManager'],
-      },
-      {
-        titleKey: 'face.upload',
-        icon: 'mdi-upload',
-        to: '/face/upload',
+        to: '/face/recognition',
         roles: ['Admin', 'FamilyManager'],
       },
     ],

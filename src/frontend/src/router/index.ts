@@ -178,16 +178,10 @@ const router = createRouter({
           meta: { breadcrumb: 'userSettings.title', roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
         },
         {
-          path: 'face/upload',
-          name: 'FaceUpload',
-          component: () => import('@/views/face/FaceUploadView.vue'),
-          meta: { breadcrumb: 'face.upload.title', requiresAuth: true },
-        },
-        {
-          path: 'face/labeling',
-          name: 'FaceLabeling',
-          component: () => import('@/views/face/FaceLabelingView.vue'),
-          meta: { breadcrumb: 'face.labeling.title', requiresAuth: true },
+          path: 'face/recognition',
+          name: 'FaceRecognition',
+          component: () => import('@/views/face/FaceRecognitionView.vue'),
+          meta: { breadcrumb: 'face.recognition.title', requiresAuth: true },
         },
         {
           path: 'face/search',

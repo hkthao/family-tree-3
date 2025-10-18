@@ -8,7 +8,7 @@ interface BoundingBox {
   height: number;
 }
 
-type FaceStatus = 'recognized' | 'unrecognized' | 'newly-labeled';
+type FaceStatus = 'recognized' | 'unrecognized' | 'newly-labeled' | 'labeled';
 
 interface DetectedFace {
   id: string; // Unique ID for the detected face instance

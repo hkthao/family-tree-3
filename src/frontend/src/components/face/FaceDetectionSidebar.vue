@@ -46,7 +46,7 @@ const { t } = useI18n();
 
 const props = defineProps({
   faces: { type: Array as () => DetectedFace[], default: () => [] },
-  selectedFaceId: { type: String as PropType<string | null>, default: null },
+  selectedFaceId: { type: String as PropType<string | undefined>, default: undefined },
 });
 
 const emit = defineEmits(['face-selected']);

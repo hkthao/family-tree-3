@@ -89,7 +89,7 @@ const props = defineProps({
 
 const emit = defineEmits(['save-mapping', 'create-new-member']);
 
-const selectedMemberId = ref<string | null>(props.face.memberId);
+const selectedMemberId = ref<string | null | undefined>(props.face.memberId);
 const showCreateMemberDialog = ref(false);
 const newMemberName = ref('');
 

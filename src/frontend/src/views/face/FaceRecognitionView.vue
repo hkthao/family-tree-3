@@ -1,0 +1,99 @@
+<template>
+  <v-card class="pa-4" elevation="2">
+    <v-card-title class="text-h5">{{ t('face.recognition.title') }}</v-card-title>
+    <v-card-text>
+      <FaceUploadInput @file-uploaded="handleFileUpload" />
+
+      <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
+
+      <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
+        <v-row>
+          <v-col cols="12" md="8">
+            <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable
+              @face-selected="openSelectMemberDialog" />
+          </v-col>
+          <v-col cols="12" md="4">
+            <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog" />
+          </v-col>
+        </v-row>
+      </div>
+      <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{ t('face.recognition.uploadPrompt') }}</v-alert>
+      <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0" type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
+    </v-card-text>
+    <v-card-actions class="justify-end">
+      <v-btn color="primary" :disabled="!canSaveLabels" @click="saveLabels">
+        {{ t('face.recognition.saveLabelsButton') }}
+      </v-btn>
+    </v-card-actions>
+
+    <FaceMemberSelectDialog
+      :show="showSelectMemberDialog"
+      @update:show="showSelectMemberDialog = $event"
+      :selected-face="faceToLabel"
+      :managed-members="faceMemberStore.managedMembers"
+      @label-face="handleLabelFaceAndCloseDialog"
+    />
+  </v-card>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useFaceStore } from '@/stores/face.store';
+import { useFaceMemberStore } from '@/stores/faceMember.store';
+import { useNotificationStore } from '@/stores/notification.store';
+import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
+import type { DetectedFace } from '@/types';
+
+const { t } = useI18n();
+const router = useRouter();
+const faceStore = useFaceStore();
+const faceMemberStore = useFaceMemberStore();
+const notificationStore = useNotificationStore();
+
+const showSelectMemberDialog = ref(false);
+const faceToLabel = ref<DetectedFace | null>(null);
+
+onMounted(() => {
+  faceMemberStore.loadManagedMembers();
+});
+
+watch(() => faceStore.error, (newError) => {
+  if (newError) {
+    notificationStore.showSnackbar(newError, 'error');
+  }
+});
+
+const handleFileUpload = async (file: File) => {
+  await faceStore.detectFaces(file);
+};
+
+const openSelectMemberDialog = (faceId: string) => {
+  const face = faceStore.detectedFaces.find(f => f.id === faceId);
+  if (face) {
+    faceToLabel.value = face;
+    showSelectMemberDialog.value = true;
+  }
+};
+
+const canSaveLabels = computed(() => {
+  return faceStore.detectedFaces.some(face => face.memberId !== undefined);
+});
+
+const handleLabelFaceAndCloseDialog = (faceId: string, memberId: string) => {
+  faceStore.labelFace(faceId, memberId);
+  showSelectMemberDialog.value = false;
+  faceToLabel.value = null;
+};
+
+const saveLabels = async () => {
+  await faceStore.saveFaceLabels();
+  notificationStore.showSnackbar(t('face.recognition.saveSuccess'), 'success');
+  faceStore.resetState(); // Reset face store after saving
+};
+</script>
+
+<style scoped>
+/* Add any specific styles for this view here */
+</style>
