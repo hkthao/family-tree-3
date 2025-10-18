@@ -4,8 +4,8 @@ using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Domain.Entities;
-using Moq;  for It.IsAny
-using backend.Domain.Enums;  for FamilyRole
+using Moq;
+using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 

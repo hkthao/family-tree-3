@@ -7,7 +7,6 @@ using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using backend.Application.AI.VectorStore;
 using Microsoft.Extensions.Logging;
-using backend.Domain.Entities;  for TextChunk
 using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.AI.Chat.Queries;

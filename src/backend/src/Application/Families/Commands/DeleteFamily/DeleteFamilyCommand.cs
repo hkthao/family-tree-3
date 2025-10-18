@@ -1,4 +1,4 @@
-﻿using backend.Application.Common.Models;  for Result
+﻿using backend.Application.Common.Models;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 

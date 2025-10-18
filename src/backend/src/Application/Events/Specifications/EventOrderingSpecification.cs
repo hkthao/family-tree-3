@@ -29,7 +29,7 @@ public class EventOrderingSpecification : Specification<Event>
                     else
                         Query.OrderBy(e => e.StartDate);
                     break;
-                case "location": 
+                case "location":
                     if (sortOrder == "desc")
                         Query.OrderByDescending(e => e.Location);
                     else

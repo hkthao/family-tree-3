@@ -1,8 +1,8 @@
-using Ardalis.Specification.EntityFrameworkCore; 
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
-using backend.Application.Events.Specifications; 
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.SearchEvents;
 

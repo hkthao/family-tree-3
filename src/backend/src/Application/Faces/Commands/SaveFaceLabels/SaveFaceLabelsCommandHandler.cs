@@ -1,9 +1,9 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
-using backend.Application.AI.VectorStore; 
-using Microsoft.Extensions.Options; 
-using backend.Domain.Enums; 
+using backend.Application.AI.VectorStore;
+using Microsoft.Extensions.Options;
+using backend.Domain.Enums;
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 

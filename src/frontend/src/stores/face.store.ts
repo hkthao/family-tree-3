@@ -106,7 +106,7 @@ export const useFaceStore = defineStore('face', {
     },
 
     // Action to save all face labels to the backend
-    async saveFaceLabels(): Promise<void> {
+    async saveFaceLabels(): Promise<boolean> {
       this.loading = true;
       this.error = null;
       try {
@@ -142,14 +142,17 @@ export const useFaceStore = defineStore('face', {
           this.detectedFaces.forEach((face) => {
             if (face.memberId) face.status = 'recognized';
           });
+          return true;
         } else {
           this.error =
             result.error?.message ||
             i18n.global.t('face.errors.saveMappingFailed');
+          return false;
         }
       } catch (err: any) {
         this.error =
           err.message || i18n.global.t('face.errors.unexpectedError');
+        return false;
       } finally {
         this.loading = false;
       }

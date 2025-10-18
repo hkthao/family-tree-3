@@ -15,9 +15,9 @@ public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRe
     private readonly IValidator<AIRelationshipDto> _aiRelationshipDtoValidator;
     private readonly IApplicationDbContext _context;
     private readonly FamilyAuthorizationService _familyAuthorizationService;
-    private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger;  logger
+    private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger;
 
-    public GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger)  logger
+    public GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger)
     {
         _chatProviderFactory = chatProviderFactory;
         _aiRelationshipDtoValidator = aiRelationshipDtoValidator;

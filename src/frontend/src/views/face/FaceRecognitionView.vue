@@ -83,9 +83,11 @@ const handleRemoveFace = (faceId: string) => {
 };
 
 const saveLabels = async () => {
-  await faceStore.saveFaceLabels();
-  notificationStore.showSnackbar(t('face.recognition.saveSuccess'), 'success');
-  faceStore.resetState(); // Reset face store after saving
+  const success = await faceStore.saveFaceLabels();
+  if (success) {
+    notificationStore.showSnackbar(t('face.recognition.saveSuccess'), 'success');
+    faceStore.resetState(); // Reset face store after saving
+  }
 };
 </script>
 

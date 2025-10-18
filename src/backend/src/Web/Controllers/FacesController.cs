@@ -1,17 +1,11 @@
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands.SaveFaceLabels;
-
-namespace FamilyTree.Web.Controllers;
-
 using Microsoft.AspNetCore.Mvc;
 using backend.Application.Faces.Commands.DetectFaces;
-using backend.Application.Faces.Commands;
 using backend.Application.Faces.Queries;
 using backend.Application.Faces.Queries.GetDetectedFaces;
-using backend.Application.Faces.Commands.LabelFace;
-using MediatR;
-using Microsoft.AspNetCore.Http;
 
+namespace backend.Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 public class FacesController : ControllerBase
@@ -50,13 +44,6 @@ public class FacesController : ControllerBase
     public async Task<ActionResult<List<DetectedFaceDto>>> GetDetectedFaces(Guid imageId)
     {
         return await _mediator.Send(new GetDetectedFacesQuery { ImageId = imageId });
-    }
-
-    [HttpPost("label")]
-    public async Task<ActionResult> LabelFace([FromBody] LabelFaceCommand command)
-    {
-        await _mediator.Send(command);
-        return NoContent();
     }
 
     [HttpPost("labels")]

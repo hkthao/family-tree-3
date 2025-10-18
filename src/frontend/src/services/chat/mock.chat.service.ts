@@ -10,7 +10,7 @@ export class MockChatService implements IChatService {
       sessionId: sessionId || 'mock-session-123',
       model: 'mock-model',
       createdAt: new Date().toISOString(),
-      context: [],  missing context property
+      context: [],
     };
     return Promise.resolve({ ok: true, value: mockResponse });
   }

@@ -15,8 +15,6 @@ export class MockAIBiographyService implements IAIBiographyService {
     console.log('Generating mock biography:', { memberId, style, generatedFromDB, userPrompt, language });
     const generatedContent = `This is a mock biography for member ${memberId} in ${BiographyStyle[style]} style. ` +
                              `Prompt: ${userPrompt || 'Generated from DB data'}. Language: ${language}.`;
-    const tokensUsed = generatedContent.length / 5; // Mock token count
-
     const result: BiographyResultDto = {
       content: generatedContent,
     };
@@ -38,7 +36,7 @@ export class MockAIBiographyService implements IAIBiographyService {
       generatedFromDB: false,
       tokensUsed: 100,
       created: new Date().toISOString(),
-      language: 'en',  missing language property
+      language: 'en', 
     };
     return simulateLatency(ok(mockBiography));
   }

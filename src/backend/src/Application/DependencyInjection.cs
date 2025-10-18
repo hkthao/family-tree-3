@@ -20,7 +20,7 @@ public static class DependencyInjection
         });
 
         services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
-        services.AddScoped<Common.Services.FamilyAuthorizationService>(); 
+        services.AddScoped<Common.Services.FamilyAuthorizationService>();
         services.Configure<Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(Common.Models.EmbeddingSettings)));
 
         return services;

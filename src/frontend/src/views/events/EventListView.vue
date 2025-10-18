@@ -94,7 +94,7 @@ const handleFilterUpdate = (filters: EventFilter) => {
 const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[];  sortBy
+  sortBy: { key: string; order: string }[]; 
 }) => {
   eventStore.setPage(options.page);
   eventStore.setItemsPerPage(options.itemsPerPage);
@@ -121,7 +121,6 @@ const handleDeleteConfirm = async () => {
       );
       await loadEvents(); // Reload events after deletion
     } finally {
-       finally block for consistent dialog closing
       deleteConfirmDialog.value = false;
       eventToDelete.value = undefined;
     }

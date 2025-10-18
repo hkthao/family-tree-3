@@ -56,7 +56,7 @@ namespace backend.Infrastructure.AI.VectorStore
             {
                 Id = chunk.Id,
                 Metadata = chunk.Metadata,
-                Embedding = chunk.Embedding?.ToList() ?? new List<float>(),  null check
+                Embedding = chunk.Embedding?.ToList() ?? [],
                 Score = 1.0f, // Dummy score for in-memory store
                 Content = chunk.Metadata.GetValueOrDefault("Content", string.Empty) 
             }).Take(topK).ToList();
