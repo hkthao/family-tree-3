@@ -1,9 +1,9 @@
 using backend.Application.AI.Common;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services; // Added
+using backend.Application.Common.Services;
 using backend.Domain.Enums;
-using backend.Domain.Extensions; // Added // Added
+using backend.Domain.Extensions; // Added
 using System.Text;
 
 namespace backend.Application.Members.Commands.GenerateBiography;
@@ -119,9 +119,28 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
                 userPromptBuilder.AppendLine("Relationships:");
                 foreach (var rel in relationships)
                 {
-                    var relatedMemberName = rel.SourceMemberId == member.Id ? rel.TargetMember?.FullName : rel.SourceMember?.FullName;
-                    var relationshipType = rel.SourceMemberId == member.Id ? rel.Type.ToString() : rel.Type.GetInverseRelationshipType().ToString();
-                    userPromptBuilder.AppendLine($"- {member.FullName} is {relationshipType} of {relatedMemberName} (from {rel.StartDate?.ToShortDateString() ?? "Unknown"} to {rel.EndDate?.ToShortDateString() ?? "Present"}).");
+                    string relationshipDescription = string.Empty;
+                    if (rel.SourceMemberId == member.Id) // member is the source of the relationship
+                    {
+                        var targetMember = rel.TargetMember;
+                        if (targetMember != null)
+                        {
+                            relationshipDescription = $"{member.FullName} is {rel.Type} of {targetMember.FullName}";
+                        }
+                    }
+                    else if (rel.TargetMemberId == member.Id) // member is the target of the relationship
+                    {
+                        var sourceMember = rel.SourceMember;
+                        if (sourceMember != null)
+                        {
+                            relationshipDescription = $"{member.FullName} is {rel.Type.ToInverseDisplayType()} of {sourceMember.FullName}";
+                        }
+                    }
+
+                    if (!string.IsNullOrEmpty(relationshipDescription))
+                    {
+                        userPromptBuilder.AppendLine($"- {relationshipDescription} (from {rel.StartDate?.ToShortDateString() ?? "Unknown"} to {rel.EndDate?.ToShortDateString() ?? "Present"}).");
+                    }
                 }
             }
             // Add other relevant data if available (e.g., events, achievements)

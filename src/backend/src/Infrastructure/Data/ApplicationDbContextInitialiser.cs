@@ -400,95 +400,37 @@ public class ApplicationDbContextInitialiser
             _context.Relationships.AddRange(new List<Domain.Entities.Relationship>
             {
                 // Spouses
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = elizabethIIId, Type = Domain.Enums.RelationshipType.Husband },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = elizabethIIId, TargetMemberId = philipId, Type = Domain.Enums.RelationshipType.Wife },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = catherineId, Type = Domain.Enums.RelationshipType.Husband },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Wife },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = meghanId, Type = Domain.Enums.RelationshipType.Husband },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Wife },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = queenConsortId, Type = Domain.Enums.RelationshipType.Husband },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = queenConsortId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Wife },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = andrewId, TargetMemberId = sarahId, Type = Domain.Enums.RelationshipType.Husband },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = sarahId, TargetMemberId = andrewId, Type = Domain.Enums.RelationshipType.Wife },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = elizabethIIId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = catherineId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = meghanId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = queenConsortId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = andrewId, TargetMemberId = sarahId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
 
                 // Parent-Child: Philip & Elizabeth II -> Charles III
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = elizabethIIId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Mother },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = elizabethIIId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
 
                 // Parent-Child: Charles III & Diana -> William, Harry
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Mother },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Mother },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
 
                 // Parent-Child: William & Catherine -> George, Charlotte, Louis
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Mother },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Mother },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Mother },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
 
                 // Parent-Child: Harry & Meghan -> Archie, Lilibet Mountbatten-Windsor
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Mother },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Father },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Mother },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId }
             });
 
-            await _context.SaveChangesAsync();
-        }
-
-        // Seed UserActivities
-        if (!_context.UserActivities.Any())
-        {
-            var userProfile1Id = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
-            var userProfile2Id = Guid.Parse("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22");
-            var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb");
-            var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef");
-
-            _context.UserActivities.AddRange(new Domain.Entities.UserActivity[]
-            {
-                new Domain.Entities.UserActivity
-                {
-                    UserProfileId = userProfile1Id,
-                    ActionType = Domain.Enums.UserActionType.Login,
-                    TargetType = Domain.Enums.TargetType.UserProfile,
-                    TargetId = userProfile1Id.ToString(),
-                    ActivitySummary = "User Test User One logged in.",
-                    GroupId= Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"),
-                    Created = DateTime.UtcNow.AddDays(-5)
-                },
-                new Domain.Entities.UserActivity
-                {
-                    UserProfileId = userProfile1Id,
-                    ActionType = Domain.Enums.UserActionType.CreateFamily,
-                    TargetType = Domain.Enums.TargetType.Family,
-                    TargetId = royalFamilyId.ToString(),
-                    ActivitySummary = "User Test User One created Royal Family.",
-                    GroupId= Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"),
-                    Created = DateTime.UtcNow.AddDays(-4)
-                },
-                new Domain.Entities.UserActivity
-                {
-                    UserProfileId = userProfile2Id,
-                    ActionType = Domain.Enums.UserActionType.Login,
-                    TargetType = Domain.Enums.TargetType.UserProfile,
-                    TargetId = userProfile2Id.ToString(),
-                    ActivitySummary = "User Test User Two logged in.",
-                    Created = DateTime.UtcNow.AddDays(-3)
-                },
-                new Domain.Entities.UserActivity
-                {
-                    UserProfileId = userProfile1Id,
-                    ActionType = Domain.Enums.UserActionType.CreateMember,
-                    TargetType = Domain.Enums.TargetType.Member,
-                    TargetId = williamId.ToString(),
-                    ActivitySummary = "User Test User One created member Prince William.",
-                    GroupId= Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"),
-                    Created = DateTime.UtcNow.AddDays(-2)
-                }
-            });
             await _context.SaveChangesAsync();
         }
     }

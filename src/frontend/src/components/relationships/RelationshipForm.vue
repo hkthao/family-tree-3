@@ -29,6 +29,16 @@
         ></v-select>
       </v-col>
       <v-col cols="12" md="6">
+        <FamilyAutocomplete
+          v-model="editableRelationship.familyId"
+          :label="t('relationship.form.family')"
+          :rules="[rules.required]"
+          :readonly="props.readOnly"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
         <v-text-field
           v-model.number="editableRelationship.order"
           :label="t('relationship.form.order')"
@@ -49,7 +59,7 @@ import { useRelationshipStore } from '@/stores/relationship.store';
 import type { Relationship } from '@/types';
 import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes';
 
-import { MemberAutocomplete } from '@/components/common';
+import { MemberAutocomplete, FamilyAutocomplete } from '@/components/common';
 
 const props = defineProps<{
   id?: string; // Added
@@ -71,6 +81,7 @@ const editableRelationship = ref<Partial<Relationship>>(
         targetMemberId: '',
         type: undefined,
         order: undefined,
+        familyId: undefined, // Added familyId
       },
 );
 
