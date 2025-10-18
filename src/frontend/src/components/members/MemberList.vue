@@ -100,7 +100,7 @@ import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
 import { ChipLookup } from '@/components/common';
-import { getGenderTitle } from '@/constants/genders'; // Added
+import { getGenderTitle } from '@/constants/genders'; 
 
 const familyStore = useFamilyStore();
 

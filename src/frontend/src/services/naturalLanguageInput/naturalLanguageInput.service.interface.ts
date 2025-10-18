@@ -5,5 +5,5 @@ export interface INaturalLanguageInputService {
   generateFamilyData(prompt: string): Promise<Result<Family[], ApiError>>;
   generateMemberData(prompt: string): Promise<Result<Member[], ApiError>>;
   generateEventData(prompt: string): Promise<Result<Event[], ApiError>>;
-  generateRelationshipData(prompt: string): Promise<Result<Relationship[], ApiError>>; // Added
+  generateRelationshipData(prompt: string): Promise<Result<Relationship[], ApiError>>; 
 }

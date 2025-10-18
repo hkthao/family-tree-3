@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Faces.Queries; // For DetectedFaceDto
-using backend.Application.Faces.Common; // Added
+using backend.Application.Faces.Common; 
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 

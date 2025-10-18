@@ -10,7 +10,7 @@ export interface Event {
   familyId: string | null;
   relatedMembers?: string[];
   type: EventType;
-  color?: string; // Added color property
+  color?: string;  color property
   validationErrors?: string[];
 }
 
@@ -23,6 +23,6 @@ export interface EventFilter {
   endDate?: Date | null;
   location?: string;
   relatedMemberId?: string;
-  sortBy?: string; // Added
-  sortOrder?: 'asc' | 'desc'; // Added
+  sortBy?: string; 
+  sortOrder?: 'asc' | 'desc'; 
 }

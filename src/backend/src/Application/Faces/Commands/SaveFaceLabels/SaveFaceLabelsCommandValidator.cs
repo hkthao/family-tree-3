@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Application.Faces.Queries; // For DetectedFaceDto
-
 namespace backend.Application.Faces.Commands.SaveFaceLabels
 {
     public class SaveFaceLabelsCommandValidator : AbstractValidator<SaveFaceLabelsCommand>

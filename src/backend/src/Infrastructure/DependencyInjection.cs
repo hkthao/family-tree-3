@@ -42,7 +42,7 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
-        services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
+        services.AddScoped<IAuthorizationService, AuthorizationService>();  Authorization Service
 
         // Register Face API Service and configure its HttpClient
         services.AddHttpClient<IFaceApiService, FaceApiService>(client =>

@@ -14,8 +14,8 @@
 
 <script setup lang="ts">
 
-import { Gender } from '@/types'; // Added back
-import { GENDER_OPTIONS } from '@/constants/genders'; // Added
+import { Gender } from '@/types';  back
+import { GENDER_OPTIONS } from '@/constants/genders'; 
 
 const { modelValue, label, rules, readOnly, clearable } = defineProps<{
   modelValue: Gender | null | undefined;

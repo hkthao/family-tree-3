@@ -8,8 +8,8 @@ public interface IApplicationDbContext
     DbSet<Member> Members { get; }
     DbSet<Event> Events { get; }
     DbSet<Relationship> Relationships { get; }
-    DbSet<UserProfile> UserProfiles { get; } // Added
-    DbSet<FamilyUser> FamilyUsers { get; } // Added
+    DbSet<UserProfile> UserProfiles { get; } 
+    DbSet<FamilyUser> FamilyUsers { get; } 
     DbSet<UserActivity> UserActivities { get; }
     DbSet<UserPreference> UserPreferences { get; }
     DbSet<FileMetadata> FileMetadata { get; }

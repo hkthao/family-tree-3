@@ -1,8 +1,8 @@
-using Ardalis.Specification.EntityFrameworkCore; // Added
+using Ardalis.Specification.EntityFrameworkCore; 
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
 using backend.Application.Common.Models;
-using backend.Application.Families.Specifications; // Added
+using backend.Application.Families.Specifications; 
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 

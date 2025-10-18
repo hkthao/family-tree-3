@@ -66,7 +66,7 @@ const handleFilterUpdate = async (filters: MemberFilter) => {
 const handleListOptionsUpdate = async (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[]; // Added sortBy
+  sortBy: { key: string; order: string }[];  sortBy
 }) => {
   await memberStore.setPage(options.page);
   await memberStore.setItemsPerPage(options.itemsPerPage);

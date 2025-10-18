@@ -1,14 +1,6 @@
 import { defineStore } from 'pinia';
-import type {
-  DetectedFace,
-  SearchResult,
-  FaceStatus,
-  BoundingBox,
-  Member,
-} from '@/types';
-import type { Result } from '@/types';
+import type { DetectedFace, SearchResult, Member } from '@/types';
 import i18n from '@/plugins/i18n'; // For localization
-import { useMemberStore } from '@/stores/member.store';
 
 interface FaceState {
   uploadedImage: string | null; // Base64 or URL of the uploaded image
@@ -83,7 +75,11 @@ export const useFaceStore = defineStore('face', {
     },
 
     // Action to label a detected face with a member ID locally
-    async labelFace(faceId: string, memberId: string, memberDetails: Member): Promise<void> {
+    async labelFace(
+      faceId: string,
+      memberId: string,
+      memberDetails: Member,
+    ): Promise<void> {
       const faceIndex = this.detectedFaces.findIndex((f) => f.id === faceId);
       if (faceIndex !== -1) {
         this.detectedFaces[faceIndex].memberId = memberId;
@@ -92,15 +88,21 @@ export const useFaceStore = defineStore('face', {
           this.detectedFaces[faceIndex].memberName = memberDetails.fullName;
           this.detectedFaces[faceIndex].familyId = memberDetails.familyId;
           this.detectedFaces[faceIndex].familyName = memberDetails.familyName;
-          this.detectedFaces[faceIndex].birthYear = memberDetails.dateOfBirth ? new Date(memberDetails.dateOfBirth).getFullYear() : undefined;
-          this.detectedFaces[faceIndex].deathYear = memberDetails.dateOfDeath ? new Date(memberDetails.dateOfDeath).getFullYear() : undefined;
+          this.detectedFaces[faceIndex].birthYear = memberDetails.dateOfBirth
+            ? new Date(memberDetails.dateOfBirth).getFullYear()
+            : undefined;
+          this.detectedFaces[faceIndex].deathYear = memberDetails.dateOfDeath
+            ? new Date(memberDetails.dateOfDeath).getFullYear()
+            : undefined;
         }
       }
     },
 
     // Action to remove a detected face
     removeFace(faceId: string): void {
-      this.detectedFaces = this.detectedFaces.filter(face => face.id !== faceId);
+      this.detectedFaces = this.detectedFaces.filter(
+        (face) => face.id !== faceId,
+      );
     },
 
     // Action to save all face labels to the backend
@@ -130,18 +132,20 @@ export const useFaceStore = defineStore('face', {
         const imageId = this.uploadedImageId; // You need to add uploadedImageId to your state
 
         if (!imageId) {
-          throw new Error("Image ID is missing. Cannot save face labels.");
+          throw new Error('Image ID is missing. Cannot save face labels.');
         }
 
         const result = await this.services.face.saveLabels(faceLabels, imageId);
 
         if (result.ok) {
           // Optionally update status of faces after successful save
-          this.detectedFaces.forEach(face => {
+          this.detectedFaces.forEach((face) => {
             if (face.memberId) face.status = 'recognized';
           });
         } else {
-          this.error = result.error?.message || i18n.global.t('face.errors.saveMappingFailed');
+          this.error =
+            result.error?.message ||
+            i18n.global.t('face.errors.saveMappingFailed');
         }
       } catch (err: any) {
         this.error =
@@ -161,7 +165,9 @@ export const useFaceStore = defineStore('face', {
         // const result: Result<SearchResult[], Error> = await this.services.face.search(imageFile);
         // For now, simulate with mock data
         const mockSearchResults: SearchResult[] = [
-                      {            member: {              id: 'member123',
+          {
+            member: {
+              id: 'member123',
               fullName: 'John Doe',
               avatarUrl: 'path/to/john.jpg',
             },

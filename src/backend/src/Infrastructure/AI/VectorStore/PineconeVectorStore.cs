@@ -1,10 +1,9 @@
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
 using backend.Application.AI.VectorStore;
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models; 
 
 namespace backend.Infrastructure.AI.VectorStore;
 
@@ -13,8 +12,7 @@ public class PineconeVectorStore : IVectorStore
     private readonly ILogger<PineconeVectorStore> _logger;
     private readonly VectorStoreSettings _vectorStoreSettings;
     private readonly PineconeClient _pineconeClient;
-    private readonly IndexClient _index;
-    private readonly string _indexName;
+    private readonly string _defaultIndexName; // Renamed from _indexName
 
     public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
     {
@@ -29,20 +27,23 @@ public class PineconeVectorStore : IVectorStore
         }
 
         var apiKey = pineconeSettings.ApiKey;
-        _indexName = pineconeSettings.IndexName;
+        _defaultIndexName = pineconeSettings.IndexName; // Use default index name
         var host = pineconeSettings.Host;
 
-        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(_indexName) || string.IsNullOrEmpty(host))
+        if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(_defaultIndexName) || string.IsNullOrEmpty(host))
         {
             _logger.LogError("Pinecone configuration is missing or invalid. Check VectorStoreSettings:Pinecone:ApiKey, VectorStoreSettings:Pinecone:Environment, VectorStoreSettings:Pinecone:IndexName, and VectorStoreSettings:Pinecone:Host in settings.");
             throw new InvalidOperationException("Pinecone configuration is missing or invalid.");
         }
-
         _pineconeClient = new PineconeClient(apiKey);
-        _index = _pineconeClient.Index(_indexName, host);
     }
 
     public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+    {
+        await UpsertAsync(embedding, metadata, _defaultIndexName, embedding.Count, cancellationToken);
+    }
+
+    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
     {
         if (embedding == null || !embedding.Any())
         {
@@ -52,6 +53,34 @@ public class PineconeVectorStore : IVectorStore
 
         try
         {
+            var indexClient = _pineconeClient.Index(collectionName, _vectorStoreSettings.Pinecone.Host); // Use provided collectionName
+
+            // Check if index exists, create if not
+            var indexes = await _pineconeClient.ListIndexesAsync(null, cancellationToken); // Fixed
+            if (!indexes.Indexes!.Any(index => index.Name == collectionName))
+            {
+                _logger.LogInformation("Pinecone index {CollectionName} does not exist. Creating new index with dimension {EmbeddingDimension}.", collectionName, embeddingDimension);
+                await _pineconeClient.CreateIndexAsync(
+                    new CreateIndexRequest
+                    {
+                        Name = collectionName,
+                        Dimension = embeddingDimension,
+                        Metric = MetricType.Cosine,
+                        Spec = new ServerlessIndexSpec
+                        {
+                            Serverless = new ServerlessSpec
+                            {
+                                Cloud = ServerlessSpecCloud.Azure,
+                                Region = "eastus2",
+                            }
+                        },
+                        DeletionProtection = DeletionProtection.Enabled
+                    },
+                    cancellationToken: cancellationToken);
+                // Wait for index to be ready
+                await Task.Delay(5000, cancellationToken); // Adjust delay as needed
+            }
+
             var vectorId = Guid.NewGuid().ToString(); // Generate a unique ID for the vector
 
             var pineconeMetadata = metadata.Where(e => e.Value != null)
@@ -66,18 +95,23 @@ public class PineconeVectorStore : IVectorStore
             };
 
             var upsertRequest = new UpsertRequest { Vectors = [vector] };
-            await _index.UpsertAsync(upsertRequest, null, cancellationToken);
+            await indexClient.UpsertAsync(upsertRequest, null, cancellationToken);
 
-            _logger.LogInformation("Successfully upserted vector {VectorId} to Pinecone index {IndexName}.", vectorId, _indexName);
+            _logger.LogInformation("Successfully upserted vector {VectorId} to Pinecone index {CollectionName}. (Dimension: {EmbeddingDimension})", vectorId, collectionName, embeddingDimension);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error upserting vector to Pinecone index {IndexName}.", _indexName);
+            _logger.LogError(ex, "Error upserting vector to Pinecone index {CollectionName}. (Dimension: {EmbeddingDimension})", collectionName, embeddingDimension);
             throw; // Re-throw to be handled by higher layers
         }
     }
 
     public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    {
+        return await QueryAsync(queryEmbedding, topK, metadataFilter, _defaultIndexName, cancellationToken);
+    }
+
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
     {
         if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
@@ -86,6 +120,7 @@ public class PineconeVectorStore : IVectorStore
 
         try
         {
+            var indexClient = _pineconeClient.Index(collectionName, _vectorStoreSettings.Pinecone.Host); // Use provided collectionName
             var pineconeFilter = metadataFilter != null ? new Metadata(metadataFilter.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null;
 
             var queryRequest = new QueryRequest
@@ -97,7 +132,7 @@ public class PineconeVectorStore : IVectorStore
                 Filter = pineconeFilter
             };
 
-            var queryResponse = await _index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
+            var queryResponse = await indexClient.QueryAsync(queryRequest, cancellationToken: cancellationToken);
 
             var results = queryResponse.Matches?.Select(m => new VectorStoreQueryResult
             {
@@ -105,15 +140,15 @@ public class PineconeVectorStore : IVectorStore
                 Embedding = m.Values.HasValue ? m.Values.Value.ToArray().ToList() : new List<float>(),
                 Score = m.Score ?? 0,
                 Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>(),
-                Content = m.Metadata?.FirstOrDefault(md => md.Key == "Content").Value?.ToString() ?? string.Empty // Added
+                Content = m.Metadata?.FirstOrDefault(md => md.Key == "Content").Value?.ToString() ?? string.Empty 
             }).ToList() ?? new List<VectorStoreQueryResult>();
 
-            _logger.LogInformation("Successfully queried Pinecone index {IndexName} with TopK {TopK}. Found {Count} matches.", _indexName, topK, results.Count);
+            _logger.LogInformation("Successfully queried Pinecone index {CollectionName} with TopK {TopK}. Found {Count} matches.", collectionName, topK, results.Count);
             return results;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error querying Pinecone index {IndexName}.", _indexName);
+            _logger.LogError(ex, "Error querying Pinecone index {CollectionName}.", collectionName);
             throw; // Re-throw to be handled by higher layers
         }
     }

@@ -38,7 +38,7 @@ export class MockAIBiographyService implements IAIBiographyService {
       generatedFromDB: false,
       tokensUsed: 100,
       created: new Date().toISOString(),
-      language: 'en', // Added missing language property
+      language: 'en',  missing language property
     };
     return simulateLatency(ok(mockBiography));
   }

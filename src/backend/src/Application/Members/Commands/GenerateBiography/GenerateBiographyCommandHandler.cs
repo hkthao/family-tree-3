@@ -3,7 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Domain.Enums;
-using backend.Domain.Extensions; // Added
+using backend.Domain.Extensions; 
 using System.Text;
 
 namespace backend.Application.Members.Commands.GenerateBiography;
@@ -14,20 +14,20 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
     private readonly IUser _user;
     private readonly IAuthorizationService _authorizationService;
     private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly FamilyAuthorizationService _familyAuthorizationService; // Added
+    private readonly FamilyAuthorizationService _familyAuthorizationService; 
 
     public GenerateBiographyCommandHandler(
         IApplicationDbContext context,
         IUser user,
         IAuthorizationService authorizationService,
         IChatProviderFactory chatProviderFactory,
-        FamilyAuthorizationService familyAuthorizationService) // Added
+        FamilyAuthorizationService familyAuthorizationService) 
     {
         _context = context;
         _user = user;
         _authorizationService = authorizationService;
         _chatProviderFactory = chatProviderFactory;
-        _familyAuthorizationService = familyAuthorizationService; // Added
+        _familyAuthorizationService = familyAuthorizationService; 
     }
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
@@ -66,7 +66,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
         systemPromptBuilder.AppendLine("Focus on key life events, relationships, and personal characteristics.");
         systemPromptBuilder.AppendLine("If specific details are missing, you can use general knowledge or infer plausible information, but clearly state any assumptions.");
         systemPromptBuilder.AppendLine("Always respond with ONLY the biography text. Do not include any conversational text or greetings.");
-        systemPromptBuilder.AppendLine("Always respond in Vietnamese."); // Added
+        systemPromptBuilder.AppendLine("Always respond in Vietnamese."); 
 
         switch (request.Tone)
         {
@@ -79,10 +79,10 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
             case BiographyTone.Storytelling:
                 systemPromptBuilder.AppendLine("Write the biography in a narrative, storytelling style, engaging the reader with a compelling personal journey, anecdotes, and vivid descriptions.");
                 break;
-            case BiographyTone.Formal: // Added
+            case BiographyTone.Formal: 
                 systemPromptBuilder.AppendLine("Write the biography in a formal and respectful tone, suitable for official records or academic contexts, using precise language and avoiding colloquialisms.");
                 break;
-            case BiographyTone.Informal: // Added
+            case BiographyTone.Informal: 
                 systemPromptBuilder.AppendLine("Write the biography in an informal and engaging tone, as if telling a personal story to a close acquaintance, using conversational language and a friendly approach.");
                 break;
             case BiographyTone.Neutral:

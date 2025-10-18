@@ -1,14 +1,14 @@
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models; 
 using backend.Application.Events;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
-using backend.Application.Events.Queries.SearchEvents; // Added
-using backend.Application.Events.Commands.GenerateEventData; // Added
-using backend.Application.Events.Commands.CreateEvents; // Added
-using backend.Application.Events.Queries; // Added
+using backend.Application.Events.Queries.SearchEvents; 
+using backend.Application.Events.Commands.GenerateEventData; 
+using backend.Application.Events.Commands.CreateEvents; 
+using backend.Application.Events.Queries; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

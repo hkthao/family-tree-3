@@ -1,4 +1,4 @@
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models; 
 
 namespace backend.Application.Members.Queries.GetMemberById;
 

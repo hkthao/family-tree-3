@@ -1,11 +1,10 @@
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using backend.Application.AI.VectorStore;
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models; 
 
 namespace backend.Infrastructure.AI.VectorStore;
 
@@ -14,8 +13,8 @@ public class QdrantVectorStore : IVectorStore
     private readonly ILogger<QdrantVectorStore> _logger;
     private readonly VectorStoreSettings _vectorStoreSettings;
     private readonly QdrantClient _qdrantClient;
-    private readonly string _collectionName;
-    private readonly int _vectorSize;
+    private readonly string _defaultCollectionName; // Renamed from _collectionName
+    private readonly int _defaultVectorSize; // Renamed from _vectorSize
 
     public QdrantVectorStore(ILogger<QdrantVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
     {
@@ -31,10 +30,10 @@ public class QdrantVectorStore : IVectorStore
 
         var host = qdrantSettings.Host;
         var apiKey = qdrantSettings.ApiKey;
-        _collectionName = qdrantSettings.CollectionName;
-        _vectorSize = qdrantSettings.VectorSize;
+        _defaultCollectionName = qdrantSettings.CollectionName;
+        _defaultVectorSize = qdrantSettings.VectorSize;
 
-        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(_collectionName))
+        if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(_defaultCollectionName))
         {
             _logger.LogError("Qdrant configuration is missing or invalid. Check VectorStoreSettings:Qdrant:Host, VectorStoreSettings:Qdrant:CollectionName in settings.");
             throw new InvalidOperationException("Qdrant configuration is missing or invalid.");
@@ -42,24 +41,29 @@ public class QdrantVectorStore : IVectorStore
 
         _qdrantClient = new QdrantClient(host: host, apiKey: apiKey, https: true);
 
-        // Ensure collection exists
-        Task.Run(EnsureCollectionExistsAsync).Wait();
+        // Ensure default collection exists
+        Task.Run(() => EnsureCollectionExistsAsync(_defaultCollectionName, _defaultVectorSize)).Wait();
     }
 
-    private async Task EnsureCollectionExistsAsync()
+    private async Task EnsureCollectionExistsAsync(string collectionName, int vectorSize)
     {
-        var collectionExists = await _qdrantClient.CollectionExistsAsync(_collectionName);
+        var collectionExists = await _qdrantClient.CollectionExistsAsync(collectionName);
         if (!collectionExists)
         {
-            _logger.LogInformation("Creating Qdrant collection {CollectionName} with vector size {VectorSize}.", _collectionName, _vectorSize);
+            _logger.LogInformation("Creating Qdrant collection {CollectionName} with vector size {VectorSize}. (Host: {Host})", collectionName, vectorSize, _vectorStoreSettings.Qdrant.Host);
             await _qdrantClient.CreateCollectionAsync(
-                _collectionName,
-                new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine }
+                collectionName,
+                new VectorParams { Size = (ulong)vectorSize, Distance = Distance.Cosine }
             );
         }
     }
 
     public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+    {
+        await UpsertAsync(embedding, metadata, _defaultCollectionName, _defaultVectorSize, cancellationToken);
+    }
+
+    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
     {
         if (embedding == null || !embedding.Any())
         {
@@ -69,6 +73,8 @@ public class QdrantVectorStore : IVectorStore
 
         try
         {
+            await EnsureCollectionExistsAsync(collectionName, embeddingDimension); // Ensure specific collection exists
+
             var pointId = Guid.NewGuid().ToString(); // Generate a unique ID for the point
 
             var payload = new Dictionary<string, Value>();
@@ -88,18 +94,23 @@ public class QdrantVectorStore : IVectorStore
                 }
             };
 
-            await _qdrantClient.UpsertAsync(_collectionName, points, cancellationToken: cancellationToken);
+            await _qdrantClient.UpsertAsync(collectionName, points, cancellationToken: cancellationToken);
 
-            _logger.LogInformation("Successfully upserted vector {PointId} to Qdrant collection {CollectionName}.", pointId, _collectionName);
+            _logger.LogInformation("Successfully upserted vector {PointId} to Qdrant collection {CollectionName}. (Dimension: {EmbeddingDimension})", pointId, collectionName, embeddingDimension);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error upserting vector to Qdrant collection {CollectionName}.", _collectionName);
+            _logger.LogError(ex, "Error upserting vector to Qdrant collection {CollectionName}. (Dimension: {EmbeddingDimension})", collectionName, embeddingDimension);
             throw; // Re-throw to be handled by higher layers
         }
     }
 
     public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    {
+        return await QueryAsync(queryEmbedding, topK, metadataFilter, _defaultCollectionName, cancellationToken);
+    }
+
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
     {
         if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
@@ -109,7 +120,7 @@ public class QdrantVectorStore : IVectorStore
         try
         {
             var searchPoints = await _qdrantClient.SearchAsync(
-                collectionName: _collectionName,
+                collectionName: collectionName, // Use specific collectionName
                 vector: new ReadOnlyMemory<float>(queryEmbedding),
                 limit: (ulong)topK,
                 payloadSelector: new WithPayloadSelector { Enable = true },
@@ -130,16 +141,16 @@ public class QdrantVectorStore : IVectorStore
                         p => p.Key,
                         p => p.Value.StringValue ?? string.Empty
                     ),
-                    Content = payload.TryGetValue("Content", out var contentValue) ? contentValue.StringValue ?? string.Empty : string.Empty // Added
+                    Content = payload.TryGetValue("Content", out var contentValue) ? contentValue.StringValue ?? string.Empty : string.Empty
                 });
             }
 
-            _logger.LogInformation("Successfully queried Qdrant collection {CollectionName} with TopK {TopK}. Found {Count} matches.", _collectionName, topK, results.Count);
+            _logger.LogInformation("Successfully queried Qdrant collection {CollectionName} with TopK {TopK}. Found {Count} matches.", collectionName, topK, results.Count);
             return results;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error querying Qdrant collection {CollectionName}.", _collectionName);
+            _logger.LogError(ex, "Error querying Qdrant collection {CollectionName}. (Host: {Host})", collectionName, _vectorStoreSettings.Qdrant.Host);
             throw; // Re-throw to be handled by higher layers
         }
     }

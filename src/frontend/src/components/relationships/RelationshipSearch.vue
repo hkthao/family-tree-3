@@ -56,7 +56,7 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import type { RelationshipFilter } from '@/types';
-import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes'; // Added
+import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes'; 
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 const emit = defineEmits(['update:filters']);

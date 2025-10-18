@@ -10,7 +10,7 @@ export interface RecentActivityItem {
   type: 'member' | 'relationship' | 'family';
   description: string;
   timestamp: string;
-  familyId?: string; // Added for filtering
+  familyId?: string;  for filtering
 }
 
 export interface DashboardData {

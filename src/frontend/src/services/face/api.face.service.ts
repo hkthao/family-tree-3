@@ -24,17 +24,7 @@ export class ApiFaceService implements IFaceService {
   async saveLabels(faceLabels: DetectedFace[], imageId: string): Promise<Result<void, ApiError>> {
     const payload = {
       imageId: imageId,
-      faceLabels: faceLabels.map(face => ({
-        id: face.id,
-        boundingBox: face.boundingBox,
-        thumbnail: face.thumbnail,
-        memberId: face.memberId,
-        memberName: face.memberName,
-        familyId: face.familyId,
-        familyName: face.familyName,
-        birthYear: face.birthYear,
-        deathYear: face.deathYear,
-      })),
+      faceLabels: faceLabels,
     };
     return this.http.post<void>(`${this.apiUrl}/labels`, payload);
   }

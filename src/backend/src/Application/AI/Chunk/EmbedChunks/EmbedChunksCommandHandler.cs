@@ -54,7 +54,7 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
                 return Result.Failure($"Generated embedding for chunk {chunk.Id} is null or empty.");
             }
 
-            chunk.Metadata["Content"] = chunk.Content; // Added
+            chunk.Metadata["Content"] = chunk.Content; 
             await vectorStore.UpsertAsync(chunk.Embedding.ToList(), chunk.Metadata, cancellationToken);
         }
 

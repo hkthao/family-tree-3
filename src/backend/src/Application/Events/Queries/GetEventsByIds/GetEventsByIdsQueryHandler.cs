@@ -1,5 +1,5 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; // Added
+using backend.Application.Common.Models; 
 
 namespace backend.Application.Events.Queries.GetEventsByIds;
 

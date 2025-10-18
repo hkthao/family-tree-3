@@ -1,9 +1,9 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
-using backend.Application.AI.VectorStore; // Added
-using Microsoft.Extensions.Options; // Added
-using backend.Domain.Enums; // Added
+using backend.Application.AI.VectorStore; 
+using Microsoft.Extensions.Options; 
+using backend.Domain.Enums; 
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 
@@ -29,6 +29,8 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
             request.ImageId, request.FaceLabels.Count);
 
         IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
+        var collectionName = "family-face-embeddings";
+        var dim = 128;
 
         foreach (var faceLabel in request.FaceLabels)
         {
@@ -43,22 +45,22 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
             // Prepare metadata for vector store
             var metadata = new Dictionary<string, string>
             {
-                { "FaceId", faceLabel.Id },
-                { "ImageId", request.ImageId.ToString() },
-                { "MemberId", faceLabel.MemberId?.ToString() ?? string.Empty },
-                { "MemberName", faceLabel.MemberName ?? string.Empty },
-                { "FamilyId", faceLabel.FamilyId?.ToString() ?? string.Empty },
-                { "FamilyName", faceLabel.FamilyName ?? string.Empty },
-                { "BirthYear", faceLabel.BirthYear?.ToString() ?? string.Empty },
-                { "DeathYear", faceLabel.DeathYear?.ToString() ?? string.Empty },
-                { "BoundingBox_X", faceLabel.BoundingBox.X.ToString() },
-                { "BoundingBox_Y", faceLabel.BoundingBox.Y.ToString() },
-                { "BoundingBox_Width", faceLabel.BoundingBox.Width.ToString() },
-                { "BoundingBox_Height", faceLabel.BoundingBox.Height.ToString() },
+                { "face_id", faceLabel.Id },
+                { "image_id", request.ImageId.ToString() },
+                { "member_id", faceLabel.MemberId?.ToString() ?? string.Empty },
+                { "member_name", faceLabel.MemberName ?? string.Empty },
+                { "family_id", faceLabel.FamilyId?.ToString() ?? string.Empty },
+                { "family_name", faceLabel.FamilyName ?? string.Empty },
+                { "birth_year", faceLabel.BirthYear?.ToString() ?? string.Empty },
+                { "death_year", faceLabel.DeathYear?.ToString() ?? string.Empty },
+                { "bounding_box_x", faceLabel.BoundingBox.X.ToString() },
+                { "bounding_box_y", faceLabel.BoundingBox.Y.ToString() },
+                { "bounding_box_hidth", faceLabel.BoundingBox.Width.ToString() },
+                { "bounding_box_height", faceLabel.BoundingBox.Height.ToString() },
             };
 
             // Save embedding and metadata to vector store
-            await vectorStore.UpsertAsync([.. embedding], metadata, cancellationToken);
+            await vectorStore.UpsertAsync([.. embedding], metadata, collectionName, dim, cancellationToken);
         }
 
         return Result<Unit>.Success(Unit.Value);

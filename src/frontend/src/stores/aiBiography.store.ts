@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, Member } from '@/types'; // Added Member
+import type { BiographyResultDto, AIProviderDto, Member } from '@/types';  Member
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
-import { useNotificationStore } from './notification.store'; // Added
+import { useNotificationStore } from './notification.store'; 
 
 export const useAIBiographyStore = defineStore('aiBiography', {
   state: () => ({
@@ -12,7 +12,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
 
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
-    currentMember: null as Member | null, // Added
+    currentMember: null as Member | null, 
     style: BiographyStyle.Emotional as BiographyStyle,
     generatedFromDB: true,
     userPrompt: null as string | null,

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace backend.Application.Common.Models;
 
 public class VectorStoreQueryResult

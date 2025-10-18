@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.Queries.GetMembers; // Added
+using backend.Application.Members.Queries.GetMembers; 
 using backend.Domain.Enums;
 
 namespace backend.Application.Members.Queries.GetEditableMembers;

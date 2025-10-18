@@ -1,4 +1,4 @@
-using backend.Application.Common.Models; // Added for Result
+using backend.Application.Common.Models;  for Result
 
 namespace backend.Application.Members.Commands.DeleteMember;
 

@@ -1,4 +1,3 @@
-using backend.Application.Common.Models;
 using backend.Application.Faces.Commands;
 
 namespace backend.Application.Common.Interfaces;

@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'; // Added watch
+import { onMounted, watch } from 'vue';  watch
 import { useRoute } from 'vue-router';
 
 import AIBiographyInputPanel from '@/components/aiBiography/AIBiographyInputPanel.vue';
@@ -27,11 +27,11 @@ onMounted(() => {
   if (route.params.memberId) {
     aiBiographyStore.memberId = route.params.memberId as string;
 
-    aiBiographyStore.fetchMemberDetails(aiBiographyStore.memberId); // Added
+    aiBiographyStore.fetchMemberDetails(aiBiographyStore.memberId); 
   }
 });
 
-watch(() => route.params.memberId, (newMemberId) => { // Added watch
+watch(() => route.params.memberId, (newMemberId) => {  watch
   if (newMemberId) {
     aiBiographyStore.memberId = newMemberId as string;
     aiBiographyStore.fetchMemberDetails(newMemberId as string);

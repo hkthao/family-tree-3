@@ -62,7 +62,7 @@ import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes';
 import { MemberAutocomplete, FamilyAutocomplete } from '@/components/common';
 
 const props = defineProps<{
-  id?: string; // Added
+  id?: string; 
   readOnly?: boolean;
   initialRelationshipData?: Relationship;
 }>();
@@ -71,7 +71,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
 
-const form = ref<HTMLFormElement | null>(null); // Added
+const form = ref<HTMLFormElement | null>(null); 
 
 const editableRelationship = ref<Partial<Relationship>>(
   props.initialRelationshipData
@@ -81,7 +81,7 @@ const editableRelationship = ref<Partial<Relationship>>(
         targetMemberId: '',
         type: undefined,
         order: undefined,
-        familyId: undefined, // Added familyId
+        familyId: undefined,  familyId
       },
 );
 

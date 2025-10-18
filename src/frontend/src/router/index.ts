@@ -166,7 +166,7 @@ const router = createRouter({
               path: 'edit/:id',
               name: 'EditRelationship',
               component: () => import('@/views/relationships/RelationshipEditView.vue'),
-              props: true, // Added
+              props: true, 
               meta: { breadcrumb: 'relationship.form.editTitle' },
             },
           ],
