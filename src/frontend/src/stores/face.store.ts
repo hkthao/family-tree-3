@@ -23,6 +23,7 @@ interface FaceState {
 export const useFaceStore = defineStore('face', {
   state: (): FaceState => ({
     uploadedImage: null,
+    uploadedImageId: null, // Initialize uploadedImageId
     detectedFaces: [],
     selectedFaceId: undefined,
     faceSearchResults: [],
@@ -60,6 +61,7 @@ export const useFaceStore = defineStore('face', {
             familyName: face.familyName,
             birthYear: face.birthYear,
             deathYear: face.deathYear,
+            embedding: face.embedding, // Include embedding
             status: face.memberId ? 'recognized' : 'unrecognized',
           }));
         } else {
@@ -119,6 +121,8 @@ export const useFaceStore = defineStore('face', {
             familyName: face.familyName,
             birthYear: face.birthYear,
             deathYear: face.deathYear,
+            embedding: face.embedding, // Include embedding
+            status: face.status, // Include status
           }));
 
         // Assuming imageId is stored somewhere, e.g., in the store state or passed as a prop
@@ -157,9 +161,7 @@ export const useFaceStore = defineStore('face', {
         // const result: Result<SearchResult[], Error> = await this.services.face.search(imageFile);
         // For now, simulate with mock data
         const mockSearchResults: SearchResult[] = [
-          {
-            member: {
-              id: 'member123',
+                      {            member: {              id: 'member123',
               fullName: 'John Doe',
               avatarUrl: 'path/to/john.jpg',
             },

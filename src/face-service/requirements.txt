@@ -3,7 +3,5 @@ uvicorn
 python-multipart
 pillow
 numpy
-mtcnn
-torch
-torchvision
-facenet_pytorch
+opencv-python
+dlib

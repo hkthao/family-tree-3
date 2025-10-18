@@ -44,10 +44,11 @@ public static class DependencyInjection
 
         services.AddScoped<IAuthorizationService, AuthorizationService>(); // Added Authorization Service
 
-        services.AddHttpClient(); // Register HttpClient
-
-        // Register Face API Service
-        services.AddScoped<IFaceApiService, FaceApiService>();
+        // Register Face API Service and configure its HttpClient
+        services.AddHttpClient<IFaceApiService, FaceApiService>(client =>
+        {
+            client.BaseAddress = new Uri("http://face-service:8000");
+        });
 
         // Register Chat Module
         services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));

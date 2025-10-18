@@ -20,6 +20,7 @@ interface DetectedFace {
   familyName?: string; // For display
   birthYear?: number; // For display
   deathYear?: number; // For display
+  embedding: number[] | null; // Embedding vector for the face
   status: FaceStatus; // For UI styling: 'recognized', 'unrecognized', 'newly-labeled'
 }
 

@@ -28,12 +28,20 @@ export const useMemberStore = defineStore('member', {
     async loadEditableMembers() {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.loadEditableItems(); // Assuming a new service method
+      const result = await this.services.member.loadItems(
+        {
+          searchQuery: '',
+          familyId: undefined,
+          gender: undefined,
+        },
+        1, // page
+        5000, // itemsPerPage (a large number to get all editable members)
+      );
 
       if (result.ok) {
-        this.editableMembers = result.value;
+        this.editableMembers = result.value.items; // Extract items from paginated result
       } else {
-        this.error = i18n.global.t('member.errors.load'); // Reuse existing error message
+        this.error = i18n.global.t('member.errors.load');
         console.error(result.error);
       }
       this.loading = false;

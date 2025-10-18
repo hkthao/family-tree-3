@@ -47,6 +47,7 @@ services:
       - "8000:8000" # Expose port 8000 for the FastAPI app
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+    mem_limit: 4g # Increase memory limit
     depends_on:
       - backend # Assuming face-service might depend on backend for some reason, or remove if not needed
 

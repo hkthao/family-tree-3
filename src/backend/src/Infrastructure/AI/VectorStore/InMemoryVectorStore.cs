@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using System.Collections.Concurrent;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Infrastructure.AI.VectorStore
 {
@@ -8,13 +9,19 @@ namespace backend.Infrastructure.AI.VectorStore
     {
         private readonly ConcurrentDictionary<string, TextChunk> _store = new ConcurrentDictionary<string, TextChunk>();
 
-        public Task UpsertAsync(TextChunk chunk, CancellationToken cancellationToken = default)
+        public Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
+            var chunk = new TextChunk
+            {
+                Id = Guid.NewGuid().ToString(), // Generate a unique ID
+                Embedding = embedding.ToArray(),
+                Metadata = metadata
+            };
             _store[chunk.Id] = chunk;
             return Task.CompletedTask;
         }
 
-        public Task<List<TextChunk>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+        public Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
         {
             if (queryEmbedding == null || queryEmbedding.Length == 0)
             {
@@ -35,13 +42,13 @@ namespace backend.Infrastructure.AI.VectorStore
                     }
                 }
                 return matches;
-            }).Select(chunk => new TextChunk
+            }).Select(chunk => new VectorStoreQueryResult
             {
                 Id = chunk.Id,
-                Content = chunk.Content,
                 Metadata = chunk.Metadata,
-                Embedding = chunk.Embedding,
-                Score = 1.0f // Dummy score for in-memory store
+                Embedding = chunk.Embedding?.ToList() ?? new List<float>(), // Added null check
+                Score = 1.0f, // Dummy score for in-memory store
+                Content = chunk.Metadata.GetValueOrDefault("Content", string.Empty) // Added
             }).Take(topK).ToList();
 
             return Task.FromResult(results);

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using backend.Application.AI.VectorStore;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Infrastructure.AI.VectorStore;
 
@@ -58,48 +59,47 @@ public class QdrantVectorStore : IVectorStore
         }
     }
 
-    public async Task UpsertAsync(TextChunk chunk, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
     {
-        if (chunk.Embedding == null || chunk.Embedding.Length == 0)
+        if (embedding == null || !embedding.Any())
         {
-            _logger.LogWarning("Attempted to upsert chunk {ChunkId} without embedding. Skipping.", chunk.Id);
+            _logger.LogWarning("Attempted to upsert without embedding. Skipping.");
             return;
         }
 
         try
         {
+            var pointId = Guid.NewGuid().ToString(); // Generate a unique ID for the point
+
+            var payload = new Dictionary<string, Value>();
+            foreach (var item in metadata)
+            {
+                payload.Add(item.Key, item.Value);
+            }
+
             var points = new List<PointStruct>
             {
                 new() {
-                    Id = new PointId { Uuid = chunk.Id },
+                    Id = new PointId { Uuid = pointId },
                     Vectors = new Vectors {
-                        Vector = new Vector { Data = { chunk.Embedding.Select(e => (float)e) } }
+                        Vector = new Vector { Data = { embedding.Select(e => (float)e) } }
                     },
-                    Payload = {
-                        { "content", chunk.Content },
-                        { "fileName", chunk.Metadata.GetValueOrDefault("fileName", string.Empty) },
-                        { "fileId", chunk.Metadata.GetValueOrDefault("fileId", string.Empty) },
-                        { "familyId", chunk.Metadata.GetValueOrDefault("familyId", string.Empty) },
-                        { "category", chunk.Metadata.GetValueOrDefault("category", string.Empty) },
-                        { "createdBy", chunk.Metadata.GetValueOrDefault("createdBy", string.Empty) },
-                        { "createdAt", chunk.Metadata.GetValueOrDefault("createdAt", string.Empty) },
-                        { "page", chunk.Metadata.GetValueOrDefault("page", string.Empty) }
-                    }
+                    Payload = { payload }
                 }
             };
 
             await _qdrantClient.UpsertAsync(_collectionName, points, cancellationToken: cancellationToken);
 
-            _logger.LogInformation("Successfully upserted chunk {ChunkId} to Qdrant collection {CollectionName}.", chunk.Id, _collectionName);
+            _logger.LogInformation("Successfully upserted vector {PointId} to Qdrant collection {CollectionName}.", pointId, _collectionName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error upserting chunk {ChunkId} to Qdrant collection {CollectionName}.", chunk.Id, _collectionName);
+            _logger.LogError(ex, "Error upserting vector to Qdrant collection {CollectionName}.", _collectionName);
             throw; // Re-throw to be handled by higher layers
         }
     }
 
-    public async Task<List<TextChunk>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
     {
         if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
@@ -117,20 +117,20 @@ public class QdrantVectorStore : IVectorStore
                 cancellationToken: cancellationToken
             );
 
-            var results = new List<TextChunk>();
+            var results = new List<VectorStoreQueryResult>();
             foreach (var foundPoint in searchPoints)
             {
                 var payload = foundPoint.Payload;
-                results.Add(new TextChunk
+                results.Add(new VectorStoreQueryResult
                 {
                     Id = foundPoint.Id.Uuid,
-                    Content = payload.TryGetValue("content", out var contentValue) ? contentValue.StringValue ?? string.Empty : string.Empty,
-                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (float)e).ToArray() ?? [],
+                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (float)e).ToList() ?? new List<float>(),
                     Score = foundPoint.Score,
                     Metadata = payload.ToDictionary(
                         p => p.Key,
                         p => p.Value.StringValue ?? string.Empty
-                    )
+                    ),
+                    Content = payload.TryGetValue("Content", out var contentValue) ? contentValue.StringValue ?? string.Empty : string.Empty // Added
                 });
             }
 

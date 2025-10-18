@@ -49,7 +49,13 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
             }
             chunk.Embedding = embeddingResult.Value;
 
-            await vectorStore.UpsertAsync(chunk, cancellationToken);
+            if (chunk.Embedding == null || !chunk.Embedding.Any())
+            {
+                return Result.Failure($"Generated embedding for chunk {chunk.Id} is null or empty.");
+            }
+
+            chunk.Metadata["Content"] = chunk.Content; // Added
+            await vectorStore.UpsertAsync(chunk.Embedding.ToList(), chunk.Metadata, cancellationToken);
         }
 
         return Result.Success();

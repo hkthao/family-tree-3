@@ -4,7 +4,7 @@
     <v-card-text>
       <div class="d-flex justify-center mb-4">
         <v-avatar size="96" rounded="lg">
-          <v-img :src="face.imageUrl" alt="Cropped Face"></v-img>
+          <v-img :src="face.thumbnail" alt="Cropped Face"></v-img>
         </v-avatar>
       </div>
 

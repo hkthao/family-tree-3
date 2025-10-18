@@ -70,10 +70,10 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
 
         var mockVectorStore = new Mock<IVectorStore>();
         mockVectorStore.Setup(s => s.QueryAsync(It.IsAny<float[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<TextChunk>
+            .ReturnsAsync(new List<VectorStoreQueryResult>
             {
-                new TextChunk { Content = "Relevant context 1", Score = 0.8f },
-                new TextChunk { Content = "Relevant context 2", Score = 0.9f }
+                new VectorStoreQueryResult { Id = "1", Content = "Relevant context 1", Score = 0.8f, Embedding = new List<float>() },
+                new VectorStoreQueryResult { Id = "2", Content = "Relevant context 2", Score = 0.9f, Embedding = new List<float>() }
             });
         _mockVectorStoreFactory.Setup(f => f.CreateVectorStore(It.IsAny<VectorStoreProviderType>()))
             .Returns(mockVectorStore.Object);
@@ -116,9 +116,9 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
 
         var mockVectorStore = new Mock<IVectorStore>();
         mockVectorStore.Setup(s => s.QueryAsync(It.IsAny<float[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<TextChunk>
+            .ReturnsAsync(new List<VectorStoreQueryResult>
             {
-                new TextChunk { Content = "Irrelevant context", Score = 0.5f } // Score below threshold
+                new VectorStoreQueryResult { Id = "3", Content = "Irrelevant context", Score = 0.5f, Embedding = new List<float>() } // Score below threshold
             });
         _mockVectorStoreFactory.Setup(f => f.CreateVectorStore(It.IsAny<VectorStoreProviderType>()))
             .Returns(mockVectorStore.Object);

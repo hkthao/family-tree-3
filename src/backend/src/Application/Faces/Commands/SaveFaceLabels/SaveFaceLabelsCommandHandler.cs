@@ -1,21 +1,26 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
-using backend.Domain.Entities; // Added
+using backend.Application.AI.VectorStore; // Added
+using Microsoft.Extensions.Options; // Added
+using backend.Domain.Enums; // Added
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 
 public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsCommand, Result<Unit>>
 {
     private readonly ILogger<SaveFaceLabelsCommandHandler> _logger;
-    private readonly IVectorStore _vectorStore; // Changed from IVectorStoreService
+    private readonly IVectorStoreFactory _vectorStoreFactory;
+    private readonly VectorStoreSettings _vectorStoreSettings;
 
     public SaveFaceLabelsCommandHandler(
         ILogger<SaveFaceLabelsCommandHandler> logger,
-        IVectorStore vectorStore) // Changed constructor parameter
+        IVectorStoreFactory vectorStoreFactory,
+        IOptions<VectorStoreSettings> vectorStoreSettingsOptions)
     {
         _logger = logger;
-        _vectorStore = vectorStore; // Changed assignment
+        _vectorStoreFactory = vectorStoreFactory;
+        _vectorStoreSettings = vectorStoreSettingsOptions.Value;
     }
 
     public async Task<Result<Unit>> Handle(SaveFaceLabelsCommand request, CancellationToken cancellationToken)
@@ -23,9 +28,11 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
         _logger.LogInformation("Handling SaveFaceLabelsCommand for ImageId {ImageId} with {FaceCount} faces.",
             request.ImageId, request.FaceLabels.Count);
 
+        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
+
         foreach (var faceLabel in request.FaceLabels)
         {
-            if (faceLabel.Embedding == null || !faceLabel.Embedding.Any())
+            if (faceLabel.Embedding == null || faceLabel.Embedding.Count == 0)
             {
                 _logger.LogWarning("Face {FaceId} has no embedding. Skipping vector storage.", faceLabel.Id);
                 continue;
@@ -33,7 +40,7 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
 
             var embedding = faceLabel.Embedding;
 
-            // 2. Prepare metadata for vector store
+            // Prepare metadata for vector store
             var metadata = new Dictionary<string, string>
             {
                 { "FaceId", faceLabel.Id },
@@ -44,16 +51,14 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
                 { "FamilyName", faceLabel.FamilyName ?? string.Empty },
                 { "BirthYear", faceLabel.BirthYear?.ToString() ?? string.Empty },
                 { "DeathYear", faceLabel.DeathYear?.ToString() ?? string.Empty },
-                // Add bounding box coordinates as separate metadata fields if needed for querying
                 { "BoundingBox_X", faceLabel.BoundingBox.X.ToString() },
                 { "BoundingBox_Y", faceLabel.BoundingBox.Y.ToString() },
                 { "BoundingBox_Width", faceLabel.BoundingBox.Width.ToString() },
-                { "BoundingBox_Height", faceLabel.BoundingBox.Height.ToString() }
+                { "BoundingBox_Height", faceLabel.BoundingBox.Height.ToString() },
             };
 
-            // 3. Save embedding and metadata to vector store
-            var textChunk = new TextChunk { Embedding = embedding.ToArray(), Metadata = metadata }; // Created TextChunk
-            await _vectorStore.UpsertAsync(textChunk, cancellationToken); // Changed to UpsertAsync
+            // Save embedding and metadata to vector store
+            await vectorStore.UpsertAsync([.. embedding], metadata, cancellationToken);
         }
 
         return Result<Unit>.Success(Unit.Value);

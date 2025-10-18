@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
 using backend.Application.AI.VectorStore;
+using backend.Application.Common.Models; // Added
 
 namespace backend.Infrastructure.AI.VectorStore;
 
@@ -41,43 +42,42 @@ public class PineconeVectorStore : IVectorStore
         _index = _pineconeClient.Index(_indexName, host);
     }
 
-    public async Task UpsertAsync(TextChunk chunk, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
     {
-        if (chunk.Embedding == null || chunk.Embedding.Length == 0)
+        if (embedding == null || !embedding.Any())
         {
-            _logger.LogWarning("Attempted to upsert chunk {ChunkId} without embedding. Skipping.", chunk.Id);
+            _logger.LogWarning("Attempted to upsert without embedding. Skipping.");
             return;
         }
 
         try
         {
-            var metadata = chunk.Metadata.Where(e => e.Value != null);
-            foreach (var metadataItem in metadata)
-            {
-                _logger.LogWarning($"{metadataItem.Key} - {metadataItem.Value}");
-            }
+            var vectorId = Guid.NewGuid().ToString(); // Generate a unique ID for the vector
 
-            var keyValuePair = metadata.Select(x => new KeyValuePair<string, MetadataValue>(x.Key, new MetadataValue(x.Value))).AsEnumerable();
+            var pineconeMetadata = metadata.Where(e => e.Value != null)
+                                           .Select(e => new KeyValuePair<string, MetadataValue>(e.Key, new MetadataValue(e.Value)))
+                                           .AsEnumerable();
+
             var vector = new Vector
             {
-                Id = chunk.Id,
-                Values = new ReadOnlyMemory<float>([.. chunk.Embedding]),
-                Metadata = new Metadata(keyValuePair!)
+                Id = vectorId,
+                Values = new ReadOnlyMemory<float>([.. embedding]),
+                Metadata = new Metadata(pineconeMetadata!)
             };
 
             var upsertRequest = new UpsertRequest { Vectors = [vector] };
             await _index.UpsertAsync(upsertRequest, null, cancellationToken);
 
-            _logger.LogInformation("Successfully upserted chunk {ChunkId} to Pinecone index {IndexName}.", chunk.Id, _indexName);
+            _logger.LogInformation("Successfully upserted vector {VectorId} to Pinecone index {IndexName}.", vectorId, _indexName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error upserting chunk {ChunkId} to Pinecone index {IndexName}.", chunk.Id, _indexName);
+            _logger.LogError(ex, "Error upserting vector to Pinecone index {IndexName}.", _indexName);
             throw; // Re-throw to be handled by higher layers
         }
     }
 
-    public async Task<List<TextChunk>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
     {
         if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
@@ -99,14 +99,14 @@ public class PineconeVectorStore : IVectorStore
 
             var queryResponse = await _index.QueryAsync(queryRequest, cancellationToken: cancellationToken);
 
-            var results = queryResponse.Matches?.Select(m => new TextChunk
+            var results = queryResponse.Matches?.Select(m => new VectorStoreQueryResult
             {
                 Id = m.Id,
-                Content = m.Metadata?.FirstOrDefault(md => md.Key == "content").Value?.ToString() ?? string.Empty, // Assuming content is stored in metadata
-                Embedding = m.Values.HasValue ? m.Values.Value.ToArray() : [],
+                Embedding = m.Values.HasValue ? m.Values.Value.ToArray().ToList() : new List<float>(),
                 Score = m.Score ?? 0,
-                Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>()
-            }).ToList() ?? [];
+                Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>(),
+                Content = m.Metadata?.FirstOrDefault(md => md.Key == "Content").Value?.ToString() ?? string.Empty // Added
+            }).ToList() ?? new List<VectorStoreQueryResult>();
 
             _logger.LogInformation("Successfully queried Pinecone index {IndexName} with TopK {TopK}. Found {Count} matches.", _indexName, topK, results.Count);
             return results;

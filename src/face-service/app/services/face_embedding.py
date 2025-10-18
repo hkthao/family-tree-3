@@ -1,38 +1,58 @@
-import torch
-from facenet_pytorch import InceptionResnetV1
-from PIL import Image
+import dlib
+import cv2
 import numpy as np
+from PIL import Image
 from typing import List
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class FaceEmbeddingService:
     def __init__(self):
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.resnet = InceptionResnetV1(pretrained='vggface2').eval().to(self.device)
+        try:
+            # Load Dlib's face landmark predictor
+            self.predictor = dlib.shape_predictor("app/models/shape_predictor_68_face_landmarks.dat")
+            # Load Dlib's face recognition model
+            self.face_encoder = dlib.face_recognition_model_v1("app/models/dlib_face_recognition_resnet_model_v1.dat")
+            logger.info("FaceEmbeddingService initialized with Dlib models.")
+        except Exception as e:
+            logger.error(f"Error initializing Dlib face embedding models: {e}")
+            raise
 
     def get_embedding(self, face_image: Image.Image) -> List[float]:
         """
-        Generates a 512-dimensional face embedding for a given face image.
+        Generates a 128-dimensional face embedding for a given face image using Dlib.
 
         Args:
             face_image (Image.Image): A PIL Image object of the cropped face.
 
         Returns:
-            List[float]: A list of 512 floats representing the face embedding.
+            List[float]: A list of 128 floats representing the face embedding.
         """
-        # Preprocess the image for the FaceNet model
-        # Resize to 160x160 and convert to tensor
-        img_tensor = self.preprocess_image(face_image)
+        try:
+            # Convert PIL Image to NumPy array (RGB)
+            image_np = np.array(face_image.convert('RGB'))
+            # Convert to grayscale for landmark detection (optional, but common)
+            gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
 
-        # Generate embedding
-        with torch.no_grad():
-            embedding = self.resnet(img_tensor.unsqueeze(0).to(self.device))
-        return embedding.squeeze().tolist()
+            # Dlib's face recognition model expects a dlib.full_object_detection object
+            # We need to create a dummy rectangle for the cropped face
+            # Assuming the input face_image is already a cropped face
+            face_rect = dlib.rectangle(0, 0, image_np.shape[1], image_np.shape[0])
 
-    def preprocess_image(self, image: Image.Image) -> torch.Tensor:
-        """
-        Preprocesses a PIL Image for the FaceNet model.
-        """
-        image = image.resize((160, 160))
-        image = np.transpose(np.array(image), (2, 0, 1))  # HWC to CHW
-        image = (image - 127.5) / 128.0  # Normalize to [-1, 1]
-        return torch.tensor(image, dtype=torch.float32)
+            # Detect facial landmarks
+            landmarks = self.predictor(gray_image, face_rect)
+
+            # Compute the face descriptor (embedding)
+            embedding = self.face_encoder.compute_face_descriptor(image_np, landmarks)
+            logger.info("Successfully generated Dlib face embedding.")
+            return list(embedding)
+        except Exception as e:
+            logger.error(f"Error generating Dlib face embedding: {e}")
+            raise
