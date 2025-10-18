@@ -1,51 +1,53 @@
-Unhandled exception. Microsoft.EntityFrameworkCore.DbUpdateException: An error occurred while saving the entity changes. See the inner exception for details.
-
- ---> MySqlConnector.MySqlException (0x80004005): Unknown column 'FamilyId' in 'field list'
-
-   at MySqlConnector.Core.ServerSession.ReceiveReplyAsync(IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/ServerSession.cs:line 936
-
-   at MySqlConnector.Core.ResultSet.ReadResultSetHeaderAsync(IOBehavior ioBehavior) in /_/src/MySqlConnector/Core/ResultSet.cs:line 37
-
-   at MySqlConnector.MySqlDataReader.ActivateResultSet(CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlDataReader.cs:line 130
-
-   at MySqlConnector.MySqlDataReader.InitAsync(CommandListPosition commandListPosition, ICommandPayloadCreator payloadCreator, IDictionary`2 cachedProcedures, IMySqlCommand command, CommandBehavior behavior, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlDataReader.cs:line 483
-
-   at MySqlConnector.Core.CommandExecutor.ExecuteReaderAsync(CommandListPosition commandListPosition, ICommandPayloadCreator payloadCreator, CommandBehavior behavior, Activity activity, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/Core/CommandExecutor.cs:line 56
-
-   at MySqlConnector.MySqlCommand.ExecuteReaderAsync(CommandBehavior behavior, IOBehavior ioBehavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlCommand.cs:line 357
-
-   at MySqlConnector.MySqlCommand.ExecuteDbDataReaderAsync(CommandBehavior behavior, CancellationToken cancellationToken) in /_/src/MySqlConnector/MySqlCommand.cs:line 350
-
-   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReaderAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
-
-   --- End of inner exception stack trace ---
-
-   at Microsoft.EntityFrameworkCore.Update.ReaderModificationCommandBatch.ExecuteAsync(IRelationalConnection connection, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.Update.Internal.BatchExecutor.ExecuteAsync(IEnumerable`1 commandBatches, IRelationalConnection connection, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(IList`1 entriesToSave, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager.SaveChangesAsync(StateManager stateManager, Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
-
-   at Pomelo.EntityFrameworkCore.MySql.Storage.Internal.MySqlExecutionStrategy.ExecuteAsync[TState,TResult](TState state, Func`4 operation, Func`4 verifySucceeded, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
-
-   at Microsoft.EntityFrameworkCore.DbContext.SaveChangesAsync(Boolean acceptAllChangesOnSuccess, CancellationToken cancellationToken)
-
-   at backend.Infrastructure.Data.ApplicationDbContextInitialiser.TrySeedAsync() in /src/src/Infrastructure/Data/ApplicationDbContextInitialiser.cs:line 434
-
-   at backend.Infrastructure.Data.ApplicationDbContextInitialiser.SeedAsync() in /src/src/Infrastructure/Data/ApplicationDbContextInitialiser.cs:line 37
-
-   at Program.<Main>$(String[] args) in /src/src/Web/Program.cs:line 44
-
-   at Program.<Main>(String[] args)
+2025-10-18 13:46:18.280 | 2025-10-18 06:46:18,277 - app.services.face_embedding - INFO - FaceEmbeddingService initialized on device: cpu
+2025-10-18 13:46:18.280 | 2025-10-18 06:46:18,277 - INFO - FaceEmbeddingService initialized on device: cpu
+2025-10-18 13:46:18.281 | INFO:     Started server process [1]
+2025-10-18 13:46:18.281 | INFO:     Waiting for application startup.
+2025-10-18 13:46:18.281 | INFO:     Application startup complete.
+2025-10-18 13:46:18.282 | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2025-10-18 13:46:27.738 | 2025-10-18 06:46:27,738 - INFO - Received request to detect faces. Filename: image.jpg, ReturnCrop: True
+2025-10-18 13:46:27.880 | 
+2025-10-18 13:46:27.969 | 
+2025-10-18 13:46:28.090 | 
+2025-10-18 13:46:28.124 | 
+2025-10-18 13:46:28.158 | 
+2025-10-18 13:46:28.187 | 
+2025-10-18 13:46:28.216 | 
+2025-10-18 13:46:28.244 | 
+2025-10-18 13:46:28.270 | 
+2025-10-18 13:46:28.297 | 
+2025-10-18 13:46:28.322 | 
+2025-10-18 13:46:28.347 | 
+2025-10-18 13:46:28.723 | 
+2025-10-18 13:46:28.849 | 
+2025-10-18 13:46:28.852 | 2025-10-18 06:46:28,852 - INFO - Face detector returned 7 detections.
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/ste
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 64ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/ste
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/ste
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/ste
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
+2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step
+2025-10-18 13:46:35.506 |  1/92 ━━━━━━━━━━━━━━━━━━━━ 2s 30ms/ste
+2025-10-18 13:46:35.506 | 30/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/ste
+2025-10-18 13:46:35.506 | 60/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/st
+2025-10-18 13:46:35.506 | 91/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/st
+2025-10-18 13:46:35.506 | 92/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step
+2025-10-18 13:46:35.506 | 1/4 ━━━━━━━━━━━━━━━━━━━━ 0s 38ms/ste
+2025-10-18 13:46:35.506 | 4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
