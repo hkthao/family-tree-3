@@ -1,3 +1,6 @@
+using backend.Application.Common.Models;
+using backend.Application.Faces.Commands.SaveFaceLabels;
+
 namespace FamilyTree.Web.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +25,7 @@ public class FacesController : ControllerBase
 
     [HttpPost("detect")]
     [Consumes("multipart/form-data")]
-    public async Task<ActionResult<List<FaceDetectionResultDto>>> DetectFaces([FromForm] IFormFile file, [FromQuery] bool returnCrop = true)
+    public async Task<ActionResult<FaceDetectionResponseDto>> DetectFaces([FromForm] IFormFile file, [FromQuery] bool returnCrop = true)
     {
         if (file == null || file.Length == 0)
         {
@@ -54,5 +57,16 @@ public class FacesController : ControllerBase
     {
         await _mediator.Send(command);
         return NoContent();
+    }
+
+    [HttpPost("labels")]
+    public async Task<ActionResult<Result<Unit>>> SaveFaceLabels([FromBody] SaveFaceLabelsCommand command)
+    {
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result);
+        }
+        return BadRequest(result.Error);
     }
 }

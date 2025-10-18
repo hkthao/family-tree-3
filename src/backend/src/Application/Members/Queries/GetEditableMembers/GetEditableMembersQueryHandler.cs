@@ -1,9 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMembers; // Added
 using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Queries.GetEditableMembers;
 

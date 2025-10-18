@@ -13,7 +13,7 @@
               @face-selected="openSelectMemberDialog" />
           </v-col>
           <v-col cols="12" md="4">
-            <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog" />
+            <FaceDetectionSidebar :faces="faceStore.detectedFaces" @face-selected="openSelectMemberDialog" @remove-face="handleRemoveFace" />
           </v-col>
         </v-row>
       </div>
@@ -69,13 +69,17 @@ const openSelectMemberDialog = (faceId: string) => {
 };
 
 const canSaveLabels = computed(() => {
-  return faceStore.detectedFaces.some(face => face.memberId !== undefined);
+  return faceStore.detectedFaces.length > 0 && faceStore.detectedFaces.every(face => face.memberId !== null && face.memberId !== undefined);
 });
 
 const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) => {
   faceStore.labelFace(faceId, memberDetails.id, memberDetails);
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
+};
+
+const handleRemoveFace = (faceId: string) => {
+  faceStore.removeFace(faceId);
 };
 
 const saveLabels = async () => {

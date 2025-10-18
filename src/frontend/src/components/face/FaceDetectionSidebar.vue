@@ -30,6 +30,7 @@
             <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
             <v-icon v-else-if="face.status === 'unrecognized'" color="warning">mdi-alert-circle</v-icon>
             <v-icon v-else-if="face.status === 'newly-labeled'" color="info">mdi-tag</v-icon>
+            <v-btn icon="mdi-close-circle" variant="text" size="small" @click.stop="removeFace(face.id)"></v-btn>
           </template>
         </v-list-item>
         <v-list-item v-if="faces.length === 0">
@@ -52,7 +53,11 @@ const props = defineProps({
   selectedFaceId: { type: String as PropType<string | undefined>, default: undefined },
 });
 
-const emit = defineEmits(['face-selected']);
+const emit = defineEmits(['face-selected', 'remove-face']);
+
+const removeFace = (faceId: string) => {
+  emit('remove-face', faceId);
+};
 
 const getFaceThumbnailSrc = (face: DetectedFace) => {
   if (face.thumbnail) {

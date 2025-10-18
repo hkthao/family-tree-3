@@ -12,6 +12,7 @@ import { useMemberStore } from '@/stores/member.store';
 
 interface FaceState {
   uploadedImage: string | null; // Base64 or URL of the uploaded image
+  uploadedImageId: string | null; // ID of the uploaded image from the backend
   detectedFaces: DetectedFace[]; // Array of detected faces with bounding boxes
   selectedFaceId: string | undefined; // ID of the currently selected face for labeling
   faceSearchResults: SearchResult[]; // Results from face search
@@ -48,11 +49,17 @@ export const useFaceStore = defineStore('face', {
         const result = await this.services.face.detect(imageFile);
         if (result.ok) {
           this.uploadedImage = URL.createObjectURL(imageFile);
-          this.detectedFaces = result.value.map((face) => ({
+          this.uploadedImageId = result.value.imageId; // Assign the imageId
+          this.detectedFaces = result.value.detectedFaces.map((face) => ({
             id: face.id,
             boundingBox: face.boundingBox,
             thumbnail: face.thumbnail,
             memberId: face.memberId,
+            memberName: face.memberName,
+            familyId: face.familyId,
+            familyName: face.familyName,
+            birthYear: face.birthYear,
+            deathYear: face.deathYear,
             status: face.memberId ? 'recognized' : 'unrecognized',
           }));
         } else {
@@ -89,6 +96,11 @@ export const useFaceStore = defineStore('face', {
       }
     },
 
+    // Action to remove a detected face
+    removeFace(faceId: string): void {
+      this.detectedFaces = this.detectedFaces.filter(face => face.id !== faceId);
+    },
+
     // Action to save all face labels to the backend
     async saveFaceLabels(): Promise<void> {
       this.loading = true;
@@ -98,27 +110,35 @@ export const useFaceStore = defineStore('face', {
         const faceLabels = this.detectedFaces
           .filter((face) => face.memberId)
           .map((face) => ({
-            faceId: face.id,
+            id: face.id,
+            boundingBox: face.boundingBox,
+            thumbnail: face.thumbnail,
             memberId: face.memberId,
-            // Add other relevant data if needed, e.g., bounding box coordinates
+            memberName: face.memberName,
+            familyId: face.familyId,
+            familyName: face.familyName,
+            birthYear: face.birthYear,
+            deathYear: face.deathYear,
           }));
 
-        // TODO: Call the actual API to save face labels
-        // const result: Result<void, Error> = await this.services.face.saveLabels(faceLabels);
+        // Assuming imageId is stored somewhere, e.g., in the store state or passed as a prop
+        // For now, let's assume it's available in the store as uploadedImageId
+        const imageId = this.uploadedImageId; // You need to add uploadedImageId to your state
 
-        // Simulate API call success
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+        if (!imageId) {
+          throw new Error("Image ID is missing. Cannot save face labels.");
+        }
 
-        // if (result.ok) {
-        //   // Optionally update status of faces after successful save
-        //   this.detectedFaces.forEach(face => {
-        //     if (face.memberId) face.status = 'recognized';
-        //   });
-        //   // Show success notification
-        //   // this.notificationStore.showSnackbar(i18n.global.t('face.success.saveLabels'), 'success');
-        // } else {
-        //   this.error = result.error?.message || i18n.global.t('face.errors.saveLabelsFailed');
-        // }
+        const result = await this.services.face.saveLabels(faceLabels, imageId);
+
+        if (result.ok) {
+          // Optionally update status of faces after successful save
+          this.detectedFaces.forEach(face => {
+            if (face.memberId) face.status = 'recognized';
+          });
+        } else {
+          this.error = result.error?.message || i18n.global.t('face.errors.saveMappingFailed');
+        }
       } catch (err: any) {
         this.error =
           err.message || i18n.global.t('face.errors.unexpectedError');
