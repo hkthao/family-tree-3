@@ -1,5 +1,5 @@
 
-using backend.Application.Faces.Commands;
+using backend.Application.Faces.Common;
 
 namespace backend.Application.Faces.Queries;
 public class DetectedFaceDto

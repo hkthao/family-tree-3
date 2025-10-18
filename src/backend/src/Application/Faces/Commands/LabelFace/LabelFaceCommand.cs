@@ -1,3 +1,5 @@
+using backend.Application.Faces.Common;
+
 namespace backend.Application.Faces.Commands.LabelFace;
 public class LabelFaceCommand : IRequest<Unit>
 {

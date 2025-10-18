@@ -1,3 +1,5 @@
+using backend.Application.Faces.Common; // Added
+
 namespace backend.Application.Faces.Commands;
 
 public class FaceDetectionResultDto
@@ -6,12 +8,4 @@ public class FaceDetectionResultDto
     public BoundingBoxDto BoundingBox { get; set; } = null!;
     public float Confidence { get; set; }
     public string? Thumbnail { get; set; } // Base64 encoded image
-}
-
-public class BoundingBoxDto
-{
-    public int X { get; set; }
-    public int Y { get; set; }
-    public int Width { get; set; }
-    public int Height { get; set; }
 }
