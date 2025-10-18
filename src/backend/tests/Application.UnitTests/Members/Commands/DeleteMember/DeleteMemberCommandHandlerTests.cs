@@ -1,10 +1,10 @@
-using backend.Application.UnitTests.Common;
-using Xunit;
-using FluentAssertions;
-using Moq;
 using backend.Application.Members.Commands.DeleteMember;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using FluentAssertions;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 

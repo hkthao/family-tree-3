@@ -1,8 +1,8 @@
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
@@ -22,20 +22,20 @@ public class LocalEmbeddingProvider : IEmbeddingProvider
         _logger = logger;
     }
 
-    public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
+    public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(text))
         {
-            return Result<float[]>.Failure("Text for embedding cannot be empty or whitespace.");
+            return Result<double[]>.Failure("Text for embedding cannot be empty or whitespace.");
         }
 
         if (string.IsNullOrWhiteSpace(_settings.Local.ApiUrl))
         {
-            return Result<float[]>.Failure("Ollama API URL is not configured.");
+            return Result<double[]>.Failure("Ollama API URL is not configured.");
         }
         if (string.IsNullOrWhiteSpace(_settings.Local.Model))
         {
-            return Result<float[]>.Failure("Ollama model is not configured.");
+            return Result<double[]>.Failure("Ollama model is not configured.");
         }
 
         if (text.Length > MaxTextLength)
@@ -63,25 +63,25 @@ public class LocalEmbeddingProvider : IEmbeddingProvider
                 if (root.TryGetProperty("embeddings", out JsonElement embeddingsElement) && embeddingsElement.GetArrayLength() > 0)
                 {
                     JsonElement embeddingElement = embeddingsElement[0]; // Get the first embedding from the array
-                    float[] embedding = embeddingElement.EnumerateArray().Select(e => (float)e.GetDouble()).ToArray();
+                    double[] embedding = embeddingElement.EnumerateArray().Select(e => e.GetDouble()).ToArray();
                     _logger.LogInformation("Generated local embedding with dimension: {Dimension}", embedding.Length);
-                    return Result<float[]>.Success(embedding);
+                    return Result<double[]>.Success(embedding);
                 }
             }
 
-            return Result<float[]>.Failure("Failed to parse embedding from Ollama API response.");
+            return Result<double[]>.Failure("Failed to parse embedding from Ollama API response.");
         }
         catch (HttpRequestException ex)
         {
-            return Result<float[]>.Failure($"Ollama API request failed: {ex.Message}");
+            return Result<double[]>.Failure($"Ollama API request failed: {ex.Message}");
         }
         catch (JsonException ex)
         {
-            return Result<float[]>.Failure($"Failed to deserialize Ollama API response: {ex.Message}");
+            return Result<double[]>.Failure($"Failed to deserialize Ollama API response: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result<float[]>.Failure($"An unexpected error occurred during Ollama embedding generation: {ex.Message}");
+            return Result<double[]>.Failure($"An unexpected error occurred during Ollama embedding generation: {ex.Message}");
         }
     }
 }

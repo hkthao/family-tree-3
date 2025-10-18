@@ -14,8 +14,8 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<Relationship> Relationships => Set<Relationship>();
-    public DbSet<UserProfile> UserProfiles => Set<UserProfile>(); 
-    public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>(); 
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+    public DbSet<FamilyUser> FamilyUsers => Set<FamilyUser>();
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;

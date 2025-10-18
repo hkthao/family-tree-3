@@ -1,7 +1,7 @@
 
 namespace backend.Application.Common.Models;
 
-public class AIChatSettings 
+public class AIChatSettings
 {
     public const string SectionName = "AIChatSettings";
     public string Provider { get; set; } = "";

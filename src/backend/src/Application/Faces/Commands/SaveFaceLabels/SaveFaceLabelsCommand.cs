@@ -1,5 +1,5 @@
-using backend.Application.Faces.Queries; // Ensure DetectedFaceDto is accessible
 using backend.Application.Common.Models;
+using backend.Application.Faces.Queries; // Ensure DetectedFaceDto is accessible
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 

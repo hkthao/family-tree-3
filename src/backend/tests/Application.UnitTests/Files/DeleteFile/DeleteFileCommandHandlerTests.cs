@@ -81,7 +81,7 @@ public class DeleteFileCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
-        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userId, ContentType = "image/jpeg"};
+        var fileToDelete = new FileMetadata { Id = Guid.NewGuid(), FileName = "test.jpg", Url = "path/to/test.jpg", UploadedBy = userId, ContentType = "image/jpeg" };
         _context.FileMetadata.Add(fileToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 

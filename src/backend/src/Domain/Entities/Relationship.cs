@@ -9,7 +9,7 @@ public class Relationship : BaseEntity
     public Guid TargetMemberId { get; set; }
     public Member TargetMember { get; set; } = null!;
     public RelationshipType Type { get; set; }
-    public int? Order { get; set; } 
-    public Guid FamilyId { get; set; } 
-    public Family Family { get; set; } = null!; 
+    public int? Order { get; set; }
+    public Guid FamilyId { get; set; }
+    public Family Family { get; set; } = null!;
 }

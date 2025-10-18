@@ -1,8 +1,8 @@
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Options;
-using backend.Application.AI.VectorStore;
 
 namespace backend.Application.AI.Chunk.EmbedChunks;
 
@@ -54,7 +54,7 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
                 return Result.Failure($"Generated embedding for chunk {chunk.Id} is null or empty.");
             }
 
-            chunk.Metadata["Content"] = chunk.Content; 
+            chunk.Metadata["Content"] = chunk.Content;
             await vectorStore.UpsertAsync(chunk.Embedding.ToList(), chunk.Metadata, cancellationToken);
         }
 

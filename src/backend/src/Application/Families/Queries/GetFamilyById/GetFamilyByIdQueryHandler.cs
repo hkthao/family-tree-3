@@ -1,6 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models; 
+using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilyById;

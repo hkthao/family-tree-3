@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using backend.Application.Members.Queries;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.IntegrationTests.Database;
 

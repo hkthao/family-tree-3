@@ -1,13 +1,13 @@
-using Xunit;
-using FluentAssertions;
-using Moq;
 using backend.Application.AI.Chat.Queries;
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
-using backend.Application.AI.VectorStore;
-using Microsoft.Extensions.Logging;
 using backend.Application.UnitTests.Common;
+using backend.Domain.Enums;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.AI.Chat.Queries;
 
@@ -63,16 +63,16 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
 
         var mockEmbeddingProvider = new Mock<IEmbeddingProvider>();
         mockEmbeddingProvider.Setup(p => p.GenerateEmbeddingAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<float[]>.Success(new float[] { 0.1f, 0.2f }));
+            .ReturnsAsync(Result<double[]>.Success(new double[] { 0.1, 0.2 }));
         _mockEmbeddingProviderFactory.Setup(f => f.GetProvider(It.IsAny<EmbeddingAIProvider>()))
             .Returns(mockEmbeddingProvider.Object);
 
         var mockVectorStore = new Mock<IVectorStore>();
-        mockVectorStore.Setup(s => s.QueryAsync(It.IsAny<float[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+        mockVectorStore.Setup(s => s.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<VectorStoreQueryResult>
             {
-                new VectorStoreQueryResult { Id = "1", Content = "Relevant context 1", Score = 0.8f, Embedding = new List<float>() },
-                new VectorStoreQueryResult { Id = "2", Content = "Relevant context 2", Score = 0.9f, Embedding = new List<float>() }
+                new VectorStoreQueryResult { Id = "1", Content = "Relevant context 1", Score = 0.8, Embedding = new List<double>() },
+                new VectorStoreQueryResult { Id = "2", Content = "Relevant context 2", Score = 0.9, Embedding = new List<double>() }
             });
         _mockVectorStoreFactory.Setup(f => f.CreateVectorStore(It.IsAny<VectorStoreProviderType>()))
             .Returns(mockVectorStore.Object);
@@ -95,7 +95,7 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
         _mockEmbeddingProviderFactory.Verify(f => f.GetProvider(EmbeddingAIProvider.OpenAI), Times.Once);
         mockEmbeddingProvider.Verify(p => p.GenerateEmbeddingAsync(query.UserMessage, cancellationToken), Times.Once);
         _mockVectorStoreFactory.Verify(f => f.CreateVectorStore(VectorStoreProviderType.InMemory), Times.Once);
-        mockVectorStore.Verify(s => s.QueryAsync(It.IsAny<float[]>(), _vectorStoreSettings.TopK, It.IsAny<Dictionary<string, string>>(), cancellationToken), Times.Once);
+        mockVectorStore.Verify(s => s.QueryAsync(It.IsAny<double[]>(), _vectorStoreSettings.TopK, It.IsAny<Dictionary<string, string>>(), cancellationToken), Times.Once);
         _mockChatProviderFactory.Verify(f => f.GetProvider(ChatAIProvider.Gemini), Times.Once);
         mockChatProvider.Verify(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()), Times.Once);
     }
@@ -109,15 +109,15 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
 
         var mockEmbeddingProvider = new Mock<IEmbeddingProvider>();
         mockEmbeddingProvider.Setup(p => p.GenerateEmbeddingAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<float[]>.Success(new float[] { 0.1f, 0.2f }));
+            .ReturnsAsync(Result<double[]>.Success(new double[] { 0.1, 0.2 }));
         _mockEmbeddingProviderFactory.Setup(f => f.GetProvider(It.IsAny<EmbeddingAIProvider>()))
             .Returns(mockEmbeddingProvider.Object);
 
         var mockVectorStore = new Mock<IVectorStore>();
-        mockVectorStore.Setup(s => s.QueryAsync(It.IsAny<float[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
+        mockVectorStore.Setup(s => s.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<VectorStoreQueryResult>
             {
-                new VectorStoreQueryResult { Id = "3", Content = "Irrelevant context", Score = 0.5f, Embedding = new List<float>() } // Score below threshold
+                new VectorStoreQueryResult { Id = "3", Content = "Irrelevant context", Score = 0.5, Embedding = new List<double>() } // Score below threshold
             });
         _mockVectorStoreFactory.Setup(f => f.CreateVectorStore(It.IsAny<VectorStoreProviderType>()))
             .Returns(mockVectorStore.Object);
@@ -143,7 +143,7 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
 
         var mockEmbeddingProvider = new Mock<IEmbeddingProvider>();
         mockEmbeddingProvider.Setup(p => p.GenerateEmbeddingAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<float[]>.Failure("Embedding error"));
+            .ReturnsAsync(Result<double[]>.Failure("Embedding error"));
         _mockEmbeddingProviderFactory.Setup(f => f.GetProvider(It.IsAny<EmbeddingAIProvider>()))
             .Returns(mockEmbeddingProvider.Object);
 

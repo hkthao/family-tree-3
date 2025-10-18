@@ -15,14 +15,14 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
     private readonly IUser _user;
     private readonly IDateTime _dateTime;
 
-        public UploadFileCommandHandler(IFileStorage fileStorage, IOptions<StorageSettings> storageSettingsOptions, IApplicationDbContext context, IUser user, IDateTime dateTime)
-        {
-            _fileStorage = fileStorage;
-            _storageSettingsOptions = storageSettingsOptions;
-            _context = context;
-            _user = user;
-            _dateTime = dateTime;
-        }
+    public UploadFileCommandHandler(IFileStorage fileStorage, IOptions<StorageSettings> storageSettingsOptions, IApplicationDbContext context, IUser user, IDateTime dateTime)
+    {
+        _fileStorage = fileStorage;
+        _storageSettingsOptions = storageSettingsOptions;
+        _context = context;
+        _user = user;
+        _dateTime = dateTime;
+    }
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
         // 1. Validate file size

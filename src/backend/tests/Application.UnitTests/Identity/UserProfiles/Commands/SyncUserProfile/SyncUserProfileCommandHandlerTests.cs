@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -5,7 +6,6 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Security.Claims;
 using Xunit;
 
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.SyncUserProfile;

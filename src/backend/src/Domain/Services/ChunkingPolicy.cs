@@ -1,6 +1,6 @@
-using backend.Domain.Entities;
 using System.Text;
 using System.Text.RegularExpressions;
+using backend.Domain.Entities;
 
 namespace backend.Domain.Services
 {

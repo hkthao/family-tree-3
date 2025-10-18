@@ -1,9 +1,9 @@
 using backend.Application.Events.Commands.CreateEvent;
-using FluentAssertions;
-using Xunit;
 using backend.Application.UnitTests.Common;
-using Moq;
+using FluentAssertions;
 using FluentValidation;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 

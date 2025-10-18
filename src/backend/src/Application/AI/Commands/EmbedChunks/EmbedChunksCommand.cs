@@ -1,5 +1,5 @@
-using backend.Domain.Entities;
 using backend.Application.Common.Models;
+using backend.Domain.Entities;
 
 namespace backend.Application.AI.Commands.EmbedChunks;
 

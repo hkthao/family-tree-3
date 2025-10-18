@@ -1,13 +1,13 @@
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Commands.CreateRelationship;
-using backend.Application.Relationships.Commands.CreateRelationships; 
+using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.DeleteRelationship;
+using backend.Application.Relationships.Commands.GenerateRelationshipData;
 using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Application.Relationships.Queries;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.Relationships.Queries.GetRelationships;
 using backend.Application.Relationships.Queries.SearchRelationships;
-using backend.Application.Relationships.Commands.GenerateRelationshipData;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

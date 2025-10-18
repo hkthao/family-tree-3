@@ -1,8 +1,8 @@
 using backend.Application.Families.Queries.SearchFamilies;
-using FluentAssertions;
-using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using FluentAssertions;
+using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries.SearchFamilies;
 

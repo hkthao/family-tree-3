@@ -1,4 +1,4 @@
-using backend.Application.Common.Models; 
+using backend.Application.Common.Models;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 

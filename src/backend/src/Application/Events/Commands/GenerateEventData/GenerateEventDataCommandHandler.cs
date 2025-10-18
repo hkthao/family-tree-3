@@ -1,9 +1,9 @@
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Services;
 using backend.Application.Common.Models;
+using backend.Application.Common.Services;
 using backend.Application.Events.Queries;
 using backend.Domain.Enums;
-using System.Text.Json;
 using FluentValidation.Results;
 
 namespace backend.Application.Events.Commands.GenerateEventData;

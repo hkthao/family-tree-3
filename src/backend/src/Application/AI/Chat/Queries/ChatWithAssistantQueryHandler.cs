@@ -1,7 +1,7 @@
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
-using backend.Application.AI.VectorStore;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Chat.Queries;
@@ -40,7 +40,7 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
         {
             bool isFallback = false;
             ChatResponse? chatResponse = null;
-           var systemPrompt = new ChatMessage
+            var systemPrompt = new ChatMessage
             {
                 Role = "assistant",
                 Content = @"Bạn là trợ lý AI của FamilyTree. BẮT BUỘC trả lời bằng TIẾNG VIỆT.
@@ -62,7 +62,7 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
             var silimarityResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, [], cancellationToken);
             var searchResults = silimarityResults.Where(s => s.Score > _chatSettings.ScoreThreshold).OrderByDescending(r => r.Score).ToList();
-           
+
             // 3. Check if relevant context exists
             if (searchResults == null || searchResults.Count == 0)
             {

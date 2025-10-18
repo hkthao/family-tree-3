@@ -14,7 +14,7 @@ public class GetUploadedFileQueryHandlerTests : TestBase
 {
     private readonly GetUploadedFileQueryHandler _handler;
     private readonly Mock<IOptions<StorageSettings>> _mockStorageSettings;
-    
+
 
     public GetUploadedFileQueryHandlerTests()
     {

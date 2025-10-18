@@ -1,10 +1,10 @@
 using backend.Application.Families.Commands.UpdateFamily;
-using backend.Domain.Entities;
-using FluentAssertions;
-using Xunit;
 using backend.Application.UnitTests.Common;
-using Moq;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
+using FluentAssertions;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
@@ -39,7 +39,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         // Thêm một gia đình vào cơ sở dữ liệu để chuẩn bị cập nhật.
-        var family = new Family { Id = familyId, Name = "Old Name", Description = "Old Desc" };
+        var family = new Family { Id = familyId, Name = "Old Name", Description = "Old Desc", Code = "FAM001" };
         _context.Families.Add(family);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -163,10 +163,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         var userProfileId = Guid.NewGuid();
         var familyId = Guid.NewGuid();
         // Thiết lập người dùng mà không có hồ sơ người dùng tồn tại.
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true, false); // userProfileExists = false
-
         // Thêm một gia đình vào context để thử cập nhật.
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM002" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new UpdateFamilyCommand { Id = familyId, Name = "New Name" };
@@ -204,7 +202,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false); // User is not authorized
 
         // Thêm một gia đình vào context để thử cập nhật.
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM003" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new UpdateFamilyCommand { Id = familyId, Name = "New Name" };

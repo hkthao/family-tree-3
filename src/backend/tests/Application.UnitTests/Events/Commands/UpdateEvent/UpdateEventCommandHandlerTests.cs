@@ -1,9 +1,9 @@
 using backend.Application.Events.Commands.UpdateEvent;
-using FluentAssertions;
-using Xunit;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using FluentAssertions;
 using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 

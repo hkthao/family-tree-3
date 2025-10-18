@@ -1,7 +1,7 @@
+using System.Net.Http.Headers;
 using backend.Application.Common.Interfaces;
 using backend.Application.Faces.Commands;
 using Microsoft.Extensions.Logging;
-using System.Net.Http.Headers;
 
 namespace backend.Infrastructure.Services;
 
@@ -18,7 +18,7 @@ public class FaceApiService : IFaceApiService
 
     public async Task<List<FaceDetectionResultDto>> DetectFacesAsync(byte[] imageBytes, string contentType, bool returnCrop)
     {
-          _logger.LogInformation("Calling Python Face Detection Service for face detection.");
+        _logger.LogInformation("Calling Python Face Detection Service for face detection.");
 
         using var form = new MultipartFormDataContent();
         using var fileContent = new ByteArrayContent(imageBytes);
@@ -31,8 +31,8 @@ public class FaceApiService : IFaceApiService
         response.EnsureSuccessStatusCode();
 
         var jsonContent = await response.Content.ReadAsStringAsync();
-        jsonContent= jsonContent.Replace("bounding_box", "boundingBox");
-       // _logger.LogInformation($"Raw JSON from Python Face Detection Service: {jsonContent}");
+        jsonContent = jsonContent.Replace("bounding_box", "boundingBox");
+        // _logger.LogInformation($"Raw JSON from Python Face Detection Service: {jsonContent}");
 
         var options = new System.Text.Json.JsonSerializerOptions
         {

@@ -1,10 +1,10 @@
 using backend.Application.Members.Queries.GetMembers;
-using backend.Domain.Entities;
-using FluentAssertions;
-using Xunit;
 using backend.Application.UnitTests.Common;
-using Moq;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
+using FluentAssertions;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMembers;
 

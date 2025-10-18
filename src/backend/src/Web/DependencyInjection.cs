@@ -1,11 +1,11 @@
 ﻿
 using backend.Application.Common.Interfaces;
+using backend.Infrastructure.Auth;
 using backend.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using Microsoft.AspNetCore.Authentication;
-using backend.Infrastructure.Auth;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

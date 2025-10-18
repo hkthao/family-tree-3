@@ -1,10 +1,10 @@
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
-using backend.Application.AI.VectorStore;
-using backend.Application.Common.Models; 
 
 namespace backend.Infrastructure.AI.VectorStore;
 
@@ -58,12 +58,12 @@ public class QdrantVectorStore : IVectorStore
         }
     }
 
-    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
     {
         await UpsertAsync(embedding, metadata, _defaultCollectionName, _defaultVectorSize, cancellationToken);
     }
 
-    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
     {
         if (embedding == null || !embedding.Any())
         {
@@ -105,12 +105,12 @@ public class QdrantVectorStore : IVectorStore
         }
     }
 
-    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
     {
         return await QueryAsync(queryEmbedding, topK, metadataFilter, _defaultCollectionName, cancellationToken);
     }
 
-    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
     {
         if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
@@ -121,7 +121,7 @@ public class QdrantVectorStore : IVectorStore
         {
             var searchPoints = await _qdrantClient.SearchAsync(
                 collectionName: collectionName, // Use specific collectionName
-                vector: new ReadOnlyMemory<float>(queryEmbedding),
+                vector: new ReadOnlyMemory<float>(queryEmbedding.Select(e => (float)e).ToArray()),
                 limit: (ulong)topK,
                 payloadSelector: new WithPayloadSelector { Enable = true },
                 filter: CreateQdrantFilter(metadataFilter),
@@ -135,7 +135,7 @@ public class QdrantVectorStore : IVectorStore
                 results.Add(new VectorStoreQueryResult
                 {
                     Id = foundPoint.Id.Uuid,
-                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (float)e).ToList() ?? new List<float>(),
+                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (double)e).ToList() ?? new List<double>(),
                     Score = foundPoint.Score,
                     Metadata = payload.ToDictionary(
                         p => p.Key,

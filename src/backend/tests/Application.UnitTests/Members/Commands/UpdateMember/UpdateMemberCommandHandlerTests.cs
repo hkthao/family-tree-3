@@ -1,11 +1,11 @@
 using backend.Application.Common.Exceptions;
 using backend.Application.Members.Commands.UpdateMember;
-using backend.Domain.Entities;
-using FluentAssertions;
-using Xunit;
 using backend.Application.UnitTests.Common;
-using Moq;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
+using FluentAssertions;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 

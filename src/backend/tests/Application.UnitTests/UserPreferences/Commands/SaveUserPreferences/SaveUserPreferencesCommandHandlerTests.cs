@@ -1,5 +1,5 @@
-using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;

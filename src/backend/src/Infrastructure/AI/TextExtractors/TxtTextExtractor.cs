@@ -1,5 +1,5 @@
-using backend.Application.Common.Interfaces;
 using System.Text;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Infrastructure.AI.TextExtractors
 {

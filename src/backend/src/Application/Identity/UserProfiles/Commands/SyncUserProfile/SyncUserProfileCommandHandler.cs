@@ -1,11 +1,11 @@
 using System.Security.Claims;
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Domain.Enums;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using Microsoft.Extensions.Logging;
 using backend.Application.UserProfiles.Specifications;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 
 namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
@@ -50,7 +50,7 @@ public class SyncUserProfileCommandHandler : IRequestHandler<SyncUserProfileComm
             try
             {
                 _context.UserProfiles.Add(userProfile);
-                
+
                 // Create default user preferences
                 var userPreference = new UserPreference
                 {

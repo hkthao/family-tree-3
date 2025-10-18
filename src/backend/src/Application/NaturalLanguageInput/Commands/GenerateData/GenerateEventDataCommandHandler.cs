@@ -1,8 +1,8 @@
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace Application.NaturalLanguageInput.Commands.GenerateData;
 
@@ -48,7 +48,8 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<EventResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Events == null) {
+            if (aiResponse == null || aiResponse.Events == null)
+            {
                 return Result<List<EventDto>>.Failure("AI generated empty or unparseable JSON response.");
             }
 

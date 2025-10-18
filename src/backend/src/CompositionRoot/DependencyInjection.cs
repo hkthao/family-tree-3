@@ -2,6 +2,9 @@ using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
+using backend.Domain.Enums;
+using backend.Infrastructure;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
@@ -11,9 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using backend.Domain.Enums;
-using backend.Infrastructure;
-using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 
 namespace backend.CompositionRoot;
 
@@ -87,7 +87,7 @@ public static class DependencyInjection
                         });
                         return Task.CompletedTask;
                     },
-                    
+
                 };
             });
 

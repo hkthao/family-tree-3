@@ -1,7 +1,7 @@
+using System.Security.Claims;
+using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
-using System.Security.Claims;
 
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.SyncUserProfile;
 

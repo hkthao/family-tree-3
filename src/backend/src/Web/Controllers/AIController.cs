@@ -1,5 +1,5 @@
-using backend.Application.Members.Commands.GenerateBiography;
 using backend.Application.AI.Common;
+using backend.Application.Members.Commands.GenerateBiography;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

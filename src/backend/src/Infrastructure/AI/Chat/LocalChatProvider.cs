@@ -1,7 +1,7 @@
+using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace backend.Infrastructure.AI.Chat;
 

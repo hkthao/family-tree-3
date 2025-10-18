@@ -1,6 +1,6 @@
 using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
 namespace backend.Infrastructure.IntegrationTests.Database;
 
 public class DbContextTests : TestBase

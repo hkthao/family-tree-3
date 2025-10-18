@@ -1,11 +1,11 @@
 
-using FluentAssertions;
-using Xunit;
-using backend.Application.UnitTests.Common;
 using backend.Application.Families.Queries.GetFamilies;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using Moq;
 using backend.Domain.Enums;
+using FluentAssertions;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 
@@ -41,8 +41,8 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // Thêm các gia đình vào cơ sở dữ liệu.
         var families = new List<Family>
         {
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình 1" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình 2" }
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình 1", Code = "FAM001" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình 2", Code = "FAM002" }
         };
         _context.Families.AddRange(families);
         await _context.SaveChangesAsync(CancellationToken.None);
@@ -116,8 +116,8 @@ public class GetFamiliesQueryHandlerTests : TestBase
             .ReturnsAsync(currentUserProfile);
 
         // Tạo các gia đình.
-        var managedFamily = new Family { Id = Guid.NewGuid(), Name = "Gia đình được quản lý" };
-        var unmanagedFamily = new Family { Id = Guid.NewGuid(), Name = "Gia đình không được quản lý" };
+        var managedFamily = new Family { Id = Guid.NewGuid(), Name = "Gia đình được quản lý", Code = "FAM003" };
+        var unmanagedFamily = new Family { Id = Guid.NewGuid(), Name = "Gia đình không được quản lý", Code = "FAM004" };
         _context.Families.AddRange(managedFamily, unmanagedFamily);
 
         // Tạo FamilyUser để liên kết managedFamily với currentUserProfile.

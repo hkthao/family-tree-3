@@ -1,7 +1,7 @@
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Xunit;
-using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 

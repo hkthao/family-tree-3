@@ -1,6 +1,6 @@
+using backend.Domain.Entities; // Add this using directive
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using backend.Domain.Entities; // Add this using directive
 
 namespace backend.Infrastructure.IntegrationTests;
 

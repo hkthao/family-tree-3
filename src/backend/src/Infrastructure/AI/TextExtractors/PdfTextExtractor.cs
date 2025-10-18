@@ -1,6 +1,6 @@
+using System.Text;
 using backend.Application.Common.Interfaces;
 using UglyToad.PdfPig;
-using System.Text;
 
 namespace backend.Infrastructure.AI.TextExtractors
 {

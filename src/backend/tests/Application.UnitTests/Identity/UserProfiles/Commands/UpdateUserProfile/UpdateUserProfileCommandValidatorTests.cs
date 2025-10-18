@@ -1,6 +1,6 @@
+using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.UpdateUserProfile;
 

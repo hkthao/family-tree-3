@@ -1,18 +1,18 @@
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
-using backend.Infrastructure.Data;
-using backend.Infrastructure.Services;
+using backend.Application.Common.Models;
+using backend.Application.Common.Models.AISettings;
 using backend.Infrastructure.AI.Chat;
+using backend.Infrastructure.AI.Embeddings;
+using backend.Infrastructure.AI.TextExtractors;
+using backend.Infrastructure.AI.VectorStore;
+using backend.Infrastructure.Data;
+using backend.Infrastructure.Files;
+using backend.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Application.AI.VectorStore;
-using backend.Infrastructure.AI.Embeddings;
-using backend.Application.Common.Models;
-using backend.Application.Common.Models.AISettings;
 using Microsoft.Extensions.Options;
-using backend.Infrastructure.AI.VectorStore;
-using backend.Infrastructure.AI.TextExtractors;
-using backend.Infrastructure.Files;
 
 namespace backend.Infrastructure;
 
@@ -42,7 +42,7 @@ public static class DependencyInjection
 
         services.AddAuthorization();
 
-        services.AddScoped<IAuthorizationService, AuthorizationService>(); 
+        services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         // Register Face API Service and configure its HttpClient
         services.AddHttpClient<IFaceApiService, FaceApiService>(client =>

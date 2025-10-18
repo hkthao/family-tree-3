@@ -1,7 +1,7 @@
-using FluentValidation.TestHelper;
-using Xunit;
 using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Domain.Enums;
+using FluentValidation.TestHelper;
+using Xunit;
 
 namespace backend.Application.UnitTests.UserPreferences.Commands.SaveUserPreferences;
 

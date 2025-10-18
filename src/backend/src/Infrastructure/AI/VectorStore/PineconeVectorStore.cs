@@ -1,9 +1,9 @@
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pinecone;
-using backend.Application.AI.VectorStore;
-using backend.Application.Common.Models; 
 
 namespace backend.Infrastructure.AI.VectorStore;
 
@@ -38,12 +38,12 @@ public class PineconeVectorStore : IVectorStore
         _pineconeClient = new PineconeClient(apiKey);
     }
 
-    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
     {
         await UpsertAsync(embedding, metadata, _defaultIndexName, embedding.Count, cancellationToken);
     }
 
-    public async Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
+    public async Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
     {
         if (embedding == null || !embedding.Any())
         {
@@ -90,7 +90,7 @@ public class PineconeVectorStore : IVectorStore
             var vector = new Vector
             {
                 Id = vectorId,
-                Values = new ReadOnlyMemory<float>([.. embedding]),
+                Values = new ReadOnlyMemory<float>(embedding.Select(e => (float)e).ToArray()),
                 Metadata = new Metadata(pineconeMetadata!)
             };
 
@@ -106,12 +106,12 @@ public class PineconeVectorStore : IVectorStore
         }
     }
 
-    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
     {
         return await QueryAsync(queryEmbedding, topK, metadataFilter, _defaultIndexName, cancellationToken);
     }
 
-    public async Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
+    public async Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
     {
         if (queryEmbedding == null || queryEmbedding.Length == 0)
         {
@@ -125,7 +125,7 @@ public class PineconeVectorStore : IVectorStore
 
             var queryRequest = new QueryRequest
             {
-                Vector = new ReadOnlyMemory<float>([.. queryEmbedding]),
+                Vector = new ReadOnlyMemory<float>(queryEmbedding.Select(e => (float)e).ToArray()),
                 TopK = (uint)topK,
                 IncludeValues = true,
                 IncludeMetadata = true,
@@ -137,10 +137,10 @@ public class PineconeVectorStore : IVectorStore
             var results = queryResponse.Matches?.Select(m => new VectorStoreQueryResult
             {
                 Id = m.Id,
-                Embedding = m.Values.HasValue ? m.Values.Value.ToArray().ToList() : new List<float>(),
+                Embedding = m.Values.HasValue ? m.Values.Value.ToArray().Select(e => (double)e).ToList() : new List<double>(),
                 Score = m.Score ?? 0,
                 Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>(),
-                Content = m.Metadata?.FirstOrDefault(md => md.Key == "Content").Value?.ToString() ?? string.Empty 
+                Content = m.Metadata?.FirstOrDefault(md => md.Key == "Content").Value?.ToString() ?? string.Empty
             }).ToList() ?? new List<VectorStoreQueryResult>();
 
             _logger.LogInformation("Successfully queried Pinecone index {CollectionName} with TopK {TopK}. Found {Count} matches.", collectionName, topK, results.Count);

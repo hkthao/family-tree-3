@@ -1,8 +1,8 @@
-using backend.Application.UnitTests.Common;
-using Xunit;
-using FluentAssertions;
 using backend.Application.Events.Queries.GetEventsByIds;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using FluentAssertions;
+using Xunit;
 
 namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds;
 

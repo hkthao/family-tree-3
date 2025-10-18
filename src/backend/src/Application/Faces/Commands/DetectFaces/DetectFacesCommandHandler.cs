@@ -1,10 +1,10 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Faces.Queries; // For DetectedFaceDto
-using backend.Application.Faces.Common;
 using backend.Application.AI.VectorStore;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
+using backend.Application.Common.Interfaces;
+using backend.Application.Faces.Common;
+using backend.Application.Faces.Queries; // For DetectedFaceDto
 using backend.Domain.Enums;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 

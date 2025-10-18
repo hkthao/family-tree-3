@@ -1,5 +1,5 @@
-using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;

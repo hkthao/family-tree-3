@@ -1,5 +1,5 @@
-using Xunit;
 using backend.Application.Common.Models;
+using Xunit;
 
 namespace Application.UnitTests.Common.Models;
 

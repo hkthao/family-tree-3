@@ -46,7 +46,8 @@ public class CreateFamiliesCommandHandler : IRequestHandler<CreateFamiliesComman
                 Visibility = familyDto.Visibility ?? "Public",
                 TotalMembers = familyDto.TotalMembers,
                 TotalGenerations = familyDto.TotalGenerations ?? 0,
-                FamilyUsers = [new FamilyUser(){
+                FamilyUsers = [new FamilyUser()
+                {
                     FamilyId = familyId,
                     UserProfileId = userProfile.Id,
                     Role = FamilyRole.Manager

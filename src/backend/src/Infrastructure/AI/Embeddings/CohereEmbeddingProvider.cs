@@ -16,11 +16,11 @@ public class CohereEmbeddingProvider : IEmbeddingProvider
         _settings = embeddingSettings.Value;
     }
 
-    public async Task<Result<float[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
+    public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(_settings.Cohere.ApiKey))
         {
-            return Result<float[]>.Failure("Cohere API key is not configured.");
+            return Result<double[]>.Failure("Cohere API key is not configured.");
         }
 
         if (text.Length > MaxTextLength)
@@ -31,6 +31,6 @@ public class CohereEmbeddingProvider : IEmbeddingProvider
         // TODO: Implement actual Cohere API call to generate embedding
         // For now, return a dummy embedding for demonstration
         await Task.Delay(100, cancellationToken); // Simulate API call delay
-        return Result<float[]>.Success(new float[] { 0.4f, 0.5f, 0.6f });
+        return Result<double[]>.Success(new double[] { 0.4, 0.5, 0.6 });
     }
 }

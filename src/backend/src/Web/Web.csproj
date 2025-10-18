@@ -32,6 +32,7 @@
 
 
   <!-- Auto-generated Open API specification and Angular TypeScript clients -->
+  <!--
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
@@ -45,5 +46,6 @@
     <Message Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' == '0'" Importance="low" />
     <Error Text="$(NSwagOutput)" Condition="'$(NSwagExitCode)' != '0'" />
   </Target>
+  -->
 
 </Project>

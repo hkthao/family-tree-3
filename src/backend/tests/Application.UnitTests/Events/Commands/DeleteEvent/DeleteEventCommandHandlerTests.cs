@@ -1,9 +1,9 @@
+using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.UnitTests.Common;
-using Xunit;
+using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
-using backend.Application.Events.Commands.DeleteEvent;
-using backend.Domain.Entities;
+using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;
 

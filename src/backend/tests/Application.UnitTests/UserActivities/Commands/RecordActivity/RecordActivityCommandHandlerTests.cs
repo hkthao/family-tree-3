@@ -1,5 +1,5 @@
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;

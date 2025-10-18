@@ -1,6 +1,6 @@
+using backend.Application.Relationships.Commands.DeleteRelationship;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Relationships.Commands.DeleteRelationship;
 
 namespace backend.Application.UnitTests.Relationships.Commands.DeleteRelationship;
 

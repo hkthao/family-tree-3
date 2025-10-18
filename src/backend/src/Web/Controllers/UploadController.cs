@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
-using backend.Application.Files.UploadFile;
 using backend.Application.Files.Queries.GetUploadedFile;
+using backend.Application.Files.UploadFile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

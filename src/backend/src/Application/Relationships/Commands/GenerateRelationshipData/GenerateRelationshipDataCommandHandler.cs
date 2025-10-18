@@ -1,11 +1,11 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
-using System.Text.Json;
-using FluentValidation.Results;
 using backend.Domain.Enums;
-using backend.Application.Common.Interfaces;
+using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
-using System.Text.Json.Serialization;
 
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 

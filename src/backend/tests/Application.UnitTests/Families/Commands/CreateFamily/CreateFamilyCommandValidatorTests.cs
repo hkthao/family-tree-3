@@ -1,6 +1,6 @@
+using backend.Application.Families.Commands.CreateFamily;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Families.Commands.CreateFamily;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 

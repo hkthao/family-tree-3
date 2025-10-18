@@ -1,7 +1,7 @@
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using System.Collections.Concurrent;
-using backend.Application.Common.Models; 
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Domain.Entities;
 
 namespace backend.Infrastructure.AI.VectorStore
 {
@@ -9,12 +9,12 @@ namespace backend.Infrastructure.AI.VectorStore
     {
         private readonly ConcurrentDictionary<string, TextChunk> _store = new ConcurrentDictionary<string, TextChunk>();
 
-        public Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
+        public Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
             return UpsertAsync(embedding, metadata, "default_collection", embedding.Count, cancellationToken);
         }
 
-        public Task UpsertAsync(List<float> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
+        public Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, string collectionName, int embeddingDimension, CancellationToken cancellationToken = default)
         {
             var chunk = new TextChunk
             {
@@ -26,12 +26,12 @@ namespace backend.Infrastructure.AI.VectorStore
             return Task.CompletedTask;
         }
 
-        public Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
+        public Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, CancellationToken cancellationToken = default)
         {
             return QueryAsync(queryEmbedding, topK, metadataFilter, "default_collection", cancellationToken);
         }
 
-        public Task<List<VectorStoreQueryResult>> QueryAsync(float[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
+        public Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default)
         {
             if (queryEmbedding == null || queryEmbedding.Length == 0)
             {
@@ -58,7 +58,7 @@ namespace backend.Infrastructure.AI.VectorStore
                 Metadata = chunk.Metadata,
                 Embedding = chunk.Embedding?.ToList() ?? [],
                 Score = 1.0f, // Dummy score for in-memory store
-                Content = chunk.Metadata.GetValueOrDefault("Content", string.Empty) 
+                Content = chunk.Metadata.GetValueOrDefault("Content", string.Empty)
             }).Take(topK).ToList();
 
             return Task.FromResult(results);

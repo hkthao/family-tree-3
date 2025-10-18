@@ -1,6 +1,6 @@
-using Testcontainers.MySql;
-using Microsoft.EntityFrameworkCore;
 using backend.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Testcontainers.MySql;
 
 namespace backend.Infrastructure.IntegrationTests;
 

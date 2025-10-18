@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 using backend.Domain.Enums;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.AI.Embeddings
 {
