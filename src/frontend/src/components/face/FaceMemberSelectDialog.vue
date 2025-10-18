@@ -3,20 +3,8 @@
     <v-card>
       <v-card-title class="text-h6">{{ t('face.selectMemberDialog.title') }}</v-card-title>
       <v-card-text>
-        <div v-if="selectedFace" class="d-flex flex-column align-center mb-4">
-          <v-avatar size="96" rounded="lg" class="mb-2">
-            <v-img :src="selectedFace.imageUrl" alt="Cropped Face"></v-img>
-          </v-avatar>
-          <p class="text-subtitle-1">{{ t('face.selectMemberDialog.labelFor') }} <strong>{{ selectedFace.id }}</strong></p>
-        </div>
-
-        <MemberAutocomplete
-          v-model="selectedMemberId"
-          :label="t('face.selectMemberDialog.selectMember')"
-          :clearable="true"
-          class="mt-4"
-        />
-
+        <MemberAutocomplete v-model="selectedMemberId" :label="t('face.selectMemberDialog.selectMember')"
+          :hide-details="true" :clearable="true" />
         <v-card v-if="selectedMemberDetails" class="mt-4 pa-3" variant="outlined">
           <div class="d-flex align-center">
             <v-avatar size="48" rounded="lg" class="mr-3">
@@ -43,13 +31,14 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, Member } from '@/types';
 import { MemberAutocomplete } from '@/components/common';
+import { useMemberStore } from '@/stores/member.store';
 
 const { t } = useI18n();
+const memberStore = useMemberStore();
 
 const props = defineProps({
   show: { type: Boolean, required: true },
   selectedFace: { type: Object as () => DetectedFace | null, default: null },
-  managedMembers: { type: Array as () => Member[], required: true }, // Added managedMembers prop
 });
 
 const emit = defineEmits(['update:show', 'label-face']);
@@ -61,9 +50,10 @@ watch(() => props.selectedFace, (newFace) => {
   selectedMemberId.value = newFace?.memberId;
 }, { immediate: true });
 
-watch(selectedMemberId, (newMemberId) => {
+watch(selectedMemberId, async (newMemberId) => {
   if (newMemberId) {
-    selectedMemberDetails.value = props.managedMembers.find(m => m.id === newMemberId) || null;
+    await memberStore.getById(newMemberId);
+    selectedMemberDetails.value = memberStore.currentItem || null;
   } else {
     selectedMemberDetails.value = null;
   }

@@ -19,11 +19,26 @@ export const useMemberStore = defineStore('member', {
     totalItems: 0,
     totalPages: 1,
     sortBy: [] as { key: string; order: string }[], // Sorting key and order
+    editableMembers: [] as Member[], // New state for editable members
   }),
 
   getters: {},
 
   actions: {
+    async loadEditableMembers() {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.member.loadEditableItems(); // Assuming a new service method
+
+      if (result.ok) {
+        this.editableMembers = result.value;
+      } else {
+        this.error = i18n.global.t('member.errors.load'); // Reuse existing error message
+        console.error(result.error);
+      }
+      this.loading = false;
+    },
+
     async _loadItems() {
       this.loading = true;
       this.error = null;

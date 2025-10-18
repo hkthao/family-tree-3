@@ -52,7 +52,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
             .IsUnique();
 
         builder.Entity<Member>()
-            .HasOne<Family>()
+            .HasOne(m => m.Family)
             .WithMany()
             .HasForeignKey(m => m.FamilyId)
             .IsRequired()

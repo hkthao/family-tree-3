@@ -22,7 +22,8 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyDetailDto>();
         CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
-        CreateMap<Member, MemberListDto>();
+        CreateMap<Member, MemberListDto>()
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
         CreateMap<Member, MemberDetailDto>();
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()

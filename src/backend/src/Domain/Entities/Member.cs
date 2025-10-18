@@ -17,6 +17,7 @@ public class Member : BaseAuditableEntity
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; } // New
     public Guid FamilyId { get; set; }
+    public Family Family { get; set; } = null!;
     public bool IsRoot { get; set; } = false;
 
     // Relationships

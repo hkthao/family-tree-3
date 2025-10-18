@@ -1566,6 +1566,34 @@
         ]
       }
     },
+    "/api/Members/managed": {
+      "get": {
+        "tags": [
+          "Members"
+        ],
+        "operationId": "Members_GetEditableMembers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MemberListDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Members": {
       "post": {
         "tags": [
@@ -3367,10 +3395,19 @@
                 "type": "string",
                 "format": "guid"
               },
+              "familyName": {
+                "type": "string",
+                "nullable": true
+              },
               "isRoot": {
                 "type": "boolean"
               },
               "dateOfBirth": {
+                "type": "string",
+                "format": "date-time",
+                "nullable": true
+              },
+              "dateOfDeath": {
                 "type": "string",
                 "format": "date-time",
                 "nullable": true
@@ -3872,20 +3909,6 @@
           "order": {
             "type": "integer",
             "format": "int32",
-            "nullable": true
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
             "nullable": true
           }
         }

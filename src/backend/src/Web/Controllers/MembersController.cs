@@ -9,6 +9,7 @@ using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByIds;
+using backend.Application.Members.Queries.GetEditableMembers; // Added
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +65,17 @@ public class MembersController : ControllerBase
             return Ok(result.Value);
         }
         return BadRequest(result.Error); // Or other appropriate error handling
+    }
+
+    [HttpGet("managed")]
+    public async Task<ActionResult<List<MemberListDto>>> GetEditableMembers()
+    {
+        var result = await _mediator.Send(new GetEditableMembersQuery());
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     [HttpPost]
