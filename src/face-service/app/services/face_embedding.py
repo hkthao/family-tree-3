@@ -38,19 +38,22 @@ class FaceEmbeddingService:
         try:
             # Convert PIL Image to NumPy array (RGB)
             image_np = np.array(face_image.convert('RGB'))
-            # Convert to grayscale for landmark detection (optional, but common)
+
+            # Dlib's face detector works on grayscale images
             gray_image = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
 
-            # Dlib's face recognition model expects a dlib.full_object_detection object
-            # We need to create a dummy rectangle for the cropped face
-            # Assuming the input face_image is already a cropped face
+            # Create a dlib rectangle for the entire image, assuming it's a cropped face
             face_rect = dlib.rectangle(0, 0, image_np.shape[1], image_np.shape[0])
 
             # Detect facial landmarks
             landmarks = self.predictor(gray_image, face_rect)
 
-            # Compute the face descriptor (embedding)
-            embedding = self.face_encoder.compute_face_descriptor(image_np, landmarks)
+            # Align the face using dlib.get_face_chip
+            # This function takes the original image (image_np) and the landmarks
+            aligned_face = dlib.get_face_chip(image_np, landmarks)
+
+            # Compute the face descriptor (embedding) from the aligned face
+            embedding = self.face_encoder.compute_face_descriptor(aligned_face, landmarks)
             logger.info("Successfully generated Dlib face embedding.")
             return list(embedding)
         except Exception as e:
