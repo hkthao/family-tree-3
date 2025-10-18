@@ -16,7 +16,7 @@ export interface Member {
   placeOfBirth?: string; // New (replaces address)
   placeOfDeath?: string; // New (replaces address)
   occupation?: string; // New
-
+  familyName?: string; // New
   biography?: string; // New
   isRoot?: boolean;
   validationErrors?: string[];

@@ -8,7 +8,7 @@
         <v-card v-if="selectedMemberDetails" class="mt-4 pa-3" variant="outlined">
           <div class="d-flex align-center">
             <v-avatar size="48" rounded="lg" class="mr-3">
-              <v-img :src="selectedMemberDetails.avatarUrl" alt="Member Avatar"></v-img>
+              <v-img :src="faceThumbnailSrc" alt="Detected Face"></v-img>
             </v-avatar>
             <div>
               <div class="text-subtitle-1">{{ selectedMemberDetails.fullName }}</div>
@@ -27,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, Member } from '@/types';
 import { MemberAutocomplete } from '@/components/common';
@@ -41,7 +41,7 @@ const props = defineProps({
   selectedFace: { type: Object as () => DetectedFace | null, default: null },
 });
 
-const emit = defineEmits(['update:show', 'label-face']);
+const emit = defineEmits<{ (e: 'update:show', value: boolean): void; (e: 'label-face', faceId: string, memberDetails: Member): void; }>();
 
 const selectedMemberId = ref<string | null | undefined>(undefined);
 const selectedMemberDetails = ref<Member | null>(null); // To store full member details
@@ -59,9 +59,17 @@ watch(selectedMemberId, async (newMemberId) => {
   }
 }, { immediate: true });
 
+const faceThumbnailSrc = computed(() => {
+  if (props.selectedFace?.thumbnail) {
+    // Assuming the thumbnail is always a JPEG base64 string. Adjust if other formats are possible.
+    return `data:image/jpeg;base64,${props.selectedFace.thumbnail}`;
+  }
+  return '';
+});
+
 const handleSave = () => {
-  if (props.selectedFace && selectedMemberId.value) {
-    emit('label-face', props.selectedFace.id, selectedMemberId.value);
+  if (props.selectedFace && selectedMemberId.value && selectedMemberDetails.value) {
+    emit('label-face', props.selectedFace.id, selectedMemberDetails.value);
     emit('update:show', false);
   }
 };

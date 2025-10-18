@@ -10,4 +10,8 @@ public class DetectedFaceDto
     public string? Thumbnail { get; set; } // Base64 encoded image
     public Guid? MemberId { get; set; } // Nullable, if not yet labeled
     public string? MemberName { get; set; } // For display
+    public Guid? FamilyId { get; set; }
+    public string? FamilyName { get; set; }
+    public int? BirthYear { get; set; }
+    public int? DeathYear { get; set; }
 }

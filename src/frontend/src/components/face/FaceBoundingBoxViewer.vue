@@ -74,11 +74,6 @@ const getBoxStyle = (box: BoundingBox | null | undefined) => {
     width: `${box.width * scaleX}px`,
     height: `${box.height * scaleY}px`,
   };
-
-  console.log('BoundingBox:', box);
-  console.log('Scale factors:', { scaleX, scaleY });
-  console.log('Calculated style:', style);
-
   return style;
 };
 

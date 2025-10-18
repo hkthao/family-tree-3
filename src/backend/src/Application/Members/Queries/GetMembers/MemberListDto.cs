@@ -15,5 +15,6 @@ public class MemberListDto : BaseAuditableDto
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
     public string? Gender { get; set; }
+    public string? BirthDeathYears { get; set; }
     public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }

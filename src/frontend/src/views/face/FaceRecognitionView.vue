@@ -17,8 +17,10 @@
           </v-col>
         </v-row>
       </div>
-      <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{ t('face.recognition.uploadPrompt') }}</v-alert>
-      <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0" type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
+      <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
+        t('face.recognition.uploadPrompt') }}</v-alert>
+      <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
+        type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="primary" :disabled="!canSaveLabels" @click="saveLabels">
@@ -26,38 +28,27 @@
       </v-btn>
     </v-card-actions>
 
-    <FaceMemberSelectDialog
-      :show="showSelectMemberDialog"
-      @update:show="showSelectMemberDialog = $event"
-      :selected-face="faceToLabel"
-      :managed-members="faceMemberStore.managedMembers"
-      @label-face="handleLabelFaceAndCloseDialog"
-    />
+    <FaceMemberSelectDialog :show="showSelectMemberDialog" @update:show="showSelectMemberDialog = $event"
+      :selected-face="faceToLabel" @label-face="handleLabelFaceAndCloseDialog" />
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFaceStore } from '@/stores/face.store';
-import { useFaceMemberStore } from '@/stores/faceMember.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
-import type { DetectedFace } from '@/types';
+import type { DetectedFace, Member } from '@/types';
 
 const { t } = useI18n();
 const router = useRouter();
 const faceStore = useFaceStore();
-const faceMemberStore = useFaceMemberStore();
 const notificationStore = useNotificationStore();
 
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
-
-onMounted(() => {
-  faceMemberStore.loadManagedMembers();
-});
 
 watch(() => faceStore.error, (newError) => {
   if (newError) {
@@ -81,8 +72,8 @@ const canSaveLabels = computed(() => {
   return faceStore.detectedFaces.some(face => face.memberId !== undefined);
 });
 
-const handleLabelFaceAndCloseDialog = (faceId: string, memberId: string) => {
-  faceStore.labelFace(faceId, memberId);
+const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) => {
+  faceStore.labelFace(faceId, memberDetails.id, memberDetails);
   showSelectMemberDialog.value = false;
   faceToLabel.value = null;
 };

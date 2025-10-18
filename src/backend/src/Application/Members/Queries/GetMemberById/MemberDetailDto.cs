@@ -19,5 +19,6 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
+    public string? BirthDeathYears { get; set; }
     public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }

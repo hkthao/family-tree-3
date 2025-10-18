@@ -13,8 +13,13 @@ type FaceStatus = 'recognized' | 'unrecognized' | 'newly-labeled' | 'labeled';
 interface DetectedFace {
   id: string; // Unique ID for the detected face instance
   boundingBox: BoundingBox;
-  imageUrl: string; // URL to the cropped face image
+  thumbnail: string; // URL to the cropped face image
   memberId: string | null; // ID of the associated member, if recognized/labeled
+  memberName?: string; // For display
+  familyId?: string; // For display
+  familyName?: string; // For display
+  birthYear?: number; // For display
+  deathYear?: number; // For display
   status: FaceStatus; // For UI styling: 'recognized', 'unrecognized', 'newly-labeled'
 }
 

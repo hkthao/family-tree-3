@@ -577,5 +577,9 @@
   "face.recognition.uploadPrompt": "Tải lên một hình ảnh để phát hiện và gán nhãn khuôn mặt.",
   "face.recognition.noFacesDetected": "Không tìm thấy khuôn mặt nào trong hình ảnh đã tải lên.",
   "face.recognition.saveLabelsButton": "Lưu nhãn khuôn mặt",
-  "face.recognition.saveSuccess": "Đã lưu nhãn khuôn mặt thành công!"
+  "face.recognition.saveSuccess": "Đã lưu nhãn khuôn mặt thành công!",
+  "face.selectMemberDialog.title": "Chọn Thành viên cho Khuôn mặt",
+  "face.selectMemberDialog.labelFor": "Gán nhãn khuôn mặt:",
+  "face.selectMemberDialog.selectMember": "Chọn Thành viên",
+  "face.selectMemberDialog.searchMemberPlaceholder": "Tìm kiếm thành viên..."
 }

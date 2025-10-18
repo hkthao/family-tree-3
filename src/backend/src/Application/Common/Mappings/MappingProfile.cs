@@ -23,8 +23,18 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
-        CreateMap<Member, MemberDetailDto>();
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
+            .ForMember(dest => dest.BirthDeathYears, opt => opt.MapFrom(src =>
+                (src.DateOfBirth.HasValue ? src.DateOfBirth.Value.Year.ToString() : "") +
+                (src.DateOfBirth.HasValue && src.DateOfDeath.HasValue ? " - " : "") +
+                (src.DateOfDeath.HasValue ? src.DateOfDeath.Value.Year.ToString() : "")
+            ));
+        CreateMap<Member, MemberDetailDto>()
+            .ForMember(dest => dest.BirthDeathYears, opt => opt.MapFrom(src =>
+                (src.DateOfBirth.HasValue ? src.DateOfBirth.Value.Year.ToString() : "") +
+                (src.DateOfBirth.HasValue && src.DateOfDeath.HasValue ? " - " : "") +
+                (src.DateOfDeath.HasValue ? src.DateOfDeath.Value.Year.ToString() : "")
+            ));
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
