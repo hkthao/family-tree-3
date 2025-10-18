@@ -1,23 +1,21 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
+using backend.Domain.Entities; // Added
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 
 public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsCommand, Result<Unit>>
 {
     private readonly ILogger<SaveFaceLabelsCommandHandler> _logger;
-    private readonly IFaceApiService _faceApiService; // Assuming this service exists for face embedding
-    private readonly IVectorStoreService _vectorStoreService; // Assuming this service exists for vector storage
+    private readonly IVectorStore _vectorStore; // Changed from IVectorStoreService
 
     public SaveFaceLabelsCommandHandler(
         ILogger<SaveFaceLabelsCommandHandler> logger,
-        IFaceApiService faceApiService,
-        IVectorStoreService vectorStoreService)
+        IVectorStore vectorStore) // Changed constructor parameter
     {
         _logger = logger;
-        _faceApiService = faceApiService;
-        _vectorStoreService = vectorStoreService;
+        _vectorStore = vectorStore; // Changed assignment
     }
 
     public async Task<Result<Unit>> Handle(SaveFaceLabelsCommand request, CancellationToken cancellationToken)
@@ -27,30 +25,13 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
 
         foreach (var faceLabel in request.FaceLabels)
         {
-            if (faceLabel.Thumbnail == null)
+            if (faceLabel.Embedding == null || !faceLabel.Embedding.Any())
             {
-                _logger.LogWarning("Face {FaceId} has no thumbnail. Skipping embedding generation.", faceLabel.Id);
+                _logger.LogWarning("Face {FaceId} has no embedding. Skipping vector storage.", faceLabel.Id);
                 continue;
             }
 
-            // 1. Get face embedding from Face API Service
-            // The thumbnail is base64 encoded, so pass it directly
-            var embeddingResult = await _faceApiService.GetFaceEmbeddingAsync(faceLabel.Thumbnail, cancellationToken);
-
-            if (!embeddingResult.IsSuccess)
-            {
-                _logger.LogError("Failed to get embedding for face {FaceId}: {Error}", faceLabel.Id, embeddingResult.Error);
-                return Result<Unit>.Failure($"Failed to get embedding for face {faceLabel.Id}: {embeddingResult.Error}");
-            }
-
-            // Ensure embedding is not null before proceeding
-            if (embeddingResult.Value == null)
-            {
-                _logger.LogError("Embedding result value is null for face {FaceId}.", faceLabel.Id);
-                return Result<Unit>.Failure($"Embedding result value is null for face {faceLabel.Id}.");
-            }
-
-            var embedding = embeddingResult.Value;
+            var embedding = faceLabel.Embedding;
 
             // 2. Prepare metadata for vector store
             var metadata = new Dictionary<string, string>
@@ -71,13 +52,8 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
             };
 
             // 3. Save embedding and metadata to vector store
-            var saveResult = await _vectorStoreService.SaveVectorAsync(embedding, metadata, cancellationToken);
-
-            if (!saveResult.IsSuccess)
-            {
-                _logger.LogError("Failed to save vector for face {FaceId}: {Error}", faceLabel.Id, saveResult.Error);
-                return Result<Unit>.Failure($"Failed to save vector for face {faceLabel.Id}: {saveResult.Error}");
-            }
+            var textChunk = new TextChunk { Embedding = embedding.ToArray(), Metadata = metadata }; // Created TextChunk
+            await _vectorStore.UpsertAsync(textChunk, cancellationToken); // Changed to UpsertAsync
         }
 
         return Result<Unit>.Success(Unit.Value);

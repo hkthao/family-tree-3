@@ -7,6 +7,7 @@ from PIL import Image
 import numpy as np
 
 from app.services.face_detector import MTCNNFaceDetector
+from app.services.face_embedding import FaceEmbeddingService # Added
 from app.models.face_detection import FaceDetectionResult, BoundingBox
 
 import logging
@@ -21,8 +22,9 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Initialize the face detector
+# Initialize the face detector and embedding service
 face_detector = MTCNNFaceDetector()
+face_embedding_service = FaceEmbeddingService() # Added
 
 @app.post("/detect", response_model=List[FaceDetectionResult])
 async def detect_faces(
@@ -59,9 +61,15 @@ async def detect_faces(
             bounding_box = BoundingBox(x=int(x), y=int(y), width=int(w), height=int(h))
 
             thumbnail_base64 = None
+            face_embedding = None # Added
+
+            # Crop face
+            cropped_face = image.crop((x, y, x + w, y + h))
+
+            # Generate embedding for the cropped face
+            face_embedding = face_embedding_service.get_embedding(cropped_face) # Added
+
             if return_crop:
-                # Crop face
-                cropped_face = image.crop((x, y, x + w, y + h))
                 buffered = io.BytesIO()
                 cropped_face.save(buffered, format="PNG")
                 thumbnail_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
@@ -71,6 +79,7 @@ async def detect_faces(
                 bounding_box=bounding_box,
                 confidence=float(confidence),
                 thumbnail=thumbnail_base64,
+                embedding=face_embedding, # Added
             )
             results.append(face_result)
             logger.debug(f"Generated FaceDetectionResult: {face_result.json()}") # Log each result

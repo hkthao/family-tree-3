@@ -46,9 +46,8 @@ public static class DependencyInjection
 
         services.AddHttpClient(); // Register HttpClient
 
-        // Register Face API Service and Vector Store Service
+        // Register Face API Service
         services.AddScoped<IFaceApiService, FaceApiService>();
-        services.AddScoped<IVectorStoreService, VectorStoreService>();
 
         // Register Chat Module
         services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));

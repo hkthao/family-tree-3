@@ -4,4 +4,6 @@ python-multipart
 pillow
 numpy
 mtcnn
-tensorflow>=2.12
+torch
+torchvision
+facenet_pytorch

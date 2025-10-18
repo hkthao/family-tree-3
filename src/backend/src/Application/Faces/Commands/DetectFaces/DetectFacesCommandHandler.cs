@@ -41,6 +41,7 @@ public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, Fac
                 },
                 Confidence = faceResult.Confidence,
                 Thumbnail = faceResult.Thumbnail,
+                Embedding = faceResult.Embedding, // Added
                 MemberId = null, // Initially null
                 MemberName = null,
                 FamilyId = null,
