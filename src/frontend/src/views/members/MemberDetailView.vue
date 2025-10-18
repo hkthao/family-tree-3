@@ -26,7 +26,7 @@
         </v-window-item>
 
         <v-window-item value="relationships">
-          <MemberRelationships :member-id="member.id" />
+          <MemberRelationships :member-id="member.id" @view-member="navigateToMemberDetailView" />
         </v-window-item>
       </v-window>
     </v-card-text>
@@ -77,6 +77,10 @@ const loadMember = async () => {
 
 const navigateToEditMember = (id: string) => {
   router.push(`/members/edit/${id}`);
+};
+
+const navigateToMemberDetailView = (memberId: string) => {
+  router.push(`/members/detail/${memberId}`);
 };
 
 const closeView = () => {

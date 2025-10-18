@@ -3,18 +3,12 @@
     <v-card-text>
       <v-data-table
         :headers="headers"
-        :items="filteredRelationships"
+        :items="formattedRelationships"
         :loading="relationshipStore.loading"
         :no-data-text="t('common.noData')"
       >
-        <template v-slot:item.sourceMemberFullName="{ item }">
-          {{ item.sourceMember?.fullName }}
-        </template>
-        <template v-slot:item.targetMemberFullName="{ item }">
-          {{ item.targetMember?.fullName }}
-        </template>
-        <template v-slot:item.type="{ item }">
-          {{ getRelationshipTypeTitle(item.type) }}
+        <template v-slot:item.formattedRelationship="{ item }">
+          <span v-html="item.formattedRelationship" @click="handleRelationshipClick($event)"></span>
         </template>
       </v-data-table>
     </v-card-text>
@@ -33,14 +27,27 @@ const props = defineProps<{
   memberId: string;
 }>();
 
+const emit = defineEmits([
+  'view-member',
+]);
+
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
 
 const headers = computed(() => [
-  { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberFullName', sortable: true, align: 'start' as const },
-  { title: t('relationship.list.headers.targetMember'), key: 'targetMemberFullName', sortable: true, align: 'start' as const },
-  { title: t('relationship.list.headers.type'), key: 'type', sortable: true, align: 'start' as const },
+  { title: t('relationship.list.headers.relationship'), key: 'formattedRelationship', sortable: true, align: 'start' as const },
 ]);
+
+const formattedRelationships = computed(() => {
+  return filteredRelationships.value.map((item: Relationship) => ({
+    ...item,
+    formattedRelationship: `
+      <a class="text-primary font-weight-bold text-decoration-underline cursor-pointer" data-member-id="${item.sourceMemberId}">${item.sourceMember?.fullName}</a>
+      ${t('relationship.isThe')} ${getRelationshipTypeTitle(item.type)} ${t('relationship.of')} 
+      <a class="text-primary font-weight-bold text-decoration-underline cursor-pointer" data-member-id="${item.targetMemberId}">${item.targetMember?.fullName}</a>
+    `,
+  }));
+});
 
 const filteredRelationships = computed(() => {
   if (!props.memberId) return [];
@@ -60,4 +67,11 @@ onUnmounted(() => {
   // Reset itemsPerPage to default to not affect other components
   relationshipStore.setItemsPerPage(DEFAULT_ITEMS_PER_PAGE);
 });
+
+const handleRelationshipClick = (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.tagName === 'A' && target.dataset.memberId) {
+    emit('view-member', target.dataset.memberId);
+  }
+};
 </script>

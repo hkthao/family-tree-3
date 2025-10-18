@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-data-table :headers="headers" :items="relationshipStore.items" :loading="relationshipStore.loading"
+    <v-data-table :headers="headers" :items="formattedRelationships" :loading="relationshipStore.loading"
       :items-per-page="relationshipStore.itemsPerPage" :total-items="relationshipStore.totalItems"
       @update:options="loadItems" elevation="0">
       <template #top>
@@ -23,18 +23,8 @@
           </v-btn>
         </v-toolbar>
       </template>
-      <template v-slot:item.sourceMemberFullName="{ item }">
-        <a @click="viewItem(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-          {{ item.sourceMember?.fullName }}
-        </a>
-      </template>
-      <template v-slot:item.targetMemberFullName="{ item }">
-        <a @click="viewItem(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
-          {{ item.targetMember?.fullName }}
-        </a>
-      </template>
-      <template v-slot:item.type="{ item }">
-        {{ getRelationshipTypeTitle(item.type) }}
+      <template v-slot:item.formattedRelationship="{ item }">
+        <span v-html="item.formattedRelationship" @click="handleRelationshipClick($event, item)"></span>
       </template>
       <template v-slot:item.actions="{ item }">
         <v-tooltip :text="t('relationship.list.action.edit')">
@@ -67,23 +57,33 @@ const relationshipStore = useRelationshipStore();
 const showAiCreatePopup = ref(false);
 
 const headers = computed(() => [
-  { title: t('relationship.list.headers.sourceMember'), key: 'sourceMemberFullName', sortable: true, align: 'start' as const },
-  { title: t('relationship.list.headers.targetMember'), key: 'targetMemberFullName', sortable: true, align: 'start' as const },
-  { title: t('relationship.list.headers.type'), key: 'type', sortable: true, align: 'start' as const },
+  { title: t('relationship.list.headers.relationship'), key: 'formattedRelationship', sortable: true, align: 'start' as const },
   {
     title: t('common.actions'), key: 'actions', sortable: false, width: '120px',
     align: 'center' as const,
   },
 ]);
 
+const formattedRelationships = computed(() => {
+  return relationshipStore.items.map(item => ({
+    ...item,
+    formattedRelationship: `
+      <a class="text-primary font-weight-bold text-decoration-underline cursor-pointer" data-member-id="${item.sourceMemberId}">${item.sourceMember?.fullName}</a>
+      <a class="text-green font-weight-bold text-decoration-underline cursor-pointer">${t('relationship.isThe')} ${getRelationshipTypeTitle(item.type)} ${t('relationship.of')}</a>
+      <a class="text-primary font-weight-bold text-decoration-underline cursor-pointer" data-member-id="${item.targetMemberId}">${item.targetMember?.fullName}</a>
+    `,
+  }));
+});
 
-const emit = defineEmits([ // Added emits
+
+const emit = defineEmits([
   'update:options',
   'view',
   'edit',
   'delete',
   'create',
   'ai-create',
+  'view-member',
 ]);
 
 const loadItems = async (options: { page: number; itemsPerPage: number; sortBy: any[] }) => {
@@ -100,5 +100,15 @@ const editItem = (item: Relationship) => {
 
 const deleteItem = (item: Relationship) => {
   emit('delete', item);
+};
+
+const handleRelationshipClick = (event: MouseEvent, item: Relationship) => {
+  const target = event.target as HTMLElement;
+  if (target.tagName === 'A' && target.dataset.memberId) {
+    emit('view-member', target.dataset.memberId);
+  } else {
+    // If the click is not on a member link, view the relationship itself
+    emit('view', item);
+  }
 };
 </script>

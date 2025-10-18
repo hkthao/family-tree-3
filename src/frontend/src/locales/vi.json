@@ -320,7 +320,8 @@
       "fullName": "Họ và tên",
       "relationshipType": "Kiểu quan hệ",
       "order": "Thứ tự (Tùy chọn)",
-      "tab.general": "Thông Tin Chung"
+      "tab.general": "Thông Tin Chung",
+      "family": "Gia đình"
     },
     "type": {
       "father": "Cha",
@@ -350,6 +351,7 @@
   "relationship.list.headers.type": "Loại Quan hệ",
   "relationship.list.headers.sourceMemberFullName": "Thành viên Nguồn",
   "relationship.list.headers.targetMemberFullName": "Thành viên Đích",
+  "relationship.list.headers.relationship": "Mối quan hệ",
   "relationship.form.editTitle": "Chỉnh sửa Quan hệ",
   "relationship.form.addTitle": "Thêm Quan hệ Mới",
   "relationship.form.sourceMember": "Thành viên Nguồn",
@@ -407,6 +409,7 @@
   "menu.family": "Gia phả",
   "menu.admin": "Quản trị",
   "menu.system": "Hệ thống",
+  "face.recognition": "Nhận diện Khuôn mặt",
   "avatarInput.title": "Chọn ảnh đại diện",
   "avatarInput.tab.url": "Dán URL",
   "avatarInput.tab.upload": "Tải ảnh lên",
@@ -569,5 +572,10 @@
   "face.errors.saveMappingFailed": "Không thể lưu ánh xạ khuôn mặt.",
   "face.errors.searchFailed": "Không thể tìm kiếm bằng khuôn mặt.",
   "face.errors.unexpectedError": "Đã xảy ra lỗi không mong muốn.",
-  "face.success.saveMapping": "Đã lưu ánh xạ khuôn mặt thành công!"
+  "face.success.saveMapping": "Đã lưu ánh xạ khuôn mặt thành công!",
+  "face.recognition.title": "Nhận diện & Gán nhãn Khuôn mặt",
+  "face.recognition.uploadPrompt": "Tải lên một hình ảnh để phát hiện và gán nhãn khuôn mặt.",
+  "face.recognition.noFacesDetected": "Không tìm thấy khuôn mặt nào trong hình ảnh đã tải lên.",
+  "face.recognition.saveLabelsButton": "Lưu nhãn khuôn mặt",
+  "face.recognition.saveSuccess": "Đã lưu nhãn khuôn mặt thành công!"
 }

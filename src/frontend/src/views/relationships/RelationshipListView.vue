@@ -7,6 +7,7 @@
     @edit="navigateToEditRelationship"
     @delete="confirmDelete"
     @create="navigateToAddRelationship"
+    @view-member="navigateToMemberDetailView"
   />
 
   <!-- Confirm Delete Dialog -->
@@ -74,6 +75,10 @@ const navigateToAddRelationship = () => {
 
 const navigateToEditRelationship = (relationship: Relationship) => {
   router.push(`/relationships/edit/${relationship.id}`);
+};
+
+const navigateToMemberDetailView = (memberId: string) => {
+  router.push(`/members/detail/${memberId}`);
 };
 
 const handleFilterUpdate = (filters: RelationshipFilter) => {
