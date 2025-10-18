@@ -139,7 +139,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
 
                     if (!string.IsNullOrEmpty(relationshipDescription))
                     {
-                        userPromptBuilder.AppendLine($"- {relationshipDescription} (from {rel.StartDate?.ToShortDateString() ?? "Unknown"} to {rel.EndDate?.ToShortDateString() ?? "Present"}).");
+                        userPromptBuilder.AppendLine($"- {relationshipDescription}.");
                     }
                 }
             }

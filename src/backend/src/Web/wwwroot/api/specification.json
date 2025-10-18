@@ -3429,19 +3429,9 @@
             "format": "int32",
             "nullable": true
           },
-          "startDate": {
+          "familyId": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
+            "format": "guid"
           }
         }
       },

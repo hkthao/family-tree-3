@@ -326,9 +326,7 @@
       "father": "Cha",
       "mother": "Mẹ",
       "wife": "Vợ",
-      "husband": "Chồng",
-      "spouse": "Vợ/Chồng",
-      "parent_child": "Cha-Con"
+      "husband": "Chồng"
     },
     "list": {
       "action": {

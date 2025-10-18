@@ -298,15 +298,16 @@
       "addTitle": "Add Relationship",
       "type": "Relationship Type",
       "fullName": "Full Name",
-      "relationshipType": "Relation Type"
+      "relationshipType": "Relation Type",
+      "family": "Family",
+      "order": "Order (Optional)",
+      "tab.general": "General Information"
     },
     "type": {
       "father": "Father",
       "mother": "Mother",
       "wife": "Wife",
-      "husband": "Husband",
-      "spouse": "Spouse",
-      "parent_child": "Parent-Child"
+      "husband": "Husband"
     },
     "list": {
       "action": {
@@ -469,6 +470,17 @@
   "aiInput.promptLabelRelationship": "Describe the relationship you want to create (e.g., 'Create a relationship between John Doe and Jane Smith, where John is the husband of Jane')",
   "aiInput.relationship": "Relationship",
   "aiInput.relationships": "Relationships",
+  "face.recognition.title": "Face Recognition & Labeling",
+  "face.recognition.uploadPrompt": "Upload an image to detect and label faces.",
+  "face.recognition.noFacesDetected": "No faces detected in the uploaded image.",
+  "face.recognition.saveLabelsButton": "Save Face Labels",
+  "face.recognition.saveSuccess": "Face labels saved successfully!",
+  "face.selectMemberDialog.title": "Select Member for Face",
+  "face.selectMemberDialog.labelFor": "Labeling face:",
+  "face.selectMemberDialog.selectMember": "Select Member",
+  "face.selectMemberDialog.searchMemberPlaceholder": "Search for a member...",
+  "face.labeling.errors.loadManagedMembersFailed": "Failed to load managed members.",
+  "face.labeling.errors.unexpectedError": "An unexpected error occurred while loading members.",
   "face.upload.title": "Upload Photo for Face Detection",
   "face.upload.continueButton": "Continue to Labeling",
   "face.uploadInput.selectImage": "Select Image",

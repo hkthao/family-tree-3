@@ -1,7 +1,6 @@
 using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries;
-
 public class RelationshipDto
 {
     public Guid Id { get; set; }
@@ -11,7 +10,5 @@ public class RelationshipDto
     public RelationshipMemberDto? TargetMember { get; set; }
     public RelationshipType Type { get; set; }
     public int? Order { get; set; }
-    public DateTime? StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public string? Description { get; set; }
+    public Guid FamilyId { get; set; }
 }

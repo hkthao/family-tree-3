@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251018034529_AddFamilyIdToRelationships")]
+    partial class AddFamilyIdToRelationships
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -319,6 +322,12 @@ namespace backend.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("char(36)");
 
@@ -327,6 +336,9 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<Guid>("SourceMemberId")
                         .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<Guid>("TargetMemberId")
                         .HasColumnType("char(36)");

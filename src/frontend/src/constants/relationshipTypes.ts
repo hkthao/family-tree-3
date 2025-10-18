@@ -8,8 +8,8 @@ export const RELATIONSHIP_TYPE_OPTIONS = [
   { title: i18n.global.t('relationship.type.husband'), value: RelationshipType.Husband },
 ];
 
-export function getRelationshipTypeTitle(type: RelationshipType | undefined): string {
-  if (type === undefined) {
+export function getRelationshipTypeTitle(type: RelationshipType | undefined | null): string {
+  if (type === undefined || type === null) {
     return i18n.global.t('common.unknown');
   }
   const option = RELATIONSHIP_TYPE_OPTIONS.find(opt => opt.value === type);

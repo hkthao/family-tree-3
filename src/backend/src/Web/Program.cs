@@ -17,10 +17,15 @@ builder.Services.AddCors(options =>
         policyBuilder =>
         {
             var corsOriginsString = builder.Configuration["CORS_ORIGINS"];
+            var origins = new List<string>();
             if (!string.IsNullOrEmpty(corsOriginsString))
             {
-                var corsOrigins = corsOriginsString.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                policyBuilder.WithOrigins(corsOrigins)
+                origins.AddRange(corsOriginsString.Split(',', StringSplitOptions.RemoveEmptyEntries));
+            }
+
+            if (origins.Any())
+            {
+                policyBuilder.WithOrigins(origins.ToArray())
                              .AllowAnyHeader()
                              .AllowAnyMethod();
             }

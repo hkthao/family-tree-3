@@ -62,9 +62,6 @@ public class CreateRelationshipsCommandHandler : IRequestHandler<CreateRelations
                 TargetMemberId = relationshipInput.TargetMemberId,
                 Type = relationshipInput.Type,
                 Order = relationshipInput.Order,
-                StartDate = relationshipInput.StartDate,
-                EndDate = relationshipInput.EndDate,
-                Description = relationshipInput.Description,
                 FamilyId = sourceMember.FamilyId // Assume relationship belongs to source member's family
             };
 

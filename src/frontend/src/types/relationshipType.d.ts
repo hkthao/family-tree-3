@@ -1,6 +1,6 @@
 export enum RelationshipType {
-  Father = 'Father',
-  Mother = 'Mother',
-  Husband = 'Husband',
-  Wife = 'Wife',
+  Father = 0,
+  Mother = 1,
+  Husband = 2,
+  Wife = 3,
 }
