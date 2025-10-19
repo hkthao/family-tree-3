@@ -364,5 +364,6 @@
   "admin.title": "Admin",
   "face.errors.noFacesDetectedForSearch": "No faces detected for search.",
   "face.uploadInput.selectImage": "Select Image",
-  "face.recognition.saveLabelsButton": "Save Labels"
+  "face.recognition.saveLabelsButton": "Save Labels",
+  "face.boundingBox.labeledAs": "Labeled as"
 }

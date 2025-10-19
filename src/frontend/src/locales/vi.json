@@ -403,8 +403,5 @@
   "face.errors.noFacesDetectedForSearch": "Không tìm thấy khuôn mặt nào để tìm kiếm.",
   "face.uploadInput.selectImage": "Chọn ảnh",
   "face.recognition.saveLabelsButton": "Lưu Nhãn",
-  "ai.title": "Trí tuệ nhân tạo",
-  "ai.biography.generator.title": "Tạo Tiểu sử bằng AI",
-  "admin.title": "Quản trị",
-  "admin.chunks.title": "Quản lý Chunk tài liệu"
+  "face.boundingBox.labeledAs": "Được gán nhãn là"
 }
