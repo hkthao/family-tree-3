@@ -5,9 +5,23 @@
 - [1. Giới thiệu](#1-giới-thiệu)
 - [2. Sơ đồ quan hệ thực thể (ERD)](#2-sơ-đồ-quan-hệ-thực-thể-erd)
 - [3. Mô tả các bảng](#3-mô-tả-các-bảng)
-  - [3.1. Bảng `Families`](#31-bảng-families)
-  - [3.2. Bảng `Members`](#32-bảng-members)
-  - [3.3. Bảng `Relationships`](#33-bảng-relationships)
+  - [3.1. Bảng UserProfile](#31-bảng-userprofile)
+  - [3.2. Bảng `FamilyUsers`](#32-bảng-familyusers)
+  - [3.3. Enum `FamilyRole`](#33-enum-familyrole)
+  - [3.4. Bảng `Families`](#34-bảng-families)
+  - [3.5. Bảng `Members`](#35-bảng-members)
+  - [3.6. Bảng `Events`](#36-bảng-events)
+  - [3.7. Bảng `Relationships`](#37-bảng-relationships)
+  - [3.8. Bảng `EventMembers`](#38-bảng-eventmembers)
+  - [3.10. Bảng `UserPreferences`](#310-bảng-userpreferences)
+  - [3.11. Bảng `FileMetadata`](#311-bảng-filemetadata)
+  - [3.12. Bảng `TextChunks`](#312-bảng-textchunks)
+  - [3.13. Bảng `SystemConfigurations`](#313-bảng-systemconfigurations)
+  - [3.14. Bảng `UserActivities`](#314-bảng-useractivities)
+  - [3.15. Bảng `UserConfigs`](#315-bảng-userconfigs)
+  - [3.16. Enums](#316-enums)
+  - [3.17. Value Objects](#317-value-objects)
+  - [3.18. Constants](#318-constants)
 - [4. Toàn vẹn và Ràng buộc Dữ liệu](#4-toàn-vẹn-và-ràng-buộc-dữ-liệu)
 - [5. Hướng dẫn Mapping](#5-hướng-dẫn-mapping)
   - [5.1. Backend (Entity Framework Core)](#51-backend-entity-framework-core)
@@ -30,17 +44,26 @@ erDiagram
         string Email "Email người dùng"
         string Name "Tên hiển thị"
         string Avatar "URL ảnh đại diện"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     FAMILY {
         string Id PK "ID duy nhất"
         string Name "Tên gia đình"
+        string Code "Mã gia đình"
         string Description "Mô tả"
         string AvatarUrl "URL ảnh đại diện"
         string Address "Địa chỉ"
         string Visibility "Chế độ hiển thị (Public/Private)"
         int TotalMembers "Tổng số thành viên"
         int TotalGenerations "Tổng số thế hệ"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     FAMILY_USER {
@@ -55,6 +78,7 @@ erDiagram
         string FirstName "Tên"
         string LastName "Họ"
         string FullName "Họ và tên đầy đủ"
+        string Code "Mã thành viên"
         date DateOfBirth "Ngày sinh"
         date DateOfDeath "Ngày mất"
         string Gender "Giới tính"
@@ -63,11 +87,17 @@ erDiagram
         string PlaceOfBirth "Nơi sinh"
         string PlaceOfDeath "Nơi mất"
         string Occupation "Nghề nghiệp"
+        boolean IsRoot "Là thành viên gốc của cây gia phả"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     EVENT {
         string Id PK "ID duy nhất"
         string Name "Tên sự kiện"
+        string Code "Mã sự kiện"
         string Description "Mô tả"
         datetime StartDate "Ngày bắt đầu"
         datetime EndDate "Ngày kết thúc"
@@ -75,6 +105,10 @@ erDiagram
         string FamilyId FK "ID gia đình"
         int Type "Loại sự kiện (Enum int)"
         string Color "Mã màu"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     RELATIONSHIP {
@@ -83,24 +117,15 @@ erDiagram
         string TargetMemberId FK "ID thành viên đích"
         int Type "Loại quan hệ (Enum int)"
         int Order "Thứ tự (nếu có)"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     EVENT_MEMBER {
         string EventId PK,FK "ID sự kiện"
         string MemberId PK,FK "ID thành viên"
-    }
-
-    AI_BIOGRAPHY {
-        string Id PK "ID duy nhất"
-        string MemberId FK "ID thành viên liên quan"
-        int Style "Phong cách tiểu sử (Enum int)"
-        string Content "Nội dung tiểu sử"
-        int Provider "Nhà cung cấp AI (Enum int)"
-        string UserPrompt "Gợi ý ban đầu của người dùng"
-        boolean GeneratedFromDB "Có được tạo từ dữ liệu DB không"
-        int TokensUsed "Số lượng token đã sử dụng"
-        json Metadata "Metadata bổ sung (JSON)"
-        datetime Created "Thời gian tạo"
     }
 
     USER_PREFERENCE {
@@ -110,6 +135,10 @@ erDiagram
         boolean EmailNotificationsEnabled "Bật/tắt thông báo Email"
         boolean SmsNotificationsEnabled "Bật/tắt thông báo SMS"
         boolean InAppNotificationsEnabled "Bật/tắt thông báo trong ứng dụng"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     FILE_METADATA {
@@ -124,13 +153,51 @@ erDiagram
         string UsedById "ID của entity sử dụng file (nullable)"
         boolean IsActive "Trạng thái hoạt động"
         datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
         datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     TEXT_CHUNK {
         string Id PK "ID duy nhất"
         string Content "Nội dung văn bản"
         json Metadata "Metadata bổ sung (JSON, bao gồm fileId, familyId, category, createdBy, createdAt)"
+        json Embedding "Vector nhúng (JSON array)"
+        float Score "Điểm số liên quan"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
+    }
+
+    SYSTEM_CONFIGURATION {
+        string Id PK "ID duy nhất"
+        string Key "Khóa cấu hình"
+        string Value "Giá trị cấu hình"
+        string Description "Mô tả cấu hình"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
+    }
+
+    USER_ACTIVITY {
+        string Id PK "ID duy nhất"
+        string UserProfileId FK "ID hồ sơ người dùng"
+        int ActivityType "Loại hoạt động (Enum int)"
+        json Details "Chi tiết hoạt động (JSON)"
+        datetime Timestamp "Thời gian hoạt động"
+    }
+
+    USER_CONFIG {
+        string Id PK "ID duy nhất"
+        string UserProfileId FK "ID hồ sơ người dùng"
+        string Key "Khóa cấu hình"
+        string Value "Giá trị cấu hình"
+        datetime Created "Thời gian tạo"
+        string CreatedBy "Người tạo"
+        datetime LastModified "Thời gian cập nhật cuối cùng"
+        string LastModifiedBy "Người cập nhật cuối cùng"
     }
 
     USER_PROFILE ||--o{ FAMILY_USER : "có vai trò trong"
@@ -142,7 +209,21 @@ erDiagram
     EVENT ||--o{ EVENT_MEMBER : "liên quan đến"
     RELATIONSHIP ||--o| MEMBER : "nguồn là"
     RELATIONSHIP ||--o| MEMBER : "đích là"
-    MEMBER ||--o{ AI_BIOGRAPHY : "có tiểu sử AI"
+    USER_PROFILE ||--o| USER_PREFERENCE : "có tùy chọn"
+    USER_PROFILE ||--o{ FILE_METADATA : "tải lên"
+    MEMBER ||--o{ FILE_METADATA : "sử dụng"
+    FAMILY ||--o{ FILE_METADATA : "sử dụng"
+    FILE_METADATA ||--o{ TEXT_CHUNK : "có các chunk"
+    USER_PROFILE ||--o{ USER_ACTIVITY : "thực hiện"
+    USER_PROFILE ||--o{ USER_CONFIG : "có cấu hình"
+    FAMILY ||--o{ FAMILY_USER : "có người dùng"
+    FAMILY ||--o{ MEMBER : "có"
+    FAMILY ||--o{ EVENT : "có"
+    MEMBER ||--o{ RELATIONSHIP : "có quan hệ"
+    MEMBER ||--o{ EVENT_MEMBER : "liên quan đến"
+    EVENT ||--o{ EVENT_MEMBER : "liên quan đến"
+    RELATIONSHIP ||--o| MEMBER : "nguồn là"
+    RELATIONSHIP ||--o| MEMBER : "đích là"
     USER_PROFILE ||--o| USER_PREFERENCE : "có tùy chọn"
     USER_PROFILE ||--o{ FILE_METADATA : "tải lên"
     MEMBER ||--o{ FILE_METADATA : "sử dụng"
@@ -162,6 +243,10 @@ Thực thể `UserProfile` lưu trữ thông tin hồ sơ của người dùng, 
 | `Email`          | `string`     | Địa chỉ email của người dùng.                                      |
 | `Name`           | `string`     | Tên hiển thị của người dùng.                                       |
 | `Avatar`         | `string` (nullable) | URL của ảnh đại diện người dùng.                                   |
+| `Created`        | `datetime`   | NOT NULL  | Thời gian tạo                                          |
+| `CreatedBy`      | `string`     | NULL      | Người tạo                                              |
+| `LastModified`   | `datetime`   | NULL      | Thời gian cập nhật cuối cùng                           |
+| `LastModifiedBy` | `string`     | NULL      | Người cập nhật cuối cùng                               |
 | `FamilyUsers`    | `ICollection<FamilyUser>` | Thuộc tính điều hướng đến các gia đình mà người dùng liên kết. |
 | `UserPreference` | `UserPreference` | Thuộc tính điều hướng đến tùy chọn cá nhân của người dùng.         |
 
@@ -200,6 +285,7 @@ Lưu trữ thông tin về các gia đình hoặc dòng họ.
 | :------------ | :----------- | :-------- | :--------------------- |
 | `Id`          | `varchar(36)`| PK        | ID duy nhất của gia đình |
 | `Name`        | `varchar(100)`| NOT NULL  | Tên gia đình           |
+| `Code`        | `varchar(50)`| NOT NULL  | Mã gia đình            |
 | `Description` | `text`       | NULL      | Mô tả về gia đình      |
 | `AvatarUrl`   | `longtext`   | NULL      | URL ảnh đại diện của gia đình |
 | `Address`     | `longtext`   | NULL      | Địa chỉ của gia đình   |
@@ -220,6 +306,7 @@ Lưu trữ thông tin chi tiết của từng thành viên. Các mối quan hệ
 | `FirstName`     | `varchar(250)`| NOT NULL  | Tên                     |
 | `LastName`      | `varchar(250)`| NOT NULL  | Họ                      |
 | `FullName`      | `varchar(100)`| NOT NULL  | Họ và tên đầy đủ (tự động tạo) |
+| `Code`          | `varchar(50)`| NOT NULL  | Mã thành viên           |
 | `DateOfBirth`   | `date`       | NULL      | Ngày sinh               |
 | `DateOfDeath`   | `date`       | NULL      | Ngày mất                |
 | `Gender`        | `varchar(10)`| NULL      | Giới tính (Male, Female, Other) |
@@ -228,6 +315,7 @@ Lưu trữ thông tin chi tiết của từng thành viên. Các mối quan hệ
 | `PlaceOfBirth`  | `varchar(200)`| NULL      | Nơi sinh                |
 | `PlaceOfDeath`  | `varchar(200)`| NULL      | Nơi mất                 |
 | `Occupation`    | `varchar(100)`| NULL      | Nghề nghiệp             |
+| `IsRoot`        | `boolean`    | NOT NULL  | Là thành viên gốc của cây gia phả |
 
 - **Foreign Keys**:
   - `FamilyId`: tham chiếu đến `Families(Id)`.
@@ -241,6 +329,7 @@ Lưu trữ thông tin về các sự kiện quan trọng của gia đình.
 | :-------------- | :----------- | :-------- | :---------------------- |
 | `Id`            | `varchar(36)`| PK        | ID duy nhất của sự kiện |
 | `Name`          | `varchar(200)`| NOT NULL  | Tên sự kiện             |
+| `Code`          | `varchar(50)`| NOT NULL  | Mã sự kiện              |
 | `Description`   | `text`       | NULL      | Mô tả chi tiết          |
 | `StartDate`     | `datetime`   | NOT NULL  | Ngày bắt đầu            |
 | `EndDate`       | `datetime`   | NULL      | Ngày kết thúc           |
@@ -270,28 +359,21 @@ Lưu trữ các mối quan hệ giữa các thành viên (ví dụ: cha, mẹ, v
   - `TargetMemberId`: tham chiếu đến `Members(Id)`.
 - **Mối quan hệ**: Một `Member` có thể là `SourceMember` hoặc `TargetMember` trong nhiều `Relationship`.
 
-### 3.8. Bảng `AIBiographies`
+### 3.8. Bảng `EventMembers`
 
-Lưu trữ các tiểu sử được tạo bởi AI cho các thành viên.
+Lưu trữ mối quan hệ nhiều-nhiều giữa `Event` và `Member`.
 
 | Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
 | :-------------- | :----------- | :-------- | :---------------------- |
-| `Id`            | `varchar(36)`| PK        | ID duy nhất của tiểu sử AI |
-| `MemberId`      | `varchar(36)`| FK, NOT NULL | ID của thành viên liên quan |
-| `Style`         | `int`        | NOT NULL  | Phong cách tiểu sử (ví dụ: Emotional, Historical) |
-| `Content`       | `longtext`   | NOT NULL  | Nội dung tiểu sử         |
-| `Provider`      | `int`        | NOT NULL  | Nhà cung cấp AI (ví dụ: Gemini, OpenAI) |
-| `UserPrompt`    | `longtext`   | NOT NULL  | Gợi ý ban đầu của người dùng |
-| `GeneratedFromDB`| `boolean`    | NOT NULL  | Có được tạo từ dữ liệu DB không |
-| `TokensUsed`    | `int`        | NOT NULL  | Số lượng token đã sử dụng |
-| `Metadata`      | `json`       | NULL      | Metadata bổ sung (JSON) |
-| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo            |
+| `EventId`       | `varchar(36)`| PK, FK    | ID của sự kiện          |
+| `MemberId`      | `varchar(36)`| PK, FK    | ID của thành viên       |
 
 - **Foreign Keys**:
+  - `EventId`: tham chiếu đến `Events(Id)`.
   - `MemberId`: tham chiếu đến `Members(Id)`.
-- **Mối quan hệ**: Một `Member` có thể có nhiều `AIBiography`.
+- **Mối quan hệ**: Một `EventMember` liên kết một `Event` với một `Member`.
 
-### 3.9. Bảng `UserPreferences`
+### 3.10. Bảng `UserPreferences`
 
 Lưu trữ tùy chọn cá nhân của người dùng.
 
@@ -308,12 +390,16 @@ Lưu trữ tùy chọn cá nhân của người dùng.
 | `CreatedBy`             | `string`     | NULL      | Người tạo                |
 | `LastModified`          | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
 | `LastModifiedBy`        | `string`     | NULL      | Người cập nhật cuối cùng |
+| `Created`               | `datetime`   | NOT NULL  | Thời gian tạo            |
+| `CreatedBy`             | `string`     | NULL      | Người tạo                |
+| `LastModified`          | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
+| `LastModifiedBy`        | `string`     | NULL      | Người cập nhật cuối cùng |
 
 - **Foreign Keys**:
   - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `UserProfile` có một `UserPreference`.
 
-### 3.10. Bảng `FileMetadata`
+### 3.11. Bảng `FileMetadata`
 
 Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao gồm thông tin về vị trí lưu trữ, người tải lên và trạng thái sử dụng.
 
@@ -330,13 +416,15 @@ Lưu trữ siêu dữ liệu (metadata) của các tệp đã tải lên, bao g�
 | `UsedById`      | `varchar(36)`| NULL      | ID của entity sử dụng tệp              |
 | `IsActive`      | `boolean`    | NOT NULL  | Trạng thái hoạt động (true: đang dùng, false: không dùng) |
 | `Created`       | `datetime`   | NOT NULL  | Thời gian tạo metadata                 |
+| `CreatedBy`     | `string`     | NULL      | Người tạo                                              |
 | `LastModified`  | `datetime`   | NULL      | Thời gian cập nhật cuối cùng           |
+| `LastModifiedBy`| `string`     | NULL      | Người cập nhật cuối cùng               |
 
 - **Foreign Keys**:
   - `UploadedBy`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `UserProfile` có thể tải lên nhiều `FileMetadata`.
 
-### 3.11. Bảng `TextChunks`
+### 3.12. Bảng `TextChunks`
 
 Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các tệp tài liệu.
 
@@ -345,12 +433,98 @@ Lưu trữ các đoạn văn bản (chunks) được trích xuất từ các t�
 | `Id`            | `varchar(36)`| PK        | ID duy nhất của chunk                   |
 | `Content`       | `longtext`   | NOT NULL  | Nội dung văn bản của chunk             |
 | `Metadata`      | `json`       | NULL      | Metadata bổ sung (JSON, bao gồm `fileId`, `familyId`, `category`, `createdBy`, `createdAt`) |
+| `Embedding`     | `json`       | NULL      | Vector nhúng (JSON array)              |
+| `Score`         | `float`      | NULL      | Điểm số liên quan                      |
+| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo                          |
+| `CreatedBy`     | `string`     | NULL      | Người tạo                                              |
+| `LastModified`  | `datetime`   | NULL      | Thời gian cập nhật cuối cùng           |
+| `LastModifiedBy`| `string`     | NULL      | Người cập nhật cuối cùng               |
 
 - **Foreign Keys**: (Các khóa ngoại này được quản lý thông qua `Metadata`)
   - `FileId`: tham chiếu đến `FileMetadata(Id)`.
   - `FamilyId`: tham chiếu đến `Families(Id)`.
   - `CreatedBy`: tham chiếu đến `UserProfiles(Id)`.
 - **Mối quan hệ**: Một `FileMetadata` có thể có nhiều `TextChunk`.
+
+### 3.13. Bảng `SystemConfigurations`
+
+Lưu trữ các cấu hình hệ thống.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :-------------- | :----------- | :-------- | :---------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của cấu hình |
+| `Key`           | `varchar(255)`| NOT NULL  | Khóa cấu hình           |
+| `Value`         | `longtext`   | NULL      | Giá trị cấu hình        |
+| `Description`   | `longtext`   | NULL      | Mô tả cấu hình          |
+| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo            |
+| `CreatedBy`     | `string`     | NULL      | Người tạo                |
+| `LastModified`  | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
+| `LastModifiedBy`| `string`     | NULL      | Người cập nhật cuối cùng |
+
+### 3.14. Bảng `UserActivities`
+
+Lưu trữ các hoạt động của người dùng.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :-------------- | :----------- | :-------- | :---------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của hoạt động |
+| `UserProfileId` | `varchar(36)`| FK, NOT NULL | ID của hồ sơ người dùng |
+| `ActivityType`  | `int`        | NOT NULL  | Loại hoạt động (Enum int) |
+| `Details`       | `json`       | NULL      | Chi tiết hoạt động (JSON) |
+| `Timestamp`     | `datetime`   | NOT NULL  | Thời gian hoạt động     |
+
+- **Foreign Keys**:
+  - `UserProfileId`: tham chiếu đến `UserProfiles(Id)`.
+- **Mối quan hệ**: Một `UserProfile` có thể có nhiều `UserActivity`.
+
+### 3.15. Bảng `UserConfigs`
+
+Lưu trữ các cấu hình người dùng.
+
+| Tên cột         | Kiểu dữ liệu | Ràng buộc | Mô tả                   |
+| :-------------- | :----------- | :-------- | :---------------------- |
+| `Id`            | `varchar(36)`| PK        | ID duy nhất của cấu hình |
+| `UserProfileId` | `varchar(36)`| FK, NOT NULL | ID của hồ sơ người dùng |
+| `Key`           | `varchar(255)`| NOT NULL  | Khóa cấu hình           |
+| `Value`         | `longtext`   | NULL      | Giá trị cấu hình        |
+| `Created`       | `datetime`   | NOT NULL  | Thời gian tạo            |
+| `CreatedBy`     | `string`     | NULL      | Người tạo                |
+| `LastModified`  | `datetime`   | NULL      | Thời gian cập nhật cuối cùng |
+| `LastModifiedBy`| `string`     | NULL      | Người cập nhật cuối cùng |
+
+### 3.16. Enums
+
+Các Enums được sử dụng để định nghĩa các tập hợp giá trị cố định trong hệ thống, đảm bảo tính nhất quán và dễ quản lý.
+
+*   `AIProviderType`: Các loại nhà cung cấp AI.
+*   `BiographyStyle`: Các kiểu phong cách tiểu sử.
+*   `ChatAIProvider`: Các nhà cung cấp AI cho chức năng trò chuyện.
+*   `EmbeddingAIProvider`: Các nhà cung cấp AI cho chức năng nhúng.
+*   `EmbeddingProvider`: Các nhà cung cấp nhúng.
+*   `EventType`: Các loại sự kiện (ví dụ: Birth, Marriage, Death, Other).
+*   `FamilyRole`: Vai trò của người dùng trong gia đình (Manager, Viewer).
+*   `FamilyVisibility`: Chế độ hiển thị của gia đình (Public, Private).
+*   `Gender`: Giới tính (Male, Female, Other).
+*   `Language`: Ngôn ngữ (English, Vietnamese).
+*   `RelationshipType`: Các loại mối quan hệ (ví dụ: Parent, Child, Spouse, Sibling).
+*   `StorageProvider`: Nhà cung cấp lưu trữ (Local, Cloudinary, S3).
+*   `SystemRole`: Vai trò hệ thống.
+*   `TargetType`: Loại mục tiêu.
+*   `Theme`: Chủ đề giao diện (Light, Dark).
+*   `UserActionType`: Các loại hành động của người dùng.
+*   `VectorStoreProviderType`: Các loại nhà cung cấp Vector Store.
+
+### 3.17. Value Objects
+
+Các Value Objects được sử dụng để nhóm các thuộc tính liên quan có ý nghĩa ngữ nghĩa và không có định danh duy nhất.
+
+*   `BoundingBox`: Đại diện cho một hộp giới hạn, thường được sử dụng trong xử lý hình ảnh.
+
+### 3.18. Constants
+
+Các Constants được sử dụng để định nghĩa các giá trị không đổi trong toàn bộ ứng dụng.
+
+*   `Policies`: Định nghĩa các chính sách ủy quyền.
 
 ## 4. Toàn vẹn và Ràng buộc Dữ liệu
 
