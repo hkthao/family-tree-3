@@ -1,10 +1,10 @@
-namespace backend.Application.SystemConfigurations.Queries.SystemConfigurationDto;
+namespace backend.Application.SystemConfigurations.Queries;
 
 public class SystemConfigurationDto
 {
-    public Guid Id { get; init; }
-    public string Key { get; init; } = null!;
-    public string Value { get; init; } = null!;
-    public string? Description { get; init; }
-    public string ValueType { get; init; } = "string";
+    public Guid Id { get; set; }
+    public string Key { get; set; } = string.Empty;
+    public string? Value { get; set; }
+    public string? ValueType { get; set; }
+    public string? Description { get; set; }
 }

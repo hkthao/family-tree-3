@@ -1,8 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.SystemConfigurations.Queries.SystemConfigurationDto;
 
-namespace FamilyTree.Application.SystemConfigurations.Queries.ListSystemConfigurations;
+namespace backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
 
 public record ListSystemConfigurationsQuery : IRequest<Result<List<SystemConfigurationDto>>>;
 

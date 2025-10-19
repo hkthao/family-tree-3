@@ -1,9 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
-namespace FamilyTree.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
-
-public record DeleteSystemConfigurationCommand(int Id) : IRequest<Result>;
+namespace backend.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
 
 public class DeleteSystemConfigurationCommandHandler : IRequestHandler<DeleteSystemConfigurationCommand, Result>
 {
@@ -17,11 +15,11 @@ public class DeleteSystemConfigurationCommandHandler : IRequestHandler<DeleteSys
     public async Task<Result> Handle(DeleteSystemConfigurationCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.SystemConfigurations
-            .FindAsync(new object[] { request.Id }, cancellationToken);
+            .FirstOrDefaultAsync(sc => sc.Id == request.Id, cancellationToken);
 
         if (entity == null)
         {
-            return Result.Failure(new string[] { $"SystemConfiguration with Id {request.Id} not found." });
+            return Result.Failure($"SystemConfiguration with Id {request.Id} not found.");
         }
 
         _context.SystemConfigurations.Remove(entity);

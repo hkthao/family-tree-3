@@ -1,7 +1,7 @@
-namespace FamilyTree.Application.Common.Interfaces;
+namespace backend.Application.Common.Interfaces;
 
 public interface IConfigurationProvider
 {
-    T GetValue<T>(string key, T defaultValue);
-    T GetValue<T>(string key);
+    Task<T?> GetValue<T>(string key, T defaultValue);
+    Task<T?> GetValue<T>(string key);
 }

@@ -1,11 +1,13 @@
-using FamilyTree.Application.Common.Interfaces;
-using FamilyTree.Application.SystemConfigurations.Queries.GetSystemConfiguration;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.SystemConfigurations.Queries.GetSystemConfiguration;
+using backend.Infrastructure.AppSetting;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-namespace FamilyTree.Infrastructure.Services;
+namespace backend.Infrastructure.Services;
 
 public class ConfigurationProvider : IConfigurationProvider
 {
@@ -22,36 +24,36 @@ public class ConfigurationProvider : IConfigurationProvider
         _cache = cache;
     }
 
-    public T GetValue<T>(string key, T defaultValue)
+    public async Task<T?> GetValue<T>(string key, T defaultValue)
     {
-        return GetValueInternal<T>(key, defaultValue);
+        return await GetValueInternal<T>(key, defaultValue);
     }
 
-    public T GetValue<T>(string key)
+    public async Task<T?> GetValue<T>(string key)
     {
-        return GetValueInternal<T>(key, default(T));
+        return await GetValueInternal<T>(key, default(T));
     }
 
-    private T GetValueInternal<T>(string key, T defaultValue)
+    private async Task<T?> GetValueInternal<T>(string key, T? defaultValue)
     {
         // Priority 1: SystemConfig (from database, with caching)
-        var systemConfigValue = GetSystemConfigValue<T>(key);
+        var systemConfigValue = await GetSystemConfigValue<T>(key);
         if (systemConfigValue != null)
         {
             return systemConfigValue;
         }
 
         // Priority 2: AppSettings (from appsettings.json)
-        var appSettingsValue = GetAppSettingsValue<T>(key);
+        var appSettingsValue = GetAppSettingsValue<T>(key); // This method is not async, so no await needed here
         if (appSettingsValue != null)
         {
             return appSettingsValue;
         }
 
-        return defaultValue;
+        return defaultValue ?? default(T);
     }
 
-    private T? GetSystemConfigValue<T>(string key)
+    private async Task<T?> GetSystemConfigValue<T>(string key)
     {
         var cacheKey = $"{CacheKeyPrefix}{key}";
         if (_cache.TryGetValue(cacheKey, out T? cachedValue))
@@ -59,11 +61,11 @@ public class ConfigurationProvider : IConfigurationProvider
             return cachedValue;
         }
 
-        var result = _mediator.Send(new GetSystemConfigurationQuery(key)).Result; // .Result to unwrap Task synchronously
+        var result = await _mediator.Send(new GetSystemConfigurationQuery(key));
 
-        if (result.Succeeded && result.Data != null)
+        if (result.IsSuccess && result.Value != null)
         {
-            var value = ConvertValue<T>(result.Data.Value, result.Data.ValueType);
+            var value = ConvertValue<T>(result.Value.Value, result.Value.ValueType);
             _cache.Set(cacheKey, value, TimeSpan.FromMinutes(5)); // Cache for 5 minutes
             return value;
         }
@@ -87,8 +89,13 @@ public class ConfigurationProvider : IConfigurationProvider
         return default;
     }
 
-    private T? ConvertValue<T>(string value, string valueType)
+    private T? ConvertValue<T>(string? value, string? valueType)
     {
+        if (value == null || valueType == null)
+        {
+            return default(T);
+        }
+
         try
         {
             if (typeof(T) == typeof(string))
@@ -113,6 +120,6 @@ public class ConfigurationProvider : IConfigurationProvider
             // Log error: Could not convert value
             Console.WriteLine($"Error converting value '{value}' to type {typeof(T).Name}: {ex.Message}");
         }
-        return default;
+        return default(T);
     }
 }

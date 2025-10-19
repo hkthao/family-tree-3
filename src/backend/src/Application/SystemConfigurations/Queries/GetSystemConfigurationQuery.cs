@@ -1,8 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.SystemConfigurations.Queries.SystemConfigurationDto;
 
-namespace FamilyTree.Application.SystemConfigurations.Queries.GetSystemConfiguration;
+namespace backend.Application.SystemConfigurations.Queries.GetSystemConfiguration;
 
 public record GetSystemConfigurationQuery(string Key) : IRequest<Result<SystemConfigurationDto>>;
 
@@ -23,7 +22,7 @@ public class GetSystemConfigurationQueryHandler : IRequestHandler<GetSystemConfi
 
         if (entity == null)
         {
-            return Result<SystemConfigurationDto>.Failure(new string[] { $"SystemConfiguration with Key {request.Key} not found." });
+            return Result<SystemConfigurationDto>.Failure($"SystemConfiguration with Key {request.Key} not found.");
         }
 
         var dto = new SystemConfigurationDto

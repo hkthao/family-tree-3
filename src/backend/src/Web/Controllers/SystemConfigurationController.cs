@@ -1,41 +1,48 @@
-using FamilyTree.Application.Common.Models;
-using FamilyTree.Application.SystemConfigurations.Commands.CreateSystemConfiguration;
-using FamilyTree.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
-using FamilyTree.Application.SystemConfigurations.Commands.UpdateSystemConfiguration;
-using FamilyTree.Application.SystemConfigurations.Queries.ListSystemConfigurations;
-using FamilyTree.Application.SystemConfigurations.Queries.SystemConfigurationDto;
+using backend.Application.Common.Models;
+using backend.Application.SystemConfigurations.Commands.CreateSystemConfiguration;
+using backend.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
+using backend.Application.SystemConfigurations.Commands.UpdateSystemConfiguration;
+using backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
+using backend.Application.SystemConfigurations.Queries;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FamilyTree.Web.Controllers;
+namespace backend.Web.Controllers;
 
-public class SystemConfigurationController : ApiControllerBase
+public class SystemConfigurationController : ControllerBase
 {
+    private readonly IMediator _mediator;
+
+    public SystemConfigurationController(IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
     [HttpGet]
     public async Task<ActionResult<Result<List<SystemConfigurationDto>>>> GetSystemConfigurations()
     {
-        return await Mediator.Send(new ListSystemConfigurationsQuery());
+        return await _mediator.Send(new ListSystemConfigurationsQuery());
     }
 
     [HttpPost]
-    public async Task<ActionResult<Result<int>>> CreateSystemConfiguration(CreateSystemConfigurationCommand command)
+    public async Task<ActionResult<Result<Guid>>> CreateSystemConfiguration(CreateSystemConfigurationCommand command)
     {
-        return await Mediator.Send(command);
+        return await _mediator.Send(command);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result>> UpdateSystemConfiguration(int id, UpdateSystemConfigurationCommand command)
+    public async Task<ActionResult<Result>> UpdateSystemConfiguration(Guid id, UpdateSystemConfigurationCommand command)
     {
         if (id != command.Id)
         {
             return BadRequest();
         }
 
-        return await Mediator.Send(command);
+        return await _mediator.Send(command);
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Result>> DeleteSystemConfiguration(int id)
+    public async Task<ActionResult<Result>> DeleteSystemConfiguration(Guid id)
     {
-        return await Mediator.Send(new DeleteSystemConfigurationCommand(id));
+        return await _mediator.Send(new DeleteSystemConfigurationCommand(id));
     }
 }

@@ -1,5 +1,4 @@
 using backend.Domain.Entities;
-using FamilyTree.Domain.Entities;
 
 namespace backend.Application.Common.Interfaces;
 

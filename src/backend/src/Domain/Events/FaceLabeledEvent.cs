@@ -1,4 +1,4 @@
-namespace FamilyTree.Domain.Events;
+namespace backend.Domain.Events;
 
 using backend.Domain.Common;
 

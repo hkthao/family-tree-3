@@ -9,6 +9,7 @@ using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
+using backend.Application.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -93,7 +94,7 @@ public static class DependencyInjection
         // Register Configuration Provider
         services.AddMemoryCache();
         services.Configure<AppSetting.AppSettings>(configuration.GetSection(nameof(AppSetting.AppSettings)));
-        services.AddScoped<IConfigurationProvider, Services.ConfigurationProvider>();
+        services.AddScoped<backend.Application.Common.Interfaces.IConfigurationProvider, backend.Infrastructure.Services.ConfigurationProvider>();
 
         // Register File Storage
         services.AddTransient<LocalFileStorage>();

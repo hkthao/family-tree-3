@@ -2,7 +2,6 @@ using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using FamilyTree.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Data;
@@ -21,6 +20,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
     public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
+    public DbSet<UserConfig> UserConfigs => Set<UserConfig>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -41,6 +41,30 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         builder.Entity<SystemConfiguration>()
             .Property(sc => sc.ValueType)
+            .IsRequired()
+            .HasMaxLength(50);
+
+        builder.Entity<UserConfig>()
+            .HasKey(uc => new { uc.UserProfileId, uc.Key });
+
+        builder.Entity<UserConfig>()
+            .HasOne(uc => uc.UserProfile)
+            .WithMany() // Assuming UserProfile has no direct collection of UserConfig
+            .HasForeignKey(uc => uc.UserProfileId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade); // Cascade delete if UserProfile is deleted
+
+        builder.Entity<UserConfig>()
+            .Property(uc => uc.Key)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Entity<UserConfig>()
+            .Property(uc => uc.Value)
+            .IsRequired();
+
+        builder.Entity<UserConfig>()
+            .Property(uc => uc.ValueType)
             .IsRequired()
             .HasMaxLength(50);
 

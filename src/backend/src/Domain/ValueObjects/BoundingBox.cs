@@ -1,4 +1,4 @@
-namespace FamilyTree.Domain.ValueObjects;
+namespace backend.Domain.ValueObjects;
 
 using backend.Domain.Common;
 
