@@ -396,6 +396,7 @@
   "userSettings.preferences.themeLight": "Sáng",
   "userSettings.preferences.themeDark": "Tối",
   "face.title": "Khuôn mặt",
+  "face.sidebar.title": "Nhận diện khuôn mặt",
   "face.recognition.title": "Nhận diện & Gán nhãn Khuôn mặt",
   "face.recognition.uploadPrompt": "Tải lên một hình ảnh để phát hiện và gán nhãn khuôn mặt.",
   "face.recognition": "Nhận diện Khuôn mặt",

@@ -355,6 +355,7 @@
   "menu.admin": "Admin",
   "menu.system": "System",
   "face.title": "Face",
+  "face.sidebar.title": "Face Recognition",
   "face.errors.unexpectedError": "An unexpected error occurred.",
   "userSettings.title": "User Settings",
   "userSettings.preferences.themeLight": "Light",
