@@ -1,3 +1,4 @@
+using backend.Application.SystemConfigurations.Commands.InitializeSystemConfigurations;
 using backend.CompositionRoot;
 using Microsoft.Extensions.FileProviders;
 
@@ -53,6 +54,12 @@ else
 {
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+    await mediator.Send(new InitializeSystemConfigurationsCommand());
 }
 
 // Use CORS policy
