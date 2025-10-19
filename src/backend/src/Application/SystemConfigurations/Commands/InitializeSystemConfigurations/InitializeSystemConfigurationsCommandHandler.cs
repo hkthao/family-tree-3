@@ -37,10 +37,10 @@ public class InitializeSystemConfigurationsCommandHandler : IRequestHandler<Init
         var configurationsToSeed = new Dictionary<string, (string value, string valueType, string description)>();
 
         // Define sensitive keys that should not be stored in the database
-        var sensitiveKeys = new List<string>
-        {
-            "APIKey", "Secret", "Password", "ConnectionStrings", "JwtSettings"
-        };
+        // var sensitiveKeys = new List<string>
+        // {
+        //     "APIKey", "Secret", "Password", "ConnectionStrings", "JwtSettings"
+        // };
 
         foreach (var configEntry in _configuration.AsEnumerable())
         {
@@ -53,17 +53,20 @@ public class InitializeSystemConfigurationsCommandHandler : IRequestHandler<Init
             }
 
             // Skip sensitive keys
-            if (sensitiveKeys.Any(sk => key.Contains(sk, StringComparison.OrdinalIgnoreCase)))
-            {
-                _logger.LogDebug("Skipping sensitive configuration key: {Key}", key);
-                continue;
-            }
+            // if (sensitiveKeys.Any(sk => key.Contains(sk, StringComparison.OrdinalIgnoreCase)))
+            // {
+            //     _logger.LogDebug("Skipping sensitive configuration key: {Key}", key);
+            //     continue;
+            // }
 
             // Determine value type (simple heuristic for now)
             var valueType = "string";
             if (int.TryParse(value, out _)) valueType = "int";
             else if (bool.TryParse(value, out _)) valueType = "bool";
             else if (double.TryParse(value, out _)) valueType = "double";
+
+            if (value.StartsWith("${") && value.EndsWith("}"))
+                value = string.Empty;
 
             configurationsToSeed[key] = (value, valueType, $"Configuration loaded from IConfiguration.");
         }

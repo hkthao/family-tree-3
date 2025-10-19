@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Enums;
@@ -13,7 +12,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace backend.CompositionRoot;
@@ -39,17 +37,25 @@ public static class DependencyInjection
 
 
         var configProvider = services.BuildServiceProvider().GetRequiredService<IConfigProvider>();
-        var jwtSettings = configProvider.GetSection<backend.Application.Common.Models.AppSetting.JwtSettings>();
+        var jwtSettings = configProvider.GetSection<JwtSettings>();
 
         // Configure Auth0 Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+
+                // Add logging for JwtSettings
+                var logger = services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+                logger.LogInformation("JwtSettings - Authority: {Authority}", jwtSettings?.Authority);
+                logger.LogInformation("JwtSettings - Audience: {Audience}", jwtSettings?.Audience);
+                logger.LogInformation("JwtSettings - Namespace: {Namespace}", jwtSettings?.Namespace);
+
                 options.Authority = $"https://{jwtSettings?.Authority}";
                 options.Audience = jwtSettings?.Audience;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
+                    ValidIssuer = $"https://{jwtSettings?.Authority}",
                     ValidateAudience = true,
                     ValidAudience = jwtSettings?.Audience,
                     ValidateLifetime = true,
