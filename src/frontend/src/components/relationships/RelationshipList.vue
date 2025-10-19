@@ -90,9 +90,6 @@ const loadItems = async (options: { page: number; itemsPerPage: number; sortBy: 
   emit('update:options', options);
 };
 
-const viewItem = (item: Relationship) => {
-  emit('view', item);
-};
 
 const editItem = (item: Relationship) => {
   emit('edit', item);

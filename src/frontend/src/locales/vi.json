@@ -449,5 +449,7 @@
   "systemConfig.errors.fetch": "Không thể tải cấu hình hệ thống.",
   "systemConfig.errors.update": "Không thể cập nhật cấu hình hệ thống.",
   "admin.title": "Quản trị",
-  "systemConfig.search.label": "Tìm kiếm"
+  "systemConfig.search.label": "Tìm kiếm",
+  "systemConfig.messages.updateSuccess": "Cập nhật cấu hình hệ thống thành công!",
+  "systemConfig.messages.updateError": "Lỗi khi cập nhật cấu hình hệ thống."
 }

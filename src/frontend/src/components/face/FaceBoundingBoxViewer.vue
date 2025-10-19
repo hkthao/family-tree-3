@@ -39,7 +39,7 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['face-selected']);
+
 
 const imageContainer = ref<HTMLElement | null>(null);
 const imageLoaded = ref(false);

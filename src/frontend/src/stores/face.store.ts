@@ -159,7 +159,7 @@ export const useFaceStore = defineStore('face', {
     },
 
     // Action to search for members by a single face image
-    async searchByFace(imageFile: File): Promise<void> {
+    async searchByFace(_imageFile: File): Promise<void> {
       this.loading = true;
       this.error = null;
       this.faceSearchResults = [];

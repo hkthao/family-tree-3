@@ -405,5 +405,7 @@
   "systemConfig.sections.vectorStore": "Vector Store Settings",
   "systemConfig.sections.storage": "Storage Settings",
   "systemConfig.sections.systemFixed": "System / Fixed Settings",
-  "systemConfig.search.label": "Search"
+  "systemConfig.search.label": "Search",
+  "systemConfig.messages.updateSuccess": "System configuration updated successfully!",
+  "systemConfig.messages.updateError": "Error updating system configuration."
 }

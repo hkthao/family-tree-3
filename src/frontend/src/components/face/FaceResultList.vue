@@ -33,7 +33,7 @@ import type { SearchResult } from '@/types';
 const { t } = useI18n();
 const router = useRouter();
 
-const props = defineProps({
+const { results } = defineProps({
   results: { type: Array as () => SearchResult[], default: () => [] },
 });
 

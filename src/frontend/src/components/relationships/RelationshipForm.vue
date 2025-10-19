@@ -81,7 +81,7 @@ const editableRelationship = ref<Partial<Relationship>>(
         targetMemberId: '',
         type: undefined,
         order: undefined,
-        familyId: undefined,  familyId
+        familyId: undefined
       },
 );
 

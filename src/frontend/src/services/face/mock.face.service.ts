@@ -3,7 +3,7 @@ import { type DetectedFace } from '@/types';
 import { type IFaceService } from './face.service.interface';
 
 export class MockFaceService implements IFaceService {
-  async detect(imageFile: File): Promise<Result<{ imageId: string; detectedFaces: DetectedFace[] }, Error>> {
+  async detect(_imageFile: File): Promise<Result<{ imageId: string; detectedFaces: DetectedFace[] }, Error>> {
     // Simulate an API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 

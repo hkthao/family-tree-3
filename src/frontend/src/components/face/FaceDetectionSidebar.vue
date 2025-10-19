@@ -49,7 +49,7 @@ import { type PropType } from 'vue';
 
 const { t } = useI18n();
 
-const props = defineProps({
+const { faces, selectedFaceId, readOnly } = defineProps({
   faces: { type: Array as () => DetectedFace[], default: () => [] },
   selectedFaceId: { type: String as PropType<string | undefined>, default: undefined },
   readOnly: { type: Boolean, default: false },

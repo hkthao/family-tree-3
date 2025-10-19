@@ -10,7 +10,8 @@ export interface Event {
   familyId: string | null;
   relatedMembers?: string[];
   type: EventType;
-  color?: string;  color property
+  color?: string;
+  // color property
   validationErrors?: string[];
 }
 

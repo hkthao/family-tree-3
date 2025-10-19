@@ -36,14 +36,13 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { useFaceStore } from '@/stores/face.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { DetectedFace, Member } from '@/types';
 
 const { t } = useI18n();
-const router = useRouter();
+
 const faceStore = useFaceStore();
 const notificationStore = useNotificationStore();
 
