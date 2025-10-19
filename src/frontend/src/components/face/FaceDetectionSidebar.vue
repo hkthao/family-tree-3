@@ -30,7 +30,8 @@
             <v-icon v-if="face.status === 'recognized'" color="success">mdi-check-circle</v-icon>
             <v-icon v-else-if="face.status === 'unrecognized'" color="warning">mdi-alert-circle</v-icon>
             <v-icon v-else-if="face.status === 'newly-labeled'" color="info">mdi-tag</v-icon>
-            <v-btn icon="mdi-close-circle" variant="text" size="small" @click.stop="removeFace(face.id)"></v-btn>
+            <v-btn v-if="!readOnly" icon="mdi-close-circle" variant="text" size="small"
+              @click.stop="removeFace(face.id)"></v-btn>
           </template>
         </v-list-item>
         <v-list-item v-if="faces.length === 0">
@@ -44,13 +45,14 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace } from '@/types';
-import { type PropType, computed } from 'vue';
+import { type PropType } from 'vue';
 
 const { t } = useI18n();
 
 const props = defineProps({
   faces: { type: Array as () => DetectedFace[], default: () => [] },
   selectedFaceId: { type: String as PropType<string | undefined>, default: undefined },
+  readOnly: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['face-selected', 'remove-face']);

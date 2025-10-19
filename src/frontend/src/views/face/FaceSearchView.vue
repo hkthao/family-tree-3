@@ -1,43 +1,48 @@
 <template>
-  <v-container fluid>
-    <v-card class="pa-4" elevation="2">
-      <v-card-title class="text-h5">{{ t('face.search.title') }}</v-card-title>
-      <v-card-text>
-        <FaceUploadInput @file-uploaded="handleFileUpload" :multiple="false" />
+  <v-card class="pa-4" elevation="2">
+    <v-card-text>
+      <FaceUploadInput @file-uploaded="handleFileUpload" />
+      <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
+      <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
+        <v-row>
+          <v-col cols="12" md="8">
+            <FaceBoundingBoxViewer :image-src="faceStore.uploadedImage" :faces="faceStore.detectedFaces" selectable />
+          </v-col>
+          <v-col cols="12" md="4">
+            <FaceDetectionSidebar :readOnly="true" :faces="faceStore.detectedFaces" />
+          </v-col>
+        </v-row>
+      </div>
+      <v-alert v-else-if="!faceStore.loading && !faceStore.uploadedImage" type="info" class="my-4">{{
+        t('face.recognition.uploadPrompt') }}</v-alert>
+      <v-alert v-else-if="!faceStore.loading && faceStore.uploadedImage && faceStore.detectedFaces.length === 0"
+        type="info" class="my-4">{{ t('face.recognition.noFacesDetected') }}</v-alert>
+    </v-card-text>
+    <v-card-actions class="justify-end">
 
-        <v-progress-linear
-          v-if="faceStore.loading"
-          indeterminate
-          color="primary"
-          class="my-4"
-        ></v-progress-linear>
-
-        <v-alert v-if="faceStore.error" type="error" class="my-4">{{ faceStore.error }}</v-alert>
-
-        <div v-if="faceStore.faceSearchResults.length > 0" class="mt-4">
-          <v-card-subtitle class="text-h6">{{ t('face.search.resultsTitle') }}</v-card-subtitle>
-          <FaceResultList :results="faceStore.faceSearchResults" />
-        </div>
-        <v-alert v-else-if="!faceStore.loading && !faceStore.error && uploadedSearchImage" type="info" class="mt-4">
-          {{ t('face.search.noResults') }}
-        </v-alert>
-      </v-card-text>
-    </v-card>
-  </v-container>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
-import { FaceUploadInput, FaceResultList } from '@/components/face';
+import { useNotificationStore } from '@/stores/notification.store';
+import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 
 const { t } = useI18n();
 const faceStore = useFaceStore();
-const uploadedSearchImage = ref<File | null>(null);
+const notificationStore = useNotificationStore();
+
+watch(() => faceStore.error, (newError) => {
+  if (newError) {
+    notificationStore.showSnackbar(newError, 'error');
+  }
+});
 
 const handleFileUpload = async (file: File) => {
-  uploadedSearchImage.value = file;
-  await faceStore.searchByFace(file);
+  await faceStore.detectFaces(file);
 };
+
 </script>

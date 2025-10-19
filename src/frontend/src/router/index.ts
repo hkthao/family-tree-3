@@ -39,7 +39,7 @@ const router = createRouter({
         {
           path: 'members',
           name: 'Members',
-          component: () => import('@/views/members/MemberRouterView.vue'),
+          component: () => import('@/views/MainRouterView.vue'),
           meta: { breadcrumb: 'member.list.title' },
           children: [
             {
@@ -71,7 +71,7 @@ const router = createRouter({
         {
           path: 'family',
           name: 'FamilyManagement',
-          component: () => import('@/views/family/FamilyRouterView.vue'),
+          component: () => import('@/views/MainRouterView.vue'),
           meta: { breadcrumb: 'family.management.title' },
           children: [
             {
@@ -109,7 +109,7 @@ const router = createRouter({
         {
           path: 'events',
           name: 'Events',
-          component: () => import('@/views/events/EventRouterView.vue'),
+          component: () => import('@/views/MainRouterView.vue'),
           meta: { breadcrumb: 'event.list.title' },
           children: [
             {
@@ -141,7 +141,7 @@ const router = createRouter({
         {
           path: 'relationships',
           name: 'Relationships',
-          component: () => import('@/views/relationships/RelationshipRouterView.vue'),
+          component: () => import('@/views/MainRouterView.vue'),
           meta: { breadcrumb: 'relationship.list.title' },
           children: [
             {
@@ -178,29 +178,53 @@ const router = createRouter({
           meta: { breadcrumb: 'userSettings.title', roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
         },
         {
-          path: 'face/recognition',
-          name: 'FaceRecognition',
-          component: () => import('@/views/face/FaceRecognitionView.vue'),
-          meta: { breadcrumb: 'face.recognition.title', requiresAuth: true },
+          path: 'face',
+          name: 'Face',
+          component: () => import('@/views/MainRouterView.vue'),
+          meta: { breadcrumb: 'face.title', requiresAuth: true },
+          children: [
+            {
+              path: 'recognition',
+              name: 'FaceRecognition',
+              component: () => import('@/views/face/FaceRecognitionView.vue'),
+              meta: { breadcrumb: 'face.recognition.title', requiresAuth: true },
+            },
+            {
+              path: 'search',
+              name: 'FaceSearch',
+              component: () => import('@/views/face/FaceSearchView.vue'),
+              meta: { breadcrumb: 'face.search.title', requiresAuth: true },
+            },
+          ],
         },
         {
-          path: 'face/search',
-          name: 'FaceSearch',
-          component: () => import('@/views/face/FaceSearchView.vue'),
-          meta: { breadcrumb: 'face.search.title', requiresAuth: true },
+          path: 'ai',
+          name: 'AI',
+          component: () => import('@/views/MainRouterView.vue'),
+          meta: { breadcrumb: 'ai.title', requiresAuth: true },
+          children: [
+            {
+              path: 'biography/:memberId',
+              name: 'AIBiographyGenerator',
+              component: () => import('@/views/ai/AIBiographyGeneratorView.vue'),
+              props: true,
+              meta: { breadcrumb: 'ai.biography.generator.title', requiresAuth: true },
+            },
+          ],
         },
         {
-          path: 'ai/biography/:memberId',
-          name: 'AIBiographyGenerator',
-          component: () => import('@/views/ai/AIBiographyGeneratorView.vue'),
-          props: true,
-          meta: { breadcrumb: 'aiBiography.generator.title', requiresAuth: true },
-        },
-        {
-          path: 'admin/chunks',
-          name: 'ChunkAdmin',
-          component: () => import('@/views/admin/ChunkAdmin.vue'),
-          meta: { breadcrumb: 'chunkAdmin.title', requiresAuth: true, roles: ['Admin'] },
+          path: 'admin',
+          name: 'Admin',
+          component: () => import('@/views/MainRouterView.vue'),
+          meta: { breadcrumb: 'admin.title', requiresAuth: true, roles: ['Admin'] },
+          children: [
+            {
+              path: 'chunks',
+              name: 'ChunkAdmin',
+              component: () => import('@/views/admin/ChunkAdmin.vue'),
+              meta: { breadcrumb: 'admin.chunks.title', requiresAuth: true, roles: ['Admin'] },
+            },
+          ],
         },
         ...sidebarRoutes,
       ],
