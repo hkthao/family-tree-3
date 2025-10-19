@@ -74,6 +74,8 @@
   "ai.faceTag": "Face Tagging",
   "search.face": "Search by Face",
   "ai.chatbot": "AI Chatbot",
+  "chat.inputPlaceholder": "Type a message...",
+  "chat.initialMessage": "Hello, how can I help you?",
   "realtime.collab": "Real-time Collaboration",
   "culture.traditions": "Traditions & Festivals",
   "notifications.anniversaries": "Anniversary Notifications",
@@ -292,39 +294,24 @@
   "event.calendar.viewMode.week": "Week",
   "event.calendar.viewMode.day": "Day",
   "event.calendar.viewMode.4day": "4 Day",
-  "relationship": {
-    "form": {
-      "editTitle": "Edit Relationship",
-      "addTitle": "Add Relationship",
-      "type": "Relationship Type",
-      "fullName": "Full Name",
-      "relationshipType": "Relation Type",
-      "family": "Family",
-      "order": "Order (Optional)",
-      "tab.general": "General Information"
-    },
-    "type": {
-      "father": "Father",
-      "mother": "Mother",
-      "wife": "Wife",
-      "husband": "Husband"
-    },
-    "list": {
-      "action": {
-        "aiCreate": "Create relationship with AI"
-      },
-      "headers": {
-        "sourceMemberFullName": "Source Member Full Name",
-        "targetMemberFullName": "Target Member Full Name",
-        "type": "Relationship Type"
-      }
-    },
-    "isThe": "is the",
-    "of": "of",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-    "description": "Description"
-  },
+  "relationship.form.editTitle": "Edit Relationship",
+  "relationship.form.addTitle": "Add Relationship",
+  "relationship.form.type": "Relationship Type",
+  "relationship.form.fullName": "Full Name",
+  "relationship.form.relationshipType": "Relation Type",
+  "relationship.form.family": "Family",
+  "relationship.form.order": "Order (Optional)",
+  "relationship.form.tab.general": "General Information",
+  "relationship.type.father": "Father",
+  "relationship.type.mother": "Mother",
+  "relationship.type.wife": "Wife",
+  "relationship.type.husband": "Husband",
+  "relationship.list.action.aiCreate": "Create relationship with AI",
+  "relationship.isThe": "is the",
+  "relationship.of": "of",
+  "relationship.startDate": "Start Date",
+  "relationship.endDate": "End Date",
+  "relationship.description": "Description",
   "relationship.list.headers.type": "Relationship Type",
   "relationship.list.headers.sourceMemberFullName": "Source Member Full Name",
   "relationship.list.headers.targetMemberFullName": "Target Member Full Name",
@@ -368,9 +355,14 @@
   "menu.admin": "Admin",
   "menu.system": "System",
   "face.title": "Face",
-  "face.recognition": "Face Recognition & Labeling",
+  "face.errors.unexpectedError": "An unexpected error occurred.",
+  "userSettings.title": "User Settings",
+  "userSettings.preferences.themeLight": "Light",
+  "userSettings.preferences.themeDark": "Dark",
   "ai.title": "Artificial Intelligence",
   "ai.biography.generator.title": "AI Biography Generator",
   "admin.title": "Admin",
-  "admin.chunks.title": "Document Chunk Management"
+  "face.errors.noFacesDetectedForSearch": "No faces detected for search.",
+  "face.uploadInput.selectImage": "Select Image",
+  "face.recognition.saveLabelsButton": "Save Labels"
 }
