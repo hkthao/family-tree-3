@@ -62,11 +62,22 @@ const menu: MenuSection[] = [
         to: '/relationships',
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
+    ],
+  },
+  {
+    titleKey: 'face.sidebar.title',
+    items: [
       {
-        titleKey: 'face.recognition',
+        titleKey: 'face.recognition.title',
         icon: 'mdi-face-recognition',
         to: '/face/recognition',
-        roles: ['Admin', 'FamilyManager'],
+        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
+      },
+      {
+        titleKey: 'search.face',
+        icon: 'mdi-face-recognition',
+        to: '/face/search',
+        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
     ],
   },

@@ -21,9 +21,22 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'profile.myProfile' },
   },
   {
-    path: '/face/search',
-    name: 'FaceSearch',
-    component: () => import('@/views/face/FaceSearchView.vue'),
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'search.face', icon: 'mdi-face-recognition' },
+    path: '/face',
+    name: 'Face',
+    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'face.sidebar.title', icon: 'mdi-face-recognition' },
+    children: [
+      {
+        path: 'recognition',
+        name: 'FaceRecognition',
+        component: () => import('@/views/face/FaceRecognitionView.vue'),
+        meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'face.recognition.title' },
+      },
+      {
+        path: 'search',
+        name: 'FaceSearch',
+        component: () => import('@/views/face/FaceSearchView.vue'),
+        meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'search.face' },
+      },
+    ],
   },
 ];
