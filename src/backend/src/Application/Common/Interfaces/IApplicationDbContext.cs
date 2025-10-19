@@ -1,4 +1,5 @@
 using backend.Domain.Entities;
+using FamilyTree.Domain.Entities;
 
 namespace backend.Application.Common.Interfaces;
 
@@ -13,5 +14,6 @@ public interface IApplicationDbContext
     DbSet<UserActivity> UserActivities { get; }
     DbSet<UserPreference> UserPreferences { get; }
     DbSet<FileMetadata> FileMetadata { get; }
+    DbSet<SystemConfiguration> SystemConfigurations { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

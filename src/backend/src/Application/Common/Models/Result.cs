@@ -1,3 +1,4 @@
+
 namespace backend.Application.Common.Models;
 
 public class Result<T>
@@ -24,4 +25,9 @@ public class Result
     public static Result Failure(string error, string errorSource = "Unknown") =>
         new()
         { IsSuccess = false, Error = error, ErrorSource = errorSource };
+
+    internal static Result Failure(string[] strings)
+    {
+        throw new NotImplementedException();
+    }
 }

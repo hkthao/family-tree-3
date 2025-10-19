@@ -1,53 +1,49 @@
-2025-10-18 13:46:18.280 | 2025-10-18 06:46:18,277 - app.services.face_embedding - INFO - FaceEmbeddingService initialized on device: cpu
-2025-10-18 13:46:18.280 | 2025-10-18 06:46:18,277 - INFO - FaceEmbeddingService initialized on device: cpu
-2025-10-18 13:46:18.281 | INFO:     Started server process [1]
-2025-10-18 13:46:18.281 | INFO:     Waiting for application startup.
-2025-10-18 13:46:18.281 | INFO:     Application startup complete.
-2025-10-18 13:46:18.282 | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-2025-10-18 13:46:27.738 | 2025-10-18 06:46:27,738 - INFO - Received request to detect faces. Filename: image.jpg, ReturnCrop: True
-2025-10-18 13:46:27.880 | 
-2025-10-18 13:46:27.969 | 
-2025-10-18 13:46:28.090 | 
-2025-10-18 13:46:28.124 | 
-2025-10-18 13:46:28.158 | 
-2025-10-18 13:46:28.187 | 
-2025-10-18 13:46:28.216 | 
-2025-10-18 13:46:28.244 | 
-2025-10-18 13:46:28.270 | 
-2025-10-18 13:46:28.297 | 
-2025-10-18 13:46:28.322 | 
-2025-10-18 13:46:28.347 | 
-2025-10-18 13:46:28.723 | 
-2025-10-18 13:46:28.849 | 
-2025-10-18 13:46:28.852 | 2025-10-18 06:46:28,852 - INFO - Face detector returned 7 detections.
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 60ms/ste
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 64ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 45ms/ste
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 49ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/ste
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/ste
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/st
-2025-10-18 13:46:35.506 | 1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step
-2025-10-18 13:46:35.506 |  1/92 ━━━━━━━━━━━━━━━━━━━━ 2s 30ms/ste
-2025-10-18 13:46:35.506 | 30/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/ste
-2025-10-18 13:46:35.506 | 60/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/st
-2025-10-18 13:46:35.506 | 91/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/st
-2025-10-18 13:46:35.506 | 92/92 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step
-2025-10-18 13:46:35.506 | 1/4 ━━━━━━━━━━━━━━━━━━━━ 0s 38ms/ste
-2025-10-18 13:46:35.506 | 4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step
+You are working on an ASP.NET Core backend following Domain-Driven Design (DDD) with a CQRS pattern.  
+The application is already deployed in production, so **you must not break or refactor existing structure**.  
+The system currently stores configuration in `appsettings.json`.
+
+Your task is to implement a **System Configuration module** that allows admins and users to manage dynamic configuration values at runtime.
+
+---
+
+### Technical context
+- The application uses **EF Core** directly (no repository layer).
+- CQRS is implemented using distinct **Commands** and **Queries** with handlers.
+- Configuration values are currently injected through `IOptions<AppSettings>`.
+
+---
+
+### Requirements
+
+1. **Preserve current architecture.**
+   - Do not modify existing handlers, services, or the `AppSettings` structure.
+   - Only extend the system by adding new entities, DbSets, and CQRS handlers.
+
+2. **Introduce three configuration layers:**
+   - **Fixed Config:** stays in `appsettings.json`, not editable at runtime.
+   - **System Config:** editable by admin users; stored in the database.
+
+3. **Implementation details:**
+   - Create EF Core entities for `SystemConfig` and `UserConfig`.
+   - Add them to the existing `DbContext`.
+   - Create CQRS handlers:
+     - Commands for setting/updating config values.
+     - Queries for fetching config values (single and list).
+   - Implement a **ConfigurationProvider** service that reads values in the following priority:
+     `SystemConfig → AppSettings`.
+   - Inject this provider where dynamic configuration is needed.
+
+4. **Integration:**
+   - Register the provider and handlers via DI.
+   - Ensure backward compatibility with all existing `IOptions<AppSettings>` consumers.
+   - Keep all naming and folder conventions consistent with current CQRS structure.
+   - No breaking changes to startup or runtime behavior.
+
+5. **Optional (if feasible):**
+   - Implement minimal Admin API endpoints for reading/updating system configuration.
+   - Support caching (e.g., MemoryCache) for frequently accessed settings.
+
+---
+
+### Goal
+Implement a production-safe, database-backed system configuration layer compatible with EF Core and CQRS, extending the existing DDD structure **without refactoring or breaking current code paths**.

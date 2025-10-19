@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
+using FamilyTree.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Data;
@@ -19,10 +20,29 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
+    public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        builder.Entity<SystemConfiguration>()
+            .HasIndex(sc => sc.Key)
+            .IsUnique();
+
+        builder.Entity<SystemConfiguration>()
+            .Property(sc => sc.Key)
+            .IsRequired()
+            .HasMaxLength(200);
+
+        builder.Entity<SystemConfiguration>()
+            .Property(sc => sc.Value)
+            .IsRequired();
+
+        builder.Entity<SystemConfiguration>()
+            .Property(sc => sc.ValueType)
+            .IsRequired()
+            .HasMaxLength(50);
 
         builder.Entity<Family>()
             .Property(f => f.Code)

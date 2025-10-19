@@ -90,6 +90,11 @@ public static class DependencyInjection
         services.AddTransient<TxtTextExtractor>();
         services.AddTransient<MdTextExtractor>();
 
+        // Register Configuration Provider
+        services.AddMemoryCache();
+        services.Configure<AppSetting.AppSettings>(configuration.GetSection(nameof(AppSetting.AppSettings)));
+        services.AddScoped<IConfigurationProvider, Services.ConfigurationProvider>();
+
         // Register File Storage
         services.AddTransient<LocalFileStorage>();
         services.AddTransient<S3FileStorage>();
