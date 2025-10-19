@@ -1,4 +1,4 @@
-import { FamilyTreeView, ProfileView } from '@/views';
+import { FamilyTreeView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const sidebarRoutes: RouteRecordRaw[] = [
@@ -13,12 +13,6 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     name: 'FamilyTree',
     component: FamilyTreeView,
     meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'family.tree.title' },
-  },
-  {
-    path: '/profile',
-    name: 'UserProfile',
-    component: ProfileView,
-    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'profile.myProfile' },
   },
   {
     path: '/face',

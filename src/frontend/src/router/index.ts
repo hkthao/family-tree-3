@@ -198,21 +198,6 @@ const router = createRouter({
           ],
         },
         {
-          path: 'ai',
-          name: 'AI',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'ai.title', requiresAuth: true },
-          children: [
-            {
-              path: 'biography/:memberId',
-              name: 'AIBiographyGenerator',
-              component: () => import('@/views/ai/AIBiographyGeneratorView.vue'),
-              props: true,
-              meta: { breadcrumb: 'ai.biography.generator.title', requiresAuth: true },
-            },
-          ],
-        },
-        {
           path: 'admin',
           name: 'Admin',
           component: () => import('@/views/MainRouterView.vue'),
@@ -227,7 +212,7 @@ const router = createRouter({
             {
               path: 'config',
               name: 'SystemConfig',
-              component: () => import('@/views/ConfigView.vue'),
+              component: () => import('@/views/admin/ConfigView.vue'),
               meta: { breadcrumb: 'admin.config.title', requiresAuth: true, roles: ['Admin'] },
             },
           ],
