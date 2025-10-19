@@ -25,12 +25,12 @@ public class ConfigurationProvider : IConfigurationProvider
 
     public async Task<T?> GetValue<T>(string key, T defaultValue)
     {
-        return await GetValueInternal<T>(key, defaultValue);
+        return await GetValueInternal(key, defaultValue);
     }
 
     public async Task<T?> GetValue<T>(string key)
     {
-        return await GetValueInternal<T>(key, default(T));
+        return await GetValueInternal(key, default(T));
     }
 
     private async Task<T?> GetValueInternal<T>(string key, T? defaultValue)

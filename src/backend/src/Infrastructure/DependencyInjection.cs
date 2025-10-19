@@ -1,4 +1,3 @@
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.Embeddings;
@@ -7,13 +6,12 @@ using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
-using backend.Application.Services;
 using backend.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure;
 
@@ -44,6 +42,7 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.AddScoped<IAuthorizationService, AuthorizationService>();
+        services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
 
         // Register Face API Service and configure its HttpClient
         services.AddHttpClient<IFaceApiService, FaceApiService>(client =>
@@ -73,15 +72,14 @@ public static class DependencyInjection
         services.AddTransient<QdrantVectorStore>();
         services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
 
-        services.AddScoped<IFileTextExtractorFactory, FileTextExtractorFactory>();
-
         services.AddTransient<PdfTextExtractor>();
         services.AddTransient<TxtTextExtractor>();
         services.AddTransient<MdTextExtractor>();
-
+        services.AddScoped<IFileTextExtractorFactory, FileTextExtractorFactory>();
+        
         // Register Configuration Provider
         services.AddMemoryCache();
-        services.AddScoped<backend.Application.Common.Interfaces.IConfigProvider, backend.Application.Common.Services.ConfigProvider>();
+        services.AddScoped<IConfigProvider, Application.Common.Services.ConfigProvider>();
 
         // Register File Storage
         services.AddTransient<LocalFileStorage>();
@@ -89,7 +87,7 @@ public static class DependencyInjection
         services.AddTransient<CloudinaryFileStorage>();
         services.AddSingleton<IFileStorageFactory, FileStorageFactory>();
 
-        services.AddTransient<Microsoft.AspNetCore.Authentication.IClaimsTransformation, backend.Infrastructure.Auth.Auth0ClaimsTransformer>();
+        services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
         return services;
     }
