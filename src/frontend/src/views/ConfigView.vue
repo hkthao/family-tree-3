@@ -1,160 +1,106 @@
 <template>
-  <v-container fluid>
-    <v-card>
-      <v-card-title class="text-h5">{{ t('systemConfig.title') }}</v-card-title>
-      <v-card-text>
-        <v-tabs v-model="currentTab" color="primary" align-tabs="start">
-          <v-tab value="aiChat">{{ t('systemConfig.tabs.aiChat') }}</v-tab>
-          <v-tab value="embedding">{{ t('systemConfig.tabs.embedding') }}</v-tab>
-          <v-tab value="vectorStore">{{ t('systemConfig.tabs.vectorStore') }}</v-tab>
-          <v-tab value="storage">{{ t('systemConfig.tabs.storage') }}</v-tab>
-          <v-tab value="systemFixed">{{ t('systemConfig.tabs.systemFixed') }}</v-tab>
-        </v-tabs>
+  <v-card flat>
+    <v-card-text>
+      <v-tabs v-model="currentTab" color="primary" align-tabs="start">
+        <v-tab value="aiChat">{{ t('systemConfig.tabs.aiChat') }}</v-tab>
+        <v-tab value="embedding">{{ t('systemConfig.tabs.embedding') }}</v-tab>
+        <v-tab value="vectorStore">{{ t('systemConfig.tabs.vectorStore') }}</v-tab>
+        <v-tab value="storage">{{ t('systemConfig.tabs.storage') }}</v-tab>
+        <v-tab value="systemFixed">{{ t('systemConfig.tabs.systemFixed') }}</v-tab>
+      </v-tabs>
 
-        <v-window v-model="currentTab" class="mt-4">
-          <v-window-item value="aiChat">
-            <v-card flat>
-              <v-card-text>
-                <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.aiChat') }}</h3>
-                <v-row>
-                  <template v-for="config in aiChatConfigs" :key="config.key">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="config.value"
-                        :label="config.key"
-                        :hint="config.description"
-                        persistent-hint
-                        :readonly="isConfigReadOnly(config.key)"
-                        variant="outlined"
-                        class="mb-4"
-                      ></v-text-field>
-                    </v-col>
-                  </template>
-                </v-row>
-              </v-card-text>
-              <v-card-actions class="pa-4">
-                <v-spacer></v-spacer>
-                <v-btn color="secondary" @click="resetChanges(aiChatConfigs)">{{ t('systemConfig.actions.cancel') }}</v-btn>
-                <v-btn color="primary" @click="saveChanges(aiChatConfigs)" :loading="systemConfigStore.loading">{{ t('systemConfig.actions.save') }}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-window-item>
+      <v-window v-model="currentTab" class="mt-4">
+        <v-window-item value="aiChat">
+          <v-row class="mt-4">
+            <template v-for="config in aiChatConfigs" :key="config.key">
+              <v-col cols="6">
+                <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
+                  :readonly="isConfigReadOnly(config.key)" variant="outlined" class="mb-4"></v-text-field>
+              </v-col>
+            </template>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="resetChanges(aiChatConfigs)">{{ t('systemConfig.actions.cancel') }}</v-btn>
+            <v-btn color="primary" @click="saveChanges(aiChatConfigs)" :loading="systemConfigStore.loading">{{
+              t('systemConfig.actions.save') }}</v-btn>
+          </v-card-actions>
+        </v-window-item>
 
-          <v-window-item value="embedding">
-            <v-card flat>
-              <v-card-text>
-                <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.embedding') }}</h3>
-                <v-row>
-                  <template v-for="config in embeddingConfigs" :key="config.key">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="config.value"
-                        :label="config.key"
-                        :hint="config.description"
-                        persistent-hint
-                        :readonly="isConfigReadOnly(config.key)"
-                        variant="outlined"
-                        class="mb-4"
-                      ></v-text-field>
-                    </v-col>
-                  </template>
-                </v-row>
-              </v-card-text>
-              <v-card-actions class="pa-4">
-                <v-spacer></v-spacer>
-                <v-btn color="secondary" @click="resetChanges(embeddingConfigs)">{{ t('systemConfig.actions.cancel') }}</v-btn>
-                <v-btn color="primary" @click="saveChanges(embeddingConfigs)" :loading="systemConfigStore.loading">{{ t('systemConfig.actions.save') }}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-window-item>
+        <v-window-item value="embedding">
+          <v-row class="mt-4">
+            <template v-for="config in embeddingConfigs" :key="config.key">
+              <v-col cols="6">
+                <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
+                  :readonly="isConfigReadOnly(config.key)" variant="outlined" class="mb-4"></v-text-field>
+              </v-col>
+            </template>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="resetChanges(embeddingConfigs)">{{ t('systemConfig.actions.cancel')
+              }}</v-btn>
+            <v-btn color="primary" @click="saveChanges(embeddingConfigs)" :loading="systemConfigStore.loading">{{
+              t('systemConfig.actions.save') }}</v-btn>
+          </v-card-actions>
+        </v-window-item>
 
-          <v-window-item value="vectorStore">
-            <v-card flat>
-              <v-card-text>
-                <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.vectorStore') }}</h3>
-                <v-row>
-                  <template v-for="config in vectorStoreConfigs" :key="config.key">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="config.value"
-                        :label="config.key"
-                        :hint="config.description"
-                        persistent-hint
-                        :readonly="isConfigReadOnly(config.key)"
-                        variant="outlined"
-                        class="mb-4"
-                      ></v-text-field>
-                    </v-col>
-                  </template>
-                </v-row>
-              </v-card-text>
-              <v-card-actions class="pa-4">
-                <v-spacer></v-spacer>
-                <v-btn color="secondary" @click="resetChanges(vectorStoreConfigs)">{{ t('systemConfig.actions.cancel') }}</v-btn>
-                <v-btn color="primary" @click="saveChanges(vectorStoreConfigs)" :loading="systemConfigStore.loading">{{ t('systemConfig.actions.save') }}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-window-item>
+        <v-window-item value="vectorStore">
+          <v-row>
+            <template v-for="config in vectorStoreConfigs" :key="config.key">
+              <v-col cols="6">
+                <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
+                  :readonly="isConfigReadOnly(config.key)" variant="outlined" class="mb-4"></v-text-field>
+              </v-col>
+            </template>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="resetChanges(vectorStoreConfigs)">{{ t('systemConfig.actions.cancel')
+              }}</v-btn>
+            <v-btn color="primary" @click="saveChanges(vectorStoreConfigs)" :loading="systemConfigStore.loading">{{
+              t('systemConfig.actions.save') }}</v-btn>
+          </v-card-actions>
+        </v-window-item>
 
-          <v-window-item value="storage">
-            <v-card flat>
-              <v-card-text>
-                <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.storage') }}</h3>
-                <v-row>
-                  <template v-for="config in storageConfigs" :key="config.key">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="config.value"
-                        :label="config.key"
-                        :hint="config.description"
-                        persistent-hint
-                        :readonly="isConfigReadOnly(config.key)"
-                        variant="outlined"
-                        class="mb-4"
-                      ></v-text-field>
-                    </v-col>
-                  </template>
-                </v-row>
-              </v-card-text>
-              <v-card-actions class="pa-4">
-                <v-spacer></v-spacer>
-                <v-btn color="secondary" @click="resetChanges(storageConfigs)">{{ t('systemConfig.actions.cancel') }}</v-btn>
-                <v-btn color="primary" @click="saveChanges(storageConfigs)" :loading="systemConfigStore.loading">{{ t('systemConfig.actions.save') }}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-window-item>
+        <v-window-item value="storage">
+          <v-row class="mt-4">
+            <template v-for="config in storageConfigs" :key="config.key">
+              <v-col cols="6">
+                <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
+                  :readonly="isConfigReadOnly(config.key)" variant="outlined" class="mb-4"></v-text-field>
+              </v-col>
+            </template>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="resetChanges(storageConfigs)">{{ t('systemConfig.actions.cancel')
+              }}</v-btn>
+            <v-btn color="primary" @click="saveChanges(storageConfigs)" :loading="systemConfigStore.loading">{{
+              t('systemConfig.actions.save') }}</v-btn>
+          </v-card-actions>
+        </v-window-item>
 
-          <v-window-item value="systemFixed">
-            <v-card flat>
-              <v-card-text>
-                <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.systemFixed') }}</h3>
-                <v-row>
-                  <template v-for="config in systemFixedConfigs" :key="config.key">
-                    <v-col cols="6">
-                      <v-text-field
-                        v-model="config.value"
-                        :label="config.key"
-                        :hint="config.description"
-                        persistent-hint
-                        :readonly="isConfigReadOnly(config.key)"
-                        variant="outlined"
-                        class="mb-4"
-                      ></v-text-field>
-                    </v-col>
-                  </template>
-                </v-row>
-              </v-card-text>
-              <v-card-actions class="pa-4">
-                <v-spacer></v-spacer>
-                <v-btn color="secondary" @click="resetChanges(systemFixedConfigs)">{{ t('systemConfig.actions.cancel') }}</v-btn>
-                <v-btn color="primary" @click="saveChanges(systemFixedConfigs)" :loading="systemConfigStore.loading">{{ t('systemConfig.actions.save') }}</v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-window-item>
-        </v-window>
-      </v-card-text>
-    </v-card>
-  </v-container>
+        <v-window-item value="systemFixed">
+          <v-row class="mt-4">
+            <template v-for="config in systemFixedConfigs" :key="config.key">
+              <v-col cols="6">
+                <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
+                  :readonly="isConfigReadOnly(config.key)" variant="outlined" class="mb-4"></v-text-field>
+              </v-col>
+            </template>
+          </v-row>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="secondary" @click="resetChanges(systemFixedConfigs)">{{ t('systemConfig.actions.cancel')
+              }}</v-btn>
+            <v-btn color="primary" @click="saveChanges(systemFixedConfigs)" :loading="systemConfigStore.loading">{{
+              t('systemConfig.actions.save') }}</v-btn>
+          </v-card-actions>
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup lang="ts">
