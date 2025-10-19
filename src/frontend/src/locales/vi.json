@@ -421,5 +421,6 @@
   "systemConfig.actions.save": "Lưu",
   "systemConfig.errors.fetch": "Không thể tải cấu hình hệ thống.",
   "systemConfig.errors.update": "Không thể cập nhật cấu hình hệ thống.",
-  "systemConfig.errors.notFound": "Không tìm thấy cấu hình hệ thống."
+  "admin.title": "Quản trị",
+  "systemConfig.search.label": "Tìm kiếm"
 }

@@ -379,9 +379,5 @@
   "systemConfig.sections.vectorStore": "Vector Store Settings",
   "systemConfig.sections.storage": "Storage Settings",
   "systemConfig.sections.systemFixed": "System / Fixed Settings",
-  "systemConfig.actions.cancel": "Cancel",
-  "systemConfig.actions.save": "Save",
-  "systemConfig.errors.fetch": "Failed to fetch system configurations.",
-  "systemConfig.errors.update": "Failed to update system configuration.",
-  "systemConfig.errors.notFound": "System configuration not found."
+  "systemConfig.search.label": "Search"
 }
