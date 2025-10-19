@@ -1,7 +1,7 @@
 namespace backend.Application.Common.Models.AppSetting;
 
-public class FaceDetectionService
+public class FaceDetectionSettings
 {
-    public const string SectionName = "FaceDetectionService";
+    public const string SectionName = "FaceDetectionSettings";
     public string BaseUrl { get; set; } = null!;
 }

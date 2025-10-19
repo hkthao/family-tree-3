@@ -9,7 +9,7 @@ namespace backend.Application.Faces.Commands.DetectFaces;
 
 public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, FaceDetectionResponseDto>
 {
-    private readonly IFaceApiService _faceApiService; // Changed from IFaceDetectionService
+    private readonly IFaceApiService _faceApiService; // Changed from IFaceDetectionSettings
     private readonly IApplicationDbContext _context;
     private readonly IVectorStoreFactory _vectorStoreFactory;
     private readonly ILogger<DetectFacesCommandHandler> _logger;

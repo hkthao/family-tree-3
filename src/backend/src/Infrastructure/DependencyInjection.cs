@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Infrastructure.AI.TextExtractors;
@@ -9,7 +10,6 @@ using backend.Infrastructure.Services;
 using backend.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -45,9 +45,11 @@ public static class DependencyInjection
         services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
 
         // Register Face API Service and configure its HttpClient
-        services.AddHttpClient<IFaceApiService, FaceApiService>(client =>
+        services.AddHttpClient<IFaceApiService, FaceApiService>((serviceProvider, client) =>
         {
-            client.BaseAddress = new Uri("http://face-service:8000");
+            var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
+            var faceDetectionSettings = configProvider.GetSection<FaceDetectionSettings>();
+            client.BaseAddress = new Uri(faceDetectionSettings.BaseUrl);
         });
 
         // Register Chat Module

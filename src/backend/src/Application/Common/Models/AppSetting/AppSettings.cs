@@ -14,7 +14,7 @@ public class AppSettings
     public ConnectionStrings ConnectionStrings { get; set; } = new ConnectionStrings();
     public JwtSettings JwtSettings { get; set; } = new JwtSettings();
     public StorageSettings StorageSettings { get; set; } = new StorageSettings();
-    public FaceDetectionService FaceDetectionService { get; set; } = new FaceDetectionService();
+    public FaceDetectionSettings FaceDetectionService { get; set; } = new FaceDetectionSettings();
     public string CORS_ORIGINS { get; set; } = null!;
     public bool UseInMemoryDatabase { get; set; }
 }
