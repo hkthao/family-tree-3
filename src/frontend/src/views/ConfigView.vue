@@ -16,8 +16,8 @@
             <v-card flat>
               <v-card-text>
                 <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.aiChat') }}</h3>
-                <template v-for="config in aiChatConfigs" :key="config.key">
-                  <v-row>
+                <v-row>
+                  <template v-for="config in aiChatConfigs" :key="config.key">
                     <v-col cols="6">
                       <v-text-field
                         v-model="config.value"
@@ -29,8 +29,8 @@
                         class="mb-4"
                       ></v-text-field>
                     </v-col>
-                  </v-row>
-                </template>
+                  </template>
+                </v-row>
               </v-card-text>
               <v-card-actions class="pa-4">
                 <v-spacer></v-spacer>
@@ -44,8 +44,8 @@
             <v-card flat>
               <v-card-text>
                 <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.embedding') }}</h3>
-                <template v-for="config in embeddingConfigs" :key="config.key">
-                  <v-row>
+                <v-row>
+                  <template v-for="config in embeddingConfigs" :key="config.key">
                     <v-col cols="6">
                       <v-text-field
                         v-model="config.value"
@@ -57,8 +57,8 @@
                         class="mb-4"
                       ></v-text-field>
                     </v-col>
-                  </v-row>
-                </template>
+                  </template>
+                </v-row>
               </v-card-text>
               <v-card-actions class="pa-4">
                 <v-spacer></v-spacer>
@@ -72,8 +72,8 @@
             <v-card flat>
               <v-card-text>
                 <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.vectorStore') }}</h3>
-                <template v-for="config in vectorStoreConfigs" :key="config.key">
-                  <v-row>
+                <v-row>
+                  <template v-for="config in vectorStoreConfigs" :key="config.key">
                     <v-col cols="6">
                       <v-text-field
                         v-model="config.value"
@@ -85,8 +85,8 @@
                         class="mb-4"
                       ></v-text-field>
                     </v-col>
-                  </v-row>
-                </template>
+                  </template>
+                </v-row>
               </v-card-text>
               <v-card-actions class="pa-4">
                 <v-spacer></v-spacer>
@@ -100,8 +100,8 @@
             <v-card flat>
               <v-card-text>
                 <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.storage') }}</h3>
-                <template v-for="config in storageConfigs" :key="config.key">
-                  <v-row>
+                <v-row>
+                  <template v-for="config in storageConfigs" :key="config.key">
                     <v-col cols="6">
                       <v-text-field
                         v-model="config.value"
@@ -113,8 +113,8 @@
                         class="mb-4"
                       ></v-text-field>
                     </v-col>
-                  </v-row>
-                </template>
+                  </template>
+                </v-row>
               </v-card-text>
               <v-card-actions class="pa-4">
                 <v-spacer></v-spacer>
@@ -128,8 +128,8 @@
             <v-card flat>
               <v-card-text>
                 <h3 class="text-h6 mb-4">{{ t('systemConfig.sections.systemFixed') }}</h3>
-                <template v-for="config in systemFixedConfigs" :key="config.key">
-                  <v-row>
+                <v-row>
+                  <template v-for="config in systemFixedConfigs" :key="config.key">
                     <v-col cols="6">
                       <v-text-field
                         v-model="config.value"
@@ -141,8 +141,8 @@
                         class="mb-4"
                       ></v-text-field>
                     </v-col>
-                  </v-row>
-                </template>
+                  </template>
+                </v-row>
               </v-card-text>
               <v-card-actions class="pa-4">
                 <v-spacer></v-spacer>
