@@ -75,7 +75,7 @@ const menu: MenuSection[] = [
       },
       {
         titleKey: 'search.face',
-        icon: 'mdi-face-recognition',
+        icon: 'mdi-magnify-expand',
         to: '/face/search',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
@@ -88,32 +88,8 @@ const menu: MenuSection[] = [
       {
         titleKey: 'settings.system',
         icon: 'mdi-cog',
-        to: '/settings/system',
+        to: '/admin/config',
         roles: ['Admin'],
-      },
-      {
-        titleKey: 'userSettings.title',
-        icon: 'mdi-cog',
-        to: '/settings',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
-      },
-      {
-        titleKey: 'settings.account',
-        icon: 'mdi-lock',
-        to: '/settings/account',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
-      },
-      {
-        titleKey: 'settings.importExport',
-        icon: 'mdi-database-export',
-        to: '/settings/import-export',
-        roles: ['Admin', 'FamilyManager'],
-      },
-      {
-        titleKey: 'reports.statistics',
-        icon: 'mdi-chart-box',
-        to: '/reports',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
     ],
   },
