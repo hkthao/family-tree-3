@@ -1,8 +1,8 @@
 using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Pinecone;
 
 namespace backend.Infrastructure.AI.VectorStore;
@@ -10,16 +10,17 @@ namespace backend.Infrastructure.AI.VectorStore;
 public class PineconeVectorStore : IVectorStore
 {
     private readonly ILogger<PineconeVectorStore> _logger;
-    private readonly VectorStoreSettings _vectorStoreSettings;
+    private readonly IConfigProvider _configProvider;
     private readonly PineconeClient _pineconeClient;
     private readonly string _defaultIndexName; // Renamed from _indexName
 
-    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
+    public PineconeVectorStore(ILogger<PineconeVectorStore> logger, IConfigProvider configProvider)
     {
         _logger = logger;
-        _vectorStoreSettings = vectorStoreSettings.Value;
+        _configProvider = configProvider;
 
-        var pineconeSettings = _vectorStoreSettings.Pinecone;
+        var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+        var pineconeSettings = vectorStoreSettings.Pinecone;
 
         if (pineconeSettings == null)
         {
@@ -53,7 +54,8 @@ public class PineconeVectorStore : IVectorStore
 
         try
         {
-            var indexClient = _pineconeClient.Index(collectionName, _vectorStoreSettings.Pinecone.Host); // Use provided collectionName
+            var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+            var indexClient = _pineconeClient.Index(collectionName, vectorStoreSettings.Pinecone.Host); // Use provided collectionName
 
             // Check if index exists, create if not
             var indexes = await _pineconeClient.ListIndexesAsync(null, cancellationToken); // Fixed
@@ -120,7 +122,8 @@ public class PineconeVectorStore : IVectorStore
 
         try
         {
-            var indexClient = _pineconeClient.Index(collectionName, _vectorStoreSettings.Pinecone.Host); // Use provided collectionName
+            var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+            var indexClient = _pineconeClient.Index(collectionName, vectorStoreSettings.Pinecone.Host); // Use provided collectionName
             var pineconeFilter = metadataFilter != null ? new Metadata(metadataFilter.ToDictionary(k => k.Key, v => (MetadataValue?)v.Value)) : null;
 
             var queryRequest = new QueryRequest

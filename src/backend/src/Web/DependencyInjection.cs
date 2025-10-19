@@ -14,19 +14,13 @@ public static class DependencyInjection
     public static void AddWebServices(this IHostApplicationBuilder builder)
     {
         builder.Services.AddScoped<IUser, CurrentUser>();
-
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks();
-
         builder.Services.AddExceptionHandler<CustomExceptionHandler>();
-
-
         // Customise default API behaviour
         builder.Services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
-
         builder.Services.AddEndpointsApiExplorer();
-
         builder.Services.AddOpenApiDocument((configure, sp) =>
         {
             configure.Title = "API Cây Gia Phả";
@@ -43,23 +37,6 @@ public static class DependencyInjection
 
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
-
         builder.Services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
-
-        // Add Authentication and Authorization
-        // builder.Services.AddAuthentication(options =>
-        // {
-        //     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        //     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        // })
-        //     .AddJwtBearer(options =>
-        //     {
-        //         options.Authority = builder.Configuration["Auth0:Domain"];
-        //         options.Audience = builder.Configuration["Auth0:Audience"];
-        //         options.RequireHttpsMetadata = false;
-        //     });
-
-        // builder.Services.AddAuthorizationBuilder();
     }
-
 }

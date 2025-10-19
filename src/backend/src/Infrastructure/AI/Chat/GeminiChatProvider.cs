@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.AI.Chat;
@@ -7,21 +8,22 @@ namespace backend.Infrastructure.AI.Chat;
 public class GeminiChatProvider : IChatProvider
 {
     private readonly HttpClient _httpClient;
-    private readonly AIChatSettings _chatSettings;
     private readonly ILogger<GeminiChatProvider> _logger;
+    private readonly IConfigProvider _configProvider;
 
-    public GeminiChatProvider(HttpClient httpClient, AIChatSettings chatSettings, ILogger<GeminiChatProvider> logger)
+    public GeminiChatProvider(HttpClient httpClient, IConfigProvider configProvider, ILogger<GeminiChatProvider> logger)
     {
         _httpClient = httpClient;
-        _chatSettings = chatSettings;
+        _configProvider = configProvider;
         _logger = logger;
     }
 
     public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {
+        var chatSettings = _configProvider.GetSection<AIChatSettings>();
         // Dummy implementation for Gemini
         var concatenatedMessages = string.Join("\n", messages.Select(m => $"{m.Role}: {m.Content}"));
         _logger.LogInformation("Gemini received messages: {Messages}", concatenatedMessages);
-        return await Task.FromResult($"Gemini responded to: {concatenatedMessages} using model {_chatSettings.Gemini.Model} with API Key {_chatSettings.Gemini.ApiKey}");
+        return await Task.FromResult($"Gemini responded to: {concatenatedMessages} using model {chatSettings.Gemini.Model} with API Key {chatSettings.Gemini.ApiKey}");
     }
 }

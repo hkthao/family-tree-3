@@ -1,22 +1,24 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Infrastructure.Files;
 
 public class LocalFileStorage : IFileStorage
 {
-    private readonly StorageSettings _storageSettings;
+    private readonly IConfigProvider _configProvider;
 
-    public LocalFileStorage(StorageSettings storageSettings)
+    public LocalFileStorage(IConfigProvider configProvider)
     {
-        _storageSettings = storageSettings;
+        _configProvider = configProvider;
     }
 
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         try
         {
-            var uploadPath = Path.Combine(_storageSettings.Local.LocalStoragePath);
+            var uploadPath = Path.Combine(storageSettings.Local.LocalStoragePath);
             if (!Directory.Exists(uploadPath))
             {
                 Directory.CreateDirectory(uploadPath);
@@ -30,7 +32,7 @@ public class LocalFileStorage : IFileStorage
             }
 
             // Construct the API preview URL
-            var absoluteUrl = $"{_storageSettings.Local.BaseUrl}/api/upload/preview/{fileName}"; return Result<string>.Success(absoluteUrl);
+            var absoluteUrl = $"{storageSettings.Local.BaseUrl}/api/upload/preview/{fileName}"; return Result<string>.Success(absoluteUrl);
         }
         catch (Exception ex)
         {
@@ -40,13 +42,14 @@ public class LocalFileStorage : IFileStorage
 
     public Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
     {
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         try
         {
             // Extract file name from the URL
             var uri = new Uri(url);
             var fileName = Path.GetFileName(uri.LocalPath);
 
-            var filePath = Path.Combine(_storageSettings.Local.LocalStoragePath, fileName);
+            var filePath = Path.Combine(storageSettings.Local.LocalStoragePath, fileName);
 
             if (File.Exists(filePath))
             {

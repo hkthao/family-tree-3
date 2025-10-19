@@ -2,6 +2,7 @@ using backend.Application.AI.Chat.Queries;
 using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -16,10 +17,11 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IEmbeddingProviderFactory> _mockEmbeddingProviderFactory;
     private readonly Mock<IVectorStoreFactory> _mockVectorStoreFactory;
+    private readonly Mock<IConfigProvider> _mockConfigProvider;
+    private readonly Mock<ILogger<ChatWithAssistantQueryHandler>> _mockLogger;
     private readonly AIChatSettings _chatSettings;
     private readonly EmbeddingSettings _embeddingSettings;
     private readonly VectorStoreSettings _vectorStoreSettings;
-    private readonly Mock<ILogger<ChatWithAssistantQueryHandler>> _mockLogger;
     private readonly ChatWithAssistantQueryHandler _handler;
 
     public ChatWithAssistantQueryHandlerTests()
@@ -27,12 +29,13 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
         _mockChatProviderFactory = new Mock<IChatProviderFactory>();
         _mockEmbeddingProviderFactory = new Mock<IEmbeddingProviderFactory>();
         _mockVectorStoreFactory = new Mock<IVectorStoreFactory>();
+        _mockConfigProvider = new Mock<IConfigProvider>();
         _mockLogger = new Mock<ILogger<ChatWithAssistantQueryHandler>>();
 
         _chatSettings = new AIChatSettings
         {
             Provider = ChatAIProvider.Gemini.ToString(),
-            ScoreThreshold = 0.7f
+            ScoreThreshold = 70 // Changed from 0.7f to 70
         };
         _embeddingSettings = new EmbeddingSettings
         {
@@ -44,13 +47,15 @@ public class ChatWithAssistantQueryHandlerTests : TestBase
             TopK = 3
         };
 
+        _mockConfigProvider.Setup(x => x.GetSection<AIChatSettings>()).Returns(_chatSettings);
+        _mockConfigProvider.Setup(x => x.GetSection<EmbeddingSettings>()).Returns(_embeddingSettings);
+        _mockConfigProvider.Setup(x => x.GetSection<VectorStoreSettings>()).Returns(_vectorStoreSettings);
+
         _handler = new ChatWithAssistantQueryHandler(
             _mockChatProviderFactory.Object,
             _mockEmbeddingProviderFactory.Object,
             _mockVectorStoreFactory.Object,
-            _chatSettings,
-            _embeddingSettings,
-            _vectorStoreSettings,
+            _mockConfigProvider.Object,
             _mockLogger.Object);
     }
 

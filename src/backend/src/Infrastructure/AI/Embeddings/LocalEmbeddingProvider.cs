@@ -1,39 +1,40 @@
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
 public class LocalEmbeddingProvider : IEmbeddingProvider
 {
-    private readonly EmbeddingSettings _settings;
     private readonly HttpClient _httpClient;
     private readonly ILogger<LocalEmbeddingProvider> _logger;
+    private readonly IConfigProvider _configProvider;
 
     public string ProviderName => "Local";
-    public int MaxTextLength => _settings.Local.MaxTextLength;
+    public int MaxTextLength => _configProvider.GetSection<EmbeddingSettings>().Local.MaxTextLength;
 
-    public LocalEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings, HttpClient httpClient, ILogger<LocalEmbeddingProvider> logger)
+    public LocalEmbeddingProvider(IConfigProvider configProvider, HttpClient httpClient, ILogger<LocalEmbeddingProvider> logger)
     {
-        _settings = embeddingSettings.Value;
+        _configProvider = configProvider;
         _httpClient = httpClient;
         _logger = logger;
     }
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {
+        var settings = _configProvider.GetSection<EmbeddingSettings>();
         if (string.IsNullOrWhiteSpace(text))
         {
             return Result<double[]>.Failure("Text for embedding cannot be empty or whitespace.");
         }
 
-        if (string.IsNullOrWhiteSpace(_settings.Local.ApiUrl))
+        if (string.IsNullOrWhiteSpace(settings.Local.ApiUrl))
         {
             return Result<double[]>.Failure("Ollama API URL is not configured.");
         }
-        if (string.IsNullOrWhiteSpace(_settings.Local.Model))
+        if (string.IsNullOrWhiteSpace(settings.Local.Model))
         {
             return Result<double[]>.Failure("Ollama model is not configured.");
         }
@@ -47,13 +48,13 @@ public class LocalEmbeddingProvider : IEmbeddingProvider
         {
             var requestBody = new
             {
-                model = _settings.Local.Model,
+                model = settings.Local.Model,
                 input = text
             };
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(_settings.Local.ApiUrl, content, cancellationToken);
+            var response = await _httpClient.PostAsync(settings.Local.ApiUrl, content, cancellationToken);
             response.EnsureSuccessStatusCode();
 
             var jsonResponse = await response.Content.ReadAsStringAsync(cancellationToken);

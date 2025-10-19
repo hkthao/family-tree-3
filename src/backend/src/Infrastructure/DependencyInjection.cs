@@ -1,7 +1,5 @@
 using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Common.Models.AISettings;
 using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Infrastructure.AI.TextExtractors;
@@ -10,6 +8,8 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
 using backend.Application.Services;
+using backend.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,8 +52,6 @@ public static class DependencyInjection
         });
 
         // Register Chat Module
-        services.Configure<AIChatSettings>(configuration.GetSection(AIChatSettings.SectionName));
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<AIChatSettings>>().Value); // Register AIChatSettings as singleton
 
         services.AddTransient<GeminiChatProvider>(); // Register concrete providers
         services.AddTransient<OpenAIChatProvider>();
@@ -63,23 +61,13 @@ public static class DependencyInjection
 
 
         // Register AI Content Generator
-        services.Configure<GeminiSettings>(configuration.GetSection(nameof(GeminiSettings)));
-        services.Configure<OpenAISettings>(configuration.GetSection(nameof(OpenAISettings)));
-        services.Configure<LocalAISettings>(configuration.GetSection(nameof(LocalAISettings)));
-        services.Configure<PineconeSettings>(configuration.GetSection(nameof(PineconeSettings)));
-        services.Configure<StorageSettings>(configuration.GetSection(nameof(StorageSettings)));
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<StorageSettings>>().Value);
 
         // Register Embedding Settings and Providers
-        services.Configure<EmbeddingSettings>(configuration.GetSection(EmbeddingSettings.SectionName));
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmbeddingSettings>>().Value);
         services.AddTransient<OpenAIEmbeddingProvider>();
         services.AddTransient<CohereEmbeddingProvider>();
         services.AddTransient<LocalEmbeddingProvider>();
         services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
         // Register Vector Store
-        services.Configure<VectorStoreSettings>(configuration.GetSection(VectorStoreSettings.SectionName));
-        services.AddSingleton(sp => sp.GetRequiredService<IOptions<VectorStoreSettings>>().Value);
         services.AddTransient<InMemoryVectorStore>();
         services.AddTransient<PineconeVectorStore>();
         services.AddTransient<QdrantVectorStore>();
@@ -93,14 +81,15 @@ public static class DependencyInjection
 
         // Register Configuration Provider
         services.AddMemoryCache();
-        services.Configure<AppSetting.AppSettings>(configuration.GetSection(nameof(AppSetting.AppSettings)));
-        services.AddScoped<backend.Application.Common.Interfaces.IConfigurationProvider, backend.Infrastructure.Services.ConfigurationProvider>();
+        services.AddScoped<backend.Application.Common.Interfaces.IConfigProvider, backend.Application.Common.Services.ConfigProvider>();
 
         // Register File Storage
         services.AddTransient<LocalFileStorage>();
         services.AddTransient<S3FileStorage>();
         services.AddTransient<CloudinaryFileStorage>();
         services.AddSingleton<IFileStorageFactory, FileStorageFactory>();
+
+        services.AddTransient<Microsoft.AspNetCore.Authentication.IClaimsTransformation, backend.Infrastructure.Auth.Auth0ClaimsTransformer>();
 
         return services;
     }

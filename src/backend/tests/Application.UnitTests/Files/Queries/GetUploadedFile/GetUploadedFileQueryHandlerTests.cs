@@ -1,10 +1,11 @@
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.Queries.GetUploadedFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -13,20 +14,20 @@ namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 public class GetUploadedFileQueryHandlerTests : TestBase
 {
     private readonly GetUploadedFileQueryHandler _handler;
-    private readonly Mock<IOptions<StorageSettings>> _mockStorageSettings;
+    private readonly Mock<IConfigProvider> _mockConfigProvider;
 
 
     public GetUploadedFileQueryHandlerTests()
     {
-        _mockStorageSettings = new Mock<IOptions<StorageSettings>>();
-        _mockStorageSettings.Setup(s => s.Value).Returns(new StorageSettings
+        _mockConfigProvider = new Mock<IConfigProvider>();
+        _mockConfigProvider.Setup(x => x.GetSection<StorageSettings>()).Returns(new StorageSettings
         {
             Local = new LocalStorageSettings
             {
                 LocalStoragePath = Path.Combine(Path.GetTempPath(), "test_storage")
             }
         });
-        _handler = new GetUploadedFileQueryHandler(_mockStorageSettings.Object);
+        _handler = new GetUploadedFileQueryHandler(_mockConfigProvider.Object);
     }
 
     /// <summary>
@@ -95,7 +96,8 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Create a dummy file in the mocked storage path
-        var localStoragePath = _mockStorageSettings.Object.Value.Local.LocalStoragePath;
+        var storageSettings = _mockConfigProvider.Object.GetSection<StorageSettings>();
+        var localStoragePath = storageSettings.Local.LocalStoragePath;
         Directory.CreateDirectory(localStoragePath);
         var filePath = Path.Combine(localStoragePath, uploadedFile.FileName);
         await File.WriteAllBytesAsync(filePath, new byte[] { 0x01, 0x02, 0x03 });

@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 
@@ -8,19 +9,21 @@ namespace backend.Infrastructure.Files;
 public class CloudinaryFileStorage : IFileStorage
 {
     private readonly Cloudinary _cloudinary;
-    private readonly StorageSettings _storageSettings;
+    private readonly IConfigProvider _configProvider;
 
-    public CloudinaryFileStorage(StorageSettings storageSettings)
+    public CloudinaryFileStorage(IConfigProvider configProvider)
     {
-        _storageSettings = storageSettings;
+        _configProvider = configProvider;
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         var account = new Account(
-            _storageSettings.Cloudinary.CloudName,
-            _storageSettings.Cloudinary.ApiKey,
-            _storageSettings.Cloudinary.ApiSecret);
+            storageSettings.Cloudinary.CloudName,
+            storageSettings.Cloudinary.ApiKey,
+            storageSettings.Cloudinary.ApiSecret);
         _cloudinary = new Cloudinary(account);
     }
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         try
         {
             var resourceType = GetResourceType(contentType);

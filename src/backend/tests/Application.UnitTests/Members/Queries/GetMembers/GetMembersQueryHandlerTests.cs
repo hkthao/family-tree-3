@@ -32,7 +32,7 @@ public class GetMembersQueryHandlerTests : TestBase
         {
             var userProfile = new UserProfile { Id = userProfileId, ExternalId = userId, Email = "test@example.com", Name = "Test User" };
             _context.UserProfiles.Add(userProfile);
-            _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
+            _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TESTFAM" });
             _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
             await _context.SaveChangesAsync(CancellationToken.None);
 

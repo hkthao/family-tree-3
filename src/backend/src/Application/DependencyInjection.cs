@@ -19,9 +19,11 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
 
+        services.AddSingleton<Common.Interfaces.IConfigProvider, Common.Services.ConfigProvider>();
+
         services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
         services.AddScoped<Common.Services.FamilyAuthorizationService>();
-        services.Configure<Common.Models.EmbeddingSettings>(configuration.GetSection(nameof(Common.Models.EmbeddingSettings)));
+
 
         return services;
     }

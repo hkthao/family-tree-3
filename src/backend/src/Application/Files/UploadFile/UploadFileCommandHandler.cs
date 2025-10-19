@@ -2,38 +2,39 @@ using System.Text.RegularExpressions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
+using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Enums;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.Files.UploadFile;
 
 public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Result<string>>
 {
     private readonly IFileStorage _fileStorage;
-    private readonly IOptions<StorageSettings> _storageSettingsOptions;
+    private readonly IConfigProvider _configProvider;
     private readonly IApplicationDbContext _context;
     private readonly IUser _user;
     private readonly IDateTime _dateTime;
 
-    public UploadFileCommandHandler(IFileStorage fileStorage, IOptions<StorageSettings> storageSettingsOptions, IApplicationDbContext context, IUser user, IDateTime dateTime)
+    public UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider configProvider, IApplicationDbContext context, IUser user, IDateTime dateTime)
     {
         _fileStorage = fileStorage;
-        _storageSettingsOptions = storageSettingsOptions;
+        _configProvider = configProvider;
         _context = context;
         _user = user;
         _dateTime = dateTime;
     }
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         // 1. Validate file size
-        var maxFileSizeInBytes = _storageSettingsOptions.Value.MaxFileSizeMB * 1024 * 1024;
+        var maxFileSizeInBytes = storageSettings.MaxFileSizeMB * 1024 * 1024;
         if (request.Length == 0)
         {
             return Result<string>.Failure("File is empty.", "Validation");
         }
         if (request.Length > maxFileSizeInBytes)
         {
-            return Result<string>.Failure($"File size exceeds the maximum limit of {_storageSettingsOptions.Value.MaxFileSizeMB} MB.", "Validation");
+            return Result<string>.Failure($"File size exceeds the maximum limit of {storageSettings.MaxFileSizeMB} MB.", "Validation");
         }
 
         // 2. Validate file type
@@ -67,7 +68,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             {
                 FileName = uniqueFileName,
                 Url = uploadResult.Value,
-                StorageProvider = Enum.Parse<StorageProvider>(_storageSettingsOptions.Value.Provider, true),
+                StorageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true),
                 ContentType = request.ContentType,
                 FileSize = request.Length,
                 UploadedBy = _user.Id ?? "",

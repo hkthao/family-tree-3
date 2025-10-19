@@ -29,7 +29,7 @@ public static class TestDbContextFactory
         if (context.Families.Any(f => f.Id == royalFamilyId))
             return;
 
-        context.Families.Add(new backend.Domain.Entities.Family { Id = royalFamilyId, Name = "Royal Family", Created = DateTime.UtcNow });
+        context.Families.Add(new backend.Domain.Entities.Family { Id = royalFamilyId, Name = "Royal Family", Code = "ROYAL", Created = DateTime.UtcNow });
 
         var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef");
         var catherineId = Guid.Parse("b2c3d4e5-f6a1-8901-2345-67890abcdef0");

@@ -2,10 +2,11 @@ using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Enums;
 using backend.Infrastructure;
-using backend.Infrastructure.Auth;
+
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -25,20 +26,20 @@ public static class DependencyInjection
         services.AddInfrastructureServices(configuration);
 
 
-        // Configure StorageSettings
-        services.Configure<StorageSettings>(configuration.GetSection(nameof(StorageSettings)));
+
         services.AddScoped<IFileStorageFactory, FileStorageFactory>();
         // Register IFileStorage based on configuration
         services.AddTransient(sp =>
         {
             var factory = sp.GetRequiredService<IFileStorageFactory>();
-            var storageSettings = sp.GetRequiredService<IOptions<StorageSettings>>().Value;
+            var configProvider = sp.GetRequiredService<IConfigProvider>();
+            var storageSettings = configProvider.GetSection<StorageSettings>();
             return factory.CreateFileStorage(Enum.Parse<StorageProvider>(storageSettings.Provider, true));
         });
 
-        // Configure Auth0Config
-        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
-        var jwtSettings = configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+        var configProvider = services.BuildServiceProvider().GetRequiredService<IConfigProvider>();
+        var jwtSettings = configProvider.GetSection<backend.Application.Common.Models.AppSetting.JwtSettings>();
 
         // Configure Auth0 Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

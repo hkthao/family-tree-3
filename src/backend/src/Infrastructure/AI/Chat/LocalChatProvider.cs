@@ -1,6 +1,7 @@
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.AI.Chat;
@@ -8,24 +9,25 @@ namespace backend.Infrastructure.AI.Chat;
 public class LocalChatProvider : IChatProvider
 {
     private readonly HttpClient _httpClient;
-    private readonly AIChatSettings _chatSettings;
     private readonly ILogger<LocalChatProvider> _logger;
+    private readonly IConfigProvider _configProvider;
 
-    public LocalChatProvider(HttpClient httpClient, AIChatSettings chatSettings, ILogger<LocalChatProvider> logger)
+    public LocalChatProvider(HttpClient httpClient, IConfigProvider configProvider, ILogger<LocalChatProvider> logger)
     {
         _httpClient = httpClient;
-        _chatSettings = chatSettings;
+        _configProvider = configProvider;
         _logger = logger;
     }
 
     public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {
-        if (string.IsNullOrWhiteSpace(_chatSettings.Local.ApiUrl))
+        var chatSettings = _configProvider.GetSection<AIChatSettings>();
+        if (string.IsNullOrWhiteSpace(chatSettings.Local.ApiUrl))
         {
             _logger.LogError("Ollama chat API URL is not configured.");
             return "Error: Ollama chat API URL is not configured.";
         }
-        if (string.IsNullOrWhiteSpace(_chatSettings.Local.Model))
+        if (string.IsNullOrWhiteSpace(chatSettings.Local.Model))
         {
             _logger.LogError("Ollama chat model is not configured.");
             return "Error: Ollama chat model is not configured.";
@@ -35,7 +37,7 @@ public class LocalChatProvider : IChatProvider
         {
             var requestBody = new
             {
-                model = _chatSettings.Local.Model,
+                model = chatSettings.Local.Model,
                 messages,
                 stream = false,
                 max_tokens = 300
@@ -43,7 +45,7 @@ public class LocalChatProvider : IChatProvider
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, System.Text.Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(_chatSettings.Local.ApiUrl, content);
+            var response = await _httpClient.PostAsync(chatSettings.Local.ApiUrl, content);
             response.EnsureSuccessStatusCode();
 
             var jsonResponse = await response.Content.ReadAsStringAsync();

@@ -1,10 +1,9 @@
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Common;
-using backend.Application.Faces.Queries; // For DetectedFaceDto
+using backend.Application.Faces.Queries;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 
@@ -13,15 +12,15 @@ public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, Fac
     private readonly IFaceApiService _faceApiService; // Changed from IFaceDetectionService
     private readonly IApplicationDbContext _context;
     private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly VectorStoreSettings _vectorStoreSettings;
     private readonly ILogger<DetectFacesCommandHandler> _logger;
+    private readonly IConfigProvider _configProvider;
 
-    public DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, IVectorStoreFactory vectorStoreFactory, IOptions<VectorStoreSettings> vectorStoreSettings, ILogger<DetectFacesCommandHandler> logger)
+    public DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider, ILogger<DetectFacesCommandHandler> logger)
     {
         _faceApiService = faceApiService; // Changed
         _context = context;
         _vectorStoreFactory = vectorStoreFactory;
-        _vectorStoreSettings = vectorStoreSettings.Value;
+        _configProvider = configProvider;
         _logger = logger;
     }
 
@@ -36,7 +35,8 @@ public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, Fac
         // For now, we'll just return the detected faces with the generated ImageId
 
         var detectedFaceDtos = new List<DetectedFaceDto>();
-        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
+        var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(vectorStoreSettings.Provider));
         var collectionName = "family-face-embeddings";
 
         foreach (var faceResult in detectedFacesResult)

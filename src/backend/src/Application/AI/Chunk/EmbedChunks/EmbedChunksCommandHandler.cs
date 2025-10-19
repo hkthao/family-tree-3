@@ -1,8 +1,7 @@
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Enums;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.AI.Chunk.EmbedChunks;
 
@@ -10,15 +9,13 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
 {
     private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
     private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly VectorStoreSettings _vectorStoreSettings;
-    private readonly EmbeddingSettings _embeddingSettings;
+    private readonly IConfigProvider _configProvider;
 
-    public EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IOptions<VectorStoreSettings> vectorStoreSettingsOptions, IOptions<EmbeddingSettings> embeddingSettingsOptions)
+    public EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider)
     {
         _embeddingProviderFactory = embeddingProviderFactory;
         _vectorStoreFactory = vectorStoreFactory;
-        _vectorStoreSettings = vectorStoreSettingsOptions.Value;
-        _embeddingSettings = embeddingSettingsOptions.Value;
+        _configProvider = configProvider;
     }
 
     public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
@@ -28,17 +25,19 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
             return Result.Failure("No chunks provided for embedding.");
         }
 
+        var embeddingSettings = _configProvider.GetSection<EmbeddingSettings>();
         IEmbeddingProvider embeddingProvider;
         try
         {
-            embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(_embeddingSettings.Provider));
+            embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(embeddingSettings.Provider));
         }
         catch (ArgumentException ex)
         {
             return Result.Failure(ex.Message);
         }
 
-        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
+        var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(vectorStoreSettings.Provider));
 
         foreach (var chunk in request.Chunks)
         {

@@ -1,9 +1,8 @@
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 
@@ -11,16 +10,16 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
 {
     private readonly ILogger<SaveFaceLabelsCommandHandler> _logger;
     private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly VectorStoreSettings _vectorStoreSettings;
+    private readonly IConfigProvider _configProvider;
 
     public SaveFaceLabelsCommandHandler(
         ILogger<SaveFaceLabelsCommandHandler> logger,
         IVectorStoreFactory vectorStoreFactory,
-        IOptions<VectorStoreSettings> vectorStoreSettingsOptions)
+        IConfigProvider configProvider)
     {
         _logger = logger;
         _vectorStoreFactory = vectorStoreFactory;
-        _vectorStoreSettings = vectorStoreSettingsOptions.Value;
+        _configProvider = configProvider;
     }
 
     public async Task<Result<Unit>> Handle(SaveFaceLabelsCommand request, CancellationToken cancellationToken)
@@ -28,7 +27,8 @@ public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsComman
         _logger.LogInformation("Handling SaveFaceLabelsCommand for ImageId {ImageId} with {FaceCount} faces.",
             request.ImageId, request.FaceLabels.Count);
 
-        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
+        var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+        IVectorStore vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(vectorStoreSettings.Provider));
         var collectionName = "family-face-embeddings";
         var dim = 512;
 

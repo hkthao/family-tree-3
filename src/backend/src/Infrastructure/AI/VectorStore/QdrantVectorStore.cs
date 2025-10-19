@@ -1,8 +1,8 @@
 using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 
@@ -11,17 +11,18 @@ namespace backend.Infrastructure.AI.VectorStore;
 public class QdrantVectorStore : IVectorStore
 {
     private readonly ILogger<QdrantVectorStore> _logger;
-    private readonly VectorStoreSettings _vectorStoreSettings;
+    private readonly IConfigProvider _configProvider;
     private readonly QdrantClient _qdrantClient;
     private readonly string _defaultCollectionName; // Renamed from _collectionName
     private readonly int _defaultVectorSize; // Renamed from _vectorSize
 
-    public QdrantVectorStore(ILogger<QdrantVectorStore> logger, IOptions<VectorStoreSettings> vectorStoreSettings)
+    public QdrantVectorStore(ILogger<QdrantVectorStore> logger, IConfigProvider configProvider)
     {
         _logger = logger;
-        _vectorStoreSettings = vectorStoreSettings.Value;
+        _configProvider = configProvider;
 
-        var qdrantSettings = _vectorStoreSettings.Qdrant;
+        var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+        var qdrantSettings = vectorStoreSettings.Qdrant;
 
         if (qdrantSettings == null)
         {
@@ -31,7 +32,7 @@ public class QdrantVectorStore : IVectorStore
         var host = qdrantSettings.Host;
         var apiKey = qdrantSettings.ApiKey;
         _defaultCollectionName = qdrantSettings.CollectionName;
-        _defaultVectorSize = qdrantSettings.VectorSize;
+        _defaultVectorSize = int.Parse(qdrantSettings.VectorSize);
 
         if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(_defaultCollectionName))
         {
@@ -47,10 +48,11 @@ public class QdrantVectorStore : IVectorStore
 
     private async Task EnsureCollectionExistsAsync(string collectionName, int vectorSize)
     {
+        var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
         var collectionExists = await _qdrantClient.CollectionExistsAsync(collectionName);
         if (!collectionExists)
         {
-            _logger.LogInformation("Creating Qdrant collection {CollectionName} with vector size {VectorSize}. (Host: {Host})", collectionName, vectorSize, _vectorStoreSettings.Qdrant.Host);
+            _logger.LogInformation("Creating Qdrant collection {CollectionName} with vector size {VectorSize}. (Host: {Host})", collectionName, vectorSize, vectorStoreSettings.Qdrant.Host);
             await _qdrantClient.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)vectorSize, Distance = Distance.Cosine }
@@ -119,6 +121,7 @@ public class QdrantVectorStore : IVectorStore
 
         try
         {
+            var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
             var searchPoints = await _qdrantClient.SearchAsync(
                 collectionName: collectionName, // Use specific collectionName
                 vector: new ReadOnlyMemory<float>(queryEmbedding.Select(e => (float)e).ToArray()),
@@ -150,7 +153,8 @@ public class QdrantVectorStore : IVectorStore
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error querying Qdrant collection {CollectionName}. (Host: {Host})", collectionName, _vectorStoreSettings.Qdrant.Host);
+            var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+            _logger.LogError(ex, "Error querying Qdrant collection {CollectionName}. (Host: {Host})", collectionName, vectorStoreSettings.Qdrant.Host);
             throw; // Re-throw to be handled by higher layers
         }
     }

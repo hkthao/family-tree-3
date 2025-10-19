@@ -1,11 +1,11 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 
@@ -15,22 +15,23 @@ public class UploadFileCommandHandlerTests : TestBase
 {
     private readonly UploadFileCommandHandler _handler;
     private readonly Mock<IFileStorage> _mockFileStorage;
-    private readonly Mock<IOptions<StorageSettings>> _mockStorageSettings;
+    private readonly Mock<IConfigProvider> _mockConfigProvider;
     private readonly Mock<IDateTime> _mockDateTime;
 
     public UploadFileCommandHandlerTests()
     {
         _mockFileStorage = new Mock<IFileStorage>();
-        _mockStorageSettings = new Mock<IOptions<StorageSettings>>();
+        _mockConfigProvider = new Mock<IConfigProvider>();
         _mockDateTime = new Mock<IDateTime>();
-        _mockStorageSettings.Setup(s => s.Value).Returns(new StorageSettings
+        _mockConfigProvider.Setup(x => x.GetSection<StorageSettings>()).Returns(new StorageSettings
         {
             Local = new LocalStorageSettings
             {
                 LocalStoragePath = Path.Combine(Path.GetTempPath(), "test_storage")
-            }
+            },
+            MaxFileSizeMB = 5 // Set a default for testing
         });
-        _handler = new UploadFileCommandHandler(_mockFileStorage.Object, _mockStorageSettings.Object, _context, _mockUser.Object, _mockDateTime.Object);
+        _handler = new UploadFileCommandHandler(_mockFileStorage.Object, _mockConfigProvider.Object, _context, _mockUser.Object, _mockDateTime.Object);
     }
 
     /// <summary>

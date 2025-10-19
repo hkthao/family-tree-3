@@ -1,32 +1,34 @@
 using System.Security.Claims;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Auth
 {
     public class Auth0ClaimsTransformer : IClaimsTransformation
     {
-        private readonly JwtSettings _authConfig;
+        private readonly IConfigProvider _configProvider;
 
-        public Auth0ClaimsTransformer(IOptions<JwtSettings> authConfig)
+        public Auth0ClaimsTransformer(IConfigProvider configProvider)
         {
-            _authConfig = authConfig.Value ?? throw new ArgumentNullException("JwtOptions cannot be null.");
+            _configProvider = configProvider;
         }
 
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             var identity = (ClaimsIdentity)principal.Identity!;
+            var authConfig = _configProvider.GetSection<JwtSettings>();
 
             // Map Auth0 claims to standard .NET Core claims
             // Example: Map 'name' claim from Auth0 to ClaimTypes.Name
-            var nameClaim = identity.FindFirst($"{_authConfig.Namespace}name") ?? identity.FindFirst("name");
+            var nameClaim = identity.FindFirst($"{authConfig.Namespace}name") ?? identity.FindFirst("name");
             if (nameClaim != null)
             {
                 identity.AddClaim(new Claim(ClaimTypes.Name, nameClaim.Value));
             }
 
             // Example: Map 'email' claim from Auth0 to ClaimTypes.Email
-            var emailClaim = identity.FindFirst($"{_authConfig.Namespace}email") ?? identity.FindFirst("email");
+            var emailClaim = identity.FindFirst($"{authConfig.Namespace}email") ?? identity.FindFirst("email");
             if (emailClaim != null)
             {
                 identity.AddClaim(new Claim(ClaimTypes.Email, emailClaim.Value));

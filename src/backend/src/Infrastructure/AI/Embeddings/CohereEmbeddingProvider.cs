@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Options;
+using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
@@ -11,9 +11,9 @@ public class CohereEmbeddingProvider : IEmbeddingProvider
     public string ProviderName => "Cohere";
     public int MaxTextLength => _settings.Cohere.MaxTextLength;
 
-    public CohereEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings)
+    public CohereEmbeddingProvider(IConfigProvider configProvider)
     {
-        _settings = embeddingSettings.Value;
+        _settings = configProvider.GetSection<EmbeddingSettings>();
     }
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)

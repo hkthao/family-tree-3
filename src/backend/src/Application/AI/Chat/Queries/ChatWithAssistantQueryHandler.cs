@@ -1,6 +1,6 @@
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
@@ -11,26 +11,20 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
     private readonly IChatProviderFactory _chatProviderFactory;
     private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
     private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly AIChatSettings _chatSettings;
-    private readonly EmbeddingSettings _embeddingSettings;
-    private readonly VectorStoreSettings _vectorStoreSettings;
     private readonly ILogger<ChatWithAssistantQueryHandler> _logger;
+    private readonly IConfigProvider _configProvider;
 
     public ChatWithAssistantQueryHandler(
         IChatProviderFactory chatProviderFactory,
         IEmbeddingProviderFactory embeddingProviderFactory,
         IVectorStoreFactory vectorStoreFactory,
-        AIChatSettings chatSettings,
-        EmbeddingSettings embeddingSettings,
-        VectorStoreSettings vectorStoreSettings,
+        IConfigProvider configProvider,
         ILogger<ChatWithAssistantQueryHandler> logger)
     {
         _chatProviderFactory = chatProviderFactory;
         _embeddingProviderFactory = embeddingProviderFactory;
         _vectorStoreFactory = vectorStoreFactory;
-        _chatSettings = chatSettings;
-        _embeddingSettings = embeddingSettings;
-        _vectorStoreSettings = vectorStoreSettings;
+        _configProvider = configProvider;
         _logger = logger;
     }
 
@@ -49,8 +43,8 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             };
 
             // Proceed with RAG flow
-            // 1. Generate embedding for the user's prompt
-            var embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(_embeddingSettings.Provider));
+            var embeddingSettings = _configProvider.GetSection<EmbeddingSettings>();
+            var embeddingProvider = _embeddingProviderFactory.GetProvider(Enum.Parse<EmbeddingAIProvider>(embeddingSettings.Provider));
             var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(request.UserMessage, cancellationToken);
 
             if (!embeddingResult.IsSuccess)
@@ -59,9 +53,11 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
             var userEmbedding = embeddingResult.Value!;
 
             // 2. Search in vector store
-            var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(_vectorStoreSettings.Provider));
-            var silimarityResults = await vectorStore.QueryAsync(userEmbedding, _vectorStoreSettings.TopK, [], cancellationToken);
-            var searchResults = silimarityResults.Where(s => s.Score > _chatSettings.ScoreThreshold).OrderByDescending(r => r.Score).ToList();
+            var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+            var vectorStore = _vectorStoreFactory.CreateVectorStore(Enum.Parse<VectorStoreProviderType>(vectorStoreSettings.Provider));
+            var silimarityResults = await vectorStore.QueryAsync(userEmbedding, vectorStoreSettings.TopK, [], cancellationToken);
+            var chatSettings = _configProvider.GetSection<AIChatSettings>();
+            var searchResults = silimarityResults.Where(s => s.Score > (chatSettings.ScoreThreshold / 100.0)).OrderByDescending(r => r.Score).ToList();
 
             // 3. Check if relevant context exists
             if (searchResults == null || searchResults.Count == 0)
@@ -73,7 +69,7 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
                 {
                     Response = "Tôi không tìm thấy thông tin liên quan trong cơ sở dữ liệu. Bạn có câu hỏi nào khác về phần mềm không?",
                     SessionId = request.SessionId,
-                    Model = isFallback ? "Fallback" : _chatSettings.Provider.ToString(),
+                    Model = isFallback ? "Fallback" : chatSettings.Provider.ToString(),
                     CreatedAt = DateTime.UtcNow
                 };
                 return Result<ChatResponse>.Success(chatResponse);
@@ -90,14 +86,14 @@ public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQu
                 };
 
                 // 5. Get chat response using the determined prompt
-                var chatProvider = _chatProviderFactory.GetProvider(Enum.Parse<ChatAIProvider>(_chatSettings.Provider));
+                var chatProvider = _chatProviderFactory.GetProvider(Enum.Parse<ChatAIProvider>(chatSettings.Provider));
                 var responseContent = await chatProvider.GenerateResponseAsync(messages);
 
                 chatResponse = new ChatResponse
                 {
                     Response = responseContent,
                     SessionId = request.SessionId,
-                    Model = isFallback ? "Fallback" : _chatSettings.Provider.ToString(),
+                    Model = isFallback ? "Fallback" : chatSettings.Provider.ToString(),
                     CreatedAt = DateTime.UtcNow
                 };
             }

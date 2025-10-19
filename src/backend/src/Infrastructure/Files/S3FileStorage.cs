@@ -2,29 +2,32 @@ using Amazon.S3;
 using Amazon.S3.Model;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Infrastructure.Files;
 
 public class S3FileStorage : IFileStorage
 {
     private readonly IAmazonS3 _s3Client;
-    private readonly StorageSettings _storageSettings;
+    private readonly IConfigProvider _configProvider;
 
-    public S3FileStorage(StorageSettings storageSettings)
+    public S3FileStorage(IConfigProvider configProvider)
     {
-        _storageSettings = storageSettings;
+        _configProvider = configProvider;
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         _s3Client = new AmazonS3Client(
-            _storageSettings.S3.AccessKey,
-            _storageSettings.S3.SecretKey,
-            Amazon.RegionEndpoint.GetBySystemName(_storageSettings.S3.Region));
+            storageSettings.S3.AccessKey,
+            storageSettings.S3.SecretKey,
+            Amazon.RegionEndpoint.GetBySystemName(storageSettings.S3.Region));
     }
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         try
         {
             var putObjectRequest = new PutObjectRequest
             {
-                BucketName = _storageSettings.S3.BucketName,
+                BucketName = storageSettings.S3.BucketName,
                 Key = fileName,
                 ContentType = contentType,
                 InputStream = fileStream,
@@ -34,7 +37,7 @@ public class S3FileStorage : IFileStorage
             await _s3Client.PutObjectAsync(putObjectRequest, cancellationToken);
 
             // Construct the public URL for the uploaded file
-            var fileUrl = $"https://{_storageSettings.S3.BucketName}.s3.{_storageSettings.S3.Region}.amazonaws.com/{fileName}";
+            var fileUrl = $"https://{storageSettings.S3.BucketName}.s3.{storageSettings.S3.Region}.amazonaws.com/{fileName}";
             return Result<string>.Success(fileUrl);
         }
         catch (Exception ex)
@@ -45,6 +48,7 @@ public class S3FileStorage : IFileStorage
 
     public async Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
     {
+        var storageSettings = _configProvider.GetSection<StorageSettings>();
         try
         {
             // Extract file name from the URL
@@ -53,7 +57,7 @@ public class S3FileStorage : IFileStorage
 
             var deleteObjectRequest = new DeleteObjectRequest
             {
-                BucketName = _storageSettings.S3.BucketName,
+                BucketName = storageSettings.S3.BucketName,
                 Key = fileName
             };
             await _s3Client.DeleteObjectAsync(deleteObjectRequest, cancellationToken);

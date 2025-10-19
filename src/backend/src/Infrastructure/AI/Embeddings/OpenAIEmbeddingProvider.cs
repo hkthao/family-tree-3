@@ -2,30 +2,31 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
 public class OpenAIEmbeddingProvider : IEmbeddingProvider
 {
-    private readonly EmbeddingSettings _settings;
     private readonly HttpClient _httpClient;
     private readonly ILogger<OpenAIEmbeddingProvider> _logger;
+    private readonly IConfigProvider _configProvider;
 
     public string ProviderName => "OpenAI";
-    public int MaxTextLength => _settings.OpenAI.MaxTextLength;
+    public int MaxTextLength => _configProvider.GetSection<EmbeddingSettings>().OpenAI.MaxTextLength;
 
-    public OpenAIEmbeddingProvider(IOptions<EmbeddingSettings> embeddingSettings, HttpClient httpClient, ILogger<OpenAIEmbeddingProvider> logger)
+    public OpenAIEmbeddingProvider(IConfigProvider configProvider, HttpClient httpClient, ILogger<OpenAIEmbeddingProvider> logger)
     {
-        _settings = embeddingSettings.Value;
+        _configProvider = configProvider;
         _httpClient = httpClient;
         _logger = logger;
     }
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(_settings.OpenAI.ApiKey))
+        var settings = _configProvider.GetSection<EmbeddingSettings>();
+        if (string.IsNullOrWhiteSpace(settings.OpenAI.ApiKey))
         {
             return Result<double[]>.Failure("OpenAI API key is not configured.");
         }
@@ -37,16 +38,16 @@ public class OpenAIEmbeddingProvider : IEmbeddingProvider
 
         try
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _settings.OpenAI.ApiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.OpenAI.ApiKey);
             var requestBody = new
             {
-                model = _settings.OpenAI.Model,
+                model = settings.OpenAI.Model,
                 input = text
             };
             var jsonRequestBody = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(jsonRequestBody, System.Text.Encoding.UTF8, "application/json");
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _settings.OpenAI.ApiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", settings.OpenAI.ApiKey);
             var response = await _httpClient.PostAsync("https://api.openai.com/v1/embeddings", content, cancellationToken);
             response.EnsureSuccessStatusCode();
 

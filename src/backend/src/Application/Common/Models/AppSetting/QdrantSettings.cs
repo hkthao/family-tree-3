@@ -1,9 +1,10 @@
-namespace backend.Application.Common.Models.AISettings;
+namespace backend.Application.Common.Models.AppSetting;
 
 public class QdrantSettings
 {
+    public const string SectionName = "QdrantSettings";
     public string Host { get; set; } = null!;
     public string ApiKey { get; set; } = null!;
     public string CollectionName { get; set; } = null!;
-    public int VectorSize { get; set; } = 1024; // Default for OpenAI embeddings
+    public string VectorSize { get; set; } = null!;
 }
