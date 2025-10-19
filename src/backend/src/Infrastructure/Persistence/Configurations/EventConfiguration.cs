@@ -4,21 +4,21 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace backend.Infrastructure.Persistence.Configurations;
 
-public class MemberConfiguration : IEntityTypeConfiguration<Member>
+public class EventConfiguration : IEntityTypeConfiguration<Event>
 {
-    public void Configure(EntityTypeBuilder<Member> builder)
+    public void Configure(EntityTypeBuilder<Event> builder)
     {
-        builder.Property(m => m.Code)
+        builder.Property(e => e.Code)
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.HasIndex(m => m.Code)
+        builder.HasIndex(e => e.Code)
             .IsUnique();
 
-        builder.HasOne(m => m.Family)
+        builder.HasOne<Family>()
             .WithMany()
-            .HasForeignKey(m => m.FamilyId)
-            .IsRequired()
+            .HasForeignKey(e => e.FamilyId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

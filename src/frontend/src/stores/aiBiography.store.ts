@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, Member } from '@/types';  Member
+import type { BiographyResultDto, AIProviderDto, Member } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
-import { useNotificationStore } from './notification.store'; 
+import { useNotificationStore } from './notification.store';
 
 export const useAIBiographyStore = defineStore('aiBiography', {
   state: () => ({
@@ -12,7 +12,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
 
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
-    currentMember: null as Member | null, 
+    currentMember: null as Member | null,
     style: BiographyStyle.Emotional as BiographyStyle,
     generatedFromDB: true,
     userPrompt: null as string | null,
@@ -34,10 +34,13 @@ export const useAIBiographyStore = defineStore('aiBiography', {
             this.biographyResult = { content: this.currentMember.biography };
           }
         } else {
-          this.error = result.error?.message || i18n.global.t('aiBiography.errors.fetchMemberFailed');
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.fetchMemberFailed');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -75,8 +78,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         this.loading = false;
       }
     },
-
-
 
     async fetchAIProviders() {
       this.loading = true;
@@ -126,7 +127,10 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.error = null;
 
       try {
-        const result = await this.services.member.updateMemberBiography(memberId, content); // Changed
+        const result = await this.services.member.updateMemberBiography(
+          memberId,
+          content,
+        ); // Changed
 
         if (result.ok) {
           console.log('Biography saved successfully:', result.value);
@@ -135,7 +139,10 @@ export const useAIBiographyStore = defineStore('aiBiography', {
             this.currentMember.biography = content;
           }
           const notificationStore = useNotificationStore();
-          notificationStore.showSnackbar(i18n.global.t('aiBiography.success.save'), 'success');
+          notificationStore.showSnackbar(
+            i18n.global.t('aiBiography.success.save'),
+            'success',
+          );
         } else {
           this.error =
             result.error?.message ||

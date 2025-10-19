@@ -5,20 +5,22 @@ namespace backend.Infrastructure.AI.TextExtractors
 {
     public class FileTextExtractorFactory : IFileTextExtractorFactory
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public FileTextExtractorFactory(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
+            private readonly IServiceScopeFactory _serviceScopeFactory;
+        
+            public FileTextExtractorFactory(IServiceScopeFactory serviceScopeFactory)
+            {
+                _serviceScopeFactory = serviceScopeFactory;
+            }
         public IFileTextExtractor GetExtractor(string fileExtension)
         {
+            var scope = _serviceScopeFactory.CreateScope();
+            var serviceProvider = scope.ServiceProvider; // Get the service provider for this scope
+
             return fileExtension.ToLowerInvariant() switch
             {
-                ".pdf" => _serviceProvider.GetRequiredService<PdfTextExtractor>(),
-                ".txt" => _serviceProvider.GetRequiredService<TxtTextExtractor>(),
-                ".md" => _serviceProvider.GetRequiredService<MdTextExtractor>(),
+                ".pdf" => serviceProvider.GetRequiredService<PdfTextExtractor>(),
+                ".txt" => serviceProvider.GetRequiredService<TxtTextExtractor>(),
+                ".md" => serviceProvider.GetRequiredService<MdTextExtractor>(),
                 _ => throw new ArgumentException("Unsupported file type.")
             };
         }

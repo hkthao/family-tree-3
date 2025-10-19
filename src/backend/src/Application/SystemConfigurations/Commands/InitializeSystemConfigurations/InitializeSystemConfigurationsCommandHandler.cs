@@ -47,6 +47,10 @@ public class InitializeSystemConfigurationsCommandHandler : IRequestHandler<Init
             var key = configEntry.Key;
             var value = configEntry.Value;
 
+            // Normalize key: replace '__' with ':' for consistency with IConfiguration sections
+            key = key.Replace("__", ":"); // Environment variables use __ for nested sections
+            key = key.Replace("_", ":"); // Also replace single underscores if they are used as separators
+
             if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
             {
                 continue;

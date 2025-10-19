@@ -6,19 +6,23 @@ namespace backend.Infrastructure.AI.VectorStore;
 
 public class VectorStoreFactory : IVectorStoreFactory
 {
-    private readonly IServiceProvider _serviceProvider;
-    public VectorStoreFactory(IServiceProvider serviceProvider)
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public VectorStoreFactory(IServiceScopeFactory serviceScopeFactory)
     {
-        _serviceProvider = serviceProvider;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public IVectorStore CreateVectorStore(VectorStoreProviderType provider)
     {
+        var scope = _serviceScopeFactory.CreateScope();
+        var serviceProvider = scope.ServiceProvider; // Get the service provider for this scope
+
         return provider switch
         {
-            VectorStoreProviderType.Pinecone => _serviceProvider.GetRequiredService<PineconeVectorStore>(),
-            VectorStoreProviderType.InMemory => _serviceProvider.GetRequiredService<InMemoryVectorStore>(),
-            VectorStoreProviderType.Qdrant => _serviceProvider.GetRequiredService<QdrantVectorStore>(),
+            VectorStoreProviderType.Pinecone => serviceProvider.GetRequiredService<PineconeVectorStore>(),
+            VectorStoreProviderType.InMemory => serviceProvider.GetRequiredService<InMemoryVectorStore>(),
+            VectorStoreProviderType.Qdrant => serviceProvider.GetRequiredService<QdrantVectorStore>(),
             _ => throw new InvalidOperationException($"No vector store provider configured for: {provider}")
         };
     }

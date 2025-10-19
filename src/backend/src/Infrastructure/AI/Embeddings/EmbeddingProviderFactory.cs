@@ -6,20 +6,22 @@ namespace backend.Infrastructure.AI.Embeddings
 {
     public class EmbeddingProviderFactory : IEmbeddingProviderFactory
     {
-        private readonly IServiceProvider _serviceProvider;
-
-        public EmbeddingProviderFactory(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
+            private readonly IServiceScopeFactory _serviceScopeFactory;
+        
+            public EmbeddingProviderFactory(IServiceScopeFactory serviceScopeFactory)
+            {
+                _serviceScopeFactory = serviceScopeFactory;
+            }
         public IEmbeddingProvider GetProvider(EmbeddingAIProvider provider)
         {
+            var scope = _serviceScopeFactory.CreateScope();
+            var serviceProvider = scope.ServiceProvider; // Get the service provider for this scope
+
             return provider switch
             {
-                EmbeddingAIProvider.OpenAI => _serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
-                EmbeddingAIProvider.Cohere => _serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
-                EmbeddingAIProvider.Local => _serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
+                EmbeddingAIProvider.OpenAI => serviceProvider.GetRequiredService<OpenAIEmbeddingProvider>(),
+                EmbeddingAIProvider.Cohere => serviceProvider.GetRequiredService<CohereEmbeddingProvider>(),
+                EmbeddingAIProvider.Local => serviceProvider.GetRequiredService<LocalEmbeddingProvider>(),
                 _ => throw new ArgumentException($"Unsupported embedding provider: {provider}")
             };
         }

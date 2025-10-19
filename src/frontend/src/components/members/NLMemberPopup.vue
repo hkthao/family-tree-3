@@ -27,7 +27,7 @@
             <v-divider class="mb-2"></v-divider>
             <div v-for="key in displayKeys" :key="key">
               <p class="text-body-2">
-                <strong>{{ t(`member.${key}`) || key }}:</strong>
+                <strong>{{ t(`member.form.${key}`) || key }}:</strong>
                 {{ formatValue(member[key as keyof Member], key) }}
               </p>
             </div>

@@ -23,18 +23,30 @@ public class ConfigProvider : IConfigProvider
         var sectionName = typeof(T).Name;
 
         // Try to get from database first
-        var dbConfigResult = _systemConfigurationService.GetConfigurationAsync(sectionName).GetAwaiter().GetResult();
-        if (dbConfigResult.IsSuccess && dbConfigResult.Value!=null && !string.IsNullOrEmpty(dbConfigResult.Value.Value))
+        var allDbConfigsResult = _systemConfigurationService.GetAllConfigurationsAsync().GetAwaiter().GetResult();
+
+        if (allDbConfigsResult.IsSuccess && allDbConfigsResult.Value != null)
         {
-            try
+            var sectionConfigs = allDbConfigsResult.Value
+                .Where(c => c.Key.StartsWith(sectionName + ":")) // Filter configs belonging to this section
+                .ToDictionary(c => c.Key.Substring(sectionName.Length + 1), c => (string?)c.Value);
+
+            if (sectionConfigs.Any())
             {
-                // Deserialize the JSON string value from the database into the T object
-                return JsonSerializer.Deserialize<T>(dbConfigResult.Value.Value) ?? new T();
-            }
-            catch (JsonException ex)
-            {
-                // Log error and fall back to file/env config
-                _logger.LogError(ex, "Failed to deserialize config section {SectionName} from database.", sectionName);
+                try
+                {
+                    // Create a temporary IConfiguration from the dictionary
+                    var configBuilder = new ConfigurationBuilder();
+                    configBuilder.AddInMemoryCollection(sectionConfigs);
+                    var tempConfig = configBuilder.Build();
+
+                    // Bind the section to the T object
+                    return tempConfig.Get<T>() ?? new T();
+                }
+                catch (Exception ex) // Catch general exception during configuration binding
+                {
+                    _logger.LogError(ex, "Failed to bind config section {SectionName} from database configurations.", sectionName);
+                }
             }
         }
 

@@ -6,21 +6,24 @@ namespace backend.Infrastructure.AI.Chat;
 
 public class ChatProviderFactory : IChatProviderFactory
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public ChatProviderFactory(IServiceProvider serviceProvider)
+    public ChatProviderFactory(IServiceScopeFactory serviceScopeFactory)
     {
-        _serviceProvider = serviceProvider;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public IChatProvider GetProvider(ChatAIProvider provider)
     {
+        var scope = _serviceScopeFactory.CreateScope();
+        var serviceProvider = scope.ServiceProvider; // Get the service provider for this scope
+
         return provider switch
         {
-            ChatAIProvider.Local => _serviceProvider.GetRequiredService<LocalChatProvider>(),
-            ChatAIProvider.Gemini => _serviceProvider.GetRequiredService<GeminiChatProvider>(),
-            ChatAIProvider.OpenAI => _serviceProvider.GetRequiredService<OpenAIChatProvider>(),
-            _ => throw new InvalidOperationException($"No file chat AI provider configured for: {provider}")
+            ChatAIProvider.Gemini => serviceProvider.GetRequiredService<GeminiChatProvider>(),
+            ChatAIProvider.OpenAI => serviceProvider.GetRequiredService<OpenAIChatProvider>(),
+            ChatAIProvider.Local => serviceProvider.GetRequiredService<LocalChatProvider>(),
+            _ => throw new ArgumentOutOfRangeException(nameof(provider), $"Not supported chat AI provider: {provider}")
         };
     }
 }
