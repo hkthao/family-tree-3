@@ -3,22 +3,19 @@
     <div class="image-container" ref="imageContainer">
       <img :src="imageSrc" class="responsive-image" @load="onImageLoad" />
       <div v-if="imageLoaded" class="bounding-boxes-overlay">
-        <div
-          v-for="face in faces"
-          :key="face.id"
-          class="bounding-box"
-          :style="getBoxStyle(face.boundingBox)"
-          :class="{
-            'bounding-box--recognized': face.status === 'recognized',
-            'bounding-box--unrecognized': face.status === 'unrecognized',
-            'bounding-box--newly-labeled': face.status === 'newly-labeled',
-            'bounding-box--selected': selectable && face.id === selectedFaceId,
-            'bounding-box--selectable': selectable,
-          }"
-          @click="selectable && $emit('face-selected', face.id)"
-        >
+        <div v-for="face in faces" :key="face.id" class="bounding-box" :style="getBoxStyle(face.boundingBox)" :class="{
+          'bounding-box--recognized': face.status === 'recognized',
+          'bounding-box--unrecognized': face.status === 'unrecognized',
+          'bounding-box--newly-labeled': face.status === 'newly-labeled',
+          'bounding-box--selected': selectable && face.id === selectedFaceId,
+          'bounding-box--selectable': selectable,
+        }" @click="selectable && $emit('face-selected', face.id)">
+          <div v-if="face.memberId" class="bounding-box__name">
+            {{ face.memberName }}
+          </div>
           <v-tooltip activator="parent" location="bottom">
-            <span v-if="face.memberId">{{ t('face.boundingBox.labeledAs', { name: getMemberName(face.memberId) }) }}</span>
+            <span v-if="face.memberId">{{ t('face.boundingBox.labeledAs', { name: face.memberName })
+            }}</span>
             <span v-else>{{ t('face.boundingBox.unlabeled') }}</span>
           </v-tooltip>
         </div>
@@ -31,10 +28,8 @@
 import { ref, watch, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, BoundingBox } from '@/types';
-import { useFaceStore } from '@/stores/face.store';
 
 const { t } = useI18n();
-const faceStore = useFaceStore();
 
 const props = defineProps({
   imageSrc: { type: String, required: true },
@@ -77,15 +72,6 @@ const getBoxStyle = (box: BoundingBox | null | undefined) => {
   return style;
 };
 
-// Mock function to get member name (replace with actual store/API call)
-const getMemberName = (memberId: string | null | undefined) => {
-  if (memberId) {
-    // In a real app, you'd fetch this from a member store or a lookup map
-    // For now, return a placeholder
-    return `Member ${memberId.substring(0, 4)}`;
-  }
-  return '';
-};
 
 // Watch for imageSrc changes to reset imageLoaded state
 watch(() => props.imageSrc, () => {
@@ -110,7 +96,8 @@ watch(() => props.imageSrc, () => {
   position: relative;
   max-width: 100%;
   max-height: 100%;
-  display: inline-block; /* To make overlay position correctly */
+  display: inline-block;
+  /* To make overlay position correctly */
 }
 
 .responsive-image {
@@ -140,19 +127,38 @@ watch(() => props.imageSrc, () => {
 }
 
 .bounding-box--recognized {
-  border-color: #4CAF50; /* Green */
+  border-color: #4CAF50;
+  /* Green */
 }
 
 .bounding-box--unrecognized {
-  border-color: #FF9800; /* Orange */
+  border-color: #FF9800;
+  /* Orange */
 }
 
 .bounding-box--newly-labeled {
-  border-color: #2196F3; /* Blue */
+  border-color: #2196F3;
+  /* Blue */
 }
 
 .bounding-box--selected {
   border-width: 4px;
   filter: brightness(1.2);
+}
+
+.bounding-box__name {
+  position: absolute;
+  top: -40px;
+  left: -15px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 5px;
+  font-size: 0.70rem;
+  overflow: hidden;
+  border-radius: 3px;
+  z-index: 10;
+  min-width: 90px;
+  height: 35px;
+  text-align: center;;
 }
 </style>
