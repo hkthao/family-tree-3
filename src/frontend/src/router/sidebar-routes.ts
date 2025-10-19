@@ -20,4 +20,10 @@ export const sidebarRoutes: RouteRecordRaw[] = [
     component: ProfileView,
     meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'profile.myProfile' },
   },
+  {
+    path: '/face/search',
+    name: 'FaceSearch',
+    component: () => import('@/views/face/FaceSearchView.vue'),
+    meta: { roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'], breadcrumb: 'search.face', icon: 'mdi-face-recognition' },
+  },
 ];
