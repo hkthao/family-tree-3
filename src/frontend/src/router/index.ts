@@ -224,6 +224,12 @@ const router = createRouter({
               component: () => import('@/views/admin/ChunkAdmin.vue'),
               meta: { breadcrumb: 'admin.chunks.title', requiresAuth: true, roles: ['Admin'] },
             },
+            {
+              path: 'config',
+              name: 'SystemConfig',
+              component: () => import('@/views/SystemConfigView.vue'),
+              meta: { breadcrumb: 'admin.config.title', requiresAuth: true, roles: ['Admin'] },
+            },
           ],
         },
         ...sidebarRoutes,

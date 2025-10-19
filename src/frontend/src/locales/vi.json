@@ -404,5 +404,22 @@
   "face.errors.noFacesDetectedForSearch": "Không tìm thấy khuôn mặt nào để tìm kiếm.",
   "face.uploadInput.selectImage": "Chọn ảnh",
   "face.recognition.saveLabelsButton": "Lưu Nhãn",
-  "face.boundingBox.labeledAs": "Được gán nhãn là {name}"
+  "face.boundingBox.labeledAs": "Được gán nhãn là {name}",
+  "admin.config.title": "Cấu hình Hệ thống",
+  "systemConfig.title": "Cấu hình Hệ thống",
+  "systemConfig.tabs.aiChat": "AI Chat",
+  "systemConfig.tabs.embedding": "Nhúng (Embedding)",
+  "systemConfig.tabs.vectorStore": "Vector Store",
+  "systemConfig.tabs.storage": "Lưu trữ",
+  "systemConfig.tabs.systemFixed": "Hệ thống / Cố định",
+  "systemConfig.sections.aiChat": "Cài đặt AI Chat",
+  "systemConfig.sections.embedding": "Cài đặt Nhúng (Embedding)",
+  "systemConfig.sections.vectorStore": "Cài đặt Vector Store",
+  "systemConfig.sections.storage": "Cài đặt Lưu trữ",
+  "systemConfig.sections.systemFixed": "Cài đặt Hệ thống / Cố định",
+  "systemConfig.actions.cancel": "Hủy",
+  "systemConfig.actions.save": "Lưu",
+  "systemConfig.errors.fetch": "Không thể tải cấu hình hệ thống.",
+  "systemConfig.errors.update": "Không thể cập nhật cấu hình hệ thống.",
+  "systemConfig.errors.notFound": "Không tìm thấy cấu hình hệ thống."
 }

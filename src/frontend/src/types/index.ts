@@ -25,3 +25,4 @@ export * from './ai.d';
 export * from './auth.d';
 export * from './user.d';
 export * from './userPreference.d';
+export * from './system-config.d';

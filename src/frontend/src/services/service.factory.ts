@@ -41,6 +41,8 @@ import { ApiChunkService } from './chunk/api.chunk.service';
 import type { IFaceService } from './face/face.service.interface';
 import { MockFaceService } from './face/mock.face.service';
 import { ApiFaceService } from './face/api.face.service';
+import type { ISystemConfigService } from './system-config/system-config.service.interface';
+import { ApiSystemConfigService } from './system-config/api.system-config.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -60,6 +62,7 @@ export interface AppServices {
   chunk: IChunkService;
   face: IFaceService;
   faceMember: IFaceMemberService;
+  systemConfig: ISystemConfigService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -157,5 +160,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiFaceMemberService(apiClient)
         : testServices?.faceMember || new MockFaceMemberService(),
+    systemConfig:
+      mode === 'mock'
+        ? new ApiSystemConfigService(apiClient) // No mock service for now
+        : mode === 'real'
+        ? new ApiSystemConfigService(apiClient)
+        : testServices?.systemConfig || new ApiSystemConfigService(apiClient),
   };
 }
