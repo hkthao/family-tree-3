@@ -404,5 +404,5 @@
   "face.errors.noFacesDetectedForSearch": "Không tìm thấy khuôn mặt nào để tìm kiếm.",
   "face.uploadInput.selectImage": "Chọn ảnh",
   "face.recognition.saveLabelsButton": "Lưu Nhãn",
-  "face.boundingBox.labeledAs": "Được gán nhãn là"
+  "face.boundingBox.labeledAs": "Được gán nhãn là {name}"
 }
