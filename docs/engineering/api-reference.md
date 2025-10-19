@@ -52,11 +52,9 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
 1.  **Client lấy Token**: Client (ví dụ: Frontend app) chịu trách nhiệm lấy JWT từ một nhà cung cấp xác thực (ví dụ: Auth0, Keycloak, Firebase Auth).
 2.  **Gửi Token trong Header**: Với mỗi yêu cầu đến các endpoint được bảo vệ, client phải gửi token trong header `Authorization`.
 
-    ```http
-    GET /api/families/some-family-id
-    Host: localhost:8080
-    Authorization: Bearer <YOUR_JWT_TOKEN>
-    ```
+-   **Phương thức:** `GET`
+-   **Đường dẫn:** `/api/families/some-family-id`
+-   **Header:** `Authorization: Bearer <YOUR_JWT_TOKEN>` (thay `<YOUR_JWT_TOKEN>` bằng JWT hợp lệ của bạn)
 
 ### 2.1. Cấu hình JWT và Xác thực Backend
 
@@ -80,25 +78,7 @@ Các endpoint yêu cầu xác thực sẽ được đánh dấu bằng attribute
 
 **Ví dụ:**
 
-```csharp
-// backend/src/Web/Controllers/FamilyController.cs
-
-[Authorize]
-[ApiController]
-[Route("api/[controller]")]
-public class FamilyController : ApiControllerBase
-{
-    // ... các action methods ...
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Result<FamilyDto>>> GetFamilyById(Guid id)
-    {
-        return await Mediator.Send(new GetFamilyByIdQuery(id));
-    }
-
-    // ...
-}
-```
+-   **Ví dụ:** Một `FamilyController` được đánh dấu `[Authorize]` để yêu cầu xác thực cho tất cả các hành động của nó. Nếu một yêu cầu không có hoặc có JWT không hợp lệ, API sẽ trả về lỗi `401 Unauthorized` hoặc `403 Forbidden`.
 
 Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nếu một request không có hoặc có JWT không hợp lệ, API sẽ trả về lỗi `401 Unauthorized` hoặc `403 Forbidden`.
 
@@ -111,20 +91,17 @@ Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/me
 
 **Ví dụ:**
 
-```http
-GET /api/families?pageNumber=2&pageSize=20
-```
+-   **Ví dụ:** Để lấy trang thứ 2 với 20 mục trên mỗi trang:
+    -   **Phương thức:** `GET`
+    -   **Đường dẫn:** `/api/families?pageNumber=2&pageSize=20`
 
 Phản hồi sẽ có cấu trúc `PaginatedList<T>`:
 
-```json
-{
-  "items": [ ... ],
-  "pageNumber": 2,
-  "totalPages": 8,
-  "totalCount": 150
-}
-```
+Phản hồi sẽ có cấu trúc `PaginatedList<T>` với các trường:
+-   `items`: Một mảng chứa các đối tượng dữ liệu của trang hiện tại.
+-   `pageNumber`: Số trang hiện tại.
+-   `totalPages`: Tổng số trang có sẵn.
+-   `totalCount`: Tổng số mục trên tất cả các trang.
 
 ## 4. Lọc và Tìm kiếm
 
@@ -138,17 +115,17 @@ Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. C
 
 **Ví dụ:**
 
-```http
-GET /api/members?searchQuery=Văn&gender=Male&pageNumber=1&pageSize=10
-```
+-   **Ví dụ:** Để tìm kiếm thành viên có tên "Văn" và giới tính "Male" trên trang 1 với 10 mục mỗi trang:
+    -   **Phương thức:** `GET`
+    -   **Đường dẫn:** `/api/members?searchQuery=Văn&gender=Male&pageNumber=1&pageSize=10`
 
 **Ví dụ với `GET /api/family/search`:**
 
 -   `keyword`: Từ khóa để tìm kiếm theo tên dòng họ, mô tả, v.v.
 
-```http
-GET /api/family/search?keyword=Royal&pageNumber=1&pageSize=5
-```
+-   **Ví dụ:** Để tìm kiếm dòng họ có từ khóa "Royal" trên trang 1 với 5 mục mỗi trang:
+    -   **Phương thức:** `GET`
+    -   **Đường dẫn:** `/api/family/search?keyword=Royal&pageNumber=1&pageSize=5`
 
 ## 5. Cấu trúc Phản hồi Lỗi (Error Response)
 
@@ -164,50 +141,40 @@ Khi có lỗi xảy ra hoặc một thao tác hoàn tất, API sẽ trả về m
 
 Phản hồi sẽ có cấu trúc sau:
 
-```json
-{
-  "isSuccess": boolean, // true nếu thao tác thành công, false nếu thất bại
-  "value": any | null,  // Dữ liệu trả về nếu thành công, null nếu thất bại
-  "error": string | null, // Thông báo lỗi nếu thất bại, null nếu thành công
-  "errorCode": number | null, // Mã lỗi HTTP (ví dụ: 400, 404, 500) nếu thất bại, null nếu thành công
-  "source": string | null // Nguồn gốc của lỗi (ví dụ: tên phương thức, class) để dễ debug
-}
-```
+Phản hồi sẽ có cấu trúc sau:
+-   `isSuccess`: `boolean` - `true` nếu thao tác thành công, `false` nếu thất bại.
+-   `value`: `any | null` - Dữ liệu trả về nếu thành công, `null` nếu thất bại.
+-   `error`: `string | null` - Thông báo lỗi nếu thất bại, `null` nếu thành công.
+-   `errorCode`: `number | null` - Mã lỗi HTTP (ví dụ: 400, 404, 500) nếu thất bại, `null` nếu thành công.
+-   `source`: `string | null` - Nguồn gốc của lỗi (ví dụ: tên phương thức, class) để dễ debug.
 
 #### Ví dụ Phản hồi Thành công
 
-```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "isSuccess": true,
-  "value": {
-    "id": "16905e2b-5654-4ed0-b118-bbdd028df6eb",
-    "name": "Royal Family",
-    "description": "The British Royal Family",
-    "address": "Buckingham Palace"
-  },
-  "error": null,
-  "errorCode": null,
-  "source": null
-}
-```
+Ví dụ Phản hồi Thành công:
+-   **HTTP Status:** `200 OK`
+-   **Content-Type:** `application/json`
+-   **Body:**
+    -   `isSuccess`: `true`
+    -   `value`:
+        -   `id`: `"16905e2b-5654-4ed0-b118-bbdd028df6eb"`
+        -   `name`: `"Royal Family"`
+        -   `description`: `"The British Royal Family"`
+        -   `address`: `"Buckingham Palace"`
+    -   `error`: `null`
+    -   `errorCode`: `null`
+    -   `source`: `null`
 
 #### Ví dụ Phản hồi Lỗi
 
-```json
-HTTP/1.1 404 Not Found
-Content-Type: application/json
-
-{
-  "isSuccess": false,
-  "value": null,
-  "error": "Family with ID 'some-invalid-id' not found.",
-  "errorCode": 404,
-  "source": "FamilyService.GetFamilyByIdAsync"
-}
-```
+Ví dụ Phản hồi Lỗi:
+-   **HTTP Status:** `404 Not Found`
+-   **Content-Type:** `application/json`
+-   **Body:**
+    -   `isSuccess`: `false`
+    -   `value`: `null`
+    -   `error`: `"Family with ID 'some-invalid-id' not found."`
+    -   `errorCode`: `404`
+    -   `source`: `"FamilyService.GetFamilyByIdAsync"`
 
 **Giải thích các trường lỗi:**
 
@@ -230,10 +197,15 @@ Content-Type: application/json
 -   `GET /api/Family/search?keyword=...&page=...&itemsPerPage=...`: Tìm kiếm dòng họ theo từ khóa và hỗ trợ phân trang.
     *   **Phản hồi:** `Result<PaginatedList<Family>>`
 -   `POST /api/Family`: Tạo dòng họ mới.
-    *   **Request Body:** `CreateFamilyCommand` (ví dụ: `{ "name": "Tên dòng họ", "description": "Mô tả" }`)
+    *   **Request Body:** `CreateFamilyCommand`
+    -   `name`: `string` - Tên dòng họ (ví dụ: `"Tên dòng họ"`)
+    -   `description`: `string` - Mô tả (ví dụ: `"Mô tả"`)
     *   **Phản hồi:** `Result<Guid>` (ID của dòng họ vừa tạo)
 -   `PUT /api/Family/{id}`: Cập nhật thông tin dòng họ.
-    *   **Request Body:** `UpdateFamilyCommand` (ví dụ: `{ "id": "uuid", "name": "Tên mới", "description": "Mô tả mới" }`)
+    *   **Request Body:** `UpdateFamilyCommand`
+    -   `id`: `string (uuid)` - ID của dòng họ (ví dụ: `"uuid"`)
+    -   `name`: `string` - Tên mới (ví dụ: `"Tên mới"`)
+    -   `description`: `string` - Mô tả mới (ví dụ: `"Mô tả mới"`)
     *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/Family/{id}`: Xóa dòng họ.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
@@ -247,10 +219,17 @@ Content-Type: application/json
 -   `GET /api/members?ids=id1,id2`: Lấy thông tin nhiều thành viên theo danh sách ID.
     *   **Phản hồi:** `Result<List<Member>>`
 -   `POST /api/members`: Thêm thành viên mới.
-    *   **Request Body:** `CreateMemberCommand` (ví dụ: `{ "firstName": "Tên", "lastName": "Họ", "familyId": "uuid" }`)
+    *   **Request Body:** `CreateMemberCommand`
+    -   `firstName`: `string` - Tên (ví dụ: `"Tên"`)
+    -   `lastName`: `string` - Họ (ví dụ: `"Họ"`)
+    -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
     *   **Phản hồi:** `Result<Guid>` (ID của thành viên vừa tạo)
 -   `PUT /api/members/{id}`: Cập nhật thông tin thành viên.
-    *   **Request Body:** `UpdateMemberCommand` (ví dụ: `{ "id": "uuid", "firstName": "Tên mới", "lastName": "Họ mới" }`)
+    *   **Request Body:** `UpdateMemberCommand`
+    -   `id`: `string (uuid)` - ID của thành viên (ví dụ: `"uuid"`)
+    -   `firstName`: `string` - Tên mới (ví dụ: `"Tên mới"`)
+    -   `lastName`: `string` - Họ mới (ví dụ: `"Họ mới"`)
+    -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
     *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/members/{id}`: Xóa thành viên.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
@@ -262,10 +241,17 @@ Content-Type: application/json
 -   `GET /api/events/{id}`: Lấy thông tin sự kiện theo ID.
     *   **Phản hồi:** `Result<Event>`
 -   `POST /api/events`: Tạo sự kiện mới.
-    *   **Request Body:** `CreateEventCommand` (ví dụ: `{ "name": "Tên sự kiện", "startDate": "2023-01-01T00:00:00Z", "familyId": "uuid" }`)
+    *   **Request Body:** `CreateEventCommand`
+    -   `name`: `string` - Tên sự kiện (ví dụ: `"Tên sự kiện"`)
+    -   `startDate`: `string (date-time)` - Ngày bắt đầu (ví dụ: `"2023-01-01T00:00:00Z"`)
+    -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
     *   **Phản hồi:** `Result<Guid>` (ID của sự kiện vừa tạo)
 -   `PUT /api/events/{id}`: Cập nhật thông tin sự kiện.
-    *   **Request Body:** `UpdateEventCommand` (ví dụ: `{ "id": "uuid", "name": "Tên sự kiện mới" }`)
+    *   **Request Body:** `UpdateEventCommand`
+    -   `id`: `string (uuid)` - ID của sự kiện (ví dụ: `"uuid"`)
+    -   `name`: `string` - Tên sự kiện mới (ví dụ: `"Tên sự kiện mới"`)
+    -   `startDate`: `string (date-time)` - Ngày bắt đầu (ví dụ: `"2023-01-01T00:00:00Z"`)
+    -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
     *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/events/{id}`: Xóa sự kiện.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
@@ -287,10 +273,17 @@ Content-Type: application/json
 -   `GET /api/relationships/search?sourceMemberId=...&targetMemberId=...&type=...&page=...&itemsPerPage=...`: Tìm kiếm quan hệ theo các tiêu chí và hỗ trợ phân trang.
     *   **Phản hồi:** `Result<PaginatedList<RelationshipListDto>>`
 -   `POST /api/relationships`: Tạo quan hệ mới.
-    *   **Request Body:** `CreateRelationshipCommand` (ví dụ: `{ "sourceMemberId": "uuid", "targetMemberId": "uuid", "type": "Parent" }`)
+    *   **Request Body:** `CreateRelationshipCommand`
+    -   `sourceMemberId`: `string (uuid)` - ID thành viên nguồn (ví dụ: `"uuid"`)
+    -   `targetMemberId`: `string (uuid)` - ID thành viên đích (ví dụ: `"uuid"`)
+    -   `type`: `string (Parent/Child/Spouse/Sibling)` - Loại quan hệ (ví dụ: `"Parent"`)
     *   **Phản hồi:** `Result<Guid>` (ID của quan hệ vừa tạo)
 -   `PUT /api/relationships/{id}`: Cập nhật thông tin quan hệ.
-    *   **Request Body:** `UpdateRelationshipCommand` (ví dụ: `{ "id": "uuid", "sourceMemberId": "uuid", "targetMemberId": "uuid", "type": "Spouse" }`)
+    *   **Request Body:** `UpdateRelationshipCommand`
+    -   `id`: `string (uuid)` - ID của quan hệ (ví dụ: `"uuid"`)
+    -   `sourceMemberId`: `string (uuid)` - ID thành viên nguồn (ví dụ: `"uuid"`)
+    -   `targetMemberId`: `string (uuid)` - ID thành viên đích (ví dụ: `"uuid"`)
+    -   `type`: `string (Parent/Child/Spouse/Sibling)` - Loại quan hệ (ví dụ: `"Spouse"`)
     *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
 -   `DELETE /api/relationships/{id}`: Xóa quan hệ.
     *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
@@ -315,7 +308,12 @@ Content-Type: application/json
 ### 6.8. Quản lý AI (`/api/ai`)
 
 -   `POST /api/ai/biography`: Sinh tiểu sử cho thành viên bằng AI.
-    *   **Request Body:** `GenerateBiographyCommand` (ví dụ: `{ "memberId": "uuid", "style": "Emotional", "useDBData": "true", "userPrompt": "string (nullable)", "language": "string" }`)
+    *   **Request Body:** `GenerateBiographyCommand`
+    -   `memberId`: `string (uuid)` - ID của thành viên (ví dụ: `"uuid"`)
+    -   `style`: `string (enum: Emotional, Historical, Storytelling, Formal, Informal)` - Kiểu giọng văn (ví dụ: `"Emotional"`)
+    -   `useDBData`: `boolean` - Sử dụng dữ liệu từ DB (ví dụ: `"true"`)
+    -   `userPrompt`: `string (nullable)` - Prompt tùy chỉnh của người dùng (ví dụ: `"string (nullable)"`)
+    -   `language`: `string` - Ngôn ngữ (ví dụ: `"string"`)
     *   **Phản hồi:** `Result<BiographyResultDto>`
 -   `GET /api/ai/biography/last/{memberId}`: Lấy tiểu sử AI gần nhất cho thành viên.
     *   **Phản hồi:** `Result<AIBiographyDto?>`
@@ -328,7 +326,12 @@ Content-Type: application/json
 -   `GET /api/UserPreferences`: Lấy tùy chọn của người dùng hiện tại.
     *   **Phản hồi:** `Result<UserPreferenceDto>`
 -   `PUT /api/UserPreferences`: Cập nhật tùy chọn của người dùng hiện tại.
-    *   **Request Body:** `SaveUserPreferencesCommand` (ví dụ: `{ "theme": "Light", "language": "Vietnamese", "emailNotificationsEnabled": "true", "smsNotificationsEnabled": "false", "inAppNotificationsEnabled": "true" }`)
+    *   **Request Body:** `SaveUserPreferencesCommand`
+    -   `theme`: `string (enum: Light, Dark)` - Chủ đề (ví dụ: `"Light"`)
+    -   `language`: `string (enum: English, Vietnamese)` - Ngôn ngữ (ví dụ: `"Vietnamese"`)
+    -   `emailNotificationsEnabled`: `boolean` - Bật thông báo email (ví dụ: `"true"`)
+    -   `smsNotificationsEnabled`: `boolean` - Bật thông báo SMS (ví dụ: `"false"`)
+    -   `inAppNotificationsEnabled`: `boolean` - Bật thông báo trong ứng dụng (ví dụ: `"true"`)
     *   **Phản hồi:** `Result<UserPreferenceDto>` (trả về tùy chọn đã cập nhật)
 
 ### 6.10. Quản lý Tải lên Tệp (`/api/upload`)
@@ -342,13 +345,20 @@ Content-Type: application/json
 ### 6.11. Xử lý Dữ liệu và Tải lên Chunk (`/api/chunk/upload`)
 
 -   `POST /api/chunk/upload`: Tải lên một tệp (PDF hoặc TXT) để trích xuất văn bản, làm sạch và chia thành các chunk.
-    *   **Request Body:** `multipart/form-data` (chứa `IFormFile file`, `string fileId`, `string familyId`, `string category`, `string createdBy`)
+    *   **Request Body:** `multipart/form-data`
+    -   `file`: `IFormFile` - Tệp để tải lên (PDF hoặc TXT)
+    -   `fileId`: `string` - ID của tệp
+    -   `familyId`: `string` - ID của dòng họ
+    -   `category`: `string` - Danh mục của tệp
+    -   `createdBy`: `string` - Người tạo
     *   **Phản hồi:** `Result<List<TextChunk>>`
 
 ### 6.12. Quản lý Chatbot (`/api/chat`)
 
 -   `POST /api/chat`: Gửi tin nhắn đến chatbot AI và nhận phản hồi.
-    *   **Request Body:** `ChatRequest` (ví dụ: `{ "message": "Xin chào", "sessionId": "uuid (nullable)" }`)
+    *   **Request Body:** `ChatRequest`
+    -   `message`: `string` - Tin nhắn gửi đến chatbot (ví dụ: `"Xin chào"`)
+    -   `sessionId`: `string (uuid, nullable)` - ID phiên trò chuyện (ví dụ: `"uuid (nullable)"`)
     *   **Phản hồi:** `Result<ChatResponse>`
 
 ### 6.13. Quản lý Bảng điều khiển (`/api/dashboard`)
@@ -360,264 +370,252 @@ Content-Type: application/json
 ### 6.14. Xử lý Ngôn ngữ Tự nhiên (`/api/NaturalLanguageInput`)
 
 -   `POST /api/NaturalLanguageInput/generate-event-data`: Tạo dữ liệu sự kiện từ mô tả ngôn ngữ tự nhiên.
-    *   **Request Body:** `GenerateEventDataCommand` (ví dụ: `{ "prompt": "Tạo một sự kiện sinh nhật cho Nguyễn Văn A vào ngày 1/1/2000" }`)
+    *   **Request Body:** `GenerateEventDataCommand`
+    -   `prompt`: `string` - Mô tả sự kiện bằng ngôn ngữ tự nhiên (ví dụ: `"Tạo một sự kiện sinh nhật cho Nguyễn Văn A vào ngày 1/1/2000"`)
     *   **Phản hồi:** `Result<List<EventDto>>`
+
+### 6.15. Quản lý Khuôn mặt (`/api/Faces`)
+
+-   `POST /api/Faces/detect`: Phát hiện khuôn mặt trong ảnh được tải lên.
+    *   **Request Body:** `multipart/form-data` (chứa `IFormFile` và tùy chọn `returnCrop` (boolean))
+    *   **Phản hồi:** `List<FaceDetectionResultDto>`
+-   `GET /api/Faces/detected/{imageId}`: Lấy các khuôn mặt đã được phát hiện cho một ID ảnh.
+    *   **Path Parameters:** `imageId` (Guid)
+    *   **Phản hồi:** `List<DetectedFaceDto>`
+-   `POST /api/Faces/labels`: Lưu nhãn cho các khuôn mặt đã được phát hiện.
+    *   **Request Body:** `SaveFaceLabelsCommand`
+    *   **Phản hồi:** `Result<Unit>`
+
+### 6.16. Quản lý Cấu hình Hệ thống (`/api/SystemConfiguration`)
+
+-   `GET /api/SystemConfiguration`: Lấy danh sách tất cả cấu hình hệ thống.
+    *   **Phản hồi:** `Result<List<SystemConfigurationDto>>`
+-   `POST /api/SystemConfiguration`: Tạo cấu hình hệ thống mới.
+    *   **Request Body:** `CreateSystemConfigurationCommand`
+    *   **Phản hồi:** `Result<Guid>`
+-   `PUT /api/SystemConfiguration/{id}`: Cập nhật cấu hình hệ thống.
+    *   **Path Parameters:** `id` (Guid)
+    *   **Request Body:** `UpdateSystemConfigurationCommand`
+    *   **Phản hồi:** `Result`
+-   `DELETE /api/SystemConfiguration/{id}`: Xóa cấu hình hệ thống.
+    *   **Path Parameters:** `id` (Guid)
+    *   **Phản hồi:** `Result`
 
 ## 7. Mô hình Dữ liệu (Response Models)
 
 ### 7.1. Family
 
-```json
-{
-  "id": "string (uuid)",
-  "name": "string",
-  "description": "string",
-  "address": "string",
-  "avatarUrl": "string (url, nullable)",
-  "visibility": "string (Public/Private)",
-  "totalMembers": "number"
-}
-```
+-   `id`: `string (uuid)`
+-   `name`: `string`
+-   `code`: `string`
+-   `description`: `string`
+-   `address`: `string (nullable)`
+-   `totalMembers`: `number`
+-   `totalGenerations`: `number (nullable)`
+-   `visibility`: `string (nullable)`
+-   `avatarUrl`: `string (nullable)`
+-   `validationErrors`: `array of string (nullable)`
+-   `created`: `string (date-time)`
+-   `createdBy`: `string (nullable)`
+-   `lastModified`: `string (date-time, nullable)`
+-   `lastModifiedBy`: `string (nullable)`
 
 ### 7.2. Member
 
-```json
-{
-  "id": "string (uuid)",
-  "familyId": "string (uuid)",
-  "firstName": "string",
-  "lastName": "string",
-  "fullName": "string",
-  "gender": "string (Male/Female/Other)",
-  "dateOfBirth": "string (date-time, nullable)",
-  "dateOfDeath": "string (date-time, nullable)",
-  "birthDeathYears": "string (nullable)",
-  "avatarUrl": "string (url, nullable)",
-  "nickname": "string (nullable)",
-  "placeOfBirth": "string (nullable)",
-  "placeOfDeath": "string (nullable)",
-  "occupation": "string (nullable)",
-  "fatherId": "string (uuid, nullable)",
-  "motherId": "string (uuid, nullable)",
-  "spouseId": "string (uuid, nullable)",
-  "biography": "string (nullable)"
-}
-```
+-   `id`: `string (uuid)`
+-   `firstName`: `string`
+-   `lastName`: `string`
+-   `code`: `string`
+-   `nickname`: `string (nullable)`
+-   `gender`: `string (nullable)`
+-   `dateOfBirth`: `string (date-time, nullable)`
+-   `dateOfDeath`: `string (date-time, nullable)`
+-   `placeOfBirth`: `string (nullable)`
+-   `placeOfDeath`: `string (nullable)`
+-   `occupation`: `string (nullable)`
+-   `avatarUrl`: `string (nullable)`
+-   `biography`: `string (nullable)`
+-   `familyId`: `string (uuid)`
+-   `isRoot`: `boolean`
+-   `created`: `string (date-time)`
+-   `createdBy`: `string (nullable)`
+-   `lastModified`: `string (date-time, nullable)`
+-   `lastModifiedBy`: `string (nullable)`
 
 
 
 ### 7.3. Event
 
-```json
-{
-  "id": "string (uuid)",
-  "name": "string",
-  "description": "string (nullable)",
-  "startDate": "string (date-time)",
-  "endDate": "string (date-time, nullable)",
-  "location": "string (nullable)",
-  "familyId": "string (uuid, nullable)",
-  "type": "string (Birth, Marriage, Death, Other)",
-  "color": "string (nullable)",
-  "relatedMembers": "array of string (uuid)"
-}
-```
+-   `id`: `string (uuid)`
+-   `name`: `string`
+-   `code`: `string`
+-   `description`: `string (nullable)`
+-   `startDate`: `string (date-time, nullable)`
+-   `endDate`: `string (date-time, nullable)`
+-   `location`: `string (nullable)`
+-   `familyId`: `string (uuid, nullable)`
+-   `type`: `string (enum: Birth, Marriage, Death, Migration, Other)`
+-   `color`: `string (nullable)`
+-   `relatedMembers`: `array of string (uuid)`
+-   `created`: `string (date-time)`
+-   `createdBy`: `string (nullable)`
+-   `lastModified`: `string (date-time, nullable)`
+-   `lastModifiedBy`: `string (nullable)`
 
-### 7.4. SearchResultsDto
 
-```json
-{
-  "families": [
-    // ... Family objects ...
-  ],
-  "members": [
-    // ... Member objects ...
-  ]
-}
-```
+### 7.4. Relationship
 
-### 7.5. Relationship
+-   `id`: `string (uuid)`
+-   `sourceMemberId`: `string (uuid)`
+-   `sourceMember`: `object` (Đối tượng `RelationshipMemberDto`)
+-   `targetMemberId`: `string (uuid)`
+-   `targetMember`: `object` (Đối tượng `RelationshipMemberDto`)
+-   `type`: `string (enum: Father, Mother, Husband, Wife)`
+-   `order`: `number (nullable)`
+-   `familyId`: `string (uuid)`
 
-```json
-{
-  "id": "string (uuid)",
-  "sourceMemberId": "string (uuid)",
-  "targetMemberId": "string (uuid)",
-  "type": "string (Parent/Child/Spouse/Sibling)",
-  "order": "number (nullable)"
-}
-```
+### 7.5. RelationshipListDto
 
-### 7.6. RelationshipListDto
+-   `id`: `string (uuid)`
+-   `sourceMemberId`: `string (uuid)`
+-   `targetMemberId`: `string (uuid)`
+-   `type`: `string (enum: Father, Mother, Husband, Wife)`
+-   `order`: `number (nullable)`
+-   `startDate`: `string (date-time, nullable)`
+-   `endDate`: `string (date-time, nullable)`
+-   `description`: `string (nullable)`
+-   `sourceMember`: `object` (Đối tượng `RelationshipMemberDto`)
+-   `targetMember`: `object` (Đối tượng `RelationshipMemberDto`)
 
-```json
-{
-  "id": "string (uuid)",
-  "sourceMemberId": "string (uuid)",
-  "targetMemberId": "string (uuid)",
-  "type": "string (Parent/Child/Spouse/Sibling)",
-  "order": "number (nullable)",
-  "sourceMemberFullName": "string",
-  "targetMemberFullName": "string"
-}
-```
+### 7.6. UserProfile
 
-### 7.7. UserProfile
+-   `id`: `string (uuid)`
+-   `externalId`: `string`
+-   `email`: `string`
+-   `name`: `string`
+-   `avatar`: `string (url, nullable)`
+-   `roles`: `array of string`
 
-```json
-{
-  "id": "string (uuid)",
-  "externalId": "string",
-  "email": "string",
-  "name": "string",
-  "avatar": "string (url, nullable)",
-  "roles": [
-    "string"
-  ]
-}
-```
+### 7.7. UserActivity
 
-### 7.8. UserActivity
+-   `id`: `string (uuid)`
+-   `userProfileId`: `string (uuid)`
+-   `actionType`: `string (enum: Login, CreateFamily, UpdateMember, etc.)`
+-   `targetType`: `string (enum: Family, Member, UserProfile, etc.)`
+-   `targetId`: `string`
+-   `groupId`: `string (uuid, nullable)`
+-   `metadata`: `object (nullable)` (Đối tượng `JsonDocument`)
+-   `activitySummary`: `string`
+-   `created`: `string (date-time)`
 
-```json
-{
-  "id": "string (uuid)",
-  "userProfileId": "string (uuid)",
-  "actionType": "string (enum: Login, CreateFamily, UpdateMember, etc.)",
-  "targetType": "string (enum: Family, Member, UserProfile, etc.)",
-  "targetId": "string (uuid)",
-  "metadata": "object (json, nullable)",
-  "activitySummary": "string",
-  "created": "string (date-time)"
-}
-```
 
-### 7.9. AIBiographyDto
+### 7.8. BiographyResultDto
 
-```json
-{
-  "id": "string (uuid)",
-  "memberId": "string (uuid)",
-  "style": "string (enum: Emotional, Historical, Storytelling, Formal, Informal)",
-  "content": "string",
-  "provider": "string (enum: Gemini, OpenAI, LocalAI)",
-  "userPrompt": "string",
-  "generatedFromDB": "boolean",
-  "tokensUsed": "number",
-  "metadata": "object (json, nullable)",
-  "created": "string (date-time)"
-}
-```
+-   `content`: `string`
 
-### 7.10. BiographyResultDto
 
-```json
-{
-  "content": "string",
-  "provider": "string (enum: Gemini, OpenAI, LocalAI)",
-  "tokensUsed": "number",
-  "generatedAt": "string (date-time)",
-  "userPrompt": "string"
-}
-```
+### 7.9. UserPreference
 
-### 7.11. AIProvider
+-   `theme`: `string (enum: Light, Dark)`
+-   `language`: `string (enum: English, Vietnamese)`
+-   `emailNotificationsEnabled`: `boolean`
+-   `smsNotificationsEnabled`: `boolean`
+-   `inAppNotificationsEnabled`: `boolean`
 
-```json
-{
-  "providerType": "string (enum: Gemini, OpenAI, LocalAI)",
-  "name": "string",
-  "isEnabled": "boolean",
-  "dailyUsageLimit": "number",
-  "currentDailyUsage": "number",
-  "maxTokensPerRequest": "number"
-}
-```
+### 7.10. TextChunk
 
-### 7.12. UserPreference
+-   `id`: `string`
+-   `content`: `string`
+-   `metadata`: `object` (Các thuộc tính bổ sung có kiểu `string`)
+-   `embedding`: `array of number (float, nullable)`
+-   `score`: `number (float)`
 
-```json
-{
-  "id": "string (uuid)",
-  "userProfileId": "string (uuid)",
-  "theme": "string (enum: Light, Dark)",
-  "language": "string (enum: English, Vietnamese)",
-  "emailNotificationsEnabled": "boolean",
-  "smsNotificationsEnabled": "boolean",
-  "inAppNotificationsEnabled": "boolean",
-  "created": "string (date-time)",
-  "createdBy": "string (nullable)",
-  "lastModified": "string (date-time, nullable)",
-  "lastModifiedBy": "string (nullable)"
-}
-```
 
-### 7.13. FileMetadata
 
-```json
-{
-  "id": "string (uuid)",
-  "fileName": "string",
-  "url": "string",
-  "storageProvider": "string (enum: Local, Cloudinary, S3, AzureBlob)",
-  "contentType": "string",
-  "fileSize": "number",
-  "uploadedBy": "string (uuid)",
-  "usedByEntity": "string (nullable)",
-  "usedById": "string (uuid, nullable)",
-  "isActive": "boolean",
-  "created": "string (date-time)",
-  "lastModified": "string (date-time, nullable)"
-}
-```
+### 7.11. ChatResponse
 
-### 7.14. TextChunk
+-   `response`: `string`
+-   `context`: `array of string`
+-   `sessionId`: `string (uuid, nullable)`
+-   `model`: `string (nullable)`
+-   `createdAt`: `string (date-time)`
 
-```json
-{
-  "id": "string (uuid)",
-  "content": "string",
-  "metadata": { 
-    "fileName": "string", 
-    "fileId": "string", 
-    "familyId": "string", 
-    "page": "string", 
-    "category": "string", 
-    "createdBy": "string", 
-    "createdAt": "string (date-time)" 
-  }
-}
-```
+### 7.12. DashboardStatsDto
 
-### 7.15. ChatResponse
+-   `totalFamilies`: `number`
+-   `totalMembers`: `number`
+-   `totalRelationships`: `number`
+-   `totalGenerations`: `number`
 
-```json
-{
-  "response": "string",
-  "context": "array of string",
-  "sessionId": "string (uuid, nullable)",
-  "model": "string (nullable)",
-  "createdAt": "string (date-time)"
-}
-```
+### 7.13. GenerateEventDataCommand
 
-### 7.16. DashboardStatsDto
+-   `prompt`: `string`
 
-```json
-{
-  "totalFamilies": "number",
-  "totalMembers": "number",
-  "totalRelationships": "number",
-  "totalGenerations": "number"
-}
-```
 
-### 7.17. GenerateEventDataCommand
+### 7.14. FaceDetectionResultDto
 
-```json
-{
-  "prompt": "string"
-}
-```
+-   `id`: `string`
+-   `boundingBox`:
+    -   `x`: `number`
+    -   `y`: `number`
+    -   `width`: `number`
+    -   `height`: `number`
+-   `confidence`: `number`
+-   `thumbnail`: `string (Base64 encoded image, nullable)`
+
+### 7.15. DetectedFaceDto
+
+-   `id`: `string`
+-   `boundingBox`:
+    -   `x`: `number`
+    -   `y`: `number`
+    -   `width`: `number`
+    -   `height`: `number`
+-   `confidence`: `number`
+-   `thumbnail`: `string (Base64 encoded image, nullable)`
+-   `memberId`: `string (uuid, nullable)`
+-   `memberName`: `string (nullable)`
+
+### 7.16. BoundingBoxDto
+
+-   `x`: `number`
+-   `y`: `number`
+-   `width`: `number`
+-   `height`: `number`
+
+### 7.17. LabelFaceCommand
+
+-   `memberId`: `string (uuid)`
+-   `faceId`: `string`
+-   `boundingBox`:
+    -   `x`: `number`
+    -   `y`: `number`
+    -   `width`: `number`
+    -   `height`: `number`
+-   `confidence`: `number`
+-   `thumbnail`: `string (Base64 encoded image, nullable)`
+
+### 7.18. SystemConfigurationDto
+
+-   `id`: `string (uuid)`
+-   `key`: `string`
+-   `value`: `string (nullable)`
+-   `valueType`: `string (nullable)`
+-   `description`: `string (nullable)`
+
+### 7.19. CreateSystemConfigurationCommand
+
+-   `key`: `string`
+-   `value`: `string`
+-   `valueType`: `string`
+-   `description`: `string`
+
+### 7.20. UpdateSystemConfigurationCommand
+
+-   `id`: `string (uuid)`
+-   `key`: `string`
+-   `value`: `string`
+-   `valueType`: `string`
+-   `description`: `string`
 
 ```

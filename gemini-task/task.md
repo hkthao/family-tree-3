@@ -1,49 +1,49 @@
-You are working on an ASP.NET Core backend following Domain-Driven Design (DDD) with a CQRS pattern.  
-The application is already deployed in production, so **you must not break or refactor existing structure**.  
-The system currently stores configuration in `appsettings.json`.
+You are a senior frontend engineer. I need you to implement a **Configuration UI feature** in an existing Vue 3 project that uses **Pinia for state management** and **Vuetify for UI components**. Before generating code, you must:
 
-Your task is to implement a **System Configuration module** that allows admins and users to manage dynamic configuration values at runtime.
+1. **Check existing code style**:
+   - Look at other services, Pinia stores, and UI components in the project.
+   - Reuse coding patterns, folder structure, naming conventions, and Vuetify styling.
+   - Do not introduce new architectural patterns or break current conventions.
 
----
+2. **Functionality requirements**:
+   - Create a **Configuration page/component** to manage admin-editable system settings.
+   - Group settings into **tabs** (AI Chat, Embedding, Vector Store, Storage, System / Fixed).
+   - Editable fields:
+       - String → text input
+       - Boolean → switch / checkbox
+       - Integer → number input
+       - Enum / Provider → select/dropdown
+       - JSON objects → textarea or JSON editor
+   - Read-only fields for fixed settings (DB connections, JWT, CORS).
 
-### Technical context
-- The application uses **EF Core** directly (no repository layer).
-- CQRS is implemented using distinct **Commands** and **Queries** with handlers.
-- Configuration values are currently injected through `IOptions<AppSettings>`.
+3. **Pinia store**:
+   - Create a store for **config state** with actions to:
+       - Fetch all settings from backend service.
+       - Update individual settings (with optimistic UI update).
+       - Handle caching / state management as per project style.
+   - Follow patterns of other existing stores (modules, actions, getters).
 
----
+4. **Service integration**:
+   - Integrate with **ConfigurationProvider backend service** (via API) to:
+       - Fetch settings (`GET /api/systemconfig`)
+       - Update settings (`PUT /api/systemconfig/{key}`)
+   - Include error handling and success notifications.
 
-### Requirements
+5. **UI behavior**:
+   - Tabs or accordion for setting categories.
+   - Save / Cancel buttons per section or global.
+   - Inline validation based on type (required, number >0, enum options valid).
+   - Optionally: live preview/test area for AIChatSettings.
 
-1. **Preserve current architecture.**
-   - Do not modify existing handlers, services, or the `AppSettings` structure.
-   - Only extend the system by adding new entities, DbSets, and CQRS handlers.
+6. **Code style requirements**:
+   - Follow Vuetify 3 component syntax.
+   - Use script setup `<script setup>` with TypeScript.
+   - Use Pinia store modules consistent with other features.
+   - Keep styling consistent (spacing, class names, colors) with other project components.
+   - No hard-coded API URLs; use existing project service pattern.
 
-2. **Introduce three configuration layers:**
-   - **Fixed Config:** stays in `appsettings.json`, not editable at runtime.
-   - **System Config:** editable by admin users; stored in the database.
+7. **Output**:
+   - Generate the **Vue component**, **Pinia store**, and **service** scaffold.
+   - Do not generate example API keys or secrets.
 
-3. **Implementation details:**
-   - Create EF Core entities for `SystemConfig` and `UserConfig`.
-   - Add them to the existing `DbContext`.
-   - Create CQRS handlers:
-     - Commands for setting/updating config values.
-     - Queries for fetching config values (single and list).
-   - Implement a **ConfigurationProvider** service that reads values in the following priority:
-     `SystemConfig → AppSettings`.
-   - Inject this provider where dynamic configuration is needed.
-
-4. **Integration:**
-   - Register the provider and handlers via DI.
-   - Ensure backward compatibility with all existing `IOptions<AppSettings>` consumers.
-   - Keep all naming and folder conventions consistent with current CQRS structure.
-   - No breaking changes to startup or runtime behavior.
-
-5. **Optional (if feasible):**
-   - Implement minimal Admin API endpoints for reading/updating system configuration.
-   - Support caching (e.g., MemoryCache) for frequently accessed settings.
-
----
-
-### Goal
-Implement a production-safe, database-backed system configuration layer compatible with EF Core and CQRS, extending the existing DDD structure **without refactoring or breaking current code paths**.
+Your output should be **ready to drop into the project** and compile without breaking existing features.

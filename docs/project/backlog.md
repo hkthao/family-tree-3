@@ -100,7 +100,7 @@ Phần này liệt kê các User Story đang chờ được phát triển, đư�
     -   Tệp xuất chứa tất cả thông tin thành viên và mối quan hệ đã nhập, bao gồm cả các sự kiện.
     -   Hệ thống xử lý chính xác dữ liệu khi nhập từ tệp GEDCOM, bao gồm việc tạo mới hoặc cập nhật thành viên/mối quan hệ.
 
-#### US_012: In cây gia phả
+#### US_037: In cây gia phả
 -   **User Story**: Là người dùng, tôi muốn in cây gia phả để có bản sao vật lý hoặc chia sẻ ngoại tuyến.
 -   **Priority**: Low
 -   **Estimate**: TBD
