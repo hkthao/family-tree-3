@@ -37,11 +37,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
 
         builder.Entity<SystemConfiguration>()
             .Property(sc => sc.Value)
-            .IsRequired();
+            .IsRequired(false);
 
         builder.Entity<SystemConfiguration>()
             .Property(sc => sc.ValueType)
-            .IsRequired()
+            .IsRequired(false)
             .HasMaxLength(50);
 
         builder.Entity<UserConfig>()

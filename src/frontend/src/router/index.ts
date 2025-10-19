@@ -227,7 +227,7 @@ const router = createRouter({
             {
               path: 'config',
               name: 'SystemConfig',
-              component: () => import('@/views/SystemConfigView.vue'),
+              component: () => import('@/views/ConfigView.vue'),
               meta: { breadcrumb: 'admin.config.title', requiresAuth: true, roles: ['Admin'] },
             },
           ],

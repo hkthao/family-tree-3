@@ -5,9 +5,13 @@ using backend.Application.SystemConfigurations.Commands.UpdateSystemConfiguratio
 using backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
 using backend.Application.SystemConfigurations.Queries;
 using Microsoft.AspNetCore.Mvc;
+using backend.Application.Common.Security;
 
 namespace backend.Web.Controllers;
 
+[Authorize]
+[ApiController]
+[Route("api/[controller]")]
 public class SystemConfigurationController : ControllerBase
 {
     private readonly IMediator _mediator;

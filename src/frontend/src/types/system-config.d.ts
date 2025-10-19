@@ -1,8 +1,7 @@
 export interface SystemConfig {
+  id: string;
   key: string;
-  value: any;
-  type: string; // e.g., 'string', 'boolean', 'integer', 'enum', 'json'
+  value?: any;
+  valueType?: string; // e.g., 'string', 'int', 'bool', 'json'
   description?: string;
-  isReadOnly: boolean;
-  options?: { value: string; text: string }[]; // For enum types
 }

@@ -1,49 +1,105 @@
-You are a senior frontend engineer. I need you to implement a **Configuration UI feature** in an existing Vue 3 project that uses **Pinia for state management** and **Vuetify for UI components**. Before generating code, you must:
+````
+You are a senior frontend engineer.  
+Implement a new **System Configuration Management feature** for an existing **Vue 3 + Pinia + Vuetify** project.
 
-1. **Check existing code style**:
-   - Look at other services, Pinia stores, and UI components in the project.
-   - Reuse coding patterns, folder structure, naming conventions, and Vuetify styling.
-   - Do not introduce new architectural patterns or break current conventions.
+---
 
-2. **Functionality requirements**:
-   - Create a **Configuration page/component** to manage admin-editable system settings.
-   - Group settings into **tabs** (AI Chat, Embedding, Vector Store, Storage, System / Fixed).
-   - Editable fields:
-       - String → text input
-       - Boolean → switch / checkbox
-       - Integer → number input
-       - Enum / Provider → select/dropdown
-       - JSON objects → textarea or JSON editor
-   - Read-only fields for fixed settings (DB connections, JWT, CORS).
+### 🔍 BEFORE YOU START
+- Inspect existing **services**, **Pinia stores**, and **Vuetify components** in the codebase.
+- Follow existing project conventions: folder structure, naming patterns, import style, API handling, and error management.
+- Do **not** introduce new libraries or architectural patterns.
 
-3. **Pinia store**:
-   - Create a store for **config state** with actions to:
-       - Fetch all settings from backend service.
-       - Update individual settings (with optimistic UI update).
-       - Handle caching / state management as per project style.
-   - Follow patterns of other existing stores (modules, actions, getters).
+---
 
-4. **Service integration**:
-   - Integrate with **ConfigurationProvider backend service** (via API) to:
-       - Fetch settings (`GET /api/systemconfig`)
-       - Update settings (`PUT /api/systemconfig/{key}`)
-   - Include error handling and success notifications.
+### 🧩 BACKEND MODEL REFERENCE
 
-5. **UI behavior**:
-   - Tabs or accordion for setting categories.
-   - Save / Cancel buttons per section or global.
-   - Inline validation based on type (required, number >0, enum options valid).
-   - Optionally: live preview/test area for AIChatSettings.
+The backend provides this model for each configuration item:
 
-6. **Code style requirements**:
-   - Follow Vuetify 3 component syntax.
-   - Use script setup `<script setup>` with TypeScript.
-   - Use Pinia store modules consistent with other features.
-   - Keep styling consistent (spacing, class names, colors) with other project components.
-   - No hard-coded API URLs; use existing project service pattern.
+```csharp
+public class SystemConfigurationDto
+{
+    public Guid Id { get; set; }
+    public string Key { get; set; } = string.Empty;
+    public string? Value { get; set; }
+    public string? ValueType { get; set; }
+    public string? Description { get; set; }
+}
+````
 
-7. **Output**:
-   - Generate the **Vue component**, **Pinia store**, and **service** scaffold.
-   - Do not generate example API keys or secrets.
+---
 
-Your output should be **ready to drop into the project** and compile without breaking existing features.
+### ⚙️ FEATURE REQUIREMENTS
+
+1. **UI Component**
+
+   * Create a `ConfigView.vue` page using Vuetify 3.
+   * Use a tabbed layout or accordion sections for categories:
+
+     * AI Chat
+     * Embedding
+     * Vector Store
+     * Storage
+     * System / Fixed
+   * Display all configurations fetched from backend.
+   * Render input components dynamically based on `ValueType`:
+
+     * `"string"` → text field
+     * `"int"` → numeric input
+     * `"bool"` → switch
+     * `"json"` → JSON textarea editor
+   * Show `Description` below each field as helper text.
+   * Read-only for fixed or sensitive keys (JWT, ConnectionStrings, API keys).
+   * Include “Save” and “Cancel” buttons per tab.
+
+2. **Pinia Store**
+
+   * Create a store (e.g. `stores/configStore.ts`) to manage state:
+
+     * `state`: list of `SystemConfigurationDto`
+     * `actions`: `fetchConfigs()`, `updateConfig(key, value)`
+     * Handle optimistic updates and error fallback.
+     * Follow the same code conventions as other stores in the project.
+
+3. **Service Layer**
+
+   * Create a service (e.g. `services/configService.ts`) that calls backend endpoints:
+
+     * `GET /api/systemconfig` → fetch all configs
+     * `PUT /api/systemconfig/{key}` → update one config
+   * Reuse the existing HTTP client abstraction (do not create a new one).
+
+4. **UX Requirements**
+
+   * Validate each field based on `ValueType`.
+   * Show success/error toasts using the project’s existing notification system.
+   * Highlight unsaved changes until “Save” is clicked.
+   * Add “Reset to Default” if supported by API.
+   * Optionally include a “Test Configuration” section for AIChatSettings.
+
+5. **Code Style**
+
+   * Use `<script setup lang="ts">`.
+   * Follow existing TypeScript + Pinia patterns.
+   * Keep Vuetify styling consistent (spacing, typography, color scheme).
+   * Include proper typing for each config item.
+
+6. **Output**
+
+   * Generate:
+
+     * `src/stores/configStore.ts`
+     * `src/services/configService.ts`
+     * `src/views/ConfigView.vue`
+   * Code must compile immediately and integrate with the current project without breaking anything.
+   * Include clear inline comments explaining logic for dynamic rendering, value parsing, and save flow.
+
+---
+
+### 💡 Additional Guidance
+
+* Infer `ValueType` from backend response when rendering inputs.
+* Preserve current app code structure and patterns.
+* Use computed properties for reactive type casting (e.g., `parseInt`, `JSON.parse`).
+* Use Vuetify’s built-in components (`v-text-field`, `v-switch`, `v-select`, `v-textarea`, `v-card`, `v-tabs`).
+
+```

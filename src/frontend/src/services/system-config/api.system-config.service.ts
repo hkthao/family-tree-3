@@ -7,7 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ApiSystemConfigService implements ISystemConfigService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/systemconfig`;
+  private apiUrl = `${API_BASE_URL}/SystemConfiguration`;
 
   async getSystemConfigs(): Promise<Result<SystemConfig[], ApiError>> {
     return this.http.get<SystemConfig[]>(this.apiUrl);

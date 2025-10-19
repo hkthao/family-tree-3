@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { type SystemConfig, type ApiError } from '@/types';
+import { type SystemConfig } from '@/types';
 import i18n from '@/plugins/i18n';
 
 export const useSystemConfigStore = defineStore('systemConfig', {
