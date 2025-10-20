@@ -60,6 +60,7 @@ public class CreateEventsCommandHandlerTests : TestBase
         return new CreateEventDto
         {
             Name = "Test Event",
+            Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper(), // Generate a unique code
             Type = EventType.Birth,
             StartDate = DateTime.UtcNow.AddDays(-10),
             EndDate = DateTime.UtcNow.AddDays(-9),
