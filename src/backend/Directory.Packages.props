@@ -46,6 +46,7 @@
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="7.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Moq" Version="4.20.70" />
+    <PackageVersion Include="AutoFixture" Version="4.18.0" />
     <PackageVersion Include="Pinecone.Client" Version="4.0.2" />
     <PackageVersion Include="Qdrant.Client" Version="1.15.1" />
     <PackageVersion Include="xunit" Version="2.5.3" />

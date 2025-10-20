@@ -1,4 +1,3 @@
-using System;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using FluentValidation.TestHelper;

@@ -1,5 +1,4 @@
 using backend.Application.AI.Chat.Queries;
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;

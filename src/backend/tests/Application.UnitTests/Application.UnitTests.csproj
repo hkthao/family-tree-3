@@ -22,6 +22,7 @@
         <PackageReference Include="Moq" />
         <PackageReference Include="FluentAssertions" />
         <PackageReference Include="FluentValidation" />
+        <PackageReference Include="AutoFixture" />
     </ItemGroup>
 
     <ItemGroup>
