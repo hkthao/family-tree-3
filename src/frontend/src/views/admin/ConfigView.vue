@@ -8,11 +8,9 @@
       <v-row>
         <template v-for="config in filteredAndSortedConfigs" :key="config.key">
           <v-col cols="6">
-            <div class="d-flex align-center">
-              <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
-                class="mb-4 mr-2"></v-text-field>
-              <v-btn icon="mdi-content-save" size="small" color="primary" @click="saveConfig(config)"></v-btn>
-            </div>
+            <v-text-field v-model="config.value" :label="config.key" :hint="config.description" persistent-hint
+              class="mb-4" append-inner-icon="mdi-content-save" @click:append-inner="saveConfig(config)"
+              variant="outlined"></v-text-field>
           </v-col>
         </template>
       </v-row>
@@ -59,7 +57,7 @@ const filteredAndSortedConfigs = computed(() => {
 });
 
 const saveConfig = async (config: SystemConfig) => {
-  await systemConfigStore.updateSystemConfig(config.key, config.value);
+  await systemConfigStore.updateSystemConfig(config.id, config);
   if (!systemConfigStore.error) {
     notificationStore.showSnackbar(
       t('systemConfig.messages.updateSuccess'),

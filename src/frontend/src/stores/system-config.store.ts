@@ -27,30 +27,17 @@ export const useSystemConfigStore = defineStore('systemConfig', {
       this.loading = false;
     },
 
-    async updateSystemConfig(key: string, value: any) {
+    async updateSystemConfig(id: string, value: SystemConfig) {
       this.loading = true;
       this.error = null;
-      // Optimistic update
-      const originalConfig = this.configs.find((config) => config.key === key);
-      if (originalConfig) {
-        const originalValue = originalConfig.value;
-        originalConfig.value = value;
-
-        const result = await this.services.systemConfig.updateSystemConfig(key, value);
-        if (result.ok) {
-          // Update successful, replace with the actual updated config from the backend
-          const index = this.configs.findIndex((config) => config.key === key);
-          if (index !== -1) {
-            this.configs[index] = result.value;
-          }
-        } else {
-          // Revert on error
-          originalConfig.value = originalValue;
-          this.error = i18n.global.t('systemConfig.errors.update');
-          console.error(result.error);
-        }
-      } else {
-        this.error = i18n.global.t('systemConfig.errors.notFound');
+      const result = await this.services.systemConfig.updateSystemConfig(
+        id,
+        value,
+      );
+      if (!result.ok) {
+        // Revert on error
+        this.error = i18n.global.t('systemConfig.errors.update');
+        console.error(result.error);
       }
       this.loading = false;
     },

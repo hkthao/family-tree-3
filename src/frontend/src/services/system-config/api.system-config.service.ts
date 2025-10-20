@@ -13,7 +13,10 @@ export class ApiSystemConfigService implements ISystemConfigService {
     return this.http.get<SystemConfig[]>(this.apiUrl);
   }
 
-  async updateSystemConfig(key: string, value: any): Promise<Result<SystemConfig, ApiError>> {
-    return this.http.put<SystemConfig>(`${this.apiUrl}/${key}`, { value });
+  async updateSystemConfig(
+    id: string,
+    value: any,
+  ): Promise<Result<SystemConfig, ApiError>> {
+    return this.http.put<SystemConfig>(`${this.apiUrl}/${id}`, value);
   }
 }

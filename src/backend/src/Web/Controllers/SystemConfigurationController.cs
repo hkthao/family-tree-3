@@ -28,13 +28,13 @@ public class SystemConfigurationController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Result<Guid>>> CreateSystemConfiguration(CreateSystemConfigurationCommand command)
+    public async Task<ActionResult<Result<Guid>>> CreateSystemConfiguration([FromBody] CreateSystemConfigurationCommand command)
     {
         return await _mediator.Send(command);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result>> UpdateSystemConfiguration(Guid id, UpdateSystemConfigurationCommand command)
+    public async Task<ActionResult<Result>> UpdateSystemConfiguration([FromRoute] Guid id, [FromBody] UpdateSystemConfigurationCommand command)
     {
         if (id != command.Id)
         {
@@ -45,7 +45,7 @@ public class SystemConfigurationController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Result>> DeleteSystemConfiguration(Guid id)
+    public async Task<ActionResult<Result>> DeleteSystemConfiguration([FromRoute]Guid id)
     {
         return await _mediator.Send(new DeleteSystemConfigurationCommand(id));
     }
