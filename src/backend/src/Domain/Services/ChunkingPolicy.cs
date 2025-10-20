@@ -4,7 +4,7 @@ using backend.Domain.Entities;
 
 namespace backend.Domain.Services
 {
-    public class ChunkingPolicy
+    public class ChunkingPolicy : IChunkingPolicy
     {
         private const int MinChunkWords = 300;
         private const int MaxChunkWords = 400;

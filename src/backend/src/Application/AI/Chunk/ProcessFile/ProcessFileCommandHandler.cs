@@ -8,9 +8,9 @@ namespace backend.Application.AI.Chunk.ProcessFile;
 public class ProcessFileCommandHandler : IRequestHandler<ProcessFileCommand, Result<List<TextChunk>>>
 {
     private readonly IFileTextExtractorFactory _extractorFactory;
-    private readonly ChunkingPolicy _chunkingPolicy;
+    private readonly IChunkingPolicy _chunkingPolicy;
 
-    public ProcessFileCommandHandler(IFileTextExtractorFactory extractorFactory, ChunkingPolicy chunkingPolicy)
+    public ProcessFileCommandHandler(IFileTextExtractorFactory extractorFactory, IChunkingPolicy chunkingPolicy)
     {
         _extractorFactory = extractorFactory;
         _chunkingPolicy = chunkingPolicy;
