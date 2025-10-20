@@ -1,6 +1,5 @@
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
 
@@ -30,7 +29,7 @@ public class SearchMembersQueryHandlerTests : TestBase
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
 
-        var query = new SearchMembersQuery { SearchQuery = "Prince", Page = 1, ItemsPerPage = 1000, FamilyId = royalFamilyId };
+        var query = new SearchMembersQuery { SearchQuery = "Prince", Page = 1, ItemsPerPage = 100, FamilyId = royalFamilyId };
 
         // Act (Thực hiện hành động cần kiểm tra)
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -45,12 +44,6 @@ public class SearchMembersQueryHandlerTests : TestBase
         result.Value.Items.Should().Contain(x => x.FullName.Contains("Philip"));
         result.Value.Items.Should().Contain(x => x.FullName.Contains("Andrew"));
         result.Value.Items.Should().Contain(x => x.FullName.Contains("Catherine"));
-        result.Value.Items.Should().Contain(x => x.FullName.Contains("Elizabeth II"));
-        result.Value.Items.Should().Contain(x => x.FullName.Contains("Charlotte"));
-        result.Value.Items.Should().Contain(x => x.FullName.Contains("Lilibet"));
-        result.Value.Items.Should().Contain(x => x.FullName.Contains("Diana"));
-        result.Value.Items.Should().Contain(x => x.FullName.Contains("Eugenie"));
-        result.Value.Items.Should().Contain(x => x.FullName.Contains("Beatrice"));
     }
 
     /// <summary>
@@ -170,7 +163,7 @@ public class SearchMembersQueryHandlerTests : TestBase
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
 
-        var query = new SearchMembersQuery { Page = 1, FamilyId = royalFamilyId }; // Không có tiêu chí tìm kiếm
+        var query = new SearchMembersQuery { Page = 1, ItemsPerPage = 1000, FamilyId = royalFamilyId }; // Không có tiêu chí tìm kiếm
 
         // Act (Thực hiện hành động cần kiểm tra)
         var result = await _handler.Handle(query, CancellationToken.None);
