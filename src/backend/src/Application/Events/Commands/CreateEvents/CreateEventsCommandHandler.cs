@@ -23,6 +23,11 @@ public class CreateEventsCommandHandler : IRequestHandler<CreateEventsCommand, R
         var createdEventIds = new List<Guid>();
         var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
 
+        if (currentUserProfile == null)
+        {
+            return Result<List<Guid>>.Failure("User profile not found.", "NotFound");
+        }
+
         foreach (var command in request.Events)
         {
             var family = await _context.Families
