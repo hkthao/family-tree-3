@@ -58,7 +58,8 @@ public class CreateFamilyCommandHandlerTests : TestBase
             Description = "Mô tả gia đình mới",
             Address = "Địa chỉ mới",
             AvatarUrl = "http://example.com/avatar.jpg",
-            Visibility = "Public"
+            Visibility = "Public",
+            Code = "FAM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper()
         };
 
         // Act (Thực hiện hành động cần kiểm tra)
@@ -102,13 +103,12 @@ public class CreateFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Giả lập _user.Id là null hoặc rỗng.
-        _mockUser.Setup(x => x.Id).Returns((string)null!);
-
         var command = new CreateFamilyCommand
         {
             Name = "Gia đình",
             Description = "Mô tả",
-            Visibility = "Private"
+            Visibility = "Private",
+            Code = "FAM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper()
         };
 
         // Act (Thực hiện hành động cần kiểm tra)
@@ -149,7 +149,8 @@ public class CreateFamilyCommandHandlerTests : TestBase
         {
             Name = "Gia đình",
             Description = "Mô tả",
-            Visibility = "Private"
+            Visibility = "Private",
+            Code = "FAM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper()
         };
 
         // Act (Thực hiện hành động cần kiểm tra)

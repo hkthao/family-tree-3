@@ -5,6 +5,7 @@ namespace backend.Application.Events.Commands.CreateEvents;
 public class CreateEventDto
 {
     public string Name { get; set; } = null!;
+    public string Code { get; set; } = null!;
     public EventType Type { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }

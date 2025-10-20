@@ -27,9 +27,9 @@ public class SearchEventsQueryHandlerTests : TestBase
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var familyId = Guid.NewGuid();
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện A", Description = "Mô tả A", FamilyId = familyId });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện B", Description = "Mô tả B", FamilyId = familyId });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện C", Description = "Mô tả C", FamilyId = familyId });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện A", Description = "Mô tả A", FamilyId = familyId, Code = "EVT001" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện B", Description = "Mô tả B", FamilyId = familyId, Code = "EVT002" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện C", Description = "Mô tả C", FamilyId = familyId, Code = "EVT003" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchEventsQuery { SearchQuery = "Sự kiện A", Page = 1, ItemsPerPage = 10 };
@@ -55,8 +55,8 @@ public class SearchEventsQueryHandlerTests : TestBase
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var familyId1 = Guid.NewGuid();
         var familyId2 = Guid.NewGuid();
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Gia đình 1", FamilyId = familyId1 });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Gia đình 2", FamilyId = familyId2 });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Gia đình 1", FamilyId = familyId1, Code = "EVT001" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Gia đình 2", FamilyId = familyId2, Code = "EVT002" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchEventsQuery { FamilyId = familyId1, Page = 1, ItemsPerPage = 10 };
@@ -81,9 +81,9 @@ public class SearchEventsQueryHandlerTests : TestBase
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var familyId = Guid.NewGuid();
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Hôm Qua", StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddDays(-1), FamilyId = familyId });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Hôm Nay", StartDate = DateTime.Now, EndDate = DateTime.Now, FamilyId = familyId });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Ngày Mai", StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now.AddDays(1), FamilyId = familyId });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Hôm Qua", StartDate = DateTime.Now.AddDays(-1), EndDate = DateTime.Now.AddDays(-1), FamilyId = familyId, Code = "EVT001" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Hôm Nay", StartDate = DateTime.Now, EndDate = DateTime.Now, FamilyId = familyId, Code = "EVT002" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Ngày Mai", StartDate = DateTime.Now.AddDays(1), EndDate = DateTime.Now.AddDays(1), FamilyId = familyId, Code = "EVT003" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchEventsQuery { StartDate = DateTime.Now.AddHours(-1), EndDate = DateTime.Now.AddHours(1), Page = 1, ItemsPerPage = 10 };
@@ -110,9 +110,9 @@ public class SearchEventsQueryHandlerTests : TestBase
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var familyId1 = Guid.NewGuid();
         var familyId2 = Guid.NewGuid();
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện A Gia đình 1", FamilyId = familyId1 });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện B Gia đình 1", FamilyId = familyId1 });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện A Gia đình 2", FamilyId = familyId2 });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện A Gia đình 1", FamilyId = familyId1, Code = "EVT001" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện B Gia đình 1", FamilyId = familyId1, Code = "EVT002" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện A Gia đình 2", FamilyId = familyId2, Code = "EVT003" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchEventsQuery { SearchQuery = "Sự kiện A", FamilyId = familyId1, Page = 1, ItemsPerPage = 10 };
@@ -138,7 +138,7 @@ public class SearchEventsQueryHandlerTests : TestBase
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var familyId = Guid.NewGuid();
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Duy Nhất", FamilyId = familyId });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện Duy Nhất", FamilyId = familyId, Code = "EVT001" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchEventsQuery { SearchQuery = "Sự kiện Không Tồn Tại", Page = 1, ItemsPerPage = 10 };
@@ -163,8 +163,8 @@ public class SearchEventsQueryHandlerTests : TestBase
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         var familyId = Guid.NewGuid();
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1", FamilyId = familyId });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2", FamilyId = familyId });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1", FamilyId = familyId, Code = "EVT001" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2", FamilyId = familyId, Code = "EVT002" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchEventsQuery { Page = 1, ItemsPerPage = 10 }; // Không có tiêu chí tìm kiếm

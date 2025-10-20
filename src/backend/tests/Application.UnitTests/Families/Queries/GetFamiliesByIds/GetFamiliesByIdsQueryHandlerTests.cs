@@ -39,8 +39,8 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupData();
 
         // Thêm một số gia đình vào cơ sở dữ liệu.
-        var family1 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 1" };
-        var family2 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 2" };
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 1", Code = "GFBI1" };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 2", Code = "GFBI2" };
         _context.Families.Add(family1);
         _context.Families.Add(family2);
         await _context.SaveChangesAsync(CancellationToken.None);
@@ -73,7 +73,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupData();
 
         // Thêm một gia đình vào cơ sở dữ liệu.
-        var existingFamily = new Family { Id = Guid.NewGuid(), Name = "Gia đình Tồn Tại" };
+        var existingFamily = new Family { Id = Guid.NewGuid(), Name = "Gia đình Tồn Tại", Code = "GFBIE" };
         _context.Families.Add(existingFamily);
         await _context.SaveChangesAsync(CancellationToken.None);
 

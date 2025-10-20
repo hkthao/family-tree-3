@@ -21,26 +21,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
             _mockFamilyTreeService.Object);
     }
 
-    private async Task ClearDatabaseAndSetupUser(string userId, Guid userProfileId, Guid familyId, bool isAdmin, bool canManageFamily)
-    {
-        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
-        _context.Members.RemoveRange(_context.Members);
-        _context.Events.RemoveRange(_context.Events);
-        _context.Families.RemoveRange(_context.Families);
-        _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        await _context.SaveChangesAsync(CancellationToken.None);
 
-        var userProfile = new UserProfile { Id = userProfileId, ExternalId = userId, Email = "test@example.com", Name = "Test User" };
-        _context.UserProfiles.Add(userProfile);
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
-        _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userProfile);
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(isAdmin);
-        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, userProfile)).Returns(canManageFamily);
-    }
 
     /// <summary>
     /// Kiểm tra xem một thành viên có được xóa thành công khi người dùng có quyền.
@@ -53,13 +34,21 @@ public class DeleteMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_Delete_Member_Successfully()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef"); // Prince William ID from SeedSampleData
+
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
+        _context.FamilyUsers.Add(new FamilyUser { FamilyId = royalFamilyId, UserProfileId = currentUserProfile.Id, Role = FamilyRole.Manager });
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(true);
 
         // Thêm một thành viên vào cơ sở dữ liệu để xóa.
-        var memberToDelete = new Member { Id = Guid.NewGuid(), FirstName = "Thành viên", LastName = "Để Xóa", FamilyId = familyId };
+        var memberToDelete = new Member { Id = williamId, FirstName = "Thành viên", LastName = "Để Xóa", FamilyId = royalFamilyId, Code = "DM001" };
         _context.Members.Add(memberToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -75,7 +64,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
         deletedMember.Should().BeNull();
 
         _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(royalFamilyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -89,10 +78,17 @@ public class DeleteMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_MemberNotFound()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
+        _context.FamilyUsers.Add(new FamilyUser { FamilyId = royalFamilyId, UserProfileId = currentUserProfile.Id, Role = FamilyRole.Manager });
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(true);
 
         // Tạo lệnh xóa thành viên với một ID không tồn tại.
         var nonExistentMemberId = Guid.NewGuid();
@@ -119,13 +115,20 @@ public class DeleteMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_UserIsNotAuthorizedToManageFamily()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false); // User is not authorized
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef"); // Prince William ID from SeedSampleData
+
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(false); // User is not authorized
 
         // Thêm một thành viên vào cơ sở dữ liệu để xóa.
-        var memberToDelete = new Member { Id = Guid.NewGuid(), FirstName = "Thành viên", LastName = "Không Được Xóa", FamilyId = familyId };
+        var memberToDelete = new Member { Id = williamId, FirstName = "Thành viên", LastName = "Không Được Xóa", FamilyId = royalFamilyId, Code = "DM002" };
         _context.Members.Add(memberToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 

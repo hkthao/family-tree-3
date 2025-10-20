@@ -32,7 +32,7 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         // Thêm một gia đình vào cơ sở dữ liệu.
         var familyId = Guid.NewGuid();
         var familyName = "Gia đình Tìm kiếm";
-        _context.Families.Add(new backend.Domain.Entities.Family { Id = familyId, Name = familyName });
+        _context.Families.Add(new backend.Domain.Entities.Family { Id = familyId, Name = familyName, Code = "TESTFAM" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Act (Thực hiện hành động cần kiểm tra)

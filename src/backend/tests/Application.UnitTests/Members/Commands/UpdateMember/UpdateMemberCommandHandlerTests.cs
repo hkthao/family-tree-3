@@ -17,34 +17,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         _handler = new UpdateMemberCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockFamilyTreeService.Object);
     }
 
-    private async Task ClearDatabaseAndSetupUser(string userId, Guid userProfileId, Guid familyId, bool isAdmin, bool canManageFamily, bool userProfileExists = true)
-    {
-        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
-        _context.Members.RemoveRange(_context.Members);
-        _context.Events.RemoveRange(_context.Events);
-        _context.Families.RemoveRange(_context.Families);
-        _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        await _context.SaveChangesAsync(CancellationToken.None);
 
-        if (userProfileExists)
-        {
-            var userProfile = new UserProfile { Id = userProfileId, ExternalId = userId, Email = "test@example.com", Name = "Test User" };
-            _context.UserProfiles.Add(userProfile);
-            _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
-            _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
-            await _context.SaveChangesAsync(CancellationToken.None);
-
-            _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(userProfile);
-            _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(isAdmin);
-            _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, userProfile)).Returns(canManageFamily);
-        }
-        else
-        {
-            _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync((UserProfile)null!);
-        }
-    }
 
     /// <summary>
     /// Kiểm tra xem một thành viên có được cập nhật thành công khi tất cả các điều kiện hợp lệ.
@@ -57,23 +30,30 @@ public class UpdateMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_Update_Member_Successfully()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef"); // Prince William ID from SeedSampleData
 
-        // Thêm một thành viên vào cơ sở dữ liệu để cập nhật.
-        var memberToUpdate = new Member { Id = Guid.NewGuid(), FirstName = "Tên Cũ", LastName = "Họ Cũ", FamilyId = familyId };
-        _context.Members.Add(memberToUpdate);
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
+        _context.FamilyUsers.Add(new FamilyUser { FamilyId = royalFamilyId, UserProfileId = currentUserProfile.Id, Role = FamilyRole.Manager });
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(true);
+
+        // Lấy thành viên từ dữ liệu mẫu để cập nhật.
+        var memberToUpdate = await _context.Members.FindAsync(williamId);
+        memberToUpdate.Should().NotBeNull(); // Đảm bảo thành viên tồn tại
 
         var command = new UpdateMemberCommand
         {
-            Id = memberToUpdate.Id,
+            Id = memberToUpdate!.Id,
             FirstName = "Tên Mới",
             LastName = "Họ Mới",
             Gender = "Female",
-            FamilyId = familyId
+            FamilyId = royalFamilyId
         };
 
         // Act (Thực hiện hành động cần kiểm tra)
@@ -87,7 +67,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.LastName.Should().Be("Họ Mới");
 
         _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(royalFamilyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -101,13 +81,20 @@ public class UpdateMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_Throw_NotFoundException_When_MemberNotFound()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
+        _context.FamilyUsers.Add(new FamilyUser { FamilyId = royalFamilyId, UserProfileId = currentUserProfile.Id, Role = FamilyRole.Manager });
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(true);
 
         var invalidId = Guid.NewGuid();
-        var command = new UpdateMemberCommand { Id = invalidId, FirstName = "Tên", LastName = "Họ", FamilyId = familyId };
+        var command = new UpdateMemberCommand { Id = invalidId, FirstName = "Tên", LastName = "Họ", FamilyId = royalFamilyId };
 
         // Act (Thực hiện hành động cần kiểm tra)
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
@@ -129,22 +116,28 @@ public class UpdateMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_UserIsNotAuthorizedToManageFamily()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false); // User is not authorized
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef"); // Prince William ID from SeedSampleData
 
-        // Thêm một thành viên vào cơ sở dữ liệu để cập nhật.
-        var memberToUpdate = new Member { Id = Guid.NewGuid(), FirstName = "Tên", LastName = "Họ", FamilyId = familyId };
-        _context.Members.Add(memberToUpdate);
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(false); // User is not authorized
+
+        // Lấy thành viên từ dữ liệu mẫu để cập nhật.
+        var memberToUpdate = await _context.Members.FindAsync(williamId);
+        memberToUpdate.Should().NotBeNull(); // Đảm bảo thành viên tồn tại
 
         var command = new UpdateMemberCommand
         {
-            Id = memberToUpdate.Id,
+            Id = memberToUpdate!.Id,
             FirstName = "Tên Mới",
             LastName = "Họ Mới",
-            FamilyId = familyId
+            FamilyId = royalFamilyId
         };
 
         // Act (Thực hiện hành động cần kiểm tra)
@@ -169,27 +162,36 @@ public class UpdateMemberCommandHandlerTests : TestBase
     public async Task Handle_Should_SetOldRootToNonRoot_WhenNewRootIsUpdated()
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var williamId = Guid.Parse("a1b2c3d4-e5f6-7890-1234-567890abcdef"); // Prince William ID from SeedSampleData
+        var harryId = Guid.Parse("a1b2c3d4-e5f6-3456-7890-1234567890ab"); // Prince Harry ID from SeedSampleData
 
-        // Tạo một thành viên gốc hiện có.
-        var oldRootMember = new Member { Id = Guid.NewGuid(), FirstName = "Gốc Cũ", LastName = "Họ Gốc Cũ", FamilyId = familyId, IsRoot = true };
-        _context.Members.Add(oldRootMember);
+        var currentUserProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(currentUserProfile);
+        _context.FamilyUsers.Add(new FamilyUser { FamilyId = royalFamilyId, UserProfileId = currentUserProfile.Id, Role = FamilyRole.Manager });
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        // Tạo một thành viên khác để cập nhật thành gốc mới.
-        var memberToBecomeNewRoot = new Member { Id = Guid.NewGuid(), FirstName = "Gốc Mới", LastName = "Họ Gốc Mới", FamilyId = familyId, IsRoot = false };
-        _context.Members.Add(memberToBecomeNewRoot);
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(currentUserProfile);
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(royalFamilyId, currentUserProfile)).Returns(true);
+
+        // Lấy thành viên gốc hiện có từ dữ liệu mẫu và đặt IsRoot = true.
+        var oldRootMember = await _context.Members.FindAsync(williamId);
+        oldRootMember.Should().NotBeNull();
+        oldRootMember!.IsRoot = true;
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Lấy thành viên khác từ dữ liệu mẫu để cập nhật thành gốc mới.
+        var memberToBecomeNewRoot = await _context.Members.FindAsync(harryId);
+        memberToBecomeNewRoot.Should().NotBeNull();
 
         var command = new UpdateMemberCommand
         {
-            Id = memberToBecomeNewRoot.Id,
+            Id = memberToBecomeNewRoot!.Id,
             FirstName = "Gốc Mới",
             LastName = "Họ Gốc Mới",
-            FamilyId = familyId,
+            FamilyId = royalFamilyId,
             IsRoot = true
         };
 
@@ -208,6 +210,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedOldRootMember!.IsRoot.Should().BeFalse();
 
         _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(royalFamilyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

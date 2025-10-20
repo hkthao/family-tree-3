@@ -53,25 +53,25 @@ public static class TestDbContextFactory
 
         var members = new List<backend.Domain.Entities.Member>
         {
-            new backend.Domain.Entities.Member { Id = williamId, FirstName = "Prince", LastName = "William, Prince of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = catherineId, FirstName = "Catherine,", LastName = "Princess of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = georgeId, FirstName = "Prince", LastName = "George of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = elizabethIIId, FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = louisId, FirstName = "Prince", LastName = "Louis of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = harryId, FirstName = "Prince", LastName = "Harry, Duke of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = meghanId, FirstName = "Meghan,", LastName = "Duchess of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = lilibetMountbattenWindsorId, FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = charlesIIIId, FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = queenConsortId, FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = philipId, FirstName = "Prince", LastName = "Philip, Duke of Edinburgh", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = dianaId, FirstName = "Princess", LastName = "of Wales", FamilyId = royalFamilyId, Created = DateTime.UtcNow }, // Diana
-            new backend.Domain.Entities.Member { Id = andrewId, FirstName = "Prince", LastName = "Andrew, Duke of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = sarahId, FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = eugenieId, FirstName = "Princess", LastName = "Eugenie of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = beatriceId, FirstName = "Princess", LastName = "Beatrice of York", FamilyId = royalFamilyId, Created = DateTime.UtcNow },
-            new backend.Domain.Entities.Member { Id = lilibetSussexId, FirstName = "Princess", LastName = "Lilibet of Sussex", FamilyId = royalFamilyId, Created = DateTime.UtcNow }
+            new backend.Domain.Entities.Member { Id = williamId, FirstName = "Prince", LastName = "William, Prince of Wales", Code = "M001", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = catherineId, FirstName = "Catherine,", LastName = "Princess of Wales", Code = "M002", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = georgeId, FirstName = "Prince", LastName = "George of Wales", Code = "M003", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = elizabethIIId, FirstName = "Queen", LastName = "Elizabeth II", Code = "M004", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = charlotteId, FirstName = "Princess", LastName = "Charlotte of Wales", Code = "M005", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = louisId, FirstName = "Prince", LastName = "Louis of Wales", Code = "M006", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = harryId, FirstName = "Prince", LastName = "Harry, Duke of Sussex", Code = "M007", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = meghanId, FirstName = "Meghan,", LastName = "Duchess of Sussex", Code = "M008", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = archieId, FirstName = "Archie", LastName = "Mountbatten-Windsor", Code = "M009", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = lilibetMountbattenWindsorId, FirstName = "Lilibet", LastName = "Mountbatten-Windsor", Code = "M010", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = charlesIIIId, FirstName = "King", LastName = "Charles III", Code = "M011", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = queenConsortId, FirstName = "Queen", LastName = "Consort", Code = "M012", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = philipId, FirstName = "Prince", LastName = "Philip, Duke of Edinburgh", Code = "M013", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = dianaId, FirstName = "Princess", LastName = "of Wales", Code = "M014", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() }, // Diana
+            new backend.Domain.Entities.Member { Id = andrewId, FirstName = "Prince", LastName = "Andrew, Duke of York", Code = "M015", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Male.ToString() },
+            new backend.Domain.Entities.Member { Id = sarahId, FirstName = "Sarah", LastName = "Ferguson", Code = "M016", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = eugenieId, FirstName = "Princess", LastName = "Eugenie of York", Code = "M017", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = beatriceId, FirstName = "Princess", LastName = "Beatrice of York", Code = "M018", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() },
+            new backend.Domain.Entities.Member { Id = lilibetSussexId, FirstName = "Princess", LastName = "Lilibet of Sussex", Code = "M019", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Gender = backend.Domain.Enums.Gender.Female.ToString() }
         };
         context.Members.AddRange(members);
 
@@ -81,6 +81,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Prince George",
+                Code = "E001",
                 Description = "The birth of Prince George of Wales.",
                 StartDate = new DateTime(2013, 7, 22),
                 Location = "St Mary's Hospital, London",
@@ -92,6 +93,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Marriage of William and Catherine",
+                Code = "E002",
                 Description = "The marriage of Prince William, Duke of Cambridge, and Catherine Middleton.",
                 StartDate = new DateTime(2011, 4, 29),
                 Location = "Westminster Abbey, London",
@@ -103,6 +105,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Death of Queen Elizabeth II",
+                Code = "E003",
                 Description = "The death of Queen Elizabeth II.",
                 StartDate = new DateTime(2022, 9, 8),
                 Location = "Balmoral Castle, Scotland",
@@ -114,6 +117,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Princess Charlotte",
+                Code = "E004",
                 Description = "The birth of Princess Charlotte of Wales.",
                 StartDate = new DateTime(2015, 5, 2),
                 Location = "St Mary's Hospital, London",
@@ -125,6 +129,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Prince Louis",
+                Code = "E005",
                 Description = "The birth of Prince Louis of Wales.",
                 StartDate = new DateTime(2018, 4, 23),
                 Location = "St Mary's Hospital, London",
@@ -136,6 +141,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Marriage of Harry and Meghan",
+                Code = "E006",
                 Description = "The marriage of Prince Harry and Meghan Markle.",
                 StartDate = new DateTime(2018, 5, 19),
                 Location = "St George's Chapel, Windsor Castle",
@@ -147,6 +153,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Archie Mountbatten-Windsor",
+                Code = "E007",
                 Description = "The birth of Archie Mountbatten-Windsor.",
                 StartDate = new DateTime(2019, 5, 6),
                 Location = "The Portland Hospital, London",
@@ -158,6 +165,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Lilibet Mountbatten-Windsor",
+                Code = "E008",
                 Description = "The birth of Lilibet Mountbatten-Windsor.",
                 StartDate = new DateTime(2021, 6, 4),
                 Location = "Santa Barbara Cottage Hospital, California",
@@ -169,6 +177,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Queen's Platinum Jubilee",
+                Code = "E009",
                 Description = "Celebration of Queen Elizabeth II's 70 years on the throne.",
                 StartDate = new DateTime(2022, 6, 2),
                 EndDate = new DateTime(2022, 6, 5),
@@ -180,6 +189,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Coronation of King Charles III",
+                Code = "E010",
                 Description = "The coronation of King Charles III and Queen Camilla.",
                 StartDate = new DateTime(2023, 5, 6),
                 Location = "Westminster Abbey, London",
@@ -191,6 +201,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Trooping the Colour 2023",
+                Code = "E011",
                 Description = "The King's official birthday parade.",
                 StartDate = new DateTime(2023, 6, 17),
                 Location = "London",
@@ -201,6 +212,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Prince Philip's Funeral",
+                Code = "E012",
                 Description = "The funeral of Prince Philip, Duke of Edinburgh.",
                 StartDate = new DateTime(2021, 4, 17),
                 Location = "St George's Chapel, Windsor Castle",
@@ -212,6 +224,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Princess Diana's Funeral",
+                Code = "E013",
                 Description = "The funeral of Diana, Princess of Wales.",
                 StartDate = new DateTime(1997, 9, 6),
                 Location = "Westminster Abbey, London",
@@ -223,6 +236,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Royal Wedding of Prince Andrew and Sarah Ferguson",
+                Code = "E014",
                 Description = "The wedding of Prince Andrew and Sarah Ferguson.",
                 StartDate = new DateTime(1986, 7, 23),
                 Location = "Westminster Abbey, London",
@@ -234,6 +248,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Royal Wedding of Princess Eugenie and Jack Brooksbank",
+                Code = "E015",
                 Description = "The wedding of Princess Eugenie of York and Jack Brooksbank.",
                 StartDate = new DateTime(2018, 10, 12),
                 Location = "St George's Chapel, Windsor Castle",
@@ -245,6 +260,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Royal Wedding of Princess Beatrice and Edoardo Mapelli Mozzi",
+                Code = "E016",
                 Description = "The wedding of Princess Beatrice of York and Edoardo Mapelli Mozzi.",
                 StartDate = new DateTime(2020, 7, 17),
                 Location = "Royal Chapel of All Saints, Royal Lodge, Windsor",
@@ -256,6 +272,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Prince William",
+                Code = "E017",
                 Description = "The birth of Prince William, Prince of Wales.",
                 StartDate = new DateTime(1982, 6, 21),
                 Location = "St Mary's Hospital, London",
@@ -267,6 +284,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of Prince Harry",
+                Code = "E018",
                 Description = "The birth of Prince Harry, Duke of Sussex.",
                 StartDate = new DateTime(1984, 9, 15),
                 Location = "St Mary's Hospital, London",
@@ -278,6 +296,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Birth of King Charles III",
+                Code = "E019",
                 Description = "The birth of King Charles III.",
                 StartDate = new DateTime(1948, 11, 14),
                 Location = "Buckingham Palace, London",
@@ -289,6 +308,7 @@ public static class TestDbContextFactory
             {
                 Id = Guid.NewGuid(),
                 Name = "Queen Elizabeth II's Coronation",
+                Code = "E020",
                 Description = "The coronation of Queen Elizabeth II.",
                 StartDate = new DateTime(1953, 6, 2),
                 Location = "Westminster Abbey, London",

@@ -39,9 +39,9 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupData();
 
         _context.Families.AddRange(
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình A", Description = "Mô tả A", Address = "Địa chỉ A" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình B", Description = "Mô tả B", Address = "Địa chỉ B" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình C", Description = "Mô tả C", Address = "Địa chỉ C" }
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình A", Description = "Mô tả A", Address = "Địa chỉ A", Code = "FSA" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình B", Description = "Mô tả B", Address = "Địa chỉ B", Code = "FSB" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình C", Description = "Mô tả C", Address = "Địa chỉ C", Code = "FSC" }
         );
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -69,8 +69,8 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupData();
 
         _context.Families.AddRange(
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình Công khai", Visibility = "Public" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình Riêng tư", Visibility = "Private" }
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình Công khai", Visibility = "Public", Code = "FSPUB" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình Riêng tư", Visibility = "Private", Code = "FSPRIV" }
         );
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -99,9 +99,9 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupData();
 
         _context.Families.AddRange(
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình A Công khai", Visibility = "Public" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình B Riêng tư", Visibility = "Private" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình C Công khai", Visibility = "Public" }
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình A Công khai", Visibility = "Public", Code = "FSAMC" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình B Riêng tư", Visibility = "Private", Code = "FSBMC" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình C Công khai", Visibility = "Public", Code = "FSCCC" }
         );
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -129,7 +129,7 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         await ClearDatabaseAndSetupData();
 
-        _context.Families.Add(new Family { Id = Guid.NewGuid(), Name = "Gia đình Duy Nhất", Visibility = "Private" });
+        _context.Families.Add(new Family { Id = Guid.NewGuid(), Name = "Gia đình Duy Nhất", Visibility = "Private", Code = "FSDN" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var query = new SearchFamiliesQuery { SearchQuery = "Gia đình Không Tồn Tại", Page = 1, ItemsPerPage = 10 };
@@ -156,8 +156,8 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         await ClearDatabaseAndSetupData();
 
         _context.Families.AddRange(
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình 1", Visibility = "Public" },
-            new Family { Id = Guid.NewGuid(), Name = "Gia đình 2", Visibility = "Private" }
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình 1", Visibility = "Public", Code = "FS1" },
+            new Family { Id = Guid.NewGuid(), Name = "Gia đình 2", Visibility = "Private", Code = "FS2" }
         );
         await _context.SaveChangesAsync(CancellationToken.None);
 

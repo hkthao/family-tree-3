@@ -36,7 +36,7 @@ public class DeleteEventCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
         // Thêm một sự kiện vào cơ sở dữ liệu để xóa.
-        var eventToDelete = new Event { Id = Guid.NewGuid(), Name = "Sự kiện để xóa", FamilyId = Guid.NewGuid() };
+        var eventToDelete = new Event { Id = Guid.NewGuid(), Name = "Sự kiện để xóa", FamilyId = Guid.NewGuid(), Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() };
         _context.Events.Add(eventToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -108,7 +108,7 @@ public class DeleteEventCommandHandlerTests : TestBase
 
         // Thêm một sự kiện vào cơ sở dữ liệu để xóa, với FamilyId.
         var familyId = Guid.NewGuid();
-        var eventToDelete = new Event { Id = Guid.NewGuid(), Name = "Sự kiện không được phép xóa", FamilyId = familyId };
+        var eventToDelete = new Event { Id = Guid.NewGuid(), Name = "Sự kiện không được phép xóa", FamilyId = familyId, Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() };
         _context.Events.Add(eventToDelete);
         await _context.SaveChangesAsync(CancellationToken.None);
 

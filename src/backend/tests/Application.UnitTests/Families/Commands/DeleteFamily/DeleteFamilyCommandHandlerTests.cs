@@ -46,6 +46,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
             _context.UserProfiles.Add(userProfile);
             // Thiết lập người dùng với vai trò Quản lý gia đình.
             _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
+            _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() });
             await _context.SaveChangesAsync(CancellationToken.None);
 
             // Thiết lập các hành vi của mock IAuthorizationService.
@@ -155,7 +156,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true, false); // userProfileExists = false
 
         // Thêm một gia đình vào context để thử xóa.
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAMPROF" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo lệnh xóa gia đình.
@@ -193,8 +194,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         // Thiết lập người dùng không có quyền quản lý gia đình.
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false); // User is not authorized
 
-        // Thêm một gia đình vào context để thử xóa.
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAMAUTH" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo lệnh xóa gia đình.

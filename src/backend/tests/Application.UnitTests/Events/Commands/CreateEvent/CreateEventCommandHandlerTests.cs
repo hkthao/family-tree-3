@@ -40,6 +40,7 @@ public class CreateEventCommandHandlerTests : TestBase
         {
             Name = "Sự kiện Mới",
             Description = "Mô tả sự kiện mới",
+            Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() // Add a unique code
         };
 
         // Act (Thực hiện hành động cần kiểm tra)

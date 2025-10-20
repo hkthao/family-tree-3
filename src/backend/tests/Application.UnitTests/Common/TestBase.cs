@@ -18,7 +18,7 @@ public abstract class TestBase : IDisposable
 
     protected TestBase()
     {
-        _context = TestDbContextFactory.Create();
+        _context = TestDbContextFactory.Create(true);
 
         var configurationProvider = new MapperConfiguration(cfg =>
         {

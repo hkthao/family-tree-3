@@ -27,8 +27,8 @@ public class GetEventsByIdsQueryHandlerTests : TestBase
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         // Thêm một số sự kiện vào cơ sở dữ liệu.
-        var event1 = new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1" };
-        var event2 = new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2" };
+        var event1 = new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1", Code = "EVT001" };
+        var event2 = new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2", Code = "EVT002" };
         _context.Events.Add(event1);
         _context.Events.Add(event2);
         await _context.SaveChangesAsync(CancellationToken.None);
@@ -59,7 +59,7 @@ public class GetEventsByIdsQueryHandlerTests : TestBase
     {
         // Arrange (Thiết lập môi trường cho bài kiểm tra)
         // Thêm một sự kiện vào cơ sở dữ liệu.
-        var existingEvent = new Event { Id = Guid.NewGuid(), Name = "Sự kiện Tồn Tại" };
+        var existingEvent = new Event { Id = Guid.NewGuid(), Name = "Sự kiện Tồn Tại", Code = "EVT001" };
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync(CancellationToken.None);
 

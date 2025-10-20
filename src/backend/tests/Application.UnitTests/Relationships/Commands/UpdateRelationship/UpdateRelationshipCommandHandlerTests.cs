@@ -17,53 +17,7 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         _handler = new UpdateRelationshipCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object);
     }
 
-    /// <summary>
-    /// Thiết lập môi trường kiểm thử bằng cách xóa dữ liệu cũ và tạo người dùng, hồ sơ người dùng, gia đình.
-    /// </summary>
-    /// <param name="userId">ID của người dùng hiện tại.</param>
-    /// <param name="userProfileId">ID của hồ sơ người dùng.</param>
-    /// <param name="familyId">ID của gia đình.</param>
-    /// <param name="isAdmin">Cho biết người dùng có phải là quản trị viên hay không.</param>
-    /// <param name="canManageFamily">Cho biết người dùng có quyền quản lý gia đình hay không.</param>
-    /// <param name="userProfileExists">Cho biết hồ sơ người dùng có tồn tại hay không.</param>
-    private async Task ClearDatabaseAndSetupUser(string userId, Guid userProfileId, Guid familyId, bool isAdmin, bool canManageFamily, bool userProfileExists = true)
-    {
-        // Xóa tất cả dữ liệu liên quan để đảm bảo môi trường sạch cho mỗi bài kiểm tra.
-        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
-        _context.Members.RemoveRange(_context.Members);
-        _context.Events.RemoveRange(_context.Events);
-        _context.Families.RemoveRange(_context.Families);
-        _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        _context.Relationships.RemoveRange(_context.Relationships);
-        await _context.SaveChangesAsync(CancellationToken.None);
 
-        // Thiết lập ID người dùng hiện tại cho mock IUser.
-        _mockUser.Setup(x => x.Id).Returns(userId);
-
-        if (userProfileExists)
-        {
-            // Tạo và thêm hồ sơ người dùng vào cơ sở dữ liệu.
-            var userProfile = new UserProfile { Id = userProfileId, ExternalId = userId, Email = "test@example.com", Name = "Test User" };
-            _context.UserProfiles.Add(userProfile);
-            // Create a Family with a Code
-            _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TESTFAM", Created = DateTime.UtcNow });
-            // Thiết lập người dùng với vai trò Quản lý gia đình.
-            _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
-            await _context.SaveChangesAsync(CancellationToken.None);
-
-            // Thiết lập các hành vi của mock IAuthorizationService.
-            _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(userProfile);
-            _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(isAdmin);
-            _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, userProfile)).Returns(canManageFamily);
-        }
-        else
-        {
-            // Thiết lập mock IAuthorizationService trả về null nếu hồ sơ người dùng không tồn tại.
-            _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync((UserProfile)null!);
-        }
-    }
 
     /// <summary>
     /// Kiểm tra xem một mối quan hệ có được cập nhật thành công.
@@ -72,15 +26,15 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_Should_UpdateRelationship_Successfully()
     {
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var familyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var member1 = _context.Members.First(m => m.Code == "M001"); // Prince William
+        var member2 = _context.Members.First(m => m.Code == "M002"); // Catherine
+        var member3 = _context.Members.First(m => m.Code == "M003"); // Prince George
 
-        var member1 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Member", LastName = "1" };
-        var member2 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Member", LastName = "2" };
-        var member3 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Member", LastName = "3" };
-        _context.Members.AddRange(member1, member2, member3);
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, It.IsAny<UserProfile>())).Returns(true);
+
         var existingRelationship = new Relationship
         {
             Id = Guid.NewGuid(),
@@ -118,10 +72,10 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_RelationshipNotFound()
     {
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var familyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, It.IsAny<UserProfile>())).Returns(true);
 
         var command = new UpdateRelationshipCommand
         {
@@ -147,10 +101,9 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_UserProfileNotFound()
     {
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true, false); // userProfileExists = false
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync((UserProfile)null!); // Simulate user profile not found
 
         var command = new UpdateRelationshipCommand
         {
@@ -176,14 +129,14 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_UserIsNotAuthorized()
     {
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false); // User is not authorized
+        var familyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var member1 = _context.Members.First(m => m.Code == "M001"); // Prince William
+        var member2 = _context.Members.First(m => m.Code == "M002"); // Catherine
 
-        var member1 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Member", LastName = "1" };
-        var member2 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Member", LastName = "2" };
-        _context.Members.AddRange(member1, member2);
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, It.IsAny<UserProfile>())).Returns(false); // User is not authorized
+
         var existingRelationship = new Relationship
         {
             Id = Guid.NewGuid(),
@@ -218,13 +171,13 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_Should_ReturnFailure_When_MemberNotFound()
     {
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfileId = Guid.NewGuid();
-        var familyId = Guid.NewGuid();
-        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
+        var familyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var member1 = _context.Members.First(m => m.Code == "M001"); // Prince William
 
-        var member1 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Member", LastName = "1" };
-        _context.Members.Add(member1);
+        _mockUser.Setup(x => x.Id).Returns(Guid.NewGuid().ToString());
+        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(false);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId, It.IsAny<UserProfile>())).Returns(true);
+
         var existingRelationship = new Relationship
         {
             Id = Guid.NewGuid(),

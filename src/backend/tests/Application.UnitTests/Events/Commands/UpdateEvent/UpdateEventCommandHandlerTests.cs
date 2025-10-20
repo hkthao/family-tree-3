@@ -36,7 +36,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
 
         // Thêm một sự kiện vào cơ sở dữ liệu để cập nhật.
-        var existingEvent = new Event { Id = Guid.NewGuid(), Name = "Tên Cũ", Description = "Mô tả cũ", FamilyId = Guid.NewGuid() };
+        var existingEvent = new Event { Id = Guid.NewGuid(), Name = "Tên Cũ", Description = "Mô tả cũ", FamilyId = Guid.NewGuid(), Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() };
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -88,7 +88,8 @@ public class UpdateEventCommandHandlerTests : TestBase
             Id = nonExistentEventId,
             Name = "Tên Mới",
             Description = "Mô tả mới",
-            FamilyId = Guid.NewGuid()
+            FamilyId = Guid.NewGuid(),
+            Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper()
         };
 
         // Act (Thực hiện hành động cần kiểm tra)
@@ -123,7 +124,7 @@ public class UpdateEventCommandHandlerTests : TestBase
 
         // Thêm một sự kiện vào cơ sở dữ liệu để cập nhật, với FamilyId.
         var familyId = Guid.NewGuid();
-        var existingEvent = new Event { Id = Guid.NewGuid(), Name = "Sự kiện không được phép cập nhật", FamilyId = familyId };
+        var existingEvent = new Event { Id = Guid.NewGuid(), Name = "Sự kiện không được phép cập nhật", FamilyId = familyId, Code = "EVT" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() };
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -133,7 +134,8 @@ public class UpdateEventCommandHandlerTests : TestBase
             Id = existingEvent.Id,
             Name = "Tên Mới",
             Description = "Mô tả mới",
-            FamilyId = existingEvent.FamilyId
+            FamilyId = existingEvent.FamilyId,
+            Code = existingEvent.Code
         };
 
         // Act (Thực hiện hành động cần kiểm tra)

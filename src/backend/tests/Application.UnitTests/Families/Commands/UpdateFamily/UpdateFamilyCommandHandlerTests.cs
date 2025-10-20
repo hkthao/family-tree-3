@@ -1,3 +1,4 @@
+using backend.Application.Common.Exceptions;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -132,6 +133,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
             _context.UserProfiles.Add(userProfile);
             // Thiết lập người dùng với vai trò Quản lý gia đình.
             _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
+            _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM" + Guid.NewGuid().ToString().Substring(0, 5).ToUpper() });
             await _context.SaveChangesAsync(CancellationToken.None);
 
             // Thiết lập các hành vi của mock IAuthorizationService.
@@ -163,9 +165,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         var userProfileId = Guid.NewGuid();
         var familyId = Guid.NewGuid();
         // Thiết lập người dùng mà không có hồ sơ người dùng tồn tại.
-        // Thêm một gia đình vào context để thử cập nhật.
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM002" });
-        await _context.SaveChangesAsync(CancellationToken.None);
+        await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false, false);
 
         var command = new UpdateFamilyCommand { Id = familyId, Name = "New Name" };
 
@@ -201,20 +201,16 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Thiết lập người dùng không có quyền quản lý gia đình.
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, false); // User is not authorized
 
-        // Thêm một gia đình vào context để thử cập nhật.
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "FAM003" });
-        await _context.SaveChangesAsync(CancellationToken.None);
+
 
         var command = new UpdateFamilyCommand { Id = familyId, Name = "New Name" };
 
         // Act: Thực hiện hành động cần kiểm tra (gọi handler cập nhật gia đình).
-        var result = await _handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert: Kiểm tra kết quả mong đợi.
-        // 1. Đảm bảo lệnh cập nhật thất bại.
-        result.IsSuccess.Should().BeFalse();
-        // 2. Đảm bảo thông báo lỗi chứa chuỗi "User does not have permission to update this family.".
-        result.Error.Should().Contain("User does not have permission to update this family.");
+        // 1. Đảm bảo ném ra NotFoundException.
+        await act.Should().ThrowAsync<NotFoundException>();
 
         // 3. Xác minh rằng các dịch vụ khác không được gọi.
         _mockMediator.Verify(m => m.Send(It.IsAny<backend.Application.UserActivities.Commands.RecordActivity.RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Never);

@@ -26,26 +26,19 @@ public class GetEventsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnAllEvents_WhenNoFilterIsApplied()
     {
         // Arrange: Thiết lập môi trường và dữ liệu ban đầu cho bài kiểm tra.
-        // Xóa tất cả các sự kiện hiện có để đảm bảo môi trường test sạch.
-        _context.Events.RemoveRange(_context.Events);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        // Tạo một gia đình và thêm vào cơ sở dữ liệu.
-        var family = new Family { Id = Guid.NewGuid(), Name = "Gia đình Test" };
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
 
         // Thêm một số sự kiện vào cơ sở dữ liệu cho gia đình này.
         var events = new List<Event>
         {
-            new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1", FamilyId = family.Id, Created = DateTime.UtcNow },
-            new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2", FamilyId = family.Id, Created = DateTime.UtcNow }
+            new Event { Id = Guid.NewGuid(), Name = "Sự kiện 1", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Code = "EVT001" },
+            new Event { Id = Guid.NewGuid(), Name = "Sự kiện 2", FamilyId = royalFamilyId, Created = DateTime.UtcNow, Code = "EVT002" }
         };
         _context.Events.AddRange(events);
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo truy vấn để lấy tất cả sự kiện cho gia đình này.
-        var query = new GetEventsQuery { FamilyId = family.Id, ItemsPerPage = 10000 };
+        var query = new GetEventsQuery { FamilyId = royalFamilyId, ItemsPerPage = 10000 };
 
         // Act: Thực hiện hành động cần kiểm tra (gọi handler lấy sự kiện).
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -68,21 +61,15 @@ public class GetEventsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnEventsForSpecificFamilyId()
     {
         // Arrange: Thiết lập môi trường và dữ liệu ban đầu cho bài kiểm tra.
-        // Xóa tất cả các sự kiện hiện có để đảm bảo môi trường test sạch.
-        _context.Events.RemoveRange(_context.Events);
-        _context.Families.RemoveRange(_context.Families);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        // Tạo hai gia đình và thêm sự kiện cho mỗi gia đình.
-        var family1 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 1" };
-        var family2 = new Family { Id = Guid.NewGuid(), Name = "Gia đình 2" };
-        _context.Families.AddRange(family1, family2);
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện của Gia đình 1", FamilyId = family1.Id });
-        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện của Gia đình 2", FamilyId = family2.Id });
+        var royalFamilyId = Guid.Parse("16905e2b-5654-4ed0-b118-bbdd028df6eb"); // Royal Family ID from SeedSampleData
+        var anotherFamilyId = Guid.NewGuid();
+        _context.Families.Add(new Family { Id = anotherFamilyId, Name = "Another Family", Code = "ANOTHERFAM" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện của Gia đình Hoàng gia", FamilyId = royalFamilyId, Code = "EVT003" });
+        _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = "Sự kiện của Gia đình Khác", FamilyId = anotherFamilyId, Code = "EVT004" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo truy vấn để lấy sự kiện cho FamilyId của gia đình 1.
-        var query = new GetEventsQuery { FamilyId = family1.Id, ItemsPerPage = 10 };
+        var query = new GetEventsQuery { FamilyId = royalFamilyId, ItemsPerPage = 10 };
 
         // Act: Thực hiện hành động cần kiểm tra (gọi handler lấy sự kiện).
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -105,18 +92,12 @@ public class GetEventsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnEmptyList_WhenNoEventsForFamilyId()
     {
         // Arrange: Thiết lập môi trường và dữ liệu ban đầu cho bài kiểm tra.
-        // Xóa tất cả các sự kiện hiện có để đảm bảo môi trường test sạch.
-        _context.Events.RemoveRange(_context.Events);
-        _context.Families.RemoveRange(_context.Families);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        // Tạo một gia đình nhưng không thêm sự kiện nào cho nó.
-        var family = new Family { Id = Guid.NewGuid(), Name = "Gia đình Không Sự kiện" };
-        _context.Families.Add(family);
+        var familyId = Guid.NewGuid();
+        _context.Families.Add(new Family { Id = familyId, Name = "Gia đình Không Sự kiện", Code = "FAMNOEVT" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo truy vấn để lấy sự kiện cho gia đình này.
-        var query = new GetEventsQuery { FamilyId = family.Id, ItemsPerPage = 10 };
+        var query = new GetEventsQuery { FamilyId = familyId, ItemsPerPage = 10 };
 
         // Act: Thực hiện hành động cần kiểm tra (gọi handler lấy sự kiện).
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -139,22 +120,19 @@ public class GetEventsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnPaginatedEvents()
     {
         // Arrange: Thiết lập môi trường và dữ liệu ban đầu cho bài kiểm tra.
-        // Xóa tất cả các sự kiện hiện có để đảm bảo môi trường test sạch.
-        _context.Events.RemoveRange(_context.Events);
-        _context.Families.RemoveRange(_context.Families);
+        var familyId = Guid.NewGuid();
+        _context.Families.Add(new Family { Id = familyId, Name = "Gia đình Phân trang", Code = "FAMPAG" });
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo một gia đình và thêm nhiều sự kiện vào cơ sở dữ liệu.
-        var family = new Family { Id = Guid.NewGuid(), Name = "Gia đình Phân trang" };
-        _context.Families.Add(family);
         for (int i = 0; i < 5; i++)
         {
-            _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = $"Sự kiện {i}", FamilyId = family.Id });
+            _context.Events.Add(new Event { Id = Guid.NewGuid(), Name = $"Sự kiện {i}", FamilyId = familyId, Code = $"EVT{i:D3}" });
         }
         await _context.SaveChangesAsync(CancellationToken.None);
 
         // Tạo truy vấn với phân trang (trang 1, 2 mục mỗi trang).
-        var query = new GetEventsQuery { FamilyId = family.Id, Page = 1, ItemsPerPage = 2 };
+        var query = new GetEventsQuery { FamilyId = familyId, Page = 1, ItemsPerPage = 2 };
 
         // Act: Thực hiện hành động cần kiểm tra (gọi handler lấy sự kiện).
         var result = await _handler.Handle(query, CancellationToken.None);
