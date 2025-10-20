@@ -35,7 +35,7 @@ public class CreateMemberCommandHandlerTests : TestBase
 
         var userProfile = new UserProfile { Id = userProfileId, ExternalId = userId, Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family" });
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TEST_FAMILY" });
         _context.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfileId, Role = FamilyRole.Manager });
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -67,7 +67,8 @@ public class CreateMemberCommandHandlerTests : TestBase
             FirstName = "Thành viên",
             LastName = "Mới",
             FamilyId = familyId,
-            IsRoot = false
+            IsRoot = false,
+            Code = Guid.NewGuid().ToString()
         };
 
         // Act (Thực hiện hành động cần kiểm tra)
@@ -215,7 +216,7 @@ public class CreateMemberCommandHandlerTests : TestBase
         await ClearDatabaseAndSetupUser(userId, userProfileId, familyId, false, true);
 
         // Tạo một thành viên gốc hiện có.
-        var oldRootMember = new Member { Id = Guid.NewGuid(), FirstName = "Gốc Cũ", LastName = "Họ Gốc Cũ", FamilyId = familyId, IsRoot = true };
+        var oldRootMember = new Member { Id = Guid.NewGuid(), FirstName = "Gốc Cũ", LastName = "Họ Gốc Cũ", FamilyId = familyId, IsRoot = true, Code = Guid.NewGuid().ToString() };
         _context.Members.Add(oldRootMember);
         await _context.SaveChangesAsync(CancellationToken.None);
 

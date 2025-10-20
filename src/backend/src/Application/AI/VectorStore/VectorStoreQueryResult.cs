@@ -1,4 +1,4 @@
-namespace backend.Application.Common.Models;
+namespace backend.Application.AI.VectorStore;
 
 public class VectorStoreQueryResult
 {

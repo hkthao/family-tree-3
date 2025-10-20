@@ -1,4 +1,4 @@
-namespace backend.Application.AI.Common;
+namespace backend.Application.Members.Commands.GenerateBiography;
 
 /// <summary>
 /// Represents the result of a biography generation request for the API.

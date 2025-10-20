@@ -1,4 +1,4 @@
-using backend.Application.AI.Common;
+
 using backend.Application.Common.Models;
 
 namespace backend.Application.Members.Commands.GenerateBiography;

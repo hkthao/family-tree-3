@@ -1,4 +1,4 @@
-using backend.Application.Common.Models;
+using backend.Application.AI.VectorStore;
 
 namespace backend.Application.Common.Interfaces;
 
