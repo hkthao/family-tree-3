@@ -39,7 +39,7 @@ public class FamilyAuthorizationService
         if (!(_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString())) &&
             !family.FamilyUsers.Any(fu => fu.UserProfileId == currentUserProfile!.Id && fu.Role == FamilyRole.Manager))
         {
-            return Result<Family>.Failure($"User is not authorized to manage family {family.Name}.");
+            return Result<Family>.Failure($"User is not authorized to manage family {family.Name}.", "Authorization");
         }
 
         return Result<Family>.Success(family);
