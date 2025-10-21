@@ -18,7 +18,7 @@ public class FamilyAuthorizationService
         _authorizationService = authorizationService;
     }
 
-    public async Task<Result<Family>> AuthorizeFamilyAccess(Guid? familyId, CancellationToken cancellationToken)
+    public virtual async Task<Result<Family>> AuthorizeFamilyAccess(Guid? familyId, CancellationToken cancellationToken)
     {
         if (!familyId.HasValue)
         {
