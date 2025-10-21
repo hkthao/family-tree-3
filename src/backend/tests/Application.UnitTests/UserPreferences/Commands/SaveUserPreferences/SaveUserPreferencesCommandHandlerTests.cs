@@ -1,158 +1,241 @@
-using backend.Application.UnitTests.Common;
+using AutoFixture;
+using AutoMapper;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.UserPreferences.Commands.SaveUserPreferences;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.UserPreferences.Commands.SaveUserPreferences;
 
 public class SaveUserPreferencesCommandHandlerTests : TestBase
 {
-    /// <summary>
-    /// Mục tiêu: Kiểm tra rằng handler có thể cập nhật các thiết lập người dùng (UserPreferences) thành công
-    /// khi người dùng đã có thiết lập từ trước.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldUpdateExistingPreferences_WhenRequestIsValid()
+    private readonly SaveUserPreferencesCommandHandler _handler;
+
+    public SaveUserPreferencesCommandHandlerTests()
     {
-        // ARRANGE
-        // 1. Tạo một UserProfile và một UserPreference đã tồn tại trong cơ sở dữ liệu.
-        //    - Tạo đối tượng UserProfile thủ công.
-        //    - Lưu vào DbContext để EF Core gán một Id.
-        var userProfile = new UserProfile
-        {
-            Id = Guid.NewGuid(),
-            ExternalId = Guid.NewGuid().ToString(),
-            Email = "test@example.com",
-            Name = "Test User"
-        };
-        _context.UserProfiles.Add(userProfile);
-        await _context.SaveChangesAsync();
-
-        // 2. Thiết lập Mock cho IUser service để trả về ExternalId của người dùng vừa tạo.
-        //    - Điều này giả lập rằng người dùng đang đăng nhập chính là người dùng này.
-        _mockUser.Setup(u => u.Id).Returns(userProfile.ExternalId);
-
-        // 3. Tạo một UserPreference đã tồn tại, liên kết với UserProfile ở trên.
-        var existingPreference = new UserPreference
-        {
-            Id = Guid.NewGuid(),
-            UserProfileId = userProfile.Id,
-            Language = Language.English, // Giá trị ban đầu
-            Theme = Theme.Light // Giá trị ban đầu
-        };
-        _context.UserPreferences.Add(existingPreference);
-        await _context.SaveChangesAsync();
-        // 4. Tạo command với dữ liệu mới để cập nhật.
-        var command = new SaveUserPreferencesCommand
-        {
-            Language = Language.Vietnamese, // Giá trị mới
-            Theme = Theme.Dark // Giá trị mới
-        };
-
-        // 5. Khởi tạo handler với các dependency cần thiết.
-        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
-
-        // ACT
-        // Thực thi handler để cập nhật dữ liệu.
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // ASSERT
-        // 1. Kiểm tra kết quả trả về phải là thành công.
-        result.IsSuccess.Should().BeTrue();
-
-        // 2. Tìm lại UserPreference trong DB để xác nhận thay đổi bằng một context mới.
-        var updatedPreference = await _context.UserPreferences.FirstOrDefaultAsync(e => e.Id == existingPreference.Id);
-
-        // 3. Các thuộc tính phải được cập nhật chính xác theo giá trị mới từ command.
-        //    - Giải thích: Điều này khẳng định logic cập nhật của handler hoạt động đúng
-        //      khi tìm thấy một preference đã tồn tại.
-        updatedPreference.Should().NotBeNull();
-        updatedPreference!.Language.Should().Be(command.Language);
-        updatedPreference!.Theme.Should().Be(command.Theme);
+        _handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
     }
 
-    /// <summary>
-    /// Mục tiêu: Kiểm tra rằng handler sẽ tạo mới UserPreference nếu chưa tồn tại
-    /// cho người dùng hiện tại.
-    /// </summary>
     [Fact]
-    public async Task Handle_ShouldCreateNewPreferences_WhenNoneExist()
+    public async Task Handle_ShouldCreateUserPreference_WhenUserPreferenceDoesNotExist()
     {
-        // ARRANGE
-        // 1. Tạo UserProfile nhưng KHÔNG tạo UserPreference tương ứng.
-        var userProfile = new UserProfile
-        {
-            Id = Guid.NewGuid(),
-            ExternalId = Guid.NewGuid().ToString(),
-            Email = "newuser@example.com",
-            Name = "New User"
-        };
+        // 🎯 Mục tiêu của test:
+        // Xác minh rằng một UserPreference mới được tạo và lưu vào cơ sở dữ liệu
+        // khi người dùng hiện tại chưa có UserPreference nào.
+
+        // ⚙️ Các bước (Arrange, Act, Assert):
+        // Arrange:
+        // 1. Tạo một UserProfile giả lập với UserPreference là null.
+        // 2. Thiết lập _mockUser để trả về UserProfileId của người dùng giả lập.
+        // 3. Tạo một SaveUserPreferencesCommand với các giá trị mong muốn.
+        // Act:
+        // 1. Gọi phương thức Handle của handler.
+        // Assert:
+        // 1. Kiểm tra xem kết quả trả về là thành công.
+        // 2. Kiểm tra xem UserPreference mới đã được tạo và lưu vào cơ sở dữ liệu với các giá trị chính xác.
+
+        // Arrange
+        var userId = Guid.NewGuid().ToString();
+        var userProfile = _fixture.Build<UserProfile>()
+                                  .With(up => up.ExternalId, userId)
+                                  .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
+                                  .Create();
         _context.UserProfiles.Add(userProfile);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(CancellationToken.None);
 
-        // 2. Mock IUser service để giả lập người dùng này đang đăng nhập.
-        _mockUser.Setup(u => u.Id).Returns(userProfile.ExternalId);
+        _mockUser.Setup(u => u.Id).Returns(userId);
 
-        // 3. Tạo command với các giá trị cần lưu.
         var command = new SaveUserPreferencesCommand
         {
-            Language = Language.Vietnamese,
-            Theme = Theme.Dark
+            Theme = Theme.Dark,
+            Language = Language.English,
+            EmailNotificationsEnabled = true,
+            SmsNotificationsEnabled = false,
+            InAppNotificationsEnabled = true
         };
 
-        // 4. Khởi tạo handler.
-        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
 
-        // ACT
-        // Thực thi handler.
-        var result = await handler.Handle(command, CancellationToken.None);
-
-        // ASSERT
-        // 1. Kết quả phải thành công.
+        // Assert
+        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        // 2. Phải có một UserPreference mới được tạo trong DB bằng một context mới.
-        using var queryContext = CreateNewContext();
-        var newPreference = await queryContext.UserPreferences.FirstOrDefaultAsync(p => p.UserProfile.Id == userProfile.Id);
+        var savedUserPreference = _context.UserPreferences.FirstOrDefault(up => up.UserProfileId == userProfile.Id);
+        savedUserPreference.Should().NotBeNull();
+        savedUserPreference!.Theme.Should().Be(command.Theme);
+        savedUserPreference.Language.Should().Be(command.Language);
+        savedUserPreference.EmailNotificationsEnabled.Should().Be(command.EmailNotificationsEnabled);
+        savedUserPreference.SmsNotificationsEnabled.Should().Be(command.SmsNotificationsEnabled);
+        savedUserPreference.InAppNotificationsEnabled.Should().Be(command.InAppNotificationsEnabled);
 
-        // 3. Dữ liệu của preference mới phải khớp với command.
-        //    - Giải thích: Điều này xác nhận logic của handler có thể xử lý trường hợp
-        //      tạo mới preference khi người dùng lần đầu tiên lưu thiết lập.
-        newPreference.Should().NotBeNull();
-        newPreference!.Language.Should().Be(command.Language);
-        newPreference!.Theme.Should().Be(command.Theme);
+        // 💡 Giải thích:
+        // Test này đảm bảo rằng khi một người dùng chưa có bất kỳ tùy chọn nào,
+        // hệ thống sẽ tạo một bản ghi UserPreference mới với các giá trị được cung cấp trong command
+        // và liên kết nó với UserProfile của người dùng đó.
     }
 
-    /// <summary>
-    /// Mục tiêu: Kiểm tra rằng handler trả về lỗi khi không thể xác thực người dùng (user ID is null).
-    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldUpdateExistingUserPreference_WhenUserPreferenceExists()
+    {
+        // 🎯 Mục tiêu của test:
+        // Xác minh rằng một UserPreference hiện có được cập nhật chính xác
+        // khi người dùng gửi một SaveUserPreferencesCommand.
+
+        // ⚙️ Các bước (Arrange, Act, Assert):
+        // Arrange:
+        // 1. Tạo một UserProfile và một UserPreference hiện có cho người dùng.
+        // 2. Thiết lập _mockUser để trả về UserProfileId của người dùng.
+        // 3. Tạo một SaveUserPreferencesCommand với các giá trị mới.
+        // Act:
+        // 1. Gọi phương thức Handle của handler.
+        // Assert:
+        // 1. Kiểm tra xem kết quả trả về là thành công.
+        // 2. Kiểm tra xem UserPreference hiện có đã được cập nhật với các giá trị mới.
+
+        // Arrange
+        var userId = Guid.NewGuid().ToString();
+        var userProfile = _fixture.Build<UserProfile>()
+                                  .With(up => up.ExternalId, userId)
+                                  .Create();
+        var existingUserPreference = _fixture.Build<UserPreference>()
+                                             .With(up => up.UserProfileId, userProfile.Id)
+                                             .With(up => up.Theme, Theme.Light)
+                                             .With(up => up.Language, Language.Vietnamese)
+                                             .Create();
+        
+        _context.UserProfiles.Add(userProfile);
+        _context.UserPreferences.Add(existingUserPreference);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _mockUser.Setup(u => u.Id).Returns(userId);
+
+        var command = new SaveUserPreferencesCommand
+        {
+            Theme = Theme.Dark,
+            Language = Language.English,
+            EmailNotificationsEnabled = true,
+            SmsNotificationsEnabled = true,
+            InAppNotificationsEnabled = false
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+
+        var updatedUserProfile = _context.UserProfiles.Include(up => up.UserPreference).FirstOrDefault(up => up.Id == userProfile.Id);
+        updatedUserProfile.Should().NotBeNull();
+        updatedUserProfile!.UserPreference.Should().NotBeNull();
+        updatedUserProfile.UserPreference!.Theme.Should().Be(command.Theme);
+        updatedUserProfile.UserPreference.Language.Should().Be(command.Language);
+        updatedUserProfile.UserPreference.EmailNotificationsEnabled.Should().Be(command.EmailNotificationsEnabled);
+        updatedUserProfile.UserPreference.SmsNotificationsEnabled.Should().Be(command.SmsNotificationsEnabled);
+        updatedUserProfile.UserPreference.InAppNotificationsEnabled.Should().Be(command.InAppNotificationsEnabled);
+
+        // 💡 Giải thích:
+        // Test này đảm bảo rằng khi một người dùng đã có UserPreference,
+        // hệ thống sẽ tìm và cập nhật bản ghi hiện có với các giá trị mới từ command.
+    }
+
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
     {
-        // ARRANGE
-        // 1. Mock IUser service để trả về null, giả lập người dùng chưa đăng nhập.
-        _mockUser.Setup(u => u.Id).Returns((string)null!);
+        // 🎯 Mục tiêu của test:
+        // Xác minh rằng handler trả về một kết quả thất bại
+        // khi người dùng không được xác thực (User.Id là null hoặc rỗng).
 
-        // 2. Tạo command.
-        var command = new SaveUserPreferencesCommand();
+        // ⚙️ Các bước (Arrange, Act, Assert):
+        // Arrange:
+        // 1. Thiết lập _mockUser để trả về null cho User.Id.
+        // 2. Tạo một SaveUserPreferencesCommand bất kỳ.
+        // Act:
+        // 1. Gọi phương thức Handle của handler.
+        // Assert:
+        // 1. Kiểm tra xem kết quả trả về là thất bại.
+        // 2. Kiểm tra thông báo lỗi phù hợp.
 
-        // 3. Khởi tạo handler.
-        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
+        // Arrange
+        _mockUser.Setup(u => u.Id).Returns((string)null!); // User is not authenticated
 
-        // ACT
-        // Thực thi handler.
-        var result = await handler.Handle(command, CancellationToken.None);
+        var command = new SaveUserPreferencesCommand
+        {
+            Theme = Theme.Light,
+            Language = Language.Vietnamese,
+            EmailNotificationsEnabled = false,
+            SmsNotificationsEnabled = false,
+            InAppNotificationsEnabled = false
+        };
 
-        // ASSERT
-        // 1. Kết quả phải là thất bại.
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be("User is not authenticated.");
+        result.ErrorSource.Should().Be("Authentication");
 
-        // 2. Phải có thông điệp lỗi rõ ràng về việc xác thực.
-        //    - Giải thích: Đây là một bước kiểm tra bảo mật quan trọng, đảm bảo rằng
-        //      không có hành động nào được thực hiện nếu không xác định được danh tính người dùng.
-        result.Error.Should().Contain("User is not authenticated.");
+        // 💡 Giải thích:
+        // Test này kiểm tra trường hợp bảo mật cơ bản: nếu không có người dùng được xác thực,
+        // yêu cầu lưu tùy chọn sẽ bị từ chối với thông báo lỗi rõ ràng.
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
+    {
+        // 🎯 Mục tiêu của test:
+        // Xác minh rằng handler trả về một kết quả thất bại
+        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
+
+        // ⚙️ Các bước (Arrange, Act, Assert):
+        // Arrange:
+        // 1. Thiết lập _mockUser để trả về một UserProfileId hợp lệ nhưng không tồn tại trong DB.
+        // 2. Đảm bảo không có UserProfile nào trong DB khớp với ID này.
+        // 3. Tạo một SaveUserPreferencesCommand bất kỳ.
+        // Act:
+        // 1. Gọi phương thức Handle của handler.
+        // Assert:
+        // 1. Kiểm tra xem kết quả trả về là thất bại.
+        // 2. Kiểm tra thông báo lỗi phù hợp.
+
+        // Arrange
+        var userId = Guid.NewGuid().ToString();
+        _mockUser.Setup(u => u.Id).Returns(userId);
+
+        // Ensure no UserProfile exists for this userId
+        _context.UserProfiles.RemoveRange(_context.UserProfiles);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        var command = new SaveUserPreferencesCommand
+        {
+            Theme = Theme.Light,
+            Language = Language.Vietnamese,
+            EmailNotificationsEnabled = false,
+            SmsNotificationsEnabled = false,
+            InAppNotificationsEnabled = false
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be("User profile not found.");
+        result.ErrorSource.Should().Be("NotFound");
+
+        // 💡 Giải thích:
+        // Test này đảm bảo rằng ngay cả khi người dùng được xác thực,
+        // nếu hồ sơ người dùng của họ không tồn tại trong hệ thống,
+        // yêu cầu sẽ thất bại để ngăn chặn việc tạo dữ liệu không hợp lệ.
     }
 }
