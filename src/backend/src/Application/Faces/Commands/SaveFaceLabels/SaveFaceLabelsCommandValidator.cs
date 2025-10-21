@@ -17,11 +17,11 @@ namespace backend.Application.Faces.Commands.SaveFaceLabels
                     .NotEmpty().WithMessage("DetectedFaceDto Id is required.");
 
                 face.RuleFor(f => f.MemberId)
-                    .NotEmpty().WithMessage("DetectedFaceDto MemberId is required for labeled faces.");
+                    .NotNull().WithMessage("DetectedFaceDto MemberId is required for labeled faces.")
+                    .Must(id => id != Guid.Empty).WithMessage("DetectedFaceDto MemberId is required for labeled faces.");
 
                 face.RuleFor(f => f.Embedding)
-                    .NotNull().WithMessage("DetectedFaceDto Embedding cannot be null.")
-                    .Must(e => e != null && e.Any()).WithMessage("DetectedFaceDto Embedding cannot be empty.");
+                    .NotNull().NotEmpty().WithMessage("DetectedFaceDto Embedding cannot be empty.");
             });
         }
     }
