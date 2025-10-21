@@ -30,7 +30,7 @@ public class DeleteEventCommandHandler : IRequestHandler<DeleteEventCommand, Res
 
         if (entity == null)
         {
-            return Result<bool>.Failure($"Event with ID {request.Id} not found.");
+            return Result<bool>.Failure($"Event with ID {request.Id} not found.", "NotFound");
         }
 
         // Authorization check: Only family managers or admins can delete events

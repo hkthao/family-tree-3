@@ -38,7 +38,7 @@ public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, Res
 
         if (entity == null)
         {
-            return Result<bool>.Failure($"Event with ID {request.Id} not found.");
+            return Result<bool>.Failure($"Event with ID {request.Id} not found.", "NotFound");
         }
 
         var oldName = entity.Name; // Capture old name for activity summary
