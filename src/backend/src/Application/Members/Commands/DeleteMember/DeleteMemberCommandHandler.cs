@@ -32,7 +32,7 @@ public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, R
 
             // Authorization check
             // First, get the member to find its familyId
-            var memberToDelete = await _context.Members.FindAsync(new object[] { request.Id }, cancellationToken);
+            var memberToDelete = await _context.Members.FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
             if (memberToDelete == null)
             {
                 return Result.Failure($"Member with ID {request.Id} not found.", "NotFound");
