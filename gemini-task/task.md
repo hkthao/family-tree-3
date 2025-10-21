@@ -1,105 +1,78 @@
-````
-You are a senior frontend engineer.  
-Implement a new **System Configuration Management feature** for an existing **Vue 3 + Pinia + Vuetify** project.
+Bạn là một chuyên gia .NET về kiểm thử phần mềm. Hãy giúp tôi tự động viết các Unit Test và Integration Test cho dự án ASP.NET Core theo mô hình DDD + CQRS.
+
+🎯 Bối cảnh:
+
+- Project sử dụng Entity Framework Core (DbContext trực tiếp, KHÔNG dùng repository pattern).
+- Framework test: xUnit + FluentAssertions.
+- Có thể sử dụng AutoFixture để tạo dữ liệu hoặc input test, và AutoMoq để mock các dependency phụ (nhưng KHÔNG mock DbContext).
+- Dữ liệu test nên dùng EF InMemoryDatabase (UseInMemoryDatabase(Guid.NewGuid().ToString())) để mô phỏng database thật.
+- Mỗi test phải chạy độc lập, không dùng chung dữ liệu với test khác.
 
 ---
 
-### 🔍 BEFORE YOU START
-- Inspect existing **services**, **Pinia stores**, and **Vuetify components** in the codebase.
-- Follow existing project conventions: folder structure, naming patterns, import style, API handling, and error management.
-- Do **not** introduce new libraries or architectural patterns.
+### 🧩 **Yêu cầu khi viết test**
+
+1. **Phạm vi test**
+   - Viết test cho từng CommandHandler, QueryHandler, hoặc Service trong thư mục `Application.UnitTests`.
+   - Mỗi file test chỉ tập trung vào **các case quan trọng nhất**, ví dụ:
+     - Entity không tồn tại → throw `NotFoundException`.
+     - Dữ liệu hợp lệ → trả kết quả hoặc cập nhật chính xác.
+     - Dữ liệu/quyền không hợp lệ → trả lỗi phù hợp.
+
+2. **Cấu trúc test**
+   - Mỗi test method phải có comment chi tiết:
+     - 🎯 Mục tiêu của test.
+     - ⚙️ Các bước (Arrange, Act, Assert).
+     - 💡 Giải thích vì sao kết quả mong đợi là đúng.
+   - Đặt tên test rõ ràng theo chuẩn:
+     - `Handle_ShouldThrowNotFoundException_WhenMemberNotFound`
+     - `Handle_ShouldUpdateMemberCorrectly_WhenValidRequest`
+
+3. **Giới hạn phạm vi**
+   - Chỉ viết 2–3 test case tiêu biểu cho mỗi handler.
+   - Khi implement:
+     - Viết từng test một.
+     - Chạy test, khi tất cả pass → mới chuyển sang handler tiếp theo.
+
+4. **Cách setup dữ liệu**
+   - KHÔNG mock DbSet hoặc EF method như `FirstOrDefaultAsync`.
+   - Tạo dữ liệu test bằng:
+     - Thủ công (seed entity, gán Id/FK đúng), hoặc
+     - AutoFixture (nhưng phải gán FK thủ công nếu có quan hệ).
+   - Mỗi test khởi tạo một InMemoryDatabase mới để đảm bảo độc lập.
+
+5. **Tái sử dụng setup**
+   - Tạo `BaseTest` class để gom logic khởi tạo chung:
+     - DbContext (InMemory)
+     - AutoFixture config
+     - AutoMoq setup (nếu có dependency)
+   - Các test kế thừa `BaseTest` để tránh lặp code.
 
 ---
 
-### 🧩 BACKEND MODEL REFERENCE
+### 🚫 **Cảnh báo quan trọng**
 
-The backend provides this model for each configuration item:
-
-```csharp
-public class SystemConfigurationDto
-{
-    public Guid Id { get; set; }
-    public string Key { get; set; } = string.Empty;
-    public string? Value { get; set; }
-    public string? ValueType { get; set; }
-    public string? Description { get; set; }
-}
-````
+- **KHÔNG được tự bịa hoặc suy đoán model, property, hoặc field.**
+- Chỉ được dùng **các entity, DTO, và property có thật trong mã nguồn hiện có của dự án**.
+- Nếu không chắc chắn về cấu trúc model → hãy hỏi lại hoặc tra cứu trong code trước khi viết test.
+- Không thêm thuộc tính giả như `CreatedAt`, `UpdatedAt`, `IsDeleted`, v.v. nếu không có trong model thật.
 
 ---
 
-### ⚙️ FEATURE REQUIREMENTS
+### 📁 **Kết quả mong muốn**
 
-1. **UI Component**
-
-   * Create a `ConfigView.vue` page using Vuetify 3.
-   * Use a tabbed layout or accordion sections for categories:
-
-     * AI Chat
-     * Embedding
-     * Vector Store
-     * Storage
-     * System / Fixed
-   * Display all configurations fetched from backend.
-   * Render input components dynamically based on `ValueType`:
-
-     * `"string"` → text field
-     * `"int"` → numeric input
-     * `"bool"` → switch
-     * `"json"` → JSON textarea editor
-   * Show `Description` below each field as helper text.
-   * Read-only for fixed or sensitive keys (JWT, ConnectionStrings, API keys).
-   * Include “Save” and “Cancel” buttons per tab.
-
-2. **Pinia Store**
-
-   * Create a store (e.g. `stores/configStore.ts`) to manage state:
-
-     * `state`: list of `SystemConfigurationDto`
-     * `actions`: `fetchConfigs()`, `updateConfig(key, value)`
-     * Handle optimistic updates and error fallback.
-     * Follow the same code conventions as other stores in the project.
-
-3. **Service Layer**
-
-   * Create a service (e.g. `services/configService.ts`) that calls backend endpoints:
-
-     * `GET /api/systemconfig` → fetch all configs
-     * `PUT /api/systemconfig/{key}` → update one config
-   * Reuse the existing HTTP client abstraction (do not create a new one).
-
-4. **UX Requirements**
-
-   * Validate each field based on `ValueType`.
-   * Show success/error toasts using the project’s existing notification system.
-   * Highlight unsaved changes until “Save” is clicked.
-   * Add “Reset to Default” if supported by API.
-   * Optionally include a “Test Configuration” section for AIChatSettings.
-
-5. **Code Style**
-
-   * Use `<script setup lang="ts">`.
-   * Follow existing TypeScript + Pinia patterns.
-   * Keep Vuetify styling consistent (spacing, typography, color scheme).
-   * Include proper typing for each config item.
-
-6. **Output**
-
-   * Generate:
-
-     * `src/stores/configStore.ts`
-     * `src/services/configService.ts`
-     * `src/views/ConfigView.vue`
-   * Code must compile immediately and integrate with the current project without breaking anything.
-   * Include clear inline comments explaining logic for dynamic rendering, value parsing, and save flow.
+- Mỗi file test nằm trong `Application.UnitTests/<Module>/<Feature>/<FeatureName>Tests.cs`
+- Mỗi test:
+  - Chạy độc lập.
+  - Dễ hiểu cho junior developer.
+  - Có comment rõ ràng (Arrange / Act / Assert / Explain).
+  - Dùng FluentAssertions để assert.
+  - Chạy async nếu cần (`await handler.Handle(...)`).
 
 ---
 
-### 💡 Additional Guidance
+### ⚙️ **Mục tiêu cuối cùng**
 
-* Infer `ValueType` from backend response when rendering inputs.
-* Preserve current app code structure and patterns.
-* Use computed properties for reactive type casting (e.g., `parseInt`, `JSON.parse`).
-* Use Vuetify’s built-in components (`v-text-field`, `v-switch`, `v-select`, `v-textarea`, `v-card`, `v-tabs`).
-
-```
+- Giúp tôi — một developer làm việc một mình — có thể nhanh chóng tạo test hữu ích cho từng handler mà không tốn thời gian.
+- Tập trung vào **tốc độ, tính chính xác và độ dễ hiểu**.
+- Không cần độ bao phủ tuyệt đối, chỉ cần test các case chính, đáng tin cậy, có thể chạy tự động.

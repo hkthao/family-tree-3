@@ -1,64 +1,55 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
+using AutoMapper;
 using backend.Application.Common.Interfaces;
-using backend.Application.Identity.UserProfiles.Queries;
-using backend.Domain.Entities;
 using backend.Infrastructure.Data;
-using FluentAssertions;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Xunit;
-using Microsoft.EntityFrameworkCore.Metadata;
+using System;
 
 namespace backend.Application.UnitTests.Common;
 
+/// <summary>
+/// Lớp cơ sở cho các bài kiểm thử đơn vị.
+/// Cung cấp môi trường cơ sở dữ liệu trong bộ nhớ, AutoFixture và AutoMoq để thiết lập dữ liệu và mock các dependency.
+/// </summary>
 public abstract class TestBase : IDisposable
 {
-    protected readonly IFixture _fixture;
     protected readonly ApplicationDbContext _context;
-    protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    protected readonly Mock<IMediator> _mockMediator;
-    protected readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
+    protected readonly IFixture _fixture;
+    protected readonly Mock<IUser> _mockUser;
+    protected readonly Mock<IMapper> _mapperMock;
 
     protected TestBase()
     {
+        // Cấu hình AutoFixture với AutoMoq để tự động tạo đối tượng và mock interface
         _fixture = new Fixture().Customize(new AutoMoqCustomization());
-
-        // Cấu hình AutoFixture để xử lý các tham chiếu vòng lặp trong biểu đồ đối tượng.
-        // Điều này ngăn chặn lỗi 'circular reference' khi tạo các đối tượng phức tạp có quan hệ qua lại.
         _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
             .ForEach(b => _fixture.Behaviors.Remove(b));
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-        // Setup In-Memory DbContext
+        // Thiết lập InMemoryDatabase cho mỗi test để đảm bảo tính độc lập
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
+
         _context = new ApplicationDbContext(options);
-        _context.Database.EnsureCreated(); // Ensure the database is created for each test
+        _context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
-        // Mock services
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockFamilyTreeService = _fixture.Freeze<Mock<IFamilyTreeService>>();
+        // Mock ICurrentUserService
+        _mockUser = _fixture.Freeze<Mock<IUser>>();
 
-        // Default mock for GetCurrentUserProfileAsync to return a valid UserProfile
-        // This can be overridden in specific tests if needed
-        _mockAuthorizationService.Setup(x => x.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_fixture.Create<UserProfile>());
-
-        // Default mock for IsAdmin to return true for most tests, can be overridden
-        _mockAuthorizationService.Setup(x => x.IsAdmin()).Returns(true);
-
-        // Default mock for CanManageFamily to return true for most tests, can be overridden
-        _mockAuthorizationService.Setup(x => x.CanManageFamily(It.IsAny<Guid>(), It.IsAny<UserProfile>()))
-            .Returns(true);
+        // Cấu hình AutoMapper (cần một cấu hình mapper thực tế nếu có)
+        // Đối với các unit test, thường mock IMapper hoặc cung cấp một cấu hình tối thiểu.
+        // Ở đây, chúng ta sẽ mock nó và thiết lập hành vi cụ thể khi cần.
+        _mapperMock = _fixture.Freeze<Mock<IMapper>>();
     }
 
+    /// <summary>
+    /// Giải phóng tài nguyên.
+    /// </summary>
     public void Dispose()
     {
-        _context.Database.EnsureDeleted(); // Clean up the database after each test
         _context.Dispose();
     }
 }
