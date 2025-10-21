@@ -48,7 +48,7 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<MemberResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Members == null)
+            if (aiResponse == null || aiResponse.Members == null || !aiResponse.Members.Any())
             {
                 return Result<List<MemberDto>>.Failure("AI generated empty or unparseable JSON response.");
             }
