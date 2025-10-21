@@ -58,7 +58,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         };
 
         // 5. Khởi tạo handler với các dependency cần thiết.
-        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapperMock.Object);
+        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
 
         // ACT
         // Thực thi handler để cập nhật dữ liệu.
@@ -109,7 +109,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         };
 
         // 4. Khởi tạo handler.
-        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapperMock.Object);
+        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
 
         // ACT
         // Thực thi handler.
@@ -145,7 +145,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         var command = new SaveUserPreferencesCommand();
 
         // 3. Khởi tạo handler.
-        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapperMock.Object);
+        var handler = new SaveUserPreferencesCommandHandler(_context, _mockUser.Object, _mapper);
 
         // ACT
         // Thực thi handler.

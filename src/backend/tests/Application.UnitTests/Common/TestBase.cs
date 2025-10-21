@@ -18,7 +18,7 @@ public abstract class TestBase : IDisposable
     protected readonly ApplicationDbContext _context;
     protected readonly IFixture _fixture;
     protected readonly Mock<IUser> _mockUser;
-    protected readonly Mock<IMapper> _mapperMock;
+    protected readonly IMapper _mapper;
     protected readonly string _databaseName;
 
     protected TestBase()
@@ -41,10 +41,14 @@ public abstract class TestBase : IDisposable
         // Mock ICurrentUserService
         _mockUser = _fixture.Freeze<Mock<IUser>>();
 
-        // Cấu hình AutoMapper (cần một cấu hình mapper thực tế nếu có)
-        // Đối với các unit test, thường mock IMapper hoặc cung cấp một cấu hình tối thiểu.
-        // Ở đây, chúng ta sẽ mock nó và thiết lập hành vi cụ thể khi cần.
-        _mapperMock = _fixture.Freeze<Mock<IMapper>>();
+        // Cấu hình AutoMapper
+        var mapperConfiguration = new MapperConfiguration(cfg =>
+        {
+            cfg.AddProfile<MappingProfile>();
+            cfg.AddProfile<UserPreferenceMappingProfile>();
+            // Add other profiles if needed
+        });
+        _mapper = mapperConfiguration.CreateMapper();
     }
 
     /// <summary>

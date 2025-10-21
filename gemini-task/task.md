@@ -4,7 +4,7 @@ Bạn là một chuyên gia .NET về kiểm thử phần mềm. Hãy giúp tôi
 
 - Project sử dụng Entity Framework Core (DbContext trực tiếp, KHÔNG dùng repository pattern).
 - Framework test: xUnit + FluentAssertions.
-- Có thể sử dụng AutoFixture để tạo dữ liệu hoặc input test, và AutoMoq để mock các dependency phụ (nhưng KHÔNG mock DbContext).
+- Có thể sử dụng input test nhap du lieu thu cong, và AutoMoq để mock các dependency phụ (nhưng KHÔNG mock DbContext).
 - Dữ liệu test nên dùng EF InMemoryDatabase (UseInMemoryDatabase(Guid.NewGuid().ToString())) để mô phỏng database thật.
 - Mỗi test phải chạy độc lập, không dùng chung dữ liệu với test khác.
 

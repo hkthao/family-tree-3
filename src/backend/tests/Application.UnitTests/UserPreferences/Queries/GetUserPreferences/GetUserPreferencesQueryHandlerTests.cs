@@ -20,18 +20,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
 
     public GetUserPreferencesQueryHandlerTests()
     {
-        // Cấu hình IMapper để ánh xạ UserPreference sang UserPreferenceDto
-        _mapperMock.Setup(m => m.Map<UserPreferenceDto>(It.IsAny<UserPreference>()))
-                   .Returns((UserPreference source) => new UserPreferenceDto
-                   {
-                       Theme = source.Theme,
-                       Language = source.Language,
-                       EmailNotificationsEnabled = source.EmailNotificationsEnabled,
-                       SmsNotificationsEnabled = source.SmsNotificationsEnabled,
-                       InAppNotificationsEnabled = source.InAppNotificationsEnabled
-                   });
-
-        _handler = new GetUserPreferencesQueryHandler(_context, _mockUser.Object, _mapperMock.Object);
+        _handler = new GetUserPreferencesQueryHandler(_context, _mockUser.Object, _mapper);
     }
 
     [Theory, AutoData]
