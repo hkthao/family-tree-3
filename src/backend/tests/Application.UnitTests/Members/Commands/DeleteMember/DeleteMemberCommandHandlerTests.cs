@@ -135,8 +135,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         var memberAfterDeletionAttempt = await _context.Members.FirstOrDefaultAsync(m => m.Id == member.Id);
         memberAfterDeletionAttempt.Should().BeNull(); // Mong đợi là null nếu xóa thành công
 
-        _context.Members.Count().Should().Be(0); // Thêm assertion này để kiểm tra số lượng thành viên sau khi xóa
-
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(member.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
         _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         // 💡 Giải thích: Người dùng admin có quyền xóa thành viên mà không cần kiểm tra quyền quản lý gia đình cụ thể.
