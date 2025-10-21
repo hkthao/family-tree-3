@@ -2,18 +2,18 @@ namespace backend.Application.Members.Inputs;
 
 public record MemberInput
 {
-    public string LastName { get; init; } = null!;
-    public string FirstName { get; init; } = null!;
-    public string? Code { get; init; }
-    public string? Nickname { get; init; }
-    public DateTime? DateOfBirth { get; init; }
-    public DateTime? DateOfDeath { get; init; }
-    public string? PlaceOfBirth { get; init; }
-    public string? PlaceOfDeath { get; init; }
-    public string? Gender { get; init; }
-    public string? AvatarUrl { get; init; }
-    public string? Occupation { get; init; }
-    public string? Biography { get; init; }
-    public Guid FamilyId { get; init; }
-    public bool IsRoot { get; init; }
+    public string LastName { get; set; } = null!;
+    public string FirstName { get; set; } = null!;
+    public string? Code { get; set; }
+    public string? Nickname { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public DateTime? DateOfDeath { get; set; }
+    public string? PlaceOfBirth { get; set; }
+    public string? PlaceOfDeath { get; set; }
+    public string? Gender { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? Occupation { get; set; }
+    public string? Biography { get; set; }
+    public Guid FamilyId { get; set; }
+    public bool IsRoot { get; set; }
 }
