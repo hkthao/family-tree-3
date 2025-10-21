@@ -1,5 +1,4 @@
 using AutoMapper;
-using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Domain.Entities;
 

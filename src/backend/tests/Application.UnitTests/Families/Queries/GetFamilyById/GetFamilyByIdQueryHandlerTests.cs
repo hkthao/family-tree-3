@@ -1,15 +1,8 @@
-using AutoFixture;
 using AutoFixture.Xunit2;
-using AutoMapper;
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Families.Queries;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Queries;

@@ -1,15 +1,10 @@
 using AutoFixture;
 using AutoFixture.Xunit2;
-using AutoMapper;
-using backend.Application.Common.Exceptions;
-using backend.Application.Common.Interfaces;
-using backend.Application.UserPreferences.Queries;
-using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.UserPreferences.Queries;

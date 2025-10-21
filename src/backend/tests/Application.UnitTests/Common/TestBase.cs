@@ -5,7 +5,6 @@ using backend.Application.Common.Interfaces;
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System;
 
 namespace backend.Application.UnitTests.Common;
 
