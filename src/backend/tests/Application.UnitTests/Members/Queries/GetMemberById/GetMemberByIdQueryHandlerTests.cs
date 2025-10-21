@@ -64,7 +64,7 @@ public class GetMemberByIdQueryHandlerTests : TestBase
             FamilyId = family.Id,
             FirstName = "John",
             LastName = "Doe",
-            Code = "MEMBER123", // Added missing Code property
+            Code = "MEMBER123",
             Gender = "Male",
             DateOfBirth = new DateTime(1990, 1, 1),
             PlaceOfBirth = "Test City",
