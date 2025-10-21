@@ -19,6 +19,7 @@ public abstract class TestBase : IDisposable
     protected readonly IFixture _fixture;
     protected readonly Mock<IUser> _mockUser;
     protected readonly Mock<IMapper> _mapperMock;
+    protected readonly string _databaseName;
 
     protected TestBase()
     {
@@ -29,8 +30,9 @@ public abstract class TestBase : IDisposable
         _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
         // Thiết lập InMemoryDatabase cho mỗi test để đảm bảo tính độc lập
+        _databaseName = Guid.NewGuid().ToString();
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .UseInMemoryDatabase(_databaseName)
             .Options;
 
         _context = new ApplicationDbContext(options);
@@ -51,5 +53,19 @@ public abstract class TestBase : IDisposable
     public void Dispose()
     {
         _context.Dispose();
+    }
+
+    /// <summary>
+    /// Tạo một instance ApplicationDbContext mới với cùng cấu hình InMemoryDatabase.
+    /// Hữu ích cho việc kiểm tra các thay đổi đã được lưu vào DB.
+    /// </summary>
+    protected ApplicationDbContext CreateNewContext()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(_databaseName) // Sử dụng cùng tên DB
+            .Options;
+        var newContext = new ApplicationDbContext(options);
+        newContext.Database.EnsureCreated();
+        return newContext;
     }
 }

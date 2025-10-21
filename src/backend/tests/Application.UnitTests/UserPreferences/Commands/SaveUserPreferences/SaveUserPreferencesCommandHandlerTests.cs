@@ -24,12 +24,17 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
     {
         // ARRANGE
         // 1. Tạo một UserProfile và một UserPreference đã tồn tại trong cơ sở dữ liệu.
-        //    - Sử dụng Fixture để tạo đối tượng UserProfile.
+        //    - Tạo đối tượng UserProfile thủ công.
         //    - Lưu vào DbContext để EF Core gán một Id.
-        var userProfile = _fixture.Create<UserProfile>();
+        var userProfile = new UserProfile
+        {
+            Id = Guid.NewGuid(),
+            ExternalId = Guid.NewGuid().ToString(),
+            Email = "test@example.com",
+            Name = "Test User"
+        };
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync();
-        _context.Entry(userProfile).State = EntityState.Detached;
 
         // 2. Thiết lập Mock cho IUser service để trả về ExternalId của người dùng vừa tạo.
         //    - Điều này giả lập rằng người dùng đang đăng nhập chính là người dùng này.
@@ -38,14 +43,13 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 3. Tạo một UserPreference đã tồn tại, liên kết với UserProfile ở trên.
         var existingPreference = new UserPreference
         {
+            Id = Guid.NewGuid(),
             UserProfileId = userProfile.Id,
             Language = Language.English, // Giá trị ban đầu
             Theme = Theme.Light // Giá trị ban đầu
         };
         _context.UserPreferences.Add(existingPreference);
         await _context.SaveChangesAsync();
-        _context.Entry(existingPreference).State = EntityState.Detached;
-
         // 4. Tạo command với dữ liệu mới để cập nhật.
         var command = new SaveUserPreferencesCommand
         {
@@ -64,8 +68,8 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 1. Kiểm tra kết quả trả về phải là thành công.
         result.IsSuccess.Should().BeTrue();
 
-        // 2. Tìm lại UserPreference trong DB để xác nhận thay đổi.
-        var updatedPreference = await _context.UserPreferences.FindAsync(existingPreference.Id);
+        // 2. Tìm lại UserPreference trong DB để xác nhận thay đổi bằng một context mới.
+        var updatedPreference = await _context.UserPreferences.FirstOrDefaultAsync(e => e.Id == existingPreference.Id);
 
         // 3. Các thuộc tính phải được cập nhật chính xác theo giá trị mới từ command.
         //    - Giải thích: Điều này khẳng định logic cập nhật của handler hoạt động đúng
@@ -84,10 +88,15 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
     {
         // ARRANGE
         // 1. Tạo UserProfile nhưng KHÔNG tạo UserPreference tương ứng.
-        var userProfile = _fixture.Create<UserProfile>();
+        var userProfile = new UserProfile
+        {
+            Id = Guid.NewGuid(),
+            ExternalId = Guid.NewGuid().ToString(),
+            Email = "newuser@example.com",
+            Name = "New User"
+        };
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync();
-        _context.Entry(userProfile).State = EntityState.Detached;
 
         // 2. Mock IUser service để giả lập người dùng này đang đăng nhập.
         _mockUser.Setup(u => u.Id).Returns(userProfile.ExternalId);
@@ -110,8 +119,9 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 1. Kết quả phải thành công.
         result.IsSuccess.Should().BeTrue();
 
-        // 2. Phải có một UserPreference mới được tạo trong DB.
-        var newPreference = await _context.UserPreferences.FirstOrDefaultAsync(p => p.UserProfileId == userProfile.Id);
+        // 2. Phải có một UserPreference mới được tạo trong DB bằng một context mới.
+        using var queryContext = CreateNewContext();
+        var newPreference = await queryContext.UserPreferences.FirstOrDefaultAsync(p => p.UserProfile.Id == userProfile.Id);
 
         // 3. Dữ liệu của preference mới phải khớp với command.
         //    - Giải thích: Điều này xác nhận logic của handler có thể xử lý trường hợp
