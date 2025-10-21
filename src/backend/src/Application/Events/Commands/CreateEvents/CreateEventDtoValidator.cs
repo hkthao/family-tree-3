@@ -13,7 +13,8 @@ public class CreateEventDtoValidator : AbstractValidator<CreateEventDto>
             .MaximumLength(50).WithMessage("Mã sự kiện không được vượt quá 50 ký tự.");
 
         RuleFor(x => x.FamilyId)
-            .NotEmpty().WithMessage("ID gia đình không được để trống.");
+            .NotEmpty().WithMessage("ID gia đình không được để trống.")
+            .Must(id => id != Guid.Empty).WithMessage("ID gia đình không được để trống.");
 
         RuleFor(x => x.EndDate)
             .GreaterThanOrEqualTo(x => x.StartDate)
