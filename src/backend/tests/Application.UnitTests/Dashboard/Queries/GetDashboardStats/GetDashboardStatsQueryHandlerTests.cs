@@ -1,13 +1,11 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Dashboard.Queries.GetDashboardStats;

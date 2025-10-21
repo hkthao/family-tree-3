@@ -1,7 +1,6 @@
 using backend.Application.Families.Commands.UpdateFamily;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 

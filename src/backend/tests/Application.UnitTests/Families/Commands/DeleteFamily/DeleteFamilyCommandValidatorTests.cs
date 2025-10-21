@@ -1,7 +1,6 @@
 using backend.Application.Families.Commands.DeleteFamily;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 
