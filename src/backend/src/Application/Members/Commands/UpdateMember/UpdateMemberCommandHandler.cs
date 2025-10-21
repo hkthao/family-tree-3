@@ -42,7 +42,7 @@ public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, R
 
         if (entity == null)
         {
-            throw new NotFoundException(nameof(Member), request.Id);
+            return Result<Guid>.Failure($"Member with ID {request.Id} not found.", "NotFound");
         }
 
         var oldFullName = entity.FullName; // Capture old name for activity summary
