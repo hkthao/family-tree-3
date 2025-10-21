@@ -88,6 +88,10 @@ public class DeleteFileCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenFileStorageDeletionFails()
     {
         // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi xóa tệp khỏi bộ lưu trữ thất bại.
+        // ⚙️ Các bước (Arrange, Act, Assert):
+        // 1. Arrange: Tạo FileMetadata với UploadedBy khớp với _user.Id. Mock _fileStorage.DeleteFileAsync() trả về Result.Failure.
+        // 2. Act: Gọi phương thức Handle.
+        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var fileId = Guid.NewGuid();
         var userId = Guid.NewGuid().ToString();
         var fileMetadata = new FileMetadata
