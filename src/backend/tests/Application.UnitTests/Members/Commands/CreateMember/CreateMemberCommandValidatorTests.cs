@@ -1,8 +1,6 @@
 using backend.Application.Members.Commands.CreateMember;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
-using backend.Application.Members.Inputs;
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMember;
 

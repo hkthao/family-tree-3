@@ -1,7 +1,6 @@
 using backend.Application.Files.CleanupUnusedFiles;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.Files.CleanupUnusedFiles;
 

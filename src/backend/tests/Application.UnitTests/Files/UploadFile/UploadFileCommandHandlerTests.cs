@@ -1,20 +1,13 @@
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.UploadFile;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 

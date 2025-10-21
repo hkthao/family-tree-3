@@ -1,20 +1,13 @@
 using AutoFixture;
-using AutoFixture.AutoMoq;
-using AutoFixture.Xunit2;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
 using MediatR;
 using Moq;
 using Xunit;
-
-using backend.Application.Members.Inputs;
 using backend.Application.UnitTests.Common;
-using backend.Application.Identity.UserProfiles.Queries;
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMember;
 

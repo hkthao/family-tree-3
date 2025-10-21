@@ -11,7 +11,6 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using Moq;
-using System.Text.Json;
 using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.GenerateEventData;

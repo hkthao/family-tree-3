@@ -1,21 +1,8 @@
-using AutoFixture;
-using AutoFixture.AutoMoq;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Ardalis.Specification; // Needed for WithSpecification
 
 namespace backend.Application.UnitTests.Members.Queries.SearchMembers;
 

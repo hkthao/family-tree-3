@@ -2,7 +2,6 @@ using AutoFixture;
 using backend.Application.Files.DeleteFile;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.Files.DeleteFile;
 

@@ -1,5 +1,3 @@
-using AutoFixture;
-using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.DeleteFile;
@@ -8,11 +6,6 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace backend.Application.UnitTests.Files.DeleteFile;
 

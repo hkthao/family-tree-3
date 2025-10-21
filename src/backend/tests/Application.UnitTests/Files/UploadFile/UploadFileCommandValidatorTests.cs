@@ -2,8 +2,6 @@ using AutoFixture;
 using backend.Application.Files.UploadFile;
 using FluentValidation.TestHelper;
 using Xunit;
-using AutoFixture.Kernel;
-using System.IO;
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 

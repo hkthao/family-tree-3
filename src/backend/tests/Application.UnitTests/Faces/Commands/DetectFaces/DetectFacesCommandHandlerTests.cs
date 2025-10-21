@@ -4,7 +4,6 @@ using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands;
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Common;
-using backend.Application.Faces.Queries;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;

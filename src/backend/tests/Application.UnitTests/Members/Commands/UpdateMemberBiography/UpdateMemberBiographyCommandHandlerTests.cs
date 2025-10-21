@@ -1,7 +1,5 @@
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Domain.Entities;
@@ -10,7 +8,6 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using backend.Application.UnitTests.Common;
-using Microsoft.EntityFrameworkCore; // Needed for FindAsync
 
 namespace backend.Application.UnitTests.Members.Commands.UpdateMemberBiography;
 

@@ -9,7 +9,6 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;

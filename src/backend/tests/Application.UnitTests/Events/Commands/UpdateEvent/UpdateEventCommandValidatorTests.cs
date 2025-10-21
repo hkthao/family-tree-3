@@ -1,7 +1,6 @@
 using backend.Application.Events.Commands.UpdateEvent;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 

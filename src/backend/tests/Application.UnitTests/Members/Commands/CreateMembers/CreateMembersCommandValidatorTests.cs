@@ -2,9 +2,7 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Members.Commands.CreateMembers;
 using backend.Application.Members.Queries;
-using FluentValidation;
 using FluentValidation.TestHelper;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMembers;

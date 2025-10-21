@@ -1,7 +1,6 @@
 using backend.Application.Members.Commands.DeleteMember;
 using FluentValidation.TestHelper;
 using Xunit;
-using System;
 
 namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 
