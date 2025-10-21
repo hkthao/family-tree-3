@@ -45,6 +45,9 @@ public abstract class TestBase : IDisposable
         {
             cfg.AddProfile<MappingProfile>();
             cfg.AddProfile<UserPreferenceMappingProfile>();
+            cfg.AddProfile<MemberMappingProfile>();
+            cfg.AddProfile<RelationshipMappingProfile>();
+            cfg.AddProfile<RelationshipMemberMappingProfile>();
             // Add other profiles if needed
         });
         _mapper = mapperConfiguration.CreateMapper();

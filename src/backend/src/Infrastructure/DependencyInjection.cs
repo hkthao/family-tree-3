@@ -4,10 +4,10 @@ using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.AI.VectorStore;
+using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
-using backend.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -78,7 +78,7 @@ public static class DependencyInjection
         services.AddTransient<TxtTextExtractor>();
         services.AddTransient<MdTextExtractor>();
         services.AddScoped<IFileTextExtractorFactory, FileTextExtractorFactory>();
-        
+
         // Register Configuration Provider
         services.AddMemoryCache();
         services.AddScoped<IConfigProvider, Application.Common.Services.ConfigProvider>();

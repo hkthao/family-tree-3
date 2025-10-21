@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
-using backend.Application.Common.Interfaces;
 using backend.Application.AI.VectorStore;
+using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 
 namespace backend.Infrastructure.AI.VectorStore

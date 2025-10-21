@@ -1,11 +1,11 @@
 using backend.Application.Common.Models;
+using backend.Application.Common.Security;
 using backend.Application.SystemConfigurations.Commands.CreateSystemConfiguration;
 using backend.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
 using backend.Application.SystemConfigurations.Commands.UpdateSystemConfiguration;
-using backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
 using backend.Application.SystemConfigurations.Queries;
+using backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.Common.Security;
 
 namespace backend.Web.Controllers;
 
@@ -45,7 +45,7 @@ public class SystemConfigurationController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<Result>> DeleteSystemConfiguration([FromRoute]Guid id)
+    public async Task<ActionResult<Result>> DeleteSystemConfiguration([FromRoute] Guid id)
     {
         return await _mediator.Send(new DeleteSystemConfigurationCommand(id));
     }

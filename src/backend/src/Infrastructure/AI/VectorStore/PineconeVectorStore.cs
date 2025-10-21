@@ -1,5 +1,5 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.AI.VectorStore;
+using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
 using Pinecone;

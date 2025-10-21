@@ -6,12 +6,12 @@ namespace backend.Infrastructure.AI.Embeddings
 {
     public class EmbeddingProviderFactory : IEmbeddingProviderFactory
     {
-            private readonly IServiceScopeFactory _serviceScopeFactory;
-        
-            public EmbeddingProviderFactory(IServiceScopeFactory serviceScopeFactory)
-            {
-                _serviceScopeFactory = serviceScopeFactory;
-            }
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
+        public EmbeddingProviderFactory(IServiceScopeFactory serviceScopeFactory)
+        {
+            _serviceScopeFactory = serviceScopeFactory;
+        }
         public IEmbeddingProvider GetProvider(EmbeddingAIProvider provider)
         {
             var scope = _serviceScopeFactory.CreateScope();

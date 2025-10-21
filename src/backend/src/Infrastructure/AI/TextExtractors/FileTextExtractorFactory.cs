@@ -5,12 +5,12 @@ namespace backend.Infrastructure.AI.TextExtractors
 {
     public class FileTextExtractorFactory : IFileTextExtractorFactory
     {
-            private readonly IServiceScopeFactory _serviceScopeFactory;
-        
-            public FileTextExtractorFactory(IServiceScopeFactory serviceScopeFactory)
-            {
-                _serviceScopeFactory = serviceScopeFactory;
-            }
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+
+        public FileTextExtractorFactory(IServiceScopeFactory serviceScopeFactory)
+        {
+            _serviceScopeFactory = serviceScopeFactory;
+        }
         public IFileTextExtractor GetExtractor(string fileExtension)
         {
             var scope = _serviceScopeFactory.CreateScope();
