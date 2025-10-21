@@ -56,7 +56,7 @@ public abstract class TestBase : IDisposable
     /// <summary>
     /// Giải phóng tài nguyên.
     /// </summary>
-    public void Dispose()
+    public virtual void Dispose()
     {
         _context.Dispose();
     }
