@@ -11,7 +11,8 @@ public class CreateEventCommandValidator : AbstractValidator<CreateEventCommand>
 
         RuleFor(v => v.FamilyId)
             .NotNull().WithMessage("FamilyId cannot be null.")
-            .NotEmpty().WithMessage("FamilyId cannot be empty.");
+            .NotEmpty().WithMessage("FamilyId cannot be empty.")
+            .Must(id => id != Guid.Empty).WithMessage("FamilyId cannot be empty.");
 
         RuleFor(v => v.Description)
             .MaximumLength(1000).WithMessage("Description must not exceed 1000 characters.");
