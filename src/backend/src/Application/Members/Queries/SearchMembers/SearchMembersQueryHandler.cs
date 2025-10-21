@@ -27,7 +27,6 @@ public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Res
         query = query.WithSpecification(new MemberByGenderSpecification(request.Gender));
         query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new MemberOrderingSpecification(request.SortBy, request.SortOrder));
-        query = query.WithSpecification(new MemberPaginationSpecification((request.Page - 1) * request.ItemsPerPage, request.ItemsPerPage));
 
         var paginatedList = await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)

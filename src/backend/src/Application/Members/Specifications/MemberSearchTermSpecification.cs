@@ -9,7 +9,7 @@ public class MemberSearchTermSpecification : Specification<Member>
     {
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            Query.Where(m => m.FirstName.Contains(searchTerm) || m.LastName.Contains(searchTerm) || (m.Nickname != null && m.Nickname.Contains(searchTerm)));
+            Query.Where(m => m.FirstName.ToLower().Contains(searchTerm.ToLower()) || m.LastName.ToLower().Contains(searchTerm.ToLower()) || (m.Nickname != null && m.Nickname.ToLower().Contains(searchTerm.ToLower())));
         }
     }
 }
