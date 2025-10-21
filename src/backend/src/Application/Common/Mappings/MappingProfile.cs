@@ -4,6 +4,7 @@ using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Families;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
@@ -12,7 +13,7 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Domain.Entities;
 
-namespace backend.Application.Identity.UserProfiles.Queries;
+namespace backend.Application.Common.Mappings;
 
 public class MappingProfile : Profile
 {
@@ -48,5 +49,6 @@ public class MappingProfile : Profile
         CreateMap<UserProfile, UserProfileDto>();
         CreateMap<UserActivity, UserActivityDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
+        CreateMap<UserProfile, UserProfileDto>();
     }
 }

@@ -3,6 +3,8 @@ using AutoFixture.AutoMoq;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Infrastructure.Data;
+using backend.Application.Identity.UserProfiles.Queries;
+using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 
@@ -48,6 +50,7 @@ public abstract class TestBase : IDisposable
             cfg.AddProfile<MemberMappingProfile>();
             cfg.AddProfile<RelationshipMappingProfile>();
             cfg.AddProfile<RelationshipMemberMappingProfile>();
+            cfg.CreateMap<UserProfile, UserProfileDto>();
             // Add other profiles if needed
         });
         _mapper = mapperConfiguration.CreateMapper();
