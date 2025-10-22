@@ -7,7 +7,7 @@ namespace backend.Infrastructure.AI.VectorStore
 {
     public class InMemoryVectorStore : IVectorStore
     {
-        private readonly ConcurrentDictionary<string, TextChunk> _store = new ConcurrentDictionary<string, TextChunk>();
+        private readonly ConcurrentDictionary<string, TextChunk> _store = new();
 
         public Task UpsertAsync(List<double> embedding, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
         {
@@ -19,7 +19,7 @@ namespace backend.Infrastructure.AI.VectorStore
             var chunk = new TextChunk
             {
                 Id = Guid.NewGuid().ToString(), // Generate a unique ID
-                Embedding = embedding.ToArray(),
+                Embedding = [.. embedding],
                 Metadata = metadata
             };
             _store[chunk.Id] = chunk;

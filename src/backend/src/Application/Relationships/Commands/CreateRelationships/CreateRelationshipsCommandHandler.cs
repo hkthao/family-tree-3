@@ -8,27 +8,18 @@ using MediatR;
 
 namespace backend.Application.Relationships.Commands.CreateRelationships;
 
-public class CreateRelationshipsCommandHandler : IRequestHandler<CreateRelationshipsCommand, Result<List<Guid>>>
+public class CreateRelationshipsCommandHandler(
+    IApplicationDbContext context,
+    IUser user,
+    IAuthorizationService authorizationService,
+    FamilyAuthorizationService familyAuthorizationService,
+    IMediator mediator) : IRequestHandler<CreateRelationshipsCommand, Result<List<Guid>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly FamilyAuthorizationService _familyAuthorizationService;
-    private readonly IMediator _mediator;
-
-    public CreateRelationshipsCommandHandler(
-        IApplicationDbContext context,
-        IUser user,
-        IAuthorizationService authorizationService,
-        FamilyAuthorizationService familyAuthorizationService,
-        IMediator mediator)
-    {
-        _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-        _familyAuthorizationService = familyAuthorizationService;
-        _mediator = mediator;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<List<Guid>>> Handle(CreateRelationshipsCommand request, CancellationToken cancellationToken)
     {

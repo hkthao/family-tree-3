@@ -12,13 +12,13 @@ namespace backend.Domain.Services
         public List<TextChunk> ChunkText(string text, string fileName, string fileId, string familyId, string category, string createdBy)
         {
             string cleanedText = CleanText(text);
-            List<TextChunk> chunks = new List<TextChunk>();
+            List<TextChunk> chunks = [];
             string[] words = cleanedText.Split(new[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 
             int currentWordIndex = 0;
             while (currentWordIndex < words.Length)
             {
-                StringBuilder currentChunkContent = new StringBuilder();
+                StringBuilder currentChunkContent = new();
                 int chunkWordCount = 0;
 
                 // Try to build a chunk within MaxChunkWords

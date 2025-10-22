@@ -4,14 +4,9 @@ using backend.Domain.Entities;
 
 namespace backend.Application.SystemConfigurations.Commands.CreateSystemConfiguration;
 
-public class CreateSystemConfigurationCommandHandler : IRequestHandler<CreateSystemConfigurationCommand, Result<Guid>>
+public class CreateSystemConfigurationCommandHandler(IApplicationDbContext context) : IRequestHandler<CreateSystemConfigurationCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public CreateSystemConfigurationCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<Result<Guid>> Handle(CreateSystemConfigurationCommand request, CancellationToken cancellationToken)
     {

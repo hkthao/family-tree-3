@@ -8,14 +8,9 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class DashboardController : ControllerBase
+public class DashboardController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public DashboardController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     /// <summary>
     /// Retrieves dashboard statistics for the current user.
@@ -28,10 +23,6 @@ public class DashboardController : ControllerBase
         var query = new GetDashboardStatsQuery { FamilyId = familyId };
         var result = await _mediator.Send(query);
 
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<DashboardStatsDto>)Ok(result.Value) : (ActionResult<DashboardStatsDto>)BadRequest(result.Error);
     }
 }

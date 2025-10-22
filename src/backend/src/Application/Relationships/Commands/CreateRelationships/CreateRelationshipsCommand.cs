@@ -5,5 +5,5 @@ namespace backend.Application.Relationships.Commands.CreateRelationships;
 
 public class CreateRelationshipsCommand : IRequest<Result<List<Guid>>>
 {
-    public List<RelationshipInput> Relationships { get; set; } = new List<RelationshipInput>(); // Corrected type
+    public List<RelationshipInput> Relationships { get; set; } = []; // Corrected type
 }

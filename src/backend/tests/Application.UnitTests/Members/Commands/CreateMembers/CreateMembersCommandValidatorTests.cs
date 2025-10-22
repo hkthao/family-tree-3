@@ -27,7 +27,7 @@ public class CreateMembersCommandValidatorTests
         // 1. Tạo một CreateMembersCommand với danh sách Members rỗng.
         // 2. Thực hiện validate command.
         // 3. Kiểm tra xem có lỗi validation cho Members với thông báo lỗi cụ thể.
-        var command = new CreateMembersCommand(new List<AIMemberDto>());
+        var command = new CreateMembersCommand([]);
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Members)
               .WithErrorMessage("At least one member is required.");

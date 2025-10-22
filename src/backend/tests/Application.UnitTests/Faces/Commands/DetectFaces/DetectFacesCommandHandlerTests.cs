@@ -66,8 +66,7 @@ public class DetectFacesCommandHandlerTests : TestBase
         // Arrange
         var faceResults = new List<FaceDetectionResultDto>
         {
-            new FaceDetectionResultDto
-            {
+            new() {
                 Id = Guid.NewGuid().ToString(),
                 BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                 Confidence = 0.9f,
@@ -138,8 +137,7 @@ public class DetectFacesCommandHandlerTests : TestBase
         var embedding = new double[] { 0.1, 0.2, 0.3 };
         var faceResults = new List<FaceDetectionResultDto>
         {
-            new FaceDetectionResultDto
-            {
+            new() {
                 Id = Guid.NewGuid().ToString(),
                 BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                 Confidence = 0.9f,
@@ -164,7 +162,7 @@ public class DetectFacesCommandHandlerTests : TestBase
             }
         };
         _mockVectorStore.Setup(vs => vs.QueryAsync(embedding, 1, It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                        .ReturnsAsync(new List<VectorStoreQueryResult> { queryResult });
+                        .ReturnsAsync([queryResult]);
 
         var command = _fixture.Create<DetectFacesCommand>();
 
@@ -210,8 +208,7 @@ public class DetectFacesCommandHandlerTests : TestBase
         var embedding = new double[] { 0.4, 0.5, 0.6 };
         var faceResults = new List<FaceDetectionResultDto>
         {
-            new FaceDetectionResultDto
-            {
+            new() {
                 Id = Guid.NewGuid().ToString(),
                 BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                 Confidence = 0.9f,
@@ -223,7 +220,7 @@ public class DetectFacesCommandHandlerTests : TestBase
                            .ReturnsAsync(faceResults);
 
         _mockVectorStore.Setup(vs => vs.QueryAsync(embedding, 1, It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                        .ReturnsAsync(new List<VectorStoreQueryResult>()); // No match
+                        .ReturnsAsync([]); // No match
 
         var command = _fixture.Create<DetectFacesCommand>();
 
@@ -264,8 +261,7 @@ public class DetectFacesCommandHandlerTests : TestBase
         var embedding = new double[] { 0.7, 0.8, 0.9 };
         var faceResults = new List<FaceDetectionResultDto>
         {
-            new FaceDetectionResultDto
-            {
+            new() {
                 Id = Guid.NewGuid().ToString(),
                 BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
                 Confidence = 0.9f,

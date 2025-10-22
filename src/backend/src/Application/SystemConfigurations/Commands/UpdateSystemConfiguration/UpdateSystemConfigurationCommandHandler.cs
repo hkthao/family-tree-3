@@ -3,14 +3,9 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.SystemConfigurations.Commands.UpdateSystemConfiguration;
 
-public class UpdateSystemConfigurationCommandHandler : IRequestHandler<UpdateSystemConfigurationCommand, Result>
+public class UpdateSystemConfigurationCommandHandler(IApplicationDbContext context) : IRequestHandler<UpdateSystemConfigurationCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-
-    public UpdateSystemConfigurationCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<Result> Handle(UpdateSystemConfigurationCommand request, CancellationToken cancellationToken)
     {

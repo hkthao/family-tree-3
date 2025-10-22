@@ -69,27 +69,25 @@ public static class DependencyInjection
 
                         _ = Task.Run(async () =>
                         {
-                            using (var scope = context.HttpContext.RequestServices.CreateScope())
-                            {
-                                var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                                var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
+                            using var scope = context.HttpContext.RequestServices.CreateScope();
+                            var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                            var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
 
-                                try
+                            try
+                            {
+                                var command = new SyncUserProfileCommand
                                 {
-                                    var command = new SyncUserProfileCommand
-                                    {
-                                        UserPrincipal = context.Principal!
-                                    };
-                                    var result = await mediator.Send(command);
-                                    if (!result.IsSuccess)
-                                    {
-                                        scopedLogger.LogError("Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, result.Error);
-                                    }
-                                }
-                                catch (Exception ex)
+                                    UserPrincipal = context.Principal!
+                                };
+                                var result = await mediator.Send(command);
+                                if (!result.IsSuccess)
                                 {
-                                    scopedLogger.LogError(ex, "Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, ex.Message);
+                                    scopedLogger.LogError("Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, result.Error);
                                 }
+                            }
+                            catch (Exception ex)
+                            {
+                                scopedLogger.LogError(ex, "Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, ex.Message);
                             }
                         });
                         return Task.CompletedTask;

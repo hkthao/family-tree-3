@@ -8,14 +8,9 @@ namespace backend.Application.UserActivities.Commands.RecordActivity;
 /// <summary>
 /// Handler for recording a user activity.
 /// </summary>
-public class RecordActivityCommandHandler : IRequestHandler<RecordActivityCommand, Result<Guid>>
+public class RecordActivityCommandHandler(IApplicationDbContext context) : IRequestHandler<RecordActivityCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public RecordActivityCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<Result<Guid>> Handle(RecordActivityCommand request, CancellationToken cancellationToken)
     {

@@ -5,16 +5,9 @@ namespace Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class NaturalLanguageInputController : ControllerBase
+public class NaturalLanguageInputController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public NaturalLanguageInputController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
-
+    private readonly IMediator _mediator = mediator;
 
     [HttpPost("generate-event-data")]
     public async Task<ActionResult<string>> GenerateEventData([FromBody] GenerateEventDataCommand command)

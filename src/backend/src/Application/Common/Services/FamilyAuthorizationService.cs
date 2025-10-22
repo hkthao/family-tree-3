@@ -5,18 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Common.Services;
 
-public class FamilyAuthorizationService
+public class FamilyAuthorizationService(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-
-    public FamilyAuthorizationService(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public virtual async Task<Result<Family>> AuthorizeFamilyAccess(Guid? familyId, CancellationToken cancellationToken)
     {
@@ -36,12 +29,9 @@ public class FamilyAuthorizationService
 
         var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
 
-        if (!(_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString())) &&
-            !family.FamilyUsers.Any(fu => fu.UserProfileId == currentUserProfile!.Id && fu.Role == FamilyRole.Manager))
-        {
-            return Result<Family>.Failure($"User is not authorized to manage family {family.Name}.", "Authorization");
-        }
-
-        return Result<Family>.Success(family);
+        return !(_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString())) &&
+            !family.FamilyUsers.Any(fu => fu.UserProfileId == currentUserProfile!.Id && fu.Role == FamilyRole.Manager)
+            ? Result<Family>.Failure($"User is not authorized to manage family {family.Name}.", "Authorization")
+            : Result<Family>.Success(family);
     }
 }

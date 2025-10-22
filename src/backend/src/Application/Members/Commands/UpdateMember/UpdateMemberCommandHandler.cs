@@ -7,20 +7,12 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-    private readonly IFamilyTreeService _familyTreeService;
-
-    public UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-        _familyTreeService = familyTreeService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {

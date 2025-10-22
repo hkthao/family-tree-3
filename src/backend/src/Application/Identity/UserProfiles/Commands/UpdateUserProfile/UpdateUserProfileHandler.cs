@@ -4,14 +4,9 @@ using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 
 namespace backend.Application.Identity.Commands.UpdateUserProfile;
 
-public class UpdateUserProfileCommandHandler : IRequestHandler<UpdateUserProfileCommand, Result>
+public class UpdateUserProfileCommandHandler(IApplicationDbContext context) : IRequestHandler<UpdateUserProfileCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-
-    public UpdateUserProfileCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {

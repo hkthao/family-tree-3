@@ -8,14 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace backend.Web.Controllers;
 [ApiController]
 [Route("api/[controller]")]
-public class FacesController : ControllerBase
+public class FacesController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public FacesController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpPost("detect")]
     [Consumes("multipart/form-data")]
@@ -50,10 +45,6 @@ public class FacesController : ControllerBase
     public async Task<ActionResult<Result<Unit>>> SaveFaceLabels([FromBody] SaveFaceLabelsCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<Result<Unit>>)Ok(result) : (ActionResult<Result<Unit>>)BadRequest(result.Error);
     }
 }

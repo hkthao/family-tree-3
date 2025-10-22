@@ -5,16 +5,10 @@ using FluentValidation.Results;
 
 namespace backend.Application.Members.Commands.CreateMembers;
 
-public class CreateMembersCommandHandler : IRequestHandler<CreateMembersCommand, Result<List<Guid>>>
+public class CreateMembersCommandHandler(IValidator<AIMemberDto> aiMemberDtoValidator, IMediator mediator) : IRequestHandler<CreateMembersCommand, Result<List<Guid>>>
 {
-    private readonly IValidator<AIMemberDto> _aiMemberDtoValidator;
-    private readonly IMediator _mediator;
-
-    public CreateMembersCommandHandler(IValidator<AIMemberDto> aiMemberDtoValidator, IMediator mediator)
-    {
-        _aiMemberDtoValidator = aiMemberDtoValidator;
-        _mediator = mediator;
-    }
+    private readonly IValidator<AIMemberDto> _aiMemberDtoValidator = aiMemberDtoValidator;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<List<Guid>>> Handle(CreateMembersCommand request, CancellationToken cancellationToken)
     {

@@ -62,7 +62,7 @@ public class InitializeSystemConfigurationsCommandHandlerTests : TestBase
             configuration);
 
         _mockSystemConfigurationService.Setup(s => s.GetAllConfigurationsAsync())
-            .ReturnsAsync(Result<List<SystemConfiguration>>.Success(new List<SystemConfiguration> { new SystemConfiguration() }));
+            .ReturnsAsync(Result<List<SystemConfiguration>>.Success([new()]));
 
         var result = await handler.Handle(new InitializeSystemConfigurationsCommand(), CancellationToken.None);
 
@@ -93,7 +93,7 @@ public class InitializeSystemConfigurationsCommandHandlerTests : TestBase
             configuration);
 
         _mockSystemConfigurationService.Setup(s => s.GetAllConfigurationsAsync())
-            .ReturnsAsync(Result<List<SystemConfiguration>>.Success(new List<SystemConfiguration>()));
+            .ReturnsAsync(Result<List<SystemConfiguration>>.Success([]));
 
         var result = await handler.Handle(new InitializeSystemConfigurationsCommand(), CancellationToken.None);
 
@@ -132,7 +132,7 @@ public class InitializeSystemConfigurationsCommandHandlerTests : TestBase
             configuration);
 
         _mockSystemConfigurationService.Setup(s => s.GetAllConfigurationsAsync())
-            .ReturnsAsync(Result<List<SystemConfiguration>>.Success(new List<SystemConfiguration>()));
+            .ReturnsAsync(Result<List<SystemConfiguration>>.Success([]));
 
         _mockSystemConfigurationService.Setup(s => s.SetConfigurationsAsync(It.IsAny<Dictionary<string, (string value, string valueType, string description)>>()))
             .ReturnsAsync(Result.Success());
@@ -177,7 +177,7 @@ public class InitializeSystemConfigurationsCommandHandlerTests : TestBase
             configuration);
 
         _mockSystemConfigurationService.Setup(s => s.GetAllConfigurationsAsync())
-            .ReturnsAsync(Result<List<SystemConfiguration>>.Success(new List<SystemConfiguration>()));
+            .ReturnsAsync(Result<List<SystemConfiguration>>.Success([]));
 
         var errorMessage = "Failed to save configurations.";
         _mockSystemConfigurationService.Setup(s => s.SetConfigurationsAsync(It.IsAny<Dictionary<string, (string value, string valueType, string description)>>()))

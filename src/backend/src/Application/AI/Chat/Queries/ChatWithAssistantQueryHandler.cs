@@ -6,27 +6,18 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Chat.Queries;
 
-public class ChatWithAssistantQueryHandler : IRequestHandler<ChatWithAssistantQuery, Result<ChatResponse>>
+public class ChatWithAssistantQueryHandler(
+    IChatProviderFactory chatProviderFactory,
+    IEmbeddingProviderFactory embeddingProviderFactory,
+    IVectorStoreFactory vectorStoreFactory,
+    IConfigProvider configProvider,
+    ILogger<ChatWithAssistantQueryHandler> logger) : IRequestHandler<ChatWithAssistantQuery, Result<ChatResponse>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
-    private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly ILogger<ChatWithAssistantQueryHandler> _logger;
-    private readonly IConfigProvider _configProvider;
-
-    public ChatWithAssistantQueryHandler(
-        IChatProviderFactory chatProviderFactory,
-        IEmbeddingProviderFactory embeddingProviderFactory,
-        IVectorStoreFactory vectorStoreFactory,
-        IConfigProvider configProvider,
-        ILogger<ChatWithAssistantQueryHandler> logger)
-    {
-        _chatProviderFactory = chatProviderFactory;
-        _embeddingProviderFactory = embeddingProviderFactory;
-        _vectorStoreFactory = vectorStoreFactory;
-        _configProvider = configProvider;
-        _logger = logger;
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    private readonly IEmbeddingProviderFactory _embeddingProviderFactory = embeddingProviderFactory;
+    private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
+    private readonly ILogger<ChatWithAssistantQueryHandler> _logger = logger;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<Result<ChatResponse>> Handle(ChatWithAssistantQuery request, CancellationToken cancellationToken)
     {

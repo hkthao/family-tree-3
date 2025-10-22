@@ -206,7 +206,7 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
 
         var validationFailures = new List<ValidationFailure>
         {
-            new ValidationFailure("Type", "Loại mối quan hệ không hợp lệ.")
+            new("Type", "Loại mối quan hệ không hợp lệ.")
         };
         _mockAIRelationshipDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIRelationshipDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult(validationFailures));

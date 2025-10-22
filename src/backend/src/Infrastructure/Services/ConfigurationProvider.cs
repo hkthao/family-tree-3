@@ -8,20 +8,13 @@ using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure.Services;
 
-public class ConfigurationProvider : IConfigurationProvider
+public class ConfigurationProvider(IMediator mediator, IOptions<AppSettings> appSettings, IMemoryCache cache) : IConfigurationProvider
 {
-    private readonly IMediator _mediator;
-    private readonly AppSettings _appSettings;
-    private readonly IMemoryCache _cache;
+    private readonly IMediator _mediator = mediator;
+    private readonly AppSettings _appSettings = appSettings.Value;
+    private readonly IMemoryCache _cache = cache;
 
     private const string CacheKeyPrefix = "SystemConfig_";
-
-    public ConfigurationProvider(IMediator mediator, IOptions<AppSettings> appSettings, IMemoryCache cache)
-    {
-        _mediator = mediator;
-        _appSettings = appSettings.Value;
-        _cache = cache;
-    }
 
     public async Task<T?> GetValue<T>(string key, T defaultValue)
     {
@@ -44,12 +37,7 @@ public class ConfigurationProvider : IConfigurationProvider
 
         // Priority 2: AppSettings (from appsettings.json)
         var appSettingsValue = GetAppSettingsValue<T>(key); // This method is not async, so no await needed here
-        if (appSettingsValue != null)
-        {
-            return appSettingsValue;
-        }
-
-        return defaultValue ?? default(T);
+        return appSettingsValue != null ? appSettingsValue : defaultValue ?? default;
     }
 
     private async Task<T?> GetSystemConfigValue<T>(string key)
@@ -92,7 +80,7 @@ public class ConfigurationProvider : IConfigurationProvider
     {
         if (value == null || valueType == null)
         {
-            return default(T);
+            return default;
         }
 
         try
@@ -119,6 +107,6 @@ public class ConfigurationProvider : IConfigurationProvider
             // Log error: Could not convert value
             Console.WriteLine($"Error converting value '{value}' to type {typeof(T).Name}: {ex.Message}");
         }
-        return default(T);
+        return default;
     }
 }

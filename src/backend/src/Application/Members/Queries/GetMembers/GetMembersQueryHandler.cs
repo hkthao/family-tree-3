@@ -5,20 +5,12 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
-public class GetMembersQueryHandler : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
+public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService) : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-
-    public GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _mapper = mapper;
-        _user = user;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {

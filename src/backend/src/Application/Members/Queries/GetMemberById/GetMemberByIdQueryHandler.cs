@@ -6,16 +6,10 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
-public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
+public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<MemberDetailDto>> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
@@ -31,11 +25,8 @@ public class GetMemberByIdQueryHandler : IRequestHandler<GetMemberByIdQuery, Res
             .ProjectTo<MemberDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (memberDto == null)
-        {
-            return Result<MemberDetailDto>.Failure($"Member with ID {request.Id} not found.");
-        }
-
-        return Result<MemberDetailDto>.Success(memberDto);
+        return memberDto == null
+            ? Result<MemberDetailDto>.Failure($"Member with ID {request.Id} not found.")
+            : Result<MemberDetailDto>.Success(memberDto);
     }
 }

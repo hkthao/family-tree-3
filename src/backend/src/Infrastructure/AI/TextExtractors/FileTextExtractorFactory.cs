@@ -3,14 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.AI.TextExtractors
 {
-    public class FileTextExtractorFactory : IFileTextExtractorFactory
+    public class FileTextExtractorFactory(IServiceScopeFactory serviceScopeFactory) : IFileTextExtractorFactory
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-        public FileTextExtractorFactory(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-        }
         public IFileTextExtractor GetExtractor(string fileExtension)
         {
             var scope = _serviceScopeFactory.CreateScope();

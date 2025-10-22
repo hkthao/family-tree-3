@@ -5,16 +5,10 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetEvents;
 
-public class GetEventsQueryHandler : IRequestHandler<GetEventsQuery, Result<IReadOnlyList<EventListDto>>>
+public class GetEventsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetEventsQuery, Result<IReadOnlyList<EventListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<IReadOnlyList<EventListDto>>> Handle(GetEventsQuery request, CancellationToken cancellationToken)
     {

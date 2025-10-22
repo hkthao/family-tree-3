@@ -4,16 +4,10 @@ using backend.Application.Members.Queries.GetMembers;
 
 namespace backend.Application.Members.Queries.GetMembersByIds;
 
-public class GetMembersByIdsQueryHandler : IRequestHandler<GetMembersByIdsQuery, Result<IReadOnlyList<MemberListDto>>>
+public class GetMembersByIdsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetMembersByIdsQuery, Result<IReadOnlyList<MemberListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetMembersByIdsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersByIdsQuery request, CancellationToken cancellationToken)
     {

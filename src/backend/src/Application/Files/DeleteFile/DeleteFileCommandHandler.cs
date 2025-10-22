@@ -3,18 +3,11 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Files.DeleteFile;
 
-public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Result>
+public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IUser user) : IRequestHandler<DeleteFileCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileStorage _fileStorage;
-    private readonly IUser _user;
-
-    public DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IUser user)
-    {
-        _context = context;
-        _fileStorage = fileStorage;
-        _user = user;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IFileStorage _fileStorage = fileStorage;
+    private readonly IUser _user = user;
 
     public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {

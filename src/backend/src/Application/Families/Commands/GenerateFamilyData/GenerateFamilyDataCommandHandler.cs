@@ -6,16 +6,10 @@ using FluentValidation.Results;
 
 namespace backend.Application.Families.Commands.GenerateFamilyData;
 
-public class GenerateFamilyDataCommandHandler : IRequestHandler<GenerateFamilyDataCommand, Result<List<FamilyDto>>>
+public class GenerateFamilyDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<FamilyDto> familyDtoValidator) : IRequestHandler<GenerateFamilyDataCommand, Result<List<FamilyDto>>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly IValidator<FamilyDto> _familyDtoValidator;
-
-    public GenerateFamilyDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<FamilyDto> familyDtoValidator)
-    {
-        _chatProviderFactory = chatProviderFactory;
-        _familyDtoValidator = familyDtoValidator;
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    private readonly IValidator<FamilyDto> _familyDtoValidator = familyDtoValidator;
 
     public async Task<Result<List<FamilyDto>>> Handle(GenerateFamilyDataCommand request, CancellationToken cancellationToken)
     {

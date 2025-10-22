@@ -10,14 +10,9 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class UserPreferencesController : ControllerBase
+public class UserPreferencesController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public UserPreferencesController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     /// <summary>
     /// Retrieves the current user's preferences.
@@ -27,11 +22,7 @@ public class UserPreferencesController : ControllerBase
     public async Task<ActionResult<UserPreferenceDto>> GetUserPreferences()
     {
         var result = await _mediator.Send(new GetUserPreferencesQuery());
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<UserPreferenceDto>)Ok(result.Value) : (ActionResult<UserPreferenceDto>)BadRequest(result.Error);
     }
 
     /// <summary>
@@ -43,10 +34,6 @@ public class UserPreferencesController : ControllerBase
     public async Task<ActionResult<Result>> SaveUserPreferences([FromBody] SaveUserPreferencesCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result);
+        return result.IsSuccess ? (ActionResult<Result>)Ok(result) : (ActionResult<Result>)BadRequest(result);
     }
 }

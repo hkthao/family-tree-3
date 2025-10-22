@@ -8,20 +8,12 @@ namespace backend.Application.UserActivities.Queries.GetRecentActivities;
 /// <summary>
 /// Handler for fetching recent user activities.
 /// </summary>
-public class GetRecentActivitiesQueryHandler : IRequestHandler<GetRecentActivitiesQuery, Result<List<UserActivityDto>>>
+public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService) : IRequestHandler<GetRecentActivitiesQuery, Result<List<UserActivityDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-
-    public GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _mapper = mapper;
-        _user = user;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<List<UserActivityDto>>> Handle(GetRecentActivitiesQuery request, CancellationToken cancellationToken)
     {

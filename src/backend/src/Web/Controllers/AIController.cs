@@ -7,16 +7,10 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class AIController : ControllerBase
+public class AIController(IMediator mediator, ILogger<AIController> logger) : ControllerBase
 {
-    private readonly IMediator _mediator;
-    private readonly ILogger<AIController> _logger; // Re-add this
-
-    public AIController(IMediator mediator, ILogger<AIController> logger) // Modify constructor
-    {
-        _mediator = mediator;
-        _logger = logger; // Assign logger
-    }
+    private readonly IMediator _mediator = mediator;
+    private readonly ILogger<AIController> _logger = logger; // Re-add this
 
     /// <summary>
     /// Generates a biography for a member using AI.
@@ -27,10 +21,6 @@ public class AIController : ControllerBase
     public async Task<ActionResult<BiographyResultDto>> GenerateBiography([FromBody] GenerateBiographyCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<BiographyResultDto>)Ok(result.Value) : (ActionResult<BiographyResultDto>)BadRequest(result.Error);
     }
 }

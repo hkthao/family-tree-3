@@ -6,22 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, Result<Guid>>
+public class CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-    private readonly IFamilyTreeService _familyTreeService;
-
-    public CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
-    {
-        _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-        _familyTreeService = familyTreeService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
@@ -105,6 +96,6 @@ public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand, R
     {
         // For simplicity, generate a GUID and take a substring.
         // In a real application, you'd want to ensure uniqueness against existing codes in the database.
-        return $"{prefix}-{Guid.NewGuid().ToString().Substring(0, 5).ToUpper()}";
+        return $"{prefix}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
     }
 }

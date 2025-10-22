@@ -43,8 +43,8 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
-            new Claim(ClaimTypes.Email, "test@example.com"),
-            new Claim(ClaimTypes.Name, "Test User")
+            new(ClaimTypes.Email, "test@example.com"),
+            new(ClaimTypes.Name, "Test User")
         }));
 
         var command = new SyncUserProfileCommand { UserPrincipal = userPrincipal };
@@ -72,9 +72,9 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         var name = "New User";
         var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
-            new Claim(ClaimTypes.NameIdentifier, externalId),
-            new Claim(ClaimTypes.Email, email),
-            new Claim(ClaimTypes.Name, name)
+            new(ClaimTypes.NameIdentifier, externalId),
+            new(ClaimTypes.Email, email),
+            new(ClaimTypes.Name, name)
         }));
 
         var command = new SyncUserProfileCommand { UserPrincipal = userPrincipal };
@@ -125,9 +125,9 @@ public class SyncUserProfileCommandHandlerTests : TestBase
 
         var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
-            new Claim(ClaimTypes.NameIdentifier, externalId),
-            new Claim(ClaimTypes.Email, "existing@example.com"),
-            new Claim(ClaimTypes.Name, "Existing User")
+            new(ClaimTypes.NameIdentifier, externalId),
+            new(ClaimTypes.Email, "existing@example.com"),
+            new(ClaimTypes.Name, "Existing User")
         }));
 
         var command = new SyncUserProfileCommand { UserPrincipal = userPrincipal };

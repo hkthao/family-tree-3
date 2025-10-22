@@ -47,7 +47,7 @@ public class SaveFaceLabelsCommandValidatorTests
     public void ShouldHaveError_WhenFaceLabelsIsEmpty()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi FaceLabels là danh sách rỗng.
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto>() };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [] };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.FaceLabels)
               .WithErrorMessage("FaceLabels list cannot be empty.");
@@ -61,9 +61,9 @@ public class SaveFaceLabelsCommandValidatorTests
         {
             Id = Guid.NewGuid().ToString(),
             MemberId = Guid.NewGuid(),
-            Embedding = new List<double> { 0.1, 0.2 }
+            Embedding = [0.1, 0.2]
         };
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto> { validFace } };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [validFace] };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveValidationErrorFor(x => x.FaceLabels);
     }
@@ -76,9 +76,9 @@ public class SaveFaceLabelsCommandValidatorTests
         {
             Id = string.Empty,
             MemberId = Guid.NewGuid(),
-            Embedding = new List<double> { 0.1, 0.2 }
+            Embedding = [0.1, 0.2]
         };
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto> { invalidFace } };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [invalidFace] };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("FaceLabels[0].Id")
               .WithErrorMessage("DetectedFaceDto Id is required.");
@@ -92,9 +92,9 @@ public class SaveFaceLabelsCommandValidatorTests
         {
             Id = Guid.NewGuid().ToString(),
             MemberId = Guid.Empty,
-            Embedding = new List<double> { 0.1, 0.2 }
+            Embedding = [0.1, 0.2]
         };
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto> { invalidFace } };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [invalidFace] };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("FaceLabels[0].MemberId")
               .WithErrorMessage("DetectedFaceDto MemberId is required for labeled faces.");
@@ -110,7 +110,7 @@ public class SaveFaceLabelsCommandValidatorTests
             MemberId = Guid.NewGuid(),
             Embedding = null
         };
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto> { invalidFace } };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [invalidFace] };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("FaceLabels[0].Embedding")
               .WithErrorMessage("'Embedding' must not be empty.");
@@ -124,9 +124,9 @@ public class SaveFaceLabelsCommandValidatorTests
         {
             Id = Guid.NewGuid().ToString(),
             MemberId = Guid.NewGuid(),
-            Embedding = new List<double>()
+            Embedding = []
         };
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto> { invalidFace } };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [invalidFace] };
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("FaceLabels[0].Embedding")
               .WithErrorMessage("DetectedFaceDto Embedding cannot be empty.");
@@ -140,9 +140,9 @@ public class SaveFaceLabelsCommandValidatorTests
         {
             Id = Guid.NewGuid().ToString(),
             MemberId = Guid.NewGuid(),
-            Embedding = new List<double> { 0.1, 0.2 }
+            Embedding = [0.1, 0.2]
         };
-        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = new List<DetectedFaceDto> { validFace } };
+        var command = new SaveFaceLabelsCommand { ImageId = Guid.NewGuid(), FaceLabels = [validFace] };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
     }

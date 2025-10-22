@@ -5,18 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
-public class UpdateRelationshipCommandHandler : IRequestHandler<UpdateRelationshipCommand, Result<bool>>
+public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<UpdateRelationshipCommand, Result<bool>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-
-    public UpdateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<bool>> Handle(UpdateRelationshipCommand request, CancellationToken cancellationToken)
     {

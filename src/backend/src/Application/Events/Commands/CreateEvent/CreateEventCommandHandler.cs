@@ -6,18 +6,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Result<Guid>>
+public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-
-    public CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
@@ -70,6 +63,6 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Res
     {
         // For simplicity, generate a GUID and take a substring.
         // In a real application, you'd want to ensure uniqueness against existing codes in the database.
-        return $"{prefix}-{Guid.NewGuid().ToString().Substring(0, 5).ToUpper()}";
+        return $"{prefix}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
     }
 }

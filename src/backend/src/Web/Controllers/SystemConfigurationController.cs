@@ -12,14 +12,9 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class SystemConfigurationController : ControllerBase
+public class SystemConfigurationController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public SystemConfigurationController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet]
     public async Task<ActionResult<Result<List<SystemConfigurationDto>>>> GetSystemConfigurations()
@@ -36,12 +31,7 @@ public class SystemConfigurationController : ControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<Result>> UpdateSystemConfiguration([FromRoute] Guid id, [FromBody] UpdateSystemConfigurationCommand command)
     {
-        if (id != command.Id)
-        {
-            return BadRequest();
-        }
-
-        return await _mediator.Send(command);
+        return id != command.Id ? (ActionResult<Result>)BadRequest() : (ActionResult<Result>)await _mediator.Send(command);
     }
 
     [HttpDelete("{id}")]

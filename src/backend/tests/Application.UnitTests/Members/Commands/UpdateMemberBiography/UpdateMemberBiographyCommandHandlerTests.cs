@@ -150,7 +150,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockUser.Setup(u => u.Id).Returns(userProfileId.ToString());
-        _mockUser.Setup(u => u.Roles).Returns(new List<string>()); // Not an admin
+        _mockUser.Setup(u => u.Roles).Returns([]); // Not an admin
 
         _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(userProfile);

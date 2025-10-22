@@ -5,16 +5,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries.GetRelationships;
 
-public class GetRelationshipsQueryHandler : IRequestHandler<GetRelationshipsQuery, Result<PaginatedList<RelationshipListDto>>>
+public class GetRelationshipsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetRelationshipsQuery, Result<PaginatedList<RelationshipListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetRelationshipsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<RelationshipListDto>>> Handle(GetRelationshipsQuery request, CancellationToken cancellationToken)
     {

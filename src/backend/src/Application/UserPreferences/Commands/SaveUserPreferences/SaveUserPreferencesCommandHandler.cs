@@ -6,18 +6,11 @@ using backend.Domain.Entities;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 
-public class SaveUserPreferencesCommandHandler : IRequestHandler<SaveUserPreferencesCommand, Result>
+public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user, IMapper mapper) : IRequestHandler<SaveUserPreferencesCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IMapper _mapper;
-
-    public SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user, IMapper mapper)
-    {
-        _context = context;
-        _user = user;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {

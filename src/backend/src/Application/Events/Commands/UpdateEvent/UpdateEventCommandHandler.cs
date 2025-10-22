@@ -5,18 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
-public class UpdateEventCommandHandler : IRequestHandler<UpdateEventCommand, Result<bool>>
+public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<UpdateEventCommand, Result<bool>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-
-    public UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {

@@ -3,14 +3,9 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
 
-public class DeleteSystemConfigurationCommandHandler : IRequestHandler<DeleteSystemConfigurationCommand, Result>
+public class DeleteSystemConfigurationCommandHandler(IApplicationDbContext context) : IRequestHandler<DeleteSystemConfigurationCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-
-    public DeleteSystemConfigurationCommandHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<Result> Handle(DeleteSystemConfigurationCommand request, CancellationToken cancellationToken)
     {

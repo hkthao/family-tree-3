@@ -18,5 +18,5 @@ public class AIRelationshipDto
     public string? FamilyCode { get; set; }
     public Guid? FamilyId { get; set; }
 
-    public List<string> ValidationErrors { get; set; } = new List<string>();
+    public List<string> ValidationErrors { get; set; } = [];
 }

@@ -29,7 +29,7 @@ public class CreateMembersCommandHandlerTests : TestBase
 
 
 
-        _fixture.Customize<AIMemberDto>(c => c.With(x => x.Gender, "Male").With(x => x.ValidationErrors, new List<string>())); // Ensure valid gender and empty ValidationErrors for AIMemberDto
+        _fixture.Customize<AIMemberDto>(c => c.With(x => x.Gender, "Male").With(x => x.ValidationErrors, [])); // Ensure valid gender and empty ValidationErrors for AIMemberDto
 
         _handler = new CreateMembersCommandHandler(
 
@@ -54,7 +54,7 @@ public class CreateMembersCommandHandlerTests : TestBase
         var command = new CreateMembersCommand(members);
 
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIMemberDto>(), It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(new ValidationResult(new List<ValidationFailure> { new ValidationFailure("Prop", "Error") }));
+                                 .ReturnsAsync(new ValidationResult(new List<ValidationFailure> { new("Prop", "Error") }));
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -118,7 +118,7 @@ public class CreateMembersCommandHandlerTests : TestBase
         var validMembers = members.Skip(1).ToList();
 
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(invalidMember, It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(new ValidationResult(new List<ValidationFailure> { new ValidationFailure("Prop", "Error") }));
+                                 .ReturnsAsync(new ValidationResult(new List<ValidationFailure> { new("Prop", "Error") }));
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(It.Is<AIMemberDto>(m => validMembers.Contains(m)), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new ValidationResult());
 

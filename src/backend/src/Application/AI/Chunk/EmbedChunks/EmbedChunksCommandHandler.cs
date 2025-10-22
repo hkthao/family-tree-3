@@ -5,18 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.AI.Chunk.EmbedChunks;
 
-public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Result>
+public class EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider) : IRequestHandler<EmbedChunksCommand, Result>
 {
-    private readonly IEmbeddingProviderFactory _embeddingProviderFactory;
-    private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly IConfigProvider _configProvider;
-
-    public EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider)
-    {
-        _embeddingProviderFactory = embeddingProviderFactory;
-        _vectorStoreFactory = vectorStoreFactory;
-        _configProvider = configProvider;
-    }
+    private readonly IEmbeddingProviderFactory _embeddingProviderFactory = embeddingProviderFactory;
+    private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
     {
@@ -54,7 +47,7 @@ public class EmbedChunksCommandHandler : IRequestHandler<EmbedChunksCommand, Res
             }
 
             chunk.Metadata["Content"] = chunk.Content;
-            await vectorStore.UpsertAsync(chunk.Embedding.ToList(), chunk.Metadata, cancellationToken);
+            await vectorStore.UpsertAsync([.. chunk.Embedding], chunk.Metadata, cancellationToken);
         }
 
         return Result.Success();

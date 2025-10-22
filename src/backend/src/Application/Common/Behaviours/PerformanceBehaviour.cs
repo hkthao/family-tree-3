@@ -4,17 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Behaviours;
 
-public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class PerformanceBehaviour<TRequest, TResponse>(ILogger<TRequest> logger, IUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly ILogger<TRequest> _logger;
-    private readonly IUser _user;
-
-    public PerformanceBehaviour(ILogger<TRequest> logger, IUser user)
-    {
-        _logger = logger;
-        _user = user;
-    }
+    private readonly ILogger<TRequest> _logger = logger;
+    private readonly IUser _user = user;
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {

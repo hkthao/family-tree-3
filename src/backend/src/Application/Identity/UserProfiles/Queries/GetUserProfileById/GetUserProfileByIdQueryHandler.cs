@@ -3,16 +3,10 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
 
-public class GetUserProfileByIdQueryHandler : IRequestHandler<GetUserProfileByIdQuery, Result<UserProfileDto>>
+public class GetUserProfileByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetUserProfileByIdQuery, Result<UserProfileDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetUserProfileByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserProfileDto>> Handle(GetUserProfileByIdQuery request, CancellationToken cancellationToken)
     {

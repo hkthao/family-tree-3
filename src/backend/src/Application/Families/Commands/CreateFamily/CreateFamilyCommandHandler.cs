@@ -8,20 +8,12 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
-public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, Result<Guid>>
+public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser user, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<CreateFamilyCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IMediator _mediator;
-    private readonly IFamilyTreeService _familyTreeService;
-
-    public CreateFamilyCommandHandler(IApplicationDbContext context, IUser user, IMediator mediator, IFamilyTreeService familyTreeService)
-    {
-        _context = context;
-        _user = user;
-        _mediator = mediator;
-        _familyTreeService = familyTreeService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IMediator _mediator = mediator;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
@@ -95,6 +87,6 @@ public class CreateFamilyCommandHandler : IRequestHandler<CreateFamilyCommand, R
     {
         // For simplicity, generate a GUID and take a substring.
         // In a real application, you'd want to ensure uniqueness against existing codes in the database.
-        return $"{prefix}-{Guid.NewGuid().ToString().Substring(0, 5).ToUpper()}";
+        return $"{prefix}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
     }
 }

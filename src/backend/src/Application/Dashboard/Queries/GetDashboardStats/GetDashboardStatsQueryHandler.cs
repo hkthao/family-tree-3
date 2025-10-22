@@ -3,16 +3,10 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
-public class GetDashboardStatsQueryHandler : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
+public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-
-    public GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {

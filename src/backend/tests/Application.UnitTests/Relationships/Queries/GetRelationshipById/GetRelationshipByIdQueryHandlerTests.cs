@@ -30,10 +30,7 @@ public class GetRelationshipByIdQueryHandlerTests : TestBase
         _fixture.Customize(new AutoMoqCustomization());
 
         // Mock ConfigurationProvider for ProjectTo
-        _mockMapper.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<backend.Application.UnitTests.Common.MappingProfile>(); // Use fully qualified name
-        }).CreateMapper().ConfigurationProvider);
+        _mockMapper.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg => cfg.AddProfile<backend.Application.UnitTests.Common.MappingProfile>()).CreateMapper().ConfigurationProvider);
 
         _handler = new GetRelationshipByIdQueryHandler(
             _context,

@@ -7,22 +7,13 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 
-public class DetectFacesCommandHandler : IRequestHandler<DetectFacesCommand, FaceDetectionResponseDto>
+public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider, ILogger<DetectFacesCommandHandler> logger) : IRequestHandler<DetectFacesCommand, FaceDetectionResponseDto>
 {
-    private readonly IFaceApiService _faceApiService; // Changed from IFaceDetectionSettings
-    private readonly IApplicationDbContext _context;
-    private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly ILogger<DetectFacesCommandHandler> _logger;
-    private readonly IConfigProvider _configProvider;
-
-    public DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider, ILogger<DetectFacesCommandHandler> logger)
-    {
-        _faceApiService = faceApiService; // Changed
-        _context = context;
-        _vectorStoreFactory = vectorStoreFactory;
-        _configProvider = configProvider;
-        _logger = logger;
-    }
+    private readonly IFaceApiService _faceApiService = faceApiService; // Changed from IFaceDetectionSettings
+    private readonly IApplicationDbContext _context = context;
+    private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
+    private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<FaceDetectionResponseDto> Handle(DetectFacesCommand request, CancellationToken cancellationToken)
     {

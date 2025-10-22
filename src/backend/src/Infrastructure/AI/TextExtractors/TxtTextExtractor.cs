@@ -7,10 +7,8 @@ namespace backend.Infrastructure.AI.TextExtractors
     {
         public async Task<string> ExtractTextAsync(Stream fileStream)
         {
-            using (StreamReader reader = new StreamReader(fileStream, Encoding.UTF8))
-            {
-                return await reader.ReadToEndAsync();
-            }
+            using StreamReader reader = new(fileStream, Encoding.UTF8);
+            return await reader.ReadToEndAsync();
         }
     }
 }

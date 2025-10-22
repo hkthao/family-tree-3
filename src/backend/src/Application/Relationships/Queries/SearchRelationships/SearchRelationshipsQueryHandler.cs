@@ -6,16 +6,10 @@ using backend.Application.Relationships.Specifications;
 
 namespace backend.Application.Relationships.Queries.SearchRelationships;
 
-public class SearchRelationshipsQueryHandler : IRequestHandler<SearchRelationshipsQuery, Result<PaginatedList<RelationshipListDto>>>
+public class SearchRelationshipsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchRelationshipsQuery, Result<PaginatedList<RelationshipListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchRelationshipsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<RelationshipListDto>>> Handle(SearchRelationshipsQuery request, CancellationToken cancellationToken)
     {

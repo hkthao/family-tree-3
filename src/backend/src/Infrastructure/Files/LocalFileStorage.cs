@@ -4,14 +4,9 @@ using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Infrastructure.Files;
 
-public class LocalFileStorage : IFileStorage
+public class LocalFileStorage(IConfigProvider configProvider) : IFileStorage
 {
-    private readonly IConfigProvider _configProvider;
-
-    public LocalFileStorage(IConfigProvider configProvider)
-    {
-        _configProvider = configProvider;
-    }
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {

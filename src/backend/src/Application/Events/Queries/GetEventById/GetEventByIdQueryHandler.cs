@@ -5,16 +5,10 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetEventById;
 
-public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Result<EventDetailDto>>
+public class GetEventByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetEventByIdQuery, Result<EventDetailDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetEventByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<EventDetailDto>> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
     {
@@ -29,11 +23,8 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Resul
             .ProjectTo<EventDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (eventDto == null)
-        {
-            return Result<EventDetailDto>.Failure($"Event with ID {request.Id} not found.");
-        }
-
-        return Result<EventDetailDto>.Success(eventDto);
+        return eventDto == null
+            ? Result<EventDetailDto>.Failure($"Event with ID {request.Id} not found.")
+            : Result<EventDetailDto>.Success(eventDto);
     }
 }

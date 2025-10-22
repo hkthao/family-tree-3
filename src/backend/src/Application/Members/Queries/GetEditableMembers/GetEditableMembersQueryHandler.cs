@@ -5,16 +5,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.Queries.GetEditableMembers;
 
-public class GetEditableMembersQueryHandler : IRequestHandler<GetEditableMembersQuery, Result<List<MemberListDto>>>
+public class GetEditableMembersQueryHandler(IApplicationDbContext context, IUser user) : IRequestHandler<GetEditableMembersQuery, Result<List<MemberListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-
-    public GetEditableMembersQueryHandler(IApplicationDbContext context, IUser user)
-    {
-        _context = context;
-        _user = user;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
 
     public async Task<Result<List<MemberListDto>>> Handle(GetEditableMembersQuery request, CancellationToken cancellationToken)
     {

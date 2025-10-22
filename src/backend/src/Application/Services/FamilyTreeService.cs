@@ -3,14 +3,9 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Services;
 
-public class FamilyTreeService : IFamilyTreeService
+public class FamilyTreeService(IApplicationDbContext context) : IFamilyTreeService
 {
-    private readonly IApplicationDbContext _context;
-
-    public FamilyTreeService(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<int> CalculateTotalMembers(Guid familyId, CancellationToken cancellationToken = default)
     {

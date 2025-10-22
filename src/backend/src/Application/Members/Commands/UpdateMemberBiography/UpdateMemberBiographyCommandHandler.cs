@@ -4,24 +4,16 @@ using backend.Application.Common.Services;
 
 namespace backend.Application.Members.Commands.UpdateMemberBiography;
 
-public class UpdateMemberBiographyCommandHandler : IRequestHandler<UpdateMemberBiographyCommand, Result>
+public class UpdateMemberBiographyCommandHandler(
+    IApplicationDbContext context,
+    IUser user,
+    IAuthorizationService authorizationService,
+    FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<UpdateMemberBiographyCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly FamilyAuthorizationService _familyAuthorizationService;
-
-    public UpdateMemberBiographyCommandHandler(
-        IApplicationDbContext context,
-        IUser user,
-        IAuthorizationService authorizationService,
-        FamilyAuthorizationService familyAuthorizationService)
-    {
-        _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-        _familyAuthorizationService = familyAuthorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
 
     public async Task<Result> Handle(UpdateMemberBiographyCommand request, CancellationToken cancellationToken)
     {

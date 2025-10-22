@@ -4,14 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.AI.Chat;
 
-public class ChatProviderFactory : IChatProviderFactory
+public class ChatProviderFactory(IServiceScopeFactory serviceScopeFactory) : IChatProviderFactory
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public ChatProviderFactory(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
     public IChatProvider GetProvider(ChatAIProvider provider)
     {

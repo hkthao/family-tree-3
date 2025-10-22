@@ -58,8 +58,8 @@ public class CreateRelationshipsCommandHandlerTests : TestBase
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chứa danh sách các Guid của các mối quan hệ đã tạo.
         var relationshipInputs = new List<TestRelationshipInput>
             {
-                new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 },
-                new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Mother, Order = 2 }
+                new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 },
+                new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Mother, Order = 2 }
             };
 
         _mockMediator.Setup(m => m.Send(It.IsAny<CreateRelationshipCommand>(), It.IsAny<CancellationToken>()))
@@ -86,8 +86,8 @@ public class CreateRelationshipsCommandHandlerTests : TestBase
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và chứa thông báo lỗi từ lệnh con thất bại.
         var relationshipInputs = new List<TestRelationshipInput>
                         {
-                            new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 },
-                            new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Mother, Order = 2 }
+                            new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 },
+                            new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Mother, Order = 2 }
                         };
 
         var firstRelationshipId = Guid.NewGuid();
@@ -119,9 +119,9 @@ public class CreateRelationshipsCommandHandlerTests : TestBase
         // 3. Assert: Kiểm tra _mockMediator.Verify được gọi đúng số lần với It.IsAny<CreateRelationshipCommand>().
         var relationshipInputs = new List<TestRelationshipInput>
                                     {
-                                        new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 },
-                                        new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Mother, Order = 2 },
-                                        new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Wife, Order = 3 }
+                                        new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 },
+                                        new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Mother, Order = 2 },
+                                        new() { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Wife, Order = 3 }
                                     };
 
         _mockMediator.Setup(m => m.Send(It.IsAny<CreateRelationshipCommand>(), It.IsAny<CancellationToken>()))

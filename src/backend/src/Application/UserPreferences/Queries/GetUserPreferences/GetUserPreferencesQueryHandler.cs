@@ -7,18 +7,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
 
-public class GetUserPreferencesQueryHandler : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
+public class GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper) : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IMapper _mapper;
-
-    public GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper)
-    {
-        _context = context;
-        _user = user;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
     {

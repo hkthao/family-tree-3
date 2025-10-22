@@ -3,16 +3,10 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Events.Queries.GetEventsByIds;
 
-public class GetEventsByIdsQueryHandler : IRequestHandler<GetEventsByIdsQuery, Result<List<EventDto>>>
+public class GetEventsByIdsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetEventsByIdsQuery, Result<List<EventDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetEventsByIdsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<List<EventDto>>> Handle(GetEventsByIdsQuery request, CancellationToken cancellationToken)
     {

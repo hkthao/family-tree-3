@@ -6,14 +6,9 @@ using backend.Domain.Enums;
 
 namespace Application.NaturalLanguageInput.Commands.GenerateData;
 
-public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDataCommand, Result<List<MemberDto>>>
+public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory) : IRequestHandler<GenerateMemberDataCommand, Result<List<MemberDto>>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-
-    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory)
-    {
-        _chatProviderFactory = chatProviderFactory;
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
 
     public async Task<Result<List<MemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
     {
@@ -48,12 +43,9 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<MemberResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Members == null || !aiResponse.Members.Any())
-            {
-                return Result<List<MemberDto>>.Failure("AI generated empty or unparseable JSON response.");
-            }
-
-            return Result<List<MemberDto>>.Success(aiResponse.Members);
+            return aiResponse == null || aiResponse.Members == null || !aiResponse.Members.Any()
+                ? Result<List<MemberDto>>.Failure("AI generated empty or unparseable JSON response.")
+                : Result<List<MemberDto>>.Success(aiResponse.Members);
         }
         catch (JsonException ex)
         {

@@ -5,18 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
-public class DeleteRelationshipCommandHandler : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
+public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-
-    public DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<bool>> Handle(DeleteRelationshipCommand request, CancellationToken cancellationToken)
     {

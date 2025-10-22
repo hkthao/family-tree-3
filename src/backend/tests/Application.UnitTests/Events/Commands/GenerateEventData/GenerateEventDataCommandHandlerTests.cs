@@ -360,7 +360,7 @@ public class GenerateEventDataCommandHandlerTests : TestBase
 
         _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(userProfile);
-        _mockUser.Setup(u => u.Roles).Returns(new List<string> { SystemRole.Admin.ToString() });
+        _mockUser.Setup(u => u.Roles).Returns([SystemRole.Admin.ToString()]);
         _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(family.Id, It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(Result<Family>.Success(family));
         _mockAIEventDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>()))

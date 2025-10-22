@@ -6,14 +6,9 @@ using backend.Domain.Enums;
 
 namespace Application.NaturalLanguageInput.Commands.GenerateData;
 
-public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventDataCommand, Result<List<EventDto>>>
+public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory) : IRequestHandler<GenerateEventDataCommand, Result<List<EventDto>>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-
-    public GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory)
-    {
-        _chatProviderFactory = chatProviderFactory;
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
 
     public async Task<Result<List<EventDto>>> Handle(GenerateEventDataCommand request, CancellationToken cancellationToken)
     {
@@ -48,12 +43,9 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         {
             var aiResponse = JsonSerializer.Deserialize<EventResponseData>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            if (aiResponse == null || aiResponse.Events == null || !aiResponse.Events.Any())
-            {
-                return Result<List<EventDto>>.Failure("AI generated empty or unparseable JSON response.");
-            }
-
-            return Result<List<EventDto>>.Success(aiResponse.Events);
+            return aiResponse == null || aiResponse.Events == null || !aiResponse.Events.Any()
+                ? Result<List<EventDto>>.Failure("AI generated empty or unparseable JSON response.")
+                : Result<List<EventDto>>.Success(aiResponse.Events);
         }
         catch (JsonException ex)
         {

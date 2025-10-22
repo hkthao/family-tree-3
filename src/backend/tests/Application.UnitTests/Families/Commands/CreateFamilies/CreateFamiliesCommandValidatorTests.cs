@@ -21,7 +21,7 @@ public class CreateFamiliesCommandValidatorTests
     public void ShouldHaveError_WhenFamiliesListIsEmpty()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi danh sách Families rỗng.
-        var command = new CreateFamiliesCommand(new List<FamilyDto>());
+        var command = new CreateFamiliesCommand([]);
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Families)
               .WithErrorMessage("At least one family is required.");
@@ -31,7 +31,7 @@ public class CreateFamiliesCommandValidatorTests
     public void ShouldNotHaveError_WhenFamiliesListIsNotEmptyAndValid()
     {
         // 🎯 Mục tiêu của test: Xác minh không có lỗi khi danh sách Families không rỗng và hợp lệ.
-        var command = new CreateFamiliesCommand(new List<FamilyDto> { new FamilyDto { Name = "Test Family", Visibility = "Public" } });
+        var command = new CreateFamiliesCommand([new() { Name = "Test Family", Visibility = "Public" }]);
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -42,7 +42,7 @@ public class CreateFamiliesCommandValidatorTests
         // 🎯 Mục tiêu của test: Xác minh lỗi khi bất kỳ FamilyDto nào trong danh sách không hợp lệ.
         var invalidFamilyDto = new FamilyDto { Name = "" }; // Invalid name
 
-        var command = new CreateFamiliesCommand(new List<FamilyDto> { invalidFamilyDto });
+        var command = new CreateFamiliesCommand([invalidFamilyDto]);
         var result = _validator.TestValidate(command);
         result.IsValid.Should().BeFalse(); // Overall validation should fail
         result.Errors.Should().Contain(e => e.PropertyName == "Families[0].Name" && e.ErrorMessage == "Name is required.");

@@ -6,14 +6,9 @@ namespace backend.Web.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ChatController : ControllerBase
+public class ChatController(ISender mediator) : ControllerBase
 {
-    private readonly ISender _mediator;
-
-    public ChatController(ISender mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly ISender _mediator = mediator;
 
     [HttpPost]
     public async Task<ActionResult<ChatResponse>> ChatWithAssistant([FromBody] ChatRequest request)
@@ -21,14 +16,7 @@ public class ChatController : ControllerBase
         var query = new ChatWithAssistantQuery(request.Message, request.SessionId);
         var result = await _mediator.Send(query);
 
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        else
-        {
-            return BadRequest(result.Error);
-        }
+        return result.IsSuccess ? (ActionResult<ChatResponse>)Ok(result.Value) : (ActionResult<ChatResponse>)BadRequest(result.Error);
     }
 }
 

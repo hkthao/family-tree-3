@@ -5,16 +5,10 @@ using backend.Domain.Services;
 
 namespace backend.Application.AI.Chunk.ProcessFile;
 
-public class ProcessFileCommandHandler : IRequestHandler<ProcessFileCommand, Result<List<TextChunk>>>
+public class ProcessFileCommandHandler(IFileTextExtractorFactory extractorFactory, IChunkingPolicy chunkingPolicy) : IRequestHandler<ProcessFileCommand, Result<List<TextChunk>>>
 {
-    private readonly IFileTextExtractorFactory _extractorFactory;
-    private readonly IChunkingPolicy _chunkingPolicy;
-
-    public ProcessFileCommandHandler(IFileTextExtractorFactory extractorFactory, IChunkingPolicy chunkingPolicy)
-    {
-        _extractorFactory = extractorFactory;
-        _chunkingPolicy = chunkingPolicy;
-    }
+    private readonly IFileTextExtractorFactory _extractorFactory = extractorFactory;
+    private readonly IChunkingPolicy _chunkingPolicy = chunkingPolicy;
 
     public async Task<Result<List<TextChunk>>> Handle(ProcessFileCommand request, CancellationToken cancellationToken)
     {

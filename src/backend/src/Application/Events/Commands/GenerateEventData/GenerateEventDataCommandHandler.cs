@@ -8,20 +8,12 @@ using FluentValidation.Results;
 
 namespace backend.Application.Events.Commands.GenerateEventData;
 
-public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventDataCommand, Result<List<AIEventDto>>>
+public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateEventDataCommand, Result<List<AIEventDto>>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly IValidator<AIEventDto> _aiEventDtoValidator;
-    private readonly IApplicationDbContext _context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService;
-
-    public GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService)
-    {
-        _chatProviderFactory = chatProviderFactory;
-        _aiEventDtoValidator = aiEventDtoValidator;
-        _context = context;
-        _familyAuthorizationService = familyAuthorizationService;
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    private readonly IValidator<AIEventDto> _aiEventDtoValidator = aiEventDtoValidator;
+    private readonly IApplicationDbContext _context = context;
+    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
 
     public async Task<Result<List<AIEventDto>>> Handle(GenerateEventDataCommand request, CancellationToken cancellationToken)
     {

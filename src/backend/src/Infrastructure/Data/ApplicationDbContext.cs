@@ -6,10 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Data;
 
-public class ApplicationDbContext : DbContext, IApplicationDbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-
     public DbSet<Family> Families => Set<Family>();
     public DbSet<Member> Members => Set<Member>();
     public DbSet<Event> Events => Set<Event>();

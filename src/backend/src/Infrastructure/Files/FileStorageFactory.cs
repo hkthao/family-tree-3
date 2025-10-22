@@ -4,14 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.Files;
 
-public class FileStorageFactory : IFileStorageFactory
+public class FileStorageFactory(IServiceScopeFactory serviceScopeFactory) : IFileStorageFactory
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public FileStorageFactory(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
     public IFileStorage CreateFileStorage(StorageProvider provider)
     {

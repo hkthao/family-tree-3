@@ -5,21 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.SystemConfigurations.Commands.InitializeSystemConfigurations;
 
-public class InitializeSystemConfigurationsCommandHandler : IRequestHandler<InitializeSystemConfigurationsCommand, Result>
+public class InitializeSystemConfigurationsCommandHandler(
+    ILogger<InitializeSystemConfigurationsCommandHandler> logger,
+    ISystemConfigurationService systemConfigurationService,
+    IConfiguration configuration) : IRequestHandler<InitializeSystemConfigurationsCommand, Result>
 {
-    private readonly ILogger<InitializeSystemConfigurationsCommandHandler> _logger;
-    private readonly ISystemConfigurationService _systemConfigurationService;
-    private readonly IConfiguration _configuration;
-
-    public InitializeSystemConfigurationsCommandHandler(
-        ILogger<InitializeSystemConfigurationsCommandHandler> logger,
-        ISystemConfigurationService systemConfigurationService,
-        IConfiguration configuration)
-    {
-        _logger = logger;
-        _systemConfigurationService = systemConfigurationService;
-        _configuration = configuration;
-    }
+    private readonly ILogger<InitializeSystemConfigurationsCommandHandler> _logger = logger;
+    private readonly ISystemConfigurationService _systemConfigurationService = systemConfigurationService;
+    private readonly IConfiguration _configuration = configuration;
 
     public async Task<Result> Handle(InitializeSystemConfigurationsCommand request, CancellationToken cancellationToken)
     {

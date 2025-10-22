@@ -5,16 +5,11 @@ using backend.Application.Common.Security;
 
 namespace backend.Application.Common.Behaviours;
 
-public class AuthorizationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+public class AuthorizationBehaviour<TRequest, TResponse>(
+    IUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    private readonly IUser _user;
-
-    public AuthorizationBehaviour(
-        IUser user)
-    {
-        _user = user;
-    }
+    private readonly IUser _user = user;
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {

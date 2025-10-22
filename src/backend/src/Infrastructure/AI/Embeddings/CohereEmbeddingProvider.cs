@@ -4,17 +4,12 @@ using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
-public class CohereEmbeddingProvider : IEmbeddingProvider
+public class CohereEmbeddingProvider(IConfigProvider configProvider) : IEmbeddingProvider
 {
-    private readonly EmbeddingSettings _settings;
+    private readonly EmbeddingSettings _settings = configProvider.GetSection<EmbeddingSettings>();
 
     public string ProviderName => "Cohere";
     public int MaxTextLength => _settings.Cohere.MaxTextLength;
-
-    public CohereEmbeddingProvider(IConfigProvider configProvider)
-    {
-        _settings = configProvider.GetSection<EmbeddingSettings>();
-    }
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {
@@ -25,12 +20,12 @@ public class CohereEmbeddingProvider : IEmbeddingProvider
 
         if (text.Length > MaxTextLength)
         {
-            text = text[..MaxTextLength];
+            _ = text[..MaxTextLength];
         }
 
         // TODO: Implement actual Cohere API call to generate embedding
         // For now, return a dummy embedding for demonstration
         await Task.Delay(100, cancellationToken); // Simulate API call delay
-        return Result<double[]>.Success(new double[] { 0.4, 0.5, 0.6 });
+        return Result<double[]>.Success([0.4, 0.5, 0.6]);
     }
 }

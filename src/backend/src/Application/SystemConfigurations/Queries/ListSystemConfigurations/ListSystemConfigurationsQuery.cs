@@ -5,14 +5,9 @@ namespace backend.Application.SystemConfigurations.Queries.ListSystemConfigurati
 
 public record ListSystemConfigurationsQuery : IRequest<Result<List<SystemConfigurationDto>>>;
 
-public class ListSystemConfigurationsQueryHandler : IRequestHandler<ListSystemConfigurationsQuery, Result<List<SystemConfigurationDto>>>
+public class ListSystemConfigurationsQueryHandler(IApplicationDbContext context) : IRequestHandler<ListSystemConfigurationsQuery, Result<List<SystemConfigurationDto>>>
 {
-    private readonly IApplicationDbContext _context;
-
-    public ListSystemConfigurationsQueryHandler(IApplicationDbContext context)
-    {
-        _context = context;
-    }
+    private readonly IApplicationDbContext _context = context;
 
     public async Task<Result<List<SystemConfigurationDto>>> Handle(ListSystemConfigurationsQuery request, CancellationToken cancellationToken)
     {

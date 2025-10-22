@@ -1,16 +1,9 @@
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Queries.GetDetectedFaces;
-public class GetDetectedFacesQueryHandler : IRequestHandler<GetDetectedFacesQuery, List<DetectedFaceDto>>
+public class GetDetectedFacesQueryHandler(ILogger<GetDetectedFacesQueryHandler> logger /*, IVectorStoreService vectorStoreService*/) : IRequestHandler<GetDetectedFacesQuery, List<DetectedFaceDto>>
 {
-    private readonly ILogger<GetDetectedFacesQueryHandler> _logger;
-    // private readonly IVectorStoreService _vectorStoreService; // Placeholder for vector store service
-
-    public GetDetectedFacesQueryHandler(ILogger<GetDetectedFacesQueryHandler> logger /*, IVectorStoreService vectorStoreService*/)
-    {
-        _logger = logger;
-        // _vectorStoreService = vectorStoreService;
-    }
+    private readonly ILogger<GetDetectedFacesQueryHandler> _logger = logger;
 
     public async Task<List<DetectedFaceDto>> Handle(GetDetectedFacesQuery request, CancellationToken cancellationToken)
     {
@@ -22,6 +15,6 @@ public class GetDetectedFacesQueryHandler : IRequestHandler<GetDetectedFacesQuer
 
         await Task.CompletedTask;
 
-        return new List<DetectedFaceDto>();
+        return [];
     }
 }

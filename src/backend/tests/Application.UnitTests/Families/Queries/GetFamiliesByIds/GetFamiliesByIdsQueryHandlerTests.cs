@@ -109,7 +109,7 @@ public class GetFamiliesByIdsQueryHandlerTests : TestBase
         // 2. Kiểm tra xem danh sách gia đình trả về là rỗng.
 
         // Arrange
-        var query = new GetFamiliesByIdsQuery(new List<Guid>());
+        var query = new GetFamiliesByIdsQuery([]);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

@@ -90,11 +90,11 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
 
         var activities = new List<UserActivity>
         {
-            new UserActivity { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 1" },
-            new UserActivity { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.UpdateMember, TargetType = TargetType.Member, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 2" },
-            new UserActivity { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.DeleteEvent, TargetType = TargetType.Event, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 3" },
-            new UserActivity { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 4" },
-            new UserActivity { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.UpdateMember, TargetType = TargetType.Member, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 5" }
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 1" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.UpdateMember, TargetType = TargetType.Member, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 2" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.DeleteEvent, TargetType = TargetType.Event, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 3" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 4" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.UpdateMember, TargetType = TargetType.Member, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 5" }
         };
         _context.UserActivities.AddRange(activities);
         await _context.SaveChangesAsync();
@@ -227,10 +227,7 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
-        result.Value.Should().AllSatisfy(dto =>
-        {
-            dto.GroupId.Should().Be(targetGroupId);
-        });
+        result.Value.Should().AllSatisfy(dto => dto.GroupId.Should().Be(targetGroupId));
         // 💡 Giải thích: Handler phải áp dụng UserActivityByGroupSpec để lọc kết quả.
     }
 }

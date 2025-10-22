@@ -7,16 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Services;
 
-public class AuthorizationService : IAuthorizationService
+public class AuthorizationService(IUser user, IApplicationDbContext context) : IAuthorizationService
 {
-    private readonly IUser _user;
-    private readonly IApplicationDbContext _context;
-
-    public AuthorizationService(IUser user, IApplicationDbContext context)
-    {
-        _user = user;
-        _context = context;
-    }
+    private readonly IUser _user = user;
+    private readonly IApplicationDbContext _context = context;
 
     public bool IsAdmin()
     {
@@ -25,12 +19,9 @@ public class AuthorizationService : IAuthorizationService
 
     public async Task<UserProfile?> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(_user.Id))
-        {
-            return null;
-        }
-
-        return await _context.UserProfiles
+        return string.IsNullOrEmpty(_user.Id)
+            ? null
+            : await _context.UserProfiles
             .WithSpecification(new UserProfileByAuth0IdSpec(_user.Id))
             .FirstOrDefaultAsync(cancellationToken);
     }

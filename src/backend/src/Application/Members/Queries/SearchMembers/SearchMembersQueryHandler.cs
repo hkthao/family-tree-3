@@ -7,16 +7,10 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
-public class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
+public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {

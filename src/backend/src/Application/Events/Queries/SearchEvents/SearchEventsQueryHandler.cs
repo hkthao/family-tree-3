@@ -6,16 +6,10 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.SearchEvents;
 
-public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
+public class SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchEventsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchEventsQuery request, CancellationToken cancellationToken)
     {

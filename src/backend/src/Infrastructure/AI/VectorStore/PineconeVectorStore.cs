@@ -19,13 +19,7 @@ public class PineconeVectorStore : IVectorStore
         _configProvider = configProvider;
 
         var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
-        var pineconeSettings = vectorStoreSettings.Pinecone;
-
-        if (pineconeSettings == null)
-        {
-            throw new InvalidOperationException("Pinecone settings not found or invalid.");
-        }
-
+        var pineconeSettings = vectorStoreSettings.Pinecone ?? throw new InvalidOperationException("Pinecone settings not found or invalid.");
         var apiKey = pineconeSettings.ApiKey;
         _defaultIndexName = pineconeSettings.IndexName; // Use default index name
         var host = pineconeSettings.Host;
@@ -139,11 +133,11 @@ public class PineconeVectorStore : IVectorStore
             var results = queryResponse.Matches?.Select(m => new VectorStoreQueryResult
             {
                 Id = m.Id,
-                Embedding = m.Values.HasValue ? m.Values.Value.ToArray().Select(e => (double)e).ToList() : new List<double>(),
+                Embedding = m.Values.HasValue ? m.Values.Value.ToArray().Select(e => (double)e).ToList() : [],
                 Score = m.Score ?? 0,
-                Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : new Dictionary<string, string>(),
+                Metadata = m.Metadata != null ? m.Metadata.ToDictionary(k => k.Key, v => v.Value?.ToString() ?? string.Empty) : [],
                 Content = m.Metadata?.FirstOrDefault(md => md.Key == "Content").Value?.ToString() ?? string.Empty
-            }).ToList() ?? new List<VectorStoreQueryResult>();
+            }).ToList() ?? [];
 
             _logger.LogInformation("Successfully queried Pinecone index {CollectionName} with TopK {TopK}. Found {Count} matches.", collectionName, topK, results.Count);
             return results;

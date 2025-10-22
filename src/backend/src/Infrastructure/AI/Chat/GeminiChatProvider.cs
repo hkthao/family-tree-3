@@ -5,18 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.AI.Chat;
 
-public class GeminiChatProvider : IChatProvider
+public class GeminiChatProvider(HttpClient httpClient, IConfigProvider configProvider, ILogger<GeminiChatProvider> logger) : IChatProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<GeminiChatProvider> _logger;
-    private readonly IConfigProvider _configProvider;
-
-    public GeminiChatProvider(HttpClient httpClient, IConfigProvider configProvider, ILogger<GeminiChatProvider> logger)
-    {
-        _httpClient = httpClient;
-        _configProvider = configProvider;
-        _logger = logger;
-    }
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<GeminiChatProvider> _logger = logger;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {

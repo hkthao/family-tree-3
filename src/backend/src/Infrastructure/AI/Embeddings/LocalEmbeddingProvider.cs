@@ -6,21 +6,14 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
-public class LocalEmbeddingProvider : IEmbeddingProvider
+public class LocalEmbeddingProvider(IConfigProvider configProvider, HttpClient httpClient, ILogger<LocalEmbeddingProvider> logger) : IEmbeddingProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<LocalEmbeddingProvider> _logger;
-    private readonly IConfigProvider _configProvider;
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<LocalEmbeddingProvider> _logger = logger;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public string ProviderName => "Local";
     public int MaxTextLength => _configProvider.GetSection<EmbeddingSettings>().Local.MaxTextLength;
-
-    public LocalEmbeddingProvider(IConfigProvider configProvider, HttpClient httpClient, ILogger<LocalEmbeddingProvider> logger)
-    {
-        _configProvider = configProvider;
-        _httpClient = httpClient;
-        _logger = logger;
-    }
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {

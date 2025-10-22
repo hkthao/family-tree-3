@@ -4,14 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.AI.VectorStore;
 
-public class VectorStoreFactory : IVectorStoreFactory
+public class VectorStoreFactory(IServiceScopeFactory serviceScopeFactory) : IVectorStoreFactory
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-
-    public VectorStoreFactory(IServiceScopeFactory serviceScopeFactory)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-    }
+    private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
     public IVectorStore CreateVectorStore(VectorStoreProviderType provider)
     {

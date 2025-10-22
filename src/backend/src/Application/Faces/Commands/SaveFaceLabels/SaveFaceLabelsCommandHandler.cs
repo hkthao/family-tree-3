@@ -6,21 +6,14 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 
-public class SaveFaceLabelsCommandHandler : IRequestHandler<SaveFaceLabelsCommand, Result<Unit>>
+public class SaveFaceLabelsCommandHandler(
+    ILogger<SaveFaceLabelsCommandHandler> logger,
+    IVectorStoreFactory vectorStoreFactory,
+    IConfigProvider configProvider) : IRequestHandler<SaveFaceLabelsCommand, Result<Unit>>
 {
-    private readonly ILogger<SaveFaceLabelsCommandHandler> _logger;
-    private readonly IVectorStoreFactory _vectorStoreFactory;
-    private readonly IConfigProvider _configProvider;
-
-    public SaveFaceLabelsCommandHandler(
-        ILogger<SaveFaceLabelsCommandHandler> logger,
-        IVectorStoreFactory vectorStoreFactory,
-        IConfigProvider configProvider)
-    {
-        _logger = logger;
-        _vectorStoreFactory = vectorStoreFactory;
-        _configProvider = configProvider;
-    }
+    private readonly ILogger<SaveFaceLabelsCommandHandler> _logger = logger;
+    private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<Result<Unit>> Handle(SaveFaceLabelsCommand request, CancellationToken cancellationToken)
     {

@@ -4,14 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.AI.Embeddings
 {
-    public class EmbeddingProviderFactory : IEmbeddingProviderFactory
+    public class EmbeddingProviderFactory(IServiceScopeFactory serviceScopeFactory) : IEmbeddingProviderFactory
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
-        public EmbeddingProviderFactory(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-        }
         public IEmbeddingProvider GetProvider(EmbeddingAIProvider provider)
         {
             var scope = _serviceScopeFactory.CreateScope();

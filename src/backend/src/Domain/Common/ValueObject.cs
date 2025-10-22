@@ -5,12 +5,7 @@ public abstract class ValueObject
 {
     protected static bool EqualOperator(ValueObject left, ValueObject right)
     {
-        if (left is null ^ right is null)
-        {
-            return false;
-        }
-
-        return left?.Equals(right!) != false;
+        return left is null ^ right is null ? false : left?.Equals(right!) != false;
     }
 
     protected static bool NotEqualOperator(ValueObject left, ValueObject right)
@@ -20,12 +15,7 @@ public abstract class ValueObject
 
     public static bool operator ==(ValueObject? left, ValueObject? right)
     {
-        if (ReferenceEquals(left, null))
-        {
-            return ReferenceEquals(right, null);
-        }
-
-        return left.Equals(right);
+        return left is null ? right is null : left.Equals(right);
     }
 
     public static bool operator !=(ValueObject? left, ValueObject? right)

@@ -62,7 +62,7 @@ public class UpdateMemberBiographyCommandValidatorTests
         {
             longBiographyContent += _fixture.Create<string>();
         }
-        longBiographyContent = longBiographyContent.Substring(0, 1501); // Đảm bảo chính xác 1501 ký tự
+        longBiographyContent = longBiographyContent[..1501]; // Đảm bảo chính xác 1501 ký tự
 
         var command = new UpdateMemberBiographyCommand { MemberId = Guid.NewGuid(), BiographyContent = longBiographyContent };
 
@@ -81,7 +81,7 @@ public class UpdateMemberBiographyCommandValidatorTests
         // 1. Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent có độ dài hợp lệ.
         // 2. Act: Gọi phương thức Validate của validator.
         // 3. Assert: Kiểm tra rằng không có lỗi cho thuộc tính BiographyContent.
-        var validBiographyContent = _fixture.Create<string>().PadRight(100, 'a').Substring(0, 100); // Ensure at least 100 characters
+        var validBiographyContent = _fixture.Create<string>().PadRight(100, 'a')[..100]; // Ensure at least 100 characters
         var command = new UpdateMemberBiographyCommand { MemberId = Guid.NewGuid(), BiographyContent = validBiographyContent };
 
         var result = _validator.TestValidate(command);

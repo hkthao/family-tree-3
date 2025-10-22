@@ -4,18 +4,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Services;
 
-public class ConfigProvider : IConfigProvider
+public class ConfigProvider(IConfiguration configuration, ISystemConfigurationService systemConfigurationService, ILogger<ConfigProvider> logger) : IConfigProvider
 {
-    private readonly IConfiguration _configuration;
-    private readonly ISystemConfigurationService _systemConfigurationService;
-    private readonly ILogger<ConfigProvider> _logger;
-
-    public ConfigProvider(IConfiguration configuration, ISystemConfigurationService systemConfigurationService, ILogger<ConfigProvider> logger)
-    {
-        _configuration = configuration;
-        _systemConfigurationService = systemConfigurationService;
-        _logger = logger;
-    }
+    private readonly IConfiguration _configuration = configuration;
+    private readonly ISystemConfigurationService _systemConfigurationService = systemConfigurationService;
+    private readonly ILogger<ConfigProvider> _logger = logger;
 
     public T GetSection<T>() where T : new()
     {
@@ -28,7 +21,7 @@ public class ConfigProvider : IConfigProvider
         {
             var sectionConfigs = allDbConfigsResult.Value
                 .Where(c => c.Key.StartsWith(sectionName + ":")) // Filter configs belonging to this section
-                .ToDictionary(c => c.Key.Substring(sectionName.Length + 1), c => (string?)c.Value);
+                .ToDictionary(c => c.Key[(sectionName.Length + 1)..], c => (string?)c.Value);
 
             if (sectionConfigs.Any())
             {

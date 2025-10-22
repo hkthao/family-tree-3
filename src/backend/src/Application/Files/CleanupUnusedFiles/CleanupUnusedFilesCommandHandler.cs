@@ -3,18 +3,11 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Files.CleanupUnusedFiles;
 
-public class CleanupUnusedFilesCommandHandler : IRequestHandler<CleanupUnusedFilesCommand, Result<int>>
+public class CleanupUnusedFilesCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IDateTime dateTime) : IRequestHandler<CleanupUnusedFilesCommand, Result<int>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IFileStorage _fileStorage;
-    private readonly IDateTime _dateTime;
-
-    public CleanupUnusedFilesCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IDateTime dateTime)
-    {
-        _context = context;
-        _fileStorage = fileStorage;
-        _dateTime = dateTime;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IFileStorage _fileStorage = fileStorage;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<int>> Handle(CleanupUnusedFilesCommand request, CancellationToken cancellationToken)
     {

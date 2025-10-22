@@ -5,20 +5,12 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler : IRequestHandler<DeleteMemberCommand, Result>
+public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<DeleteMemberCommand, Result>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-    private readonly IFamilyTreeService _familyTreeService;
-
-    public DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-        _familyTreeService = familyTreeService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {

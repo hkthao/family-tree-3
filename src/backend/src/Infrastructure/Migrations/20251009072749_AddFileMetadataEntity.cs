@@ -36,10 +36,7 @@ public partial class AddFileMetadataEntity : Migration
                 LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
                     .Annotation("MySql:CharSet", "utf8mb4")
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_FileMetadata", x => x.Id);
-            })
+            constraints: table => table.PrimaryKey("PK_FileMetadata", x => x.Id))
             .Annotation("MySql:CharSet", "utf8mb4");
     }
 

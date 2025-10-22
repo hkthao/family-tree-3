@@ -5,16 +5,10 @@ using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
-public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
+public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetFamilyByIdQuery, Result<FamilyDetailDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<FamilyDetailDto>> Handle(GetFamilyByIdQuery request, CancellationToken cancellationToken)
     {
@@ -29,11 +23,8 @@ public class GetFamilyByIdQueryHandler : IRequestHandler<GetFamilyByIdQuery, Res
             .ProjectTo<FamilyDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (familyDto == null)
-        {
-            return Result<FamilyDetailDto>.Failure($"Family with ID {request.Id} not found.");
-        }
-
-        return Result<FamilyDetailDto>.Success(familyDto);
+        return familyDto == null
+            ? Result<FamilyDetailDto>.Failure($"Family with ID {request.Id} not found.")
+            : Result<FamilyDetailDto>.Success(familyDto);
     }
 }

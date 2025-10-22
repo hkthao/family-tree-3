@@ -9,22 +9,13 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 
-public class GenerateRelationshipDataCommandHandler : IRequestHandler<GenerateRelationshipDataCommand, Result<List<AIRelationshipDto>>>
+public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger) : IRequestHandler<GenerateRelationshipDataCommand, Result<List<AIRelationshipDto>>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly IValidator<AIRelationshipDto> _aiRelationshipDtoValidator;
-    private readonly IApplicationDbContext _context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService;
-    private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger;
-
-    public GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger)
-    {
-        _chatProviderFactory = chatProviderFactory;
-        _aiRelationshipDtoValidator = aiRelationshipDtoValidator;
-        _context = context;
-        _familyAuthorizationService = familyAuthorizationService;
-        _logger = logger; // Assigned logger
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    private readonly IValidator<AIRelationshipDto> _aiRelationshipDtoValidator = aiRelationshipDtoValidator;
+    private readonly IApplicationDbContext _context = context;
+    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
+    private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger = logger;
 
     public async Task<Result<List<AIRelationshipDto>>> Handle(GenerateRelationshipDataCommand request, CancellationToken cancellationToken)
     {

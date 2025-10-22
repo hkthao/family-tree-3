@@ -21,13 +21,7 @@ public class QdrantVectorStore : IVectorStore
         _configProvider = configProvider;
 
         var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
-        var qdrantSettings = vectorStoreSettings.Qdrant;
-
-        if (qdrantSettings == null)
-        {
-            throw new InvalidOperationException("Qdrant settings not found or invalid.");
-        }
-
+        var qdrantSettings = vectorStoreSettings.Qdrant ?? throw new InvalidOperationException("Qdrant settings not found or invalid.");
         var host = qdrantSettings.Host;
         var apiKey = qdrantSettings.ApiKey;
         _defaultCollectionName = qdrantSettings.CollectionName;
@@ -137,7 +131,7 @@ public class QdrantVectorStore : IVectorStore
                 results.Add(new VectorStoreQueryResult
                 {
                     Id = foundPoint.Id.Uuid,
-                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (double)e).ToList() ?? new List<double>(),
+                    Embedding = foundPoint.Vectors?.Vector?.Data?.Select(e => (double)e).ToList() ?? [],
                     Score = foundPoint.Score,
                     Metadata = payload.ToDictionary(
                         p => p.Key,

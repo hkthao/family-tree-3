@@ -5,16 +5,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Services;
 
-public class FaceApiService : IFaceApiService
+public class FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClient) : IFaceApiService
 {
-    private readonly ILogger<FaceApiService> _logger;
-    private readonly HttpClient _httpClient;
-
-    public FaceApiService(ILogger<FaceApiService> logger, HttpClient httpClient)
-    {
-        _logger = logger;
-        _httpClient = httpClient;
-    }
+    private readonly ILogger<FaceApiService> _logger = logger;
+    private readonly HttpClient _httpClient = httpClient;
 
     public async Task<List<FaceDetectionResultDto>> DetectFacesAsync(byte[] imageBytes, string contentType, bool returnCrop)
     {
@@ -43,6 +37,6 @@ public class FaceApiService : IFaceApiService
         //_logger.LogInformation($"Deserialized FaceDetectionResultDto in C#: {System.Text.Json.JsonSerializer.Serialize(result)}");
         _logger.LogInformation("Successfully received response from Python Face Detection Service.");
 
-        return result ?? new List<FaceDetectionResultDto>();
+        return result ?? [];
     }
 }

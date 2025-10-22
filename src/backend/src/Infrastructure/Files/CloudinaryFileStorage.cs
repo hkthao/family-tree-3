@@ -23,7 +23,7 @@ public class CloudinaryFileStorage : IFileStorage
     }
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        _ = _configProvider.GetSection<StorageSettings>();
         try
         {
             var resourceType = GetResourceType(contentType);
@@ -66,10 +66,9 @@ public class CloudinaryFileStorage : IFileStorage
                     break;
             }
 
-            if (uploadResult.Error != null)
-                return Result<string>.Failure(uploadResult.Error.Message, "Cloudinary");
-
-            return Result<string>.Success(uploadResult.SecureUrl.ToString());
+            return uploadResult.Error != null
+                ? Result<string>.Failure(uploadResult.Error.Message, "Cloudinary")
+                : Result<string>.Success(uploadResult.SecureUrl.ToString());
         }
         catch (Exception ex)
         {
@@ -90,12 +89,7 @@ public class CloudinaryFileStorage : IFileStorage
             var deletionParams = new DeletionParams(publicId);
             var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
 
-            if (deletionResult.Error != null)
-            {
-                return Result.Failure(deletionResult.Error.Message, "Cloudinary");
-            }
-
-            return Result.Success();
+            return deletionResult.Error != null ? Result.Failure(deletionResult.Error.Message, "Cloudinary") : Result.Success();
         }
         catch (Exception ex)
         {
@@ -127,13 +121,9 @@ public class CloudinaryFileStorage : IFileStorage
         {
             return ResourceType.Image;
         }
-        else if (contentType.StartsWith("video"))
-        {
-            return ResourceType.Video;
-        }
         else
         {
-            return ResourceType.Raw;
+            return contentType.StartsWith("video") ? ResourceType.Video : ResourceType.Raw;
         }
     }
 }

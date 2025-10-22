@@ -31,7 +31,7 @@ public class CreateRelationshipsCommandValidatorTests
         // 3. Assert: Kiểm tra có lỗi validation cho Relationships.
         var command = new CreateRelationshipsCommand
         {
-            Relationships = new List<RelationshipInput>()
+            Relationships = []
         };
 
         var result = _validator.TestValidate(command);
@@ -51,10 +51,10 @@ public class CreateRelationshipsCommandValidatorTests
         // 3. Assert: Kiểm tra có lỗi validation cho SourceMemberId.
         var command = new CreateRelationshipsCommand
         {
-            Relationships = new List<RelationshipInput>
-            {
+            Relationships =
+            [
                 new TestRelationshipInput { SourceMemberId = Guid.Empty, TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father }
-            }
+            ]
         };
 
         var result = _validator.TestValidate(command);
@@ -73,10 +73,10 @@ public class CreateRelationshipsCommandValidatorTests
         // 3. Assert: Kiểm tra có lỗi validation cho TargetMemberId.
         var command = new CreateRelationshipsCommand
         {
-            Relationships = new List<RelationshipInput>
-            {
+            Relationships =
+            [
                 new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.Empty, Type = RelationshipType.Father }
-            }
+            ]
         };
 
         var result = _validator.TestValidate(command);
@@ -95,10 +95,10 @@ public class CreateRelationshipsCommandValidatorTests
         // 3. Assert: Kiểm tra có lỗi validation cho Type.
         var command = new CreateRelationshipsCommand
         {
-            Relationships = new List<RelationshipInput>
-            {
+            Relationships =
+            [
                 new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = (RelationshipType)999 }
-            }
+            ]
         };
 
         var result = _validator.TestValidate(command);
@@ -118,10 +118,10 @@ public class CreateRelationshipsCommandValidatorTests
         var memberId = Guid.NewGuid();
         var command = new CreateRelationshipsCommand
         {
-            Relationships = new List<RelationshipInput>
-            {
+            Relationships =
+            [
                 new TestRelationshipInput { SourceMemberId = memberId, TargetMemberId = memberId, Type = RelationshipType.Father }
-            }
+            ]
         };
 
         var result = _validator.TestValidate(command);
@@ -140,10 +140,10 @@ public class CreateRelationshipsCommandValidatorTests
         // 3. Assert: Kiểm tra không có lỗi validation.
         var command = new CreateRelationshipsCommand
         {
-            Relationships = new List<RelationshipInput>
-            {
+            Relationships =
+            [
                 new TestRelationshipInput { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Father, Order = 1 }
-            }
+            ]
         };
 
         var result = _validator.TestValidate(command);

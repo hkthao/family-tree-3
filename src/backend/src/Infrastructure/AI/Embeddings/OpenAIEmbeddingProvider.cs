@@ -7,21 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.AI.Embeddings;
 
-public class OpenAIEmbeddingProvider : IEmbeddingProvider
+public class OpenAIEmbeddingProvider(IConfigProvider configProvider, HttpClient httpClient, ILogger<OpenAIEmbeddingProvider> logger) : IEmbeddingProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<OpenAIEmbeddingProvider> _logger;
-    private readonly IConfigProvider _configProvider;
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<OpenAIEmbeddingProvider> _logger = logger;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public string ProviderName => "OpenAI";
     public int MaxTextLength => _configProvider.GetSection<EmbeddingSettings>().OpenAI.MaxTextLength;
-
-    public OpenAIEmbeddingProvider(IConfigProvider configProvider, HttpClient httpClient, ILogger<OpenAIEmbeddingProvider> logger)
-    {
-        _configProvider = configProvider;
-        _httpClient = httpClient;
-        _logger = logger;
-    }
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {

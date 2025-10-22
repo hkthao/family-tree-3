@@ -6,18 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.AI.Chat;
 
-public class LocalChatProvider : IChatProvider
+public class LocalChatProvider(HttpClient httpClient, IConfigProvider configProvider, ILogger<LocalChatProvider> logger) : IChatProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly ILogger<LocalChatProvider> _logger;
-    private readonly IConfigProvider _configProvider;
-
-    public LocalChatProvider(HttpClient httpClient, IConfigProvider configProvider, ILogger<LocalChatProvider> logger)
-    {
-        _httpClient = httpClient;
-        _configProvider = configProvider;
-        _logger = logger;
-    }
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly ILogger<LocalChatProvider> _logger = logger;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {

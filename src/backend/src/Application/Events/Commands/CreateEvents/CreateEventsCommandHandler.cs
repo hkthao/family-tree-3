@@ -5,18 +5,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.Commands.CreateEvents;
 
-public class CreateEventsCommandHandler : IRequestHandler<CreateEventsCommand, Result<List<Guid>>>
+public class CreateEventsCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService) : IRequestHandler<CreateEventsCommand, Result<List<Guid>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-
-    public CreateEventsCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<List<Guid>>> Handle(CreateEventsCommand request, CancellationToken cancellationToken)
     {

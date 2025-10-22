@@ -23,7 +23,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         // 1. Arrange: Tạo một GetMembersByIdsQuery với danh sách ID rỗng.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
-        var query = new GetMembersByIdsQuery(new List<Guid>());
+        var query = new GetMembersByIdsQuery([]);
 
         var result = await _handler.Handle(query, CancellationToken.None);
 
@@ -41,7 +41,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         // 1. Arrange: Tạo một GetMembersByIdsQuery với các ID không tồn tại trong Context.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
-        var query = new GetMembersByIdsQuery(new List<Guid> { Guid.NewGuid(), Guid.NewGuid() });
+        var query = new GetMembersByIdsQuery([Guid.NewGuid(), Guid.NewGuid()]);
 
         // No members added to _context
 
@@ -69,7 +69,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync();
 
-        var query = new GetMembersByIdsQuery(new List<Guid> { member1.Id, member2.Id });
+        var query = new GetMembersByIdsQuery([member1.Id, member2.Id]);
 
         var result = await _handler.Handle(query, CancellationToken.None);
 
@@ -99,7 +99,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         _context.Members.AddRange(member1, member2, member3);
         await _context.SaveChangesAsync();
 
-        var query = new GetMembersByIdsQuery(new List<Guid> { member1.Id, member3.Id, Guid.NewGuid() }); // member1, member3, and one non-existent ID
+        var query = new GetMembersByIdsQuery([member1.Id, member3.Id, Guid.NewGuid()]); // member1, member3, and one non-existent ID
 
         var result = await _handler.Handle(query, CancellationToken.None);
 

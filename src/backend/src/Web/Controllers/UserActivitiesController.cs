@@ -9,14 +9,9 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/activities")]
-public class UserActivitiesController : ControllerBase
+public class UserActivitiesController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public UserActivitiesController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     /// <summary>
     /// Retrieves a list of recent user activities for the current user.
@@ -43,10 +38,6 @@ public class UserActivitiesController : ControllerBase
 
         var result = await _mediator.Send(query);
 
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<UserActivityDto>>)Ok(result.Value) : (ActionResult<List<UserActivityDto>>)BadRequest(result.Error);
     }
 }

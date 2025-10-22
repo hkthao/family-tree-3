@@ -37,10 +37,7 @@ public partial class InitialCreate : Migration
                 LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
                     .Annotation("MySql:CharSet", "utf8mb4")
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_Families", x => x.Id);
-            })
+            constraints: table => table.PrimaryKey("PK_Families", x => x.Id))
             .Annotation("MySql:CharSet", "utf8mb4");
 
         migrationBuilder.CreateTable(
@@ -254,10 +251,7 @@ public partial class InitialCreate : Migration
                 LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
                     .Annotation("MySql:CharSet", "utf8mb4")
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_UserActivities", x => x.Id);
-            })
+            constraints: table => table.PrimaryKey("PK_UserActivities", x => x.Id))
             .Annotation("MySql:CharSet", "utf8mb4");
 
         migrationBuilder.CreateTable(
@@ -278,10 +272,7 @@ public partial class InitialCreate : Migration
                 LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
                     .Annotation("MySql:CharSet", "utf8mb4")
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_UserPreferences", x => x.UserProfileId);
-            })
+            constraints: table => table.PrimaryKey("PK_UserPreferences", x => x.UserProfileId))
             .Annotation("MySql:CharSet", "utf8mb4");
 
         migrationBuilder.CreateTable(

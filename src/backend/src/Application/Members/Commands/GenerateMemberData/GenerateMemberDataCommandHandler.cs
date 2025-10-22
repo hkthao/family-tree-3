@@ -8,20 +8,12 @@ using FluentValidation.Results;
 
 namespace backend.Application.Members.Commands.GenerateMemberData;
 
-public class GenerateMemberDataCommandHandler : IRequestHandler<GenerateMemberDataCommand, Result<List<AIMemberDto>>>
+public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateMemberDataCommand, Result<List<AIMemberDto>>>
 {
-    private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly IValidator<AIMemberDto> _aiMemberDtoValidator;
-    private readonly IApplicationDbContext _context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService;
-
-    public GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService)
-    {
-        _chatProviderFactory = chatProviderFactory;
-        _aiMemberDtoValidator = aiMemberDtoValidator;
-        _context = context;
-        _familyAuthorizationService = familyAuthorizationService;
-    }
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    private readonly IValidator<AIMemberDto> _aiMemberDtoValidator = aiMemberDtoValidator;
+    private readonly IApplicationDbContext _context = context;
+    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
 
     public async Task<Result<List<AIMemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
     {

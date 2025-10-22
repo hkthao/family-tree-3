@@ -5,18 +5,11 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
 
-public class GetUpcomingEventsQueryHandler : IRequestHandler<GetUpcomingEventsQuery, Result<List<EventDto>>>
+public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<GetUpcomingEventsQuery, Result<List<EventDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    private readonly IAuthorizationService _authorizationService;
-
-    public GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService)
-    {
-        _context = context;
-        _mapper = mapper;
-        _authorizationService = authorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<List<EventDto>>> Handle(GetUpcomingEventsQuery request, CancellationToken cancellationToken)
     {

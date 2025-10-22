@@ -8,27 +8,18 @@ using backend.Domain.Extensions;
 
 namespace backend.Application.Members.Commands.GenerateBiography;
 
-public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
+public class GenerateBiographyCommandHandler(
+    IApplicationDbContext context,
+    IUser user,
+    IAuthorizationService authorizationService,
+    IChatProviderFactory chatProviderFactory,
+    FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IChatProviderFactory _chatProviderFactory;
-    private readonly FamilyAuthorizationService _familyAuthorizationService;
-
-    public GenerateBiographyCommandHandler(
-        IApplicationDbContext context,
-        IUser user,
-        IAuthorizationService authorizationService,
-        IChatProviderFactory chatProviderFactory,
-        FamilyAuthorizationService familyAuthorizationService)
-    {
-        _context = context;
-        _user = user;
-        _authorizationService = authorizationService;
-        _chatProviderFactory = chatProviderFactory;
-        _familyAuthorizationService = familyAuthorizationService;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
     {

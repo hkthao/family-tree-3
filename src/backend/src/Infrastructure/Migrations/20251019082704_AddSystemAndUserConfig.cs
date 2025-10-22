@@ -30,10 +30,7 @@ namespace backend.Infrastructure.Migrations
                     LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemConfigurations", x => x.Id);
-                })
+                constraints: table => table.PrimaryKey("PK_SystemConfigurations", x => x.Id))
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(

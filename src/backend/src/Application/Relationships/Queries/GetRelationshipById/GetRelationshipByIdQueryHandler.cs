@@ -5,16 +5,10 @@ using backend.Application.Relationships.Specifications;
 
 namespace backend.Application.Relationships.Queries.GetRelationshipById;
 
-public class GetRelationshipByIdQueryHandler : IRequestHandler<GetRelationshipByIdQuery, Result<RelationshipDto>>
+public class GetRelationshipByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetRelationshipByIdQuery, Result<RelationshipDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetRelationshipByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<RelationshipDto>> Handle(GetRelationshipByIdQuery request, CancellationToken cancellationToken)
     {
@@ -24,9 +18,8 @@ public class GetRelationshipByIdQueryHandler : IRequestHandler<GetRelationshipBy
         var relationshipDto = await query
             .ProjectTo<RelationshipDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
-        if (relationshipDto == null)
-            return Result<RelationshipDto>.Failure($"Relationship with ID {request.Id} not found.");
-
-        return Result<RelationshipDto>.Success(relationshipDto);
+        return relationshipDto == null
+            ? Result<RelationshipDto>.Failure($"Relationship with ID {request.Id} not found.")
+            : Result<RelationshipDto>.Success(relationshipDto);
     }
 }

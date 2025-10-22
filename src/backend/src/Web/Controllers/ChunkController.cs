@@ -7,14 +7,9 @@ namespace backend.Web.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ChunkController : ControllerBase
+    public class ChunkController(IMediator mediator) : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public ChunkController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+        private readonly IMediator _mediator = mediator;
 
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
@@ -27,27 +22,18 @@ namespace backend.Web.Controllers
             [FromForm] string category,
             [FromForm] string createdBy)
         {
-            using (var stream = file.OpenReadStream())
+            using var stream = file.OpenReadStream();
+            var command = new ProcessFileCommand
             {
-                var command = new ProcessFileCommand
-                {
-                    FileStream = stream,
-                    FileName = file.FileName,
-                    FileId = fileId,
-                    FamilyId = familyId,
-                    Category = category,
-                    CreatedBy = createdBy
-                }; var result = await _mediator.Send(command);
+                FileStream = stream,
+                FileName = file.FileName,
+                FileId = fileId,
+                FamilyId = familyId,
+                Category = category,
+                CreatedBy = createdBy
+            }; var result = await _mediator.Send(command);
 
-                if (result.IsSuccess)
-                {
-                    return Ok(result.Value);
-                }
-                else
-                {
-                    return BadRequest(result.Error);
-                }
-            }
+            return result.IsSuccess ? (ActionResult<List<TextChunk>>)Ok(result.Value) : (ActionResult<List<TextChunk>>)BadRequest(result.Error);
         }
 
         [HttpPost("approve")]
@@ -62,14 +48,7 @@ namespace backend.Web.Controllers
 
             var result = await _mediator.Send(command);
 
-            if (result.IsSuccess)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return BadRequest(result.Error);
-            }
+            return result.IsSuccess ? Ok(result) : BadRequest(result.Error);
         }
     }
 }

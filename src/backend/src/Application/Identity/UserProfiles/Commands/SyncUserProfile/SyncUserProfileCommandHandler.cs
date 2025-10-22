@@ -10,18 +10,12 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 
-public class SyncUserProfileCommandHandler : IRequestHandler<SyncUserProfileCommand, Result<bool>>
+public class SyncUserProfileCommandHandler(
+    IApplicationDbContext context,
+    ILogger<SyncUserProfileCommandHandler> logger) : IRequestHandler<SyncUserProfileCommand, Result<bool>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ILogger<SyncUserProfileCommandHandler> _logger;
-
-    public SyncUserProfileCommandHandler(
-        IApplicationDbContext context,
-        ILogger<SyncUserProfileCommandHandler> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly ILogger<SyncUserProfileCommandHandler> _logger = logger;
 
     public async Task<Result<bool>> Handle(SyncUserProfileCommand request, CancellationToken cancellationToken)
     {

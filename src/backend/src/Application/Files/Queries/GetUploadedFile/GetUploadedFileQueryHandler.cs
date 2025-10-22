@@ -4,14 +4,9 @@ using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Application.Files.Queries.GetUploadedFile;
 
-public class GetUploadedFileQueryHandler : IRequestHandler<GetUploadedFileQuery, Result<FileContentDto>>
+public class GetUploadedFileQueryHandler(IConfigProvider configProvider) : IRequestHandler<GetUploadedFileQuery, Result<FileContentDto>>
 {
-    private readonly IConfigProvider _configProvider;
-
-    public GetUploadedFileQueryHandler(IConfigProvider configProvider)
-    {
-        _configProvider = configProvider;
-    }
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public Task<Result<FileContentDto>> Handle(GetUploadedFileQuery request, CancellationToken cancellationToken)
     {

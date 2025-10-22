@@ -3,16 +3,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Data;
 
-public class ApplicationDbContextInitialiser
+public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context)
 {
-    private readonly ILogger<ApplicationDbContextInitialiser> _logger;
-    private readonly ApplicationDbContext _context;
-
-    public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context)
-    {
-        _logger = logger;
-        _context = context;
-    }
+    private readonly ILogger<ApplicationDbContextInitialiser> _logger = logger;
+    private readonly ApplicationDbContext _context = context;
 
     public async Task InitialiseAsync()
     {
@@ -54,25 +48,23 @@ public class ApplicationDbContextInitialiser
             var userProfile1Id = Guid.Parse("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11");
             var userProfile2Id = Guid.Parse("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22");
 
-            _context.UserProfiles.AddRange(new Domain.Entities.UserProfile[]
-            {
-                new Domain.Entities.UserProfile
-                {
+            _context.UserProfiles.AddRange(
+            [
+                new() {
                     Id = userProfile1Id,
                     ExternalId = "auth0|testuser1",
                     Email = "testuser1@example.com",
                     Name = "Test User One",
                     Created = DateTime.UtcNow
                 },
-                new Domain.Entities.UserProfile
-                {
+                new() {
                     Id = userProfile2Id,
                     ExternalId = "auth0|testuser2",
                     Email = "testuser2@example.com",
                     Name = "Test User Two",
                     Created = DateTime.UtcNow
                 }
-            });
+            ]);
             await _context.SaveChangesAsync();
         }
 
@@ -131,32 +123,31 @@ public class ApplicationDbContextInitialiser
 
             var members = new List<Domain.Entities.Member>
             {
-                new Domain.Entities.Member { Id = williamId, Code = "MEM-WM", FirstName = "Prince", LastName = "William", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1982, 6, 21), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = catherineId, Code = "MEM-CT", FirstName = "Catherine", LastName = "Middleton", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1982, 1, 9), PlaceOfBirth = "Reading", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = georgeId, Code = "MEM-GG", FirstName = "Prince", LastName = "George", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2013, 7, 22), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = elizabethIIId, Code = "MEM-EL", FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1926, 4, 21), DateOfDeath = new DateTime(2022, 9, 8), PlaceOfBirth = "London", PlaceOfDeath = "Balmoral", Occupation = "Monarch" },
-                new Domain.Entities.Member { Id = charlotteId, Code = "MEM-CH", FirstName = "Princess", LastName = "Charlotte", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2015, 5, 2), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = louisId, Code = "MEM-LO", FirstName = "Prince", LastName = "Louis", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2018, 4, 23), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = harryId, Code = "MEM-HA", FirstName = "Prince", LastName = "Harry", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1984, 9, 15), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = meghanId, Code = "MEM-MM", FirstName = "Meghan", LastName = "Markle", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1981, 8, 4), PlaceOfBirth = "Los Angeles", Occupation = "Actress" },
-                new Domain.Entities.Member { Id = archieId, Code = "MEM-AM", FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2019, 5, 6), PlaceOfBirth = "London" },
-                new Domain.Entities.Member { Id = lilibetMountbattenWindsorId, Code = "MEM-LM", FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" },
-                new Domain.Entities.Member { Id = charlesIIIId, Code = "MEM-KC", FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1948, 11, 14), PlaceOfBirth = "London", Occupation = "Monarch"},
-                new Domain.Entities.Member { Id = queenConsortId, Code = "MEM-QC", FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1947, 7, 17), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = philipId, Code = "MEM-PP", FirstName = "Prince", LastName = "Philip", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1921, 6, 10), DateOfDeath = new DateTime(2021, 4, 9), PlaceOfBirth = "Corfu", PlaceOfDeath = "Windsor", Occupation = "Royal Consort", IsRoot = true },
-                new Domain.Entities.Member { Id = dianaId, Code = "MEM-PD", FirstName = "Princess", LastName = "Diana", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1961, 7, 1), DateOfDeath = new DateTime(1997, 8, 31), PlaceOfBirth = "Sandringham", PlaceOfDeath = "Paris", Occupation = "Princess" },
-                new Domain.Entities.Member { Id = andrewId, Code = "MEM-PA", FirstName = "Prince", LastName = "Andrew", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1960, 2, 19), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = sarahId, Code = "MEM-SF", FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1959, 10, 15), PlaceOfBirth = "London", Occupation = "Author" },
-                new Domain.Entities.Member { Id = eugenieId, Code = "MEM-EU", FirstName = "Princess", LastName = "Eugenie", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1990, 3, 23), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = beatriceId, Code = "MEM-BE", FirstName = "Princess", LastName = "Beatrice", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1988, 8, 8), PlaceOfBirth = "London", Occupation = "Royal" },
-                new Domain.Entities.Member { Id = lilibetSussexId, Code = "MEM-LS", FirstName = "Princess", LastName = "Lilibet", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" }
+                new() { Id = williamId, Code = "MEM-WM", FirstName = "Prince", LastName = "William", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1982, 6, 21), PlaceOfBirth = "London", Occupation = "Royal" },
+                new() { Id = catherineId, Code = "MEM-CT", FirstName = "Catherine", LastName = "Middleton", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1982, 1, 9), PlaceOfBirth = "Reading", Occupation = "Royal" },
+                new() { Id = georgeId, Code = "MEM-GG", FirstName = "Prince", LastName = "George", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2013, 7, 22), PlaceOfBirth = "London" },
+                new() { Id = elizabethIIId, Code = "MEM-EL", FirstName = "Queen", LastName = "Elizabeth II", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1926, 4, 21), DateOfDeath = new DateTime(2022, 9, 8), PlaceOfBirth = "London", PlaceOfDeath = "Balmoral", Occupation = "Monarch" },
+                new() { Id = charlotteId, Code = "MEM-CH", FirstName = "Princess", LastName = "Charlotte", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2015, 5, 2), PlaceOfBirth = "London" },
+                new() { Id = louisId, Code = "MEM-LO", FirstName = "Prince", LastName = "Louis", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2018, 4, 23), PlaceOfBirth = "London" },
+                new() { Id = harryId, Code = "MEM-HA", FirstName = "Prince", LastName = "Harry", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1984, 9, 15), PlaceOfBirth = "London", Occupation = "Royal" },
+                new() { Id = meghanId, Code = "MEM-MM", FirstName = "Meghan", LastName = "Markle", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1981, 8, 4), PlaceOfBirth = "Los Angeles", Occupation = "Actress" },
+                new() { Id = archieId, Code = "MEM-AM", FirstName = "Archie", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(2019, 5, 6), PlaceOfBirth = "London" },
+                new() { Id = lilibetMountbattenWindsorId, Code = "MEM-LM", FirstName = "Lilibet", LastName = "Mountbatten-Windsor", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" },
+                new() { Id = charlesIIIId, Code = "MEM-KC", FirstName = "King", LastName = "Charles III", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1948, 11, 14), PlaceOfBirth = "London", Occupation = "Monarch"},
+                new() { Id = queenConsortId, Code = "MEM-QC", FirstName = "Queen", LastName = "Consort", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1947, 7, 17), PlaceOfBirth = "London", Occupation = "Royal" },
+                new() { Id = philipId, Code = "MEM-PP", FirstName = "Prince", LastName = "Philip", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1921, 6, 10), DateOfDeath = new DateTime(2021, 4, 9), PlaceOfBirth = "Corfu", PlaceOfDeath = "Windsor", Occupation = "Royal Consort", IsRoot = true },
+                new() { Id = dianaId, Code = "MEM-PD", FirstName = "Princess", LastName = "Diana", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1961, 7, 1), DateOfDeath = new DateTime(1997, 8, 31), PlaceOfBirth = "Sandringham", PlaceOfDeath = "Paris", Occupation = "Princess" },
+                new() { Id = andrewId, Code = "MEM-PA", FirstName = "Prince", LastName = "Andrew", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar.png", Gender = Domain.Enums.Gender.Male.ToString(), DateOfBirth = new DateTime(1960, 2, 19), PlaceOfBirth = "London", Occupation = "Royal" },
+                new() { Id = sarahId, Code = "MEM-SF", FirstName = "Sarah", LastName = "Ferguson", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1959, 10, 15), PlaceOfBirth = "London", Occupation = "Author" },
+                new() { Id = eugenieId, Code = "MEM-EU", FirstName = "Princess", LastName = "Eugenie", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1990, 3, 23), PlaceOfBirth = "London", Occupation = "Royal" },
+                new() { Id = beatriceId, Code = "MEM-BE", FirstName = "Princess", LastName = "Beatrice", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(1988, 8, 8), PlaceOfBirth = "London", Occupation = "Royal" },
+                new() { Id = lilibetSussexId, Code = "MEM-LS", FirstName = "Princess", LastName = "Lilibet", FamilyId = royalFamilyId, Created = DateTime.UtcNow, AvatarUrl = "https://www.w3schools.com/howto/img_avatar2.png", Gender = Domain.Enums.Gender.Female.ToString(), DateOfBirth = new DateTime(2021, 6, 4), PlaceOfBirth = "Santa Barbara" }
             };
             _context.Members.AddRange(members);
 
             _context.Events.AddRange(new List<Domain.Entities.Event>
             {
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-PG",
                     Name = "Birth of Prince George",
@@ -167,8 +158,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == georgeId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-M-WC",
                     Name = "Marriage of William and Catherine",
@@ -179,8 +169,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Marriage,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == williamId), members.First(m => m.Id == catherineId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-D-QE",
                     Name = "Death of Queen Elizabeth II",
@@ -191,8 +180,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Death,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == elizabethIIId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-PC",
                     Name = "Birth of Princess Charlotte",
@@ -203,8 +191,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == charlotteId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-PL",
                     Name = "Birth of Prince Louis",
@@ -215,8 +202,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == louisId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-M-HM",
                     Name = "Marriage of Harry and Meghan",
@@ -227,8 +213,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Marriage,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == harryId), members.First(m => m.Id == meghanId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-AM",
                     Name = "Birth of Archie Mountbatten-Windsor",
@@ -239,8 +224,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == archieId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-LM",
                     Name = "Birth of Lilibet Mountbatten-Windsor",
@@ -251,8 +235,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == lilibetMountbattenWindsorId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-QPJ",
                     Name = "Queen's Platinum Jubilee",
@@ -263,8 +246,7 @@ public class ApplicationDbContextInitialiser
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Other
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-C-KC",
                     Name = "Coronation of King Charles III",
@@ -275,8 +257,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Other,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == charlesIIIId), members.First(m => m.Id == queenConsortId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-TTC",
                     Name = "Trooping the Colour 2023",
@@ -286,8 +267,7 @@ public class ApplicationDbContextInitialiser
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Other
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-F-PP",
                     Name = "Prince Philip's Funeral",
@@ -298,8 +278,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Death,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == philipId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-F-PD",
                     Name = "Princess Diana's Funeral",
@@ -310,8 +289,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Death,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == dianaId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-M-AS",
                     Name = "Royal Wedding of Prince Andrew and Sarah Ferguson",
@@ -322,8 +300,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Marriage,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == andrewId), members.First(m => m.Id == sarahId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-M-EJ",
                     Name = "Royal Wedding of Princess Eugenie and Jack Brooksbank",
@@ -334,8 +311,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Marriage,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == eugenieId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-M-BM",
                     Name = "Royal Wedding of Princess Beatrice and Edoardo Mapelli Mozzi",
@@ -346,8 +322,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Marriage,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == beatriceId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-PW",
                     Name = "Birth of Prince William",
@@ -358,8 +333,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == williamId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-PH",
                     Name = "Birth of Prince Harry",
@@ -370,8 +344,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == harryId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-B-KC",
                     Name = "Birth of King Charles III",
@@ -382,8 +355,7 @@ public class ApplicationDbContextInitialiser
                     Type = Domain.Enums.EventType.Birth,
                     RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == charlesIIIId) }
                 },
-                new Domain.Entities.Event
-                {
+                new() {
                     Id = Guid.NewGuid(),
                     Code = "EVT-C-QE",
                     Name = "Queen Elizabeth II's Coronation",
@@ -400,35 +372,35 @@ public class ApplicationDbContextInitialiser
             _context.Relationships.AddRange(new List<Domain.Entities.Relationship>
             {
                 // Spouses
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = elizabethIIId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = catherineId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = meghanId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = queenConsortId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = andrewId, TargetMemberId = sarahId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = elizabethIIId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = catherineId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = meghanId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = queenConsortId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = andrewId, TargetMemberId = sarahId, Type = Domain.Enums.RelationshipType.Husband, FamilyId = royalFamilyId },
 
                 // Parent-Child: Philip & Elizabeth II -> Charles III
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = elizabethIIId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = philipId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = elizabethIIId, TargetMemberId = charlesIIIId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
 
                 // Parent-Child: Charles III & Diana -> William, Harry
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = williamId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = charlesIIIId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = dianaId, TargetMemberId = harryId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
 
                 // Parent-Child: William & Catherine -> George, Charlotte, Louis
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = georgeId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = charlotteId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = williamId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = catherineId, TargetMemberId = louisId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
 
                 // Parent-Child: Harry & Meghan -> Archie, Lilibet Mountbatten-Windsor
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
-                new Domain.Entities.Relationship { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId }
+                new() { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = archieId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = harryId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Father, FamilyId = royalFamilyId },
+                new() { Id = Guid.NewGuid(), SourceMemberId = meghanId, TargetMemberId = lilibetMountbattenWindsorId, Type = Domain.Enums.RelationshipType.Mother, FamilyId = royalFamilyId }
             });
 
             await _context.SaveChangesAsync();

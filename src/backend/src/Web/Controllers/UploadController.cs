@@ -9,14 +9,9 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class UploadController : ControllerBase
+public class UploadController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public UploadController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     /// <summary>
     /// Uploads a file to the configured storage provider.
@@ -37,11 +32,7 @@ public class UploadController : ControllerBase
         };
         var result = await _mediator.Send(command, cancellationToken);
 
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result);
+        return result.IsSuccess ? (ActionResult<Result<string>>)Ok(result) : (ActionResult<Result<string>>)BadRequest(result);
     }
 
     /// <summary>
@@ -60,11 +51,6 @@ public class UploadController : ControllerBase
             return File(result.Value.Content, result.Value.ContentType);
         }
 
-        if (result.ErrorSource == "NotFound")
-        {
-            return NotFound();
-        }
-
-        return BadRequest(result.Error);
+        return result.ErrorSource == "NotFound" ? NotFound() : BadRequest(result.Error);
     }
 }

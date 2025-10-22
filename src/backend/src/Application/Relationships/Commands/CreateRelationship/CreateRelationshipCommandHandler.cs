@@ -6,18 +6,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
-public class CreateRelationshipCommandHandler : IRequestHandler<CreateRelationshipCommand, Result<Guid>>
+public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<CreateRelationshipCommand, Result<Guid>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IAuthorizationService _authorizationService;
-    private readonly IMediator _mediator;
-
-    public CreateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator)
-    {
-        _context = context;
-        _authorizationService = authorizationService;
-        _mediator = mediator;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<Guid>> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
     {

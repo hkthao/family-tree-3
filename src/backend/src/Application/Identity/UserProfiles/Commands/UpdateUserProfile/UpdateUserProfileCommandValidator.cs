@@ -26,7 +26,6 @@ public class UpdateUserProfileCommandValidator : AbstractValidator<UpdateUserPro
 
     private bool BeAValidUrl(string? url)
     {
-        if (string.IsNullOrEmpty(url)) return true;
-        return Uri.TryCreate(url, UriKind.Absolute, out _);
+        return string.IsNullOrEmpty(url) ? true : Uri.TryCreate(url, UriKind.Absolute, out _);
     }
 }

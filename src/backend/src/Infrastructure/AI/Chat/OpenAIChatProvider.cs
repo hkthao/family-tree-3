@@ -4,16 +4,10 @@ using backend.Application.Common.Models.AppSetting;
 
 namespace backend.Infrastructure.AI.Chat;
 
-public class OpenAIChatProvider : IChatProvider
+public class OpenAIChatProvider(HttpClient httpClient, IConfigProvider configProvider) : IChatProvider
 {
-    private readonly HttpClient _httpClient;
-    private readonly IConfigProvider _configProvider;
-
-    public OpenAIChatProvider(HttpClient httpClient, IConfigProvider configProvider)
-    {
-        _httpClient = httpClient;
-        _configProvider = configProvider;
-    }
+    private readonly HttpClient _httpClient = httpClient;
+    private readonly IConfigProvider _configProvider = configProvider;
 
     public async Task<string> GenerateResponseAsync(List<ChatMessage> messages)
     {

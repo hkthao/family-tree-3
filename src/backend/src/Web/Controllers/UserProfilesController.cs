@@ -13,56 +13,37 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class UserProfilesController : ControllerBase
+public class UserProfilesController(IMediator mediator) : ControllerBase
 {
 
-    private readonly IMediator _mediator;
-
-    public UserProfilesController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("me")]
     public async Task<ActionResult<UserProfileDto>> GetCurrentUserProfile()
     {
         var result = await _mediator.Send(new GetCurrentUserProfileQuery());
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.IsSuccess ? (ActionResult<UserProfileDto>)Ok(result.Value) : (ActionResult<UserProfileDto>)NotFound(result.Error);
     }
 
     [HttpGet]
     public async Task<ActionResult<List<UserProfileDto>>> GetAllUserProfiles()
     {
         var result = await _mediator.Send(new GetAllUserProfilesQuery());
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<UserProfileDto>>)Ok(result.Value) : (ActionResult<List<UserProfileDto>>)BadRequest(result.Error);
     }
 
     [HttpGet("byExternalId/{externalId}")]
     public async Task<ActionResult<UserProfileDto>> GetUserProfileByExternalId(string externalId)
     {
         var result = await _mediator.Send(new GetUserProfileByExternalIdQuery { ExternalId = externalId });
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return NotFound(result.Error);
+        return result.IsSuccess ? (ActionResult<UserProfileDto>)Ok(result.Value) : (ActionResult<UserProfileDto>)NotFound(result.Error);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<UserProfileDto>> GetUserProfileById(Guid id)
     {
         var result = await _mediator.Send(new GetUserProfileByIdQuery { Id = id });
-        if (result.IsSuccess)
-            return Ok(result.Value);
-        return NotFound(result.Error);
+        return result.IsSuccess ? (ActionResult<UserProfileDto>)Ok(result.Value) : (ActionResult<UserProfileDto>)NotFound(result.Error);
     }
 
     /// <summary>
@@ -80,10 +61,6 @@ public class UserProfilesController : ControllerBase
         }
 
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result);
+        return result.IsSuccess ? (ActionResult<Result>)Ok(result) : (ActionResult<Result>)BadRequest(result);
     }
 }

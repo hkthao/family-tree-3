@@ -6,16 +6,10 @@ using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.SearchFamilies;
 
-public class SearchFamiliesQueryHandler : IRequestHandler<SearchFamiliesQuery, Result<PaginatedList<FamilyDto>>>
+public class SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchFamiliesQuery, Result<PaginatedList<FamilyDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public SearchFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<FamilyDto>>> Handle(SearchFamiliesQuery request, CancellationToken cancellationToken)
     {

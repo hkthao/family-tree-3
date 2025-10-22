@@ -12,9 +12,7 @@ builder.AddWebServices();
 builder.Services.AddControllers();
 
 // Add CORS policy
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
+builder.Services.AddCors(options => options.AddPolicy("AllowFrontend",
         policyBuilder =>
         {
             var corsOriginsString = builder.Configuration["CORS_ORIGINS"];
@@ -26,7 +24,7 @@ builder.Services.AddCors(options =>
 
             if (origins.Any())
             {
-                policyBuilder.WithOrigins(origins.ToArray())
+                policyBuilder.WithOrigins([.. origins])
                              .AllowAnyHeader()
                              .AllowAnyMethod();
             }
@@ -34,8 +32,7 @@ builder.Services.AddCors(options =>
             {
                 Console.WriteLine("CORS_ORIGINS environment variable not found or is empty.");
             }
-        });
-});
+        }));
 
 var app = builder.Build();
 
@@ -43,12 +40,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     // Initialise and seed database
-    using (var scope = app.Services.CreateScope())
-    {
-        var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
-        await initialiser.InitialiseAsync();
-        await initialiser.SeedAsync();
-    }
+    using var scope = app.Services.CreateScope();
+    var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
+    await initialiser.InitialiseAsync();
+    await initialiser.SeedAsync();
 }
 else
 {

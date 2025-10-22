@@ -7,16 +7,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.Commands.CreateFamilies;
 
-public class CreateFamiliesCommandHandler : IRequestHandler<CreateFamiliesCommand, Result<List<Guid>>>
+public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<CreateFamiliesCommand, Result<List<Guid>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-
-    public CreateFamiliesCommandHandler(IApplicationDbContext context, IUser user)
-    {
-        _context = context;
-        _user = user;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
 
     public async Task<Result<List<Guid>>> Handle(CreateFamiliesCommand request, CancellationToken cancellationToken)
     {

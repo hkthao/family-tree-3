@@ -5,14 +5,9 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace backend.Infrastructure.Auth
 {
-    public class Auth0ClaimsTransformer : IClaimsTransformation
+    public class Auth0ClaimsTransformer(IConfigProvider configProvider) : IClaimsTransformation
     {
-        private readonly IConfigProvider _configProvider;
-
-        public Auth0ClaimsTransformer(IConfigProvider configProvider)
-        {
-            _configProvider = configProvider;
-        }
+        private readonly IConfigProvider _configProvider = configProvider;
 
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {

@@ -1,19 +1,11 @@
 namespace backend.Application.Common.Models;
 
-public class PaginatedList<T>
+public class PaginatedList<T>(List<T> items, int count, int page, int itemsPerPage)
 {
-    public List<T> Items { get; set; } = [];
-    public int Page { get; set; }
-    public int TotalPages { get; set; }
-    public int TotalItems { get; set; }
-
-    public PaginatedList(List<T> items, int count, int page, int itemsPerPage)
-    {
-        Page = page;
-        TotalPages = (int)Math.Ceiling(count / (double)itemsPerPage);
-        TotalItems = count;
-        Items = items;
-    }
+    public List<T> Items { get; set; } = items;
+    public int Page { get; set; } = page;
+    public int TotalPages { get; set; } = (int)Math.Ceiling(count / (double)itemsPerPage);
+    public int TotalItems { get; set; } = count;
 
     public static async Task<PaginatedList<T>> CreateAsync(IQueryable<T> source, int page, int itemsPerPage)
     {

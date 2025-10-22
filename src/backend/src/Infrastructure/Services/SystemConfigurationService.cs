@@ -6,25 +6,17 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Services;
 
-public class SystemConfigurationService : ISystemConfigurationService
+public class SystemConfigurationService(IApplicationDbContext context, ILogger<SystemConfigurationService> logger) : ISystemConfigurationService
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ILogger<SystemConfigurationService> _logger;
-
-    public SystemConfigurationService(IApplicationDbContext context, ILogger<SystemConfigurationService> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly ILogger<SystemConfigurationService> _logger = logger;
 
     public async Task<Result<SystemConfiguration>> GetConfigurationAsync(string key)
     {
         var config = await _context.SystemConfigurations.FirstOrDefaultAsync(sc => sc.Key == key);
-        if (config == null)
-        {
-            return Result<SystemConfiguration>.Failure($"Configuration with key '{key}' not found.");
-        }
-        return Result<SystemConfiguration>.Success(config);
+        return config == null
+            ? Result<SystemConfiguration>.Failure($"Configuration with key '{key}' not found.")
+            : Result<SystemConfiguration>.Success(config);
     }
 
     public async Task<Result<List<SystemConfiguration>>> GetAllConfigurationsAsync()

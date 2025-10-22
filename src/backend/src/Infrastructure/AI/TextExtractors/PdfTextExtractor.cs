@@ -10,15 +10,13 @@ namespace backend.Infrastructure.AI.TextExtractors
         {
             return await Task.Run(() =>
             {
-                using (var document = PdfDocument.Open(fileStream))
+                using var document = PdfDocument.Open(fileStream);
+                StringBuilder sb = new();
+                foreach (var page in document.GetPages())
                 {
-                    StringBuilder sb = new StringBuilder();
-                    foreach (var page in document.GetPages())
-                    {
-                        sb.AppendLine(page.Text);
-                    }
-                    return sb.ToString();
+                    sb.AppendLine(page.Text);
                 }
+                return sb.ToString();
             });
         }
     }

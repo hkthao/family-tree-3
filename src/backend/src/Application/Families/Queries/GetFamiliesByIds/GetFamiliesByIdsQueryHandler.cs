@@ -3,16 +3,10 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Families.Queries.GetFamiliesByIds;
 
-public class GetFamiliesByIdsQueryHandler : IRequestHandler<GetFamiliesByIdsQuery, Result<List<FamilyDto>>>
+public class GetFamiliesByIdsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetFamiliesByIdsQuery, Result<List<FamilyDto>>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetFamiliesByIdsQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<List<FamilyDto>>> Handle(GetFamiliesByIdsQuery request, CancellationToken cancellationToken)
     {

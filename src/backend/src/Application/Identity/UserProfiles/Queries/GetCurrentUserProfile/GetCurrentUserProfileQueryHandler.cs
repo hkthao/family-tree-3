@@ -3,18 +3,11 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 
-public class GetCurrentUserProfileQueryHandler : IRequestHandler<GetCurrentUserProfileQuery, Result<UserProfileDto>>
+public class GetCurrentUserProfileQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper) : IRequestHandler<GetCurrentUserProfileQuery, Result<UserProfileDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IMapper _mapper;
-
-    public GetCurrentUserProfileQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper)
-    {
-        _context = context;
-        _user = user;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = user;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserProfileDto>> Handle(GetCurrentUserProfileQuery request, CancellationToken cancellationToken)
     {

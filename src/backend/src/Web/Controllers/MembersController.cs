@@ -19,14 +19,9 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class MembersController : ControllerBase
+public class MembersController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public MembersController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<MemberListDto>>> Search([FromQuery] SearchMembersQuery query)
@@ -55,7 +50,7 @@ public class MembersController : ControllerBase
     {
         if (string.IsNullOrEmpty(ids))
         {
-            return Ok(Result<List<MemberListDto>>.Success(new List<MemberListDto>()).Value);
+            return Ok(Result<List<MemberListDto>>.Success([]).Value);
         }
 
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
@@ -71,44 +66,28 @@ public class MembersController : ControllerBase
     public async Task<ActionResult<List<MemberListDto>>> GetEditableMembers()
     {
         var result = await _mediator.Send(new GetEditableMembersQuery());
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<MemberListDto>>)Ok(result.Value) : (ActionResult<List<MemberListDto>>)BadRequest(result.Error);
     }
 
     [HttpPost]
     public async Task<ActionResult<Guid>> CreateMember([FromBody] CreateMemberCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
     }
 
     [HttpPost("generate-member-data")]
     public async Task<ActionResult<List<MemberDto>>> GenerateMemberData([FromBody] GenerateMemberDataCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<MemberDto>>)Ok(result.Value) : (ActionResult<List<MemberDto>>)BadRequest(result.Error);
     }
 
     [HttpPost("bulk-create")]
     public async Task<ActionResult<List<Guid>>> CreateMembers([FromBody] CreateMembersCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
     }
 
     [HttpPut("{id}")]
@@ -119,22 +98,14 @@ public class MembersController : ControllerBase
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMember(Guid id)
     {
         var result = await _mediator.Send(new DeleteMemberCommand(id));
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     [HttpPut("{id}/biography")]
@@ -145,10 +116,6 @@ public class MembersController : ControllerBase
             return BadRequest();
         }
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 }

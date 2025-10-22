@@ -3,16 +3,10 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Identity.UserProfiles.Queries.GetUserProfileByExternalId;
 
-public class GetUserProfileByExternalIdQueryHandler : IRequestHandler<GetUserProfileByExternalIdQuery, Result<UserProfileDto>>
+public class GetUserProfileByExternalIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetUserProfileByExternalIdQuery, Result<UserProfileDto>>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IMapper _mapper;
-
-    public GetUserProfileByExternalIdQueryHandler(IApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserProfileDto>> Handle(GetUserProfileByExternalIdQuery request, CancellationToken cancellationToken)
     {

@@ -17,24 +17,15 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class EventsController : ControllerBase
+public class EventsController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public EventsController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
+    private readonly IMediator _mediator = mediator;
 
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<EventDto>>> GetEvents([FromQuery] GetEventsQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<IReadOnlyList<EventDto>>)Ok(result.Value) : (ActionResult<IReadOnlyList<EventDto>>)BadRequest(result.Error);
     }
 
     [HttpGet("{id}")]
@@ -52,11 +43,7 @@ public class EventsController : ControllerBase
     public async Task<ActionResult<Guid>> Create(CreateEventCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
     }
 
     [HttpPut("{id}")]
@@ -68,33 +55,21 @@ public class EventsController : ControllerBase
         }
 
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(Guid id)
     {
         var result = await _mediator.Send(new DeleteEventCommand(id));
-        if (result.IsSuccess)
-        {
-            return NoContent();
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? NoContent() : BadRequest(result.Error);
     }
 
     [HttpGet("search")]
     public async Task<ActionResult<PaginatedList<EventDto>>> Search([FromQuery] SearchEventsQuery query)
     {
         var result = await _mediator.Send(query);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<PaginatedList<EventDto>>)Ok(result.Value) : (ActionResult<PaginatedList<EventDto>>)BadRequest(result.Error);
     }
 
     /// <summary>
@@ -112,32 +87,20 @@ public class EventsController : ControllerBase
             EndDate = DateTime.UtcNow.Date.AddDays(30)
         };
         var result = await _mediator.Send(query);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<EventDto>>)Ok(result.Value) : (ActionResult<List<EventDto>>)BadRequest(result.Error);
     }
 
     [HttpPost("generate-event-data")]
     public async Task<ActionResult<List<AIEventDto>>> GenerateEventData([FromBody] GenerateEventDataCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<AIEventDto>>)Ok(result.Value) : (ActionResult<List<AIEventDto>>)BadRequest(result.Error);
     }
 
     [HttpPost("bulk-create")]
     public async Task<ActionResult<List<Guid>>> CreateEvents([FromBody] CreateEventsCommand command)
     {
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
     }
 }
