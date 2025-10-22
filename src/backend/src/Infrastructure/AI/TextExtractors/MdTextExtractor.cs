@@ -10,28 +10,42 @@ namespace backend.Infrastructure.AI.TextExtractors
             using StreamReader reader = new(fileStream);
             string markdownContent = await reader.ReadToEndAsync();
 
-            // Simple Markdown to plain text conversion
-            // Remove headers (e.g., # Header)
-            markdownContent = Regex.Replace(markdownContent, @"^#+\s.*$", "", RegexOptions.Multiline);
-            // Remove bold and italics (e.g., **bold**, *italics*)
+            // Remove code blocks (both fenced and indented)
+            markdownContent = Regex.Replace(markdownContent, @"```.*?```", "", RegexOptions.Singleline);
+            markdownContent = Regex.Replace(markdownContent, @"`(.+?)`", "$1", RegexOptions.Singleline);
+
+            // Remove HTML tags
+            markdownContent = Regex.Replace(markdownContent, @"<[^>]*>", "");
+
+            // Replace images with their alt text
+            markdownContent = Regex.Replace(markdownContent, @"!\[(.*?)\]\(.*?\)", "$1");
+
+            // Replace links with their text
+            markdownContent = Regex.Replace(markdownContent, @"\[(.*?)\]\(.*?\)", "$1");
+
+            // Replace headers with a single newline
+            markdownContent = Regex.Replace(markdownContent, @"^#+\s.*$", "\n", RegexOptions.Multiline);
+
+            // Replace blockquotes with a single newline
+            markdownContent = Regex.Replace(markdownContent, @"^>\s?.*$", "\n", RegexOptions.Multiline);
+
+            // Remove list item markers, but keep the content and its newline
+            markdownContent = Regex.Replace(markdownContent, @"^(\s*[\*\-+]|\s*\d+\.)\s+", "", RegexOptions.Multiline);
+
+            // Remove bold and italics
             markdownContent = Regex.Replace(markdownContent, @"(\*\*|__)(.*?)\1", "$2");
             markdownContent = Regex.Replace(markdownContent, @"(\*|_)(.*?)\1", "$2");
-            // Remove links (e.g., [text](url))
-            markdownContent = Regex.Replace(markdownContent, @"\\[(.*?)\\](.*?)", " $1");
-            // Remove images (e.g., ![alt text](url))
-            markdownContent = Regex.Replace(markdownContent, @"!\[(.*?)\](.*?)", " $1");
-            // Remove blockquotes (e.g., > Quote)
-            markdownContent = Regex.Replace(markdownContent, @"^>\s.*$", "", RegexOptions.Multiline);
-            // Remove list items (e.g., - Item)
-            markdownContent = Regex.Replace(markdownContent, @"^(\*|\-|\+)\s", "", RegexOptions.Multiline);
-            // Remove code blocks (e.g., ```code```)
-            markdownContent = Regex.Replace(markdownContent, @"```.*?```", "", RegexOptions.Singleline);
-            // Remove inline code (e.g., `code`)
-            markdownContent = Regex.Replace(markdownContent, @"`(.*?)`", "$1");
-            // Replace multiple newlines with a single one
+
+            // Normalize newlines
+            markdownContent = Regex.Replace(markdownContent, @"\r\n|\r", "\n");
+
+            // Collapse multiple newlines to a single newline
             markdownContent = Regex.Replace(markdownContent, @"\n\s*\n", "\n");
-            // Trim whitespace from each line and the overall string
-            markdownContent = string.Join(Environment.NewLine, markdownContent.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).Select(line => line.Trim()));
+
+            // Replace multiple spaces/tabs with a single space
+            markdownContent = Regex.Replace(markdownContent, @"[ \t]+", " ");
+
+            // Trim leading/trailing whitespace from the overall string
             markdownContent = markdownContent.Trim();
 
             return markdownContent;
