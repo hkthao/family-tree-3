@@ -1,16 +1,10 @@
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoFixture;
 using AutoFixture.AutoMoq;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

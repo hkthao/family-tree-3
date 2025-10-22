@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Application.NaturalLanguageInput.Commands.GenerateData;
-using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;

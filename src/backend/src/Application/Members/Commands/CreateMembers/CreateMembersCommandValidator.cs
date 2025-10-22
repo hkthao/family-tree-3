@@ -1,5 +1,3 @@
-using backend.Application.Members.Queries;
-
 namespace backend.Application.Members.Commands.CreateMembers;
 
 public class CreateMembersCommandValidator : AbstractValidator<CreateMembersCommand>

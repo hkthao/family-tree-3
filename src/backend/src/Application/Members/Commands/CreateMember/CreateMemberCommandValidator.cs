@@ -49,6 +49,6 @@ public class CreateMemberCommandValidator : AbstractValidator<CreateMemberComman
 
     private bool BeAValidGender(string? gender)
     {
-        return string.IsNullOrEmpty(gender) ? true : gender == "Male" || gender == "Female" || gender == "Other";
+        return string.IsNullOrEmpty(gender) || gender == "Male" || gender == "Female" || gender == "Other";
     }
 }

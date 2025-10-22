@@ -1,6 +1,3 @@
-using backend.Application.Common.Models;
-using FluentValidation;
-
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
 public class DeleteRelationshipCommandValidator : AbstractValidator<DeleteRelationshipCommand>

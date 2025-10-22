@@ -1,4 +1,3 @@
-using System;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using FluentValidation.TestHelper;
 using Xunit;

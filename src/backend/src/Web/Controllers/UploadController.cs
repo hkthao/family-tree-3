@@ -46,11 +46,8 @@ public class UploadController(IMediator mediator) : ControllerBase
         var query = new GetUploadedFileQuery { FileName = fileName };
         var result = await _mediator.Send(query);
 
-        if (result.IsSuccess && result.Value != null)
-        {
-            return File(result.Value.Content, result.Value.ContentType);
-        }
-
-        return result.ErrorSource == "NotFound" ? NotFound() : BadRequest(result.Error);
+        return result.IsSuccess && result.Value != null
+            ? File(result.Value.Content, result.Value.ContentType)
+            : result.ErrorSource == "NotFound" ? NotFound() : BadRequest(result.Error);
     }
 }

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -12,11 +6,9 @@ using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.Inputs;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

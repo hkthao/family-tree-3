@@ -117,13 +117,6 @@ public class CloudinaryFileStorage : IFileStorage
 
     private ResourceType GetResourceType(string contentType)
     {
-        if (contentType.StartsWith("image"))
-        {
-            return ResourceType.Image;
-        }
-        else
-        {
-            return contentType.StartsWith("video") ? ResourceType.Video : ResourceType.Raw;
-        }
+        return contentType.StartsWith("image") ? ResourceType.Image : contentType.StartsWith("video") ? ResourceType.Video : ResourceType.Raw;
     }
 }

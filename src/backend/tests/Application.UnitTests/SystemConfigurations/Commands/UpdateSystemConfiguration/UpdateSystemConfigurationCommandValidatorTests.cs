@@ -1,4 +1,3 @@
-using System;
 using backend.Application.SystemConfigurations.Commands.UpdateSystemConfiguration;
 using FluentValidation.TestHelper;
 using Xunit;

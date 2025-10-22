@@ -2,9 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Application.Relationships.Commands.CreateRelationship;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
-using MediatR;
 
 namespace backend.Application.Relationships.Commands.CreateRelationships;
 

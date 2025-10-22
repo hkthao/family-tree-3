@@ -5,7 +5,7 @@ public abstract class ValueObject
 {
     protected static bool EqualOperator(ValueObject left, ValueObject right)
     {
-        return left is null ^ right is null ? false : left?.Equals(right!) != false;
+        return !(left is null ^ right is null) && left?.Equals(right!) != false;
     }
 
     protected static bool NotEqualOperator(ValueObject left, ValueObject right)

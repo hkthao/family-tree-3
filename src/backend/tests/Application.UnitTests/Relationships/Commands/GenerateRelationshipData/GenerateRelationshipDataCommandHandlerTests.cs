@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -16,7 +10,6 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

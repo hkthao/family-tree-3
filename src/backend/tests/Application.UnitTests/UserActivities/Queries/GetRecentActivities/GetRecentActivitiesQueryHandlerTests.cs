@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoFixture;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Queries;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -132,24 +124,9 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         var targetFamilyId = Guid.NewGuid().ToString();
         var activities = new List<UserActivity>
         {
-            _fixture.Build<UserActivity>()
-                .With(ua => ua.UserProfileId, userProfileId)
-                .With(ua => ua.TargetType, TargetType.Family)
-                .With(ua => ua.TargetId, targetFamilyId)
-                .Without(ua => ua.Metadata)
-                .Create(),
-            _fixture.Build<UserActivity>()
-                .With(ua => ua.UserProfileId, userProfileId)
-                .With(ua => ua.TargetType, TargetType.Member)
-                .With(ua => ua.TargetId, Guid.NewGuid().ToString())
-                .Without(ua => ua.Metadata)
-                .Create(),
-            _fixture.Build<UserActivity>()
-                .With(ua => ua.UserProfileId, userProfileId)
-                .With(ua => ua.TargetType, TargetType.Family)
-                .With(ua => ua.TargetId, targetFamilyId)
-                .Without(ua => ua.Metadata)
-                .Create()
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = targetFamilyId, GroupId = Guid.NewGuid(), ActivitySummary = "Activity 1" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.UpdateMember, TargetType = TargetType.Member, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 2" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = targetFamilyId, GroupId = Guid.NewGuid(), ActivitySummary = "Activity 3" }
         };
         _context.UserActivities.AddRange(activities);
         await _context.SaveChangesAsync();
@@ -195,21 +172,9 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         var targetGroupId = Guid.NewGuid();
         var activities = new List<UserActivity>
         {
-            _fixture.Build<UserActivity>()
-                .With(ua => ua.UserProfileId, userProfileId)
-                .With(ua => ua.GroupId, targetGroupId)
-                .Without(ua => ua.Metadata)
-                .Create(),
-            _fixture.Build<UserActivity>()
-                .With(ua => ua.UserProfileId, userProfileId)
-                .With(ua => ua.GroupId, Guid.NewGuid())
-                .Without(ua => ua.Metadata)
-                .Create(),
-            _fixture.Build<UserActivity>()
-                .With(ua => ua.UserProfileId, userProfileId)
-                .With(ua => ua.GroupId, targetGroupId)
-                .Without(ua => ua.Metadata)
-                .Create()
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.CreateFamily, TargetType = TargetType.Family, TargetId = Guid.NewGuid().ToString(), GroupId = targetGroupId, ActivitySummary = "Activity 1" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.UpdateMember, TargetType = TargetType.Member, TargetId = Guid.NewGuid().ToString(), GroupId = Guid.NewGuid(), ActivitySummary = "Activity 2" },
+            new() { Id = Guid.NewGuid(), UserProfileId = userProfileId, ActionType = UserActionType.DeleteEvent, TargetType = TargetType.Event, TargetId = Guid.NewGuid().ToString(), GroupId = targetGroupId, ActivitySummary = "Activity 3" }
         };
         _context.UserActivities.AddRange(activities);
         await _context.SaveChangesAsync();

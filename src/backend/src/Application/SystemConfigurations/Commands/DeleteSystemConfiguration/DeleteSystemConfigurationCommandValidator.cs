@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.SystemConfigurations.Commands.DeleteSystemConfiguration;
 
 public class DeleteSystemConfigurationCommandValidator : AbstractValidator<DeleteSystemConfigurationCommand>
