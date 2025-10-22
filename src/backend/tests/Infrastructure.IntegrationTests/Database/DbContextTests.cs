@@ -3,22 +3,27 @@ using backend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 namespace backend.Infrastructure.IntegrationTests.Database;
 
-public class DbContextTests : TestBase
+public class DbContextTests : IntegrationTestBase
 {
+    public DbContextTests(IntegrationTestFixture fixture) : base(fixture)
+    {
+    }
+
+
     [Fact]
     public async Task CanInsertAndGetMembers()
     {
         // Arrange
-        var father = CreateMember("Father", "Test", "Male", new DateTime(1970, 1, 1));
-        var child = CreateMember("Child", "Test", "Female", new DateTime(2000, 1, 1));
+        var father = new Member { Id = Guid.NewGuid(), FirstName = "Father", LastName = "Test", Gender = "Male", DateOfBirth = new DateTime(1970, 1, 1), Code = "FATHER001", FamilyId = Guid.NewGuid() };
+        var child = new Member { Id = Guid.NewGuid(), FirstName = "Child", LastName = "Test", Gender = "Female", DateOfBirth = new DateTime(2000, 1, 1), Code = "CHILD001", FamilyId = father.FamilyId };
 
-        Context.Members.Add(father);
-        Context.Members.Add(child);
-        await Context.SaveChangesAsync();
+        _dbContext.Members.Add(father);
+        _dbContext.Members.Add(child);
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        var retrievedFather = await Context.Members.FindAsync(father.Id);
-        var retrievedChild = await Context.Members.FindAsync(child.Id);
+        var retrievedFather = await _dbContext.Members.FindAsync(father.Id);
+        var retrievedChild = await _dbContext.Members.FindAsync(child.Id);
 
         // Assert
         retrievedFather.Should().NotBeNull();
@@ -31,12 +36,12 @@ public class DbContextTests : TestBase
     public async Task CanInsertAndGetRelationships()
     {
         // Arrange
-        var father = CreateMember("Father", "Test", "Male", new DateTime(1970, 1, 1));
-        var child = CreateMember("Child", "Test", "Female", new DateTime(2000, 1, 1));
+        var father = new Member { Id = Guid.NewGuid(), FirstName = "Father", LastName = "Test", Gender = "Male", DateOfBirth = new DateTime(1970, 1, 1), Code = "FATHER002", FamilyId = Guid.NewGuid() };
+        var child = new Member { Id = Guid.NewGuid(), FirstName = "Child", LastName = "Test", Gender = "Female", DateOfBirth = new DateTime(2000, 1, 1), Code = "CHILD002", FamilyId = father.FamilyId };
 
-        Context.Members.Add(father);
-        Context.Members.Add(child);
-        await Context.SaveChangesAsync();
+        _dbContext.Members.Add(father);
+        _dbContext.Members.Add(child);
+        await _dbContext.SaveChangesAsync();
 
         var relationship = new Relationship
         {
@@ -45,11 +50,11 @@ public class DbContextTests : TestBase
             Type = RelationshipType.Father
         };
 
-        Context.Relationships.Add(relationship);
-        await Context.SaveChangesAsync();
+        _dbContext.Relationships.Add(relationship);
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        var retrievedRelationship = await Context.Relationships
+        var retrievedRelationship = await _dbContext.Relationships
             .Include(r => r.SourceMember)
             .Include(r => r.TargetMember)
             .FirstOrDefaultAsync(r => r.Id == relationship.Id);
@@ -67,48 +72,54 @@ public class DbContextTests : TestBase
     public async Task Member_RequiredFields_CannotBeNull()
     {
         // Arrange
-        var member = new Member { FirstName = "Test", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyId = DefaultFamily.Id }; // LastName is null
+        var familyId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "FAM003" };
+        _dbContext.Families.Add(family);
+        await _dbContext.SaveChangesAsync();
 
-        Context.Members.Add(member);
+        var member = new Member { FirstName = "Test", Gender = "Male", DateOfBirth = new DateTime(1990, 1, 1), FamilyId = familyId }; // Code is null
+
+        _dbContext.Members.Add(member);
 
         // Act & Assert
-        await Assert.ThrowsAsync<DbUpdateException>(async () => await Context.SaveChangesAsync());
+        await Assert.ThrowsAsync<DbUpdateException>(async () => await _dbContext.SaveChangesAsync());
     }
 
     [Fact]
     public async Task CanQueryFamilyRelationships()
     {
         // Arrange
-        var father = CreateMember("John", "Doe", "Male", new DateTime(1970, 1, 1));
-        var mother = CreateMember("Jane", "Doe", "Female", new DateTime(1972, 1, 1));
-        var child1 = CreateMember("Alice", "Doe", "Female", new DateTime(1995, 1, 1));
-        var child2 = CreateMember("Bob", "Doe", "Male", new DateTime(1998, 1, 1));
+        var familyId = Guid.NewGuid();
+        var father = new Member { Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1970, 1, 1), Code = "JOHN001", FamilyId = familyId };
+        var mother = new Member { Id = Guid.NewGuid(), FirstName = "Jane", LastName = "Doe", Gender = "Female", DateOfBirth = new DateTime(1972, 1, 1), Code = "JANE001", FamilyId = familyId };
+        var child1 = new Member { Id = Guid.NewGuid(), FirstName = "Alice", LastName = "Doe", Gender = "Female", DateOfBirth = new DateTime(1995, 1, 1), Code = "ALICE001", FamilyId = familyId };
+        var child2 = new Member { Id = Guid.NewGuid(), FirstName = "Bob", LastName = "Doe", Gender = "Male", DateOfBirth = new DateTime(1998, 1, 1), Code = "BOB001", FamilyId = familyId };
 
-        Context.Members.AddRange(father, mother, child1, child2);
-        await Context.SaveChangesAsync();
+        _dbContext.Members.AddRange(father, mother, child1, child2);
+        await _dbContext.SaveChangesAsync();
 
         // Father-Child relationships
-        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child1.Id, Type = RelationshipType.Father });
-        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child2.Id, Type = RelationshipType.Father });
+        _dbContext.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child1.Id, Type = RelationshipType.Father });
+        _dbContext.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = child2.Id, Type = RelationshipType.Father });
 
         // Mother-Child relationships
-        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child1.Id, Type = RelationshipType.Mother });
-        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child2.Id, Type = RelationshipType.Mother });
+        _dbContext.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child1.Id, Type = RelationshipType.Mother });
+        _dbContext.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = child2.Id, Type = RelationshipType.Mother });
 
         // Spouse relationship
-        Context.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = mother.Id, Type = RelationshipType.Husband });
-        Context.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = father.Id, Type = RelationshipType.Wife });
+        _dbContext.Relationships.Add(new Relationship { SourceMemberId = father.Id, TargetMemberId = mother.Id, Type = RelationshipType.Husband });
+        _dbContext.Relationships.Add(new Relationship { SourceMemberId = mother.Id, TargetMemberId = father.Id, Type = RelationshipType.Wife });
 
-        await Context.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
         // Act
-        var johnRelationships = await Context.Relationships
+        var johnRelationships = await _dbContext.Relationships
             .Include(r => r.SourceMember)
             .Include(r => r.TargetMember)
             .Where(r => r.SourceMemberId == father.Id || r.TargetMemberId == father.Id)
             .ToListAsync();
 
-        var aliceRelationships = await Context.Relationships
+        var aliceRelationships = await _dbContext.Relationships
             .Include(r => r.SourceMember)
             .Include(r => r.TargetMember)
             .Where(r => r.SourceMemberId == child1.Id || r.TargetMemberId == child1.Id)
@@ -117,7 +128,7 @@ public class DbContextTests : TestBase
         // Assert John's relationships
         johnRelationships.Should().NotBeNull();
         johnRelationships.Should().HaveCount(4); // 2 Father (to children) + 1 Husband (to wife) + 1 Wife (from wife)
-        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Alice" && r.Type == RelationshipType.Father);
+        johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "John" && r.Type == RelationshipType.Father);
         johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Bob" && r.Type == RelationshipType.Father);
         johnRelationships.Should().Contain(r => r.TargetMember.FirstName == "Jane" && r.Type == RelationshipType.Husband);
         johnRelationships.Should().Contain(r => r.SourceMember.FirstName == "Jane" && r.Type == RelationshipType.Wife);
