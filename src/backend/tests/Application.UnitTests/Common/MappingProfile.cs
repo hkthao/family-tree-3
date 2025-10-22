@@ -5,6 +5,7 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Relationships.Queries;
+using backend.Application.UserActivities.Queries;
 using backend.Domain.Entities;
 
 namespace backend.Application.UnitTests.Common;
@@ -21,5 +22,7 @@ public class MappingProfile : Profile
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>();
         CreateMap<Member, RelationshipMemberDto>();
+        CreateMap<UserActivity, UserActivityDto>()
+            .ForMember(dest => dest.UserProfileId, opt => opt.MapFrom(src => src.UserProfileId));
     }
 }
