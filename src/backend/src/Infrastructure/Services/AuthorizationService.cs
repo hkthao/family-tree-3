@@ -38,12 +38,10 @@ public class AuthorizationService(IUser user, IApplicationDbContext context) : I
 
     public bool HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)
     {
+        if (IsAdmin()) return true; // Admin bypasses family-specific role checks
+
         var familyUser = userProfile.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId);
         if (familyUser == null) return false;
-
-        // Admin role has full access, so it's always true if requiredRole is less than or equal to Admin
-        // This logic might need adjustment based on exact role hierarchy
-        if (IsAdmin()) return true; // Admin bypasses family-specific role checks
 
         return familyUser.Role <= requiredRole; // Assuming enum values are ordered by privilege
     }
