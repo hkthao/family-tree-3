@@ -1,14 +1,14 @@
-using AutoFixture;
-using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
-using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
-using FluentAssertions;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoFixture;
+using backend.Application.Common.Models;
+using backend.Application.UnitTests.Common;
+using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using FluentAssertions;
 using Xunit;
 
 namespace backend.Application.UnitTests.UserActivities.Commands.RecordActivity;

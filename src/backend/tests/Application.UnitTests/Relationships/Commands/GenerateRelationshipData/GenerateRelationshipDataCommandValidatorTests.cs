@@ -1,7 +1,7 @@
+using backend.Application.Relationships.Commands.GenerateRelationshipData;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Relationships.Commands.GenerateRelationshipData;
 
 namespace backend.Application.UnitTests.Relationships.Commands.GenerateRelationshipData;
 

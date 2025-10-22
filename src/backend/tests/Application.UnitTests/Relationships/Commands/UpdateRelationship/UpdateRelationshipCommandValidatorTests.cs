@@ -1,9 +1,9 @@
-using FluentAssertions;
-using FluentValidation.TestHelper;
-using Xunit;
 using System;
 using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Domain.Enums;
+using FluentAssertions;
+using FluentValidation.TestHelper;
+using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.UpdateRelationship;
 

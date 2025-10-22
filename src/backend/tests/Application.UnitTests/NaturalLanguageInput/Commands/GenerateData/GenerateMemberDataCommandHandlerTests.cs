@@ -1,19 +1,19 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using Application.NaturalLanguageInput.Commands.GenerateData;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries;
+using backend.Application.UnitTests.Common;
+using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Application.UnitTests.Common;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Application.NaturalLanguageInput.Commands.GenerateData;
-using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.UnitTests.NaturalLanguageInput.Commands.GenerateData;
 

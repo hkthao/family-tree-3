@@ -2,9 +2,9 @@ using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
-using backend.Infrastructure.Data;
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Domain.Entities;
+using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 

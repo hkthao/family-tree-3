@@ -7,10 +7,10 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore;
-using MediatR;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 

@@ -2,10 +2,10 @@ using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.Queries.GetUploadedFile;
+using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 

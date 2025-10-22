@@ -19,27 +19,27 @@ public class CreateMembersCommandHandlerTests : TestBase
     private readonly Mock<IMediator> _mockMediator;
     private readonly CreateMembersCommandHandler _handler;
 
-        public CreateMembersCommandHandlerTests()
+    public CreateMembersCommandHandlerTests()
 
-        {
+    {
 
-            _mockAIMemberDtoValidator = new Mock<IValidator<AIMemberDto>>();
+        _mockAIMemberDtoValidator = new Mock<IValidator<AIMemberDto>>();
 
-            _mockMediator = new Mock<IMediator>(); // Khởi tạo _mockMediator
+        _mockMediator = new Mock<IMediator>(); // Khởi tạo _mockMediator
 
-    
 
-            _fixture.Customize<AIMemberDto>(c => c.With(x => x.Gender, "Male").With(x => x.ValidationErrors, new List<string>())); // Ensure valid gender and empty ValidationErrors for AIMemberDto
 
-            _handler = new CreateMembersCommandHandler(
+        _fixture.Customize<AIMemberDto>(c => c.With(x => x.Gender, "Male").With(x => x.ValidationErrors, new List<string>())); // Ensure valid gender and empty ValidationErrors for AIMemberDto
 
-                _mockAIMemberDtoValidator.Object,
+        _handler = new CreateMembersCommandHandler(
 
-                _mockMediator.Object
+            _mockAIMemberDtoValidator.Object,
 
-            );
+            _mockMediator.Object
 
-        }
+        );
+
+    }
 
     [Fact]
     public async Task Handle_ShouldReturnSuccessWithEmptyList_WhenAllMembersAreInvalid()

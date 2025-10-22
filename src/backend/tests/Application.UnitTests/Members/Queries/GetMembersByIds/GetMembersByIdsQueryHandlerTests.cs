@@ -1,8 +1,8 @@
 using backend.Application.Members.Queries.GetMembersByIds;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Xunit;
-using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.Members.Queries.GetMembersByIds;
 

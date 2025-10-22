@@ -1,7 +1,7 @@
 using backend.Application.Faces.Commands.SaveFaceLabels;
+using backend.Application.Faces.Queries;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Faces.Queries;
 
 namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels;
 

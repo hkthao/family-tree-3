@@ -1,7 +1,7 @@
 using backend.Application.Events.Commands.CreateEvents;
+using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
-using FluentAssertions;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvents;
 

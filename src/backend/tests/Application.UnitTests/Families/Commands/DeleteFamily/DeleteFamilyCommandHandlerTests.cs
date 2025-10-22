@@ -6,10 +6,10 @@ using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
-using Xunit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 
@@ -196,7 +196,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        var deletedFamily = await _context.Families.FirstOrDefaultAsync(e=>e.Id == existingFamily.Id);
+        var deletedFamily = await _context.Families.FirstOrDefaultAsync(e => e.Id == existingFamily.Id);
         deletedFamily.Should().BeNull();
 
         _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);

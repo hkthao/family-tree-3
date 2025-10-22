@@ -3,10 +3,10 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 
@@ -179,7 +179,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         var managedFamily2 = new Family { Id = Guid.NewGuid(), Name = "Managed Family 2", Code = "MF2" };
         var unmanagedFamily = new Family { Id = Guid.NewGuid(), Name = "Unmanaged Family", Code = "UF1" };
         _context.Families.AddRange(managedFamily1, managedFamily2, unmanagedFamily);
-        
+
         _context.FamilyUsers.Add(new FamilyUser { FamilyId = managedFamily1.Id, UserProfileId = userProfile.Id, Role = FamilyRole.Manager });
         _context.FamilyUsers.Add(new FamilyUser { FamilyId = managedFamily2.Id, UserProfileId = userProfile.Id, Role = FamilyRole.Viewer });
         await _context.SaveChangesAsync(CancellationToken.None);

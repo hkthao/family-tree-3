@@ -1,6 +1,7 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.DeleteMember;
+using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -9,8 +10,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-
-using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 
@@ -128,7 +127,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         _context.Members.Should().NotContain(m => m.Id == member.Id);
-        
+
         // Thêm assertion này để kiểm tra xem memberToDelete có bị null không
         var memberAfterDeletionAttempt = await _context.Members.FirstOrDefaultAsync(m => m.Id == member.Id);
         memberAfterDeletionAttempt.Should().BeNull(); // Mong đợi là null nếu xóa thành công

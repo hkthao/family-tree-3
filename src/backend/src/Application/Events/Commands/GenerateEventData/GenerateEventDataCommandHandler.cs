@@ -99,7 +99,7 @@ public class GenerateEventDataCommandHandler : IRequestHandler<GenerateEventData
                     foreach (var memberIdentifier in eventDto.RelatedMembers)
                     {
                         var members = await _context.Members
-                            .Where(m => m.FamilyId == eventDto.FamilyId.Value && 
+                            .Where(m => m.FamilyId == eventDto.FamilyId.Value &&
                                         (m.FirstName + " " + m.LastName == memberIdentifier || m.Code == memberIdentifier))
                             .ToListAsync(cancellationToken);
 

@@ -4,6 +4,7 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Services;
 using backend.Application.Members.Commands.GenerateMemberData;
 using backend.Application.Members.Queries;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -11,8 +12,6 @@ using FluentValidation;
 using FluentValidation.Results;
 using Moq;
 using Xunit;
-
-using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.Members.Commands.GenerateMemberData;
 

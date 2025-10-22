@@ -1,4 +1,5 @@
 using AutoFixture;
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands;
@@ -11,7 +12,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.AI.VectorStore;
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
 

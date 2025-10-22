@@ -2,9 +2,9 @@ using AutoFixture;
 using backend.Application.Families.Queries.SearchFamilies;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
 using Xunit;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Families.Queries.SearchFamilies;
 
@@ -214,12 +214,12 @@ public class SearchFamiliesQueryHandlerTests : TestBase
         result.Value.Items.Last().Id.Should().Be(families[5].Id);
         result.Value.TotalItems.Should().Be(10);
 
-                // 💡 Giải thích:
+        // 💡 Giải thích:
 
-                // Test này đảm bảo rằng chức năng phân trang hoạt động chính xác,
+        // Test này đảm bảo rằng chức năng phân trang hoạt động chính xác,
 
-                // trả về đúng số lượng mục và các mục chính xác cho trang được yêu cầu.
+        // trả về đúng số lượng mục và các mục chính xác cho trang được yêu cầu.
 
-            }
+    }
 
-        }
+}

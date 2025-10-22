@@ -4,9 +4,9 @@ using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using MediatR;
 using Moq;
 using Xunit;
-using MediatR;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;
 

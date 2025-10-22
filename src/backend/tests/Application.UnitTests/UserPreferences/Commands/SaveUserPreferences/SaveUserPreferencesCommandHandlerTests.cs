@@ -1,6 +1,6 @@
 using AutoFixture;
-using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -105,7 +105,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
                                              .With(up => up.Theme, Theme.Light)
                                              .With(up => up.Language, Language.Vietnamese)
                                              .Create();
-        
+
         _context.UserProfiles.Add(userProfile);
         _context.UserPreferences.Add(existingUserPreference);
         await _context.SaveChangesAsync(CancellationToken.None);

@@ -1,11 +1,11 @@
-using FluentAssertions;
-using FluentValidation.TestHelper;
-using Xunit;
 using System;
 using System.Collections.Generic;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.Inputs;
 using backend.Domain.Enums;
+using FluentAssertions;
+using FluentValidation.TestHelper;
+using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.CreateRelationships;
 

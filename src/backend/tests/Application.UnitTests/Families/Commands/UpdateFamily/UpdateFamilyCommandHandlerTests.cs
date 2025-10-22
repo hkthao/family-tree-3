@@ -7,9 +7,9 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
+using MediatR;
 using Moq;
 using Xunit;
-using MediatR;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 

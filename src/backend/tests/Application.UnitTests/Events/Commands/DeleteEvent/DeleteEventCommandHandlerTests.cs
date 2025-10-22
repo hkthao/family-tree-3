@@ -5,11 +5,11 @@ using backend.Application.Events.Commands.DeleteEvent;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
+using MediatR;
 using Moq;
 using Xunit;
-using MediatR;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;
 

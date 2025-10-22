@@ -1,8 +1,8 @@
+using backend.Application.Relationships.Commands.GenerateRelationshipData;
+using backend.Domain.Enums;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Relationships.Commands.GenerateRelationshipData;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Relationships.Commands.GenerateRelationshipData;
 

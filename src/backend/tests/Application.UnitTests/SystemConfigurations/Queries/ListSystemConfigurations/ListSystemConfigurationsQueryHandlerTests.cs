@@ -1,14 +1,14 @@
-using AutoFixture;
-using backend.Application.Common.Models;
-using backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
-using backend.Application.SystemConfigurations.Queries;
-using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
-using FluentAssertions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoFixture;
+using backend.Application.Common.Models;
+using backend.Application.SystemConfigurations.Queries;
+using backend.Application.SystemConfigurations.Queries.ListSystemConfigurations;
+using backend.Application.UnitTests.Common;
+using backend.Domain.Entities;
+using FluentAssertions;
 using Xunit;
 
 namespace backend.Application.UnitTests.SystemConfigurations.Queries.ListSystemConfigurations;

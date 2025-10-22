@@ -3,11 +3,11 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.UploadFile;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Application.UnitTests.Common;
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 

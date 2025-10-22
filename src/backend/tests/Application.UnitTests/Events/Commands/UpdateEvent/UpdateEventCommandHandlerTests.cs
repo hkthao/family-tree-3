@@ -5,12 +5,12 @@ using backend.Application.Events.Commands.UpdateEvent;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
-using Xunit;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using backend.Domain.Enums;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 

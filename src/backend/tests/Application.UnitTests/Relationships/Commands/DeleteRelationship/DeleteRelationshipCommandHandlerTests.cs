@@ -1,20 +1,20 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Commands.DeleteRelationship;
+using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-using backend.Application.UnitTests.Common;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using backend.Domain.Enums;
-using MediatR;
 
 namespace backend.Application.UnitTests.Relationships.Commands.DeleteRelationship;
 
@@ -183,7 +183,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
             TargetMemberId = Guid.NewGuid(),
             Type = RelationshipType.Father,
             FamilyId = familyId
-        };_context.Relationships.Add(relationship);
+        }; _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);

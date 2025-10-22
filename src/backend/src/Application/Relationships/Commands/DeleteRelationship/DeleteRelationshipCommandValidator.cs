@@ -1,5 +1,5 @@
-using FluentValidation;
 using backend.Application.Common.Models;
+using FluentValidation;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
