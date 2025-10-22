@@ -1,19 +1,17 @@
-using AutoFixture;
-using backend.Application.Members.Commands.GenerateMemberData;
+using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
+using backend.Application.Members.Commands.GenerateMemberData;
 
 namespace backend.Application.UnitTests.Members.Commands.GenerateMemberData;
 
 public class GenerateMemberDataCommandValidatorTests
 {
     private readonly GenerateMemberDataCommandValidator _validator;
-    private readonly IFixture _fixture;
 
     public GenerateMemberDataCommandValidatorTests()
     {
         _validator = new GenerateMemberDataCommandValidator();
-        _fixture = new Fixture();
     }
 
     [Fact]
@@ -21,39 +19,51 @@ public class GenerateMemberDataCommandValidatorTests
     {
         // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi Prompt trống.
         // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một GenerateMemberDataCommand với Prompt là chuỗi rỗng.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính Prompt với thông báo phù hợp.
+        // 1. Arrange: Tạo một GenerateMemberDataCommand với Prompt rỗng.
+        // 2. Act: Gọi TestValidate trên validator.
+        // 3. Assert: Kiểm tra có lỗi validation cho Prompt với thông báo phù hợp.
         var command = new GenerateMemberDataCommand(string.Empty);
 
         var result = _validator.TestValidate(command);
 
-        result.ShouldHaveValidationErrorFor(c => c.Prompt)
-            .WithErrorMessage("Prompt is required.");
-        // 💡 Giải thích: Prompt là trường bắt buộc và không được để trống.
-    }
-
-    [Fact]
-    public void ShouldHaveErrorWhenPromptExceedsMaxLength()
-    {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi Prompt vượt quá 1000 ký tự.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một GenerateMemberDataCommand với Prompt dài hơn 1000 ký tự.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính Prompt với thông báo phù hợp.
-        var longPrompt = _fixture.Create<string>();
-        while (longPrompt.Length <= 1000)
-        {
-            longPrompt += _fixture.Create<string>();
+        result.ShouldHaveValidationErrorFor(x => x.Prompt);
+                result.Errors.Should().Contain(e => e.ErrorMessage == "Prompt is required.");
+                // 💡 Giải thích: Prompt là bắt buộc.
+            }
+        
+            [Fact]
+            public void ShouldHaveErrorWhenPromptExceedsMaxLength()
+            {
+                // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi Prompt vượt quá 1000 ký tự.
+                // ⚙️ Các bước (Arrange, Act, Assert):
+                // 1. Arrange: Tạo một GenerateMemberDataCommand với Prompt dài hơn 1000 ký tự.
+                // 2. Act: Gọi TestValidate trên validator.
+                // 3. Assert: Kiểm tra có lỗi validation cho Prompt với thông báo phù hợp.
+                var longPrompt = new string('a', 1001);
+                var command = new GenerateMemberDataCommand(longPrompt);
+        
+                var result = _validator.TestValidate(command);
+        
+                result.ShouldHaveValidationErrorFor(x => x.Prompt);
+                result.Errors.Should().Contain(e => e.ErrorMessage == "Prompt must not exceed 1000 characters.");
+                // 💡 Giải thích: Prompt không được vượt quá 1000 ký tự.
+            }
+        
+            [Fact]
+            public void ShouldNotHaveErrorWhenPromptIsValid()
+            {
+                // 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi Prompt hợp lệ.
+                // ⚙️ Các bước (Arrange, Act, Assert):
+                // 1. Arrange: Tạo một GenerateMemberDataCommand với Prompt hợp lệ.
+                // 2. Act: Gọi TestValidate trên validator.
+                // 3. Assert: Kiểm tra không có lỗi validation.
+                var validPrompt = new string('a', 500);
+                var command = new GenerateMemberDataCommand(validPrompt);
+        
+                var result = _validator.TestValidate(command);
+        
+                result.ShouldNotHaveAnyValidationErrors();
+                // 💡 Giải thích: Command hợp lệ phải vượt qua validation.
+            }
         }
-        longPrompt = longPrompt.Substring(0, 1001); // Đảm bảo chính xác 1001 ký tự
-
-        var command = new GenerateMemberDataCommand(longPrompt);
-
-        var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Prompt)
-            .WithErrorMessage("Prompt must not exceed 1000 characters.");
-        // 💡 Giải thích: Prompt không được vượt quá 1000 ký tự.
-    }
-}
+        
