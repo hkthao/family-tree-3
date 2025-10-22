@@ -1,36 +1,36 @@
 using backend.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Testcontainers.MySql;
+using System;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace backend.Infrastructure.IntegrationTests;
 
 public class IntegrationTestFixture : IAsyncLifetime
 {
-    private MySqlContainer _mySqlContainer = null!;
     public ApplicationDbContext DbContext { get; private set; } = null!;
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
-        _mySqlContainer = new MySqlBuilder().Build();
-        await _mySqlContainer.StartAsync();
-
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseMySql(_mySqlContainer.GetConnectionString(), ServerVersion.AutoDetect(_mySqlContainer.GetConnectionString()));
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()); // Use in-memory database
 
         DbContext = new ApplicationDbContext(optionsBuilder.Options);
-        await DbContext.Database.MigrateAsync();
+        DbContext.Database.EnsureCreated(); // Ensure database is created
+
+        return Task.CompletedTask;
     }
 
     public async Task DisposeAsync()
     {
+        await DbContext.Database.EnsureDeletedAsync(); // Ensure database is deleted
         await DbContext.DisposeAsync();
-        await _mySqlContainer.DisposeAsync();
     }
 
     public async Task ResetState()
     {
         await DbContext.Database.EnsureDeletedAsync();
-        await DbContext.Database.MigrateAsync();
+        DbContext.Database.EnsureCreated();
     }
 }
 
