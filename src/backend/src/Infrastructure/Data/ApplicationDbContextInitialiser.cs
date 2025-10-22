@@ -50,14 +50,16 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
 
             _context.UserProfiles.AddRange(
             [
-                new() {
+                new()
+                {
                     Id = userProfile1Id,
                     ExternalId = "auth0|testuser1",
                     Email = "testuser1@example.com",
                     Name = "Test User One",
                     Created = DateTime.UtcNow
                 },
-                new() {
+                new()
+                {
                     Id = userProfile2Id,
                     ExternalId = "auth0|testuser2",
                     Email = "testuser2@example.com",

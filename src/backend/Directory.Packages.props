@@ -8,6 +8,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AutoFixture.Xunit2" Version="4.18.1" />
+
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="4.5.0" />
     <PackageVersion Include="Ardalis.Specification" Version="9.3.1" />
@@ -29,7 +32,6 @@
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.3.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(AspnetVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="$(AspnetVersion)" />
     <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.1.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="$(EfcoreVersion)" />
