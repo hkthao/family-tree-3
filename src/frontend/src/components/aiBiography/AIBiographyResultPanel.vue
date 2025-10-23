@@ -1,3 +1,31 @@
+<script setup lang="ts">
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useAIBiographyStore } from '@/stores/aiBiography.store';
+
+const props = defineProps({
+  biographyContent: { type: String, default: '' },
+});
+
+const emit = defineEmits(['update:biographyContent', 'save', 'regenerate']);
+
+const { t } = useI18n();
+const aiBiographyStore = useAIBiographyStore();
+
+const displayContent = computed({
+  get: () => props.biographyContent,
+  set: (value) => emit('update:biographyContent', value),
+});
+
+const saveBiography = () => {
+  emit('save', props.biographyContent);
+};
+
+const regenerateBiography = () => {
+  emit('regenerate');
+};
+</script>
+
 <template>
   <v-card class="pa-4 d-flex flex-column" elevation="2" height="100%">
     <v-card-title class="d-flex align-center">
@@ -12,18 +40,16 @@
       <v-alert v-else-if="aiBiographyStore.error" type="error" dense dismissible class="mb-4">
         {{ aiBiographyStore.error }}
       </v-alert>
-      <div v-else-if="aiBiographyStore.biographyResult">
-        <v-textarea v-model="editableContent" :label="t('aiBiography.output.biographyContentLabel')"  auto-grow
+      <div v-else-if="aiBiographyStore.biographyResult || biographyContent">
+        <v-textarea v-model="displayContent" :label="t('aiBiography.output.biographyContentLabel')" auto-grow
           variant="outlined"></v-textarea>
-        <!-- Removed provider and tokensUsed display -->
-
       </div>
       <div v-else>
         <p>{{ t('aiBiography.output.noBiographyYet') }}</p>
       </div>
     </v-card-text>
 
-    <v-card-actions v-if="aiBiographyStore.biographyResult">
+    <v-card-actions v-if="aiBiographyStore.biographyResult || biographyContent">
       <v-btn color="primary" @click="saveBiography">
         {{ t('aiBiography.output.saveButton') }}
       </v-btn>
@@ -33,32 +59,3 @@
     </v-card-actions>
   </v-card>
 </template>
-
-<script setup lang="ts">
-import { ref, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useAIBiographyStore } from '@/stores/aiBiography.store';
-
-const { t } = useI18n();
-const aiBiographyStore = useAIBiographyStore();
-
-const editableContent = ref('');
-
-watch(() => aiBiographyStore.biographyResult, (newResult) => {
-  if (newResult) {
-    editableContent.value = newResult.content;
-  }
-}, { immediate: true });
-
-const saveBiography = () => {
-  if (aiBiographyStore.memberId && editableContent.value) {
-    aiBiographyStore.saveBiography(aiBiographyStore.memberId, editableContent.value);
-  }
-};
-
-const regenerateBiography = () => {
-  aiBiographyStore.generateBiography();
-};
-
-
-</script>

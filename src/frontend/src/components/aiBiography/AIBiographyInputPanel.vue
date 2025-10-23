@@ -23,7 +23,7 @@
         </v-col>
       </v-row>
       <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
-        :placeholder="t('aiBiography.input.promptPlaceholder')" rows="5" variant="outlined" clearable counter
+        :placeholder="t('aiBiography.input.promptPlaceholder')" :auto-grow="true" variant="outlined" clearable counter
         :rules="[rules.userPromptLength]"></v-textarea>
     </v-card-text>
 
