@@ -11,17 +11,17 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static void AddWebServices(this IHostApplicationBuilder builder)
+    public static void AddWebServices(this IServiceCollection services)
     {
-        builder.Services.AddScoped<IUser, CurrentUser>();
-        builder.Services.AddHttpContextAccessor();
-        builder.Services.AddHealthChecks();
-        builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+        services.AddScoped<IUser, CurrentUser>();
+        services.AddHttpContextAccessor();
+        services.AddHealthChecks();
+        services.AddExceptionHandler<CustomExceptionHandler>();
         // Customise default API behaviour
-        builder.Services.Configure<ApiBehaviorOptions>(options =>
+        services.Configure<ApiBehaviorOptions>(options =>
             options.SuppressModelStateInvalidFilter = true);
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddOpenApiDocument((configure, sp) =>
+        services.AddEndpointsApiExplorer();
+        services.AddOpenApiDocument((configure, sp) =>
         {
             configure.Title = "API Cây Gia Phả";
             configure.Description = "API để quản lý thông tin cây gia phả, bao gồm các dòng họ, thành viên, và các mối quan hệ.";
@@ -37,6 +37,6 @@ public static class DependencyInjection
 
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
-        builder.Services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
+        services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
     }
 }

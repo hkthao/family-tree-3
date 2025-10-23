@@ -23,8 +23,6 @@ public static class DependencyInjection
         services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
-
-
         services.AddScoped<IFileStorageFactory, FileStorageFactory>();
         // Register IFileStorage based on configuration
         services.AddTransient(sp =>
@@ -35,7 +33,6 @@ public static class DependencyInjection
             return factory.CreateFileStorage(Enum.Parse<StorageProvider>(storageSettings.Provider, true));
         });
 
-
         var configProvider = services.BuildServiceProvider().GetRequiredService<IConfigProvider>();
         var jwtSettings = configProvider.GetSection<JwtSettings>();
 
@@ -43,7 +40,6 @@ public static class DependencyInjection
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-
                 // Add logging for JwtSettings
                 var logger = services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
                 logger.LogInformation("JwtSettings - Authority: {Authority}", jwtSettings?.Authority);

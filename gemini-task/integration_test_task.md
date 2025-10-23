@@ -1,48 +1,130 @@
-Bạn là một trợ lý phát triển phần mềm chuyên nghiệp. Nhiệm vụ của bạn là **viết Integration Tests bằng C# (xUnit) cho ASP.NET Core app theo DDD** dựa trên repo “Infrastructure” của app gia phả. Hãy thực hiện các yêu cầu sau:
 
-1. **Mục tiêu Integration Test**  
-   - Test luồng thực từ **Web/API → Application layer → Infrastructure → Database / External Services**.  
-   - Không chỉ test unit, mà kiểm tra phối hợp giữa các layer, transaction, mapping, config.  
-   - Test các luồng nghiệp vụ quan trọng: CRUD FamilyTree/Member/User, AI Chat Providers, File Storage, Auth0 login & token validation, Service layer logic.  
+### **Implement Integration Tests cho ASP.NET Core DDD với SQLite In-Memory**
 
-2. **Sequential test**  
-   - Test case trước pass mới chạy test case sau.  
-   - Dùng `IClassFixture` hoặc `Collection` của xUnit để đảm bảo tuần tự.
+> ⚠️ **Scope:**
+>
+> * Integration Test kiểm tra luồng thực giữa `API (Web)` → `Application` → `Infrastructure` → `Database`.
+> * Dùng **SQLite In-Memory Database**, **không dùng SQL Server hoặc DB thật**, **không mock repository hoặc DbContext**.
 
-3. **Môi trường thật / sandbox**  
-   - Database test container (SQL Server/Postgres) hoặc sandbox DB.  
-   - External API / AI provider / File Storage dùng sandbox nếu cần.  
-   - Auth0 test account cho login/token validation.  
+---
 
-4. **Comment tiếng Việt chi tiết**  
-   - Giải thích mục tiêu test, dữ liệu đầu vào, kết quả mong đợi.  
-   - Ví dụ:
-     ```csharp
-     // Test luồng tạo FamilyTree: tạo cây mới và validate root member
-     ```
+## 🧩 Cấu trúc chuẩn Integration Test Project
 
-5. **Dựa trên implement thật & docs/**  
-   - Không bịa selector, API, domain event, hoặc logic nghiệp vụ.  
-   - Tham khảo folder `docs/` nếu cần thông tin thêm.  
+```
+tests/
+└── Infrastructure.IntegrationTests/
+    ├── Common/
+    │   ├── IntegrationTestBase.cs        ← setup WebApplicationFactory + SQLite InMemory
+    │   ├── TestDatabaseFixture.cs        ← quản lý database lifecycle
+    │   └── HttpClientExtensions.cs       ← helper gọi API
+    │
+    ├── Controllers/
+    │   ├── FamilyControllerTests.cs
+    │   ├── MemberControllerTests.cs
+    │   └── AuthControllerTests.cs
+    │
+    ├── Services/
+    │   ├── FileStorageIntegrationTests.cs
+    │   ├── ChatProviderIntegrationTests.cs
+    │   └── VectorStoreIntegrationTests.cs
+    │
+    ├── Infrastructure/
+    │   ├── ConfigurationProviderTests.cs
+    │   └── DateTimeServiceTests.cs
+    │
+    └── IntegrationTests.csproj
+```
 
-6. **Setup / Teardown**  
-   - Seed dữ liệu test hợp lý trước test.  
-   - Cleanup database / storage sau test case nếu cần.
+---
 
-7. **Output yêu cầu**  
-   - Một file C# xUnit Integration Test hoàn chỉnh, có thể chạy trực tiếp trong `Infrastructure.IntegrationTests/`.  
-   - Test sequential các case quan trọng:  
-     1. CRUD FamilyTree, Member, User  
-     2. AI Chat Provider request → response → parse JSON → verify  
-     3. Auth0 login + token validation  
-     4. File Storage lưu / đọc / xoá file sandbox  
-     5. Service layer phối hợp repository + provider + business logic  
-   - Comment tiếng Việt rõ ràng từng bước.  
-   - Chạy được với `dotnet test` hoặc Docker.
+## ⚙️ Các yêu cầu Gemini cần setup chính xác
 
-Hãy viết **một file Integration Test hoàn chỉnh**, bao gồm:  
-- Setup database test container + DI container  
-- Seed dữ liệu test cần thiết  
-- Sequential test theo luồng nghiệp vụ quan trọng  
-- Cleanup dữ liệu sau mỗi test case  
-- Comment tiếng Việt chi tiết
+### 1️⃣ WebApplicationFactory
+
+* Dùng `WebApplicationFactory<Program>` để **khởi chạy API thật** (Startup pipeline).
+* Tạo `HttpClient` để gọi endpoint thật (`/api/...`), không mock controller.
+
+### 2️⃣ Dùng SQLite In-Memory Database
+
+* Thay bằng `UseSqlite("DataSource=:memory:")` + giữ connection mở suốt vòng đời test.
+* Tạo fixture:
+
+  ```csharp
+  public class TestDatabaseFixture : IAsyncLifetime
+  {
+      public SqliteConnection Connection { get; private set; } = default!;
+      public AppDbContext DbContext { get; private set; } = default!;
+
+      public async Task InitializeAsync()
+      {
+          Connection = new SqliteConnection("DataSource=:memory:");
+          await Connection.OpenAsync();
+
+          var options = new DbContextOptionsBuilder<AppDbContext>()
+              .UseSqlite(Connection)
+              .Options;
+
+          DbContext = new AppDbContext(options);
+          await DbContext.Database.EnsureCreatedAsync();
+      }
+
+      public async Task DisposeAsync()
+      {
+          await Connection.CloseAsync();
+      }
+  }
+  ```
+
+### 3️⃣ Dependency Injection
+
+* Giữ nguyên toàn bộ module `Application` và `Infrastructure`.
+* Gắn SQLite connection vào DI trong `IntegrationTestBase`:
+
+  ```csharp
+  protected override void ConfigureWebHost(IWebHostBuilder builder)
+  {
+      builder.ConfigureServices(services =>
+      {
+          services.RemoveAll(typeof(DbContextOptions<AppDbContext>));
+          services.AddDbContext<AppDbContext>(options =>
+              options.UseSqlite(_fixture.Connection));
+      });
+  }
+  ```
+
+### 4️⃣ Viết test theo luồng thực
+
+* Test API thực sự (CRUD, Auth, Upload...).
+* Gọi `POST → GET → DELETE`, kiểm tra response và DB state.
+
+  ```csharp
+  /// <summary>✅ Tạo mới Family và xác thực tồn tại trong DB</summary>
+  /// <remarks>
+  /// ⚙️ B1: Gửi POST /api/families
+  /// ⚙️ B2: Gửi GET /api/families/{id}
+  /// </remarks>
+  [Fact]
+  public async Task CreateFamily_ShouldPersistInSQLiteMemory()
+  {
+      // Arrange
+      var request = new CreateFamilyRequest("Huynh");
+
+      // Act
+      var response = await _client.PostAsJsonAsync("/api/family", request);
+      var family = await _fixture.DbContext.Families.FirstOrDefaultAsync(f => f.Name == "Huynh");
+
+      // Assert
+      response.StatusCode.Should().Be(HttpStatusCode.Created);
+      family.Should().NotBeNull();
+  }
+  ```
+
+### 5️⃣ Bình luận bằng tiếng Việt
+
+* Mỗi test có cấu trúc:
+
+  ```csharp
+  /// <summary>✅ Mục tiêu test...</summary>
+  /// <remarks>⚙️ Các bước thực hiện...</remarks>
+  /// <explanation>💡 Giải thích logic hoặc mục tiêu business...</explanation>
+  ```

@@ -17,8 +17,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserActivity> UserActivities => Set<UserActivity>();
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
-    public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
-    public DbSet<UserConfig> UserConfigs => Set<UserConfig>();
+
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
