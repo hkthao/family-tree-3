@@ -11,10 +11,15 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1" @click="handleUpdateItem">{{
+      <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn
+        color="blue-darken-1"
+        data-testid="button-save"
+        @click="handleUpdateItem"
+        >{{
         t('common.save')
-        }}</v-btn>
+        }}</v-btn
+      >
     </v-card-actions>
   </v-card>
 </template>

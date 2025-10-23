@@ -85,7 +85,7 @@ describe('FamilyAddView.vue', () => {
     (familyStore.addItem as any).mockResolvedValue(undefined); // Mock successful addItem
 
     // Act: Kích hoạt sự kiện click vào nút "Lưu".
-    await wrapper.findAll('button')[1].trigger('click'); // Assuming save is the second button
+    await wrapper.find('[data-testid="button-save"]').trigger('click');
 
     // Assert: Kiểm tra các hành vi mong đợi.
     expect(mockFamilyFormValidate).toHaveBeenCalled();
@@ -119,7 +119,7 @@ describe('FamilyAddView.vue', () => {
     });
 
     // Act: Kích hoạt sự kiện click vào nút "Hủy".
-    await wrapper.findAll('button')[0].trigger('click'); // Assuming cancel is the first button
+    await wrapper.find('[data-testid="button-cancel"]').trigger('click');
 
     // Assert: Kiểm tra rằng mockPush đã được gọi với đường dẫn chính xác.
     expect(mockPush).toHaveBeenCalledWith('/family');
@@ -150,7 +150,7 @@ describe('FamilyAddView.vue', () => {
     mockFamilyFormGetFormData.mockReturnValue({}); // Return an empty object as it shouldn't be called
 
     // Act: Kích hoạt sự kiện click vào nút "Lưu".
-    await wrapper.findAll('button')[1].trigger('click');
+    await wrapper.find('[data-testid="button-save"]').trigger('click');
 
     // Assert: Kiểm tra các hành vi mong đợi.
     expect(mockFamilyFormValidate).toHaveBeenCalled();
