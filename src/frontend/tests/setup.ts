@@ -5,3 +5,6 @@ Object.defineProperty(global.URL, 'createObjectURL', {
   writable: true,
   value: vi.fn(() => 'mock-object-url'),
 });
+
+// Mock console.error globally to prevent test output pollution
+vi.spyOn(console, 'error').mockImplementation(() => {});

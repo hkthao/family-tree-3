@@ -19,10 +19,10 @@ export const useUserProfileStore = defineStore('userProfile', {
         if (result.ok) {
           this.userProfile = result.value;
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchError');
+          this.error = i18n.global.t('userSettings.profile.fetchError');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+        this.error = i18n.global.t('userSettings.profile.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -36,10 +36,10 @@ export const useUserProfileStore = defineStore('userProfile', {
         if (result.ok) {
           this.userProfile = result.value;
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchError');
+          this.error = i18n.global.t('userSettings.profile.fetchError');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+        this.error = i18n.global.t('userSettings.profile.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -53,10 +53,10 @@ export const useUserProfileStore = defineStore('userProfile', {
         if (result.ok) {
           this.userProfile = result.value;
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchError');
+          this.error = i18n.global.t('userSettings.profile.fetchError');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+        this.error = i18n.global.t('userSettings.profile.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -70,10 +70,10 @@ export const useUserProfileStore = defineStore('userProfile', {
         if (result.ok) {
           this.allUserProfiles = result.value;
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.profile.fetchAllError');
+          this.error = i18n.global.t('userSettings.profile.fetchAllError');
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+        this.error = i18n.global.t('userSettings.profile.unexpectedError');
       } finally {
         this.loading = false;
       }
@@ -88,11 +88,11 @@ export const useUserProfileStore = defineStore('userProfile', {
           this.userProfile = result.value;
           return true;
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.profile.saveError');
+          this.error = i18n.global.t('userSettings.profile.saveError');
           return false;
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.profile.unexpectedError');
+        this.error = i18n.global.t('userSettings.profile.unexpectedError');
         return false;
       } finally {
         this.loading = false;

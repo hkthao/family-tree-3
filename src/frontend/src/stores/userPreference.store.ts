@@ -8,6 +8,8 @@ export const useUserPreferenceStore = defineStore('userPreference', {
     loading: false,
     error: null as string | null,
     preferences: {
+      id: '1',
+      userProfileId: '1',
       theme: Theme.Light,
       language: Language.English,
       emailNotificationsEnabled: true,
@@ -25,10 +27,10 @@ export const useUserPreferenceStore = defineStore('userPreference', {
         if (result.ok) {
           this.preferences = result.value;
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.preferences.fetchError');
+          this.error = i18n.global.t('userSettings.preferences.fetchError'); // Always use i18n key
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.preferences.unexpectedError');
+        this.error = i18n.global.t('userSettings.preferences.unexpectedError'); // Always use i18n key
       } finally {
         this.loading = false;
       }
@@ -43,10 +45,10 @@ export const useUserPreferenceStore = defineStore('userPreference', {
           // Optionally, show a success message
           // i18n.global.t('userSettings.preferences.saveSuccess');
         } else {
-          this.error = result.error?.message || i18n.global.t('userSettings.preferences.saveError');
+          this.error = i18n.global.t('userSettings.preferences.saveError'); // Always use i18n key
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('userSettings.preferences.unexpectedError');
+        this.error = i18n.global.t('userSettings.preferences.unexpectedError'); // Always use i18n key
       } finally {
         this.loading = false;
       }

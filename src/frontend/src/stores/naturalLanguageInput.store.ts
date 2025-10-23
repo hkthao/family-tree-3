@@ -21,7 +21,7 @@ export const useNaturalLanguageInputStore = defineStore('naturalLanguageInput', 
           return null;
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.families') });
+        this.error = i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.families') });
         console.error(err);
         return null;
       } finally {
@@ -42,7 +42,7 @@ export const useNaturalLanguageInputStore = defineStore('naturalLanguageInput', 
           return null;
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.members') });
+        this.error = i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.members') });
         console.error(err);
         return null;
       } finally {
@@ -63,7 +63,7 @@ export const useNaturalLanguageInputStore = defineStore('naturalLanguageInput', 
           return null;
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.events') });
+        this.error = i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.events') });
         console.error(err);
         return null;
       } finally {
@@ -84,7 +84,7 @@ export const useNaturalLanguageInputStore = defineStore('naturalLanguageInput', 
           return null;
         }
       } catch (err: any) {
-        this.error = err.message || i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.relationships') });
+        this.error = i18n.global.t('aiInput.generateError', { entity: i18n.global.t('aiInput.relationships') });
         console.error(err);
         return null;
       } finally {
