@@ -25,7 +25,7 @@ export class ApiEventService implements IEventService {
     return this.http.post<Event>(this.apiUrl, newItem);
   }
 
-  async addMultiple(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
+  async addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
     console.log('Adding multiple events via API');
     return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, newItems);
   }

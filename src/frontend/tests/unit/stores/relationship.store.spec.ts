@@ -1,12 +1,11 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Relationship, Paginated, Result, RelationshipFilter } from '@/types';
+import type { Relationship, Paginated } from '@/types';
 import { RelationshipType } from '@/types';
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
-import { ServicesPlugin } from '@/plugins/services.plugin';
-import { createServices, type ServiceMode, type AppServices } from '@/services/service.factory';
+import { createServices } from '@/services/service.factory';
 
 // Mock the IRelationshipService
 const mockFetch = vi.fn();
@@ -76,8 +75,16 @@ describe('relationship.store', () => {
     mockGetByIds.mockReset();
     mockAddItems.mockReset();
 
-    // The store's services are now automatically set by the mocked createServices
-    // No need to manually assign store.services here anymore
+    mockDelete.mockReset();
+    mockLoadItems.mockReset();
+    mockGetByIds.mockReset();
+    mockAddItems.mockReset();
+
+    mockAdd.mockResolvedValue(ok(mockRelationship)); // Default for addItem
+    mockUpdate.mockResolvedValue(ok(mockRelationship)); // Default for updateItem
+    mockDelete.mockResolvedValue(ok(undefined)); // Default for deleteItem
+    mockAddItems.mockResolvedValue(ok(['new-id-1'])); // Default for addItems
+    // mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships)); // Moved to specific tests
   });
 
   const mockRelationship: Relationship = {
@@ -127,7 +134,7 @@ describe('relationship.store', () => {
 
   describe('addItem', () => {
     it('should add an item successfully', async () => {
-      mockAdd.mockResolvedValue(ok(mockRelationship));
+      mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships)); // _loadItems is called after successful add
       await store.addItem({ ...mockRelationship });
 
       expect(store.loading).toBe(false);
@@ -151,7 +158,6 @@ describe('relationship.store', () => {
 
   describe('updateItem', () => {
     it('should update an item successfully', async () => {
-      mockUpdate.mockResolvedValue(ok(mockPaginatedRelationships));
       mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships));
 
       await store.updateItem(mockRelationship);
@@ -177,7 +183,6 @@ describe('relationship.store', () => {
 
   describe('deleteItem', () => {
     it('should delete an item successfully', async () => {
-      mockDelete.mockResolvedValue(ok(undefined));
       mockLoadItems.mockResolvedValue(ok(mockPaginatedRelationships));
 
       const result = await store.deleteItem(mockRelationship.id!);

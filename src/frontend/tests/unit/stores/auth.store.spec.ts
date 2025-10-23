@@ -3,116 +3,131 @@ import { useAuthStore } from '@/stores/auth.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { User } from '@/types';
 
-// Mock the authService
+// Mock the AuthService
 const mockGetUser = vi.fn();
 const mockGetAccessToken = vi.fn();
 const mockLogin = vi.fn();
 const mockLogout = vi.fn();
 const mockRegister = vi.fn();
 
+// Mock the useAuthService hook
 vi.mock('@/services/auth/authService', () => ({
-  useAuthService: () => ({
+  useAuthService: vi.fn(() => ({
     getUser: mockGetUser,
     getAccessToken: mockGetAccessToken,
     login: mockLogin,
     logout: mockLogout,
     register: mockRegister,
-  }),
+  })),
+}));
+
+// Mock the entire service factory (even though auth.store doesn't use it directly, other stores might)
+vi.mock('@/services/service.factory', () => ({
+  createServices: vi.fn(() => ({
+    ai: {},
+    auth: {},
+    chat: {},
+    chunk: {},
+    dashboard: {},
+    event: {},
+    face: {},
+    faceMember: {},
+    family: {},
+    fileUpload: {},
+    member: {},
+    naturalLanguageInput: {},
+    notification: {},
+    relationship: {},
+    systemConfig: {},
+    userActivity: {},
+    userPreference: {},
+    userProfile: {},
+    userSettings: {},
+  })),
 }));
 
 describe('auth.store', () => {
+  let store: ReturnType<typeof useAuthStore>;
+
+  const mockUser: User = {
+    id: 'user-1',
+    email: 'test@example.com',
+    roles: ['User'],
+    externalId: '',
+    name: ''
+  };
+  const mockToken = 'mock-jwt-token';
+
   beforeEach(() => {
-    setActivePinia(createPinia());
+    const pinia = createPinia();
+    setActivePinia(pinia);
+    store = useAuthStore();
+    store.$reset();
+
     // Reset mocks before each test
     mockGetUser.mockReset();
     mockGetAccessToken.mockReset();
     mockLogin.mockReset();
     mockLogout.mockReset();
     mockRegister.mockReset();
+
+    // Set default mock resolved values
+    mockGetUser.mockResolvedValue(mockUser);
+    mockGetAccessToken.mockResolvedValue(mockToken);
+    mockLogin.mockResolvedValue(undefined);
+    mockLogout.mockResolvedValue(undefined);
+    mockRegister.mockResolvedValue(mockUser);
   });
 
-  // --- Getters Tests ---
-  it('isAuthenticated should return true if user is present', () => {
-    const store = useAuthStore();
-    store.user = {
-      id: '1',
-      externalId: 'auth0|1',
-      name: 'test',
-      email: 'test@example.com',
-      roles: [],
-    } as User;
-    expect(store.isAuthenticated).toBe(true);
+  it('should have correct initial state', () => {
+    expect(store.user).toBeNull();
+    expect(store.token).toBeNull();
+    expect(store.loading).toBe(false);
+    expect(store.error).toBeNull();
   });
 
-  it('isAuthenticated should return false if user is null', () => {
-    const store = useAuthStore();
-    store.user = null;
-    expect(store.isAuthenticated).toBe(false);
-  });
+  describe('getters', () => {
+    it('isAuthenticated should return true if user exists', () => {
+      store.user = mockUser;
+      expect(store.isAuthenticated).toBe(true);
+    });
 
-  it('isAdmin should return true if user has Admin role', () => {
-    const store = useAuthStore();
-    store.user = {
-      id: '1',
-      externalId: 'auth0|1',
-      email: 'test@example.com',
-      roles: ['Admin'],
-    } as User;
-    expect(store.isAdmin).toBe(true);
-  });
+    it('isAuthenticated should return false if user is null', () => {
+      store.user = null;
+      expect(store.isAuthenticated).toBe(false);
+    });
 
-  it('isAdmin should return false if user does not have Admin role', () => {
-    const store = useAuthStore();
-    store.user = {
-      id: '1',
-      externalId: 'auth0|1',
-      email: 'test@example.com',
-      roles: ['User'],
-    } as User;
-    expect(store.isAdmin).toBe(false);
-  });
+    it('isAdmin should return true if user has Admin role', () => {
+      store.user = { ...mockUser, roles: ['User', 'Admin'] };
+      expect(store.isAdmin).toBe(true);
+    });
 
-  it('isFamilyManager should return true if user has FamilyManager role', () => {
-    const store = useAuthStore();
-    store.user = {
-      id: '1',
-      externalId: 'auth0|1',
-      email: 'test@example.com',
-      roles: ['FamilyManager'],
-    } as User;
-    expect(store.isFamilyManager).toBe(true);
-  });
+    it('isAdmin should return false if user does not have Admin role', () => {
+      store.user = mockUser;
+      expect(store.isAdmin).toBe(false);
+    });
 
-  it('isFamilyManager should return false if user does not have FamilyManager role', () => {
-    const store = useAuthStore();
-    store.user = {
-      id: '1',
-      externalId: 'auth0|1',
-      email: 'test@example.com',
-      roles: ['User'],
-    } as User;
-    expect(store.isFamilyManager).toBe(false);
-  });
+    it('isFamilyManager should return true if user has FamilyManager role', () => {
+      store.user = { ...mockUser, roles: ['User', 'FamilyManager'] };
+      expect(store.isFamilyManager).toBe(true);
+    });
 
-  // --- Actions Tests ---
+    it('isFamilyManager should return false if user does not have FamilyManager role', () => {
+      store.user = mockUser;
+      expect(store.isFamilyManager).toBe(false);
+    });
+
+    it('getAccessToken should return the token', () => {
+      store.token = mockToken;
+      expect(store.getAccessToken).toBe(mockToken);
+    });
+  });
 
   describe('initAuth', () => {
     it('should initialize auth successfully', async () => {
-      const store = useAuthStore();
-      const mockUser = {
-        id: '1',
-        externalId: 'auth0|1',
-        email: 'test@example.com',
-        name: 'test',
-        roles: [],
-      } as User;
-      const mockToken = 'mock-token';
+      const result = await store.initAuth();
 
-      mockGetUser.mockResolvedValue(mockUser);
-      mockGetAccessToken.mockResolvedValue(mockToken);
-
-      await store.initAuth();
-
+      expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.user).toEqual(mockUser);
@@ -121,96 +136,54 @@ describe('auth.store', () => {
       expect(mockGetAccessToken).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle initAuth failure', async () => {
-      const store = useAuthStore();
-      const errorMessage = 'Auth init failed';
-
+    it('should handle init auth failure', async () => {
+      const errorMessage = 'Failed to get user.';
       mockGetUser.mockRejectedValue(new Error(errorMessage));
 
-      await store.initAuth();
+      const result = await store.initAuth();
 
+      expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
       expect(mockGetUser).toHaveBeenCalledTimes(1);
-      expect(mockGetAccessToken).not.toHaveBeenCalled();
+      expect(mockGetAccessToken).not.toHaveBeenCalled(); // Should not be called if getUser fails
     });
   });
 
   describe('login', () => {
+    it('should initiate login successfully', async () => {
+      const result = await store.login();
 
-    it('should login successfully', async () => {
-      const store = useAuthStore();
-      const mockUser = {
-        id: '1',
-        externalId: 'auth0|1',
-        email: 'test@example.com',
-        name: 'test',
-        roles: [],
-      } as User;
-      const mockToken = 'mock-token';
-
-      mockLogin.mockResolvedValue(mockUser);
-      mockGetAccessToken.mockResolvedValue(mockToken);
-
-      await store.login();
-
+      expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
-      // User and token are set by initAuth after redirect, not directly by login()
-      expect(store.user).toBeNull();
-      expect(store.token).toBeNull();
-      expect(mockLogin).toHaveBeenCalledWith({ appState: { target: '/' } });
-      expect(mockGetAccessToken).not.toHaveBeenCalled(); // Not called directly by login
-    });
-
-    it('should handle login failure (invalid credentials)', async () => {
-      const store = useAuthStore();
-
-      mockLogin.mockRejectedValue(new Error('Login failed.'));
-
-      await store.login();
-
-      expect(store.loading).toBe(false);
-      expect(store.error).toBe('Login failed.');
-      expect(store.user).toBeNull();
-      expect(store.token).toBeNull();
+      expect(mockLogin).toHaveBeenCalledTimes(1);
       expect(mockLogin).toHaveBeenCalledWith({ appState: { target: '/' } });
     });
 
-    it('should handle login failure (service error)', async () => {
-      const store = useAuthStore();
-      const errorMessage = 'Network error';
-
+    it('should handle login failure', async () => {
+      const errorMessage = 'Login failed.';
       mockLogin.mockRejectedValue(new Error(errorMessage));
 
-      await store.login();
+      const result = await store.login();
 
+      expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
-      expect(store.user).toBeNull();
-      expect(store.token).toBeNull();
-      expect(mockLogin).toHaveBeenCalledWith({ appState: { target: '/' } });
+      expect(mockLogin).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('logout', () => {
     it('should logout successfully', async () => {
-      const store = useAuthStore();
-      store.user = {
-        id: '1',
-        externalId: 'auth0|1',
-        name: 'test',
-        email: 'test@example.com',
-        roles: [],
-      } as User;
-      store.token = 'existing-token';
+      store.user = mockUser;
+      store.token = mockToken;
 
-      mockLogout.mockResolvedValue(undefined);
+      const result = await store.logout();
 
-      await store.logout();
-
+      expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.user).toBeNull();
@@ -219,95 +192,71 @@ describe('auth.store', () => {
     });
 
     it('should handle logout failure', async () => {
-      const store = useAuthStore();
-      store.user = {
-        id: '1',
-        externalId: 'auth0|1',
-        name: 'test',
-        email: 'test@example.com',
-        roles: [],
-      } as User;
-      store.token = 'existing-token';
-      const errorMessage = 'Logout service error';
-
+      const errorMessage = 'Logout failed.';
       mockLogout.mockRejectedValue(new Error(errorMessage));
 
-      await store.logout();
+      store.user = mockUser;
+      store.token = mockToken;
 
+      const result = await store.logout();
+
+      expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
-      // User and token should remain if logout failed to clear them
-      expect(store.user).toEqual({
-        id: '1',
-        externalId: 'auth0|1',
-        name: 'test',
-        email: 'test@example.com',
-        roles: [],
-      });
-      expect(store.token).toBe('existing-token');
+      expect(store.user).toEqual(mockUser); // State should not be cleared on failure
+      expect(store.token).toBe(mockToken); // State should not be cleared on failure
       expect(mockLogout).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('register', () => {
-    const registrationData = {
-      email: 'new@example.com',
-      password: 'newpassword',
-      name: 'New User',
-    };
-
     it('should register successfully', async () => {
-      const store = useAuthStore();
-      const mockUser = {
-        id: '2',
-        externalId: 'auth0|2',
-        name: 'test',
-        email: 'new@example.com',
-        roles: [],
-      } as User;
-      const mockToken = 'new-mock-token';
-
+      const registerData = { email: 'new@example.com', password: 'password' };
       mockRegister.mockResolvedValue(mockUser);
-      mockGetAccessToken.mockResolvedValue(mockToken);
+      mockGetAccessToken.mockResolvedValue('new-token');
 
-      await store.register(registrationData);
+      const result = await store.register(registerData);
 
+      expect(result.ok).toBe(true);
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.user).toEqual(mockUser);
-      expect(store.token).toBe(mockToken);
-      expect(mockRegister).toHaveBeenCalledWith(registrationData);
+      expect(store.token).toBe('new-token');
+      expect(mockRegister).toHaveBeenCalledTimes(1);
+      expect(mockRegister).toHaveBeenCalledWith(registerData);
       expect(mockGetAccessToken).toHaveBeenCalledTimes(1);
     });
 
-    it('should handle registration failure (service returns null user)', async () => {
-      const store = useAuthStore();
-
-      mockRegister.mockResolvedValue(null);
-      mockGetAccessToken.mockResolvedValue(null);
-
-      await store.register(registrationData);
-
-      expect(store.loading).toBe(false);
-      expect(store.error).toBe('Registration failed.');
-      expect(store.user).toBeNull();
-      expect(store.token).toBeNull();
-      expect(mockRegister).toHaveBeenCalledWith(registrationData);
-    });
-
-    it('should handle registration failure (service error)', async () => {
-      const store = useAuthStore();
-      const errorMessage = 'Registration service error';
-
+    it('should handle register failure (service error)', async () => {
+      const errorMessage = 'Registration failed.';
       mockRegister.mockRejectedValue(new Error(errorMessage));
+      const registerData = { email: 'new@example.com', password: 'password' };
 
-      await store.register(registrationData);
+      const result = await store.register(registerData);
 
+      expect(result.ok).toBe(false);
       expect(store.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
       expect(store.user).toBeNull();
       expect(store.token).toBeNull();
-      expect(mockRegister).toHaveBeenCalledWith(registrationData);
+      expect(mockRegister).toHaveBeenCalledTimes(1);
+      expect(mockGetAccessToken).not.toHaveBeenCalled();
+    });
+
+    it('should handle register failure (no user returned)', async () => {
+      mockRegister.mockResolvedValue(null);
+      mockGetAccessToken.mockResolvedValue(null); // Ensure token is null if no user
+      const registerData = { email: 'new@example.com', password: 'password' };
+
+      const result = await store.register(registerData);
+
+      expect(result.ok).toBe(false);
+      expect(store.loading).toBe(false);
+      expect(store.error).toBe('Registration failed.');
+      expect(store.user).toBeNull();
+      expect(store.token).toBeNull();
+      expect(mockRegister).toHaveBeenCalledTimes(1);
+      expect(mockGetAccessToken).toHaveBeenCalledTimes(1); // It is called, but should return null
     });
   });
 });

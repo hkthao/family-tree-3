@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
-import type { MessageItem, ChatListItem } from '@/types';
+import type { MessageItem, ChatListItem, Result } from '@/types';
+import { ok, err } from '@/types';
+import type { ApiError } from '@/plugins/axios';
 
 interface ChatState {
   chatList: ChatListItem[];
@@ -30,13 +32,14 @@ export const useChatStore = defineStore('chat', {
   },
 
   actions: {
-    async fetchChatList() {
+    async fetchChatList(): Promise<Result<void, string>> {
       // In a real application, this would fetch from an API
       // For now, we use dummy data
       // this.chatList = await this.services.chat.fetchChats(); // Example usage
       if (this.chatList.length > 0 && !this.selectedChatId) {
         this.selectedChatId = this.chatList[0].id;
       }
+      return { ok: true, value: undefined };
     },
 
     selectChat(chatId: string, t: (key: string) => string) {
@@ -56,8 +59,12 @@ export const useChatStore = defineStore('chat', {
       }
     },
 
-    async sendMessage(userMessage: string, currentUserId: string) {
-      if (!this.selectedChatId) return;
+    async sendMessage(userMessage: string, currentUserId: string): Promise<Result<void, ApiError>> {
+      if (!this.selectedChatId) {
+        const errorMessage = 'No chat selected.';
+        this.error = errorMessage;
+        return { ok: false, error: { message: errorMessage } as ApiError };
+      }
 
       this.isLoading = true;
       this.error = null;
@@ -102,6 +109,7 @@ export const useChatStore = defineStore('chat', {
               ? new Date(botResponse.createdAt).toLocaleTimeString()
               : new Date().toLocaleTimeString();
           }
+          return { ok: true, value: undefined };
         } else {
           this.error = result.error?.message || 'Failed to send message.';
           console.error('Error sending message:', result.error);
@@ -113,6 +121,7 @@ export const useChatStore = defineStore('chat', {
             direction: 'incoming',
           };
           this.messages[this.selectedChatId].push(errorMessage);
+          return { ok: false, error: result.error };
         }
       } catch (error: any) {
         this.error = error.message || 'Failed to send message.';
@@ -125,6 +134,7 @@ export const useChatStore = defineStore('chat', {
           direction: 'incoming',
         };
         this.messages[this.selectedChatId].push(errorMessage);
+        return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.isLoading = false;
       }

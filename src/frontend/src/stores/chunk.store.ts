@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
-import type { TextChunk } from '@/types';
+import type { TextChunk, Result } from '@/types';
 import i18n from '@/plugins/i18n';
+import type { ApiError } from '@/plugins/axios';
 
 interface ChunkState {
   chunks: TextChunk[];
@@ -24,7 +25,7 @@ export const useChunkStore = defineStore('chunk', {
         category: string;
         createdBy: string;
       },
-    ): Promise<void> {
+    ): Promise<Result<TextChunk[], ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -35,13 +36,16 @@ export const useChunkStore = defineStore('chunk', {
             ...chunk,
             approved: true,
           }));
+          return result;
         } else {
           this.error = i18n.global.t('chunkAdmin.uploadError');
           console.error(result.error);
+          return result;
         }
       } catch (err: any) {
         this.error = err.message || i18n.global.t('chunkAdmin.uploadError');
         console.error('Upload error:', err);
+        return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.loading = false;
       }
@@ -59,7 +63,7 @@ export const useChunkStore = defineStore('chunk', {
       this.chunks = [];
     },
 
-    async approveChunks(chunksToApprove: TextChunk[]): Promise<void> {
+    async approveChunks(chunksToApprove: TextChunk[]): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -68,13 +72,16 @@ export const useChunkStore = defineStore('chunk', {
           // Optionally, clear approved chunks from the store or update their status
           // For now, we'll just clear all chunks after successful approval
           this.clearChunks();
+          return result;
         } else {
           this.error = i18n.global.t('chunkAdmin.approveError');
           console.error(result.error);
+          return result;
         }
       } catch (err: any) {
         this.error = err.message || i18n.global.t('chunkAdmin.approveError');
         console.error('Approve chunks error:', err);
+        return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.loading = false;
       }

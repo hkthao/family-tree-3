@@ -17,6 +17,10 @@ export function setupStoreForTesting<T extends () => any>(
 ) {
   setActivePinia(createPinia());
   const store = useStore();
-  store.services = createServices('test', { [serviceName]: mockService });
+  // @ts-ignore - Allow direct assignment to services
+  store.services = createServices('mock'); // Call the globally mocked createServices
+  // Assign the specific mockService to the correct property
+  // @ts-ignore
+  store.services[serviceName] = mockService;
   return store;
 }

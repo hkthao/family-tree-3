@@ -1,6 +1,7 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { EventFilter, Event } from '@/types';
+import type { EventFilter, Event, Result } from '@/types';
+import type { ApiError } from '@/plugins/axios';
 import { defineStore } from 'pinia';
 import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 
@@ -53,7 +54,7 @@ export const useEventStore = defineStore('event', {
       this.loading = false;
     },
 
-    async addItems(newItems: Event[]): Promise<void> {
+    async addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -69,17 +70,20 @@ export const useEventStore = defineStore('event', {
         }));
 
         // Assuming a bulk add method exists in the service
-        const result = await this.services.event.addMultiple(createCommands);
+        const result = await this.services.event.addItems(createCommands);
         if (result.ok) {
           this.eventCache.clear(); // Invalidate cache on add
           await this._loadItems();
+          return result; // Return the result from the service
         } else {
           this.error = i18n.global.t('aiInput.saveError'); // Generic save error for now
           console.error(result.error);
+          return result; // Return the error result
         }
       } catch (err: any) {
         this.error = err.message || i18n.global.t('aiInput.saveError');
         console.error(err);
+        return { ok: false, error: { message: this.error } } as Result<string[], ApiError>; // Return a failure result
       } finally {
         this.loading = false;
       }
@@ -99,7 +103,7 @@ export const useEventStore = defineStore('event', {
       this.loading = false;
     },
 
-    async deleteItem(id: string): Promise<void> {
+    async deleteItem(id: string): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await this.services.event.delete(id);
@@ -111,6 +115,7 @@ export const useEventStore = defineStore('event', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
     async setPage(page: number) {

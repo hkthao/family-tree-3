@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, Member } from '@/types';
+import type { BiographyResultDto, AIProviderDto, Member, Result } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 import { useNotificationStore } from './notification.store';
+import { err } from '@/types';
+import type { ApiError } from '@/plugins/axios';
 
 export const useAIBiographyStore = defineStore('aiBiography', {
   state: () => ({
@@ -88,43 +90,38 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       this.generatedFromDB = true;
     },
 
-    async saveBiography(memberId: string, content: string) {
+    async saveBiography(memberId: string, content: string): Promise<Result<void, ApiError>> {
       if (!memberId || !content) {
         this.error = i18n.global.t('aiBiography.errors.saveFailed');
-        return;
+        return err({ message: this.error } as ApiError); // Return an error result
       }
 
       this.loading = true;
       this.error = null;
 
-      try {
-        const result = await this.services.member.updateMemberBiography(
-          memberId,
-          content,
-        ); // Changed
+      const result = await this.services.member.updateMemberBiography(
+        memberId,
+        content,
+      ); // Changed
 
-        if (result.ok) {
-          console.log('Biography saved successfully:', result.value);
-          // Optionally, update the currentMember's biography in the store
-          if (this.currentMember) {
-            this.currentMember.biography = content;
-          }
-          const notificationStore = useNotificationStore();
-          notificationStore.showSnackbar(
-            i18n.global.t('aiBiography.success.save'),
-            'success',
-          );
-        } else {
-          this.error =
-            result.error?.message ||
-            i18n.global.t('aiBiography.errors.saveFailed');
+      if (result.ok) {
+        console.log('Biography saved successfully:', result.value);
+        // Optionally, update the currentMember's biography in the store
+        if (this.currentMember) {
+          this.currentMember.biography = content;
         }
-      } catch (err: any) {
+        const notificationStore = useNotificationStore();
+        notificationStore.showSnackbar(
+          i18n.global.t('aiBiography.success.save'),
+          'success',
+        );
+      } else {
         this.error =
-          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-      } finally {
-        this.loading = false;
+          result.error?.message ||
+          i18n.global.t('aiBiography.errors.saveFailed');
       }
+      this.loading = false;
+      return result;
     },
   },
 });

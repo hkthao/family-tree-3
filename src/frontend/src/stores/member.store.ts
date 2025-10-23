@@ -1,8 +1,9 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { Member, MemberFilter } from '@/types';
+import type { Member, MemberFilter, Result } from '@/types';
 import { defineStore } from 'pinia';
 import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
+import type { ApiError } from '@/plugins/axios';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -77,7 +78,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async addItem(newItem: Omit<Member, 'id'>): Promise<void> {
+    async addItem(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.add(newItem);
@@ -89,9 +90,10 @@ export const useMemberStore = defineStore('member', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
-    async addItems(newItems: Omit<Member, 'id'>[]): Promise<void> {
+    async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.addItems(newItems);
@@ -103,6 +105,7 @@ export const useMemberStore = defineStore('member', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
     async updateItem(updatedItem: Member): Promise<void> {
@@ -119,7 +122,7 @@ export const useMemberStore = defineStore('member', {
       this.loading = false;
     },
 
-    async deleteItem(id: string): Promise<void> {
+    async deleteItem(id: string): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       const result = await this.services.member.delete(id);
@@ -131,6 +134,7 @@ export const useMemberStore = defineStore('member', {
         console.error(result.error);
       }
       this.loading = false;
+      return result;
     },
 
     async setPage(page: number) {
