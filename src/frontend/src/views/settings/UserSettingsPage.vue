@@ -5,18 +5,18 @@
         <v-row>
           <v-col cols="12" md="3">
             <v-tabs v-model="tab" color="primary" direction="vertical">
-              <v-tab value="profile">{{ t('userSettings.tab.profile') }}</v-tab>
-              <v-tab value="preferences">{{
+              <v-tab value="profile" data-testid="tab-profile">{{ t('userSettings.tab.profile') }}</v-tab>
+              <v-tab value="preferences" data-testid="tab-preferences">{{
                 t('userSettings.tab.preferences')
                 }}</v-tab>
             </v-tabs>
           </v-col>
           <v-col cols="12" md="9">
             <v-window v-model="tab">
-              <v-window-item value="profile">
+              <v-window-item value="profile" data-testid="window-item-profile">
                 <ProfileSettings />
               </v-window-item>
-              <v-window-item value="preferences">
+              <v-window-item value="preferences" data-testid="window-item-preferences">
                 <PreferencesSettings />
               </v-window-item>
             </v-window>
