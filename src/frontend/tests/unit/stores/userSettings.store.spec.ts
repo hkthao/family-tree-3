@@ -74,7 +74,7 @@ describe('userSettings.store', () => {
     store = useUserSettingsStore();
     store.$reset();
     // Manually inject the mocked services
-    // @ts-ignore
+    // @ts-expect-error: Mocking services for testing
     store.services = createServices('mock');
     // Reset mocks before each test
     mockGetUserPreferences.mockReset();

@@ -5,7 +5,6 @@ import { Gender, type DetectedFace, type SearchResult, type Member } from '@/typ
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the IFaceService
 const mockDetect = vi.fn();
@@ -102,7 +101,7 @@ describe('face.store', () => {
     store = useFaceStore();
     store.$reset();
     // Manually inject the mocked services
-    // @ts-ignore
+    // @ts-expect-error: Mocking services for testing
     store.services = createServices('mock');
 
     // Reset mocks before each test

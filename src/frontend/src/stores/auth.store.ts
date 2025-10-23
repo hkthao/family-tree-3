@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { useAuthService } from '@/services/auth/authService';
 import type { User, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

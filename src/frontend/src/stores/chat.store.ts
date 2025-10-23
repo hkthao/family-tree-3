@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import type { MessageItem, ChatListItem, Result } from '@/types';
-import { ok, err } from '@/types';
+import type { ChatListItem, MessageItem } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 
 interface ChatState {

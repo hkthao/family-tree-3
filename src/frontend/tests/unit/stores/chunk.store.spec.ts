@@ -5,7 +5,6 @@ import type { TextChunk } from '@/types';
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the IChunkService
 const mockUploadFile = vi.fn();
@@ -89,7 +88,7 @@ describe('chunk.store', () => {
     store = useChunkStore();
     store.$reset();
     // Manually inject the mocked services
-    // @ts-ignore
+    // @ts-expect-error: Mocking services for testing
     store.services = createServices('mock');
 
     // Reset mocks before each test
