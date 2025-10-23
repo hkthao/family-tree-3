@@ -45,7 +45,15 @@ public static class DependencyInjection
 
 
         // Register Face API Service and configure its HttpClient
-        services.AddHttpClient<IFaceApiService, FaceApiService>((serviceProvider, client) =>
+        services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>
+        {
+            var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
+            var faceDetectionSettings = configProvider.GetSection<FaceDetectionSettings>();
+            var client = new HttpClient { BaseAddress = new Uri(faceDetectionSettings.BaseUrl) };
+            return new FaceApiService(client);
+        });
+
+        services.AddHttpClient<FaceApiService>(); // Register for HttpClient injection
         {
             var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
             var faceDetectionSettings = configProvider.GetSection<FaceDetectionSettings>();
