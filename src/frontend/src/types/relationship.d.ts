@@ -9,7 +9,7 @@ export interface RelationshipMember {
 }
 
 export interface Relationship {
-  id?: string;
+  id: string;
   sourceMemberName?: string;
   sourceMemberCode?: string;
   sourceMemberId: string;

@@ -2,6 +2,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { EventFilter, Event } from '@/types';
 import { defineStore } from 'pinia';
+import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 
 export const useEventStore = defineStore('event', {
   state: () => ({
@@ -14,6 +15,7 @@ export const useEventStore = defineStore('event', {
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 1,
+    eventCache: new IdCache<Event>(), // Add eventCache to state
   }),
   getters: {},
   actions: {
@@ -29,6 +31,7 @@ export const useEventStore = defineStore('event', {
         this.items = result.value.items;
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
+        this.eventCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('event.errors.load');
         console.error(result.error);
@@ -41,6 +44,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.add(newItem);
       if (result.ok) {
+        this.eventCache.clear(); // Invalidate cache on add
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.add');
@@ -67,6 +71,7 @@ export const useEventStore = defineStore('event', {
         // Assuming a bulk add method exists in the service
         const result = await this.services.event.addMultiple(createCommands);
         if (result.ok) {
+          this.eventCache.clear(); // Invalidate cache on add
           await this._loadItems();
         } else {
           this.error = i18n.global.t('aiInput.saveError'); // Generic save error for now
@@ -85,6 +90,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.update(updatedItem);
       if (result.ok) {
+        this.eventCache.clear(); // Invalidate cache on update
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.update');
@@ -98,6 +104,7 @@ export const useEventStore = defineStore('event', {
       this.error = null;
       const result = await this.services.event.delete(id);
       if (result.ok) {
+        this.eventCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       } else {
         this.error = i18n.global.t('event.errors.delete');
@@ -134,30 +141,47 @@ export const useEventStore = defineStore('event', {
       this.currentItem = item;
     },
 
-    async getById(id: string): Promise<void> {
+    async getById(id: string): Promise<Event | undefined> {
       this.loading = true;
       this.error = null;
+
+      const cachedEvent = this.eventCache.get(id);
+      if (cachedEvent) {
+        this.loading = false;
+        this.currentItem = cachedEvent;
+        return cachedEvent;
+      }
+
       const result = await this.services.event.getById(id);
       this.loading = false;
       if (result.ok) {
-        this.currentItem = { ...(result.value as Event) }; // Set currentItem
+        if (result.value) {
+          this.currentItem = result.value;
+          this.eventCache.set(result.value); // Cache the fetched event
+          return result.value;
+        }
       } else {
         this.error = i18n.global.t('event.errors.loadById');
         console.error(result.error);
       }
+      return undefined;
     },
 
     async getByIds(ids: string[]): Promise<Event[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.event.getByIds(ids);
+
+      const result = await this.eventCache.getMany(ids, (missingIds) =>
+        this.services.event.getByIds(missingIds),
+      );
+
       this.loading = false;
       if (result.ok) {
-        return result.value
+        return result.value;
       } else {
         this.error = result.error.message || 'Không thể tải danh sách sự kiện.';
         console.error(result.error);
-        return []
+        return [];
       }
     },
 

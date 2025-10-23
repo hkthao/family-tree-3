@@ -2,6 +2,7 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { Member, MemberFilter } from '@/types';
 import { defineStore } from 'pinia';
+import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
@@ -20,6 +21,7 @@ export const useMemberStore = defineStore('member', {
     totalPages: 1,
     sortBy: [] as { key: string; order: string }[], // Sorting key and order
     editableMembers: [] as Member[], // New state for editable members
+    memberCache: new IdCache<Member>(), // Add memberCache to state
   }),
 
   getters: {},
@@ -40,6 +42,7 @@ export const useMemberStore = defineStore('member', {
 
       if (result.ok) {
         this.editableMembers = result.value.items; // Extract items from paginated result
+        this.memberCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('member.errors.load');
         console.error(result.error);
@@ -63,6 +66,7 @@ export const useMemberStore = defineStore('member', {
         this.items = result.value.items;
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
+        this.memberCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('member.errors.load');
         this.items = [];
@@ -78,6 +82,7 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.add(newItem);
       if (result.ok) {
+        this.memberCache.clear(); // Invalidate cache on add
         await this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.add');
@@ -91,6 +96,7 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.addItems(newItems);
       if (result.ok) {
+        this.memberCache.clear(); // Invalidate cache on add
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('member.errors.add');
@@ -104,6 +110,7 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.update(updatedItem);
       if (result.ok) {
+        this.memberCache.clear(); // Invalidate cache on update
        await this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.update');
@@ -117,6 +124,7 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.delete(id);
       if (result.ok) {
+        this.memberCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       } else {
         this.error = result.error.message || 'Failed to delete member.';
@@ -150,17 +158,30 @@ export const useMemberStore = defineStore('member', {
       this.currentItem = item;
     },
 
-    async getById(id: string): Promise<void> {
+    async getById(id: string): Promise<Member | undefined> {
       this.loading = true;
       this.error = null;
+
+      const cachedMember = this.memberCache.get(id);
+      if (cachedMember) {
+        this.loading = false;
+        this.currentItem = cachedMember;
+        return cachedMember;
+      }
+
       const result = await this.services.member.getById(id);
       this.loading = false;
       if (result.ok) {
-        this.currentItem = { ...(result.value as Member) };
+        if (result.value) {
+          this.currentItem = result.value;
+          this.memberCache.set(result.value); // Cache the fetched member
+          return result.value;
+        }
       } else {
         this.error = i18n.global.t('member.errors.loadById');
         console.error(result.error);
       }
+      return undefined;
     },
 
     async getByFamilyId(familyId: string): Promise<void> {
@@ -173,7 +194,11 @@ export const useMemberStore = defineStore('member', {
     async getByIds(ids: string[]): Promise<Member[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.member.getByIds(ids);
+
+      const result = await this.memberCache.getMany(ids, (missingIds) =>
+        this.services.member.getByIds(missingIds),
+      );
+
       this.loading = false;
       if (result.ok) {
         return result.value;

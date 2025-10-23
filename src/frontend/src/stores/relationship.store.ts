@@ -3,6 +3,7 @@ import type { Relationship, Result, RelationshipFilter } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
+import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 
 export const useRelationshipStore = defineStore('relationship', {
   state: () => ({
@@ -15,6 +16,7 @@ export const useRelationshipStore = defineStore('relationship', {
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
     totalPages: 0,
+    relationshipCache: new IdCache<Relationship>(), // Add relationshipCache to state
   }),
   getters: {},
   actions: {
@@ -31,6 +33,7 @@ export const useRelationshipStore = defineStore('relationship', {
         this.items = result.value.items;
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
+        this.relationshipCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('relationship.errors.load');
         console.error(result.error);
@@ -43,6 +46,7 @@ export const useRelationshipStore = defineStore('relationship', {
       this.error = null;
       const result = await this.services.relationship.add(newItem);
       if (result.ok) {
+        this.relationshipCache.clear(); // Invalidate cache on add
         await this._loadItems();
       } else {
         this.error = i18n.global.t('relationship.errors.add');
@@ -56,6 +60,7 @@ export const useRelationshipStore = defineStore('relationship', {
       this.error = null;
       const result = await this.services.relationship.update(updatedItem);
       if (result.ok) {
+        this.relationshipCache.clear(); // Invalidate cache on update
         await this._loadItems();
       } else {
         this.error = i18n.global.t('relationship.errors.update');
@@ -69,6 +74,7 @@ export const useRelationshipStore = defineStore('relationship', {
       this.error = null;
       const result = await this.services.relationship.delete(id);
       if (result.ok) {
+        this.relationshipCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       } else {
         this.error = i18n.global.t('relationship.errors.delete');
@@ -106,23 +112,40 @@ export const useRelationshipStore = defineStore('relationship', {
       this.currentItem = item;
     },
 
-    async getById(id: string): Promise<void> {
+    async getById(id: string): Promise<Relationship | undefined> {
       this.loading = true;
       this.error = null;
+
+      const cachedRelationship = this.relationshipCache.get(id);
+      if (cachedRelationship) {
+        this.loading = false;
+        this.currentItem = cachedRelationship;
+        return cachedRelationship;
+      }
+
       const result = await this.services.relationship.getById(id);
       this.loading = false;
       if (result.ok) {
-        this.currentItem = { ...(result.value as Relationship) }; // Set currentItem
+        if (result.value) {
+          this.currentItem = result.value;
+          this.relationshipCache.set(result.value); // Cache the fetched relationship
+          return result.value;
+        }
       } else {
         this.error = i18n.global.t('relationship.errors.loadById');
         console.error(result.error);
       }
+      return undefined;
     },
 
     async getByIds(ids: string[]): Promise<Relationship[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.relationship.getByIds(ids);
+
+      const result = await this.relationshipCache.getMany(ids, (missingIds) =>
+        this.services.relationship.getByIds(missingIds),
+      );
+
       this.loading = false;
       if (result.ok) {
         return result.value;
@@ -147,6 +170,7 @@ export const useRelationshipStore = defineStore('relationship', {
         const result = await this.services.relationship.addItems(newItems); // Changed
 
         if (result.ok) {
+          this.relationshipCache.clear(); // Invalidate cache on add
           await this._loadItems();
           return result; // Return the result from the service
         } else {
