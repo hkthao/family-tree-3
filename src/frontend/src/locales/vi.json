@@ -446,6 +446,8 @@
   "face.errors.noFacesDetectedForSearch": "Không tìm thấy khuôn mặt nào để tìm kiếm.",
   "face.uploadInput.selectImage": "Chọn ảnh",
   "face.recognition.saveLabelsButton": "Lưu Nhãn",
+  "face.recognition.noFacesDetected": "Không tìm thấy khuôn mặt nào trong ảnh.",
+  "face.recognition.saveSuccess": "Nhãn khuôn mặt đã được lưu thành công!",
   "face.boundingBox.labeledAs": "Được gán nhãn là {name}",
   "admin.config.title": "Cấu hình Hệ thống",
   "systemConfig.title": "Cấu hình Hệ thống",

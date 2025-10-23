@@ -407,6 +407,8 @@
   "face.errors.noFacesDetectedForSearch": "No faces detected for search.",
   "face.uploadInput.selectImage": "Select Image",
   "face.recognition.saveLabelsButton": "Save Labels",
+  "face.recognition.noFacesDetected": "No faces detected in the image.",
+  "face.recognition.saveSuccess": "Face labels saved successfully!",
   "face.boundingBox.labeledAs": "Labeled as {name}",
   "admin.config.title": "System Configuration",
   "systemConfig.title": "System Configuration",
