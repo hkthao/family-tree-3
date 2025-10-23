@@ -1,78 +1,56 @@
-Bạn là một chuyên gia .NET về kiểm thử phần mềm. Hãy giúp tôi tự động viết các Unit Test và Integration Test cho dự án ASP.NET Core theo mô hình DDD + CQRS.
+Bạn là chuyên gia lập trình C# và .NET, hiểu chuẩn XML Documentation của Microsoft, đồng thời viết comment bằng tiếng Việt chuẩn, rõ ràng.
 
-🎯 Bối cảnh:
+Tôi có một repository ASP.NET Core chưa có comment.  
+Nhiệm vụ của bạn là tự động thêm comment **bằng tiếng Việt** cho tất cả code, bao gồm:
 
-- Project sử dụng Entity Framework Core (DbContext trực tiếp, KHÔNG dùng repository pattern).
-- Framework test: xUnit + FluentAssertions.
-- Có thể sử dụng input test nhap du lieu thu cong, và AutoMoq để mock các dependency phụ (nhưng KHÔNG mock DbContext).
-- Dữ liệu test nên dùng EF InMemoryDatabase (UseInMemoryDatabase(Guid.NewGuid().ToString())) để mô phỏng database thật.
-- Mỗi test phải chạy độc lập, không dùng chung dữ liệu với test khác.
+1. **Class, struct, enum**
+2. **Properties** (kể cả class được trả về)
+3. **Method, function, controller action, service**
+4. **Tham số đầu vào** (`<param>`)
+5. **Giá trị trả về** (`<returns>`)
+6. **Exceptions nếu có** (`<exception>`)
+7. **HTTP verb** cho controller action (ví dụ GET, POST…)
 
----
+### Yêu cầu chi tiết:
+- Sử dụng tiếng Việt chuẩn, dễ hiểu, mô tả rõ ràng mục đích, chức năng.  
+- Không thay đổi logic hoặc hành vi code — chỉ thêm comment.  
+- Nếu method trả về một object, hãy thêm mô tả **từng property của object**.  
+- Đảm bảo comment cho mọi **public** và **internal** member.  
+- Trả về **file source code đã comment** hoặc patch cập nhật.
 
-### 🧩 **Yêu cầu khi viết test**
+### Ví dụ comment:
 
-1. **Phạm vi test**
-   - Viết test cho từng CommandHandler, QueryHandler, hoặc Service trong thư mục `Application.UnitTests`.
-   - Mỗi file test chỉ tập trung vào **các case quan trọng nhất**, ví dụ:
-     - Entity không tồn tại → throw `NotFoundException`.
-     - Dữ liệu hợp lệ → trả kết quả hoặc cập nhật chính xác.
-     - Dữ liệu/quyền không hợp lệ → trả lỗi phù hợp.
+#### Class + Property
+```csharp
+/// <summary>
+/// Thông tin khách hàng
+/// </summary>
+public class Customer
+{
+    /// <summary>
+    /// Tên đầy đủ của khách hàng
+    /// </summary>
+    public string FullName { get; set; }
 
-2. **Cấu trúc test**
-   - Mỗi test method phải có comment chi tiết:
-     - 🎯 Mục tiêu của test.
-     - ⚙️ Các bước (Arrange, Act, Assert).
-     - 💡 Giải thích vì sao kết quả mong đợi là đúng.
-   - Đặt tên test rõ ràng theo chuẩn:
-     - `Handle_ShouldThrowNotFoundException_WhenMemberNotFound`
-     - `Handle_ShouldUpdateMemberCorrectly_WhenValidRequest`
+    /// <summary>
+    /// Tuổi của khách hàng
+    /// </summary>
+    public int Age { get; set; }
+}
 
-3. **Giới hạn phạm vi**
-   - Chỉ viết 2–3 test case tiêu biểu cho mỗi handler.
-   - Khi implement:
-     - Viết từng test một.
-     - Chạy test, khi tất cả pass → mới chuyển sang handler tiếp theo.
+/// <summary>
+/// Lấy danh sách khách hàng theo tuổi
+/// </summary>
+/// <param name="minAge">Tuổi tối thiểu</param>
+/// <param name="maxAge">Tuổi tối đa</param>
+/// <returns>Danh sách khách hàng thỏa điều kiện</returns>
+public List<Customer> GetCustomersByAge(int minAge, int maxAge)
 
-4. **Cách setup dữ liệu**
-   - KHÔNG mock DbSet hoặc EF method như `FirstOrDefaultAsync`.
-   - Tạo dữ liệu test bằng:
-     - Thủ công (seed entity, gán Id/FK đúng), hoặc
-     - AutoFixture (nhưng phải gán FK thủ công nếu có quan hệ).
-   - Mỗi test khởi tạo một InMemoryDatabase mới để đảm bảo độc lập.
-
-5. **Tái sử dụng setup**
-   - Tạo `BaseTest` class để gom logic khởi tạo chung:
-     - DbContext (InMemory)
-     - AutoFixture config
-     - AutoMoq setup (nếu có dependency)
-   - Các test kế thừa `BaseTest` để tránh lặp code.
-
----
-
-### 🚫 **Cảnh báo quan trọng**
-
-- **KHÔNG được tự bịa hoặc suy đoán model, property, hoặc field.**
-- Chỉ được dùng **các entity, DTO, và property có thật trong mã nguồn hiện có của dự án**.
-- Nếu không chắc chắn về cấu trúc model → hãy hỏi lại hoặc tra cứu trong code trước khi viết test.
-- Không thêm thuộc tính giả như `CreatedAt`, `UpdatedAt`, `IsDeleted`, v.v. nếu không có trong model thật.
-
----
-
-### 📁 **Kết quả mong muốn**
-
-- Mỗi file test nằm trong `Application.UnitTests/<Module>/<Feature>/<FeatureName>Tests.cs`
-- Mỗi test:
-  - Chạy độc lập.
-  - Dễ hiểu cho junior developer.
-  - Có comment rõ ràng (Arrange / Act / Assert / Explain).
-  - Dùng FluentAssertions để assert.
-  - Chạy async nếu cần (`await handler.Handle(...)`).
-
----
-
-### ⚙️ **Mục tiêu cuối cùng**
-
-- Giúp tôi — một developer làm việc một mình — có thể nhanh chóng tạo test hữu ích cho từng handler mà không tốn thời gian.
-- Tập trung vào **tốc độ, tính chính xác và độ dễ hiểu**.
-- Không cần độ bao phủ tuyệt đối, chỉ cần test các case chính, đáng tin cậy, có thể chạy tự động.
+/// <summary>
+/// Xử lý GET request để lấy danh sách khách hàng theo tuổi
+/// </summary>
+/// <param name="minAge">Tuổi tối thiểu</param>
+/// <param name="maxAge">Tuổi tối đa</param>
+/// <returns>Danh sách khách hàng thỏa điều kiện</returns>
+[HttpGet("customers/by-age")]
+public List<Customer> GetCustomersByAge(int minAge, int maxAge)

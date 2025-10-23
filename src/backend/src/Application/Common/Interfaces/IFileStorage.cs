@@ -3,25 +3,25 @@ using backend.Application.Common.Models;
 namespace backend.Application.Common.Interfaces;
 
 /// <summary>
-/// Defines the interface for file storage operations.
+/// Định nghĩa giao diện cho các hoạt động lưu trữ tệp.
 /// </summary>
 public interface IFileStorage
 {
     /// <summary>
-    /// Uploads a file to the configured storage provider.
+    /// Tải lên một tệp lên nhà cung cấp lưu trữ đã cấu hình.
     /// </summary>
-    /// <param name="fileStream">The stream of the file to upload.</param>
-    /// <param name="fileName">The original name of the file.</param>
-    /// <param name="contentType">The content type of the file.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A Result containing the URL of the uploaded file on success, or an error on failure.</returns>
+    /// <param name="fileStream">Luồng của tệp cần tải lên.</param>
+    /// <param name="fileName">Tên gốc của tệp.</param>
+    /// <param name="contentType">Loại nội dung của tệp.</param>
+    /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
+    /// <returns>Một đối tượng Result chứa URL của tệp đã tải lên khi thành công, hoặc lỗi khi thất bại.</returns>
     Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Deletes a file from the configured storage provider.
+    /// Xóa một tệp khỏi nhà cung cấp lưu trữ đã cấu hình.
     /// </summary>
-    /// <param name="url">The URL of the file to delete.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A Result indicating success or failure.</returns>
+    /// <param name="url">URL của tệp cần xóa.</param>
+    /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
+    /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken);
 }

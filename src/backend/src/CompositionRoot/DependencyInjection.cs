@@ -16,8 +16,18 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace backend.CompositionRoot;
 
+/// <summary>
+/// Lớp mở rộng để đăng ký các dịch vụ gốc (Composition Root) vào bộ chứa dependency injection.
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Đăng ký tất cả các dịch vụ cần thiết cho ứng dụng, bao gồm các dịch vụ từ tầng Application và Infrastructure,
+    /// cấu hình lưu trữ tệp và xác thực Auth0.
+    /// </summary>
+    /// <param name="services">Bộ sưu tập dịch vụ để đăng ký.</param>
+    /// <param name="configuration">Cấu hình ứng dụng.</param>
+    /// <returns>Bộ sưu tập dịch vụ đã được cập nhật.</returns>
     public static IServiceCollection AddCompositionRootServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplicationServices(configuration);

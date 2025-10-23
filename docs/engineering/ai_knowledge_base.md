@@ -54,9 +54,7 @@ Phần này mô tả cách trí tuệ nhân tạo (AI) được tích hợp và 
 *   **Cách hoạt động:**
     1.  **Tải ảnh lên & Phát hiện:** Người dùng tải lên ảnh, hệ thống AI phát hiện các khuôn mặt và tạo hộp giới hạn.
     2.  **Gán nhãn khuôn mặt:** Người dùng gán nhãn cho các khuôn mặt được phát hiện với các thành viên hiện có hoặc tạo thành viên mới.
-    3.  **Tìm kiếm khuôn mặt:** Người dùng tải lên một ảnh khuôn mặt, hệ thống tìm kiếm các thành viên phù hợp trong cơ sở dữ liệu.
 
-    *Lưu ý: Tính năng này hiện đang trong giai đoạn phát triển và sẽ được triển khai trong các phiên bản tương lai.*
 
 ## 3. Quản lý và cấu hình AI
 

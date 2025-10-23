@@ -2,11 +2,27 @@
 
 namespace backend.Application.Common.Behaviours;
 
+/// <summary>
+/// Hành vi pipeline để thực hiện xác thực (validation) cho các yêu cầu.
+/// </summary>
+/// <typeparam name="TRequest">Kiểu của yêu cầu.</typeparam>
+/// <typeparam name="TResponse">Kiểu của phản hồi.</typeparam>
 public class ValidationBehaviour<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
+    /// <summary>
+    /// Danh sách các trình xác thực cho yêu cầu.
+    /// </summary>
     private readonly IEnumerable<IValidator<TRequest>> _validators = validators;
 
+    /// <summary>
+    /// Xử lý xác thực cho yêu cầu.
+    /// </summary>
+    /// <param name="request">Yêu cầu hiện tại.</param>
+    /// <param name="next">Delegate để chuyển yêu cầu đến handler tiếp theo trong pipeline.</param>
+    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
+    /// <returns>Phản hồi từ handler tiếp theo.</returns>
+    /// <exception cref="ValidationException">Ném ra nếu có lỗi xác thực.</exception>
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         if (_validators.Any())

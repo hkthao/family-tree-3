@@ -16,8 +16,17 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure;
 
+/// <summary>
+/// Lớp mở rộng để đăng ký các dịch vụ cơ sở hạ tầng (Infrastructure) vào bộ chứa dependency injection.
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Đăng ký các dịch vụ cần thiết cho tầng cơ sở hạ tầng của ứng dụng.
+    /// </summary>
+    /// <param name="services">Bộ sưu tập dịch vụ để đăng ký.</param>
+    /// <param name="configuration">Cấu hình ứng dụng.</param>
+    /// <returns>Bộ sưu tập dịch vụ đã được cập nhật.</returns>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))

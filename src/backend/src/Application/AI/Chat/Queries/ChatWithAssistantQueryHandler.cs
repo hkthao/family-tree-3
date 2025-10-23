@@ -6,6 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.AI.Chat.Queries;
 
+/// <summary>
+/// Xử lý truy vấn ChatWithAssistantQuery để tạo phản hồi trò chuyện từ trợ lý AI.
+/// </summary>
 public class ChatWithAssistantQueryHandler(
     IChatProviderFactory chatProviderFactory,
     IEmbeddingProviderFactory embeddingProviderFactory,
@@ -13,12 +16,34 @@ public class ChatWithAssistantQueryHandler(
     IConfigProvider configProvider,
     ILogger<ChatWithAssistantQueryHandler> logger) : IRequestHandler<ChatWithAssistantQuery, Result<ChatResponse>>
 {
+    /// <summary>
+    /// Nhà máy tạo nhà cung cấp trò chuyện AI.
+    /// </summary>
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
+    /// <summary>
+    /// Nhà máy tạo nhà cung cấp nhúng (embedding) AI.
+    /// </summary>
     private readonly IEmbeddingProviderFactory _embeddingProviderFactory = embeddingProviderFactory;
+    /// <summary>
+    /// Nhà máy tạo kho lưu trữ vector.
+    /// </summary>
     private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
+    /// <summary>
+    /// Đối tượng ghi log.
+    /// </summary>
     private readonly ILogger<ChatWithAssistantQueryHandler> _logger = logger;
+    /// <summary>
+    /// Nhà cung cấp cấu hình ứng dụng.
+    /// </summary>
     private readonly IConfigProvider _configProvider = configProvider;
 
+    /// <summary>
+    /// Xử lý truy vấn ChatWithAssistantQuery để tạo phản hồi trò chuyện.
+    /// </summary>
+    /// <param name="request">Truy vấn chứa tin nhắn người dùng và ID phiên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
+    /// <returns>Một đối tượng Result chứa ChatResponse hoặc thông báo lỗi.</returns>
+    /// <exception cref="Exception">Ném ra nếu có lỗi trong quá trình tạo phản hồi trò chuyện.</exception>
     public async Task<Result<ChatResponse>> Handle(ChatWithAssistantQuery request, CancellationToken cancellationToken)
     {
         try
