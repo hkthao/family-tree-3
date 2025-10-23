@@ -45,7 +45,7 @@
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id" />
+      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id" imageExpr="avatarUrl" />
     </template>
 
     <!-- Date of Birth column -->

@@ -1,7 +1,7 @@
 import { EventType } from './event-type.d.ts';
 
 export interface Event {
-  id?: string;
+  id: string;
   name: string;
   description?: string;
   startDate: Date | null;
