@@ -66,6 +66,12 @@ const router = createRouter({
               component: () => import('@/views/members/MemberEditView.vue'),
               meta: { breadcrumb: 'member.form.editTitle' },
             },
+            {
+              path: 'biography/:memberId',
+              name: 'MemberBiography',
+              component: () => import('@/views/members/MemberBiographyView.vue'),
+              meta: { breadcrumb: 'aiBiography.generator.title' },
+            },
           ],
         },
         {

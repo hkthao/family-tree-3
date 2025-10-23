@@ -55,7 +55,7 @@ const navigateToEditMember = (member: Member) => {
 };
 
 const navigateToAIBiography = (member: Member) => {
-  router.push(`/ai/biography/${member.id}`);
+  router.push(`/members/biography/${member.id}`);
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
