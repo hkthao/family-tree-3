@@ -1,179 +1,179 @@
-# Frontend Unit Test Task - Hướng dẫn kiểm thử Pinia Stores và Vue Components với Service Dependencies
+# Frontend Unit Test Task - Hướng dẫn kiểm thử Pinia Stores và Vue Components
 
 ## Vấn đề
 
-Trước đây, các unit test cho Pinia store và Vue components thường gặp lỗi `TypeError: Cannot read properties of undefined` hoặc tương tự khi truy cập các service (ví dụ: `this.services.relationship`) trong các action của store, hoặc khi tương tác với các component con và thư viện UI (như Vuetify). Điều này cho thấy các dependency service, Pinia store instances, hoặc các component/thư viện UI không được inject hoặc mock đúng cách trong môi trường test.
+Unit test cho Pinia store và Vue component thường gặp lỗi khi tương tác với các dependency như services, store instances khác, hoặc các thư viện UI (Vuetify). Lỗi thường là `TypeError: Cannot read properties of undefined` hoặc component không render đúng như mong đợi. Điều này xảy ra do các dependency không được inject hoặc mock đúng cách trong môi trường test.
 
-## Giải pháp và Các điểm quan trọng đã học
+## Giải pháp và Kinh nghiệm
 
-Để đảm bảo các Pinia store và Vue components được kiểm thử nhận được các dependency đã được mock đúng cách, chúng ta cần tuân thủ các nguyên tắc sau:
+### 1. Mocking Dependencies
 
-### 1. Mock toàn cục `createServices`
+#### 1.1. Mock Services
 
-Sử dụng `vi.mock` để mock toàn bộ module `@/services/service.factory`. Hàm `createServices` được mock sẽ trả về một đối tượng chứa tất cả các service đã được mock. Các service không được sử dụng trực tiếp bởi store hoặc component đang kiểm thử có thể được mock là các đối tượng rỗng.
+Sử dụng `vi.mock` để mock toàn bộ module `@/services/service.factory`. Hàm `createServices` được mock sẽ trả về một đối tượng chứa các service đã được mock.
 
 ```typescript
-// Mock the IEventService (hoặc bất kỳ service nào khác)
+// Mock các hàm của service
 const mockFetch = vi.fn();
 const mockGetById = vi.fn();
-// ... các mock function khác cho service cụ thể
 
-// Mock toàn bộ service factory để kiểm soát việc inject service
+// Mock service factory
 vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
-    event: { // Tên service tương ứng với store đang test
+    event: { // Tên service
       fetch: mockFetch,
       getById: mockGetById,
-      // ... các mock function đã định nghĩa
     },
-    // Thêm các service khác dưới dạng đối tượng rỗng nếu chúng không được sử dụng trực tiếp
-    ai: {},
-    auth: {},
-    // ... các service khác
+    ai: {}, // Mock rỗng cho các service không dùng
   })),
 }));
 ```
 
-### 2. Mock `vue-router` và `vue-i18n`
+#### 1.2. Mock `vue-router`
 
-Khi component hoặc store sử dụng `useRouter` hoặc `useI18n`, cần mock chúng để kiểm soát hành vi điều hướng và dịch thuật.
+- **Mock cơ bản:** Nếu chỉ cần mock `useRouter` để kiểm tra điều hướng (`push`).
 
 ```typescript
-// Mock vue-router
 const mockPush = vi.fn();
 vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}));
-
-// Mock vue-i18n (cho component sử dụng useI18n)
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn((key) => key), // Mock t function to return the key
-  }),
-}));
-
-// Mock @/plugins/i18n (cho store hoặc nơi khác sử dụng i18n.global.t)
-vi.mock('@/plugins/i18n', () => ({
-  default: {
-    global: {
-      t: vi.fn((key) => key),
-    },
-  },
+  useRouter: () => ({ push: mockPush }),
+  useRoute: () => ({ params: {} }), // Cung cấp route mặc định
 }));
 ```
 
-### 3. Setup `beforeEach` nhất quán cho Store Tests
+- **Mock `useRoute` với `ref` cho Watchers:** Khi component theo dõi (`watch`) sự thay đổi của `route.params`, `useRoute` phải trả về một đối tượng reactive. Sử dụng `ref` từ `vue` để tạo mock này.
 
-Trong mỗi `beforeEach` block của store tests, hãy đảm bảo các bước sau được thực hiện:
+```typescript
+import { ref } from 'vue';
 
-*   **Khởi tạo Pinia:** `const pinia = createTestingPinia({ createSpy: vi.fn });`
-*   **Khởi tạo Store:** `store = useEventStore(pinia);` (thay `useEventStore` bằng store tương ứng và **truyền instance `pinia` vào**).
-*   **Reset Store State:** `store.$reset();` để đảm bảo trạng thái sạch cho mỗi test.
-*   **Inject Service đã Mock:** `store.services = createServices('mock');` Đây là bước quan trọng để inject các service đã được mock toàn cục vào instance của store. Tham số `'mock'` đảm bảo rằng phiên bản mock của `createServices` được gọi.
-*   **Reset Mock Functions:** `mockFetch.mockReset();` (và các mock function khác) để đảm bảo tính độc lập giữa các test.
-*   **Thiết lập giá trị trả về mặc định cho Mock:** `mockDelete.mockResolvedValue(ok(undefined));` để tránh lỗi cho các hành động không phải là trọng tâm của test hiện tại. Các mock cho `_loadItems` nên được đặt trong từng `it` block nếu hành vi của nó thay đổi giữa các test.
+const route = ref({ params: { id: '1' } });
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+  useRoute: () => route.value,
+}));
+
+// Trong test, thay đổi route bằng cách thay đổi .value
+route.value.params.id = '2';
+await wrapper.vm.$nextTick(); // Chờ watcher cập nhật
+```
+
+#### 1.3. Mock `vue-i18n`
+
+Mock `useI18n` và plugin `i18n` để kiểm soát việc dịch thuật.
+
+```typescript
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: (key) => key }),
+}));
+
+vi.mock('@/plugins/i18n', () => ({
+  default: { global: { t: (key) => key } },
+}));
+```
+
+#### 1.4. Mock API trình duyệt và Thư viện bên thứ ba
+
+JSDOM (môi trường test của Vitest) không có sẵn một số API của trình duyệt như `ResizeObserver` (được Vuetify sử dụng). Cần mock chúng trong file setup test (`tests/setup.ts`).
+
+```typescript
+// tests/setup.ts
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock);
+```
+
+### 2. Setup Test
+
+#### 2.1. `beforeEach` cho Store Tests
+
+- **Khởi tạo Pinia và Store:** Luôn truyền `pinia` instance vào `useStore`.
+- **Inject Services:** Gán các service đã mock vào `store.services`.
 
 ```typescript
 beforeEach(() => {
   vi.clearAllMocks();
-  const pinia = createTestingPinia({
-    createSpy: vi.fn,
-  });
-  store = useEventStore(pinia); // Truyền pinia instance
+  const pinia = createTestingPinia({ createSpy: vi.fn });
+  store = useEventStore(pinia); // Truyền pinia
   store.$reset();
-  // Inject thủ công các service đã được mock
   // @ts-ignore
   store.services = createServices('mock');
-  // Reset các mock trước mỗi test
   mockFetch.mockReset();
-  mockGetById.mockReset();
-  // ... reset các mock function khác
-  mockDelete.mockResolvedValue(ok(undefined));
-  mockAddItems.mockResolvedValue(ok(['new-id-1']));
-  // mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents)); // Đặt trong từng it block nếu cần
 });
 ```
 
-### 4. Setup `beforeEach` nhất quán cho Component Tests
+#### 2.2. `beforeEach` cho Component Tests
 
-Khi test Vue components sử dụng Pinia stores và Vuetify, cần cấu hình `mount` options một cách cẩn thận:
-
-*   **Khởi tạo Pinia và Vuetify:** Tạo instance `pinia` với `createTestingPinia({ createSpy: vi.fn })` và `vuetify` với `createVuetify()`. Lưu ý rằng `createTestingPinia` cần được gọi trực tiếp trong `plugins` array của `mount` để đảm bảo Pinia được khởi tạo đúng cách cho mỗi test.
-*   **Truyền vào `global.plugins`:** Đảm bảo cả `createTestingPinia({ createSpy: vi.fn })` và `vuetify` được truyền vào mảng `plugins` trong `global` options của `mount`.
+- **Chia sẻ `pinia` instance:** Khai báo `pinia` ở scope của `describe` và khởi tạo nó trong `beforeEach`. Sau đó, truyền cùng một `pinia` instance này vào `plugins` của `mount`.
+- **Lỗi thường gặp:** Nếu `mount` sử dụng `createTestingPinia` mới, component sẽ có một store khác với store trong test, dẫn đến mock không hoạt động.
 
 ```typescript
-  let familyStore: ReturnType<typeof useFamilyStore>;
-  let notificationStore: ReturnType<typeof useNotificationStore>;
+describe('MyComponent.vue', () => {
+  let pinia: ReturnType<typeof createTestingPinia>;
   let vuetify: any;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Khởi tạo Pinia và các store
-    const pinia = createTestingPinia({
-      createSpy: vi.fn,
-    });
-    familyStore = useFamilyStore(pinia); // Truyền pinia instance
-    notificationStore = useNotificationStore(pinia); // Truyền pinia instance
-
-    // Khởi tạo Vuetify
+    pinia = createTestingPinia({ createSpy: vi.fn });
     vuetify = createVuetify();
+    // ... mock stores
   });
 
-  it('should render correctly', () => {
-    const wrapper = mount(FamilyAddView, {
+  it('should work', () => {
+    const wrapper = mount(MyComponent, {
       global: {
-        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify], // Truyền cả pinia và vuetify
+        plugins: [pinia, vuetify], // Dùng chung instance
       },
     });
-    // ... assertions
   });
-```
-
-### 5. Mocking Component Refs và Methods
-
-Khi một component cha tương tác với các method của component con thông qua `ref` (ví dụ: `familyFormRef.value.validate()`), cần mock các method này trên instance của component con. Điều này được thực hiện bằng cách gán trực tiếp các `vi.fn()` đã mock vào các thuộc tính tương ứng của `familyForm.vm`.
-
-```typescript
-    const familyForm = wrapper.findComponent(FamilyForm);
-    // Gán mock component instance vào ref của component cha
-    (wrapper.vm as any).familyFormRef = familyForm.vm;
-
-    // Mock các method của component con
-    (familyForm.vm as any).validate = vi.fn().mockResolvedValue(true);
-    (familyForm.vm as any).getFormData = vi.fn().mockReturnValue({
-      name: 'Test Family',
-      description: 'A family for testing',
-    });
-```
-
-### 6. Cấu trúc Test Actions
-
-*   Mỗi action của store hoặc hành vi của component nên được kiểm thử trong một `describe` block riêng.
-*   Sử dụng `it` block để mô tả các trường hợp test cụ thể (thành công, thất bại, validation).
-*   Sử dụng `mockResolvedValue` hoặc `mockRejectedValue` trên các mock function của service hoặc component con để mô phỏng phản hồi.
-*   Sử dụng `expect` để kiểm tra:
-    *   Sự thay đổi trạng thái của store (`store.loading`, `store.error`, `store.items`).
-    *   Giá trị trả về của action.
-    *   Việc các mock function của service hoặc component con có được gọi đúng cách hay không (`toHaveBeenCalledTimes`, `toHaveBeenCalledWith`).
-
-### 7. Xử lý lỗi
-
-*   Luôn bao gồm các test case xử lý lỗi, kiểm tra rằng `store.error` được thiết lập và `store.loading` được reset về `false` khi có lỗi từ service.
-
-```typescript
-it('should handle load items failure', async () => {
-  const errorMessage = 'Failed to load events.';
-  mockLoadItems.mockResolvedValue(err({ message: errorMessage } as ApiError));
-
-  await store._loadItems();
-
-  expect(store.loading).toBe(false);
-  expect(store.error).toBeTruthy();
-  expect(store.items).toEqual([]);
-  expect(mockLoadItems).toHaveBeenCalledTimes(1);
 });
 ```
 
-Bằng cách tuân thủ các nguyên tắc này, chúng ta có thể tạo ra các unit test mạnh mẽ và đáng tin cậy cho các Pinia store và Vue components có dependency service, đảm bảo rằng các store và component hoạt động đúng như mong đợi trong mọi tình huống.
+### 3. Viết Test cho Component
+
+#### 3.1. Xử lý Tác vụ Bất đồng bộ
+
+- **Sử dụng `flushPromises`:** Khi test các hành động bất đồng bộ (ví dụ: gọi API trong `onMounted`), sử dụng `await flushPromises()` từ `@vue/test-utils` để đảm bảo tất cả các promise đã được giải quyết trước khi thực hiện assertion.
+- **Tránh `vi.runOnlyPendingTimers()`:** Hàm này chỉ dành cho timers (`setTimeout`, `setInterval`), không dùng cho promise.
+
+```typescript
+it('should render data after mount', async () => {
+  const wrapper = mount(MyComponent, { /* ... */ });
+  await flushPromises(); // Chờ onMounted và các promise khác hoàn tất
+  expect(wrapper.text()).toContain('dữ liệu đã render');
+});
+```
+
+#### 3.2. Lựa chọn Element để Tương tác
+
+- **Ưu tiên `data-testid`:** Thay vì dùng class CSS hoặc cấu trúc DOM dễ thay đổi, hãy thêm thuộc tính `data-testid` vào các element quan trọng trong component.
+- **Cách dùng:**
+  - Trong component: `<v-btn data-testid="button-submit">Lưu</v-btn>`
+  - Trong test: `await wrapper.find('[data-testid="button-submit"]').trigger('click');`
+
+#### 3.3. Cấu trúc Test Method rõ ràng
+
+Sử dụng comment để làm rõ mục tiêu, các bước, và lý do cho kết quả mong đợi.
+
+```typescript
+it('should navigate to edit page when Edit button is clicked', async () => {
+  // Mục tiêu: Đảm bảo nút "Sửa" điều hướng đúng trang.
+  
+  // Arrange: Khởi tạo component.
+  const wrapper = mount(MyComponent, { /* ... */ });
+  await flushPromises();
+
+  // Act: Tìm và click nút "Sửa".
+  await wrapper.find('[data-testid="button-edit"]').trigger('click');
+
+  // Assert: Kiểm tra router.push được gọi đúng.
+  expect(mockPush).toHaveBeenCalledWith('/edit/1');
+
+  // Giải thích: Nút "Sửa" là một phần quan trọng của luồng CRUD.
+});
+```
+
+Bằng cách tuân thủ các nguyên tắc này, unit test sẽ trở nên mạnh mẽ, dễ bảo trì và ít bị ảnh hưởng bởi các thay đổi về cấu trúc UI.

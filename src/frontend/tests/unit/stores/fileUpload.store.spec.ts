@@ -1,8 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useFileUploadStore } from '@/stores/fileUpload.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import { ok } from '@/types';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IFileUploadService
@@ -45,7 +44,6 @@ describe('fileUpload.store', () => {
     store = useFileUploadStore();
     store.$reset();
     // Inject the mocked services
-    // @ts-ignore
     store.services = createServices('mock');
 
     // Reset mocks before each test

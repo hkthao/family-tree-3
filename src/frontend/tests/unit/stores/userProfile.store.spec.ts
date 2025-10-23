@@ -5,7 +5,6 @@ import { ok, err } from '@/types';
 import type { UserProfile } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the IUserProfileService
 const mockGetCurrentUserProfile = vi.fn();
@@ -71,7 +70,6 @@ describe('userProfile.store', () => {
     store = useUserProfileStore();
     store.$reset();
     // Inject the mocked services
-    // @ts-ignore
     store.services = createServices('mock');
 
     // Reset mocks before each test

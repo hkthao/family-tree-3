@@ -6,10 +6,10 @@
     </v-card-title>
     <v-card-text>
       <v-tabs v-model="selectedTab" class="mb-4">
-        <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
-        <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
-        <v-tab value="calendar">{{ t('event.view.calendar') }}</v-tab>
-        <v-tab value="family-tree">{{ t('family.tree.title') }}</v-tab>
+        <v-tab value="general" data-testid="tab-general">{{ t('member.form.tab.general') }}</v-tab>
+        <v-tab value="timeline" data-testid="tab-timeline">{{ t('member.form.tab.timeline') }}</v-tab>
+        <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
+        <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="selectedTab">
@@ -36,10 +36,10 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="gray" @click="closeView">
+      <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="navigateToEditFamily(family.id)">
+      <v-btn color="primary" @click="navigateToEditFamily(family.id)" data-testid="button-edit">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>

@@ -5,7 +5,6 @@ import { ok, err } from '@/types';
 import type { SystemConfig } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the ISystemConfigService
 const mockGetSystemConfigs = vi.fn();
@@ -57,7 +56,6 @@ describe('systemConfig.store', () => {
     store = useSystemConfigStore();
     store.$reset();
     // Inject the mocked services
-    // @ts-ignore
     store.services = createServices('mock');
 
     // Reset mocks before each test

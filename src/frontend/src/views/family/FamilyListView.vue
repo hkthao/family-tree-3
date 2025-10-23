@@ -22,8 +22,6 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { useMemberStore } from '@/stores/member.store';
-import { useEventStore } from '@/stores/event.store';
 import { FamilySearch, FamilyList, NLFamilyPopup } from '@/components/family';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -34,8 +32,6 @@ const { t } = useI18n();
 const router = useRouter();
 
 const familyStore = useFamilyStore();
-const memberStore = useMemberStore();
-const eventStore = useEventStore();
 const { items } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
 

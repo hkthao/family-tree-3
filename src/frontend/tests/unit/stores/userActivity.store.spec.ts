@@ -46,7 +46,6 @@ describe('userActivity.store', () => {
     store = useUserActivityStore();
     store.$reset();
     // Inject the mocked services
-    // @ts-ignore
     store.services = createServices('mock');
 
     // Reset mocks before each test

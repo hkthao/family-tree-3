@@ -4,18 +4,9 @@ import { createTestingPinia } from '@pinia/testing';
 import { setActivePinia } from 'pinia';
 import FamilyListView from '@/views/family/FamilyListView.vue';
 import { useFamilyStore } from '@/stores/family.store';
-import { useNotificationStore } from '@/stores/notification.store';
-
-vi.mock('@/stores/notification.store', () => ({
-  useNotificationStore: vi.fn(() => ({
-    snackbar: { show: false, message: '', color: '' },
-    showSnackbar: vi.fn(),
-  })),
-}));
 import { useMemberStore } from '@/stores/member.store';
 import { useEventStore } from '@/stores/event.store';
-import { useRouter } from 'vue-router';
-import { nextTick, ref } from 'vue';
+import { nextTick } from 'vue';
 import { createI18n } from 'vue-i18n';
 import {
   FamilyVisibility,
@@ -25,7 +16,13 @@ import {
   Gender,
   EventType,
 } from '@/types';
-import type { Mock } from 'vitest';
+
+vi.mock('@/stores/notification.store', () => ({
+  useNotificationStore: vi.fn(() => ({
+    snackbar: { show: false, message: '', color: '' },
+    showSnackbar: vi.fn(),
+  })),
+}));
 // Mock child components
 vi.mock('@/components/family', () => ({
   FamilySearch: { name: 'FamilySearch', template: '<div>FamilySearch</div>' },
@@ -56,9 +53,6 @@ vi.mock('vue-router', () => ({
 
 describe('FamilyListView.vue', () => {
   let familyStore: ReturnType<typeof useFamilyStore>;
-  let notificationStore: ReturnType<typeof useNotificationStore>;
-  let router: ReturnType<typeof useRouter>;
-
   const mockFamily: Family = {
     id: 'family123',
     name: 'Test Family',
@@ -108,8 +102,6 @@ describe('FamilyListView.vue', () => {
   beforeEach(() => {
     setActivePinia(pinia);
     familyStore = useFamilyStore();
-    notificationStore = useNotificationStore();
-    router = useRouter();
 
     vi.clearAllMocks();
     mockPush.mockClear();
@@ -368,7 +360,6 @@ describe('FamilyListView.vue', () => {
       familyStore = useFamilyStore();
       const memberStore = useMemberStore();
       const eventStore = useEventStore();
-      notificationStore = useNotificationStore();
 
       familyStore.addItem = vi.fn().mockResolvedValue(ok(mockFamily));
       memberStore.addItem = vi.fn().mockResolvedValue(ok(mockMember));

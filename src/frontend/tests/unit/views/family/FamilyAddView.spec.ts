@@ -5,7 +5,6 @@ import { createTestingPinia } from '@pinia/testing';
 import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyForm } from '@/components/family';
-import type { Family } from '@/types';
 import { createVuetify } from 'vuetify';
 
 // Mock vue-router
@@ -47,18 +46,9 @@ vi.mock('@/components/family', () => ({
 }));
 
 describe('FamilyAddView.vue', () => {
-  let familyStore: ReturnType<typeof useFamilyStore>;
-  let notificationStore: ReturnType<typeof useNotificationStore>;
   let vuetify: any;
-
   beforeEach(() => {
     vi.clearAllMocks();
-    const pinia = createTestingPinia({
-      createSpy: vi.fn,
-    });
-    familyStore = useFamilyStore(pinia);
-    notificationStore = useNotificationStore(pinia);
-
     // Initialize Vuetify
     vuetify = createVuetify();
 
@@ -68,7 +58,7 @@ describe('FamilyAddView.vue', () => {
   });
 
   it('should add a family and show success notification on successful save', async () => {
-    // Mục tiêu của test: Đảm bảo rằng khi người dùng thêm một gia đình thành công, 
+    // Mục tiêu của test: Đảm bảo rằng khi người dùng thêm một gia đình thành công,
     // thông báo thành công sẽ hiển thị và ứng dụng sẽ điều hướng về trang danh sách gia đình.
 
     // Các bước (Arrange, Act, Assert):

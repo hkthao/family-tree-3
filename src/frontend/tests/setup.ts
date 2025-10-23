@@ -8,3 +8,12 @@ Object.defineProperty(global.URL, 'createObjectURL', {
 
 // Mock console.error globally to prevent test output pollution
 vi.spyOn(console, 'error').mockImplementation(() => {});
+
+// Mock ResizeObserver
+const ResizeObserverMock = vi.fn(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+vi.stubGlobal('ResizeObserver', ResizeObserverMock);

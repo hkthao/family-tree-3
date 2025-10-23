@@ -5,7 +5,6 @@ import { ok, err } from '@/types';
 import { RelationshipType, type Family, type Member, type Event, type Relationship, EventType } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the INaturalLanguageInputService
 const mockGenerateFamilyData = vi.fn();
@@ -61,7 +60,6 @@ describe('naturalLanguageInput.store', () => {
     store = useNaturalLanguageInputStore();
     store.$reset();
     // Inject the mocked services
-    // @ts-ignore
     store.services = createServices('mock');
 
     // Reset mocks before each test

@@ -6,7 +6,6 @@ import type { UserPreference } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { Theme, Language } from '@/types';
 import { createServices } from '@/services/service.factory';
-import i18n from '@/plugins/i18n';
 
 // Mock the IUserPreferenceService
 const mockGetUserPreferences = vi.fn();
@@ -73,7 +72,6 @@ describe('userPreference.store', () => {
     store.$reset();
     store.preferences = initialPreferences;
     // Inject the mocked services
-    // @ts-ignore
     store.services = createServices('mock');
 
     // Reset mocks before each test
