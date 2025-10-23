@@ -63,7 +63,7 @@ jobs:
         context: ./src/backend
         file: src/infra/Dockerfile.backend
         push: false
-        tags: your-dockerhub-username/family-tree-backend:latest
+        tags: hkthao/family-tree-backend:latest
         outputs: type=docker,dest=/tmp/backend-image.tar
 
     - name: Build frontend Docker image
@@ -72,7 +72,7 @@ jobs:
         context: ./src/frontend
         file: src/infra/Dockerfile.frontend
         push: false
-        tags: your-dockerhub-username/family-tree-frontend:latest
+        tags: hkthao/family-tree-frontend:latest
         outputs: type=docker,dest=/tmp/frontend-image.tar
 
     - name: Upload backend Docker image artifact
@@ -90,7 +90,6 @@ jobs:
   docker-push:
     needs: docker-build
     runs-on: ubuntu-latest
-    if: false # Temporarily skip pushing
 
     steps:
     - name: Download backend Docker image artifact
