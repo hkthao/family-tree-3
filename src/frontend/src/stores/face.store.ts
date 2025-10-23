@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
-import type { DetectedFace, SearchResult, Member } from '@/types';
+import type { DetectedFace, SearchResult, Member, Result } from '@/types';
 import i18n from '@/plugins/i18n'; // For localization
+import type { ApiError } from '@/plugins/axios';
 
 interface FaceState {
   uploadedImage: string | null; // Base64 or URL of the uploaded image
@@ -35,7 +36,7 @@ export const useFaceStore = defineStore('face', {
 
   actions: {
     // Action to handle image upload and face detection
-    async detectFaces(imageFile: File): Promise<void> {
+    async detectFaces(imageFile: File): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -56,14 +57,17 @@ export const useFaceStore = defineStore('face', {
             embedding: face.embedding, // Include embedding
             status: face.memberId ? 'recognized' : 'unrecognized',
           }));
+          return { ok: true, value: undefined };
         } else {
           this.error =
             result.error?.message ||
             i18n.global.t('face.errors.detectionFailed');
+          return { ok: false, error: result.error };
         }
       } catch (err: any) {
         this.error =
           err.message || i18n.global.t('face.errors.unexpectedError');
+        return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.loading = false;
       }
@@ -106,7 +110,7 @@ export const useFaceStore = defineStore('face', {
     },
 
     // Action to save all face labels to the backend
-    async saveFaceLabels(): Promise<boolean> {
+    async saveFaceLabels(): Promise<Result<void, ApiError>> {
       this.loading = true;
       this.error = null;
       try {
@@ -132,7 +136,9 @@ export const useFaceStore = defineStore('face', {
         const imageId = this.uploadedImageId; // You need to add uploadedImageId to your state
 
         if (!imageId) {
-          throw new Error('Image ID is missing. Cannot save face labels.');
+          const errorMessage = 'Image ID is missing. Cannot save face labels.';
+          this.error = errorMessage;
+          return { ok: false, error: { message: errorMessage } as ApiError };
         }
 
         const result = await this.services.face.saveLabels(faceLabels, imageId);
@@ -142,67 +148,28 @@ export const useFaceStore = defineStore('face', {
           this.detectedFaces.forEach((face) => {
             if (face.memberId) face.status = 'recognized';
           });
-          return true;
+          return { ok: true, value: undefined };
         } else {
           this.error =
             result.error?.message ||
             i18n.global.t('face.errors.saveMappingFailed');
-          return false;
+          return { ok: false, error: result.error };
         }
       } catch (err: any) {
         this.error =
           err.message || i18n.global.t('face.errors.unexpectedError');
-        return false;
+        return { ok: false, error: { message: this.error } as ApiError };
       } finally {
         this.loading = false;
       }
     },
 
-    // Action to search for members by a single face image
-    async searchByFace(_imageFile: File): Promise<void> {
-      this.loading = true;
-      this.error = null;
-      this.faceSearchResults = [];
-      try {
-        // Simulate API call
-        // const result: Result<SearchResult[], Error> = await this.services.face.search(imageFile);
-        // For now, simulate with mock data
-        const mockSearchResults: SearchResult[] = [
-          {
-            member: {
-              id: 'member123',
-              fullName: 'John Doe',
-              avatarUrl: 'path/to/john.jpg',
-            },
-            confidence: 0.95,
-          },
-          {
-            member: {
-              id: 'member456',
-              fullName: 'Jane Smith',
-              avatarUrl: 'path/to/jane.jpg',
-            },
-            confidence: 0.8,
-          },
-        ];
-        this.faceSearchResults = mockSearchResults; // Replace with actual API result
 
-        // if (result.ok) {
-        //   this.faceSearchResults = result.value;
-        // } else {
-        //   this.error = result.error?.message || i18n.global.t('face.errors.searchFailed');
-        // }
-      } catch (err: any) {
-        this.error =
-          err.message || i18n.global.t('face.errors.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
 
     // Reset the store state
     resetState(): void {
       this.uploadedImage = null;
+      this.uploadedImageId = null;
       this.detectedFaces = [];
       this.selectedFaceId = undefined;
       this.faceSearchResults = [];

@@ -218,7 +218,7 @@ export class MockEventService implements IEventService {
     }
   }
 
-  async addMultiple(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
+  async addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
     try {
       const newIds: string[] = [];
       newItems.forEach(newItem => {
