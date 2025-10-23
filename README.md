@@ -1,65 +1,90 @@
 # Dự án Cây Gia Phả (Family Tree Project)
 
-Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình, cho phép xây dựng, quản lý và trực quan hóa cây gia phả một cách dễ dàng.
+Một hệ thống quản lý gia phả chuyên nghiệp cho phép bạn xây dựng, quản lý và trực quan hóa cây gia phả của gia đình một cách dễ dàng.
 
----
+## ✨ Tính Năng Chính
 
-## ✨ Tính Năng Chính (Features)
+-   **Quản lý Gia đình/Dòng họ:** Tạo, xem, chỉnh sửa và quản lý thông tin cho nhiều gia đình hoặc dòng họ khác nhau.
+-   **Quản lý Thành viên:** Thêm, sửa, xóa và xem thông tin chi tiết cho từng thành viên (tên, ngày sinh/mất, giới tính, nghề nghiệp, v.v.).
+-   **Quản lý Mối quan hệ:** Thiết lập các mối quan hệ (cha/mẹ, vợ/chồng, con) giữa các thành viên, hỗ trợ các mối quan hệ phức tạp.
+-   **Quản lý Sự kiện:** Thêm, sửa, xóa và xem các sự kiện quan trọng của gia đình (sinh, kết hôn, mất, họp mặt).
+-   **Trực quan hóa Cây Gia Phả:** Xem cây gia phả dưới dạng một biểu đồ tương tác có khả năng phóng to, di chuyển, lọc và nhiều kiểu hiển thị khác nhau.
+-   **Tìm kiếm & Lọc:** Dễ dàng tìm kiếm thành viên và dòng họ theo tên, ngày sinh, giới tính và các tiêu chí khác.
+-   **Đa ngôn ngữ:** Giao diện hỗ trợ cả tiếng Việt và tiếng Anh.
+-   **Xuất/Nhập dữ liệu:** Hỗ trợ xuất/nhập cây gia phả theo các định dạng phổ biến (ví dụ: GEDCOM, PDF).
+-   **Báo cáo & Thống kê:** Cung cấp các báo cáo thống kê chi tiết về gia phả.
+-   **Tích hợp AI (Kế hoạch)**: Gợi ý tiểu sử, nhận diện khuôn mặt để tự động gắn thẻ.
 
-- **Quản lý Dòng họ/Gia đình:** Tạo và quản lý thông tin nhiều dòng họ hoặc gia đình khác nhau.
-- **Quản lý Thành viên:** Thêm, sửa, xóa thông tin chi tiết của từng thành viên (họ tên, ngày sinh/mất, thế hệ,...).
-- **Quản lý Quan hệ:** Thiết lập các mối quan hệ (cha/mẹ, vợ/chồng, con) giữa các thành viên.
-- **Trực quan hóa Cây Gia Phả:** Xem cây gia phả dưới dạng biểu đồ có thể tương tác (zoom, kéo, lọc).
-- **Tìm kiếm & Lọc:** Dễ dàng tìm kiếm thành viên theo tên, thế hệ và các tiêu chí khác.
-- **Đa ngôn ngữ:** Hỗ trợ giao diện tiếng Việt và tiếng Anh.
+## 🛠️ Công Nghệ Sử Dụng
 
-## 🛠️ Công Nghệ Sử Dụng (Tech Stack)
+-   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation (Authentication handled by Auth0)
+-   **Frontend:** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
+-   **Cơ sở dữ liệu:** MySQL
+-   **Triển khai:** Docker, Docker Compose, Nginx
+-   **CI/CD:** GitHub Actions
 
-- **Backend:** ASP.NET 8, Clean Architecture, JWT Authentication
-- **Frontend:** Vue.js 3, Vuetify 3, Pinia, Vue Router, Vite
-- **Database:** MongoDB
-- **Deployment:** Docker, Nginx
-- **CI/CD:** GitHub Actions
+## 🚀 Bắt Đầu Nhanh
 
-## 🚀 Bắt Đầu Nhanh (Getting Started)
+### Yêu Cầu Cần Thiết
 
-### Yêu cầu
+-   **Docker & Docker Compose**: Phiên bản mới nhất.
+-   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn).
+-   **Node.js 20+**: Phiên bản 20.x (hoặc mới hơn).
+-   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations (cài đặt bằng `dotnet tool install --global dotnet-ef`).
 
-- Docker & Docker Compose
-- .NET 8 SDK (cho phát triển backend)
-- Node.js 20+ (cho phát triển frontend)
+### Cài Đặt và Chạy
 
-### Cài đặt và Chạy
+1.  **Clone repository:**
+    ```bash
+    git clone https://github.com/hkthao/family-tree-3.git
+    cd family-tree-3
+    ```
 
-1. **Clone a repository:**
-   ```bash
-   git clone https://github.com/your-username/family-tree-3.git
-   cd family-tree-3
-   ```
+2.  **Cấu hình Auth0**: 
+    *   **Auth0 Dashboard**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `http://localhost:5000`. 
+    *   **Biến môi trường Frontend**: Tạo file `frontend/.env.development` dựa trên `frontend/.env.example` và điền các thông tin Auth0 của bạn (Domain, Client ID, Audience).
+    *   **Biến môi trường Backend (Local Development)**: Cấu hình `Auth0:Domain` và `Auth0:Audience` trong `src/backend/src/Web/Properties/launchSettings.json`.
+    *   **Biến môi trường Backend (Docker Compose)**: Nếu chạy với Docker Compose, đảm bảo các biến môi trường `Auth0__Domain` và `Auth0__Audience` được thiết lập trong file `.env` hoặc `docker-compose.yml`.
 
-2. **Tạo project Backend (nếu chưa có):**
-   *Lưu ý: Bước này chỉ cần làm một lần duy nhất.*
-   ```bash
-   # Cài đặt template
-   dotnet new --install JasonTaylor.CleanArchitecture
-   # Tạo project
-   dotnet new ca-sln -o backend --use-program-main
-   ```
+3.  **Chạy ứng dụng với Docker Compose:**
+    Lệnh này sẽ build (nếu cần) và chạy backend, frontend, và cơ sở dữ liệu. Đây là cách nhanh nhất để khởi động toàn bộ hệ thống.
+    ```bash
+    docker-compose -f src/infra/docker-compose.yml up --build
+    ```
 
-3. **Chạy ứng dụng với Docker Compose:**
-   Lệnh này sẽ build và chạy backend, frontend, và database.
-   ```bash
-   docker-compose up -d
-   ```
+4.  **Cấu hình Database (chỉ lần đầu)**:
+    Nếu bạn chạy Backend với MySQL (không phải In-Memory Database), bạn cần áp dụng migrations để tạo schema database và seed dữ liệu mẫu.
+    ```bash
+dotnet ef database update --project src/backend/src/Infrastructure --startup-project src/backend/src/Web
+    ```
 
-4. **Truy cập ứng dụng:**
-   - **Frontend:** [http://localhost](http://localhost)
-   - **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
+5.  **Truy cập ứng dụng:**
+    -   **Frontend:** [http://localhost](http://localhost) (được phục vụ bởi Nginx)
+    -   **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
-## 🤝 Đóng Góp (Contributing)
+Để có hướng dẫn chi tiết hơn, bao gồm cách chạy các dịch vụ riêng lẻ để phát triển, vui lòng tham khảo [Hướng dẫn Phát triển](./docs/engineering/development-guide.md).
 
-Chúng tôi hoan nghênh mọi sự đóng góp! Vui lòng đọc file [docs/contribution.md](./docs/contribution.md) để biết chi tiết về quy trình đóng góp, quy tắc đặt tên branch, và quy trình code review.
+## 📚 Tài Liệu Dự Án
 
-## 📄 Giấy Phép (License)
+Tất cả tài liệu dự án được đặt trong thư mục [`docs/`](./docs/README.md). Dưới đây là một số tài liệu quan trọng để bạn bắt đầu:
 
-Dự án này được cấp phép dưới giấy phép MIT. Xem file [LICENSE](./LICENSE) để biết thêm chi tiết.
+-   [**Kiến trúc tổng quan**](./docs/engineering/architecture.md)
+-   [**Hướng dẫn Phát triển**](./docs/engineering/development-guide.md)
+-   [**Hướng dẫn Backend**](./docs/engineering/backend-guide.md)
+-   [**Hướng dẫn Frontend**](./docs/engineering/frontend-guide.md)
+-   [**Tham chiếu API**](./docs/engineering/api-reference.md)
+-   [**Mô hình Dữ liệu**](./docs/engineering/data-model.md)
+-   [**Hướng dẫn Kiểm thử & QA**](./docs/engineering/testing-guide.md)
+-   [**Hướng dẫn Bảo mật**](./docs/engineering/security-guide.md)
+-   [**Product Backlog**](./docs/project/backlog.md)
+-   [**Lộ trình Phát triển**](./docs/project/roadmap.md)
+-   [**Kế hoạch Sprint**](./docs/project/sprints.md)
+-   [**Ghi chú phát hành**](./docs/project/release-notes.md)
+
+## 🤝 Đóng Góp
+
+Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md) của chúng tôi để biết chi tiết về quy tắc ứng xử và quy trình gửi pull request.
+
+## 📄 Giấy Phép
+
+Dự án này được cấp phép theo Giấy phép MIT. Xem tệp [LICENSE](./LICENSE) để biết chi tiết.

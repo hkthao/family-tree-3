@@ -1,0 +1,20 @@
+# Exclude Node.js modules and build output
+node_modules/
+dist/
+# Exclude IDE files
+.vscode/
+.idea/
+# Exclude debug logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+# Exclude lock files if npm install is handled by Dockerfile
+package-lock.json
+yarn.lock
+# Exclude test-related files if not needed for production build
+coverage/
+cypress/
+*.local
+/cypress/videos/
+/cypress/screenshots/
+*.tsbuildinfo

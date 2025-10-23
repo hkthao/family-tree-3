@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>backend.Infrastructure</RootNamespace>
+    <AssemblyName>backend.Infrastructure</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <PackageReference Include="Auth0.AuthenticationApi" />
+
+    <PackageReference Include="Auth0.ManagementApi" />
+
+    <PackageReference Include="AWSSDK.S3" />
+
+    <PackageReference Include="CloudinaryDotNet" />
+
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Pinecone.Client" />
+    <PackageReference Include="Qdrant.Client" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" />
+    <PackageReference Include="AWSSDK.SecurityToken" />
+    <PackageReference Include="UglyToad.PdfPig" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
+  </ItemGroup>
+
+</Project>

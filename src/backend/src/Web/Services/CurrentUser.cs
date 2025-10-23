@@ -1,0 +1,19 @@
+using System.Security.Claims;
+using backend.Application.Common.Interfaces;
+
+namespace backend.Web.Services;
+
+public class CurrentUser(IHttpContextAccessor httpContextAccessor) : IUser
+{
+    private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
+    public string? Id
+    {
+        get
+        {
+            return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        }
+    }
+    public List<string>? Roles => _httpContextAccessor.HttpContext?.User?.FindAll("https://familytree.com/roles").Select(x => x.Value).ToList();
+
+}

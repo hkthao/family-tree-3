@@ -1,0 +1,44 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/backend/src/Web/bin/Debug/net8.0/Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/backend/src/Web",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Launch Chrome against localhost",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:80",
+            "webRoot": "${workspaceFolder}/src/frontend",
+            "preLaunchTask": "npm: dev - frontend"
+        },
+        {
+            "name": ".NET Core Launch (test current file)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "dotnet",
+            "args": [
+                "test",
+                "${workspaceFolder}/src/backend/tests/Application.UnitTests/Application.UnitTests.csproj"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}

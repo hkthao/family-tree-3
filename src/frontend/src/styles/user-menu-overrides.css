@@ -1,0 +1,23 @@
+.user-menu-sheet {
+  border-radius: 8px !important;
+}
+
+.user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(var(--v-border-color), 0.12);
+  margin-bottom: 8px;
+}
+
+.online-dot {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  border: 2px solid rgb(var(--v-theme-surface)); /* White border for contrast */
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: rgb(var(--v-theme-success));
+}
