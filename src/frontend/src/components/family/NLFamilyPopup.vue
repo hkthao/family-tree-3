@@ -167,6 +167,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Tạo gia đình Nguyễn tại Hà Nội. Gia đình này nổi tiếng về truyền thống học vấn và là dòng dõi học giả. Họ có trụ sở chính ở quận Hoàn Kiếm. Số điện thoại liên hệ là 0123456789, email liên hệ: nguyensfamily@example.com. Trang web chính thức là www.nguyensfamily.vn. Gia đình được thành lập từ năm 1800. Có một huy hiệu gia đình màu xanh với hình sách. Thêm các tag liên quan: học giả, Hà Nội, Việt Nam. Hình ảnh đại diện: https://www.w3schools.com/w3images/avatar5.png. Số thành viên hiện tại là 15, với 4 thế hệ`;
+  prompt.value = `Tôi muốn tạo một gia đình mới. Tên gia đình là "Gia đình An Khang". Mã gia đình là "AK001". Mô tả là "Một gia đình hạnh phúc và thịnh vượng với nhiều thế hệ". Địa chỉ là "Số 1, Đường Hạnh Phúc, Quận 1, TP.HCM". Gia đình này sẽ công khai. Ảnh đại diện là "https://example.com/ankhang_family.jpg". Gia đình có khoảng 50 thành viên và 5 thế hệ.`;
 };
 </script>
