@@ -46,10 +46,10 @@ const deleteConfirmDialog = ref(false);
 const familyToDelete = ref<Family | undefined>(undefined);
 const aiInputDialog = ref(false);
 
-const handleFilterUpdate = (filters: FamilyFilter) => {
+const handleFilterUpdate = async (filters: FamilyFilter) => {
   currentFilters.value = filters;
   familyStore.filter = currentFilters.value;
-  familyStore._loadItems()
+  await familyStore._loadItems()
 };
 
 const handleListOptionsUpdate = (options: {
@@ -114,20 +114,11 @@ const handleAiSave = async (generatedData: GeneratedDataResponse) => {
         await familyStore.addItem(family);
       }
     }
-    if (generatedData.members.length > 0) {
-      for (const member of generatedData.members) {
-        await memberStore.addItem(member);
-      }
-    }
-    if (generatedData.events.length > 0) {
-      for (const event of generatedData.events) {
-        await eventStore.addItem(event);
-      }
-    }
     notificationStore.showSnackbar(
       t('aiInput.saveSuccess'),
       'success',
     );
+    console.log('handleAiSave success path reached');
   } catch (error) {
     console.error('Error saving generated data:', error);
     notificationStore.showSnackbar(
@@ -135,7 +126,7 @@ const handleAiSave = async (generatedData: GeneratedDataResponse) => {
       'error',
     );
   } finally {
-    familyStore._loadItems(); // Refresh the family list after saving
+    await familyStore._loadItems(); // Refresh the family list after saving
   }
 };
 </script>

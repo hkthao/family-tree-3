@@ -25,6 +25,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = await authService.getAccessToken();
         return { ok: true, value: this.user };
       } catch (err: any) {
+        this.error = err.message || 'Failed to get user.';
         return { ok: false, error: this.error || 'Unknown error' };
       } finally {
         this.loading = false;
@@ -59,6 +60,7 @@ export const useAuthStore = defineStore('auth', {
         this.token = null;
         return { ok: true, value: undefined };
       } catch (err: any) {
+        this.error = err.message || 'Logout failed.';
         return { ok: false, error: this.error || 'Unknown error' };
       } finally {
         this.loading = false;

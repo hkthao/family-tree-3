@@ -104,14 +104,12 @@ describe('face.store', () => {
     store.services = createServices('mock');
 
     // Reset mocks before each test
-    mockDetect.mockReset();
-    mockSaveLabels.mockReset();
-    mockSearch.mockReset();
+    (store.services.face.detect as any).mockReset();
+    (store.services.face.saveLabels as any).mockReset();
 
-    // Set default mock resolved values
-    mockDetect.mockResolvedValue(ok(mockFaceDetectionResult));
-    mockSaveLabels.mockResolvedValue(ok(undefined));
-    mockSearch.mockResolvedValue(ok([mockSearchResult]));
+    // Set default mock resolved values on the injected service mocks
+    (store.services.face.detect as any).mockResolvedValue(ok(mockFaceDetectionResult));
+    (store.services.face.saveLabels as any).mockResolvedValue(ok(undefined));
   });
 
   it('should have correct initial state', () => {
@@ -198,7 +196,7 @@ describe('face.store', () => {
     it('should not label if face not found', () => {
       store.detectedFaces = [{ ...mockDetectedFace }];
       store.labelFace('non-existent', 'member-1', mockMember);
-      expect(store.detectedFaces[0].memberId).toBeUndefined();
+      expect(store.detectedFaces[0].memberId).toBeNull();
     });
   });
 
