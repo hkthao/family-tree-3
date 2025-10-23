@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure;
 
@@ -49,16 +50,12 @@ public static class DependencyInjection
         {
             var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
             var faceDetectionSettings = configProvider.GetSection<FaceDetectionSettings>();
+            var logger = serviceProvider.GetRequiredService<ILogger<FaceApiService>>(); // Get the logger
             var client = new HttpClient { BaseAddress = new Uri(faceDetectionSettings.BaseUrl) };
-            return new FaceApiService(client);
+            return new FaceApiService(logger, client); // Pass both logger and client
         });
 
         services.AddHttpClient<FaceApiService>(); // Register for HttpClient injection
-        {
-            var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
-            var faceDetectionSettings = configProvider.GetSection<FaceDetectionSettings>();
-            client.BaseAddress = new Uri(faceDetectionSettings.BaseUrl);
-        });
 
         // Register Chat Module
 
