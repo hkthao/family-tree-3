@@ -353,6 +353,8 @@
   "relationship.type.mother": "Mẹ",
   "relationship.type.wife": "Vợ",
   "relationship.type.husband": "Chồng",
+  "relationship.type.spouse": "Vợ/Chồng",
+  "relationship.type.parent_child": "Cha mẹ - Con cái",
   "relationship.list.action.aiCreate": "Tạo mối quan hệ bằng AI",
   "relationship.isThe": "là",
   "relationship.of": "của",

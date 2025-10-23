@@ -308,6 +308,8 @@
   "relationship.type.mother": "Mother",
   "relationship.type.wife": "Wife",
   "relationship.type.husband": "Husband",
+  "relationship.type.spouse": "Spouse",
+  "relationship.type.parent_child": "Parent-Child",
   "relationship.list.action.aiCreate": "Create relationship with AI",
   "relationship.isThe": "is the",
   "relationship.of": "of",
