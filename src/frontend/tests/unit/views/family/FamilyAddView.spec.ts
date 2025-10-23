@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import FamilyAddView from '@/views/family/FamilyAddView.vue';
 import { createTestingPinia } from '@pinia/testing';
 import { useFamilyStore } from '@/stores/family.store';
@@ -32,13 +32,16 @@ vi.mock('@/plugins/i18n', () => ({
 }));
 
 // Mock the FamilyForm component
+let mockFamilyFormValidate: Mock;
+let mockFamilyFormGetFormData: Mock;
+
 vi.mock('@/components/family', () => ({
   FamilyForm: {
     template: '<div class="mock-family-form"></div>',
     props: ['family'],
     methods: {
-      validate: vi.fn(),
-      getFormData: vi.fn(),
+      validate: () => mockFamilyFormValidate(),
+      getFormData: () => mockFamilyFormGetFormData(),
     },
   },
 }));
@@ -58,6 +61,10 @@ describe('FamilyAddView.vue', () => {
 
     // Initialize Vuetify
     vuetify = createVuetify();
+
+    // Reassign and reset mocks for FamilyForm methods
+    mockFamilyFormValidate = vi.fn();
+    mockFamilyFormGetFormData = vi.fn();
   });
 
   it('should add a family and show success notification on successful save', async () => {
@@ -80,8 +87,8 @@ describe('FamilyAddView.vue', () => {
     // Set the ref value
     (wrapper.vm as any).familyFormRef = familyForm.vm;
 
-    (familyForm.vm as any).validate = vi.fn().mockResolvedValue(true);
-    (familyForm.vm as any).getFormData = vi.fn().mockReturnValue({
+    mockFamilyFormValidate.mockResolvedValue(true);
+    mockFamilyFormGetFormData.mockReturnValue({
       name: 'Test Family',
       description: 'A family for testing',
     });
@@ -91,8 +98,8 @@ describe('FamilyAddView.vue', () => {
     await wrapper.findAll('button')[1].trigger('click'); // Assuming save is the second button
 
     // Assert: Kiểm tra các hành vi mong đợi.
-    expect(familyForm.vm.validate).toHaveBeenCalled();
-    expect(familyForm.vm.getFormData).toHaveBeenCalled();
+    expect(mockFamilyFormValidate).toHaveBeenCalled();
+    expect(mockFamilyFormGetFormData).toHaveBeenCalled();
     expect(familyStore.addItem).toHaveBeenCalledWith({
       name: 'Test Family',
       description: 'A family for testing',
@@ -129,5 +136,41 @@ describe('FamilyAddView.vue', () => {
     // Giải thích vì sao kết quả mong đợi là đúng:
     // - mockPush() của vue-router phải được gọi với đường dẫn '/family' để xác nhận điều hướng.
     // - Không có store action nào khác được gọi vì hành động chỉ là hủy bỏ.
+  });
+
+  it('should not add a family if validation fails', async () => {
+    // Mục tiêu của test: Đảm bảo rằng khi validation của form thất bại,
+    // không có hành động nào được thực hiện để thêm gia đình và không có thông báo thành công nào hiển thị.
+
+    // Các bước (Arrange, Act, Assert):
+    // Arrange: Khởi tạo component, mock FamilyForm để simulate validation thất bại.
+    const wrapper = mount(FamilyAddView, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify],
+      },
+    });
+
+    const familyStore = useFamilyStore();
+    const notificationStore = useNotificationStore();
+
+    const familyForm = wrapper.findComponent(FamilyForm);
+    (wrapper.vm as any).familyFormRef = familyForm.vm;
+
+    mockFamilyFormValidate.mockResolvedValue(false);
+    mockFamilyFormGetFormData.mockReturnValue({}); // Return an empty object as it shouldn't be called
+
+    // Act: Kích hoạt sự kiện click vào nút "Lưu".
+    await wrapper.findAll('button')[1].trigger('click');
+
+    // Assert: Kiểm tra các hành vi mong đợi.
+    expect(mockFamilyFormValidate).toHaveBeenCalled();
+    expect(mockFamilyFormGetFormData).not.toHaveBeenCalled();
+    expect(familyStore.addItem).not.toHaveBeenCalled();
+    expect(notificationStore.showSnackbar).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+    // Giải thích vì sao kết quả mong đợi là đúng:
+    // - validate() của FamilyForm phải được gọi.
+    // - getFormData(), addItem() và showSnackbar() không được gọi vì validation thất bại.
+    // - mockPush() không được gọi vì không có điều hướng.
   });
 });

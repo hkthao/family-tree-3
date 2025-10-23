@@ -21,7 +21,7 @@ export default mergeConfig(
           functions: 0,
           lines: 0
         },
-        include: ['src/stores/**/*.ts', 'src/views/family/FamilyListView.vue', 'src/views/members/MemberListView.vue']
+        include: ['src/stores/**/*.ts', 'src/views/family/FamilyListView.vue', 'src/views/members/MemberListView.vue', 'src/views/family/FamilyAddView.vue']
       },
       server: {
         deps: {
