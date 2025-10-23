@@ -1,3 +1,6 @@
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+
 namespace backend.Application.Common.Interfaces;
 
 /// <summary>
@@ -31,7 +34,7 @@ public interface IAuthorizationService
     /// </summary>
     /// <param name="familyId">ID của gia đình cần kiểm tra quyền quản lý.</param>
     /// <param name="userProfile">Hồ sơ người dùng hiện tại.</param>
-    /// <returns>True nếu người dùng có thể quản lý gia đình, ngược lại là false.</n
+    /// <returns>True nếu người dùng có thể quản lý gia đình, ngược lại là false.</returns>
     bool CanManageFamily(Guid familyId, UserProfile userProfile);
 
     /// <summary>
