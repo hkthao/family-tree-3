@@ -79,36 +79,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       }
     },
 
-    async fetchAIProviders() {
-      this.loading = true;
-      this.error = null;
-      this.aiProviders = [];
-      try {
-        const result = await (
-          this as any
-        ).services.aiBiography.getAIProviders();
-        if (result.ok) {
-          this.aiProviders = result.value;
-          // Set selectedProvider to the first enabled provider, or default to Gemini
-          if (this.aiProviders.length > 0) {
-            const enabledProvider = this.aiProviders.find((p) => p.isEnabled);
-            this.selectedProvider =
-              enabledProvider?.providerType || AIProviderType.Gemini;
-          } else {
-            this.selectedProvider = AIProviderType.Gemini;
-          }
-        } else {
-          this.error =
-            result.error?.message ||
-            i18n.global.t('aiBiography.errors.fetchProvidersFailed');
-        }
-      } catch (err: any) {
-        this.error =
-          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
+
 
     clearForm() {
       this.userPrompt = null;
