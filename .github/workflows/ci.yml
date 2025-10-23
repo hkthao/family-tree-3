@@ -32,19 +32,7 @@ jobs:
       run: dotnet format src/backend/ --verify-no-changes --include-generated
 
     - name: Test Backend
-      run: dotnet test src/backend/backend.sln /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=${{ github.workspace }}/src/backend/artifacts/coverage/coverage.cobertura.xml --no-build --verbosity normal
-
-    - name: Install ReportGenerator
-      run: dotnet tool install -g dotnet-reportgenerator-globaltool
-
-    - name: Generate Coverage Report
-      run: reportgenerator "-reports:${{ github.workspace }}/src/backend/artifacts/coverage/coverage.cobertura.xml" "-targetdir:${{ github.workspace }}/src/backend/coverage-report" -reporttypes:Html
-
-    - name: Upload Backend Coverage Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: backend-coverage-report
-        path: src/backend/coverage-report
+      run: dotnet test src/backend/backend.sln --no-build --verbosity normal
 
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -59,12 +47,6 @@ jobs:
 
     - name: Test Frontend
       run: npm run test:coverage --prefix src/frontend
-
-    - name: Upload frontend coverage report
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-coverage
-        path: src/frontend/tests/coverage/frontend/
 
   docker-build:
     needs: build-and-test
@@ -136,7 +118,7 @@ jobs:
         password: ${{ secrets.DOCKER_TOKEN }}
 
     - name: Push backend Docker image
-      run: docker push your-dockerhub-username/family-tree-backend:latest
+      run: docker push hkthao/family-tree-backend:latest
 
     - name: Push frontend Docker image
-      run: docker push your-dockerhub-username/family-tree-frontend:latest
+      run: docker push hkthao/family-tree-frontend:latest
