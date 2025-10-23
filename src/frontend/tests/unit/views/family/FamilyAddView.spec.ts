@@ -96,4 +96,14 @@ describe('FamilyAddView.vue', () => {
     );
     expect(mockPush).toHaveBeenCalledWith('/family');
   });
+
+  it('should navigate to /family when cancel button is clicked', async () => {
+    const wrapper = mount(FamilyAddView, {
+      global: {
+        plugins: [createTestingPinia({ createSpy: vi.fn }), vuetify],
+      },
+    });
+    await wrapper.findAll('button')[0].trigger('click'); // Assuming cancel is the first button
+    expect(mockPush).toHaveBeenCalledWith('/family');
+  });
 });
