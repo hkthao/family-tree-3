@@ -61,7 +61,6 @@ describe('member.store', () => {
     store = useMemberStore();
     store.$reset();
     // Manually inject the mocked services
-    // @ts-expect-error: Mocking services for testing
     store.services = createServices('mock');
     // Reset mocks before each test
     mockFetch.mockReset();
