@@ -369,8 +369,6 @@
   "userSettings.profile.saveSuccess": "Profile updated successfully!",
   "userSettings.profile.saveError": "Error updating profile.",
   "userSettings.profile.validationError": "Validation error. Please check the information.",
-  "userSettings.tab.profile": "Profile",
-  "userSettings.tab.preferences": "Preferences",
   "avatarInput.uploadArea.clickOrDrag": "Click or drag file here to upload",
   "avatarInput.uploadArea.supportedFormats": "Supported formats: JPG, PNG, GIF",
   "avatarInput.cropper.title": "Crop Avatar",
