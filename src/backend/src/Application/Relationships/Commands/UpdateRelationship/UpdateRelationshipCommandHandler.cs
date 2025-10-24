@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
@@ -47,17 +47,9 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
         entity.Type = request.Type;
         entity.Order = request.Order;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        entity.AddDomainEvent(new RelationshipUpdatedEvent(entity));
 
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.UpdateRelationship,
-            TargetType = TargetType.Member,
-            TargetId = entity.Id.ToString(),
-            ActivitySummary = $"Updated relationship {oldSourceMemberId}-{oldType}-{oldTargetMemberId} to {entity.SourceMemberId}-{entity.Type}-{entity.TargetMemberId}."
-        }, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         return Result<bool>.Success(true);
     }

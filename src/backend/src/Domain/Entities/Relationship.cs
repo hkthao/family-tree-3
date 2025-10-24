@@ -1,8 +1,9 @@
+using backend.Domain.Common;
 using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
 
-public class Relationship : BaseEntity
+public class Relationship : BaseAuditableEntity
 {
     public Guid SourceMemberId { get; set; }
     public Member SourceMember { get; set; } = null!;

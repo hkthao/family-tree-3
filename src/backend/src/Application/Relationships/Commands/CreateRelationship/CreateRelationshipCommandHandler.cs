@@ -1,8 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
@@ -41,18 +41,9 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
         };
 
         _context.Relationships.Add(entity);
+        entity.AddDomainEvent(new RelationshipCreatedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.CreateRelationship,
-            TargetType = TargetType.Member,
-            TargetId = entity.Id.ToString(),
-            ActivitySummary = $"Created relationship between {sourceMember.FullName} and {request.TargetMemberId} (Type: {request.Type})."
-        }, cancellationToken);
 
         return Result<Guid>.Success(entity.Id);
     }

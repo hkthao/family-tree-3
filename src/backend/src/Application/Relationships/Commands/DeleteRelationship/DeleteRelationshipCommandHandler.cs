@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
@@ -40,19 +40,10 @@ public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAu
 
         var activitySummary = $"Deleted relationship {entity.SourceMemberId}-{entity.Type}-{entity.TargetMemberId}.";
 
+        entity.AddDomainEvent(new RelationshipDeletedEvent(entity));
         _context.Relationships.Remove(entity);
 
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.DeleteRelationship,
-            TargetType = TargetType.Member,
-            TargetId = sourceMember.Id.ToString(),
-            ActivitySummary = activitySummary
-        }, cancellationToken);
 
         return Result<bool>.Success(true);
     }
