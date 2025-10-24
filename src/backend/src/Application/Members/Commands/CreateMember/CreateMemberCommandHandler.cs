@@ -73,9 +73,6 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IUser use
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        // Update family stats
-        await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
-
         return Result<Guid>.Success(entity.Id);
     }
 

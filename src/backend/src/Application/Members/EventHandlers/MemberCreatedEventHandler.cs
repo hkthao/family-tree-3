@@ -8,12 +8,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly INotificationService _notificationService = notificationService;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
+    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task Handle(MemberCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -62,5 +63,8 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
             },
             cancellationToken
         );
+
+        // Update family stats
+        await _familyTreeService.UpdateFamilyStats(notification.Member.FamilyId, cancellationToken);
     }
 }
