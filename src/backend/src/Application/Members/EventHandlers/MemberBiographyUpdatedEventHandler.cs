@@ -5,6 +5,7 @@ using backend.Domain.Events.Members;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Members.EventHandlers;
 
@@ -37,14 +38,14 @@ public class MemberBiographyUpdatedEventHandler(ILogger<MemberBiographyUpdatedEv
         {
             RecipientUserId = notification.Member.LastModifiedBy?.ToString() ?? "UnknownUser", // Assuming LastModifiedBy is the recipient
             Title = "Member Biography Updated",
-            Body = $"The biography for member '{notification.Member.FullName}' has been updated.",
-            Data = new Dictionary<string, string>
+            Message = $"The biography for member '{notification.Member.FullName}' has been updated.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "MemberId", notification.Member.Id.ToString() },
-                { "MemberName", notification.Member.FullName },
-                { "FamilyId", notification.Member.FamilyId.ToString() }
-            },
-            DeepLink = $"/families/{notification.Member.FamilyId}/members/{notification.Member.Id}" // Example deep link
+                MemberId = notification.Member.Id.ToString(),
+                MemberName = notification.Member.FullName,
+                FamilyId = notification.Member.FamilyId.ToString(),
+                DeepLink = $"/families/{notification.Member.FamilyId}/members/{notification.Member.Id}"
+            })
         }, cancellationToken);
 
         // Update member data in Vector DB for search via GlobalSearchService

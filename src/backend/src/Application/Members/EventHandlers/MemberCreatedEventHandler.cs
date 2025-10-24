@@ -5,6 +5,7 @@ using backend.Domain.Events.Members;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Members.EventHandlers;
 
@@ -38,14 +39,14 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
         {
             RecipientUserId = notification.Member.CreatedBy!, // Assuming CreatedBy is the recipient
             Title = "Member Created",
-            Body = $"A new member '{notification.Member.FullName}' has been added to family '{notification.Member.FamilyId}'.",
-            Data = new Dictionary<string, string>
+            Message = $"A new member '{notification.Member.FullName}' has been added to family '{notification.Member.FamilyId}'.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "MemberId", notification.Member.Id.ToString() },
-                { "MemberName", notification.Member.FullName },
-                { "FamilyId", notification.Member.FamilyId.ToString() }
-            },
-            DeepLink = $"/families/{notification.Member.FamilyId}/members/{notification.Member.Id}" // Example deep link
+                MemberId = notification.Member.Id.ToString(),
+                MemberName = notification.Member.FullName,
+                FamilyId = notification.Member.FamilyId.ToString(),
+                DeepLink = $"/families/{notification.Member.FamilyId}/members/{notification.Member.Id}"
+            })
         }, cancellationToken);
 
         // Store member data in Vector DB for search via GlobalSearchService

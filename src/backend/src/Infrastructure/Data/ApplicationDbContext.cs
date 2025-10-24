@@ -44,6 +44,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Notification.
+    /// </summary>
+    public DbSet<Notification> Notifications => Set<Notification>();
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationPreference.
+    /// </summary>
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;

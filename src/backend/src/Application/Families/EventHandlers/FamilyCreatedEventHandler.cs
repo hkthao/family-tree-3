@@ -5,6 +5,7 @@ using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Families.EventHandlers;
 
@@ -37,13 +38,13 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         {
             RecipientUserId = notification.Family.CreatedBy!, // Assuming CreatedBy is the recipient
             Title = "Family Created",
-            Body = $"Your family '{notification.Family.Name}' has been successfully created.",
-            Data = new Dictionary<string, string>
+            Message = $"Your family '{notification.Family.Name}' has been successfully created.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "FamilyId", notification.Family.Id.ToString() },
-                { "FamilyName", notification.Family.Name }
-            },
-            DeepLink = $"/families/{notification.Family.Id}" // Example deep link
+                FamilyId = notification.Family.Id.ToString(),
+                FamilyName = notification.Family.Name,
+                DeepLink = $"/families/{notification.Family.Id}"
+            })
         }, cancellationToken);
 
         // Store family data in Vector DB for search via GlobalSearchService

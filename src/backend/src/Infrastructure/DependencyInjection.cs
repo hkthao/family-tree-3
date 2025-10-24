@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
+using backend.Application.Services;
 using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Infrastructure.AI.TextExtractors;
@@ -8,6 +9,7 @@ using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
+using backend.Infrastructure.Services.Notifications;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +50,15 @@ public static class DependencyInjection
         services.AddSingleton<IDateTime, DateTimeService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
+
+        // Register Notification Services
+        services.AddScoped<IFirebaseNotificationService, FirebaseNotificationService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IInAppNotificationService, InAppNotificationService>();
+
+        // Register Background Task Queue
+        services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
+        services.AddHostedService<QueuedHostedService>();
 
         services.AddScoped<ApplicationDbContextInitialiser>();
 

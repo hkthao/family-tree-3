@@ -1,5 +1,6 @@
 ﻿
 using backend.Application.Common.Interfaces;
+using backend.Application.Services;
 using backend.Infrastructure.Auth;
 using backend.Web.Services;
 using Microsoft.AspNetCore.Authentication;
@@ -14,6 +15,7 @@ public static class DependencyInjection
     public static void AddWebServices(this IServiceCollection services)
     {
         services.AddScoped<IUser, CurrentUser>();
+        services.AddScoped<INotificationHubService, SignalRNotificationHubService>();
         services.AddHttpContextAccessor();
         services.AddHealthChecks();
         services.AddExceptionHandler<CustomExceptionHandler>();

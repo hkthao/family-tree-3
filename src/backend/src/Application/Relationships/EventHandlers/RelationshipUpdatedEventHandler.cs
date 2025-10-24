@@ -5,6 +5,7 @@ using backend.Domain.Events.Relationships;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Relationships.EventHandlers;
 
@@ -37,15 +38,15 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
         {
             RecipientUserId = notification.Relationship.LastModifiedBy?.ToString() ?? "UnknownUser", // Use LastModifiedBy from auditable entity
             Title = "Relationship Updated",
-            Body = $"Relationship (Type: {notification.Relationship.Type}) between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId} has been successfully updated.",
-            Data = new Dictionary<string, string>
+            Message = $"Relationship (Type: {notification.Relationship.Type}) between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId} has been successfully updated.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "RelationshipId", notification.Relationship.Id.ToString() },
-                { "RelationshipType", notification.Relationship.Type.ToString() },
-                { "SourceMemberId", notification.Relationship.SourceMemberId.ToString() },
-                { "TargetMemberId", notification.Relationship.TargetMemberId.ToString() }
-            },
-            DeepLink = $"/relationships/{notification.Relationship.Id}" // Example deep link
+                RelationshipId = notification.Relationship.Id.ToString(),
+                RelationshipType = notification.Relationship.Type.ToString(),
+                SourceMemberId = notification.Relationship.SourceMemberId.ToString(),
+                TargetMemberId = notification.Relationship.TargetMemberId.ToString(),
+                DeepLink = $"/relationships/{notification.Relationship.Id}"
+            })
         }, cancellationToken);
         // Update relationship data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

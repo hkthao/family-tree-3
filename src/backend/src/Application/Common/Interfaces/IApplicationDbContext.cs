@@ -40,6 +40,14 @@ public interface IApplicationDbContext
     /// </summary>
     DbSet<UserPreference> UserPreferences { get; }
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Notification.
+    /// </summary>
+    DbSet<Notification> Notifications { get; }
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationPreference.
+    /// </summary>
+    DbSet<NotificationPreference> NotificationPreferences { get; }
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>
     DbSet<FileMetadata> FileMetadata { get; }

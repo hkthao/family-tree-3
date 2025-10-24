@@ -1,5 +1,6 @@
 
 using backend.CompositionRoot;
+using backend.Web.Hubs;
 using Microsoft.Extensions.FileProviders;
 
 /// <summary>
@@ -58,6 +59,7 @@ public class Startup
         services.AddWebServices();
 
         services.AddControllers();
+        services.AddSignalR();
 
         services.AddCors(options => options.AddPolicy("AllowFrontend",
             policyBuilder =>
@@ -128,6 +130,7 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
+            endpoints.MapHub<NotificationHub>("/notificationHub");
             endpoints.MapFallbackToFile("index.html");
             endpoints.MapGet("/", context =>
             {

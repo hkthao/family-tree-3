@@ -5,6 +5,7 @@ using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Families.EventHandlers;
 
@@ -37,13 +38,13 @@ public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger
         {
             RecipientUserId = notification.Family.LastModifiedBy!, // Assuming LastModifiedBy is the recipient
             Title = "Family Deleted",
-            Body = $"Your family '{notification.Family.Name}' has been successfully deleted.",
-            Data = new Dictionary<string, string>
+            Message = $"Your family '{notification.Family.Name}' has been successfully deleted.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "FamilyId", notification.Family.Id.ToString() },
-                { "FamilyName", notification.Family.Name }
-            },
-            DeepLink = $"/families" // No specific family page after deletion
+                FamilyId = notification.Family.Id.ToString(),
+                FamilyName = notification.Family.Name,
+                DeepLink = "/families"
+            })
         }, cancellationToken);
 
         // Remove family data from Vector DB for search via GlobalSearchService

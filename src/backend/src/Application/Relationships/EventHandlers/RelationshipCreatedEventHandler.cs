@@ -5,6 +5,7 @@ using backend.Domain.Events.Relationships;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Relationships.EventHandlers;
 
@@ -37,15 +38,15 @@ public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHan
         {
             RecipientUserId = notification.Relationship.CreatedBy?.ToString() ?? "UnknownUser", // Use CreatedBy from auditable entity
             Title = "Relationship Created",
-            Body = $"A new relationship (Type: {notification.Relationship.Type}) has been created between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId}.",
-            Data = new Dictionary<string, string>
+            Message = $"A new relationship (Type: {notification.Relationship.Type}) has been created between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId}.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "RelationshipId", notification.Relationship.Id.ToString() },
-                { "RelationshipType", notification.Relationship.Type.ToString() },
-                { "SourceMemberId", notification.Relationship.SourceMemberId.ToString() },
-                { "TargetMemberId", notification.Relationship.TargetMemberId.ToString() }
-            },
-            DeepLink = $"/relationships/{notification.Relationship.Id}" // Example deep link
+                RelationshipId = notification.Relationship.Id.ToString(),
+                RelationshipType = notification.Relationship.Type.ToString(),
+                SourceMemberId = notification.Relationship.SourceMemberId.ToString(),
+                TargetMemberId = notification.Relationship.TargetMemberId.ToString(),
+                DeepLink = $"/relationships/{notification.Relationship.Id}"
+            })
         }, cancellationToken);
 
         // Store relationship data in Vector DB for search via GlobalSearchService

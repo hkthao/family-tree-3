@@ -5,6 +5,7 @@ using backend.Domain.Events.Members;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Members.EventHandlers;
 
@@ -37,14 +38,14 @@ public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger
         {
             RecipientUserId = notification.Member.LastModifiedBy!, // Assuming LastModifiedBy is the recipient
             Title = "Member Deleted",
-            Body = $"Member '{notification.Member.FullName}' has been deleted from family '{notification.Member.FamilyId}'.",
-            Data = new Dictionary<string, string>
+            Message = $"Member '{notification.Member.FullName}' has been deleted from family '{notification.Member.FamilyId}'.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "MemberId", notification.Member.Id.ToString() },
-                { "MemberName", notification.Member.FullName },
-                { "FamilyId", notification.Member.FamilyId.ToString() }
-            },
-            DeepLink = $"/families/{notification.Member.FamilyId}" // Example deep link to family page
+                MemberId = notification.Member.Id.ToString(),
+                MemberName = notification.Member.FullName,
+                FamilyId = notification.Member.FamilyId.ToString(),
+                DeepLink = $"/families/{notification.Member.FamilyId}"
+            })
         }, cancellationToken);
 
         // Remove member data from Vector DB for search via GlobalSearchService

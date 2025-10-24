@@ -1,4 +1,7 @@
 
+using backend.Domain.Common;
+using backend.Domain.Events;
+
 namespace backend.Domain.Entities;
 
 public class Member : BaseAuditableEntity
@@ -22,4 +25,16 @@ public class Member : BaseAuditableEntity
 
     // Relationships
     public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();
+
+    public Member() { }
+
+    public Member(string lastName, string firstName, string code, Guid familyId)
+    {
+        LastName = lastName;
+        FirstName = firstName;
+        Code = code;
+        FamilyId = familyId;
+
+        AddDomainEvent(new NewFamilyMemberAddedEvent(this));
+    }
 }

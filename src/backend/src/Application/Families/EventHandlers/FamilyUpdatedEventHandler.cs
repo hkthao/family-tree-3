@@ -5,6 +5,7 @@ using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
+using System.Text.Json;
 
 namespace backend.Application.Families.EventHandlers;
 
@@ -37,13 +38,13 @@ public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger
         {
             RecipientUserId = notification.Family.LastModifiedBy!, // Assuming LastModifiedBy is the recipient
             Title = "Family Updated",
-            Body = $"Your family '{notification.Family.Name}' has been successfully updated.",
-            Data = new Dictionary<string, string>
+            Message = $"Your family '{notification.Family.Name}' has been successfully updated.",
+            Data = System.Text.Json.JsonSerializer.Serialize(new
             {
-                { "FamilyId", notification.Family.Id.ToString() },
-                { "FamilyName", notification.Family.Name }
-            },
-            DeepLink = $"/families/{notification.Family.Id}" // Example deep link
+                FamilyId = notification.Family.Id.ToString(),
+                FamilyName = notification.Family.Name,
+                DeepLink = $"/families/{notification.Family.Id}"
+            })
         }, cancellationToken);
 
         // Update family data in Vector DB for search via GlobalSearchService
