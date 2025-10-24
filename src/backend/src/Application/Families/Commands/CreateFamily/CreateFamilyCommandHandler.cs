@@ -5,6 +5,7 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Application.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
@@ -42,6 +43,7 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
             };
 
             _context.Families.Add(entity);
+            entity.AddDomainEvent(new FamilyCreatedEvent(entity));
 
             await _context.SaveChangesAsync(cancellationToken);
 

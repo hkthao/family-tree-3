@@ -1,5 +1,7 @@
-﻿namespace backend.Domain.Common;
+﻿using MediatR;
 
-public abstract class BaseEvent
+namespace backend.Domain.Common;
+
+public abstract class BaseEvent : INotification
 {
 }
