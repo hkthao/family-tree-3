@@ -8,7 +8,7 @@ namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/activities")]
+[Route("api/activity")]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
 /// </summary>

@@ -19,7 +19,7 @@ namespace backend.Web.Controllers;
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/family")]
 public class FamilyController(IMediator mediator) : ControllerBase
 {
     /// <summary>

@@ -12,7 +12,7 @@ namespace backend.Web.Controllers;
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/upload")]
 public class UploadController(IMediator mediator) : ControllerBase
 {
     /// <summary>

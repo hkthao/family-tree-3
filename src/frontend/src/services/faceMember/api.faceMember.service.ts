@@ -11,7 +11,7 @@ export class ApiFaceMemberService implements IFaceMemberService {
 
   async getManagedMembers(): Promise<Result<Member[], Error>> {
     try {
-      const response = await this.client.get<Member[]>('/api/members/managed');
+      const response = await this.client.get<Member[]>('/api/member/managed');
       if (response.ok) {
         return { ok: true, value: response.value || [] };
       } else {

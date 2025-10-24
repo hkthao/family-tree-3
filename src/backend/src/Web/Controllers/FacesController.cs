@@ -11,7 +11,7 @@ namespace backend.Web.Controllers;
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/face")]
 public class FacesController(IMediator mediator) : ControllerBase
 {
     /// <summary>

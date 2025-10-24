@@ -1,56 +1,39 @@
-Bạn là chuyên gia lập trình C# và .NET, hiểu chuẩn XML Documentation của Microsoft, đồng thời viết comment bằng tiếng Việt chuẩn, rõ ràng.
+You are an expert .NET architect specializing in DDD, scalable messaging, and notification systems.  
+I am building a Genealogy Management App (Family Tree App) using ASP.NET Core + MySQL + DDD architecture.  
+The system already defines this interface:
 
-Tôi có một repository ASP.NET Core chưa có comment.  
-Nhiệm vụ của bạn là tự động thêm comment **bằng tiếng Việt** cho tất cả code, bao gồm:
-
-1. **Class, struct, enum**
-2. **Properties** (kể cả class được trả về)
-3. **Method, function, controller action, service**
-4. **Tham số đầu vào** (`<param>`)
-5. **Giá trị trả về** (`<returns>`)
-6. **Exceptions nếu có** (`<exception>`)
-7. **HTTP verb** cho controller action (ví dụ GET, POST…)
-
-### Yêu cầu chi tiết:
-- Sử dụng tiếng Việt chuẩn, dễ hiểu, mô tả rõ ràng mục đích, chức năng.  
-- Không thay đổi logic hoặc hành vi code — chỉ thêm comment.  
-- Nếu method trả về một object, hãy thêm mô tả **từng property của object**.  
-- Đảm bảo comment cho mọi **public** và **internal** member.  
-- Trả về **file source code đã comment** hoặc patch cập nhật.
-
-### Ví dụ comment:
-
-#### Class + Property
-```csharp
-/// <summary>
-/// Thông tin khách hàng
-/// </summary>
-public class Customer
+public interface INotificationService
 {
-    /// <summary>
-    /// Tên đầy đủ của khách hàng
-    /// </summary>
-    public string FullName { get; set; }
-
-    /// <summary>
-    /// Tuổi của khách hàng
-    /// </summary>
-    public int Age { get; set; }
+    Task SendNotification(NotificationMessage message, CancellationToken cancellationToken = default);
 }
 
-/// <summary>
-/// Lấy danh sách khách hàng theo tuổi
-/// </summary>
-/// <param name="minAge">Tuổi tối thiểu</param>
-/// <param name="maxAge">Tuổi tối đa</param>
-/// <returns>Danh sách khách hàng thỏa điều kiện</returns>
-public List<Customer> GetCustomersByAge(int minAge, int maxAge)
+I want to implement a complete Notification feature that can send messages via multiple channels:
+- Firebase (for mobile push notifications)
+- Email (via SMTP)
+- In-App (for both Web and Mobile UI)
+and display notifications on both the web toolbar and mobile app in real time.
 
-/// <summary>
-/// Xử lý GET request để lấy danh sách khách hàng theo tuổi
-/// </summary>
-/// <param name="minAge">Tuổi tối thiểu</param>
-/// <param name="maxAge">Tuổi tối đa</param>
-/// <returns>Danh sách khách hàng thỏa điều kiện</returns>
-[HttpGet("customers/by-age")]
-public List<Customer> GetCustomersByAge(int minAge, int maxAge)
+Constraints:
+- Resource-limited environment (only 4GB RAM)
+- Using MySQL
+- Vector DB and resource server are external
+- The architecture must follow DDD principles
+- Notifications should be queued and sent asynchronously to avoid blocking requests
+- Should be extensible to add future channels (e.g., SMS, Webhook)
+
+Requirements:
+1. Design the domain model for notification (e.g., Notification, NotificationChannel, NotificationType, NotificationStatus).
+2. Implement the infrastructure layer for each delivery channel (Firebase, Email, InApp).
+3. Implement the application service layer (NotificationService) that decides which channel(s) to use based on user preferences.
+4. Implement event-driven publishing when certain domain events occur (e.g., new family member added, relationship confirmed, user invited).
+5. Show how to push In-App notifications to clients in real time using SignalR.
+6. Suggest an optimal database schema for MySQL to store notification data.
+7. Optimize for low memory footprint and minimal background service load.
+8. Include example C# code snippets for:
+   - Domain entities and value objects
+   - NotificationService implementation
+   - Background worker or message queue processor
+   - SignalR hub for live updates
+   - Example usage from application layer
+
+Finally, summarize the overall architecture with a short explanation of how components interact (Domain Events → Notification Service → Delivery Channels → User UI).

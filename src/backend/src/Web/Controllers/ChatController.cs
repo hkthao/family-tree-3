@@ -9,7 +9,7 @@ namespace backend.Web.Controllers;
 /// </summary>
 /// <param name="mediator">Đối tượng ISender để gửi các lệnh và truy vấn.</param>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/chat")]
 public class ChatController(ISender mediator) : ControllerBase
 {
     /// <summary>

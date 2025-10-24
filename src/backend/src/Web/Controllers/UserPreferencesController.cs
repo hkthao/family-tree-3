@@ -9,7 +9,7 @@ namespace backend.Web.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/user-preference")]
 /// <summary>
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến tùy chọn người dùng.
 /// </summary>

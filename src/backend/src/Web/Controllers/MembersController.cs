@@ -24,7 +24,7 @@ namespace backend.Web.Controllers;
 /// <param name="logger">Đối tượng ILogger để ghi log.</param>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/member")]
 public class MembersController(IMediator mediator, ILogger<MembersController> logger) : ControllerBase
 {
     /// <summary>

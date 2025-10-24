@@ -8,7 +8,7 @@ namespace Web.Controllers;
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/natural-language-input")]
 public class NaturalLanguageInputController(IMediator mediator) : ControllerBase
 {
     /// <summary>

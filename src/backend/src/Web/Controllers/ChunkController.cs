@@ -10,8 +10,7 @@ namespace backend.Web.Controllers
     /// </summary>
     /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
     [ApiController]
-    [Route("api/[controller]")]
-    public class ChunkController(IMediator mediator) : ControllerBase
+    [Route("api/chunk")]    public class ChunkController(IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Đối tượng IMediator để gửi các lệnh và truy vấn.
