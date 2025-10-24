@@ -42,4 +42,12 @@ public interface IVectorStore
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
     /// <returns>Danh sách các kết quả truy vấn từ kho vector.</returns>
     Task<List<VectorStoreQueryResult>> QueryAsync(double[] queryEmbedding, int topK, Dictionary<string, string> metadataFilter, string collectionName, CancellationToken cancellationToken = default); // New overload
+
+    /// <summary>
+    /// Xóa một embedding khỏi kho vector dựa trên ID thực thể và tên collection.
+    /// </summary>
+    /// <param name="entityId">ID của thực thể cần xóa.</param>
+    /// <param name="collectionName">Tên của collection chứa embedding.</param>
+    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
+    Task DeleteAsync(string entityId, string collectionName, CancellationToken cancellationToken = default);
 }

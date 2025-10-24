@@ -9,4 +9,5 @@ public interface IGlobalSearchService
     // TODO: Add methods for other entity types (members, relationships, documentation)
 
     Task<Result<List<GlobalSearchResult>>> SearchAsync(string query, CancellationToken cancellationToken = default);
+    Task DeleteEntityFromSearchAsync(string entityId, string entityType, CancellationToken cancellationToken = default);
 }

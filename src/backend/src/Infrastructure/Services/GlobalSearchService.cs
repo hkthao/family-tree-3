@@ -20,7 +20,7 @@ public class GlobalSearchService(ILogger<GlobalSearchService> logger, IEmbedding
     {
         try
         {
-            var embeddingProvider = _embeddingProviderFactory.GetProvider(EmbeddingAIProvider.OpenAI); // Use configured provider
+            var embeddingProvider = _embeddingProviderFactory.GetProvider(EmbeddingAIProvider.Local); // Use configured provider
             var vectorStore = _vectorStoreFactory.CreateVectorStore(VectorStoreProviderType.Pinecone); // Use configured store
 
             string textToEmbed = $"Family Name: {family.Name}. Description: {family.Description}. Address: {family.Address}";
@@ -82,6 +82,22 @@ public class GlobalSearchService(ILogger<GlobalSearchService> logger, IEmbedding
         {
             _logger.LogError(ex, "Error performing global search for query: {Query}", query);
             return Result<List<GlobalSearchResult>>.Failure($"Error performing global search: {ex.Message}");
+        }
+    }
+
+    public async Task DeleteEntityFromSearchAsync(string entityId, string entityType, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var vectorStore = _vectorStoreFactory.CreateVectorStore(VectorStoreProviderType.Pinecone); // Use configured store
+            string collectionName = entityType.ToLower() + "s"; // Simple convention for collection name
+
+            await vectorStore.DeleteAsync(entityId, collectionName, cancellationToken);
+            _logger.LogInformation("Entity {EntityType} with ID {EntityId} successfully deleted from vector DB search index.", entityType, entityId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting entity {EntityType} with ID {EntityId} from vector DB search index.", entityType, entityId);
         }
     }
 }

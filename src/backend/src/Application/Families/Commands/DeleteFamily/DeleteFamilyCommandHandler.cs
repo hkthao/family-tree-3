@@ -2,8 +2,8 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 
@@ -40,22 +40,13 @@ public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
 
             var familyName = entity.Name; // Capture family name for activity summary
 
+            entity.AddDomainEvent(new FamilyDeletedEvent(entity));
             _context.Families.Remove(entity);
 
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats
             await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
-
-            // Record activity
-            await _mediator.Send(new RecordActivityCommand
-            {
-                UserProfileId = currentUserProfile.Id,
-                ActionType = UserActionType.DeleteFamily,
-                TargetType = TargetType.Family,
-                TargetId = entity.Id.ToString(),
-                ActivitySummary = $"Deleted family '{familyName}'."
-            }, cancellationToken);
 
             return Result.Success();
         }

@@ -2,8 +2,8 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -48,20 +48,12 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             entity.AvatarUrl = request.AvatarUrl;
             entity.Visibility = request.Visibility;
 
+            entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
+
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats
             await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
-
-            // Record activity
-            await _mediator.Send(new RecordActivityCommand
-            {
-                UserProfileId = currentUserProfile.Id,
-                ActionType = UserActionType.UpdateFamily,
-                TargetType = TargetType.Family,
-                TargetId = entity.Id.ToString(),
-                ActivitySummary = $"Updated family '{oldName}' to '{entity.Name}'."
-            }, cancellationToken);
 
             return Result.Success();
         }

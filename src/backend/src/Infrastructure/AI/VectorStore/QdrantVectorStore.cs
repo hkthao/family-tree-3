@@ -152,6 +152,24 @@ public class QdrantVectorStore : IVectorStore
         }
     }
 
+    public async Task DeleteAsync(string entityId, string collectionName, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _qdrantClient.DeleteAsync(
+                collectionName,
+                new PointId { Uuid = entityId.ToString() },
+                cancellationToken: cancellationToken
+            );
+            _logger.LogInformation("Successfully deleted vector for entity {EntityId} from Qdrant collection {CollectionName}.", entityId, collectionName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting vector for entity {EntityId} from Qdrant collection {CollectionName}.", entityId, collectionName);
+            throw; // Re-throw to be handled by higher layers
+        }
+    }
+
     private Filter? CreateQdrantFilter(Dictionary<string, string> metadataFilter)
     {
         if (metadataFilter == null || !metadataFilter.Any())
