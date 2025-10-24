@@ -9,18 +9,25 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/activities")]
+/// <summary>
+/// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
+/// </summary>
+/// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 public class UserActivitiesController(IMediator mediator) : ControllerBase
 {
+    /// <summary>
+    /// Đối tượng IMediator để gửi các lệnh và truy vấn.
+    /// </summary>
     private readonly IMediator _mediator = mediator;
 
     /// <summary>
-    /// Retrieves a list of recent user activities for the current user.
+    /// Truy xuất danh sách các hoạt động gần đây của người dùng hiện tại.
     /// </summary>
-    /// <param name="limit">The maximum number of activities to return (default: 20).</param>
-    /// <param name="targetType">Optional: Filter activities by the type of the target resource.</param>
-    /// <param name="targetId">Optional: Filter activities by the ID of the target resource.</param>
-    /// <param name="familyId">Optional: Filter activities by FamilyId.</param>
-    /// <returns>A list of recent user activities.</returns>
+    /// <param name="limit">Số lượng hoạt động tối đa để trả về (mặc định: 20).</param>
+    /// <param name="targetType">Tùy chọn: Lọc hoạt động theo loại tài nguyên mục tiêu.</param>
+    /// <param name="targetId">Tùy chọn: Lọc hoạt động theo ID của tài nguyên mục tiêu.</param>
+    /// <param name="groupId">Tùy chọn: Lọc hoạt động theo ID nhóm (FamilyId).</param>
+    /// <returns>Danh sách các hoạt động gần đây của người dùng.</returns>
     [HttpGet("recent")]
     public async Task<ActionResult<List<UserActivityDto>>> GetRecentActivities(
         [FromQuery] int limit = 20,

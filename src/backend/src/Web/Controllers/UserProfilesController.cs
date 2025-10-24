@@ -13,11 +13,22 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
+/// <summary>
+/// Bộ điều khiển xử lý các yêu cầu liên quan đến hồ sơ người dùng.
+/// </summary>
+/// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 public class UserProfilesController(IMediator mediator) : ControllerBase
 {
 
+    /// <summary>
+    /// Đối tượng IMediator để gửi các lệnh và truy vấn.
+    /// </summary>
     private readonly IMediator _mediator = mediator;
 
+    /// <summary>
+    /// Xử lý GET request để lấy hồ sơ của người dùng hiện tại.
+    /// </summary>
+    /// <returns>Hồ sơ của người dùng hiện tại.</returns>
     [HttpGet("me")]
     public async Task<ActionResult<UserProfileDto>> GetCurrentUserProfile()
     {
@@ -25,6 +36,10 @@ public class UserProfilesController(IMediator mediator) : ControllerBase
         return result.IsSuccess ? (ActionResult<UserProfileDto>)Ok(result.Value) : (ActionResult<UserProfileDto>)NotFound(result.Error);
     }
 
+    /// <summary>
+    /// Xử lý GET request để lấy tất cả hồ sơ người dùng.
+    /// </summary>
+    /// <returns>Danh sách tất cả hồ sơ người dùng.</returns>
     [HttpGet]
     public async Task<ActionResult<List<UserProfileDto>>> GetAllUserProfiles()
     {
@@ -32,6 +47,11 @@ public class UserProfilesController(IMediator mediator) : ControllerBase
         return result.IsSuccess ? (ActionResult<List<UserProfileDto>>)Ok(result.Value) : (ActionResult<List<UserProfileDto>>)BadRequest(result.Error);
     }
 
+    /// <summary>
+    /// Xử lý GET request để lấy hồ sơ người dùng theo ID bên ngoài.
+    /// </summary>
+    /// <param name="externalId">ID bên ngoài của người dùng.</param>
+    /// <returns>Hồ sơ người dùng.</returns>
     [HttpGet("byExternalId/{externalId}")]
     public async Task<ActionResult<UserProfileDto>> GetUserProfileByExternalId(string externalId)
     {
@@ -39,6 +59,11 @@ public class UserProfilesController(IMediator mediator) : ControllerBase
         return result.IsSuccess ? (ActionResult<UserProfileDto>)Ok(result.Value) : (ActionResult<UserProfileDto>)NotFound(result.Error);
     }
 
+    /// <summary>
+    /// Xử lý GET request để lấy hồ sơ người dùng theo ID nội bộ.
+    /// </summary>
+    /// <param name="id">ID nội bộ của người dùng.</param>
+    /// <returns>Hồ sơ người dùng.</returns>
     [HttpGet("{id}")]
     public async Task<ActionResult<UserProfileDto>> GetUserProfileById(Guid id)
     {
@@ -47,11 +72,11 @@ public class UserProfilesController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Updates the current user's profile.
+    /// Cập nhật hồ sơ của người dùng hiện tại.
     /// </summary>
-    /// <param name="userId">The ID of the user to update.</param>
-    /// <param name="command">The command containing updated user profile data.</param>
-    /// <returns>A Result indicating success or failure.</returns>
+    /// <param name="userId">ID của người dùng cần cập nhật.</param>
+    /// <param name="command">Lệnh chứa dữ liệu hồ sơ người dùng đã cập nhật.</param>
+    /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     [HttpPut("{userId}")]
     public async Task<ActionResult<Result>> UpdateUserProfile(string userId, [FromBody] UpdateUserProfileCommand command)
     {

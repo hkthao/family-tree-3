@@ -10,14 +10,21 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
+/// <summary>
+/// Bộ điều khiển xử lý các yêu cầu liên quan đến tùy chọn người dùng.
+/// </summary>
+/// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 public class UserPreferencesController(IMediator mediator) : ControllerBase
 {
+    /// <summary>
+    /// Đối tượng IMediator để gửi các lệnh và truy vấn.
+    /// </summary>
     private readonly IMediator _mediator = mediator;
 
     /// <summary>
-    /// Retrieves the current user's preferences.
+    /// Truy xuất tùy chọn của người dùng hiện tại.
     /// </summary>
-    /// <returns>The user's preferences.</returns>
+    /// <returns>Tùy chọn của người dùng.</returns>
     [HttpGet]
     public async Task<ActionResult<UserPreferenceDto>> GetUserPreferences()
     {
@@ -26,10 +33,10 @@ public class UserPreferencesController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Saves the current user's preferences.
+    /// Lưu tùy chọn của người dùng hiện tại.
     /// </summary>
-    /// <param name="command">The command containing user preferences data.</param>
-    /// <returns>A Result indicating success or failure.</returns>
+    /// <param name="command">Lệnh chứa dữ liệu tùy chọn người dùng.</param>
+    /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     [HttpPut]
     public async Task<ActionResult<Result>> SaveUserPreferences([FromBody] SaveUserPreferencesCommand command)
     {
