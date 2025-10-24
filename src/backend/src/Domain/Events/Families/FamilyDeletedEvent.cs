@@ -3,7 +3,7 @@ using backend.Domain.Entities;
 
 namespace backend.Domain.Events.Families;
 
-public class FamilyDeletedEvent : BaseEvent
+public class FamilyDeletedEvent : BaseEvent, IDomainEvent
 {
     public FamilyDeletedEvent(Family family)
     {

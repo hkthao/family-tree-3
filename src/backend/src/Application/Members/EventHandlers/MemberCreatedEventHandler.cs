@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Members;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
@@ -34,20 +32,8 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
             ActivitySummary = $"Created member '{notification.Member.FullName}' in family '{notification.Member.FamilyId}'."
         }, cancellationToken);
 
-        // Send notification for member creation
-        await _notificationService.SendNotification(new NotificationMessage
-        {
-            RecipientUserId = notification.Member.CreatedBy!, // Assuming CreatedBy is the recipient
-            Title = "Member Created",
-            Message = $"A new member '{notification.Member.FullName}' has been added to family '{notification.Member.FamilyId}'.",
-            Data = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                MemberId = notification.Member.Id.ToString(),
-                MemberName = notification.Member.FullName,
-                FamilyId = notification.Member.FamilyId.ToString(),
-                DeepLink = $"/families/{notification.Member.FamilyId}/members/{notification.Member.Id}"
-            })
-        }, cancellationToken);
+        // Publish notification for member creation
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Store member data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

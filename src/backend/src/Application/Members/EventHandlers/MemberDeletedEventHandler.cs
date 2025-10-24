@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Members;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<MemberDeletedEvent>
+public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<MemberDeletedEvent>
 {
     private readonly ILogger<MemberDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
 
     public async Task Handle(MemberDeletedEvent notification, CancellationToken cancellationToken)
@@ -33,20 +31,8 @@ public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger
             ActivitySummary = $"Deleted member '{notification.Member.FullName}' from family '{notification.Member.FamilyId}'."
         }, cancellationToken);
 
-        // Send notification for member deletion
-        await _notificationService.SendNotification(new NotificationMessage
-        {
-            RecipientUserId = notification.Member.LastModifiedBy!, // Assuming LastModifiedBy is the recipient
-            Title = "Member Deleted",
-            Message = $"Member '{notification.Member.FullName}' has been deleted from family '{notification.Member.FamilyId}'.",
-            Data = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                MemberId = notification.Member.Id.ToString(),
-                MemberName = notification.Member.FullName,
-                FamilyId = notification.Member.FamilyId.ToString(),
-                DeepLink = $"/families/{notification.Member.FamilyId}"
-            })
-        }, cancellationToken);
+        // Publish notification for member deletion
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Remove member data from Vector DB for search via GlobalSearchService
         await _globalSearchService.DeleteEntityFromSearchAsync(notification.Member.Id.ToString(), "Member", cancellationToken);

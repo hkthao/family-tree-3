@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IDateTime, DateTimeService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IDomainEventNotificationPublisher, DomainEventNotificationPublisher>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
         // Register Notification Services

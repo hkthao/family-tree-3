@@ -3,7 +3,7 @@ using backend.Domain.Entities;
 
 namespace backend.Domain.Events.Members;
 
-public class MemberDeletedEvent : BaseEvent
+public class MemberDeletedEvent : BaseEvent, IDomainEvent
 {
     public MemberDeletedEvent(Member member)
     {

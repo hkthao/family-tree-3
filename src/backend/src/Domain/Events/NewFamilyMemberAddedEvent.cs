@@ -6,7 +6,7 @@ namespace backend.Domain.Events;
 /// <summary>
 /// Sự kiện miền được kích hoạt khi một thành viên gia đình mới được thêm vào.
 /// </summary>
-public class NewFamilyMemberAddedEvent : BaseEvent
+public class NewFamilyMemberAddedEvent : BaseEvent, IDomainEvent
 {
     /// <summary>
     /// Thành viên gia đình mới được thêm vào.

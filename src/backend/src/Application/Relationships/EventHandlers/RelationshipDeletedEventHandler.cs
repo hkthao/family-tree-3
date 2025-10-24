@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Relationships;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<RelationshipDeletedEvent>
+public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<RelationshipDeletedEvent>
 {
     private readonly ILogger<RelationshipDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
 
     public async Task Handle(RelationshipDeletedEvent notification, CancellationToken cancellationToken)
@@ -33,21 +31,8 @@ public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHan
             ActivitySummary = $"Deleted relationship {notification.Relationship.SourceMemberId}-{notification.Relationship.Type}-{notification.Relationship.TargetMemberId}."
         }, cancellationToken);
 
-        // Send notification for relationship deletion
-        await _notificationService.SendNotification(new NotificationMessage
-        {
-            RecipientUserId = notification.Relationship.LastModifiedBy?.ToString() ?? "UnknownUser", // Use LastModifiedBy from auditable entity
-            Title = "Relationship Deleted",
-            Message = $"Relationship (Type: {notification.Relationship.Type}) between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId} has been successfully deleted.",
-            Data = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                RelationshipId = notification.Relationship.Id.ToString(),
-                RelationshipType = notification.Relationship.Type.ToString(),
-                SourceMemberId = notification.Relationship.SourceMemberId.ToString(),
-                TargetMemberId = notification.Relationship.TargetMemberId.ToString(),
-                DeepLink = "/relationships"
-            })
-        }, cancellationToken);
+        // Publish notification for relationship deletion
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Remove relationship data from Vector DB for search via GlobalSearchService
         await _globalSearchService.DeleteEntityFromSearchAsync(notification.Relationship.Id.ToString(), "Relationship", cancellationToken);

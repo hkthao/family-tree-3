@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Members;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
 
     public async Task Handle(MemberUpdatedEvent notification, CancellationToken cancellationToken)
@@ -33,20 +31,8 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
             ActivitySummary = $"Updated member '{notification.Member.FullName}' in family '{notification.Member.FamilyId}'."
         }, cancellationToken);
 
-        // Send notification for member update
-        await _notificationService.SendNotification(new NotificationMessage
-        {
-            RecipientUserId = notification.Member.LastModifiedBy!, // Assuming LastModifiedBy is the recipient
-            Title = "Member Updated",
-            Message = $"Member '{notification.Member.FullName}' in family '{notification.Member.FamilyId}' has been successfully updated.",
-            Data = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                MemberId = notification.Member.Id.ToString(),
-                MemberName = notification.Member.FullName,
-                FamilyId = notification.Member.FamilyId.ToString(),
-                DeepLink = $"/families/{notification.Member.FamilyId}/members/{notification.Member.Id}"
-            })
-        }, cancellationToken);
+        // Publish notification for member update
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Update member data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

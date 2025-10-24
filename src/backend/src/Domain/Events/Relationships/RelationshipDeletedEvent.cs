@@ -3,7 +3,7 @@ using backend.Domain.Entities;
 
 namespace backend.Domain.Events.Relationships;
 
-public class RelationshipDeletedEvent : BaseEvent
+public class RelationshipDeletedEvent : BaseEvent, IDomainEvent
 {
     public RelationshipDeletedEvent(Relationship relationship)
     {

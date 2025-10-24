@@ -52,6 +52,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationTemplate.
+    /// </summary>
+    public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;

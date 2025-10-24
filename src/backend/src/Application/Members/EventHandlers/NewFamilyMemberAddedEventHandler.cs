@@ -1,5 +1,4 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Domain.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -12,17 +11,14 @@ namespace backend.Application.Members.EventHandlers;
 public class NewFamilyMemberAddedEventHandler : INotificationHandler<NewFamilyMemberAddedEvent>
 {
     private readonly ILogger<NewFamilyMemberAddedEventHandler> _logger;
-    private readonly INotificationService _notificationService;
-    private readonly IUser _user;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher;
 
     public NewFamilyMemberAddedEventHandler(
         ILogger<NewFamilyMemberAddedEventHandler> logger,
-        INotificationService notificationService,
-        IUser user)
+        IDomainEventNotificationPublisher notificationPublisher)
     {
         _logger = logger;
-        _notificationService = notificationService;
-        _user = user;
+        _notificationPublisher = notificationPublisher;
     }
 
     /// <summary>
@@ -35,18 +31,7 @@ public class NewFamilyMemberAddedEventHandler : INotificationHandler<NewFamilyMe
     {
         _logger.LogInformation("FamilyTree Domain Event: {DomainEvent}", notification.GetType().Name);
 
-        // Gửi thông báo cho người tạo thành viên mới hoặc các thành viên liên quan
-        var message = new NotificationMessage
-        {
-            RecipientUserId = _user.Id ?? throw new InvalidOperationException("User ID not found."), // Gửi cho người dùng hiện tại
-            SenderUserId = _user.Id,
-            Title = "Thành viên mới được thêm vào gia đình",
-            Message = $"Thành viên {notification.NewMember.FullName} đã được thêm vào gia đình của bạn.",
-            Type = Domain.Enums.NotificationType.NewFamilyMember,
-            FamilyId = notification.NewMember.FamilyId,
-            PreferredChannels = new List<Domain.Enums.NotificationChannel> { Domain.Enums.NotificationChannel.InApp } // Chỉ gửi In-App
-        };
-
-        await _notificationService.SendNotification(message, cancellationToken);
+        // Publish notification for new family member added
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
     }
 }

@@ -1,39 +1,55 @@
-You are an expert .NET architect specializing in DDD, scalable messaging, and notification systems.  
-I am building a Genealogy Management App (Family Tree App) using ASP.NET Core + MySQL + DDD architecture.  
-The system already defines this interface:
+You are an expert .NET architect specialized in ASP.NET Core, DDD, CQRS, and scalable notification systems.
+
+I am building a Family Tree application using ASP.NET Core 8 + MySQL.
+I already have this interface defined:
 
 public interface INotificationService
 {
     Task SendNotification(NotificationMessage message, CancellationToken cancellationToken = default);
 }
 
-I want to implement a complete Notification feature that can send messages via multiple channels:
-- Firebase (for mobile push notifications)
-- Email (via SMTP)
-- In-App (for both Web and Mobile UI)
-and display notifications on both the web toolbar and mobile app in real time.
+I want you to implement a complete **Notification Template System** with the following constraints and goals:
 
-Constraints:
-- Resource-limited environment (only 4GB RAM)
-- Using MySQL
-- Vector DB and resource server are external
-- The architecture must follow DDD principles
-- Notifications should be queued and sent asynchronously to avoid blocking requests
-- Should be extensible to add future channels (e.g., SMS, Webhook)
+---
 
-Requirements:
-1. Design the domain model for notification (e.g., Notification, NotificationChannel, NotificationType, NotificationStatus).
-2. Implement the infrastructure layer for each delivery channel (Firebase, Email, InApp).
-3. Implement the application service layer (NotificationService) that decides which channel(s) to use based on user preferences.
-4. Implement event-driven publishing when certain domain events occur (e.g., new family member added, relationship confirmed, user invited).
-5. Show how to push In-App notifications to clients in real time using SignalR.
-6. Suggest an optimal database schema for MySQL to store notification data.
-7. Optimize for low memory footprint and minimal background service load.
-8. Include example C# code snippets for:
-   - Domain entities and value objects
-   - NotificationService implementation
-   - Background worker or message queue processor
-   - SignalR hub for live updates
-   - Example usage from application layer
+### 🧩 Architecture requirements:
+- Use **CQRS pattern** (Command + Query + Handler) with MediatR.
+- Use **DbContext directly (no repository)**.
+- Follow DDD layering (Domain, Application, Infrastructure).
+- Keep resource usage low (only 4GB RAM available).
+- Support multiple notification channels: Email, Firebase Push, and InApp (SignalR).
+- Templates should use placeholder syntax like `{{UserName}}`, `{{FamilyName}}`.
+- Template rendering should replace placeholders dynamically.
+- Use dependency injection properly.
 
-Finally, summarize the overall architecture with a short explanation of how components interact (Domain Events → Notification Service → Delivery Channels → User UI).
+---
+
+### 🧱 Implementation requirements:
+1. Define the **Domain Entities**:
+   - NotificationTemplate (Id, EventType, Channel, Subject, Body, IsActive)
+   - NotificationMessage (Id, Channel, Content, RecipientId, CreatedAt, Status)
+2. Implement **NotificationDbContext** using Entity Framework Core with MySQL.
+3. Implement **CQRS commands/queries**:
+   - `CreateNotificationTemplateCommand`
+   - `UpdateNotificationTemplateCommand`
+   - `GetNotificationTemplateByEventTypeQuery`
+   - `ListNotificationTemplatesQuery`
+4. Implement **Application Service (NotificationService)**:
+   - Use DbContext directly (no repository abstraction).
+   - Load template by event type + channel.
+   - Replace placeholders in the template body.
+   - Send message via appropriate channel dispatcher.
+5. Implement **NotificationChannelDispatchers**:
+   - use SMTP
+   - use Firebase Admin SDK
+   - use SignalR Hub
+   - Use a simple interface.
+6. Implement **SignalR Hub** for real-time InApp notifications.
+7. Add **EF Core migrations** and sample seeding for templates (3 events minimum).
+8. Include example **CQRS usage**:
+   - Create new template
+   - Send notification by event type
+9. Use **.NET dependency injection configuration** in Program.cs.
+
+---
+

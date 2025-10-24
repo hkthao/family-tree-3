@@ -1,123 +1,143 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
+using backend.Application.NotificationTemplates.Queries;
+using backend.Application.NotificationTemplates.Queries.GetNotificationTemplateByEventType;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Text.RegularExpressions;
 
 namespace backend.Application.Services;
 
 /// <summary>
-/// Triển khai dịch vụ gửi thông báo, quản lý việc lưu trữ và phân phối thông báo đến các kênh khác nhau.
+/// Triển khai dịch vụ gửi thông báo, sử dụng các mẫu thông báo và các kênh gửi khác nhau.
 /// </summary>
 public class NotificationService : INotificationService
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IUser _user;
-    private readonly IFirebaseNotificationService _firebaseNotificationService;
-    private readonly IEmailService _emailService;
-    private readonly IInAppNotificationService _inAppNotificationService;
     private readonly ILogger<NotificationService> _logger;
+    private readonly IMediator _mediator;
+    private readonly IEmailService _emailService;
+    private readonly IFirebaseNotificationService _firebaseNotificationService;
+    private readonly IInAppNotificationService _inAppNotificationService;
+    private readonly IApplicationDbContext _context;
 
     public NotificationService(
-        IApplicationDbContext context,
-        IUser user,
-        IFirebaseNotificationService firebaseNotificationService,
+        ILogger<NotificationService> logger,
+        IMediator mediator,
         IEmailService emailService,
+        IFirebaseNotificationService firebaseNotificationService,
         IInAppNotificationService inAppNotificationService,
-        ILogger<NotificationService> logger)
+        IApplicationDbContext context)
     {
-        _context = context;
-        _user = user;
-        _firebaseNotificationService = firebaseNotificationService;
-        _emailService = emailService;
-        _inAppNotificationService = inAppNotificationService;
         _logger = logger;
+        _mediator = mediator;
+        _emailService = emailService;
+        _firebaseNotificationService = firebaseNotificationService;
+        _inAppNotificationService = inAppNotificationService;
+        _context = context;
     }
 
     /// <summary>
-    /// Gửi một thông báo đến người dùng, lưu trữ vào cơ sở dữ liệu và phân phối qua các kênh đã cấu hình.
+    /// Gửi một thông báo dựa trên loại sự kiện, kênh và các placeholder.
     /// </summary>
-    /// <param name="message">Thông điệp thông báo.</param>
+    /// <param name="eventType">Loại sự kiện kích hoạt thông báo.</param>
+    /// <param name="channel">Kênh thông báo sẽ được gửi.</param>
+    /// <param name="placeholders">Từ điển chứa các giá trị thay thế cho placeholder trong mẫu.</param>
+    /// <param name="recipientUserId">ID của người dùng nhận thông báo.</param>
+    /// <param name="familyId">ID của gia đình liên quan (tùy chọn).</param>
+    /// <param name="senderUserId">ID của người dùng gửi thông báo (tùy chọn).</param>
     /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
     /// <returns>Task biểu thị hoạt động không đồng bộ.</returns>
-    public async Task SendNotification(NotificationMessage message, CancellationToken cancellationToken = default)
+    public async Task SendNotificationAsync(
+        NotificationType eventType,
+        NotificationChannel channel,
+        Dictionary<string, string> placeholders,
+        string recipientUserId,
+        Guid? familyId = null,
+        string? senderUserId = null,
+        CancellationToken cancellationToken = default)
     {
-        // 1. Lưu thông báo vào cơ sở dữ liệu
+        _logger.LogInformation("Attempting to send notification for EventType: {EventType}, Channel: {Channel}, Recipient: {RecipientUserId}",
+            eventType, channel, recipientUserId);
+
+        // 1. Lấy mẫu thông báo
+        var template = await _mediator.Send(new GetNotificationTemplateByEventTypeQuery
+        {
+            EventType = eventType,
+            Channel = channel
+        }, cancellationToken);
+
+        if (template == null)
+        {
+            _logger.LogWarning("No active notification template found for EventType: {EventType} and Channel: {Channel}. Notification not sent.",
+                eventType, channel);
+            return;
+        }
+
+        // 2. Render mẫu thông báo
+        var renderedSubject = RenderTemplate(template.Subject, placeholders);
+        var renderedBody = RenderTemplate(template.Body, placeholders);
+
+        // 3. Tạo và lưu thông báo vào DB
         var notification = new Notification
         {
-            RecipientUserId = message.RecipientUserId,
-            SenderUserId = message.SenderUserId,
-            Title = message.Title,
-            Message = message.Message,
-            Type = message.Type,
-            FamilyId = message.FamilyId,
+            RecipientUserId = recipientUserId,
+            SenderUserId = senderUserId,
+            Title = renderedSubject,
+            Message = renderedBody,
+            Type = eventType,
+            FamilyId = familyId,
             Status = NotificationStatus.Pending // Ban đầu là Pending
         };
 
         _context.Notifications.Add(notification);
         await _context.SaveChangesAsync(cancellationToken);
 
-        // 2. Lấy tùy chọn thông báo của người dùng
-        var userPreferences = await _context.NotificationPreferences
-            .Where(p => p.UserId == message.RecipientUserId)
-            .ToListAsync(cancellationToken);
-
-        // 3. Quyết định kênh nào sẽ sử dụng
-        var channelsToSend = new List<NotificationChannel>();
-
-        if (message.PreferredChannels != null && message.PreferredChannels.Any())
+        // 4. Gửi thông báo qua kênh phù hợp
+        switch (channel)
         {
-            // Nếu tin nhắn chỉ định kênh ưu tiên, sử dụng chúng
-            channelsToSend.AddRange(message.PreferredChannels);
+            case NotificationChannel.InApp:
+                await _inAppNotificationService.SendInAppNotificationAsync(notification, cancellationToken);
+                break;
+            case NotificationChannel.Email:
+                // TODO: Lấy email người nhận từ cơ sở dữ liệu hoặc dịch vụ khác
+                // Tạm thời dùng một email giả
+                await _emailService.SendEmailAsync(notification, "mock@example.com", cancellationToken);
+                break;
+            case NotificationChannel.Firebase:
+                // TODO: Lấy device token từ cơ sở dữ liệu hoặc dịch vụ khác
+                // Tạm thời dùng một device token giả
+                await _firebaseNotificationService.SendPushNotificationAsync(notification, "mock_device_token", cancellationToken);
+                break;
+            case NotificationChannel.SMS:
+                _logger.LogWarning("SMS channel not implemented. Skipping SMS notification for user {RecipientUserId}", recipientUserId);
+                break;
+            case NotificationChannel.Webhook:
+                _logger.LogWarning("Webhook channel not implemented. Skipping Webhook notification for user {RecipientUserId}", recipientUserId);
+                break;
+            default:
+                _logger.LogWarning("Unknown notification channel: {Channel}. Notification not sent.", channel);
+                break;
         }
-        else
-        {
-            // Nếu không, sử dụng tùy chọn của người dùng hoặc mặc định
-            foreach (NotificationChannel channel in Enum.GetValues(typeof(NotificationChannel)))
-            {
-                var preference = userPreferences.FirstOrDefault(p => p.Channel == channel && (p.NotificationType == null || p.NotificationType == message.Type));
-                if (preference?.Enabled ?? true) // Mặc định là bật nếu không có tùy chọn cụ thể
-                {
-                    channelsToSend.Add(channel);
-                }
-            }
-        }
-
-        // 4. Gửi thông báo qua các kênh đã chọn
-        var sendTasks = new List<Task>();
-        foreach (var channel in channelsToSend.Distinct())
-        {
-            switch (channel)
-            {
-                case NotificationChannel.InApp:
-                    sendTasks.Add(_inAppNotificationService.SendInAppNotificationAsync(notification, cancellationToken));
-                    break;
-                case NotificationChannel.Firebase:
-                    // TODO: Lấy device token từ cơ sở dữ liệu hoặc dịch vụ khác
-                    // Tạm thời bỏ qua hoặc dùng một device token giả
-                    _logger.LogWarning("Firebase device token not implemented. Skipping Firebase notification for user {RecipientUserId}", message.RecipientUserId);
-                    // sendTasks.Add(_firebaseNotificationService.SendPushNotificationAsync(notification, "mock_device_token", cancellationToken));
-                    break;
-                case NotificationChannel.Email:
-                    // TODO: Lấy email người nhận từ cơ sở dữ liệu hoặc dịch vụ khác
-                    // Tạm thời bỏ qua hoặc dùng một email giả
-                    _logger.LogWarning("Recipient email not implemented. Skipping Email notification for user {RecipientUserId}", message.RecipientUserId);
-                    // sendTasks.Add(_emailService.SendEmailAsync(notification, "mock@example.com", cancellationToken));
-                    break;
-                case NotificationChannel.SMS:
-                    _logger.LogWarning("SMS channel not implemented. Skipping SMS notification for user {RecipientUserId}", message.RecipientUserId);
-                    break;
-                case NotificationChannel.Webhook:
-                    _logger.LogWarning("Webhook channel not implemented. Skipping Webhook notification for user {RecipientUserId}", message.RecipientUserId);
-                    break;
-            }
-        }
-
-        await Task.WhenAll(sendTasks);
 
         // Cập nhật trạng thái thông báo sau khi gửi (có thể cần logic phức tạp hơn để xử lý lỗi từng kênh)
         notification.MarkAsSent();
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Thay thế các placeholder trong chuỗi bằng các giá trị cung cấp.
+    /// Placeholder có định dạng {{Key}}.
+    /// </summary>
+    /// <param name="templateString">Chuỗi mẫu chứa các placeholder.</param>
+    /// <param name="placeholders">Từ điển các cặp key-value để thay thế.</param>
+    /// <returns>Chuỗi đã được render.</returns>
+    private string RenderTemplate(string templateString, Dictionary<string, string> placeholders)
+    {
+        return Regex.Replace(templateString, @"\{\{(.*?)\}\}", match =>
+        {
+            var key = match.Groups[1].Value;
+            return placeholders.TryGetValue(key, out var value) ? value : match.Value; // Giữ nguyên placeholder nếu không tìm thấy key
+        });
     }
 }

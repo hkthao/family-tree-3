@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<FamilyCreatedEvent>
+public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<FamilyCreatedEvent>
 {
     private readonly ILogger<FamilyCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
 
     public async Task Handle(FamilyCreatedEvent notification, CancellationToken cancellationToken)
@@ -33,19 +31,8 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
             ActivitySummary = $"Created family '{notification.Family.Name}'."
         }, cancellationToken);
 
-        // Send notification for family creation
-        await _notificationService.SendNotification(new NotificationMessage
-        {
-            RecipientUserId = notification.Family.CreatedBy!, // Assuming CreatedBy is the recipient
-            Title = "Family Created",
-            Message = $"Your family '{notification.Family.Name}' has been successfully created.",
-            Data = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                FamilyId = notification.Family.Id.ToString(),
-                FamilyName = notification.Family.Name,
-                DeepLink = $"/families/{notification.Family.Id}"
-            })
-        }, cancellationToken);
+        // Publish notification for family creation
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Store family data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(
@@ -64,3 +51,4 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         );
     }
 }
+

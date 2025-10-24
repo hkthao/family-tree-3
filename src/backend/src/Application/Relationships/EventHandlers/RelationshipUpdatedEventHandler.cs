@@ -1,19 +1,17 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Relationships;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using System.Text.Json;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<RelationshipUpdatedEvent>
+public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<RelationshipUpdatedEvent>
 {
     private readonly ILogger<RelationshipUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly INotificationService _notificationService = notificationService;
+    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
 
     public async Task Handle(RelationshipUpdatedEvent notification, CancellationToken cancellationToken)
@@ -33,21 +31,9 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
             ActivitySummary = $"Updated relationship {notification.Relationship.SourceMemberId}-{notification.Relationship.Type}-{notification.Relationship.TargetMemberId}."
         }, cancellationToken);
 
-        // Send notification for relationship update
-        await _notificationService.SendNotification(new NotificationMessage
-        {
-            RecipientUserId = notification.Relationship.LastModifiedBy?.ToString() ?? "UnknownUser", // Use LastModifiedBy from auditable entity
-            Title = "Relationship Updated",
-            Message = $"Relationship (Type: {notification.Relationship.Type}) between {notification.Relationship.SourceMemberId} and {notification.Relationship.TargetMemberId} has been successfully updated.",
-            Data = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                RelationshipId = notification.Relationship.Id.ToString(),
-                RelationshipType = notification.Relationship.Type.ToString(),
-                SourceMemberId = notification.Relationship.SourceMemberId.ToString(),
-                TargetMemberId = notification.Relationship.TargetMemberId.ToString(),
-                DeepLink = $"/relationships/{notification.Relationship.Id}"
-            })
-        }, cancellationToken);
+        // Publish notification for relationship update
+        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
+
         // Update relationship data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(
             notification.Relationship,
