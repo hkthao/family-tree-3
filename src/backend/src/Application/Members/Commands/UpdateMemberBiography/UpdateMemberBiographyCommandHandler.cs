@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Services;
+using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.UpdateMemberBiography;
 
@@ -37,6 +38,7 @@ public class UpdateMemberBiographyCommandHandler(
         }
 
         member.Biography = request.BiographyContent;
+        member.AddDomainEvent(new MemberBiographyUpdatedEvent(member));
 
         await _context.SaveChangesAsync(cancellationToken);
 
