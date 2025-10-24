@@ -43,6 +43,9 @@ import { MockFaceService } from './face/mock.face.service';
 import { ApiFaceService } from './face/api.face.service';
 import type { ISystemConfigService } from './system-config/system-config.service.interface';
 import { ApiSystemConfigService } from './system-config/api.system-config.service';
+import type { INotificationTemplateService } from './notificationTemplate/notificationTemplate.service.interface';
+import { MockNotificationTemplateService } from './notificationTemplate/mock.notificationTemplate.service';
+import { ApiNotificationTemplateService } from './notificationTemplate/api.notificationTemplate.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 
@@ -63,6 +66,7 @@ export interface AppServices {
   face: IFaceService;
   faceMember: IFaceMemberService;
   systemConfig: ISystemConfigService;
+  notificationTemplate: INotificationTemplateService;
 }
 
 import apiClient from '@/plugins/axios';
@@ -166,5 +170,11 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : mode === 'real'
         ? new ApiSystemConfigService(apiClient)
         : testServices?.systemConfig || new ApiSystemConfigService(apiClient),
+    notificationTemplate:
+      mode === 'mock'
+        ? new MockNotificationTemplateService()
+        : mode === 'real'
+        ? new ApiNotificationTemplateService(apiClient)
+        : testServices?.notificationTemplate || new MockNotificationTemplateService(),
   };
 }

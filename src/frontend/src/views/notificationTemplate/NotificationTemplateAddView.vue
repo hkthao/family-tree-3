@@ -1,0 +1,86 @@
+<template>
+  <v-card>
+    <v-card-title class="text-center">
+      <span class="text-h5 text-uppercase">{{
+        t('admin.notificationTemplates.form.addTitle')
+      }}</span>
+    </v-card-title>
+    <v-card-text>
+      <NotificationTemplateForm ref="notificationTemplateFormRef" @cancel="closeForm" @save="handleAddItem" />
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{
+        t('common.cancel')
+      }}</v-btn>
+      <v-btn
+        color="blue-darken-1"
+        data-testid="button-save"
+        @click="validateAndSave"
+        :loading="loading"
+        >{{ t('common.save') }}</v-btn
+      >
+    </v-card-actions>
+  </v-card>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useNotificationTemplateStore } from '@/stores/notificationTemplate.store';
+import { useNotificationStore } from '@/stores/notification.store';
+import { NotificationTemplateForm } from '@/views/notificationTemplate';
+import type { NotificationTemplate } from '@/types';
+import { storeToRefs } from 'pinia';
+
+interface NotificationTemplateFormExposed {
+  validate: () => Promise<boolean>;
+  getFormData: () => Omit<NotificationTemplate, 'id' | 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>;
+}
+
+const notificationTemplateFormRef = ref<NotificationTemplateFormExposed | null>(null);
+
+const { t } = useI18n();
+const router = useRouter();
+const notificationTemplateStore = useNotificationTemplateStore();
+const notificationStore = useNotificationStore();
+
+const { loading, error } = storeToRefs(notificationTemplateStore);
+
+const validateAndSave = async () => {
+  if (!notificationTemplateFormRef.value) return;
+  const isValid = await notificationTemplateFormRef.value.validate();
+  if (isValid) {
+    const itemData = notificationTemplateFormRef.value.getFormData();
+    await handleAddItem(itemData);
+  }
+};
+
+const handleAddItem = async (itemData: Omit<NotificationTemplate, 'id' | 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>) => {
+  try {
+    await notificationTemplateStore.addItem(itemData);
+    if (!notificationTemplateStore.error) {
+      notificationStore.showSnackbar(
+        t('notificationTemplate.messages.addSuccess'),
+        'success',
+      );
+      closeForm();
+    } else {
+      notificationStore.showSnackbar(
+        notificationTemplateStore.error || t('notificationTemplate.errors.add'),
+        'error',
+      );
+    }
+  } catch (err) {
+    notificationStore.showSnackbar(
+      t('notificationTemplate.errors.add'),
+      'error',
+    );
+  }
+};
+
+const closeForm = () => {
+  router.push({ name: 'NotificationTemplateList' });
+};
+</script>

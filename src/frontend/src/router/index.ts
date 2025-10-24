@@ -221,6 +221,33 @@ const router = createRouter({
               component: () => import('@/views/admin/ConfigView.vue'),
               meta: { breadcrumb: 'admin.config.title', requiresAuth: true, roles: ['Admin'] },
             },
+            {
+              path: 'notification-templates',
+              name: 'NotificationTemplates',
+              component: () => import('@/views/MainRouterView.vue'),
+              meta: { breadcrumb: 'admin.notificationTemplates.title', requiresAuth: true, roles: ['Admin'] },
+              children: [
+                {
+                  path: '',
+                  name: 'NotificationTemplateList',
+                  component: () => import('@/views/notificationTemplate/NotificationTemplateListView.vue'),
+                  meta: { breadcrumb: 'admin.notificationTemplates.list.title', requiresAuth: true, roles: ['Admin'] },
+                },
+                {
+                  path: 'add',
+                  name: 'AddNotificationTemplate',
+                  component: () => import('@/views/notificationTemplate/NotificationTemplateAddView.vue'),
+                  meta: { breadcrumb: 'admin.notificationTemplates.form.addTitle', requiresAuth: true, roles: ['Admin'] },
+                },
+                {
+                  path: 'edit/:id',
+                  name: 'EditNotificationTemplate',
+                  component: () => import('@/views/notificationTemplate/NotificationTemplateEditView.vue'),
+                  props: true,
+                  meta: { breadcrumb: 'admin.notificationTemplates.form.editTitle', requiresAuth: true, roles: ['Admin'] },
+                },
+              ],
+            },
           ],
         },
         ...sidebarRoutes,
