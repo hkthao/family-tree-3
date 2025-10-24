@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
@@ -38,21 +38,12 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             var memberFullName = memberToDelete.FullName; // Capture full name for activity summary
             var familyId = memberToDelete.FamilyId; // Capture familyId before deletion
 
+            memberToDelete.AddDomainEvent(new MemberDeletedEvent(memberToDelete));
             _context.Members.Remove(memberToDelete);
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats
             await _familyTreeService.UpdateFamilyStats(familyId, cancellationToken);
-
-            // Record activity
-            await _mediator.Send(new RecordActivityCommand
-            {
-                UserProfileId = currentUserProfile.Id,
-                ActionType = UserActionType.DeleteMember,
-                TargetType = TargetType.Member,
-                TargetId = request.Id.ToString(),
-                ActivitySummary = $"Deleted member '{memberFullName}' from family '{familyId}'."
-            }, cancellationToken);
 
             return Result.Success();
         }

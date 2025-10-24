@@ -47,6 +47,19 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         }, cancellationToken);
 
         // Store family data in Vector DB for search via GlobalSearchService
-        await _globalSearchService.UpsertFamilyForSearchAsync(notification.Family, cancellationToken);
+        await _globalSearchService.UpsertEntityAsync(
+            notification.Family,
+            "Family",
+            family => $"Family Name: {family.Name}. Description: {family.Description}. Address: {family.Address}",
+            family => new Dictionary<string, string>
+            {
+                { "EntityType", "Family" },
+                { "EntityId", family.Id.ToString() },
+                { "Name", family.Name },
+                { "Description", family.Description ?? "" },
+                { "DeepLink", $"/families/{family.Id}" }
+            },
+            cancellationToken
+        );
     }
 }

@@ -5,6 +5,7 @@ using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using backend.Application.AI.Embeddings;
 using backend.Application.AI.VectorStore;
+using System.Reflection; // Needed for GetProperty
 
 namespace backend.Infrastructure.Services;
 
@@ -14,39 +15,48 @@ public class GlobalSearchService(ILogger<GlobalSearchService> logger, IEmbedding
     private readonly IEmbeddingProviderFactory _embeddingProviderFactory = embeddingProviderFactory;
     private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
 
-    private const string FamilyCollectionName = "families";
-
-    public async Task UpsertFamilyForSearchAsync(Family family, CancellationToken cancellationToken = default)
+    public async Task UpsertEntityAsync<T>(T entity, string entityType, Func<T, string> textExtractor, Func<T, Dictionary<string, string>> metadataExtractor, CancellationToken cancellationToken = default)
     {
         try
         {
             var embeddingProvider = _embeddingProviderFactory.GetProvider(EmbeddingAIProvider.Local); // Use configured provider
             var vectorStore = _vectorStoreFactory.CreateVectorStore(VectorStoreProviderType.Pinecone); // Use configured store
 
-            string textToEmbed = $"Family Name: {family.Name}. Description: {family.Description}. Address: {family.Address}";
+            string textToEmbed = textExtractor(entity);
             var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(textToEmbed, cancellationToken);
 
             if (embeddingResult.IsSuccess)
             {
-                var metadata = new Dictionary<string, string>
+                var metadata = metadataExtractor(entity);
+                // Ensure EntityType and EntityId are in metadata
+                if (!metadata.ContainsKey("EntityType")) metadata["EntityType"] = entityType;
+                if (!metadata.ContainsKey("EntityId"))
                 {
-                    { "EntityType", "Family" },
-                    { "EntityId", family.Id.ToString() },
-                    { "Name", family.Name },
-                    { "Description", family.Description ?? "" },
-                    { "DeepLink", $"/families/{family.Id}" }
-                };
-                await vectorStore.UpsertAsync(embeddingResult.Value!.ToList(), metadata, FamilyCollectionName, embeddingProvider.EmbeddingDimension, cancellationToken);
-                _logger.LogInformation("Family {FamilyId} data successfully upserted to vector DB for search.", family.Id);
+                    // Assuming entity has an Id property of type Guid
+                    var idProperty = typeof(T).GetProperty("Id");
+                    if (idProperty != null && idProperty.PropertyType == typeof(Guid))
+                    {
+                        metadata["EntityId"] = ((Guid)idProperty.GetValue(entity)!).ToString();
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Entity {EntityType} does not have a Guid Id property for search indexing. Skipping upsert.", entityType);
+                        return; // Skip upsert if no identifiable ID
+                    }
+                }
+
+                string collectionName = entityType.ToLower() + "s"; // Simple convention for collection name
+                await vectorStore.UpsertAsync(embeddingResult.Value!.ToList(), metadata, collectionName, embeddingProvider.EmbeddingDimension, cancellationToken);
+                _logger.LogInformation("Entity {EntityType} with ID {EntityId} data successfully upserted to vector DB for search.", entityType, metadata["EntityId"]);
             }
             else
             {
-                _logger.LogError("Failed to generate embedding for family {FamilyId}: {Error}", family.Id, embeddingResult.Error);
+                _logger.LogError("Failed to generate embedding for entity {EntityType} with ID {EntityId}: {Error}", entityType, metadataExtractor(entity).GetValueOrDefault("EntityId", "Unknown"), embeddingResult.Error);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error upserting family {FamilyId} data to vector DB for search.", family.Id);
+            _logger.LogError(ex, "Error upserting entity {EntityType} data to vector DB for search.", entityType);
         }
     }
 
@@ -64,7 +74,7 @@ public class GlobalSearchService(ILogger<GlobalSearchService> logger, IEmbedding
                 return Result<List<GlobalSearchResult>>.Failure($"Failed to generate embedding for search query: {queryEmbeddingResult.Error}");
             }
 
-            var queryResults = await vectorStore.QueryAsync(queryEmbeddingResult.Value!, 10, new Dictionary<string, string>(), FamilyCollectionName, cancellationToken);
+            var queryResults = await vectorStore.QueryAsync(queryEmbeddingResult.Value!, 10, new Dictionary<string, string>(), "families", cancellationToken); 
 
             var results = queryResults.Select(qr => new GlobalSearchResult
             {

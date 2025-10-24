@@ -1,8 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -69,25 +69,12 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IUser use
         }
 
         _context.Members.Add(entity);
+        entity.AddDomainEvent(new MemberCreatedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
 
         // Update family stats
         await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
-
-        // Record activity
-        var currentUserProfileForActivity = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfileForActivity != null)
-        {
-            await _mediator.Send(new RecordActivityCommand
-            {
-                UserProfileId = currentUserProfileForActivity.Id,
-                ActionType = UserActionType.CreateMember,
-                TargetType = TargetType.Member,
-                TargetId = entity.Id.ToString(),
-                ActivitySummary = $"Created member '{entity.FullName}' in family '{request.FamilyId}'."
-            }, cancellationToken);
-        }
 
         return Result<Guid>.Success(entity.Id);
     }

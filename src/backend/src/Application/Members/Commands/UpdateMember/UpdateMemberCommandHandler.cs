@@ -1,7 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
@@ -62,20 +62,12 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
         }
 
+        entity.AddDomainEvent(new MemberUpdatedEvent(entity));
+
         await _context.SaveChangesAsync(cancellationToken);
 
         // Update family stats
         await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
-
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.UpdateMember,
-            TargetType = TargetType.Member,
-            TargetId = entity.Id.ToString(),
-            ActivitySummary = $"Updated member '{oldFullName}' to '{entity.FullName}'."
-        }, cancellationToken);
 
         return Result<Guid>.Success(entity.Id);
     }
