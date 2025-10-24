@@ -22,4 +22,5 @@ public interface IEmbeddingProvider
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
     /// <returns>Một đối tượng Result chứa mảng double biểu diễn embedding hoặc thông báo lỗi.</returns>
     Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default);
+    int EmbeddingDimension { get; }
 }
