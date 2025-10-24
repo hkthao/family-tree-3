@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useUserActivityStore } from '@/stores/userActivity.store';
+import { useUserActivityStore } from '@/stores/user-activity.store';
 import { ok, err } from '@/types';
 import type { RecentActivity } from '@/types';
 import { TargetType, UserActionType } from '@/types';

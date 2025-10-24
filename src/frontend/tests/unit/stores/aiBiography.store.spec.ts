@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useAIBiographyStore } from '@/stores/aiBiography.store';
+import { useAIBiographyStore } from '@/stores/ai-biography.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BiographyResultDto, Member } from '@/types';
 import { BiographyStyle, AIProviderType, Gender } from '@/types';
@@ -23,7 +23,7 @@ vi.mock('@/services/service.factory', () => ({
     aiBiography: {
       generateBiography: mockGenerateBiography,
     },
-    // Add other services as empty objects if they are not directly used by aiBiography.store
+L26: // Add other services as empty objects if they are not directly used by ai-biography.store
     ai: {},
     auth: {},
     chat: {},
@@ -62,7 +62,7 @@ vi.mock('@/stores/notification.store', () => ({
   })),
 }));
 
-describe('aiBiography.store', () => {
+describe('ai-biography.store', () => {
   let store: ReturnType<typeof useAIBiographyStore>;
 
   const mockMember: Member = {

@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useUserProfileStore } from '@/stores/userProfile.store';
+import { useUserProfileStore } from '@/stores/user-profile.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok, err } from '@/types';
 import type { UserProfile } from '@/types';
@@ -23,7 +23,7 @@ vi.mock('@/services/service.factory', () => ({
       getAllUserProfiles: mockGetAllUserProfiles,
       updateUserProfile: mockUpdateUserProfile,
     },
-    // Add other services as empty objects if they are not directly used by userProfile.store
+    // Add other services as empty objects if they are not directly used by user-profile.store
     ai: {},
     auth: {},
     chat: {},
@@ -53,7 +53,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('userProfile.store', () => {
+describe('user-profile.store', () => {
   let store: ReturnType<typeof useUserProfileStore>;
 
   const mockUserProfile: UserProfile = {

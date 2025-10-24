@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useFileUploadStore } from '@/stores/fileUpload.store';
+import { useFileUploadStore } from '@/stores/file-upload.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok } from '@/types';
 import { createServices } from '@/services/service.factory';
@@ -13,7 +13,7 @@ vi.mock('@/services/service.factory', () => ({
     fileUpload: {
       uploadFile: mockUploadFile,
     },
-    // Add other services as empty objects if they are not directly used by fileUpload.store
+    // Add other services as empty objects if they are not directly used by file-upload.store
     ai: {},
     auth: {},
     chat: {},
@@ -35,7 +35,7 @@ vi.mock('@/services/service.factory', () => ({
   })),
 }));
 
-describe('fileUpload.store', () => {
+describe('file-upload.store', () => {
   let store: ReturnType<typeof useFileUploadStore>;
 
   beforeEach(() => {

@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useUserSettingsStore } from '@/stores/userSettings.store';
+import { useUserSettingsStore } from '@/stores/user-settings.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserPreference } from '@/types';
 import { Theme, Language } from '@/types';
@@ -19,7 +19,7 @@ vi.mock('@/services/service.factory', () => ({
       getUserPreferences: mockGetUserPreferences,
       saveUserPreferences: mockSaveUserPreferences,
     },
-    // Add other services as empty objects if they are not directly used by userSettings.store
+    // Add other services as empty objects if they are not directly used by user-settings.store
     ai: {},
     auth: {},
     chat: {},
@@ -51,7 +51,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('userSettings.store', () => {
+describe('user-settings.store', () => {
   let store: ReturnType<typeof useUserSettingsStore>;
 
   const mockUserPreference: UserPreference = {

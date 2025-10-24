@@ -1,7 +1,7 @@
 import type { Result } from '@/types';
 import type { UserProfile } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { IUserProfileService } from './userProfile.service.interface';
+import type { IUserProfileService } from './user-profile.service.interface';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 

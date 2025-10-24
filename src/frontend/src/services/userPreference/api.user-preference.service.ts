@@ -1,4 +1,4 @@
-import type { IUserPreferenceService } from './userPreference.service.interface';
+import type { IUserPreferenceService } from './user-preference.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { Result, UserPreference } from '@/types';
 

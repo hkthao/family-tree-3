@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useMemberAutocompleteStore } from '@/stores/memberAutocomplete.store';
+import { useMemberAutocompleteStore } from '@/stores/member-autocomplete.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '@/plugins/i18n';
 import type { Member } from '@/types';
@@ -7,7 +7,7 @@ import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
-// Mock the IMemberService methods used by memberAutocomplete.store
+// Mock the IMemberService methods used by member-autocomplete.store
 const mockLoadItems = vi.fn();
 const mockGetByIds = vi.fn();
 
@@ -17,7 +17,7 @@ vi.mock('@/services/service.factory', () => ({
     member: {
       loadItems: mockLoadItems,
       getByIds: mockGetByIds,
-      // Add other services as empty objects if they are not directly used by memberAutocomplete.store
+      // Add other services as empty objects if they are not directly used by member-autocomplete.store
       add: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
@@ -39,7 +39,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('memberAutocomplete.store', () => {
+describe('member-autocomplete.store', () => {
   let store: ReturnType<typeof useMemberAutocompleteStore>;
 
   beforeEach(() => {

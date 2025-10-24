@@ -1,4 +1,4 @@
-import type { IUserActivityService } from './userActivity.service.interface';
+import type { IUserActivityService } from './user-activity.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { Result, RecentActivity, TargetType } from '@/types';
 

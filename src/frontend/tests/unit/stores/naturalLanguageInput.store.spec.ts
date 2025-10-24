@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useNaturalLanguageInputStore } from '@/stores/naturalLanguageInput.store';
+import { useNaturalLanguageInputStore } from '@/stores/natural-language-input.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ok, err } from '@/types';
 import { RelationshipType, type Family, type Member, type Event, type Relationship, EventType } from '@/types';
@@ -21,7 +21,7 @@ vi.mock('@/services/service.factory', () => ({
       generateEventData: mockGenerateEventData,
       generateRelationshipData: mockGenerateRelationshipData,
     },
-    // Add other services as empty objects if they are not directly used by naturalLanguageInput.store
+    // Add other services as empty objects if they are not directly used by natural-language-input.store
     ai: {},
     auth: {},
     chat: {},
@@ -51,7 +51,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('naturalLanguageInput.store', () => {
+describe('natural-language-input.store', () => {
   let store: ReturnType<typeof useNaturalLanguageInputStore>;
 
   beforeEach(() => {

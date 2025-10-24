@@ -1,5 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
-import { useFamilyAutocompleteStore } from '@/stores/familyAutocomplete.store';
+import { useFamilyAutocompleteStore } from '@/stores/family-autocomplete.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '@/plugins/i18n';
 import type { Family } from '@/types';
@@ -7,7 +7,7 @@ import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
-// Mock the IFamilyService methods used by familyAutocomplete.store
+// Mock the IFamilyService methods used by family-autocomplete.store
 const mockLoadItems = vi.fn();
 const mockGetByIds = vi.fn();
 
@@ -17,7 +17,7 @@ vi.mock('@/services/service.factory', () => ({
     family: {
       loadItems: mockLoadItems,
       getByIds: mockGetByIds,
-      // Add other services as empty objects if they are not directly used by familyAutocomplete.store
+      // Add other services as empty objects if they are not directly used by family-autocomplete.store
       add: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
@@ -39,7 +39,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('familyAutocomplete.store', () => {
+describe('family-autocomplete.store', () => {
   let store: ReturnType<typeof useFamilyAutocompleteStore>;
 
   beforeEach(() => {
