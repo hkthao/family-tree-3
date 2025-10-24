@@ -163,17 +163,6 @@ export const useFamilyStore = defineStore('family', {
       return undefined;
     },
 
-    async searchLookup(
-      filter: FamilyFilter,
-      page: number,
-      itemsPerPage: number,
-    ) {
-      this.filter = filter;
-      this.currentPage = page;
-      this.itemsPerPage = itemsPerPage;
-      await this._loadItems();
-    },
-
     async getByIds(ids: string[]): Promise<Family[]> {
       this.loading = true;
       this.error = null;

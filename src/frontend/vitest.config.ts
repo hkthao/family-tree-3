@@ -29,5 +29,10 @@ export default mergeConfig(
         }
       }
     },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
   }),
 );
