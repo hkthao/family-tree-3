@@ -5,18 +5,15 @@ using backend.Domain.Events.Families;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
-using backend.Application.AI.VectorStore;
-using backend.Application.AI.Embeddings;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IVectorStoreFactory vectorStoreFactory, IEmbeddingProviderFactory embeddingProviderFactory) : INotificationHandler<FamilyCreatedEvent>
+public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, INotificationService notificationService, IGlobalSearchService globalSearchService) : INotificationHandler<FamilyCreatedEvent>
 {
     private readonly ILogger<FamilyCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly INotificationService _notificationService = notificationService;
-    private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
-    private readonly IEmbeddingProviderFactory _embeddingProviderFactory = embeddingProviderFactory;
+    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
 
     public async Task Handle(FamilyCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -49,34 +46,7 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
             DeepLink = $"/families/{notification.Family.Id}" // Example deep link
         }, cancellationToken);
 
-        // Store family data in Vector DB for search
-        try
-        {
-            var embeddingProvider = _embeddingProviderFactory.GetProvider(EmbeddingAIProvider.OpenAI); // Use correct enum
-            var vectorStore = _vectorStoreFactory.CreateVectorStore(VectorStoreProviderType.Pinecone); // Use correct method and enum
-
-            string textToEmbed = $"Family Name: {notification.Family.Name}. Description: {notification.Family.Description}";
-            var embeddingResult = await embeddingProvider.GenerateEmbeddingAsync(textToEmbed, cancellationToken);
-
-            if (embeddingResult.IsSuccess) // Use IsSuccess
-            {
-                var metadata = new Dictionary<string, string>
-                {
-                    { "FamilyId", notification.Family.Id.ToString() },
-                    { "FamilyName", notification.Family.Name },
-                    { "Description", notification.Family.Description ?? "" }
-                };
-                await vectorStore.UpsertAsync(embeddingResult.Value!.ToList(), metadata, "families", embeddingProvider.EmbeddingDimension, cancellationToken); // Use EmbeddingDimension and null-forgiving operator
-                _logger.LogInformation("Family {FamilyId} data successfully upserted to vector DB.", notification.Family.Id);
-            }
-            else
-            {
-                _logger.LogError("Failed to generate embedding for family {FamilyId}: {Error}", notification.Family.Id, embeddingResult.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error storing family {FamilyId} data in vector DB.", notification.Family.Id);
-        }
+        // Store family data in Vector DB for search via GlobalSearchService
+        await _globalSearchService.UpsertFamilyForSearchAsync(notification.Family, cancellationToken);
     }
 }

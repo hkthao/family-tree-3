@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IDateTime, DateTimeService>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
         services.AddScoped<ApplicationDbContextInitialiser>();
 
