@@ -1,7 +1,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Application.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -60,16 +59,6 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
 
             // Update family stats
             await _familyTreeService.UpdateFamilyStats(entity.Id, cancellationToken);
-
-            // Record activity
-            await _mediator.Send(new RecordActivityCommand
-            {
-                UserProfileId = userProfile.Id,
-                ActionType = UserActionType.CreateFamily,
-                TargetType = TargetType.Family,
-                TargetId = entity.Id.ToString(),
-                ActivitySummary = $"Created family '{entity.Name}'."
-            }, cancellationToken);
 
             return Result<Guid>.Success(entity.Id);
         }
