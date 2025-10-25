@@ -17,7 +17,7 @@ namespace backend.Web.Controllers;
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hồ sơ người dùng.
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
-public class UserProfilesController(IMediator mediator) : ControllerBase
+public class UserProfileController(IMediator mediator) : ControllerBase
 {
 
     /// <summary>

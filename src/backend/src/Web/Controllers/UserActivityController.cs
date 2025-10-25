@@ -13,7 +13,7 @@ namespace backend.Web.Controllers;
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến hoạt động của người dùng.
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
-public class UserActivitiesController(IMediator mediator) : ControllerBase
+public class UserActivityController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.

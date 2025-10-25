@@ -25,7 +25,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/member")]
-public class MembersController(IMediator mediator, ILogger<MembersController> logger) : ControllerBase
+public class MemberController(IMediator mediator, ILogger<MemberController> logger) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
@@ -34,7 +34,7 @@ public class MembersController(IMediator mediator, ILogger<MembersController> lo
     /// <summary>
     /// Đối tượng ILogger để ghi log.
     /// </summary>
-    private readonly ILogger<MembersController> _logger = logger;
+    private readonly ILogger<MemberController> _logger = logger;
 
     /// <summary>
     /// Tạo tiểu sử cho một thành viên bằng AI.

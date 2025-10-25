@@ -20,7 +20,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/relationship")]
-public class RelationshipsController(IMediator mediator) : ControllerBase
+public class RelationshipController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.

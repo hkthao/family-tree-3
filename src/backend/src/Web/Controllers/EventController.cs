@@ -21,7 +21,7 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/event")]
-public class EventsController(IMediator mediator) : ControllerBase
+public class EventController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.

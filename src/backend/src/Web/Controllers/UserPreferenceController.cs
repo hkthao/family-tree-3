@@ -14,7 +14,7 @@ namespace backend.Web.Controllers;
 /// Bộ điều khiển xử lý các yêu cầu liên quan đến tùy chọn người dùng.
 /// </summary>
 /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
-public class UserPreferencesController(IMediator mediator) : ControllerBase
+public class UserPreferenceController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
