@@ -2,6 +2,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events.Events;
 
 namespace backend.Application.Events.Commands.CreateEvents;
 
@@ -14,29 +15,18 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IUser use
     public async Task<Result<List<Guid>>> Handle(CreateEventsCommand request, CancellationToken cancellationToken)
     {
         var createdEventIds = new List<Guid>();
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-
-        if (currentUserProfile == null)
-        {
-            return Result<List<Guid>>.Failure("User profile not found.", "NotFound");
-        }
 
         foreach (var command in request.Events)
         {
-            var family = await _context.Families
-                .Include(f => f.FamilyUsers)
-                .FirstOrDefaultAsync(f => f.Id == command.FamilyId, cancellationToken);
-
-            if (family == null)
+            if (!command.FamilyId.HasValue)
             {
-                return Result<List<Guid>>.Failure($"Family with ID {command.FamilyId} not found.");
+                return Result<List<Guid>>.Failure("FamilyId is required for event creation.");
             }
 
             // Check authorization for the family
-            if (!(_user.Roles != null && _user.Roles.Contains(SystemRole.Admin.ToString())) &&
-                !family.FamilyUsers.Any(fu => fu.UserProfileId == currentUserProfile!.Id && fu.Role == FamilyRole.Manager))
+            if (!_authorizationService.CanManageFamily(command.FamilyId.Value))
             {
-                return Result<List<Guid>>.Failure($"User is not authorized to create events in family {family.Name}.");
+                return Result<List<Guid>>.Failure($"User is not authorized to create events in family with ID {command.FamilyId.Value}.");
             }
 
             var entity = new Event
@@ -59,6 +49,7 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IUser use
                 }
             }
 
+            entity.AddDomainEvent(new EventCreatedEvent(entity));
             _context.Events.Add(entity);
             createdEventIds.Add(entity.Id);
         }

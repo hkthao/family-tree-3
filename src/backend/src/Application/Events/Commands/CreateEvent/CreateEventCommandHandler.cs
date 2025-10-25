@@ -3,14 +3,14 @@ using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<CreateEventCommand, Result<Guid>>
+public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
@@ -40,17 +40,11 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
         _context.Events.Add(entity);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        entity.AddDomainEvent(new Domain.Events.Events.EventCreatedEvent(entity));
 
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.CreateEvent,
-            TargetType = TargetType.Event,
-            TargetId = entity.Id.ToString(),
-            ActivitySummary = $"Created event '{entity.Name}'."
-        }, cancellationToken); return Result<Guid>.Success(entity.Id);
+        await _context.SaveChangesAsync(cancellationToken);
+        
+        return Result<Guid>.Success(entity.Id);
     }
 
     private string GenerateUniqueCode(string prefix)

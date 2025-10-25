@@ -16,19 +16,16 @@ namespace backend.Application.UnitTests.Relationships.Commands.UpdateRelationshi
 public class UpdateRelationshipCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
     private readonly UpdateRelationshipCommandHandler _handler;
 
     public UpdateRelationshipCommandHandlerTests()
     {
         _mockAuthorizationService = new Mock<IAuthorizationService>();
-        _mockMediator = new Mock<IMediator>();
         _fixture.Customize(new AutoMoqCustomization());
-
         _handler = new UpdateRelationshipCommandHandler(
             _context,
             _mockAuthorizationService.Object,
-            _mockMediator.Object
+            _mockUser.Object
         );
     }
 
@@ -40,9 +37,6 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về null.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((UserProfile?)null);
-
         var command = new UpdateRelationshipCommand
         {
             Id = Guid.NewGuid(),
@@ -69,10 +63,6 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Đảm bảo mối quan hệ không tồn tại trong _context.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var command = new UpdateRelationshipCommand
         {
             Id = Guid.NewGuid(), // Non-existent ID
@@ -98,10 +88,6 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ vào _context, nhưng không thêm thành viên nguồn tương ứng.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var relationship = _fixture.Build<Relationship>()
             .Without(r => r.SourceMember) // Ensure SourceMember is not loaded
             .Create();
@@ -135,8 +121,6 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
 
         var familyId = Guid.NewGuid();
         var sourceMember = _fixture.Build<Member>()
@@ -151,7 +135,7 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId, currentUserProfile)).Returns(false);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(false);
 
         var command = new UpdateRelationshipCommand
         {
@@ -179,10 +163,6 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ và thành viên nguồn vào _context. Thiết lập _mockAuthorizationService.IsAdmin trả về false và _mockAuthorizationService.CanManageFamily trả về true.
         // 2. Act: Gọi phương thức Handle với các thông tin cập nhật.
         // 3. Assert: Kiểm tra kết quả trả về là thành công. Xác minh mối quan hệ đã được cập nhật trong _context. Xác minh RecordActivityCommand được gửi.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Code = "FAM001", Name = "Test Family" };
         _context.Families.Add(family);
@@ -226,7 +206,7 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId, currentUserProfile)).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(true);
 
         var updatedSourceMemberId = Guid.NewGuid();
         var updatedTargetMemberId = Guid.NewGuid();
@@ -254,8 +234,6 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         updatedRelationship.TargetMemberId.Should().Be(updatedTargetMemberId);
         updatedRelationship.Type.Should().Be(updatedType);
         updatedRelationship.Order.Should().Be(updatedOrder);
-
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         // 💡 Giải thích: Handler phải cập nhật mối quan hệ và ghi lại hoạt động.
     }
 }

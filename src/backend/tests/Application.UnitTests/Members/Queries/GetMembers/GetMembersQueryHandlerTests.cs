@@ -34,7 +34,7 @@ public class GetMembersQueryHandlerTests : TestBase
         // 1. Arrange: Mock _mockUser.Id trả về null.
         // 2. Act: Gọi phương thức Handle với một GetMembersQuery bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((string)null!);
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!);
 
         var query = _fixture.Create<GetMembersQuery>();
 
@@ -55,7 +55,7 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Thêm nhiều gia đình và thành viên vào Context.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery không có FamilyId.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chứa tất cả thành viên.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
 
@@ -94,7 +94,7 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Thêm nhiều gia đình và thành viên vào Context.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery có FamilyId cụ thể.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa thành viên của gia đình đó.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
 
@@ -133,10 +133,9 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Mock _mockAuthorizationService.GetCurrentUserProfileAsync() trả về null.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync((UserProfile)null!);
 
         var query = _fixture.Create<GetMembersQuery>();
 
@@ -157,11 +156,11 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Thiết lập UserProfile với FamilyUsers cho các gia đình cụ thể.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery không có FamilyId.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa thành viên từ các gia đình có quyền truy cập.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
 
-        var userProfile = new UserProfile { Id = Guid.Parse(userId), ExternalId = userId, Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA001" };
@@ -183,8 +182,6 @@ public class GetMembersQueryHandlerTests : TestBase
         // No FamilyUser for family3, so not accessible
 
         await _context.SaveChangesAsync();
-
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
 
         var query = new GetMembersQuery { FamilyId = null };
 
@@ -209,11 +206,11 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Thiết lập UserProfile với FamilyUsers cho các gia đình.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery có FamilyId cụ thể và có quyền truy cập.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa thành viên của gia đình đó.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
 
-        var userProfile = new UserProfile { Id = Guid.Parse(userId), ExternalId = userId, Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA001" };
@@ -229,8 +226,6 @@ public class GetMembersQueryHandlerTests : TestBase
         // No FamilyUser for family2, so not accessible
 
         await _context.SaveChangesAsync();
-
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
 
         var query = new GetMembersQuery { FamilyId = family1.Id }; // Specific accessible FamilyId
 
@@ -254,11 +249,11 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Thiết lập UserProfile với FamilyUsers cho các gia đình.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery có FamilyId cụ thể và không có quyền truy cập.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
 
-        var userProfile = new UserProfile { Id = Guid.Parse(userId), ExternalId = userId, Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA001" };
@@ -274,8 +269,6 @@ public class GetMembersQueryHandlerTests : TestBase
         // No FamilyUser for family2, so not accessible
 
         await _context.SaveChangesAsync();
-
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
 
         var query = new GetMembersQuery { FamilyId = family2.Id }; // Specific inaccessible FamilyId
 
@@ -296,7 +289,7 @@ public class GetMembersQueryHandlerTests : TestBase
         //             Thêm nhiều thành viên với tên khác nhau vào Context.
         // 2. Act: Gọi phương thức Handle với GetMembersQuery có SearchTerm.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa thành viên khớp với SearchTerm.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true); // Admin to bypass family access checks
 

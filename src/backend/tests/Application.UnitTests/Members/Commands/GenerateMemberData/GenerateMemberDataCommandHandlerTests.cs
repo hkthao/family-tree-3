@@ -1,7 +1,6 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Members.Commands.GenerateMemberData;
 using backend.Application.Members.Queries;
 using backend.Application.UnitTests.Common;
@@ -19,7 +18,6 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
 {
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IValidator<AIMemberDto>> _mockAIMemberDtoValidator;
-    private readonly Mock<FamilyAuthorizationService> _mockFamilyAuthorizationService;
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly GenerateMemberDataCommandHandler _handler;
@@ -29,7 +27,6 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
         _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
         _mockAIMemberDtoValidator = _fixture.Freeze<Mock<IValidator<AIMemberDto>>>();
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockFamilyAuthorizationService = new Mock<FamilyAuthorizationService>(_context, _mockUser.Object, _mockAuthorizationService.Object);
         _mockChatProvider = new Mock<IChatProvider>();
 
         _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))
@@ -39,7 +36,7 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
             _mockChatProviderFactory.Object,
             _mockAIMemberDtoValidator.Object,
             _context,
-            _mockFamilyAuthorizationService.Object
+            _mockAuthorizationService.Object
         );
     }
 
@@ -124,9 +121,6 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
         _context.Families.RemoveRange(_context.Families);
         await _context.SaveChangesAsync();
 
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Failure("Family 'NonExistentFamily' not found or you do not have permission to manage it."));
-
         // Mock the validator to pass for other fields
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIMemberDto>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new ValidationResult());
@@ -197,9 +191,6 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
 
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Success(family));
-
         var validationErrors = new List<ValidationFailure>
         {
             new("FirstName", "First Name is required.")
@@ -235,9 +226,6 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
         var family = _fixture.Build<Family>().With(f => f.Name, "ExistingFamily").Create();
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
-
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Success(family));
 
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIMemberDto>(), It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(new ValidationResult()); // Validation passes

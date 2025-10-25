@@ -37,9 +37,9 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 2. Kiểm tra xem UserPreference mới đã được tạo và lưu vào cơ sở dữ liệu với các giá trị chính xác.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
+                                  .With(up => up.ExternalId, userId.ToString())
                                   .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
                                   .Create();
         _context.UserProfiles.Add(userProfile);
@@ -96,9 +96,9 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 2. Kiểm tra xem UserPreference hiện có đã được cập nhật với các giá trị mới.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
+                                  .With(up => up.ExternalId, userId.ToString())
                                   .Create();
         var existingUserPreference = _fixture.Build<UserPreference>()
                                              .With(up => up.UserProfileId, userProfile.Id)
@@ -160,7 +160,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns((string)null!); // User is not authenticated
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User is not authenticated
 
         var command = new SaveUserPreferencesCommand
         {
@@ -204,7 +204,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         // Ensure no UserProfile exists for this userId

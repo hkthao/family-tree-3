@@ -6,12 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<RelationshipCreatedEvent>
+public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,IUser _user) : INotificationHandler<RelationshipCreatedEvent>
 {
     private readonly ILogger<RelationshipCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
+    private readonly IUser _user = _user;
 
     public async Task Handle(RelationshipCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -23,7 +24,7 @@ public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHan
         // Record activity for relationship creation
         await _mediator.Send(new RecordActivityCommand
         {
-            // UserProfileId will be determined by the RecordActivityCommand handler based on the current user
+            UserProfileId = _user.Id!.Value,
             ActionType = UserActionType.CreateRelationship,
             TargetType = TargetType.Relationship,
             TargetId = notification.Relationship.Id.ToString(),

@@ -64,7 +64,7 @@ public class DeleteFileCommandHandlerTests : TestBase
         _context.FileMetadata.Add(fileMetadata);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString()); // Current user is different
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid()); // Current user is different
 
         var command = new DeleteFileCommand { FileId = fileId };
 
@@ -86,13 +86,13 @@ public class DeleteFileCommandHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var fileId = Guid.NewGuid();
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var fileMetadata = new FileMetadata
         {
             Id = fileId,
             FileName = "test.jpg",
             Url = "http://example.com/test.jpg",
-            UploadedBy = userId,
+            UploadedBy = userId.ToString(),
             ContentType = "image/jpeg", // Thêm ContentType
             IsActive = true
         };
@@ -125,13 +125,13 @@ public class DeleteFileCommandHandlerTests : TestBase
         // 3. Assert: Kiểm tra kết quả trả về là thành công. Xác minh _fileStorage.DeleteFileAsync() được gọi.
         //             Xác minh FileMetadata bị xóa khỏi Context.
         var fileId = Guid.NewGuid();
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var fileMetadata = new FileMetadata
         {
             Id = fileId,
             FileName = "test.jpg",
             Url = "http://example.com/test.jpg",
-            UploadedBy = userId,
+            UploadedBy = userId.ToString(),
             ContentType = "image/jpeg", // Thêm ContentType
             IsActive = true
         };

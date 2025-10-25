@@ -28,7 +28,7 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         // ⚙️ Các bước (Arrange, Act, Assert):
 
         // 1. Arrange: Thiết lập _mockUser.Setup(u => u.Id).Returns((string)null);
-        _mockUser.Setup(u => u.Id).Returns(string.Empty);
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // User not authenticated
         var query = new GetRecentActivitiesQuery();
 
         // 2. Act: Gọi phương thức Handle của handler.
@@ -48,10 +48,11 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
 
         // ⚙️ Các bước (Arrange, Act, Assert):
 
-        // 1. Arrange: Thiết lập _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString()); và _mockAuthorizationService để trả về null.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(default(UserProfile));
+        // 1. Arrange: Thiết lập _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString()); và đảm bảo không có UserProfile nào trong DB.
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
+        // Ensure no UserProfile exists for this ID
+        _context.UserProfiles.RemoveRange(_context.UserProfiles);
+        await _context.SaveChangesAsync(CancellationToken.None);
         var query = new GetRecentActivitiesQuery();
 
         // 2. Act: Gọi phương thức Handle của handler.
@@ -71,14 +72,14 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
 
         // ⚙️ Các bước (Arrange, Act, Assert):
 
-        // 1. Arrange: Thiết lập _mockUser và _mockAuthorizationService. Tạo và thêm UserActivity entities vào DB.
-        var currentUserId = Guid.NewGuid().ToString();
+        // 1. Arrange: Thiết lập _mockUser. Tạo và thêm UserProfile và UserActivity entities vào DB.
+        var currentUserId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(currentUserId);
 
         var userProfileId = Guid.NewGuid();
-        var userProfile = new UserProfile { Id = userProfileId, ExternalId = currentUserId, Email = "test@example.com", Name = "Test User" };
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userProfile);
+        var userProfile = new UserProfile { Id = userProfileId, ExternalId = currentUserId.ToString(), Email = "test@example.com", Name = "Test User" };
+        _context.UserProfiles.Add(userProfile);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
         var activities = new List<UserActivity>
         {
@@ -113,14 +114,10 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         // ⚙️ Các bước (Arrange, Act, Assert):
 
         // 1. Arrange: Thiết lập _mockUser và _mockAuthorizationService. Tạo và thêm UserActivity entities vào DB.
-        var currentUserId = Guid.NewGuid().ToString();
+        var currentUserId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(currentUserId);
 
         var userProfileId = Guid.NewGuid();
-        var userProfile = new UserProfile { Id = userProfileId, ExternalId = currentUserId, Email = "test@example.com", Name = "Test User" };
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userProfile);
-
         var targetFamilyId = Guid.NewGuid().ToString();
         var activities = new List<UserActivity>
         {
@@ -161,14 +158,10 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         // ⚙️ Các bước (Arrange, Act, Assert):
 
         // 1. Arrange: Thiết lập _mockUser và _mockAuthorizationService. Tạo và thêm UserActivity entities vào DB.
-        var currentUserId = Guid.NewGuid().ToString();
+        var currentUserId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(currentUserId);
 
         var userProfileId = Guid.NewGuid();
-        var userProfile = new UserProfile { Id = userProfileId, ExternalId = currentUserId, Email = "test@example.com", Name = "Test User" };
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userProfile);
-
         var targetGroupId = Guid.NewGuid();
         var activities = new List<UserActivity>
         {

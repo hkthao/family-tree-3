@@ -6,13 +6,14 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService,IUser _user) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
+    private readonly IUser _user = _user;
 
     public async Task Handle(MemberCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +25,7 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
         // Record activity for member creation
         await _mediator.Send(new RecordActivityCommand
         {
-            // UserProfileId will be determined by the RecordActivityCommand handler based on the current user
+            UserProfileId = _user.Id!.Value,
             ActionType = UserActionType.CreateMember,
             TargetType = TargetType.Member,
             TargetId = notification.Member.Id.ToString(),

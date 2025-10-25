@@ -18,7 +18,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
     public GetDashboardStatsQueryHandlerTests()
     {
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _handler = new GetDashboardStatsQueryHandler(_context, _mockAuthorizationService.Object);
+        _handler = new GetDashboardStatsQueryHandler(_context,_mockAuthorizationService.Object, _mockUser.Object);
     }
 
     [Fact]
@@ -39,8 +39,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((UserProfile)null!); // UserProfile not found
+        _mockUser.Setup(x => x.Id).Returns((Guid?)null); // Simulate UserProfile not found
 
         var query = _fixture.Create<GetDashboardStatsQuery>();
 
@@ -101,8 +100,9 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()));
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
+        _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
+        _mockUser.Setup(x => x.ExternalId).Returns(userProfile.ExternalId);
         var query = _fixture.Build<GetDashboardStatsQuery>().Without(q => q.FamilyId).Create();
 
         _context.Families.Should().HaveCount(2);

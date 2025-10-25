@@ -1,7 +1,6 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Events.Commands.GenerateEventData;
 using backend.Application.Events.Queries;
 using backend.Application.UnitTests.Common;
@@ -22,7 +21,6 @@ public class GenerateEventDataCommandHandlerTests : TestBase
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly Mock<IValidator<AIEventDto>> _mockAIEventDtoValidator;
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<FamilyAuthorizationService> _mockFamilyAuthorizationService;
 
     public GenerateEventDataCommandHandlerTests()
     {
@@ -30,8 +28,6 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         _mockChatProvider = _fixture.Freeze<Mock<IChatProvider>>();
         _mockAIEventDtoValidator = _fixture.Freeze<Mock<IValidator<AIEventDto>>>();
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockFamilyAuthorizationService = new Mock<FamilyAuthorizationService>(_context, _mockUser.Object, _mockAuthorizationService.Object);
-
         _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))
                                 .Returns(_mockChatProvider.Object);
 
@@ -39,7 +35,7 @@ public class GenerateEventDataCommandHandlerTests : TestBase
             _mockChatProviderFactory.Object,
             _mockAIEventDtoValidator.Object,
             _context,
-            _mockFamilyAuthorizationService.Object);
+            _mockAuthorizationService.Object);
     }
 
     [Fact]
@@ -170,16 +166,9 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         // 2. Kiểm tra xem danh sách sự kiện trả về có chứa lỗi xác thực cho FamilyName.
 
         // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
-
         var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"NonExistentFamily\" } ] }";
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(aiResponseJson);
-
-        _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(Result<Family>.Failure("Family not found."));
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
@@ -233,9 +222,6 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(aiResponseJson);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
-
         var command = _fixture.Create<GenerateEventDataCommand>();
 
         // Act
@@ -285,11 +271,6 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"NonExistentMember\"] } ] }";
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(aiResponseJson);
-
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
-        _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(family.Id, It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(Result<Family>.Success(family));
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
@@ -357,12 +338,7 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"startDate\": \"2023-01-01\", \"location\": \"Location 1\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"John Doe\"] } ] }";
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(aiResponseJson);
-
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
         _mockUser.Setup(u => u.Roles).Returns([SystemRole.Admin.ToString()]);
-        _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(family.Id, It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(Result<Family>.Success(family));
         _mockAIEventDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new ValidationResult());
 

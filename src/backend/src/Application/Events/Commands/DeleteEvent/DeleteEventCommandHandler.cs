@@ -2,14 +2,16 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.DeleteEvent;
 
-public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<DeleteEventCommand, Result<bool>>
+public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user, ILogger<DeleteEventCommandHandler> logger) : IRequestHandler<DeleteEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
+    private readonly IUser _user = user;
+    private readonly ILogger<DeleteEventCommandHandler> _logger = logger;
 
     public async Task<Result<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
@@ -20,22 +22,18 @@ public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthoriza
         if (!_authorizationService.CanManageFamily(entity.FamilyId!.Value))
             return Result<bool>.Failure("Access denied. Only family managers or admins can delete events.", "Forbidden");
 
-        var eventName = entity.Name; // Capture event name for activity summary
+        entity.AddDomainEvent(new Domain.Events.Events.EventDeletedEvent(entity));
 
         _context.Events.Remove(entity);
 
         await _context.SaveChangesAsync(cancellationToken);
 
         // Record activity
-        await _mediator.Send(new RecordActivityCommand
+        if (!_user.Id.HasValue)
         {
-            UserProfileId = _user.Id,
-            ActionType = UserActionType.DeleteEvent,
-            TargetType = TargetType.Event,
-            TargetId = request.Id.ToString(),
-            ActivitySummary = $"Deleted event '{eventName}'."
-        }, cancellationToken);
-
+            _logger.LogWarning("Current user ID not found when recording activity for event deletion. Activity will not be recorded.");
+            return Result<bool>.Failure("User is not authenticated.", "Authentication");
+        }
         return Result<bool>.Success(true);
     }
 }

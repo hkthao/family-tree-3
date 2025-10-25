@@ -1,14 +1,11 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Events;
 using backend.Domain.Events.Families;
 using FluentAssertions;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -24,19 +21,19 @@ public class DeleteFamilyCommandHandlerTests : TestBase
     {
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
 
-        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object);
+        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenUserNotAuthenticated()
     {
         // 🎯 Mục tiêu của test:
         // Xác minh rằng handler trả về một kết quả thất bại
-        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
+        // khi người dùng chưa được xác thực.
 
         // ⚙️ Các bước (Arrange, Act, Assert):
         // Arrange:
-        // 1. Thiết lập _mockAuthorizationService để trả về null cho GetCurrentUserProfileAsync.
+        // 1. Thiết lập _mockUser.Id trả về null hoặc chuỗi rỗng.
         // 2. Tạo một DeleteFamilyCommand bất kỳ.
         // Act:
         // 1. Gọi phương thức Handle của handler.
@@ -45,8 +42,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((UserProfile)null!); // UserProfile not found
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User not authenticated
 
         var command = _fixture.Create<DeleteFamilyCommand>();
 
@@ -56,11 +52,11 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Be("User is not authenticated.");
+        result.ErrorSource.Should().Be("Authentication");
 
         // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu hồ sơ người dùng không tồn tại trong hệ thống,
+        // Test này đảm bảo rằng nếu người dùng chưa được xác thực,
         // yêu cầu xóa gia đình sẽ thất bại để ngăn chặn việc thao tác dữ liệu không hợp lệ.
     }
 
@@ -85,10 +81,9 @@ public class DeleteFamilyCommandHandlerTests : TestBase
 
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>(), It.IsAny<UserProfile>()))
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>()))
                                  .Returns(false);
 
         var command = _fixture.Create<DeleteFamilyCommand>();
@@ -128,8 +123,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
 
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true); // Assume admin for simplicity in this test
 
         // Ensure no Family exists for this ID
@@ -179,6 +173,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
+        _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
 
         var command = new DeleteFamilyCommand(existingFamily.Id);
@@ -229,10 +224,9 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id, userProfile))
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id))
                                  .Returns(true);
 
         var command = new DeleteFamilyCommand(existingFamily.Id);

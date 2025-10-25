@@ -25,7 +25,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockMediator = _fixture.Freeze<Mock<IMediator>>();
 
-        _handler = new UpdateEventCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object);
+        _handler = new UpdateEventCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]
@@ -46,8 +46,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((UserProfile)null!); // UserProfile not found
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // Simulate UserProfile not found
 
         var command = _fixture.Create<UpdateEventCommand>();
 
@@ -85,8 +84,7 @@ public class UpdateEventCommandHandlerTests : TestBase
 
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
 
         // Ensure no Event exists for this ID
@@ -138,10 +136,9 @@ public class UpdateEventCommandHandlerTests : TestBase
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id, userProfile))
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id))
                                  .Returns(false);
 
         var command = _fixture.Build<UpdateEventCommand>()
@@ -192,8 +189,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         _context.Events.Add(existingEvent);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
         _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
@@ -267,10 +263,9 @@ public class UpdateEventCommandHandlerTests : TestBase
         _context.FamilyUsers.Add(familyUser);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id, userProfile))
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id))
                                  .Returns(true);
         _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
@@ -342,8 +337,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
         _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));

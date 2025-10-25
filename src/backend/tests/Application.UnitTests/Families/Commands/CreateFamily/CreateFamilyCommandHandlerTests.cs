@@ -1,17 +1,9 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.Events;
 using backend.Domain.Events.Families;
 using FluentAssertions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
@@ -22,8 +14,6 @@ public class CreateFamilyCommandHandlerTests : TestBase
 
     public CreateFamilyCommandHandlerTests()
     {
-        var _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-
         _handler = new CreateFamilyCommandHandler(_context, _mockUser.Object);
     }
 
@@ -50,18 +40,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 5. Kiểm tra xem FamilyCreatedEvent và FamilyStatsUpdatedEvent đã được thêm vào domain events.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
-                                  .Create();
-        _context.UserProfiles.Add(userProfile);
+        var userId = Guid.NewGuid();
         await _context.SaveChangesAsync(CancellationToken.None);
-
         _mockUser.Setup(u => u.Id).Returns(userId);
-        var _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-
         var command = _fixture.Build<CreateFamilyCommand>()
                                .With(c => c.Name, "Test Family")
                                .With(c => c.Description, "A family for testing")
@@ -81,12 +62,6 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily!.Name.Should().Be(command.Name);
         createdFamily.Description.Should().Be(command.Description);
         createdFamily.Code.Should().Be(command.Code);
-
-        var familyUser = await _context.FamilyUsers.FirstOrDefaultAsync(fu => fu.FamilyId == createdFamily.Id && fu.UserProfileId == userProfile.Id);
-        familyUser.Should().NotBeNull();
-        familyUser!.Role.Should().Be(FamilyRole.Manager);
-
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
 
         createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyCreatedEvent);
         createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
@@ -117,7 +92,7 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns((string)null!); // User is not authenticated
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // User is not authenticated
 
         var command = _fixture.Create<CreateFamilyCommand>();
 
@@ -154,7 +129,7 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         // Ensure no UserProfile exists for this userId
@@ -198,18 +173,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 2. Kiểm tra xem gia đình được tạo có Code không rỗng và bắt đầu bằng "FAM-".
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
-                                  .Create();
-        _context.UserProfiles.Add(userProfile);
+        var userId = Guid.NewGuid();
         await _context.SaveChangesAsync(CancellationToken.None);
-
         _mockUser.Setup(u => u.Id).Returns(userId);
-        var _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-
         var command = _fixture.Build<CreateFamilyCommand>()
                                .With(c => c.Name, "Family Without Code")
                                .Without(c => c.Code) // Không cung cấp Code

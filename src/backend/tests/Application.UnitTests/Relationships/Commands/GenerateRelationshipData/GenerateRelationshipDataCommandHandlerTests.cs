@@ -1,7 +1,6 @@
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Relationships.Commands.GenerateRelationshipData;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -19,22 +18,18 @@ namespace backend.Application.UnitTests.Relationships.Commands.GenerateRelations
 public class GenerateRelationshipDataCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly Mock<IValidator<AIRelationshipDto>> _mockAIRelationshipDtoValidator;
-    private readonly Mock<FamilyAuthorizationService> _mockFamilyAuthorizationService;
     private readonly Mock<ILogger<GenerateRelationshipDataCommandHandler>> _mockLogger;
     private readonly GenerateRelationshipDataCommandHandler _handler;
 
     public GenerateRelationshipDataCommandHandlerTests()
     {
         _mockAuthorizationService = new Mock<IAuthorizationService>();
-        _mockMediator = new Mock<IMediator>();
         _mockChatProviderFactory = new Mock<IChatProviderFactory>();
         _mockChatProvider = new Mock<IChatProvider>();
         _mockAIRelationshipDtoValidator = new Mock<IValidator<AIRelationshipDto>>();
-        _mockFamilyAuthorizationService = new Mock<FamilyAuthorizationService>(_context, _mockUser.Object, _mockAuthorizationService.Object);
         _mockLogger = new Mock<ILogger<GenerateRelationshipDataCommandHandler>>();
         _fixture.Customize(new AutoMoqCustomization());
 
@@ -45,7 +40,7 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
             _mockChatProviderFactory.Object,
             _mockAIRelationshipDtoValidator.Object,
             _context,
-            _mockFamilyAuthorizationService.Object,
+            _mockAuthorizationService.Object,
             _mockLogger.Object
         );
     }
@@ -148,9 +143,7 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
     {
         // 🎯 Mục tiêu của test: Xác minh handler trả về các mối quan hệ với lỗi validation khi ủy quyền truy cập gia đình thất bại.
         // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockChatProvider.GenerateResponseAsync trả về JSON với SourceMemberName và TargetMemberName tồn tại. Thiết lập _mockFamilyAuthorizationService.AuthorizeFamilyAccess trả về Result<Family>.Failure.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công nhưng các AIRelationshipDto có lỗi validation phù hợp.
+        // 1. Arrange: Thiết lập _mockChatProvider.GenerateResponseAsync trả về JSON với SourceMemberName và TargetMemberName tồn tại. Thiết lập _mockAuthorizationService.CanAccessFamily trả về false.
         var familyId = Guid.NewGuid();
         var sourceMember = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Source", LastName = "Existent", Code = "SM001" };
         var targetMember = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Target", LastName = "Existent", Code = "TM001" };
@@ -160,8 +153,8 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
             .ReturnsAsync($"{{ \"relationships\": [ {{ \"sourceMemberName\": \"Existent Source\", \"targetMemberName\": \"Existent Target\", \"type\": \"Father\" }} ] }}");
 
-        _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Family>.Failure("Access denied."));
+        _mockAuthorizationService.Setup(s => s.CanAccessFamily(It.IsAny<Guid>()))
+            .Returns(false);
 
         _mockAIRelationshipDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIRelationshipDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
@@ -194,8 +187,8 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
             .ReturnsAsync("{ \"relationships\": [ { \"sourceMemberName\": \"Valid Source\", \"targetMemberName\": \"Valid Target\", \"type\": \"Father\" } ] }");
 
-        _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Family>.Success(new Family()));
+        _mockAuthorizationService.Setup(s => s.CanAccessFamily(It.IsAny<Guid>()))
+            .Returns(true);
 
         var validationFailures = new List<ValidationFailure>
         {
@@ -233,8 +226,8 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
             .ReturnsAsync($"{{ \"relationships\": [ {{ \"sourceMemberName\": \"Valid Source\", \"targetMemberName\": \"Valid Target\", \"type\": \"Father\", \"order\": 1 }} ] }}");
 
-        _mockFamilyAuthorizationService.Setup(s => s.AuthorizeFamilyAccess(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<Family>.Success(new Family()));
+        _mockAuthorizationService.Setup(s => s.CanAccessFamily(It.IsAny<Guid>()))
+            .Returns(true);
 
         _mockAIRelationshipDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIRelationshipDto>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());

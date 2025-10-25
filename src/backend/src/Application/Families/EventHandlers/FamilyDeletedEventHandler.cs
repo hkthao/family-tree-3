@@ -6,12 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService) : INotificationHandler<FamilyDeletedEvent>
+public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,IUser _user) : INotificationHandler<FamilyDeletedEvent>
 {
     private readonly ILogger<FamilyDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
+    private readonly IUser _user = _user;
 
     public async Task Handle(FamilyDeletedEvent notification, CancellationToken cancellationToken)
     {
@@ -23,7 +24,7 @@ public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger
         // Record activity for family deletion
         await _mediator.Send(new RecordActivityCommand
         {
-            // UserProfileId will be determined by the RecordActivityCommand handler based on the current user
+            UserProfileId = _user.Id!.Value,
             ActionType = UserActionType.DeleteFamily,
             TargetType = TargetType.Family,
             TargetId = notification.Family.Id.ToString(),

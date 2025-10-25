@@ -25,11 +25,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         _mockMediator = new Mock<IMediator>();
         _fixture.Customize(new AutoMoqCustomization());
 
-        _handler = new CreateRelationshipCommandHandler(
-            _context,
-            _mockAuthorizationService.Object,
-            _mockMediator.Object
-        );
+        _handler = new CreateRelationshipCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockUser.Object);
     }
 
     [Fact]
@@ -40,8 +36,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về null.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((UserProfile?)null);
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // Simulate UserProfile not found
 
         var command = new CreateRelationshipCommand
         {
@@ -67,9 +62,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Đảm bảo thành viên nguồn không tồn tại trong Context.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
 
         var command = new CreateRelationshipCommand
         {
@@ -96,10 +89,6 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         //             Thiết lập _mockAuthorizationService.IsAdmin trả về false và _mockAuthorizationService.CanManageFamily trả về false.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var familyId = Guid.NewGuid();
         var sourceMember = _fixture.Build<Member>()
             .With(m => m.FamilyId, familyId)
@@ -108,7 +97,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId, currentUserProfile)).Returns(false);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(false);
 
         var command = new CreateRelationshipCommand
         {
@@ -142,9 +131,6 @@ public class CreateRelationshipCommandHandlerTests : TestBase
             Email = "test@example.com",
             Name = "Test User"
         };
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var familyId = Guid.NewGuid();
         var sourceMember = new Member
         {
@@ -172,7 +158,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         retrievedTargetMember.Should().NotBeNull(); // Ensure target member is in DB
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId, It.IsAny<UserProfile>())).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(true);
 
         var command = new CreateRelationshipCommand
         {
@@ -185,7 +171,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         var result = await _handler.Handle(command, CancellationToken.None);
 
         _mockAuthorizationService.Verify(s => s.IsAdmin(), Times.Once);
-        _mockAuthorizationService.Verify(s => s.CanManageFamily(familyId, currentUserProfile), Times.Once);
+        _mockAuthorizationService.Verify(s => s.CanManageFamily(familyId), Times.Once);
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();

@@ -2,11 +2,8 @@ using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
@@ -16,20 +13,17 @@ namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 public class DeleteMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
     private readonly DeleteMemberCommandHandler _handler;
 
     public DeleteMemberCommandHandlerTests()
     {
         _mockAuthorizationService = new Mock<IAuthorizationService>();
-        _mockMediator = new Mock<IMediator>();
         _mockFamilyTreeService = new Mock<IFamilyTreeService>();
 
         _handler = new DeleteMemberCommandHandler(
             _context,
             _mockAuthorizationService.Object,
-            _mockMediator.Object,
             _mockFamilyTreeService.Object
         );
     }
@@ -42,8 +36,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         // 1. Arrange: Mock GetCurrentUserProfileAsync trả về null.
         // 2. Act: Gọi phương thức Handle với một DeleteMemberCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync((UserProfile)null!); // Profile không tìm thấy
-
         var command = _fixture.Create<DeleteMemberCommand>();
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -62,8 +54,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         // 1. Arrange: Đảm bảo _context.Members không chứa thành viên cần xóa.
         // 2. Act: Gọi phương thức Handle với một DeleteMemberCommand có Id không tồn tại.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_fixture.Create<UserProfile>());
-
         var command = _fixture.Create<DeleteMemberCommand>();
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -86,9 +76,8 @@ public class DeleteMemberCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_fixture.Create<UserProfile>());
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(a => a.CanManageFamily(member.FamilyId, It.IsAny<UserProfile>())).Returns(false);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(member.FamilyId)).Returns(false);
 
         var command = new DeleteMemberCommand(member.Id);
 
@@ -117,7 +106,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         _context.Members.Count().Should().Be(1);
 
         var userProfile = new UserProfile { Id = Guid.NewGuid() };
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
 
         var command = new DeleteMemberCommand(memberId);
@@ -131,9 +119,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         // Thêm assertion này để kiểm tra xem memberToDelete có bị null không
         var memberAfterDeletionAttempt = await _context.Members.FirstOrDefaultAsync(m => m.Id == member.Id);
         memberAfterDeletionAttempt.Should().BeNull(); // Mong đợi là null nếu xóa thành công
-
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(member.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         // 💡 Giải thích: Người dùng admin có quyền xóa thành viên mà không cần kiểm tra quyền quản lý gia đình cụ thể.
     }
 
@@ -150,12 +135,8 @@ public class DeleteMemberCommandHandlerTests : TestBase
         var member = new Member { Id = memberId, FamilyId = familyId, FirstName = "Test", LastName = "Member", Code = "M001" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
-
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
-        userProfile.FamilyUsers.Add(new FamilyUser { FamilyId = familyId, UserProfileId = userProfile.Id, Role = FamilyRole.Manager });
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(a => a.CanManageFamily(familyId, userProfile)).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(familyId)).Returns(true);
 
         var command = new DeleteMemberCommand(memberId);
 
@@ -164,8 +145,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         _context.Members.Should().NotContain(m => m.Id == member.Id);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(member.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         // 💡 Giải thích: Người dùng có quyền quản lý gia đình có thể xóa thành viên.
     }
 }

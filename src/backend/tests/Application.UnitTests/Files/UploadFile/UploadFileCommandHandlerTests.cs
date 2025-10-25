@@ -29,7 +29,7 @@ public class UploadFileCommandHandlerTests : TestBase
             .Returns(new StorageSettings { MaxFileSizeMB = 5, Provider = "Local" });
 
         // Setup default user behavior
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
 
         _handler = new UploadFileCommandHandler(
             _mockFileStorage.Object,
@@ -179,7 +179,7 @@ public class UploadFileCommandHandlerTests : TestBase
                 It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<string>.Success(uploadedUrl));
 
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         var now = DateTime.UtcNow;
@@ -212,7 +212,7 @@ public class UploadFileCommandHandlerTests : TestBase
         savedMetadata.StorageProvider.Should().Be(StorageProvider.Local);
         savedMetadata.ContentType.Should().Be(command.ContentType);
         savedMetadata.FileSize.Should().Be(command.Length);
-        savedMetadata.UploadedBy.Should().Be(userId);
+        savedMetadata.UploadedBy.Should().Be(userId.ToString());
         savedMetadata.IsActive.Should().BeTrue();
         savedMetadata.Created.Should().Be(now);
         savedMetadata.LastModified.Should().Be(now);
@@ -232,7 +232,7 @@ public class UploadFileCommandHandlerTests : TestBase
                 It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<string>.Success(uploadedUrl));
 
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         var now = DateTime.UtcNow;

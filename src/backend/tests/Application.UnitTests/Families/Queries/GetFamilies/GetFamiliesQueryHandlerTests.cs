@@ -39,7 +39,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns((string)null!); // User is not authenticated
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User is not authenticated
 
         var query = _fixture.Create<GetFamiliesQuery>();
 
@@ -67,7 +67,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // Arrange:
         // 1. Thiết lập _mockUser để trả về một User.Id hợp lệ.
         // 2. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
-        // 3. Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync để trả về null.
+        // 3. Đảm bảo không có UserProfile nào trong DB khớp với ID của người dùng.
         // 4. Tạo một GetFamiliesQuery bất kỳ.
         // Act:
         // 1. Gọi phương thức Handle của handler.
@@ -76,10 +76,9 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // 2. Kiểm tra xem danh sách gia đình trả về là rỗng.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((UserProfile)null!); // UserProfile not found
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // User not authenticated
 
         var query = _fixture.Create<GetFamiliesQuery>();
 
@@ -92,7 +91,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         result.Value.Should().BeEmpty();
 
         // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu người dùng không phải là quản trị viên và không có hồ sơ người dùng,
+        // Test này đảm bảo rằng nếu người dùng không phải là quản trị viên và không có hồ sơ người dùng trong DB,
         // họ sẽ không thể truy cập bất kỳ gia đình nào và một danh sách rỗng sẽ được trả về.
     }
 
@@ -116,7 +115,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // 2. Kiểm tra xem danh sách gia đình trả về chứa tất cả các gia đình trong DB.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
 
         var families = _fixture.CreateMany<Family>(5).ToList();
@@ -159,8 +158,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // 2. Tạo FamilyUser để liên kết UserProfile với một số Family cụ thể.
         // 3. Thiết lập _mockUser để trả về User.Id của người dùng.
         // 4. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
-        // 5. Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync để trả về UserProfile.
-        // 6. Tạo một GetFamiliesQuery bất kỳ.
+        // 5. Tạo một GetFamiliesQuery bất kỳ.
         // Act:
         // 1. Gọi phương thức Handle của handler.
         // Assert:
@@ -171,8 +169,8 @@ public class GetFamiliesQueryHandlerTests : TestBase
         _context.Families.RemoveRange(_context.Families);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var userId = Guid.NewGuid().ToString();
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = userId, Email = "test@example.com", Name = "Test User" };
+        var userId = Guid.NewGuid();
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
         var managedFamily1 = new Family { Id = Guid.NewGuid(), Name = "Managed Family 1", Code = "MF1" };
@@ -186,8 +184,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
 
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
+
 
         var query = _fixture
         .Build<GetFamiliesQuery>()
@@ -234,7 +231,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // 2. Kiểm tra xem danh sách gia đình trả về chỉ chứa các gia đình khớp với thuật ngữ tìm kiếm.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
 
         var family1 = _fixture.Build<Family>().With(f => f.Name, "Family Alpha").Create();
@@ -285,7 +282,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         // 2. Kiểm tra xem danh sách gia đình trả về có số lượng mục chính xác và các mục đúng.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
 
         var families = _fixture.CreateMany<Family>(10).OrderBy(f => f.Name).ToList();

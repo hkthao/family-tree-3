@@ -1,7 +1,5 @@
 using AutoFixture.AutoMoq;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.Inputs;
@@ -16,23 +14,15 @@ namespace backend.Application.UnitTests.Relationships.Commands.CreateRelationshi
 
 public class CreateRelationshipsCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<FamilyAuthorizationService> _mockFamilyAuthorizationService;
     private readonly Mock<IMediator> _mockMediator;
     private readonly CreateRelationshipsCommandHandler _handler;
 
     public CreateRelationshipsCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
-        _mockFamilyAuthorizationService = new Mock<FamilyAuthorizationService>(_context, _mockUser.Object, _mockAuthorizationService.Object);
         _mockMediator = new Mock<IMediator>();
         _fixture.Customize(new AutoMoqCustomization());
 
         _handler = new CreateRelationshipsCommandHandler(
-            _context,
-            _mockUser.Object,
-            _mockAuthorizationService.Object,
-            _mockFamilyAuthorizationService.Object,
             _mockMediator.Object
         );
     }

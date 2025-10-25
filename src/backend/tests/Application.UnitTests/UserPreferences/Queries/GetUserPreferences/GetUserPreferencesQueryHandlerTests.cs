@@ -36,9 +36,8 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // 2. Kiểm tra xem UserPreferenceDto trả về có chứa các giá trị chính xác.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
                                   .Create();
         var existingUserPreference = _fixture.Build<UserPreference>()
                                              .With(up => up.UserProfileId, userProfile.Id)
@@ -94,9 +93,8 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // 2. Kiểm tra xem UserPreferenceDto trả về có chứa các giá trị mặc định.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
                                   .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
                                   .Create();
         _context.UserProfiles.Add(userProfile);
@@ -142,7 +140,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns((string)null!); // User is not authenticated
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User is not authenticated
 
         var query = new GetUserPreferencesQuery();
 
@@ -179,7 +177,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         // Ensure no UserProfile exists for this userId

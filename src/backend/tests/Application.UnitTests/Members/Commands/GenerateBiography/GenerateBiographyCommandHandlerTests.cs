@@ -1,7 +1,6 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Members.Commands.GenerateBiography;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -16,7 +15,6 @@ public class GenerateBiographyCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
-    private readonly Mock<FamilyAuthorizationService> _mockFamilyAuthorizationService;
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly GenerateBiographyCommandHandler _handler;
 
@@ -25,7 +23,6 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
         _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
-        _mockFamilyAuthorizationService = new Mock<FamilyAuthorizationService>(_context, _mockUser.Object, _mockAuthorizationService.Object);
         _mockChatProvider = new Mock<IChatProvider>();
 
         _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))
@@ -35,8 +32,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
             _context,
             _mockUser.Object,
             _mockAuthorizationService.Object,
-            _mockChatProviderFactory.Object,
-            _mockFamilyAuthorizationService.Object
+            _mockChatProviderFactory.Object
         );
     }
 
@@ -48,7 +44,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         // 1. Arrange: Mock _user.Id trả về null hoặc chuỗi rỗng.
         // 2. Act: Gọi phương thức Handle với một GenerateBiographyCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((string)null!); // User not authenticated
+        _mockUser.Setup(u => u.Id).Returns(Guid.Empty); // User not authenticated
 
         var command = _fixture.Create<GenerateBiographyCommand>();
 
@@ -69,9 +65,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         // 1. Arrange: Mock _user.Id trả về một giá trị hợp lệ. Mock GetCurrentUserProfileAsync trả về null.
         // 2. Act: Gọi phương thức Handle với một GenerateBiographyCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString()); // User authenticated
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync((UserProfile)null!); // Profile not found
-
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid()); // User authenticated
         var command = _fixture.Create<GenerateBiographyCommand>();
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -92,8 +86,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         //             Đảm bảo _context.Members không chứa thành viên cần tìm.
         // 2. Act: Gọi phương thức Handle với một GenerateBiographyCommand có MemberId không tồn tại.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_fixture.Create<UserProfile>());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
 
         var nonExistentMemberId = Guid.NewGuid();
         var command = _fixture.Build<GenerateBiographyCommand>()
@@ -123,11 +116,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(member.FamilyId, It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Failure("Access denied.", "Authorization"));
-
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         var command = _fixture.Build<GenerateBiographyCommand>()
             .With(c => c.MemberId, member.Id)
             .Create();
@@ -156,10 +145,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(member.FamilyId, It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Success(member.Family));
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockChatProvider.Setup(c => c.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(string.Empty); // AI generates empty biography
 
@@ -202,10 +188,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(member.FamilyId, It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Success(member.Family));
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         List<ChatMessage>? capturedMessages = null;
         _mockChatProvider.Setup(c => c.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .Callback<List<ChatMessage>>(messages => capturedMessages = messages)
@@ -260,10 +243,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(member.FamilyId, It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Success(member.Family));
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         List<ChatMessage>? capturedMessages = null;
         _mockChatProvider.Setup(c => c.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .Callback<List<ChatMessage>>(messages => capturedMessages = messages)
@@ -317,10 +297,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
-        _mockFamilyAuthorizationService.Setup(f => f.AuthorizeFamilyAccess(member.FamilyId, It.IsAny<CancellationToken>()))
-                                       .ReturnsAsync(Result<Family>.Success(member.Family));
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
 
         // Create a very long biography (e.g., 2000 words)
         var longBiography = string.Join(" ", Enumerable.Repeat("word", 2000));

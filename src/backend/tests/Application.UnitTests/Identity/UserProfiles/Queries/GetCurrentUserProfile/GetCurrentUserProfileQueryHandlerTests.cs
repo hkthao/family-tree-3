@@ -30,7 +30,7 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockUser.Id trả về null.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((string)null!);
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!);
 
         var query = new GetCurrentUserProfileQuery();
 
@@ -51,7 +51,7 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockUser.Id trả về một ID hợp lệ. Đảm bảo không có UserProfile nào trong Context khớp với ID đó.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         var query = new GetCurrentUserProfileQuery();
@@ -73,12 +73,12 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockUser.Id trả về một ID hợp lệ. Thêm một UserProfile vào Context khớp với ID đó.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chứa UserProfileDto khớp với hồ sơ người dùng đã thêm.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         var existingUserProfile = new UserProfile
         {
-            ExternalId = userId,
+            ExternalId = userId.ToString(),
             Email = "current@example.com",
             Name = "Current User"
         };
@@ -92,7 +92,7 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.ExternalId.Should().Be(userId);
+        result.Value!.ExternalId.Should().Be(userId.ToString());
         result.Value.Email.Should().Be("current@example.com");
         result.Value.Name.Should().Be("Current User");
         // 💡 Giải thích: Handler phải truy xuất và ánh xạ đúng hồ sơ người dùng hiện tại.
@@ -107,14 +107,14 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
         //             Thêm một UserProfile vào Context khớp với ID đó.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và UserProfileDto chứa các vai trò đã thiết lập.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var roles = new List<string> { "Admin", "User" };
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockUser.Setup(u => u.Roles).Returns(roles);
 
         var existingUserProfile = new UserProfile
         {
-            ExternalId = userId,
+            ExternalId = userId.ToString(),
             Email = "current@example.com",
             Name = "Current User"
         };

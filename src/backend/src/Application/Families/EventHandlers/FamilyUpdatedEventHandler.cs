@@ -6,14 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser user, IApplicationDbContext context) : INotificationHandler<FamilyUpdatedEvent>
+public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,IUser _user) : INotificationHandler<FamilyUpdatedEvent>
 {
     private readonly ILogger<FamilyUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = user;
-    private readonly IApplicationDbContext _context = context;
+    private readonly IUser _user = _user;
 
     public async Task Handle(FamilyUpdatedEvent notification, CancellationToken cancellationToken)
     {
@@ -22,16 +21,10 @@ public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger
         _logger.LogInformation("Family {FamilyName} ({FamilyId}) was successfully updated.",
             notification.Family.Name, notification.Family.Id);
 
-        if (!_user.Id.HasValue)
-        {
-            _logger.LogWarning("Current user ID not found when recording activity for family update. Activity will not be recorded.");
-            return; // Or throw an exception, depending on desired behavior
-        }
-
         // Record activity for family update
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id.Value,
+            UserProfileId = _user.Id!.Value,
             ActionType = UserActionType.UpdateFamily,
             TargetType = TargetType.Family,
             TargetId = notification.Family.Id.ToString(),

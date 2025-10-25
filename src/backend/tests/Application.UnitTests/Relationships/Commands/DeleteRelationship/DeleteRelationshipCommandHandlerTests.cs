@@ -28,7 +28,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         _handler = new DeleteRelationshipCommandHandler(
             _context,
             _mockAuthorizationService.Object,
-            _mockMediator.Object
+            _mockUser.Object
         );
     }
 
@@ -40,9 +40,6 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về null.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync((UserProfile?)null);
-
         var command = new DeleteRelationshipCommand(Guid.NewGuid());
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -62,10 +59,6 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Đảm bảo mối quan hệ không tồn tại trong _context.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var command = new DeleteRelationshipCommand(Guid.NewGuid()); // Non-existent ID
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -84,10 +77,6 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ vào _context, nhưng không thêm thành viên nguồn tương ứng.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var relationship = _fixture.Build<Relationship>()
             .Without(r => r.SourceMember) // Ensure SourceMember is not loaded
             .Create();
@@ -113,10 +102,6 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ và thành viên nguồn vào _context. Thiết lập _mockAuthorizationService.IsAdmin trả về false và _mockAuthorizationService.CanManageFamily trả về false.
         // 2. Act: Gọi phương thức Handle.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var familyId = Guid.NewGuid();
         var sourceMember = _fixture.Build<Member>()
             .With(m => m.FamilyId, familyId)
@@ -129,7 +114,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId, currentUserProfile)).Returns(false);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(false);
 
         var command = new DeleteRelationshipCommand(relationship.Id);
 
@@ -149,10 +134,6 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // ⚙️ Các bước (Arrange, Act, Assert):
         // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ và thành viên nguồn vào _context. Thiết lập _mockAuthorizationService.IsAdmin trả về false và _mockAuthorizationService.CanManageFamily trả về true.
         // 2. Act: Gọi phương thức Handle.
-        var currentUserProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentUserProfile);
-
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Code = "FAM001", Name = "Test Family" };
         _context.Families.Add(family);
@@ -182,7 +163,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId, currentUserProfile)).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(true);
 
         var command = new DeleteRelationshipCommand(relationship.Id);
 

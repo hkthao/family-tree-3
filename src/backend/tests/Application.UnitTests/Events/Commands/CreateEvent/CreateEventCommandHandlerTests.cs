@@ -2,7 +2,6 @@ using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using FluentAssertions;
 using MediatR;
 using Moq;
@@ -21,7 +20,7 @@ public class CreateEventCommandHandlerTests : TestBase
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockMediator = _fixture.Freeze<Mock<IMediator>>();
 
-        _handler = new CreateEventCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object);
+        _handler = new CreateEventCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]
@@ -42,8 +41,7 @@ public class CreateEventCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((UserProfile)null!); // UserProfile not found
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // Simulate UserProfile not found
 
         var command = _fixture.Create<CreateEventCommand>();
 

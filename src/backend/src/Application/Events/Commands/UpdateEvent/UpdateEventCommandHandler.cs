@@ -1,16 +1,13 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
-public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<UpdateEventCommand, Result<bool>>
+public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
 
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
@@ -28,8 +25,6 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         {
             return Result<bool>.Failure($"Event with ID {request.Id} not found.", "NotFound");
         }
-
-        var oldName = entity.Name; // Capture old name for activity summary
 
         var relatedMembers = await _context.Members
             .Where(m => request.RelatedMembers.Contains(m.Id))
@@ -51,17 +46,9 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             entity.EventMembers.Add(new EventMember { EventId = entity.Id, MemberId = member.Id });
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
+        entity.AddDomainEvent(new Domain.Events.Events.EventUpdatedEvent(entity));
 
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.UpdateEvent,
-            TargetType = TargetType.Event,
-            TargetId = entity.Id.ToString(),
-            ActivitySummary = $"Updated event '{oldName}' to '{entity.Name}'."
-        }, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
 
         return Result<bool>.Success(true);
     }

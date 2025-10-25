@@ -5,18 +5,18 @@ using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
 
-public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService) : IRequestHandler<GetUpcomingEventsQuery, Result<List<EventDto>>>
+public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper, IAuthorizationService authorizationService, IUser user) : IRequestHandler<GetUpcomingEventsQuery, Result<List<EventDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _user = user;
 
     public async Task<Result<List<EventDto>>> Handle(GetUpcomingEventsQuery request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
+        if (!_user.Id.HasValue)
         {
-            return Result<List<EventDto>>.Failure("User profile not found.", "NotFound");
+            return Result<List<EventDto>>.Failure("User is not authenticated.", "Authentication");
         }
 
         IQueryable<Domain.Entities.Event> eventsQuery = _context.Events;
@@ -25,7 +25,7 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
         {
             // Filter events by user access if not admin
             var accessibleFamilyIds = await _context.FamilyUsers
-                .Where(fu => fu.UserProfileId == currentUserProfile.Id)
+                .Where(fu => fu.UserProfileId == _user.Id.Value)
                 .Select(fu => fu.FamilyId)
                 .ToListAsync(cancellationToken);
 

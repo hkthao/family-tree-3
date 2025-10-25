@@ -1,12 +1,9 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using Xunit;
 
@@ -15,20 +12,17 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 public class UpdateMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
         _mockAuthorizationService = new Mock<IAuthorizationService>();
-        _mockMediator = new Mock<IMediator>();
         _mockFamilyTreeService = new Mock<IFamilyTreeService>();
 
         _handler = new UpdateMemberCommandHandler(
             _context,
             _mockAuthorizationService.Object,
-            _mockMediator.Object,
             _mockFamilyTreeService.Object
         );
     }
@@ -41,10 +35,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // 1. Arrange: Mock GetCurrentUserProfileAsync trả về null.
         // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync((UserProfile)null!);
-
         var command = _fixture.Create<UpdateMemberCommand>();
-
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -61,7 +52,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // 1. Arrange: Mock GetCurrentUserProfileAsync trả về profile hợp lệ. Thêm một thành viên hiện có vào DB.
         // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand có Id không tồn tại.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_fixture.Create<UserProfile>());
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
 
         // Add an existing member to the database
@@ -99,9 +89,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>(), It.IsAny<UserProfile>())).Returns(false);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(false);
 
         var command = _fixture.Create<UpdateMemberCommand>();
 
@@ -127,10 +116,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         _context.Members.Add(existingMember);
         await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
         _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                               .Returns(Task.CompletedTask);
 
@@ -172,7 +158,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.IsRoot.Should().Be(command.IsRoot);
 
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         // 💡 Giải thích: Người dùng admin có quyền cập nhật thành viên và các thay đổi được phản ánh chính xác.
     }
 
@@ -189,11 +174,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         _context.Members.Add(existingMember);
         await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>())).ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(a => a.CanManageFamily(existingMember.FamilyId, userProfile)).Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(existingMember.FamilyId)).Returns(true);
         _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                               .Returns(Task.CompletedTask);
 
@@ -235,7 +217,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.IsRoot.Should().Be(command.IsRoot);
 
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
         // 💡 Giải thích: Người dùng có quyền quản lý gia đình có thể cập nhật thành viên và các thay đổi được phản ánh chính xác.
     }
 }

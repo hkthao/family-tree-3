@@ -25,7 +25,7 @@ public class GetEditableMembersQueryHandlerTests : TestBase
         // 1. Arrange: Mock _mockUser.Id trả về null.
         // 2. Act: Gọi phương thức Handle với một GetEditableMembersQuery bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((string)null!);
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!);
 
         var query = _fixture.Create<GetEditableMembersQuery>();
 
@@ -45,7 +45,7 @@ public class GetEditableMembersQueryHandlerTests : TestBase
         // 1. Arrange: Mock _mockUser.Id trả về một ID hợp lệ. Đảm bảo không có FamilyUser nào cho người dùng này.
         // 2. Act: Gọi phương thức Handle với một GetEditableMembersQuery bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách thành viên rỗng.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         // No FamilyUser entries for this userId in _context
@@ -69,7 +69,7 @@ public class GetEditableMembersQueryHandlerTests : TestBase
         //             Đảm bảo người dùng là quản lý/admin của một số gia đình.
         // 2. Act: Gọi phương thức Handle với một GetEditableMembersQuery bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chứa các MemberListDto mong đợi.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         // Family 1 (Managed by user)
@@ -92,7 +92,7 @@ public class GetEditableMembersQueryHandlerTests : TestBase
         var member4 = new Member { Id = Guid.NewGuid(), FamilyId = family3.Id, FirstName = "Member", LastName = "Four", Code = "M004" };
         _context.Members.Add(member4);
 
-        var userProfile = new UserProfile { Id = Guid.Parse(userId), ExternalId = userId, Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
         // User manages Family 1 (Manager role)
@@ -128,7 +128,7 @@ public class GetEditableMembersQueryHandlerTests : TestBase
         //             Đảm bảo người dùng chỉ là thành viên (không phải quản lý/admin) của gia đình.
         // 2. Act: Gọi phương thức Handle với một GetEditableMembersQuery bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách thành viên rỗng.
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
         var family = new Family { Id = Guid.NewGuid(), Name = "Family D", Code = "FD001" };
@@ -136,7 +136,7 @@ public class GetEditableMembersQueryHandlerTests : TestBase
         var member = new Member { Id = Guid.NewGuid(), FamilyId = family.Id, FirstName = "Member", LastName = "Five", Code = "M005" };
         _context.Members.Add(member);
 
-        var userProfile = new UserProfile { Id = Guid.Parse(userId), ExternalId = userId, Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
         // User is only a member of Family D

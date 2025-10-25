@@ -1,6 +1,5 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Services;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -14,24 +13,16 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMemberBiography;
 public class UpdateMemberBiographyCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly FamilyAuthorizationService _familyAuthorizationService; // Real instance
     private readonly UpdateMemberBiographyCommandHandler _handler;
 
     public UpdateMemberBiographyCommandHandlerTests()
     {
         _mockAuthorizationService = new Mock<IAuthorizationService>();
-        // Instantiate real FamilyAuthorizationService with mocked dependencies
-        _familyAuthorizationService = new FamilyAuthorizationService(
-            _context, // Real DbContext from TestBase
-            _mockUser.Object, // Mocked IUser from TestBase
-            _mockAuthorizationService.Object
-        );
 
         _handler = new UpdateMemberBiographyCommandHandler(
             _context,
             _mockUser.Object,
-            _mockAuthorizationService.Object,
-            _familyAuthorizationService
+            _mockAuthorizationService.Object
         );
     }
 
@@ -43,7 +34,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         // 1. Arrange: Mock _mockUser.Id trả về null.
         // 2. Act: Gọi phương thức Handle với một UpdateMemberBiographyCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((string)null!);
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null!);
 
         var command = _fixture.Create<UpdateMemberBiographyCommand>();
 
@@ -64,7 +55,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         // 1. Arrange: Mock _mockUser.Id trả về một ID hợp lệ. Đảm bảo không có thành viên nào trong DB.
         // 2. Act: Gọi phương thức Handle với một UpdateMemberBiographyCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         // No member added to _context.Members, so FindAsync will return null
 
         var command = _fixture.Create<UpdateMemberBiographyCommand>();
@@ -87,7 +78,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         //             Mock _mockAuthorizationService.CanManageFamily trả về false.
         // 2. Act: Gọi phương thức Handle với một UpdateMemberBiographyCommand.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid().ToString());
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family Name", Code = "TF001" }; // Manually create Family
         _context.Families.Add(family);
@@ -98,13 +89,8 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(a => a.CanManageFamily(
-            It.IsAny<Guid>(), It.IsAny<UserProfile>())).Returns(false);
+        _mockAuthorizationService.Setup(a => a.CanAccessFamily(It.IsAny<Guid>())).Returns(false);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false); // Ensure not admin
-
-        // Mock GetCurrentUserProfileAsync to return a UserProfile for FamilyAuthorizationService
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_fixture.Create<UserProfile>());
 
         var command = new UpdateMemberBiographyCommand { MemberId = member.Id, BiographyContent = _fixture.Create<string>() };
 
@@ -112,7 +98,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"User is not authorized to manage family {family.Name}.");
+        result.Error.Should().Contain("Only family managers or admins can update member biography.");
         result.ErrorSource.Should().Be("Authorization");
         // 💡 Giải thích: Handler phải kiểm tra quyền truy cập của người dùng trước khi cập nhật thông tin thành viên.
     }
@@ -149,11 +135,10 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         _context.FamilyUsers.Add(familyUser);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(userProfileId.ToString());
+        _mockUser.Setup(u => u.Id).Returns(userProfileId);
         _mockUser.Setup(u => u.Roles).Returns([]); // Not an admin
 
-        _mockAuthorizationService.Setup(a => a.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(userProfile);
+
 
         var command = new UpdateMemberBiographyCommand
         {
