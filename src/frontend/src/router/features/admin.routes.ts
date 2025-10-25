@@ -5,7 +5,7 @@ import {
   NotificationTemplateEditView,
   NotificationTemplateListView,
 } from '@/views/notification-template';
-import type { RouteRecordRaw } from 'vue-router';
+import { RouterView, type RouteRecordRaw } from 'vue-router';
 
 export const adminRoutes: RouteRecordRaw[] = [
   {
@@ -29,7 +29,7 @@ export const adminRoutes: RouteRecordRaw[] = [
       {
         path: 'notification-template',
         name: 'NotificationTemplate',
-        component: MainRouterView,
+        component: RouterView,
         meta: { breadcrumb: 'admin.notificationTemplates.title', requiresAuth: true, roles: ['Admin'] },
         children: [
           {

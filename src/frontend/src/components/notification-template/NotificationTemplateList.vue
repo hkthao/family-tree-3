@@ -51,54 +51,57 @@ const getNotificationChannelName = (channel: NotificationChannel) => {
 </script>
 
 <template>
-  <v-card>
-    <v-card-title class="d-flex align-center">
-      {{ t('admin.notificationTemplates.list.title') }}
-      <v-spacer></v-spacer>
-      <v-btn color="primary" class="ml-4" @click="emit('add')">
-        {{ t('notificationTemplate.list.addTemplate') }}
+  <v-data-table-server
+    :items-per-page="props.itemsPerPage"
+    @update:items-per-page="emit('update:itemsPerPage', $event)"
+    :page="props.currentPage"
+    @update:page="emit('update:page', $event)"
+    :sort-by="props.sortBy"
+    @update:sort-by="emit('update:sortBy', $event)"
+    :headers="headers"
+    :items="props.items"
+    :items-length="props.totalItems"
+    :loading="props.loading"
+    item-value="id"
+    elevation="1"
+  >
+    <template #top>
+      <v-toolbar flat>
+        <v-toolbar-title>{{ t('admin.notificationTemplates.list.title') }}</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn color="primary" icon @click="emit('add')">
+          <v-tooltip :text="t('notificationTemplate.list.addTemplate')">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props">mdi-plus</v-icon>
+            </template>
+          </v-tooltip>
+        </v-btn>
+      </v-toolbar>
+    </template>
+
+    <template v-slot:item.eventType="{ item }">
+      {{ getNotificationTypeName(item.eventType) }}
+    </template>
+    <template v-slot:item.channel="{ item }">
+      {{ getNotificationChannelName(item.channel) }}
+    </template>
+    <template v-slot:item.isActive="{ item }">
+      <v-icon :color="item.isActive ? 'success' : 'error'">
+        {{ item.isActive ? 'mdi-check-circle' : 'mdi-close-circle' }}
+      </v-icon>
+    </template>
+    <template v-slot:item.actions="{ item }">
+      <v-icon small class="me-2" @click="item.id && emit('edit', item.id)">
+        mdi-pencil
+      </v-icon>
+      <v-icon small @click="item.id && emit('delete', item.id)">
+        mdi-delete
+      </v-icon>
+    </template>
+    <template v-slot:no-data>
+      <v-btn color="primary" @click="emit('reset')">
+        {{ t('common.reset') }}
       </v-btn>
-    </v-card-title>
-    <v-card-text>
-      <v-data-table-server
-        :items-per-page="props.itemsPerPage"
-        @update:items-per-page="emit('update:itemsPerPage', $event)"
-        :page="props.currentPage"
-        @update:page="emit('update:page', $event)"
-        :sort-by="props.sortBy"
-        @update:sort-by="emit('update:sortBy', $event)"
-        :headers="headers"
-        :items="props.items"
-        :items-length="props.totalItems"
-        :loading="props.loading"
-        item-value="id"
-        class="elevation-1"
-      >
-        <template v-slot:item.eventType="{ item }">
-          {{ getNotificationTypeName(item.eventType) }}
-        </template>
-        <template v-slot:item.channel="{ item }">
-          {{ getNotificationChannelName(item.channel) }}
-        </template>
-        <template v-slot:item.isActive="{ item }">
-          <v-icon :color="item.isActive ? 'success' : 'error'">
-            {{ item.isActive ? 'mdi-check-circle' : 'mdi-close-circle' }}
-          </v-icon>
-        </template>
-        <template v-slot:item.actions="{ item }">
-          <v-icon small class="me-2" @click="item.id && emit('edit', item.id)">
-            mdi-pencil
-          </v-icon>
-          <v-icon small @click="item.id && emit('delete', item.id)">
-            mdi-delete
-          </v-icon>
-        </template>
-        <template v-slot:no-data>
-          <v-btn color="primary" @click="emit('reset')">
-            {{ t('common.reset') }}
-          </v-btn>
-        </template>
-      </v-data-table-server>
-    </v-card-text>
-  </v-card>
+    </template>
+  </v-data-table-server>
 </template>
