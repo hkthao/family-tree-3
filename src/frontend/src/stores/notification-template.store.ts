@@ -45,7 +45,6 @@ export const useNotificationTemplateStore = defineStore('notificationTemplate', 
         this.items.splice(0, this.items.length);
         this.totalItems = 0;
         this.totalPages = 1;
-        console.error(result.error);
       }
       this.loading = false;
     },

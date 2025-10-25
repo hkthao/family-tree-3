@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NotificationChannel, NotificationType, TemplateFormat } from '@/types';
 import type { NotificationTemplate } from '@/types';
 import Editor from '@/components/common/Editor.vue';
+import type { OutputData } from '@editorjs/editorjs';
 
 interface Props {
   initialTemplateData?: NotificationTemplate;
@@ -24,10 +25,17 @@ const form = ref<Omit<NotificationTemplate, 'created' | 'createdBy' | 'lastModif
   eventType: NotificationType.General,
   channel: NotificationChannel.InApp,
   subject: '',
-  body: '',
-  format: TemplateFormat.PlainText,
+  body: { blocks: [] }, // Initialize as an empty OutputData object
+  format: TemplateFormat.Html, // Default to HTML for editor
   languageCode: 'vi', // Default to Vietnamese
   isActive: true,
+});
+
+const htmlBody = computed<OutputData>({
+  get: () => form.value.body as OutputData,
+  set: (newVal) => {
+    form.value.body = newVal;
+  },
 });
 
 watch(
@@ -38,11 +46,40 @@ watch(
       // If the format is HTML, parse the body string into an object for the editor
       if (form.value.format === TemplateFormat.Html && typeof form.value.body === 'string') {
         try {
-          form.value.body = JSON.parse(form.value.body);
+          const parsedBody = JSON.parse(form.value.body);
+          // Check if parsedBody is a valid Editor.js OutputData structure
+          if (parsedBody && typeof parsedBody === 'object' && Array.isArray(parsedBody.blocks)) {
+            form.value.body = parsedBody;
+          } else {
+            // If not a valid OutputData, treat as plain text and convert to a single paragraph block
+            form.value.body = {
+              blocks: [
+                {
+                  type: 'paragraph',
+                  data: {
+                    text: form.value.body, // Use the original string as text
+                  },
+                },
+              ],
+            };
+          }
         } catch (e) {
           console.error("Error parsing initial HTML body data:", e);
-          form.value.body = { blocks: [] };
+          // If parsing fails, treat the original string as plain text
+          form.value.body = {
+            blocks: [
+              {
+                type: 'paragraph',
+                data: {
+                  text: form.value.body, // Use the original string as text
+                },
+              },
+            ],
+          };
         }
+      } else if (typeof form.value.body !== 'object' || form.value.body === null) {
+        // If it's not a string and not a valid object, initialize as empty OutputData
+        form.value.body = { blocks: [] };
       }
     }
   },
@@ -178,7 +215,7 @@ defineExpose({
 
     <Editor
       v-if="form.format === TemplateFormat.Html"
-      v-model="form.body"
+      v-model="htmlBody"
       :label="t('notificationTemplate.form.body')"
       :read-only="readOnly"
     />

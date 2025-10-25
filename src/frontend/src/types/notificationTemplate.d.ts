@@ -1,12 +1,13 @@
 import type { BaseEntity } from './base.d';
 import type { NotificationChannel, NotificationType } from './notification.d';
 import type { TemplateFormat } from './template-format.d';
+import type { OutputData } from '@editorjs/editorjs';
 
 export interface NotificationTemplate extends BaseEntity {
   eventType: NotificationType;
   channel: NotificationChannel;
   subject: string;
-  body: string;
+  body: string | OutputData;
   format: TemplateFormat;
   languageCode: string;
   placeholders?: string;
