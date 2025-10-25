@@ -3,7 +3,6 @@ using backend.Application.NotificationTemplates.Queries;
 using backend.Application.NotificationTemplates.Queries.GetNotificationTemplateByEventType;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Text.RegularExpressions;
 
@@ -67,7 +66,7 @@ public class NotificationService : INotificationService
             Channel = channel
         }, cancellationToken);
 
-        if (template == null)
+        if (!template.IsSuccess || template.Value == null)
         {
             _logger.LogWarning("No active notification template found for EventType: {EventType} and Channel: {Channel}. Notification not sent.",
                 eventType, channel);
@@ -75,8 +74,8 @@ public class NotificationService : INotificationService
         }
 
         // 2. Render mẫu thông báo
-        var renderedSubject = RenderTemplate(template.Subject, placeholders);
-        var renderedBody = RenderTemplate(template.Body, placeholders);
+        var renderedSubject = RenderTemplate(template.Value.Subject, placeholders);
+        var renderedBody = RenderTemplate(template.Value.Body, placeholders);
 
         // 3. Tạo và lưu thông báo vào DB
         var notification = new Notification
