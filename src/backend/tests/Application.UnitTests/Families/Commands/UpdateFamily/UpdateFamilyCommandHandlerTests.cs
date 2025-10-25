@@ -6,6 +6,8 @@ using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events;
+using backend.Domain.Events.Families;
 using FluentAssertions;
 using MediatR;
 using Moq;
@@ -17,16 +19,12 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 {
     private readonly UpdateFamilyCommandHandler _handler;
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
-    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     public UpdateFamilyCommandHandlerTests()
     {
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockFamilyTreeService = _fixture.Freeze<Mock<IFamilyTreeService>>();
 
-        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockFamilyTreeService.Object);
+        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]
@@ -184,10 +182,6 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
                                  .ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateFamilyCommand>()
                                .With(c => c.Id, existingFamily.Id)
@@ -211,8 +205,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.Address.Should().Be(command.Address);
         updatedFamily.Visibility.Should().Be(command.Visibility);
 
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh rằng một quản trị viên có thể cập nhật thành công tất cả các thuộc tính
@@ -252,10 +246,6 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id, userProfile))
                                  .Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateFamilyCommand>()
                                .With(c => c.Id, existingFamily.Id)
@@ -279,8 +269,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.Address.Should().Be(command.Address);
         updatedFamily.Visibility.Should().Be(command.Visibility);
 
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh rằng một người dùng có quyền quản lý gia đình có thể cập nhật thành công

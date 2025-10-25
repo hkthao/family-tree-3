@@ -6,6 +6,8 @@ using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events;
+using backend.Domain.Events.Families;
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -17,15 +19,12 @@ namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 public class CreateFamilyCommandHandlerTests : TestBase
 {
     private readonly CreateFamilyCommandHandler _handler;
-    private readonly Mock<IMediator> _mockMediator;
-    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     public CreateFamilyCommandHandlerTests()
     {
-        _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockFamilyTreeService = _fixture.Freeze<Mock<IFamilyTreeService>>();
+        var _mockMediator = _fixture.Freeze<Mock<IMediator>>();
 
-        _handler = new CreateFamilyCommandHandler(_context, _mockUser.Object, _mockMediator.Object, _mockFamilyTreeService.Object);
+        _handler = new CreateFamilyCommandHandler(_context, _mockUser.Object);
     }
 
     [Fact]
@@ -41,7 +40,6 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 2. Thiết lập _mockUser để trả về UserProfileId của người dùng.
         // 3. Tạo một CreateFamilyCommand hợp lệ.
         // 4. Thiết lập _mockMediator để không làm gì khi RecordActivityCommand được gửi.
-        // 5. Thiết lập _mockFamilyTreeService để không làm gì khi UpdateFamilyStats được gọi.
         // Act:
         // 1. Gọi phương thức Handle của handler.
         // Assert:
@@ -49,7 +47,7 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 2. Kiểm tra xem gia đình mới đã được lưu vào DB với các thuộc tính chính xác.
         // 3. Kiểm tra xem FamilyUser đã được tạo và gán vai trò Manager cho người dùng.
         // 4. Kiểm tra xem RecordActivityCommand đã được gửi đi một lần.
-        // 5. Kiểm tra xem UpdateFamilyStats đã được gọi một lần.
+        // 5. Kiểm tra xem FamilyCreatedEvent và FamilyStatsUpdatedEvent đã được thêm vào domain events.
 
         // Arrange
         var userId = Guid.NewGuid().ToString();
@@ -60,10 +58,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         _mockUser.Setup(u => u.Id).Returns(userId);
+        var _mockMediator = _fixture.Freeze<Mock<IMediator>>();
         _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<CreateFamilyCommand>()
                                .With(c => c.Name, "Test Family")
@@ -90,14 +87,16 @@ public class CreateFamilyCommandHandlerTests : TestBase
         familyUser!.Role.Should().Be(FamilyRole.Manager);
 
         _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(createdFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+
+        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyCreatedEvent);
+        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh toàn bộ luồng tạo gia đình thành công:
         // 1. Gia đình được tạo và lưu vào cơ sở dữ liệu.
         // 2. Người dùng tạo được tự động gán vai trò quản lý cho gia đình đó.
         // 3. Hoạt động tạo gia đình được ghi lại thông qua IMediator.
-        // 4. Số liệu thống kê gia đình được cập nhật thông qua IFamilyTreeService.
+        // 4. Các sự kiện FamilyCreatedEvent và FamilyStatsUpdatedEvent được thêm vào domain events của thực thể gia đình.
     }
 
     [Fact]
@@ -207,10 +206,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         _mockUser.Setup(u => u.Id).Returns(userId);
+        var _mockMediator = _fixture.Freeze<Mock<IMediator>>();
         _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
                      .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<CreateFamilyCommand>()
                                .With(c => c.Name, "Family Without Code")
@@ -229,6 +227,9 @@ public class CreateFamilyCommandHandlerTests : TestBase
         createdFamily.Should().NotBeNull();
         createdFamily!.Code.Should().NotBeNullOrEmpty();
         createdFamily.Code.Should().StartWith("FAM-");
+
+        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyCreatedEvent);
+        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng nếu người dùng không cung cấp mã cho gia đình,

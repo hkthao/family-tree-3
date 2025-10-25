@@ -5,6 +5,8 @@ using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
+using backend.Domain.Events;
+using backend.Domain.Events.Families;
 using FluentAssertions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -17,16 +19,12 @@ public class DeleteFamilyCommandHandlerTests : TestBase
 {
     private readonly DeleteFamilyCommandHandler _handler;
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
-    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     public DeleteFamilyCommandHandlerTests()
     {
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockFamilyTreeService = _fixture.Freeze<Mock<IFamilyTreeService>>();
 
-        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockFamilyTreeService.Object);
+        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]
@@ -181,10 +179,6 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
 
         var command = new DeleteFamilyCommand(existingFamily.Id);
@@ -199,8 +193,8 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         var deletedFamily = await _context.Families.FirstOrDefaultAsync(e => e.Id == existingFamily.Id);
         deletedFamily.Should().BeNull();
 
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+        existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
+        existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh rằng một quản trị viên có thể xóa thành công một gia đình hiện có
@@ -240,10 +234,6 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id, userProfile))
                                  .Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = new DeleteFamilyCommand(existingFamily.Id);
 
@@ -257,8 +247,8 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         var deletedFamily = await _context.Families.FindAsync(existingFamily.Id);
         deletedFamily.Should().BeNull();
 
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+        existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
+        existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh rằng một người dùng có quyền quản lý gia đình có thể xóa thành công
