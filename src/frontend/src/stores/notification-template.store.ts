@@ -16,7 +16,7 @@ export const useNotificationTemplateStore = defineStore('notificationTemplate', 
     currentPage: 1,
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
     totalPages: 1,
-    sortBy: [] as { key: string; order: string }[],
+    sortBy: [] as { key: string; order?: 'asc' | 'desc' }[],
   }),
   getters: {},
   actions: {
@@ -29,7 +29,7 @@ export const useNotificationTemplateStore = defineStore('notificationTemplate', 
           sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
           sortOrder:
             this.sortBy.length > 0
-              ? (this.sortBy[0].order as 'asc' | 'desc')
+              ? (this.sortBy[0].order as 'asc' | 'desc' | undefined)
               : undefined,
         },
         this.currentPage,
@@ -107,7 +107,7 @@ export const useNotificationTemplateStore = defineStore('notificationTemplate', 
       }
     },
 
-    setSortBy(sortBy: { key: string; order: string }[]) {
+    setSortBy(sortBy: { key: string; order?: 'asc' | 'desc' }[]) {
       this.sortBy = sortBy;
       this.currentPage = 1;
       this._loadItems();

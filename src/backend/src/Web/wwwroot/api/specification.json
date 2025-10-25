@@ -2428,7 +2428,7 @@
         ]
       }
     },
-    "/api/UserProfiles/me": {
+    "/api/user-profile/me": {
       "get": {
         "tags": [
           "UserProfiles"
@@ -2453,7 +2453,7 @@
         ]
       }
     },
-    "/api/UserProfiles": {
+    "/api/user-profile": {
       "get": {
         "tags": [
           "UserProfiles"
@@ -2481,7 +2481,7 @@
         ]
       }
     },
-    "/api/UserProfiles/byExternalId/{externalId}": {
+    "/api/user-profile/byExternalId/{externalId}": {
       "get": {
         "tags": [
           "UserProfiles"
@@ -2517,7 +2517,7 @@
         ]
       }
     },
-    "/api/UserProfiles/{id}": {
+    "/api/user-profile/{id}": {
       "get": {
         "tags": [
           "UserProfiles"
@@ -2554,7 +2554,7 @@
         ]
       }
     },
-    "/api/UserProfiles/{userId}": {
+    "/api/user-profile/{userId}": {
       "put": {
         "tags": [
           "UserProfiles"

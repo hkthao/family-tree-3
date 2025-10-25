@@ -1,7 +1,7 @@
 import type { Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { NotificationTemplate, NotificationTemplateFilter } from '@/types';
-import type { PaginatedItems } from '@/types/pagination.d';
+import type { Paginated } from '@/types/pagination.d';
 
 export interface INotificationTemplateService {
   loadItems(
@@ -10,7 +10,7 @@ export interface INotificationTemplateService {
     itemsPerPage?: number,
     sortBy?: string,
     sortOrder?: 'asc' | 'desc',
-  ): Promise<Result<PaginatedItems<NotificationTemplate>, ApiError>>;
+  ): Promise<Result<Paginated<NotificationTemplate>, ApiError>>;
   getById(id: string): Promise<Result<NotificationTemplate, ApiError>>;
   add(newItem: Omit<NotificationTemplate, 'id' | 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>): Promise<Result<NotificationTemplate, ApiError>>;
   update(updatedItem: NotificationTemplate): Promise<Result<void, ApiError>>;

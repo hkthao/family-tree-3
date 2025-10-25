@@ -57,6 +57,9 @@ describe('member-autocomplete.store', () => {
   const mockMember: Member = {
     id: 'member-1',
     fullName: 'Test Member',
+    lastName: 'Member',
+    firstName: 'Test',
+    familyId: 'family-1',
   };
 
   it('should have initial state values', () => {
@@ -69,8 +72,8 @@ describe('member-autocomplete.store', () => {
   describe('searchMembers', () => {
     it('should fetch members successfully', async () => {
       const mockMembers: Member[] = [
-        { id: '1', fullName: 'Member A' },
-        { id: '2', fullName: 'Member B' },
+        { id: '1', fullName: 'Member A', lastName: 'A', firstName: 'Member', familyId: 'family-1' },
+        { id: '2', fullName: 'Member B', lastName: 'B', firstName: 'Member', familyId: 'family-1' },
       ];
       mockLoadItems.mockResolvedValue(ok({ items: mockMembers, totalItems: 2, totalPages: 1 }));
 
@@ -103,8 +106,8 @@ describe('member-autocomplete.store', () => {
   describe('getMemberByIds', () => {
     it('should fetch members by IDs successfully', async () => {
       const mockMembers: Member[] = [
-        { id: '1', fullName: 'Member A' },
-        { id: '2', fullName: 'Member B' },
+        { id: '1', fullName: 'Member A', lastName: 'A', firstName: 'Member', familyId: 'family-1' },
+        { id: '2', fullName: 'Member B', lastName: 'B', firstName: 'Member', familyId: 'family-1' },
       ];
       mockGetByIds.mockResolvedValue(ok(mockMembers));
 
@@ -128,7 +131,7 @@ describe('member-autocomplete.store', () => {
     });
 
     it('should return cached members if available', async () => {
-      const cachedMember: Member = { id: '3', fullName: 'Member C' };
+      const cachedMember: Member = { id: '3', fullName: 'Member C', lastName: 'C', firstName: 'Member', familyId: 'family-1' };
       store.memberCache.set(cachedMember); // Correct usage of IdCache.set
       mockGetByIds.mockResolvedValue(ok([])); // Should not be called for cached item
 

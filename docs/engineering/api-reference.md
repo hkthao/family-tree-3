@@ -13,7 +13,7 @@
   - [6.3. Quản lý Sự kiện (`/api/events`)](#63-quản-lý-sự-kiện-apievents)
   - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
   - [6.5. Quản lý Quan hệ (`/api/relationships`)](#65-quản-lý-quan-hệ-apirelationships)
-  - [6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
+  - [6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
   - [6.7. Quản lý Hoạt động Người dùng (`/api/activities`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
   - [6.8. Quản lý AI (`/api/ai`)](#68-quản-lý-ai-api-ai)
   - [6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)](#69-quản-lý-tùy-chọn-người-dùng-apiuserpreferences)
@@ -323,18 +323,18 @@ Ví dụ Phản hồi Lỗi:
 -   `DELETE /api/relationships/{id}`: Xóa quan hệ.
     *   **Phản hồi:** `204 No Content` nếu thành công.
 
-### 6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)
+### 6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)
 
--   `GET /api/UserProfiles/me`: Lấy thông tin hồ sơ của người dùng hiện tại.
+-   `GET /api/user-profile/me`: Lấy thông tin hồ sơ của người dùng hiện tại.
     *   **Mô tả:** Endpoint này không yêu cầu ID người dùng trong URL; ID được lấy từ ngữ cảnh xác thực của server.
     *   **Phản hồi:** `Result<UserProfileDto>`
--   `GET /api/UserProfiles`: Lấy danh sách tất cả hồ sơ người dùng.
+-   `GET /api/user-profile`: Lấy danh sách tất cả hồ sơ người dùng.
     *   **Phản hồi:** `Result<List<UserProfileDto>>`
--   `GET /api/UserProfiles/{id}`: Lấy thông tin hồ sơ người dùng theo ID nội bộ (GUID).
+-   `GET /api/user-profile/{id}`: Lấy thông tin hồ sơ người dùng theo ID nội bộ (GUID).
     *   **Phản hồi:** `Result<UserProfileDto>`
--   `GET /api/UserProfiles/byExternalId/{externalId}`: Lấy thông tin hồ sơ người dùng theo External ID (ví dụ: Auth0 User ID).
+-   `GET /api/user-profile/byExternalId/{externalId}`: Lấy thông tin hồ sơ người dùng theo External ID (ví dụ: Auth0 User ID).
     *   **Phản hồi:** `Result<UserProfileDto>`
--   `PUT /api/UserProfiles/{userId}`: Cập nhật hồ sơ người dùng.
+-   `PUT /api/user-profile/{userId}`: Cập nhật hồ sơ người dùng.
     *   **Path Parameters:** `userId` (string)
     *   **Request Body:** `UpdateUserProfileCommand`
     *   **Phản hồi:** `Result`

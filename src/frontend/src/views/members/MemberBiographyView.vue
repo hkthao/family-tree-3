@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useAIBiographyStore } from '@/stores/aiBiography.store';
+import { useAIBiographyStore } from '@/stores/ai-biography.store';
 import { AIBiographyInputPanel, AIBiographyResultPanel } from '@/components/aiBiography';
 
 const route = useRoute();

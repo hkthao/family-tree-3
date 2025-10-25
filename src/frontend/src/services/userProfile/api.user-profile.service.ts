@@ -6,7 +6,7 @@ import type { IUserProfileService } from './user-profile.service.interface';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class UserProfileApiService implements IUserProfileService {
-  private apiUrl = `${API_BASE_URL}/UserProfiles`;
+  private apiUrl = `${API_BASE_URL}/user-profile`;
 
   constructor(private http: ApiClientMethods) {}
 

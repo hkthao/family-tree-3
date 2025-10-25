@@ -10,6 +10,7 @@
         ref="notificationTemplateFormRef"
         v-if="currentItem"
         :initial-template-data="currentItem"
+        :form-title="t('admin.notificationTemplates.form.editTitle')"
         @cancel="closeForm"
         @save="handleUpdateItem"
       />
@@ -35,8 +36,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
-import { useNotificationTemplateStore } from '@/stores/notificationTemplate.store';
-import { useNotificationStore } from '@/stores/notification.store';
+import { useNotificationTemplateStore, useNotificationStore } from '@/stores';
 import { NotificationTemplateForm } from '@/views/notificationTemplate';
 import type { NotificationTemplate } from '@/types';
 import { storeToRefs } from 'pinia';

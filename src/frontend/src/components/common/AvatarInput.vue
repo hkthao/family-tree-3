@@ -67,7 +67,7 @@ import { useI18n } from 'vue-i18n';
 import AvatarDisplay from './AvatarDisplay.vue';
 import { Cropper, type CropperResult } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
-import { useFileUploadStore } from '@/stores/fileUpload.store';
+import { useFileUploadStore } from '@/stores';
 import { useNotificationStore } from '@/stores/notification.store';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
 

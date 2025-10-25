@@ -37,7 +37,7 @@ vi.mock('@/services/service.factory', () => ({
   })),
 }));
 
-describe('userActivity.store', () => {
+describe('user-activity.store', () => {
   let store: ReturnType<typeof useUserActivityStore>;
 
   beforeEach(() => {

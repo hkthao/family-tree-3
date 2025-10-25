@@ -204,11 +204,11 @@ Phần này liệt kê các User Story đã hoàn thành và được triển kh
     -   Giảm sự phụ thuộc của các component UI vào `authStore`.
 
 #### US_028: API Hồ sơ Người dùng hiện tại
--   **User Story**: Là nhà phát triển, tôi muốn có endpoint backend mới `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại một cách an toàn.
+-   **User Story**: Là nhà phát triển, tôi muốn có endpoint backend mới `GET /api/user-profile/me` để lấy hồ sơ của người dùng hiện tại một cách an toàn.
 -   **Priority**: High
 -   **Estimate**: 1 ngày
 -   **Acceptance Criteria**:
-    -   Endpoint `GET /api/UserProfiles/me` trả về `UserProfileDto` của người dùng hiện tại.
+    -   Endpoint `GET /api/user-profile/me` trả về `UserProfileDto` của người dùng hiện tại.
     -   Endpoint này không yêu cầu ID người dùng trong URL; ID được lấy từ ngữ cảnh xác thực của server.
 
 #### US_029: Trường Avatar cho Hồ sơ Người dùng

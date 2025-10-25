@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { MainLayout } from '@/layouts';
 import { sidebarRoutes } from './sidebar-routes';
 import { canAccessMenu } from '@/utils/menu-permissions';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/stores';
 import { useAuthService } from '@/services/auth/authService';
 import type { AppState } from '@/types';
 

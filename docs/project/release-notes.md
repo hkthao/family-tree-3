@@ -29,7 +29,7 @@
     -   Đăng nhập hệ thống an toàn với JWT Bearer Token.
     -   Refactor `auth0UserId` thành `externalId` để tách biệt khỏi nhà cung cấp xác thực cụ thể.
     -   Quản lý Hồ sơ Người dùng tập trung trong `userProfileStore` (Frontend).
-    -   API mới `GET /api/UserProfiles/me` để lấy hồ sơ của người dùng hiện tại.
+    -   API mới `GET /api/user-profile/me` để lấy hồ sơ của người dùng hiện tại.
     -   Hỗ trợ trường `Avatar` cho Hồ sơ Người dùng.
     -   Xử lý kết quả nhất quán với `Result` wrapper cho `GetCurrentUserProfileQueryHandler`.
 -   **Quản lý Dòng họ & Thành viên**:

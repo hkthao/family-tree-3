@@ -47,7 +47,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import { useI18n } from 'vue-i18n';
-import { useUserSettingsStore } from '@/stores/userSettings.store';
+import { useUserSettingsStore } from '@/stores';
 import { getThemeOptions } from '@/constants/theme.constants';
 import { getLanguageOptions } from '@/constants/language.constants';
 import { useNotificationStore } from '@/stores/notification.store';

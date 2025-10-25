@@ -32,7 +32,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNotificationStore } from '@/stores/notification.store';
 import { AvatarInput } from '@/components/common';
-import { useUserProfileStore } from '@/stores/userProfile.store';
+import { useUserProfileStore } from '@/stores';
 import type { UserProfile } from '@/types';
 
 const { t } = useI18n();

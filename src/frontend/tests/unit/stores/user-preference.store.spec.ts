@@ -48,7 +48,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('userPreference.store', () => {
+describe('user-preference.store', () => {
   let store: ReturnType<typeof useUserPreferenceStore>;
 
   const initialPreferences: UserPreference = {

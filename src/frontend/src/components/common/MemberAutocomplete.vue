@@ -1,5 +1,5 @@
 <template>
-  <v-autocomplete v-model="internalSelectedItems" @update:model-value="handleAutocompleteUpdate" :items="items"
+  <v-autocomplete v-model="internalSelectedItems" @update:model-value="handleAutocompleteUpdate" :items="members"
     item-title="fullName" item-value="id" :label="label" :rules="rules" :readonly="readOnly" :clearable="clearable"
     :loading="loading" :search="searchTerm" @update:search="onSearchInput" :multiple="multiple" :chips="multiple"
     :closable-chips="multiple" return-object>
@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue';
-import { useMemberAutocompleteStore } from '@/stores/memberAutocomplete.store';
+import { useMemberAutocompleteStore } from '@/stores';
 
 // A more specific type for the function being debounced
 type DebounceableFunction = (...args: any[]) => void;

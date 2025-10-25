@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import { useFamilyAutocompleteStore } from '@/stores/familyAutocomplete.store';
+import { useFamilyAutocompleteStore } from '@/stores';
 
 // A more specific type for the function being debounced
 type DebounceableFunction = (...args: any[]) => void;

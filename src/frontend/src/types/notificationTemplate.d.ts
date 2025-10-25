@@ -14,4 +14,6 @@ export interface NotificationTemplateFilter {
   channel?: NotificationChannel;
   isActive?: boolean;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }

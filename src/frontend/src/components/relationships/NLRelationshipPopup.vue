@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useNaturalLanguageInputStore } from '@/stores/naturalLanguageInput.store';
+import { useNaturalLanguageInputStore } from '@/stores';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import type { Relationship } from '@/types';

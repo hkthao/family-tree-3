@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { useUserActivityStore } from '@/stores/userActivity.store';
+import { useUserActivityStore } from '@/stores';
 import { onMounted, watch } from 'vue';
 import { TargetType } from '@/types';
 import { useI18n } from 'vue-i18n';

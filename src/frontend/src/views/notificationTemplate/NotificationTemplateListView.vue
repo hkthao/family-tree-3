@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useNotificationTemplateStore } from '@/stores/notificationTemplate.store';
+import { useNotificationTemplateStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -120,13 +120,13 @@ const getNotificationChannelName = (channel: NotificationChannel) => {
                 <v-icon
                   small
                   class="me-2"
-                  @click="editTemplate(item.id)"
+                  @click="item.id && editTemplate(item.id)"
                 >
                   mdi-pencil
                 </v-icon>
                 <v-icon
                   small
-                  @click="deleteTemplate(item.id)"
+                  @click="item.id && deleteTemplate(item.id)"
                 >
                   mdi-delete
                 </v-icon>

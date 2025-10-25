@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAIBiographyStore } from '@/stores/aiBiography.store';
+import { useAIBiographyStore } from '@/stores/ai-biography.store';
 
 const props = defineProps({
   biographyContent: { type: String, default: '' },

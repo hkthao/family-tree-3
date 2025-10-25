@@ -31,7 +31,7 @@ import { useRouter } from 'vue-router';
 import type { VTextField } from 'vuetify/components';
 import type { User } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { useUserSettingsStore } from '@/stores/userSettings.store';
+import { useUserSettingsStore } from '@/stores';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 

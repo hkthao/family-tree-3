@@ -47,7 +47,7 @@ vi.mock('@/plugins/i18n', () => ({
   },
 }));
 
-describe('systemConfig.store', () => {
+describe('system-config.store', () => {
   let store: ReturnType<typeof useSystemConfigStore>;
 
   beforeEach(() => {

@@ -23,7 +23,7 @@ vi.mock('@/services/service.factory', () => ({
     aiBiography: {
       generateBiography: mockGenerateBiography,
     },
-L26: // Add other services as empty objects if they are not directly used by ai-biography.store
+    // Add other services as empty objects if they are not directly used by ai-biography.store
     ai: {},
     auth: {},
     chat: {},

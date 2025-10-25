@@ -1,8 +1,8 @@
 import type { Result } from '@/types';
-import { ApiClientMethods } from '@/plugins/axios';
+import type { ApiClientMethods } from '@/plugins/axios';
 import type { ApiError } from '@/plugins/axios';
 import type { NotificationTemplate, NotificationTemplateFilter } from '@/types';
-import type { PaginatedItems } from '@/types/pagination.d';
+import type { Paginated } from '@/types/pagination.d';
 import type { INotificationTemplateService } from './notificationTemplate.service.interface';
 
 export class ApiNotificationTemplateService implements INotificationTemplateService {
@@ -14,8 +14,8 @@ export class ApiNotificationTemplateService implements INotificationTemplateServ
     itemsPerPage?: number,
     sortBy?: string,
     sortOrder?: 'asc' | 'desc',
-  ): Promise<Result<PaginatedItems<NotificationTemplate>, ApiError>> {
-    return this.api.get<PaginatedItems<NotificationTemplate>>('/notificationTemplates', {
+  ): Promise<Result<Paginated<NotificationTemplate>, ApiError>> {
+    return this.api.get<Paginated<NotificationTemplate>>('/notificationTemplates', {
       params: { ...filter, page, itemsPerPage, sortBy, sortOrder },
     });
   }

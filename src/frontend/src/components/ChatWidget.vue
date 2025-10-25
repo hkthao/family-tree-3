@@ -61,9 +61,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick } from 'vue';
-import { useChatStore } from '@/stores/chat.store';
-import { useAuthStore } from '@/stores/auth.store';
-import { useUserProfileStore } from '@/stores/userProfile.store';
+import { useChatStore, useAuthStore, useUserProfileStore } from '@/stores';
 import { useI18n } from 'vue-i18n';
 import AvatarDisplay from '@/components/common/AvatarDisplay.vue';
 import { Vue3Lottie } from 'vue3-lottie';

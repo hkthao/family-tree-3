@@ -6,7 +6,7 @@
       }}</span>
     </v-card-title>
     <v-card-text>
-      <NotificationTemplateForm ref="notificationTemplateFormRef" @cancel="closeForm" @save="handleAddItem" />
+      <NotificationTemplateForm ref="notificationTemplateFormRef" :form-title="t('admin.notificationTemplates.form.addTitle')" @cancel="closeForm" @save="handleAddItem" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -28,8 +28,7 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useNotificationTemplateStore } from '@/stores/notificationTemplate.store';
-import { useNotificationStore } from '@/stores/notification.store';
+import { useNotificationTemplateStore, useNotificationStore } from '@/stores';
 import { NotificationTemplateForm } from '@/views/notificationTemplate';
 import type { NotificationTemplate } from '@/types';
 import { storeToRefs } from 'pinia';
