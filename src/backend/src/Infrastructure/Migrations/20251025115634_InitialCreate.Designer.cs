@@ -11,7 +11,7 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251025114113_InitialCreate")]
+    [Migration("20251025115634_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -21,21 +21,6 @@ namespace backend.Infrastructure.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.19")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
-
-            modelBuilder.Entity("EventMember", b =>
-                {
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("RelatedMembersId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("EventId", "RelatedMembersId");
-
-                    b.HasIndex("RelatedMembersId");
-
-                    b.ToTable("EventMember");
-                });
 
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
@@ -51,26 +36,26 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("code");
 
                     b.Property<string>("Color")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("_color");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("color");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)")
-                        .HasColumnName("_description");
+                        .HasColumnName("description");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_end_date");
+                        .HasColumnName("end_date");
 
                     b.Property<Guid?>("FamilyId")
                         .HasColumnType("char(36)")
@@ -78,30 +63,30 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("Location")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)")
-                        .HasColumnName("_location");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("location");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
-                        .HasColumnName("_name");
+                        .HasColumnName("name");
 
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_start_date");
+                        .HasColumnName("start_date");
 
                     b.Property<int>("Type")
                         .HasColumnType("int")
-                        .HasColumnName("_type");
+                        .HasColumnName("type");
 
                     b.HasKey("Id");
 
@@ -110,7 +95,24 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.ToTable("events", (string)null);
+                    b.ToTable("event", (string)null);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.EventMember", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("event_id");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("member_id");
+
+                    b.HasKey("EventId", "MemberId");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("event_member", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
@@ -121,12 +123,14 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Address")
-                        .HasColumnType("longtext")
-                        .HasColumnName("_address");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("address");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("longtext")
-                        .HasColumnName("_avatar_url");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("avatar_url");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -136,50 +140,51 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext")
-                        .HasColumnName("_description");
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("description");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
-                        .HasColumnName("_name");
+                        .HasColumnName("name");
 
                     b.Property<int>("TotalGenerations")
                         .HasColumnType("int")
-                        .HasColumnName("_total_generations");
+                        .HasColumnName("total_generations");
 
                     b.Property<int>("TotalMembers")
                         .HasColumnType("int")
-                        .HasColumnName("_total_members");
+                        .HasColumnName("total_members");
 
                     b.Property<string>("Visibility")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)")
-                        .HasColumnName("_visibility");
+                        .HasColumnName("visibility");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("families", (string)null);
+                    b.ToTable("family", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
@@ -193,18 +198,17 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("user_profile_id");
 
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("_id");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("Role")
                         .HasColumnType("int")
-                        .HasColumnName("_role");
+                        .HasColumnName("role");
 
                     b.HasKey("FamilyId", "UserProfileId");
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("family_users", (string)null);
+                    b.ToTable("family_user", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FileMetadata", b =>
@@ -222,11 +226,11 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -244,11 +248,11 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<int>("StorageProvider")
                         .HasColumnType("int")
@@ -273,7 +277,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<Guid?>("UsedById")
                         .HasColumnType("char(36)")
-                        .HasColumnName("_used_by_id");
+                        .HasColumnName("used_by_id");
 
                     b.HasKey("Id");
 
@@ -288,12 +292,14 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("longtext")
-                        .HasColumnName("_avatar_url");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("avatar_url");
 
                     b.Property<string>("Biography")
-                        .HasColumnType("longtext")
-                        .HasColumnName("_biography");
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)")
+                        .HasColumnName("biography");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -303,19 +309,19 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_date_of_birth");
+                        .HasColumnName("date_of_birth");
 
                     b.Property<DateTime?>("DateOfDeath")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_date_of_death");
+                        .HasColumnName("date_of_death");
 
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("char(36)")
@@ -325,50 +331,50 @@ namespace backend.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("_first_name");
+                        .HasColumnName("first_name");
 
                     b.Property<string>("Gender")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)")
-                        .HasColumnName("_gender");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("gender");
 
                     b.Property<bool>("IsRoot")
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("_is_root");
+                        .HasColumnName("is_root");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("_last_name");
+                        .HasColumnName("last_name");
 
                     b.Property<string>("Nickname")
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
-                        .HasColumnName("_nickname");
+                        .HasColumnName("nickname");
 
                     b.Property<string>("Occupation")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("_occupation");
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("occupation");
 
                     b.Property<string>("PlaceOfBirth")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
-                        .HasColumnName("_place_of_birth");
+                        .HasColumnName("place_of_birth");
 
                     b.Property<string>("PlaceOfDeath")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
-                        .HasColumnName("_place_of_death");
+                        .HasColumnName("place_of_death");
 
                     b.HasKey("Id");
 
@@ -377,7 +383,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.ToTable("members", (string)null);
+                    b.ToTable("member", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Notification", b =>
@@ -551,7 +557,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("notification_templates", (string)null);
+                    b.ToTable("notification_template", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Relationship", b =>
@@ -563,27 +569,27 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("char(36)")
-                        .HasColumnName("_family_id");
+                        .HasColumnName("family_id");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<int?>("Order")
                         .HasColumnType("int")
-                        .HasColumnName("_order");
+                        .HasColumnName("order");
 
                     b.Property<Guid>("SourceMemberId")
                         .HasColumnType("char(36)")
@@ -595,7 +601,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<int>("Type")
                         .HasColumnType("int")
-                        .HasColumnName("_type");
+                        .HasColumnName("type");
 
                     b.HasKey("Id");
 
@@ -605,7 +611,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("TargetMemberId");
 
-                    b.ToTable("relationships", (string)null);
+                    b.ToTable("relationship", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.TextChunk", b =>
@@ -718,47 +724,47 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<bool>("EmailNotificationsEnabled")
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("_email_notifications_enabled");
+                        .HasColumnName("email_notifications_enabled");
 
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)")
-                        .HasColumnName("_id");
+                        .HasColumnName("id");
 
                     b.Property<bool>("InAppNotificationsEnabled")
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("_in_app_notifications_enabled");
+                        .HasColumnName("in_app_notifications_enabled");
 
                     b.Property<int>("Language")
                         .HasColumnType("int")
-                        .HasColumnName("_language");
+                        .HasColumnName("language");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<bool>("SmsNotificationsEnabled")
                         .HasColumnType("tinyint(1)")
-                        .HasColumnName("_sms_notifications_enabled");
+                        .HasColumnName("sms_notifications_enabled");
 
                     b.Property<int>("Theme")
                         .HasColumnType("int")
-                        .HasColumnName("_theme");
+                        .HasColumnName("theme");
 
                     b.HasKey("UserProfileId");
 
-                    b.ToTable("user_preferences", (string)null);
+                    b.ToTable("user_preference", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserProfile", b =>
@@ -769,16 +775,17 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Avatar")
-                        .HasColumnType("longtext")
-                        .HasColumnName("_avatar");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("avatar");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_created");
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_created_by");
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -794,11 +801,11 @@ namespace backend.Infrastructure.Migrations
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)")
-                        .HasColumnName("_last_modified");
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext")
-                        .HasColumnName("_last_modified_by");
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -807,8 +814,7 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnName("name");
 
                     b.Property<Guid?>("UserPreferenceUserProfileId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("_user_preference_user_profile_id");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -817,22 +823,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("UserPreferenceUserProfileId");
 
-                    b.ToTable("user_profiles", (string)null);
-                });
-
-            modelBuilder.Entity("EventMember", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Event", null)
-                        .WithMany()
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Domain.Entities.Member", null)
-                        .WithMany()
-                        .HasForeignKey("RelatedMembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.ToTable("user_profile", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
@@ -841,6 +832,25 @@ namespace backend.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("FamilyId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.EventMember", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Event", "Event")
+                        .WithMany("EventMembers")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Domain.Entities.Member", "Member")
+                        .WithMany("EventMembers")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
@@ -931,6 +941,11 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("UserPreference");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.Event", b =>
+                {
+                    b.Navigation("EventMembers");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
                 {
                     b.Navigation("FamilyUsers");
@@ -938,6 +953,8 @@ namespace backend.Infrastructure.Migrations
 
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
                 {
+                    b.Navigation("EventMembers");
+
                     b.Navigation("Relationships");
                 });
 

@@ -18,13 +18,13 @@ public class EventMemberConfiguration : IEntityTypeConfiguration<EventMember>
         builder.Property(em => em.MemberId)
             .HasColumnName("member_id");
 
-        builder.HasOne<Event>()
-            .WithMany(e => e.RelatedMembers)
+        builder.HasOne(em => em.Event)
+            .WithMany(e => e.EventMembers)
             .HasForeignKey(em => em.EventId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne<Member>()
-            .WithMany()
+        builder.HasOne(em => em.Member)
+            .WithMany(m => m.EventMembers)
             .HasForeignKey(em => em.MemberId)
             .OnDelete(DeleteBehavior.Cascade);
     }

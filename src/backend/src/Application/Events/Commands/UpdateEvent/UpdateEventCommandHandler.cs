@@ -1,6 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Entities;
 using backend.Domain.Enums;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
@@ -26,7 +27,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         }
 
         var entity = await _context.Events
-            .Include(e => e.RelatedMembers)
+            .Include(e => e.EventMembers)
             .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
 
         if (entity == null)
@@ -48,7 +49,13 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         entity.FamilyId = request.FamilyId;
         entity.Type = request.Type;
         entity.Color = request.Color;
-        entity.RelatedMembers = relatedMembers; // Update related members
+
+        // Update related members
+        entity.EventMembers.Clear();
+        foreach (var member in relatedMembers)
+        {
+            entity.EventMembers.Add(new EventMember { EventId = entity.Id, MemberId = member.Id });
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

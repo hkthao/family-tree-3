@@ -45,9 +45,9 @@ public class MappingProfile : Profile
             ));
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
         CreateMap<Event, EventDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.RelatedMembers.Select(m => m.Id)));
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()
             .ForMember(dest => dest.SourceMember, opt => opt.MapFrom(src => src.SourceMember))

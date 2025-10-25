@@ -55,11 +55,7 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IUser use
             {
                 foreach (var memberId in command.RelatedMembers)
                 {
-                    var member = await _context.Members.FindAsync(Guid.Parse(memberId));
-                    if (member != null)
-                    {
-                        entity.RelatedMembers.Add(member);
-                    }
+                    entity.EventMembers.Add(new EventMember { EventId = entity.Id, MemberId = Guid.Parse(memberId) });
                 }
             }
 

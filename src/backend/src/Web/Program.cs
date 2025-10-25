@@ -94,10 +94,13 @@ public class Startup
         if (env.IsDevelopment())
         {
             // Initialise and seed database
-            // using var scope = app.ApplicationServices.CreateScope();
-            // var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
-            // await initialiser.InitialiseAsync();
-            // await initialiser.SeedAsync();
+            Task.Run(async () =>
+            {
+                using var scope = app.ApplicationServices.CreateScope();
+                var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
+                await initialiser.InitialiseAsync();
+                await initialiser.SeedAsync();
+            });
         }
         else
         {

@@ -41,7 +41,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             FamilyId = request.FamilyId,
             Type = request.Type,
             Color = request.Color,
-            RelatedMembers = relatedMembers
+            EventMembers = relatedMembers.Select(m => new EventMember { MemberId = m.Id }).ToList()
         };
 
         _context.Events.Add(entity);
