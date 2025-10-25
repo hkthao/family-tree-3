@@ -321,6 +321,8 @@
   "relationship.list.headers.targetMemberFullName": "Target Member Full Name",
   "relationship.list.headers.relationship": "Relationship",
   "common.name": "Name",
+  "common.language.en": "English",
+  "common.language.vi": "Vietnamese",
   "common.noData": "No data available",
   "familyTree.fullName": "Full Name",
   "familyTree.birthYear": "Birth Year",

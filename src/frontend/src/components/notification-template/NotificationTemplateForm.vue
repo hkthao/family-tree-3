@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, type PropType } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NotificationChannel, NotificationType, TemplateFormat } from '@/types';
 import type { NotificationTemplate } from '@/types';
@@ -162,6 +162,7 @@ defineExpose({
           :rules="rules.eventType"
           :readonly="readOnly"
           required
+          hide-details
         ></v-select>
       </v-col>
       <v-col cols="12" md="6">
@@ -174,6 +175,7 @@ defineExpose({
           :rules="rules.channel"
           :readonly="readOnly"
           required
+          hide-details
         ></v-select>
       </v-col>
     </v-row>
@@ -189,6 +191,7 @@ defineExpose({
           :rules="rules.format"
           :readonly="readOnly"
           required
+          hide-details
         ></v-select>
       </v-col>
       <v-col cols="12" md="6">
@@ -201,37 +204,54 @@ defineExpose({
           :rules="rules.languageCode"
           :readonly="readOnly"
           required
+          hide-details
         ></v-select>
       </v-col>
     </v-row>
 
-    <v-text-field
-      v-model="form.subject"
-      :label="t('notificationTemplate.form.subject')"
-      :rules="rules.subject"
-      :readonly="readOnly"
-      required
-    ></v-text-field>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field
+          v-model="form.subject"
+          :label="t('notificationTemplate.form.subject')"
+          :rules="rules.subject"
+          :readonly="readOnly"
+          required
+          hide-details
+        ></v-text-field>
+      </v-col>
+    </v-row>
 
-    <Editor
-      v-if="form.format === TemplateFormat.Html"
-      v-model="htmlBody"
-      :label="t('notificationTemplate.form.body')"
-      :read-only="readOnly"
-    />
-    <v-textarea
-      v-else
-      v-model="form.body"
-      :label="t('notificationTemplate.form.body')"
-      :rules="rules.body"
-      :readonly="readOnly"
-      required
-    ></v-textarea>
+    <v-row>
+      <v-col cols="12">
+        <Editor
+          v-if="form.format === TemplateFormat.Html"
+          v-model="htmlBody"
+          :label="t('notificationTemplate.form.body')"
+          :read-only="readOnly"
+          hide-details
+        />
+        <v-textarea
+          v-else
+          v-model="form.body"
+          :label="t('notificationTemplate.form.body')"
+          :rules="rules.body"
+          :readonly="readOnly"
+          required
+          hide-details
+        ></v-textarea>
+      </v-col>
+    </v-row>
 
-    <v-checkbox
-      v-model="form.isActive"
-      :label="t('notificationTemplate.form.isActive')"
-      :readonly="readOnly"
-    ></v-checkbox>
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox
+          v-model="form.isActive"
+          :label="t('notificationTemplate.form.isActive')"
+          :readonly="readOnly"
+          hide-details
+        ></v-checkbox>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
