@@ -39,7 +39,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
-import { EventSearch, EventList, NLEventPopup } from '@/components/events';
+import { EventSearch, EventList, NLEventPopup } from '@/components/event';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -75,15 +75,15 @@ const loadEvents = async (
 };
 
 const navigateToDetailView = (event: Event) => {
-  router.push(`/events/detail/${event.id}`);
+  router.push(`/event/detail/${event.id}`);
 };
 
 const navigateToCreateView = () => {
-  router.push('/events/add');
+  router.push('/event/add');
 };
 
 const navigateToEditEvent = (event: Event) => {
-  router.push(`/events/edit/${event.id}`);
+  router.push(`/event/edit/${event.id}`);
 };
 
 const handleFilterUpdate = (filters: EventFilter) => {

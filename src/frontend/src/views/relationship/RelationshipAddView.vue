@@ -26,7 +26,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { useNotificationStore } from '@/stores/notification.store';
-import { RelationshipForm } from '@/components/relationships';
+import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
 
 const relationshipFormRef = ref<InstanceType<typeof RelationshipForm> | null>(null);
@@ -64,6 +64,6 @@ const handleAddItem = async () => {
 };
 
 const closeForm = () => {
-  router.push('/relationships');
+  router.push('/relationship');
 };
 </script>

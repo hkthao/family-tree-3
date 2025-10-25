@@ -58,6 +58,6 @@ const handleAddEvent = async () => {
 };
 
 const closeForm = () => {
-  router.push('/events');
+  router.push('/event');
 };
 </script>

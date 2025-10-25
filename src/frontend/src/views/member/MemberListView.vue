@@ -26,7 +26,7 @@ import { onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { MemberSearch, MemberList, NLMemberPopup } from '@/components/members';
+import { MemberSearch, MemberList, NLMemberPopup } from '@/components/member';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
@@ -43,19 +43,19 @@ const aiInputDialog = ref(false);
 const notificationStore = useNotificationStore();
 
 const navigateToDetailView = (member: Member) => {
-  router.push(`/members/detail/${member.id}`);
+  router.push(`/member/detail/${member.id}`);
 };
 
 const navigateToCreateView = () => {
-  router.push('/members/add');
+  router.push('/member/add');
 };
 
 const navigateToEditMember = (member: Member) => {
-  router.push(`/members/edit/${member.id}`);
+  router.push(`/member/edit/${member.id}`);
 };
 
 const navigateToAIBiography = (member: Member) => {
-  router.push(`/members/biography/${member.id}`);
+  router.push(`/member/biography/${member.id}`);
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {

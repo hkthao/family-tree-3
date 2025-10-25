@@ -21,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter, useRoute } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
-import { EventForm } from '@/components/events';
+import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
 
 interface EventFormExposed {
@@ -72,6 +72,6 @@ const handleUpdateEvent = async () => {
 };
 
 const closeForm = () => {
-  router.push('/events');
+  router.push('/event');
 };
 </script>

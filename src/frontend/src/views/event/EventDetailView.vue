@@ -36,7 +36,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import type { Event } from '@/types';
-import { EventForm } from '@/components/events';
+import { EventForm } from '@/components/event';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -62,11 +62,11 @@ const loadEvent = async () => {
 };
 
 const navigateToEditEvent = (id: string) => {
-  router.push(`/events/edit/${id}`);
+  router.push(`/event/edit/${id}`);
 };
 
 const closeView = () => {
-  router.push('/events');
+  router.push('/event');
 };
 
 onMounted(() => {

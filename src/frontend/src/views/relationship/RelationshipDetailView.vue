@@ -38,7 +38,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import { RelationshipForm } from '@/components/relationships';
+import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
 
 const { t } = useI18n();
@@ -61,11 +61,11 @@ const loadRelationship = async () => {
 };
 
 const navigateToEditRelationship = (id: string) => {
-  router.push(`/relationships/edit/${id}`);
+  router.push(`/relationship/edit/${id}`);
 };
 
 const closeView = () => {
-  router.push('/relationships');
+  router.push('/relationship');
 };
 
 onMounted(() => {

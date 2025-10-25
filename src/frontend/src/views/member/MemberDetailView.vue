@@ -46,9 +46,9 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
-import { MemberForm } from '@/components/members';
-import { EventTimeline, EventCalendar } from '@/components/events';
-import MemberRelationships from '@/components/members/MemberRelationships.vue';
+import { MemberForm } from '@/components/member';
+import { EventTimeline, EventCalendar } from '@/components/event';
+import MemberRelationships from '@/components/member/MemberRelationships.vue';
 import type { Member } from '@/types';
 
 const { t } = useI18n();
@@ -76,15 +76,15 @@ const loadMember = async () => {
 };
 
 const navigateToEditMember = (id: string) => {
-  router.push(`/members/edit/${id}`);
+  router.push(`/member/edit/${id}`);
 };
 
 const navigateToMemberDetailView = (memberId: string) => {
-  router.push(`/members/detail/${memberId}`);
+  router.push(`/member/detail/${memberId}`);
 };
 
 const closeView = () => {
-  router.push('/members');
+  router.push('/member');
 };
 
 onMounted(() => {

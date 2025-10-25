@@ -37,7 +37,7 @@ import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import { RelationshipSearch, RelationshipList } from '@/components/relationships'; // Grouped imports
+import { RelationshipSearch, RelationshipList } from '@/components/relationship';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -66,19 +66,19 @@ const loadRelationships = async () => {
 
 const navigateToDetailView = (relationship: Relationship) => {
   // Assuming a detail view for relationship exists, similar to member
-  router.push(`/relationships/detail/${relationship.id}`);
+  router.push(`/relationship/detail/${relationship.id}`);
 };
 
 const navigateToAddRelationship = () => {
-  router.push('/relationships/add');
+  router.push('/relationship/add');
 };
 
 const navigateToEditRelationship = (relationship: Relationship) => {
-  router.push(`/relationships/edit/${relationship.id}`);
+  router.push(`/relationship/edit/${relationship.id}`);
 };
 
 const navigateToMemberDetailView = (memberId: string) => {
-  router.push(`/members/detail/${memberId}`);
+  router.push(`/member/detail/${memberId}`);
 };
 
 const handleFilterUpdate = (filters: RelationshipFilter) => {

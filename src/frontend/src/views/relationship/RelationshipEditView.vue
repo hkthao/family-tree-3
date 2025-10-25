@@ -32,7 +32,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 
 import type { Relationship } from '@/types';
 
-import RelationshipForm from '@/components/relationships/RelationshipForm.vue';
+import RelationshipForm from '@/components/relationship/RelationshipForm.vue';
 
 const props = defineProps<{ id: string }>();
 const router = useRouter();
