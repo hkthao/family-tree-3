@@ -37,7 +37,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useNotificationTemplateStore, useNotificationStore } from '@/stores';
-import { NotificationTemplateForm } from '@/views/notification-template';
+import { NotificationTemplateForm } from '@/components/notification-template';
 import type { NotificationTemplate } from '@/types';
 import { storeToRefs } from 'pinia';
 
