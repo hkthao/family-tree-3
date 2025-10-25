@@ -26,7 +26,7 @@
 import { computed } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import menu from '@/data/menuItems';
-import { canAccessMenu } from '@/utils/menu-permissions';
+import { canAccessMenu } from '@/utils/menuPermissions';
 import type { User } from '@/types';
 import { AppNameDisplay } from '@/components/common';
 

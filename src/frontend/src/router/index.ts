@@ -1,15 +1,23 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { MainLayout } from '@/layouts';
-import { sidebarRoutes } from './sidebar-routes';
-import { canAccessMenu } from '@/utils/menu-permissions';
+
+import { canAccessMenu } from '@/utils/menuPermissions';
 import { useAuthStore } from '@/stores';
 import { useAuthService } from '@/services/auth/authService';
 import type { AppState } from '@/types';
 
+// Import feature routes
+import { memberRoutes } from './features/member.routes';
+import { familyRoutes } from './features/family.routes';
+import { eventRoutes } from './features/event.routes';
+import { relationshipRoutes } from './features/relationship.routes';
+import { adminRoutes } from './features/admin.routes';
+import { faceRoutes } from './features/face.routes';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    {
+    { 
       path: '/login',
       name: 'Login',
       component: () => import('@/views/auth/LoginView.vue'),
@@ -36,221 +44,13 @@ const router = createRouter({
           component: () => import('@/views/dashboard/DashboardView.vue'),
           meta: { breadcrumb: 'dashboard.title' },
         },
-        {
-          path: 'members',
-          name: 'Members',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'member.list.title' },
-          children: [
-            {
-              path: '',
-              name: 'MemberList',
-              component: () => import('@/views/members/MemberListView.vue'),
-              meta: { breadcrumb: 'member.list.title' },
-            },
-            {
-              path: 'add',
-              name: 'AddMember',
-              component: () => import('@/views/members/MemberAddView.vue'),
-              meta: { breadcrumb: 'member.form.addTitle' },
-            },
-            {
-              path: 'detail/:id',
-              name: 'MemberDetail',
-              component: () => import('@/views/members/MemberDetailView.vue'),
-              meta: { breadcrumb: 'member.detail.title' },
-            },
-            {
-              path: 'edit/:id',
-              name: 'EditMember',
-              component: () => import('@/views/members/MemberEditView.vue'),
-              meta: { breadcrumb: 'member.form.editTitle' },
-            },
-            {
-              path: 'biography/:memberId',
-              name: 'MemberBiography',
-              component: () => import('@/views/members/MemberBiographyView.vue'),
-              meta: { breadcrumb: 'aiBiography.generator.title' },
-            },
-          ],
-        },
-        {
-          path: 'family',
-          name: 'FamilyManagement',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'family.management.title' },
-          children: [
-            {
-              path: '',
-              name: 'FamilyList',
-              component: () => import('@/views/family/FamilyListView.vue'),
-              meta: { breadcrumb: 'family.management.title' },
-            },
-            {
-              path: 'add',
-              name: 'AddFamily',
-              component: () => import('@/views/family/FamilyAddView.vue'),
-              meta: { breadcrumb: 'family.form.addTitle' },
-            },
-            {
-              path: 'detail/:id',
-              name: 'FamilyDetail',
-              component: () => import('@/views/family/FamilyDetailView.vue'),
-              meta: { breadcrumb: 'family.detail.title' },
-            },
-            {
-              path: 'edit/:id',
-              name: 'EditFamily',
-              component: () => import('@/views/family/FamilyEditView.vue'),
-              meta: { breadcrumb: 'family.form.editTitle' },
-            },
-            {
-              path: 'tree',
-              name: 'FamilyTree',
-              component: () => import('@/views/family/FamilyTreeView.vue'),
-              meta: { breadcrumb: 'family.tree.title' },
-            },
-          ],
-        },
-        {
-          path: 'events',
-          name: 'Events',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'event.list.title' },
-          children: [
-            {
-              path: '',
-              name: 'EventList',
-              component: () => import('@/views/events/EventListView.vue'),
-              meta: { breadcrumb: 'event.list.title' },
-            },
-            {
-              path: 'add',
-              name: 'AddEvent',
-              component: () => import('@/views/events/EventAddView.vue'),
-              meta: { breadcrumb: 'event.form.addTitle' },
-            },
-            {
-              path: 'edit/:id',
-              name: 'EditEvent',
-              component: () => import('@/views/events/EventEditView.vue'),
-              meta: { breadcrumb: 'event.form.editTitle' },
-            },
-            {
-              path: 'detail/:id',
-              name: 'EventDetail',
-              component: () => import('@/views/events/EventDetailView.vue'),
-              meta: { breadcrumb: 'event.detail.title' },
-            },
-          ],
-        },
-        {
-          path: 'relationships',
-          name: 'Relationships',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'relationship.list.title' },
-          children: [
-            {
-              path: '',
-              name: 'RelationshipList',
-              component: () => import('@/views/relationships/RelationshipListView.vue'),
-              meta: { breadcrumb: 'relationship.list.title' },
-            },
-            {
-              path: 'add',
-              name: 'AddRelationship',
-              component: () => import('@/views/relationships/RelationshipAddView.vue'),
-              meta: { breadcrumb: 'relationship.form.addTitle' },
-            },
-            {
-              path: 'detail/:id',
-              name: 'RelationshipDetail',
-              component: () => import('@/views/relationships/RelationshipDetailView.vue'),
-              meta: { breadcrumb: 'relationship.detail.title' },
-            },
-            {
-              path: 'edit/:id',
-              name: 'EditRelationship',
-              component: () => import('@/views/relationships/RelationshipEditView.vue'),
-              props: true, 
-              meta: { breadcrumb: 'relationship.form.editTitle' },
-            },
-          ],
-        },
-        {
-          path: 'settings',
-          name: 'UserSettings',
-          component: () => import('@/views/settings/UserSettingsPage.vue'),
-          meta: { breadcrumb: 'userSettings.title', roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'] },
-        },
-        {
-          path: 'face',
-          name: 'Face',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'face.title', requiresAuth: true },
-          children: [
-            {
-              path: 'recognition',
-              name: 'FaceRecognition',
-              component: () => import('@/views/face/FaceRecognitionView.vue'),
-              meta: { breadcrumb: 'face.recognition.title', requiresAuth: true },
-            },
-            {
-              path: 'search',
-              name: 'FaceSearch',
-              component: () => import('@/views/face/FaceSearchView.vue'),
-              meta: { breadcrumb: 'face.search.title', requiresAuth: true },
-            },
-          ],
-        },
-        {
-          path: 'admin',
-          name: 'Admin',
-          component: () => import('@/views/MainRouterView.vue'),
-          meta: { breadcrumb: 'admin.title', requiresAuth: true, roles: ['Admin'] },
-          children: [
-            {
-              path: 'chunks',
-              name: 'ChunkAdmin',
-              component: () => import('@/views/admin/ChunkAdmin.vue'),
-              meta: { breadcrumb: 'admin.chunks.title', requiresAuth: true, roles: ['Admin'] },
-            },
-            {
-              path: 'config',
-              name: 'SystemConfig',
-              component: () => import('@/views/admin/ConfigView.vue'),
-              meta: { breadcrumb: 'admin.config.title', requiresAuth: true, roles: ['Admin'] },
-            },
-            {
-              path: 'notification-templates',
-              name: 'NotificationTemplates',
-              component: () => import('@/views/MainRouterView.vue'),
-              meta: { breadcrumb: 'admin.notificationTemplates.title', requiresAuth: true, roles: ['Admin'] },
-              children: [
-                {
-                  path: '',
-                  name: 'NotificationTemplateList',
-                  component: () => import('@/views/notificationTemplate/NotificationTemplateListView.vue'),
-                  meta: { breadcrumb: 'admin.notificationTemplates.list.title', requiresAuth: true, roles: ['Admin'] },
-                },
-                {
-                  path: 'add',
-                  name: 'AddNotificationTemplate',
-                  component: () => import('@/views/notificationTemplate/NotificationTemplateAddView.vue'),
-                  meta: { breadcrumb: 'admin.notificationTemplates.form.addTitle', requiresAuth: true, roles: ['Admin'] },
-                },
-                {
-                  path: 'edit/:id',
-                  name: 'EditNotificationTemplate',
-                  component: () => import('@/views/notificationTemplate/NotificationTemplateEditView.vue'),
-                  props: true,
-                  meta: { breadcrumb: 'admin.notificationTemplates.form.editTitle', requiresAuth: true, roles: ['Admin'] },
-                },
-              ],
-            },
-          ],
-        },
-        ...sidebarRoutes,
+        ...memberRoutes,
+        ...familyRoutes,
+        ...eventRoutes,
+        ...relationshipRoutes,
+        ...adminRoutes,
+        ...faceRoutes,
+
       ],
     },
     {
