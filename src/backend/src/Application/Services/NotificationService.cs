@@ -3,8 +3,8 @@ using backend.Application.NotificationTemplates.Queries;
 using backend.Application.NotificationTemplates.Queries.GetNotificationTemplateByEventType;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using System.Text.RegularExpressions;
 
 namespace backend.Application.Services;
 
@@ -19,6 +19,8 @@ public class NotificationService : INotificationService
     private readonly IFirebaseNotificationService _firebaseNotificationService;
     private readonly IInAppNotificationService _inAppNotificationService;
     private readonly IApplicationDbContext _context;
+    private readonly ITemplateRenderer _templateRenderer;
+    private readonly IMemoryCache _memoryCache;
 
     public NotificationService(
         ILogger<NotificationService> logger,
@@ -26,7 +28,9 @@ public class NotificationService : INotificationService
         IEmailService emailService,
         IFirebaseNotificationService firebaseNotificationService,
         IInAppNotificationService inAppNotificationService,
-        IApplicationDbContext context)
+        IApplicationDbContext context,
+        ITemplateRenderer templateRenderer,
+        IMemoryCache memoryCache)
     {
         _logger = logger;
         _mediator = mediator;
@@ -34,6 +38,8 @@ public class NotificationService : INotificationService
         _firebaseNotificationService = firebaseNotificationService;
         _inAppNotificationService = inAppNotificationService;
         _context = context;
+        _templateRenderer = templateRenderer;
+        _memoryCache = memoryCache;
     }
 
     /// <summary>
@@ -59,23 +65,31 @@ public class NotificationService : INotificationService
         _logger.LogInformation("Attempting to send notification for EventType: {EventType}, Channel: {Channel}, Recipient: {RecipientUserId}",
             eventType, channel, recipientUserId);
 
-        // 1. Lấy mẫu thông báo
-        var template = await _mediator.Send(new GetNotificationTemplateByEventTypeQuery
+        // 1. Lấy mẫu thông báo từ cache hoặc từ database
+        var cacheKey = $"NotificationTemplate_{eventType}_{channel}";
+        if (!_memoryCache.TryGetValue(cacheKey, out NotificationTemplateDto? templateDto))
         {
-            EventType = eventType,
-            Channel = channel
-        }, cancellationToken);
+            var templateResult = await _mediator.Send(new GetNotificationTemplateByEventTypeQuery
+            {
+                EventType = eventType,
+                Channel = channel
+            }, cancellationToken);
 
-        if (!template.IsSuccess || template.Value == null)
-        {
-            _logger.LogWarning("No active notification template found for EventType: {EventType} and Channel: {Channel}. Notification not sent.",
-                eventType, channel);
-            return;
+            if (!templateResult.IsSuccess || templateResult.Value == null)
+            {
+                _logger.LogWarning("No active notification template found for EventType: {EventType} and Channel: {Channel}. Notification not sent.",
+                    eventType, channel);
+                return;
+            }
+            templateDto = templateResult.Value;
+
+            // Cache the template for a short period (e.g., 5 minutes)
+            _memoryCache.Set(cacheKey, templateDto, TimeSpan.FromMinutes(5));
         }
 
         // 2. Render mẫu thông báo
-        var renderedSubject = RenderTemplate(template.Value.Subject, placeholders);
-        var renderedBody = RenderTemplate(template.Value.Body, placeholders);
+        var renderedSubject = _templateRenderer.Render(templateDto!.Subject, placeholders);
+        var renderedBody = _templateRenderer.Render(templateDto.Body, placeholders);
 
         // 3. Tạo và lưu thông báo vào DB
         var notification = new Notification
@@ -122,21 +136,5 @@ public class NotificationService : INotificationService
         // Cập nhật trạng thái thông báo sau khi gửi (có thể cần logic phức tạp hơn để xử lý lỗi từng kênh)
         notification.MarkAsSent();
         await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// Thay thế các placeholder trong chuỗi bằng các giá trị cung cấp.
-    /// Placeholder có định dạng {{Key}}.
-    /// </summary>
-    /// <param name="templateString">Chuỗi mẫu chứa các placeholder.</param>
-    /// <param name="placeholders">Từ điển các cặp key-value để thay thế.</param>
-    /// <returns>Chuỗi đã được render.</returns>
-    private string RenderTemplate(string templateString, Dictionary<string, string> placeholders)
-    {
-        return Regex.Replace(templateString, @"\{\{(.*?)\}\}", match =>
-        {
-            var key = match.Groups[1].Value;
-            return placeholders.TryGetValue(key, out var value) ? value : match.Value; // Giữ nguyên placeholder nếu không tìm thấy key
-        });
     }
 }

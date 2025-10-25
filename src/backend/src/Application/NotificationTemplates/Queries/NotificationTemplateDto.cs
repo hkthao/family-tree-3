@@ -9,6 +9,9 @@ public class NotificationTemplateDto
     public NotificationChannel Channel { get; set; }
     public string Subject { get; set; } = null!;
     public string Body { get; set; } = null!;
+    public TemplateFormat Format { get; set; }
+    public string LanguageCode { get; set; } = null!;
+    public string? Placeholders { get; set; }
     public bool IsActive { get; set; }
     public DateTime Created { get; set; }
     public string? CreatedBy { get; set; }

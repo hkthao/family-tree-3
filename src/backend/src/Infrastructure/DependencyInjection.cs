@@ -51,6 +51,7 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDomainEventNotificationPublisher, DomainEventNotificationPublisher>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
+        services.AddScoped<ITemplateRenderer, FluidTemplateRenderer>();
 
         // Register Notification Services
         services.AddScoped<IFirebaseNotificationService, FirebaseNotificationService>();

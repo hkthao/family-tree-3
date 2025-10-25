@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { NotificationChannel, NotificationType } from '@/types';
+import { NotificationChannel, NotificationType, TemplateFormat } from '@/types';
 import type { NotificationTemplate } from '@/types';
 
 interface Props {
@@ -19,11 +19,13 @@ const { t } = useI18n();
 
 const formRef = ref<HTMLFormElement | null>(null);
 
-const form = ref<Omit<NotificationTemplate, 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>>({
+const form = ref<Omit<NotificationTemplate, 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy' | 'placeholders'>>({
   eventType: NotificationType.General,
   channel: NotificationChannel.InApp,
   subject: '',
   body: '',
+  format: TemplateFormat.PlainText,
+  languageCode: 'en',
   isActive: true,
 });
 
@@ -51,11 +53,20 @@ const notificationChannels = Object.keys(NotificationChannel)
     value: NotificationChannel[key as keyof typeof NotificationChannel],
   }));
 
+const templateFormats = Object.keys(TemplateFormat)
+  .filter(key => isNaN(Number(key)))
+  .map(key => ({
+    title: t(`templateFormat.${key}`),
+    value: TemplateFormat[key as keyof typeof TemplateFormat],
+  }));
+
 const rules = {
   eventType: [(v: NotificationType) => v !== undefined && v !== null || t('notificationTemplate.form.validation.eventTypeRequired')],
   channel: [(v: NotificationChannel) => v !== undefined && v !== null || t('notificationTemplate.form.validation.channelRequired')],
   subject: [(v: string) => !!v || t('notificationTemplate.form.validation.subjectRequired')],
   body: [(v: string) => !!v || t('notificationTemplate.form.validation.bodyRequired')],
+  format: [(v: TemplateFormat) => v !== undefined && v !== null || t('notificationTemplate.form.validation.formatRequired')],
+  languageCode: [(v: string) => !!v || t('notificationTemplate.form.validation.languageCodeRequired')],
 };
 
 const validate = async () => {
@@ -107,6 +118,30 @@ defineExpose({
           :readonly="readOnly"
           required
         ></v-select>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-select
+          v-model="form.format"
+          :items="templateFormats"
+          item-title="title"
+          item-value="value"
+          :label="t('notificationTemplate.form.format')"
+          :rules="rules.format"
+          :readonly="readOnly"
+          required
+        ></v-select>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field
+          v-model="form.languageCode"
+          :label="t('notificationTemplate.form.languageCode')"
+          :rules="rules.languageCode"
+          :readonly="readOnly"
+          required
+        ></v-text-field>
       </v-col>
     </v-row>
 

@@ -21,6 +21,8 @@ public class CreateNotificationTemplateCommandHandler : IRequestHandler<CreateNo
             Channel = request.Channel,
             Subject = request.Subject,
             Body = request.Body,
+            Format = request.Format,
+            LanguageCode = request.LanguageCode,
             IsActive = request.IsActive
         };
 

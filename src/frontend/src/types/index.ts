@@ -28,3 +28,4 @@ export * from './userPreference.d';
 export * from './system-config.d';
 export * from './notification.d';
 export * from './notificationTemplate.d';
+export * from './template-format.d';

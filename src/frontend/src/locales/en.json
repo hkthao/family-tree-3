@@ -446,6 +446,10 @@
   "notificationTemplate.form.validation.channelRequired": "Channel is required.",
   "notificationTemplate.form.validation.subjectRequired": "Subject is required.",
   "notificationTemplate.form.validation.bodyRequired": "Body is required.",
+  "notificationTemplate.form.format": "Format",
+  "notificationTemplate.form.languageCode": "Language Code",
+  "notificationTemplate.form.validation.formatRequired": "Format is required.",
+  "notificationTemplate.form.validation.languageCodeRequired": "Language Code is required.",
   "notificationTemplate.search.title": "Search Notification Templates",
   "notificationTemplate.search.searchLabel": "Search by Subject or Body",
   "notificationTemplate.messages.addSuccess": "Notification template added successfully!",
@@ -471,5 +475,8 @@
   "notificationChannel.Email": "Email",
   "notificationChannel.Firebase": "Firebase",
   "notificationChannel.SMS": "SMS",
-  "notificationChannel.Webhook": "Webhook"
+  "notificationChannel.Webhook": "Webhook",
+  "templateFormat.PlainText": "Plain Text",
+  "templateFormat.Html": "HTML",
+  "templateFormat.Markdown": "Markdown"
 }

@@ -10,5 +10,7 @@ public record CreateNotificationTemplateCommand : IRequest<Result<Guid>>
     public NotificationChannel Channel { get; init; }
     public string Subject { get; init; } = null!;
     public string Body { get; init; } = null!;
+    public TemplateFormat Format { get; init; }
+    public string LanguageCode { get; init; } = "en";
     public bool IsActive { get; init; } = true;
 }

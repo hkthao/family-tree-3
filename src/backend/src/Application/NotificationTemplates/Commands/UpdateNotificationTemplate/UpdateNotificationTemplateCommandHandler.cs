@@ -29,6 +29,8 @@ public class UpdateNotificationTemplateCommandHandler : IRequestHandler<UpdateNo
         entity.Channel = request.Channel;
         entity.Subject = request.Subject;
         entity.Body = request.Body;
+        entity.Format = request.Format;
+        entity.LanguageCode = request.LanguageCode;
         entity.IsActive = request.IsActive;
 
         await _context.SaveChangesAsync(cancellationToken);

@@ -56,5 +56,6 @@ public class MappingProfile : Profile
         CreateMap<UserActivity, UserActivityDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
         CreateMap<UserProfile, UserProfileDto>();
+        CreateMap<NotificationTemplate, NotificationTemplateDto>();
     }
 }

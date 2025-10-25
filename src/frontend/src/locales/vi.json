@@ -490,6 +490,10 @@
   "notificationTemplate.form.validation.channelRequired": "Kênh là bắt buộc.",
   "notificationTemplate.form.validation.subjectRequired": "Chủ đề là bắt buộc.",
   "notificationTemplate.form.validation.bodyRequired": "Nội dung là bắt buộc.",
+  "notificationTemplate.form.format": "Định dạng",
+  "notificationTemplate.form.languageCode": "Mã ngôn ngữ",
+  "notificationTemplate.form.validation.formatRequired": "Định dạng là bắt buộc.",
+  "notificationTemplate.form.validation.languageCodeRequired": "Mã ngôn ngữ là bắt buộc.",
   "notificationTemplate.search.title": "Tìm kiếm Mẫu Thông báo",
   "notificationTemplate.search.searchLabel": "Tìm kiếm theo Chủ đề hoặc Nội dung",
   "notificationTemplate.messages.addSuccess": "Thêm mẫu thông báo thành công!",
@@ -515,5 +519,8 @@
   "notificationChannel.Email": "Email",
   "notificationChannel.Firebase": "Firebase",
   "notificationChannel.SMS": "SMS",
-  "notificationChannel.Webhook": "Webhook"
+  "notificationChannel.Webhook": "Webhook",
+  "templateFormat.PlainText": "Văn bản thuần túy",
+  "templateFormat.Html": "HTML",
+  "templateFormat.Markdown": "Markdown"
 }

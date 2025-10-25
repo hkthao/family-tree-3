@@ -30,6 +30,21 @@ public class NotificationTemplate : BaseAuditableEntity
     public string Body { get; set; } = string.Empty;
 
     /// <summary>
+    /// Định dạng của nội dung mẫu (ví dụ: PlainText, Html, Markdown).
+    /// </summary>
+    public TemplateFormat Format { get; set; }
+
+    /// <summary>
+    /// Mã ngôn ngữ của mẫu (ví dụ: "en", "vi").
+    /// </summary>
+    public string LanguageCode { get; set; } = "en";
+
+    /// <summary>
+    /// Các placeholder có sẵn trong mẫu, lưu dưới dạng JSON string.
+    /// </summary>
+    public string? Placeholders { get; set; }
+
+    /// <summary>
     /// Cho biết mẫu thông báo này có đang hoạt động hay không.
     /// </summary>
     public bool IsActive { get; set; } = true;
