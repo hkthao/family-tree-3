@@ -12,5 +12,7 @@ public record GetNotificationTemplatesQuery : IRequest<Result<PaginatedList<Noti
     public string? SortOrder { get; init; }
     public NotificationType? EventType { get; init; }
     public NotificationChannel? Channel { get; init; }
+    public TemplateFormat? Format { get; init; }
+    public string? LanguageCode { get; init; }
     public bool? IsActive { get; init; }
 }

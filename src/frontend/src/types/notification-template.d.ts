@@ -17,6 +17,8 @@ export interface NotificationTemplate extends BaseEntity {
 export interface NotificationTemplateFilter {
   eventType?: NotificationType;
   channel?: NotificationChannel;
+  format?: TemplateFormat;
+  languageCode?: string;
   isActive?: boolean;
   search?: string;
   sortBy?: string;

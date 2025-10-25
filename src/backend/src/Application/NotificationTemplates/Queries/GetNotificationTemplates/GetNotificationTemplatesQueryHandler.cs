@@ -34,6 +34,16 @@ public class GetNotificationTemplatesQueryHandler : IRequestHandler<GetNotificat
             query = query.Where(nt => nt.Channel == request.Channel.Value);
         }
 
+        if (request.Format.HasValue)
+        {
+            query = query.Where(nt => nt.Format == request.Format.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.LanguageCode))
+        {
+            query = query.Where(nt => nt.LanguageCode == request.LanguageCode);
+        }
+
         if (request.IsActive.HasValue)
         {
             query = query.Where(nt => nt.IsActive == request.IsActive.Value);
