@@ -52,9 +52,26 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNotificationStore, useNotificationTemplateStore } from '@/stores';
+import { NotificationType, NotificationChannel, TemplateFormat } from '@/types';
 
 const props = defineProps({
   modelValue: Boolean,
+  eventType: {
+    type: String,
+    default: null,
+  },
+  channel: {
+    type: String,
+    default: null,
+  },
+  format: {
+    type: String,
+    default: null,
+  },
+  language: {
+    type: String,
+    default: null,
+  },
 });
 
 const emit = defineEmits([
@@ -70,6 +87,24 @@ const prompt = ref('');
 const generatedData = ref<{ subject: string; body: string; validationErrors?: string[] } | null>(null);
 const loading = ref(false);
 const form = ref<HTMLFormElement | null>(null);
+
+const getNotificationTypeText = computed(() => {
+  if (props.eventType === null) return null;
+  const enumKey = NotificationType[parseInt(props.eventType, 10)];
+  return enumKey ? t(`notificationType.${enumKey}`) : null;
+});
+
+const getNotificationChannelText = computed(() => {
+  if (props.channel === null) return null;
+  const enumKey = NotificationChannel[parseInt(props.channel, 10)];
+  return enumKey ? t(`notificationChannel.${enumKey}`) : null;
+});
+
+const getTemplateFormatText = computed(() => {
+  if (props.format === null) return null;
+  const enumKey = TemplateFormat[parseInt(props.format, 10)];
+  return enumKey ? t(`templateFormat.${enumKey}`) : null;
+});
 
 const hasValidationErrors = computed(() => {
   return generatedData.value?.validationErrors && generatedData.value.validationErrors.length > 0 || false;
@@ -98,8 +133,22 @@ const generateData = async () => {
   loading.value = true;
   notificationTemplateStore.error = null; // Clear previous errors
   try {
+    let fullPrompt = prompt.value;
+    if (getNotificationTypeText.value) {
+      fullPrompt += `\nLoại sự kiện: ${getNotificationTypeText.value}`;
+    }
+    if (getNotificationChannelText.value) {
+      fullPrompt += `\nKênh thông báo: ${getNotificationChannelText.value}`;
+    }
+    if (getTemplateFormatText.value) {
+      fullPrompt += `\nĐịnh dạng: ${getTemplateFormatText.value}`;
+    }
+    if (props.language) {
+      fullPrompt += `\nNgôn ngữ: ${props.language}`;
+    }
+
     const result = await notificationTemplateStore.generateAiContent(
-      prompt.value,
+      fullPrompt,
     );
     if (result.ok) {
       generatedData.value = result.value;
@@ -133,6 +182,19 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = t('notificationTemplate.form.aiPromptSample');
+  let sample = t('notificationTemplate.form.aiPromptSample');
+  if (getNotificationTypeText.value) {
+    sample += `\nLoại sự kiện: ${getNotificationTypeText.value}`;
+  }
+  if (getNotificationChannelText.value) {
+    sample += `\nKênh thông báo: ${getNotificationChannelText.value}`;
+  }
+  if (getTemplateFormatText.value) {
+    sample += `\nĐịnh dạng: ${getTemplateFormatText.value}`;
+  }
+  if (props.language) {
+    sample += `\nNgôn ngữ: ${props.language}`;
+  }
+  prompt.value = sample;
 };
 </script>

@@ -92,6 +92,13 @@ const closeForm = () => {
         t('common.save') }}</v-btn>
     </v-card-actions>
 
-    <NLNotificationTemplateContentPopup v-model="showAiContentPopup" @generated="handleAiContentGenerated" />
+        <NLNotificationTemplateContentPopup
+      v-model="showAiContentPopup"
+      @generated="handleAiContentGenerated"
+      :event-type="String(notificationTemplateFormRef?.getFormData().eventType)"
+      :channel="String(notificationTemplateFormRef?.getFormData().channel)"
+      :format="String(notificationTemplateFormRef?.getFormData().format)"
+      :language="String(notificationTemplateFormRef?.getFormData().languageCode)"
+    />
   </v-card>
 </template>
