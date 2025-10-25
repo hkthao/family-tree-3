@@ -98,10 +98,5 @@ const getNotificationChannelName = (channel: NotificationChannel) => {
         mdi-delete
       </v-icon>
     </template>
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="emit('reset')">
-        {{ t('common.reset') }}
-      </v-btn>
-    </template>
   </v-data-table-server>
 </template>
