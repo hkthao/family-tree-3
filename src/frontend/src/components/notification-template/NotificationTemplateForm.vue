@@ -25,7 +25,7 @@ const form = ref<Omit<NotificationTemplate, 'created' | 'createdBy' | 'lastModif
   subject: '',
   body: '',
   format: TemplateFormat.PlainText,
-  languageCode: 'en',
+  languageCode: 'vi', // Default to Vietnamese
   isActive: true,
 });
 
@@ -59,6 +59,11 @@ const templateFormats = Object.keys(TemplateFormat)
     title: t(`templateFormat.${key}`),
     value: TemplateFormat[key as keyof typeof TemplateFormat],
   }));
+
+const languageOptions = computed(() => [
+  { title: t('common.language.en'), value: 'en' },
+  { title: t('common.language.vi'), value: 'vi' },
+]);
 
 const rules = {
   eventType: [(v: NotificationType) => v !== undefined && v !== null || t('notificationTemplate.form.validation.eventTypeRequired')],
@@ -135,13 +140,16 @@ defineExpose({
         ></v-select>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field
+        <v-select
           v-model="form.languageCode"
+          :items="languageOptions"
+          item-title="title"
+          item-value="value"
           :label="t('notificationTemplate.form.languageCode')"
           :rules="rules.languageCode"
           :readonly="readOnly"
           required
-        ></v-text-field>
+        ></v-select>
       </v-col>
     </v-row>
 
