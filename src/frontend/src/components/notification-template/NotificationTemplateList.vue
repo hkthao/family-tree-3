@@ -29,7 +29,7 @@ const headers = computed<DataTableHeader[]>(() => [
   { title: t('notificationTemplate.list.headers.eventType'), key: 'eventType' },
   { title: t('notificationTemplate.list.headers.channel'), key: 'channel' },
   { title: t('notificationTemplate.list.headers.subject'), key: 'subject' },
-  { title: t('notificationTemplate.list.headers.isActive'), key: 'isActive' },
+  { title: t('notificationTemplate.list.headers.isActive'), key: 'isActive', align: 'center' },
   { title: t('common.actions'), key: 'actions', sortable: false },
 ]);
 

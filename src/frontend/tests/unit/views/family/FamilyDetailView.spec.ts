@@ -7,7 +7,7 @@ import { useFamilyStore } from '@/stores/family.store';
 import { FamilyVisibility, type Family } from '@/types';
 import { createVuetify } from 'vuetify';
 import { FamilyForm, TreeChart } from '@/components/family';
-import { EventTimeline, EventCalendar } from '@/components/events';
+import { EventTimeline, EventCalendar } from '@/components/event';
 
 const mockPush = vi.fn();
 const route = ref({
