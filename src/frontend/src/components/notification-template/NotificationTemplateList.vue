@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NotificationChannel, NotificationType } from '@/types';
 import type { NotificationTemplate } from '@/types';
@@ -21,13 +21,9 @@ const emit = defineEmits([
   'edit',
   'delete',
   'add',
-  'search',
-  'reset',
 ]);
 
 const { t } = useI18n();
-
-const searchQuery = ref('');
 
 const headers = computed<DataTableHeader[]>(() => [
   { title: t('notificationTemplate.list.headers.eventType'), key: 'eventType' },
@@ -52,16 +48,6 @@ const getNotificationTypeName = (type: NotificationType) => {
 const getNotificationChannelName = (channel: NotificationChannel) => {
   return t(`notificationChannel.${NotificationChannel[channel]}`);
 };
-
-// Watcher for search query changes
-watch(searchQuery, () => {
-  emit('search', searchQuery.value);
-});
-
-const handleReset = () => {
-  searchQuery.value = '';
-  emit('reset');
-};
 </script>
 
 <template>
@@ -69,16 +55,6 @@ const handleReset = () => {
     <v-card-title class="d-flex align-center">
       {{ t('admin.notificationTemplates.list.title') }}
       <v-spacer></v-spacer>
-      <v-text-field
-        v-model="searchQuery"
-        append-inner-icon="mdi-magnify"
-        :label="t('common.search')"
-        single-line
-        hide-details
-        density="compact"
-        @click:append-inner="emit('search', searchQuery)"
-        @keydown.enter="emit('search', searchQuery)"
-      ></v-text-field>
       <v-btn color="primary" class="ml-4" @click="emit('add')">
         {{ t('notificationTemplate.list.addTemplate') }}
       </v-btn>
@@ -118,7 +94,7 @@ const handleReset = () => {
           </v-icon>
         </template>
         <template v-slot:no-data>
-          <v-btn color="primary" @click="handleReset">
+          <v-btn color="primary" @click="emit('reset')">
             {{ t('common.reset') }}
           </v-btn>
         </template>

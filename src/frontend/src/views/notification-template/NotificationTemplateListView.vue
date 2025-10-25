@@ -4,7 +4,8 @@ import { useNotificationTemplateStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { NotificationTemplateList } from '@/components/notification-template';
+import { NotificationTemplateList, NotificationTemplateSearch } from '@/components/notification-template';
+import type { NotificationTemplateFilter } from '@/types';
 
 const notificationTemplateStore = useNotificationTemplateStore();
 const { items, loading, totalItems, itemsPerPage, currentPage, sortBy } = storeToRefs(notificationTemplateStore);
@@ -35,12 +36,8 @@ watch(sortBy, (newVal) => {
   notificationTemplateStore.setSortBy(newVal);
 });
 
-const handleSearch = (searchQuery: string) => {
-  notificationTemplateStore.setFilter({ search: searchQuery });
-};
-
-const handleReset = () => {
-  notificationTemplateStore.setFilter({ search: '' });
+const handleUpdateFilters = (filters: NotificationTemplateFilter) => {
+  notificationTemplateStore.setFilter(filters);
 };
 
 const handleAdd = () => {
@@ -59,6 +56,7 @@ const handleDelete = async (id: string) => {
 </script>
 
 <template>
+  <NotificationTemplateSearch @update:filters="handleUpdateFilters" />
   <NotificationTemplateList
     :items="items"
     :total-items="totalItems"
@@ -69,8 +67,6 @@ const handleDelete = async (id: string) => {
     @update:items-per-page="notificationTemplateStore.setItemsPerPage($event)"
     @update:page="notificationTemplateStore.setPage($event)"
     @update:sort-by="notificationTemplateStore.setSortBy($event)"
-    @search="handleSearch"
-    @reset="handleReset"
     @add="handleAdd"
     @edit="handleEdit"
     @delete="handleDelete"
