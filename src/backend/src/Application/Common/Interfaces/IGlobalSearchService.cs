@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
 
 namespace backend.Application.Common.Interfaces;
 

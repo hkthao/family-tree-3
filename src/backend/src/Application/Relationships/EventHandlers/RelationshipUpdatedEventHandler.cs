@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Events.Relationships;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using backend.Domain.Enums;
 

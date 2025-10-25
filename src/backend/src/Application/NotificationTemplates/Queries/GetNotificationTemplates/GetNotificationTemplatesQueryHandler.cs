@@ -1,10 +1,6 @@
-using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.NotificationTemplates.Queries.GetNotificationTemplates;
 

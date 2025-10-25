@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;

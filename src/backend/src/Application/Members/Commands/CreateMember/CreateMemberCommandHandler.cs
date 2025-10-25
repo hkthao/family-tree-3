@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.CreateMember;

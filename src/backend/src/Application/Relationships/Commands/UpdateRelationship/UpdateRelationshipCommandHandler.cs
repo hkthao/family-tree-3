@@ -1,6 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
 using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
