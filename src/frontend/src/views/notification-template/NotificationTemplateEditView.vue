@@ -10,9 +10,8 @@
         ref="notificationTemplateFormRef"
         v-if="currentItem"
         :initial-template-data="currentItem"
-        :form-title="t('admin.notificationTemplates.form.editTitle')"
+        @submit="handleUpdateItem"
         @cancel="closeForm"
-        @save="handleUpdateItem"
       />
       <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>

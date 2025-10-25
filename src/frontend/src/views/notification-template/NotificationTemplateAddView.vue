@@ -6,7 +6,7 @@
       }}</span>
     </v-card-title>
     <v-card-text>
-      <NotificationTemplateForm ref="notificationTemplateFormRef" :form-title="t('admin.notificationTemplates.form.addTitle')" @cancel="closeForm" @save="handleAddItem" />
+      <NotificationTemplateForm ref="notificationTemplateFormRef" @submit="handleAddItem" @cancel="closeForm" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
