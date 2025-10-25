@@ -45,7 +45,7 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
                 { "EntityId", member.Id.ToString() },
                 { "Name", member.FullName },
                 { "Description", member.Biography ?? "" },
-                { "DeepLink", $"/families/{member.FamilyId}/members/{member.Id}" }
+                { "DeepLink", $"/families/{member.FamilyId}/member/{member.Id}" }
             },
             cancellationToken
         );

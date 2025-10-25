@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 export class ApiEventService implements IEventService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/events`;
+  private apiUrl = `${API_BASE_URL}/event`;
 
   async fetch(): Promise<Result<Event[], ApiError>> {
     console.log('Fetching events from API');

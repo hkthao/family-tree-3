@@ -48,7 +48,7 @@ vi.mock('@/components/family', () => ({
   },
 }));
 
-vi.mock('@/components/events', () => ({
+vi.mock('@/components/event', () => ({
   EventTimeline: {
     template: '<div class="mock-event-timeline"></div>',
     props: ['familyId', 'readOnly'],

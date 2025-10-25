@@ -9,7 +9,7 @@ System.InvalidOperationException: The provider for the source 'IQueryable' doesn
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, Expression expression, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ExecuteAsync[TSource,TResult](MethodInfo operatorMethodInfo, IQueryable`1 source, LambdaExpression expression, CancellationToken cancellationToken)
    at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync[TSource](IQueryable`1 source, Expression`1 predicate, CancellationToken cancellationToken)
-   at backend.Application.Members.Commands.UpdateMember.UpdateMemberCommandHandler.Handle(UpdateMemberCommand request, CancellationToken cancellationToken) in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/src/Application/Members/Commands/UpdateMember/UpdateMemberCommandHandler.cs:line 39
+   at backend.Application.Members.Commands.UpdateMember.UpdateMemberCommandHandler.Handle(UpdateMemberCommand request, CancellationToken cancellationToken) in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/src/Application/Member/Commands/UpdateMember/UpdateMemberCommandHandler.cs:line 39
    at FluentAssertions.Specialized.AsyncFunctionAssertions`2.InvokeWithInterceptionAsync(Func`1 action).
   Stack Trace:
      at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
@@ -21,7 +21,7 @@ System.InvalidOperationException: The provider for the source 'IQueryable' doesn
    at FluentAssertions.Specialized.DelegateAssertionsBase`2.ThrowInternal[TException](Exception exception, String because, Object[] becauseArgs)
    at FluentAssertions.Specialized.AsyncFunctionAssertions`2.ThrowAsync[TException](String because, Object[] becauseArgs)
    at FluentAssertions.ExceptionAssertionsExtensions.WithMessage[TException](Task`1 task, String expectedWildcardPattern, String because, Object[] becauseArgs)
-   at backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldThrowNotFoundException_WhenMemberNotFound() in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/tests/Application.UnitTests/Members/Commands/UpdateMember/UpdateMemberCommandHandlerTests.cs:line 144
+   at backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldThrowNotFoundException_WhenMemberNotFound() in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/tests/Application.UnitTests/Member/Commands/UpdateMember/UpdateMemberCommandHandlerTests.cs:line 144
 --- End of stack trace from previous location ---
   Failed backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldUpdateIsRootCorrectly_WhenNewRootIsSet [13 ms]
   Error Message:
@@ -35,7 +35,7 @@ Extension methods (here: EntityFrameworkQueryableExtensions.FirstOrDefaultAsync)
    at Moq.Mock.SetupRecursive[TSetup](Mock mock, LambdaExpression expression, Func`4 setupLast, Boolean allowNonOverridableLastProperty) in /_/src/Moq/Mock.cs:line 728
    at Moq.Mock.Setup(Mock mock, LambdaExpression expression, Condition condition) in /_/src/Moq/Mock.cs:line 562
    at Moq.Mock`1.Setup[TResult](Expression`1 expression) in /_/src/Moq/Mock`1.cs:line 645
-   at backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldUpdateIsRootCorrectly_WhenNewRootIsSet() in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/tests/Application.UnitTests/Members/Commands/UpdateMember/UpdateMemberCommandHandlerTests.cs:line 276
+   at backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldUpdateIsRootCorrectly_WhenNewRootIsSet() in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/tests/Application.UnitTests/Member/Commands/UpdateMember/UpdateMemberCommandHandlerTests.cs:line 276
 --- End of stack trace from previous location ---
   Failed backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldUpdateMemberAndReturnSuccessResult_WhenMemberExistsAndAuthorized [5 ms]
   Error Message:
@@ -49,7 +49,7 @@ Extension methods (here: EntityFrameworkQueryableExtensions.FirstOrDefaultAsync)
    at Moq.Mock.SetupRecursive[TSetup](Mock mock, LambdaExpression expression, Func`4 setupLast, Boolean allowNonOverridableLastProperty) in /_/src/Moq/Mock.cs:line 728
    at Moq.Mock.Setup(Mock mock, LambdaExpression expression, Condition condition) in /_/src/Moq/Mock.cs:line 562
    at Moq.Mock`1.Setup[TResult](Expression`1 expression) in /_/src/Moq/Mock`1.cs:line 645
-   at backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldUpdateMemberAndReturnSuccessResult_WhenMemberExistsAndAuthorized() in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/tests/Application.UnitTests/Members/Commands/UpdateMember/UpdateMemberCommandHandlerTests.cs:line 187
+   at backend.Application.UnitTests.Members.Commands.UpdateMember.UpdateMemberCommandHandlerTests.Handle_ShouldUpdateMemberAndReturnSuccessResult_WhenMemberExistsAndAuthorized() in /Users/kimthaohuynh/Documents/Projects/family-tree-3/src/backend/tests/Application.UnitTests/Member/Commands/UpdateMember/UpdateMemberCommandHandlerTests.cs:line 187
 --- End of stack trace from previous location ---
 
 Failed!  - Failed:     3, Passed:     2, Skipped:     0, Total:     5, Duration: 79 ms - Application.UnitTests.dll (net8.0)

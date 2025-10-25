@@ -45,7 +45,7 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
                 { "Type", relationship.Type.ToString() },
                 { "SourceMemberId", relationship.SourceMemberId.ToString() },
                 { "TargetMemberId", relationship.TargetMemberId.ToString() },
-                { "DeepLink", $"/relationships/{relationship.Id}" }
+                { "DeepLink", $"/relationship/{relationship.Id}" }
             },
             cancellationToken
         );

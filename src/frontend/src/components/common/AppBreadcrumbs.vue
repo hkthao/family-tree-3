@@ -36,13 +36,13 @@ const generateBreadcrumbs = () => {
       let href = match.path;
       // For dynamic routes, the breadcrumb should link to the parent list view
       if (match.path.includes(':id')) {
-        // Example: /members/detail/:id -> /members
-        // Example: /members/edit/:id -> /members
+        // Example: /member/detail/:id -> /member
+        // Example: /member/edit/:id -> /member
         href = match.path.substring(0, match.path.lastIndexOf('/'));
       }
       // For add routes, the breadcrumb should link to the parent list view
       if (match.path.endsWith('/add')) {
-        // Example: /members/add -> /members
+        // Example: /member/add -> /member
         href = match.path.substring(0, match.path.lastIndexOf('/'));
       }
 

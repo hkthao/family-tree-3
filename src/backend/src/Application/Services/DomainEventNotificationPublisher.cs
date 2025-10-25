@@ -132,7 +132,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             {
                 { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
-                { "DeepLink", $"/members/{domainEvent.Member.Id}" }
+                { "DeepLink", $"/member/{domainEvent.Member.Id}" }
             },
             domainEvent.Member.CreatedBy!,
             domainEvent.Member.FamilyId,
@@ -149,7 +149,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             {
                 { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
-                { "DeepLink", $"/members/{domainEvent.Member.Id}" }
+                { "DeepLink", $"/member/{domainEvent.Member.Id}" }
             },
             domainEvent.Member.LastModifiedBy!,
             domainEvent.Member.FamilyId,
@@ -181,7 +181,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             {
                 { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
-                { "DeepLink", $"/members/{domainEvent.Member.Id}" }
+                { "DeepLink", $"/member/{domainEvent.Member.Id}" }
             },
             domainEvent.Member.LastModifiedBy!,
             domainEvent.Member.FamilyId,
@@ -198,7 +198,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             {
                 { "NewMemberName", $"{domainEvent.NewMember.FirstName} {domainEvent.NewMember.LastName}" },
                 { "FamilyName", domainEvent.NewMember.Family?.Name ?? "" },
-                { "DeepLink", $"/members/{domainEvent.NewMember.Id}" }
+                { "DeepLink", $"/member/{domainEvent.NewMember.Id}" }
             },
             domainEvent.NewMember.CreatedBy!,
             domainEvent.NewMember.FamilyId,

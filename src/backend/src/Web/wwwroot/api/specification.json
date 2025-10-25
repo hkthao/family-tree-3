@@ -385,7 +385,7 @@
         ]
       }
     },
-    "/api/Events": {
+    "/api/event": {
       "get": {
         "tags": [
           "Events"
@@ -558,7 +558,7 @@
         ]
       }
     },
-    "/api/Events/{id}": {
+    "/api/event/{id}": {
       "get": {
         "tags": [
           "Events"
@@ -679,7 +679,7 @@
         ]
       }
     },
-    "/api/Events/search": {
+    "/api/event/search": {
       "get": {
         "tags": [
           "Events"
@@ -800,7 +800,7 @@
         ]
       }
     },
-    "/api/Events/upcoming": {
+    "/api/event/upcoming": {
       "get": {
         "tags": [
           "Events"
@@ -840,7 +840,7 @@
         ]
       }
     },
-    "/api/Events/generate-event-data": {
+    "/api/event/generate-event-data": {
       "post": {
         "tags": [
           "Events"
@@ -880,7 +880,7 @@
         ]
       }
     },
-    "/api/Events/bulk-create": {
+    "/api/event/bulk-create": {
       "post": {
         "tags": [
           "Events"
@@ -1316,7 +1316,7 @@
         ]
       }
     },
-    "/api/Members/search": {
+    "/api/Member/search": {
       "get": {
         "tags": [
           "Members"
@@ -1407,7 +1407,7 @@
         ]
       }
     },
-    "/api/Members/{id}": {
+    "/api/Member/{id}": {
       "get": {
         "tags": [
           "Members"
@@ -1528,7 +1528,7 @@
         ]
       }
     },
-    "/api/Members/by-ids": {
+    "/api/Member/by-ids": {
       "get": {
         "tags": [
           "Members"
@@ -1566,7 +1566,7 @@
         ]
       }
     },
-    "/api/Members/managed": {
+    "/api/Member/managed": {
       "get": {
         "tags": [
           "Members"
@@ -1594,7 +1594,7 @@
         ]
       }
     },
-    "/api/Members": {
+    "/api/Member": {
       "post": {
         "tags": [
           "Members"
@@ -1632,7 +1632,7 @@
         ]
       }
     },
-    "/api/Members/generate-member-data": {
+    "/api/Member/generate-member-data": {
       "post": {
         "tags": [
           "Members"
@@ -1672,7 +1672,7 @@
         ]
       }
     },
-    "/api/Members/bulk-create": {
+    "/api/Member/bulk-create": {
       "post": {
         "tags": [
           "Members"
@@ -1713,7 +1713,7 @@
         ]
       }
     },
-    "/api/Members/{id}/biography": {
+    "/api/Member/{id}/biography": {
       "put": {
         "tags": [
           "Members"
@@ -1763,7 +1763,7 @@
         ]
       }
     },
-    "/api/Relationships": {
+    "/api/Relationship": {
       "get": {
         "tags": [
           "Relationships"
@@ -1901,7 +1901,7 @@
         ]
       }
     },
-    "/api/Relationships/{id}": {
+    "/api/Relationship/{id}": {
       "get": {
         "tags": [
           "Relationships"
@@ -2022,7 +2022,7 @@
         ]
       }
     },
-    "/api/Relationships/search": {
+    "/api/Relationship/search": {
       "get": {
         "tags": [
           "Relationships"
@@ -2114,7 +2114,7 @@
         ]
       }
     },
-    "/api/Relationships/generate-relationship-data": {
+    "/api/Relationship/generate-relationship-data": {
       "post": {
         "tags": [
           "Relationships"
@@ -2154,7 +2154,7 @@
         ]
       }
     },
-    "/api/Relationships/bulk-create": {
+    "/api/Relationship/bulk-create": {
       "post": {
         "tags": [
           "Relationships"

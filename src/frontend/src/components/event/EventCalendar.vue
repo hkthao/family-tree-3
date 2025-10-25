@@ -163,7 +163,7 @@ const getEventColor: CalendarEventColorFunction = (event: {
 };
 
 const showEventDetails = (eventSlotScope: Event) => {
-  router.push(`/events/detail/${eventSlotScope.id}`);
+  router.push(`/event/detail/${eventSlotScope.id}`);
 };
 
 watch(
