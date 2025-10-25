@@ -10,7 +10,8 @@ namespace backend.Web.Controllers
     /// </summary>
     /// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
     [ApiController]
-    [Route("api/chunk")]    public class ChunkController(IMediator mediator) : ControllerBase
+    [Route("api/chunk")]
+    public class ChunkController(IMediator mediator) : ControllerBase
     {
         /// <summary>
         /// Đối tượng IMediator để gửi các lệnh và truy vấn.
@@ -46,7 +47,8 @@ namespace backend.Web.Controllers
                 FamilyId = familyId,
                 Category = category,
                 CreatedBy = createdBy
-            }; var result = await _mediator.Send(command);
+            };
+            var result = await _mediator.Send(command);
 
             return result.IsSuccess ? (ActionResult<List<TextChunk>>)Ok(result.Value) : (ActionResult<List<TextChunk>>)BadRequest(result.Error);
         }

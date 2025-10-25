@@ -101,7 +101,7 @@ const notificationChannels = Object.keys(NotificationChannel)
   }));
 
 const templateFormats = Object.keys(TemplateFormat)
-  .filter(key => isNaN(Number(key)))
+  .filter(key => isNaN(Number(key)) && TemplateFormat[key as keyof typeof TemplateFormat] !== TemplateFormat.Markdown)
   .map(key => ({
     title: t(`templateFormat.${key}`),
     value: TemplateFormat[key as keyof typeof TemplateFormat],
