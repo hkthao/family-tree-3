@@ -41,7 +41,7 @@ const menu: MenuSection[] = [
       {
         titleKey: 'family.manageMembers',
         icon: 'mdi-account-multiple',
-        to: '/members',
+        to: '/member',
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
       {
@@ -53,13 +53,13 @@ const menu: MenuSection[] = [
       {
         titleKey: 'event.list.title',
         icon: 'mdi-calendar-month',
-        to: '/events',
+        to: '/event',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
       {
         titleKey: 'relationship.list.title',
         icon: 'mdi-relation-many-to-many',
-        to: '/relationships',
+        to: '/relationship',
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
     ],
@@ -86,9 +86,9 @@ const menu: MenuSection[] = [
     titleKey: 'menu.system',
     items: [
       {
-        titleKey: 'settings.system',
-        icon: 'mdi-cog',
-        to: '/admin/config',
+        titleKey: 'admin.notificationTemplates.title',
+        icon: 'mdi-email-multiple-outline',
+        to: '/admin/notification-template',
         roles: ['Admin'],
       },
     ],

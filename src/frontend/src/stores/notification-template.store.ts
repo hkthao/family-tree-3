@@ -36,7 +36,7 @@ export const useNotificationTemplateStore = defineStore('notificationTemplate', 
         this.itemsPerPage,
       );
 
-      if (result.ok) {
+      if (result.ok && result.value && result.value.items) {
         this.items.splice(0, this.items.length, ...result.value.items);
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
