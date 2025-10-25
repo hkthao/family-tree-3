@@ -22,15 +22,7 @@
     @confirm="handleDeleteConfirm"
     @cancel="handleDeleteCancel"
   />
-  <!-- Global Snackbar -->
-  <v-snackbar
-    v-if="notificationStore.snackbar"
-    v-model="notificationStore.snackbar.show"
-    :color="notificationStore.snackbar.color"
-    timeout="3000"
-  >
-    {{ notificationStore.snackbar.message }}
-  </v-snackbar>
+
 </template>
 
 <script setup lang="ts">
