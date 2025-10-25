@@ -31,7 +31,7 @@ import { ApiSystemConfigService } from './system-config/api.system-config.servic
 import type { INotificationTemplateService } from './notification-template/notification-template.service.interface';
 import { ApiNotificationTemplateService } from './notification-template/api.notification-template.service';
 
-export type ServiceMode = 'real' | 'test';
+export type ServiceMode = 'real' | 'test' | 'mock';
 
 export interface AppServices {
   family: IFamilyService;

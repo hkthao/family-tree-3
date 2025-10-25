@@ -2,7 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useNotificationTemplateStore } from '@/stores/notification-template.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NotificationTemplate, Paginated } from '@/types';
-import { NotificationType, NotificationChannel } from '@/types';
+import { NotificationType, NotificationChannel, TemplateFormat } from '@/types';
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
@@ -68,6 +68,8 @@ describe('notification-template.store', () => {
 
     eventType: NotificationType.FamilyCreated, // Added missing property
     channel: NotificationChannel.Email, // Added missing property
+    languageCode: 'vi',
+    format: TemplateFormat.PlainText,
     isActive: false,
     created: new Date().toISOString(),
     createdBy: 'user-1',

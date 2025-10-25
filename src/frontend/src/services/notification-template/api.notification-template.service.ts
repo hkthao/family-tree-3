@@ -50,9 +50,7 @@ export class ApiNotificationTemplateService
   async generateAiContent(
     prompt: string,
   ): Promise<Result<{ subject: string; body: string }, ApiError>> {
-    return this.api.post<{ subject: string; body: string }>(
-      `${this.baseUrl}/generate-ai-content`,
-      {
+    return this.api.post<{ subject: string; body: string }>(`${this.baseUrl}/generate-content-ai`, {
         prompt,
       },
     );
