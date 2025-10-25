@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import type { NotificationTemplate, NotificationTemplateFilter } from '@/types';
+import { NotificationType, NotificationChannel, TemplateFormat } from '@/types';
+import type { Paginated } from '@/types/pagination.d';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { ApiError } from '@/plugins/axios';
@@ -85,6 +87,22 @@ export const useNotificationTemplateStore = defineStore('notificationTemplate', 
         await this._loadItems();
       } else {
         this.error = i18n.global.t('notificationTemplate.errors.delete');
+        console.error(result.error);
+      }
+      this.loading = false;
+      return result;
+    },
+
+    async generateAiContent(
+      prompt: string,
+    ): Promise<Result<{ subject: string; body: string }, ApiError>> {
+      this.loading = true;
+      this.error = null;
+      const result = await this.services.notificationTemplate.generateAiContent(
+        prompt,
+      );
+      if (!result.ok) {
+        this.error = i18n.global.t('notificationTemplate.errors.aiGenerationFailed');
         console.error(result.error);
       }
       this.loading = false;

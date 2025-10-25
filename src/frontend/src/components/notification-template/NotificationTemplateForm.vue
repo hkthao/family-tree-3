@@ -143,9 +143,24 @@ const submitForm = async () => {
   }
 };
 
+const setSubjectAndBody = (subject: string, body: string) => {
+  form.value.subject = subject;
+  form.value.body = {
+    blocks: [
+      {
+        type: 'paragraph',
+        data: {
+          text: body,
+        },
+      },
+    ],
+  };
+};
+
 defineExpose({
   validate,
   getFormData,
+  setSubjectAndBody,
 });
 </script>
 

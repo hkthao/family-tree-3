@@ -22,3 +22,16 @@ export interface NotificationTemplateFilter {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface GenerateNotificationTemplateContentRequest {
+  prompt: string;
+  notificationType: NotificationType;
+  channel: NotificationChannel;
+  languageCode: string;
+  format: TemplateFormat;
+}
+
+export interface GeneratedNotificationTemplateContentResponse {
+  subject: string;
+  body: string;
+}

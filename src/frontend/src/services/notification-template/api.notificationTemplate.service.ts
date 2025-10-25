@@ -2,6 +2,7 @@ import type { Result } from '@/types';
 import type { ApiClientMethods } from '@/plugins/axios';
 import type { ApiError } from '@/plugins/axios';
 import type { NotificationTemplate, NotificationTemplateFilter } from '@/types';
+import { NotificationType, NotificationChannel, TemplateFormat } from '@/types';
 import type { Paginated } from '@/types/pagination.d';
 import type { INotificationTemplateService } from './notificationTemplate.service.interface';
 
@@ -34,5 +35,17 @@ export class ApiNotificationTemplateService implements INotificationTemplateServ
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     return this.api.delete<void>(`/api/notification-template/${id}`);
+  }
+
+  async generateAiContent(
+    prompt: string,
+  ): Promise<Result<{ subject: string; body: string }, ApiError>> {
+    return this.api.post<{ subject: string; body: string }>('/api/notification-template/generate-ai-content', {
+      prompt,
+      eventType: NotificationType.General,
+      channel: NotificationChannel.InApp,
+      languageCode: 'vi',
+      format: TemplateFormat.PlainText,
+    });
   }
 }

@@ -22,16 +22,16 @@ import type { IFileUploadService } from './fileUpload/fileUpload.service.interfa
 import { FileUploadApiService } from './fileUpload/api.fileUpload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
-import type { INaturalLanguageInputService } from './naturalLanguageInput/naturalLanguageInput.service.interface';
-import { ApiNaturalLanguageInputService } from './naturalLanguageInput/api.naturalLanguageInput.service';
+import type { INaturalLanguageInputService } from './natural-language-input/natural-language-input.service.interface';
+import { ApiNaturalLanguageInputService } from './natural-language-input/api.natural-language-input.service';
 import type { IChunkService } from './chunk/chunk.service.interface';
 import { ApiChunkService } from './chunk/api.chunk.service';
 import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { ISystemConfigService } from './system-config/system-config.service.interface';
 import { ApiSystemConfigService } from './system-config/api.system-config.service';
-import type { INotificationTemplateService } from './notificationTemplate/notificationTemplate.service.interface';
-import { ApiNotificationTemplateService } from './notificationTemplate/api.notificationTemplate.service';
+import type { INotificationTemplateService } from './notification-template/notificationTemplate.service.interface';
+import { ApiNotificationTemplateService } from './notification-template/api.notificationTemplate.service';
 
 export type ServiceMode = 'mock' | 'real' | 'test';
 

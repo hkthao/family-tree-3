@@ -2,6 +2,7 @@ using backend.Application.Common.Models;
 using backend.Application.NotificationTemplates.Commands.CreateNotificationTemplate;
 using backend.Application.NotificationTemplates.Commands.DeleteNotificationTemplate;
 using backend.Application.NotificationTemplates.Commands.UpdateNotificationTemplate;
+using backend.Application.NotificationTemplates.Commands.GenerateNotificationTemplateContent;
 using backend.Application.NotificationTemplates.Queries;
 using backend.Application.NotificationTemplates.Queries.GetNotificationTemplateById;
 using backend.Application.NotificationTemplates.Queries.GetNotificationTemplates;
@@ -36,6 +37,18 @@ public class NotificationTemplateController(IMediator mediator) : ControllerBase
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? CreatedAtAction(nameof(GetNotificationTemplateById), new { id = result.Value }, result.Value) : BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Tạo nội dung và chủ đề cho mẫu thông báo bằng AI.
+    /// </summary>
+    /// <param name="command">Lệnh tạo nội dung mẫu thông báo bằng AI.</param>
+    /// <returns>Nội dung và chủ đề được tạo bởi AI.</returns>
+    [HttpPost("generate-content-ai")]
+    public async Task<ActionResult<GeneratedNotificationTemplateContentDto>> GenerateNotificationTemplateContent([FromBody] GenerateNotificationTemplateContentCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
 
     [HttpPut("{id}")]

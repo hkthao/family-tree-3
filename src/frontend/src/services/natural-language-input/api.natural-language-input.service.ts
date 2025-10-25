@@ -1,7 +1,7 @@
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { GenerateDataRequest } from '@/types';
 import { type Event, type Family, type Member, type Relationship, type Result } from '@/types';
-import type { INaturalLanguageInputService } from './naturalLanguageInput.service.interface';
+import type { INaturalLanguageInputService } from './natural-language-input.service.interface';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
