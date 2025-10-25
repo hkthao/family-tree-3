@@ -468,7 +468,6 @@
   "notificationType.MemberDeleted": "Member Deleted",
   "notificationType.MemberBiographyUpdated": "Member Biography Updated",
   "notificationType.NewFamilyMember": "New Family Member",
-  "notificationType.RelationshipConfirmed": "Relationship Confirmed",
   "notificationType.RelationshipCreated": "Relationship Created",
   "notificationType.RelationshipUpdated": "Relationship Updated",
   "notificationType.RelationshipDeleted": "Relationship Deleted",

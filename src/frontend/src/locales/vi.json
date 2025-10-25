@@ -512,7 +512,6 @@
   "notificationType.MemberDeleted": "Thành viên bị xóa",
   "notificationType.MemberBiographyUpdated": "Tiểu sử thành viên được cập nhật",
   "notificationType.NewFamilyMember": "Thành viên mới trong gia đình",
-  "notificationType.RelationshipConfirmed": "Mối quan hệ được xác nhận",
   "notificationType.RelationshipCreated": "Mối quan hệ được tạo",
   "notificationType.RelationshipUpdated": "Mối quan hệ được cập nhật",
   "notificationType.RelationshipDeleted": "Mối quan hệ bị xóa",
