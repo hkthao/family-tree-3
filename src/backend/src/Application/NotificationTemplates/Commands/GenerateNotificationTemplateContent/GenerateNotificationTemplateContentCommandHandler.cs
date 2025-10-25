@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.NotificationTemplates.Queries;
@@ -18,7 +17,7 @@ public class GenerateNotificationTemplateContentCommandHandler(IChatProviderFact
         var chatProvider = _chatProviderFactory.GetProvider(ChatAIProvider.Local);
 
         // Xây dựng lời nhắc cho AI
-        var systemPrompt = BuildAiSystemPrompt(request);
+        var systemPrompt = BuildAiSystemPrompt();
         var userPrompt = request.Prompt;
 
         var chatMessages = new List<ChatMessage>
@@ -48,16 +47,11 @@ public class GenerateNotificationTemplateContentCommandHandler(IChatProviderFact
     /// <summary>
     /// Xây dựng lời nhắc hệ thống cho AI dựa trên các tham số yêu cầu.
     /// </summary>
-    /// <param name="request">Yêu cầu tạo nội dung mẫu thông báo.</param>
     /// <returns>Lời nhắc hệ thống được định dạng cho AI.</returns>
-    private string BuildAiSystemPrompt(GenerateNotificationTemplateContentCommand request)
+    private string BuildAiSystemPrompt()
     {
         var promptBuilder = new System.Text.StringBuilder();
         promptBuilder.AppendLine("You are an AI assistant that generates JSON data for notification template content based on natural language descriptions. The output must always be a single JSON object containing 'subject' and 'body' fields. The body should be in the specified format.");
-        promptBuilder.AppendLine($"Notification Type: {request.NotificationType}");
-        promptBuilder.AppendLine($"Channel: {request.Channel}");
-        promptBuilder.AppendLine($"Language Code: {request.LanguageCode}");
-        promptBuilder.AppendLine($"Format: {request.Format}");
         promptBuilder.AppendLine("Please provide the output in a JSON format with 'subject' and 'body' fields.");
         promptBuilder.AppendLine("Example: { \"subject\": \"Your Subject\", \"body\": \"Your Body Content\" }");
         promptBuilder.AppendLine("Always respond with ONLY the JSON object. Do not include any conversational text.");

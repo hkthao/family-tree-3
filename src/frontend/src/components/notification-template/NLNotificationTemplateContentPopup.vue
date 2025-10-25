@@ -7,12 +7,6 @@
           <v-textarea v-model="prompt" :label="t('notificationTemplate.form.aiPromptLabel')" rows="3" outlined clearable
             counter :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
         </v-form>
-        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
-          {{ t('aiInput.generateButton') }}
-        </v-btn>
-        <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
-          {{ t('aiInput.fillSampleButton') }}
-        </v-btn>
 
         <div v-if="generatedData">
           <v-alert type="info" class="mb-4">{{ t('aiInput.previewMessage') }}</v-alert>
@@ -37,6 +31,12 @@
         </div>
       </v-card-text>
       <v-card-actions>
+        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mr-2">
+          {{ t('aiInput.generateButton') }}
+        </v-btn>
+        <v-btn color="info" @click="fillSamplePrompt" class="mr-2">
+          {{ t('aiInput.fillSampleButton') }}
+        </v-btn>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
           }}</v-btn>
