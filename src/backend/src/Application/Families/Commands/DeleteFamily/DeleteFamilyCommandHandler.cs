@@ -2,16 +2,15 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
+using backend.Domain.Events;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 
-public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<DeleteFamilyCommand, Result>
+public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
     {
@@ -45,7 +44,7 @@ public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats
-            await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
+            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(request.Id));
 
             return Result.Success();
         }

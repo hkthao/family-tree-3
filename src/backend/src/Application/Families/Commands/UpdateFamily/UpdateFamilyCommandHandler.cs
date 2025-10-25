@@ -2,16 +2,15 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
+using backend.Domain.Events;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
-public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<UpdateFamilyCommand, Result>
+public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result> Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
@@ -52,7 +51,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats
-            await _familyTreeService.UpdateFamilyStats(request.Id, cancellationToken);
+            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
 
             return Result.Success();
         }

@@ -100,8 +100,8 @@ tests/
   ```csharp
   /// <summary>✅ Tạo mới Family và xác thực tồn tại trong DB</summary>
   /// <remarks>
-  /// ⚙️ B1: Gửi POST /api/families
-  /// ⚙️ B2: Gửi GET /api/families/{id}
+  /// ⚙️ B1: Gửi POST /api/family
+  /// ⚙️ B2: Gửi GET /api/family/{id}
   /// </remarks>
   [Fact]
   public async Task CreateFamily_ShouldPersistInSQLiteMemory()

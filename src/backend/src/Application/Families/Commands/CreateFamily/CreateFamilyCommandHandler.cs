@@ -4,16 +4,15 @@ using backend.Application.Common.Models;
 using backend.Application.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
-public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser user, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<CreateFamilyCommand, Result<Guid>>
+public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<CreateFamilyCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IUser _user = user;
-    private readonly IMediator _mediator = mediator;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
@@ -58,7 +57,7 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats
-            await _familyTreeService.UpdateFamilyStats(entity.Id, cancellationToken);
+            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
 
             return Result<Guid>.Success(entity.Id);
         }

@@ -92,7 +92,7 @@ sequenceDiagram
     participant Infrastructure
     participant Database
 
-    Client->>Controller: Gửi HTTP Request (ví dụ: GET /api/families)
+    Client->>Controller: Gửi HTTP Request (ví dụ: GET /api/family)
     Controller->>MediatR: Gửi Command/Query (ví dụ: GetFamiliesQuery)
     MediatR->>Handler: Điều phối đến Handler tương ứng (ví dụ: GetFamiliesQueryHandler)
     Handler->>CompositionRoot: Yêu cầu IApplicationDbContext

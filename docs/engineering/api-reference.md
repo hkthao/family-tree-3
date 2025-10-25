@@ -8,7 +8,7 @@
 - [4. Lọc và Tìm kiếm](#4-lọc-và-tìm-kiếm)
 - [5. Cấu trúc Phản hồi Lỗi (Error Response)](#5-cấu-trúc-phản-hồi-lỗi-error-response)
 - [6. Các Endpoint chính](#6-các-endpoint-chính)
-  - [6.1. Quản lý Dòng họ (`/api/families`)](#61-quản-lý-dòng-họ-apifamilies)
+  - [6.1. Quản lý Dòng họ (`/api/family`)](#61-quản-lý-dòng-họ-apifamilies)
   - [6.2. Quản lý Thành viên (`/api/member`)](#62-quản-lý-thành-viên-apimembers)
   - [6.3. Quản lý Sự kiện (`/api/event`)](#63-quản-lý-sự-kiện-apievents)
   - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
@@ -53,7 +53,7 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
 2.  **Gửi Token trong Header**: Với mỗi yêu cầu đến các endpoint được bảo vệ, client phải gửi token trong header `Authorization`.
 
 -   **Phương thức:** `GET`
--   **Đường dẫn:** `/api/families/some-family-id`
+-   **Đường dẫn:** `/api/family/some-family-id`
 -   **Header:** `Authorization: Bearer <YOUR_JWT_TOKEN>` (thay `<YOUR_JWT_TOKEN>` bằng JWT hợp lệ của bạn)
 
 ### 2.1. Cấu hình JWT và Xác thực Backend
@@ -84,7 +84,7 @@ Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nế
 
 ## 3. Phân trang (Pagination)
 
-Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/member`) đều hỗ trợ phân trang qua các query parameter sau:
+Các endpoint trả về danh sách (ví dụ: `GET /api/family`, `GET /api/member`) đều hỗ trợ phân trang qua các query parameter sau:
 
 -   `pageNumber` (int, optional, default: 1): Số trang muốn lấy.
 -   `pageSize` (int, optional, default: 10): Số lượng mục trên mỗi trang.
@@ -93,7 +93,7 @@ Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/me
 
 -   **Ví dụ:** Để lấy trang thứ 2 với 20 mục trên mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/families?pageNumber=2&pageSize=20`
+    -   **Đường dẫn:** `/api/family?pageNumber=2&pageSize=20`
 
 Phản hồi sẽ có cấu trúc `PaginatedList<T>`:
 
@@ -186,7 +186,7 @@ Ví dụ Phản hồi Lỗi:
 
 ## 6. Các Endpoint chính
 
-### 6.1. Quản lý Dòng họ (`/api/families`)
+### 6.1. Quản lý Dòng họ (`/api/family`)
 
 -   `GET /api/Family?ids=id1,id2,...`: Lấy thông tin nhiều dòng họ theo danh sách ID (comma-separated).
     *   **Phản hồi:** `Result<List<Family>>`

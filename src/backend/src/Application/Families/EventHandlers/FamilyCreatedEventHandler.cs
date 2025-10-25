@@ -44,7 +44,7 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
                 { "EntityId", family.Id.ToString() },
                 { "Name", family.Name },
                 { "Description", family.Description ?? "" },
-                { "DeepLink", $"/families/{family.Id}" }
+                { "DeepLink", $"/family/{family.Id}" }
             },
             cancellationToken
         );

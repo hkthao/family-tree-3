@@ -85,7 +85,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             new Dictionary<string, string>
             {
                 { "FamilyName", domainEvent.Family.Name },
-                { "DeepLink", $"/families/{domainEvent.Family.Id}" }
+                { "DeepLink", $"/family/{domainEvent.Family.Id}" }
             },
             domainEvent.Family.CreatedBy!,
             domainEvent.Family.Id,
@@ -101,7 +101,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             new Dictionary<string, string>
             {
                 { "FamilyName", domainEvent.Family.Name },
-                { "DeepLink", $"/families/{domainEvent.Family.Id}" }
+                { "DeepLink", $"/family/{domainEvent.Family.Id}" }
             },
             domainEvent.Family.LastModifiedBy!,
             domainEvent.Family.Id,
