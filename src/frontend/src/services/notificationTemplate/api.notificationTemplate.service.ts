@@ -15,24 +15,24 @@ export class ApiNotificationTemplateService implements INotificationTemplateServ
     sortBy?: string,
     sortOrder?: 'asc' | 'desc',
   ): Promise<Result<Paginated<NotificationTemplate>, ApiError>> {
-    return this.api.get<Paginated<NotificationTemplate>>('/notificationTemplates', {
+    return this.api.get<Paginated<NotificationTemplate>>('/api/notification-template', {
       params: { ...filter, page, itemsPerPage, sortBy, sortOrder },
     });
   }
 
   async getById(id: string): Promise<Result<NotificationTemplate, ApiError>> {
-    return this.api.get<NotificationTemplate>(`/notificationTemplates/${id}`);
+    return this.api.get<NotificationTemplate>(`/api/notification-template/${id}`);
   }
 
   async add(newItem: Omit<NotificationTemplate, 'id' | 'created' | 'createdBy' | 'lastModified' | 'lastModifiedBy'>): Promise<Result<NotificationTemplate, ApiError>> {
-    return this.api.post<NotificationTemplate>('/notificationTemplates', newItem);
+    return this.api.post<NotificationTemplate>('/api/notification-template', newItem);
   }
 
   async update(updatedItem: NotificationTemplate): Promise<Result<void, ApiError>> {
-    return this.api.put<void>(`/notificationTemplates/${updatedItem.id}`, updatedItem);
+    return this.api.put<void>(`/api/notification-template/${updatedItem.id}`, updatedItem);
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    return this.api.delete<void>(`/notificationTemplates/${id}`);
+    return this.api.delete<void>(`/api/notification-template/${id}`);
   }
 }
