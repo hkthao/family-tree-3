@@ -1,11 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
-using backend.Application.AI.Embeddings;
-using backend.Application.AI.VectorStore;
-using System.Reflection; // Needed for GetProperty
 
 namespace backend.Infrastructure.Services;
 

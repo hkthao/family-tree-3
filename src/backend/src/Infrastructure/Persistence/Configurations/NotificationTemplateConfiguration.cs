@@ -1,5 +1,4 @@
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,7 +8,7 @@ public class NotificationTemplateConfiguration : IEntityTypeConfiguration<Notifi
 {
     public void Configure(EntityTypeBuilder<NotificationTemplate> builder)
     {
-        builder.ToTable("notification_templates");
+        builder.ToTable("notification_template");
 
         builder.HasKey(nt => nt.Id);
 

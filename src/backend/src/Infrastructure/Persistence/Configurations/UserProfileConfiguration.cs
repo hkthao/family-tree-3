@@ -1,7 +1,6 @@
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using backend.Domain.Extensions;
 
 namespace backend.Infrastructure.Persistence.Configurations;
 
@@ -9,34 +8,35 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 {
     public void Configure(EntityTypeBuilder<UserProfile> builder)
     {
-        builder.ToTable("user_profiles");
-
-        // Map all properties to kebab-case column names
-        foreach (var property in builder.Metadata.GetProperties())
-        {
-            if (property.Name == "Id") continue; // Skip Id as it is handled separately
-            property.SetColumnName(property.Name.ToKebabCase());
-        }
+        builder.ToTable("user_profile");
 
         builder.Property(up => up.Id).HasColumnName("id");
+        builder.Property(up => up.Created).HasColumnName("created");
+        builder.Property(up => up.CreatedBy).HasColumnName("created_by");
+        builder.Property(up => up.LastModified).HasColumnName("last_modified");
+        builder.Property(up => up.LastModifiedBy).HasColumnName("last_modified_by");
 
         builder.Property(up => up.ExternalId)
+            .HasColumnName("external_id")
             .HasMaxLength(256)
-            .IsRequired()
-            .HasColumnName("external_id");
+            .IsRequired();
 
         builder.HasIndex(up => up.ExternalId)
             .IsUnique();
 
         builder.Property(up => up.Email)
+            .HasColumnName("email")
             .HasMaxLength(256)
-            .IsRequired()
-            .HasColumnName("email");
+            .IsRequired();
 
         builder.Property(up => up.Name)
+            .HasColumnName("name")
             .HasMaxLength(256)
-            .IsRequired()
-            .HasColumnName("name");
+            .IsRequired();
+
+        builder.Property(up => up.Avatar)
+            .HasColumnName("avatar")
+            .HasMaxLength(500);
 
         // Configure the one-to-many relationship with FamilyUser
         builder.HasMany(up => up.FamilyUsers)

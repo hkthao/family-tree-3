@@ -25,6 +25,7 @@ public class Member : BaseAuditableEntity
 
     // Relationships
     public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();
+    public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
 
     public Member() { }
 
