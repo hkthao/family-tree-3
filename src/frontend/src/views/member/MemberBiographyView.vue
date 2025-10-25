@@ -19,7 +19,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAIBiographyStore } from '@/stores/ai-biography.store';
-import { AIBiographyInputPanel, AIBiographyResultPanel } from '@/components/aiBiography';
+import { AIBiographyInputPanel, AIBiographyResultPanel } from '@/components/ai-biography';
 
 const route = useRoute();
 const aiBiographyStore = useAIBiographyStore();

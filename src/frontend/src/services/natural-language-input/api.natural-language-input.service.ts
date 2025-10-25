@@ -8,7 +8,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ApiNaturalLanguageInputService implements INaturalLanguageInputService {
   constructor(private http: ApiClientMethods) {}
 
-  private naturalLanguageInputApiUrl = `${API_BASE_URL}/NaturalLanguageInput`;
   private familyApiUrl = `${API_BASE_URL}/Family`;
   private membersApiUrl = `${API_BASE_URL}/Members`;
   private relationshipApiUrl = `${API_BASE_URL}/Relationships`; // Corrected to plural

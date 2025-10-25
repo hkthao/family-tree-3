@@ -1,4 +1,4 @@
-import type { IAIBiographyService } from './aiBiography.service.interface';
+import type { IAIBiographyService } from './ai-biography.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { Result, BiographyResultDto, AIProviderDto, BiographyStyle, AIBiography } from '@/types';
 

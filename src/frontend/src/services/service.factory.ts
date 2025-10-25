@@ -1,5 +1,3 @@
-import type { IFaceMemberService } from './faceMember/faceMember.service.interface';
-import { ApiFaceMemberService } from './faceMember/api.faceMember.service';
 import type { IFamilyService } from './family/family.service.interface';
 import { ApiFamilyService } from './family/api.family.service';
 import type { IMemberService } from './member/member.service.interface';
@@ -8,18 +6,18 @@ import type { IEventService } from './event/event.service.interface';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
-import type { IUserProfileService } from './userProfile/user-profile.service.interface';
-import { UserProfileApiService } from './userProfile/api.user-profile.service';
-import type { IUserActivityService } from './userActivity/user-activity.service.interface';
-import { ApiUserActivityService } from './userActivity/api.user-activity.service';
+import type { IUserProfileService } from './user-profile/user-profile.service.interface';
+import { UserProfileApiService } from './user-profile/api.user-profile.service';
+import type { IUserActivityService } from './user-activity/user-activity.service.interface';
+import { ApiUserActivityService } from './user-activity/api.user-activity.service';
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
-import type { IAIBiographyService } from './aiBiography/aiBiography.service.interface';
-import { ApiAIBiographyService } from './aiBiography/api.aiBiography.service';
-import type { IUserPreferenceService } from './userPreference/user-preference.service.interface';
-import { ApiUserPreferenceService } from './userPreference/api.user-preference.service';
-import type { IFileUploadService } from './fileUpload/fileUpload.service.interface';
-import { FileUploadApiService } from './fileUpload/api.fileUpload.service';
+import type { IAIBiographyService } from './ai-biography/ai-biography.service.interface';
+import { ApiAIBiographyService } from './ai-biography/api.ai-biography.service';
+import type { IUserPreferenceService } from './user-preference/user-preference.service.interface';
+import { ApiUserPreferenceService } from './user-preference/api.user-preference.service';
+import type { IFileUploadService } from './file-upload/file-upload.service.interface';
+import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
 import type { INaturalLanguageInputService } from './natural-language-input/natural-language-input.service.interface';
@@ -30,10 +28,10 @@ import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { ISystemConfigService } from './system-config/system-config.service.interface';
 import { ApiSystemConfigService } from './system-config/api.system-config.service';
-import type { INotificationTemplateService } from './notification-template/notificationTemplate.service.interface';
-import { ApiNotificationTemplateService } from './notification-template/api.notificationTemplate.service';
+import type { INotificationTemplateService } from './notification-template/notification-template.service.interface';
+import { ApiNotificationTemplateService } from './notification-template/api.notification-template.service';
 
-export type ServiceMode = 'mock' | 'real' | 'test';
+export type ServiceMode = 'real' | 'test';
 
 export interface AppServices {
   family: IFamilyService;
@@ -50,7 +48,6 @@ export interface AppServices {
   naturalLanguageInput: INaturalLanguageInputService;
   chunk: IChunkService;
   face: IFaceService;
-  faceMember: IFaceMemberService;
   systemConfig: ISystemConfigService;
   notificationTemplate: INotificationTemplateService;
 }
@@ -116,10 +113,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFaceService(apiClient)
         : testServices?.face || new ApiFaceService(apiClient),
-    faceMember:
-      mode === 'real'
-        ? new ApiFaceMemberService(apiClient)
-        : testServices?.faceMember || new ApiFaceMemberService(apiClient),
     systemConfig:
       mode === 'real'
         ? new ApiSystemConfigService(apiClient)

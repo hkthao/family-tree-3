@@ -1,6 +1,6 @@
 import type { Result } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { IFileUploadService } from './fileUpload.service.interface';
+import type { IFileUploadService } from './file-upload.service.interface';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
