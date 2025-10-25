@@ -362,12 +362,12 @@ public class UpdateEventCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        var updatedEvent = await _context.Events.Include(e => e.RelatedMembers).FirstOrDefaultAsync(e => e.Id == existingEvent.Id);
+        var updatedEvent = await _context.Events.Include(e => e.EventMembers).FirstOrDefaultAsync(e => e.Id == existingEvent.Id);
         updatedEvent.Should().NotBeNull();
         updatedEvent!.Name.Should().Be(command.Name);
-        updatedEvent.RelatedMembers.Should().HaveCount(2);
-        updatedEvent.RelatedMembers.Select(m => m.Id).Should().Contain(member1.Id);
-        updatedEvent.RelatedMembers.Select(m => m.Id).Should().Contain(member2.Id);
+        updatedEvent.EventMembers.Should().HaveCount(2);
+        updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member1.Id);
+        updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member2.Id);
 
         _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
 
