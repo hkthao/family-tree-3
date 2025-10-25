@@ -8,6 +8,8 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
 {
     public void Configure(EntityTypeBuilder<Member> builder)
     {
+        builder.ToTable("members");
+
         builder.Property(m => m.Code)
             .IsRequired()
             .HasMaxLength(50);

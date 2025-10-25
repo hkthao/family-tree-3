@@ -8,6 +8,8 @@ public class UserPreferenceConfiguration : IEntityTypeConfiguration<UserPreferen
 {
     public void Configure(EntityTypeBuilder<UserPreference> builder)
     {
+        builder.ToTable("user_preferences");
+
         builder.HasKey(up => up.UserProfileId);
 
         builder.HasOne(up => up.UserProfile)

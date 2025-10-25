@@ -8,6 +8,8 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 {
     public void Configure(EntityTypeBuilder<Event> builder)
     {
+        builder.ToTable("events");
+
         builder.Property(e => e.Code)
             .IsRequired()
             .HasMaxLength(50);

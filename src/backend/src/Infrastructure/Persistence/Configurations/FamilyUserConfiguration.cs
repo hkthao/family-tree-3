@@ -8,6 +8,8 @@ public class FamilyUserConfiguration : IEntityTypeConfiguration<FamilyUser>
 {
     public void Configure(EntityTypeBuilder<FamilyUser> builder)
     {
+        builder.ToTable("family_users");
+
         builder.HasKey(fu => new { fu.FamilyId, fu.UserProfileId });
 
         builder.HasOne(fu => fu.Family)

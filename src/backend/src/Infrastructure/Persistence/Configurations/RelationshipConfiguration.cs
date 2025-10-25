@@ -8,6 +8,8 @@ public class RelationshipConfiguration : IEntityTypeConfiguration<Relationship>
 {
     public void Configure(EntityTypeBuilder<Relationship> builder)
     {
+        builder.ToTable("relationships");
+
         builder.HasOne(r => r.SourceMember)
             .WithMany(m => m.Relationships)
             .HasForeignKey(r => r.SourceMemberId)

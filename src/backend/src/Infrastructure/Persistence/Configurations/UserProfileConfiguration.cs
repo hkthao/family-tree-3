@@ -8,6 +8,8 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 {
     public void Configure(EntityTypeBuilder<UserProfile> builder)
     {
+        builder.ToTable("user_profiles");
+
         builder.Property(up => up.ExternalId)
             .HasMaxLength(256)
             .IsRequired();

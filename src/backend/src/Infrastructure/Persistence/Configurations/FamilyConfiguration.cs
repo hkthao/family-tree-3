@@ -8,6 +8,8 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
 {
     public void Configure(EntityTypeBuilder<Family> builder)
     {
+        builder.ToTable("families");
+
         builder.Property(f => f.Code)
             .IsRequired()
             .HasMaxLength(50);
