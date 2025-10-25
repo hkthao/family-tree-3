@@ -11,6 +11,7 @@ using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
+using backend.Application.NotificationTemplates.Queries;
 using backend.Domain.Entities;
 
 namespace backend.Application.Common.Mappings;
