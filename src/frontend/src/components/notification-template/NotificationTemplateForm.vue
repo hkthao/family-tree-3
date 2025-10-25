@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { NotificationChannel, NotificationType, TemplateFormat } from '@/types';
 import type { NotificationTemplate } from '@/types';
+import Editor from '@/components/common/Editor.vue';
 
 interface Props {
   initialTemplateData?: NotificationTemplate;
@@ -34,6 +35,15 @@ watch(
   (newVal) => {
     if (newVal) {
       form.value = { ...newVal };
+      // If the format is HTML, parse the body string into an object for the editor
+      if (form.value.format === TemplateFormat.Html && typeof form.value.body === 'string') {
+        try {
+          form.value.body = JSON.parse(form.value.body);
+        } catch (e) {
+          console.error("Error parsing initial HTML body data:", e);
+          form.value.body = { blocks: [] };
+        }
+      }
     }
   },
   { immediate: true, deep: true },
@@ -69,7 +79,7 @@ const rules = {
   eventType: [(v: NotificationType) => v !== undefined && v !== null || t('notificationTemplate.form.validation.eventTypeRequired')],
   channel: [(v: NotificationChannel) => v !== undefined && v !== null || t('notificationTemplate.form.validation.channelRequired')],
   subject: [(v: string) => !!v || t('notificationTemplate.form.validation.subjectRequired')],
-  body: [(v: string) => !!v || t('notificationTemplate.form.validation.bodyRequired')],
+  body: [(v: string | object) => !!v || t('notificationTemplate.form.validation.bodyRequired')], // Adjusted rule for object type
   format: [(v: TemplateFormat) => v !== undefined && v !== null || t('notificationTemplate.form.validation.formatRequired')],
   languageCode: [(v: string) => !!v || t('notificationTemplate.form.validation.languageCodeRequired')],
 };
@@ -81,13 +91,18 @@ const validate = async () => {
 };
 
 const getFormData = () => {
-  return form.value;
+  const formData = { ...form.value };
+  // If the format is HTML, stringify the body object before returning
+  if (formData.format === TemplateFormat.Html && typeof formData.body === 'object') {
+    formData.body = JSON.stringify(formData.body);
+  }
+  return formData;
 };
 
 const submitForm = async () => {
   const { valid } = await formRef.value!.validate();
   if (valid) {
-    emit('submit', form.value);
+    emit('submit', getFormData()); // Emit processed data
   }
 };
 
@@ -161,7 +176,14 @@ defineExpose({
       required
     ></v-text-field>
 
+    <Editor
+      v-if="form.format === TemplateFormat.Html"
+      v-model="form.body"
+      :label="t('notificationTemplate.form.body')"
+      :read-only="readOnly"
+    />
     <v-textarea
+      v-else
       v-model="form.body"
       :label="t('notificationTemplate.form.body')"
       :rules="rules.body"
