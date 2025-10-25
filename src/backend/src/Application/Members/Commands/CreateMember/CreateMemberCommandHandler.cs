@@ -5,38 +5,20 @@ using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
+public class CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_user.Id))
-        {
+        if (!_user.Id.HasValue)
             return Result<Guid>.Failure("User is not authenticated.");
-        }
 
         // If the user has the 'Admin' role, bypass family-specific access checks
-        if (!_authorizationService.IsAdmin())
-        {
-            // For non-admin users, apply family-specific access checks
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-
-            if (currentUserProfile == null)
-            {
-                return Result<Guid>.Failure("User profile not found.");
-            }
-
-            // Check if the user has Manager role for the family
-            if (!_authorizationService.CanManageFamily(request.FamilyId, currentUserProfile))
-            {
-                return Result<Guid>.Failure("Access denied. Only family managers can create members.");
-            }
-        }
+        if (!_authorizationService.CanManageFamily(request.FamilyId))
+            return Result<Guid>.Failure("Access denied. Only family managers can create members.");
 
         var entity = new Member
         {
@@ -62,9 +44,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IUser use
                 .Where(m => m.FamilyId == request.FamilyId && m.IsRoot)
                 .FirstOrDefaultAsync(cancellationToken);
             if (currentRoot != null)
-            {
                 currentRoot.IsRoot = false;
-            }
         }
 
         _context.Members.Add(entity);

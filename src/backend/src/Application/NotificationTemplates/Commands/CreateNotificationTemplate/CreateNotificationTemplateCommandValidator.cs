@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Domain.Enums;
-
 namespace backend.Application.NotificationTemplates.Commands.CreateNotificationTemplate;
 
 public class CreateNotificationTemplateCommandValidator : AbstractValidator<CreateNotificationTemplateCommand>

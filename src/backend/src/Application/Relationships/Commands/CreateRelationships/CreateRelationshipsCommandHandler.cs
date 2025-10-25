@@ -1,21 +1,10 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Relationships.Commands.CreateRelationship;
 
 namespace backend.Application.Relationships.Commands.CreateRelationships;
 
-public class CreateRelationshipsCommandHandler(
-    IApplicationDbContext context,
-    IUser user,
-    IAuthorizationService authorizationService,
-    FamilyAuthorizationService familyAuthorizationService,
-    IMediator mediator) : IRequestHandler<CreateRelationshipsCommand, Result<List<Guid>>>
+public class CreateRelationshipsCommandHandler(IMediator mediator) : IRequestHandler<CreateRelationshipsCommand, Result<List<Guid>>>
 {
-    private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
-    private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
     private readonly IMediator _mediator = mediator;
 
     public async Task<Result<List<Guid>>> Handle(CreateRelationshipsCommand request, CancellationToken cancellationToken)

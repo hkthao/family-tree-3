@@ -14,14 +14,8 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<Guid>.Failure("User profile not found.", "NotFound");
-        }
-
         // Authorization check: Only family managers or admins can create events
-        if (!_authorizationService.IsAdmin() && (request.FamilyId.HasValue && !_authorizationService.CanManageFamily(request.FamilyId.Value, currentUserProfile)))
+        if (!_authorizationService.CanManageFamily(request.FamilyId!.Value))
         {
             return Result<Guid>.Failure("Access denied. Only family managers or admins can create events.", "Forbidden");
         }

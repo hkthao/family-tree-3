@@ -14,7 +14,12 @@ public static class DependencyInjection
 {
     public static void AddWebServices(this IServiceCollection services)
     {
-        services.AddScoped<IUser, CurrentUser>();
+        services.AddScoped<IUser, CurrentUser>(provider =>
+        {
+            var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            var context = provider.GetRequiredService<IApplicationDbContext>();
+            return new CurrentUser(httpContextAccessor, context);
+        });
         services.AddScoped<INotificationHubService, SignalRNotificationHubService>();
         services.AddHttpContextAccessor();
         services.AddHealthChecks();

@@ -57,7 +57,7 @@ public class NotificationService : INotificationService
         NotificationType eventType,
         NotificationChannel channel,
         Dictionary<string, string> placeholders,
-        string recipientUserId,
+        Guid? recipientUserId,
         Guid? familyId = null,
         string? senderUserId = null,
         CancellationToken cancellationToken = default)
@@ -94,7 +94,7 @@ public class NotificationService : INotificationService
         // 3. Tạo và lưu thông báo vào DB
         var notification = new Notification
         {
-            RecipientUserId = recipientUserId,
+            RecipientUserId = recipientUserId?.ToString() ?? string.Empty,
             SenderUserId = senderUserId,
             Title = renderedSubject,
             Message = renderedBody,

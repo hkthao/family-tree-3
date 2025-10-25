@@ -14,7 +14,7 @@ public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapp
 
     public async Task<Result<IReadOnlyList<FamilyListDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_user.Id))
+        if (!_user.Id.HasValue)
         {
             return Result<IReadOnlyList<FamilyListDto>>.Failure("User is not authenticated.");
         }
@@ -29,16 +29,8 @@ public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapp
         else
         {
             // For non-admin users, apply family-specific access checks
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-
-            if (currentUserProfile == null)
-            {
-                // If user profile doesn't exist, they have no access to any families
-                return Result<IReadOnlyList<FamilyListDto>>.Success([]);
-            }
-
             // Apply user access specification
-            query = query.WithSpecification(new FamilyByUserIdSpec(currentUserProfile.Id));
+            query = query.WithSpecification(new FamilyByUserIdSpec(_user.Id.Value));
         }
 
         // Apply other specifications

@@ -4,26 +4,20 @@ using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
-public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
+public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
+    private readonly IUser _user = user;
 
     public async Task<Result<bool>> Handle(DeleteRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<bool>.Failure("User profile not found.", "NotFound");
-        }
+        if (!_user.Id.HasValue)
+            return Result<bool>.Failure("User is not authenticated.", "Authentication");
 
         var entity = await _context.Relationships.FindAsync(request.Id);
-
         if (entity == null)
-        {
             return Result<bool>.Failure($"Relationship with ID {request.Id} not found.");
-        }
 
         // Authorization check: Get family ID from source member
         var sourceMember = await _context.Members.FindAsync(entity.SourceMemberId);
@@ -32,12 +26,10 @@ public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<bool>.Failure($"Source member for relationship {request.Id} not found.", "NotFound");
         }
 
-        if (!_authorizationService.IsAdmin() && !_authorizationService.CanManageFamily(sourceMember.FamilyId, currentUserProfile))
+        if (!_authorizationService.CanManageFamily(sourceMember.FamilyId))
         {
             return Result<bool>.Failure("Access denied. Only family managers or admins can delete relationships.", "Forbidden");
         }
-
-        var activitySummary = $"Deleted relationship {entity.SourceMemberId}-{entity.Type}-{entity.TargetMemberId}.";
 
         entity.AddDomainEvent(new RelationshipDeletedEvent(entity));
         _context.Relationships.Remove(entity);

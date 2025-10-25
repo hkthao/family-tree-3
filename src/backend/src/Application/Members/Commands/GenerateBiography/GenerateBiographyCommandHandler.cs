@@ -1,8 +1,6 @@
 using System.Text;
-
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Domain.Enums;
 using backend.Domain.Extensions;
 
@@ -12,27 +10,18 @@ public class GenerateBiographyCommandHandler(
     IApplicationDbContext context,
     IUser user,
     IAuthorizationService authorizationService,
-    IChatProviderFactory chatProviderFactory,
-    FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
+    IChatProviderFactory chatProviderFactory) : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
+        if (!_user.Id.HasValue)
         {
             return Result<BiographyResultDto>.Failure("User is not authenticated.", "Authentication");
-        }
-
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<BiographyResultDto>.Failure("User profile not found.", "NotFound");
         }
 
         var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
@@ -42,10 +31,10 @@ public class GenerateBiographyCommandHandler(
         }
 
         // Authorization check: User must be a manager of the family the member belongs to, or an admin.
-        var authorizationResult = await _familyAuthorizationService.AuthorizeFamilyAccess(member.FamilyId, cancellationToken);
-        if (!authorizationResult.IsSuccess)
+        var authorizationResult = _authorizationService.CanAccessFamily(member.FamilyId);
+        if (!authorizationResult)
         {
-            return Result<BiographyResultDto>.Failure(authorizationResult.Error ?? "Unknown authorization error.", authorizationResult.ErrorSource ?? "Authorization");
+            return Result<BiographyResultDto>.Failure("Access denied", "AccessDenied");
         }
 
         // --- AI Biography Generation Logic ---

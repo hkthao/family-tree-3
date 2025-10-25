@@ -7,36 +7,29 @@ using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 
-public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteFamilyCommand, Result>
+public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<DeleteFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _user = user;
 
     public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-            if (currentUserProfile == null)
+            if (!_user.Id.HasValue)
             {
-                return Result.Failure("User profile not found.", "NotFound");
+                return Result.Failure("User is not authenticated.", "Authentication");
             }
-            if (!_authorizationService.IsAdmin())
+
+            if (!_authorizationService.CanManageFamily(request.Id))
             {
-                if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
-                {
-                    return Result.Failure("User does not have permission to delete this family.", "Forbidden");
-                }
+                return Result.Failure("User does not have permission to delete this family.", "Forbidden");
             }
 
             var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
-
             if (entity == null)
-            {
                 return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
-            }
-
-            var familyName = entity.Name; // Capture family name for activity summary
 
             entity.AddDomainEvent(new FamilyDeletedEvent(entity));
             _context.Families.Remove(entity);

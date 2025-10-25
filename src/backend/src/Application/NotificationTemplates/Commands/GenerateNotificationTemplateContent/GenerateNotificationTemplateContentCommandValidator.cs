@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.NotificationTemplates.Commands.GenerateNotificationTemplateContent;
 
 public class GenerateNotificationTemplateContentCommandValidator : AbstractValidator<GenerateNotificationTemplateContentCommand>

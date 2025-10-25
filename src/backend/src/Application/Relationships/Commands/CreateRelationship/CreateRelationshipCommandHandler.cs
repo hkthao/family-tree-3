@@ -5,18 +5,18 @@ using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
-public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator) : IRequestHandler<CreateRelationshipCommand, Result<Guid>>
+public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IUser user) : IRequestHandler<CreateRelationshipCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IMediator _mediator = mediator;
+    private readonly IUser _user = user;
 
     public async Task<Result<Guid>> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
+        if (!_user.Id.HasValue)
         {
-            return Result<Guid>.Failure("User profile not found.", "NotFound");
+            return Result<Guid>.Failure("User is not authenticated.", "Authentication");
         }
 
         // Authorization check: Get family ID from source member
@@ -26,7 +26,7 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<Guid>.Failure($"Source member with ID {request.SourceMemberId} not found.", "NotFound");
         }
 
-        if (!_authorizationService.IsAdmin() && !_authorizationService.CanManageFamily(sourceMember.FamilyId, currentUserProfile))
+        if (!_authorizationService.CanManageFamily(sourceMember.FamilyId))
         {
             return Result<Guid>.Failure("Access denied. Only family managers or admins can create relationships.", "Forbidden");
         }

@@ -14,7 +14,7 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrEmpty(_user.Id))
+        if (!_user.Id.HasValue)
         {
             return Result<IReadOnlyList<MemberListDto>>.Failure("User is not authenticated.");
         }
@@ -33,22 +33,14 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
         }
         else
         {
-            // For non-admin users, apply family-specific access checks
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-
-            if (currentUserProfile == null)
-            {
-                return Result<IReadOnlyList<MemberListDto>>.Success(new List<MemberListDto>());
-            }
-
             // Get IDs of families the user has access to
-            var accessibleFamilyIds = currentUserProfile.FamilyUsers.Select(fu => fu.FamilyId).ToList();
+            var accessibleFamilyIds = _context.FamilyUsers.Where(e=>e.UserProfileId == _user.Id).Select(fu => fu.FamilyId).ToList();
 
             // Apply family access filter if a specific FamilyId is requested
             if (request.FamilyId.HasValue && request.FamilyId.Value != Guid.Empty)
             {
                 // Check if the requested FamilyId is among the user's accessible families
-                if (!accessibleFamilyIds.Contains(request.FamilyId.Value!))
+                if (!accessibleFamilyIds.Contains(request.FamilyId.Value))
                 {
                     return Result<IReadOnlyList<MemberListDto>>.Failure("Access denied to the requested family.");
                 }

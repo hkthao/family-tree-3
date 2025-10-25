@@ -4,37 +4,22 @@ using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService,  IFamilyTreeService familyTreeService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<Guid>.Failure("User profile not found.", "NotFound");
-        }
-
-        // Authorization check (similar to CreateMemberCommandHandler)
-        if (!_authorizationService.IsAdmin() && !_authorizationService.CanManageFamily(request.FamilyId, currentUserProfile))
-        {
+        if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<Guid>.Failure("Access denied. Only family managers can update members.", "Forbidden");
-        }
 
         var entity = await _context.Members
             .Include(m => m.Relationships)
             .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
-
         if (entity == null)
-        {
             return Result<Guid>.Failure($"Member with ID {request.Id} not found.", "NotFound");
-        }
-
-        var oldFullName = entity.FullName; // Capture old name for activity summary
 
         entity.FirstName = request.FirstName;
         entity.LastName = request.LastName;

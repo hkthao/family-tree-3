@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.NotificationTemplates.Commands.DeleteNotificationTemplate;
 
 public class DeleteNotificationTemplateCommandValidator : AbstractValidator<DeleteNotificationTemplateCommand>

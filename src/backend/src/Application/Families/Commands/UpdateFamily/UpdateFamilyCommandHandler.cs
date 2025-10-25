@@ -2,21 +2,31 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
+using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Events;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
-public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateFamilyCommand, Result>
+public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<UpdateFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _user = user;
 
     public async Task<Result> Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
+            if (!_user.Id.HasValue)
+            {
+                return Result.Failure("User is not authenticated.", "Authentication");
+            }
+
+            var currentUserProfile = await _context.UserProfiles
+                .WithSpecification(new UserProfileByIdSpecification(_user.Id.Value))
+                .FirstOrDefaultAsync(cancellationToken);
+
             if (currentUserProfile == null)
             {
                 return Result.Failure("User profile not found.", "NotFound");
@@ -24,7 +34,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
 
             if (!_authorizationService.IsAdmin())
             {
-                if (!_authorizationService.CanManageFamily(request.Id, currentUserProfile))
+                if (!_authorizationService.CanManageFamily(request.Id))
                 {
                     return Result.Failure("User does not have permission to update this family.", "Forbidden");
                 }

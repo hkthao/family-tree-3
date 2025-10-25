@@ -1,8 +1,6 @@
 using System.Security.Claims;
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
@@ -76,6 +74,6 @@ public class SyncUserProfileCommandHandler(
 
     private async Task<UserProfile?> GetUserProfileByExternalId(string externalId, CancellationToken cancellationToken)
     {
-        return await _context.UserProfiles.WithSpecification(new UserProfileByExternalIdSpecification(externalId)).FirstOrDefaultAsync(cancellationToken);
+        return await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == externalId, cancellationToken);
     }
 }

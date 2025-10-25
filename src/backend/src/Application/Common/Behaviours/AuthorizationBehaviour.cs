@@ -35,7 +35,7 @@ public class AuthorizationBehaviour<TRequest, TResponse>(
         if (authorizeAttributes.Any())
         {
             // Must be authenticated user
-            if (_user.Id == default)
+            if (!_user.Id.HasValue)
             {
                 throw new UnauthorizedAccessException();
             }

@@ -11,16 +11,14 @@ public class GetCurrentUserProfileQueryHandler(IApplicationDbContext context, IU
 
     public async Task<Result<UserProfileDto>> Handle(GetCurrentUserProfileQuery request, CancellationToken cancellationToken)
     {
-        var userId = _user.Id;
-
-        if (userId == null)
+        if (!_user.Id.HasValue)
         {
             return Result<UserProfileDto>.Failure("User not authenticated.", "Unauthorized");
         }
 
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.ExternalId == userId, cancellationToken);
+            .FirstOrDefaultAsync(up => up.Id == _user.Id.Value, cancellationToken);
 
         if (userProfile == null)
         {

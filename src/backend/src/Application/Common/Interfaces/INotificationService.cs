@@ -22,7 +22,7 @@ public interface INotificationService
         NotificationType eventType,
         NotificationChannel channel,
         Dictionary<string, string> placeholders,
-        string recipientUserId,
+        Guid? recipientUserId,
         Guid? familyId = null,
         string? senderUserId = null,
         CancellationToken cancellationToken = default);

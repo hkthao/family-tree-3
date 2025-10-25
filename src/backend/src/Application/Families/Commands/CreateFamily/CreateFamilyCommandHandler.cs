@@ -1,7 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserProfiles.Specifications;
+using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Events;
@@ -18,13 +18,12 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
     {
         try
         {
-            var currentUserId = _user.Id;
-            if (string.IsNullOrEmpty(currentUserId))
+            if (!_user.Id.HasValue)
             {
                 return Result<Guid>.Failure("Current user ID not found.", "Authentication");
             }
 
-            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByExternalIdSpecification(currentUserId)).FirstOrDefaultAsync(cancellationToken);
+            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByIdSpecification(_user.Id.Value)).FirstOrDefaultAsync(cancellationToken);
             if (userProfile == null)
             {
                 return Result<Guid>.Failure("User profile not found.", "NotFound");

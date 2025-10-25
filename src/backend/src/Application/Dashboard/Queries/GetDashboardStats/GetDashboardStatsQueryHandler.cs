@@ -3,26 +3,21 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
-public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
+public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _user = user;
 
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<DashboardStatsDto>.Failure("User profile not found.", "NotFound");
-        }
 
         IQueryable<Domain.Entities.Family> familiesQuery = _context.Families;
-
         if (!_authorizationService.IsAdmin())
         {
             // Filter families by user access if not admin
             var accessibleFamilyIds = await _context.FamilyUsers
-                .Where(fu => fu.UserProfileId == currentUserProfile.Id)
+                .Where(fu => fu.UserProfileId == _user.Id)
                 .Select(fu => fu.FamilyId)
                 .ToListAsync(cancellationToken);
 

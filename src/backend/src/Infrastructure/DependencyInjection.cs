@@ -7,6 +7,7 @@ using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
+using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
 using backend.Infrastructure.Services.Notifications;
@@ -31,16 +32,20 @@ public static class DependencyInjection
     /// <returns>Bộ sưu tập dịch vụ đã được cập nhật.</returns>
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddScoped<DispatchDomainEventsInterceptor>();
+
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseInMemoryDatabase("FamilyTreeDb"));
+            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+                options.UseInMemoryDatabase("FamilyTreeDb")
+                       .AddInterceptors(serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>()));
         }
         else
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+                       .AddInterceptors(serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>()));
         }
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());

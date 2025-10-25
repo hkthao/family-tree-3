@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.NotificationTemplates.Queries.GetNotificationTemplates;
 
 public class GetNotificationTemplatesQueryValidator : AbstractValidator<GetNotificationTemplatesQuery>

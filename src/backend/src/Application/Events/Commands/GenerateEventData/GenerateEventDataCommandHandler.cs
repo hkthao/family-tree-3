@@ -1,19 +1,18 @@
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Events.Queries;
 using backend.Domain.Enums;
 using FluentValidation.Results;
 
 namespace backend.Application.Events.Commands.GenerateEventData;
 
-public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateEventDataCommand, Result<List<AIEventDto>>>
+public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIEventDto> aiEventDtoValidator, IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<GenerateEventDataCommand, Result<List<AIEventDto>>>
 {
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
     private readonly IValidator<AIEventDto> _aiEventDtoValidator = aiEventDtoValidator;
     private readonly IApplicationDbContext _context = context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<List<AIEventDto>>> Handle(GenerateEventDataCommand request, CancellationToken cancellationToken)
     {
@@ -64,15 +63,11 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
                     if (families.Count == 1)
                     {
                         var family = families.First();
-                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(family.Id, cancellationToken);
-                        if (authResult.IsSuccess)
-                        {
+                        var authResult = _authorizationService.CanAccessFamily(family.Id);
+                        if (authResult)
                             eventDto.FamilyId = family.Id;
-                        }
-                        else if (authResult.Error != null)
-                        {
-                            eventDto.ValidationErrors.Add(authResult.Error!);
-                        }
+                        else
+                            eventDto.ValidationErrors.Add("User does not have permission to update this family.");
                     }
                     else if (families.Count == 0)
                     {
@@ -96,23 +91,14 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
                             .ToListAsync(cancellationToken);
 
                         if (members.Count == 1)
-                        {
                             memberIds.Add(members.First().Id);
-                        }
                         else if (members.Count == 0)
-                        {
                             eventDto.ValidationErrors.Add($"Related member '{memberIdentifier}' not found in family '{eventDto.FamilyName}'.");
-                        }
                         else
-                        {
                             eventDto.ValidationErrors.Add($"Multiple members found with name or code '{memberIdentifier}' in family '{eventDto.FamilyName}'. Please specify.");
-                        }
                     }
-                    // Note: We are not storing memberIds directly in AIEventDto, but this is where you would typically map them to the Event entity.
-                    // For now, we just validate their existence.
                 }
-
-                // Validate AIEventDto
+                
                 ValidationResult validationResult = await _aiEventDtoValidator.ValidateAsync(eventDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {

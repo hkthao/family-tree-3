@@ -2,7 +2,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Specifications;
+using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Enums;
 
 namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
@@ -15,15 +15,14 @@ public class GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser
 
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
     {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
+        if (!_user.Id.HasValue)
         {
             return Result<UserPreferenceDto>.Failure("User is not authenticated.", "Authentication");
         }
 
         var userProfile = await _context.UserProfiles
             .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByAuth0IdSpec(currentUserId))
+            .WithSpecification(new UserProfileByIdSpecification(_user.Id.Value))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)

@@ -63,7 +63,7 @@ public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider 
                 StorageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true),
                 ContentType = request.ContentType,
                 FileSize = request.Length,
-                UploadedBy = _user.Id ?? "",
+                UploadedBy = _user.Id?.ToString() ?? "",
                 IsActive = true,
                 Created = _dateTime.Now,
                 LastModified = _dateTime.Now

@@ -14,14 +14,8 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<bool>.Failure("User profile not found.", "NotFound");
-        }
-
         // Authorization check: Only family managers or admins can update events
-        if (!_authorizationService.IsAdmin() && (request.FamilyId.HasValue && !_authorizationService.CanManageFamily(request.FamilyId.Value, currentUserProfile)))
+        if (!_authorizationService.CanManageFamily(request.FamilyId!.Value))
         {
             return Result<bool>.Failure("Access denied. Only family managers or admins can update events.", "Forbidden");
         }

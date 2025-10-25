@@ -16,13 +16,16 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 {
     private readonly ILogger<DomainEventNotificationPublisher> _logger;
     private readonly INotificationService _notificationService;
+    private readonly IApplicationDbContext _context;
 
     public DomainEventNotificationPublisher(
         ILogger<DomainEventNotificationPublisher> logger,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IApplicationDbContext context)
     {
         _logger = logger;
         _notificationService = notificationService;
+        _context = context;
     }
 
     /// <summary>
@@ -79,6 +82,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleFamilyCreatedEvent(FamilyCreatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from CreatedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Family.CreatedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Family.CreatedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.FamilyCreated,
             NotificationChannel.InApp,
@@ -87,7 +98,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "FamilyName", domainEvent.Family.Name },
                 { "DeepLink", $"/family/{domainEvent.Family.Id}" }
             },
-            domainEvent.Family.CreatedBy!,
+            recipientUserProfileId,
             domainEvent.Family.Id,
             cancellationToken: cancellationToken
         );
@@ -95,6 +106,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleFamilyUpdatedEvent(FamilyUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Family.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Family.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.FamilyUpdated,
             NotificationChannel.InApp,
@@ -103,7 +122,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "FamilyName", domainEvent.Family.Name },
                 { "DeepLink", $"/family/{domainEvent.Family.Id}" }
             },
-            domainEvent.Family.LastModifiedBy!,
+            recipientUserProfileId,
             domainEvent.Family.Id,
             cancellationToken: cancellationToken
         );
@@ -111,6 +130,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleFamilyDeletedEvent(FamilyDeletedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Family.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Family.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.FamilyDeleted,
             NotificationChannel.InApp,
@@ -118,13 +145,21 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             {
                 { "FamilyName", domainEvent.Family.Name }
             },
-            domainEvent.Family.LastModifiedBy!, // Assuming the deleter is the recipient
+            recipientUserProfileId, // Assuming the deleter is the recipient
             cancellationToken: cancellationToken
         );
     }
 
     private async Task HandleMemberCreatedEvent(MemberCreatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from CreatedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Member.CreatedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Member.CreatedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.MemberCreated,
             NotificationChannel.InApp,
@@ -134,7 +169,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
                 { "DeepLink", $"/member/{domainEvent.Member.Id}" }
             },
-            domainEvent.Member.CreatedBy!,
+            recipientUserProfileId,
             domainEvent.Member.FamilyId,
             cancellationToken: cancellationToken
         );
@@ -142,6 +177,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleMemberUpdatedEvent(MemberUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Member.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Member.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.MemberUpdated,
             NotificationChannel.InApp,
@@ -151,7 +194,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
                 { "DeepLink", $"/member/{domainEvent.Member.Id}" }
             },
-            domainEvent.Member.LastModifiedBy!,
+            recipientUserProfileId,
             domainEvent.Member.FamilyId,
             cancellationToken: cancellationToken
         );
@@ -159,6 +202,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleMemberDeletedEvent(MemberDeletedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Member.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Member.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.MemberDeleted,
             NotificationChannel.InApp,
@@ -167,13 +218,21 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" }
             },
-            domainEvent.Member.LastModifiedBy!, // Assuming the deleter is the recipient
+            recipientUserProfileId, // Assuming the deleter is the recipient
             cancellationToken: cancellationToken
         );
     }
 
     private async Task HandleMemberBiographyUpdatedEvent(MemberBiographyUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Member.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Member.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.MemberBiographyUpdated,
             NotificationChannel.InApp,
@@ -183,7 +242,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
                 { "DeepLink", $"/member/{domainEvent.Member.Id}" }
             },
-            domainEvent.Member.LastModifiedBy!,
+            recipientUserProfileId,
             domainEvent.Member.FamilyId,
             cancellationToken: cancellationToken
         );
@@ -191,6 +250,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleNewFamilyMemberAddedEvent(NewFamilyMemberAddedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from CreatedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.NewMember.CreatedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.NewMember.CreatedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.NewFamilyMember,
             NotificationChannel.InApp,
@@ -200,7 +267,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "FamilyName", domainEvent.NewMember.Family?.Name ?? "" },
                 { "DeepLink", $"/member/{domainEvent.NewMember.Id}" }
             },
-            domainEvent.NewMember.CreatedBy!,
+            recipientUserProfileId,
             domainEvent.NewMember.FamilyId,
             cancellationToken: cancellationToken
         );
@@ -208,6 +275,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleRelationshipCreatedEvent(RelationshipCreatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from CreatedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Relationship.CreatedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Relationship.CreatedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.RelationshipCreated,
             NotificationChannel.InApp,
@@ -218,7 +293,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "RelationshipType", domainEvent.Relationship.Type.ToString() },
                 { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
             },
-            domainEvent.Relationship.CreatedBy!,
+            recipientUserProfileId,
             domainEvent.Relationship.FamilyId,
             cancellationToken: cancellationToken
         );
@@ -226,6 +301,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleRelationshipUpdatedEvent(RelationshipUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Relationship.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Relationship.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.RelationshipUpdated,
             NotificationChannel.InApp,
@@ -236,7 +319,7 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "RelationshipType", domainEvent.Relationship.Type.ToString() },
                 { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
             },
-            domainEvent.Relationship.LastModifiedBy!,
+            recipientUserProfileId,
             domainEvent.Relationship.FamilyId,
             cancellationToken: cancellationToken
         );
@@ -244,6 +327,14 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
 
     private async Task HandleRelationshipDeletedEvent(RelationshipDeletedEvent domainEvent, CancellationToken cancellationToken)
     {
+        // Resolve UserProfileId from LastModifiedBy (ExternalId)
+        Guid? recipientUserProfileId = null;
+        if (!string.IsNullOrEmpty(domainEvent.Relationship.LastModifiedBy))
+        {
+            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.Relationship.LastModifiedBy, cancellationToken);
+            recipientUserProfileId = userProfile?.Id;
+        }
+
         await _notificationService.SendNotificationAsync(
             NotificationType.RelationshipDeleted,
             NotificationChannel.InApp,
@@ -254,7 +345,8 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
                 { "RelationshipType", domainEvent.Relationship.Type.ToString() },
                 { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
             },
-            domainEvent.Relationship.LastModifiedBy!,
+
+            recipientUserProfileId,
             domainEvent.Relationship.FamilyId,
             cancellationToken: cancellationToken
         );

@@ -12,16 +12,14 @@ public class GetEditableMembersQueryHandler(IApplicationDbContext context, IUser
 
     public async Task<Result<List<MemberListDto>>> Handle(GetEditableMembersQuery request, CancellationToken cancellationToken)
     {
-        var userId = _user.Id;
-
-        if (userId == null)
+        if (!_user.Id.HasValue)
         {
             return Result<List<MemberListDto>>.Failure("User not authenticated.");
         }
 
         // Get families where the current user is a manager
         var managedFamilyIds = await _context.FamilyUsers
-            .Where(fu => fu.UserProfileId.ToString() == userId && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Admin))
+            .Where(fu => fu.UserProfileId == _user.Id.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Admin))
             .Select(fu => fu.FamilyId)
             .ToListAsync(cancellationToken);
 

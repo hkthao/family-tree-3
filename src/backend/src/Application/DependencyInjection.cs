@@ -22,7 +22,6 @@ public static class DependencyInjection
         services.AddScoped<Common.Interfaces.IConfigProvider, Common.Services.ConfigProvider>();
 
         services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
-        services.AddScoped<Common.Services.FamilyAuthorizationService>();
 
 
         return services;

@@ -1,9 +1,5 @@
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Specifications;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Services;
 
@@ -17,30 +13,23 @@ public class AuthorizationService(IUser user, IApplicationDbContext context) : I
         return _user.Roles != null && _user.Roles.Contains("Admin");
     }
 
-    public async Task<UserProfile?> GetCurrentUserProfileAsync(CancellationToken cancellationToken = default)
+    public bool CanAccessFamily(Guid familyId)
     {
-        return string.IsNullOrEmpty(_user.Id)
-            ? null
-            : await _context.UserProfiles
-            .WithSpecification(new UserProfileByAuth0IdSpec(_user.Id))
-            .FirstOrDefaultAsync(cancellationToken);
+        if (IsAdmin()) return true; // Admin bypasses family-specific role checks
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId);
     }
 
-    public bool CanAccessFamily(Guid familyId, UserProfile userProfile)
+    public bool CanManageFamily(Guid familyId)
     {
-        return userProfile.FamilyUsers.Any(fu => fu.FamilyId == familyId);
+        if (IsAdmin()) return true; // Admin bypasses family-specific role checks
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.Role == FamilyRole.Manager);
     }
 
-    public bool CanManageFamily(Guid familyId, UserProfile userProfile)
-    {
-        return userProfile.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.Role == FamilyRole.Manager);
-    }
-
-    public bool HasFamilyRole(Guid familyId, UserProfile userProfile, FamilyRole requiredRole)
+    public bool HasFamilyRole(Guid familyId, FamilyRole requiredRole)
     {
         if (IsAdmin()) return true; // Admin bypasses family-specific role checks
 
-        var familyUser = userProfile.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId);
+        var familyUser = _context.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId);
         if (familyUser == null) return false;
 
         return familyUser.Role <= requiredRole; // Assuming enum values are ordered by privilege

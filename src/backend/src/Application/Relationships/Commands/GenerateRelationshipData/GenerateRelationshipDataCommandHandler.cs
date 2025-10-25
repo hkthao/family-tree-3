@@ -2,19 +2,18 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Domain.Enums;
 using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 
-public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger) : IRequestHandler<GenerateRelationshipDataCommand, Result<List<AIRelationshipDto>>>
+public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger) : IRequestHandler<GenerateRelationshipDataCommand, Result<List<AIRelationshipDto>>>
 {
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
     private readonly IValidator<AIRelationshipDto> _aiRelationshipDtoValidator = aiRelationshipDtoValidator;
     private readonly IApplicationDbContext _context = context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger = logger;
 
     public async Task<Result<List<AIRelationshipDto>>> Handle(GenerateRelationshipDataCommand request, CancellationToken cancellationToken)
@@ -71,15 +70,11 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
 
                     if (sourceMember != null)
                     {
-                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(sourceMember.FamilyId, cancellationToken);
-                        if (authResult.IsSuccess)
-                        {
+                        var authResult = _authorizationService.CanAccessFamily(sourceMember.FamilyId);
+                        if (authResult)
                             relationshipDto.SourceMemberId = sourceMember.Id;
-                        }
                         else
-                        {
-                            relationshipDto.ValidationErrors.Add(authResult.Error ?? $"No permission to access family of {relationshipDto.SourceMemberName}.");
-                        }
+                            relationshipDto.ValidationErrors.Add($"No permission to access family of {relationshipDto.SourceMemberName}.");
                     }
                     else
                     {
@@ -101,15 +96,11 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
 
                     if (targetMember != null)
                     {
-                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(targetMember.FamilyId, cancellationToken);
-                        if (authResult.IsSuccess)
-                        {
+                        var authResult = _authorizationService.CanAccessFamily(targetMember.FamilyId);
+                        if (authResult)
                             relationshipDto.TargetMemberId = targetMember.Id;
-                        }
                         else
-                        {
-                            relationshipDto.ValidationErrors.Add(authResult.Error ?? $"No permission to access family of {relationshipDto.TargetMemberName}.");
-                        }
+                            relationshipDto.ValidationErrors.Add($"No permission to access family of {relationshipDto.TargetMemberName}.");
                     }
                     else
                     {

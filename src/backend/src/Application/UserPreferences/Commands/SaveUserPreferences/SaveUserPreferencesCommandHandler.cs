@@ -1,7 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Specifications;
+using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Entities;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
@@ -14,15 +14,14 @@ public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IU
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
+        if (!_user.Id.HasValue)
         {
             return Result.Failure("User is not authenticated.", "Authentication");
         }
 
         var userProfile = await _context.UserProfiles
             .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByAuth0IdSpec(currentUserId))
+            .WithSpecification(new UserProfileByIdSpecification(_user.Id.Value))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)

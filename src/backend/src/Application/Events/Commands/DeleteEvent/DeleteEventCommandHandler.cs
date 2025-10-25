@@ -13,24 +13,12 @@ public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
     public async Task<Result<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<bool>.Failure("User profile not found.", "NotFound");
-        }
-
         var entity = await _context.Events.FindAsync(request.Id);
-
         if (entity == null)
-        {
             return Result<bool>.Failure($"Event with ID {request.Id} not found.", "NotFound");
-        }
 
-        // Authorization check: Only family managers or admins can delete events
-        if (!_authorizationService.IsAdmin() && (entity.FamilyId.HasValue && !_authorizationService.CanManageFamily(entity.FamilyId.Value, currentUserProfile)))
-        {
+        if (!_authorizationService.CanManageFamily(entity.FamilyId!.Value))
             return Result<bool>.Failure("Access denied. Only family managers or admins can delete events.", "Forbidden");
-        }
 
         var eventName = entity.Name; // Capture event name for activity summary
 
@@ -41,7 +29,7 @@ public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthoriza
         // Record activity
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = currentUserProfile.Id,
+            UserProfileId = _user.Id,
             ActionType = UserActionType.DeleteEvent,
             TargetType = TargetType.Event,
             TargetId = request.Id.ToString(),

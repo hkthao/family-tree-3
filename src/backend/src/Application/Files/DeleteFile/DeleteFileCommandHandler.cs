@@ -19,7 +19,7 @@ public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorag
             return Result.Failure("File metadata not found.", "NotFound");
         }
 
-        if (fileMetadata.UploadedBy != _user.Id)
+        if (fileMetadata.UploadedBy != _user.Id?.ToString())
         {
             return Result.Failure("User is not authorized to delete this file.", "Forbidden");
         }

@@ -1,6 +1,3 @@
-using FluentValidation;
-using backend.Domain.Enums;
-
 namespace backend.Application.NotificationTemplates.Queries.GetNotificationTemplateByEventType;
 
 public class GetNotificationTemplateByEventTypeQueryValidator : AbstractValidator<GetNotificationTemplateByEventTypeQuery>
