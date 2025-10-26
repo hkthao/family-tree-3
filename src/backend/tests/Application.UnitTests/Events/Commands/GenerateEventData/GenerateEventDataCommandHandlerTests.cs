@@ -41,146 +41,127 @@ public class GenerateEventDataCommandHandlerTests : TestBase
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
     /// khi AI trả về một phản hồi trống hoặc null.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về một chuỗi trống. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Thiết lập _mockChatProvider để trả về một chuỗi trống.
+    ///               Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng trường hợp AI không tạo ra phản hồi, ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
+    /// trường hợp AI không tạo ra phản hồi, ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenAIResponseIsEmpty()
     {
-        // Arrange
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(string.Empty);
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be("AI did not return a response.");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống xử lý đúng trường hợp AI không tạo ra phản hồi,
-        // ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
     }
 
     /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
     /// khi AI trả về một chuỗi JSON không hợp lệ.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về một chuỗi JSON không hợp lệ. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Thiết lập _mockChatProvider để trả về một chuỗi JSON không hợp lệ.
+    ///               Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng trường hợp AI tạo ra JSON không hợp lệ, ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
+    /// trường hợp AI tạo ra JSON không hợp lệ, ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenAIResponseIsInvalidJson()
     {
-        // Arrange
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync("{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\" "); // Invalid JSON
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("AI generated invalid response:");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống xử lý đúng trường hợp AI tạo ra JSON không hợp lệ,
-        // ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
     }
 
     /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một danh sách trống
     /// khi AI trả về JSON hợp lệ nhưng không có sự kiện nào được tạo.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về JSON hợp lệ nhưng với danh sách sự kiện trống. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Thiết lập _mockChatProvider để trả về JSON hợp lệ nhưng với danh sách sự kiện trống.
+    ///               Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về là rỗng.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng trường hợp AI không tạo ra sự kiện nào, trả về một danh sách trống thay vì lỗi.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và danh sách sự kiện trả về là rỗng.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
+    /// trường hợp AI không tạo ra sự kiện nào, trả về một danh sách trống thay vì lỗi.
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnEmptyList_WhenNoEventsGenerated()
     {
-        // Arrange
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync("{ \"events\": [] }"); // Valid JSON, empty events list
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeEmpty();
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống xử lý đúng trường hợp AI không tạo ra sự kiện nào,
-        // trả về một danh sách trống thay vì lỗi.
     }
 
     /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
     /// khi AI tạo sự kiện cho một gia đình không tồn tại hoặc người dùng không có quyền quản lý.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName. Thiết lập _mockAuthorizationService để trả về UserProfile. Thiết lập _mockFamilyAuthorizationService để trả về lỗi "Family not found" khi AuthorizeFamilyAccess được gọi. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName không tồn tại.
+    ///               Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về có chứa lỗi xác thực cho FamilyName.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện với FamilyName không hợp lệ, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
+    ///              có chứa lỗi xác thực cho FamilyName.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện
+    /// với FamilyName không hợp lệ, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công
+    /// (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenFamilyNotFound()
     {
-        // Arrange
         var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"NonExistentFamily\" } ] }";
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(aiResponseJson);
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue(); // It's a success in terms of AI response processing, but events have validation errors
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(1);
         result.Value!.First().ValidationErrors.Should().Contain(string.Format(ErrorMessages.FamilyNotFound, "NonExistentFamily"));
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi AI tạo ra một sự kiện với FamilyName không hợp lệ,
-        // hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công
-        // (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
     }
 
     /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
     /// khi AI tạo sự kiện cho một FamilyName/Code khớp với nhiều gia đình.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UserProfile giả lập và thêm vào DB. Tạo hai Family có cùng tên hoặc mã và thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName. Thiết lập _mockAuthorizationService để trả về UserProfile. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Tạo hai Family có cùng tên và thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ
+    ///               với một sự kiện có FamilyName trùng lặp. Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về có chứa lỗi xác thực cho FamilyName.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện với FamilyName khớp với nhiều gia đình, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
+    ///              có chứa lỗi xác thực cho FamilyName.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện
+    /// với FamilyName khớp với nhiều gia đình, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó
+    /// và trả về kết quả thành công (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenMultipleFamiliesFound()
     {
-        // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
-        _context.UserProfiles.Add(userProfile);
-
         var familyName = "DuplicateFamily";
         var family1 = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
         var family2 = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
@@ -193,37 +174,32 @@ public class GenerateEventDataCommandHandlerTests : TestBase
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(1);
         result.Value!.First().ValidationErrors.Should().Contain(ErrorMessages.MultipleFamiliesFound);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi AI tạo ra một sự kiện với FamilyName khớp với nhiều gia đình,
-        // hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công.
     }
 
     /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
     /// khi AI tạo sự kiện với các thành viên liên quan không tìm thấy trong gia đình được chỉ định.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UserProfile giả lập và một Family, sau đó thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName và RelatedMembers không tồn tại. Thiết lập _mockAuthorizationService để trả về UserProfile. Thiết lập _mockFamilyAuthorizationService để trả về thành công khi AuthorizeFamilyAccess được gọi. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Tạo một Family và thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ
+    ///               với một sự kiện có FamilyName và RelatedMembers không tồn tại.
+    ///               Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về có chứa lỗi xác thực cho RelatedMembers.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện với RelatedMembers không tồn tại, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
+    ///              có chứa lỗi xác thực cho RelatedMembers.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện
+    /// với RelatedMembers không tồn tại, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó
+    /// và trả về kết quả thành công (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenRelatedMemberNotFound()
     {
-        // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
-        _context.UserProfiles.Add(userProfile);
-
         var familyName = "TestFamily";
         var family = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
         _context.Families.Add(family);
@@ -235,41 +211,35 @@ public class GenerateEventDataCommandHandlerTests : TestBase
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(1);
         var generatedEvents = result.Value!;
         generatedEvents.First().ValidationErrors.Should().Contain("Related member 'NonExistentMember' not found in family 'TestFamily'.");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi AI tạo ra một sự kiện với RelatedMembers không tồn tại,
-        // hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công.
     }
 
     /// <summary>
     /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện được tạo thành công
     /// khi AI trả về một phản hồi hợp lệ và tất cả các thực thể liên quan được tìm thấy và ủy quyền.
     /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UserProfile giả lập, Family và Member, sau đó thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName và RelatedMembers hợp lệ. Thiết lập _mockAuthorizationService để trả về UserProfile. Thiết lập _mockFamilyAuthorizationService để trả về thành công khi AuthorizeFamilyAccess được gọi. Thiết lập _mockAIEventDtoValidator để trả về ValidationResult thành công. Tạo một GenerateEventDataCommand bất kỳ.
+    ///    - Arrange: Tạo một UserProfile, Family và Member, sau đó thêm vào DB.
+    ///               Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName và RelatedMembers hợp lệ.
+    ///               Thiết lập _mockAuthorizationService để CanManageFamily trả về true.
+    ///               Thiết lập _mockAIEventDtoValidator để trả về ValidationResult thành công.
+    ///               Tạo một GenerateEventDataCommand bất kỳ.
     ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về có chứa sự kiện được tạo. Kiểm tra xem không có lỗi xác thực nào.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện hợp lệ và tất cả các thực thể liên quan được tìm thấy và ủy quyền, hệ thống sẽ trả về sự kiện đó mà không có lỗi xác thực.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
+    ///              có chứa sự kiện được tạo và không có lỗi xác thực nào.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện hợp lệ
+    /// và tất cả các thực thể liên quan được tìm thấy và ủy quyền, hệ thống sẽ trả về sự kiện đó
+    /// mà không có lỗi xác thực.
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnEventsSuccessfully_WhenValidAIResponse()
     {
-        // Arrange
-        _context.Families.RemoveRange(_context.Families);
-        _context.Members.RemoveRange(_context.Members);
-        _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
-        _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
         var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
         _context.UserProfiles.Add(userProfile);
 
@@ -284,22 +254,17 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         _context.FamilyUsers.Add(familyUser);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _context.Members.Should().HaveCount(1);
-
         var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"startDate\": \"2023-01-01\", \"location\": \"Location 1\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"John Doe\"] } ] }";
         _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
                          .ReturnsAsync(aiResponseJson);
-        _mockUser.Setup(u => u.Roles).Returns([SystemRole.Admin.ToString()]);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id)).Returns(true);
         _mockAIEventDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>()))
                                 .ReturnsAsync(new ValidationResult());
 
         var command = _fixture.Create<GenerateEventDataCommand>();
 
-        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
@@ -307,9 +272,5 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         var generatedEvents = result.Value!;
         generatedEvents.First().Name.Should().Be("Event 1");
         generatedEvents.First().ValidationErrors.Should().BeEmpty();
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi AI tạo ra một sự kiện hợp lệ và tất cả các thực thể liên quan
-        // được tìm thấy và ủy quyền, hệ thống sẽ trả về sự kiện đó mà không có lỗi xác thực.
     }
 }
