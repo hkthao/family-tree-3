@@ -18,7 +18,7 @@ public class GetUploadedFileQueryHandlerTests : TestBase
     public GetUploadedFileQueryHandlerTests()
     {
         _mockConfigProvider = new Mock<IConfigProvider>();
-        _fixture.Customize(new AutoMoqCustomization());
+
 
         // Create a temporary directory for testing file storage
         _testStoragePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
@@ -61,7 +61,6 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("File not found.");
         result.ErrorSource.Should().Be("NotFound");
-        await Task.CompletedTask;
     }
 
     /// <summary>
@@ -89,7 +88,7 @@ public class GetUploadedFileQueryHandlerTests : TestBase
         result.Value.Should().NotBeNull();
         result.Value!.Content.Should().Equal(System.Text.Encoding.UTF8.GetBytes(fileContent));
         result.Value.ContentType.Should().Be("application/octet-stream"); // Default for .txt
-        await Task.CompletedTask;
+
     }
 
     /// <summary>
