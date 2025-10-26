@@ -45,24 +45,19 @@ public class DetectFacesCommandHandlerTests : TestBase
             _mockLogger.Object);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các khuôn mặt được phát hiện
+    /// khi dịch vụ Face API phát hiện khuôn mặt nhưng không có embedding (ví dụ: khuôn mặt không rõ ràng).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockFaceApiService để trả về một danh sách FaceDetectionResultDto không có embedding.
+    ///    - Act: Gọi phương thức Handle của handler với một DetectFacesCommand bất kỳ.
+    ///    - Assert: Kiểm tra xem kết quả trả về không phải là null. Kiểm tra xem số lượng khuôn mặt được phát hiện khớp với số lượng trả về từ Face API. Kiểm tra xem không có MemberId nào được gán (vì không có embedding để tìm kiếm).
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng handler xử lý đúng trường hợp không có embedding từ Face API,
+    /// trả về các khuôn mặt được phát hiện mà không cố gắng truy vấn vector store.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnDetectedFaces_WhenNoEmbeddings()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về các khuôn mặt được phát hiện
-        // khi dịch vụ Face API phát hiện khuôn mặt nhưng không có embedding (ví dụ: khuôn mặt không rõ ràng).
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockFaceApiService để trả về một danh sách FaceDetectionResultDto không có embedding.
-        // 2. Tạo một DetectFacesCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về không phải là null.
-        // 2. Kiểm tra xem số lượng khuôn mặt được phát hiện khớp với số lượng trả về từ Face API.
-        // 3. Kiểm tra xem không có MemberId nào được gán (vì không có embedding để tìm kiếm).
-
         // Arrange
         var faceResults = new List<FaceDetectionResultDto>
         {
@@ -88,10 +83,6 @@ public class DetectFacesCommandHandlerTests : TestBase
         var detectedFacesResponse = response.Value!;
         detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
         _mockVectorStore.Verify(vs => vs.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng handler xử lý đúng trường hợp không có embedding từ Face API,
-        // trả về các khuôn mặt được phát hiện mà không cố gắng truy vấn vector store.
     }
 
     [Fact]
