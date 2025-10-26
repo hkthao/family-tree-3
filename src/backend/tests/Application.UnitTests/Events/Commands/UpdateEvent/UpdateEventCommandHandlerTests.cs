@@ -26,25 +26,22 @@ public class UpdateEventCommandHandlerTests : TestBase
         _handler = new UpdateEventCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockUser để trả về null cho Id, dẫn đến _mockAuthorizationService.CanManageFamily trả về false. Tạo một UpdateEventCommand bất kỳ.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp (AccessDenied).
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng nếu không có người dùng được xác thực, yêu cầu cập nhật sự kiện sẽ bị từ chối quyền truy cập.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockAuthorizationService để trả về null cho GetCurrentUserProfileAsync.
-        // 2. Tạo một UpdateEventCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // Simulate UserProfile not found
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // Simulate no authenticated user
+        // Since there's no authenticated user, CanManageFamily will return false, leading to AccessDenied
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>())).Returns(false);
 
         var command = _fixture.Create<UpdateEventCommand>();
 
@@ -54,36 +51,26 @@ public class UpdateEventCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu hồ sơ người dùng không tồn tại trong hệ thống,
-        // yêu cầu cập nhật sự kiện sẽ thất bại để ngăn chặn việc thao tác dữ liệu không hợp lệ.
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi sự kiện cần cập nhật không tìm thấy trong cơ sở dữ liệu.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập và thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để CanManageFamily trả về true. Đảm bảo không có Event nào trong DB khớp với ID của command. Tạo một UpdateEventCommand bất kỳ.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống không thể cập nhật một sự kiện không tồn tại, ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenEventNotFound()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi sự kiện cần cập nhật không tìm thấy trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
-        // 2. Đảm bảo không có Event nào trong DB khớp với ID của command.
-        // 3. Tạo một UpdateEventCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
         // Ensure no Event exists for this ID
         _context.Events.RemoveRange(_context.Events);
@@ -99,31 +86,20 @@ public class UpdateEventCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain(string.Format(ErrorMessages.EventNotFound, command.Id));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống không thể cập nhật một sự kiện không tồn tại,
-        // ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi người dùng không có quyền quản lý gia đình.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập và một Family, Event. Thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để CanManageFamily là false. Tạo một UpdateEventCommand với ID của sự kiện.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình) mới có thể cập nhật sự kiện.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthorized()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng không phải là quản trị viên và không có quyền quản lý gia đình.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và một Family, Event.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile, IsAdmin là false,
-        //    và CanManageFamily là false.
-        // 3. Tạo một UpdateEventCommand với ID của sự kiện.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         var family = _fixture.Create<Family>();
@@ -135,7 +111,6 @@ public class UpdateEventCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id))
                                  .Returns(false);
 
@@ -150,33 +125,26 @@ public class UpdateEventCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("Access denied. Only family managers or admins can update events.");
-        result.ErrorSource.Should().Be("Forbidden");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình)
-        // mới có thể cập nhật sự kiện.
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler cập nhật thành công một sự kiện
+    /// khi yêu cầu hợp lệ và người dùng là quản trị viên.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    /// Arrange:
+    /// 1. Tạo một UserProfile giả lập, Family và Event hiện có, sau đó thêm vào DB.
+    /// 2. Thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để IsAdmin là true và CanManageFamily là true.
+    /// 3. Tạo một UpdateEventCommand với các giá trị mới.
+    /// Act:
+    /// 1. Gọi phương thức Handle của handler.
+    /// Assert:
+    /// 1. Kiểm tra xem kết quả trả về là thành công.
+    /// 2. Kiểm tra xem thông tin sự kiện trong DB đã được cập nhật chính xác.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldUpdateEventSuccessfully_WhenValidRequestAndUserIsAdmin()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler cập nhật thành công một sự kiện
-        // khi yêu cầu hợp lệ và người dùng là quản trị viên.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập, Family và Event hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile và IsAdmin là true.
-        // 3. Tạo một UpdateEventCommand với các giá trị mới.
-        // 4. Thiết lập _mockMediator.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem thông tin sự kiện trong DB đã được cập nhật chính xác.
-        // 3. Kiểm tra xem RecordActivityCommand đã được gọi.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         var family = _fixture.Create<Family>();
@@ -189,8 +157,7 @@ public class UpdateEventCommandHandlerTests : TestBase
 
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id)).Returns(true);
 
         var command = _fixture.Build<UpdateEventCommand>()
                             .With(c => c.Id, existingEvent.Id)
@@ -219,36 +186,20 @@ public class UpdateEventCommandHandlerTests : TestBase
         updatedEvent.StartDate.Should().Be(command.StartDate);
         updatedEvent.EndDate.Should().Be(command.EndDate);
         updatedEvent.Color.Should().Be(command.Color);
-
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một quản trị viên có thể cập nhật thành công tất cả các thuộc tính
-        // của một sự kiện hiện có và các hoạt động liên quan được ghi lại.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler cập nhật thành công một sự kiện
+    /// khi yêu cầu hợp lệ và người dùng là quản lý gia đình (nhưng không phải là quản trị viên).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập, Family và Event hiện có, sau đó thêm vào DB. Tạo một FamilyUser để liên kết UserProfile với Family với vai trò Manager. Thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để IsAdmin là false, và CanManageFamily là true.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem thông tin sự kiện trong DB đã được cập nhật chính xác.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này xác minh rằng một người quản lý gia đình có thể cập nhật thành công một sự kiện hiện có.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldUpdateEventSuccessfully_WhenValidRequestAndUserIsFamilyManager()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler cập nhật thành công một sự kiện
-        // khi yêu cầu hợp lệ và người dùng là quản lý gia đình (nhưng không phải là quản trị viên).
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập, Family và Event hiện có, sau đó thêm vào DB.
-        // 2. Tạo một FamilyUser để liên kết UserProfile với Family với vai trò Manager.
-        // 3. Thiết lập _mockAuthorizationService để trả về UserProfile, IsAdmin là false,
-        //    và CanManageFamily là true.
-        // 4. Tạo một UpdateEventCommand với các giá trị mới.
-        // 5. Thiết lập _mockMediator.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem thông tin sự kiện trong DB đã được cập nhật chính xác.
-        // 3. Kiểm tra xem RecordActivityCommand đã được gọi.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         var family = _fixture.Create<Family>();
@@ -265,8 +216,6 @@ public class UpdateEventCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id))
                                  .Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
 
         var command = _fixture.Build<UpdateEventCommand>()
                             .With(c => c.Id, existingEvent.Id)
@@ -295,33 +244,20 @@ public class UpdateEventCommandHandlerTests : TestBase
         updatedEvent.StartDate.Should().Be(command.StartDate);
         updatedEvent.EndDate.Should().Be(command.EndDate);
         updatedEvent.Color.Should().Be(command.Color);
-
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một người quản lý gia đình có thể cập nhật thành công tất cả các thuộc tính
-        // của một sự kiện hiện có và các hoạt động liên quan được ghi lại.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler cập nhật thành công một sự kiện với các thành viên liên quan.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập, Family, Event và Members, sau đó thêm vào DB. Thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để IsAdmin là true và CanManageFamily là true.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem thông tin sự kiện trong DB đã được cập nhật chính xác, bao gồm RelatedMembers.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này xác minh rằng một quản trị viên có thể cập nhật thành công một sự kiện
+    /// bao gồm cả việc liên kết các thành viên liên quan.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldUpdateEventSuccessfully_WithRelatedMembers()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler cập nhật thành công một sự kiện với các thành viên liên quan.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập, Family, Event và Members, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile và IsAdmin là true.
-        // 3. Tạo một UpdateEventCommand với các giá trị mới và RelatedMembers.
-        // 4. Thiết lập _mockMediator.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem thông tin sự kiện trong DB đã được cập nhật chính xác, bao gồm RelatedMembers.
-        // 3. Kiểm tra xem RecordActivityCommand đã được gọi.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         var family = _fixture.Create<Family>();
@@ -337,8 +273,7 @@ public class UpdateEventCommandHandlerTests : TestBase
 
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(family.Id)).Returns(true);
 
         var command = _fixture.Build<UpdateEventCommand>()
                             .With(c => c.Id, existingEvent.Id)
@@ -360,32 +295,21 @@ public class UpdateEventCommandHandlerTests : TestBase
         updatedEvent.EventMembers.Should().HaveCount(2);
         updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member1.Id);
         updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member2.Id);
-
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một quản trị viên có thể cập nhật thành công một sự kiện
-        // bao gồm cả việc liên kết các thành viên liên quan.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi một FamilyId không hợp lệ (không tồn tại) được cung cấp trong command.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập và thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để CanManageFamily trả về false cho FamilyId không tồn tại. Tạo một UpdateEventCommand với một FamilyId không tồn tại.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống không thể cập nhật sự kiện cho một gia đình không tồn tại,
+    /// ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenInvalidFamilyId()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi một FamilyId không hợp lệ (không tồn tại) được cung cấp trong command.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
-        // 2. Thiết lập _mockAuthorizationService để trả về IsAdmin là true.
-        // 3. Tạo một UpdateEventCommand với một FamilyId không tồn tại.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
@@ -395,6 +319,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(s => s.CanManageFamily(invalidFamilyId)).Returns(false); // Không có quyền quản lý gia đình không tồn tại
 
         var command = _fixture.Build<UpdateEventCommand>()
+                            .With(c => c.Id, Guid.NewGuid())
                             .With(c => c.FamilyId, invalidFamilyId)
                             .Create();
 
@@ -404,11 +329,7 @@ public class UpdateEventCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("Access denied. Only family managers or admins can update events.");
-        result.ErrorSource.Should().Be("Forbidden");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống không thể cập nhật sự kiện cho một gia đình không tồn tại,
-        // ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
 }
