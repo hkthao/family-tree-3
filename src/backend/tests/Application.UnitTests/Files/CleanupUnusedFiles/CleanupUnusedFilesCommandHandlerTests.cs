@@ -1,10 +1,9 @@
-using AutoFixture.AutoMoq;
+using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Files.CleanupUnusedFiles;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using FluentAssertions;
 using Moq;
 using Xunit;
 
@@ -20,188 +19,211 @@ public class CleanupUnusedFilesCommandHandlerTests : TestBase
     {
         _mockFileStorage = new Mock<IFileStorage>();
         _mockDateTime = new Mock<IDateTime>();
-        _fixture.Customize(new AutoMoqCustomization());
 
-        _handler = new CleanupUnusedFilesCommandHandler(
-            _context,
-            _mockFileStorage.Object,
-            _mockDateTime.Object
-        );
+        _handler = new CleanupUnusedFilesCommandHandler(_context, _mockFileStorage.Object, _mockDateTime.Object);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về thành công với số lượng file đã xóa là 0
+    /// khi không tìm thấy file không sử dụng nào trong cơ sở dữ liệu.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập thời gian hiện tại của hệ thống. Đảm bảo cơ sở dữ liệu không chứa FileMetadata nào thỏa mãn điều kiện xóa.
+    ///    - Act: Gọi phương thức Handle của handler với một CleanupUnusedFilesCommand.
+    ///    - Assert: Kiểm tra rằng kết quả trả về là thành công và giá trị là 0.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Khi không có file nào để dọn dẹp, hệ thống nên báo cáo thành công
+    /// mà không thực hiện bất kỳ thao tác xóa nào.
+    /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnZeroWhenNoUnusedFiles()
+    public async Task Handle_NoUnusedFilesFound_ReturnsSuccessWithZeroDeleted()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về 0 khi không có tệp nào cần dọn dẹp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockDateTime.Now. Tạo một số FileMetadata nhưng không có cái nào đáp ứng tiêu chí 'unused'.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công với giá trị 0. Xác minh _fileStorage.DeleteFileAsync không được gọi.
-        var now = DateTime.UtcNow;
+        // Arrange
+        var now = _fixture.Create<DateTime>();
         _mockDateTime.Setup(dt => dt.Now).Returns(now);
-
         var command = new CleanupUnusedFilesCommand { OlderThan = TimeSpan.FromDays(30) };
 
-        // Add a file that is active (should not be deleted)
-        _context.FileMetadata.Add(new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "active_file.jpg",
-            Url = "http://example.com/active_file.jpg",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/jpeg",
-            IsActive = true,
-            Created = now.Subtract(TimeSpan.FromDays(40))
-        });
-
-        // Add a file that is used (should not be deleted)
-        _context.FileMetadata.Add(new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "used_file.jpg",
-            Url = "http://example.com/used_file.jpg",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/jpeg",
-            IsActive = false,
-            UsedById = Guid.NewGuid(), // Used by some entity
-            Created = now.Subtract(TimeSpan.FromDays(40))
-        });
-
-        // Add a file that is not old enough (should not be deleted)
-        _context.FileMetadata.Add(new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "recent_file.jpg",
-            Url = "http://example.com/recent_file.jpg",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/jpeg",
-            IsActive = false,
-            UsedById = null,
-            Created = now.Subtract(TimeSpan.FromDays(10)) // Not older than 30 days
-        });
-
-        await _context.SaveChangesAsync();
-
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(0);
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(0, result.Value);
         _mockFileStorage.Verify(fs => fs.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-        _context.FileMetadata.Count().Should().Be(3); // No files should be deleted from DB
-        // 💡 Giải thích: Không có tệp nào đáp ứng tất cả các tiêu chí để được dọn dẹp, vì vậy không có tệp nào bị xóa và số lượng tệp đã xóa là 0.
+        Assert.Equal(0, _context.FileMetadata.Count());
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler xóa thành công các file không sử dụng
+    /// và trả về số lượng file đã xóa chính xác.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập thời gian hiện tại. Thêm các FileMetadata không sử dụng vào cơ sở dữ liệu.
+    ///               Cấu hình _mockFileStorage để trả về thành công khi xóa file.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra rằng kết quả trả về là thành công và số lượng file đã xóa là chính xác.
+    ///              Xác minh rằng _mockFileStorage.DeleteFileAsync được gọi cho mỗi file.
+    ///              Xác minh rằng các file đã bị xóa khỏi cơ sở dữ liệu.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Khi có các file không sử dụng và việc xóa khỏi storage thành công,
+    /// hệ thống nên xóa chúng khỏi cả storage và cơ sở dữ liệu, đồng thời báo cáo số lượng chính xác.
+    /// </summary>
     [Fact]
-    public async Task Handle_ShouldDeleteUnusedFilesSuccessfully()
+    public async Task Handle_UnusedFilesFoundAndSuccessfullyDeleted_ReturnsSuccessWithCorrectCount()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler xóa thành công các tệp không sử dụng khỏi bộ lưu trữ và cơ sở dữ liệu.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockDateTime.Now. Tạo một số FileMetadata đáp ứng tiêu chí 'unused'. Mock _fileStorage.DeleteFileAsync trả về Result.Success().
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công với số lượng tệp đã xóa chính xác. Xác minh _fileStorage.DeleteFileAsync được gọi cho mỗi tệp không sử dụng. Xác minh các FileMetadata đã bị xóa khỏi Context.
-        var now = DateTime.UtcNow;
+        // Arrange
+        var now = _fixture.Create<DateTime>();
         _mockDateTime.Setup(dt => dt.Now).Returns(now);
-
+        var cutoffDate = now.Subtract(TimeSpan.FromDays(30));
         var command = new CleanupUnusedFilesCommand { OlderThan = TimeSpan.FromDays(30) };
 
-        var unusedFile1 = new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "unused_file1.jpg",
-            Url = "http://example.com/unused_file1.jpg",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/jpeg",
-            IsActive = false,
-            UsedById = null,
-            Created = now.Subtract(TimeSpan.FromDays(40)) // Older than 30 days
-        };
-        var unusedFile2 = new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "unused_file2.png",
-            Url = "http://example.com/unused_file2.png",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/png",
-            IsActive = false,
-            UsedById = null,
-            Created = now.Subtract(TimeSpan.FromDays(50)) // Older than 30 days
-        };
+        var unusedFile1 = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.Subtract(TimeSpan.FromDays(1)))
+            .Create();
+        var unusedFile2 = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.Subtract(TimeSpan.FromDays(10)))
+            .Create();
+        var usedFile = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, true) // Active file
+            .With(fm => fm.UsedById, _fixture.Create<Guid>())
+            .With(fm => fm.Created, cutoffDate.Subtract(TimeSpan.FromDays(5)))
+            .Create();
+        var newFile = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.AddDays(1)) // Newer than cutoff
+            .Create();
 
-        // Add a file that should NOT be deleted (e.g., active)
-        var activeFile = new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "active_file.gif",
-            Url = "http://example.com/active_file.gif",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/gif",
-            IsActive = true,
-            UsedById = null,
-            Created = now.Subtract(TimeSpan.FromDays(60))
-        };
-
-        _context.FileMetadata.AddRange(unusedFile1, unusedFile2, activeFile);
-        await _context.SaveChangesAsync();
+        _context.FileMetadata.AddRange(unusedFile1, unusedFile2, usedFile, newFile);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
         _mockFileStorage.Setup(fs => fs.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(2); // Two files should be deleted
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value); // unusedFile1 and unusedFile2 should be deleted
 
         _mockFileStorage.Verify(fs => fs.DeleteFileAsync(unusedFile1.Url, It.IsAny<CancellationToken>()), Times.Once);
         _mockFileStorage.Verify(fs => fs.DeleteFileAsync(unusedFile2.Url, It.IsAny<CancellationToken>()), Times.Once);
-        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(activeFile.Url, It.IsAny<CancellationToken>()), Times.Never);
+        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(usedFile.Url, It.IsAny<CancellationToken>()), Times.Never);
+        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(newFile.Url, It.IsAny<CancellationToken>()), Times.Never);
 
-        _context.FileMetadata.Should().ContainSingle(fm => fm.Id == activeFile.Id); // Only active file should remain
-        _context.FileMetadata.Should().NotContain(fm => fm.Id == unusedFile1.Id);
-        _context.FileMetadata.Should().NotContain(fm => fm.Id == unusedFile2.Id);
-        // 💡 Giải thích: Hai tệp không sử dụng đã được xóa thành công khỏi bộ lưu trữ và cơ sở dữ liệu, trong khi tệp đang hoạt động vẫn còn nguyên.
+        Assert.Equal(2, _context.FileMetadata.Count()); // usedFile and newFile should remain
+        Assert.Contains(usedFile, _context.FileMetadata);
+        Assert.Contains(newFile, _context.FileMetadata);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler xử lý đúng khi một số file không sử dụng không thể xóa khỏi storage.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập thời gian hiện tại. Thêm các FileMetadata không sử dụng vào cơ sở dữ liệu.
+    ///               Cấu hình _mockFileStorage để trả về thành công cho một số file và thất bại cho các file khác.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra rằng kết quả trả về là thành công và số lượng file đã xóa là chính xác (chỉ những file xóa thành công).
+    ///              Xác minh rằng _mockFileStorage.DeleteFileAsync được gọi cho tất cả các file không sử dụng.
+    ///              Xác minh rằng chỉ những file xóa thành công mới bị xóa khỏi cơ sở dữ liệu.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Hệ thống nên tiếp tục xử lý các file khác ngay cả khi một số file không thể xóa.
+    /// Chỉ những file được xóa thành công khỏi storage mới nên bị xóa khỏi cơ sở dữ liệu để duy trì tính nhất quán.
+    /// </summary>
     [Fact]
-    public async Task Handle_ShouldNotDeleteMetadataWhenFileStorageDeletionFails()
+    public async Task Handle_UnusedFilesFoundButPartialDeletionFails_ReturnsSuccessWithCorrectCount()
     {
-        // 🎯 Mục tiêu của test: Xác minh rằng siêu dữ liệu không bị xóa khỏi DB nếu xóa tệp khỏi bộ lưu trữ thất bại.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockDateTime.Now. Tạo một FileMetadata đáp ứng tiêu chí 'unused'. Mock _fileStorage.DeleteFileAsync trả về Result.Failure.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công với giá trị 0. Xác minh _fileStorage.DeleteFileAsync được gọi. Xác minh FileMetadata vẫn còn trong Context.
-        var now = DateTime.UtcNow;
+        // Arrange
+        var now = _fixture.Create<DateTime>();
         _mockDateTime.Setup(dt => dt.Now).Returns(now);
-
+        var cutoffDate = now.Subtract(TimeSpan.FromDays(30));
         var command = new CleanupUnusedFilesCommand { OlderThan = TimeSpan.FromDays(30) };
 
-        var unusedFile = new FileMetadata
-        {
-            Id = Guid.NewGuid(),
-            FileName = "failed_delete_file.jpg",
-            Url = "http://example.com/failed_delete_file.jpg",
-            UploadedBy = Guid.NewGuid().ToString(),
-            ContentType = "image/jpeg",
-            IsActive = false,
-            UsedById = null,
-            Created = now.Subtract(TimeSpan.FromDays(40)) // Older than 30 days
-        };
+        var unusedFileSuccess1 = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.Subtract(TimeSpan.FromDays(1)))
+            .Create();
+        var unusedFileFail = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.Subtract(TimeSpan.FromDays(5)))
+            .Create();
+        var unusedFileSuccess2 = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.Subtract(TimeSpan.FromDays(10)))
+            .Create();
 
-        _context.FileMetadata.Add(unusedFile);
-        await _context.SaveChangesAsync();
+        _context.FileMetadata.AddRange(unusedFileSuccess1, unusedFileFail, unusedFileSuccess2);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockFileStorage.Setup(fs => fs.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Failure("Storage deletion failed.", "FileStorage"));
+        _mockFileStorage.SetupSequence(fs => fs.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Result.Success()) // For unusedFileSuccess1
+            .ReturnsAsync(Result.Failure("Failed to delete")) // For unusedFileFail
+            .ReturnsAsync(Result.Success()); // For unusedFileSuccess2
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue(); // Handler returns success even if some deletions fail, but count is 0 for failed ones
-        result.Value.Should().Be(0); // No files successfully deleted from DB
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, result.Value); // unusedFileSuccess1 and unusedFileSuccess2 should be deleted
 
-        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(unusedFile.Url, It.IsAny<CancellationToken>()), Times.Once);
-        _context.FileMetadata.Should().ContainSingle(fm => fm.Id == unusedFile.Id); // Metadata should still be in DB
-        // 💡 Giải thích: Mặc dù tệp được xác định là không sử dụng, nhưng do lỗi khi xóa khỏi bộ lưu trữ, siêu dữ liệu của nó không được xóa khỏi cơ sở dữ liệu.
+        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(unusedFileSuccess1.Url, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(unusedFileFail.Url, It.IsAny<CancellationToken>()), Times.Once);
+        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(unusedFileSuccess2.Url, It.IsAny<CancellationToken>()), Times.Once);
+
+        Assert.Equal(1, _context.FileMetadata.Count()); // unusedFileFail should remain
+        Assert.Contains(unusedFileFail, _context.FileMetadata);
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler không xóa bất kỳ file nào
+    /// khi không có file nào cũ hơn ngày cắt (cutoff date).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập thời gian hiện tại. Thêm các FileMetadata không sử dụng vào cơ sở dữ liệu,
+    ///               nhưng tất cả đều mới hơn hoặc bằng ngày cắt.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra rằng kết quả trả về là thành công và số lượng file đã xóa là 0.
+    ///              Xác minh rằng _mockFileStorage.DeleteFileAsync không bao giờ được gọi.
+    ///              Xác minh rằng tất cả các file ban đầu vẫn còn trong cơ sở dữ liệu.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Chỉ những file cũ hơn ngày cắt mới đủ điều kiện để xóa.
+    /// Nếu không có file nào thỏa mãn điều kiện này, không có thao tác xóa nào nên được thực hiện.
+    /// </summary>
+    [Fact]
+    public async Task Handle_NoFilesOlderThanCutoffDate_ReturnsSuccessWithZeroDeleted()
+    {
+        // Arrange
+        var now = _fixture.Create<DateTime>();
+        _mockDateTime.Setup(dt => dt.Now).Returns(now);
+        var cutoffDate = now.Subtract(TimeSpan.FromDays(30));
+        var command = new CleanupUnusedFilesCommand { OlderThan = TimeSpan.FromDays(30) };
+
+        var unusedFileNotOldEnough1 = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate.AddDays(5)) // Newer than cutoff
+            .Create();
+        var unusedFileNotOldEnough2 = _fixture.Build<FileMetadata>()
+            .With(fm => fm.IsActive, false)
+            .With(fm => fm.UsedById, (Guid?)null)
+            .With(fm => fm.Created, cutoffDate) // Exactly at cutoff
+            .Create();
+
+        _context.FileMetadata.AddRange(unusedFileNotOldEnough1, unusedFileNotOldEnough2);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(0, result.Value);
+
+        _mockFileStorage.Verify(fs => fs.DeleteFileAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+
+        Assert.Equal(2, _context.FileMetadata.Count());
+        Assert.Contains(unusedFileNotOldEnough1, _context.FileMetadata);
+        Assert.Contains(unusedFileNotOldEnough2, _context.FileMetadata);
     }
 }
