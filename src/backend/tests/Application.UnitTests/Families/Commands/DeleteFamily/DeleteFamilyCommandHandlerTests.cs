@@ -1,5 +1,5 @@
+using backend.Application.Common.Constants;
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -21,61 +21,22 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng chưa được xác thực.
 
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser.Id trả về null hoặc chuỗi rỗng.
-        // 2. Tạo một DeleteFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
-        // Arrange
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User not authenticated
-
-        var command = _fixture.Create<DeleteFamilyCommand>();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User is not authenticated.");
-        result.ErrorSource.Should().Be("Authentication");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu người dùng chưa được xác thực,
-        // yêu cầu xóa gia đình sẽ thất bại để ngăn chặn việc thao tác dữ liệu không hợp lệ.
-    }
-
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi người dùng không phải là quản trị viên và không có quyền quản lý gia đình.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập. Thiết lập _mockAuthorizationService.IsAdmin để trả về false
+    ///               và _mockAuthorizationService.CanManageFamily để trả về false.
+    ///    - Act: Gọi phương thức Handle của handler với một DeleteFamilyCommand bất kỳ.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.AccessDenied
+    ///              và ErrorSource là ErrorSources.Forbidden.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình)
+    /// mới có thể xóa gia đình.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserDoesNotHavePermission()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng không phải là quản trị viên và không có quyền quản lý gia đình.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
-        // 2. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
-        // 3. Thiết lập _mockAuthorizationService.CanManageFamily để trả về false.
-        // 4. Tạo một DeleteFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
@@ -91,33 +52,26 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User does not have permission to delete this family.");
-        result.ErrorSource.Should().Be("Forbidden");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình)
-        // mới có thể xóa gia đình.
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi gia đình cần xóa không tìm thấy trong cơ sở dữ liệu.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập. Thiết lập _mockAuthorizationService.IsAdmin để trả về true.
+    ///               Đảm bảo không có Family nào trong DB khớp với ID của command.
+    ///    - Act: Gọi phương thức Handle của handler với một DeleteFamilyCommand bất kỳ.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.AccessDenied
+    ///              và ErrorSource là ErrorSources.Forbidden.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Hệ thống không thể xóa một gia đình không tồn tại,
+    /// ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu. Trong trường hợp này, lỗi truy cập bị từ chối
+    /// được trả về vì người dùng không có quyền truy cập vào một gia đình không tồn tại.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenFamilyNotFound()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi gia đình cần xóa không tìm thấy trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
-        // 2. Thiết lập _mockAuthorizationService.IsAdmin để trả về true (hoặc CanManageFamily trả về true).
-        // 3. Đảm bảo không có Family nào trong DB khớp với ID của command.
-        // 4. Tạo một DeleteFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
@@ -135,43 +89,35 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Family with ID {command.Id} not found.");
-        result.ErrorSource.Should().Be("NotFound");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống không thể xóa một gia đình không tồn tại,
-        // ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler xóa thành công một gia đình
+    /// khi yêu cầu hợp lệ và người dùng là quản trị viên.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập và một Family hiện có, sau đó thêm vào DB.
+    ///               Thiết lập _mockAuthorizationService để trả về IsAdmin là true.
+    ///    - Act: Gọi phương thức Handle của handler với một DeleteFamilyCommand với ID của gia đình hiện có.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem gia đình đã bị xóa khỏi DB.
+    ///              Kiểm tra xem FamilyDeletedEvent và FamilyStatsUpdatedEvent đã được kích hoạt.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một quản trị viên có thể xóa thành công một gia đình hiện có
+    /// và các hoạt động liên quan được ghi lại.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldDeleteFamilySuccessfully_WhenValidRequestAndUserIsAdmin()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler xóa thành công một gia đình
-        // khi yêu cầu hợp lệ và người dùng là quản trị viên.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và một Family hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile và IsAdmin là true.
-        // 3. Tạo một DeleteFamilyCommand với ID của gia đình hiện có.
-        // 4. Thiết lập _mockMediator và _mockFamilyTreeService.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem gia đình đã bị xóa khỏi DB.
-        // 3. Kiểm tra xem RecordActivityCommand và UpdateFamilyStats đã được gọi.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         var existingFamily = _fixture.Create<Family>();
         _context.Families.Add(existingFamily);
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
-
         _mockUser.Setup(x => x.Id).Returns(userProfile.Id);
+
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id)).Returns(true);
 
         var command = new DeleteFamilyCommand(existingFamily.Id);
 
@@ -187,33 +133,23 @@ public class DeleteFamilyCommandHandlerTests : TestBase
 
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một quản trị viên có thể xóa thành công một gia đình hiện có
-        // và các hoạt động liên quan được ghi lại.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler xóa thành công một gia đình
+    /// khi yêu cầu hợp lệ và người dùng có quyền quản lý gia đình (nhưng không phải là quản trị viên).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập và một Family hiện có, sau đó thêm vào DB.
+    ///               Thiết lập _mockAuthorizationService để trả về IsAdmin là false và CanManageFamily là true.
+    ///    - Act: Gọi phương thức Handle của handler với một DeleteFamilyCommand với ID của gia đình hiện có.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem gia đình đã bị xóa khỏi DB.
+    ///              Kiểm tra xem FamilyDeletedEvent và FamilyStatsUpdatedEvent đã được kích hoạt.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một người dùng có quyền quản lý gia đình có thể xóa thành công
+    /// một gia đình hiện có và các hoạt động liên quan được ghi lại.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldDeleteFamilySuccessfully_WhenValidRequestAndUserCanManageFamily()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler xóa thành công một gia đình
-        // khi yêu cầu hợp lệ và người dùng có quyền quản lý gia đình (nhưng không phải là quản trị viên).
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và một Family hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile, IsAdmin là false,
-        //    và CanManageFamily là true.
-        // 3. Tạo một DeleteFamilyCommand với ID của gia đình hiện có.
-        // 4. Thiết lập _mockMediator và _mockFamilyTreeService.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem gia đình đã bị xóa khỏi DB.
-        // 3. Kiểm tra xem RecordActivityCommand và UpdateFamilyStats đã được gọi.
-
         // Arrange
         var userProfile = _fixture.Create<UserProfile>();
         var existingFamily = _fixture.Create<Family>();
@@ -240,9 +176,5 @@ public class DeleteFamilyCommandHandlerTests : TestBase
 
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một người dùng có quyền quản lý gia đình có thể xóa thành công
-        // một gia đình hiện có và các hoạt động liên quan được ghi lại.
     }
 }

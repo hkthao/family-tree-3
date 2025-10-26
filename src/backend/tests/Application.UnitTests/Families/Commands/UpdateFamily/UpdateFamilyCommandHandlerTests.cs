@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.UpdateFamily;
@@ -49,8 +50,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User does not have permission to update this family.");
-        result.ErrorSource.Should().Be("Forbidden");
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình)
@@ -90,8 +91,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Family with ID {command.Id} not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, command.Id));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng hệ thống không thể cập nhật một gia đình không tồn tại,

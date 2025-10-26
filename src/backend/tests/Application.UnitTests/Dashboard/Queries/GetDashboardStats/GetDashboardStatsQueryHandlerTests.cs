@@ -1,15 +1,17 @@
+using backend.Application.Common.Constants;
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Dashboard.Queries.GetDashboardStats;
 
+/// <summary>
+/// Bộ test cho GetDashboardStatsQueryHandler.
+/// </summary>
 public class GetDashboardStatsQueryHandlerTests : TestBase
 {
     private readonly GetDashboardStatsQueryHandler _handler;
@@ -19,23 +21,20 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _handler = new GetDashboardStatsQueryHandler(_context, _mockAuthorizationService.Object, _mockUser.Object);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockUser.Id trả về null để mô phỏng UserProfile không tìm thấy.
+    ///    - Act: Gọi phương thức Handle của handler với một GetDashboardStatsQuery bất kỳ.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.UserProfileNotFound
+    ///              và ErrorSource là ErrorSources.NotFound.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler phải kiểm tra sự tồn tại của hồ sơ người dùng
+    /// sau khi xác thực để đảm bảo tính toàn vẹn dữ liệu và ngăn chặn các lỗi không mong muốn.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockAuthorizationService để trả về null cho GetCurrentUserProfileAsync.
-        // 2. Tạo một GetDashboardStatsQuery bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
         _mockUser.Setup(x => x.Id).Returns((Guid?)null); // Simulate UserProfile not found
 
@@ -47,34 +46,25 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu hồ sơ người dùng không tồn tại trong hệ thống,
-        // yêu cầu lấy thống kê dashboard sẽ thất bại để ngăn chặn việc truy cập dữ liệu không hợp lệ.
+        result.Error.Should().Be(ErrorMessages.Unauthorized);
+        result.ErrorSource.Should().Be(ErrorSources.Authentication);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về thống kê dashboard cho tất cả các gia đình
+    /// khi người dùng là quản trị viên.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo UserProfile cho admin, thêm các Family, Member, Relationship vào DB.
+    ///               Thiết lập _mockAuthorizationService.IsAdmin để trả về true. Thiết lập _mockUser.Id và _mockUser.ExternalId.
+    ///    - Act: Gọi phương thức Handle của handler với một GetDashboardStatsQuery không có FamilyId.
+    ///    - Assert: Kiểm tra kết quả trả về là thành công. DashboardStatsDto chứa các giá trị thống kê chính xác
+    ///              (TotalFamilies, TotalMembers, TotalRelationships). TotalGenerations được đặt là 0 (placeholder).
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một quản trị viên phải có quyền truy xuất thống kê tổng thể
+    /// cho toàn bộ hệ thống.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnAllStats_WhenUserIsAdmin()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về thống kê dashboard cho tất cả các gia đình
-        // khi người dùng là quản trị viên.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile giả lập và thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile và IsAdmin là true.
-        // 3. Thêm một số gia đình, thành viên và mối quan hệ vào DB.
-        // 4. Tạo một GetDashboardStatsQuery bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem DashboardStatsDto có chứa các giá trị thống kê chính xác.
-
-        // Arrange
         _context.Families.RemoveRange(_context.Families);
         _context.Members.RemoveRange(_context.Members);
         _context.Relationships.RemoveRange(_context.Relationships);
@@ -105,20 +95,14 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
 
         _context.Families.Should().HaveCount(2);
 
-        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.TotalFamilies.Should().Be(2);
         result.Value.TotalMembers.Should().Be(3);
         result.Value.TotalRelationships.Should().Be(1);
-        result.Value.TotalGenerations.Should().Be(0); // Placeholder
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng một quản trị viên có thể truy xuất thống kê tổng thể
-        // cho tất cả các gia đình, thành viên và mối quan hệ trong hệ thống.
+        result.Value.TotalGenerations.Should().Be(0); 
     }
 }

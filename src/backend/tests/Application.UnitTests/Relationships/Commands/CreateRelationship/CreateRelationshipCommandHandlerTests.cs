@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using backend.Application.Common.Interfaces;
@@ -46,8 +47,8 @@ public class CreateRelationshipCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Be(ErrorMessages.Unauthorized);
+        result.ErrorSource.Should().Be(ErrorSources.Authentication);
         // 💡 Giải thích: Không thể tạo mối quan hệ nếu không tìm thấy hồ sơ người dùng hiện tại.
     }
 
@@ -72,8 +73,8 @@ public class CreateRelationshipCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Source member with ID {command.SourceMemberId} not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Source member with ID {command.SourceMemberId}"));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
         // 💡 Giải thích: Không thể tạo mối quan hệ nếu thành viên nguồn không tồn tại.
     }
 
@@ -107,8 +108,8 @@ public class CreateRelationshipCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers or admins can create relationships.");
-        result.ErrorSource.Should().Be("Forbidden");
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
         // 💡 Giải thích: Người dùng phải có quyền quản lý gia đình để tạo mối quan hệ.
     }
 
