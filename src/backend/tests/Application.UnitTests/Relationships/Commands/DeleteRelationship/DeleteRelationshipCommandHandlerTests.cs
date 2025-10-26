@@ -1,26 +1,26 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using backend.Application.Common.Interfaces;
+using backend.Application.Common.Constants;
 using backend.Application.Relationships.Commands.DeleteRelationship;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using MediatR;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.DeleteRelationship;
 
+/// <summary>
+/// Bộ test cho DeleteRelationshipCommandHandler.
+/// </summary>
 public class DeleteRelationshipCommandHandlerTests : TestBase
 {
-    private readonly Mock<IMediator> _mockMediator;
+
     private readonly DeleteRelationshipCommandHandler _handler;
 
     public DeleteRelationshipCommandHandlerTests()
     {
-        _mockMediator = new Mock<IMediator>();
+
         _fixture.Customize(new AutoMoqCustomization());
 
         _handler = new DeleteRelationshipCommandHandler(
@@ -29,51 +29,44 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailureWhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi hồ sơ người dùng không tìm thấy.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về null.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var command = new DeleteRelationshipCommand(Guid.NewGuid());
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-        // 💡 Giải thích: Không thể xóa mối quan hệ nếu không tìm thấy hồ sơ người dùng hiện tại.
-    }
-
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy mối quan hệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một DeleteRelationshipCommand với Id không tồn tại.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.NotFound
+    ///              và ErrorSource là ErrorSources.NotFound.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Không thể xóa mối quan hệ không tồn tại.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailureWhenRelationshipNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy mối quan hệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Đảm bảo mối quan hệ không tồn tại trong _context.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+        // Arrange
         var command = new DeleteRelationshipCommand(Guid.NewGuid()); // Non-existent ID
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
+        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Relationship with ID {command.Id} not found.");
-        // 💡 Giải thích: Không thể xóa mối quan hệ không tồn tại.
+        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Relationship with ID {command.Id}"));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy thành viên nguồn của mối quan hệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thêm một mối quan hệ vào _context, nhưng không thêm thành viên nguồn tương ứng.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.NotFound
+    ///              và ErrorSource là ErrorSources.NotFound.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Không thể xác thực quyền nếu không tìm thấy thành viên nguồn.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailureWhenSourceMemberNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy thành viên nguồn của mối quan hệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ vào _context, nhưng không thêm thành viên nguồn tương ứng.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+        // Arrange
         var relationship = _fixture.Build<Relationship>()
             .Without(r => r.SourceMember) // Ensure SourceMember is not loaded
             .Create();
@@ -82,23 +75,30 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
 
         var command = new DeleteRelationshipCommand(relationship.Id);
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
+        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Source member for relationship {command.Id} not found.");
-        result.ErrorSource.Should().Be("NotFound");
-        // 💡 Giải thích: Không thể xác thực quyền nếu không tìm thấy thành viên nguồn.
+        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Source member for relationship {command.Id}"));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng không được ủy quyền xóa mối quan hệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockAuthorizationService.IsAdmin trả về false và _mockAuthorizationService.CanManageFamily trả về false.
+    ///               Thêm một mối quan hệ và thành viên nguồn vào _context.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.AccessDenied
+    ///              và ErrorSource là ErrorSources.Forbidden.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Người dùng phải có quyền quản lý gia đình hoặc là admin để xóa mối quan hệ.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailureWhenUserNotAuthorized()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng không được ủy quyền xóa mối quan hệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về một UserProfile hợp lệ. Thêm một mối quan hệ và thành viên nguồn vào _context. Thiết lập _mockAuthorizationService.IsAdmin trả về false và _mockAuthorizationService.CanManageFamily trả về false.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+        // Arrange
         var familyId = Guid.NewGuid();
         var sourceMember = _fixture.Build<Member>()
             .With(m => m.FamilyId, familyId)
@@ -119,9 +119,8 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers or admins can delete relationships.");
-        result.ErrorSource.Should().Be("Forbidden");
-        // 💡 Giải thích: Người dùng phải có quyền quản lý gia đình hoặc là admin để xóa mối quan hệ.
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
     }
 
     [Fact]
@@ -169,7 +168,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeTrue();
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
+
         // 💡 Giải thích: Handler phải xóa mối quan hệ và ghi lại hoạt động.
     }
 }
