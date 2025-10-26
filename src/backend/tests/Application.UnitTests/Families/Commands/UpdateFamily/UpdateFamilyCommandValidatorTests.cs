@@ -290,42 +290,82 @@ public class UpdateFamilyCommandValidatorTests
         result.ShouldNotHaveValidationErrorFor(x => x.AvatarUrl);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility là null.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateFamilyCommand với Visibility là null.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính Visibility với thông báo lỗi "Visibility cannot be null.".
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Visibility là trường bắt buộc và không được để null.
+    /// </summary>
     [Fact]
     public void ShouldHaveError_WhenVisibilityIsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility là null.
+        // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name", Visibility = null! };
+        // Act
         var result = _validator.TestValidate(command);
+        // Assert
         result.ShouldHaveValidationErrorFor(x => x.Visibility)
               .WithErrorMessage("Visibility cannot be null.");
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility là chuỗi rỗng.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateFamilyCommand với Visibility là chuỗi rỗng.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính Visibility với thông báo lỗi "Visibility cannot be empty.".
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Visibility là trường bắt buộc và không được để trống.
+    /// </summary>
     [Fact]
     public void ShouldHaveError_WhenVisibilityIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility là chuỗi rỗng.
+        // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name", Visibility = string.Empty };
+        // Act
         var result = _validator.TestValidate(command);
+        // Assert
         result.ShouldHaveValidationErrorFor(x => x.Visibility)
               .WithErrorMessage("Visibility cannot be empty.");
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateFamilyCommand với Visibility không hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem có lỗi xác thực cho thuộc tính Visibility với thông báo lỗi "Visibility must be 'Public' or 'Private'.".
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Visibility phải là một trong các giá trị hợp lệ ('Public' hoặc 'Private').
+    /// </summary>
     [Fact]
     public void ShouldHaveError_WhenVisibilityIsInvalid()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility không hợp lệ.
+        // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name", Visibility = "Invalid" };
+        // Act
         var result = _validator.TestValidate(command);
+        // Assert
         result.ShouldHaveValidationErrorFor(x => x.Visibility)
               .WithErrorMessage("Visibility must be 'Public' or 'Private'.");
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh không có lỗi khi Visibility hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateFamilyCommand với Visibility hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator.
+    ///    - Assert: Kiểm tra xem không có lỗi xác thực cho thuộc tính Visibility.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Visibility hợp lệ không nên gây ra lỗi xác thực.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveError_WhenVisibilityIsValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Visibility hợp lệ.
+        // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Valid Name", Visibility = "Public" };
+        // Act
         var result = _validator.TestValidate(command);
+        // Assert
         result.ShouldNotHaveValidationErrorFor(x => x.Visibility);
     }
 }
