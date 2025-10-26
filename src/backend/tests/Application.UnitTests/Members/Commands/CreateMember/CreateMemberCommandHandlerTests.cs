@@ -68,6 +68,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     {
         _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
         var command = _fixture.Create<CreateMemberCommand>();
 
@@ -130,6 +131,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     {
         _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
         var command = _fixture.Build<CreateMemberCommand>()
             .With(c => c.IsRoot, true)
@@ -166,6 +168,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     {
         _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
         var existingRoot = _fixture.Build<Member>()
             .With(m => m.FamilyId, Guid.NewGuid())
@@ -192,5 +195,37 @@ public class CreateMemberCommandHandlerTests : TestBase
 
         _context.Members.Should().Contain(m => m.FirstName == command.FirstName && m.LastName == command.LastName && m.IsRoot == true);
         _context.Members.Count().Should().Be(2);
+    }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler tạo một mã duy nhất cho thành viên
+    /// khi trường Code trong CreateMemberCommand là null hoặc rỗng.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockUser.Id hợp lệ. Thiết lập _mockAuthorizationService để IsAdmin trả về true.
+    ///               Tạo một CreateMemberCommand với Code là null.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công.
+    ///              Kiểm tra rằng thành viên đã được thêm vào context và trường Code không rỗng.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống tự động
+    /// tạo một mã duy nhất cho thành viên khi người dùng không cung cấp, duy trì tính toàn vẹn dữ liệu.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldGenerateUniqueCode_WhenCodeIsNull()
+    {
+        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
+        _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
+
+        var command = _fixture.Build<CreateMemberCommand>()
+            .With(c => c.Code, (string)null!)
+            .Create();
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeEmpty();
+        _context.Members.Should().Contain(m => m.FirstName == command.FirstName && m.LastName == command.LastName && !string.IsNullOrEmpty(m.Code));
+        _context.Members.Count().Should().Be(1);
     }
 }

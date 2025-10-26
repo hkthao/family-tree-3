@@ -136,7 +136,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain(backend.Application.Common.Constants.ErrorMessages.NoContent);
+        result.Error.Should().Contain(backend.Application.Common.Constants.ErrorMessages.NoAIResponse);
         result.ErrorSource.Should().Be(backend.Application.Common.Constants.ErrorSources.NoContent);
     }
 
