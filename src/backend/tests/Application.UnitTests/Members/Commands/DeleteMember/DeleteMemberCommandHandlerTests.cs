@@ -28,32 +28,44 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
 
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi không tìm thấy thành viên cần xóa.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Đảm bảo _context.Members không chứa thành viên cần xóa.
+    ///               Tạo một DeleteMemberCommand với Id của một thành viên không tồn tại.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống không thể xóa
+    /// một thành viên không tồn tại, ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenMemberNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi thành viên không tồn tại.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Đảm bảo _context.Members không chứa thành viên cần xóa.
-        // 2. Act: Gọi phương thức Handle với một DeleteMemberCommand có Id không tồn tại.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var command = _fixture.Create<DeleteMemberCommand>();
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Member with ID {command.Id} not found.");
-        // 💡 Giải thích: Handler phải kiểm tra sự tồn tại của thành viên trước khi xóa.
+        result.Error.Should().Contain(string.Format(backend.Application.Common.Constants.ErrorMessages.NotFound, $"Member with ID {command.Id}"));
+        result.ErrorSource.Should().Be(backend.Application.Common.Constants.ErrorSources.NotFound);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi người dùng không có quyền quản lý gia đình mà thành viên thuộc về.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một thành viên. Thiết lập _mockAuthorizationService để IsAdmin trả về false
+    ///               và CanManageFamily trả về false cho FamilyId của thành viên.
+    ///    - Act: Gọi phương thức Handle với DeleteMemberCommand của thành viên đó.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng chỉ những người dùng
+    /// có quyền quản lý gia đình mới có thể xóa thành viên, bảo vệ dữ liệu gia đình khỏi truy cập trái phép.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserCannotManageFamily()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng không có quyền quản lý gia đình.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một thành viên, mock GetCurrentUserProfileAsync trả về profile hợp lệ, IsAdmin trả về false, CanManageFamily trả về false.
-        // 2. Act: Gọi phương thức Handle với DeleteMemberCommand của thành viên đó.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var member = _fixture.Create<Member>();
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
@@ -67,18 +79,26 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers can delete members.");
-        // 💡 Giải thích: Người dùng phải có quyền quản lý gia đình để xóa thành viên.
+        result.Error.Should().Contain(backend.Application.Common.Constants.ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(backend.Application.Common.Constants.ErrorSources.Forbidden);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler xóa thành viên thành công
+    /// khi người dùng hiện tại là quản trị viên (Admin).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một thành viên và thêm vào context. Thiết lập _mockAuthorizationService để IsAdmin trả về true.
+    ///               Thiết lập _mockFamilyTreeService để UpdateFamilyStats trả về Task.CompletedTask.
+    ///    - Act: Gọi phương thức Handle với DeleteMemberCommand của thành viên đó.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công.
+    ///              Kiểm tra rằng thành viên đã bị xóa khỏi context.
+    ///              Xác minh rằng _mockFamilyTreeService.UpdateFamilyStats đã được gọi một lần.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng người dùng có vai trò quản trị viên
+    /// có thể xóa thành viên một cách thành công và các thay đổi được lưu trữ chính xác.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldDeleteMemberSuccessfully_WhenAdminUser()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler xóa thành viên thành công khi người dùng là admin.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một thành viên, mock GetCurrentUserProfileAsync trả về profile hợp lệ, IsAdmin trả về true.
-        // 2. Act: Gọi phương thức Handle với DeleteMemberCommand của thành viên đó.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công, thành viên bị xóa khỏi context, và các service khác được gọi.
         var memberId = Guid.NewGuid();
         var familyId = Guid.NewGuid();
         var member = new Member { Id = memberId, FamilyId = familyId, FirstName = "Test", LastName = "Member", Code = "M001" };
@@ -87,8 +107,9 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         _context.Members.Count().Should().Be(1);
 
-        var userProfile = new UserProfile { Id = Guid.NewGuid() };
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                              .Returns(Task.CompletedTask);
 
         var command = new DeleteMemberCommand(memberId);
 
@@ -98,27 +119,38 @@ public class DeleteMemberCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         _context.Members.Should().NotContain(m => m.Id == member.Id);
 
-        // Thêm assertion này để kiểm tra xem memberToDelete có bị null không
         var memberAfterDeletionAttempt = await _context.Members.FirstOrDefaultAsync(m => m.Id == member.Id);
-        memberAfterDeletionAttempt.Should().BeNull(); // Mong đợi là null nếu xóa thành công
-        // 💡 Giải thích: Người dùng admin có quyền xóa thành viên mà không cần kiểm tra quyền quản lý gia đình cụ thể.
+        memberAfterDeletionAttempt.Should().BeNull();
+        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler xóa thành viên thành công
+    /// khi người dùng hiện tại có quyền quản lý gia đình (Manager).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một thành viên và thêm vào context. Thiết lập _mockAuthorizationService để IsAdmin trả về false
+    ///               và CanManageFamily trả về true cho FamilyId của thành viên. Thiết lập _mockFamilyTreeService
+    ///               để UpdateFamilyStats trả về Task.CompletedTask.
+    ///    - Act: Gọi phương thức Handle với DeleteMemberCommand của thành viên đó.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công.
+    ///              Kiểm tra rằng thành viên đã bị xóa khỏi context.
+    ///              Xác minh rằng _mockFamilyTreeService.UpdateFamilyStats đã được gọi một lần.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng người dùng có vai trò quản lý gia đình
+    /// có thể xóa thành viên một cách thành công và các thay đổi được lưu trữ chính xác.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldDeleteMemberSuccessfully_WhenManagerUser()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler xóa thành viên thành công khi người dùng có quyền quản lý gia đình.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một thành viên, mock GetCurrentUserProfileAsync trả về profile hợp lệ, IsAdmin trả về false, CanManageFamily trả về true.
-        // 2. Act: Gọi phương thức Handle với DeleteMemberCommand của thành viên đó.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công, thành viên bị xóa khỏi context, và các service khác được gọi.
         var memberId = Guid.NewGuid();
         var familyId = Guid.NewGuid();
         var member = new Member { Id = memberId, FamilyId = familyId, FirstName = "Test", LastName = "Member", Code = "M001" };
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
+
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(familyId)).Returns(true);
+        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                              .Returns(Task.CompletedTask);
 
         var command = new DeleteMemberCommand(memberId);
 
@@ -127,6 +159,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         _context.Members.Should().NotContain(m => m.Id == member.Id);
-        // 💡 Giải thích: Người dùng có quyền quản lý gia đình có thể xóa thành viên.
+        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }
