@@ -14,36 +14,40 @@ public class SyncUserProfileCommandValidatorTests
         _validator = new SyncUserProfileCommandValidator();
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi UserPrincipal của SyncUserProfileCommand là null.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một SyncUserProfileCommand với UserPrincipal được đặt thành null.
+    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
+    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính UserPrincipal với thông báo lỗi cụ thể "UserPrincipal cannot be null.".
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: UserPrincipal là một trường bắt buộc và không được phép có giá trị null để đảm bảo thông tin người dùng hợp lệ.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenUserPrincipalIsNull()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi UserPrincipal là null.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một SyncUserProfileCommand với UserPrincipal là null.
-        // 2. Act: Gọi phương thức TestValidate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính UserPrincipal với thông báo phù hợp.
         var command = new SyncUserProfileCommand { UserPrincipal = null! };
 
         var result = _validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(c => c.UserPrincipal)
             .WithErrorMessage("UserPrincipal cannot be null.");
-        // 💡 Giải thích: UserPrincipal là trường bắt buộc và không được để null.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng validator không báo lỗi khi UserPrincipal của SyncUserProfileCommand được cung cấp hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một SyncUserProfileCommand với UserPrincipal được đặt thành một ClaimsPrincipal hợp lệ.
+    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
+    ///    - Assert: Kiểm tra rằng không có lỗi xác thực nào cho thuộc tính UserPrincipal.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một UserPrincipal hợp lệ nên vượt qua quá trình xác thực mà không có bất kỳ lỗi nào.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveErrorWhenUserPrincipalIsProvided()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi UserPrincipal được cung cấp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một SyncUserProfileCommand với UserPrincipal hợp lệ.
-        // 2. Act: Gọi phương thức TestValidate của validator.
-        // 3. Assert: Kiểm tra rằng không có lỗi cho thuộc tính UserPrincipal.
         var command = new SyncUserProfileCommand { UserPrincipal = new ClaimsPrincipal() };
 
         var result = _validator.TestValidate(command);
 
         result.ShouldNotHaveValidationErrorFor(c => c.UserPrincipal);
-        // 💡 Giải thích: UserPrincipal hợp lệ không gây ra lỗi.
     }
 }
