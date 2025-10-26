@@ -239,4 +239,75 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng khi một thành viên được cập nhật với IsRoot = true,
+    /// và đã có một thành viên gốc khác trong cùng gia đình, thì thành viên gốc cũ
+    /// sẽ được cập nhật IsRoot = false và thành viên hiện tại sẽ được đặt làm gốc.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile, một thành viên hiện có (sẽ được cập nhật) và một thành viên gốc cũ.
+    ///               Thêm cả hai thành viên vào context. Thiết lập _mockUser.Id trả về Id của UserProfile.
+    ///               Thiết lập _mockAuthorizationService để IsAdmin trả về true và CanManageFamily trả về true.
+    ///               Thiết lập _mockFamilyTreeService để UpdateFamilyStats trả về Task.CompletedTask.
+    ///               Tạo một UpdateMemberCommand với Id của thành viên hiện có và IsRoot = true.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và Value là Id của thành viên.
+    ///              Kiểm tra rằng thành viên gốc cũ đã được cập nhật IsRoot = false.
+    ///              Kiểm tra rằng thành viên hiện tại đã được cập nhật IsRoot = true.
+    ///              Xác minh rằng _mockFamilyTreeService.UpdateFamilyStats đã được gọi một lần.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng chỉ có một thành viên
+    /// duy nhất có thể là gốc trong một gia đình tại một thời điểm. Khi một thành viên được cập nhật
+    /// và chỉ định làm gốc, thành viên gốc hiện có sẽ tự động bị hủy đặt gốc.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldUpdateExistingRoot_WhenIsRootIsTrueAndExistingRootExists()
+    {
+        var userProfile = _fixture.Create<UserProfile>();
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
+        _context.UserProfiles.Add(userProfile);
+        await _context.SaveChangesAsync();
+
+        var familyId = Guid.NewGuid();
+
+        var oldRootMember = _fixture.Build<Member>()
+            .With(m => m.FamilyId, familyId)
+            .With(m => m.IsRoot, true)
+            .Create();
+        _context.Members.Add(oldRootMember);
+        await _context.SaveChangesAsync();
+
+        var memberToUpdate = _fixture.Build<Member>()
+            .With(m => m.FamilyId, familyId)
+            .With(m => m.IsRoot, false)
+            .Create();
+        _context.Members.Add(memberToUpdate);
+        await _context.SaveChangesAsync();
+
+        _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
+        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                              .Returns(Task.CompletedTask);
+
+        var command = _fixture.Build<UpdateMemberCommand>()
+            .With(c => c.Id, memberToUpdate.Id)
+            .With(c => c.FamilyId, familyId)
+            .With(c => c.IsRoot, true)
+            .Create();
+
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().Be(memberToUpdate.Id);
+
+        var updatedOldRootMember = await _context.Members.FindAsync(oldRootMember.Id);
+        updatedOldRootMember.Should().NotBeNull();
+        updatedOldRootMember!.IsRoot.Should().BeFalse();
+
+        var updatedMemberToUpdate = await _context.Members.FindAsync(memberToUpdate.Id);
+        updatedMemberToUpdate.Should().NotBeNull();
+        updatedMemberToUpdate!.IsRoot.Should().BeTrue();
+
+        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
