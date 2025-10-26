@@ -168,4 +168,83 @@ public class SearchEventsQueryHandlerTests : TestBase
         result.Value!.TotalItems.Should().Be(3);
         result.Value!.TotalPages.Should().Be(2);
     }
+
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler lọc và phân trang các sự kiện một cách chính xác
+    /// dựa trên nhiều tiêu chí.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thêm một số sự kiện vào DB với các thuộc tính khác nhau.
+    ///               Tạo một SearchEventsQuery với các tiêu chí tìm kiếm kết hợp (SearchQuery, Type, FamilyId, DateRange) và thông tin phân trang.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công, danh sách phân trang chứa các sự kiện mong đợi,
+    ///              và thông tin phân trang (TotalItems, TotalPages) là chính xác.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng tất cả các bộ lọc và phân trang
+    /// được áp dụng đồng thời và chính xác, cung cấp kết quả tìm kiếm và phân trang mong muốn.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldFilterAndPaginateEventsCorrectly()
+    {
+        // Arrange
+        var family1 = _fixture.Create<Family>();
+        var family2 = _fixture.Create<Family>();
+        _context.Families.AddRange(family1, family2);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        var event1 = _fixture.Build<Event>()
+            .With(e => e.Name, "Family1 Birthday")
+            .With(e => e.Location, "New York")
+            .With(e => e.Type, EventType.Birth)
+            .With(e => e.FamilyId, family1.Id)
+            .With(e => e.StartDate, new DateTime(2023, 1, 1))
+            .With(e => e.EndDate, new DateTime(2023, 1, 1))
+            .Create();
+        var event2 = _fixture.Build<Event>()
+            .With(e => e.Name, "Family1 Wedding")
+            .With(e => e.Location, "New York")
+            .With(e => e.Type, EventType.Marriage)
+            .With(e => e.FamilyId, family1.Id)
+            .With(e => e.StartDate, new DateTime(2023, 5, 10))
+            .Create();
+        var event3 = _fixture.Build<Event>()
+            .With(e => e.Name, "Family2 Birthday")
+            .With(e => e.Location, "Los Angeles")
+            .With(e => e.Type, EventType.Birth)
+            .With(e => e.FamilyId, family2.Id)
+            .With(e => e.StartDate, new DateTime(2024, 6, 15))
+            .Create();
+        var event4 = _fixture.Build<Event>()
+            .With(e => e.Name, "Family1 Anniversary")
+            .With(e => e.Location, "Chicago")
+            .With(e => e.Type, EventType.Marriage)
+            .With(e => e.FamilyId, family1.Id)
+            .With(e => e.StartDate, new DateTime(2023, 7, 20))
+            .Create();
+
+        _context.Events.AddRange(event1, event2, event3, event4);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        var query = new SearchEventsQuery
+        {
+            SearchQuery = "Family1",
+            Type = EventType.Marriage.ToString(),
+            FamilyId = family1.Id,
+            StartDate = new DateTime(2023, 1, 1),
+            EndDate = new DateTime(2023, 12, 31),
+            Page = 1,
+            ItemsPerPage = 10
+        };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().HaveCount(2);
+        result.Value!.Items.Should().Contain(e => e.Name == event2.Name);
+        result.Value!.Items.Should().Contain(e => e.Name == event4.Name);
+        result.Value!.TotalItems.Should().Be(2);
+        result.Value!.TotalPages.Should().Be(1);
+    }
 }
