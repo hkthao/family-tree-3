@@ -61,6 +61,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
+    /// </summary>
+    public DbSet<EventMember> EventMembers => Set<EventMember>();
 
 
     /// <summary>
