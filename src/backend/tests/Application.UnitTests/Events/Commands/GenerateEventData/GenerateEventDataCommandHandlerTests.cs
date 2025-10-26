@@ -20,14 +20,12 @@ public class GenerateEventDataCommandHandlerTests : TestBase
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly Mock<IValidator<AIEventDto>> _mockAIEventDtoValidator;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
 
     public GenerateEventDataCommandHandlerTests()
     {
         _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
         _mockChatProvider = _fixture.Freeze<Mock<IChatProvider>>();
         _mockAIEventDtoValidator = _fixture.Freeze<Mock<IValidator<AIEventDto>>>();
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))
                                 .Returns(_mockChatProvider.Object);
 

@@ -1,3 +1,11 @@
+/*
+ * Tên file: CreateFamilyCommandHandlerTests.cs
+ * Mục đích: Kiểm thử logic tạo gia đình sau khi refactor (loại bỏ check login, thêm AuthorizationBehavior).
+ * Đối tượng kiểm thử: CreateFamilyCommandHandler.
+ * Phạm vi: Unit test mức Application, sử dụng Moq và in-memory DbContext.
+ * Người đọc: Tester, Dev, Junior Dev đều có thể hiểu dễ dàng.
+ */
+
 using AutoFixture;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.UnitTests.Common;
@@ -74,41 +82,6 @@ public class CreateFamilyCommandHandlerTests : TestBase
         // 4. Các sự kiện FamilyCreatedEvent và FamilyStatsUpdatedEvent được thêm vào domain events của thực thể gia đình.
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng không được xác thực (User.Id là null hoặc rỗng).
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser để trả về null cho User.Id.
-        // 2. Tạo một CreateFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
-        // Arrange
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // User is not authenticated
-
-        var command = _fixture.Create<CreateFamilyCommand>();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("Current user ID not found.");
-        result.ErrorSource.Should().Be("Authentication");
-
-        // 💡 Giải thích:
-        // Test này kiểm tra trường hợp bảo mật cơ bản: nếu không có người dùng được xác thực,
-        // yêu cầu tạo gia đình sẽ bị từ chối với thông báo lỗi rõ ràng.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()

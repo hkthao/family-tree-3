@@ -9,18 +9,16 @@ namespace backend.Application.Members.Commands.GenerateBiography;
 
 public class GenerateBiographyCommandHandler(
     IApplicationDbContext context,
-    IUser user,
     IAuthorizationService authorizationService,
     IChatProviderFactory chatProviderFactory) : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
     {
-        var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
+        var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
         if (member == null)
         {
             return Result<BiographyResultDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);

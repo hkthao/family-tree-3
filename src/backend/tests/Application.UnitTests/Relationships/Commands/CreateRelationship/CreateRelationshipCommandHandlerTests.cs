@@ -15,17 +15,14 @@ namespace backend.Application.UnitTests.Relationships.Commands.CreateRelationshi
 
 public class CreateRelationshipCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IMediator> _mockMediator;
     private readonly CreateRelationshipCommandHandler _handler;
 
     public CreateRelationshipCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockMediator = new Mock<IMediator>();
         _fixture.Customize(new AutoMoqCustomization());
-
-        _handler = new CreateRelationshipCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockUser.Object);
+        _handler = new CreateRelationshipCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]

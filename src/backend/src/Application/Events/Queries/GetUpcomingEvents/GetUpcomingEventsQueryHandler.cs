@@ -1,5 +1,4 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
@@ -22,7 +21,7 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
             // Filter events by user access if not admin
             if (!_user.Id.HasValue)
             {
-                return Result<List<EventDto>>.Success(new List<EventDto>()); // No user ID, no accessible families
+                return Result<List<EventDto>>.Success([]); // No user ID, no accessible families
             }
 
             var accessibleFamilyIds = await _context.FamilyUsers

@@ -13,87 +13,13 @@ namespace backend.Application.UnitTests.Families.Queries.GetFamilies;
 public class GetFamiliesQueryHandlerTests : TestBase
 {
     private readonly GetFamiliesQueryHandler _handler;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
 
     public GetFamiliesQueryHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _handler = new GetFamiliesQueryHandler(_context, _mapper, _mockUser.Object, _mockAuthorizationService.Object);
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng không được xác thực (User.Id là null hoặc rỗng).
 
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser để trả về null cho User.Id.
-        // 2. Tạo một GetFamiliesQuery bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
-        // Arrange
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User is not authenticated
-
-        var query = _fixture.Create<GetFamiliesQuery>();
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User is not authenticated.");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu không có người dùng được xác thực,
-        // yêu cầu truy vấn danh sách gia đình sẽ bị từ chối với thông báo lỗi rõ ràng.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnEmptyList_WhenUserProfileNotFoundAndNotAdmin()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một danh sách rỗng
-        // khi người dùng không phải là quản trị viên và UserProfile của họ không tìm thấy.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser để trả về một User.Id hợp lệ.
-        // 2. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
-        // 3. Đảm bảo không có UserProfile nào trong DB khớp với ID của người dùng.
-        // 4. Tạo một GetFamiliesQuery bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem danh sách gia đình trả về là rỗng.
-
-        // Arrange
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null); // User not authenticated
-
-        var query = _fixture.Create<GetFamiliesQuery>();
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEmpty();
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu người dùng không phải là quản trị viên và không có hồ sơ người dùng trong DB,
-        // họ sẽ không thể truy cập bất kỳ gia đình nào và một danh sách rỗng sẽ được trả về.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnAllFamilies_WhenUserIsAdmin()

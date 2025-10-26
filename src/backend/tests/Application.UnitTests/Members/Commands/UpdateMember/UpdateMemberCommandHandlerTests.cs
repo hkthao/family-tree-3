@@ -12,14 +12,12 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockFamilyTreeService = new Mock<IFamilyTreeService>();
 
 

@@ -5,12 +5,10 @@ using backend.Domain.Entities;
 
 namespace backend.Application.Events.Commands.CreateEvent;
 
-public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<CreateEventCommand, Result<Guid>>
+public class CreateEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreateEventCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _user = user;
-
     public async Task<Result<Guid>> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can create events
@@ -34,7 +32,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             FamilyId = request.FamilyId,
             Type = request.Type,
             Color = request.Color,
-            EventMembers = relatedMembers.Select(m => new EventMember { MemberId = m.Id }).ToList()
+            EventMembers = [.. relatedMembers.Select(m => new EventMember { MemberId = m.Id })]
         };
 
         _context.Events.Add(entity);

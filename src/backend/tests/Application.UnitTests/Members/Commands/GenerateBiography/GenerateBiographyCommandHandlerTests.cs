@@ -13,69 +13,25 @@ namespace backend.Application.UnitTests.Members.Commands.GenerateBiography;
 
 public class GenerateBiographyCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly GenerateBiographyCommandHandler _handler;
 
     public GenerateBiographyCommandHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
         _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
         _mockChatProvider = new Mock<IChatProvider>();
-
         _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))
                                 .Returns(_mockChatProvider.Object);
 
         _handler = new GenerateBiographyCommandHandler(
             _context,
-            _mockUser.Object,
             _mockAuthorizationService.Object,
             _mockChatProviderFactory.Object
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng chưa được xác thực.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock _user.Id trả về null hoặc chuỗi rỗng.
-        // 2. Act: Gọi phương thức Handle với một GenerateBiographyCommand bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.Empty); // User not authenticated
 
-        var command = _fixture.Create<GenerateBiographyCommand>();
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User is not authenticated.");
-        result.ErrorSource.Should().Be("Authentication");
-        // 💡 Giải thích: Handler phải kiểm tra xác thực người dùng trước khi thực hiện các thao tác khác.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy UserProfile.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock _user.Id trả về một giá trị hợp lệ. Mock GetCurrentUserProfileAsync trả về null.
-        // 2. Act: Gọi phương thức Handle với một GenerateBiographyCommand bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid()); // User authenticated
-        var command = _fixture.Create<GenerateBiographyCommand>();
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-        // 💡 Giải thích: Handler phải kiểm tra UserProfile trước khi thực hiện các thao tác khác.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenMemberNotFound()

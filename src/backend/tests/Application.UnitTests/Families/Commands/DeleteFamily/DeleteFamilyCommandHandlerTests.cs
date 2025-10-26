@@ -15,13 +15,10 @@ namespace backend.Application.UnitTests.Families.Commands.DeleteFamily;
 public class DeleteFamilyCommandHandlerTests : TestBase
 {
     private readonly DeleteFamilyCommandHandler _handler;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
 
     public DeleteFamilyCommandHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-
-        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object);
+        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]

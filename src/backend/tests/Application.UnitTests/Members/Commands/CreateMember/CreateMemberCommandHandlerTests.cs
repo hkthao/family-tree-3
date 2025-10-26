@@ -11,60 +11,17 @@ namespace backend.Application.UnitTests.Members.Commands.CreateMember;
 
 public class CreateMemberCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly CreateMemberCommandHandler _handler;
 
     public CreateMemberCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
-
         _handler = new CreateMemberCommandHandler(
             _context,
-            _mockUser.Object,
             _mockAuthorizationService.Object
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng chưa xác thực.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockUser.Id trả về null hoặc string.Empty.
-        // 2. Act: Gọi phương thức Handle của handler với một CreateMemberCommand bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // Người dùng chưa xác thực
 
-        var command = _fixture.Create<CreateMemberCommand>();
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User is not authenticated.");
-        // 💡 Giải thích: Handler phải kiểm tra trạng thái xác thực của người dùng trước khi thực hiện các thao tác khác.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng không phải admin và không tìm thấy profile.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockUser.Id trả về một giá trị hợp lệ, _mockAuthorizationService.IsAdmin() trả về false, và GetCurrentUserProfileAsync trả về null.
-        // 2. Act: Gọi phương thức Handle của handler.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns(Guid.NewGuid());
-        _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
-
-        var command = _fixture.Create<CreateMemberCommand>();
-
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        // 💡 Giải thích: Đối với người dùng không phải admin, việc tìm thấy user profile là cần thiết để kiểm tra quyền hạn.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserCannotManageFamily()

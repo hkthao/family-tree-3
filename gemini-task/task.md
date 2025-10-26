@@ -1,65 +1,75 @@
-You are an expert .NET architect specialized in DDD, CQRS, and Clean Architecture.
+You are a senior .NET test architect with experience in clean testing, CQRS, and MediatR-based applications.
 
-I have an ASP.NET Core application using MediatR and CQRS patterns for the Application layer.  
-Currently, most of my command/query Handlers contain the following issues:
-- They check if the user is logged in using ICurrentUser.Id == null.
-- They use hard-coded error messages like "Access denied" or "User not logged in".
-- They manually set CreatedBy and UpdatedBy fields for every entity before saving.
-- Authorization checks (business-level permissions) are mixed with authentication checks.
-- Unit tests become complicated due to repeated login and error logic.
+The project has just completed a major refactor of all Command and Query Handlers:
+- Removed all login checks from handlers (authentication is handled by pipeline).
+- Added AuthorizationBehavior<TRequest, TResponse> for authentication checks.
+- Centralized error messages in ErrorMessages static class.
+- Auto-populated audit fields (CreatedBy, UpdatedBy) inside DbContext.
+- Simplified handler logic to focus only on business rules and domain events.
 
-Your task is to **refactor all Handlers in the Application layer** to make them clean, consistent, and testable.
+Now I need you to **rebuild all existing unit tests** for the Application layer so they align with the new architecture.
 
-### Refactor Goals
+### ✅ Goals
 
-1. **Remove all login checks from Handlers.**  
-   - Authentication should be handled globally by middleware or MediatR pipeline.
-   - If user is not logged in, block the request before reaching the handler.
+1. **Update all tests** (e.g. `UpdateEventCommandHandlerTests`, `CreateFamilyCommandHandlerTests`, etc.)
+   - Remove login-related test cases (no need to test "user not logged in").
+   - Keep or add test cases for:
+     - Success path (happy flow)
+     - Authorization failure (`CanManageFamily` returns false)
+     - Entity not found
+     - Domain event raised (if applicable)
+     - Database save verified
 
-2. **Introduce a global AuthorizationBehavior<TRequest, TResponse> (MediatR Pipeline)**  
-   - Automatically validates whether a user is authenticated using ICurrentUser.
-   - Throws UnauthorizedAccessException if not.
+2. **Use xUnit + Moq** for mocking.
+   - Mock dependencies like `_context`, `_authorizationService`, `_currentUser`.
+   - Test result should be of type `Result<T>` and assert Success / Failure accordingly.
 
-3. **Use a centralized ErrorMessages static class**  
-   - Example:
+3. **Add clear, simple Vietnamese comments in every test method and setup.**
+   - Dễ hiểu cho **tester**, **junior dev**, **reviewer**.
+   - Ví dụ:
      ```csharp
-     public static class ErrorMessages
-     {
-         public const string AccessDenied = "Access denied. You do not have permission to perform this action.";
-         public const string NotFound = "{0} not found.";
-         public const string Unauthorized = "User is not authenticated.";
-     }
+     // Mô tả: Kiểm tra khi người dùng có quyền quản lý gia đình thì cập nhật sự kiện thành công.
+     // Kết quả mong đợi: Trả về Success = true và sự kiện được cập nhật trong DB.
      ```
-   - Replace all hard-coded strings in handlers with references to ErrorMessages.
 
-5. **Simplify Handlers:**
-   - Keep only business rules (e.g., CanManageFamily, CanEditEvent).
-   - Keep domain events intact.
-   - Return `Result<T>` objects for all responses (no raw exceptions).
+4. **Add summary comment block at the top of each test file:**
+   ```csharp
+   /*
+    * Tên file: UpdateEventCommandHandlerTests.cs
+    * Mục đích: Kiểm thử logic cập nhật sự kiện sau khi refactor (loại bỏ check login).
+    * Đối tượng kiểm thử: UpdateEventCommandHandler.
+    * Phạm vi: Unit test mức Application, sử dụng Moq và in-memory DbContext.
+    * Người đọc: Tester, Dev, Junior Dev đều có thể hiểu dễ dàng.
+    */
+Follow consistent structure for all tests:
 
-6. **Ensure naming conventions follow DDD standards:**
-   - Commands: `CreateEventCommand`, `UpdateEventCommand`
-   - Queries: `GetFamilyMembersQuery`
-   - Handlers: `[CommandName]Handler`, `[QueryName]Handler`
-   - Use folders `/Commands/`, `/Queries/`, `/Validators/` within each feature.
+Arrange: Chuẩn bị dữ liệu và mock.
 
-7. **Keep Handlers short and readable:**
-   - Max 50–70 lines per handler.
-   - Extract long domain logic to domain services if needed.
+Act: Gọi Handler.
 
-8. **Demonstrate refactor with one example:**
-   - Rewrite `UpdateEventCommandHandler` to:
-     - Remove login check.
-     - Use `_authorizationService.CanManageFamily(...)`
-     - Use `ErrorMessages` constants.
-     - Rely on DbContext audit for CreatedBy/UpdatedBy.
-     - Fire domain event `EventUpdatedEvent`.
+Assert: Kiểm tra kết quả mong đợi.
 
-### Deliverables
-- Refactored example handler (UpdateEventCommandHandler).
-- Example of AuthorizationBehavior<TRequest, TResponse>.
-- Example of DbContext audit configuration.
-- Example of ErrorMessages static class.
-- Consistent folder and file naming convention for Application layer.
+Example test case to show in output:
 
-Output should be clean, production-ready C# code, formatted using typical .NET conventions.
+UpdateEventCommandHandlerTests
+
+Test success scenario.
+
+Test “event not found”.
+
+Test “unauthorized user”.
+Each with comments as described.
+
+Output format:
+
+Fully working C# code with Vietnamese comments and /// <summary> for test class.
+
+Deliverables
+
+Updated test files for all command and query handlers.
+
+Each test contains Vietnamese comments explaining purpose, steps, and expected result.
+
+Summary block at top of each file.
+
+Ready-to-run xUnit tests with Moq.

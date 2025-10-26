@@ -19,14 +19,12 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IValidator<AIMemberDto>> _mockAIMemberDtoValidator;
     private readonly Mock<IChatProvider> _mockChatProvider;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly GenerateMemberDataCommandHandler _handler;
 
     public GenerateMemberDataCommandHandlerTests()
     {
         _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
         _mockAIMemberDtoValidator = _fixture.Freeze<Mock<IValidator<AIMemberDto>>>();
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockChatProvider = new Mock<IChatProvider>();
 
         _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))

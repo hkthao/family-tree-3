@@ -6,14 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventUpdatedEventHandler(ILogger<EventUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser user, IApplicationDbContext context) : INotificationHandler<EventUpdatedEvent>
+public class EventUpdatedEventHandler(ILogger<EventUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser user) : INotificationHandler<EventUpdatedEvent>
 {
     private readonly ILogger<EventUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly IUser _user = user;
-    private readonly IApplicationDbContext _context = context;
 
     public async Task Handle(EventUpdatedEvent notification, CancellationToken cancellationToken)
     {

@@ -5,11 +5,10 @@ using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
-public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<UpdateRelationshipCommand, Result<bool>>
+public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateRelationshipCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _user = user;
 
     public async Task<Result<bool>> Handle(UpdateRelationshipCommand request, CancellationToken cancellationToken)
     {

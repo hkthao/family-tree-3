@@ -13,45 +13,18 @@ namespace backend.Application.UnitTests.Relationships.Commands.UpdateRelationshi
 
 public class UpdateRelationshipCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly UpdateRelationshipCommandHandler _handler;
 
     public UpdateRelationshipCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _fixture.Customize(new AutoMoqCustomization());
         _handler = new UpdateRelationshipCommandHandler(
             _context,
-            _mockAuthorizationService.Object,
-            _mockUser.Object
+            _mockAuthorizationService.Object
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailureWhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi hồ sơ người dùng không tìm thấy.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockAuthorizationService.GetCurrentUserProfileAsync trả về null.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var command = new UpdateRelationshipCommand
-        {
-            Id = Guid.NewGuid(),
-            SourceMemberId = Guid.NewGuid(),
-            TargetMemberId = Guid.NewGuid(),
-            Type = RelationshipType.Father,
-            Order = 1
-        };
 
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-        // 💡 Giải thích: Không thể cập nhật mối quan hệ nếu không tìm thấy hồ sơ người dùng hiện tại.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailureWhenRelationshipNotFound()

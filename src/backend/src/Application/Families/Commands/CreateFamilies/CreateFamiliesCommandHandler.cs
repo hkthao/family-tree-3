@@ -1,8 +1,5 @@
-using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
@@ -16,13 +13,6 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
     public async Task<Result<List<Guid>>> Handle(CreateFamiliesCommand request, CancellationToken cancellationToken)
     {
         var createdFamilyIds = new List<Guid>();
-
-        var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value)).FirstOrDefaultAsync(cancellationToken);
-        if (userProfile == null)
-        {
-            return Result<List<Guid>>.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
-        }
-
         foreach (var familyDto in request.Families)
         {
             var familyId = Guid.NewGuid();
@@ -39,11 +29,10 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
                 FamilyUsers = [new FamilyUser()
                 {
                     FamilyId = familyId,
-                    UserProfileId = userProfile.Id,
+                    UserProfileId = _user.Id!.Value,
                     Role = FamilyRole.Manager
                 }]
             };
-
             _context.Families.Add(entity);
             createdFamilyIds.Add(entity.Id);
         }

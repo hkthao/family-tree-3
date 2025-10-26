@@ -9,7 +9,6 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-
     public async Task<Result<bool>> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
     {
         // Authorization check: Only family managers or admins can update events

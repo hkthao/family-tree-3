@@ -15,20 +15,17 @@ namespace backend.Application.UnitTests.Relationships.Commands.DeleteRelationshi
 
 public class DeleteRelationshipCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IMediator> _mockMediator;
     private readonly DeleteRelationshipCommandHandler _handler;
 
     public DeleteRelationshipCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockMediator = new Mock<IMediator>();
         _fixture.Customize(new AutoMoqCustomization());
 
         _handler = new DeleteRelationshipCommandHandler(
             _context,
-            _mockAuthorizationService.Object,
-            _mockUser.Object
+            _mockAuthorizationService.Object
         );
     }
 

@@ -15,45 +15,13 @@ namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 public class UpdateFamilyCommandHandlerTests : TestBase
 {
     private readonly UpdateFamilyCommandHandler _handler;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
 
     public UpdateFamilyCommandHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-
-        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object,_mockUser.Object);
+        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
 
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser.Id trả về null hoặc chuỗi rỗng.
-        // 2. Tạo một UpdateFamilyCommand bất kỳ.
-
-        // Arrange
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null!); // User not authenticated
-
-        var command = _fixture.Create<UpdateFamilyCommand>();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User is not authenticated.");
-        result.ErrorSource.Should().Be("NotFound");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu hồ sơ người dùng không tồn tại trong hệ thống,
-        // yêu cầu cập nhật gia đình sẽ thất bại để ngăn chặn việc thao tác dữ liệu không hợp lệ.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserDoesNotHavePermission()

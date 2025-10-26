@@ -3,31 +3,20 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Events;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
-public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<UpdateFamilyCommand, Result>
+public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _user = user;
 
     public async Task<Result> Handle(UpdateFamilyCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var currentUserProfile = await _context.UserProfiles
-                .WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value))
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (currentUserProfile == null)
-            {
-                return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
-            }
-
             if (!_authorizationService.IsAdmin())
             {
                 if (!_authorizationService.CanManageFamily(request.Id))
@@ -37,14 +26,8 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             }
 
             var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
-
             if (entity == null)
-            {
                 return Result.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
-            }
-
-
-            var oldName = entity.Name; // Capture old name for activity summary
 
             entity.Name = request.Name;
             entity.Description = request.Description;

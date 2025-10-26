@@ -7,16 +7,14 @@ namespace backend.Application.Members.Commands.UpdateMemberBiography;
 
 public class UpdateMemberBiographyCommandHandler(
     IApplicationDbContext context,
-    IUser user,
     IAuthorizationService authorizationService) : IRequestHandler<UpdateMemberBiographyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result> Handle(UpdateMemberBiographyCommand request, CancellationToken cancellationToken)
     {
-        var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
+        var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
         if (member == null)
             return Result.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
 

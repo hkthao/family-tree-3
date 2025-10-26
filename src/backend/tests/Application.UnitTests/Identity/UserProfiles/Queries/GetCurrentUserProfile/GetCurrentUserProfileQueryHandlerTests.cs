@@ -1,4 +1,5 @@
 using AutoFixture.AutoMoq;
+using backend.Application.Common.Constants;
 using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -22,26 +23,6 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailureWhenUserNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng chưa được xác thực.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thiết lập _mockUser.Id trả về null.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null!);
-
-        var query = new GetCurrentUserProfileQuery();
-
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User not authenticated.");
-        result.ErrorSource.Should().Be("Unauthorized");
-        // 💡 Giải thích: Không thể truy xuất hồ sơ người dùng hiện tại nếu người dùng chưa được xác thực.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailureWhenUserProfileNotFound()

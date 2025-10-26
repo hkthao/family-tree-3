@@ -13,12 +13,10 @@ namespace backend.Application.UnitTests.Dashboard.Queries.GetDashboardStats;
 public class GetDashboardStatsQueryHandlerTests : TestBase
 {
     private readonly GetDashboardStatsQueryHandler _handler;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
 
     public GetDashboardStatsQueryHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _handler = new GetDashboardStatsQueryHandler(_context,_mockAuthorizationService.Object, _mockUser.Object);
+        _handler = new GetDashboardStatsQueryHandler(_context, _mockAuthorizationService.Object, _mockUser.Object);
     }
 
     [Fact]

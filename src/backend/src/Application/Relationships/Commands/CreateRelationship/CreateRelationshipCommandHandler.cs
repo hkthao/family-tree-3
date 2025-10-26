@@ -6,12 +6,10 @@ using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
-public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IUser user) : IRequestHandler<CreateRelationshipCommand, Result<Guid>>
+public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreateRelationshipCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
-    private readonly IUser _user = user;
 
     public async Task<Result<Guid>> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
     {

@@ -7,7 +7,6 @@ using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.Members.Commands.GenerateBiography;
 using backend.Application.Members.Queries;
-using backend.Application.Members.Queries.GetEditableMembers;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByIds;
@@ -105,17 +104,6 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
             return Ok(result.Value);
         }
         return BadRequest(result.Error); // Or other appropriate error handling
-    }
-
-    /// <summary>
-    /// Xử lý GET request để lấy danh sách các thành viên mà người dùng hiện tại có quyền chỉnh sửa.
-    /// </summary>
-    /// <returns>Danh sách các thành viên có thể chỉnh sửa.</returns>
-    [HttpGet("managed")]
-    public async Task<ActionResult<List<MemberListDto>>> GetEditableMembers()
-    {
-        var result = await _mediator.Send(new GetEditableMembersQuery());
-        return result.IsSuccess ? (ActionResult<List<MemberListDto>>)Ok(result.Value) : (ActionResult<List<MemberListDto>>)BadRequest(result.Error);
     }
 
     /// <summary>

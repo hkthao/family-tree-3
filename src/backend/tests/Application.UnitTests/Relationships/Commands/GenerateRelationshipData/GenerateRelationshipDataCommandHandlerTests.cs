@@ -16,7 +16,6 @@ namespace backend.Application.UnitTests.Relationships.Commands.GenerateRelations
 
 public class GenerateRelationshipDataCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
     private readonly Mock<IChatProvider> _mockChatProvider;
     private readonly Mock<IValidator<AIRelationshipDto>> _mockAIRelationshipDtoValidator;
@@ -25,7 +24,6 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
 
     public GenerateRelationshipDataCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockChatProviderFactory = new Mock<IChatProviderFactory>();
         _mockChatProvider = new Mock<IChatProvider>();
         _mockAIRelationshipDtoValidator = new Mock<IValidator<AIRelationshipDto>>();

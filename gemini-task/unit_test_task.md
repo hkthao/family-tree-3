@@ -1,119 +1,172 @@
-Bạn là một chuyên gia .NET về kiểm thử phần mềm. Hãy giúp tôi tự động viết các Unit Test và Integration Test cho dự án ASP.NET Core theo mô hình DDD + CQRS.
+Dưới đây là **phiên bản hoàn chỉnh, format chuẩn Markdown (.md)** của prompt cho **Gemini CLI** — giúp tự động viết lại toàn bộ Unit Test và Integration Test phù hợp với refactor mới của dự án .NET DDD + CQRS:
 
-🎯 Bối cảnh:
+---
 
-Project sử dụng Entity Framework Core (DbContext trực tiếp, KHÔNG dùng repository pattern).
+# 🧠 Prompt Gemini CLI — Sinh Unit Test & Integration Test cho Dự án ASP.NET Core (DDD + CQRS)
 
-Framework test: xUnit + FluentAssertions.
+## 🎯 **Bối cảnh**
 
-Có thể sử dụng input test nhập dữ liệu thủ công, và AutoMoq để mock các dependency phụ (nhưng KHÔNG mock DbContext).
+Dự án sử dụng **Entity Framework Core** với **DbContext trực tiếp** (❌ KHÔNG dùng Repository Pattern).
 
-Dữ liệu test nên dùng EF InMemoryDatabase (UseInMemoryDatabase(Guid.NewGuid().ToString())) để mô phỏng database thật.
+Framework test:
 
-Mỗi test phải chạy độc lập, không dùng chung dữ liệu với test khác.
+* **xUnit** + **FluentAssertions**
+* Có thể dùng **AutoMoq** để mock dependency phụ (KHÔNG mock DbContext)
+* **EF InMemoryDatabase** (`UseInMemoryDatabase(Guid.NewGuid().ToString())`) để mô phỏng database thật
+* Mỗi test **chạy độc lập**, không dùng chung dữ liệu
 
-🧩 Yêu cầu khi viết test
+---
 
-Phạm vi test
+## 🧩 **Phạm vi test**
 
-Viết test cho từng CommandHandler, QueryHandler, hoặc Service trong thư mục Application.UnitTests.
+Viết test cho **từng CommandHandler, QueryHandler, hoặc Service** trong thư mục:
 
-Mỗi file test chỉ tập trung vào các case quan trọng nhất, ví dụ:
+```
+Application.UnitTests/<Module>/<Feature>/<FeatureName>Tests.cs
+```
 
-Entity không tồn tại → throw NotFoundException.
+Mỗi file test chỉ tập trung vào **Cac case tiêu biểu**:
 
-Dữ liệu hợp lệ → trả kết quả hoặc cập nhật chính xác.
+* ❌ Entity không tồn tại → throw `NotFoundException`
+* ✅ Dữ liệu hợp lệ → trả kết quả hoặc cập nhật chính xác
+* 🚫 Quyền hoặc dữ liệu không hợp lệ → trả lỗi phù hợp
 
-Dữ liệu/quyền không hợp lệ → trả lỗi phù hợp.
+---
 
-Cấu trúc test
+## 🧱 **Cấu trúc test**
 
-Mỗi test method phải có comment chi tiết:
+### 🔹 Add summary comment block đầu file
 
-🎯 Mục tiêu của test.
+```csharp
+/// <summary>
+/// 🎯 Mục tiêu: Kiểm thử hành vi của UpdateEventCommandHandler.
+/// ⚙️ Các bước: Arrange - Act - Assert.
+/// 💡 Giải thích: Đảm bảo handler phản hồi đúng khi dữ liệu hợp lệ hoặc khi entity không tồn tại.
+/// </summary>
+```
 
-⚙️ Các bước (Arrange, Act, Assert).
+### 🔹 Mỗi test method cần có comment chi tiết:
 
-💡 Giải thích vì sao kết quả mong đợi là đúng.
+```csharp
+// 🎯 Mục tiêu: Kiểm tra handler ném lỗi khi không tìm thấy Event.
+// ⚙️ Arrange: Tạo context rỗng, khởi tạo handler.
+// ⚙️ Act: Gọi Handle với Id không tồn tại.
+// ⚙️ Assert: Kỳ vọng NotFoundException.
+// 💡 Giải thích: Vì entity không tồn tại nên handler phải ném lỗi NotFound.
+```
 
-Đặt tên test rõ ràng theo chuẩn:
+### 🔹 Đặt tên test rõ ràng:
 
-Handle_ShouldThrowNotFoundException_WhenMemberNotFound
+* `Handle_ShouldThrowNotFoundException_WhenEventNotFound`
+* `Handle_ShouldUpdateEventSuccessfully_WhenValidRequest`
+* `Handle_ShouldReturnForbidden_WhenUserNotAuthorized`
 
-Handle_ShouldUpdateMemberCorrectly_WhenValidRequest
+---
 
-Tham khảo style và cách setup các test đã pass trước đó trong repo để đồng nhất.
+## 🧩 **Cách setup dữ liệu**
 
-Giới hạn phạm vi
-
-Chỉ viết 2–3 test case tiêu biểu cho mỗi handler.
-
-Khi implement:
-
-Viết từng test một.
-
-Chạy test, khi tất cả pass → mới chuyển sang handler tiếp theo.
-
-Cách setup dữ liệu
-
-KHÔNG mock DbSet hoặc EF method như FirstOrDefaultAsync.
+Không mock `DbSet` hoặc các method như `FirstOrDefaultAsync`.
 
 Tạo dữ liệu test bằng:
 
-Thủ công (seed entity, gán Id/FK đúng), hoặc
+* Seed entity thủ công, **gán Id/FK hợp lệ**
+* Hoặc dùng **AutoFixture** (nhưng phải gán FK thủ công nếu có quan hệ)
 
-AutoFixture (nhưng phải gán FK thủ công nếu có quan hệ).
+Mỗi test dùng **database mới**:
 
-Mỗi test khởi tạo một InMemoryDatabase mới để đảm bảo độc lập.
+```csharp
+var options = new DbContextOptionsBuilder<AppDbContext>()
+    .UseInMemoryDatabase(Guid.NewGuid().ToString())
+    .Options;
+```
 
-Tái sử dụng setup
+---
 
-Tạo BaseTest class để gom logic khởi tạo chung:
+## 🧰 **BaseTest Class**
 
-DbContext (InMemory)
+Tạo `BaseTest` dùng chung cho tất cả:
 
-AutoFixture config
+```csharp
+public abstract class BaseTest
+{
+    protected readonly AppDbContext _context;
+    protected readonly IMapper _mapper;
+    protected readonly Mock<IAuthorizationService> _authMock;
 
-AutoMoq setup (nếu có dependency)
+    protected BaseTest()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
 
-Các test kế thừa BaseTest để tránh lặp code.
+        _context = new AppDbContext(options);
+        _authMock = new Mock<IAuthorizationService>();
+    }
+}
+```
 
-Tham khảo tài liệu
+Các test kế thừa `BaseTest` để giảm lặp code.
 
-Trước khi viết test, hãy đọc các tài liệu trong thư mục Docs/ của repo để nắm rõ cấu trúc model, property, và use case.
+---
 
-Không tự bịa hoặc suy đoán model, property, hoặc field.
+## 🧩 **Phần mở rộng bổ sung**
 
-🚫 Cảnh báo quan trọng
+Bổ sung các **loại test khác** phù hợp refactor mới:
 
-Chỉ được dùng các entity, DTO, và property có thật trong mã nguồn hiện có của dự án.
+### 1️⃣ **Authorization & Validation**
 
-Nếu không chắc chắn về cấu trúc model → hãy hỏi lại hoặc tra cứu trong code trước khi viết test.
+* Khi user chưa login → trả lỗi `Unauthorized`
+* Khi user không có quyền → `Forbidden`
+* Khi request thiếu field bắt buộc → `ValidationException`
 
-Không thêm thuộc tính giả như CreatedAt, UpdatedAt, IsDeleted, v.v. nếu không có trong model thật.
+### 2️⃣ **Integration Test**
 
-📁 Kết quả mong muốn
+* Mô phỏng pipeline thực qua **Mediator.Send(...)**
+* Test transaction logic thật, không mock handler
+* Dùng database thật (InMemory) và real DI container
 
-Mỗi file test nằm trong Application.UnitTests/<Module>/<Feature>/<FeatureName>Tests.cs.
+### 3️⃣ **Domain Event Test**
 
-Mỗi test:
+* Kiểm tra khi entity thay đổi, **DomainEvent** được publish
+* Assert rằng event xuất hiện trong `entity.DomainEvents`
 
-Chạy độc lập.
+### 4️⃣ **Audit Field Auto-set**
 
-Dễ hiểu cho junior developer.
+* Khi SaveChanges, kiểm tra `CreatedBy`, `UpdatedBy` tự động set đúng
+* Đảm bảo dữ liệu được cập nhật đồng nhất giữa các handler
 
-Có comment rõ ràng (Arrange / Act / Assert / Explain).
+### 5️⃣ **Performance / Consistency**
 
-Dùng FluentAssertions để assert.
+* Dữ liệu sau Update không bị trùng hoặc ghi đè ngoài ý muốn
+* EventMembers hoặc ChildEntities được cập nhật đúng số lượng
 
-Chạy async nếu cần (await handler.Handle(...)).
+---
 
-Đồng nhất style test với các test đã pass trước đó.
+## ⚙️ **Nguyên tắc thực thi**
 
-⚙️ Mục tiêu cuối cùng
+1. Viết từng test nhỏ, chạy pass trước khi sang handler khác.
+2. Không thêm field giả (CreatedAt, UpdatedAt, IsDeleted...) nếu không có trong model thật.
+3. Mỗi test có comment rõ ràng (Arrange / Act / Assert / Explain).
+4. Dễ hiểu với **junior developer** hoặc **tester không chuyên backend**.
+5. Giữ style đồng nhất với các test đã pass trước đó.
 
-Giúp tôi — một developer làm việc một mình — có thể nhanh chóng tạo test hữu ích cho từng handler mà không tốn thời gian.
+---
 
-Tập trung vào tốc độ, tính chính xác và độ dễ hiểu.
+## 📁 **Kết quả mong muốn**
 
-Không cần độ bao phủ tuyệt đối, chỉ cần test các case chính, đáng tin cậy, có thể chạy tự động.
+* Mỗi test chạy độc lập, pass ổn định.
+* Có giải thích dễ hiểu.
+* Sử dụng đúng FluentAssertions (`result.Should().BeTrue();`).
+* Tất cả test chạy async (`await handler.Handle(...);`).
+* Cấu trúc rõ ràng, dễ maintain, dễ mở rộng thêm test mới.
+
+---
+
+## ⚙️ **Mục tiêu cuối cùng**
+
+> Giúp tôi — một developer làm việc một mình — có thể:
+>
+> * Viết test nhanh, đúng, dễ hiểu
+> * Đảm bảo handler refactor vẫn hoạt động chính xác
+> * Không cần đoán mô hình hoặc thêm property giả
+> * Tạo ra test tự động hóa hữu ích cho CI/CD pipeline

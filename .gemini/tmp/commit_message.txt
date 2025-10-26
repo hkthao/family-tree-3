@@ -1,8 +1,8 @@
-feat: Standardize error handling, implement auditable entities, and refine FaceController responses
+refactor: Update unit tests after authorization service simplification
 
-This commit introduces several improvements across the backend:
+This commit refactors several unit tests in the backend Application layer to align with the simplification of the authorization service.
 
-- **Standardized Error Handling:** Replaced hardcoded error messages with `ErrorMessages` and `ErrorSources` constants for consistent and localized error reporting across various application handlers (Members, NotificationTemplates, Relationships, UserActivities, UserPreferences).
-- **Auditable Entities:** Implemented `AuditableEntitySaveChangesInterceptor` to automatically populate `CreatedBy`, `Created`, `LastModifiedBy`, and `LastModified` fields for entities inheriting from `BaseAuditableEntity`. This enhances data integrity and traceability.
-- **Refined FaceController Responses:** Modified `FaceController` endpoints to return `BadRequest` with detailed error messages when operations fail, providing clearer feedback to API consumers.
-- **Unit Test Alignment:** Updated relevant unit tests to reflect the new error handling mechanisms and ensure continued test coverage and correctness.
+Key changes include:
+- Removing redundant `_mockAuthorizationService` instances from test classes where the authorization logic is now handled differently.
+- Adjusting test methods that previously checked for unauthenticated users or missing user profiles, as these checks are now integrated into the authorization service itself or handled at a higher level.
+- Deleting `src/backend/tests/Application.UnitTests/Members/Queries/GetEditableMembers/GetEditableMembersQueryHandlerTests.cs` which is no longer relevant due to changes in how editable members are determined.

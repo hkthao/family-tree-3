@@ -84,8 +84,9 @@ public class DetectFacesCommandHandlerTests : TestBase
 
         // Assert
         response.Should().NotBeNull();
-        response.DetectedFaces.Should().HaveCount(1);
-        response.DetectedFaces.First().MemberId.Should().BeNull();
+        response.IsSuccess.Should().BeTrue();
+        var detectedFacesResponse = response.Value!;
+        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
         _mockVectorStore.Verify(vs => vs.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
 
         // 💡 Giải thích:
@@ -171,13 +172,15 @@ public class DetectFacesCommandHandlerTests : TestBase
 
         // Assert
         response.Should().NotBeNull();
-        response.Value.DetectedFaces.Should().HaveCount(1);
-        response.Value.DetectedFaces.First().MemberId.Should().Be(member.Id);
-        response.Value.DetectedFaces.First().MemberName.Should().Be(member.FullName);
-        response.Value.DetectedFaces.First().FamilyId.Should().Be(family.Id);
-        response.Value.DetectedFaces.First().FamilyName.Should().Be(family.Name);
-        response.Value.DetectedFaces.First().BirthYear.Should().Be(member.DateOfBirth?.Year);
-        response.Value.DetectedFaces.First().DeathYear.Should().Be(member.DateOfDeath?.Year);
+        response.IsSuccess.Should().BeTrue();
+        var detectedFacesResponse = response.Value!;
+        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
+        detectedFacesResponse.DetectedFaces.First().MemberId.Should().Be(member.Id);
+        detectedFacesResponse.DetectedFaces.First().MemberName.Should().Be(member.FullName);
+        detectedFacesResponse.DetectedFaces.First().FamilyId.Should().Be(family.Id);
+        detectedFacesResponse.DetectedFaces.First().FamilyName.Should().Be(family.Name);
+        detectedFacesResponse.DetectedFaces.First().BirthYear.Should().Be(member.DateOfBirth?.Year);
+        detectedFacesResponse.DetectedFaces.First().DeathYear.Should().Be(member.DateOfDeath?.Year);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng khi một embedding khuôn mặt khớp với một thành viên hiện có,
@@ -229,9 +232,11 @@ public class DetectFacesCommandHandlerTests : TestBase
 
         // Assert
         response.Should().NotBeNull();
-        response.Value.DetectedFaces.Should().HaveCount(1);
-        response.Value.DetectedFaces.First().MemberId.Should().BeNull();
-        response.Value.DetectedFaces.First().MemberName.Should().BeNull();
+        response.IsSuccess.Should().BeTrue();
+        var detectedFacesResponse = response.Value!;
+        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
+        detectedFacesResponse.DetectedFaces.First().MemberId.Should().BeNull();
+        detectedFacesResponse.DetectedFaces.First().MemberName.Should().BeNull();
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng khi không có khớp nào trong vector store,
@@ -282,7 +287,9 @@ public class DetectFacesCommandHandlerTests : TestBase
 
         // Assert
         response.Should().NotBeNull();
-        response.DetectedFaces.Should().HaveCount(1);
+        response.IsSuccess.Should().BeTrue();
+        var detectedFacesResponse = response.Value!;
+        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
         _mockLogger.Verify(x => x.Log(
             LogLevel.Error,
             It.IsAny<EventId>(),

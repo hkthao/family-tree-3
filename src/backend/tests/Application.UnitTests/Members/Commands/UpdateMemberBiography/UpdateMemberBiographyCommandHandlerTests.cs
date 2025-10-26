@@ -12,16 +12,12 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMemberBiography;
 
 public class UpdateMemberBiographyCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly UpdateMemberBiographyCommandHandler _handler;
 
     public UpdateMemberBiographyCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
-
         _handler = new UpdateMemberBiographyCommandHandler(
             _context,
-            _mockUser.Object,
             _mockAuthorizationService.Object
         );
     }

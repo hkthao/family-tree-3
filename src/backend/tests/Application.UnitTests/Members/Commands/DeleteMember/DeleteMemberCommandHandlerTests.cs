@@ -12,13 +12,11 @@ namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 
 public class DeleteMemberCommandHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
     private readonly DeleteMemberCommandHandler _handler;
 
     public DeleteMemberCommandHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockFamilyTreeService = new Mock<IFamilyTreeService>();
 
         _handler = new DeleteMemberCommandHandler(
@@ -28,23 +26,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy UserProfile.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock GetCurrentUserProfileAsync trả về null.
-        // 2. Act: Gọi phương thức Handle với một DeleteMemberCommand bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var command = _fixture.Create<DeleteMemberCommand>();
 
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        // 💡 Giải thích: Handler phải kiểm tra UserProfile trước khi thực hiện các thao tác khác.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenMemberNotFound()

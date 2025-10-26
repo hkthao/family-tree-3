@@ -5,11 +5,10 @@ using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
-public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
+public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _user = user;
 
     public async Task<Result<bool>> Handle(DeleteRelationshipCommand request, CancellationToken cancellationToken)
     {

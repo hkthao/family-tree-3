@@ -8,11 +8,10 @@ using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 
-public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<DeleteFamilyCommand, Result>
+public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _user = user;
 
     public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
     {

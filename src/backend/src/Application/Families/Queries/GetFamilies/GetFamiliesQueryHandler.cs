@@ -1,5 +1,4 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
@@ -15,8 +14,8 @@ public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapp
 
     public async Task<Result<IReadOnlyList<FamilyListDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Families.AsQueryable();
 
+        var query = _context.Families.AsQueryable();
         // If the user has the 'Admin' role, bypass family-specific access checks
         if (_authorizationService.IsAdmin())
         {
@@ -27,8 +26,8 @@ public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapp
             // For non-admin users, apply family-specific access checks
             // Apply user access specification
             query = query.WithSpecification(new FamilyByUserIdSpec(_user.Id!.Value));
-        }
 
+        }
         // Apply other specifications
         query = query.WithSpecification(new FamilySearchTermSpecification(request.SearchTerm));
         query = query.WithSpecification(new FamilyOrderingSpecification(request.SortBy, request.SortOrder));

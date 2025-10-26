@@ -18,14 +18,11 @@ namespace backend.Application.UnitTests.Events.Commands.UpdateEvent;
 public class UpdateEventCommandHandlerTests : TestBase
 {
     private readonly UpdateEventCommandHandler _handler;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IMediator> _mockMediator;
 
     public UpdateEventCommandHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-
         _handler = new UpdateEventCommandHandler(_context, _mockAuthorizationService.Object);
     }
 

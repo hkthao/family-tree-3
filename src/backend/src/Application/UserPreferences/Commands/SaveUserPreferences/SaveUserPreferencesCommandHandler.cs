@@ -7,11 +7,10 @@ using backend.Domain.Entities;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 
-public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user, IMapper mapper) : IRequestHandler<SaveUserPreferencesCommand, Result>
+public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<SaveUserPreferencesCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IUser _user = user;
-    private readonly IMapper _mapper = mapper;
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {

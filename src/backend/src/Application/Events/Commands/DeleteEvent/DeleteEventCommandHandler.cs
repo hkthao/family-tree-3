@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.Commands.DeleteEvent;
 
@@ -12,7 +11,7 @@ public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
     public async Task<Result<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Events.FindAsync(request.Id);
+        var entity = await _context.Events.FindAsync(request.Id, cancellationToken);
         if (entity == null)
             return Result<bool>.Failure(string.Format(ErrorMessages.EventNotFound, request.Id), ErrorSources.NotFound);
 

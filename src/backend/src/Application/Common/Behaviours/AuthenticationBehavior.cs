@@ -1,4 +1,3 @@
-using MediatR;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 

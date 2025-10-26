@@ -1,4 +1,5 @@
 using AutoFixture;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.UnitTests.Common;
@@ -12,12 +13,10 @@ namespace backend.Application.UnitTests.Members.Queries.GetMembers;
 
 public class GetMembersQueryHandlerTests : TestBase
 {
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly GetMembersQueryHandler _handler;
 
     public GetMembersQueryHandlerTests()
     {
-        _mockAuthorizationService = new Mock<IAuthorizationService>();
         _handler = new GetMembersQueryHandler(
             _context,
             _mapper,
@@ -26,25 +25,6 @@ public class GetMembersQueryHandlerTests : TestBase
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng chưa được xác thực.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock _mockUser.Id trả về null.
-        // 2. Act: Gọi phương thức Handle với một GetMembersQuery bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null!);
-
-        var query = _fixture.Create<GetMembersQuery>();
-
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User is not authenticated.");
-        // 💡 Giải thích: Handler phải kiểm tra xác thực người dùng trước khi thực hiện các thao tác khác.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnAllMembers_WhenAdminAndNoFamilyId()

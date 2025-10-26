@@ -2,7 +2,6 @@ using backend.Application.Common.Models;
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Commands.SaveFaceLabels;
 using backend.Application.Faces.Queries;
-using backend.Application.Faces.Queries.GetDetectedFaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -46,22 +45,6 @@ public class FaceController(IMediator mediator) : ControllerBase
         };
 
         var result = await _mediator.Send(command);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-        return BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý GET request để lấy danh sách các khuôn mặt đã được phát hiện cho một hình ảnh cụ thể.
-    /// </summary>
-    /// <param name="imageId">ID của hình ảnh.</param>
-    /// <returns>Danh sách các khuôn mặt đã được phát hiện.</returns>
-    [HttpGet("detected/{imageId}")]
-    public async Task<ActionResult<List<DetectedFaceDto>>> GetDetectedFaces(Guid imageId)
-    {
-        var result = await _mediator.Send(new GetDetectedFacesQuery { ImageId = imageId });
         if (result.IsSuccess)
         {
             return Ok(result.Value);

@@ -6,10 +6,9 @@ using backend.Domain.Events.Members;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler(IApplicationDbContext context, IUser user, IAuthorizationService authorizationService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
+public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
