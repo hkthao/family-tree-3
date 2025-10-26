@@ -1,4 +1,5 @@
 using System.Text;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
@@ -19,22 +20,17 @@ public class GenerateBiographyCommandHandler(
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-        {
-            return Result<BiographyResultDto>.Failure("User is not authenticated.", "Authentication");
-        }
-
         var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
         if (member == null)
         {
-            return Result<BiographyResultDto>.Failure($"Member with ID {request.MemberId} not found.", "NotFound");
+            return Result<BiographyResultDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
 
         // Authorization check: User must be a manager of the family the member belongs to, or an admin.
         var authorizationResult = _authorizationService.CanAccessFamily(member.FamilyId);
         if (!authorizationResult)
         {
-            return Result<BiographyResultDto>.Failure("Access denied", "AccessDenied");
+            return Result<BiographyResultDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         // --- AI Biography Generation Logic ---
@@ -144,7 +140,7 @@ public class GenerateBiographyCommandHandler(
 
         if (string.IsNullOrWhiteSpace(biographyText))
         {
-            return Result<BiographyResultDto>.Failure("AI did not return a biography.", "NoContent");
+            return Result<BiographyResultDto>.Failure(ErrorMessages.NoAIResponse, ErrorSources.NoContent);
         }
 
         // Ensure biography is within 1500 words (approximate)

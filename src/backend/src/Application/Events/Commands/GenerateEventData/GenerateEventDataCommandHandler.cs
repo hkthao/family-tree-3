@@ -1,4 +1,5 @@
 using System.Text.Json;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Queries;
@@ -33,7 +34,7 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<List<AIEventDto>>.Failure("AI did not return a response.");
+            return Result<List<AIEventDto>>.Failure(ErrorMessages.NoAIResponse);
         }
 
         try
@@ -67,15 +68,15 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
                         if (authResult)
                             eventDto.FamilyId = family.Id;
                         else
-                            eventDto.ValidationErrors.Add("User does not have permission to update this family.");
+                            eventDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else if (families.Count == 0)
                     {
-                        eventDto.ValidationErrors.Add($"Family '{eventDto.FamilyName}' not found or you do not have permission to manage it.");
+                        eventDto.ValidationErrors.Add(string.Format(ErrorMessages.FamilyNotFound, eventDto.FamilyName));
                     }
                     else
                     {
-                        eventDto.ValidationErrors.Add($"Multiple families found with name or code '{eventDto.FamilyName}'. Please specify.");
+                        eventDto.ValidationErrors.Add(ErrorMessages.MultipleFamiliesFound);
                     }
                 }
 
@@ -93,9 +94,9 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
                         if (members.Count == 1)
                             memberIds.Add(members.First().Id);
                         else if (members.Count == 0)
-                            eventDto.ValidationErrors.Add($"Related member '{memberIdentifier}' not found in family '{eventDto.FamilyName}'.");
+                            eventDto.ValidationErrors.Add(string.Format(ErrorMessages.NotFound, $"Related member '{memberIdentifier}' in family '{eventDto.FamilyName}'"));
                         else
-                            eventDto.ValidationErrors.Add($"Multiple members found with name or code '{memberIdentifier}' in family '{eventDto.FamilyName}'. Please specify.");
+                            eventDto.ValidationErrors.Add(ErrorMessages.MultipleMembersFound);
                     }
                 }
                 
@@ -110,11 +111,11 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
         }
         catch (JsonException ex)
         {
-            return Result<List<AIEventDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<AIEventDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message));
         }
         catch (Exception ex)
         {
-            return Result<List<AIEventDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<AIEventDto>>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
     private class AIResponseData

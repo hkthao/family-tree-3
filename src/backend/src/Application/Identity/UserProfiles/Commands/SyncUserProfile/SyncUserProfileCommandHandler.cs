@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
@@ -23,8 +24,8 @@ public class SyncUserProfileCommandHandler(
 
         if (string.IsNullOrEmpty(externalId))
         {
-            _logger.LogWarning("External ID (sub claim) not found in claims. Cannot sync user profile.");
-            return Result<bool>.Failure("External ID (sub claim) not found in claims.", "Authentication");
+            _logger.LogWarning(ErrorMessages.ExternalIdNotFound + ". Cannot sync user profile.");
+            return Result<bool>.Failure(ErrorMessages.ExternalIdNotFound, ErrorSources.Authentication);
         }
 
         var userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
@@ -64,8 +65,13 @@ public class SyncUserProfileCommandHandler(
                 if (userProfile == null)
                 {
                     _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {ExternalId}. This should not happen.", externalId);
-                    throw; // Re-throw if the user still doesn't exist, as it was not a duplicate entry issue.
+                    return Result<bool>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database); // Return failure instead of re-throwing
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An unexpected error occurred while creating a user profile for {ExternalId}.", externalId);
+                return Result<bool>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception); // Return failure instead of re-throwing
             }
         }
 

@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
+using backend.Domain.Common;
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 

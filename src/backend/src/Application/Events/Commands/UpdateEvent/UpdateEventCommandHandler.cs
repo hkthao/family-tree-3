@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
@@ -14,7 +15,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         // Authorization check: Only family managers or admins can update events
         if (!_authorizationService.CanManageFamily(request.FamilyId!.Value))
         {
-            return Result<bool>.Failure("Access denied. Only family managers or admins can update events.", "Forbidden");
+            return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         var entity = await _context.Events
@@ -23,7 +24,7 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
 
         if (entity == null)
         {
-            return Result<bool>.Failure($"Event with ID {request.Id} not found.", "NotFound");
+            return Result<bool>.Failure(string.Format(ErrorMessages.EventNotFound, request.Id), ErrorSources.NotFound);
         }
 
         var relatedMembers = await _context.Members

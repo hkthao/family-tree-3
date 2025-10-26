@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
@@ -17,19 +18,14 @@ public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
     {
         try
         {
-            if (!_user.Id.HasValue)
-            {
-                return Result.Failure("User is not authenticated.", "Authentication");
-            }
-
             if (!_authorizationService.CanManageFamily(request.Id))
             {
-                return Result.Failure("User does not have permission to delete this family.", "Forbidden");
+                return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
             var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);
             if (entity == null)
-                return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
+                return Result.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
 
             entity.AddDomainEvent(new FamilyDeletedEvent(entity));
             _context.Families.Remove(entity);
@@ -43,11 +39,11 @@ public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure($"Database error occurred while deleting family: {ex.Message}", "Database");
+            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database);
         }
         catch (Exception ex)
         {
-            return Result.Failure($"An unexpected error occurred while deleting family: {ex.Message}", "Exception");
+            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
         }
     }
 }

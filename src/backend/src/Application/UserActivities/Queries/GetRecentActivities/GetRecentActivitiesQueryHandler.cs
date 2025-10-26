@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.UserActivities.Specifications;
@@ -17,15 +18,10 @@ public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMap
 
     public async Task<Result<List<UserActivityDto>>> Handle(GetRecentActivitiesQuery request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-        {
-            return Result<List<UserActivityDto>>.Failure("User is not authenticated.", "Authentication");
-        }
-
         var query = _context.UserActivities.AsNoTracking();
 
         // Apply specifications
-        query = query.WithSpecification(new UserActivityByProfileIdSpec(_user.Id.Value));
+        query = query.WithSpecification(new UserActivityByProfileIdSpec(_user.Id!.Value));
 
         var userActivities = await query
             .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)

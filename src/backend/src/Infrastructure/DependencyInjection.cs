@@ -33,19 +33,24 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<DispatchDomainEventsInterceptor>();
+        services.AddScoped<AuditableEntitySaveChangesInterceptor>();
 
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))
         {
             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
                 options.UseInMemoryDatabase("FamilyTreeDb")
-                       .AddInterceptors(serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>()));
+                       .AddInterceptors(
+                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
+                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()));
         }
         else
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-                       .AddInterceptors(serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>()));
+                       .AddInterceptors(
+                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
+                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()));
         }
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());

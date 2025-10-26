@@ -171,13 +171,13 @@ public class DetectFacesCommandHandlerTests : TestBase
 
         // Assert
         response.Should().NotBeNull();
-        response.DetectedFaces.Should().HaveCount(1);
-        response.DetectedFaces.First().MemberId.Should().Be(member.Id);
-        response.DetectedFaces.First().MemberName.Should().Be(member.FullName);
-        response.DetectedFaces.First().FamilyId.Should().Be(family.Id);
-        response.DetectedFaces.First().FamilyName.Should().Be(family.Name);
-        response.DetectedFaces.First().BirthYear.Should().Be(member.DateOfBirth?.Year);
-        response.DetectedFaces.First().DeathYear.Should().Be(member.DateOfDeath?.Year);
+        response.Value.DetectedFaces.Should().HaveCount(1);
+        response.Value.DetectedFaces.First().MemberId.Should().Be(member.Id);
+        response.Value.DetectedFaces.First().MemberName.Should().Be(member.FullName);
+        response.Value.DetectedFaces.First().FamilyId.Should().Be(family.Id);
+        response.Value.DetectedFaces.First().FamilyName.Should().Be(family.Name);
+        response.Value.DetectedFaces.First().BirthYear.Should().Be(member.DateOfBirth?.Year);
+        response.Value.DetectedFaces.First().DeathYear.Should().Be(member.DateOfDeath?.Year);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng khi một embedding khuôn mặt khớp với một thành viên hiện có,
@@ -229,9 +229,9 @@ public class DetectFacesCommandHandlerTests : TestBase
 
         // Assert
         response.Should().NotBeNull();
-        response.DetectedFaces.Should().HaveCount(1);
-        response.DetectedFaces.First().MemberId.Should().BeNull();
-        response.DetectedFaces.First().MemberName.Should().BeNull();
+        response.Value.DetectedFaces.Should().HaveCount(1);
+        response.Value.DetectedFaces.First().MemberId.Should().BeNull();
+        response.Value.DetectedFaces.First().MemberName.Should().BeNull();
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng khi không có khớp nào trong vector store,

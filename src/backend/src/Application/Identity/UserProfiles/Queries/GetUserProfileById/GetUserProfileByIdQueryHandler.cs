@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
@@ -16,7 +17,7 @@ public class GetUserProfileByIdQueryHandler(IApplicationDbContext context, IMapp
 
         if (userProfile == null)
         {
-            return Result<UserProfileDto>.Failure("User profile not found.", "NotFound");
+            return Result<UserProfileDto>.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
         var userProfileDto = _mapper.Map<UserProfileDto>(userProfile);

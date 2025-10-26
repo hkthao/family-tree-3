@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
@@ -33,7 +34,7 @@ public class EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProvid
     {
         if (request.Chunks == null || request.Chunks.Count == 0)
         {
-            return Result.Failure("No chunks provided for embedding.");
+            return Result.Failure(string.Format(ErrorMessages.NotFound, "Chunks"));
         }
 
         var embeddingSettings = _configProvider.GetSection<EmbeddingSettings>();

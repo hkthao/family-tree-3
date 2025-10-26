@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
@@ -18,25 +19,20 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
     {
         try
         {
-            if (!_user.Id.HasValue)
-            {
-                return Result.Failure("User is not authenticated.", "Authentication");
-            }
-
             var currentUserProfile = await _context.UserProfiles
-                .WithSpecification(new UserProfileByIdSpecification(_user.Id.Value))
+                .WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value))
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (currentUserProfile == null)
             {
-                return Result.Failure("User profile not found.", "NotFound");
+                return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
             }
 
             if (!_authorizationService.IsAdmin())
             {
                 if (!_authorizationService.CanManageFamily(request.Id))
                 {
-                    return Result.Failure("User does not have permission to update this family.", "Forbidden");
+                    return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
                 }
             }
 
@@ -44,7 +40,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
 
             if (entity == null)
             {
-                return Result.Failure($"Family with ID {request.Id} not found.", "NotFound");
+                return Result.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
             }
 
 
@@ -67,11 +63,11 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
         }
         catch (DbUpdateException ex)
         {
-            return Result.Failure($"Database error occurred while updating family: {ex.Message}", "Database");
+            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database);
         }
         catch (Exception ex)
         {
-            return Result.Failure($"An unexpected error occurred while updating family: {ex.Message}", "Exception");
+            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
         }
     }
 }

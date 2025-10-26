@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Specifications;
@@ -14,11 +15,6 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-        {
-            return Result<IReadOnlyList<MemberListDto>>.Failure("User is not authenticated.");
-        }
-
         var query = _context.Members.AsQueryable();
 
         // If the user has the 'Admin' role, bypass family-specific access checks
@@ -34,7 +30,7 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
         else
         {
             // Get IDs of families the user has access to
-            var accessibleFamilyIds = _context.FamilyUsers.Where(e=>e.UserProfileId == _user.Id).Select(fu => fu.FamilyId).ToList();
+            var accessibleFamilyIds = _context.FamilyUsers.Where(e=>e.UserProfileId == _user.Id!.Value).Select(fu => fu.FamilyId).ToList();
 
             // Apply family access filter if a specific FamilyId is requested
             if (request.FamilyId.HasValue && request.FamilyId.Value != Guid.Empty)
@@ -42,7 +38,7 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
                 // Check if the requested FamilyId is among the user's accessible families
                 if (!accessibleFamilyIds.Contains(request.FamilyId.Value))
                 {
-                    return Result<IReadOnlyList<MemberListDto>>.Failure("Access denied to the requested family.");
+                    return Result<IReadOnlyList<MemberListDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
                 }
                 query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId.Value));
             }

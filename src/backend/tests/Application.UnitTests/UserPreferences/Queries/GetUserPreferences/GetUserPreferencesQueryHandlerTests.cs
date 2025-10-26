@@ -38,6 +38,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // Arrange
         var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
+                                  .With(up => up.Id, userId)
                                   .Create();
         var existingUserPreference = _fixture.Build<UserPreference>()
                                              .With(up => up.UserProfileId, userProfile.Id)
@@ -95,6 +96,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // Arrange
         var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
+                                  .With(up => up.Id, userId)
                                   .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
                                   .Create();
         _context.UserProfiles.Add(userProfile);
@@ -180,9 +182,11 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         var userId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(userId);
 
-        // Ensure no UserProfile exists for this userId
-        _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _context.UserProfiles.Should().BeEmpty(); // Debug assertion
+
+
+
+
 
         var query = new GetUserPreferencesQuery();
 

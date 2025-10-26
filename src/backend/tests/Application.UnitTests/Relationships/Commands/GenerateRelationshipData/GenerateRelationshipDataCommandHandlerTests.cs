@@ -8,7 +8,6 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Specifications;
@@ -19,7 +20,7 @@ public class GetRelationshipByIdQueryHandler(IApplicationDbContext context, IMap
             .ProjectTo<RelationshipDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
         return relationshipDto == null
-            ? Result<RelationshipDto>.Failure($"Relationship with ID {request.Id} not found.")
+            ? Result<RelationshipDto>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound)
             : Result<RelationshipDto>.Success(relationshipDto);
     }
 }

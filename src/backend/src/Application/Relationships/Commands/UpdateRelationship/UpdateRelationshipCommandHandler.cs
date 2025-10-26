@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events.Relationships;
@@ -12,20 +13,17 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
 
     public async Task<Result<bool>> Handle(UpdateRelationshipCommand request, CancellationToken cancellationToken)
     {
-        if (!_user.IsAuthenticated)
-            return Result<bool>.Failure("User is not authenticated.", "Authentication");
-
         var entity = await _context.Relationships.FindAsync(request.Id);
         if (entity == null)
-            return Result<bool>.Failure($"Relationship with ID {request.Id} not found.", "NotFound");
+            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound);
 
         // Authorization check: Get family ID from source member
         var sourceMember = await _context.Members.FindAsync(entity.SourceMemberId);
         if (sourceMember == null)
-            return Result<bool>.Failure($"Source member for relationship {request.Id} not found.", "NotFound");
+            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Source member for relationship {request.Id}"), ErrorSources.NotFound);
 
         if (!_authorizationService.CanManageFamily(sourceMember.FamilyId))
-            return Result<bool>.Failure("Access denied. Only family managers or admins can update relationships.", "Forbidden");
+            return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         entity.SourceMemberId = request.SourceMemberId;
         entity.TargetMemberId = request.TargetMemberId;

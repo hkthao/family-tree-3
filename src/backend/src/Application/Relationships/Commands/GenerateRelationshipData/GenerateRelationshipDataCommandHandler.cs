@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
@@ -37,7 +38,7 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
         if (string.IsNullOrWhiteSpace(jsonString))
         {
             _logger.LogWarning("AI did not return a response for prompt: {Prompt}", request.Prompt); // Log warning
-            return Result<List<AIRelationshipDto>>.Failure("AI did not return a response.");
+            return Result<List<AIRelationshipDto>>.Failure(ErrorMessages.NoAIResponse);
         }
 
         try
@@ -74,11 +75,11 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
                         if (authResult)
                             relationshipDto.SourceMemberId = sourceMember.Id;
                         else
-                            relationshipDto.ValidationErrors.Add($"No permission to access family of {relationshipDto.SourceMemberName}.");
+                            relationshipDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else
                     {
-                        relationshipDto.ValidationErrors.Add($"Source member '{relationshipDto.SourceMemberName}' not found.");
+                        relationshipDto.ValidationErrors.Add(string.Format(ErrorMessages.NotFound, $"Source member '{relationshipDto.SourceMemberName}'"));
                     }
                 }
 
@@ -100,11 +101,11 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
                         if (authResult)
                             relationshipDto.TargetMemberId = targetMember.Id;
                         else
-                            relationshipDto.ValidationErrors.Add($"No permission to access family of {relationshipDto.TargetMemberName}.");
+                            relationshipDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else
                     {
-                        relationshipDto.ValidationErrors.Add($"Target member '{relationshipDto.TargetMemberName}' not found.");
+                        relationshipDto.ValidationErrors.Add(string.Format(ErrorMessages.NotFound, $"Target member '{relationshipDto.TargetMemberName}'"));
                     }
                 }
 
@@ -120,11 +121,11 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
         catch (JsonException ex)
         {
             _logger.LogError(ex, "AI generated invalid JSON. Details: {Message}", ex.Message);
-            return Result<List<AIRelationshipDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<AIRelationshipDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message));
         }
         catch (Exception ex)
         {
-            return Result<List<AIRelationshipDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<AIRelationshipDto>>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
 

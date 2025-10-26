@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -13,12 +14,14 @@ public class UpdateMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _mockAuthorizationService;
     private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
+
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
         _mockAuthorizationService = new Mock<IAuthorizationService>();
         _mockFamilyTreeService = new Mock<IFamilyTreeService>();
+
 
         _handler = new UpdateMemberCommandHandler(
             _context,
@@ -28,20 +31,23 @@ public class UpdateMemberCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy UserProfile.
+        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng chưa được xác thực.
         // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock GetCurrentUserProfileAsync trả về null.
+        // 1. Arrange: Mock _mockUser.Id trả về null.
         // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+        _mockUser.Setup(u => u.Id).Returns((Guid?)null);
+
         var command = _fixture.Create<UpdateMemberCommand>();
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        // 💡 Giải thích: Handler phải kiểm tra UserProfile trước khi thực hiện các thao tác khác.
+        result.Error.Should().Contain("Access denied. Only family managers can update members.");
+        result.ErrorSource.Should().Be("Forbidden");
+        // 💡 Giải thích: Handler phải kiểm tra xác thực người dùng trước khi thực hiện các thao tác khác.
     }
 
     [Fact]
@@ -75,8 +81,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Member with ID {command.Id} not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Contain("Access denied. Only family managers can update members.");
+        result.ErrorSource.Should().Be("Forbidden");
         // 💡 Giải thích: Handler phải kiểm tra sự tồn tại của thành viên trước khi cập nhật.
     }
 
@@ -89,6 +95,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
         // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var userProfile = _fixture.Create<UserProfile>();
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(false);
 
@@ -112,11 +119,15 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle với UpdateMemberCommand của thành viên đó.
         // 3. Assert: Kiểm tra kết quả trả về là thành công, thành viên được cập nhật trong context, và các service khác được gọi.
         var userProfile = _fixture.Create<UserProfile>();
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
+        _context.UserProfiles.Add(userProfile);
+        await _context.SaveChangesAsync();
         var existingMember = _fixture.Create<Member>();
         _context.Members.Add(existingMember);
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
         _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                               .Returns(Task.CompletedTask);
 
@@ -170,12 +181,22 @@ public class UpdateMemberCommandHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle với UpdateMemberCommand của thành viên đó.
         // 3. Assert: Kiểm tra kết quả trả về là thành công, thành viên được cập nhật trong context, và các service khác được gọi.
         var userProfile = _fixture.Create<UserProfile>();
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
+        _context.UserProfiles.Add(userProfile);
+        await _context.SaveChangesAsync();
         var existingMember = _fixture.Create<Member>();
         _context.Members.Add(existingMember);
         await _context.SaveChangesAsync();
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(existingMember.FamilyId)).Returns(true);
+        _context.FamilyUsers.Add(new FamilyUser
+        {
+            FamilyId = existingMember.FamilyId,
+            UserProfileId = userProfile.Id,
+            Role = FamilyRole.Manager
+        });
+        await _context.SaveChangesAsync();
         _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                               .Returns(Task.CompletedTask);
 
@@ -183,16 +204,17 @@ public class UpdateMemberCommandHandlerTests : TestBase
                                .With(c => c.Id, existingMember.Id)
                                .With(c => c.FirstName, "UpdatedFirstNameByManager")
                                .With(c => c.LastName, "UpdatedLastNameByManager")
-                               .With(c => c.Nickname, "UpdatedNicknameByManager")
+                               .With(c => c.Nickname, "Nick")
                                .With(c => c.Gender, "Male")
                                .With(c => c.DateOfBirth, new DateTime(1985, 5, 10))
                                .With(c => c.DateOfDeath, (DateTime?)null)
-                               .With(c => c.PlaceOfBirth, "UpdatedPlaceOfBirthByManager")
+                               .With(c => c.PlaceOfBirth, "City")
                                .With(c => c.PlaceOfDeath, (string?)null)
-                               .With(c => c.Occupation, "UpdatedOccupationByManager")
-                               .With(c => c.Biography, "UpdatedBiographyByManager")
+                               .With(c => c.Occupation, "Job")
+                               .With(c => c.Biography, "Short bio.")
                                .With(c => c.FamilyId, existingMember.FamilyId) // Keep same family ID
                                .With(c => c.IsRoot, false)
+                               .With(c => c.AvatarUrl, (string?)null)
                                .Create();
 
         var result = await _handler.Handle(command, CancellationToken.None);

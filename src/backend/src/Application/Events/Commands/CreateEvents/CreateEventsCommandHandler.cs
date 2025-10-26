@@ -1,7 +1,7 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 using backend.Domain.Events.Events;
 
 namespace backend.Application.Events.Commands.CreateEvents;
@@ -20,13 +20,13 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IUser use
         {
             if (!command.FamilyId.HasValue)
             {
-                return Result<List<Guid>>.Failure("FamilyId is required for event creation.");
+                return Result<List<Guid>>.Failure(string.Format(ErrorMessages.NotFound, command.FamilyId), ErrorSources.NotFound);
             }
 
             // Check authorization for the family
             if (!_authorizationService.CanManageFamily(command.FamilyId.Value))
             {
-                return Result<List<Guid>>.Failure($"User is not authorized to create events in family with ID {command.FamilyId.Value}.");
+                return Result<List<Guid>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
             var entity = new Event

@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
@@ -24,7 +25,7 @@ public class GetFamilyByIdQueryHandler(IApplicationDbContext context, IMapper ma
             .FirstOrDefaultAsync(cancellationToken);
 
         return familyDto == null
-            ? Result<FamilyDetailDto>.Failure($"Family with ID {request.Id} not found.")
+            ? Result<FamilyDetailDto>.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound)
             : Result<FamilyDetailDto>.Success(familyDto);
     }
 }

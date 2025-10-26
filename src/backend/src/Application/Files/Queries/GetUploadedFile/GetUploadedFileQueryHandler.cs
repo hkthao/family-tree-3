@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
@@ -17,7 +18,7 @@ public class GetUploadedFileQueryHandler(IConfigProvider configProvider) : IRequ
 
         if (!File.Exists(filePath))
         {
-            return Task.FromResult(Result<FileContentDto>.Failure("File not found.", "NotFound"));
+            return Task.FromResult(Result<FileContentDto>.Failure(string.Format(ErrorMessages.NotFound, "File"), ErrorSources.NotFound));
         }
 
         // Determine content type

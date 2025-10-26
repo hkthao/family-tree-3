@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Specifications;
@@ -15,15 +16,11 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
     public async Task<Result<List<Guid>>> Handle(CreateFamiliesCommand request, CancellationToken cancellationToken)
     {
         var createdFamilyIds = new List<Guid>();
-        if (!_user.Id.HasValue)
-        {
-            return Result<List<Guid>>.Failure("Current user ID not found.", "Authentication");
-        }
 
-        var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByIdSpecification(_user.Id.Value)).FirstOrDefaultAsync(cancellationToken);
+        var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value)).FirstOrDefaultAsync(cancellationToken);
         if (userProfile == null)
         {
-            return Result<List<Guid>>.Failure("User profile not found.", "NotFound");
+            return Result<List<Guid>>.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
         foreach (var familyDto in request.Families)

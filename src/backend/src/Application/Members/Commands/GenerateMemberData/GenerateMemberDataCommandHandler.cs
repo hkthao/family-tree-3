@@ -1,4 +1,5 @@
 using System.Text.Json;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries;
@@ -33,7 +34,7 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<List<AIMemberDto>>.Failure("AI did not return a response.");
+            return Result<List<AIMemberDto>>.Failure(ErrorMessages.NoAIResponse);
         }
 
         try
@@ -68,15 +69,15 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
                         if (authResult)
                             memberDto.FamilyId = family.Id;
                         else
-                            memberDto.ValidationErrors.Add("you do not have permission to access family");
+                            memberDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else if (families.Count == 0)
                     {
-                        memberDto.ValidationErrors.Add($"Family '{memberDto.FamilyName}' not found or you do not have permission to manage it.");
+                        memberDto.ValidationErrors.Add(string.Format(ErrorMessages.FamilyNotFound, memberDto.FamilyName));
                     }
                     else
                     {
-                        memberDto.ValidationErrors.Add($"Multiple families found with name '{memberDto.FamilyName}'. Please specify.");
+                        memberDto.ValidationErrors.Add(ErrorMessages.MultipleFamiliesFound);
                     }
                 }
 
@@ -92,11 +93,11 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
         }
         catch (JsonException ex)
         {
-            return Result<List<AIMemberDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<AIMemberDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message));
         }
         catch (Exception ex)
         {
-            return Result<List<AIMemberDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<AIMemberDto>>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
     private class AIResponseData

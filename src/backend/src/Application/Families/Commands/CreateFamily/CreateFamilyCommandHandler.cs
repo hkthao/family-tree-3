@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Specifications;
@@ -18,15 +19,10 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
     {
         try
         {
-            if (!_user.Id.HasValue)
-            {
-                return Result<Guid>.Failure("Current user ID not found.", "Authentication");
-            }
-
-            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByIdSpecification(_user.Id.Value)).FirstOrDefaultAsync(cancellationToken);
+            var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value)).FirstOrDefaultAsync(cancellationToken);
             if (userProfile == null)
             {
-                return Result<Guid>.Failure("User profile not found.", "NotFound");
+                return Result<Guid>.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
             }
 
             var entity = new Family
@@ -63,12 +59,12 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
         catch (DbUpdateException ex)
         {
             // Log the exception details here if a logger is available
-            return Result<Guid>.Failure($"Database error occurred while creating family: {ex.Message}", "Database");
+            return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database);
         }
         catch (Exception ex)
         {
             // Log the exception details here if a logger is available
-            return Result<Guid>.Failure($"An unexpected error occurred while creating family: {ex.Message}", "Exception");
+            return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
         }
     }
 

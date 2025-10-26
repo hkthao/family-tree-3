@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.NotificationTemplates.Queries;
@@ -31,7 +32,7 @@ public class GenerateNotificationTemplateContentCommandHandler(IChatProviderFact
 
         if (string.IsNullOrEmpty(generatedContent))
         {
-            return Result<GeneratedNotificationTemplateContentDto>.Failure("AI failed to generate content.");
+            return Result<GeneratedNotificationTemplateContentDto>.Failure(ErrorMessages.NoAIResponse);
         }
 
         // Phân tích nội dung được tạo để trích xuất chủ đề và nội dung

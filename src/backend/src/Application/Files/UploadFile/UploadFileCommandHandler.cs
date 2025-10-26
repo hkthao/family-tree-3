@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
@@ -22,11 +23,11 @@ public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider 
         var maxFileSizeInBytes = storageSettings.MaxFileSizeMB * 1024 * 1024;
         if (request.Length == 0)
         {
-            return Result<string>.Failure("File is empty.", "Validation");
+            return Result<string>.Failure(ErrorMessages.FileEmpty, ErrorSources.Validation);
         }
         if (request.Length > maxFileSizeInBytes)
         {
-            return Result<string>.Failure($"File size exceeds the maximum limit of {storageSettings.MaxFileSizeMB} MB.", "Validation");
+            return Result<string>.Failure(string.Format(ErrorMessages.FileSizeExceedsLimit, storageSettings.MaxFileSizeMB), ErrorSources.Validation);
         }
 
         // 2. Validate file type
@@ -34,7 +35,7 @@ public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider 
         var fileExtension = Path.GetExtension(request.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(fileExtension))
         {
-            return Result<string>.Failure("Invalid file type. Only JPG, JPEG, PNG, PDF, DOCX are allowed.", "Validation");
+            return Result<string>.Failure(ErrorMessages.InvalidFileType, ErrorSources.Validation);
         }
 
         // 3. Sanitize file name to prevent path traversal
@@ -48,11 +49,11 @@ public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider 
             var uploadResult = await _fileStorage.UploadFileAsync(request.FileStream, uniqueFileName, request.ContentType, cancellationToken);
             if (!uploadResult.IsSuccess)
             {
-                return Result<string>.Failure(uploadResult.Error ?? "File upload failed.", uploadResult.ErrorSource ?? "FileStorage");
+                return Result<string>.Failure(uploadResult.Error ?? ErrorMessages.FileUploadFailed, uploadResult.ErrorSource ?? ErrorSources.FileStorage);
             }
             if (uploadResult.Value == null)
             {
-                return Result<string>.Failure("File upload succeeded but returned a null URL.", "FileStorage");
+                return Result<string>.Failure(ErrorMessages.FileUploadNullUrl, ErrorSources.FileStorage);
             }
 
             // 5. Save file metadata to DB

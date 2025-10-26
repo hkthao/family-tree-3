@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
@@ -99,8 +100,8 @@ public class UpdateEventCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Event with ID {command.Id} not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Contain(string.Format(ErrorMessages.EventNotFound, command.Id));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng hệ thống không thể cập nhật một sự kiện không tồn tại,
@@ -368,5 +369,49 @@ public class UpdateEventCommandHandlerTests : TestBase
         // 💡 Giải thích:
         // Test này xác minh rằng một quản trị viên có thể cập nhật thành công một sự kiện
         // bao gồm cả việc liên kết các thành viên liên quan.
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenInvalidFamilyId()
+    {
+        // 🎯 Mục tiêu của test:
+        // Xác minh rằng handler trả về một kết quả thất bại
+        // khi một FamilyId không hợp lệ (không tồn tại) được cung cấp trong command.
+
+        // ⚙️ Các bước (Arrange, Act, Assert):
+        // Arrange:
+        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
+        // 2. Thiết lập _mockAuthorizationService để trả về IsAdmin là true.
+        // 3. Tạo một UpdateEventCommand với một FamilyId không tồn tại.
+        // Act:
+        // 1. Gọi phương thức Handle của handler.
+        // Assert:
+        // 1. Kiểm tra xem kết quả trả về là thất bại.
+        // 2. Kiểm tra thông báo lỗi phù hợp.
+
+        // Arrange
+        var userProfile = _fixture.Create<UserProfile>();
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
+        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false); // Not an admin
+
+        var invalidFamilyId = Guid.NewGuid(); // FamilyId không tồn tại
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(invalidFamilyId)).Returns(false); // Không có quyền quản lý gia đình không tồn tại
+
+        var command = _fixture.Build<UpdateEventCommand>()
+                            .With(c => c.FamilyId, invalidFamilyId)
+                            .Create();
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be("Access denied. Only family managers or admins can update events.");
+        result.ErrorSource.Should().Be("Forbidden");
+
+        // 💡 Giải thích:
+        // Test này đảm bảo rằng hệ thống không thể cập nhật sự kiện cho một gia đình không tồn tại,
+        // ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
     }
 }

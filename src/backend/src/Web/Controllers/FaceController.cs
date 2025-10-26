@@ -45,7 +45,12 @@ public class FaceController(IMediator mediator) : ControllerBase
             ReturnCrop = returnCrop
         };
 
-        return await _mediator.Send(command);
+        var result = await _mediator.Send(command);
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     /// <summary>
@@ -56,7 +61,12 @@ public class FaceController(IMediator mediator) : ControllerBase
     [HttpGet("detected/{imageId}")]
     public async Task<ActionResult<List<DetectedFaceDto>>> GetDetectedFaces(Guid imageId)
     {
-        return await _mediator.Send(new GetDetectedFacesQuery { ImageId = imageId });
+        var result = await _mediator.Send(new GetDetectedFacesQuery { ImageId = imageId });
+        if (result.IsSuccess)
+        {
+            return Ok(result.Value);
+        }
+        return BadRequest(result.Error);
     }
 
     /// <summary>

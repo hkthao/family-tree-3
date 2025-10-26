@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries.GetMembers;
@@ -12,14 +13,9 @@ public class GetEditableMembersQueryHandler(IApplicationDbContext context, IUser
 
     public async Task<Result<List<MemberListDto>>> Handle(GetEditableMembersQuery request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-        {
-            return Result<List<MemberListDto>>.Failure("User not authenticated.");
-        }
-
         // Get families where the current user is a manager
         var managedFamilyIds = await _context.FamilyUsers
-            .Where(fu => fu.UserProfileId == _user.Id.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Admin))
+            .Where(fu => fu.UserProfileId == _user.Id!.Value && (fu.Role == FamilyRole.Manager || fu.Role == FamilyRole.Admin))
             .Select(fu => fu.FamilyId)
             .ToListAsync(cancellationToken);
 

@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
@@ -26,7 +27,7 @@ public class GetNotificationTemplateByEventTypeQueryHandler : IRequestHandler<Ge
 
         if (entity == null)
         {
-            return Result<NotificationTemplateDto>.Failure("Notification template not found.");
+            return Result<NotificationTemplateDto>.Failure(string.Format(ErrorMessages.NotFound, "Notification template"), ErrorSources.NotFound);
         }
 
         return Result<NotificationTemplateDto>.Success(_mapper.Map<NotificationTemplateDto>(entity));

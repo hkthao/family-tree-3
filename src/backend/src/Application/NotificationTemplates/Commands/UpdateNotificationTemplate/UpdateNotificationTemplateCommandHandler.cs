@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Exceptions;
@@ -21,7 +22,7 @@ public class UpdateNotificationTemplateCommandHandler : IRequestHandler<UpdateNo
 
         if (entity == null)
         {
-            return Result<Unit>.Failure(new NotFoundException(nameof(NotificationTemplate), request.Id).Message);
+            return Result<Unit>.Failure(string.Format(ErrorMessages.NotFound, nameof(NotificationTemplate)), ErrorSources.NotFound);
         }
 
         entity.EventType = request.EventType;

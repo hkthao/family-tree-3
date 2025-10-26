@@ -1,11 +1,13 @@
+using backend.Application.Common.Constants;
+using backend.Application.Common.Models;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Queries.GetDetectedFaces;
-public class GetDetectedFacesQueryHandler(ILogger<GetDetectedFacesQueryHandler> logger /*, IVectorStoreService vectorStoreService*/) : IRequestHandler<GetDetectedFacesQuery, List<DetectedFaceDto>>
+public class GetDetectedFacesQueryHandler(ILogger<GetDetectedFacesQueryHandler> logger /*, IVectorStoreService vectorStoreService*/) : IRequestHandler<GetDetectedFacesQuery, Result<List<DetectedFaceDto>>>
 {
     private readonly ILogger<GetDetectedFacesQueryHandler> _logger = logger;
 
-    public async Task<List<DetectedFaceDto>> Handle(GetDetectedFacesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<DetectedFaceDto>>> Handle(GetDetectedFacesQuery request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Retrieving detected faces for ImageId {ImageId} (placeholder).", request.ImageId);
 
@@ -15,6 +17,6 @@ public class GetDetectedFacesQueryHandler(ILogger<GetDetectedFacesQueryHandler> 
 
         await Task.CompletedTask;
 
-        return [];
+        return Result<List<DetectedFaceDto>>.Success([]);
     }
 }

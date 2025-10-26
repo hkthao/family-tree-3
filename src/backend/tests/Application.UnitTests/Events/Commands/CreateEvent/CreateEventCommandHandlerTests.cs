@@ -20,7 +20,8 @@ public class CreateEventCommandHandlerTests : TestBase
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockMediator = _fixture.Freeze<Mock<IMediator>>();
 
-        _handler = new CreateEventCommandHandler(_context, _mockAuthorizationService.Object);
+
+        _handler = new CreateEventCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object);
     }
 
     [Fact]

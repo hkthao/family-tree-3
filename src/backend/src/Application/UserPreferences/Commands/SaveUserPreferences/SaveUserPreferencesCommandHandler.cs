@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Specifications;
@@ -14,19 +15,14 @@ public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IU
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-        {
-            return Result.Failure("User is not authenticated.", "Authentication");
-        }
-
         var userProfile = await _context.UserProfiles
             .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByIdSpecification(_user.Id.Value))
+            .WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)
         {
-            return Result.Failure("User profile not found.", "NotFound");
+            return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
         if (userProfile.UserPreference == null)

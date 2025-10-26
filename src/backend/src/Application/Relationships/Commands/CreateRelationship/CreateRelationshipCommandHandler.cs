@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
@@ -14,21 +15,16 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
 
     public async Task<Result<Guid>> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-        {
-            return Result<Guid>.Failure("User is not authenticated.", "Authentication");
-        }
-
         // Authorization check: Get family ID from source member
         var sourceMember = await _context.Members.FindAsync(request.SourceMemberId);
         if (sourceMember == null)
         {
-            return Result<Guid>.Failure($"Source member with ID {request.SourceMemberId} not found.", "NotFound");
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Source member with ID {request.SourceMemberId}"), ErrorSources.NotFound);
         }
 
         if (!_authorizationService.CanManageFamily(sourceMember.FamilyId))
         {
-            return Result<Guid>.Failure("Access denied. Only family managers or admins can create relationships.", "Forbidden");
+            return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         var entity = new Relationship

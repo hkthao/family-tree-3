@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Exceptions;
 using backend.Application.Common.Models;
@@ -24,7 +25,7 @@ public class GetNotificationTemplateByIdQueryHandler : IRequestHandler<GetNotifi
 
         if (entity == null)
         {
-            return Result<NotificationTemplateDto>.Failure(new NotFoundException(nameof(NotificationTemplate), request.Id).Message);
+            return Result<NotificationTemplateDto>.Failure(string.Format(ErrorMessages.NotFound, nameof(NotificationTemplate)), ErrorSources.NotFound);
         }
 
         return Result<NotificationTemplateDto>.Success(_mapper.Map<NotificationTemplateDto>(entity));

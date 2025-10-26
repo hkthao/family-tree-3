@@ -39,6 +39,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // Arrange
         var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
+                                  .With(up => up.Id, userId)
                                   .With(up => up.ExternalId, userId.ToString())
                                   .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
                                   .Create();
@@ -98,6 +99,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         // Arrange
         var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
+                                  .With(up => up.Id, userId)
                                   .With(up => up.ExternalId, userId.ToString())
                                   .Create();
         var existingUserPreference = _fixture.Build<UserPreference>()

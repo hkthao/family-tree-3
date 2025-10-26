@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events.Members;
@@ -17,12 +18,12 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             var memberToDelete = await _context.Members.FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
             if (memberToDelete == null)
             {
-                return Result.Failure($"Member with ID {request.Id} not found.", "NotFound");
+                return Result.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
             }
 
             if (!_authorizationService.CanManageFamily(memberToDelete.FamilyId))
             {
-                return Result.Failure("Access denied. Only family managers can delete members.", "Forbidden");
+                return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
             var memberFullName = memberToDelete.FullName; // Capture full name for activity summary
@@ -40,7 +41,7 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         catch (Exception ex)
         {
             // Log the exception details here if a logger is available
-            return Result.Failure($"An unexpected error occurred while deleting member: {ex.Message}", "Exception");
+            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
         }
     }
 }

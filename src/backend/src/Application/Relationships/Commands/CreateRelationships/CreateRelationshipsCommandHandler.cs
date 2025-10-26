@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
 using backend.Application.Relationships.Commands.CreateRelationship;
 
@@ -25,7 +26,7 @@ public class CreateRelationshipsCommandHandler(IMediator mediator) : IRequestHan
 
             if (!result.IsSuccess)
             {
-                return Result<List<Guid>>.Failure(result.Error ?? "Unknown error during single relationship creation.", result.ErrorSource ?? "Unknown");
+                return Result<List<Guid>>.Failure(result.Error ?? string.Format(ErrorMessages.UnexpectedError, "single relationship creation"), result.ErrorSource ?? ErrorSources.Exception);
             }
 
             createdRelationshipIds.Add(result.Value);

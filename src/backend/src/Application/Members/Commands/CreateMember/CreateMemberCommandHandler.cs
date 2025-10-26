@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
@@ -13,12 +14,9 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IUser use
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
-        if (!_user.Id.HasValue)
-            return Result<Guid>.Failure("User is not authenticated.");
-
         // If the user has the 'Admin' role, bypass family-specific access checks
         if (!_authorizationService.CanManageFamily(request.FamilyId))
-            return Result<Guid>.Failure("Access denied. Only family managers can create members.");
+            return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         var entity = new Member
         {

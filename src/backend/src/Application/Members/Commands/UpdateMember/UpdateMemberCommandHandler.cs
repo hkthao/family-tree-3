@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events.Members;
@@ -13,13 +14,13 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.CanManageFamily(request.FamilyId))
-            return Result<Guid>.Failure("Access denied. Only family managers can update members.", "Forbidden");
+            return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         var entity = await _context.Members
             .Include(m => m.Relationships)
             .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
         if (entity == null)
-            return Result<Guid>.Failure($"Member with ID {request.Id} not found.", "NotFound");
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
 
         entity.FirstName = request.FirstName;
         entity.LastName = request.LastName;

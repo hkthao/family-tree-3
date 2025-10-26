@@ -8,7 +8,6 @@ using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using MediatR;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -24,7 +23,7 @@ public class DeleteEventCommandHandlerTests : TestBase
     {
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
         _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _handler = new DeleteEventCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, Mock.Of<ILogger<DeleteEventCommandHandler>>());
+        _handler = new DeleteEventCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
     [Fact]
