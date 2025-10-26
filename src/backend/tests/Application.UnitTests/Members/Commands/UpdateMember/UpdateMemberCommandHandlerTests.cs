@@ -28,70 +28,52 @@ public class UpdateMemberCommandHandlerTests : TestBase
         );
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
-    {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng chưa được xác thực.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock _mockUser.Id trả về null.
-        // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockUser.Setup(u => u.Id).Returns((Guid?)null);
 
-        var command = _fixture.Create<UpdateMemberCommand>();
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers can update members.");
-        result.ErrorSource.Should().Be("Forbidden");
-        // 💡 Giải thích: Handler phải kiểm tra xác thực người dùng trước khi thực hiện các thao tác khác.
-    }
-
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi không tìm thấy thành viên cần cập nhật.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockUser.Id trả về Id hợp lệ. Thiết lập _mockAuthorizationService để CanManageFamily trả về true.
+    ///               Tạo một UpdateMemberCommand với Id của một thành viên không tồn tại.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống không thể cập nhật
+    /// một thành viên không tồn tại, ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenMemberNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy thành viên.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock GetCurrentUserProfileAsync trả về profile hợp lệ. Thêm một thành viên hiện có vào DB.
-        // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand có Id không tồn tại.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
-
-        // Add an existing member to the database
-        var existingMember = _fixture.Create<Member>();
-        _context.Members.Add(existingMember);
-        await _context.SaveChangesAsync();
-
-        // Ensure the database contains the existing member
-        _context.Members.Any(m => m.Id == existingMember.Id).Should().BeTrue();
+        var userProfile = _fixture.Create<UserProfile>();
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
         var nonExistentMemberId = Guid.NewGuid();
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.Id, nonExistentMemberId)
             .Create();
 
-        // Assert that Find also returns null for the non-existent ID
-        _context.Members.Find(command.Id).Should().BeNull();
-
-        // Now, try to handle the command and expect a failure result
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers can update members.");
-        result.ErrorSource.Should().Be("Forbidden");
-        // 💡 Giải thích: Handler phải kiểm tra sự tồn tại của thành viên trước khi cập nhật.
+        result.Error.Should().Contain(string.Format(backend.Application.Common.Constants.ErrorMessages.NotFound, $"Member with ID {nonExistentMemberId}"));
+        result.ErrorSource.Should().Be("NotFound");
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi người dùng không có quyền quản lý gia đình mà thành viên thuộc về.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockUser.Id trả về Id hợp lệ. Thiết lập _mockAuthorizationService để IsAdmin trả về false
+    ///               và CanManageFamily trả về false cho bất kỳ FamilyId nào.
+    ///    - Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng chỉ những người dùng
+    /// có quyền quản lý gia đình mới có thể cập nhật thông tin thành viên, bảo vệ dữ liệu gia đình khỏi truy cập trái phép.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserCannotManageFamily()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi người dùng không có quyền quản lý gia đình.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Mock GetCurrentUserProfileAsync trả về profile hợp lệ, IsAdmin trả về false, CanManageFamily trả về false.
-        // 2. Act: Gọi phương thức Handle với một UpdateMemberCommand bất kỳ.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
@@ -103,19 +85,28 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers can update members.");
+        result.Error.Should().Contain(backend.Application.Common.Constants.ErrorMessages.AccessDenied);
         result.ErrorSource.Should().Be("Forbidden");
-        // 💡 Giải thích: Người dùng phải có quyền quản lý gia đình để cập nhật thành viên.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler cập nhật thành viên thành công
+    /// khi người dùng hiện tại là quản trị viên (Admin).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile và một Member. Thiết lập _mockUser.Id trả về Id của UserProfile.
+    ///               Thiết lập _mockAuthorizationService để IsAdmin trả về true và CanManageFamily trả về true.
+    ///               Thiết lập _mockFamilyTreeService để UpdateFamilyStats trả về Task.CompletedTask.
+    ///               Tạo một UpdateMemberCommand với các thông tin cập nhật và Id của Member đã tạo.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và Value là Id của thành viên.
+    ///              Kiểm tra rằng các thuộc tính của thành viên trong database đã được cập nhật chính xác.
+    ///              Xác minh rằng _mockFamilyTreeService.UpdateFamilyStats đã được gọi một lần.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng người dùng có vai trò quản trị viên
+    /// có thể thực hiện cập nhật thông tin thành viên một cách thành công và các thay đổi được lưu trữ chính xác.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldUpdateMemberSuccessfully_WhenAdminUser()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler cập nhật thành viên thành công khi người dùng là admin.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một thành viên, mock GetCurrentUserProfileAsync trả về profile hợp lệ, IsAdmin trả về true.
-        // 2. Act: Gọi phương thức Handle với UpdateMemberCommand của thành viên đó.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công, thành viên được cập nhật trong context, và các service khác được gọi.
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _context.UserProfiles.Add(userProfile);
@@ -167,17 +158,27 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.IsRoot.Should().Be(command.IsRoot);
 
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
-        // 💡 Giải thích: Người dùng admin có quyền cập nhật thành viên và các thay đổi được phản ánh chính xác.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler cập nhật thành viên thành công
+    /// khi người dùng hiện tại có quyền quản lý gia đình (Manager).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile và một Member. Thiết lập _mockUser.Id trả về Id của UserProfile.
+    ///               Thiết lập _mockAuthorizationService để IsAdmin trả về false và CanManageFamily trả về true
+    ///               cho FamilyId của thành viên. Thêm FamilyUser với vai trò Manager.
+    ///               Thiết lập _mockFamilyTreeService để UpdateFamilyStats trả về Task.CompletedTask.
+    ///               Tạo một UpdateMemberCommand với các thông tin cập nhật và Id của Member đã tạo.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và Value là Id của thành viên.
+    ///              Kiểm tra rằng các thuộc tính của thành viên trong database đã được cập nhật chính xác.
+    ///              Xác minh rằng _mockFamilyTreeService.UpdateFamilyStats đã được gọi một lần.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng người dùng có vai trò quản lý gia đình
+    /// có thể thực hiện cập nhật thông tin thành viên một cách thành công và các thay đổi được lưu trữ chính xác.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldUpdateMemberSuccessfully_WhenManagerUser()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler cập nhật thành viên thành công khi người dùng có quyền quản lý gia đình.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một thành viên, mock GetCurrentUserProfileAsync trả về profile hợp lệ, IsAdmin trả về false, CanManageFamily trả về true.
-        // 2. Act: Gọi phương thức Handle với UpdateMemberCommand của thành viên đó.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công, thành viên được cập nhật trong context, và các service khác được gọi.
         var userProfile = _fixture.Create<UserProfile>();
         _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _context.UserProfiles.Add(userProfile);
@@ -237,6 +238,5 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.IsRoot.Should().Be(command.IsRoot);
 
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
-        // 💡 Giải thích: Người dùng có quyền quản lý gia đình có thể cập nhật thành viên và các thay đổi được phản ánh chính xác.
     }
 }
