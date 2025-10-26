@@ -14,7 +14,7 @@ public class GetAllUserProfilesQueryHandlerTests : TestBase
 
     public GetAllUserProfilesQueryHandlerTests()
     {
-        _fixture.Customize(new AutoMoqCustomization());
+
 
         _handler = new GetAllUserProfilesQueryHandler(
             _context,
