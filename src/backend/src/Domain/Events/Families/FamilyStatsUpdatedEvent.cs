@@ -1,5 +1,3 @@
-using backend.Domain.Common;
-
 namespace backend.Domain.Events.Families;
 
 public class FamilyStatsUpdatedEvent : BaseEvent

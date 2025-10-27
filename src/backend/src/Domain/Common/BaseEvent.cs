@@ -1,6 +1,4 @@
-﻿using MediatR;
-
-namespace backend.Domain.Common;
+﻿namespace backend.Domain.Common;
 
 public abstract class BaseEvent : IDomainEvent
 {

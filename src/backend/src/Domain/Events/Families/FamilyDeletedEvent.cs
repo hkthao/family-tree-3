@@ -1,4 +1,3 @@
-using backend.Domain.Common;
 using backend.Domain.Entities;
 
 namespace backend.Domain.Events.Families;
