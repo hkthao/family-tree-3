@@ -1,7 +1,6 @@
 using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Common;
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,17 +44,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Notification.
-    /// </summary>
-    public DbSet<Notification> Notifications => Set<Notification>();
-    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationPreference.
     /// </summary>
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationTemplate.
-    /// </summary>
-    public DbSet<NotificationTemplate> NotificationTemplates => Set<NotificationTemplate>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>
@@ -65,7 +56,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// Lấy hoặc thiết lập DbSet cho các thực thể EventMember.
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
-
 
     /// <summary>
     /// Cấu hình mô hình được phát hiện bởi DbContext.

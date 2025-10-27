@@ -61,9 +61,6 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             case MemberBiographyUpdatedEvent memberBiographyUpdatedEvent:
                 await HandleMemberBiographyUpdatedEvent(memberBiographyUpdatedEvent, cancellationToken);
                 break;
-            case NewFamilyMemberAddedEvent newFamilyMemberAddedEvent:
-                await HandleNewFamilyMemberAddedEvent(newFamilyMemberAddedEvent, cancellationToken);
-                break;
             case RelationshipCreatedEvent relationshipCreatedEvent:
                 await HandleRelationshipCreatedEvent(relationshipCreatedEvent, cancellationToken);
                 break;
@@ -90,18 +87,18 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.FamilyCreated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "FamilyName", domainEvent.Family.Name },
-                { "DeepLink", $"/family/{domainEvent.Family.Id}" }
-            },
-            recipientUserProfileId,
-            domainEvent.Family.Id,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.FamilyCreated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "FamilyName", domainEvent.Family.Name },
+        //         { "DeepLink", $"/family/{domainEvent.Family.Id}" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Family.Id,
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleFamilyUpdatedEvent(FamilyUpdatedEvent domainEvent, CancellationToken cancellationToken)
@@ -114,18 +111,18 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.FamilyUpdated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "FamilyName", domainEvent.Family.Name },
-                { "DeepLink", $"/family/{domainEvent.Family.Id}" }
-            },
-            recipientUserProfileId,
-            domainEvent.Family.Id,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.FamilyUpdated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "FamilyName", domainEvent.Family.Name },
+        //         { "DeepLink", $"/family/{domainEvent.Family.Id}" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Family.Id,
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleFamilyDeletedEvent(FamilyDeletedEvent domainEvent, CancellationToken cancellationToken)
@@ -138,16 +135,16 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.FamilyDeleted,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "FamilyName", domainEvent.Family.Name }
-            },
-            recipientUserProfileId, // Assuming the deleter is the recipient
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.FamilyDeleted,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "FamilyName", domainEvent.Family.Name }
+        //     },
+        //     recipientUserProfileId, // Assuming the deleter is the recipient
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleMemberCreatedEvent(MemberCreatedEvent domainEvent, CancellationToken cancellationToken)
@@ -160,19 +157,19 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.MemberCreated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
-                { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
-                { "DeepLink", $"/member/{domainEvent.Member.Id}" }
-            },
-            recipientUserProfileId,
-            domainEvent.Member.FamilyId,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.MemberCreated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
+        //         { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
+        //         { "DeepLink", $"/member/{domainEvent.Member.Id}" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Member.FamilyId,
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleMemberUpdatedEvent(MemberUpdatedEvent domainEvent, CancellationToken cancellationToken)
@@ -185,19 +182,19 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.MemberUpdated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
-                { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
-                { "DeepLink", $"/member/{domainEvent.Member.Id}" }
-            },
-            recipientUserProfileId,
-            domainEvent.Member.FamilyId,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.MemberUpdated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
+        //         { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
+        //         { "DeepLink", $"/member/{domainEvent.Member.Id}" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Member.FamilyId,
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleMemberDeletedEvent(MemberDeletedEvent domainEvent, CancellationToken cancellationToken)
@@ -210,17 +207,17 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.MemberDeleted,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
-                { "FamilyName", domainEvent.Member.Family?.Name ?? "" }
-            },
-            recipientUserProfileId, // Assuming the deleter is the recipient
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.MemberDeleted,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
+        //         { "FamilyName", domainEvent.Member.Family?.Name ?? "" }
+        //     },
+        //     recipientUserProfileId, // Assuming the deleter is the recipient
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleMemberBiographyUpdatedEvent(MemberBiographyUpdatedEvent domainEvent, CancellationToken cancellationToken)
@@ -233,46 +230,20 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.MemberBiographyUpdated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
-                { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
-                { "DeepLink", $"/member/{domainEvent.Member.Id}" }
-            },
-            recipientUserProfileId,
-            domainEvent.Member.FamilyId,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.MemberBiographyUpdated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "MemberName", $"{domainEvent.Member.FirstName} {domainEvent.Member.LastName}" },
+        //         { "FamilyName", domainEvent.Member.Family?.Name ?? "" },
+        //         { "DeepLink", $"/member/{domainEvent.Member.Id}" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Member.FamilyId,
+        //     cancellationToken: cancellationToken
+        // );
     }
-
-    private async Task HandleNewFamilyMemberAddedEvent(NewFamilyMemberAddedEvent domainEvent, CancellationToken cancellationToken)
-    {
-        // Resolve UserProfileId from CreatedBy (ExternalId)
-        Guid? recipientUserProfileId = null;
-        if (!string.IsNullOrEmpty(domainEvent.NewMember.CreatedBy))
-        {
-            var userProfile = await _context.UserProfiles.FirstOrDefaultAsync(up => up.ExternalId == domainEvent.NewMember.CreatedBy, cancellationToken);
-            recipientUserProfileId = userProfile?.Id;
-        }
-
-        await _notificationService.SendNotificationAsync(
-            NotificationType.NewFamilyMember,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "NewMemberName", $"{domainEvent.NewMember.FirstName} {domainEvent.NewMember.LastName}" },
-                { "FamilyName", domainEvent.NewMember.Family?.Name ?? "" },
-                { "DeepLink", $"/member/{domainEvent.NewMember.Id}" }
-            },
-            recipientUserProfileId,
-            domainEvent.NewMember.FamilyId,
-            cancellationToken: cancellationToken
-        );
-    }
-
     private async Task HandleRelationshipCreatedEvent(RelationshipCreatedEvent domainEvent, CancellationToken cancellationToken)
     {
         // Resolve UserProfileId from CreatedBy (ExternalId)
@@ -283,20 +254,20 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.RelationshipCreated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "SourceMemberName", $"{domainEvent.Relationship.SourceMember?.FirstName} {domainEvent.Relationship.SourceMember?.LastName}" },
-                { "TargetMemberName", $"{domainEvent.Relationship.TargetMember?.FirstName} {domainEvent.Relationship.TargetMember?.LastName}" },
-                { "RelationshipType", domainEvent.Relationship.Type.ToString() },
-                { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
-            },
-            recipientUserProfileId,
-            domainEvent.Relationship.FamilyId,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.RelationshipCreated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "SourceMemberName", $"{domainEvent.Relationship.SourceMember?.FirstName} {domainEvent.Relationship.SourceMember?.LastName}" },
+        //         { "TargetMemberName", $"{domainEvent.Relationship.TargetMember?.FirstName} {domainEvent.Relationship.TargetMember?.LastName}" },
+        //         { "RelationshipType", domainEvent.Relationship.Type.ToString() },
+        //         { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Relationship.FamilyId,
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleRelationshipUpdatedEvent(RelationshipUpdatedEvent domainEvent, CancellationToken cancellationToken)
@@ -309,20 +280,20 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.RelationshipUpdated,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "SourceMemberName", $"{domainEvent.Relationship.SourceMember?.FirstName} {domainEvent.Relationship.SourceMember?.LastName}" },
-                { "TargetMemberName", $"{domainEvent.Relationship.TargetMember?.FirstName} {domainEvent.Relationship.TargetMember?.LastName}" },
-                { "RelationshipType", domainEvent.Relationship.Type.ToString() },
-                { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
-            },
-            recipientUserProfileId,
-            domainEvent.Relationship.FamilyId,
-            cancellationToken: cancellationToken
-        );
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.RelationshipUpdated,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "SourceMemberName", $"{domainEvent.Relationship.SourceMember?.FirstName} {domainEvent.Relationship.SourceMember?.LastName}" },
+        //         { "TargetMemberName", $"{domainEvent.Relationship.TargetMember?.FirstName} {domainEvent.Relationship.TargetMember?.LastName}" },
+        //         { "RelationshipType", domainEvent.Relationship.Type.ToString() },
+        //         { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
+        //     },
+        //     recipientUserProfileId,
+        //     domainEvent.Relationship.FamilyId,
+        //     cancellationToken: cancellationToken
+        // );
     }
 
     private async Task HandleRelationshipDeletedEvent(RelationshipDeletedEvent domainEvent, CancellationToken cancellationToken)
@@ -335,20 +306,20 @@ public class DomainEventNotificationPublisher : IDomainEventNotificationPublishe
             recipientUserProfileId = userProfile?.Id;
         }
 
-        await _notificationService.SendNotificationAsync(
-            NotificationType.RelationshipDeleted,
-            NotificationChannel.InApp,
-            new Dictionary<string, string>
-            {
-                { "SourceMemberName", $"{domainEvent.Relationship.SourceMember?.FirstName} {domainEvent.Relationship.SourceMember?.LastName}" },
-                { "TargetMemberName", $"{domainEvent.Relationship.TargetMember?.FirstName} {domainEvent.Relationship.TargetMember?.LastName}" },
-                { "RelationshipType", domainEvent.Relationship.Type.ToString() },
-                { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
-            },
+        // await _notificationService.SendNotificationAsync(
+        //     NotificationType.RelationshipDeleted,
+        //     NotificationChannel.InApp,
+        //     new Dictionary<string, string>
+        //     {
+        //         { "SourceMemberName", $"{domainEvent.Relationship.SourceMember?.FirstName} {domainEvent.Relationship.SourceMember?.LastName}" },
+        //         { "TargetMemberName", $"{domainEvent.Relationship.TargetMember?.FirstName} {domainEvent.Relationship.TargetMember?.LastName}" },
+        //         { "RelationshipType", domainEvent.Relationship.Type.ToString() },
+        //         { "FamilyName", domainEvent.Relationship.Family?.Name ?? "" }
+        //     },
 
-            recipientUserProfileId,
-            domainEvent.Relationship.FamilyId,
-            cancellationToken: cancellationToken
-        );
+        //     recipientUserProfileId,
+        //     domainEvent.Relationship.FamilyId,
+        //     cancellationToken: cancellationToken
+        // );
     }
 }

@@ -1,7 +1,3 @@
-
-using backend.Domain.Common;
-using backend.Domain.Events;
-
 namespace backend.Domain.Entities;
 
 public class Member : BaseAuditableEntity
@@ -35,7 +31,5 @@ public class Member : BaseAuditableEntity
         FirstName = firstName;
         Code = code;
         FamilyId = familyId;
-
-        AddDomainEvent(new NewFamilyMemberAddedEvent(this));
     }
 }

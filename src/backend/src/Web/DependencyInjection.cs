@@ -20,7 +20,6 @@ public static class DependencyInjection
             var context = provider.GetRequiredService<IApplicationDbContext>();
             return new CurrentUser(httpContextAccessor, context);
         });
-        services.AddScoped<INotificationHubService, SignalRNotificationHubService>();
         services.AddHttpContextAccessor();
         services.AddHealthChecks();
         services.AddExceptionHandler<CustomExceptionHandler>();

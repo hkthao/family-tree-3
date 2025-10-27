@@ -407,38 +407,5 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
 
             await _context.SaveChangesAsync();
         }
-
-        // Seed NotificationTemplates
-        if (!_context.NotificationTemplates.Any())
-        {
-            _context.NotificationTemplates.AddRange(
-            [
-                new Domain.Entities.NotificationTemplate
-                {
-                    EventType = Domain.Enums.NotificationType.NewFamilyMember,
-                    Channel = Domain.Enums.NotificationChannel.InApp,
-                    Subject = "Thành viên mới trong gia đình {{FamilyName}}",
-                    Body = "Thành viên {{NewMemberName}} đã được thêm vào gia đình {{FamilyName}} của bạn.",
-                    IsActive = true
-                },
-                new Domain.Entities.NotificationTemplate
-                {
-                    EventType = Domain.Enums.NotificationType.FamilyUpdated,
-                    Channel = Domain.Enums.NotificationChannel.InApp,
-                    Subject = "Cập nhật thông tin gia đình {{FamilyName}}",
-                    Body = "Thông tin gia đình {{FamilyName}} của bạn đã được cập nhật.",
-                    IsActive = true
-                },
-                new Domain.Entities.NotificationTemplate
-                {
-                    EventType = Domain.Enums.NotificationType.MemberCreated,
-                    Channel = Domain.Enums.NotificationChannel.InApp,
-                    Subject = "Thành viên mới {{MemberName}} đã được tạo",
-                    Body = "Thành viên {{MemberName}} đã được thêm vào gia đình {{FamilyName}}.",
-                    IsActive = true
-                }
-            ]);
-            await _context.SaveChangesAsync();
-        }
     }
 }

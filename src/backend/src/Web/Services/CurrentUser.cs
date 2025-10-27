@@ -1,7 +1,5 @@
 using System.Security.Claims;
 using backend.Application.Common.Interfaces;
-using backend.Infrastructure.Data; // Assuming ApplicationDbContext is here
-using Microsoft.EntityFrameworkCore; // For FirstOrDefaultAsync
 
 namespace backend.Web.Services;
 

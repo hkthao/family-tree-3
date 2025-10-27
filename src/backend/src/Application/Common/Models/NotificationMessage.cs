@@ -1,4 +1,3 @@
-using backend.Domain.Enums;
 
 namespace backend.Application.Common.Models;
 
@@ -25,26 +24,10 @@ public class NotificationMessage
     /// <summary>
     /// Nội dung chi tiết của thông báo.
     /// </summary>
-    public string Message { get; set; } = string.Empty;
+    public string Body { get; set; } = string.Empty;
 
     /// <summary>
-    /// Loại thông báo.
+    /// Dữ liệu bổ sung dưới dạng Dictionary để thông báo có thể sử dụng.
     /// </summary>
-    public NotificationType Type { get; set; } = NotificationType.General;
-
-    /// <summary>
-    /// ID của gia đình liên quan đến thông báo (nếu có).
-    /// </summary>
-    public Guid? FamilyId { get; set; }
-
-    /// <summary>
-    /// Các kênh mà thông báo này nên được gửi đến.
-    /// Nếu null hoặc rỗng, dịch vụ sẽ sử dụng tùy chọn mặc định hoặc tùy chọn của người dùng.
-    /// </summary>
-    public List<NotificationChannel>? PreferredChannels { get; set; }
-
-    /// <summary>
-    /// Dữ liệu bổ sung dưới dạng JSON để thông báo có thể sử dụng.
-    /// </summary>
-    public string? Data { get; set; }
+    public Dictionary<string, object>? Metadata { get; set; }
 }

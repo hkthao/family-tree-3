@@ -10,12 +10,13 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
-using backend.Infrastructure.Services.Notifications;
+using backend.Infrastructure.Novu;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace backend.Infrastructure;
 
@@ -65,11 +66,6 @@ public static class DependencyInjection
         services.AddScoped<IDomainEventNotificationPublisher, DomainEventNotificationPublisher>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
         services.AddScoped<ITemplateRenderer, FluidTemplateRenderer>();
-
-        // Register Notification Services
-        services.AddScoped<IFirebaseNotificationService, FirebaseNotificationService>();
-        services.AddScoped<IEmailService, EmailService>();
-        services.AddScoped<IInAppNotificationService, InAppNotificationService>();
 
         // Register Background Task Queue
         services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
@@ -132,6 +128,22 @@ public static class DependencyInjection
         services.AddSingleton<IFileStorageFactory, FileStorageFactory>();
 
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
+
+        // Add Novu services
+        services.AddNovuServices(configuration);
+
+        return services;
+    }
+
+    /// <summary>
+    /// Adds Novu related services to the dependency injection container.
+    /// </summary>
+    public static IServiceCollection AddNovuServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        // 1. Configure and bind Novu settings from appsettings.json
+        var novuSettings = new NovuSettings();
+        configuration.GetSection(NovuSettings.SectionName).Bind(novuSettings);
+        services.AddSingleton(Options.Create(novuSettings));
 
         return services;
     }

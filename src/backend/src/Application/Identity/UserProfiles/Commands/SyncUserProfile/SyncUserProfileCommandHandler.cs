@@ -48,8 +48,8 @@ public class SyncUserProfileCommandHandler(
                 var userPreference = new UserPreference
                 {
                     UserProfile = userProfile,
-                    Theme = Theme.Light, // Default theme
-                    Language = Language.English // Default language
+                    Theme = Theme.Dark, // Default theme
+                    Language = Language.Vietnamese // Default language
                 };
                 _context.UserPreferences.Add(userPreference);
 
@@ -74,7 +74,6 @@ public class SyncUserProfileCommandHandler(
                 return Result<bool>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception); // Return failure instead of re-throwing
             }
         }
-
         return Result<bool>.Success(newUserCreated);
     }
 

@@ -1,29 +1,18 @@
 using backend.Domain.Enums;
+using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Interfaces;
 
 /// <summary>
-/// Giao diện cho dịch vụ gửi thông báo, sử dụng các mẫu thông báo.
+/// Giao diện cho dịch vụ gửi thông báo cấp ứng dụng, sử dụng các nhà cung cấp thông báo bên ngoài.
 /// </summary>
 public interface INotificationService
 {
     /// <summary>
-    /// Gửi một thông báo dựa trên loại sự kiện, kênh và các placeholder.
+    /// Gửi một tin nhắn thông báo thông qua các nhà cung cấp thông báo đã đăng ký.
     /// </summary>
-    /// <param name="eventType">Loại sự kiện kích hoạt thông báo.</param>
-    /// <param name="channel">Kênh thông báo sẽ được gửi.</param>
-    /// <param name="placeholders">Từ điển chứa các giá trị thay thế cho placeholder trong mẫu.</param>
-    /// <param name="recipientUserId">ID của người dùng nhận thông báo.</param>
-    /// <param name="familyId">ID của gia đình liên quan (tùy chọn).</param>
-    /// <param name="senderUserId">ID của người dùng gửi thông báo (tùy chọn).</param>
+    /// <param name="message">Tin nhắn thông báo chứa thông tin người nhận, nội dung và metadata.</param>
     /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
     /// <returns>Task biểu thị hoạt động không đồng bộ.</returns>
-    Task SendNotificationAsync(
-        NotificationType eventType,
-        NotificationChannel channel,
-        Dictionary<string, string> placeholders,
-        Guid? recipientUserId,
-        Guid? familyId = null,
-        string? senderUserId = null,
-        CancellationToken cancellationToken = default);
+    Task SendNotificationAsync(NotificationMessage message, CancellationToken cancellationToken = default);
 }
