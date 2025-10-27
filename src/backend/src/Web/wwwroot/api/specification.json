@@ -2292,7 +2292,7 @@
         ]
       }
     },
-    "/api/activities/recent": {
+    "/api/activity/recent": {
       "get": {
         "tags": [
           "UserActivities"

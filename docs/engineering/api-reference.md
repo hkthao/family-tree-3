@@ -14,7 +14,7 @@
   - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
   - [6.5. Quản lý Quan hệ (`/api/relationship`)](#65-quản-lý-quan-hệ-apirelationships)
   - [6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
-  - [6.7. Quản lý Hoạt động Người dùng (`/api/activities`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
+  - [6.7. Quản lý Hoạt động Người dùng (`/api/activity`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
   - [6.8. Quản lý AI (`/api/ai`)](#68-quản-lý-ai-api-ai)
   - [6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)](#69-quản-lý-tùy-chọn-người-dùng-apiuserpreferences)
   - [6.10. Quản lý Tải lên Tệp (`/api/upload`)](#610-quản-lý-tải-lên-tệp-apiupload)
@@ -339,9 +339,9 @@ Ví dụ Phản hồi Lỗi:
     *   **Request Body:** `UpdateUserProfileCommand`
     *   **Phản hồi:** `Result`
 
-### 6.7. Quản lý Hoạt động Người dùng (`/api/activities`)
+### 6.7. Quản lý Hoạt động Người dùng (`/api/activity`)
 
--   `GET /api/activities/recent?limit=...&targetType=...&targetId=...&groupId=...`: Lấy danh sách các hoạt động gần đây của người dùng.
+-   `GET /api/activity/recent?limit=...&targetType=...&targetId=...&groupId=...`: Lấy danh sách các hoạt động gần đây của người dùng.
     *   **Phản hồi:** `Result<List<UserActivityDto>>`
 
 ### 6.8. Quản lý AI (`/api/ai`)

@@ -33,11 +33,7 @@ public class CurrentUser : IUser
 
             // Resolve ProfileId asynchronously. This is a bit tricky in a property getter.
             // For simplicity, we'll block here, but in a real app, consider making IUser async or resolving ProfileId earlier.
-            var userProfile = _context.UserProfiles
-                                      .FirstOrDefaultAsync(up => up.ExternalId == ExternalId)
-                                      .GetAwaiter()
-                                      .GetResult();
-
+            var userProfile = _context.UserProfiles.FirstOrDefault(up => up.ExternalId == ExternalId);
             _profileIdCache = userProfile?.Id;
             return _profileIdCache;
         }

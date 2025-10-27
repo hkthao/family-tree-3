@@ -742,7 +742,7 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
 ### 11.5. API Endpoint
 
 -   **`UserActivitiesController`** (`backend/src/Web/Controllers/UserActivitiesController.cs`):
-    -   Cung cấp endpoint `GET /api/activities/recent` để truy vấn các hoạt động gần đây.
+    -   Cung cấp endpoint `GET /api/activity/recent` để truy vấn các hoạt động gần đây.
     -   Hỗ trợ các tham số `limit`, `targetType`, `targetId`, `familyId` qua query string.
     -   Yêu cầu xác thực (`[Authorize]`).
 

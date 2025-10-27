@@ -5,7 +5,7 @@ import type { Result, RecentActivity, TargetType } from '@/types';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export class ApiUserActivityService implements IUserActivityService {
-  private apiUrl = `${API_BASE_URL}/activities`;
+  private apiUrl = `${API_BASE_URL}/activity`;
 
   constructor(private http: ApiClientMethods) {}
 
