@@ -93,7 +93,7 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
         }
         catch (JsonException ex)
         {
-            return Result<List<AIMemberDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message));
+            return Result<List<AIMemberDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message), ErrorSources.Exception);
         }
         catch (Exception ex)
         {

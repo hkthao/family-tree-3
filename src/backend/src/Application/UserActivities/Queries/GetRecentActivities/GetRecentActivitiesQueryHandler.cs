@@ -22,6 +22,11 @@ public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMap
         // Apply specifications
         query = query.WithSpecification(new UserActivityByProfileIdSpec(_user.Id!.Value));
 
+        if (request.GroupId.HasValue)
+        {
+            query = query.WithSpecification(new UserActivityByGroupIdSpec(request.GroupId.Value));
+        }
+
         var userActivities = await query
             .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);

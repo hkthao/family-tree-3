@@ -108,7 +108,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         _context.FamilyUsers.Add(new FamilyUser { FamilyId = managedFamily2.Id, UserProfileId = userProfile.Id, Role = FamilyRole.Viewer });
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockUser.Setup(u => u.Id).Returns(userId);
+        _mockUser.Setup(u => u.Id).Returns(userProfile.Id);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
 
 

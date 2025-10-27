@@ -108,6 +108,7 @@ public class DeleteMemberCommandHandlerTests : TestBase
         _context.Members.Count().Should().Be(1);
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
+        _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
         _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                               .Returns(Task.CompletedTask);
 
