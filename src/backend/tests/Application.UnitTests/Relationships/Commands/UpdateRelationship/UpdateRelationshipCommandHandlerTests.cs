@@ -121,7 +121,7 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Access denied. Only family managers or admins can update relationships.");
+        result.Error.Should().Contain(backend.Application.Common.Constants.ErrorMessages.AccessDenied);
         result.ErrorSource.Should().Be("Forbidden");
         // 💡 Giải thích: Người dùng phải có quyền quản lý gia đình hoặc là admin để cập nhật mối quan hệ.
     }

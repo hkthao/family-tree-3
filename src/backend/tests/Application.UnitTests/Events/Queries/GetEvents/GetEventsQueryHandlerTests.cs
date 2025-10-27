@@ -353,28 +353,23 @@ public class GetEventsQueryHandlerTests : TestBase
     public async Task Handle_ShouldFilterByRelatedMemberId()
     {
         // Arrange
-        var family = _fixture.Create<Family>();
+        var familyId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         _context.Families.Add(family);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var member1 = _fixture.Build<Member>()
-            .With(m => m.FamilyId, family.Id)
-            .Create();
-        var member2 = _fixture.Build<Member>()
-            .With(m => m.FamilyId, family.Id)
-            .Create();
+        var member1 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "John", LastName = "Doe", Code = "M001" };
+        var member2 = new Member { Id = Guid.NewGuid(), FamilyId = familyId, FirstName = "Jane", LastName = "Doe", Code = "M002" };
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var event1 = _fixture.Build<Event>()
-            .With(e => e.FamilyId, family.Id)
-            .Create();
-        event1.EventMembers.Add(new EventMember { EventId = event1.Id, MemberId = member1.Id });
+        var event1Id = Guid.NewGuid();
+        var event1 = new Event { Id = event1Id, FamilyId = familyId, Name = "Event 1", Code = "E001" };
+        event1.EventMembers.Add(new EventMember { EventId = event1Id, MemberId = member1.Id });
 
-        var event2 = _fixture.Build<Event>()
-            .With(e => e.FamilyId, family.Id)
-            .Create();
-        event2.EventMembers.Add(new EventMember { EventId = event2.Id, MemberId = member2.Id });
+        var event2Id = Guid.NewGuid();
+        var event2 = new Event { Id = event2Id, FamilyId = familyId, Name = "Event 2", Code = "E002" };
+        event2.EventMembers.Add(new EventMember { EventId = event2Id, MemberId = member2.Id });
 
         _context.Events.AddRange(event1, event2);
         await _context.SaveChangesAsync(CancellationToken.None);

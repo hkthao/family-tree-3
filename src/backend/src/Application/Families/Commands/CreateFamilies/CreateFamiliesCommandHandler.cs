@@ -24,6 +24,7 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
                 Address = familyDto.Address,
                 AvatarUrl = familyDto.AvatarUrl,
                 Visibility = familyDto.Visibility ?? "Public",
+                Code = familyDto.Code,
                 TotalMembers = familyDto.TotalMembers,
                 TotalGenerations = familyDto.TotalGenerations ?? 0,
                 FamilyUsers = [new FamilyUser()

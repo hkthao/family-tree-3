@@ -258,8 +258,8 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         _context.Families.Add(family);
 
         var memberIdentifier = "John Doe";
-        var member1 = _fixture.Build<Member>().With(m => m.FamilyId, family.Id).With(m => m.FirstName, "John").With(m => m.LastName, "Doe").Create();
-        var member2 = _fixture.Build<Member>().With(m => m.FamilyId, family.Id).With(m => m.FirstName, "John").With(m => m.LastName, "Doe").Create();
+        var member1 = new Member { Id = Guid.NewGuid(), FamilyId = family.Id, FirstName = "John", LastName = "Doe", Code = "JD001" };
+        var member2 = new Member { Id = Guid.NewGuid(), FamilyId = family.Id, FirstName = "John", LastName = "Doe", Code = "JD002" };
         _context.Members.AddRange(member1, member2);
         await _context.SaveChangesAsync(CancellationToken.None);
 
