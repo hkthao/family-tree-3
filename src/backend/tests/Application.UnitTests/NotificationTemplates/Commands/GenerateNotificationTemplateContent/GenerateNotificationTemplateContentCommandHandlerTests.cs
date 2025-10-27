@@ -3,7 +3,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.NotificationTemplates.Commands.GenerateNotificationTemplateContent;
-using backend.Application.NotificationTemplates.Queries;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using FluentAssertions;

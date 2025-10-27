@@ -1,11 +1,9 @@
 using backend.Application.Common.Constants;
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using backend.Domain.Events;
 using backend.Domain.Events.Families;
 using FluentAssertions;
 using Moq;

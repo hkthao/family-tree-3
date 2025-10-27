@@ -3,6 +3,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Events.Members;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -46,6 +47,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         _context.Members.Add(entity);
         entity.AddDomainEvent(new MemberCreatedEvent(entity));
+        entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.FamilyId));
 
         await _context.SaveChangesAsync(cancellationToken);
 

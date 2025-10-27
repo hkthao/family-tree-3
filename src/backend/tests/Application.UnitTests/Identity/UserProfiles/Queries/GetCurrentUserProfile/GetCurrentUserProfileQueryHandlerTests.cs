@@ -1,5 +1,3 @@
-using AutoFixture.AutoMoq;
-using backend.Application.Common.Constants;
 using backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

@@ -1,4 +1,3 @@
-using AutoFixture.Xunit2;
 using backend.Application.Common.Constants;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.UnitTests.Common;

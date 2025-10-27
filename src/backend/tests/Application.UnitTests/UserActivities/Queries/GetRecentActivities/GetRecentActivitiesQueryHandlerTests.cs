@@ -1,11 +1,8 @@
-using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.UserActivities.Queries.GetRecentActivities;

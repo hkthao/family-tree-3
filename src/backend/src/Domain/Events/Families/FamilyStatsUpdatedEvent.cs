@@ -1,13 +1,13 @@
 using backend.Domain.Common;
 
-namespace backend.Domain.Events;
+namespace backend.Domain.Events.Families;
 
 public class FamilyStatsUpdatedEvent : BaseEvent
 {
-    public Guid FamilyId { get; }
-
     public FamilyStatsUpdatedEvent(Guid familyId)
     {
         FamilyId = familyId;
     }
+
+    public Guid FamilyId { get; }
 }

@@ -1,5 +1,4 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.DeleteMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -12,17 +11,13 @@ namespace backend.Application.UnitTests.Members.Commands.DeleteMember;
 
 public class DeleteMemberCommandHandlerTests : TestBase
 {
-    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
     private readonly DeleteMemberCommandHandler _handler;
 
     public DeleteMemberCommandHandlerTests()
     {
-        _mockFamilyTreeService = new Mock<IFamilyTreeService>();
-
         _handler = new DeleteMemberCommandHandler(
             _context,
-            _mockAuthorizationService.Object,
-            _mockFamilyTreeService.Object
+            _mockAuthorizationService.Object
         );
     }
 
@@ -109,8 +104,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = new DeleteMemberCommand(memberId);
 
@@ -122,7 +115,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         var memberAfterDeletionAttempt = await _context.Members.FirstOrDefaultAsync(m => m.Id == member.Id);
         memberAfterDeletionAttempt.Should().BeNull();
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -150,8 +142,6 @@ public class DeleteMemberCommandHandlerTests : TestBase
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(familyId)).Returns(true);
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = new DeleteMemberCommand(memberId);
 
@@ -160,6 +150,5 @@ public class DeleteMemberCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         _context.Members.Should().NotContain(m => m.Id == member.Id);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

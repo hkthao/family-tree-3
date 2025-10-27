@@ -1,5 +1,4 @@
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

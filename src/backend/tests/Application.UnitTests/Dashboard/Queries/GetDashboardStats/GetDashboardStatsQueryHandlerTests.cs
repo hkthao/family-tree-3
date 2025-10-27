@@ -1,4 +1,3 @@
-using backend.Application.Common.Constants;
 using AutoFixture;
 using backend.Application.Dashboard.Queries.GetDashboardStats;
 using backend.Application.UnitTests.Common;

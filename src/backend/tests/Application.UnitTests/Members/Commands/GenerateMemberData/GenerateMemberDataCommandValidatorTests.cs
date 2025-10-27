@@ -1,5 +1,4 @@
 using backend.Application.Members.Commands.GenerateMemberData;
-using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
 

@@ -5,7 +5,6 @@ using backend.Application.Members.EventHandlers;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Events.Members;
-using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;

@@ -50,8 +50,5 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
             },
             cancellationToken
         );
-
-        // Update family stats
-        await _familyTreeService.UpdateFamilyStats(notification.Member.FamilyId, cancellationToken);
     }
 }

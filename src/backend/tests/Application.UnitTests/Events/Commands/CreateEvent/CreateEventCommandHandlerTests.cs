@@ -1,11 +1,9 @@
 using AutoFixture;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.CreateEvent;

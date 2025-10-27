@@ -6,7 +6,6 @@ using backend.Application.UnitTests.Common;
 using backend.Application.Events.EventHandlers;
 using backend.Domain.Entities;
 using backend.Domain.Events.Events;
-using FluentAssertions;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;

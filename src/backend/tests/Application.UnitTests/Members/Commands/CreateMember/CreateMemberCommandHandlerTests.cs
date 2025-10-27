@@ -1,5 +1,4 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

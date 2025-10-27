@@ -2,14 +2,14 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events.Members;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IFamilyTreeService familyTreeService) : IRequestHandler<DeleteMemberCommand, Result>
+public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteMemberCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
@@ -33,8 +33,8 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             _context.Members.Remove(memberToDelete);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Update family stats
-            await _familyTreeService.UpdateFamilyStats(familyId, cancellationToken);
+            // Update family stats via domain event
+            memberToDelete.AddDomainEvent(new FamilyStatsUpdatedEvent(familyId));
 
             return Result.Success();
         }

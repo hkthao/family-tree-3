@@ -1,6 +1,5 @@
 using AutoFixture;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands.SaveFaceLabels;
 using backend.Application.Faces.Queries;

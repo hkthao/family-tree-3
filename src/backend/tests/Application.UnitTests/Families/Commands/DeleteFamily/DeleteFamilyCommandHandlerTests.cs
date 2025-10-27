@@ -3,7 +3,6 @@ using AutoFixture;
 using backend.Application.Families.Commands.DeleteFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Events;
 using backend.Domain.Events.Families;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;

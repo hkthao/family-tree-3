@@ -1,13 +1,9 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Families;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamilies;

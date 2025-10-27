@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
-using backend.Domain.Events;
+using backend.Domain.Events.Families;
+using MediatR;
 
 namespace backend.Application.Families.EventHandlers;
 

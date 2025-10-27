@@ -1,12 +1,9 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.NotificationTemplates.Commands.UpdateNotificationTemplate;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,14 +1,9 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.NotificationTemplates.Commands.CreateNotificationTemplate;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
-using Microsoft.EntityFrameworkCore; // Required for DbSet
 
 namespace backend.Application.UnitTests.NotificationTemplates.Commands.CreateNotificationTemplate;
 

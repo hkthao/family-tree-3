@@ -2,15 +2,14 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Events.Members;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService,  IFamilyTreeService familyTreeService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
-
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.CanManageFamily(request.FamilyId))
@@ -49,11 +48,9 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
 
         entity.AddDomainEvent(new MemberUpdatedEvent(entity));
+        entity.AddDomainEvent(new FamilyStatsUpdatedEvent(request.FamilyId)); // Moved before SaveChangesAsync
 
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Update family stats
-        await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
 
         return Result<Guid>.Success(entity.Id);
     }

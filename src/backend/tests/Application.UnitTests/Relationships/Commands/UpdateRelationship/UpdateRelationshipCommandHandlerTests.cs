@@ -1,12 +1,10 @@
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Relationships.Commands.UpdateRelationship;

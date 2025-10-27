@@ -1,5 +1,4 @@
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -12,19 +11,14 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 
 public class UpdateMemberCommandHandlerTests : TestBase
 {
-    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
-
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
-        _mockFamilyTreeService = new Mock<IFamilyTreeService>();
-
 
         _handler = new UpdateMemberCommandHandler(
             _context,
-            _mockAuthorizationService.Object,
-            _mockFamilyTreeService.Object
+            _mockAuthorizationService.Object
         );
     }
 
@@ -117,8 +111,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateMemberCommand>()
                                .With(c => c.Id, existingMember.Id)
@@ -129,7 +121,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
                                .With(c => c.DateOfBirth, new DateTime(1990, 1, 1))
                                .With(c => c.DateOfDeath, new DateTime(2050, 1, 1))
                                .With(c => c.PlaceOfBirth, "UpdatedPlaceOfBirth")
-                               .With(c => c.PlaceOfDeath, "UpdatedPlaceOfDeath")
+                               .With(c => c.PlaceOfDeath, "UpdatedPlaceOfOfDeath")
                                .With(c => c.Occupation, "UpdatedOccupation")
                                .With(c => c.Biography, "UpdatedBiography")
                                .With(c => c.FamilyId, existingMember.FamilyId) // Keep same family ID
@@ -156,8 +148,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Biography.Should().Be(command.Biography);
         updatedMember.FamilyId.Should().Be(command.FamilyId);
         updatedMember.IsRoot.Should().Be(command.IsRoot);
-
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -196,8 +186,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
             Role = FamilyRole.Manager
         });
         await _context.SaveChangesAsync();
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateMemberCommand>()
                                .With(c => c.Id, existingMember.Id)
@@ -236,8 +224,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         updatedMember.Biography.Should().Be(command.Biography);
         updatedMember.FamilyId.Should().Be(command.FamilyId);
         updatedMember.IsRoot.Should().Be(command.IsRoot);
-
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingMember.FamilyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>
@@ -285,8 +271,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
 
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.Id, memberToUpdate.Id)
@@ -299,6 +283,5 @@ public class UpdateMemberCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(memberToUpdate.Id);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

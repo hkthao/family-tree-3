@@ -1,7 +1,6 @@
 using AutoFixture;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Events;
 using backend.Domain.Events.Families;
 using FluentAssertions;
 using Xunit;

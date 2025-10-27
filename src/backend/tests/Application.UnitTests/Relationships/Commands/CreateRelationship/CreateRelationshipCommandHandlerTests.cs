@@ -1,10 +1,8 @@
 using backend.Application.Common.Constants;
 using AutoFixture;
 using AutoFixture.AutoMoq;
-using backend.Application.Common.Interfaces;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;

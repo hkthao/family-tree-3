@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using AutoFixture;
-using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
