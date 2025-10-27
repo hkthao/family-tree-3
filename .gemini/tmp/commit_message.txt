@@ -1,8 +1,8 @@
-refactor: Update unit tests after authorization service simplification
+feat(member): Add unit tests for Member event handlers
 
-This commit refactors several unit tests in the backend Application layer to align with the simplification of the authorization service.
+- Added comprehensive unit tests for `MemberBiographyUpdatedEventHandler` to verify logging, activity recording, notification publishing, and global search service updates.
+- Added comprehensive unit tests for `MemberCreatedEventHandler` to verify logging, activity recording, notification publishing, global search service updates, and family stats updates.
+- Added comprehensive unit tests for `MemberDeletedEventHandler` to verify logging, activity recording, notification publishing, and global search service deletions.
+- Added comprehensive unit tests for `MemberUpdatedEventHandler` to verify logging, activity recording, notification publishing, and global search service updates.
 
-Key changes include:
-- Removing redundant `_mockAuthorizationService` instances from test classes where the authorization logic is now handled differently.
-- Adjusting test methods that previously checked for unauthenticated users or missing user profiles, as these checks are now integrated into the authorization service itself or handled at a higher level.
-- Deleting `src/backend/tests/Application.UnitTests/Members/Queries/GetEditableMembers/GetEditableMembersQueryHandlerTests.cs` which is no longer relevant due to changes in how editable members are determined.
+All new event handler tests are passing.

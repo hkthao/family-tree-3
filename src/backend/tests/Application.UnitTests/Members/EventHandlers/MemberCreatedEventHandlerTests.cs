@@ -1,3 +1,4 @@
+
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.EventHandlers;
@@ -11,28 +12,26 @@ using Moq;
 using Xunit;
 using backend.Domain.Enums;
 
+using backend.Application.UnitTests.Common;
+
 namespace backend.Application.UnitTests.Members.EventHandlers;
 
-public class MemberCreatedEventHandlerTests
+public class MemberCreatedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<MemberCreatedEventHandler>> _mockLogger;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IDomainEventNotificationPublisher> _mockNotificationPublisher;
     private readonly Mock<IGlobalSearchService> _mockGlobalSearchService;
     private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
-    private readonly Mock<IUser> _mockUser;
-    private readonly Fixture _fixture;
     private readonly MemberCreatedEventHandler _handler;
 
-    public MemberCreatedEventHandlerTests()
+    public MemberCreatedEventHandlerTests() : base()
     {
         _mockLogger = new Mock<ILogger<MemberCreatedEventHandler>>();
         _mockMediator = new Mock<IMediator>();
         _mockNotificationPublisher = new Mock<IDomainEventNotificationPublisher>();
         _mockGlobalSearchService = new Mock<IGlobalSearchService>();
         _mockFamilyTreeService = new Mock<IFamilyTreeService>();
-        _mockUser = new Mock<IUser>();
-        _fixture = new Fixture();
 
         _handler = new MemberCreatedEventHandler(
             _mockLogger.Object,
@@ -60,7 +59,7 @@ public class MemberCreatedEventHandlerTests
     public async Task Handle_ShouldPerformAllRequiredActions_WhenMemberCreatedEventIsHandled()
     {
         // Arrange
-        var member = _fixture.Build<Member>()
+        var member = ((Fixture)_fixture).Build<Member>()
             .Without(m => m.Family)
             .Without(m => m.Relationships)
             .Create();
@@ -109,7 +108,8 @@ public class MemberCreatedEventHandlerTests
                 cmd.ActionType == UserActionType.CreateMember &&
                 cmd.TargetType == TargetType.Member &&
                 cmd.TargetId == notification.Member.Id.ToString() &&
-                cmd.ActivitySummary == $"Created member '{notification.Member.FullName}'."),
+                cmd.ActivitySummary.Contains($"Created member '{notification.Member.FullName}'") &&
+                cmd.ActivitySummary.Contains($"in family '{notification.Member.FamilyId}'")),
             It.IsAny<CancellationToken>()), Times.Once);
 
         _mockNotificationPublisher.Verify(p => p.PublishNotificationForEventAsync(notification, It.IsAny<CancellationToken>()), Times.Once);

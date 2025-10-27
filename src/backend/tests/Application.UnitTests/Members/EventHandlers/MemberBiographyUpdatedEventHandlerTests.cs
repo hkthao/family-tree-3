@@ -1,4 +1,5 @@
 using AutoFixture;
+using backend.Application.UnitTests.Common;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.EventHandlers;
 using backend.Application.UserActivities.Commands.RecordActivity;
@@ -13,24 +14,20 @@ using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Members.EventHandlers;
 
-public class MemberBiographyUpdatedEventHandlerTests
+public class MemberBiographyUpdatedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<MemberBiographyUpdatedEventHandler>> _mockLogger;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IDomainEventNotificationPublisher> _mockNotificationPublisher;
     private readonly Mock<IGlobalSearchService> _mockGlobalSearchService;
-    private readonly Mock<IUser> _mockUser;
-    private readonly Fixture _fixture;
     private readonly MemberBiographyUpdatedEventHandler _handler;
 
-    public MemberBiographyUpdatedEventHandlerTests()
+    public MemberBiographyUpdatedEventHandlerTests() : base()
     {
         _mockLogger = new Mock<ILogger<MemberBiographyUpdatedEventHandler>>();
         _mockMediator = new Mock<IMediator>();
         _mockNotificationPublisher = new Mock<IDomainEventNotificationPublisher>();
         _mockGlobalSearchService = new Mock<IGlobalSearchService>();
-        _mockUser = new Mock<IUser>();
-        _fixture = new Fixture();
 
         _handler = new MemberBiographyUpdatedEventHandler(
             _mockLogger.Object,
@@ -57,7 +54,7 @@ public class MemberBiographyUpdatedEventHandlerTests
     public async Task Handle_ShouldPerformAllRequiredActions_WhenMemberBiographyUpdatedEventIsHandled()
     {
         // Arrange
-        var member = _fixture.Build<Member>()
+        var member = ((Fixture)_fixture).Build<Member>()
             .Without(m => m.Family)
             .Without(m => m.Relationships)
             .Create();

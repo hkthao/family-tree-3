@@ -1,3 +1,4 @@
+
 using AutoFixture;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.EventHandlers;
@@ -11,26 +12,24 @@ using Moq;
 using Xunit;
 using backend.Domain.Enums;
 
+using backend.Application.UnitTests.Common;
+
 namespace backend.Application.UnitTests.Members.EventHandlers;
 
-public class MemberDeletedEventHandlerTests
+public class MemberDeletedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<MemberDeletedEventHandler>> _mockLogger;
     private readonly Mock<IMediator> _mockMediator;
     private readonly Mock<IDomainEventNotificationPublisher> _mockNotificationPublisher;
     private readonly Mock<IGlobalSearchService> _mockGlobalSearchService;
-    private readonly Mock<IUser> _mockUser;
-    private readonly Fixture _fixture;
     private readonly MemberDeletedEventHandler _handler;
 
-    public MemberDeletedEventHandlerTests()
+    public MemberDeletedEventHandlerTests() : base()
     {
         _mockLogger = new Mock<ILogger<MemberDeletedEventHandler>>();
         _mockMediator = new Mock<IMediator>();
         _mockNotificationPublisher = new Mock<IDomainEventNotificationPublisher>();
         _mockGlobalSearchService = new Mock<IGlobalSearchService>();
-        _mockUser = new Mock<IUser>();
-        _fixture = new Fixture();
 
         _handler = new MemberDeletedEventHandler(
             _mockLogger.Object,
@@ -57,7 +56,7 @@ public class MemberDeletedEventHandlerTests
     public async Task Handle_ShouldPerformAllRequiredActions_WhenMemberDeletedEventIsHandled()
     {
         // Arrange
-        var member = _fixture.Build<Member>()
+        var member = ((Fixture)_fixture).Build<Member>()
             .Without(m => m.Family)
             .Without(m => m.Relationships)
             .Create();
@@ -102,14 +101,15 @@ public class MemberDeletedEventHandlerTests
                 cmd.ActionType == UserActionType.DeleteMember &&
                 cmd.TargetType == TargetType.Member &&
                 cmd.TargetId == notification.Member.Id.ToString() &&
-                cmd.ActivitySummary == $"Deleted member '{notification.Member.FullName}'."),
+                cmd.ActivitySummary.Contains($"Deleted member '{notification.Member.FullName}'") &&
+                cmd.ActivitySummary.Contains($"from family '{notification.Member.FamilyId}'")),
             It.IsAny<CancellationToken>()), Times.Once);
 
         _mockNotificationPublisher.Verify(p => p.PublishNotificationForEventAsync(notification, It.IsAny<CancellationToken>()), Times.Once);
 
         _mockGlobalSearchService.Verify(g => g.DeleteEntityFromSearchAsync(
-            "Member",
             notification.Member.Id.ToString(),
+            "Member",
             It.IsAny<CancellationToken>()
         ), Times.Once);
     }

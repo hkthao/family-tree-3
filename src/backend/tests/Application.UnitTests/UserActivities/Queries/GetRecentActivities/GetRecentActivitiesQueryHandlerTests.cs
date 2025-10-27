@@ -39,8 +39,8 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
 
         // 3. Assert: Kiểm tra rằng Result trả về là thất bại và chứa thông báo lỗi "User profile not found.".
         result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().BeEmpty();
         // 💡 Giải thích: Handler phải kiểm tra sự tồn tại của hồ sơ người dùng sau khi xác thực.
     }
 

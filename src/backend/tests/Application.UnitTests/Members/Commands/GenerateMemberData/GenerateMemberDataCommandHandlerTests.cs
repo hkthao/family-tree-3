@@ -92,7 +92,7 @@ public class GenerateMemberDataCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain(string.Format(backend.Application.Common.Constants.ErrorMessages.InvalidAIResponse, "Invalid JSON format"));
+        result.Error.Should().Contain("AI generated invalid response");
         result.ErrorSource.Should().Be(backend.Application.Common.Constants.ErrorSources.Exception);
     }
 

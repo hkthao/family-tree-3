@@ -44,6 +44,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             if (currentRoot != null)
             {
                 currentRoot.IsRoot = false;
+                _context.Members.Update(currentRoot);
             }
         }
 

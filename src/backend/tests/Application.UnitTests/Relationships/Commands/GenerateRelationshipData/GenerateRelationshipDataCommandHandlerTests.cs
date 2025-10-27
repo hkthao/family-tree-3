@@ -80,7 +80,7 @@ public class GenerateRelationshipDataCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("AI generated invalid JSON");
+        result.Error.Should().Contain("AI generated invalid response");
         // 💡 Giải thích: Handler phải xử lý lỗi khi JSON từ AI không thể deserialize.
     }
 

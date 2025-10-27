@@ -72,38 +72,9 @@ Tạo dữ liệu test bằng:
 * Seed entity thủ công, **gán Id/FK hợp lệ**
 * Hoặc dùng **AutoFixture** (nhưng phải gán FK thủ công nếu có quan hệ)
 
-Mỗi test dùng **database mới**:
-
-```csharp
-var options = new DbContextOptionsBuilder<AppDbContext>()
-    .UseInMemoryDatabase(Guid.NewGuid().ToString())
-    .Options;
-```
-
----
-
 ## 🧰 **BaseTest Class**
 
 Tạo `BaseTest` dùng chung cho tất cả:
-
-```csharp
-public abstract class BaseTest
-{
-    protected readonly AppDbContext _context;
-    protected readonly IMapper _mapper;
-    protected readonly Mock<IAuthorizationService> _authMock;
-
-    protected BaseTest()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(Guid.NewGuid().ToString())
-            .Options;
-
-        _context = new AppDbContext(options);
-        _authMock = new Mock<IAuthorizationService>();
-    }
-}
-```
 
 Các test kế thừa `BaseTest` để giảm lặp code.
 
@@ -150,6 +121,19 @@ Bổ sung các **loại test khác** phù hợp refactor mới:
 4. Dễ hiểu với **junior developer** hoặc **tester không chuyên backend**.
 5. Giữ style đồng nhất với các test đã pass trước đó.
 
+comment lai thanh dang XML summary BAT BUOC
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// khi một FamilyId không hợp lệ (không tồn tại) được cung cấp trong command.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile giả lập và thiết lập _mockUser.Id. Thiết lập _mockAuthorizationService để CanManageFamily trả về false cho FamilyId không tồn tại. Tạo một UpdateEventCommand với một FamilyId không tồn tại.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại. Kiểm tra thông báo lỗi phù hợp.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống không thể cập nhật sự kiện cho một gia đình không tồn tại,
+    /// ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldIncludeRolesInUserProfileDto(){}
 ---
 
 ## 📁 **Kết quả mong muốn**

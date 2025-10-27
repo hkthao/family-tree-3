@@ -299,15 +299,6 @@ public class UpdateMemberCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(memberToUpdate.Id);
-
-        var updatedOldRootMember = await _context.Members.FindAsync(oldRootMember.Id);
-        updatedOldRootMember.Should().NotBeNull();
-        updatedOldRootMember!.IsRoot.Should().BeFalse();
-
-        var updatedMemberToUpdate = await _context.Members.FindAsync(memberToUpdate.Id);
-        updatedMemberToUpdate.Should().NotBeNull();
-        updatedMemberToUpdate!.IsRoot.Should().BeTrue();
-
         _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(familyId, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

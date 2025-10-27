@@ -34,7 +34,7 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<List<AIMemberDto>>.Failure(ErrorMessages.NoAIResponse);
+            return Result<List<AIMemberDto>>.Failure(ErrorMessages.NoAIResponse, ErrorSources.NoContent);
         }
 
         try
