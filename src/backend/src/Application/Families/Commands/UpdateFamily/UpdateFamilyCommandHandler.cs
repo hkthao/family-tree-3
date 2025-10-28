@@ -3,7 +3,6 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using backend.Domain.Events;
 using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.UpdateFamily;

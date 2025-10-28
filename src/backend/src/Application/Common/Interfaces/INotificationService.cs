@@ -1,4 +1,3 @@
-using backend.Domain.Enums;
 using backend.Application.Common.Models;
 
 namespace backend.Application.Common.Interfaces;

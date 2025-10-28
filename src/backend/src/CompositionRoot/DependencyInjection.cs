@@ -5,7 +5,6 @@ using backend.Application.Common.Models.AppSetting;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Enums;
 using backend.Infrastructure;
-
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

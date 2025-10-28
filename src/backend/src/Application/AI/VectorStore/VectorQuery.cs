@@ -1,5 +1,4 @@
 namespace backend.Application.AI.VectorStore;
-
 /// <summary>
 /// Đại diện cho một truy vấn vào kho vector.
 /// </summary>

@@ -1,10 +1,8 @@
 using backend.Application.Common.Interfaces;
 using backend.Domain.Common;
-using backend.Domain.Events;
 using backend.Domain.Events.Families;
 using backend.Domain.Events.Members;
 using backend.Domain.Events.Relationships;
-using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Services;
