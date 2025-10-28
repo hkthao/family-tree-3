@@ -23,7 +23,6 @@ app.use(vuetify);
 app.use(i18n);
 i18n.global.locale.value = 'vi';
 app.directive('resize', Resize);
-
 setAuthService(auth0Service); // Initialize auth service
 
 app.mount('#app');

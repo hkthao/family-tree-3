@@ -11,11 +11,7 @@
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
 
-    <v-btn icon>
-      <v-badge content="4" color="error">
-        <v-icon>mdi-bell-outline</v-icon>
-      </v-badge>
-    </v-btn>
+    <NotificationBell />
 
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
@@ -34,6 +30,7 @@ import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
+import NotificationBell from '@/components/common/NotificationBell.vue';
 
 const { t } = useI18n();
 const theme = useTheme();

@@ -32,6 +32,7 @@
     "@editorjs/table": "^2.4.5",
     "@faker-js/faker": "^10.0.0",
     "@mdi/font": "^7.4.47",
+    "@novu/js": "^3.11.0",
     "@pinia/testing": "^1.0.2",
     "apexcharts": "^5.3.5",
     "axios": "^1.7.2",
