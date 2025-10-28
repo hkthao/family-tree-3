@@ -1,6 +1,5 @@
 
 using backend.CompositionRoot;
-using backend.Web.Hubs;
 using Microsoft.Extensions.FileProviders;
 
 /// <summary>
@@ -133,7 +132,6 @@ public class Startup
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllers();
-            endpoints.MapHub<NotificationHub>("/notificationHub");
             endpoints.MapFallbackToFile("index.html");
             endpoints.MapGet("/", context =>
             {

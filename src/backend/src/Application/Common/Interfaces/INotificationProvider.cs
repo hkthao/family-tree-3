@@ -15,4 +15,10 @@ public interface INotificationProvider
     /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
     /// <returns>Task biểu thị hoạt động không đồng bộ.</returns>
     Task SendAsync(NotificationMessage message, CancellationToken cancellationToken);
+    Task SyncSubscriberAsync(
+        string subscriberId,
+        string? firstName,
+        string? lastName,
+        string? email,
+        string? phone);
 }
