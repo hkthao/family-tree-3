@@ -83,6 +83,19 @@ public class SyncUserProfileCommandHandler(
                 return Result<UserProfileDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception); // Return failure instead of re-throwing
             }
         }
+        else
+        {
+            // Update existing UserProfile with default values if properties are empty
+            bool changed = false;
+            if (string.IsNullOrEmpty(userProfile.FirstName)) { userProfile.FirstName = string.IsNullOrEmpty(firstName) ? "Unknown" : firstName; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.LastName)) { userProfile.LastName = string.IsNullOrEmpty(lastName) ? "Unknown" : lastName; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.Phone)) { userProfile.Phone = string.IsNullOrEmpty(phone) ? "N/A" : phone; changed = true; }
+            if (changed)
+            {
+                await _context.SaveChangesAsync(cancellationToken);
+                _logger.LogInformation("Updated existing user profile {ExternalId} with default values for missing properties.", externalId);
+            }
+        }
 
         // If user already exists, check for profile updates and potentially re-sync with Novu if profile details changed
         // For simplicity, we'll only send welcome notification on first creation for now.
