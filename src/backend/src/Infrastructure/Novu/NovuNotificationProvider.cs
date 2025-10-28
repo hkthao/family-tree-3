@@ -1,9 +1,10 @@
+using System.Net;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Options;
 using Novu; // For NovuSDK
-using Novu.Models.Components; // For DTOs like TriggerEventRequestDto, To
+using Novu.Models.Components; // For DTOs like TriggerEventRequestDto, To, SubscriberCreateData
 
 namespace backend.Infrastructure.Novu;
 
@@ -13,17 +14,14 @@ namespace backend.Infrastructure.Novu;
 public class NovuNotificationProvider : INotificationProvider
 {
     private readonly NovuSDK _novuSdk;
-    private readonly NovuSettings _novuSettings;
-
     /// <summary>
     /// Khởi tạo một phiên bản mới của NovuNotificationProvider.
     /// </summary>
     /// <param name="novuSdk">SDK Novu để tương tác với API Novu.</param>
     /// <param name="novuSettings">Cài đặt cấu hình cho Novu.</param>
-    public NovuNotificationProvider(NovuSDK novuSdk, IOptions<NovuSettings> novuSettings)
+    public NovuNotificationProvider(NovuSDK novuSdk)
     {
         _novuSdk = novuSdk;
-        _novuSettings = novuSettings.Value;
     }
 
     /// <summary>
@@ -36,15 +34,24 @@ public class NovuNotificationProvider : INotificationProvider
     {
         // Novu yêu cầu một subscriberId. Sử dụng RecipientUserId làm subscriberId.
         var subscriberId = message.RecipientUserId;
+        var res = await _novuSdk.Subscribers.RetrieveAsync(subscriberId: subscriberId);
+        if (res.HttpMeta.Response.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Extract subscriber details from metadata
+            var firstName = message.Metadata?.GetValueOrDefault("FirstName", "")?.ToString();
+            var lastName = message.Metadata?.GetValueOrDefault("LastName", "")?.ToString();
+            var email = message.Metadata?.GetValueOrDefault("Email", "")?.ToString();
+            var phone = message.Metadata?.GetValueOrDefault("Phone", "")?.ToString();
 
-        // The Novu SDK example uses TriggerAsync directly on the sdk object.
-        // It also uses TriggerEventRequestDto and To.CreateStr for the recipient.
-        // The metadata can be passed as Payload.
-
-        // Note: The Novu SDK example does not show a direct "Create Subscriber" method.
-        // It assumes the subscriber already exists or is created implicitly by triggering an event.
-        // If explicit subscriber creation is needed, I'll need to find the correct method.
-        // For now, I'll proceed with TriggerAsync as shown in the example.
+            await _novuSdk.Subscribers.CreateAsync(createSubscriberRequestDto: new CreateSubscriberRequestDto()
+            {
+                SubscriberId = subscriberId,
+                FirstName = firstName,
+                LastName = lastName,
+                Email = email,
+                Phone = phone,
+            });
+        }
 
         var triggerEventRequestDto = new TriggerEventRequestDto()
         {

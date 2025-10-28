@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
@@ -12,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using backend.Domain.Events;
+using MediatR;
 
 namespace backend.CompositionRoot;
 
@@ -20,6 +23,7 @@ namespace backend.CompositionRoot;
 /// </summary>
 public static class DependencyInjection
 {
+
     /// <summary>
     /// Đăng ký tất cả các dịch vụ cần thiết cho ứng dụng, bao gồm các dịch vụ từ tầng Application và Infrastructure,
     /// cấu hình lưu trữ tệp và xác thực Auth0.
@@ -70,8 +74,11 @@ public static class DependencyInjection
                 {
                     OnTokenValidated = context =>
                     {
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-
+                        var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        if (string.IsNullOrEmpty(externalId))
+                        {
+                            return Task.CompletedTask;
+                        }
                         _ = Task.Run(async () =>
                         {
                             using var scope = context.HttpContext.RequestServices.CreateScope();
@@ -80,19 +87,12 @@ public static class DependencyInjection
 
                             try
                             {
-                                var command = new SyncUserProfileCommand
-                                {
-                                    UserPrincipal = context.Principal!
-                                };
-                                var result = await mediator.Send(command);
-                                if (!result.IsSuccess)
-                                {
-                                    scopedLogger.LogError("Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, result.Error);
-                                }
+                                var userLoggedInEvent = new UserLoggedInEvent(context.Principal!); // Create the event
+                                await mediator.Publish(userLoggedInEvent); // Publish the event
                             }
                             catch (Exception ex)
                             {
-                                scopedLogger.LogError(ex, "Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, ex.Message);
+                                scopedLogger.LogError(ex, "Error publishing UserLoggedInEvent for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
                             }
                         });
                         return Task.CompletedTask;

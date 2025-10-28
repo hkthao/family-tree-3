@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -13,16 +15,19 @@ namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.SyncUserP
 public class SyncUserProfileCommandHandlerTests : TestBase
 {
     private readonly Mock<ILogger<SyncUserProfileCommandHandler>> _mockLogger;
+    private readonly Mock<INotificationService> _mockNotificationService;
     private readonly SyncUserProfileCommandHandler _handler;
 
     public SyncUserProfileCommandHandlerTests()
     {
         _mockLogger = new Mock<ILogger<SyncUserProfileCommandHandler>>();
+        _mockNotificationService = new Mock<INotificationService>();
 
 
         _handler = new SyncUserProfileCommandHandler(
             _context,
-            _mockLogger.Object
+            _mockLogger.Object,
+            _mockNotificationService.Object
         );
     }
 
@@ -64,8 +69,9 @@ public class SyncUserProfileCommandHandlerTests : TestBase
     ///    - Act: Gọi phương thức Handle của handler với một SyncUserProfileCommand chứa ClaimsPrincipal đã tạo.
     ///    - Assert: Kiểm tra rằng kết quả trả về là thành công (IsSuccess = true) và giá trị là true (newUserCreated).
     ///              Xác minh rằng một UserProfile mới đã được thêm vào cơ sở dữ liệu với các thông tin chính xác.
-    ///              Xác minh rằng một UserPreference mặc định (Theme.Light, Language.English) đã được tạo và liên kết với UserProfile mới.
+    ///              Xác minh rằng một UserPreference mặc định (Theme.Dark, Language.Vietnamese) đã được tạo và liên kết với UserProfile mới.
     ///              Xác minh rằng một thông tin đã được ghi lại bởi logger.
+    ///              Xác minh rằng SendNotificationAsync đã được gọi một lần.
     /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Khi một người dùng mới đăng nhập lần đầu, hệ thống phải tự động tạo hồ sơ và thiết lập các tùy chọn mặc định cho họ.
     /// </summary>
     [Fact]
@@ -96,10 +102,11 @@ public class SyncUserProfileCommandHandlerTests : TestBase
 
         _context.UserPreferences.Should().ContainSingle(up => up.UserProfileId == newUserProfile.Id);
         var newUserPreference = _context.UserPreferences.First(up => up.UserProfileId == newUserProfile.Id);
-        newUserPreference.Theme.Should().Be(Theme.Light);
-        newUserPreference.Language.Should().Be(Language.English);
+        newUserPreference.Theme.Should().Be(Theme.Dark);
+        newUserPreference.Language.Should().Be(Language.Vietnamese);
 
         _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        _mockNotificationService.Verify(x => x.SendNotificationAsync(It.IsAny<NotificationMessage>(), It.IsAny<CancellationToken>()), Times.Once); // Verify notification sent
     }
 
         /// <summary>
@@ -108,10 +115,11 @@ public class SyncUserProfileCommandHandlerTests : TestBase
     /// ⚙️ Các bước (Arrange, Act, Assert):
     ///    - Arrange: Tạo một UserProfile và UserPreference hiện có trong cơ sở dữ liệu.
     ///               Tạo một ClaimsPrincipal với External ID khớp với UserProfile hiện có.
-    ///    - Act: Gọi phương thức Handle của handler với một SyncUserProfileCommand chứa ClaimsPrincipal này.
+    ///    - Act: Gọi phương thức Handle của handler với một SyncUserProfileCommand chứa ClaimsPrincipal đã tạo.
     ///    - Assert: Kiểm tra rằng kết quả trả về là thành công (IsSuccess = true) và giá trị là false (newUserCreated).
     ///              Xác minh rằng không có UserProfile hoặc UserPreference mới nào được thêm vào cơ sở dữ liệu.
     ///              Xác minh rằng không có thông tin nào được ghi lại bởi logger (liên quan đến việc tạo người dùng mới).
+    ///              Xác minh rằng SendNotificationAsync không được gọi.
     /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Nếu người dùng đã tồn tại, hệ thống chỉ cần xác nhận sự tồn tại mà không cần tạo lại hồ sơ.
     /// </summary>
     [Fact]
@@ -151,5 +159,6 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         _context.UserProfiles.Count().Should().Be(1); // No new user profile should be added
         _context.UserPreferences.Count().Should().Be(1); // No new user preference should be added
         _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Never);
+        _mockNotificationService.Verify(x => x.SendNotificationAsync(It.IsAny<NotificationMessage>(), It.IsAny<CancellationToken>()), Times.Never); // Verify notification not sent
     }
 }
