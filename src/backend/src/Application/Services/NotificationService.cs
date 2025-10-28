@@ -1,5 +1,7 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Options;
 
 namespace backend.Application.Services;
 
@@ -8,15 +10,18 @@ namespace backend.Application.Services;
 /// </summary>
 public class NotificationService : INotificationService
 {
-    private readonly INotificationProvider _notificationProvider;
+    private readonly INotificationProviderFactory _notificationProviderFactory;
+    private readonly NotificationSettings _notificationSettings;
 
     /// <summary>
     /// Khởi tạo một phiên bản mới của NotificationService.
     /// </summary>
-    /// <param name="notificationProvider">Nhà cung cấp thông báo để gửi tin nhắn.</param>
-    public NotificationService(INotificationProvider notificationProvider)
+    /// <param name="notificationProviderFactory">Factory để lấy nhà cung cấp thông báo.</param>
+    /// <param name="notificationSettings">Cài đặt cấu hình cho dịch vụ thông báo.</param>
+    public NotificationService(INotificationProviderFactory notificationProviderFactory, IOptions<NotificationSettings> notificationSettings)
     {
-        _notificationProvider = notificationProvider;
+        _notificationProviderFactory = notificationProviderFactory;
+        _notificationSettings = notificationSettings.Value;
     }
 
     /// <summary>
@@ -27,6 +32,12 @@ public class NotificationService : INotificationService
     /// <returns>Task biểu thị hoạt động không đồng bộ.</returns>
     public Task SendNotificationAsync(NotificationMessage message, CancellationToken cancellationToken = default)
     {
-        return _notificationProvider.SendAsync(message, cancellationToken);
+        if (string.IsNullOrEmpty(_notificationSettings.Provider))
+        {
+            throw new InvalidOperationException("Notification provider is not configured.");
+        }
+
+        var provider = _notificationProviderFactory.GetProvider(_notificationSettings.Provider);
+        return provider.SendAsync(message, cancellationToken);
     }
 }

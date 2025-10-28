@@ -34,6 +34,10 @@ public class AppSettings
     /// </summary>
     public FaceDetectionSettings FaceDetectionService { get; set; } = new FaceDetectionSettings();
     /// <summary>
+    /// Cài đặt cho dịch vụ thông báo.
+    /// </summary>
+    public NotificationSettings NotificationSettings { get; set; } = new NotificationSettings();
+    /// <summary>
     /// Các nguồn gốc (origins) được phép cho CORS (Cross-Origin Resource Sharing).
     /// </summary>
     public string CORS_ORIGINS { get; set; } = null!;

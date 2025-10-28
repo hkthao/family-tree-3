@@ -10,12 +10,16 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
+using Novu;
+using backend.Infrastructure.Novu;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 
 namespace backend.Infrastructure;
 
@@ -61,6 +65,8 @@ public static class DependencyInjection
         // --- Common Services (always registered) ---
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IDateTime, DateTimeService>();
+        // Register NotificationSettings
+        services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDomainEventNotificationPublisher, DomainEventNotificationPublisher>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
@@ -128,6 +134,9 @@ public static class DependencyInjection
 
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
+        // Register Notification Provider Factory
+        services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
+
         // Add Novu services
         services.AddNovuServices(configuration);
 
@@ -143,6 +152,16 @@ public static class DependencyInjection
         var novuSettings = new NovuSettings();
         configuration.GetSection(NovuSettings.SectionName).Bind(novuSettings);
         services.AddSingleton(Options.Create(novuSettings));
+
+        // 2. Register NovuSDK
+        services.AddSingleton<NovuSDK>(provider =>
+        {
+            var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
+            return new NovuSDK(secretKey: settings.ApiKey);
+        });
+
+        // 3. Register NovuNotificationProvider as INotificationProvider
+        services.AddScoped<INotificationProvider, NovuNotificationProvider>();
 
         return services;
     }
