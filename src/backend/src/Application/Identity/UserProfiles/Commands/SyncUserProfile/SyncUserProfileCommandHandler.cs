@@ -2,6 +2,7 @@ using System.Security.Claims;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Identity.UserProfiles.Queries;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
@@ -12,13 +13,13 @@ namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 public class SyncUserProfileCommandHandler(
     IApplicationDbContext context,
     ILogger<SyncUserProfileCommandHandler> logger,
-    INotificationService notificationService) : IRequestHandler<SyncUserProfileCommand, Result<bool>>
+    INotificationService notificationService) : IRequestHandler<SyncUserProfileCommand, Result<UserProfileDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<SyncUserProfileCommandHandler> _logger = logger;
     private readonly INotificationService _notificationService = notificationService;
 
-    public async Task<Result<bool>> Handle(SyncUserProfileCommand request, CancellationToken cancellationToken)
+    public async Task<Result<UserProfileDto>> Handle(SyncUserProfileCommand request, CancellationToken cancellationToken)
     {
         var externalId = request.UserPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = request.UserPrincipal.FindFirst(ClaimTypes.Email)?.Value;
@@ -32,11 +33,10 @@ public class SyncUserProfileCommandHandler(
         if (string.IsNullOrEmpty(externalId))
         {
             _logger.LogWarning(ErrorMessages.ExternalIdNotFound + ". Cannot sync user profile.");
-            return Result<bool>.Failure(ErrorMessages.ExternalIdNotFound, ErrorSources.Authentication);
+            return Result<UserProfileDto>.Failure(ErrorMessages.ExternalIdNotFound, ErrorSources.Authentication);
         }
 
         var userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
-        bool newUserCreated = false;
 
         if (userProfile == null)
         {
@@ -46,6 +46,10 @@ public class SyncUserProfileCommandHandler(
                 ExternalId = externalId,
                 Email = email ?? "", // Email might be null if not provided
                 Name = name ?? "",   // Name might be null if not provided
+                FirstName = firstName ?? "",
+                LastName = lastName ?? "",
+                Phone = phone ?? "",
+                Avatar = ""
             };
             try
             {
@@ -61,29 +65,8 @@ public class SyncUserProfileCommandHandler(
                 _context.UserPreferences.Add(userPreference);
 
                 await _context.SaveChangesAsync(cancellationToken);
+                userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
                 _logger.LogInformation("Created new user profile for external user {ExternalId}.", externalId);
-                newUserCreated = true;
-
-                // Send welcome notification to Novu
-                if (userProfile.Email != null)
-                {
-                    var notificationMessage = new NotificationMessage
-                    {
-                        RecipientUserId = userProfile.Id.ToString(), // Novu Subscriber ID
-                        Title = "Welcome to Family Tree App!",
-                        Body = $"Hello {userProfile.Name}, welcome to Family Tree App! We are excited to have you.",
-                        Metadata = new Dictionary<string, object>
-                        {
-                            { "FirstName", firstName ?? userProfile.Name.Split(' ').FirstOrDefault() ?? "" },
-                            { "LastName", lastName ?? userProfile.Name.Split(' ').LastOrDefault() ?? "" },
-                            { "Email", userProfile.Email },
-                            { "Phone", phone ?? "" }
-                        }
-                    };
-                    // The cancellationToken is passed through the entire pipeline
-                    await _notificationService.SendNotificationAsync(notificationMessage, cancellationToken);
-                    _logger.LogInformation("Sent welcome notification to Novu for new user {ExternalId}.", externalId);
-                }
             }
             catch (DbUpdateException ex)
             {
@@ -93,13 +76,13 @@ public class SyncUserProfileCommandHandler(
                 if (userProfile == null)
                 {
                     _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {ExternalId}. This should not happen.", externalId);
-                    return Result<bool>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database); // Return failure instead of re-throwing
+                    return Result<UserProfileDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database); // Return failure instead of re-throwing
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred while creating a user profile for {ExternalId}.", externalId);
-                return Result<bool>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception); // Return failure instead of re-throwing
+                return Result<UserProfileDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception); // Return failure instead of re-throwing
             }
         }
 
@@ -107,7 +90,14 @@ public class SyncUserProfileCommandHandler(
         // For simplicity, we'll only send welcome notification on first creation for now.
         // More refined logic can be added here to update Novu subscriber details if userProfile fields change.
 
-        return Result<bool>.Success(newUserCreated);
+        return Result<UserProfileDto>.Success(new UserProfileDto()
+        {
+            Id = userProfile!.Id,
+            ExternalId = userProfile.ExternalId,
+            Email = userProfile.Email,
+            Name = userProfile.Name,
+            Avatar = userProfile.Avatar,
+        });
     }
 
     private async Task<UserProfile?> GetUserProfileByExternalId(string externalId, CancellationToken cancellationToken)

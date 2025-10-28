@@ -93,7 +93,7 @@ public class SyncUserProfileCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeTrue(); // newUserCreated should be true
+        result.Value.Should().NotBeNull(); // Ensure a UserProfileDto is returned
 
         _context.UserProfiles.Should().ContainSingle(up => up.ExternalId == externalId);
         var newUserProfile = _context.UserProfiles.First(up => up.ExternalId == externalId);
@@ -154,7 +154,7 @@ public class SyncUserProfileCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeFalse(); // newUserCreated should be false
+        result.Value.Should().NotBeNull(); // Ensure a UserProfileDto is returned
 
         _context.UserProfiles.Count().Should().Be(1); // No new user profile should be added
         _context.UserPreferences.Count().Should().Be(1); // No new user preference should be added

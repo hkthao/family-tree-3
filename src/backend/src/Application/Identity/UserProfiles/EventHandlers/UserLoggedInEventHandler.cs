@@ -1,7 +1,6 @@
-using backend.Application.Common.Interfaces;
+using backend.Application.Identity.UserProfiles.Commands.SyncNotificationSubscriber;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Events;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 
@@ -42,10 +41,20 @@ public class UserLoggedInEventHandler : INotificationHandler<UserLoggedInEvent>
         };
 
         var result = await _mediator.Send(command, cancellationToken);
-
         if (!result.IsSuccess)
         {
             _logger.LogError("Error syncing user profile for external ID: {ExternalId}. Details: {Error}", notification.UserPrincipal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, result.Error);
         }
+
+        var syncNotificationSubscriberCommand = new SyncNotificationSubscriberCommand()
+        {
+            UserProfile = result.Value!
+        };
+        var syncResult = await _mediator.Send(syncNotificationSubscriberCommand, cancellationToken);
+        if (!syncResult.IsSuccess)
+        {
+            _logger.LogError("Error sync notification subscriber for profile ID: {Id}. Details: {Error}", result.Value?.Id, syncResult.Error);
+        }
+
     }
 }

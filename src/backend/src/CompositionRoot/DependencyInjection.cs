@@ -72,30 +72,21 @@ public static class DependencyInjection
                 };
                 options.Events = new JwtBearerEvents
                 {
-                    OnTokenValidated = context =>
+                    OnTokenValidated = async (context) =>
                     {
                         var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                        if (string.IsNullOrEmpty(externalId))
+                        using var scope = context.HttpContext.RequestServices.CreateScope();
+                        var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        try
                         {
-                            return Task.CompletedTask;
+                            var userLoggedInEvent = new UserLoggedInEvent(context.Principal!); // Create the event
+                            await mediator.Publish(userLoggedInEvent); // Publish the event
                         }
-                        _ = Task.Run(async () =>
+                        catch (Exception ex)
                         {
-                            using var scope = context.HttpContext.RequestServices.CreateScope();
-                            var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                            var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
-
-                            try
-                            {
-                                var userLoggedInEvent = new UserLoggedInEvent(context.Principal!); // Create the event
-                                await mediator.Publish(userLoggedInEvent); // Publish the event
-                            }
-                            catch (Exception ex)
-                            {
-                                scopedLogger.LogError(ex, "Error publishing UserLoggedInEvent for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
-                            }
-                        });
-                        return Task.CompletedTask;
+                            scopedLogger.LogError(ex, "Error publishing UserLoggedInEvent for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
+                        }
                     },
 
                 };
