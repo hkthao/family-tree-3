@@ -41,7 +41,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.UserProfiles.RemoveRange(_context.UserProfiles);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "admin@example.com", Name = "Admin User" };
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "admin@example.com", Name = "Admin User", FirstName = "Admin", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1" };
@@ -97,7 +97,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.UserProfiles.RemoveRange(_context.UserProfiles);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "admin@example.com", Name = "Admin User" };
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "admin@example.com", Name = "Admin User", FirstName = "Admin", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1" };
@@ -154,7 +154,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "user@example.com", Name = "Normal User" };
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "user@example.com", Name = "Normal User", FirstName = "Normal", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1" };
@@ -217,7 +217,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.FamilyUsers.RemoveRange(_context.FamilyUsers);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "user@example.com", Name = "Normal User" };
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "user@example.com", Name = "Normal User", FirstName = "Normal", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1" };

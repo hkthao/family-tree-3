@@ -453,3 +453,6 @@ yarn.lock
 src/backend/src/Web/appsettings.Development.json
 src/backend/src/Web/wwwroot/uploads/
 src/backend/src/Web/appsettings.Development.json
+
+# Gemini task files
+gemini-task/

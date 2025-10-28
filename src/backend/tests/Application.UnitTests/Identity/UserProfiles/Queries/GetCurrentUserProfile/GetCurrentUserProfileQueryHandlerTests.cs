@@ -64,7 +64,10 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
             Id = userId, // Explicitly set Id to match _mockUser.Id
             ExternalId = Guid.NewGuid().ToString(), // ExternalId can be different
             Email = "current@example.com",
-            Name = "Current User"
+            Name = "Current User",
+            FirstName = "Current",
+            LastName = "User",
+            Phone = "1234567890"
         };
         _context.UserProfiles.Add(existingUserProfile);
         await _context.SaveChangesAsync();
@@ -104,7 +107,10 @@ public class GetCurrentUserProfileQueryHandlerTests : TestBase
             Id = userId, // Explicitly set Id to match _mockUser.Id
             ExternalId = Guid.NewGuid().ToString(), // ExternalId can be different
             Email = "current@example.com",
-            Name = "Current User"
+            Name = "Current User",
+            FirstName = "Current",
+            LastName = "User",
+            Phone = "1234567890"
         };
         _context.UserProfiles.Add(existingUserProfile);
         await _context.SaveChangesAsync();

@@ -385,7 +385,7 @@ public class GenerateEventDataCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnEventsSuccessfully_WhenValidAIResponse()
     {
         // Arrange
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var familyName = "TestFamily";

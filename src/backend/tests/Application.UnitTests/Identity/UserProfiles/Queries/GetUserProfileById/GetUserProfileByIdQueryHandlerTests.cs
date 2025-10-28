@@ -54,7 +54,10 @@ public class GetUserProfileByIdQueryHandlerTests : TestBase
             Id = userProfileId,
             ExternalId = Guid.NewGuid().ToString(),
             Email = "test@example.com",
-            Name = "Test User"
+            Name = "Test User",
+            FirstName = "Test",
+            LastName = "User",
+            Phone = "1234567890"
         };
         _context.UserProfiles.Add(existingUserProfile);
         await _context.SaveChangesAsync();

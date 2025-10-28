@@ -53,10 +53,10 @@ public static class DependencyInjection
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
-                    //    .AddInterceptors(
-                    //        serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
-                    //        serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()
-                    //        )
+                       .AddInterceptors(
+                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>()
+                          // serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()
+                           )
                            );
         }
 

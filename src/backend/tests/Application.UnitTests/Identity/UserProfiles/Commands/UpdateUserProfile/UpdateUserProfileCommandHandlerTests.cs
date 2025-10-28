@@ -84,6 +84,9 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
             ExternalId = Guid.NewGuid().ToString(),
             Email = "old@example.com",
             Name = "Old Name",
+            FirstName = "Old",
+            LastName = "Name",
+            Phone = "1234567890",
             Avatar = "http://old.com/avatar.jpg"
         };
         _context.UserProfiles.Add(existingUserProfile);

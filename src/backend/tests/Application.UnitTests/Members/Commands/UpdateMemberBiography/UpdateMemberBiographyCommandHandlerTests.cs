@@ -120,7 +120,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
 
-        var userProfile = new UserProfile { Id = userProfileId, ExternalId = "external-user-id", Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userProfileId, ExternalId = "external-user-id", Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync();
 

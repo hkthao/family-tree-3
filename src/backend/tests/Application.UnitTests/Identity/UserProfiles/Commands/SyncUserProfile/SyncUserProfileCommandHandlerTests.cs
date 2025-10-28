@@ -26,8 +26,7 @@ public class SyncUserProfileCommandHandlerTests : TestBase
 
         _handler = new SyncUserProfileCommandHandler(
             _context,
-            _mockLogger.Object,
-            _mockNotificationService.Object
+            _mockLogger.Object
         );
     }
 
@@ -106,7 +105,6 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         newUserPreference.Language.Should().Be(Language.Vietnamese);
 
         _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
-        _mockNotificationService.Verify(x => x.SendNotificationAsync(It.IsAny<NotificationMessage>(), It.IsAny<CancellationToken>()), Times.Once); // Verify notification sent
     }
 
         /// <summary>
@@ -130,7 +128,10 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         {
             ExternalId = externalId,
             Email = "existing@example.com",
-            Name = "Existing User"
+            Name = "Existing User",
+            FirstName = "Existing",
+            LastName = "User",
+            Phone = "0987654321"
         };
         _context.UserProfiles.Add(existingUserProfile);
         _context.UserPreferences.Add(new UserPreference

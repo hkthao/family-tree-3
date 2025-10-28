@@ -67,10 +67,10 @@ public class NovuNotificationProvider : INotificationProvider
         await _novuSdk.Subscribers.CreateAsync(createSubscriberRequestDto: new CreateSubscriberRequestDto()
         {
             SubscriberId = subscriberId,
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email,
-            Phone = phone,
+            FirstName = string.IsNullOrEmpty(firstName) ? null : firstName,
+            LastName = string.IsNullOrEmpty(lastName) ? null : lastName,
+            Email = string.IsNullOrEmpty(email) ? null : email,
+            Phone = string.IsNullOrEmpty(phone) ? null : phone,
             // You can add more subscriber data here if available in metadata
             // For example, if metadata contains "Avatar", you can add it here.
             // Data = metadata // If Novu's CreateSubscriberRequestDto supports a generic data field

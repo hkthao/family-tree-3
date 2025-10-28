@@ -12,12 +12,10 @@ namespace backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 
 public class SyncUserProfileCommandHandler(
     IApplicationDbContext context,
-    ILogger<SyncUserProfileCommandHandler> logger,
-    INotificationService notificationService) : IRequestHandler<SyncUserProfileCommand, Result<UserProfileDto>>
+    ILogger<SyncUserProfileCommandHandler> logger) : IRequestHandler<SyncUserProfileCommand, Result<UserProfileDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly ILogger<SyncUserProfileCommandHandler> _logger = logger;
-    private readonly INotificationService _notificationService = notificationService;
 
     public async Task<Result<UserProfileDto>> Handle(SyncUserProfileCommand request, CancellationToken cancellationToken)
     {
@@ -46,9 +44,9 @@ public class SyncUserProfileCommandHandler(
                 ExternalId = externalId,
                 Email = email ?? "", // Email might be null if not provided
                 Name = name ?? "",   // Name might be null if not provided
-                FirstName = firstName ?? "",
-                LastName = lastName ?? "",
-                Phone = phone ?? "",
+                FirstName = string.IsNullOrEmpty(firstName) ? "Unknown" : firstName,
+                LastName = string.IsNullOrEmpty(lastName) ? "Unknown" : lastName,
+                Phone = string.IsNullOrEmpty(phone) ? "N/A" : phone,
                 Avatar = ""
             };
             try

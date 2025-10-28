@@ -59,7 +59,7 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         var currentUserId = Guid.NewGuid();
         _mockUser.Setup(u => u.Id).Returns(currentUserId);
 
-        var userProfile = new UserProfile { Id = currentUserId, ExternalId = currentUserId.ToString(), Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = currentUserId, ExternalId = currentUserId.ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
