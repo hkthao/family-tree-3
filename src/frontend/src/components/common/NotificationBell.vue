@@ -1,75 +1,56 @@
 <template>
-  <div ref="novuInbox"></div>
+  <v-btn icon>
+    <v-badge :content="unseenCount" color="error" :model-value="unseenCount > 0">
+      <v-icon>mdi-bell-outline</v-icon>
+    </v-badge>
+  </v-btn>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useUserProfileStore } from '@/stores';
-import { NovuUI } from '@novu/js/ui';
-
-interface NovuOptions {
-  options: {
-    applicationIdentifier: string;
-    subscriberId: string;
-  };
-}
+import { Novu } from '@novu/js';
 
 const userProfileStore = useUserProfileStore();
-const novuInbox = ref<HTMLElement | null>(null);
-let novuInstance: NovuUI | null = null;
+const unseenCount = ref(0);
+let novuDispose: (() => void) | null = null;
 
 // Placeholder for applicationIdentifier - needs to be configured
 const applicationIdentifier = ref(import.meta.env.VITE_NOVU_APPLICATION_IDENTIFIER || '');
 
-// Get subscriberId from the authenticated user
-
 onMounted(async () => {
-  if (!novuInbox.value) {
-    console.error('Novu inbox container element not found');
+  await userProfileStore.fetchCurrentUserProfile();
+  const subscriberId = userProfileStore.userProfile?.id;
+
+  if (!subscriberId) {
+    console.warn('Subscriber ID not found. Novu notifications will not be initialized.');
     return;
   }
-  await userProfileStore.fetchCurrentUserProfile()
-  const subscriberId = userProfileStore.userProfile?.id
-  if (!subscriberId)
-    return
 
   try {
-    const novu = new NovuUI({
-      options: {
-        applicationIdentifier: applicationIdentifier.value,
-        subscriberId: subscriberId,
-      },
-      container: novuInbox.value,
-    } as NovuOptions);
-
-    // Mount the Inbox component to our div reference
-    // This is where Novu creates and injects its Inbox UI
-    novu.mountComponent({
-      name: "Inbox",
-      props: {},
-      element: novuInbox.value, // The actual DOM element where Inbox will be mounted
+    const novu = new Novu({
+      applicationIdentifier: applicationIdentifier.value,
+      subscriberId: subscriberId,
     });
 
-    // Store the instance for cleanup
-    novuInstance = novu;
+    // Lấy số count ban đầu
+    const { data } = await novu.notifications.count();
+    if (data)
+      unseenCount.value = data.count;
+
+    novuDispose = novu.on('notifications.unseen_count_changed', (data) => {
+      console.log('notifications.unseen_count_changed');
+      unseenCount.value = data.result;
+    });
 
   } catch (error) {
-    console.error('Failed to initialize Novu Inbox:', error);
+    console.error('Failed to initialize Novu client:', error);
   }
 });
 
 onUnmounted(() => {
-  if (novuInstance && novuInbox.value) {
-    try {
-      // Properly unmount the Novu component to prevent memory leaks
-      novuInstance.unmountComponent(novuInbox.value);
-    } catch (error) {
-      console.error("Failed to unmount Novu inbox:", error);
-    }
+  if (novuDispose) {
+    novuDispose();
   }
 });
 </script>
-
-<style scoped>
-/* Add any specific styles for your notification bell here */
-</style>

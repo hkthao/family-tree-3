@@ -4,15 +4,11 @@
     <v-text-field density="comfortable" variant="solo" prepend-inner-icon="mdi-magnify" :label="t('topbar.search')"
       single-line hide-details class="mx-4" @keydown.meta.k.prevent="focusSearch" ref="searchField" rounded flat>
     </v-text-field>
-
     <v-spacer></v-spacer>
-
     <v-btn icon @click="toggleTheme">
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
-
     <NotificationBell />
-
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
     </div>
