@@ -447,6 +447,7 @@ yarn.lock
 .env
 .env.*
 !frontend/.env.example
+!src/backend/.env.example
 
 # Backend development appsettings (untracked for local configuration)
 src/backend/src/Web/appsettings.Development.json
