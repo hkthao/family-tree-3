@@ -535,5 +535,7 @@
   "notificationChannel.Webhook": "Webhook",
   "templateFormat.PlainText": "Văn bản thuần túy",
   "templateFormat.Html": "HTML",
-  "templateFormat.Markdown": "Markdown"
+  "templateFormat.Markdown": "Markdown",
+  "novu.tabs.all": "Tất cả",
+  "novu.tabs.unread": "Chưa đọc"
 }

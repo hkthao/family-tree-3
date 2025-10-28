@@ -7,6 +7,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useUserProfileStore } from '@/stores';
 import { NovuUI } from '@novu/js/ui';
 import { dark } from '@novu/js/themes'; // Import the dark theme object
+import { useI18n } from 'vue-i18n'; // Import useI18n
 
 interface NovuOptions {
   options: {
@@ -15,6 +16,7 @@ interface NovuOptions {
   };
 }
 
+const { t } = useI18n(); // Initialize t for translations
 const userProfileStore = useUserProfileStore();
 const novuInbox = ref<HTMLElement | null>(null);
 let novuInstance: NovuUI | null = null;
@@ -44,6 +46,16 @@ onMounted(async () => {
       appearance: {
         baseTheme: dark, // Use the imported dark theme object
       },
+      tabs: [
+        {
+          label: t('novu.tabs.all'),
+          filter: {}, // Show all notifications
+        },
+        {
+          label: t('novu.tabs.unread'),
+          filter: { read: false }, // Show only unread notifications
+        },
+      ],
     } as NovuOptions);
 
     // Mount the Inbox component to our div reference

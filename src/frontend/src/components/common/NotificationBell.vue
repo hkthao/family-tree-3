@@ -21,7 +21,8 @@ import NovuInbox from './NovuInbox.vue'
 
 const userProfileStore = useUserProfileStore();
 const unseenCount = ref(0);
-let novuDispose: (() => void) | null = null;
+let unseen_count_changed: (() => void) | null = null;
+let notification_received: (() => void) | null = null;
 const applicationIdentifier = ref(import.meta.env.VITE_NOVU_APPLICATION_IDENTIFIER || '');
 
 const updateUnReadCount = async (novu: Novu) => {
@@ -53,13 +54,11 @@ onMounted(async () => {
     // Lấy số count ban đầu
     await updateUnReadCount(novu)
 
-    novuDispose = novu.on('notifications.unseen_count_changed', async (data) => {
-      console.log('notifications.unseen_count_changed', data);
+    unseen_count_changed = novu.on('notifications.unseen_count_changed', async () => {
       await updateUnReadCount(novu)
     });
 
-    novu.on('notifications.notification_received', async (data) => {
-      console.log('notifications.notification_received', data);
+    notification_received = novu.on('notifications.notification_received', async () => {
       await updateUnReadCount(novu)
     });
 
@@ -69,8 +68,11 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  if (novuDispose) {
-    novuDispose();
+  if (unseen_count_changed) {
+    unseen_count_changed();
+  }
+  if (notification_received) {
+    notification_received();
   }
 });
 </script>
