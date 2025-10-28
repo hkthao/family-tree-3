@@ -94,7 +94,7 @@ public class GetFamiliesQueryHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var userId = Guid.NewGuid();
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var managedFamily1 = new Family { Id = Guid.NewGuid(), Name = "Managed Family 1", Code = "MF1" };

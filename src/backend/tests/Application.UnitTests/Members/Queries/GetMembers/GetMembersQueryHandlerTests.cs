@@ -154,7 +154,7 @@ public class GetMembersQueryHandlerTests : TestBase
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
 
-        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA001" };
@@ -199,7 +199,7 @@ public class GetMembersQueryHandlerTests : TestBase
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
 
-        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA001" };
@@ -244,7 +244,7 @@ public class GetMembersQueryHandlerTests : TestBase
         _mockUser.Setup(u => u.Id).Returns(userId);
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(false);
 
-        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User" };
+        var userProfile = new UserProfile { Id = userId, ExternalId = userId.ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
         _context.UserProfiles.Add(userProfile);
 
         var family1 = new Family { Id = Guid.NewGuid(), Name = "Family A", Code = "FA001" };
