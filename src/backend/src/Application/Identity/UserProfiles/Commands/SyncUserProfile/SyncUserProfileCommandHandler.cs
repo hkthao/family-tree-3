@@ -22,37 +22,30 @@ public class SyncUserProfileCommandHandler(
         var externalId = request.UserPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = request.UserPrincipal.FindFirst(ClaimTypes.Email)?.Value;
         var name = request.UserPrincipal.FindFirst(ClaimTypes.Name)?.Value;
-
-        // Extract first and last name if available from claims
         var firstName = request.UserPrincipal.FindFirst(ClaimTypes.GivenName)?.Value;
         var lastName = request.UserPrincipal.FindFirst(ClaimTypes.Surname)?.Value;
         var phone = request.UserPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value;
 
-        if (string.IsNullOrEmpty(externalId))
-        {
-            _logger.LogWarning(ErrorMessages.ExternalIdNotFound + ". Cannot sync user profile.");
-            return Result<UserProfileDto>.Failure(ErrorMessages.ExternalIdNotFound, ErrorSources.Authentication);
-        }
-
-        var userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
+        UserProfile? userProfile = null;
+        if (!string.IsNullOrEmpty(externalId))
+            userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
 
         if (userProfile == null)
         {
             // Create new UserProfile
             userProfile = new UserProfile
             {
-                ExternalId = externalId,
-                Email = email ?? "", // Email might be null if not provided
-                Name = name ?? "",   // Name might be null if not provided
-                FirstName = string.IsNullOrEmpty(firstName) ? "Unknown" : firstName,
-                LastName = string.IsNullOrEmpty(lastName) ? "Unknown" : lastName,
-                Phone = string.IsNullOrEmpty(phone) ? "N/A" : phone,
+                ExternalId = externalId ?? "",
+                Email = email ?? "",
+                Name = name ?? "",
+                FirstName = firstName ?? "",
+                LastName = lastName ?? "",
+                Phone = phone ?? "",
                 Avatar = ""
             };
             try
             {
                 _context.UserProfiles.Add(userProfile);
-
                 // Create default user preferences
                 var userPreference = new UserPreference
                 {
@@ -61,21 +54,8 @@ public class SyncUserProfileCommandHandler(
                     Language = Language.Vietnamese // Default language
                 };
                 _context.UserPreferences.Add(userPreference);
-
                 await _context.SaveChangesAsync(cancellationToken);
-                userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
                 _logger.LogInformation("Created new user profile for external user {ExternalId}.", externalId);
-            }
-            catch (DbUpdateException ex)
-            {
-                _logger.LogWarning(ex, "A database update exception occurred while creating a user profile. This might be due to a race condition. Attempting to re-fetch the user.");
-                // Attempt to re-fetch the user to handle potential race conditions where the user was created by another request.
-                userProfile = await GetUserProfileByExternalId(externalId, cancellationToken);
-                if (userProfile == null)
-                {
-                    _logger.LogError(ex, "Failed to retrieve existing user profile after a DbUpdateException for {ExternalId}. This should not happen.", externalId);
-                    return Result<UserProfileDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database); // Return failure instead of re-throwing
-                }
             }
             catch (Exception ex)
             {
@@ -87,9 +67,11 @@ public class SyncUserProfileCommandHandler(
         {
             // Update existing UserProfile with default values if properties are empty
             bool changed = false;
-            if (string.IsNullOrEmpty(userProfile.FirstName)) { userProfile.FirstName = string.IsNullOrEmpty(firstName) ? "Unknown" : firstName; changed = true; }
-            if (string.IsNullOrEmpty(userProfile.LastName)) { userProfile.LastName = string.IsNullOrEmpty(lastName) ? "Unknown" : lastName; changed = true; }
-            if (string.IsNullOrEmpty(userProfile.Phone)) { userProfile.Phone = string.IsNullOrEmpty(phone) ? "N/A" : phone; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.FirstName)) { userProfile.FirstName = firstName ?? ""; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.LastName)) { userProfile.LastName = lastName ?? ""; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.Phone)) { userProfile.Phone = phone ?? ""; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.Name)) { userProfile.Name = name ?? ""; changed = true; }
+            if (string.IsNullOrEmpty(userProfile.Email)) { userProfile.Email = email ?? ""; changed = true; }
             if (changed)
             {
                 await _context.SaveChangesAsync(cancellationToken);
@@ -107,6 +89,9 @@ public class SyncUserProfileCommandHandler(
             ExternalId = userProfile.ExternalId,
             Email = userProfile.Email,
             Name = userProfile.Name,
+            Phone = userProfile.Phone,
+            FirstName = userProfile.FirstName,
+            LastName = userProfile.LastName,
             Avatar = userProfile.Avatar,
         });
     }

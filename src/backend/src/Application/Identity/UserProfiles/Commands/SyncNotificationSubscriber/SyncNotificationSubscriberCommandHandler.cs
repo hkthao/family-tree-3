@@ -21,17 +21,11 @@ public class SyncNotificationSubscriberCommandHandler(
 
     public async Task<Result<bool>> Handle(SyncNotificationSubscriberCommand request, CancellationToken cancellationToken)
     {
-        var externalId = request.UserProfile.ExternalId;
+        var id = request.UserProfile.Id.ToString();
         var email = request.UserProfile.Email;
         var firstName = request.UserProfile.FirstName;
         var lastName = request.UserProfile.LastName;
         var phone = request.UserProfile.Phone;
-
-        if (string.IsNullOrEmpty(externalId))
-        {
-            _logger.LogWarning(ErrorMessages.ExternalIdNotFound + ". Cannot sync notification subscriber.");
-            return Result<bool>.Failure(ErrorMessages.ExternalIdNotFound, ErrorSources.Authentication);
-        }
 
         if (string.IsNullOrEmpty(_notificationSettings.Provider))
         {
@@ -43,18 +37,18 @@ public class SyncNotificationSubscriberCommandHandler(
         {
             var provider = _notificationProviderFactory.GetProvider(_notificationSettings.Provider);
             await provider.SyncSubscriberAsync(
-                externalId,
+                id,
                 firstName,
                 lastName,
                 email,
                 phone);
 
-            _logger.LogInformation("Successfully synchronized notification subscriber for external ID: {ExternalId}.", externalId);
+            _logger.LogInformation("Successfully synchronized notification subscriber for external ID: {id}.", id);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error synchronizing notification subscriber for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
+            _logger.LogError(ex, "Error synchronizing notification subscriber for external ID: {id}. Details: {Error}", id, ex.Message);
             return Result<bool>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
         }
     }

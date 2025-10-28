@@ -153,12 +153,20 @@ public static class DependencyInjection
         configuration.GetSection(NovuSettings.SectionName).Bind(novuSettings);
         services.AddSingleton(Options.Create(novuSettings));
 
-        // 2. Register NovuSDK
-        services.AddSingleton<NovuSDK>(provider =>
-        {
-            var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
-            return new NovuSDK(secretKey: settings.ApiKey);
-        });
+            // 2. Register NovuSDK
+            services.AddSingleton<NovuSDK>(provider =>
+            {
+                var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
+                var logger = provider.GetRequiredService<ILogger<NovuSDK>>();
+
+                if (string.IsNullOrEmpty(settings.ApiKey))
+                {
+                    throw new ArgumentNullException(nameof(settings.ApiKey), "Novu API Key is not configured. Please check NovuSettings in appsettings.json or environment variables.");
+                }
+
+                // logger.LogInformation("NovuSDK secretKey: ", settings.ApiKey);
+                return new NovuSDK(secretKey: settings.ApiKey);
+            });
 
         // 3. Register NovuNotificationProvider as INotificationProvider
         services.AddScoped<INotificationProvider, NovuNotificationProvider>();

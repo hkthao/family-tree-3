@@ -6,6 +6,6 @@ namespace backend.Application.Common.Models.AppSetting;
 /// </summary>
 public class NovuSettings
 {
-    public const string SectionName = "Novu";
+    public const string SectionName = "NovuSettings";
     public string ApiKey { get; set; } = string.Empty;
 }

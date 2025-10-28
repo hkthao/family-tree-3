@@ -1,8 +1,5 @@
-using System.Net;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting;
-using Microsoft.Extensions.Options;
 using Novu; // For NovuSDK
 using Novu.Models.Components; // For DTOs like TriggerEventRequestDto, To, SubscriberCreateData
 
@@ -67,10 +64,10 @@ public class NovuNotificationProvider : INotificationProvider
         await _novuSdk.Subscribers.CreateAsync(createSubscriberRequestDto: new CreateSubscriberRequestDto()
         {
             SubscriberId = subscriberId,
-            FirstName = string.IsNullOrEmpty(firstName) ? null : firstName,
-            LastName = string.IsNullOrEmpty(lastName) ? null : lastName,
-            Email = string.IsNullOrEmpty(email) ? null : email,
-            Phone = string.IsNullOrEmpty(phone) ? null : phone,
+            FirstName = string.IsNullOrEmpty(firstName) ? string.Empty : firstName,
+            LastName = string.IsNullOrEmpty(lastName) ? string.Empty : lastName,
+            Email = string.IsNullOrEmpty(email) ? string.Empty : email,
+            Phone = string.IsNullOrEmpty(phone) ? string.Empty : phone,
             // You can add more subscriber data here if available in metadata
             // For example, if metadata contains "Avatar", you can add it here.
             // Data = metadata // If Novu's CreateSubscriberRequestDto supports a generic data field

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using backend.Domain.Events;
 using MediatR;
+using Microsoft.AspNetCore.Authentication;
 
 namespace backend.CompositionRoot;
 
@@ -77,10 +78,12 @@ public static class DependencyInjection
                         var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                         using var scope = context.HttpContext.RequestServices.CreateScope();
                         var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                        var claimsTransformation = scope.ServiceProvider.GetRequiredService<IClaimsTransformation>();
                         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                         try
                         {
-                            var userLoggedInEvent = new UserLoggedInEvent(context.Principal!); // Create the event
+                            var principal = await claimsTransformation.TransformAsync(context.Principal!);
+                            var userLoggedInEvent = new UserLoggedInEvent(principal); // Create the event
                             await mediator.Publish(userLoggedInEvent); // Publish the event
                         }
                         catch (Exception ex)

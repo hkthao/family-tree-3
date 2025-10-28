@@ -33,7 +33,10 @@ public class UserLoggedInEventHandler : INotificationHandler<UserLoggedInEvent>
     /// <returns>Task biểu thị hoạt động không đồng bộ.</returns>
     public async Task Handle(UserLoggedInEvent notification, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("UserLoggedInEvent handled for user: {ExternalId}", notification.UserPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+        foreach (var claim in notification.UserPrincipal.Claims)
+        {
+            _logger.LogInformation("UserLoggedInEvent Claim {Type}: {Value}", claim.Type, claim.Value);
+        }
 
         var command = new SyncUserProfileCommand
         {
