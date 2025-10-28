@@ -10,7 +10,6 @@ using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
-using backend.Infrastructure.Novu;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

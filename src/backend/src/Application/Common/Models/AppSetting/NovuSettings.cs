@@ -1,5 +1,5 @@
 
-namespace backend.Infrastructure.Novu;
+namespace backend.Application.Common.Models.AppSetting;
 
 /// <summary>
 /// Configuration settings for Novu.
