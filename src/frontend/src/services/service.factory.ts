@@ -28,8 +28,7 @@ import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { ISystemConfigService } from './system-config/system-config.service.interface';
 import { ApiSystemConfigService } from './system-config/api.system-config.service';
-import type { INotificationTemplateService } from './notification-template/notification-template.service.interface';
-import { ApiNotificationTemplateService } from './notification-template/api.notification-template.service';
+
 
 export type ServiceMode = 'real' | 'test' | 'mock';
 
@@ -49,7 +48,7 @@ export interface AppServices {
   chunk: IChunkService;
   face: IFaceService;
   systemConfig: ISystemConfigService;
-  notificationTemplate: INotificationTemplateService;
+
 }
 
 import apiClient from '@/plugins/axios';
@@ -117,9 +116,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiSystemConfigService(apiClient)
         : testServices?.systemConfig || new ApiSystemConfigService(apiClient),
-    notificationTemplate:
-      mode === 'real'
-        ? new ApiNotificationTemplateService(apiClient)
-        : testServices?.notificationTemplate || new ApiNotificationTemplateService(apiClient),
+
   };
 }

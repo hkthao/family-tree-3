@@ -86,9 +86,9 @@ const menu: MenuSection[] = [
     titleKey: 'menu.system',
     items: [
       {
-        titleKey: 'admin.notificationTemplates.title',
-        icon: 'mdi-email-multiple-outline',
-        to: '/admin/notification-template',
+        titleKey: 'admin.config.title',
+        icon: 'mdi-cog',
+        to: '/admin/config',
         roles: ['Admin'],
       },
     ],

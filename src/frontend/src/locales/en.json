@@ -414,6 +414,7 @@
   "face.recognition.noFacesDetected": "No faces detected in the image.",
   "face.recognition.saveSuccess": "Face labels saved successfully!",
   "face.boundingBox.labeledAs": "Labeled as {name}",
+  "face.search.title": "Face Search",
   "admin.config.title": "System Configuration",
   "systemConfig.title": "System Configuration",
   "systemConfig.tabs.aiChat": "AI Chat",
