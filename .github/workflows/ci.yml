@@ -75,14 +75,14 @@ jobs:
         tags: hkthao/family-tree-backend:latest
         outputs: type=docker,dest=/tmp/backend-image.tar
 
-    # - name: Build frontend Docker image
-    #   uses: docker/build-push-action@v4
-    #   with:
-    #     context: ./src/infra
-    #     file: ./src/infra/Dockerfile.frontend
-    #     push: false
-    #     tags: hkthao/family-tree-frontend:latest
-    #     outputs: type=docker,dest=/tmp/frontend-image.tar
+    - name: Build frontend Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./src/frontend
+        file: ./src/infra/Dockerfile.frontend
+        push: false
+        tags: hkthao/family-tree-frontend:latest
+        outputs: type=docker,dest=/tmp/frontend-image.tar
 
     # - name: Upload backend Docker image artifact
     #   uses: actions/upload-artifact@v4
