@@ -58,8 +58,6 @@ public class Startup
         services.AddWebServices();
 
         services.AddControllers();
-        services.AddSignalR();
-
         services.AddCors(options => options.AddPolicy("AllowFrontend",
             policyBuilder =>
             {

@@ -15,13 +15,11 @@ namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.SyncUserP
 public class SyncUserProfileCommandHandlerTests : TestBase
 {
     private readonly Mock<ILogger<SyncUserProfileCommandHandler>> _mockLogger;
-    private readonly Mock<INotificationService> _mockNotificationService;
     private readonly SyncUserProfileCommandHandler _handler;
 
     public SyncUserProfileCommandHandlerTests()
     {
         _mockLogger = new Mock<ILogger<SyncUserProfileCommandHandler>>();
-        _mockNotificationService = new Mock<INotificationService>();
 
 
         _handler = new SyncUserProfileCommandHandler(
@@ -93,10 +91,12 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull(); // Ensure a UserProfileDto is returned
+        result.Value!.IsNewUser.Should().BeTrue();
 
         _context.UserProfiles.Should().ContainSingle(up => up.ExternalId == externalId);
-        var newUserProfile = _context.UserProfiles.First(up => up.ExternalId == externalId);
-        newUserProfile.Email.Should().Be(email);
+        var newUserProfile = _context.UserProfiles.First(up => up.ExternalId == externalId)!;
+        string actualEmail = newUserProfile.Email;
+        actualEmail.Should().Be(email);
         newUserProfile.Name.Should().Be(name);
 
         _context.UserPreferences.Should().ContainSingle(up => up.UserProfileId == newUserProfile.Id);
@@ -160,6 +160,5 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         _context.UserProfiles.Count().Should().Be(1); // No new user profile should be added
         _context.UserPreferences.Count().Should().Be(1); // No new user preference should be added
         _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Never);
-        _mockNotificationService.Verify(x => x.SendNotificationAsync(It.IsAny<NotificationMessage>(), It.IsAny<CancellationToken>()), Times.Never); // Verify notification not sent
     }
 }

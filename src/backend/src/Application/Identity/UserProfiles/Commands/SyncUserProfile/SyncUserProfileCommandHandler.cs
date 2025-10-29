@@ -19,6 +19,7 @@ public class SyncUserProfileCommandHandler(
 
     public async Task<Result<UserProfileDto>> Handle(SyncUserProfileCommand request, CancellationToken cancellationToken)
     {
+        bool isNewUser = false;
         var externalId = request.UserPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = request.UserPrincipal.FindFirst(ClaimTypes.Email)?.Value;
         var name = request.UserPrincipal.FindFirst(ClaimTypes.Name)?.Value;
@@ -32,6 +33,7 @@ public class SyncUserProfileCommandHandler(
 
         if (userProfile == null)
         {
+            isNewUser = true;
             // Create new UserProfile
             userProfile = new UserProfile
             {
@@ -93,6 +95,7 @@ public class SyncUserProfileCommandHandler(
             FirstName = userProfile.FirstName,
             LastName = userProfile.LastName,
             Avatar = userProfile.Avatar,
+            IsNewUser = isNewUser
         });
     }
 

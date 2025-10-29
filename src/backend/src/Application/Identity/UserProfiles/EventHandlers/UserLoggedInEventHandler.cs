@@ -1,3 +1,6 @@
+using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Commands.SyncNotificationSubscriber;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Events;
@@ -13,16 +16,18 @@ public class UserLoggedInEventHandler : INotificationHandler<UserLoggedInEvent>
 {
     private readonly ILogger<UserLoggedInEventHandler> _logger;
     private readonly IMediator _mediator;
+    private readonly INotificationService _notificationService;
 
     /// <summary>
     /// Khởi tạo một phiên bản mới của UserLoggedInEventHandler.
     /// </summary>
     /// <param name="logger">Logger để ghi nhật ký thông tin.</param>
     /// <param name="mediator">Mediator để gửi các lệnh và truy vấn.</param>
-    public UserLoggedInEventHandler(ILogger<UserLoggedInEventHandler> logger, IMediator mediator)
+    public UserLoggedInEventHandler(ILogger<UserLoggedInEventHandler> logger, IMediator mediator, INotificationService notificationService)
     {
         _logger = logger;
         _mediator = mediator;
+        _notificationService = notificationService;
     }
 
     /// <summary>
@@ -59,5 +64,20 @@ public class UserLoggedInEventHandler : INotificationHandler<UserLoggedInEvent>
             _logger.LogError("Error sync notification subscriber for profile ID: {Id}. Details: {Error}", result.Value?.Id, syncResult.Error);
         }
 
+        // Send welcome notification if it's a new user
+        if (result.IsSuccess && result.Value!.IsNewUser)
+        {
+            var welcomeNotificationMessage = new NotificationMessage
+            {
+                RecipientUserId = result.Value.Id.ToString(),
+                Title = NovuWorkflow.WelcomeNotification,
+                Metadata = new Dictionary<string, object>
+                {
+                    { "firstName", result.Value.FirstName ?? result.Value.Name ?? result.Value.Email }
+                }
+            };
+            await _notificationService.SendNotificationAsync(welcomeNotificationMessage, cancellationToken);
+            _logger.LogInformation("Sent welcome notification to new user {UserId}.", result.Value.Id);
+        }
     }
 }
