@@ -8,63 +8,54 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # build-and-test:
-  #   runs-on: ubuntu-latest
+  build-and-test:
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #   - uses: actions/checkout@v4
+    steps:
+    - uses: actions/checkout@v4
 
-  #   - name: Setup .NET
-  #     uses: actions/setup-dotnet@v4
-  #     with:
-  #       dotnet-version: 8.0.x
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
-  #   - name: Restore Backend Dependencies
-  #     run: dotnet restore src/backend/backend.sln
+    - name: Restore Backend Dependencies
+      run: dotnet restore src/backend/backend.sln
 
-  #   - name: Build Backend
-  #     run: dotnet build src/backend/backend.sln --no-restore
+    - name: Build Backend
+      run: dotnet build src/backend/backend.sln --no-restore
 
-  #   - name: Fix Backend Formatting
-  #     run: dotnet format src/backend/ --include-generated
+    - name: Fix Backend Formatting
+      run: dotnet format src/backend/ --include-generated
 
-  #   - name: Verify Backend Formatting
-  #     run: dotnet format src/backend/ --verify-no-changes --include-generated
+    - name: Verify Backend Formatting
+      run: dotnet format src/backend/ --verify-no-changes --include-generated
 
-  #   - name: Test Backend
-  #     run: dotnet test src/backend/backend.sln --no-build --verbosity normal
+    - name: Test Backend
+      run: dotnet test src/backend/backend.sln --no-build --verbosity normal
 
-  #   - name: Setup Node.js
-  #     uses: actions/setup-node@v4
-  #     with:
-  #       node-version: 20
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
 
-  #   - name: Install Frontend Dependencies
-  #     run: npm install --prefix src/frontend
+    - name: Install Frontend Dependencies
+      run: npm install --prefix src/frontend
 
-  #   - name: Lint Frontend
-  #     run: npm run lint --prefix src/frontend
+    - name: Lint Frontend
+      run: npm run lint --prefix src/frontend
 
-  #   - name: Test Frontend
-  #     run: npm run test:coverage --prefix src/frontend
+    - name: Test Frontend
+      run: npm run test:coverage --prefix src/frontend
 
   docker-build:
-    # needs: build-and-test
+    needs: build-and-test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
-
-    - name: Check backend build context
-      run: |
-        echo "Current working directory:"
-        pwd
-        echo "Listing contents of current directory:"
-        ls -F
-        echo "Listing contents of ./src/backend:"
-        ls -R ./src/backend
 
     - name: Build backend Docker image
       uses: docker/build-push-action@v4
@@ -84,15 +75,14 @@ jobs:
         tags: hkthao/family-tree-frontend:latest
         outputs: type=docker,dest=/tmp/frontend-image.tar
 
-    # - name: Upload backend Docker image artifact
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: backend-image
-    #     path: /tmp/backend-image.tar
+    - name: Upload backend Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-image
+        path: /tmp/backend-image.tar
 
-    # - name: Upload frontend Docker image artifact
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: frontend-image
-    #     path: /tmp/frontend-image.tar
-
+    - name: Upload frontend Docker image artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-image
+        path: /tmp/frontend-image.tar
