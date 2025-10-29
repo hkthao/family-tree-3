@@ -27,8 +27,6 @@ graph TD
 -   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta.
 -   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu của hệ thống.
 
-*Lưu ý: Dịch vụ Email hiện chưa được triển khai trong hệ thống. Đây là một tính năng tiềm năng trong tương lai để gửi thông báo cho người dùng.*
-
 ## 2. Sơ đồ container (Container Diagram - C2)
 
 Sơ đồ này chia nhỏ hệ thống thành các container (ứng dụng, database, etc.).
@@ -38,9 +36,10 @@ graph TD
     subgraph "Hệ thống Cây Gia Phả"
         A(Frontend - Vue.js) -->|API calls| B(Backend - ASP.NET Core)
         B -->|Reads/Writes| C(Database - MySQL)
+        B -->|Giao tiếp| D(Face Service - Python)
     end
 
-    D[Người dùng] -->|HTTPS| A
+    E[Người dùng] -->|HTTPS| A
 ```
 
 -   **Frontend**: Ứng dụng Single Page Application (SPA) bằng Vue.js, chạy trên trình duyệt của người dùng.
@@ -87,6 +86,7 @@ graph TD
         C -->|Sử dụng| E(IFileTextExtractorFactory)
         C -->|Sử dụng| F(ChunkingPolicy)
         C -->|Sử dụng| UP(IUserPreferenceService)
+        C -->|Sử dụng| AI(AI Service)
     end
 
     subgraph "Infrastructure Layer"
@@ -94,6 +94,8 @@ graph TD
         D --> G
         E --> H(PdfTextExtractor/TxtTextExtractor)
         UP --> G
+        AI --> J(External AI Provider)
+        AI --> K(Face Service)
     end
 
     subgraph "Domain Layer"
@@ -119,6 +121,27 @@ graph TD
 -   **ChunkingPolicy**: Domain Service chứa logic làm sạch và chia nhỏ văn bản thành các chunk.
 -   **IUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
 
+## 4.1. Kiến trúc AI (AI Architecture)
+
+Phần này mô tả cách các tính năng Trí tuệ Nhân tạo (AI) được tích hợp vào hệ thống, bao gồm các dịch vụ AI bên ngoài và cách chúng tương tác với Backend.
+
+```mermaid
+graph TD
+    subgraph "Hệ thống Cây Gia Phả"
+        subgraph "Backend - ASP.NET Core"
+            A[Application Layer] -->|Sử dụng| B(AI Service)
+            B -->|Gọi API| C(External AI Provider)
+            B -->|Gọi API| D(Face Service)
+        end
+    end
+
+    C -->|Trả về kết quả| B
+    D -->|Trả về kết quả| B
+```
+
+-   **AI Service (trong Backend)**: Một dịch vụ tổng hợp trong Application Layer của Backend, chịu trách nhiệm điều phối các yêu cầu liên quan đến AI. Nó có thể gọi các nhà cung cấp AI bên ngoài hoặc các dịch vụ AI cục bộ.
+-   **External AI Provider**: Các dịch vụ AI bên ngoài như Google Gemini, OpenAI, Novu, Qdrant, và các mô hình LLM cục bộ, được sử dụng cho các tác vụ như tạo tiểu sử, trích xuất thông tin, v.v.
+-   **Face Service**: Một dịch vụ AI cục bộ (ví dụ: chạy bằng Python) chịu trách nhiệm cho các tác vụ như phát hiện khuôn mặt, nhận dạng khuôn mặt, tạo embeddings khuôn mặt. Dịch vụ này được triển khai như một container riêng biệt và giao tiếp với Backend qua API.
 
 ## 5. Sơ đồ triển khai (Deployment View)
 
@@ -130,6 +153,7 @@ graph TD
         A(Nginx) --> B(Frontend Container)
         A --> C(Backend Container)
         C --> D(Database Container)
+        C --> F(Face Service Container)
     end
 
     E[Người dùng] -->|HTTPS| A
@@ -196,7 +220,7 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 
 #### Khả năng thay thế
 
-Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài (trước đây là `Auth0UserId`).
+Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài. Thông tin người dùng hiện tại được truy cập thông qua interface `IUser`.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 
