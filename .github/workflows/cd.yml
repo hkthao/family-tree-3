@@ -1,0 +1,44 @@
+# .github/workflows/cd.yml
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"] # Tên của workflow CI
+    types:
+      - completed
+
+jobs:
+  docker-push:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.ref == 'refs/heads/main' }}
+
+    steps:
+    - name: Download backend Docker image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-image
+        path: /tmp
+
+    - name: Download frontend Docker image artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-image
+        path: /tmp
+
+    - name: Load backend Docker image
+      run: docker load --input /tmp/backend-image.tar
+
+    - name: Load frontend Docker image
+      run: docker load --input /tmp/frontend-image.tar
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+
+    - name: Push backend Docker image
+      run: docker push hkthao/family-tree-backend:latest
+
+    - name: Push frontend Docker image
+      run: docker push hkthao/family-tree-frontend:latest
