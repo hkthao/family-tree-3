@@ -29,17 +29,17 @@ public class SyncUserProfileCommandHandlerTests : TestBase
     }
 
         /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler tạo một hồ sơ người dùng mới với ExternalId rỗng
     /// khi External ID (ClaimTypes.NameIdentifier) không được tìm thấy trong ClaimsPrincipal của người dùng.
     /// ⚙️ Các bước (Arrange, Act, Assert):
     ///    - Arrange: Tạo một ClaimsPrincipal không chứa ClaimTypes.NameIdentifier.
     ///    - Act: Gọi phương thức Handle của handler với một SyncUserProfileCommand chứa ClaimsPrincipal này.
-    ///    - Assert: Kiểm tra rằng kết quả trả về là thất bại (IsSuccess = false) và chứa thông báo lỗi phù hợp ("External ID (sub claim) not found in claims.").
-    ///              Xác minh rằng một cảnh báo đã được ghi lại bởi logger.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: External ID là bắt buộc để xác định và đồng bộ hóa hồ sơ người dùng; nếu thiếu, hoạt động không thể tiếp tục.
+    ///    - Assert: Kiểm tra rằng kết quả trả về là thành công (IsSuccess = true) và một UserProfile mới được tạo với ExternalId rỗng.
+    ///              Xác minh rằng một thông tin đã được ghi lại bởi logger.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Hệ thống tạo hồ sơ người dùng ngay cả khi External ID không có, để đảm bảo người dùng có thể tiếp tục sử dụng ứng dụng.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnFailureWhenExternalIdNotFound()
+    public async Task Handle_ShouldCreateNewUserProfileWithEmptyExternalIdWhenExternalIdNotFound()
     {
         var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
         {
@@ -52,10 +52,10 @@ public class SyncUserProfileCommandHandlerTests : TestBase
         var result = await _handler.Handle(command, CancellationToken.None);
 
         result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("External ID (sub claim) not found in claims.");
-        result.ErrorSource.Should().Be("Authentication");
-        _mockLogger.Verify(x => x.Log(LogLevel.Warning, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.ExternalId.Should().BeEmpty();
+        _context.UserProfiles.Should().ContainSingle(up => up.ExternalId == "");
+        _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
     }
 
         /// <summary>

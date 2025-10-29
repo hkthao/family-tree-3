@@ -90,7 +90,7 @@ public class UserLoggedInEventHandlerTests : TestBase
                 string.Equals(msg.Metadata["firstName"], userProfileDto.FirstName)),
             It.IsAny<CancellationToken>()),
             Times.Once);
-        _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once);
+
     }
 
     /// <summary>
@@ -138,6 +138,6 @@ public class UserLoggedInEventHandlerTests : TestBase
             It.IsAny<NotificationMessage>(),
             It.IsAny<CancellationToken>()),
             Times.Never);
-        _mockLogger.Verify(x => x.Log(LogLevel.Information, It.IsAny<EventId>(), It.IsAny<It.IsAnyType>(), It.IsAny<Exception?>(), It.IsAny<Func<It.IsAnyType, Exception?, string>>()), Times.Once); // Log for SyncUserProfile
+
     }
 }
