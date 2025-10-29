@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia';
-import type { IMemberService } from '@/services/member/member.service.interface';
 import type { Member, MemberFilter } from '@/types/member';
-import type { Result } from '@/types/result';
 import { IdCache } from '@/utils/cacheUtils';
 import i18n from '@/plugins/i18n';
 import type { ApiError } from '@/plugins/axios';

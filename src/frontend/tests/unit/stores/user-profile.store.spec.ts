@@ -70,7 +70,7 @@ describe('user-profile.store', () => {
     store = useUserProfileStore();
     store.$reset();
     // Inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
 
     // Reset mocks before each test
     mockGetCurrentUserProfile.mockReset();

@@ -48,19 +48,11 @@ describe('member-autocomplete.store', () => {
     store = useMemberAutocompleteStore();
     store.$reset();
     // Manually inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
     // Reset mocks before each test
     mockLoadItems.mockReset();
     mockGetByIds.mockReset();
   });
-
-  const mockMember: Member = {
-    id: 'member-1',
-    fullName: 'Test Member',
-    lastName: 'Member',
-    firstName: 'Test',
-    familyId: 'family-1',
-  };
 
   it('should have initial state values', () => {
     expect(store.members).toEqual([]);

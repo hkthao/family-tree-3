@@ -14,7 +14,6 @@ export * from './natural-language-input.store';
 
 export * from './notification.store';
 export * from './relationship.store';
-export * from './system-config.store';
 export * from './user-activity.store';
 export * from './user-preference.store';
 export * from './user-profile.store';

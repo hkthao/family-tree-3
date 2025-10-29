@@ -48,16 +48,11 @@ describe('family-autocomplete.store', () => {
     store = useFamilyAutocompleteStore();
     store.$reset();
     // Manually inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
     // Reset mocks before each test
     mockLoadItems.mockReset();
     mockGetByIds.mockReset();
   });
-
-  const mockFamily: Family = {
-    id: 'family-1',
-    name: 'Test Family',
-  };
 
   it('should have initial state values', () => {
     expect(store.families).toEqual([]);

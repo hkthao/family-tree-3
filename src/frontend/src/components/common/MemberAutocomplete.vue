@@ -2,7 +2,7 @@
   <v-autocomplete v-model="internalSelectedItems" @update:model-value="handleAutocompleteUpdate" :items="members"
     item-title="fullName" item-value="id" :label="label" :rules="rules" :readonly="readOnly" :clearable="clearable"
     :loading="loading" :search="searchTerm" @update:search="onSearchInput" :multiple="multiple" :chips="multiple"
-    :closable-chips="multiple" return-object>
+    :closable-chips="multiple" return-object :hide-details="hideDetails">
     <template #chip="{ props, item }">
       <v-chip v-bind="props" size="small" v-if="item.raw"
         :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.fullName"></v-chip>

@@ -1,3 +1,4 @@
+import type { RouteRecordRaw } from 'vue-router';
 import { MainRouterView } from '@/views';
 import { ChunkAdmin } from '@/views/admin';
 export const adminRoutes: RouteRecordRaw[] = [

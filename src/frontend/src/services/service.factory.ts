@@ -26,11 +26,9 @@ import type { IChunkService } from './chunk/chunk.service.interface';
 import { ApiChunkService } from './chunk/api.chunk.service';
 import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
-import type { ISystemConfigService } from './system-config/system-config.service.interface';
-import { ApiSystemConfigService } from './system-config/api.system-config.service';
 
 
-export type ServiceMode = 'real' | 'test' | 'mock';
+export type ServiceMode = 'real' | 'test';
 
 export interface AppServices {
   family: IFamilyService;
@@ -47,7 +45,6 @@ export interface AppServices {
   naturalLanguageInput: INaturalLanguageInputService;
   chunk: IChunkService;
   face: IFaceService;
-  systemConfig: ISystemConfigService;
 
 }
 
@@ -112,10 +109,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFaceService(apiClient)
         : testServices?.face || new ApiFaceService(apiClient),
-    systemConfig:
-      mode === 'real'
-        ? new ApiSystemConfigService(apiClient)
-        : testServices?.systemConfig || new ApiSystemConfigService(apiClient),
 
   };
 }

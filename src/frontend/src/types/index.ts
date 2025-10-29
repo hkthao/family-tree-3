@@ -25,7 +25,6 @@ export * from './ai.d';
 export * from './auth.d';
 export * from './user.d';
 export * from './user-preference.d';
-export * from './system-config.d';
 export * from './notification.d';
 export * from './notification-template.d';
 export * from './template-format.d';

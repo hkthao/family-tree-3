@@ -72,7 +72,7 @@ describe('user-preference.store', () => {
     store.$reset();
     store.preferences = initialPreferences;
     // Inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
 
     // Reset mocks before each test
     mockGetUserPreferences.mockReset();

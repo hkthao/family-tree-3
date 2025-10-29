@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
-import type { IFamilyService } from '@/services/family/family.service.interface';
+
 import type { Family, FamilyFilter } from '@/types/family';
-import type { Result } from '@/types/result';
 import { IdCache } from '@/utils/cacheUtils';
 import i18n from '@/plugins/i18n';
 import type { ApiError } from '@/plugins/axios';
+
+
 
 export const useFamilyAutocompleteStore = defineStore('familyAutocomplete', {
   state: () => ({

@@ -74,7 +74,7 @@ describe('user-settings.store', () => {
     store = useUserSettingsStore();
     store.$reset();
     // Manually inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
     // Reset mocks before each test
     mockGetUserPreferences.mockReset();
     mockSaveUserPreferences.mockReset();

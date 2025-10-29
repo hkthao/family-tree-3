@@ -66,7 +66,7 @@ describe('dashboard.store', () => {
     store.$reset();
     store.upcomingEvents = []; // Ensure upcomingEvents is empty initially
     // Manually inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
 
     // Reset mocks before each test
     mockFetchStats.mockReset();

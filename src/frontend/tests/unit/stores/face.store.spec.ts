@@ -101,7 +101,7 @@ describe('face.store', () => {
     store = useFaceStore();
     store.$reset();
     // Manually inject the mocked services
-    store.services = createServices('mock');
+    store.services = createServices('test');
 
     // Reset mocks before each test
     (store.services.face.detect as any).mockReset();
