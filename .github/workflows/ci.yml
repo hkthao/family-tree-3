@@ -66,8 +66,8 @@ jobs:
     - name: Build backend Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./src/backend
-        file: ../../infra/Dockerfile.backend
+        context: ./infra
+        file: Dockerfile.backend
         push: false
         tags: hkthao/family-tree-backend:latest
         outputs: type=docker,dest=/tmp/backend-image.tar
@@ -75,8 +75,8 @@ jobs:
     - name: Build frontend Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./src/frontend
-        file: ../../infra/Dockerfile.frontend
+        context: ./infra
+        file: Dockerfile.frontend
         push: false
         tags: hkthao/family-tree-frontend:latest
         outputs: type=docker,dest=/tmp/frontend-image.tar
