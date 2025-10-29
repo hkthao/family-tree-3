@@ -1,14 +1,13 @@
-# .github/workflows/cd.yml
-name: CD Pipeline
+name: CD Pipeline for Backend
 
 on:
   workflow_run:
-    workflows: ["CI Pipeline"] # Tên của workflow CI
+    workflows: ["CI Pipeline"]
     types:
       - completed
 
 jobs:
-  docker-push:
+  docker-push-backend:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
 
@@ -31,11 +30,3 @@ jobs:
         file: ./src/infra/Dockerfile.backend
         push: true
         tags: hkthao/family-tree-backend:latest
-
-    - name: Build and push frontend Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: ./src/frontend
-        file: ./src/infra/Dockerfile.frontend
-        push: true
-        tags: hkthao/family-tree-frontend:latest
