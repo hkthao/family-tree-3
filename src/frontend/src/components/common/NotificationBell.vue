@@ -80,5 +80,6 @@ onUnmounted(() => {
 <style>
 .inbox-contaner {
   overflow-x: hidden !important;
+  max-width: 400px;
 }
 </style>
