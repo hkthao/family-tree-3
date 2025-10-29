@@ -57,8 +57,11 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: List infra directory contents
-      run: ls -l infra
+    - name: Debug working directory and files
+      run: |
+        pwd
+        ls -l
+        ls -l src
 
     - name: Build backend Docker image
       uses: docker/build-push-action@v4
