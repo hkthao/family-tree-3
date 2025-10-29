@@ -16,6 +16,7 @@
           :prepend-icon="item.icon"
           :title="$t(item.titleKey)"
           active-class="active-item"
+          :exact="item.exact"
         ></v-list-item>
       </template>
     </v-list>

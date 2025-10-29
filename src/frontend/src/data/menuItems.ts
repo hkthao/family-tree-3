@@ -3,6 +3,7 @@ export interface MenuItem {
   icon: string;
   to?: string;
   roles?: string[];
+  exact?: boolean;
   badge?: {
     text: string;
     color: string;
@@ -49,6 +50,7 @@ const menu: MenuSection[] = [
         icon: 'mdi-home-group',
         to: '/family',
         roles: ['Admin', 'FamilyManager'],
+        exact: true,
       },
       {
         titleKey: 'event.list.title',
