@@ -18,12 +18,14 @@ jobs:
       with:
         name: backend-image
         path: /tmp
+        run-id: ${{ github.event.workflow_run.id }}
 
     - name: Download frontend Docker image artifact
       uses: actions/download-artifact@v4
       with:
         name: frontend-image
         path: /tmp
+        run-id: ${{ github.event.workflow_run.id }}
 
     - name: Load backend Docker image
       run: docker load --input /tmp/backend-image.tar
