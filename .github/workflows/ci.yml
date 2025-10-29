@@ -62,12 +62,14 @@ jobs:
         pwd
         ls -l
         ls -l src
+        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+        ls -l $GITHUB_WORKSPACE/infra
 
     - name: Build backend Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./infra
-        file: Dockerfile.backend
+        context: .
+        file: infra/Dockerfile.backend
         push: false
         tags: hkthao/family-tree-backend:latest
         outputs: type=docker,dest=/tmp/backend-image.tar
@@ -75,8 +77,8 @@ jobs:
     - name: Build frontend Docker image
       uses: docker/build-push-action@v4
       with:
-        context: ./infra
-        file: Dockerfile.frontend
+        context: .
+        file: infra/Dockerfile.frontend
         push: false
         tags: hkthao/family-tree-frontend:latest
         outputs: type=docker,dest=/tmp/frontend-image.tar
