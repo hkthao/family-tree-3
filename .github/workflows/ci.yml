@@ -63,7 +63,7 @@ jobs:
         ls -l
         ls -l src
         echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-        ls -l $GITHUB_WORKSPACE/infra
+        cat infra/Dockerfile.backend
 
     - name: Build backend Docker image
       uses: docker/build-push-action@v4
