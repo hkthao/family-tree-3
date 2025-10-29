@@ -20,7 +20,7 @@ export class ApiRelationshipService implements IRelationshipService {
 
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/relationships`;
+  private apiUrl = `${API_BASE_URL}/relationship`;
 
   async fetch(): Promise<Result<Relationship[], ApiError>> {
     const result = await this.http.get<Relationship[]>(this.apiUrl);

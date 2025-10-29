@@ -1,13 +1,11 @@
+using backend.Application.Common.Constants;
 using AutoFixture;
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.UnitTests.Common;
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Domain.Events.Families;
 using FluentAssertions;
-using MediatR;
 using Moq;
 using Xunit;
 
@@ -16,55 +14,13 @@ namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 public class UpdateFamilyCommandHandlerTests : TestBase
 {
     private readonly UpdateFamilyCommandHandler _handler;
-    private readonly Mock<IAuthorizationService> _mockAuthorizationService;
-    private readonly Mock<IMediator> _mockMediator;
-    private readonly Mock<IFamilyTreeService> _mockFamilyTreeService;
 
     public UpdateFamilyCommandHandlerTests()
     {
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
-        _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _mockFamilyTreeService = _fixture.Freeze<Mock<IFamilyTreeService>>();
-
-        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object, _mockMediator.Object, _mockFamilyTreeService.Object);
+        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object);
     }
 
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
 
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockAuthorizationService để trả về null cho GetCurrentUserProfileAsync.
-        // 2. Tạo một UpdateFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
-        // Arrange
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync((UserProfile)null!); // UserProfile not found
-
-        var command = _fixture.Create<UpdateFamilyCommand>();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu hồ sơ người dùng không tồn tại trong hệ thống,
-        // yêu cầu cập nhật gia đình sẽ thất bại để ngăn chặn việc thao tác dữ liệu không hợp lệ.
-    }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserDoesNotHavePermission()
@@ -75,22 +31,13 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // ⚙️ Các bước (Arrange, Act, Assert):
         // Arrange:
-        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
-        // 2. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
-        // 3. Thiết lập _mockAuthorizationService.CanManageFamily để trả về false.
-        // 4. Tạo một UpdateFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
+        // 1. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
+        // 2. Thiết lập _mockAuthorizationService.CanManageFamily để trả về false.
+        // 3. Tạo một UpdateFamilyCommand bất kỳ.
 
         // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>(), It.IsAny<UserProfile>()))
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>()))
                                  .Returns(false);
 
         var command = _fixture.Create<UpdateFamilyCommand>();
@@ -101,8 +48,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User does not have permission to update this family.");
-        result.ErrorSource.Should().Be("Forbidden");
+        result.Error.Should().Be(ErrorMessages.AccessDenied);
+        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình)
@@ -118,10 +65,9 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // ⚙️ Các bước (Arrange, Act, Assert):
         // Arrange:
-        // 1. Tạo một UserProfile giả lập và thiết lập _mockAuthorizationService để trả về nó.
-        // 2. Thiết lập _mockAuthorizationService.IsAdmin để trả về true (hoặc CanManageFamily trả về true).
-        // 3. Đảm bảo không có Family nào trong DB khớp với ID của command.
-        // 4. Tạo một UpdateFamilyCommand bất kỳ.
+        // 1. Thiết lập _mockAuthorizationService.IsAdmin để trả về true (hoặc CanManageFamily trả về true).
+        // 2. Đảm bảo không có Family nào trong DB khớp với ID của command.
+        // 3. Tạo một UpdateFamilyCommand bất kỳ.
         // Act:
         // 1. Gọi phương thức Handle của handler.
         // Assert:
@@ -129,9 +75,6 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // 2. Kiểm tra thông báo lỗi phù hợp.
 
         // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true); // Assume admin for simplicity in this test
 
         // Ensure no Family exists for this ID
@@ -146,8 +89,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Family with ID {command.Id} not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, command.Id));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng hệ thống không thể cập nhật một gia đình không tồn tại,
@@ -163,31 +106,17 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // ⚙️ Các bước (Arrange, Act, Assert):
         // Arrange:
-        // 1. Tạo một UserProfile giả lập và một Family hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile và IsAdmin là true.
+        // 1. Tạo một Family hiện có, sau đó thêm vào DB.
+        // 2. Thiết lập _mockAuthorizationService để trả về IsAdmin là true.
         // 3. Tạo một UpdateFamilyCommand với các giá trị mới.
         // 4. Thiết lập _mockMediator và _mockFamilyTreeService.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem thông tin gia đình trong DB đã được cập nhật chính xác.
-        // 3. Kiểm tra xem RecordActivityCommand và UpdateFamilyStats đã được gọi.
 
         // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
         var existingFamily = _fixture.Create<Family>();
         _context.Families.Add(existingFamily);
-        _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateFamilyCommand>()
                                .With(c => c.Id, existingFamily.Id)
@@ -211,8 +140,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.Address.Should().Be(command.Address);
         updatedFamily.Visibility.Should().Be(command.Visibility);
 
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh rằng một quản trị viên có thể cập nhật thành công tất cả các thuộc tính
@@ -228,34 +157,20 @@ public class UpdateFamilyCommandHandlerTests : TestBase
 
         // ⚙️ Các bước (Arrange, Act, Assert):
         // Arrange:
-        // 1. Tạo một UserProfile giả lập và một Family hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về UserProfile, IsAdmin là false,
+        // 1. Tạo một Family hiện có, sau đó thêm vào DB.
+        // 2. Thiết lập _mockAuthorizationService để trả về IsAdmin là false,
         //    và CanManageFamily là true.
         // 3. Tạo một UpdateFamilyCommand với các giá trị mới.
         // 4. Thiết lập _mockMediator và _mockFamilyTreeService.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem thông tin gia đình trong DB đã được cập nhật chính xác.
-        // 3. Kiểm tra xem RecordActivityCommand và UpdateFamilyStats đã được gọi.
 
         // Arrange
-        var userProfile = _fixture.Create<UserProfile>();
         var existingFamily = _fixture.Create<Family>();
         _context.Families.Add(existingFamily);
-        _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _mockAuthorizationService.Setup(s => s.GetCurrentUserProfileAsync(It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(userProfile);
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id, userProfile))
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id))
                                  .Returns(true);
-        _mockMediator.Setup(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()))
-                     .ReturnsAsync(Result<Guid>.Success(Guid.NewGuid()));
-        _mockFamilyTreeService.Setup(f => f.UpdateFamilyStats(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-                              .Returns(Task.CompletedTask);
 
         var command = _fixture.Build<UpdateFamilyCommand>()
                                .With(c => c.Id, existingFamily.Id)
@@ -279,8 +194,8 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         updatedFamily.Address.Should().Be(command.Address);
         updatedFamily.Visibility.Should().Be(command.Visibility);
 
-        _mockMediator.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), It.IsAny<CancellationToken>()), Times.Once);
-        _mockFamilyTreeService.Verify(f => f.UpdateFamilyStats(existingFamily.Id, It.IsAny<CancellationToken>()), Times.Once);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
+        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
 
         // 💡 Giải thích:
         // Test này xác minh rằng một người dùng có quyền quản lý gia đình có thể cập nhật thành công

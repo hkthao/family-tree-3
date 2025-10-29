@@ -220,7 +220,7 @@ Bảng dưới đây cung cấp cái nhìn tổng quan về các test case chín
     *   Ứng dụng Frontend và Backend đang chạy.
 -   **Các bước thực hiện**:
     1.  Đăng nhập vào hệ thống.
-    2.  Truy cập trang quản lý dòng họ (ví dụ: `/families`).
+    2.  Truy cập trang quản lý dòng họ (ví dụ: `/family`).
     3.  Nhấn nút "Tạo dòng họ mới" (hoặc biểu tượng `+`).
     4.  Điền tên dòng họ (ví dụ: "Dòng họ Trần") và các thông tin khác hợp lệ vào biểu mẫu (ví dụ: mô tả, địa chỉ, chế độ hiển thị).
     5.  Nhấn nút "Lưu" hoặc "Tạo".

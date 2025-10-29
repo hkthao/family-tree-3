@@ -1,0 +1,8 @@
+feat(member): Add unit tests for Member event handlers
+
+- Added comprehensive unit tests for `MemberBiographyUpdatedEventHandler` to verify logging, activity recording, notification publishing, and global search service updates.
+- Added comprehensive unit tests for `MemberCreatedEventHandler` to verify logging, activity recording, notification publishing, global search service updates, and family stats updates.
+- Added comprehensive unit tests for `MemberDeletedEventHandler` to verify logging, activity recording, notification publishing, and global search service deletions.
+- Added comprehensive unit tests for `MemberUpdatedEventHandler` to verify logging, activity recording, notification publishing, and global search service updates.
+
+All new event handler tests are passing.

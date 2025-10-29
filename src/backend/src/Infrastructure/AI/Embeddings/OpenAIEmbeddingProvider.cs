@@ -15,6 +15,7 @@ public class OpenAIEmbeddingProvider(IConfigProvider configProvider, HttpClient 
 
     public string ProviderName => "OpenAI";
     public int MaxTextLength => _configProvider.GetSection<EmbeddingSettings>().OpenAI.MaxTextLength;
+    public int EmbeddingDimension => 1536; // OpenAI's text-embedding-ada-002 dimension
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {

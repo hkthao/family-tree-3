@@ -1,5 +1,6 @@
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Specifications;
@@ -26,7 +27,7 @@ public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper ma
             .FirstOrDefaultAsync(cancellationToken);
 
         return memberDto == null
-            ? Result<MemberDetailDto>.Failure($"Member with ID {request.Id} not found.")
+            ? Result<MemberDetailDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound)
             : Result<MemberDetailDto>.Success(memberDto);
     }
 }

@@ -1,6 +1,7 @@
 using AutoFixture;
-using backend.Application.UnitTests.Common;
+using backend.Application.Common.Constants;
 using backend.Application.UserPreferences.Queries.GetUserPreferences;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -8,6 +9,9 @@ using Xunit;
 
 namespace backend.Application.UnitTests.UserPreferences.Queries.GetUserPreferences;
 
+/// <summary>
+/// Bộ test cho GetUserPreferencesQueryHandler.
+/// </summary>
 public class GetUserPreferencesQueryHandlerTests : TestBase
 {
     private readonly GetUserPreferencesQueryHandler _handler;
@@ -17,43 +21,27 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         _handler = new GetUserPreferencesQueryHandler(_context, _mockUser.Object, _mapper);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Kiểm tra xem handler có trả về các tùy chọn mặc định khi người dùng không có UserPreference nào được lưu trữ hay không.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile hợp lệ nhưng không có UserPreference liên kết. Thiết lập _mockUser.Id để trả về ID của UserProfile này. Thêm UserProfile vào _context.
+    ///    - Act: Gọi Handle của GetUserPreferencesQueryHandler.
+    ///    - Assert: Kết quả phải là Success. Data của kết quả phải chứa các giá trị mặc định (Theme.Light, Language.English, EmailNotificationsEnabled = true, v.v.).
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler được thiết kế để cung cấp một tập hợp các tùy chọn mặc định nếu không tìm thấy tùy chọn người dùng cụ thể, đảm bảo ứng dụng luôn có cấu hình cơ bản để hoạt động.
+    /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnUserPreferences_WhenUserPreferencesExist()
+    public async Task Handle_ShouldReturnDefaultPreferences_WhenUserHasNoExistingPreference()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về các tùy chọn người dùng hiện có
-        // khi chúng tồn tại trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile và một UserPreference với các giá trị cụ thể.
-        // 2. Thiết lập _mockUser để trả về UserProfileId của người dùng.
-        // 3. Tạo một GetUserPreferencesQuery.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem UserPreferenceDto trả về có chứa các giá trị chính xác.
-
         // Arrange
-        var userId = Guid.NewGuid().ToString();
+        var userId = Guid.NewGuid();
         var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
-                                  .Create();
-        var existingUserPreference = _fixture.Build<UserPreference>()
-                                             .With(up => up.UserProfileId, userProfile.Id)
-                                             .With(up => up.Theme, Theme.Dark)
-                                             .With(up => up.Language, Language.English)
-                                             .With(up => up.EmailNotificationsEnabled, true)
-                                             .With(up => up.SmsNotificationsEnabled, false)
-                                             .With(up => up.InAppNotificationsEnabled, true)
-                                             .Create();
-        userProfile.UserPreference = existingUserPreference;
-        _context.UserProfiles.Add(userProfile);
-        _context.UserPreferences.Add(existingUserPreference);
-        await _context.SaveChangesAsync(CancellationToken.None);
+            .With(up => up.Id, userId)
+            .Without(up => up.UserPreference) // Đảm bảo không có UserPreference
+            .Create();
 
         _mockUser.Setup(u => u.Id).Returns(userId);
+        _context.UserProfiles.Add(userProfile);
+        await _context.SaveChangesAsync();
 
         var query = new GetUserPreferencesQuery();
 
@@ -61,56 +49,6 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value!.Theme.Should().Be(existingUserPreference.Theme);
-        result.Value.Language.Should().Be(existingUserPreference.Language);
-        result.Value.EmailNotificationsEnabled.Should().Be(existingUserPreference.EmailNotificationsEnabled);
-        result.Value.SmsNotificationsEnabled.Should().Be(existingUserPreference.SmsNotificationsEnabled);
-        result.Value.InAppNotificationsEnabled.Should().Be(existingUserPreference.InAppNotificationsEnabled);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi người dùng có UserPreference đã lưu,
-        // handler sẽ truy xuất và trả về các tùy chọn đó một cách chính xác.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnDefaultPreferences_WhenUserPreferencesDoNotExist()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về các tùy chọn mặc định
-        // khi người dùng chưa có UserPreference nào được lưu trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một UserProfile nhưng không tạo UserPreference cho nó.
-        // 2. Thiết lập _mockUser để trả về UserProfileId của người dùng.
-        // 3. Tạo một GetUserPreferencesQuery.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thành công.
-        // 2. Kiểm tra xem UserPreferenceDto trả về có chứa các giá trị mặc định.
-
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
-        var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.ExternalId, userId)
-                                  .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
-                                  .Create();
-        _context.UserProfiles.Add(userProfile);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        _mockUser.Setup(u => u.Id).Returns(userId);
-
-        var query = new GetUserPreferencesQuery();
-
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.Theme.Should().Be(Theme.Light);
@@ -118,73 +56,39 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         result.Value.EmailNotificationsEnabled.Should().BeTrue();
         result.Value.SmsNotificationsEnabled.Should().BeFalse();
         result.Value.InAppNotificationsEnabled.Should().BeTrue();
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng nếu không tìm thấy tùy chọn người dùng đã lưu,
-        // hệ thống sẽ cung cấp một bộ tùy chọn mặc định để đảm bảo ứng dụng luôn có trạng thái hợp lệ.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Kiểm tra xem handler có trả về các tùy chọn người dùng hiện có khi chúng được lưu trữ hay không.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UserProfile hợp lệ. Tạo một UserPreference với các giá trị tùy chỉnh và liên kết nó với UserProfile. Thiết lập _mockUser.Id để trả về ID của UserProfile này. Thêm UserProfile và UserPreference vào _context.
+    ///    - Act: Gọi Handle của GetUserPreferencesQueryHandler.
+    ///    - Assert: Kết quả phải là Success. Data của kết quả phải khớp với các giá trị tùy chỉnh đã được lưu trữ.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler phải truy xuất và trả về chính xác các tùy chọn đã được người dùng cấu hình và lưu trữ trong cơ sở dữ liệu.
+    /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserIsNotAuthenticated()
+    public async Task Handle_ShouldReturnExistingPreferences_WhenUserHasExistingPreference()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng không được xác thực (User.Id là null hoặc rỗng).
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser để trả về null cho User.Id.
-        // 2. Tạo một GetUserPreferencesQuery.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
-        _mockUser.Setup(u => u.Id).Returns((string)null!); // User is not authenticated
+        var userId = Guid.NewGuid();
+        var userPreference = _fixture.Build<UserPreference>()
+            .With(up => up.Theme, Theme.Dark)
+            .With(up => up.Language, Language.Vietnamese)
+            .With(up => up.EmailNotificationsEnabled, false)
+            .With(up => up.SmsNotificationsEnabled, true)
+            .With(up => up.InAppNotificationsEnabled, false)
+            .Create();
 
-        var query = new GetUserPreferencesQuery();
+        var userProfile = _fixture.Build<UserProfile>()
+            .With(up => up.Id, userId)
+            .With(up => up.UserPreference, userPreference)
+            .Create();
+        userPreference.UserProfile = userProfile; // Đảm bảo liên kết hai chiều
 
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User is not authenticated.");
-        result.ErrorSource.Should().Be("Authentication");
-
-        // 💡 Giải thích:
-        // Test này kiểm tra trường hợp bảo mật cơ bản: nếu không có người dùng được xác thực,
-        // yêu cầu truy vấn tùy chọn sẽ bị từ chối với thông báo lỗi rõ ràng.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi UserProfile của người dùng được xác thực không tìm thấy trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockUser để trả về một UserProfileId hợp lệ nhưng không tồn tại trong DB.
-        // 2. Đảm bảo không có UserProfile nào trong DB khớp với ID này.
-        // 3. Tạo một GetUserPreferencesQuery.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
-        // Arrange
-        var userId = Guid.NewGuid().ToString();
         _mockUser.Setup(u => u.Id).Returns(userId);
-
-        // Ensure no UserProfile exists for this userId
-        _context.UserProfiles.RemoveRange(_context.UserProfiles);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _context.UserProfiles.Add(userProfile);
+        _context.UserPreferences.Add(userPreference);
+        await _context.SaveChangesAsync();
 
         var query = new GetUserPreferencesQuery();
 
@@ -192,14 +96,37 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value!.Theme.Should().Be(Theme.Dark);
+        result.Value.Language.Should().Be(Language.Vietnamese);
+        result.Value.EmailNotificationsEnabled.Should().BeFalse();
+        result.Value.SmsNotificationsEnabled.Should().BeTrue();
+        result.Value.InAppNotificationsEnabled.Should().BeFalse();
+    }
 
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng ngay cả khi người dùng được xác thực,
-        // nếu hồ sơ người dùng của họ không tồn tại trong hệ thống,
-        // yêu cầu sẽ thất bại để ngăn chặn việc truy vấn dữ liệu không hợp lệ.
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Kiểm tra xem handler có trả về lỗi UserProfileNotFound khi không tìm thấy UserProfile cho ID người dùng hiện tại hay không.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thiết lập _mockUser.Id để trả về một ID không tồn tại trong cơ sở dữ liệu. Đảm bảo _context không chứa UserProfile nào với ID đó.
+    ///    - Act: Gọi Handle của GetUserPreferencesQueryHandler.
+    ///    - Assert: Kết quả phải là Failure. Error của kết quả phải là ErrorMessages.UserProfileNotFound.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Đây là một trường hợp lỗi quan trọng để đảm bảo rằng hệ thống xử lý đúng đắn khi không thể xác định người dùng hiện tại, ngăn chặn các lỗi không mong muốn hoặc truy cập dữ liệu sai.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldReturnUserProfileNotFound_WhenUserProfileDoesNotExist()
+    {
+        // Arrange
+        var nonExistentUserId = Guid.NewGuid();
+        _mockUser.Setup(u => u.Id).Returns(nonExistentUserId);
+
+        var query = new GetUserPreferencesQuery();
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(ErrorMessages.UserProfileNotFound);
     }
 }

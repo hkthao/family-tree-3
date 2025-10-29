@@ -1,19 +1,19 @@
 using System.Text.Json;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Application.Members.Queries;
 using backend.Domain.Enums;
 using FluentValidation.Results;
 
 namespace backend.Application.Members.Commands.GenerateMemberData;
 
-public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateMemberDataCommand, Result<List<AIMemberDto>>>
+public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIMemberDto> aiMemberDtoValidator, IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<GenerateMemberDataCommand, Result<List<AIMemberDto>>>
 {
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
     private readonly IValidator<AIMemberDto> _aiMemberDtoValidator = aiMemberDtoValidator;
     private readonly IApplicationDbContext _context = context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<List<AIMemberDto>>> Handle(GenerateMemberDataCommand request, CancellationToken cancellationToken)
     {
@@ -34,7 +34,7 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<List<AIMemberDto>>.Failure("AI did not return a response.");
+            return Result<List<AIMemberDto>>.Failure(ErrorMessages.NoAIResponse, ErrorSources.NoContent);
         }
 
         try
@@ -65,23 +65,19 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
                     if (families.Count == 1)
                     {
                         var family = families.First();
-                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(family.Id, cancellationToken);
-                        if (authResult.IsSuccess)
-                        {
+                        var authResult = _authorizationService.CanAccessFamily(family.Id);
+                        if (authResult)
                             memberDto.FamilyId = family.Id;
-                        }
-                        else if (authResult.Error != null)
-                        {
-                            memberDto.ValidationErrors.Add(authResult.Error);
-                        }
+                        else
+                            memberDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else if (families.Count == 0)
                     {
-                        memberDto.ValidationErrors.Add($"Family '{memberDto.FamilyName}' not found or you do not have permission to manage it.");
+                        memberDto.ValidationErrors.Add(string.Format(ErrorMessages.FamilyNotFound, memberDto.FamilyName));
                     }
                     else
                     {
-                        memberDto.ValidationErrors.Add($"Multiple families found with name '{memberDto.FamilyName}'. Please specify.");
+                        memberDto.ValidationErrors.Add(ErrorMessages.MultipleFamiliesFound);
                     }
                 }
 
@@ -97,11 +93,11 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
         }
         catch (JsonException ex)
         {
-            return Result<List<AIMemberDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<AIMemberDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message), ErrorSources.Exception);
         }
         catch (Exception ex)
         {
-            return Result<List<AIMemberDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<AIMemberDto>>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
     private class AIResponseData

@@ -6,19 +6,26 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
 
+/// <summary>
+/// Bộ điều khiển xử lý các yêu cầu liên quan đến tải lên và truy xuất tệp.
+/// </summary>
+/// <param name="mediator">Đối tượng IMediator để gửi các lệnh và truy vấn.</param>
 [Authorize]
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/upload")]
 public class UploadController(IMediator mediator) : ControllerBase
 {
+    /// <summary>
+    /// Đối tượng IMediator để gửi các lệnh và truy vấn.
+    /// </summary>
     private readonly IMediator _mediator = mediator;
 
     /// <summary>
-    /// Uploads a file to the configured storage provider.
+    /// Tải lên một tệp lên nhà cung cấp lưu trữ đã cấu hình.
     /// </summary>
-    /// <param name="file">The file to upload.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A Result containing the URL of the uploaded file on success, or an error on failure.</returns>
+    /// <param name="file">Tệp cần tải lên.</param>
+    /// <param name="cancellationToken">Token hủy bỏ thao tác.</param>
+    /// <returns>Một đối tượng Result chứa URL của tệp đã tải lên nếu thành công, hoặc lỗi nếu thất bại.</returns>
     [HttpPost]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<Result<string>>> Upload([FromForm] IFormFile file, CancellationToken cancellationToken)
@@ -36,10 +43,10 @@ public class UploadController(IMediator mediator) : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves an uploaded file for preview, requiring authentication.
+    /// Truy xuất một tệp đã tải lên để xem trước, yêu cầu xác thực.
     /// </summary>
-    /// <param name="fileName">The name of the file to retrieve.</param>
-    /// <returns>The file content or a 404 Not Found.</returns>
+    /// <param name="fileName">Tên của tệp cần truy xuất.</param>
+    /// <returns>Nội dung tệp hoặc 404 Not Found nếu không tìm thấy.</returns>
     [HttpGet("preview/{fileName}")]
     public async Task<IActionResult> GetUploadedFile(string fileName)
     {

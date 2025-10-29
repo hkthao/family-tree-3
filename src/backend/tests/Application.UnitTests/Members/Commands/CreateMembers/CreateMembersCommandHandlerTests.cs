@@ -20,36 +20,36 @@ public class CreateMembersCommandHandlerTests : TestBase
     private readonly CreateMembersCommandHandler _handler;
 
     public CreateMembersCommandHandlerTests()
-
     {
-
         _mockAIMemberDtoValidator = new Mock<IValidator<AIMemberDto>>();
+        _mockMediator = new Mock<IMediator>();
 
-        _mockMediator = new Mock<IMediator>(); // Khởi tạo _mockMediator
-
-
-
-        _fixture.Customize<AIMemberDto>(c => c.With(x => x.Gender, "Male").With(x => x.ValidationErrors, [])); // Ensure valid gender and empty ValidationErrors for AIMemberDto
+        _fixture.Customize<AIMemberDto>(c => c.With(x => x.Gender, "Male").With(x => x.ValidationErrors, (List<string>?)null));
 
         _handler = new CreateMembersCommandHandler(
-
             _mockAIMemberDtoValidator.Object,
-
             _mockMediator.Object
-
         );
-
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một danh sách rỗng các ID
+    /// khi tất cả các thành viên trong command đều không hợp lệ (validation thất bại).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand chứa nhiều AIMemberDto.
+    ///               Thiết lập _mockAIMemberDtoValidator để trả về một ValidationResult chứa lỗi
+    ///               cho tất cả các AIMemberDto.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công (IsSuccess = true) nhưng danh sách Value là rỗng.
+    ///              Kiểm tra rằng thuộc tính ValidationErrors của mỗi AIMemberDto không rỗng.
+    ///              Xác minh rằng phương thức Send của _mockMediator không bao giờ được gọi (vì không có thành viên hợp lệ nào để tạo).
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng nếu không có thành viên nào
+    /// vượt qua bước validation ban đầu, hệ thống sẽ không cố gắng tạo chúng và trả về một kết quả thành công
+    /// với danh sách ID rỗng, đồng thời ghi nhận lỗi validation vào từng thành viên.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnSuccessWithEmptyList_WhenAllMembersAreInvalid()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về danh sách rỗng khi tất cả thành viên đều không hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một CreateMembersCommand với nhiều thành viên.
-        //    Mock _mockAIMemberDtoValidator để trả về lỗi validation cho tất cả thành viên.
-        // 2. Act: Gọi phương thức Handle của handler.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách ID rỗng.
         var members = _fixture.CreateMany<AIMemberDto>(3).ToList();
         var command = new CreateMembersCommand(members);
 
@@ -63,24 +63,34 @@ public class CreateMembersCommandHandlerTests : TestBase
         result.Value.Should().BeEmpty();
         members.Should().AllSatisfy(m => m.ValidationErrors.Should().NotBeEmpty());
         _mockMediator.Verify(m => m.Send(It.IsAny<CreateMemberCommand>(), It.IsAny<CancellationToken>()), Times.Never);
-        // 💡 Giải thích: Nếu các thành viên không vượt qua validation ban đầu, chúng sẽ không được gửi đi để tạo.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về tất cả các ID của thành viên
+    /// khi tất cả các thành viên trong command đều hợp lệ và được tạo thành công.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand chứa nhiều AIMemberDto.
+    ///               Thiết lập _mockAIMemberDtoValidator để trả về một ValidationResult thành công
+    ///               cho tất cả các AIMemberDto.
+    ///               Thiết lập _mockMediator để trả về một Result.Success với một Guid mới
+    ///               mỗi khi CreateMemberCommand được gửi đi.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công (IsSuccess = true) và danh sách Value
+    ///              chứa tất cả các ID đã được tạo. Kiểm tra rằng thuộc tính ValidationErrors của
+    ///              mỗi AIMemberDto là rỗng hoặc null. Xác minh rằng phương thức Send của _mockMediator
+    ///              được gọi đúng số lần bằng số lượng thành viên.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng nếu tất cả các thành viên
+    /// đều hợp lệ, chúng sẽ được xử lý để tạo và tất cả các ID của thành viên được tạo thành công
+    /// sẽ được trả về trong kết quả.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnSuccessWithAllIds_WhenAllMembersAreValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về tất cả ID khi tất cả thành viên đều hợp lệ và được tạo thành công.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một CreateMembersCommand với nhiều thành viên.
-        //    Mock _mockAIMemberDtoValidator để trả về thành công cho tất cả thành viên.
-        //    Mock _mockMediator để trả về thành công với ID hợp lệ cho mỗi CreateMemberCommand.
-        // 2. Act: Gọi phương thức Handle của handler.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách ID chứa tất cả ID đã tạo.
         var members = _fixture.CreateMany<AIMemberDto>(3).ToList();
         var command = new CreateMembersCommand(members);
 
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIMemberDto>(), It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(new ValidationResult()); // Validation thành công
+                                 .ReturnsAsync(new ValidationResult());
 
         var createdIds = new List<Guid>();
         _mockMediator.Setup(m => m.Send(It.IsAny<CreateMemberCommand>(), It.IsAny<CancellationToken>()))
@@ -99,21 +109,32 @@ public class CreateMembersCommandHandlerTests : TestBase
         result.Value.Should().BeEquivalentTo(createdIds);
         _mockMediator.Verify(m => m.Send(It.IsAny<CreateMemberCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(members.Count));
         members.Should().AllSatisfy(m => m.ValidationErrors.Should().BeNullOrEmpty());
-        // 💡 Giải thích: Tất cả thành viên hợp lệ sẽ được gửi đi để tạo và ID của chúng sẽ được trả về.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một danh sách ID một phần
+    /// khi một số thành viên trong command không hợp lệ (validation thất bại) và một số khác hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand chứa nhiều AIMemberDto.
+    ///               Thiết lập _mockAIMemberDtoValidator để trả về lỗi cho một số AIMemberDto
+    ///               và thành công cho những AIMemberDto còn lại.
+    ///               Thiết lập _mockMediator để trả về một Result.Success với một Guid mới
+    ///               chỉ cho các CreateMemberCommand hợp lệ.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công (IsSuccess = true) và danh sách Value
+    ///              chứa các ID của chỉ những thành viên hợp lệ được tạo. Kiểm tra rằng thuộc tính
+    ///              ValidationErrors của các AIMemberDto không hợp lệ là không rỗng và của các AIMemberDto
+    ///              hợp lệ là rỗng hoặc null. Xác minh rằng phương thức Send của _mockMediator
+    ///              được gọi đúng số lần bằng số lượng thành viên hợp lệ.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống chỉ cố gắng tạo
+    /// các thành viên đã vượt qua validation. Các thành viên không hợp lệ sẽ được bỏ qua và lỗi của chúng
+    /// sẽ được ghi nhận, trong khi các thành viên hợp lệ sẽ được tạo và ID của chúng sẽ được trả về.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnSuccessWithPartialIds_WhenSomeMembersAreInvalid()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về một phần ID khi một số thành viên không hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một CreateMembersCommand với 3 thành viên.
-        //    Mock _mockAIMemberDtoValidator để trả về lỗi cho thành viên đầu tiên, thành công cho hai thành viên còn lại.
-        //    Mock _mockMediator để trả về thành công cho các CreateMemberCommand hợp lệ.
-        // 2. Act: Gọi phương thức Handle của handler.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách ID chỉ chứa ID của các thành viên hợp lệ.
         var members = _fixture.CreateMany<AIMemberDto>(3).ToList();
-        var command = new CreateMembersCommand(members); // Thêm dòng này
+        var command = new CreateMembersCommand(members);
         var invalidMember = members[0];
         var validMembers = members.Skip(1).ToList();
 
@@ -140,19 +161,31 @@ public class CreateMembersCommandHandlerTests : TestBase
         invalidMember.ValidationErrors.Should().NotBeEmpty();
         validMembers.Should().AllSatisfy(m => m.ValidationErrors.Should().BeNullOrEmpty());
         _mockMediator.Verify(m => m.Send(It.IsAny<CreateMemberCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(validMembers.Count));
-        // 💡 Giải thích: Chỉ các thành viên hợp lệ mới được gửi đi để tạo, và ID của chúng sẽ được trả về.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một danh sách ID một phần
+    /// khi một số thành viên hợp lệ nhưng việc tạo chúng thông qua Mediator thất bại.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand chứa nhiều AIMemberDto.
+    ///               Thiết lập _mockAIMemberDtoValidator để trả về ValidationResult thành công
+    ///               cho tất cả các AIMemberDto.
+    ///               Thiết lập _mockMediator để trả về Result.Success với một Guid mới
+    ///               cho một số CreateMemberCommand và Result.Failure cho những CreateMemberCommand khác.
+    ///    - Act: Gọi phương thức Handle của handler với command đã tạo.
+    ///    - Assert: Kiểm tra xem kết quả trả về là thành công (IsSuccess = true) và danh sách Value
+    ///              chứa các ID của chỉ những thành viên được tạo thành công. Kiểm tra rằng thuộc tính
+    ///              ValidationErrors của các AIMemberDto mà việc tạo thất bại là không rỗng và của các
+    ///              AIMemberDto được tạo thành công là rỗng hoặc null. Xác minh rằng phương thức Send
+    ///              của _mockMediator được gọi đúng số lần bằng số lượng thành viên.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống vẫn tiếp tục
+    /// xử lý các thành viên khác ngay cả khi việc tạo một số thành viên thất bại. Chỉ các ID của
+    /// những thành viên được tạo thành công mới được trả về, và lỗi của các thành viên thất bại
+    /// sẽ được ghi nhận vào thuộc tính ValidationErrors của chúng.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnSuccessWithPartialIds_WhenSomeMembersFailCreation()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về một phần ID khi một số thành viên hợp lệ nhưng việc tạo thất bại.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một CreateMembersCommand với 3 thành viên.
-        //    Mock _mockAIMemberDtoValidator để trả về thành công cho tất cả thành viên.
-        //    Mock _mockMediator để trả về thành công cho thành viên đầu tiên, thất bại cho thành viên thứ hai, và thành công cho thành viên thứ ba.
-        // 2. Act: Gọi phương thức Handle của handler.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách ID chỉ chứa ID của các thành viên được tạo thành công.
         var member1 = _fixture.Build<AIMemberDto>()
             .With(x => x.FirstName, "Member1")
             .With(x => x.Gender, "Male")
@@ -173,7 +206,7 @@ public class CreateMembersCommandHandlerTests : TestBase
         var command = new CreateMembersCommand(members);
 
         _mockAIMemberDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIMemberDto>(), It.IsAny<CancellationToken>()))
-                                 .ReturnsAsync(new ValidationResult()); // Mặc định là thành công
+                                 .ReturnsAsync(new ValidationResult());
 
         var expectedCreatedIds = new List<Guid>();
         _mockMediator.Setup(m => m.Send(It.Is<CreateMemberCommand>(cmd => cmd.FirstName == member1.FirstName), It.IsAny<CancellationToken>()))
@@ -197,12 +230,11 @@ public class CreateMembersCommandHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(2); // Chỉ 2 thành viên được tạo thành công
+        result.Value.Should().HaveCount(2);
         result.Value.Should().BeEquivalentTo(expectedCreatedIds);
         member1.ValidationErrors.Should().BeNullOrEmpty();
-        member2.ValidationErrors.Should().NotBeEmpty(); // Thành viên thứ 2 có lỗi tạo
+        member2.ValidationErrors.Should().NotBeEmpty();
         member3.ValidationErrors.Should().BeNullOrEmpty();
         _mockMediator.Verify(m => m.Send(It.IsAny<CreateMemberCommand>(), It.IsAny<CancellationToken>()), Times.Exactly(members.Count));
-        // 💡 Giải thích: Chỉ các thành viên được tạo thành công mới có ID trong danh sách trả về. Các thành viên thất bại sẽ có lỗi được ghi lại.
     }
 }

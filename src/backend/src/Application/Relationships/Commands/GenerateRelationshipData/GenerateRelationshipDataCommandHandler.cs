@@ -1,20 +1,20 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Domain.Enums;
 using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Relationships.Commands.GenerateRelationshipData;
 
-public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, FamilyAuthorizationService familyAuthorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger) : IRequestHandler<GenerateRelationshipDataCommand, Result<List<AIRelationshipDto>>>
+public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatProviderFactory, IValidator<AIRelationshipDto> aiRelationshipDtoValidator, IApplicationDbContext context, IAuthorizationService authorizationService, ILogger<GenerateRelationshipDataCommandHandler> logger) : IRequestHandler<GenerateRelationshipDataCommand, Result<List<AIRelationshipDto>>>
 {
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
     private readonly IValidator<AIRelationshipDto> _aiRelationshipDtoValidator = aiRelationshipDtoValidator;
     private readonly IApplicationDbContext _context = context;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly ILogger<GenerateRelationshipDataCommandHandler> _logger = logger;
 
     public async Task<Result<List<AIRelationshipDto>>> Handle(GenerateRelationshipDataCommand request, CancellationToken cancellationToken)
@@ -38,7 +38,7 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
         if (string.IsNullOrWhiteSpace(jsonString))
         {
             _logger.LogWarning("AI did not return a response for prompt: {Prompt}", request.Prompt); // Log warning
-            return Result<List<AIRelationshipDto>>.Failure("AI did not return a response.");
+            return Result<List<AIRelationshipDto>>.Failure(ErrorMessages.NoAIResponse);
         }
 
         try
@@ -71,19 +71,15 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
 
                     if (sourceMember != null)
                     {
-                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(sourceMember.FamilyId, cancellationToken);
-                        if (authResult.IsSuccess)
-                        {
+                        var authResult = _authorizationService.CanAccessFamily(sourceMember.FamilyId);
+                        if (authResult)
                             relationshipDto.SourceMemberId = sourceMember.Id;
-                        }
                         else
-                        {
-                            relationshipDto.ValidationErrors.Add(authResult.Error ?? $"No permission to access family of {relationshipDto.SourceMemberName}.");
-                        }
+                            relationshipDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else
                     {
-                        relationshipDto.ValidationErrors.Add($"Source member '{relationshipDto.SourceMemberName}' not found.");
+                        relationshipDto.ValidationErrors.Add(string.Format(ErrorMessages.NotFound, $"Source member '{relationshipDto.SourceMemberName}'"));
                     }
                 }
 
@@ -101,19 +97,15 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
 
                     if (targetMember != null)
                     {
-                        var authResult = await _familyAuthorizationService.AuthorizeFamilyAccess(targetMember.FamilyId, cancellationToken);
-                        if (authResult.IsSuccess)
-                        {
+                        var authResult = _authorizationService.CanAccessFamily(targetMember.FamilyId);
+                        if (authResult)
                             relationshipDto.TargetMemberId = targetMember.Id;
-                        }
                         else
-                        {
-                            relationshipDto.ValidationErrors.Add(authResult.Error ?? $"No permission to access family of {relationshipDto.TargetMemberName}.");
-                        }
+                            relationshipDto.ValidationErrors.Add(ErrorMessages.AccessDenied);
                     }
                     else
                     {
-                        relationshipDto.ValidationErrors.Add($"Target member '{relationshipDto.TargetMemberName}' not found.");
+                        relationshipDto.ValidationErrors.Add(string.Format(ErrorMessages.NotFound, $"Target member '{relationshipDto.TargetMemberName}'"));
                     }
                 }
 
@@ -129,11 +121,11 @@ public class GenerateRelationshipDataCommandHandler(IChatProviderFactory chatPro
         catch (JsonException ex)
         {
             _logger.LogError(ex, "AI generated invalid JSON. Details: {Message}", ex.Message);
-            return Result<List<AIRelationshipDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<AIRelationshipDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message));
         }
         catch (Exception ex)
         {
-            return Result<List<AIRelationshipDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<AIRelationshipDto>>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
 

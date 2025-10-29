@@ -3,6 +3,7 @@ export interface MenuItem {
   icon: string;
   to?: string;
   roles?: string[];
+  exact?: boolean;
   badge?: {
     text: string;
     color: string;
@@ -41,7 +42,7 @@ const menu: MenuSection[] = [
       {
         titleKey: 'family.manageMembers',
         icon: 'mdi-account-multiple',
-        to: '/members',
+        to: '/member',
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
       {
@@ -49,17 +50,18 @@ const menu: MenuSection[] = [
         icon: 'mdi-home-group',
         to: '/family',
         roles: ['Admin', 'FamilyManager'],
+        exact: true,
       },
       {
         titleKey: 'event.list.title',
         icon: 'mdi-calendar-month',
-        to: '/events',
+        to: '/event',
         roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
       {
         titleKey: 'relationship.list.title',
         icon: 'mdi-relation-many-to-many',
-        to: '/relationships',
+        to: '/relationship',
         roles: ['Admin', 'FamilyManager', 'Editor'],
       },
     ],
@@ -82,17 +84,6 @@ const menu: MenuSection[] = [
     ],
   },
 
-  {
-    titleKey: 'menu.system',
-    items: [
-      {
-        titleKey: 'settings.system',
-        icon: 'mdi-cog',
-        to: '/admin/config',
-        roles: ['Admin'],
-      },
-    ],
-  },
 ];
 
 export default menu;

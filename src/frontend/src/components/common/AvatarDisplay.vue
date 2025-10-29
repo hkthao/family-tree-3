@@ -8,7 +8,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import axios from 'axios';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/stores';
 
 const props = defineProps({
   src: { type: String, default: null },

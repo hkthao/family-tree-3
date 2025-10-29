@@ -4,19 +4,11 @@
     <v-text-field density="comfortable" variant="solo" prepend-inner-icon="mdi-magnify" :label="t('topbar.search')"
       single-line hide-details class="mx-4" @keydown.meta.k.prevent="focusSearch" ref="searchField" rounded flat>
     </v-text-field>
-
     <v-spacer></v-spacer>
-
     <v-btn icon @click="toggleTheme">
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
-
-    <v-btn icon>
-      <v-badge content="4" color="error">
-        <v-icon>mdi-bell-outline</v-icon>
-      </v-badge>
-    </v-btn>
-
+    <NotificationBell />
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
     </div>
@@ -31,9 +23,10 @@ import { useRouter } from 'vue-router';
 import type { VTextField } from 'vuetify/components';
 import type { User } from '@/types';
 import { useI18n } from 'vue-i18n';
-import { useUserSettingsStore } from '@/stores/userSettings.store';
+import { useUserSettingsStore } from '@/stores';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
+import NotificationBell from '@/components/common/NotificationBell.vue';
 
 const { t } = useI18n();
 const theme = useTheme();

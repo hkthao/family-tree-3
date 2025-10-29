@@ -55,8 +55,7 @@
 import { userMenuItems } from '@/data/userMenuItems';
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth.store';
-import { useUserProfileStore } from '@/stores/userProfile.store';
+import { useAuthStore, useUserProfileStore } from '@/stores';
 import { AvatarDisplay } from '@/components/common';
 
 const menuItems = userMenuItems;

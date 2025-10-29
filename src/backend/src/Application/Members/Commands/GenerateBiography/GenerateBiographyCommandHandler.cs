@@ -1,8 +1,7 @@
 using System.Text;
-
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Services;
 using backend.Domain.Enums;
 using backend.Domain.Extensions;
 
@@ -10,42 +9,26 @@ namespace backend.Application.Members.Commands.GenerateBiography;
 
 public class GenerateBiographyCommandHandler(
     IApplicationDbContext context,
-    IUser user,
     IAuthorizationService authorizationService,
-    IChatProviderFactory chatProviderFactory,
-    FamilyAuthorizationService familyAuthorizationService) : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
+    IChatProviderFactory chatProviderFactory) : IRequestHandler<GenerateBiographyCommand, Result<BiographyResultDto>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IChatProviderFactory _chatProviderFactory = chatProviderFactory;
-    private readonly FamilyAuthorizationService _familyAuthorizationService = familyAuthorizationService;
 
     public async Task<Result<BiographyResultDto>> Handle(GenerateBiographyCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
-        {
-            return Result<BiographyResultDto>.Failure("User is not authenticated.", "Authentication");
-        }
-
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<BiographyResultDto>.Failure("User profile not found.", "NotFound");
-        }
-
-        var member = await _context.Members.FindAsync(new object[] { request.MemberId }, cancellationToken);
+        var member = await _context.Members.FindAsync([request.MemberId], cancellationToken);
         if (member == null)
         {
-            return Result<BiographyResultDto>.Failure($"Member with ID {request.MemberId} not found.", "NotFound");
+            return Result<BiographyResultDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.MemberId}"), ErrorSources.NotFound);
         }
 
         // Authorization check: User must be a manager of the family the member belongs to, or an admin.
-        var authorizationResult = await _familyAuthorizationService.AuthorizeFamilyAccess(member.FamilyId, cancellationToken);
-        if (!authorizationResult.IsSuccess)
+        var authorizationResult = _authorizationService.CanAccessFamily(member.FamilyId);
+        if (!authorizationResult)
         {
-            return Result<BiographyResultDto>.Failure(authorizationResult.Error ?? "Unknown authorization error.", authorizationResult.ErrorSource ?? "Authorization");
+            return Result<BiographyResultDto>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
         // --- AI Biography Generation Logic ---
@@ -155,7 +138,7 @@ public class GenerateBiographyCommandHandler(
 
         if (string.IsNullOrWhiteSpace(biographyText))
         {
-            return Result<BiographyResultDto>.Failure("AI did not return a biography.", "NoContent");
+            return Result<BiographyResultDto>.Failure(ErrorMessages.NoAIResponse, ErrorSources.NoContent);
         }
 
         // Ensure biography is within 1500 words (approximate)

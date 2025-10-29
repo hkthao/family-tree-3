@@ -4,12 +4,30 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Behaviours;
 
+/// <summary>
+/// Hành vi pipeline để theo dõi hiệu suất của các yêu cầu.
+/// </summary>
+/// <typeparam name="TRequest">Kiểu của yêu cầu.</typeparam>
+/// <typeparam name="TResponse">Kiểu của phản hồi.</typeparam>
 public class PerformanceBehaviour<TRequest, TResponse>(ILogger<TRequest> logger, IUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
+    /// <summary>
+    /// Đối tượng ghi log.
+    /// </summary>
     private readonly ILogger<TRequest> _logger = logger;
+    /// <summary>
+    /// Thông tin người dùng hiện tại.
+    /// </summary>
     private readonly IUser _user = user;
 
+    /// <summary>
+    /// Xử lý yêu cầu và ghi log nếu thời gian xử lý vượt quá ngưỡng.
+    /// </summary>
+    /// <param name="request">Yêu cầu hiện tại.</param>
+    /// <param name="next">Delegate để chuyển yêu cầu đến handler tiếp theo trong pipeline.</param>
+    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
+    /// <returns>Phản hồi từ handler tiếp theo.</returns>
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var timer = Stopwatch.StartNew();

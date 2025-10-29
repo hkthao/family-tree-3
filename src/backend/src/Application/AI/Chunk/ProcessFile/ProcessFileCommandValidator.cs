@@ -1,7 +1,13 @@
 namespace backend.Application.AI.Chunk.ProcessFile;
 
+/// <summary>
+/// Trình xác thực cho ProcessFileCommand.
+/// </summary>
 public class ProcessFileCommandValidator : AbstractValidator<ProcessFileCommand>
 {
+    /// <summary>
+    /// Khởi tạo một phiên bản mới của lớp ProcessFileCommandValidator và định nghĩa các quy tắc xác thực.
+    /// </summary>
     public ProcessFileCommandValidator()
     {
         RuleFor(v => v.FileStream)

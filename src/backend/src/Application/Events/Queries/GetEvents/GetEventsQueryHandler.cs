@@ -15,6 +15,10 @@ public class GetEventsQueryHandler(IApplicationDbContext context, IMapper mapper
         var query = _context.Events.AsQueryable();
 
         // Apply individual specifications
+        if (request.RelatedMemberId.HasValue)
+        {
+            query = query.Include(e => e.EventMembers);
+        }
         query = query.WithSpecification(new EventSearchTermSpecification(request.SearchTerm));
         query = query.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
         query = query.WithSpecification(new EventTypeSpecification(request.EventType?.ToString())); // Convert EventType enum to string

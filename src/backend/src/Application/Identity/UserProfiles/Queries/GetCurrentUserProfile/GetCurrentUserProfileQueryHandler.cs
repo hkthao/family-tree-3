@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 
@@ -11,20 +12,13 @@ public class GetCurrentUserProfileQueryHandler(IApplicationDbContext context, IU
 
     public async Task<Result<UserProfileDto>> Handle(GetCurrentUserProfileQuery request, CancellationToken cancellationToken)
     {
-        var userId = _user.Id;
-
-        if (userId == null)
-        {
-            return Result<UserProfileDto>.Failure("User not authenticated.", "Unauthorized");
-        }
-
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.ExternalId == userId, cancellationToken);
+            .FirstOrDefaultAsync(up => up.Id == _user.Id!.Value, cancellationToken);
 
         if (userProfile == null)
         {
-            return Result<UserProfileDto>.Failure("User profile not found.", "NotFound");
+            return Result<UserProfileDto>.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
         var userProfileDto = _mapper.Map<UserProfileDto>(userProfile);

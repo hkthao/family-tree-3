@@ -1,32 +1,24 @@
 <template>
-  <v-container fluid>
-    <v-card>
-      <v-card-title>
-        <div class="d-flex flex-row">
-          <h1 class="text-h5 flex-grow-1">
-            {{ t('family.tree.title') }}
-          </h1>
-          <FamilyAutocomplete
-            v-model="selectedFamilyId"
-            class="tree-filter-input"
-            :label="t('family.tree.filterByFamily')"
-            clearable
-            @update:modelValue="onFamilyChange"
-            hideDetails
-          />
-        </div>
-      </v-card-title>
+  <v-card>
+    <v-card-title>
+      <div class="d-flex flex-row">
+        <h1 class="text-h5 flex-grow-1">
+          {{ t('family.tree.title') }}
+        </h1>
+        <FamilyAutocomplete v-model="selectedFamilyId" class="tree-filter-input"
+          :label="t('family.tree.filterByFamily')" clearable @update:modelValue="onFamilyChange" hideDetails />
+      </div>
+    </v-card-title>
 
-      <v-card-text>
-        <div v-if="!selectedFamilyId" class="text-center pa-8">
-          <p>{{ t('event.messages.selectFamily') }}</p>
-        </div>
-        <template v-else>
-          <TreeChart :family-id="selectedFamilyId" />
-        </template>
-      </v-card-text>
-    </v-card>
-  </v-container>
+    <v-card-text>
+      <div v-if="!selectedFamilyId" class="text-center pa-8">
+        <p>{{ t('event.messages.selectFamily') }}</p>
+      </div>
+      <template v-else>
+        <TreeChart :family-id="selectedFamilyId" />
+      </template>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup lang="ts">

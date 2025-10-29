@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
@@ -5,7 +6,6 @@ using backend.Application.Common.Models.AppSetting;
 using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Enums;
 using backend.Infrastructure;
-
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Files;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,11 +13,25 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using backend.Domain.Events;
+using MediatR;
+using Microsoft.AspNetCore.Authentication;
 
 namespace backend.CompositionRoot;
 
+/// <summary>
+/// Lớp mở rộng để đăng ký các dịch vụ gốc (Composition Root) vào bộ chứa dependency injection.
+/// </summary>
 public static class DependencyInjection
 {
+
+    /// <summary>
+    /// Đăng ký tất cả các dịch vụ cần thiết cho ứng dụng, bao gồm các dịch vụ từ tầng Application và Infrastructure,
+    /// cấu hình lưu trữ tệp và xác thực Auth0.
+    /// </summary>
+    /// <param name="services">Bộ sưu tập dịch vụ để đăng ký.</param>
+    /// <param name="configuration">Cấu hình ứng dụng.</param>
+    /// <returns>Bộ sưu tập dịch vụ đã được cập nhật.</returns>
     public static IServiceCollection AddCompositionRootServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddApplicationServices(configuration);
@@ -59,34 +73,23 @@ public static class DependencyInjection
                 };
                 options.Events = new JwtBearerEvents
                 {
-                    OnTokenValidated = context =>
+                    OnTokenValidated = async (context) =>
                     {
-                        var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-
-                        _ = Task.Run(async () =>
+                        var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        using var scope = context.HttpContext.RequestServices.CreateScope();
+                        var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                        var claimsTransformation = scope.ServiceProvider.GetRequiredService<IClaimsTransformation>();
+                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+                        try
                         {
-                            using var scope = context.HttpContext.RequestServices.CreateScope();
-                            var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                            var mediator = scope.ServiceProvider.GetRequiredService<MediatR.IMediator>();
-
-                            try
-                            {
-                                var command = new SyncUserProfileCommand
-                                {
-                                    UserPrincipal = context.Principal!
-                                };
-                                var result = await mediator.Send(command);
-                                if (!result.IsSuccess)
-                                {
-                                    scopedLogger.LogError("Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, result.Error);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                scopedLogger.LogError(ex, "Error syncing user profile for external ID: {ExternalId}. Details: {Error}", context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value, ex.Message);
-                            }
-                        });
-                        return Task.CompletedTask;
+                            var principal = await claimsTransformation.TransformAsync(context.Principal!);
+                            var userLoggedInEvent = new UserLoggedInEvent(principal); // Create the event
+                            await mediator.Publish(userLoggedInEvent); // Publish the event
+                        }
+                        catch (Exception ex)
+                        {
+                            scopedLogger.LogError(ex, "Error publishing UserLoggedInEvent for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
+                        }
                     },
 
                 };

@@ -1,70 +1,47 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
-using backend.Domain.Enums;
+using backend.Domain.Events.Members;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<DeleteMemberCommand, Result>
+public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteMemberCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-            if (currentUserProfile == null)
-            {
-                return Result.Failure("User profile not found.", "NotFound");
-            }
-
-            // Authorization check
-            // First, get the member to find its familyId
             var memberToDelete = await _context.Members.FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
             if (memberToDelete == null)
             {
-                return Result.Failure($"Member with ID {request.Id} not found.", "NotFound");
+                return Result.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
             }
 
-            if (!_authorizationService.IsAdmin() && !_authorizationService.CanManageFamily(memberToDelete.FamilyId, currentUserProfile))
+            if (!_authorizationService.CanManageFamily(memberToDelete.FamilyId))
             {
-                return Result.Failure("Access denied. Only family managers can delete members.", "Forbidden");
+                return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
             var memberFullName = memberToDelete.FullName; // Capture full name for activity summary
             var familyId = memberToDelete.FamilyId; // Capture familyId before deletion
 
+            memberToDelete.AddDomainEvent(new MemberDeletedEvent(memberToDelete));
             _context.Members.Remove(memberToDelete);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Update family stats
-            await _familyTreeService.UpdateFamilyStats(familyId, cancellationToken);
-
-            // Record activity
-            await _mediator.Send(new RecordActivityCommand
-            {
-                UserProfileId = currentUserProfile.Id,
-                ActionType = UserActionType.DeleteMember,
-                TargetType = TargetType.Member,
-                TargetId = request.Id.ToString(),
-                ActivitySummary = $"Deleted member '{memberFullName}' from family '{familyId}'."
-            }, cancellationToken);
+            // Update family stats via domain event
+            memberToDelete.AddDomainEvent(new FamilyStatsUpdatedEvent(familyId));
 
             return Result.Success();
-        }
-        catch (DbUpdateException ex)
-        {
-            // Log the exception details here if a logger is available
-            return Result.Failure($"Database error occurred while deleting member: {ex.Message}", "Database");
         }
         catch (Exception ex)
         {
             // Log the exception details here if a logger is available
-            return Result.Failure($"An unexpected error occurred while deleting member: {ex.Message}", "Exception");
+            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);
         }
     }
 }

@@ -14,7 +14,8 @@ public static class DependencyInjection
         {
             cfg.RegisterServicesFromAssembly(System.Reflection.Assembly.GetExecutingAssembly());
             cfg.AddOpenBehavior(typeof(UnhandledExceptionBehaviour<,>));
-            cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
+            //cfg.AddOpenBehavior(typeof(AuthenticationBehavior<,>));
+            //cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
             cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
@@ -22,7 +23,6 @@ public static class DependencyInjection
         services.AddScoped<Common.Interfaces.IConfigProvider, Common.Services.ConfigProvider>();
 
         services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
-        services.AddScoped<Common.Services.FamilyAuthorizationService>();
 
 
         return services;

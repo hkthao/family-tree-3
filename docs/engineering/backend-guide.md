@@ -92,7 +92,7 @@ sequenceDiagram
     participant Infrastructure
     participant Database
 
-    Client->>Controller: Gửi HTTP Request (ví dụ: GET /api/families)
+    Client->>Controller: Gửi HTTP Request (ví dụ: GET /api/family)
     Controller->>MediatR: Gửi Command/Query (ví dụ: GetFamiliesQuery)
     MediatR->>Handler: Điều phối đến Handler tương ứng (ví dụ: GetFamiliesQueryHandler)
     Handler->>CompositionRoot: Yêu cầu IApplicationDbContext
@@ -380,7 +380,7 @@ Trong dự án này, chúng ta sử dụng thư viện `Ardalis.Specification` v
 
 Thay vì một `Specification` tổng hợp, chúng ta tạo các `Specification` nhỏ hơn, tập trung vào một tiêu chí lọc hoặc sắp xếp cụ thể. Các `Specification` này sau đó được áp dụng trực tiếp trong `Query Handler`.
 
-**Ví dụ về các Specification nhỏ hơn (`Application/Events/Specifications/EventSearchTermSpecification.cs`):**
+**Ví dụ về các Specification nhỏ hơn (`Application/Event/Specifications/EventSearchTermSpecification.cs`):**
 
 ```csharp
 public class EventSearchTermSpecification : Specification<Event>
@@ -395,7 +395,7 @@ public class EventSearchTermSpecification : Specification<Event>
 }
 ```
 
-**Ví dụ về Specification cho sắp xếp (`Application/Events/Specifications/EventOrderingSpecification.cs`):**
+**Ví dụ về Specification cho sắp xếp (`Application/Event/Specifications/EventOrderingSpecification.cs`):**
 
 ```csharp
 public class EventOrderingSpecification : Specification<Event>
@@ -437,7 +437,7 @@ public class EventOrderingSpecification : Specification<Event>
 }
 ```
 
-**Ví dụ về Specification cho Quan hệ (`Application/Relationships/Specifications/RelationshipBySourceMemberIdSpecification.cs`):**
+**Ví dụ về Specification cho Quan hệ (`Application/Relationship/Specifications/RelationshipBySourceMemberIdSpecification.cs`):**
 
 ```csharp
 public class RelationshipBySourceMemberIdSpecification : Specification<Relationship>
@@ -452,7 +452,7 @@ public class RelationshipBySourceMemberIdSpecification : Specification<Relations
 }
 ```
 
-**Ví dụ sử dụng các Specification trong Query Handler (`Application/Events/Queries/SearchEvents/SearchEventsQueryHandler.cs`):**
+**Ví dụ sử dụng các Specification trong Query Handler (`Application/Event/Queries/SearchEvents/SearchEventsQueryHandler.cs`):**
 
 ```csharp
 public class SearchEventsQueryHandler : IRequestHandler<SearchEventsQuery, Result<PaginatedList<EventDto>>>
@@ -742,7 +742,7 @@ Hoạt động được ghi lại bằng cách gửi `RecordActivityCommand` th�
 ### 11.5. API Endpoint
 
 -   **`UserActivitiesController`** (`backend/src/Web/Controllers/UserActivitiesController.cs`):
-    -   Cung cấp endpoint `GET /api/activities/recent` để truy vấn các hoạt động gần đây.
+    -   Cung cấp endpoint `GET /api/activity/recent` để truy vấn các hoạt động gần đây.
     -   Hỗ trợ các tham số `limit`, `targetType`, `targetId`, `familyId` qua query string.
     -   Yêu cầu xác thực (`[Authorize]`).
 

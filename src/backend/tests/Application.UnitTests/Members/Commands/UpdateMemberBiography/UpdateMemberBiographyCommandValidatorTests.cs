@@ -16,47 +16,57 @@ public class UpdateMemberBiographyCommandValidatorTests
         _fixture = new Fixture();
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường MemberId của UpdateMemberBiographyCommand là Guid.Empty.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberBiographyCommand với MemberId là Guid.Empty.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính MemberId với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: MemberId là trường bắt buộc
+    /// để xác định thành viên cần cập nhật tiểu sử và không được phép để trống.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenMemberIdIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi MemberId trống.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberBiographyCommand với MemberId là Guid.Empty.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính MemberId với thông báo phù hợp.
         var command = new UpdateMemberBiographyCommand { MemberId = Guid.Empty, BiographyContent = _fixture.Create<string>() };
 
         var result = _validator.TestValidate(command);
 
         result.ShouldHaveValidationErrorFor(c => c.MemberId)
             .WithErrorMessage("MemberId cannot be empty.");
-        // 💡 Giải thích: MemberId là trường bắt buộc và không được để trống.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi trường MemberId của UpdateMemberBiographyCommand hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberBiographyCommand với MemberId hợp lệ.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng không có lỗi validation cho thuộc tính MemberId.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: MemberId hợp lệ không gây ra lỗi.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveErrorWhenMemberIdIsProvided()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi MemberId được cung cấp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberBiographyCommand với MemberId hợp lệ.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng không có lỗi cho thuộc tính MemberId.
         var command = new UpdateMemberBiographyCommand { MemberId = Guid.NewGuid(), BiographyContent = _fixture.Create<string>() };
 
         var result = _validator.TestValidate(command);
 
         result.ShouldNotHaveValidationErrorFor(c => c.MemberId);
-        // 💡 Giải thích: MemberId hợp lệ không gây ra lỗi.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường BiographyContent của UpdateMemberBiographyCommand
+    /// vượt quá độ dài tối đa cho phép (1500 ký tự).
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent dài hơn 1500 ký tự.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính BiographyContent với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: BiographyContent có giới hạn độ dài tối đa
+    /// để tránh việc lưu trữ quá nhiều dữ liệu và đảm bảo hiệu suất.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenBiographyContentExceedsMaxLength()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi BiographyContent vượt quá 1500 ký tự.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent dài hơn 1500 ký tự.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính BiographyContent với thông báo phù hợp.
         var longBiographyContent = _fixture.Create<string>();
         while (longBiographyContent.Length <= 1500)
         {
@@ -70,39 +80,43 @@ public class UpdateMemberBiographyCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.BiographyContent)
             .WithErrorMessage("Biography content must not exceed 1500 characters.");
-        // 💡 Giải thích: BiographyContent không được vượt quá 1500 ký tự.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi trường BiographyContent của UpdateMemberBiographyCommand
+    /// nằm trong giới hạn độ dài cho phép.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent có độ dài hợp lệ.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng không có lỗi validation cho thuộc tính BiographyContent.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: BiographyContent hợp lệ không gây ra lỗi.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveErrorWhenBiographyContentIsWithinMaxLength()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi BiographyContent nằm trong giới hạn độ dài.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent có độ dài hợp lệ.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng không có lỗi cho thuộc tính BiographyContent.
         var validBiographyContent = _fixture.Create<string>().PadRight(100, 'a')[..100]; // Ensure at least 100 characters
         var command = new UpdateMemberBiographyCommand { MemberId = Guid.NewGuid(), BiographyContent = validBiographyContent };
 
         var result = _validator.TestValidate(command);
 
         result.ShouldNotHaveValidationErrorFor(c => c.BiographyContent);
-        // 💡 Giải thích: BiographyContent hợp lệ không gây ra lỗi.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi trường BiographyContent của UpdateMemberBiographyCommand là chuỗi rỗng.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent là chuỗi rỗng.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng không có lỗi validation cho thuộc tính BiographyContent.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: BiographyContent được phép để trống.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveErrorWhenBiographyContentIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi BiographyContent trống (vì nó không có .NotEmpty()).
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberBiographyCommand với BiographyContent là chuỗi rỗng.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng không có lỗi cho thuộc tính BiographyContent.
         var command = new UpdateMemberBiographyCommand { MemberId = Guid.NewGuid(), BiographyContent = string.Empty };
 
         var result = _validator.TestValidate(command);
 
         result.ShouldNotHaveValidationErrorFor(c => c.BiographyContent);
-        // 💡 Giải thích: BiographyContent được phép để trống.
     }
 }

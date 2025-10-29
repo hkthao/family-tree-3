@@ -1,5 +1,5 @@
 ﻿namespace backend.Domain.Common;
 
-public abstract class BaseEvent
+public abstract class BaseEvent : IDomainEvent
 {
 }

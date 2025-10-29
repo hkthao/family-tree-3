@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
@@ -13,14 +14,14 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context) : IR
         // Retrieve UserProfile from DB to get ExternalId
         if (!Guid.TryParse(request.Id, out var userId))
         {
-            return Result.Failure("Invalid user ID format.", "BadRequest");
+            return Result.Failure(ErrorMessages.InvalidUserIdFormat, ErrorSources.Validation);
         }
         var userProfile = await _context.UserProfiles
             .FirstOrDefaultAsync(up => up.Id == userId, cancellationToken);
 
         if (userProfile == null)
         {
-            return Result.Failure("User profile not found.", "NotFound");
+            return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
         // Update existing UserProfile in local DB

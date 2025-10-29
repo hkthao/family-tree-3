@@ -1,41 +1,25 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserActivities.Commands.RecordActivity;
-using backend.Domain.Enums;
+using backend.Domain.Events.Members;
+using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IMediator mediator, IFamilyTreeService familyTreeService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IMediator _mediator = mediator;
-    private readonly IFamilyTreeService _familyTreeService = familyTreeService;
-
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<Guid>.Failure("User profile not found.", "NotFound");
-        }
-
-        // Authorization check (similar to CreateMemberCommandHandler)
-        if (!_authorizationService.IsAdmin() && !_authorizationService.CanManageFamily(request.FamilyId, currentUserProfile))
-        {
-            return Result<Guid>.Failure("Access denied. Only family managers can update members.", "Forbidden");
-        }
+        if (!_authorizationService.CanManageFamily(request.FamilyId))
+            return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         var entity = await _context.Members
             .Include(m => m.Relationships)
             .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
-
         if (entity == null)
-        {
-            return Result<Guid>.Failure($"Member with ID {request.Id} not found.", "NotFound");
-        }
-
-        var oldFullName = entity.FullName; // Capture old name for activity summary
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
 
         entity.FirstName = request.FirstName;
         entity.LastName = request.LastName;
@@ -59,23 +43,14 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             if (currentRoot != null)
             {
                 currentRoot.IsRoot = false;
+                _context.Members.Update(currentRoot);
             }
         }
 
+        entity.AddDomainEvent(new MemberUpdatedEvent(entity));
+        entity.AddDomainEvent(new FamilyStatsUpdatedEvent(request.FamilyId)); // Moved before SaveChangesAsync
+
         await _context.SaveChangesAsync(cancellationToken);
-
-        // Update family stats
-        await _familyTreeService.UpdateFamilyStats(request.FamilyId, cancellationToken);
-
-        // Record activity
-        await _mediator.Send(new RecordActivityCommand
-        {
-            UserProfileId = currentUserProfile.Id,
-            ActionType = UserActionType.UpdateMember,
-            TargetType = TargetType.Member,
-            TargetId = entity.Id.ToString(),
-            ActivitySummary = $"Updated member '{oldFullName}' to '{entity.FullName}'."
-        }, cancellationToken);
 
         return Result<Guid>.Success(entity.Id);
     }

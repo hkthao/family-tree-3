@@ -19,9 +19,9 @@ public class UpdateFamilyCommandValidator : AbstractValidator<UpdateFamilyComman
             .MaximumLength(500).WithMessage("Address must not exceed 500 characters.");
 
         RuleFor(v => v.AvatarUrl)
-            .MaximumLength(2048).WithMessage("AvatarUrl must not exceed 2048 characters.")
-            .Matches(@"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").When(v => !string.IsNullOrEmpty(v.AvatarUrl))
-            .WithMessage("AvatarUrl must be a valid URL.");
+            .MaximumLength(2048).WithMessage("AvatarUrl không được vượt quá 2048 ký tự.")
+            .Matches(@"^(https?|ftp)://[^\s/$.?#].[^\s]*$").When(v => !string.IsNullOrEmpty(v.AvatarUrl))
+            .WithMessage("AvatarUrl phải là một URL hợp lệ.");
 
         RuleFor(v => v.Visibility)
             .NotNull().WithMessage("Visibility cannot be null.")

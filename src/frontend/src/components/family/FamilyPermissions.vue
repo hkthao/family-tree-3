@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserProfileStore } from '@/stores/userProfile.store';
+import { useUserProfileStore } from '@/stores';
 import { storeToRefs } from 'pinia';
 import type { FamilyUser } from '@/types';
 

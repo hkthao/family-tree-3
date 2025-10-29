@@ -63,5 +63,12 @@ namespace backend.Infrastructure.AI.VectorStore
 
             return Task.FromResult(results);
         }
+
+        public Task DeleteAsync(string entityId, string collectionName, CancellationToken cancellationToken = default)
+        {
+            // In-memory store doesn't use collectionName for deletion in this simple implementation
+            _store.TryRemove(entityId, out _);
+            return Task.CompletedTask;
+        }
     }
 }

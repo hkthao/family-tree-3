@@ -8,13 +8,13 @@
 - [4. Lọc và Tìm kiếm](#4-lọc-và-tìm-kiếm)
 - [5. Cấu trúc Phản hồi Lỗi (Error Response)](#5-cấu-trúc-phản-hồi-lỗi-error-response)
 - [6. Các Endpoint chính](#6-các-endpoint-chính)
-  - [6.1. Quản lý Dòng họ (`/api/families`)](#61-quản-lý-dòng-họ-apifamilies)
-  - [6.2. Quản lý Thành viên (`/api/members`)](#62-quản-lý-thành-viên-apimembers)
-  - [6.3. Quản lý Sự kiện (`/api/events`)](#63-quản-lý-sự-kiện-apievents)
+  - [6.1. Quản lý Dòng họ (`/api/family`)](#61-quản-lý-dòng-họ-apifamilies)
+  - [6.2. Quản lý Thành viên (`/api/member`)](#62-quản-lý-thành-viên-apimembers)
+  - [6.3. Quản lý Sự kiện (`/api/event`)](#63-quản-lý-sự-kiện-apievents)
   - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
-  - [6.5. Quản lý Quan hệ (`/api/relationships`)](#65-quản-lý-quan-hệ-apirelationships)
-  - [6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
-  - [6.7. Quản lý Hoạt động Người dùng (`/api/activities`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
+  - [6.5. Quản lý Quan hệ (`/api/relationship`)](#65-quản-lý-quan-hệ-apirelationships)
+  - [6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
+  - [6.7. Quản lý Hoạt động Người dùng (`/api/activity`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
   - [6.8. Quản lý AI (`/api/ai`)](#68-quản-lý-ai-api-ai)
   - [6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)](#69-quản-lý-tùy-chọn-người-dùng-apiuserpreferences)
   - [6.10. Quản lý Tải lên Tệp (`/api/upload`)](#610-quản-lý-tải-lên-tệp-apiupload)
@@ -53,7 +53,7 @@ Hệ thống sử dụng **JWT Bearer Token** để xác thực các yêu cầu 
 2.  **Gửi Token trong Header**: Với mỗi yêu cầu đến các endpoint được bảo vệ, client phải gửi token trong header `Authorization`.
 
 -   **Phương thức:** `GET`
--   **Đường dẫn:** `/api/families/some-family-id`
+-   **Đường dẫn:** `/api/family/some-family-id`
 -   **Header:** `Authorization: Bearer <YOUR_JWT_TOKEN>` (thay `<YOUR_JWT_TOKEN>` bằng JWT hợp lệ của bạn)
 
 ### 2.1. Cấu hình JWT và Xác thực Backend
@@ -84,7 +84,7 @@ Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nế
 
 ## 3. Phân trang (Pagination)
 
-Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/members`) đều hỗ trợ phân trang qua các query parameter sau:
+Các endpoint trả về danh sách (ví dụ: `GET /api/family`, `GET /api/member`) đều hỗ trợ phân trang qua các query parameter sau:
 
 -   `pageNumber` (int, optional, default: 1): Số trang muốn lấy.
 -   `pageSize` (int, optional, default: 10): Số lượng mục trên mỗi trang.
@@ -93,7 +93,7 @@ Các endpoint trả về danh sách (ví dụ: `GET /api/families`, `GET /api/me
 
 -   **Ví dụ:** Để lấy trang thứ 2 với 20 mục trên mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/families?pageNumber=2&pageSize=20`
+    -   **Đường dẫn:** `/api/family?pageNumber=2&pageSize=20`
 
 Phản hồi sẽ có cấu trúc `PaginatedList<T>`:
 
@@ -107,7 +107,7 @@ Phản hồi sẽ có cấu trúc `PaginatedList<T>` với các trường:
 
 Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. Các tham số lọc cụ thể sẽ phụ thuộc vào từng tài nguyên (resource).
 
-**Ví dụ với `GET /api/members`:**
+**Ví dụ với `GET /api/member`:**
 
 -   `searchQuery`: Chuỗi ký tự để tìm kiếm theo tên, nghề nghiệp, v.v. (ví dụ: `searchQuery=Văn`)
 -   `gender`: Lọc theo giới tính (ví dụ: `gender=Male`)
@@ -117,7 +117,7 @@ Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. C
 
 -   **Ví dụ:** Để tìm kiếm thành viên có tên "Văn" và giới tính "Male" trên trang 1 với 10 mục mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/members?searchQuery=Văn&gender=Male&pageNumber=1&pageSize=10`
+    -   **Đường dẫn:** `/api/member?searchQuery=Văn&gender=Male&pageNumber=1&pageSize=10`
 
 **Ví dụ với `GET /api/family/search`:**
 
@@ -186,14 +186,15 @@ Ví dụ Phản hồi Lỗi:
 
 ## 6. Các Endpoint chính
 
-### 6.1. Quản lý Dòng họ (`/api/families`)
+### 6.1. Quản lý Dòng họ (`/api/family`)
 
--   `GET /api/Family`: Lấy danh sách dòng họ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
-    *   **Phản hồi:** `Result<PaginatedList<Family>>`
+-   `GET /api/Family?ids=id1,id2,...`: Lấy thông tin nhiều dòng họ theo danh sách ID (comma-separated).
+    *   **Phản hồi:** `Result<List<Family>>`
 -   `GET /api/Family/{id}`: Lấy thông tin dòng họ theo ID.
     *   **Phản hồi:** `Result<Family>`
 -   `GET /api/Family/by-ids?ids=id1,id2`: Lấy thông tin nhiều dòng họ theo danh sách ID.
     *   **Phản hồi:** `Result<List<Family>>`
+
 -   `GET /api/Family/search?keyword=...&page=...&itemsPerPage=...`: Tìm kiếm dòng họ theo từ khóa và hỗ trợ phân trang.
     *   **Phản hồi:** `Result<PaginatedList<Family>>`
 -   `POST /api/Family`: Tạo dòng họ mới.
@@ -201,108 +202,146 @@ Ví dụ Phản hồi Lỗi:
     -   `name`: `string` - Tên dòng họ (ví dụ: `"Tên dòng họ"`)
     -   `description`: `string` - Mô tả (ví dụ: `"Mô tả"`)
     *   **Phản hồi:** `Result<Guid>` (ID của dòng họ vừa tạo)
+-   `POST /api/Family/bulk-create`: Tạo nhiều dòng họ mới cùng lúc.
+    *   **Request Body:** `CreateFamiliesCommand` (một mảng các `CreateFamilyCommand`)
+    *   **Phản hồi:** `Result<List<Guid>>` (Danh sách ID của các dòng họ vừa tạo)
+-   `POST /api/Family/generate-family-data`: Tạo dữ liệu dòng họ mẫu.
+    *   **Request Body:** `GenerateFamilyDataCommand`
+    *   **Phản hồi:** `Result<List<Family>>`
 -   `PUT /api/Family/{id}`: Cập nhật thông tin dòng họ.
     *   **Request Body:** `UpdateFamilyCommand`
     -   `id`: `string (uuid)` - ID của dòng họ (ví dụ: `"uuid"`)
     -   `name`: `string` - Tên mới (ví dụ: `"Tên mới"`)
     -   `description`: `string` - Mô tả mới (ví dụ: `"Mô tả mới"`)
-    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
--   `DELETE /api/Family/{id}`: Xóa dòng họ.
-    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
+    *   **Phản hồi:** `204 No Content` nếu thành công.
+    *   **Phản hồi:** `204 No Content` nếu thành công.
 
-### 6.2. Quản lý Thành viên (`/api/members`)
+### 6.2. Quản lý Thành viên (`/api/member`)
 
--   `GET /api/members`: Lấy danh sách thành viên (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
-    *   **Phản hồi:** `Result<PaginatedList<Member>>`
--   `GET /api/members/{id}`: Lấy thông tin thành viên theo ID.
-    *   **Phản hồi:** `Result<Member>`
--   `GET /api/members?ids=id1,id2`: Lấy thông tin nhiều thành viên theo danh sách ID.
-    *   **Phản hồi:** `Result<List<Member>>`
--   `POST /api/members`: Thêm thành viên mới.
+
+-   `GET /api/member/search?searchQuery=...&gender=...&familyId=...&pageNumber=...&pageSize=...`: Tìm kiếm thành viên theo các tiêu chí và hỗ trợ phân trang.
+    *   **Phản hồi:** `PaginatedListOfMemberListDto`
+-   `GET /api/member/{id}`: Lấy thông tin thành viên theo ID.
+    *   **Phản hồi:** `MemberDetailDto`
+-   `GET /api/member?ids=id1,id2`: Lấy thông tin nhiều thành viên theo danh sách ID.
+    *   **Phản hồi:** `List<MemberListDto>`
+-   `GET /api/member/managed`: Lấy danh sách các thành viên mà người dùng hiện tại có quyền chỉnh sửa.
+    *   **Phản hồi:** `List<MemberListDto>`
+-   `POST /api/member`: Thêm thành viên mới.
     *   **Request Body:** `CreateMemberCommand`
     -   `firstName`: `string` - Tên (ví dụ: `"Tên"`)
     -   `lastName`: `string` - Họ (ví dụ: `"Họ"`)
     -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
-    *   **Phản hồi:** `Result<Guid>` (ID của thành viên vừa tạo)
--   `PUT /api/members/{id}`: Cập nhật thông tin thành viên.
+    *   **Phản hồi:** `string (uuid)` (ID của thành viên vừa tạo)
+-   `POST /api/member/generate-member-data`: Tạo dữ liệu thành viên mẫu.
+    *   **Request Body:** `GenerateMemberDataCommand`
+    *   **Phản hồi:** `List<MemberDto>`
+-   `POST /api/member/bulk-create`: Tạo nhiều thành viên mới cùng lúc.
+    *   **Request Body:** `CreateMembersCommand` (một mảng các `CreateMemberCommand`)
+    *   **Phản hồi:** `List<string (uuid)>` (Danh sách ID của các thành viên vừa tạo)
+-   `PUT /api/member/{id}`: Cập nhật thông tin thành viên.
     *   **Request Body:** `UpdateMemberCommand`
     -   `id`: `string (uuid)` - ID của thành viên (ví dụ: `"uuid"`)
     -   `firstName`: `string` - Tên mới (ví dụ: `"Tên mới"`)
     -   `lastName`: `string` - Họ mới (ví dụ: `"Họ mới"`)
     -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
-    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
--   `DELETE /api/members/{id}`: Xóa thành viên.
-    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
+    *   **Phản hồi:** `204 No Content` nếu thành công.
+-   `DELETE /api/member/{id}`: Xóa thành viên.
+    *   **Phản hồi:** `204 No Content` nếu thành công.
+-   `PUT /api/member/{id}/biography`: Cập nhật tiểu sử của thành viên.
+    *   **Request Body:** `UpdateMemberBiographyCommand`
+    -   `memberId`: `string (uuid)` - ID của thành viên (ví dụ: `"uuid"`)
+    -   `biography`: `string` - Tiểu sử mới (ví dụ: `"Tiểu sử mới"`)
+    *   **Phản hồi:** `204 No Content` nếu cập nhật thành công.
 
-### 6.3. Quản lý Sự kiện (`/api/events`)
+### 6.3. Quản lý Sự kiện (`/api/event`)
 
--   `GET /api/events`: Lấy danh sách sự kiện (hỗ trợ [phân trang](#3-phân-trang-pagination) và [lọc](#4-lọc-và-tìm-kiếm)).
-    *   **Phản hồi:** `Result<PaginatedList<Event>>`
--   `GET /api/events/{id}`: Lấy thông tin sự kiện theo ID.
-    *   **Phản hồi:** `Result<Event>`
--   `POST /api/events`: Tạo sự kiện mới.
+-   `GET /api/event?pageNumber=...&pageSize=...&searchTerm=...&eventType=...&familyId=...&startDate=...&endDate=...&location=...&relatedMemberId=...`: Lấy danh sách sự kiện (hỗ trợ phân trang và lọc).
+    *   **Phản hồi:** `List<EventDto>`
+-   `GET /api/event/{id}`: Lấy thông tin sự kiện theo ID.
+    *   **Phản hồi:** `EventDto`
+-   `GET /api/event/search?searchQuery=...&startDate=...&endDate=...&type=...&familyId=...&memberId=...&pageNumber=...&pageSize=...`: Tìm kiếm sự kiện theo các tiêu chí và hỗ trợ phân trang.
+    *   **Phản hồi:** `PaginatedListOfEventDto`
+
+-   `POST /api/event`: Tạo sự kiện mới.
     *   **Request Body:** `CreateEventCommand`
     -   `name`: `string` - Tên sự kiện (ví dụ: `"Tên sự kiện"`)
     -   `startDate`: `string (date-time)` - Ngày bắt đầu (ví dụ: `"2023-01-01T00:00:00Z"`)
     -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
-    *   **Phản hồi:** `Result<Guid>` (ID của sự kiện vừa tạo)
--   `PUT /api/events/{id}`: Cập nhật thông tin sự kiện.
+    *   **Phản hồi:** `string (uuid)` (ID của sự kiện vừa tạo)
+-   `POST /api/event/generate-event-data`: Tạo dữ liệu sự kiện mẫu từ mô tả ngôn ngữ tự nhiên.
+    *   **Request Body:** `GenerateEventDataCommand2`
+    -   `prompt`: `string` - Mô tả sự kiện bằng ngôn ngữ tự nhiên (ví dụ: `"Tạo một sự kiện sinh nhật cho Nguyễn Văn A vào ngày 1/1/2000"`)
+    *   **Phản hồi:** `List<AIEventDto>`
+-   `POST /api/event/bulk-create`: Tạo nhiều sự kiện mới cùng lúc.
+    *   **Request Body:** `CreateEventsCommand` (một mảng các `CreateEventCommand`)
+    *   **Phản hồi:** `List<string (uuid)>` (Danh sách ID của các sự kiện vừa tạo)
+-   `PUT /api/event/{id}`: Cập nhật thông tin sự kiện.
     *   **Request Body:** `UpdateEventCommand`
     -   `id`: `string (uuid)` - ID của sự kiện (ví dụ: `"uuid"`)
     -   `name`: `string` - Tên sự kiện mới (ví dụ: `"Tên sự kiện mới"`)
     -   `startDate`: `string (date-time)` - Ngày bắt đầu (ví dụ: `"2023-01-01T00:00:00Z"`)
-    -   `familyId`: `string (uuid)` - ID dòng họ (ví dụ: `"uuid"`)
-    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
--   `DELETE /api/events/{id}`: Xóa sự kiện.
-    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
+    *   **Phản hồi:** `204 No Content` nếu thành công.
+-   `DELETE /api/event/{id}`: Xóa sự kiện.
+    *   **Phản hồi:** `204 No Content` nếu thành công.
 
--   `GET /api/events/upcoming?familyId=...`: Lấy danh sách các sự kiện sắp tới (trong 30 ngày tới).
-    *   **Phản hồi:** `Result<List<EventDto>>`
+-   `GET /api/event/upcoming?familyId=...`: Lấy danh sách các sự kiện sắp tới (trong 30 ngày tới).
+    *   **Phản hồi:** `List<EventDto>`
 
 ### 6.4. Tìm kiếm chung (`/api/search`)
 
--   `GET /api/search?keyword=...`: Tìm kiếm chung trên cả dòng họ và thành viên theo từ khóa.
-    *   **Phản hồi:** `Result<SearchResultsDto>` (chứa danh sách Family và Member tìm được)
+-   `GET /api/search?keyword=...&page=...&itemsPerPage=...&sortBy=...&sortOrder=...`: Tìm kiếm chung trên cả dòng họ và thành viên theo từ khóa, hỗ trợ phân trang và sắp xếp.
+    *   **Phản hồi:** `PaginatedListOfSearchResultDto` (chứa danh sách Family và Member tìm được)
 
-### 6.5. Quản lý Quan hệ (`/api/relationships`)
+### 6.5. Quản lý Quan hệ (`/api/relationship`)
 
--   `GET /api/relationships`: Lấy danh sách quan hệ (hỗ trợ [phân trang](#3-phân-trang-pagination)).
-    *   **Phản hồi:** `Result<PaginatedList<RelationshipListDto>>`
--   `GET /api/relationships/{id}`: Lấy thông tin quan hệ theo ID.
-    *   **Phản hồi:** `Result<RelationshipDto>`
--   `GET /api/relationships/search?sourceMemberId=...&targetMemberId=...&type=...&page=...&itemsPerPage=...`: Tìm kiếm quan hệ theo các tiêu chí và hỗ trợ phân trang.
-    *   **Phản hồi:** `Result<PaginatedList<RelationshipListDto>>`
--   `POST /api/relationships`: Tạo quan hệ mới.
+-   `GET /api/relationship?pageNumber=...&pageSize=...&familyId=...&sourceMemberId=...&targetMemberId=...&type=...`: Lấy danh sách quan hệ (hỗ trợ phân trang và lọc).
+    *   **Phản hồi:** `PaginatedListOfRelationshipListDto`
+-   `GET /api/relationship/{id}`: Lấy thông tin quan hệ theo ID.
+    *   **Phản hồi:** `RelationshipDto`
+-   `GET /api/relationship/search?sourceMemberId=...&targetMemberId=...&type=...&page=...&itemsPerPage=...`: Tìm kiếm quan hệ theo các tiêu chí và hỗ trợ phân trang.
+    *   **Phản hồi:** `PaginatedListOfRelationshipListDto`
+-   `POST /api/relationship`: Tạo quan hệ mới.
     *   **Request Body:** `CreateRelationshipCommand`
     -   `sourceMemberId`: `string (uuid)` - ID thành viên nguồn (ví dụ: `"uuid"`)
     -   `targetMemberId`: `string (uuid)` - ID thành viên đích (ví dụ: `"uuid"`)
     -   `type`: `string (Parent/Child/Spouse/Sibling)` - Loại quan hệ (ví dụ: `"Parent"`)
-    *   **Phản hồi:** `Result<Guid>` (ID của quan hệ vừa tạo)
--   `PUT /api/relationships/{id}`: Cập nhật thông tin quan hệ.
+    *   **Phản hồi:** `string (uuid)` (ID của quan hệ vừa tạo)
+-   `POST /api/relationship/generate-relationship-data`: Tạo dữ liệu quan hệ mẫu.
+    *   **Request Body:** `GenerateRelationshipDataCommand`
+    *   **Phản hồi:** `List<RelationshipDto>`
+-   `POST /api/relationship/bulk-create`: Tạo nhiều quan hệ mới cùng lúc.
+    *   **Request Body:** `CreateRelationshipsCommand` (một mảng các `CreateRelationshipCommand`)
+    *   **Phản hồi:** `List<string (uuid)>` (Danh sách ID của các quan hệ vừa tạo)
+-   `PUT /api/relationship/{id}`: Cập nhật thông tin quan hệ.
     *   **Request Body:** `UpdateRelationshipCommand`
     -   `id`: `string (uuid)` - ID của quan hệ (ví dụ: `"uuid"`)
     -   `sourceMemberId`: `string (uuid)` - ID thành viên nguồn (ví dụ: `"uuid"`)
     -   `targetMemberId`: `string (uuid)` - ID thành viên đích (ví dụ: `"uuid"`)
     -   `type`: `string (Parent/Child/Spouse/Sibling)` - Loại quan hệ (ví dụ: `"Spouse"`)
-    *   **Phản hồi:** `Result<bool>` (true nếu cập nhật thành công)
--   `DELETE /api/relationships/{id}`: Xóa quan hệ.
-    *   **Phản hồi:** `Result<bool>` (true nếu xóa thành công)
+    *   **Phản hồi:** `204 No Content` nếu thành công.
+-   `DELETE /api/relationship/{id}`: Xóa quan hệ.
+    *   **Phản hồi:** `204 No Content` nếu thành công.
 
-### 6.6. Quản lý Hồ sơ Người dùng (`/api/UserProfiles`)
+### 6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)
 
--   `GET /api/UserProfiles/me`: Lấy thông tin hồ sơ của người dùng hiện tại.
+-   `GET /api/user-profile/me`: Lấy thông tin hồ sơ của người dùng hiện tại.
     *   **Mô tả:** Endpoint này không yêu cầu ID người dùng trong URL; ID được lấy từ ngữ cảnh xác thực của server.
     *   **Phản hồi:** `Result<UserProfileDto>`
--   `GET /api/UserProfiles`: Lấy danh sách tất cả hồ sơ người dùng.
+-   `GET /api/user-profile`: Lấy danh sách tất cả hồ sơ người dùng.
     *   **Phản hồi:** `Result<List<UserProfileDto>>`
--   `GET /api/UserProfiles/{id}`: Lấy thông tin hồ sơ người dùng theo ID nội bộ (GUID).
+-   `GET /api/user-profile/{id}`: Lấy thông tin hồ sơ người dùng theo ID nội bộ (GUID).
     *   **Phản hồi:** `Result<UserProfileDto>`
--   `GET /api/UserProfiles/byExternalId/{externalId}`: Lấy thông tin hồ sơ người dùng theo External ID (ví dụ: Auth0 User ID).
+-   `GET /api/user-profile/byExternalId/{externalId}`: Lấy thông tin hồ sơ người dùng theo External ID (ví dụ: Auth0 User ID).
     *   **Phản hồi:** `Result<UserProfileDto>`
+-   `PUT /api/user-profile/{userId}`: Cập nhật hồ sơ người dùng.
+    *   **Path Parameters:** `userId` (string)
+    *   **Request Body:** `UpdateUserProfileCommand`
+    *   **Phản hồi:** `Result`
 
-### 6.7. Quản lý Hoạt động Người dùng (`/api/activities`)
+### 6.7. Quản lý Hoạt động Người dùng (`/api/activity`)
 
--   `GET /api/activities/recent?limit=...&targetType=...&targetId=...&familyId=...`: Lấy danh sách các hoạt động gần đây của người dùng.
+-   `GET /api/activity/recent?limit=...&targetType=...&targetId=...&groupId=...`: Lấy danh sách các hoạt động gần đây của người dùng.
     *   **Phản hồi:** `Result<List<UserActivityDto>>`
 
 ### 6.8. Quản lý AI (`/api/ai`)
@@ -315,11 +354,9 @@ Ví dụ Phản hồi Lỗi:
     -   `userPrompt`: `string (nullable)` - Prompt tùy chỉnh của người dùng (ví dụ: `"string (nullable)"`)
     -   `language`: `string` - Ngôn ngữ (ví dụ: `"string"`)
     *   **Phản hồi:** `Result<BiographyResultDto>`
--   `GET /api/ai/biography/last/{memberId}`: Lấy tiểu sử AI gần nhất cho thành viên.
-    *   **Phản hồi:** `Result<AIBiographyDto?>`
 
--   `GET /api/ai/biography/providers`: Liệt kê các nhà cung cấp AI hiện có và trạng thái sử dụng.
-    *   **Phản hồi:** `Result<List<AIProviderDto>>`
+
+
 
 ### 6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)
 
@@ -332,13 +369,13 @@ Ví dụ Phản hồi Lỗi:
     -   `emailNotificationsEnabled`: `boolean` - Bật thông báo email (ví dụ: `"true"`)
     -   `smsNotificationsEnabled`: `boolean` - Bật thông báo SMS (ví dụ: `"false"`)
     -   `inAppNotificationsEnabled`: `boolean` - Bật thông báo trong ứng dụng (ví dụ: `"true"`)
-    *   **Phản hồi:** `Result<UserPreferenceDto>` (trả về tùy chọn đã cập nhật)
+    *   **Phản hồi:** `Result`
 
 ### 6.10. Quản lý Tải lên Tệp (`/api/upload`)
 
 -   `POST /api/upload`: Tải lên một tệp (hình ảnh, tài liệu) lên hệ thống lưu trữ đã cấu hình.
     *   **Request Body:** `multipart/form-data` (chứa `IFormFile`)
-    *   **Phản hồi:** `Result<string>` (URL công khai của tệp đã tải lên)
+    *   **Phản hồi:** `Result<Result<string>>` (chứa URL công khai của tệp đã tải lên)
 -   `GET /api/upload/preview/{fileName}`: Lấy nội dung của một tệp đã tải lên để xem trước. Yêu cầu xác thực.
     *   **Phản hồi:** `FileContentResult` (nội dung tệp với `Content-Type` phù hợp)
 
@@ -352,6 +389,9 @@ Ví dụ Phản hồi Lỗi:
     -   `category`: `string` - Danh mục của tệp
     -   `createdBy`: `string` - Người tạo
     *   **Phản hồi:** `Result<List<TextChunk>>`
+-   `POST /api/chunk/approve`: Chấp thuận các chunk văn bản đã được xử lý để tạo embeddings.
+    *   **Request Body:** `List<TextChunk>`
+    *   **Phản hồi:** `Result`
 
 ### 6.12. Quản lý Chatbot (`/api/chat`)
 
@@ -372,34 +412,21 @@ Ví dụ Phản hồi Lỗi:
 -   `POST /api/NaturalLanguageInput/generate-event-data`: Tạo dữ liệu sự kiện từ mô tả ngôn ngữ tự nhiên.
     *   **Request Body:** `GenerateEventDataCommand`
     -   `prompt`: `string` - Mô tả sự kiện bằng ngôn ngữ tự nhiên (ví dụ: `"Tạo một sự kiện sinh nhật cho Nguyễn Văn A vào ngày 1/1/2000"`)
-    *   **Phản hồi:** `Result<List<EventDto>>`
+    *   **Phản hồi:** `string`
 
 ### 6.15. Quản lý Khuôn mặt (`/api/Faces`)
 
 -   `POST /api/Faces/detect`: Phát hiện khuôn mặt trong ảnh được tải lên.
     *   **Request Body:** `multipart/form-data` (chứa `IFormFile` và tùy chọn `returnCrop` (boolean))
-    *   **Phản hồi:** `List<FaceDetectionResultDto>`
+    *   **Phản hồi:** `FaceDetectionResponseDto`
 -   `GET /api/Faces/detected/{imageId}`: Lấy các khuôn mặt đã được phát hiện cho một ID ảnh.
     *   **Path Parameters:** `imageId` (Guid)
     *   **Phản hồi:** `List<DetectedFaceDto>`
 -   `POST /api/Faces/labels`: Lưu nhãn cho các khuôn mặt đã được phát hiện.
     *   **Request Body:** `SaveFaceLabelsCommand`
-    *   **Phản hồi:** `Result<Unit>`
+    *   **Phản hồi:** `Result<Unit>` (hoặc `200 OK` với `Result` thành công)
 
-### 6.16. Quản lý Cấu hình Hệ thống (`/api/SystemConfiguration`)
 
--   `GET /api/SystemConfiguration`: Lấy danh sách tất cả cấu hình hệ thống.
-    *   **Phản hồi:** `Result<List<SystemConfigurationDto>>`
--   `POST /api/SystemConfiguration`: Tạo cấu hình hệ thống mới.
-    *   **Request Body:** `CreateSystemConfigurationCommand`
-    *   **Phản hồi:** `Result<Guid>`
--   `PUT /api/SystemConfiguration/{id}`: Cập nhật cấu hình hệ thống.
-    *   **Path Parameters:** `id` (Guid)
-    *   **Request Body:** `UpdateSystemConfigurationCommand`
-    *   **Phản hồi:** `Result`
--   `DELETE /api/SystemConfiguration/{id}`: Xóa cấu hình hệ thống.
-    *   **Path Parameters:** `id` (Guid)
-    *   **Phản hồi:** `Result`
 
 ## 7. Mô hình Dữ liệu (Response Models)
 
@@ -436,11 +463,7 @@ Ví dụ Phản hồi Lỗi:
 -   `avatarUrl`: `string (nullable)`
 -   `biography`: `string (nullable)`
 -   `familyId`: `string (uuid)`
--   `isRoot`: `boolean`
--   `created`: `string (date-time)`
--   `createdBy`: `string (nullable)`
--   `lastModified`: `string (date-time, nullable)`
--   `lastModifiedBy`: `string (nullable)`
+
 
 
 
@@ -457,10 +480,6 @@ Ví dụ Phản hồi Lỗi:
 -   `type`: `string (enum: Birth, Marriage, Death, Migration, Other)`
 -   `color`: `string (nullable)`
 -   `relatedMembers`: `array of string (uuid)`
--   `created`: `string (date-time)`
--   `createdBy`: `string (nullable)`
--   `lastModified`: `string (date-time, nullable)`
--   `lastModifiedBy`: `string (nullable)`
 
 
 ### 7.4. Relationship

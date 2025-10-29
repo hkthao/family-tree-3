@@ -1,5 +1,4 @@
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using backend.Application.Identity.UserProfiles.Queries.GetAllUserProfiles;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -14,7 +13,7 @@ public class GetAllUserProfilesQueryHandlerTests : TestBase
 
     public GetAllUserProfilesQueryHandlerTests()
     {
-        _fixture.Customize(new AutoMoqCustomization());
+
 
         _handler = new GetAllUserProfilesQueryHandler(
             _context,

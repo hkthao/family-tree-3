@@ -158,7 +158,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St Mary's Hospital, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == georgeId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == georgeId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -169,7 +169,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Westminster Abbey, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Marriage,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == williamId), members.First(m => m.Id == catherineId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == williamId).Id }, new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == catherineId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -180,7 +180,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Balmoral Castle, Scotland",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Death,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == elizabethIIId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == elizabethIIId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -191,7 +191,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St Mary's Hospital, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == charlotteId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == charlotteId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -202,7 +202,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St Mary's Hospital, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == louisId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == louisId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -213,7 +213,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St George's Chapel, Windsor Castle",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Marriage,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == harryId), members.First(m => m.Id == meghanId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == harryId).Id }, new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == meghanId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -224,7 +224,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "The Portland Hospital, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == archieId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == archieId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -235,7 +235,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Santa Barbara Cottage Hospital, California",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == lilibetMountbattenWindsorId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == lilibetMountbattenWindsorId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -257,7 +257,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Westminster Abbey, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Other,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == charlesIIIId), members.First(m => m.Id == queenConsortId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == charlesIIIId).Id }, new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == queenConsortId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -278,7 +278,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St George's Chapel, Windsor Castle",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Death,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == philipId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == philipId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -289,7 +289,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Westminster Abbey, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Death,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == dianaId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == dianaId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -300,7 +300,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Westminster Abbey, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Marriage,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == andrewId), members.First(m => m.Id == sarahId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == andrewId).Id }, new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == sarahId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -311,7 +311,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St George's Chapel, Windsor Castle",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Marriage,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == eugenieId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == eugenieId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -322,7 +322,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Royal Chapel of All Saints, Royal Lodge, Windsor",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Marriage,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == beatriceId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == beatriceId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -333,7 +333,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St Mary's Hospital, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == williamId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == williamId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -344,7 +344,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "St Mary's Hospital, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == harryId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == harryId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -355,7 +355,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Buckingham Palace, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Birth,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == charlesIIIId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == charlesIIIId).Id } }
                 },
                 new() {
                     Id = Guid.NewGuid(),
@@ -366,7 +366,7 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                     Location = "Westminster Abbey, London",
                     FamilyId = royalFamilyId,
                     Type = Domain.Enums.EventType.Other,
-                    RelatedMembers = new List<Domain.Entities.Member> { members.First(m => m.Id == elizabethIIId) }
+                    EventMembers = new List<Domain.Entities.EventMember> { new Domain.Entities.EventMember { MemberId = members.First(m => m.Id == elizabethIIId).Id } }
                 }
             });
 

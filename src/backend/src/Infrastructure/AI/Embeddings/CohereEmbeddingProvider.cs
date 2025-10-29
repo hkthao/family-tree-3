@@ -10,6 +10,7 @@ public class CohereEmbeddingProvider(IConfigProvider configProvider) : IEmbeddin
 
     public string ProviderName => "Cohere";
     public int MaxTextLength => _settings.Cohere.MaxTextLength;
+    public int EmbeddingDimension => 1024; // Placeholder dimension for Cohere
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {

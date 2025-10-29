@@ -37,7 +37,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 export class ApiMemberService implements IMemberService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/members`;
+  private apiUrl = `${API_BASE_URL}/member`;
 
   async fetch(): Promise<Result<Member[], ApiError>> {
     // Renamed from fetchMembers

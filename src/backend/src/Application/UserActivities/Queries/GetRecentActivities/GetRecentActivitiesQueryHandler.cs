@@ -17,25 +17,15 @@ public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMap
 
     public async Task<Result<List<UserActivityDto>>> Handle(GetRecentActivitiesQuery request, CancellationToken cancellationToken)
     {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
-        {
-            return Result<List<UserActivityDto>>.Failure("User is not authenticated.", "Authentication");
-        }
-
-        var currentUserProfile = await _authorizationService.GetCurrentUserProfileAsync(cancellationToken);
-        if (currentUserProfile == null)
-        {
-            return Result<List<UserActivityDto>>.Failure("User profile not found.", "NotFound");
-        }
-
         var query = _context.UserActivities.AsNoTracking();
 
         // Apply specifications
-        // query = query.WithSpecification(new UserActivityByProfileIdSpec(currentUserProfile.Id));
-        query = query.WithSpecification(new UserActivityByTargetSpec(request.TargetType, request.TargetId));
-        query = query.WithSpecification(new UserActivityByGroupSpec(request.GroupId));
-        query = query.WithSpecification(new UserActivityOrderingAndPaginationSpec(request.Limit));
+        query = query.WithSpecification(new UserActivityByProfileIdSpec(_user.Id!.Value));
+
+        if (request.GroupId.HasValue)
+        {
+            query = query.WithSpecification(new UserActivityByGroupIdSpec(request.GroupId.Value));
+        }
 
         var userActivities = await query
             .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)

@@ -19,6 +19,7 @@ public abstract class TestBase : IDisposable
     protected readonly ApplicationDbContext _context;
     protected readonly IFixture _fixture;
     protected readonly Mock<IUser> _mockUser;
+    protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
     protected readonly IMapper _mapper;
     protected readonly string _databaseName;
 
@@ -41,15 +42,13 @@ public abstract class TestBase : IDisposable
 
         // Mock ICurrentUserService
         _mockUser = _fixture.Freeze<Mock<IUser>>();
+        // Mock IAuthorizationService
+        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
 
         // Cấu hình AutoMapper
         var mapperConfiguration = new MapperConfiguration(cfg =>
         {
-            cfg.AddProfile<MappingProfile>();
-            cfg.AddProfile<UserPreferenceMappingProfile>();
-            cfg.AddProfile<MemberMappingProfile>();
-            cfg.AddProfile<RelationshipMappingProfile>();
-            cfg.AddProfile<RelationshipMemberMappingProfile>();
+            cfg.AddMaps(typeof(backend.Application.Common.Mappings.MappingProfile).Assembly);
             cfg.CreateMap<UserProfile, UserProfileDto>();
             // Add other profiles if needed
         });
@@ -62,19 +61,5 @@ public abstract class TestBase : IDisposable
     public virtual void Dispose()
     {
         _context.Dispose();
-    }
-
-    /// <summary>
-    /// Tạo một instance ApplicationDbContext mới với cùng cấu hình InMemoryDatabase.
-    /// Hữu ích cho việc kiểm tra các thay đổi đã được lưu vào DB.
-    /// </summary>
-    protected ApplicationDbContext CreateNewContext()
-    {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(_databaseName) // Sử dụng cùng tên DB
-            .Options;
-        var newContext = new ApplicationDbContext(options);
-        newContext.Database.EnsureCreated();
-        return newContext;
     }
 }

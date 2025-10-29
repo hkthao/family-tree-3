@@ -52,8 +52,15 @@ public class SaveFaceLabelsCommandHandler(
                 { "bounding_box_height", faceLabel.BoundingBox.Height.ToString() },
             };
 
-            // Save embedding and metadata to vector store
-            await vectorStore.UpsertAsync([.. embedding], metadata, collectionName, dim, cancellationToken);
+            try
+            {
+                // Save embedding and metadata to vector store
+                await vectorStore.UpsertAsync([.. embedding], metadata, collectionName, dim, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to upsert face label {FaceId} to vector store.", faceLabel.Id);
+            }
         }
 
         return Result<Unit>.Success(Unit.Value);

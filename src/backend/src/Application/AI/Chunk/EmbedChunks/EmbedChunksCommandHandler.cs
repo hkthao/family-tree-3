@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
@@ -5,17 +6,35 @@ using backend.Domain.Enums;
 
 namespace backend.Application.AI.Chunk.EmbedChunks;
 
+/// <summary>
+/// Xử lý lệnh EmbedChunksCommand để tạo và lưu trữ các embedding cho các đoạn văn bản.
+/// </summary>
 public class EmbedChunksCommandHandler(IEmbeddingProviderFactory embeddingProviderFactory, IVectorStoreFactory vectorStoreFactory, IConfigProvider configProvider) : IRequestHandler<EmbedChunksCommand, Result>
 {
+    /// <summary>
+    /// Nhà máy tạo nhà cung cấp nhúng (embedding) AI.
+    /// </summary>
     private readonly IEmbeddingProviderFactory _embeddingProviderFactory = embeddingProviderFactory;
+    /// <summary>
+    /// Nhà máy tạo kho lưu trữ vector.
+    /// </summary>
     private readonly IVectorStoreFactory _vectorStoreFactory = vectorStoreFactory;
+    /// <summary>
+    /// Nhà cung cấp cấu hình ứng dụng.
+    /// </summary>
     private readonly IConfigProvider _configProvider = configProvider;
 
+    /// <summary>
+    /// Xử lý lệnh để nhúng các đoạn văn bản và lưu trữ chúng vào kho vector.
+    /// </summary>
+    /// <param name="request">Lệnh chứa danh sách các đoạn văn bản cần nhúng.</param>
+    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
+    /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     public async Task<Result> Handle(EmbedChunksCommand request, CancellationToken cancellationToken)
     {
         if (request.Chunks == null || request.Chunks.Count == 0)
         {
-            return Result.Failure("No chunks provided for embedding.");
+            return Result.Failure(string.Format(ErrorMessages.NotFound, "Chunks"));
         }
 
         var embeddingSettings = _configProvider.GetSection<EmbeddingSettings>();

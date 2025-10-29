@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
-import { useFamilyStore } from '@/stores/family.store';
+import { useFamilyAutocompleteStore } from '@/stores';
 
 // A more specific type for the function being debounced
 type DebounceableFunction = (...args: any[]) => void;
@@ -66,17 +66,17 @@ const { modelValue, label, rules, readOnly, clearable, multiple, hideDetails } =
 
 const emit = defineEmits(['update:modelValue']);
 
-const familyStore = useFamilyStore();
+const familyAutocompleteStore = useFamilyAutocompleteStore();
 const loading = ref(false);
 const searchTerm = ref('');
 const internalSelectedItems = ref<any[]>([]); // For return-object handling
 
-const families = computed(() => familyStore.items);
+const families = computed(() => familyAutocompleteStore.items);
 
 const fetchFamilies = async (query: string = '') => {
   loading.value = true;
   try {
-    await familyStore.searchLookup({ searchQuery: query }, 1, 100); // Fetch first 100 items for autocomplete
+    await familyAutocompleteStore.searchFamilies({ searchQuery: query }); // Use new store's action
   } catch (error) {
     console.error('Error fetching families:', error);
   } finally {
@@ -119,10 +119,10 @@ watch(
       }
     }
 
-    if (idsToFetch.length > 0 && typeof familyStore.getByIds === 'function') {
+    if (idsToFetch.length > 0) {
       loading.value = true;
       try {
-        const fetchedItems = await familyStore.getByIds(idsToFetch);
+        const fetchedItems = await familyAutocompleteStore.getFamilyByIds(idsToFetch);
         internalSelectedItems.value = fetchedItems;
       } catch (error) {
         console.error('Error preloading selected items:', error);

@@ -19,47 +19,60 @@ public class CreateMembersCommandValidatorTests
         _validator = new CreateMembersCommandValidator();
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi danh sách thành viên trong CreateMembersCommand là rỗng.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand với danh sách Members rỗng.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính Members với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Danh sách thành viên không được phép rỗng
+    /// khi tạo nhiều thành viên cùng lúc.
+    /// </summary>
     [Fact]
     public void ShouldHaveError_WhenMembersListIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi danh sách thành viên rỗng.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Tạo một CreateMembersCommand với danh sách Members rỗng.
-        // 2. Thực hiện validate command.
-        // 3. Kiểm tra xem có lỗi validation cho Members với thông báo lỗi cụ thể.
         var command = new CreateMembersCommand([]);
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Members)
               .WithErrorMessage("At least one member is required.");
-        // 💡 Giải thích: Danh sách thành viên không được rỗng.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi danh sách thành viên
+    /// trong CreateMembersCommand không rỗng và tất cả các thành viên đều hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand với danh sách Members không rỗng và chứa các AIMemberDto hợp lệ.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng không có bất kỳ lỗi validation nào được báo cáo.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Khi danh sách thành viên không rỗng
+    /// và mỗi thành viên đều hợp lệ, command phải được coi là hợp lệ và không có lỗi nào được trả về.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveError_WhenMembersListIsNotEmptyAndValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi danh sách thành viên không rỗng và hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Tạo một CreateMembersCommand với danh sách Members không rỗng.
-        // 2. Mock _mockAIMemberDtoValidator để trả về thành công cho mỗi thành viên.
-        // 3. Thực hiện validate command.
-        // 4. Kiểm tra xem không có lỗi validation nào.
         var validMembers = _fixture.CreateMany<AIMemberDto>(2).ToList();
 
         var command = new CreateMembersCommand(validMembers);
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
-        // 💡 Giải thích: Khi danh sách thành viên không rỗng và mỗi thành viên đều hợp lệ, không nên có lỗi.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi có ít nhất một thành viên
+    /// trong danh sách của CreateMembersCommand không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một CreateMembersCommand với danh sách Members chứa một AIMemberDto không hợp lệ
+    ///               (ví dụ: FirstName rỗng).
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính của phần tử không hợp lệ
+    ///              trong danh sách (ví dụ: "Members[0].FirstName") với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Nếu có bất kỳ thành viên nào trong danh sách
+    /// không vượt qua validation, toàn bộ command CreateMembersCommand phải được coi là không hợp lệ
+    /// và báo lỗi tương ứng.
+    /// </summary>
     [Fact]
     public void ShouldHaveError_WhenAMemberInListIsInvalid()
     {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi có một thành viên trong danh sách không hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Tạo một CreateMembersCommand với danh sách Members chứa một thành viên không hợp lệ.
-        // 2. Mock _mockAIMemberDtoValidator để trả về lỗi cho thành viên không hợp lệ.
-        // 3. Thực hiện validate command.
-        // 4. Kiểm tra xem có lỗi validation cho phần tử không hợp lệ trong danh sách.
         var invalidMember = new AIMemberDto // Tạo thủ công để đảm bảo FirstName rỗng
         {
             FirstName = string.Empty,
@@ -74,6 +87,5 @@ public class CreateMembersCommandValidatorTests
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor("Members[0].FirstName")
               .WithErrorMessage("First name is required.");
-        // 💡 Giải thích: Khi có ít nhất một thành viên không hợp lệ trong danh sách, validator phải báo lỗi.
     }
 }

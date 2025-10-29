@@ -8,8 +8,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AutoFixture.Xunit2" Version="4.18.1" />
-
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="$(AspnetVersion)" />
+    <PackageVersion Include="Novu" Version="2.5.0" />
     <PackageVersion Include="Respawn" Version="6.2.1" />
     <PackageVersion Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
     <PackageVersion Include="Ardalis.GuardClauses" Version="4.5.0" />

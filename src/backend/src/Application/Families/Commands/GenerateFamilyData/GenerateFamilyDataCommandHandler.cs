@@ -1,4 +1,5 @@
 using System.Text.Json;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
@@ -38,7 +39,7 @@ Always respond with ONLY the JSON object. Do not include any conversational text
 
         if (string.IsNullOrWhiteSpace(jsonString))
         {
-            return Result<List<FamilyDto>>.Failure("AI did not return a response.");
+            return Result<List<FamilyDto>>.Failure(ErrorMessages.NoAIResponse);
         }
 
         try
@@ -66,11 +67,11 @@ Always respond with ONLY the JSON object. Do not include any conversational text
         }
         catch (JsonException ex)
         {
-            return Result<List<FamilyDto>>.Failure($"AI generated invalid JSON: {ex.Message}");
+            return Result<List<FamilyDto>>.Failure(string.Format(ErrorMessages.InvalidAIResponse, ex.Message));
         }
         catch (Exception ex)
         {
-            return Result<List<FamilyDto>>.Failure($"An unexpected error occurred while processing AI response: {ex.Message}");
+            return Result<List<FamilyDto>>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
     }
 

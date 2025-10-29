@@ -38,7 +38,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore, useNotificationStore } from '@/stores';
+import { useI18n } from 'vue-i18n';
 
 const username = ref('');
 const email = ref('');
@@ -52,12 +53,9 @@ const rules = {
   email: (value: string) => /.+@.+\..+/.test(value) || t('validation.email'),
 };
 
-import { useNotificationStore } from '@/stores/notification.store'; // Add import
-import { useI18n } from 'vue-i18n'; // Add useI18n import
+const { t } = useI18n();
 
-const { t } = useI18n(); // Initialize t
-
-const notificationStore = useNotificationStore(); // Initialize store
+const notificationStore = useNotificationStore();
 
 const handleRegister = async () => {
   const authStore = useAuthStore();

@@ -1,3 +1,4 @@
+using backend.Application.Common.Constants;
 using AutoFixture.AutoMoq;
 using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
@@ -8,6 +9,9 @@ using Xunit;
 
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.UpdateUserProfile;
 
+/// <summary>
+/// Bộ test cho UpdateUserProfileCommandHandler.
+/// </summary>
 public class UpdateUserProfileCommandHandlerTests : TestBase
 {
     private readonly UpdateUserProfileCommandHandler _handler;
@@ -21,23 +25,29 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
         );
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi định dạng Id không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateUserProfileCommand với Id có định dạng không phải GUID.
+    ///    - Act: Gọi phương thức Handle của handler.
+    ///    - Assert: Kiểm tra kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.InvalidUserIdFormat
+    ///              và ErrorSource là ErrorSources.Validation.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Id phải là một GUID hợp lệ để tìm kiếm hồ sơ người dùng.
+    /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailureWhenInvalidIdFormat()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi định dạng Id không hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateUserProfileCommand với Id có định dạng không phải GUID.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+        // Arrange
         var command = new UpdateUserProfileCommand { Id = "invalid-guid", Name = "Test", Email = "test@example.com" };
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
+        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("Invalid user ID format.");
-        result.ErrorSource.Should().Be("BadRequest");
-        // 💡 Giải thích: Id phải là một GUID hợp lệ để tìm kiếm hồ sơ người dùng.
+        result.Error.Should().Contain(ErrorMessages.InvalidUserIdFormat);
+        result.ErrorSource.Should().Be(ErrorSources.Validation);
     }
 
     [Fact]
@@ -74,6 +84,9 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
             ExternalId = Guid.NewGuid().ToString(),
             Email = "old@example.com",
             Name = "Old Name",
+            FirstName = "Old",
+            LastName = "Name",
+            Phone = "1234567890",
             Avatar = "http://old.com/avatar.jpg"
         };
         _context.UserProfiles.Add(existingUserProfile);

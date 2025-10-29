@@ -14,6 +14,7 @@ public class LocalEmbeddingProvider(IConfigProvider configProvider, HttpClient h
 
     public string ProviderName => "Local";
     public int MaxTextLength => _configProvider.GetSection<EmbeddingSettings>().Local.MaxTextLength;
+    public int EmbeddingDimension => 768; // Placeholder dimension for Local
 
     public async Task<Result<double[]>> GenerateEmbeddingAsync(string text, CancellationToken cancellationToken = default)
     {

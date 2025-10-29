@@ -1,4 +1,5 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
@@ -24,7 +25,7 @@ public class GetEventByIdQueryHandler(IApplicationDbContext context, IMapper map
             .FirstOrDefaultAsync(cancellationToken);
 
         return eventDto == null
-            ? Result<EventDetailDto>.Failure($"Event with ID {request.Id} not found.")
+            ? Result<EventDetailDto>.Failure(string.Format(ErrorMessages.EventNotFound, request.Id), ErrorSources.NotFound)
             : Result<EventDetailDto>.Success(eventDto);
     }
 }

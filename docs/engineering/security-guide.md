@@ -277,7 +277,7 @@ public async Task<IActionResult> PurgeData([FromBody] PurgeDataCommand command)
 }
 
 // Sử dụng chính sách kiểm tra quyền quản lý gia đình
-[HttpPut("{familyId}/members/{memberId}")]
+[HttpPut("{familyId}/member/{memberId}")]
 [Authorize(Policy = Policies.CanManageFamily)] // Chỉ người dùng có quyền quản lý gia đình mới được truy cập
 public async Task<IActionResult> UpdateMemberInFamily(Guid familyId, Guid memberId, [FromBody] UpdateMemberCommand command)
 {

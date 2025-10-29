@@ -10,10 +10,7 @@
     @cancel="handleDeleteCancel" />
   <!-- AI Input Dialog -->
   <NLFamilyPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @save="handleAiSave" />
-  <!-- Snackbar -->
-  <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
-    {{ notificationStore.snackbar.message }}
-  </v-snackbar>
+
 </template>
 
 <script setup lang="ts">

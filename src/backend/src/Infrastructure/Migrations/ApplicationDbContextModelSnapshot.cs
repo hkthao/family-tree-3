@@ -19,72 +19,71 @@ namespace backend.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "8.0.19")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("EventMember", b =>
-                {
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid>("RelatedMembersId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("EventId", "RelatedMembersId");
-
-                    b.HasIndex("RelatedMembersId");
-
-                    b.ToTable("EventMember");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("code");
 
                     b.Property<string>("Color")
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("color");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
-                        .HasColumnType("varchar(1000)");
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("description");
 
                     b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("end_date");
 
                     b.Property<Guid?>("FamilyId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("Location")
-                        .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("location");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("name");
 
                     b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("start_date");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.HasKey("Id");
 
@@ -93,215 +92,286 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.ToTable("Events");
+                    b.ToTable("event", (string)null);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.EventMember", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("event_id");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("member_id");
+
+                    b.HasKey("EventId", "MemberId");
+
+                    b.HasIndex("MemberId");
+
+                    b.ToTable("event_member", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
 
                     b.Property<string>("Address")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("address");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("avatar_url");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)")
+                        .HasColumnName("description");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("name");
 
                     b.Property<int>("TotalGenerations")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_generations");
 
                     b.Property<int>("TotalMembers")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("total_members");
 
                     b.Property<string>("Visibility")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("visibility");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique();
 
-                    b.ToTable("Families");
+                    b.ToTable("family", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
                 {
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
 
                     b.Property<Guid>("UserProfileId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_profile_id");
 
                     b.Property<Guid>("Id")
                         .HasColumnType("char(36)");
 
                     b.Property<int>("Role")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("role");
 
                     b.HasKey("FamilyId", "UserProfileId");
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("FamilyUsers");
+                    b.ToTable("family_user", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FileMetadata", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("content_type");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("file_name");
 
                     b.Property<long>("FileSize")
-                        .HasColumnType("bigint");
+                        .HasColumnType("bigint")
+                        .HasColumnName("file_size");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_active");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
 
                     b.Property<int>("StorageProvider")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("storage_provider");
 
                     b.Property<string>("UploadedBy")
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("varchar(36)");
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("uploaded_by");
 
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(2048)
-                        .HasColumnType("varchar(2048)");
+                        .HasColumnType("varchar(2048)")
+                        .HasColumnName("url");
 
                     b.Property<string>("UsedByEntity")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("used_by_entity");
 
                     b.Property<Guid?>("UsedById")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("used_by_id");
 
                     b.HasKey("Id");
 
-                    b.ToTable("FileMetadata");
+                    b.ToTable("file_metadata", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
 
                     b.Property<string>("AvatarUrl")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("avatar_url");
 
                     b.Property<string>("Biography")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)")
+                        .HasColumnName("biography");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("code");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("date_of_birth");
 
                     b.Property<DateTime?>("DateOfDeath")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("date_of_death");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("first_name");
 
                     b.Property<string>("Gender")
-                        .HasMaxLength(10)
-                        .HasColumnType("varchar(10)");
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("gender");
 
                     b.Property<bool>("IsRoot")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_root");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("last_name");
 
                     b.Property<string>("Nickname")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("nickname");
 
                     b.Property<string>("Occupation")
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("occupation");
 
                     b.Property<string>("PlaceOfBirth")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("place_of_birth");
 
                     b.Property<string>("PlaceOfDeath")
                         .HasMaxLength(200)
-                        .HasColumnType("varchar(200)");
+                        .HasColumnType("varchar(200)")
+                        .HasColumnName("place_of_death");
 
                     b.HasKey("Id");
 
@@ -310,29 +380,95 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("FamilyId");
 
-                    b.ToTable("Members");
+                    b.ToTable("member", (string)null);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.NotificationPreference", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Channel")
+                        .HasColumnType("int")
+                        .HasColumnName("channel");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("enabled");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int")
+                        .HasColumnName("notification_type");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "NotificationType", "Channel")
+                        .IsUnique()
+                        .HasDatabaseName("ix_notification_preference_user_id_notification_type_channel");
+
+                    b.ToTable("notification_preference", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Relationship", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<Guid>("FamilyId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
 
                     b.Property<int?>("Order")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("order");
 
                     b.Property<Guid>("SourceMemberId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("source_member_id");
 
                     b.Property<Guid>("TargetMemberId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("target_member_id");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("type");
 
                     b.HasKey("Id");
 
@@ -342,7 +478,51 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("TargetMemberId");
 
-                    b.ToTable("Relationships");
+                    b.ToTable("relationship", (string)null);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.TextChunk", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("varchar(4000)")
+                        .HasColumnName("content");
+
+                    b.Property<string>("Embedding")
+                        .HasColumnType("json")
+                        .HasColumnName("embedding");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("family_id");
+
+                    b.Property<string>("Metadata")
+                        .IsRequired()
+                        .HasColumnType("json")
+                        .HasColumnName("metadata");
+
+                    b.Property<float>("Score")
+                        .HasColumnType("float")
+                        .HasColumnName("score");
+
+                    b.Property<string>("Source")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("source");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("text_chunk", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserActivity", b =>
@@ -352,11 +532,14 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<int>("ActionType")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("action_type");
 
                     b.Property<string>("ActivitySummary")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("activity_summary");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime(6)");
@@ -365,7 +548,9 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<Guid?>("GroupId")
-                        .HasColumnType("char(36)");
+                        .HasMaxLength(36)
+                        .HasColumnType("char(36)")
+                        .HasColumnName("group_id");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime(6)");
@@ -373,97 +558,145 @@ namespace backend.Infrastructure.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Metadata")
+                        .HasColumnType("json")
+                        .HasColumnName("metadata");
+
                     b.Property<string>("TargetId")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("target_id");
 
                     b.Property<int>("TargetType")
-                        .HasColumnType("int");
+                        .HasMaxLength(100)
+                        .HasColumnType("int")
+                        .HasColumnName("target_type");
 
                     b.Property<Guid>("UserProfileId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_profile_id");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserProfileId");
 
-                    b.ToTable("UserActivities");
+                    b.ToTable("user_activity", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserPreference", b =>
                 {
                     b.Property<Guid>("UserProfileId")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_profile_id");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<bool>("EmailNotificationsEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("email_notifications_enabled");
 
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
 
                     b.Property<bool>("InAppNotificationsEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("in_app_notifications_enabled");
 
                     b.Property<int>("Language")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("language");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
 
                     b.Property<bool>("SmsNotificationsEnabled")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("sms_notifications_enabled");
 
                     b.Property<int>("Theme")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("theme");
 
                     b.HasKey("UserProfileId");
 
-                    b.ToTable("UserPreferences");
+                    b.ToTable("user_preference", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.UserProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id");
 
                     b.Property<string>("Avatar")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("avatar");
 
                     b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("email");
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("first_name");
 
                     b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
 
                     b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext");
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("last_name");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("phone");
 
                     b.Property<Guid?>("UserPreferenceUserProfileId")
                         .HasColumnType("char(36)");
@@ -475,22 +708,7 @@ namespace backend.Infrastructure.Migrations
 
                     b.HasIndex("UserPreferenceUserProfileId");
 
-                    b.ToTable("UserProfiles");
-                });
-
-            modelBuilder.Entity("EventMember", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Event", null)
-                        .WithMany()
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("backend.Domain.Entities.Member", null)
-                        .WithMany()
-                        .HasForeignKey("RelatedMembersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.ToTable("user_profile", (string)null);
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>
@@ -499,6 +717,25 @@ namespace backend.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("FamilyId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("backend.Domain.Entities.EventMember", b =>
+                {
+                    b.HasOne("backend.Domain.Entities.Event", "Event")
+                        .WithMany("EventMembers")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("backend.Domain.Entities.Member", "Member")
+                        .WithMany("EventMembers")
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Member");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
@@ -589,6 +826,11 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("UserPreference");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.Event", b =>
+                {
+                    b.Navigation("EventMembers");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.Family", b =>
                 {
                     b.Navigation("FamilyUsers");
@@ -596,6 +838,8 @@ namespace backend.Infrastructure.Migrations
 
             modelBuilder.Entity("backend.Domain.Entities.Member", b =>
                 {
+                    b.Navigation("EventMembers");
+
                     b.Navigation("Relationships");
                 });
 

@@ -16,14 +16,18 @@ public class UpdateMemberCommandValidatorTests
         _fixture = new Fixture();
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường Id của UpdateMemberCommand là Guid.Empty.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với Id được đặt là Guid.Empty.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính Id với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Id là trường định danh duy nhất và bắt buộc
+    /// cho mỗi thành viên, không được phép để trống (Guid.Empty) khi cập nhật.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenIdIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi Id trống.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với Id là Guid.Empty.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính Id với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.Id, Guid.Empty)
             .Create();
@@ -32,17 +36,20 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.Id)
             .WithErrorMessage("Id cannot be empty.");
-        // 💡 Giải thích: Id là trường bắt buộc và không được để trống.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường LastName của UpdateMemberCommand là chuỗi rỗng.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với LastName được đặt là chuỗi rỗng.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính LastName với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: LastName là trường bắt buộc
+    /// để xác định một thành viên và không được phép để trống.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenLastNameIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi LastName trống.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với LastName là chuỗi rỗng.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính LastName với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.LastName, string.Empty)
             .Create();
@@ -51,17 +58,20 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.LastName)
             .WithErrorMessage("Last Name cannot be empty.");
-        // 💡 Giải thích: LastName là trường bắt buộc và không được để trống.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường FirstName của UpdateMemberCommand là chuỗi rỗng.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với FirstName được đặt là chuỗi rỗng.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính FirstName với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: FirstName là trường bắt buộc
+    /// để xác định một thành viên và không được phép để trống.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenFirstNameIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi FirstName trống.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với FirstName là chuỗi rỗng.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính FirstName với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.FirstName, string.Empty)
             .Create();
@@ -70,16 +80,19 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.FirstName)
             .WithErrorMessage("First Name cannot be empty.");
-        // 💡 Giải thích: FirstName là trường bắt buộc và không được để trống.
     }
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường FamilyId của UpdateMemberCommand là Guid.Empty.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với FamilyId được đặt là Guid.Empty.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính FamilyId với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: FamilyId là trường bắt buộc
+    /// để liên kết thành viên với một gia đình và không được phép để trống.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenFamilyIdIsEmpty()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi FamilyId trống.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với FamilyId là Guid.Empty.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính FamilyId với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.FamilyId, Guid.Empty)
             .Create();
@@ -88,17 +101,20 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.FamilyId)
             .WithErrorMessage("FamilyId cannot be empty.");
-        // 💡 Giải thích: FamilyId là trường bắt buộc và không được để trống.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi DateOfDeath xảy ra trước DateOfBirth.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với DateOfBirth sau DateOfDeath.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính DateOfDeath với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Logic nghiệp vụ yêu cầu ngày mất
+    /// không thể xảy ra trước ngày sinh, đảm bảo tính hợp lệ của dữ liệu thời gian.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenDateOfDeathIsBeforeDateOfBirth()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi DateOfDeath trước DateOfBirth.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với DateOfBirth và DateOfDeath không hợp lệ.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính DateOfDeath với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.DateOfBirth, new DateTime(2000, 1, 1))
             .With(c => c.DateOfDeath, new DateTime(1999, 1, 1))
@@ -108,17 +124,20 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.DateOfDeath)
             .WithErrorMessage("DateOfDeath cannot be before DateOfBirth.");
-        // 💡 Giải thích: DateOfDeath không được phép trước DateOfBirth.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường Gender của UpdateMemberCommand chứa giá trị không hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với Gender được đặt là một chuỗi không hợp lệ (ví dụ: "InvalidGender").
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính Gender với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Gender phải là một trong các giá trị được định nghĩa
+    /// trước ('Male', 'Female', 'Other') để đảm bảo tính nhất quán và chính xác của dữ liệu giới tính.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenGenderIsInvalid()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi Gender không hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với Gender không hợp lệ.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính Gender với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.Gender, "InvalidGender")
             .Create();
@@ -127,17 +146,20 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.Gender)
             .WithErrorMessage("Gender must be 'Male', 'Female', or 'Other'.");
-        // 💡 Giải thích: Gender phải là một trong các giá trị hợp lệ.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi trường AvatarUrl của UpdateMemberCommand không phải là một URL hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với AvatarUrl được đặt là một chuỗi không phải URL hợp lệ (ví dụ: "invalid-url").
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng có lỗi validation cho thuộc tính AvatarUrl với thông báo lỗi cụ thể.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: AvatarUrl cần phải là một URL hợp lệ
+    /// để đảm bảo rằng hình ảnh đại diện có thể được truy cập và hiển thị đúng cách.
+    /// </summary>
     [Fact]
     public void ShouldHaveErrorWhenAvatarUrlIsInvalid()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator báo lỗi khi AvatarUrl không hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với AvatarUrl không hợp lệ.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng có lỗi cho thuộc tính AvatarUrl với thông báo phù hợp.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.AvatarUrl, "invalid-url")
             .Create();
@@ -146,17 +168,20 @@ public class UpdateMemberCommandValidatorTests
 
         result.ShouldHaveValidationErrorFor(c => c.AvatarUrl)
             .WithErrorMessage("Avatar URL must be a valid URL.");
-        // 💡 Giải thích: AvatarUrl phải là một URL hợp lệ.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi tất cả các trường của UpdateMemberCommand đều hợp lệ.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một UpdateMemberCommand với tất cả các trường được điền đầy đủ và hợp lệ.
+    ///    - Act: Thực hiện validate command bằng validator.
+    ///    - Assert: Kiểm tra rằng không có bất kỳ lỗi validation nào được báo cáo.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Khi tất cả dữ liệu đầu vào tuân thủ
+    /// các quy tắc validation, command phải được coi là hợp lệ và không có lỗi nào được trả về.
+    /// </summary>
     [Fact]
     public void ShouldNotHaveErrorWhenAllFieldsAreValid()
     {
-        // 🎯 Mục tiêu của test: Xác minh validator không báo lỗi khi tất cả các trường đều hợp lệ.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateMemberCommand với tất cả các trường hợp lệ.
-        // 2. Act: Gọi phương thức Validate của validator.
-        // 3. Assert: Kiểm tra rằng không có lỗi nào được báo cáo.
         var command = _fixture.Build<UpdateMemberCommand>()
             .With(c => c.Id, Guid.NewGuid())
             .With(c => c.LastName, "ValidLastName")
@@ -176,6 +201,5 @@ public class UpdateMemberCommandValidatorTests
         var result = _validator.TestValidate(command);
 
         result.ShouldNotHaveAnyValidationErrors();
-        // 💡 Giải thích: Khi tất cả các trường đều hợp lệ, validator không nên báo cáo lỗi nào.
     }
 }

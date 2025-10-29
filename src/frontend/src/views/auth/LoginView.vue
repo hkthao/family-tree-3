@@ -27,9 +27,7 @@
         </v-row>
       </v-container>
     </v-main>
-    <v-snackbar v-model="notificationStore.snackbar.show" :color="notificationStore.snackbar.color" timeout="3000">
-      {{ notificationStore.snackbar.message }}
-    </v-snackbar>
+
   </v-app>
 </template>
 

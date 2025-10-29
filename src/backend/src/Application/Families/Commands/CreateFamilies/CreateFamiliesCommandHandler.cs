@@ -1,7 +1,5 @@
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.UserProfiles.Specifications;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
@@ -15,18 +13,6 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
     public async Task<Result<List<Guid>>> Handle(CreateFamiliesCommand request, CancellationToken cancellationToken)
     {
         var createdFamilyIds = new List<Guid>();
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
-        {
-            return Result<List<Guid>>.Failure("Current user ID not found.", "Authentication");
-        }
-
-        var userProfile = await _context.UserProfiles.WithSpecification(new UserProfileByExternalIdSpecification(currentUserId)).FirstOrDefaultAsync(cancellationToken);
-        if (userProfile == null)
-        {
-            return Result<List<Guid>>.Failure("User profile not found.", "NotFound");
-        }
-
         foreach (var familyDto in request.Families)
         {
             var familyId = Guid.NewGuid();
@@ -38,16 +24,16 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
                 Address = familyDto.Address,
                 AvatarUrl = familyDto.AvatarUrl,
                 Visibility = familyDto.Visibility ?? "Public",
+                Code = familyDto.Code,
                 TotalMembers = familyDto.TotalMembers,
                 TotalGenerations = familyDto.TotalGenerations ?? 0,
                 FamilyUsers = [new FamilyUser()
                 {
                     FamilyId = familyId,
-                    UserProfileId = userProfile.Id,
+                    UserProfileId = _user.Id!.Value,
                     Role = FamilyRole.Manager
                 }]
             };
-
             _context.Families.Add(entity);
             createdFamilyIds.Add(entity.Id);
         }

@@ -1,33 +1,27 @@
 using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Specifications;
+using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Entities;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 
-public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user, IMapper mapper) : IRequestHandler<SaveUserPreferencesCommand, Result>
+public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<SaveUserPreferencesCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IUser _user = user;
-    private readonly IMapper _mapper = mapper;
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = _user.Id;
-        if (string.IsNullOrEmpty(currentUserId))
-        {
-            return Result.Failure("User is not authenticated.", "Authentication");
-        }
-
         var userProfile = await _context.UserProfiles
             .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByAuth0IdSpec(currentUserId))
+            .WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)
         {
-            return Result.Failure("User profile not found.", "NotFound");
+            return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
         if (userProfile.UserPreference == null)

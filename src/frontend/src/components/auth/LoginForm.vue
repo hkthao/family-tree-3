@@ -38,7 +38,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore, useNotificationStore } from '@/stores';
 
 const { t } = useI18n();
 const email = ref('');
@@ -51,8 +51,6 @@ const rules = {
   required: (value: string) => !!value || t('validation.required'),
   email: (value: string) => /.+@.+\..+/.test(value) || t('validation.email'),
 };
-
-import { useNotificationStore } from '@/stores/notification.store';
 
 const notificationStore = useNotificationStore();
 

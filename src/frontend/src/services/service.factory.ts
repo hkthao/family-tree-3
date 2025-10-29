@@ -1,50 +1,34 @@
-import type { IFaceMemberService } from './faceMember/faceMember.service.interface';
-import { MockFaceMemberService } from './faceMember/mock.faceMember.service';
-import { ApiFaceMemberService } from './faceMember/api.faceMember.service';
 import type { IFamilyService } from './family/family.service.interface';
-import { MockFamilyService } from './family/mock.family.service';
 import { ApiFamilyService } from './family/api.family.service';
 import type { IMemberService } from './member/member.service.interface';
-import { MockMemberService } from './member/mock.member.service';
 import { ApiMemberService } from './member/api.member.service';
 import type { IEventService } from './event/event.service.interface';
-import { MockEventService } from './event/mock.event.service';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
-import { MockRelationshipService } from './relationship/mock.relationship.service';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
-import type { IUserProfileService } from './userProfile/userProfile.service.interface';
-import { MockUserProfileService } from './userProfile/mock.userProfile.service';
-import { UserProfileApiService } from './userProfile/api.userProfile.service';
-import type { IUserActivityService } from './userActivity/userActivity.service.interface';
-import { MockUserActivityService } from './userActivity/mock.userActivity.service';
-import { ApiUserActivityService } from './userActivity/api.userActivity.service';
+import type { IUserProfileService } from './user-profile/user-profile.service.interface';
+import { UserProfileApiService } from './user-profile/api.user-profile.service';
+import type { IUserActivityService } from './user-activity/user-activity.service.interface';
+import { ApiUserActivityService } from './user-activity/api.user-activity.service';
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
-import { MockDashboardService } from './dashboard/mock.dashboard.service';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
-import type { IAIBiographyService } from './aiBiography/aiBiography.service.interface';
-import { MockAIBiographyService } from './aiBiography/mock.aiBiography.service';
-import { ApiAIBiographyService } from './aiBiography/api.aiBiography.service';
-import type { IUserPreferenceService } from './userPreference/userPreference.service.interface';
-import { MockUserPreferenceService } from './userPreference/mock.userPreference.service';
-import { ApiUserPreferenceService } from './userPreference/api.userPreference.service';
-import type { IFileUploadService } from './fileUpload/fileUpload.service.interface';
-import { MockFileUploadService } from './fileUpload/mock.fileUpload.service';
-import { FileUploadApiService } from './fileUpload/api.fileUpload.service';
+import type { IAIBiographyService } from './ai-biography/ai-biography.service.interface';
+import { ApiAIBiographyService } from './ai-biography/api.ai-biography.service';
+import type { IUserPreferenceService } from './user-preference/user-preference.service.interface';
+import { ApiUserPreferenceService } from './user-preference/api.user-preference.service';
+import type { IFileUploadService } from './file-upload/file-upload.service.interface';
+import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
-import { MockChatService } from './chat/mock.chat.service';
-import type { INaturalLanguageInputService } from './naturalLanguageInput/naturalLanguageInput.service.interface';
-import { ApiNaturalLanguageInputService } from './naturalLanguageInput/api.naturalLanguageInput.service';
+import type { INaturalLanguageInputService } from './natural-language-input/natural-language-input.service.interface';
+import { ApiNaturalLanguageInputService } from './natural-language-input/api.natural-language-input.service';
 import type { IChunkService } from './chunk/chunk.service.interface';
 import { ApiChunkService } from './chunk/api.chunk.service';
 import type { IFaceService } from './face/face.service.interface';
-import { MockFaceService } from './face/mock.face.service';
 import { ApiFaceService } from './face/api.face.service';
-import type { ISystemConfigService } from './system-config/system-config.service.interface';
-import { ApiSystemConfigService } from './system-config/api.system-config.service';
 
-export type ServiceMode = 'mock' | 'real' | 'test';
+
+export type ServiceMode = 'real' | 'test';
 
 export interface AppServices {
   family: IFamilyService;
@@ -61,8 +45,7 @@ export interface AppServices {
   naturalLanguageInput: INaturalLanguageInputService;
   chunk: IChunkService;
   face: IFaceService;
-  faceMember: IFaceMemberService;
-  systemConfig: ISystemConfigService;
+
 }
 
 import apiClient from '@/plugins/axios';
@@ -71,100 +54,61 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
   console.log(`Creating services in ${mode} mode.`);
   return {
     family:
-      mode === 'mock'
-        ? new MockFamilyService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiFamilyService(apiClient)
-        : testServices?.family || new MockFamilyService(), // Use testServices.family if provided
+        : testServices?.family || new ApiFamilyService(apiClient), // Use testServices.family if provided
     member:
-      mode === 'mock'
-        ? new MockMemberService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiMemberService(apiClient)
-        : testServices?.member || new MockMemberService(), // Use testServices.member if provided
+        : testServices?.member || new ApiMemberService(apiClient), // Use testServices.member if provided
     event:
-      mode === 'mock'
-        ? new MockEventService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiEventService(apiClient)
-        : testServices?.event || new MockEventService(), // Use testServices.event if provided
+        : testServices?.event || new ApiEventService(apiClient), // Use testServices.event if provided
     relationship:
-      mode === 'mock'
-        ? new MockRelationshipService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiRelationshipService(apiClient)
-        : testServices?.relationship || new MockRelationshipService(),
+        : testServices?.relationship || new ApiRelationshipService(apiClient),
     userProfile:
-      mode === 'mock'
-        ? new MockUserProfileService()
-        : mode === 'real'
+      mode === 'real'
         ? new UserProfileApiService(apiClient)
-        : testServices?.userProfile || new MockUserProfileService(),
+        : testServices?.userProfile || new UserProfileApiService(apiClient),
     userActivity:
-      mode === 'mock'
-        ? new MockUserActivityService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiUserActivityService(apiClient)
-        : testServices?.userActivity || new MockUserActivityService(),
+        : testServices?.userActivity || new ApiUserActivityService(apiClient),
     dashboard:
-      mode === 'mock'
-        ? new MockDashboardService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiDashboardService(apiClient)
-        : testServices?.dashboard || new MockDashboardService(),
+        : testServices?.dashboard || new ApiDashboardService(apiClient),
     aiBiography:
-      mode === 'mock'
-        ? new MockAIBiographyService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiAIBiographyService(apiClient)
-        : testServices?.aiBiography || new MockAIBiographyService(),
+        : testServices?.aiBiography || new ApiAIBiographyService(apiClient),
     userPreference:
-      mode === 'mock'
-        ? new MockUserPreferenceService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiUserPreferenceService(apiClient)
-        : testServices?.userPreference || new MockUserPreferenceService(),
+        : testServices?.userPreference || new ApiUserPreferenceService(apiClient),
     fileUpload:
-      mode === 'mock'
-        ? new MockFileUploadService()
-        : mode === 'real'
+      mode === 'real'
         ? new FileUploadApiService(apiClient)
-        : testServices?.fileUpload || new MockFileUploadService(),
+        : testServices?.fileUpload || new FileUploadApiService(apiClient),
     chat:
-      mode === 'mock'
-        ? new MockChatService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiChatService(apiClient)
-        : testServices?.chat || new MockChatService(),
+        : testServices?.chat || new ApiChatService(apiClient),
     naturalLanguageInput:
-      mode === 'mock'
-        ? new ApiNaturalLanguageInputService(apiClient) // Assuming mock is not needed for now, using API service
-        : mode === 'real'
+      mode === 'real'
         ? new ApiNaturalLanguageInputService(apiClient)
         : testServices?.naturalLanguageInput || new ApiNaturalLanguageInputService(apiClient),
     chunk:
-      mode === 'mock'
-        ? new ApiChunkService(apiClient) // Using API service for mock mode as well for now
-        : mode === 'real'
+      mode === 'real'
         ? new ApiChunkService(apiClient)
         : testServices?.chunk || new ApiChunkService(apiClient),
     face:
-      mode === 'mock'
-        ? new MockFaceService()
-        : mode === 'real'
+      mode === 'real'
         ? new ApiFaceService(apiClient)
-        : testServices?.face || new MockFaceService(),
-    faceMember:
-      mode === 'mock'
-        ? new MockFaceMemberService()
-        : mode === 'real'
-        ? new ApiFaceMemberService(apiClient)
-        : testServices?.faceMember || new MockFaceMemberService(),
-    systemConfig:
-      mode === 'mock'
-        ? new ApiSystemConfigService(apiClient) // No mock service for now
-        : mode === 'real'
-        ? new ApiSystemConfigService(apiClient)
-        : testServices?.systemConfig || new ApiSystemConfigService(apiClient),
+        : testServices?.face || new ApiFaceService(apiClient),
+
   };
 }

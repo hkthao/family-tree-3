@@ -148,4 +148,22 @@ public class PineconeVectorStore : IVectorStore
             throw; // Re-throw to be handled by higher layers
         }
     }
+
+    public async Task DeleteAsync(string entityId, string collectionName, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var vectorStoreSettings = _configProvider.GetSection<VectorStoreSettings>();
+            var indexClient = _pineconeClient.Index(collectionName, vectorStoreSettings.Pinecone.Host);
+
+            // Pinecone's delete operation can take a list of IDs
+            await indexClient.DeleteAsync(new DeleteRequest { Ids = [entityId] }, cancellationToken: cancellationToken);
+            _logger.LogInformation("Successfully deleted vector for entity {EntityId} from Pinecone index {CollectionName}.", entityId, collectionName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting vector for entity {EntityId} from Pinecone index {CollectionName}.", entityId, collectionName);
+            throw; // Re-throw to be handled by higher layers
+        }
+    }
 }

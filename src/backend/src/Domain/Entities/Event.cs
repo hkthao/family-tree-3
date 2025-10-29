@@ -13,5 +13,5 @@ public class Event : BaseAuditableEntity
     public Guid? FamilyId { get; set; }
     public EventType Type { get; set; }
     public string? Color { get; set; }
-    public ICollection<Member> RelatedMembers { get; set; } = new List<Member>();
+    public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
 }

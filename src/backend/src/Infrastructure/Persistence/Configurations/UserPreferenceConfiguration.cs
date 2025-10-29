@@ -8,11 +8,40 @@ public class UserPreferenceConfiguration : IEntityTypeConfiguration<UserPreferen
 {
     public void Configure(EntityTypeBuilder<UserPreference> builder)
     {
-        builder.HasKey(up => up.UserProfileId);
+        builder.ToTable("user_preference");
 
+        builder.Property(up => up.Id).HasColumnName("id");
+        builder.Property(up => up.Created).HasColumnName("created");
+        builder.Property(up => up.CreatedBy).HasColumnName("created_by");
+        builder.Property(up => up.LastModified).HasColumnName("last_modified");
+        builder.Property(up => up.LastModifiedBy).HasColumnName("last_modified_by");
+
+        builder.Property(up => up.UserProfileId).HasColumnName("user_profile_id");
+
+        builder.Property(up => up.Theme)
+            .HasColumnName("theme")
+            .IsRequired();
+
+        builder.Property(up => up.Language)
+            .HasColumnName("language")
+            .IsRequired();
+
+        builder.Property(up => up.EmailNotificationsEnabled)
+            .HasColumnName("email_notifications_enabled")
+            .IsRequired();
+
+        builder.Property(up => up.SmsNotificationsEnabled)
+            .HasColumnName("sms_notifications_enabled")
+            .IsRequired();
+
+        builder.Property(up => up.InAppNotificationsEnabled)
+            .HasColumnName("in_app_notifications_enabled")
+            .IsRequired();
+
+        builder.HasKey(up => up.UserProfileId);
+        
         builder.HasOne(up => up.UserProfile)
             .WithOne()
             .HasForeignKey<UserPreference>(up => up.UserProfileId)
-            .OnDelete(DeleteBehavior.Cascade);
-    }
+            .OnDelete(DeleteBehavior.Cascade);    }
 }

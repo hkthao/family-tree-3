@@ -15,52 +15,53 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         _handler = new GetMembersByIdsQueryHandler(_context, _mapper);
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về danh sách rỗng khi không có ID nào được cung cấp.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một GetMembersByIdsQuery với danh sách ID rỗng.
+    ///    - Act: Gọi phương thức Handle.
+    ///    - Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Nếu không có ID nào được cung cấp, không có thành viên nào được trả về.
+    /// </summary>  
     [Fact]
     public async Task Handle_ShouldReturnEmptyList_WhenNoIdsProvided()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về danh sách rỗng khi không có ID nào được cung cấp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một GetMembersByIdsQuery với danh sách ID rỗng.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
         var query = new GetMembersByIdsQuery([]);
-
         var result = await _handler.Handle(query, CancellationToken.None);
-
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeEmpty();
-        // 💡 Giải thích: Nếu không có ID nào được cung cấp, không có thành viên nào được trả về.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về danh sách rỗng khi không tìm thấy thành viên nào cho các ID đã cung cấp.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Tạo một GetMembersByIdsQuery với các ID không tồn tại trong Context.
+    ///    - Act: Gọi phương thức Handle.
+    ///    - Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Nếu không có thành viên nào khớp với các ID, danh sách trả về sẽ rỗng.
+    /// </summary> 
     [Fact]
     public async Task Handle_ShouldReturnEmptyList_WhenNoMembersFoundForIds()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về danh sách rỗng khi không tìm thấy thành viên nào cho các ID đã cung cấp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một GetMembersByIdsQuery với các ID không tồn tại trong Context.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và danh sách rỗng.
         var query = new GetMembersByIdsQuery([Guid.NewGuid(), Guid.NewGuid()]);
-
-        // No members added to _context
-
         var result = await _handler.Handle(query, CancellationToken.None);
-
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeEmpty();
-        // 💡 Giải thích: Nếu không có thành viên nào khớp với các ID, danh sách trả về sẽ rỗng.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler trả về các thành viên khi tìm thấy chúng cho các ID đã cung cấp.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thêm các thành viên vào Context. Tạo một GetMembersByIdsQuery với ID của các thành viên này.
+    ///    - Act: Gọi phương thức Handle.
+    ///    - Assert: Kiểm tra kết quả trả về là thành công và chứa các MemberListDto mong đợi.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler phải trả về tất cả các thành viên khớp với các ID đã cung cấp.
+    /// </summary>  
     [Fact]
     public async Task Handle_ShouldReturnMembers_WhenMembersFoundForIds()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về các thành viên khi tìm thấy chúng cho các ID đã cung cấp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thêm các thành viên vào Context. Tạo một GetMembersByIdsQuery với ID của các thành viên này.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và chứa các MemberListDto mong đợi.
         var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF001" };
         _context.Families.Add(family);
 
@@ -79,17 +80,19 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         result.Value.Should().HaveCount(2);
         result.Value.Should().Contain(m => m.Id == member1.Id);
         result.Value.Should().Contain(m => m.Id == member2.Id);
-        // 💡 Giải thích: Handler phải trả về tất cả các thành viên khớp với các ID đã cung cấp.
     }
 
+    /// <summary>
+    /// 🎯 Mục tiêu của test: Xác minh handler chỉ trả về các thành viên được yêu cầu khi một số ID không khớp.
+    /// ⚙️ Các bước (Arrange, Act, Assert):
+    ///    - Arrange: Thêm nhiều thành viên vào Context. Tạo một GetMembersByIdsQuery với một tập hợp con các ID.
+    ///    - Act: Gọi phương thức Handle.
+    ///    - Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa các MemberListDto được yêu cầu.
+    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler chỉ nên trả về các thành viên có ID khớp với danh sách yêu cầu.
+    /// </summary> 
     [Fact]
     public async Task Handle_ShouldReturnOnlyRequestedMembers_WhenSomeMembersFoundForIds()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler chỉ trả về các thành viên được yêu cầu khi một số ID không khớp.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thêm nhiều thành viên vào Context. Tạo một GetMembersByIdsQuery với một tập hợp con các ID.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa các MemberListDto được yêu cầu.
         var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF001" };
         _context.Families.Add(family);
 
@@ -110,6 +113,5 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
         result.Value.Should().Contain(m => m.Id == member1.Id);
         result.Value.Should().Contain(m => m.Id == member3.Id);
         result.Value.Should().NotContain(m => m.Id == member2.Id);
-        // 💡 Giải thích: Handler chỉ nên trả về các thành viên có ID khớp với danh sách yêu cầu.
     }
 }

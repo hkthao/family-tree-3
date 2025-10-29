@@ -21,13 +21,18 @@ export default mergeConfig(
           functions: 0,
           lines: 0
         },
-        include: ['src/stores/**/*.ts', 'src/views/family/FamilyListView.vue', 'src/views/members/MemberListView.vue', 'src/views/family/FamilyAddView.vue']
+        include: ['src/stores/**/*.ts', 'src/views/**/*.vue', 'src/components/**/*.vue']
       },
       server: {
         deps: {
           inline: ['vuetify']
         }
-      }
+      },
+    },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
   }),
 );

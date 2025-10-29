@@ -1,4 +1,4 @@
-using AutoFixture.AutoMoq;
+using backend.Application.Common.Constants;
 using backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
@@ -13,7 +13,7 @@ public class GetUserProfileByIdQueryHandlerTests : TestBase
 
     public GetUserProfileByIdQueryHandlerTests()
     {
-        _fixture.Customize(new AutoMoqCustomization());
+
 
         _handler = new GetUserProfileByIdQueryHandler(
             _context,
@@ -35,8 +35,8 @@ public class GetUserProfileByIdQueryHandlerTests : TestBase
 
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Contain(ErrorMessages.UserProfileNotFound);
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
         // 💡 Giải thích: Hồ sơ người dùng phải tồn tại để có thể truy xuất.
     }
 
@@ -54,7 +54,10 @@ public class GetUserProfileByIdQueryHandlerTests : TestBase
             Id = userProfileId,
             ExternalId = Guid.NewGuid().ToString(),
             Email = "test@example.com",
-            Name = "Test User"
+            Name = "Test User",
+            FirstName = "Test",
+            LastName = "User",
+            Phone = "1234567890"
         };
         _context.UserProfiles.Add(existingUserProfile);
         await _context.SaveChangesAsync();
