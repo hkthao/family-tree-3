@@ -10,28 +10,13 @@ on:
 jobs:
   docker-push:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
 
     steps:
-    - name: Download backend Docker image artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: backend-image
-        path: /tmp
-        run-id: ${{ github.event.workflow_run.id }}
+    - uses: actions/checkout@v4
 
-    - name: Download frontend Docker image artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-image
-        path: /tmp
-        run-id: ${{ github.event.workflow_run.id }}
-
-    - name: Load backend Docker image
-      run: docker load --input /tmp/backend-image.tar
-
-    - name: Load frontend Docker image
-      run: docker load --input /tmp/frontend-image.tar
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
 
     - name: Login to Docker Hub
       uses: docker/login-action@v3
@@ -39,8 +24,18 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
-    - name: Push backend Docker image
-      run: docker push hkthao/family-tree-backend:latest
+    - name: Build and push backend Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./src/backend
+        file: ./src/infra/Dockerfile.backend
+        push: true
+        tags: hkthao/family-tree-backend:latest
 
-    - name: Push frontend Docker image
-      run: docker push hkthao/family-tree-frontend:latest
+    - name: Build and push frontend Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./src/frontend
+        file: ./src/infra/Dockerfile.frontend
+        push: true
+        tags: hkthao/family-tree-frontend:latest

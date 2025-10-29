@@ -1,90 +1,136 @@
 # Dự án Cây Gia Phả (Family Tree Project)
 
-Một hệ thống quản lý gia phả chuyên nghiệp cho phép bạn xây dựng, quản lý và trực quan hóa cây gia phả của gia đình một cách dễ dàng.
+## 1. 🏷️ Thông tin tổng quan (Overview)
 
-## ✨ Tính Năng Chính
+Ứng dụng quản lý cây gia phả giúp người dùng tạo, xem và chia sẻ sơ đồ gia đình một cách dễ dàng và chuyên nghiệp.
 
--   **Quản lý Gia đình/Dòng họ:** Tạo, xem, chỉnh sửa và quản lý thông tin cho nhiều gia đình hoặc dòng họ khác nhau.
--   **Quản lý Thành viên:** Thêm, sửa, xóa và xem thông tin chi tiết cho từng thành viên (tên, ngày sinh/mất, giới tính, nghề nghiệp, v.v.).
--   **Quản lý Mối quan hệ:** Thiết lập các mối quan hệ (cha/mẹ, vợ/chồng, con) giữa các thành viên, hỗ trợ các mối quan hệ phức tạp.
--   **Quản lý Sự kiện:** Thêm, sửa, xóa và xem các sự kiện quan trọng của gia đình (sinh, kết hôn, mất, họp mặt).
--   **Trực quan hóa Cây Gia Phả:** Xem cây gia phả dưới dạng một biểu đồ tương tác có khả năng phóng to, di chuyển, lọc và nhiều kiểu hiển thị khác nhau.
--   **Tìm kiếm & Lọc:** Dễ dàng tìm kiếm thành viên và dòng họ theo tên, ngày sinh, giới tính và các tiêu chí khác.
--   **Đa ngôn ngữ:** Giao diện hỗ trợ cả tiếng Việt và tiếng Anh.
--   **Xuất/Nhập dữ liệu:** Hỗ trợ xuất/nhập cây gia phả theo các định dạng phổ biến (ví dụ: GEDCOM, PDF).
--   **Báo cáo & Thống kê:** Cung cấp các báo cáo thống kê chi tiết về gia phả.
--   **Tích hợp AI (Kế hoạch)**: Gợi ý tiểu sử, nhận diện khuôn mặt để tự động gắn thẻ.
+**Công nghệ chính:**
+*   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation, JWT Authentication, Novu
+*   **Frontend:** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
+*   **Cơ sở dữ liệu:** MySQL
+*   **Triển khai:** Docker, Docker Compose, Nginx
+*   **CI/CD:** GitHub Actions
 
-## 🛠️ Công Nghệ Sử Dụng
+## 2. 🏗️ Kiến trúc hệ thống (Architecture)
 
--   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation (Authentication handled by Auth0)
--   **Frontend:** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
--   **Cơ sở dữ liệu:** MySQL
--   **Triển khai:** Docker, Docker Compose, Nginx
--   **CI/CD:** GitHub Actions
+Dự án được tổ chức theo kiến trúc phân lớp rõ ràng để dễ dàng phát triển và bảo trì:
 
-## 🚀 Bắt Đầu Nhanh
+*   `src/backend`: Chứa mã nguồn cho dịch vụ API backend, tuân thủ Clean Architecture với các mẫu thiết kế như DDD (Domain-Driven Design) và CQRS (Command Query Responsibility Segregation) sử dụng MediatR. Tương tác với cơ sở dữ liệu thông qua Entity Framework Core.
+*   `src/frontend`: Chứa mã nguồn cho giao diện người dùng, được xây dựng với Vue.js 3, TypeScript và Vite.
+*   `src/infra`: Chứa các tệp cấu hình hạ tầng như Dockerfile cho backend và frontend, Docker Compose để điều phối các dịch vụ.
+*   `.github/workflows/ci.yml`: Định nghĩa pipeline CI/CD, tự động hóa quá trình build, test và linting.
 
-### Yêu Cầu Cần Thiết
+## 3. ⚙️ Cách cài đặt và chạy (Setup & Run Locally)
 
--   **Docker & Docker Compose**: Phiên bản mới nhất.
--   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn).
--   **Node.js 20+**: Phiên bản 20.x (hoặc mới hơn).
--   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations (cài đặt bằng `dotnet tool install --global dotnet-ef`).
+### 🚀 Yêu cầu:
 
-### Cài Đặt và Chạy
+*   **Docker & Docker Compose**: Phiên bản mới nhất (khuyến nghị để chạy toàn bộ ứng dụng).
+*   **.NET 8 SDK**: Phiên bản 8.0.x (hoặc mới hơn, cần cho phát triển backend).
+*   **Node.js >= 20**: Phiên bản 20.x (hoặc mới hơn, cần cho phát triển frontend).
+*   **Công cụ CLI**: `dotnet-ef` để quản lý Entity Framework Core migrations (cài đặt bằng `dotnet tool install --global dotnet-ef`).
 
-1.  **Clone repository:**
+### 🧩 Cách chạy backend (riêng lẻ):
+
+```bash
+cd src/backend
+dotnet restore
+dotnet build
+dotnet run --project src/Web
+```
+API sẽ khả dụng tại `http://localhost:5000` và Swagger UI tại `http://localhost:5000/swagger`.
+
+### 💻 Cách chạy frontend (riêng lẻ):
+
+```bash
+cd src/frontend
+npm install
+npm run dev
+```
+Ứng dụng sẽ chạy trên `http://localhost:5173`.
+
+### 🐳 Chạy bằng Docker Compose (cả hai service):
+
+Đây là cách nhanh nhất và được khuyến nghị để chạy cả Frontend, Backend, và Database trong môi trường phát triển.
+
+1.  **Cấu hình biến môi trường**: Tạo tệp `.env` trong thư mục `src/backend` và `src/frontend` dựa trên các tệp `.env.example` tương ứng. Cấu hình các biến môi trường cần thiết như chuỗi kết nối cơ sở dữ liệu, thông tin Auth0 (Domain, Client ID, Audience), và các khóa API khác.
+2.  **Chạy Docker Compose:**
     ```bash
-    git clone https://github.com/hkthao/family-tree-3.git
-    cd family-tree-3
+    docker-compose -f infra/docker-compose.yml up --build
+    ```
+    Sau khi các dịch vụ khởi động, bạn có thể truy cập:
+    *   **Frontend:** [http://localhost](http://localhost)
+    *   **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
+
+3.  **Cấu hình Database (chỉ lần đầu)**:
+    Nếu bạn chạy Backend với MySQL (không phải In-Memory Database), bạn cần áp dụng migrations để tạo schema database và seed dữ liệu mẫu. Khi chạy ở chế độ Development, ứng dụng sẽ tự động áp dụng migrations và seed dữ liệu nếu database trống.
+    ```bash
+    dotnet ef database update --project src/backend/src/Infrastructure --startup-project src/backend/src/Web
     ```
 
-2.  **Cấu hình Auth0**: 
-    *   **Auth0 Dashboard**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `http://localhost:5000`. 
-    *   **Biến môi trường Frontend**: Tạo file `frontend/.env.development` dựa trên `frontend/.env.example` và điền các thông tin Auth0 của bạn (Domain, Client ID, Audience).
-    *   **Biến môi trường Backend (Local Development)**: Cấu hình `Auth0:Domain` và `Auth0:Audience` trong `src/backend/src/Web/Properties/launchSettings.json`.
-    *   **Biến môi trường Backend (Docker Compose)**: Nếu chạy với Docker Compose, đảm bảo các biến môi trường `Auth0__Domain` và `Auth0__Audience` được thiết lập trong file `.env` hoặc `docker-compose.yml`.
+## 4. 🧪 Chạy kiểm thử (Testing)
 
-3.  **Chạy ứng dụng với Docker Compose:**
-    Lệnh này sẽ build (nếu cần) và chạy backend, frontend, và cơ sở dữ liệu. Đây là cách nhanh nhất để khởi động toàn bộ hệ thống.
-    ```bash
-    docker-compose -f src/infra/docker-compose.yml up --build
-    ```
+### Backend:
 
-4.  **Cấu hình Database (chỉ lần đầu)**:
-    Nếu bạn chạy Backend với MySQL (không phải In-Memory Database), bạn cần áp dụng migrations để tạo schema database và seed dữ liệu mẫu.
-    ```bash
-dotnet ef database update --project src/backend/src/Infrastructure --startup-project src/backend/src/Web
-    ```
+```bash
+cd src/backend
+dotnet test
+```
 
-5.  **Truy cập ứng dụng:**
-    -   **Frontend:** [http://localhost](http://localhost) (được phục vụ bởi Nginx)
-    -   **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
+### Frontend:
 
-Để có hướng dẫn chi tiết hơn, bao gồm cách chạy các dịch vụ riêng lẻ để phát triển, vui lòng tham khảo [Hướng dẫn Phát triển](./docs/engineering/development-guide.md).
+```bash
+cd src/frontend
+npm run test:coverage
+```
 
-## 📚 Tài Liệu Dự Án
+CI/CD tự động thực hiện các bước kiểm thử này trong workflow `.github/workflows/ci.yml`.
 
-Tất cả tài liệu dự án được đặt trong thư mục [`docs/`](./docs/README.md). Dưới đây là một số tài liệu quan trọng để bạn bắt đầu:
+## 5. 🔄 CI/CD Pipeline
 
--   [**Kiến trúc tổng quan**](./docs/engineering/architecture.md)
--   [**Hướng dẫn Phát triển**](./docs/engineering/development-guide.md)
--   [**Hướng dẫn Backend**](./docs/engineering/backend-guide.md)
--   [**Hướng dẫn Frontend**](./docs/engineering/frontend-guide.md)
--   [**Tham chiếu API**](./docs/engineering/api-reference.md)
--   [**Mô hình Dữ liệu**](./docs/engineering/data-model.md)
--   [**Hướng dẫn Kiểm thử & QA**](./docs/engineering/testing-guide.md)
--   [**Hướng dẫn Bảo mật**](./docs/engineering/security-guide.md)
--   [**Product Backlog**](./docs/project/backlog.md)
--   [**Lộ trình Phát triển**](./docs/project/roadmap.md)
--   [**Kế hoạch Sprint**](./docs/project/sprints.md)
--   [**Ghi chú phát hành**](./docs/project/release-notes.md)
+Dự án sử dụng GitHub Actions để tự động hóa quy trình CI/CD.
 
-## 🤝 Đóng Góp
+*   **Workflow CI (`.github/workflows/ci.yml`)**:
+    *   Được kích hoạt khi có `push` hoặc `pull_request` nhắm vào nhánh `main`.
+    *   Thực hiện:
+        1.  Build và chạy unit tests cho backend.
+        2.  Build, lint và chạy unit tests cho frontend.
+        3.  Build Docker image cho cả backend và frontend.
+        4.  Upload các Docker image này dưới dạng artifact.
 
-Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md) của chúng tôi để biết chi tiết về quy tắc ứng xử và quy trình gửi pull request.
+*   **Workflow CD (`.github/workflows/cd.yml`)**:
+    *   Được kích hoạt khi workflow CI hoàn thành thành công trên nhánh `main`.
+    *   Tải xuống các Docker image artifact.
+    *   Đăng nhập vào Docker Hub.
+    *   Push các Docker image lên Docker Hub.
 
-## 📄 Giấy Phép
+## 6. 📁 Cấu trúc thư mục (Project Structure)
+
+```
+family-tree-3/
+├── .github/workflows/ci.yml
+├── src/
+│   ├── backend/
+│   ├── frontend/
+│   └── infra/
+│       ├── Dockerfile.backend
+│       └── Dockerfile.frontend
+└── README.md
+```
+
+## 7. 🧭 Tài liệu chi tiết (References)
+
+Để có thông tin chi tiết hơn về từng phần của dự án, vui lòng tham khảo các tài liệu sau:
+
+*   [**Kiến trúc tổng quan**](./docs/engineering/architecture.md)
+*   [**Hướng dẫn Backend**](./docs/engineering/backend-guide.md)
+*   [**Hướng dẫn Frontend**](./docs/engineering/frontend-guide.md)
+*   [**Tham chiếu API**](./docs/engineering/api-reference.md)
+*   [**Mô hình Dữ liệu**](./docs/engineering/data-model.md)
+
+## 8. 👥 Đóng góp (Contributing)
+
+Chúng tôi hoan nghênh mọi đóng góp! Vui lòng đọc [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md) của chúng tôi để biết chi tiết về quy tắc ứng xử, quy trình gửi pull request, và các tiêu chuẩn về code style (`dotnet format`, `eslint`, Prettier).
+
+## 9. 📜 Giấy phép (License)
 
 Dự án này được cấp phép theo Giấy phép MIT. Xem tệp [LICENSE](./LICENSE) để biết chi tiết.
