@@ -1,5 +1,5 @@
 import { MainRouterView } from '@/views';
-import { ChunkAdmin, ConfigView as SystemConfig } from '@/views/admin';
+import { ChunkAdmin } from '@/views/admin';
 export const adminRoutes: RouteRecordRaw[] = [
   {
     path: 'admin',
@@ -12,12 +12,6 @@ export const adminRoutes: RouteRecordRaw[] = [
         name: 'ChunkAdmin',
         component: ChunkAdmin,
         meta: { breadcrumb: 'admin.chunks.title', requiresAuth: true, roles: ['Admin'] },
-      },
-      {
-        path: 'config',
-        name: 'SystemConfig',
-        component: SystemConfig,
-        meta: { breadcrumb: 'admin.config.title', requiresAuth: true, roles: ['Admin'] },
       },
 
     ],

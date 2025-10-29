@@ -84,17 +84,6 @@ const menu: MenuSection[] = [
     ],
   },
 
-  {
-    titleKey: 'menu.system',
-    items: [
-      {
-        titleKey: 'admin.config.title',
-        icon: 'mdi-cog',
-        to: '/admin/config',
-        roles: ['Admin'],
-      },
-    ],
-  },
 ];
 
 export default menu;
