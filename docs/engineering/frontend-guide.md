@@ -1,156 +1,177 @@
-# Hướng dẫn Frontend
+# Hướng dẫn Phát triển Frontend
 
-- [Giới thiệu](#giới-thiệu)
-- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
-- [Quản lý trạng thái với Pinia](#quản-lý-trạng-thái-với-pinia)
-- [Coding Style](#coding-style)
-- [Hướng dẫn Kiểm thử](#hướng-dẫn-kiểm-thử)
+Tài liệu này cung cấp hướng dẫn chi tiết về cách thiết lập, phát triển và duy trì phần frontend của ứng dụng Family Tree.
 
----
+## 1. Tổng quan
 
+Frontend của ứng dụng Family Tree là giao diện người dùng tương tác, cho phép người dùng xem, quản lý và trực quan hóa cây gia phả. Mục tiêu chính là cung cấp trải nghiệm người dùng mượt mà, trực quan và phản hồi nhanh.
 
+**Công nghệ chính:**
+*   **Framework:** Vue.js 3 (TypeScript)
+*   **UI Framework:** Vuetify 3 (Material Design)
+*   **State Management:** Pinia
+*   **Build Tool:** Vite
+*   **Routing:** Vue Router
 
-## Giới thiệu
+## 2. Cài đặt và Chạy
 
-Frontend của dự án được xây dựng bằng **Vue 3** với **TypeScript**, sử dụng **Vite** làm công cụ build và phát triển. Giao diện người dùng được xây dựng bằng **Vuetify 3** (một framework UI dựa trên Material Design), và quản lý trạng thái ứng dụng bằng **Pinia** (thư viện quản lý state nhẹ và mạnh mẽ cho Vue). **ESLint** và **Prettier** được sử dụng để đảm bảo chất lượng code và định dạng nhất quán.
+### Yêu cầu
 
-## Cấu trúc thư mục
+*   Node.js 20+ (hoặc phiên bản tương thích)
+*   npm (thường đi kèm với Node.js)
 
-Cấu trúc thư mục của Frontend được tổ chức một cách rõ ràng để dễ dàng tìm kiếm và quản lý code:
+### Chạy cục bộ (Development Mode)
 
+1.  **Điều hướng đến thư mục frontend:**
+    ```bash
+    cd src/frontend
+    ```
+2.  **Cài đặt các phụ thuộc:**
+    ```bash
+    npm install
+    ```
+3.  **Cấu hình biến môi trường:**
+    Tạo một tệp `.env` trong thư mục `src/frontend` dựa trên `src/frontend/.env.example`. Cấu hình `VITE_APP_API_BASE_URL` trỏ đến địa chỉ backend API của bạn (ví dụ: `http://localhost:5000`).
+4.  **Chạy ứng dụng:**
+    ```bash
+    npm run dev
+    ```
+    Ứng dụng sẽ chạy trên `http://localhost:5173` (hoặc một cổng khác nếu 5173 đã được sử dụng).
+
+### Xây dựng (Build for Production)
+
+Để tạo bản build sẵn sàng cho môi trường production:
+
+1.  **Điều hướng đến thư mục frontend:**
+    ```bash
+    cd src/frontend
+    ```
+2.  **Chạy lệnh build:**
+    ```bash
+    npm run build
+    ```
+    Các tệp tĩnh đã được build sẽ nằm trong thư mục `src/frontend/dist/`.
+
+## 3. Cấu trúc Thư mục
+
+Dự án frontend được tổ chức một cách rõ ràng để dễ dàng quản lý và mở rộng:
+
+*   **`src/frontend/src/`**:
+    *   **`assets/`**: Chứa các tài nguyên tĩnh như hình ảnh, font, JSON data.
+    *   **`components/`**: Chứa các Vue components có thể tái sử dụng (ví dụ: `buttons`, `cards`, `forms`).
+    *   **`constants/`**: Định nghĩa các hằng số của ứng dụng.
+    *   **`data/`**: Dữ liệu mock hoặc dữ liệu tĩnh.
+    *   **`layouts/`**: Các layout chính của ứng dụng (ví dụ: `DefaultLayout.vue`).
+    *   **`locales/`**: Các tệp dịch thuật cho tính năng đa ngôn ngữ.
+    *   **`plugins/`**: Các plugin Vue.js (ví dụ: `vuetify.ts`, `i18n.ts`, `services.plugin.ts`).
+    *   **`router/`**: Cấu hình Vue Router và định nghĩa các route.
+    *   **`services/`**: Chứa các service để tương tác với backend API hoặc các dịch vụ bên ngoài. Được tổ chức theo từng module (ví dụ: `family`, `member`).
+    *   **`stores/`**: Chứa các Pinia stores để quản lý trạng thái ứng dụng. Được tổ chức theo từng module (ví dụ: `family.store.ts`, `auth.store.ts`).
+    *   **`styles/`**: Các tệp CSS/SCSS tùy chỉnh.
+    *   **`types/`**: Định nghĩa các TypeScript interfaces và types chung của ứng dụng.
+    *   **`utils/`**: Các hàm tiện ích chung.
+    *   **`views/`**: Chứa các Vue components cấp cao nhất, đại diện cho các trang hoặc màn hình chính của ứng dụng.
+
+## 4. Quy ước (Conventions)
+
+### 4.1. Code Style & Linting
+
+*   Sử dụng ESLint và Prettier để duy trì code style nhất quán. Cấu hình được định nghĩa trong `.eslintrc.cjs` và `.prettierrc.cjs`.
+*   Để kiểm tra và tự động sửa lỗi định dạng:
+    ```bash
+    cd src/frontend
+    npm run lint
+    npm run lint:fix
+    ```
+
+### 4.2. Commit Messages
+
+Tuân thủ Conventional Commits để có các commit message rõ ràng và có cấu trúc. Ví dụ:
+
+*   `feat: add new user registration feature`
+*   `fix: correct typo in login form`
+*   `docs: update frontend development guide`
+
+### 4.3. Import Paths
+
+Luôn sử dụng alias `@/` cho các import trong thư mục `src/frontend/src/` để giữ cho đường dẫn ngắn gọn và dễ đọc. Ví dụ:
+
+```typescript
+import { useAuthStore } from '@/stores/auth.store';
+import MyComponent from '@/components/MyComponent.vue';
 ```
-frontend/
-├── src/
-│   ├── App.vue         # Component gốc của ứng dụng Vue.
-│   ├── main.ts         # File khởi tạo ứng dụng Vue và các plugin.
-│   ├── assets/         # Chứa các tài sản tĩnh như hình ảnh, icons, fonts, và các file CSS/SCSS toàn cục.
-│   ├── components/     # Chứa các Vue component có thể tái sử dụng trên nhiều trang hoặc trong các component lớn hơn (ví dụ: `BaseButton.vue`, `FamilyCard.vue`).
-│   ├── constants/      # Chứa các hằng số được sử dụng trong toàn bộ ứng dụng (ví dụ: `API_ENDPOINTS.ts`, `APP_CONFIG.ts`).
-│   ├── data/           # Chứa dữ liệu mock được sử dụng trong môi trường phát triển hoặc cho các service mock, ví dụ: `menuItems.ts`.
-│   ├── layouts/        # Chứa các layout chính của ứng dụng (ví dụ: `DefaultLayout.vue`, `AuthLayout.vue`).
-│   ├── locales/        # Chứa các file dịch (i18n) cho các ngôn ngữ khác nhau.
-│   ├── plugins/        # Chứa các plugin của Vue hoặc các thư viện bên thứ ba được khởi tạo (ví dụ: `vuetify.ts`, `pinia.ts`, `axios.ts`).
-│   ├── router/         # Chứa cấu hình routing của Vue Router, định nghĩa các đường dẫn và component tương ứng.
-│   ├── services/       # Chứa các service giao tiếp với Backend API hoặc các dịch vụ bên ngoài khác (ví dụ: `api.family.service.ts`, `api.ai.service.ts`). Các service này trả về kết quả theo `Result Pattern` để xử lý lỗi và thành công một cách nhất quán.
-│   ├── stores/         # Chứa các Pinia store để quản lý trạng thái toàn cục của ứng dụng (ví dụ: `auth.store.ts`, `userSettings.store.ts`).
-│   ├── styles/         # Chứa các style chung, biến CSS, hoặc các file SCSS/CSS được import toàn cục.
-│   ├── types/          # Chứa định nghĩa các TypeScript type và interface cho dữ liệu (ví dụ: `Family.d.ts`, `UserPreference.d.ts`).
-│   ├── utils/          # Chứa các hàm tiện ích (utility functions) không liên quan đến Vue component hoặc logic nghiệp vụ cụ thể (ví dụ: `dateUtils.ts`, `stringUtils.ts`).
-│   └── views/          # Chứa các page components, mỗi component đại diện cho một trang hoặc một route chính của ứng dụng (ví dụ: `FamilyListView.vue`, `MemberDetailView.vue`).
-├── tests/              # Chứa các file test cho Frontend (Unit Tests, Component Tests).
-└── ...                 # Các file cấu hình khác (package.json, tsconfig.json, vite.config.ts, v.v.).
-```
 
-## Quản lý trạng thái với Pinia
+## 5. Kiểm thử
 
-**Pinia** là thư viện quản lý trạng thái (state management) được khuyến nghị cho các ứng dụng Vue 3. Nó cung cấp một cách tiếp cận đơn giản, mạnh mẽ và có thể mở rộng để quản lý trạng thái toàn cục của ứng dụng. Các store của Pinia được định nghĩa trong thư mục `src/stores`.
+Dự án frontend sử dụng Vitest để chạy unit tests và kiểm tra độ bao phủ mã.
 
-#### Cấu trúc Store
+### 5.1. Chạy Tests
 
-Mỗi store được định nghĩa bằng `defineStore()` và bao gồm:
-
-*   **`state`**: Nơi lưu trữ dữ liệu trạng thái của store.
-*   **`getters`**: Các hàm tính toán dữ liệu từ `state` (tương tự computed properties).
-*   **`actions`**: Các phương thức để thay đổi `state` hoặc thực hiện các thao tác bất đồng bộ (ví dụ: gọi API).
-
-#### Các quy ước khi sử dụng Pinia trong dự án
-
-*   **Sử dụng Options API**: Các store nên được định nghĩa theo kiểu Options API của Pinia (sử dụng `state`, `getters`, `actions` làm thuộc tính của đối tượng truyền vào `defineStore`).
-*   **Truy cập Service**: Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `src/frontend/src/plugins/services.plugin.ts`.
-*   **Xử lý lỗi và Loading**: Các hành động (actions) trong store nên cập nhật trạng thái `loading` và `error` một cách nhất quán để các component có thể hiển thị trạng thái tải hoặc thông báo lỗi cho người dùng.
-*   **Dịch hóa thông báo lỗi**: Thông báo lỗi nên được dịch hóa bằng `i18n.global.t()` (ví dụ: `i18n.global.t('family.errors.load')`).
-*   **`userSettingsStore`**: `userSettingsStore` (`frontend/src/stores/userSettings.store.ts`) là nguồn đáng tin cậy duy nhất cho các cài đặt và tùy chọn cá nhân của người dùng hiện tại (chủ đề, ngôn ngữ, cài đặt thông báo). Các component UI cần hiển thị hoặc thay đổi cài đặt người dùng nên lấy dữ liệu từ store này.
-
-## Coding Style
-
-Để đảm bảo code Frontend luôn sạch, dễ đọc và nhất quán, dự án sử dụng **ESLint** để phân tích mã tĩnh (static analysis) và **Prettier** để định dạng code tự động. Các công cụ này được tích hợp vào quy trình phát triển và có thể chạy tự động.
-
-#### ESLint
-
-*   **Mục đích**: Phát hiện các lỗi cú pháp, lỗi lập trình tiềm ẩn, và các vấn đề về code style không tuân thủ quy tắc đã định nghĩa.
-*   **Cấu hình**: File `.eslintrc.cjs` trong thư mục `frontend/`.
-*   **Cách chạy**: 
-
+1.  **Điều hướng đến thư mục frontend:**
     ```bash
-    # Kiểm tra lỗi linting
-    npm run lint --prefix frontend
-    
-    # Tự động sửa các lỗi có thể sửa được
-    npm run lint:fix --prefix frontend
+    cd src/frontend
     ```
-
-#### Prettier
-
-*   **Mục đích**: Tự động định dạng code theo một bộ quy tắc nhất quán, giúp loại bỏ các tranh cãi về code style trong nhóm.
-*   **Cấu hình**: File `.prettierrc.cjs` trong thư mục `frontend/`.
-*   **Tích hợp**: Prettier thường được tích hợp với ESLint và chạy cùng với lệnh `npm run lint:fix`.
-
-#### Quy tắc chung
-
-*   **Import Order**: Nhóm các import theo thứ tự: thư viện bên ngoài, alias của project (`@/`), import tương đối (`./`, `../`).
-
-    ```typescript
-    // Tốt
-    import { ref } from 'vue';
-    import { useFamilyStore } from '@/stores/family.store';
-    import MyComponent from './MyComponent.vue';
-    ```
-
-*   **Props Order**: `defineProps` nên được định nghĩa ở đầu `<script setup>` để dễ dàng nhìn thấy các props của component.
-
-*   **CSS**: Sử dụng `<style scoped>` cho các style chỉ ảnh hưởng đến component hiện tại. Các style toàn cục hoặc biến CSS nên được đặt trong `src/styles`.
-
-*   **Vuetify**: Sử dụng các component và utility classes của Vuetify một cách nhất quán để đảm bảo giao diện đồng bộ.
-
-*   **TypeScript**: Luôn sử dụng TypeScript để định nghĩa rõ ràng các kiểu dữ liệu, giúp phát hiện lỗi sớm và cải thiện khả năng bảo trì code.
-
-#### Cấu hình IDE
-
-*   Nên cài đặt các extension ESLint và Prettier cho VS Code (hoặc IDE tương tự) và cấu hình chúng để tự động định dạng và sửa lỗi khi lưu file. Điều này giúp duy trì code style mà không cần chạy lệnh thủ công.
-
-
-
-
-
-
-## Hướng dẫn Kiểm thử
-
-Kiểm thử Frontend là rất quan trọng để đảm bảo giao diện người dùng hoạt động đúng như mong đợi và cung cấp trải nghiệm tốt. Dự án này sử dụng **Vitest** làm test runner và **Vue Test Utils** để kiểm thử các component Vue.
-
-#### Component Tests
-
-*   **Mục đích**: Kiểm tra giao diện và tương tác của từng component Vue một cách độc lập. Đảm bảo component hiển thị đúng dữ liệu, phản ứng chính xác với các sự kiện của người dùng và tương tác đúng với các props/emits.
-*   **Công cụ**: `Vitest` và `Vue Test Utils`.
-*   **Vị trí**: Các file test thường nằm cùng thư mục với component hoặc trong thư mục `tests/unit/components`.
-*   **Cách chạy**: 
-
+2.  **Chạy tất cả các tests:**
     ```bash
-    # Chạy tất cả component tests
-    npm run test:unit --prefix frontend
+    npm run test
     ```
-
-#### Store Tests (Pinia)
-
-*   **Mục đích**: Kiểm tra logic của các Pinia store, bao gồm `state`, `getters`, và `actions`. Đảm bảo rằng store quản lý trạng thái đúng cách và các action thực hiện các thay đổi hoặc gọi API một cách chính xác.
-*   **Công cụ**: `Vitest`.
-*   **Vị trí**: Các file test thường nằm trong thư mục `tests/unit/stores`.
-*   **Cách chạy**: 
-
+3.  **Chạy tests với độ bao phủ mã (Code Coverage):**
     ```bash
-    # Chạy tất cả store tests
-    npm run test:unit --prefix frontend
+    npm run test:coverage
     ```
+    Kết quả độ bao phủ mã sẽ được tạo ra trong thư mục `src/frontend/coverage/`.
 
-#### Test Coverage
+### 5.2. Hướng dẫn Viết Tests
 
-*   **Mục đích**: Đo lường tỷ lệ phần trăm mã nguồn Frontend được thực thi bởi các bài kiểm thử. Test Coverage cao giúp tăng cường sự tự tin vào chất lượng mã nguồn Frontend.
-*   **Cách tạo báo cáo**: 
+*   **Framework**: Sử dụng Vitest làm test runner và thư viện testing. Vue Test Utils để mount và tương tác với các Vue components.
+*   **Cấu trúc**: Các tệp test thường được đặt cùng thư mục với tệp mã nguồn hoặc trong thư mục `src/frontend/tests/unit/`.
+*   **Mocking**: Sử dụng Vitest's mocking utilities hoặc thư viện như `vi.mock` để mock các dependencies (ví dụ: API services, Pinia stores).
+*   **Tham khảo**: Xem các tệp test hiện có trong `src/frontend/tests/unit/` để hiểu rõ hơn về cách viết test.
 
-    ```bash
-    # Chạy test và tạo báo cáo coverage
-    npm run test:coverage --prefix frontend
-    ```
+## 6. CI/CD
 
-    Báo cáo coverage thường được tạo ra trong thư mục `frontend/coverage`.
+Frontend được tích hợp vào quy trình CI/CD của GitHub Actions thông qua workflow `ci.yml`.
 
-*   **Ngưỡng Coverage**: Đặt mục tiêu coverage hợp lý (ví dụ: 80% cho logic quan trọng) nhưng không nên coi coverage là mục tiêu duy nhất. Chất lượng test quan trọng hơn số lượng.
+*   **`build-and-test` job**: Trong job này, các bước sau được thực hiện cho frontend:
+    *   Cài đặt Node.js 20.
+    *   Cài đặt các phụ thuộc (`npm install`).
+    *   Chạy linting (`npm run lint`).
+    *   Chạy unit tests và kiểm tra độ bao phủ mã (`npm run test:coverage`).
+*   **`docker-build` job**: Sau khi các kiểm tra và test thành công, một Docker image cho frontend sẽ được xây dựng bằng `infra/Dockerfile.frontend` và gắn thẻ `hkthao/family-tree-frontend:latest`.
+
+## 7. Cấu hình Biến môi trường
+
+Frontend sử dụng các biến môi trường để cấu hình các cài đặt khác nhau tùy thuộc vào môi trường (development, production).
+
+*   **Tệp `.env`**: Khi chạy cục bộ, bạn có thể định nghĩa các biến môi trường trong tệp `.env` (hoặc `.env.development`, `.env.production`).
+*   **Tiền tố `VITE_APP_`**: Vite yêu cầu các biến môi trường được sử dụng trong mã nguồn frontend phải có tiền tố `VITE_APP_` (ví dụ: `VITE_APP_API_BASE_URL`).
+*   **Truy cập trong mã nguồn**: Các biến này có thể được truy cập trong mã nguồn bằng `import.meta.env.VITE_APP_API_BASE_URL`.
+
+## 8. Quy trình Phát triển Tính năng
+
+Khi thêm một tính năng mới vào frontend, hãy tuân thủ quy trình sau:
+
+1.  **Tạo nhánh mới:** Luôn làm việc trên một nhánh tính năng mới (ví dụ: `feature/ten-tinh-nang-moi`).
+2.  **Phát triển:**
+    *   Tạo hoặc cập nhật các components, views, services, stores liên quan.
+    *   Đảm bảo tuân thủ code style và các quy ước đã định nghĩa.
+    *   Viết unit tests cho các phần logic mới.
+3.  **Kiểm tra cục bộ:** Chạy `npm run dev` để kiểm tra tính năng trong trình duyệt.
+4.  **Chạy lint và tests:** Đảm bảo không có lỗi lint và tất cả các tests đều vượt qua (`npm run lint`, `npm run test:coverage`).
+5.  **Tạo Pull Request:** Khi hoàn thành, tạo một Pull Request lên nhánh `develop`.
+
+## 9. Xử lý sự cố (Troubleshooting)
+
+*   **Lỗi `npm install`**: Kiểm tra phiên bản Node.js của bạn có tương thích không. Thử xóa `node_modules` và `package-lock.json` rồi chạy lại `npm install`.
+*   **Lỗi API không phản hồi**: Đảm bảo backend API đang chạy và `VITE_APP_API_BASE_URL` trong tệp `.env` của frontend được cấu hình đúng.
+*   **Lỗi hiển thị UI**: Kiểm tra console của trình duyệt để tìm lỗi JavaScript hoặc CSS. Đảm bảo Vuetify đã được cài đặt và cấu hình đúng.
+*   **Lỗi Linting**: Chạy `npm run lint:fix` để tự động sửa các lỗi định dạng.
+
+## 10. Tài liệu liên quan
+
+*   [Vue.js Documentation](https://vuejs.org/)
+*   [Vuetify Documentation](https://vuetifyjs.com/)
+*   [Pinia Documentation](https://pinia.vuejs.org/)
+*   [Vite Documentation](https://vitejs.dev/)
+*   [Vitest Documentation](https://vitest.dev/)
+*   [Novu Documentation](https://docs.novu.co/)
