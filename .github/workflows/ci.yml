@@ -61,7 +61,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./src/backend
-        file: src/infra/Dockerfile.backend
+        file: infra/Dockerfile.backend
         push: false
         tags: hkthao/family-tree-backend:latest
         outputs: type=docker,dest=/tmp/backend-image.tar
@@ -70,7 +70,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./src/frontend
-        file: src/infra/Dockerfile.frontend
+        file: infra/Dockerfile.frontend
         push: false
         tags: hkthao/family-tree-frontend:latest
         outputs: type=docker,dest=/tmp/frontend-image.tar
