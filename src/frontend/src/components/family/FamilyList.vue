@@ -80,7 +80,7 @@
       </v-tooltip>
       <v-tooltip :text="t('family.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)" data-testid="delete-family-button">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)" data-testid="delete-family-button" :data-family-name="item.name">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
