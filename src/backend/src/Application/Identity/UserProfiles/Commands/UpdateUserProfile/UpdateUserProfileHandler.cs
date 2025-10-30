@@ -24,9 +24,14 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context) : IR
             return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
-        // Update existing UserProfile in local DB
-        if (request.Name != null) userProfile.Name = request.Name;
+        if (request.FirstName != null) userProfile.FirstName = request.FirstName;
+        if (request.LastName != null) userProfile.LastName = request.LastName;
+        if (request.FirstName != null || request.LastName != null)
+        {
+            userProfile.Name = $"{userProfile.FirstName} {userProfile.LastName}".Trim();
+        }
         if (request.Email != null) userProfile.Email = request.Email;
+        if (request.Phone != null) userProfile.Phone = request.Phone;
         if (request.Avatar != null) userProfile.Avatar = request.Avatar;
         // Other fields like Picture or UserMetadata are managed by Auth0 directly
 

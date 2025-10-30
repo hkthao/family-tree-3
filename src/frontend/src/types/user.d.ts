@@ -20,6 +20,9 @@ export interface UserProfile {
     externalId: string;
     email: string;
     name: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
     avatar?: string;
     roles?: string[];
 }
