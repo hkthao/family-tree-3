@@ -1,9 +1,9 @@
 <template>
-  <v-card class="mb-4">
+  <v-card class="mb-4" data-testid="member-search">
     <v-card-title class="text-h6 d-flex align-center">
       {{ t('member.search.title') }}
       <v-spacer></v-spacer>
-      <v-btn variant="text" icon size="small" @click="expanded = !expanded">
+      <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="member-search-expand-button">
         <v-tooltip :text="expanded ? t('common.collapse') : t('common.expand')">
           <template v-slot:activator="{ props }">
             <v-icon v-bind="props">{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
@@ -17,22 +17,22 @@
           <v-row>
             <v-col cols="12" md="4">
               <v-text-field v-model="filters.searchQuery" :label="t('member.search.search')" clearable
-                prepend-inner-icon="mdi-magnify"></v-text-field>
+                prepend-inner-icon="mdi-magnify" data-testid="member-search-input"></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
-              <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable />
+              <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable data-testid="member-gender-filter" />
             </v-col>
             <v-col cols="12" md="4">
-              <FamilyAutocomplete v-model="filters.familyId" :label="t('member.search.family')" clearable />
+              <FamilyAutocomplete v-model="filters.familyId" :label="t('member.search.family')" clearable data-testid="member-family-filter" />
             </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="applyFilters">{{
+          <v-btn color="primary" @click="applyFilters" data-testid="apply-filters-button">{{
             t('member.search.apply')
           }}</v-btn>
-          <v-btn @click="resetFilters">{{ t('member.search.reset') }}</v-btn>
+          <v-btn @click="resetFilters" data-testid="reset-filters-button">{{ t('member.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
     </v-expand-transition>

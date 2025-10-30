@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="form" :disabled="props.readOnly">
+  <v-form ref="form" :disabled="props.readOnly" data-testid="member-form">
     <!-- Thông tin cơ bản -->
     <v-row>
       <v-col cols="12">
@@ -59,7 +59,7 @@
     <v-row>
       <v-col cols="12">
         <FamilyAutocomplete v-model="memberForm.familyId" :label="t('member.form.familyId')" :rules="[rules.required]"
-          :readonly="props.readOnly" :multiple="false" />
+          :readonly="props.readOnly" :multiple="false" data-testid="member-family-select" />
       </v-col>
     </v-row>
 

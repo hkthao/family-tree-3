@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card data-testid="member-add-view">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('member.form.addTitle') }}</span>
     </v-card-title>
@@ -11,7 +11,7 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey"  @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
       <v-btn color="blue-darken-1"  @click="handleAddMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>

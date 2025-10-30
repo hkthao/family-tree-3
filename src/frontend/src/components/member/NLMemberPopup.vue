@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="800px">
+  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="800px" data-testid="nl-member-popup">
     <v-card>
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>

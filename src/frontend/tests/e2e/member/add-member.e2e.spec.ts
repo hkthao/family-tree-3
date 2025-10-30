@@ -1,35 +1,50 @@
 import { test, expect } from '@playwright/test';
-import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
+import { login } from '../login.setup';
 
-// test.describe('Member Management - Add Member', () => {
-//   test('should allow a user to add a member to the family tree', async ({ page }) => {
-//     // Điều hướng đến trang chi tiết cây gia phả (cần familyId)
-//     // TODO: Cần lấy familyId từ test case trước hoặc từ API
-//     // Tạm thời, chúng ta sẽ điều hướng đến trang quản lý gia phả và chọn gia phả vừa tạo
-//     await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
-//     const familyName = `Test Family`; // Cần lấy tên gia phả đã tạo
-//     await page.click(`text=${familyName}`); // Click vào gia phả vừa tạo
+test.describe('Member Management - Add Member', () => {
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
 
-//     // Nhấn nút "Thêm Thành viên Mới"
-//     await page.click('[data-testid="add-new-member-button"]');
+  test('should allow a user to add a member to the family tree', async ({ page }) => {
+    const familyName = `e2e Member Family ${new Date().getTime()}`;
+    const address = `e2e Member Address ${new Date().getTime()}`;
+    const description = `e2e Member Description ${new Date().getTime()}`;
 
-//     // Điền thông tin thành viên mới
-//     const memberFirstName = 'Thành viên';
-//     const memberLastName = `Test ${Date.now()}`;
-//     await page.fill('[data-testid="member-first-name-input"] input', memberFirstName);
-//     await page.fill('[data-testid="member-last-name-input"] input', memberLastName);
-//     await page.selectOption('[data-testid="member-gender-select"]', 'Male'); // Chọn giới tính
-//     // TODO: Cần thêm các trường khác như ngày sinh, nơi sinh, v.v.
+    // 1. Create a family first
+    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
+    await page.getByTestId('add-new-family-button').click();
+    await page.getByTestId('family-name-input').locator('input').fill(familyName);
+    await page.getByTestId('family-address-input').locator('input').fill(address);
+    await page.getByTestId('family-description-input').locator('textarea').fill(description);
+    await page.getByTestId('button-save').click();
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByText(familyName)).toBeVisible();
 
-//     // Nhấn nút "Lưu"
-//     await page.click('[data-testid="save-member-button"]');
+    // 2. Navigate to the member list page and click "Add New Member"
+    await page.getByRole('link', { name: 'Quản lý thành viên' }).click(); // Navigate to member list
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('add-new-member-button').click();
+    await page.waitForLoadState('networkidle');
 
-//     // Chờ thông báo thành công
-//     await expect(page.locator('[data-testid="snackbar-success"]')).toBeVisible();
-//     console.log(`Đã thêm thành viên mới: ${memberFirstName} ${memberLastName}`);
+    // 3. Fill in member details
+    const memberFirstName = 'Thành viên';
+    const memberLastName = `Test ${new Date().getTime()}`;
+    await page.getByTestId('member-first-name-input').locator('input').fill(memberFirstName);
+    await page.getByTestId('member-last-name-input').locator('input').fill(memberLastName);
+    await page.getByTestId('member-gender-select').click();
+    await page.getByRole('option', { name: 'Nam' }).click(); // Assuming 'Nam' is the text for Male
 
-//     // TODO: Cần lấy memberId từ URL hoặc từ API response sau khi tạo thành công
-//     // Tạm thời, chúng ta sẽ tìm kiếm tên thành viên trong danh sách để xác nhận
-//     await expect(page.locator(`text=${memberFirstName} ${memberLastName}`)).toBeVisible();
-//   });
-// });
+    // Select the family for the member
+    await page.getByTestId('member-family-select').click(); // Assuming a data-testid for family select
+    await page.waitForSelector('.v-overlay-container .v-list-item');
+    await page.getByText(familyName).click(); // Select the created family
+
+    // 4. Save the new member
+    await page.getByTestId('button-save').click();
+    await page.waitForLoadState('networkidle'); // Should navigate back to member list after saving member
+
+    // 5. Verify the new member is visible
+    await expect(page.getByText(`${memberFirstName} ${memberLastName}`)).toBeVisible();
+  });
+});

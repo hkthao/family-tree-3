@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card data-testid="member-relationships">
     <v-card-text>
       <v-data-table
         :headers="headers"

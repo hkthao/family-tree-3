@@ -1,6 +1,6 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
-    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0">
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0" data-testid="member-list">
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
