@@ -8,9 +8,9 @@ test.describe('Family Management - Create Family', () => {
   });
 
   test('should allow a user to create a new family tree', async ({ page }) => {
-    var familyName = `e2e Family ${new Date().getTime()}`
-    var address = `e2e address ${new Date().getTime()}`
-    var description = `e2e descriptions ${new Date().getTime()}`
+    const familyName = `e2e Family ${new Date().getTime()}`
+    const address = `e2e address ${new Date().getTime()}`
+    const description = `e2e descriptions ${new Date().getTime()}`
     await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
     await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
     await page.getByTestId('add-new-family-button').click();
