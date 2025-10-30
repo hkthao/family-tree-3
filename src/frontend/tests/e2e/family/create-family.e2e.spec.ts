@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
 import { login } from '../login.setup';
 
 test.describe('Family Management - Create Family', () => {
@@ -12,7 +11,6 @@ test.describe('Family Management - Create Family', () => {
     const address = `e2e address ${new Date().getTime()}`
     const description = `e2e descriptions ${new Date().getTime()}`
     await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
-    await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
     await page.getByTestId('add-new-family-button').click();
 
     await page.getByTestId('family-name-input').click();
@@ -23,6 +21,19 @@ test.describe('Family Management - Create Family', () => {
 
     await page.getByTestId('family-description-input').click();
     await page.getByTestId('family-description-input').locator('textarea').fill(description);
+
+    await page.getByTestId('family-visibility-select').click();
+    await page.waitForSelector('.v-overlay-container .v-list-item');
+    await page.locator('.v-overlay-container .v-list-item').first().click();
+
+
+    await page.getByTestId('family-managers-select').click();
+    await page.waitForSelector('.v-overlay-container .v-list-item');
+    await page.locator('.v-overlay-container .v-list-item').first().click();
+
+    await page.getByTestId('family-viewers-select').click();
+    await page.waitForSelector('.v-overlay-container .v-list-item');
+    await page.locator('.v-overlay-container .v-list-item').first().click();
 
     await page.getByTestId('button-save').click();
     await expect(page.locator('[data-testid="snackbar-success"]')).toBeVisible();

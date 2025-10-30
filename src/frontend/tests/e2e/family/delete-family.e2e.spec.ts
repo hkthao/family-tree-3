@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
 import { login } from '../login.setup';
 
 test.describe('Family Management - Delete Family', () => {
@@ -11,7 +10,7 @@ test.describe('Family Management - Delete Family', () => {
     const familyName = `e2e Delete Family ${new Date().getTime()}`;
 
     // Create a family first
-    await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
+    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
     await page.getByTestId('add-new-family-button').click();
     await page.getByTestId('family-name-input').click();
     await page.getByTestId('family-name-input').locator('input').fill(familyName);
