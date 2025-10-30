@@ -46,5 +46,6 @@ test.describe('Family Management - Create Family', () => {
     await page.getByTestId('apply-filters-button').click();
     await page.waitForLoadState('networkidle');
     await expect(page.getByText(familyName)).toBeVisible();
+    console.log('Đã tạo mới cây gia phả.');
   });
 });

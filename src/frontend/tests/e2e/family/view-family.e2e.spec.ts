@@ -35,6 +35,7 @@ test.describe('Family Management - View Family', () => {
     await expect(page.getByTestId('family-description-input').locator('textarea')).toHaveValue(description);
     await expect(page.getByTestId('family-name-input').locator('input')).toHaveValue(familyName);
     await expect(page.getByTestId('family-address-input').locator('input')).toHaveValue(address);
+    
     console.log('Đã xem chi tiết cây gia phả.');
   });
 });

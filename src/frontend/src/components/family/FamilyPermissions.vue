@@ -1,11 +1,13 @@
 <template>
   <v-row>
     <v-col>
-              <v-autocomplete v-model="managers" :items="userProfiles" item-title="name" item-value="id" chips closable-chips
-                multiple :disabled="props.readOnly" :label="t('family.permissions.managers')" data-testid="family-managers-select"></v-autocomplete>    </v-col>
+      <v-autocomplete v-model="managers" :items="userProfiles" item-title="name" item-value="id" chips closable-chips
+        multiple :disabled="props.readOnly" :label="t('family.permissions.managers')"
+        data-testid="family-managers-select"></v-autocomplete> </v-col>
     <v-col>
-              <v-autocomplete v-model="viewers" :items="userProfiles" item-title="name" item-value="id" chips closable-chips
-                multiple :disabled="props.readOnly" :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></v-autocomplete>    </v-col>
+      <v-autocomplete v-model="viewers" :items="userProfiles" item-title="name" item-value="id" chips closable-chips
+        multiple :disabled="props.readOnly" :label="t('family.permissions.viewers')"
+        data-testid="family-viewers-select"></v-autocomplete> </v-col>
   </v-row>
 </template>
 

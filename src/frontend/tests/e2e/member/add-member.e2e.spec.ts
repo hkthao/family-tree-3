@@ -26,9 +26,8 @@ test.describe('Member Management - Add Member', () => {
     await page.getByTestId('member-first-name-input').locator('input').fill(memberFirstName);
     await page.getByTestId('member-last-name-input').locator('input').fill(memberLastName);
     await page.getByTestId('member-nickname-input').locator('input').fill(memberNickname);
+    await page.waitForTimeout(500)
 
-    // await page.getByTestId('member-date-of-birth-input').click();
-    // await page.getByTestId('member-date-of-death-input').locator('input').fill(memberDateOfDeath);
     await page.locator('.mdi-calendar').first().click();
     await page.locator('button[class="v-btn v-btn--icon v-theme--dark v-btn--density-default v-btn--size-default v-btn--variant-text v-date-picker-month__day-btn"]').first().click();
 
@@ -48,20 +47,21 @@ test.describe('Member Management - Add Member', () => {
     await page.getByTestId('member-family-select').click(); // Assuming a data-testid for family select
     await page.waitForSelector('.v-overlay-container .v-list-item');
     await page.locator('.v-overlay-container .v-list-item').first().click();
+    await page.waitForTimeout(1000)
 
     // 4. Save the new member
     await page.getByTestId('save-member-button').click();
     await page.waitForLoadState('networkidle'); // Should navigate back to member list after saving member
+    await expect(page.locator('[data-testid="snackbar-success"]')).toBeVisible();
 
     // 5. Verify the new member is visible
     await page.getByTestId('member-search-expand-button').click();
     await page.waitForTimeout(500)
-    await page.getByTestId('member-search-input').locator('input').fill(memberFirstName);
+    await page.getByTestId('member-search-input').locator('input').fill(memberLastName);
     await page.getByTestId('apply-filters-button').click();
     await page.waitForLoadState('networkidle');
-    await expect(page.getByText(`${memberFirstName}`)).toBeVisible();
-    await expect(page.getByText(`${memberLastName}`)).toBeVisible();
-
+    await page.waitForTimeout(1000)
+    await expect(page.getByText(`${memberLastName} ${memberFirstName}`)).toBeVisible();
     console.log('Đã thêm thành viên.');
   });
 });

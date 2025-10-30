@@ -31,9 +31,10 @@ test.describe('Family Management - Delete Family', () => {
 
     // Chờ thông báo thành công
     await expect(page.locator('[data-testid="snackbar-success"]')).toBeVisible();
-    console.log('Đã xóa cây gia phả.');
-
+    
     // Xác nhận cây gia phả không còn trong danh sách
     await expect(page.getByText(familyName)).not.toBeVisible();
+    
+    console.log('Đã xóa cây gia phả.');
   });
 });

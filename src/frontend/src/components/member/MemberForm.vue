@@ -109,14 +109,8 @@ const rules = {
 
 const dateOfDeathRule = (value: string | Date | null) => {
   if (!value) return true;
-  if (!memberForm.value.dateOfBirth) return true;
-
-  const dateOfDeath = typeof value === 'string' ? new Date(value) : value;
-  const dateOfBirth =
-    typeof memberForm.value.dateOfBirth === 'string'
-      ? new Date(memberForm.value.dateOfBirth)
-      : memberForm.value.dateOfBirth;
-
+  const dateOfDeath = memberForm.value.dateOfDeath;
+  const dateOfBirth = memberForm.value.dateOfBirth
   if (!dateOfDeath || !dateOfBirth) return true;
   return dateOfDeath > dateOfBirth || t('validation.dateOfDeathAfterBirth');
 };
