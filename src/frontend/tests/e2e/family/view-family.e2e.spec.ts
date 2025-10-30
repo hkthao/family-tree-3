@@ -11,6 +11,7 @@ test.describe('Family Management - View Family', () => {
     const address = `e2e address ${new Date().getTime()}`;
     const description = `e2e descriptions ${new Date().getTime()}`;
 
+    console.log('Điều hướng đến trang quản lý gia đình/dòng họ để tạo gia đình.');
     // Create a family first
     await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
     await page.waitForLoadState('networkidle');
@@ -22,16 +23,22 @@ test.describe('Family Management - View Family', () => {
     await page.getByTestId('family-description-input').click();
     await page.getByTestId('family-description-input').locator('textarea').fill(description);
     await page.getByTestId('button-save').click();
+    console.log('Đã tạo gia đình để xem chi tiết.');
 
+    console.log('Tìm kiếm gia đình vừa tạo.');
     await page.getByTestId('family-search-expand-button').click();
     await page.waitForTimeout(500)
     await page.getByTestId('family-search-input').locator('input').fill(familyName);
     await page.getByTestId('apply-filters-button').click();
     await page.waitForLoadState('networkidle');
     await expect(page.getByText(familyName)).toBeVisible();
+    console.log('Đã tìm thấy gia đình.');
+
+    console.log('Click vào tên gia đình để xem chi tiết.');
     await page.getByText(familyName).click();
     await page.waitForLoadState('networkidle')
 
+    console.log('Xác minh các trường thông tin hiển thị đúng.');
     await expect(page.getByTestId('family-description-input').locator('textarea')).toHaveValue(description);
     await expect(page.getByTestId('family-name-input').locator('input')).toHaveValue(familyName);
     await expect(page.getByTestId('family-address-input').locator('input')).toHaveValue(address);
