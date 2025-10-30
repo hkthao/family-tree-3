@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
 import { login } from '../login.setup';
 
@@ -13,7 +13,7 @@ test.describe('Family Management - View Family', () => {
     const description = `e2e descriptions ${new Date().getTime()}`;
 
     // Create a family first
-    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
+    await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
     await page.getByTestId('add-new-family-button').click();
     await page.getByTestId('family-name-input').click();
     await page.getByTestId('family-name-input').locator('input').fill(familyName);
