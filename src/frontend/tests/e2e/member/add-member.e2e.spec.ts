@@ -19,6 +19,14 @@ test.describe('Member Management - Add Member', () => {
     await page.getByTestId('family-description-input').locator('textarea').fill(description);
     await page.getByTestId('button-save').click();
     await page.waitForLoadState('networkidle');
+
+    // Search for the newly created family
+    await page.getByTestId('family-search-expand-button').click();
+    await page.waitForTimeout(500); // Small wait for expand animation
+    await page.getByTestId('family-search-input').locator('input').fill(familyName);
+    await page.getByTestId('apply-filters-button').click();
+    await page.waitForLoadState('networkidle');
+
     await expect(page.getByText(familyName)).toBeVisible();
 
     // 2. Navigate to the member list page and click "Add New Member"
