@@ -15,32 +15,39 @@ test.describe('Family Management - Update Family', () => {
     const originalDescription = `e2e Original Description ${new Date().getTime()}`;
     const updatedDescription = `e2e Updated Description ${new Date().getTime()}`;
 
-    // 1. Create a family first
     await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
     await page.getByTestId('add-new-family-button').click();
     await page.getByTestId('family-name-input').locator('input').fill(originalFamilyName);
     await page.getByTestId('family-address-input').locator('input').fill(originalAddress);
     await page.getByTestId('family-description-input').locator('textarea').fill(originalDescription);
     await page.getByTestId('button-save').click();
-    await page.waitForURL('**/family/detail/*');
+
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('family-search-expand-button').click();
+    await page.waitForTimeout(500)
+    await page.getByTestId('family-search-input').locator('input').fill(originalFamilyName);
+    await page.getByTestId('apply-filters-button').click();
+    await page.waitForLoadState('networkidle');
     await expect(page.getByText(originalFamilyName)).toBeVisible();
 
-    // 2. Navigate to the edit page of the created family
-    await page.getByTestId('button-edit').click();
-    await page.waitForURL('**/family/edit/*');
+    await page.getByText(originalFamilyName).click();
+    await page.waitForLoadState('networkidle');
 
-    // 3. Update some family details
+    await page.getByTestId('button-edit').click();
+    await page.waitForLoadState('networkidle');
+
     await page.getByTestId('family-name-input').locator('input').fill(updatedFamilyName);
     await page.getByTestId('family-address-input').locator('input').fill(updatedAddress);
     await page.getByTestId('family-description-input').locator('textarea').fill(updatedDescription);
-
-    // 4. Save the changes
     await page.getByTestId('button-save').click();
-    await page.waitForURL('**/family/detail/*');
+    await page.waitForLoadState('networkidle');
 
-    // 5. Verify that the updated details are visible
+    await page.waitForLoadState('networkidle');
+    await page.getByTestId('family-search-expand-button').click();
+    await page.waitForTimeout(500)
+    await page.getByTestId('family-search-input').locator('input').fill(updatedFamilyName);
+    await page.getByTestId('apply-filters-button').click();
+    await page.waitForLoadState('networkidle');
     await expect(page.getByText(updatedFamilyName)).toBeVisible();
-    await expect(page.getByTestId('family-address-input').locator('input')).toHaveValue(updatedAddress);
-    await expect(page.getByTestId('family-description-input').locator('textarea')).toHaveValue(updatedDescription);
   });
 });

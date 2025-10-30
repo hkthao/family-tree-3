@@ -1,16 +1,17 @@
 <template>
-  <FamilySearch @update:filters="handleFilterUpdate" />
-  <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
-    :items-per-page="itemsPerPage" @update:options="handleListOptionsUpdate"
-    @update:itemsPerPage="itemsPerPage = $event" @view="navigateToViewFamily" @edit="navigateToEditFamily"
-    @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
-  <!-- Confirm Delete Dialog -->
-  <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
-    :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })" @confirm="handleDeleteConfirm"
-    @cancel="handleDeleteCancel" />
-  <!-- AI Input Dialog -->
-  <NLFamilyPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @save="handleAiSave" />
-
+  <div data-testid="family-list-view">
+    <FamilySearch @update:filters="handleFilterUpdate" />
+    <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
+      :items-per-page="itemsPerPage" @update:options="handleListOptionsUpdate"
+      @update:itemsPerPage="itemsPerPage = $event" @view="navigateToViewFamily" @edit="navigateToEditFamily"
+      @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
+    <!-- Confirm Delete Dialog -->
+    <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
+      :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })" @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel" />
+    <!-- AI Input Dialog -->
+    <NLFamilyPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @save="handleAiSave" />
+  </div>
 </template>
 
 <script setup lang="ts">

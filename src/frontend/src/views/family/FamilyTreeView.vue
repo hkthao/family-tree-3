@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card data-testid="family-tree-view">
     <v-card-title>
       <div class="d-flex flex-row">
         <h1 class="text-h5 flex-grow-1">
