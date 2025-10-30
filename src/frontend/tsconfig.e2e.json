@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "tests/e2e/**/*.ts",
+    "tests/e2e/**/*.d.ts"
+  ],
+  "compilerOptions": {
+    "types": ["node", "@playwright/test"]
+  }
+}

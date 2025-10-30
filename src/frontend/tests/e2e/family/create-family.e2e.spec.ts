@@ -25,7 +25,15 @@ test.describe('Family Management - Create Family', () => {
     await page.getByTestId('family-description-input').locator('textarea').fill(description);
 
     await page.getByTestId('button-save').click();
+    await expect(page.locator('[data-testid="snackbar-success"]')).toBeVisible();
 
+    await page.waitForLoadState('networkidle');
+
+    await page.getByTestId('family-search-expand-button').click();
+    await page.waitForTimeout(500)
+    await page.getByTestId('family-search-input').locator('input').fill(familyName);
+    await page.getByTestId('apply-filters-button').click();
+    await page.waitForLoadState('networkidle');
     await expect(page.getByText(familyName)).toBeVisible();
   });
 });

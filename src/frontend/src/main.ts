@@ -12,6 +12,7 @@ import i18n from './plugins/i18n';
 import { ServicesPlugin } from './plugins/services.plugin'; // Import ServicesPlugin
 import { setAuthService } from '@/services/auth/authService';
 import { auth0Service } from '@/services/auth/auth0Service';
+import { fakeAuthService } from '@/services/auth/fakeAuthService'; // Import fakeAuthService
 
 const app = createApp(App);
 
@@ -23,6 +24,11 @@ app.use(vuetify);
 app.use(i18n);
 i18n.global.locale.value = 'vi';
 app.directive('resize', Resize);
-setAuthService(auth0Service); // Initialize auth service
+// Conditionally set auth service for E2E tests
+if (import.meta.env.VITE_APP_E2E_TESTING === 'true') {
+  setAuthService(fakeAuthService);
+} else {
+  setAuthService(auth0Service);
+}
 
 app.mount('#app');

@@ -1,4 +1,4 @@
-export const E2E_BASE_URL = 'http://localhost/';
+export const E2E_BASE_URL = 'http://localhost:5173/';
 
 export const E2E_ROUTES = {
   DASHBOARD: 'dashboard',

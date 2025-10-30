@@ -1,6 +1,16 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
 import { login } from '../login.setup';
+
+
+const waitForPageLoaded = async (page: Page, path: string) => {
+  const [response] = await Promise.all([
+    page.waitForResponse(resp =>
+      resp.url().includes(path) && resp.status() === 200
+    ),
+  ]);
+  await expect(response.ok()).toBeTruthy();
+}
 
 test.describe('Family Management - Delete Family', () => {
   test.beforeEach(async ({ page }) => {
@@ -20,10 +30,9 @@ test.describe('Family Management - Delete Family', () => {
     await page.getByTestId('family-description-input').click();
     await page.getByTestId('family-description-input').locator('textarea').fill(familyName);
     await page.getByTestId('button-save').click();
-    await expect(page.getByText(familyName)).toBeVisible();
 
-    // Điều hướng đến trang quản lý gia phả
-    await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByText(familyName)).toBeVisible();
 
     // Chọn cây gia phả vừa tạo để xóa
     await page.locator(`[data-testid="delete-family-button"][data-family-name="${familyName}"]`).click();

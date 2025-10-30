@@ -3,7 +3,7 @@
     <v-card-title class="text-h6 d-flex align-center">
       {{ $t('member.search.title') }}
       <v-spacer></v-spacer>
-      <v-btn variant="text" icon size="small"  @click="expanded = !expanded">
+      <v-btn variant="text" icon size="small"  @click="expanded = !expanded" data-testid="family-search-expand-button">
         <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
       </v-btn>
     </v-card-title>
@@ -18,6 +18,7 @@
                 :label="$t('family.management.searchLabel')"
                 clearable
                 prepend-inner-icon="mdi-magnify"
+                data-testid="family-search-input"
               />
             </v-col>
             <v-col cols="12" md="6">
@@ -26,14 +27,15 @@
                 :items="visibilityItems"
                 :label="$t('family.management.filterLabel')"
                 density="compact"
+                data-testid="family-visibility-filter"
               />
             </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="applyFilters">{{ $t('member.search.apply') }}</v-btn>
-          <v-btn @click="resetFilters">{{ $t('member.search.reset') }}</v-btn>
+          <v-btn color="primary" @click="applyFilters" data-testid="apply-filters-button">{{ $t('member.search.apply') }}</v-btn>
+          <v-btn @click="resetFilters" data-testid="reset-filters-button">{{ $t('member.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
     </v-expand-transition>

@@ -12,10 +12,10 @@
       </v-col>
       <v-col cols="12" md="6">
         <v-select v-model="familyForm.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
-          required></v-select>
+          required data-testid="family-visibility-select"></v-select>
       </v-col>
     </v-row>
-    <v-text-field v-model="familyForm.address" :label="$t('family.form.addressLabel')"></v-text-field>
+    <v-text-field v-model="familyForm.address" :label="$t('family.form.addressLabel')" data-testid="family-address-input"></v-text-field>
     <v-textarea v-model="familyForm.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
     <FamilyPermissions :readOnly="props.readOnly" v-model="familyUsers" />
   </v-form>
