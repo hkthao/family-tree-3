@@ -166,12 +166,12 @@ export const useMemberStore = defineStore('member', {
       this.loading = true;
       this.error = null;
 
-      const cachedMember = this.memberCache.get(id);
-      if (cachedMember) {
-        this.loading = false;
-        this.currentItem = cachedMember;
-        return cachedMember;
-      }
+      // const cachedMember = this.memberCache.get(id);
+      // if (cachedMember) {
+      //   this.loading = false;
+      //   this.currentItem = cachedMember;
+      //   return cachedMember;
+      // }
 
       const result = await this.services.member.getById(id);
       this.loading = false;
