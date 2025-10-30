@@ -486,5 +486,7 @@
   "systemConfig.messages.updateSuccess": "Cập nhật cấu hình hệ thống thành công!",
   "systemConfig.messages.updateError": "Lỗi khi cập nhật cấu hình hệ thống.",
   "novu.tabs.all": "Tất cả",
-  "novu.tabs.unread": "Chưa đọc"
+  "novu.tabs.unread": "Chưa đọc",
+  "settings.user.title": "Tiêu đề người dùng",
+  "userSettings.preferences.languageEnglish": "Tiếng Anh"
 }

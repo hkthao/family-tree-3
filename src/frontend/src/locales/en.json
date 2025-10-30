@@ -500,5 +500,7 @@
   "templateFormat.Html": "HTML",
   "templateFormat.Markdown": "Markdown",
   "novu.tabs.all": "All",
-  "novu.tabs.unread": "Unread"
+  "novu.tabs.unread": "Unread",
+  "settings.user.title": "User Title",
+  "userSettings.preferences.languageEnglish": "English"
 }
