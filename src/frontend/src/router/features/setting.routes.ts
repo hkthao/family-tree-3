@@ -7,7 +7,7 @@ export const settingRoutes: RouteRecordRaw[] = [
     name: 'UserSettings',
     component: () => import('@/views/settings/UserSettingsPage.vue'),
     meta: {
-      breadcrumb: 'settings.user.title',
+      breadcrumb: 'settings.title',
     },
   },
 ];

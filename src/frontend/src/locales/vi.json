@@ -487,6 +487,6 @@
   "systemConfig.messages.updateError": "Lỗi khi cập nhật cấu hình hệ thống.",
   "novu.tabs.all": "Tất cả",
   "novu.tabs.unread": "Chưa đọc",
-  "settings.user.title": "Tiêu đề người dùng",
+  "settings.title": "Cài đặt",
   "userSettings.preferences.languageEnglish": "Tiếng Anh"
 }
