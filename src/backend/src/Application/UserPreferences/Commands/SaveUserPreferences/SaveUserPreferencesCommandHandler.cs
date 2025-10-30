@@ -47,9 +47,6 @@ public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IU
 
         userProfile.UserPreference.Theme = request.Theme;
         userProfile.UserPreference.Language = request.Language;
-        userProfile.UserPreference.EmailNotificationsEnabled = request.EmailNotificationsEnabled;
-        userProfile.UserPreference.SmsNotificationsEnabled = request.SmsNotificationsEnabled;
-        userProfile.UserPreference.InAppNotificationsEnabled = request.InAppNotificationsEnabled;
 
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -53,9 +53,6 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         result.Value.Should().NotBeNull();
         result.Value!.Theme.Should().Be(Theme.Light);
         result.Value.Language.Should().Be(Language.English);
-        result.Value.EmailNotificationsEnabled.Should().BeTrue();
-        result.Value.SmsNotificationsEnabled.Should().BeFalse();
-        result.Value.InAppNotificationsEnabled.Should().BeTrue();
     }
 
     /// <summary>
@@ -74,9 +71,6 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         var userPreference = _fixture.Build<UserPreference>()
             .With(up => up.Theme, Theme.Dark)
             .With(up => up.Language, Language.Vietnamese)
-            .With(up => up.EmailNotificationsEnabled, false)
-            .With(up => up.SmsNotificationsEnabled, true)
-            .With(up => up.InAppNotificationsEnabled, false)
             .Create();
 
         var userProfile = _fixture.Build<UserProfile>()
@@ -100,9 +94,6 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         result.Value.Should().NotBeNull();
         result.Value!.Theme.Should().Be(Theme.Dark);
         result.Value.Language.Should().Be(Language.Vietnamese);
-        result.Value.EmailNotificationsEnabled.Should().BeFalse();
-        result.Value.SmsNotificationsEnabled.Should().BeTrue();
-        result.Value.InAppNotificationsEnabled.Should().BeFalse();
     }
 
     /// <summary>

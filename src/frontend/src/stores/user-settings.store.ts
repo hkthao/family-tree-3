@@ -11,9 +11,6 @@ export const useUserSettingsStore = defineStore('userSettings', {
     preferences: {
       theme: Theme.Dark,
       language: Language.English,
-      emailNotificationsEnabled: true,
-      smsNotificationsEnabled: false,
-      inAppNotificationsEnabled: true,
     } as UserPreference,
   }),
 
@@ -51,18 +48,6 @@ export const useUserSettingsStore = defineStore('userSettings', {
     setLanguage(language: Language) {
       this.preferences.language = language;
       i18n.global.locale.value = language === Language.English ? 'en' : 'vi';
-    },
-
-    toggleEmailNotifications() {
-      this.preferences.emailNotificationsEnabled = !this.preferences.emailNotificationsEnabled;
-    },
-
-    toggleSmsNotifications() {
-      this.preferences.smsNotificationsEnabled = !this.preferences.smsNotificationsEnabled;
-    },
-
-    toggleInAppNotifications() {
-      this.preferences.inAppNotificationsEnabled = !this.preferences.inAppNotificationsEnabled;
     },
   },
 });

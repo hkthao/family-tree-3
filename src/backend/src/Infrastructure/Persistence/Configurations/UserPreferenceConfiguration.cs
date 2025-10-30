@@ -26,18 +26,6 @@ public class UserPreferenceConfiguration : IEntityTypeConfiguration<UserPreferen
             .HasColumnName("language")
             .IsRequired();
 
-        builder.Property(up => up.EmailNotificationsEnabled)
-            .HasColumnName("email_notifications_enabled")
-            .IsRequired();
-
-        builder.Property(up => up.SmsNotificationsEnabled)
-            .HasColumnName("sms_notifications_enabled")
-            .IsRequired();
-
-        builder.Property(up => up.InAppNotificationsEnabled)
-            .HasColumnName("in_app_notifications_enabled")
-            .IsRequired();
-
         builder.HasKey(up => up.UserProfileId);
         
         builder.HasOne(up => up.UserProfile)

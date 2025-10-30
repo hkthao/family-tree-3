@@ -52,9 +52,6 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         {
             Theme = Theme.Dark,
             Language = Language.English,
-            EmailNotificationsEnabled = true,
-            SmsNotificationsEnabled = false,
-            InAppNotificationsEnabled = true
         };
 
         // Act
@@ -68,9 +65,6 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         savedUserPreference.Should().NotBeNull();
         savedUserPreference!.Theme.Should().Be(command.Theme);
         savedUserPreference.Language.Should().Be(command.Language);
-        savedUserPreference.EmailNotificationsEnabled.Should().Be(command.EmailNotificationsEnabled);
-        savedUserPreference.SmsNotificationsEnabled.Should().Be(command.SmsNotificationsEnabled);
-        savedUserPreference.InAppNotificationsEnabled.Should().Be(command.InAppNotificationsEnabled);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng khi một người dùng chưa có bất kỳ tùy chọn nào,
@@ -103,7 +97,6 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
                                   .With(up => up.ExternalId, userId.ToString())
                                   .Create();
         var existingUserPreference = _fixture.Build<UserPreference>()
-                                             .With(up => up.UserProfileId, userProfile.Id)
                                              .With(up => up.Theme, Theme.Light)
                                              .With(up => up.Language, Language.Vietnamese)
                                              .Create();
@@ -118,9 +111,6 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         {
             Theme = Theme.Dark,
             Language = Language.English,
-            EmailNotificationsEnabled = true,
-            SmsNotificationsEnabled = true,
-            InAppNotificationsEnabled = false
         };
 
         // Act
@@ -135,9 +125,6 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
         updatedUserProfile!.UserPreference.Should().NotBeNull();
         updatedUserProfile.UserPreference!.Theme.Should().Be(command.Theme);
         updatedUserProfile.UserPreference.Language.Should().Be(command.Language);
-        updatedUserProfile.UserPreference.EmailNotificationsEnabled.Should().Be(command.EmailNotificationsEnabled);
-        updatedUserProfile.UserPreference.SmsNotificationsEnabled.Should().Be(command.SmsNotificationsEnabled);
-        updatedUserProfile.UserPreference.InAppNotificationsEnabled.Should().Be(command.InAppNotificationsEnabled);
 
         // 💡 Giải thích:
         // Test này đảm bảo rằng khi một người dùng đã có UserPreference,

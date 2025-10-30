@@ -13,6 +13,7 @@ import { eventRoutes } from './features/event.routes';
 import { relationshipRoutes } from './features/relationship.routes';
 import { adminRoutes } from './features/admin.routes';
 import { faceRoutes } from './features/face.routes';
+import { settingRoutes } from './features/setting.routes';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,6 +51,7 @@ const router = createRouter({
         ...relationshipRoutes,
         ...adminRoutes,
         ...faceRoutes,
+        ...settingRoutes,
 
       ],
     },

@@ -23,19 +23,6 @@
     </v-row>
 
     <v-row>
-      <v-col cols="12">
-        <VListSubheader>{{
-          t('userSettings.preferences.notifications')
-          }}</VListSubheader>
-        <v-checkbox v-model="preferencesForm.emailNotificationsEnabled"
-          :label="t('userSettings.preferences.notificationsEmail')" hide-details></v-checkbox>
-        <v-checkbox v-model="preferencesForm.smsNotificationsEnabled"
-          :label="t('userSettings.preferences.notificationsSMS')" hide-details></v-checkbox>
-        <v-checkbox v-model="preferencesForm.inAppNotificationsEnabled"
-          :label="t('userSettings.preferences.notificationsInApp')" hide-details></v-checkbox>
-      </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12" class="text-right">
         <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
       </v-col>

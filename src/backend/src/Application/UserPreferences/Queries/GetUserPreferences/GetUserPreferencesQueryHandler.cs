@@ -33,9 +33,6 @@ public class GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser
             {
                 Theme = Theme.Light,
                 Language = Language.English,
-                EmailNotificationsEnabled = true,
-                SmsNotificationsEnabled = false,
-                InAppNotificationsEnabled = true,
             });
         }
 
