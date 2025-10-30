@@ -36,13 +36,11 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 
         builder.Property(up => up.FirstName)
             .HasColumnName("first_name")
-            .HasMaxLength(256)
-            .IsRequired();
+            .HasMaxLength(256);
 
         builder.Property(up => up.LastName)
             .HasColumnName("last_name")
-            .HasMaxLength(256)
-            .IsRequired();
+            .HasMaxLength(256);
 
         builder.Property(up => up.Phone)
             .HasColumnName("phone")
