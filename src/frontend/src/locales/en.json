@@ -233,16 +233,7 @@
   "event.list.headers.relatedMembers": "Related Members",
   "event.list.headers.location": "Location",
   "event.list.action.delete": "Delete event",
-  "event.list.action.aiCreate": "Create event with AI",
-  "event.name": "Event Name",
-  "event.type": "Event Type",
-  "event.startDate": "Start Date",
-  "event.endDate": "End Date",
-  "event.location": "Location",
-  "event.description": "Description",
-  "event.familyName": "Family Name",
-  "event.relatedMembers": "Related Members",
-  "event.list.confirmDelete": "Are you sure you want to delete event {name}?",
+  "relationship.list.title": "Relationship Management",
   "event.form.title": "Event Form",
   "event.form.addTitle": "Add New Event",
   "event.form.editTitle": "Edit Event",
@@ -502,5 +493,6 @@
   "novu.tabs.all": "All",
   "novu.tabs.unread": "Unread",
   "settings.user.title": "Settings",
-  "userSettings.preferences.languageEnglish": "English"
+  "userSettings.preferences.languageEnglish": "English",
+  "userSettings.preferences.languageVietnamese": "Vietnamese"
 }

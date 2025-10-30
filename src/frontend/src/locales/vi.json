@@ -288,7 +288,8 @@
   "relationship.list.action.edit": "Chỉnh sửa quan hệ",
   "member.list.action.create": "Thêm mới thành viên",
   "relationship.list.action.create": "Thêm mới quan hệ",
-  "relationship.list.action.delete": "Xóa quan hệ",  "event.form.title": "Biểu mẫu Sự kiện",
+  "relationship.list.action.delete": "Xóa quan hệ",  "relationship.list.title": "Quản lý Quan hệ",
+  "event.form.title": "Biểu mẫu Sự kiện",
   "event.detail.title": "Chi tiết Sự kiện",
   "event.form.addTitle": "Thêm Sự kiện Mới",
   "event.form.editTitle": "Chỉnh sửa Sự kiện",
@@ -488,5 +489,6 @@
   "novu.tabs.all": "Tất cả",
   "novu.tabs.unread": "Chưa đọc",
   "settings.title": "Cài đặt",
-  "userSettings.preferences.languageEnglish": "Tiếng Anh"
+  "userSettings.preferences.languageEnglish": "Tiếng Anh",
+  "userSettings.preferences.languageVietnamese": "Tiếng Việt"
 }

@@ -8,13 +8,10 @@ export const useUserPreferenceStore = defineStore('userPreference', {
     loading: false,
     error: null as string | null,
     preferences: {
-      id: '1',
-      userProfileId: '1',
-      theme: Theme.Light,
-      language: Language.English,
-      emailNotificationsEnabled: true,
-      smsNotificationsEnabled: false,
-      inAppNotificationsEnabled: true,
+      id: '',
+      userProfileId: '',
+      theme: Theme.Dark,
+      language: Language.Vietnamese,
     } as UserPreference,
   }),
 

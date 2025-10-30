@@ -5,7 +5,7 @@ import type { Result, UserPreference } from '@/types';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export class ApiUserPreferenceService implements IUserPreferenceService {
-  private apiUrl = `${API_BASE_URL}/UserPreferences`;
+  private apiUrl = `${API_BASE_URL}/user-preference`;
 
   constructor(private http: ApiClientMethods) {}
 
