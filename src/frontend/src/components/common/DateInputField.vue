@@ -16,6 +16,7 @@
         :readonly="props.readonly"
         v-bind="activatorProps"
         :rules="rules"
+        data-testid="date-input-field"
       ></v-text-field>
     </template>
     <v-date-picker

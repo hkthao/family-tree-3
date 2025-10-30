@@ -19,18 +19,18 @@
           :readonly="props.readOnly" data-testid="member-first-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="4">
-        <v-text-field v-model="memberForm.nickname" :label="t('member.form.nickname')"
-          :readonly="props.readOnly"></v-text-field>
+        <v-text-field v-model="memberForm.nickname" :label="t('member.form.nickname')" :readonly="props.readOnly"
+          data-testid="member-nickname-input"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
         <DateInputField v-model="memberForm.dateOfBirth" :label="t('member.form.dateOfBirth')" :rules="[rules.required]"
-          :readonly="props.readOnly" />
+          :readonly="props.readOnly" data-testid="member-date-of-birth-input" />
       </v-col>
       <v-col cols="12" md="6">
         <DateInputField v-model="memberForm.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
-          :readonly="props.readOnly" :rules="[dateOfDeathRule]" />
+          :readonly="props.readOnly" :rules="[dateOfDeathRule]" data-testid="member-date-of-death-input" />
       </v-col>
     </v-row>
 
@@ -42,17 +42,17 @@
       </v-col>
       <v-col cols="12" md="4">
         <v-text-field v-model="memberForm.placeOfBirth" :label="t('member.form.placeOfBirth')"
-          :readonly="props.readOnly"></v-text-field>
+          :readonly="props.readOnly" data-testid="member-place-of-birth-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="4">
         <v-text-field v-model="memberForm.placeOfDeath" :label="t('member.form.placeOfDeath')"
-          :readonly="props.readOnly"></v-text-field>
+          :readonly="props.readOnly" data-testid="member-place-of-death-input"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="memberForm.occupation" :label="t('member.form.occupation')"
-          :readonly="props.readOnly"></v-text-field>
+        <v-text-field v-model="memberForm.occupation" :label="t('member.form.occupation')" :readonly="props.readOnly"
+          data-testid="member-occupation-input"></v-text-field>
       </v-col>
     </v-row>
 
@@ -66,10 +66,8 @@
     <!-- Thông tin khác -->
     <v-row>
       <v-col cols="12">
-        <v-textarea
-        :auto-grow="true"
-        v-model="memberForm.biography" :label="t('member.form.biography')"
-          :readonly="props.readOnly"></v-textarea>
+        <v-textarea :auto-grow="true" v-model="memberForm.biography" :label="t('member.form.biography')"
+          :readonly="props.readOnly" data-testid="member-biography-input"></v-textarea>
       </v-col>
     </v-row>
   </v-form>
@@ -78,10 +76,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
 import type { Member } from '@/types';
 import { Gender } from '@/types';
-
 import { DateInputField, GenderSelect, FamilyAutocomplete, AvatarInput, AvatarDisplay } from '@/components/common';
 
 const props = defineProps<{
