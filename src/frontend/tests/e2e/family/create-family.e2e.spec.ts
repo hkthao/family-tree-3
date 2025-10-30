@@ -1,29 +1,25 @@
 import { test, expect } from '@playwright/test';
 import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
+import { login } from '../login.setup';
 
 test.describe('Family Management - Create Family', () => {
   test('should allow a user to create a new family tree', async ({ page }) => {
-    // Điều hướng đến trang quản lý gia phả
+
+    test.beforeEach(async ({ page }) => {
+      await login(page);
+    });
+
+    var familyName = `'e2e Family ${new Date().getTime()}`
+    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
     await page.goto(`${E2E_BASE_URL}${E2E_ROUTES.FAMILY_MANAGEMENT}`);
-
-    // Nhấn nút "Thêm mới Gia đình"
-    await page.click('[data-testid="add-new-family-button"]');
-
-    // Điền thông tin cây gia phả mới
-    const familyName = `Test Family ${Date.now()}`;
-    const familyDescription = 'Mô tả cho cây gia phả test.';
-    await page.fill('[data-testid="family-name-input"]', familyName);
-    await page.fill('[data-testid="family-description-input"]', familyDescription);
-
-    // Nhấn nút "Lưu"
-    await page.click('[data-testid="save-family-button"]');
-
-    // Chờ thông báo thành công
-    await expect(page.locator('[data-testid="snackbar-success"]')).toBeVisible();
-    console.log(`Đã tạo cây gia phả mới: ${familyName}`);
-
-    // TODO: Cần lấy familyId từ URL hoặc từ API response sau khi tạo thành công
-    // Tạm thời, chúng ta sẽ tìm kiếm tên gia phả trong danh sách để xác nhận
-    await expect(page.locator(`text=${familyName}`)).toBeVisible();
+    await page.getByTestId('add-new-family-button').click();
+    await page.getByRole('textbox', { name: 'Tên Tên' }).click();
+    await page.getByRole('textbox', { name: 'Tên Tên' }).fill(familyName);
+    await page.getByRole('textbox', { name: 'Địa chỉ Địa chỉ' }).click();
+    await page.getByRole('textbox', { name: 'Địa chỉ Địa chỉ' }).fill(familyName);
+    await page.getByRole('textbox', { name: 'Mô tả Mô tả' }).click();
+    await page.getByRole('textbox', { name: 'Mô tả Mô tả' }).fill(familyName);
+    await page.getByTestId('button-save').click();
+    await expect(page.getByText(familyName)).toBeVisible();
   });
 });
