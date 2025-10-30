@@ -12,7 +12,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey"  @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1"  @click="handleAddMember">{{ t('common.save') }}</v-btn>
+      <v-btn color="blue-darken-1"  @click="handleAddMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

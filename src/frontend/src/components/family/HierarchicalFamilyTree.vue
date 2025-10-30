@@ -1,6 +1,6 @@
 <template>
   <div class="hierarchical-tree-container">
-    <div ref="chartContainer" class="f3 flex-grow-1"></div>
+    <div ref="chartContainer" class="f3 flex-grow-1" data-testid="family-tree-canvas"></div>
     <div class="legend">
       <div class="legend-item">
         <span class="legend-color-box legend-male"></span>

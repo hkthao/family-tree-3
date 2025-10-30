@@ -13,7 +13,7 @@
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn color="primary" icon @click="$emit('create')">
+        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button">
           <v-tooltip :text="t('family.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -73,14 +73,14 @@
     <template #item.actions="{ item }">
       <v-tooltip :text="t('family.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('edit', item)">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('edit', item)" data-testid="edit-family-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="t('family.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)" data-testid="delete-family-button">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>

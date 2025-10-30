@@ -430,6 +430,7 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 *.tsbuildinfo
+/src/frontend/playwright-report/
 
 # Node.js
 node_modules/

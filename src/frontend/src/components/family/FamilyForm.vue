@@ -8,7 +8,7 @@
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="familyForm.name" :label="$t('family.form.nameLabel')" :rules="[rules.required]"
-          required></v-text-field>
+          required data-testid="family-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <v-select v-model="familyForm.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
@@ -16,7 +16,7 @@
       </v-col>
     </v-row>
     <v-text-field v-model="familyForm.address" :label="$t('family.form.addressLabel')"></v-text-field>
-    <v-textarea v-model="familyForm.description" :label="$t('family.form.descriptionLabel')"></v-textarea>
+    <v-textarea v-model="familyForm.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
     <FamilyPermissions :readOnly="props.readOnly" v-model="familyUsers" />
   </v-form>
 </template>

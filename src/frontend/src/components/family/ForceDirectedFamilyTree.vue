@@ -1,5 +1,5 @@
 <template>
-  <div ref="chartContainer" class="force-directed-graph"></div>
+  <div ref="chartContainer" class="force-directed-graph" data-testid="family-tree-canvas"></div>
 </template>
 
 <script setup lang="ts">

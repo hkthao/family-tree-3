@@ -12,11 +12,11 @@
     <v-row>
       <v-col cols="12" md="4">
         <v-text-field v-model="memberForm.lastName" :label="t('member.form.lastName')" :rules="[rules.required]"
-          :readonly="props.readOnly"></v-text-field>
+          :readonly="props.readOnly" data-testid="member-last-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="4">
         <v-text-field v-model="memberForm.firstName" :label="t('member.form.firstName')" :rules="[rules.required]"
-          :readonly="props.readOnly"></v-text-field>
+          :readonly="props.readOnly" data-testid="member-first-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="4">
         <v-text-field v-model="memberForm.nickname" :label="t('member.form.nickname')"
@@ -38,7 +38,7 @@
     <v-row>
       <v-col cols="12" md="4">
         <GenderSelect v-model="memberForm.gender" :label="t('member.form.gender')" :rules="[rules.required]"
-          :read-only="props.readOnly" />
+          :read-only="props.readOnly" data-testid="member-gender-select" />
       </v-col>
       <v-col cols="12" md="4">
         <v-text-field v-model="memberForm.placeOfBirth" :label="t('member.form.placeOfBirth')"

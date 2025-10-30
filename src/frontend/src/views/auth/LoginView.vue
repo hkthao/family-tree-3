@@ -5,7 +5,7 @@
         <v-row justify="center">
           <v-col cols="12" sm="8" md="6" lg="4">
             <v-card class="elevation-12">
-              <v-card-title class="text-center text-h5 py-4">
+              <v-card-title class="text-center text-h5 py-4" data-testid="login-page-title">
                 <AppNameDisplay />
               </v-card-title>
               <v-card-subtitle class="text-center">

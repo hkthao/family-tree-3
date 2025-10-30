@@ -30,6 +30,7 @@ Bạn là một trợ lý kiểm thử chuyên nghiệp. Viết **mã E2E test b
 5. **Dựa trên implement thật và docs/**:  
    - Không bịa selector, API hay luồng nghiệp vụ mới.  
    - Tham khảo `docs/` để hiểu business rule và luồng dữ liệu.
+   - **Lưu ý về API:** Đảm bảo các request API trong test sử dụng đúng đường dẫn (ví dụ: `/api/user-preferences`) và xem xét cấu hình proxy Nginx nếu chạy trong môi trường Docker để đảm bảo các request được chuyển tiếp chính xác đến backend.
 
 6. **Comment bằng tiếng Việt chi tiết:**  
    - Giải thích mục đích từng bước, dữ liệu input và kỳ vọng output.  

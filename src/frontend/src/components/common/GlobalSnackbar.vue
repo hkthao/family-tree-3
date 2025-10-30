@@ -1,5 +1,5 @@
 <template>
-  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
+  <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000" :data-testid="snackbar.color === 'success' ? 'snackbar-success' : undefined">
     {{ snackbar.message }}
   </v-snackbar>
 </template>

@@ -12,7 +12,7 @@
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn color="primary" icon @click="$emit('create')">
+        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -71,14 +71,14 @@
       </v-tooltip>
       <v-tooltip :text="t('member.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)" data-testid="edit-member-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="t('member.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-member-button">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
