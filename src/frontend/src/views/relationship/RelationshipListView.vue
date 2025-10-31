@@ -19,6 +19,7 @@
     "
     @confirm="handleDeleteConfirm"
     @cancel="handleDeleteCancel"
+    data-testid="relationship-list-view-confirm-delete-dialog"
   />
 
 

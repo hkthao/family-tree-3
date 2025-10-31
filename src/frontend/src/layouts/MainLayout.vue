@@ -6,7 +6,7 @@
       <AppBreadcrumbs />
       <router-view />
     </v-main>
-    <ChatWidget />
+    <!-- <ChatWidget /> -->
     <GlobalSnackbar />
   </v-app>
 </template>

@@ -1,9 +1,9 @@
 <template>
-  <v-card class="mb-4">
+  <v-card class="mb-4" data-testid="relationship-search">
     <v-card-title class="text-h6 d-flex align-center">
       {{ t('relationship.search.title') }}
       <v-spacer></v-spacer>
-      <v-btn variant="text" icon size="small" @click="expanded = !expanded">
+      <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="relationship-search-expand-button">
         <v-tooltip :text="expanded ? t('common.collapse') : t('common.expand')">
           <template v-slot:activator="{ props }">
             <v-icon v-bind="props">{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
@@ -20,6 +20,7 @@
                 v-model="filters.sourceMemberId"
                 :label="t('relationship.search.sourceMember')"
                 clearable
+                data-testid="relationship-search-source-member-autocomplete"
               />
             </v-col>
             <v-col cols="12" md="4">
@@ -27,6 +28,7 @@
                 v-model="filters.targetMemberId"
                 :label="t('relationship.search.targetMember')"
                 clearable
+                data-testid="relationship-search-target-member-autocomplete"
               />
             </v-col>
             <v-col cols="12" md="4">
@@ -35,16 +37,17 @@
                 :items="relationshipTypes"
                 :label="t('relationship.search.type')"
                 clearable
+                data-testid="relationship-search-type-select"
               ></v-select>
             </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="applyFilters">{{
+          <v-btn color="primary" @click="applyFilters" data-testid="relationship-search-apply-button">{{
             t('relationship.search.apply')
           }}</v-btn>
-          <v-btn @click="resetFilters">{{ t('relationship.search.reset') }}</v-btn>
+          <v-btn @click="resetFilters" data-testid="relationship-search-reset-button">{{ t('relationship.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
     </v-expand-transition>

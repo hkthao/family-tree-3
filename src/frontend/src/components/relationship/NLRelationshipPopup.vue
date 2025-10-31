@@ -1,16 +1,16 @@
 <template>
-  <v-dialog :model-value="modelValue" @update:modelValue="$emit('update:modelValue', $event)" max-width="800px">
+  <v-dialog :model-value="modelValue" @update:modelValue="$emit('update:modelValue', $event)" max-width="800px" data-testid="nl-relationship-popup">
     <v-card>
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>
         <v-form ref="form">
           <v-textarea v-model="prompt" :label="t('aiInput.promptLabelRelationship')" rows="3" outlined clearable counter
-            :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
+            :auto-grow="true" :rules="[rules.required, rules.length(1000)]" data-testid="nl-relationship-prompt-input"></v-textarea>
         </v-form>
-        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
+        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4" data-testid="nl-relationship-generate-button">
           {{ t('aiInput.generateButton') }}
         </v-btn>
-        <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
+        <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2" data-testid="nl-relationship-fill-sample-button">
           {{ t('aiInput.fillSampleButton') }}
         </v-btn>
 
@@ -41,10 +41,10 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
+        <v-btn color="grey-darken-1" @click="cancel" :disabled="loading" data-testid="nl-relationship-cancel-button">{{ t('aiInput.cancelButton')
           }}</v-btn>
         <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors"
-          @click="save">{{
+          @click="save" data-testid="nl-relationship-save-button">{{
             t('aiInput.saveButton') }}</v-btn>
       </v-card-actions>
       <v-progress-linear v-if="loading" indeterminate color="primary" height="4" class="mb-0"></v-progress-linear>

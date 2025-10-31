@@ -30,7 +30,8 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
             SourceMemberId = request.SourceMemberId,
             TargetMemberId = request.TargetMemberId,
             Type = request.Type,
-            Order = request.Order
+            Order = request.Order,
+            FamilyId = sourceMember.FamilyId // Set FamilyId from source member
         };
 
         _context.Relationships.Add(entity);

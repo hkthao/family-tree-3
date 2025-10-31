@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card data-testid="relationship-add-view">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{
         t('relationship.form.addTitle')
@@ -10,10 +10,10 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey"  @click="closeForm">{{
+      <v-btn color="grey"  @click="closeForm" data-testid="relationship-add-cancel-button">{{
         t('common.cancel')
       }}</v-btn>
-      <v-btn color="blue-darken-1"  @click="handleAddItem">{{
+      <v-btn color="blue-darken-1"  @click="handleAddItem" data-testid="relationship-add-save-button">{{
         t('common.save')
       }}</v-btn>
     </v-card-actions>

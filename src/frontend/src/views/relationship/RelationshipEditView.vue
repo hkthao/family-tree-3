@@ -2,7 +2,7 @@
   <v-container>
     <v-row>
       <v-col cols="12">
-        <v-card>
+        <v-card data-testid="relationship-edit-view">
           <v-card-title class="d-flex align-center">
             {{ t('relationship.form.editTitle') }}
             <v-spacer></v-spacer>
@@ -13,8 +13,8 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" @click="save">{{ t('common.save') }}</v-btn>
-            <v-btn @click="cancel">{{ t('common.cancel') }}</v-btn>
+            <v-btn color="primary" @click="save" data-testid="relationship-edit-save-button">{{ t('common.save') }}</v-btn>
+            <v-btn @click="cancel" data-testid="relationship-edit-cancel-button">{{ t('common.cancel') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>

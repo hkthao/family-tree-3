@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { E2E_BASE_URL, E2E_ROUTES } from '../e2e.constants';
 import { login } from '../login.setup';
 
 test.describe('Member Management - Update Member', () => {
@@ -14,7 +13,6 @@ test.describe('Member Management - Update Member', () => {
     const memberPlaceOfBirth = 'Hà Nội';
     const memberPlaceOfDeath = 'TP. Hồ Chí Minh';
     const memberOccupation = 'Kỹ sư';
-    const memberBiography = 'Đây là tiểu sử của thành viên.';
 
     // 1. Create a new member first
     await page.getByRole('link', { name: 'Quản lý thành viên' }).click();
@@ -97,11 +95,6 @@ test.describe('Member Management - Update Member', () => {
     await page.getByText(`${memberLastName} ${memberFirstName}`).click();
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
-
-    await page.screenshot({
-      path: "1.png",
-      fullPage: true
-    })
 
     await expect(page.getByTestId('member-nickname-input').locator('input')).toHaveValue(updatedNickname);
     await expect(page.getByTestId('member-occupation-input').locator('input')).toHaveValue(updatedOccupation);

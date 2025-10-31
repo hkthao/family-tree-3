@@ -93,13 +93,16 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var newName = "New Name";
+        var newFirstName = "New";
+        var newLastName = "Name";
         var newEmail = "new@example.com";
         var newAvatar = "http://new.com/avatar.jpg";
 
         var command = new UpdateUserProfileCommand
         {
             Id = userProfileId.ToString(),
-            Name = newName,
+            FirstName = newFirstName,
+            LastName = newLastName,
             Email = newEmail,
             Avatar = newAvatar
         };

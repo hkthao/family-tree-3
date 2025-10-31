@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="relationship" class="mb-4">
+  <v-card v-if="relationship" class="mb-4" data-testid="relationship-detail-view">
     <v-card-title class="text-h6 d-flex align-center">
       {{ relationship.sourceMember?.fullName }} - {{ relationship.targetMember?.fullName }}
       <v-spacer></v-spacer>
@@ -20,10 +20,10 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="gray" @click="closeView">
+      <v-btn color="gray" @click="closeView" data-testid="relationship-detail-close-button">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="navigateToEditRelationship(relationship.id!)">
+      <v-btn color="primary" @click="navigateToEditRelationship(relationship.id!)" data-testid="relationship-detail-edit-button">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>

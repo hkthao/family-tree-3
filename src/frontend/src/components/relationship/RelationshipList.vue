@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card data-testid="relationship-list">
     <v-data-table :headers="headers" :items="formattedRelationships" :loading="relationshipStore.loading"
       :items-per-page="relationshipStore.itemsPerPage" :total-items="relationshipStore.totalItems"
       @update:options="loadItems" elevation="0">
@@ -7,14 +7,14 @@
         <v-toolbar flat>
           <v-toolbar-title>{{ t('relationship.list.title') }}</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn color="primary" icon @click="showAiCreatePopup = true">
+          <v-btn color="primary" icon @click="showAiCreatePopup = true" data-testid="relationship-ai-create-button">
             <v-tooltip :text="t('relationship.list.action.aiCreate')">
               <template v-slot:activator="{ props }">
                 <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
               </template>
             </v-tooltip>
           </v-btn>
-          <v-btn color="primary" icon @click="$emit('create')">
+          <v-btn color="primary" icon @click="$emit('create')" data-testid="relationship-create-button">
             <v-tooltip :text="t('relationship.list.action.create')">
               <template v-slot:activator="{ props }">
                 <v-icon v-bind="props">mdi-plus</v-icon>
@@ -29,12 +29,12 @@
       <template v-slot:item.actions="{ item }">
         <v-tooltip :text="t('relationship.list.action.edit')">
           <template v-slot:activator="{ props }">
-            <v-icon small class="mr-2" v-bind="props" @click="editItem(item)">mdi-pencil</v-icon>
+            <v-icon small class="mr-2" v-bind="props" @click="editItem(item)" data-testid="relationship-edit-button">mdi-pencil</v-icon>
           </template>
         </v-tooltip>
         <v-tooltip :text="t('relationship.list.action.delete')">
           <template v-slot:activator="{ props }">
-            <v-icon small v-bind="props" @click="deleteItem(item)">mdi-delete</v-icon>
+            <v-icon small v-bind="props" @click="deleteItem(item)" data-testid="relationship-delete-button">mdi-delete</v-icon>
           </template>
         </v-tooltip>
       </template>
