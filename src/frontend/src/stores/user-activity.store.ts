@@ -6,15 +6,22 @@ export const useUserActivityStore = defineStore('userActivity', {
     items: [] as RecentActivity[],
     loading: false,
     error: null as string | null,
+    page: 1,
+    pageSize: 10,
+    totalPages: 0,
+    totalCount: 0,
   }),
   actions: {
-    async fetchRecentActivities(limit?: number, targetType?: TargetType, targetId?: string, groupId?: string) {
+    async fetchRecentActivities(pageSize = 10, targetType?: TargetType, targetId?: string, groupId?: string, page = 1) {
       this.loading = true;
       this.error = null;
       try {
-        const response = await this.services.userActivity.getRecentActivities(limit, targetType, targetId, groupId);
+        const response = await this.services.userActivity.getRecentActivities(page, pageSize, targetType, targetId, groupId);
         if (response.ok) {
-          this.items = response.value;
+          this.items = response.value.items;
+          this.page = response.value.page;
+          this.totalPages = response.value.totalPages;
+          this.totalCount = response.value.totalCount;
         } else {
           this.error = response.error?.message || 'Failed to fetch recent activities.';
         }

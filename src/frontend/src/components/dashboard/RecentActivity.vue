@@ -5,11 +5,7 @@
       <span class="ml-2">{{ t('dashboard.recentActivity.title') }}</span>
     </v-card-title>
     <v-card-text class="scrollable-card-content">
-      <div v-if="userActivityStore.loading">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-        <p class="mt-2">{{ t('dashboard.recentActivity.loading') }}</p>
-      </div>
-      <v-alert v-else-if="userActivityStore.error" type="error" dense dismissible class="mb-4">
+      <v-alert v-if="userActivityStore.error" type="error" dense dismissible class="mb-4">
         {{ userActivityStore.error }}
       </v-alert>
       <v-timeline v-else density="compact" align="start" truncate-line="both">
@@ -29,7 +25,7 @@
             <div class="text-caption">{{ new Date(item.created).toLocaleTimeString() }}</div>
           </div>
         </v-timeline-item>
-        <template v-if="userActivityStore.items.length === 0">
+        <template v-if="userActivityStore.items.length === 0 && !userActivityStore.loading">
           <v-timeline-item size="small">
             <template v-slot:opposite>
               <div class="text-caption"></div>
@@ -40,7 +36,20 @@
           </v-timeline-item>
         </template>
       </v-timeline>
+      <div v-if="userActivityStore.loading" class="text-center pa-4">
+        <v-progress-circular indeterminate color="primary"></v-progress-circular>
+      </div>
     </v-card-text>
+    <v-card-actions class="justify-center">
+      <v-pagination
+        v-if="userActivityStore.totalPages > 1"
+        :model-value="userActivityStore.page"
+        :length="userActivityStore.totalPages"
+        :total-visible="4"
+        density="compact"
+        @update:modelValue="handlePageChange"
+      ></v-pagination>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -73,16 +82,20 @@ const getDotColor = (targetType: TargetType) => {
   }
 };
 
-const fetchActivities = (familyId: string | null) => {
-  userActivityStore.fetchRecentActivities(20, undefined, undefined, familyId || undefined);
+const fetchActivities = (page: number, familyId: string | null) => {
+  userActivityStore.fetchRecentActivities(10, undefined, undefined, familyId || undefined, page);
+};
+
+const handlePageChange = (page: number) => {
+  fetchActivities(page, props.familyId);
 };
 
 onMounted(() => {
-  fetchActivities(props.familyId);
+  fetchActivities(1, props.familyId);
 });
 
 watch(() => props.familyId, (newFamilyId) => {
-  fetchActivities(newFamilyId);
+  fetchActivities(1, newFamilyId);
 });
 </script>
 

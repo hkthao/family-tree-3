@@ -6,15 +6,10 @@ namespace backend.Application.UserActivities.Queries.GetRecentActivities;
 /// <summary>
 /// Query to fetch recent user activities.
 /// </summary>
-public record GetRecentActivitiesQuery : IRequest<Result<List<UserActivityDto>>>
+public record GetRecentActivitiesQuery : IRequest<Result<PaginatedList<UserActivityDto>>>
 {
     /// <summary>
     /// The maximum number of activities to return.
-    /// </summary>
-    public int Limit { get; init; } = 20;
-
-    /// <summary>
-    /// Optional: Filter activities by the type of the target resource.
     /// </summary>
     public TargetType? TargetType { get; init; }
 
@@ -27,4 +22,6 @@ public record GetRecentActivitiesQuery : IRequest<Result<List<UserActivityDto>>>
     /// Optional: Filter activities by GroupId (e.g., FamilyId).
     /// </summary>
     public Guid? GroupId { get; init; }
+    public int Page { get; init; } = 1;
+    public int PageSize { get; init; } = 10;
 }

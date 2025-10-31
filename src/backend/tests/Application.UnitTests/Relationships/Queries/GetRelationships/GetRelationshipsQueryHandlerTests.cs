@@ -448,7 +448,7 @@ public class GetRelationshipsQueryHandlerTests : TestBase
         // 🎯 Mục tiêu của test: Xác minh handler trả về các mối quan hệ được phân trang chính xác.
         // ⚙️ Các bước (Arrange, Act, Assert):
         // 1. Arrange: Thêm nhiều mối quan hệ vào _context.
-        // 2. Act: Gọi phương thức Handle với một GetRelationshipsQuery có PageNumber và PageSize được chỉ định.
+        // 2. Act: Gọi phương thức Handle với một GetRelationshipsQuery có Page và PageSize được chỉ định.
 
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Code = "FAM001", Name = "Test Family" };

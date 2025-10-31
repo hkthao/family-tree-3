@@ -114,6 +114,7 @@
   "family.form.visibility.private": "Private",
   "family.form.visibility.public": "Public",
   "common.cancel": "Cancel",
+  "common.loadMore": "Load More",
   "common.save": "Save",
   "family.form.rules.nameRequired": "Name is required.",
   "family.permissions.managers": "Managers",

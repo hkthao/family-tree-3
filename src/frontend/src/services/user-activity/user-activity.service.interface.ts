@@ -1,13 +1,12 @@
-import type { Result } from '@/types';
-import type { RecentActivity } from '@/types';
+import type { PaginatedList, RecentActivity, Result, TargetType } from '@/types';
 import type { ApiError } from '@/plugins/axios';
-import type { TargetType } from '@/types';
 
 export interface IUserActivityService {
   getRecentActivities(
-    limit?: number,
+    page,
+    pageSize?: number,
     targetType?: TargetType,
     targetId?: string,
     groupId?: string,
-  ): Promise<Result<RecentActivity[], ApiError>>;
+  ): Promise<Result<PaginatedList<RecentActivity>, ApiError>>;
 }

@@ -18,9 +18,9 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
 
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
+    public async Task Handle_ShouldReturnEmpty_WhenUserProfileNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về thất bại khi không tìm thấy hồ sơ người dùng.
+        // 🎯 Mục tiêu của test: Xác minh handler trả về danh sách rỗng khi không tìm thấy hồ sơ người dùng.
 
         // ⚙️ Các bước (Arrange, Act, Assert):
 
@@ -34,11 +34,12 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         // 2. Act: Gọi phương thức Handle của handler.
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        // 3. Assert: Kiểm tra rằng Result trả về là thất bại và chứa thông báo lỗi "User profile not found.".
+        // 3. Assert: Kiểm tra rằng Result trả về là thành công và danh sách rỗng.
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEmpty();
-        // 💡 Giải thích: Handler phải kiểm tra sự tồn tại của hồ sơ người dùng sau khi xác thực.
+        result.Value.Should().NotBeNull();
+        result.Value!.Items.Should().BeEmpty();
+        // 💡 Giải thích: Handler sẽ không tìm thấy user profile và trả về danh sách rỗng.
     }
 
 
@@ -85,8 +86,9 @@ public class GetRecentActivitiesQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(2);
-        result.Value.Should().AllSatisfy(dto => dto.GroupId.Should().Be(targetGroupId));
+        result.Value!.Items.Should().NotBeNull();
+        result.Value.Items.Should().HaveCount(2);
+        result.Value.Items.Should().AllSatisfy(dto => dto.GroupId.Should().Be(targetGroupId));
         // 💡 Giải thích: Handler phải áp dụng UserActivityByGroupSpec để lọc kết quả.
     }
 }

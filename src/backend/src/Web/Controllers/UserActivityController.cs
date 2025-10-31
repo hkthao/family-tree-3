@@ -1,3 +1,4 @@
+using backend.Application.Common.Models;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Domain.Enums;
@@ -29,15 +30,17 @@ public class UserActivityController(IMediator mediator) : ControllerBase
     /// <param name="groupId">Tùy chọn: Lọc hoạt động theo ID nhóm (FamilyId).</param>
     /// <returns>Danh sách các hoạt động gần đây của người dùng.</returns>
     [HttpGet("recent")]
-    public async Task<ActionResult<List<UserActivityDto>>> GetRecentActivities(
-        [FromQuery] int limit = 20,
+    public async Task<ActionResult<PaginatedList<UserActivityDto>>> GetRecentActivities(
+        [FromQuery] int page,
+        [FromQuery] int pageSize = 10,
         [FromQuery] TargetType? targetType = null,
         [FromQuery] string? targetId = null,
         [FromQuery] Guid? groupId = null)
     {
         var query = new GetRecentActivitiesQuery
         {
-            Limit = limit,
+            Page = page,
+            PageSize = pageSize,
             TargetType = targetType,
             TargetId = targetId,
             GroupId = groupId
@@ -45,6 +48,6 @@ public class UserActivityController(IMediator mediator) : ControllerBase
 
         var result = await _mediator.Send(query);
 
-        return result.IsSuccess ? (ActionResult<List<UserActivityDto>>)Ok(result.Value) : (ActionResult<List<UserActivityDto>>)BadRequest(result.Error);
+        return result.IsSuccess ? (ActionResult<PaginatedList<UserActivityDto>>)Ok(result.Value) : (ActionResult<PaginatedList<UserActivityDto>>)BadRequest(result.Error);
     }
 }
