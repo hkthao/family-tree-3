@@ -18,13 +18,17 @@ test.describe('Family Management - Delete Family', () => {
     const address = `e2e address ${new Date().getTime()}`;
     const description = `e2e descriptions ${new Date().getTime()}`;
 
-    console.log('Điều hướng đến trang quản lý gia đình/dòng họ để tạo gia đình.');
-    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
+    console.log('Bước 1: Tạo dữ liệu gia đình cần xóa.');
+    await Promise.all([
+      page.waitForURL('**/family'),
+      page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click(),
+    ]);
 
-    console.log('Click nút "Thêm mới gia đình".');
-    await page.getByTestId('add-new-family-button').click();
+    await Promise.all([
+      page.waitForURL('**/family/add'),
+      page.getByTestId('add-new-family-button').click(),
+    ]);
 
-    console.log('Điền thông tin gia đình.');
     await fillVuetifyInput(page, 'family-name-input', familyName);
     await fillVuetifyInput(page, 'family-address-input', address);
     await fillVuetifyTextarea(page, 'family-description-input', description);
@@ -32,35 +36,28 @@ test.describe('Family Management - Delete Family', () => {
     await selectVuetifyOption(page, 'family-managers-select', 0);
     await selectVuetifyOption(page, 'family-viewers-select', 0);
 
-    console.log('Click nút "Lưu" để tạo gia đình.');
     await page.getByTestId('button-save').click();
     await waitForSnackbar(page, 'success');
-    await page.waitForLoadState('networkidle');
-    console.log('Đã tạo gia đình thành công.');
+    console.log('✅ Đã tạo gia đình thành công.');
 
-    console.log('Mở rộng bộ lọc tìm kiếm.');
+    console.log('Bước 2: Tìm gia đình vừa tạo.');
     await page.getByTestId('family-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    console.log('Điền tên gia đình vừa tạo vào ô tìm kiếm và áp dụng bộ lọc.');
     await fillVuetifyInput(page, 'family-search-input', familyName);
     await page.getByTestId('apply-filters-button').click();
-    await page.waitForLoadState('networkidle');
+    await waitForVDataTableLoaded(page);
     await expect(page.getByText(familyName)).toBeVisible();
-    console.log('Đã tìm thấy gia đình.');
+    console.log('✅ Đã tìm thấy gia đình.');
 
-    console.log('Chọn cây gia phả vừa tạo để xóa.');
+    console.log('Bước 3: Xóa gia đình.');
     await page.locator(`[data-testid="delete-family-button"][data-family-name="${familyName}"]`).click();
 
-    console.log('Xác nhận xóa.');
-    await page.getByTestId('confirm-delete-button').click();
+    const confirmationDialog = page.locator('.v-dialog');
+    await expect(confirmationDialog).toBeVisible();
+    await confirmationDialog.getByTestId('confirm-delete-button').click();
 
-    console.log('Chờ thông báo thành công.');
+    console.log('Bước 4: Xác minh gia đình đã bị xóa.');
     await waitForSnackbar(page, 'success');
-    
-    console.log('Xác nhận cây gia phả không còn trong danh sách.');
     await expect(page.getByText(familyName)).not.toBeVisible();
-    
-    console.log('Đã xóa cây gia phả.');
+    console.log('✅ Đã xóa cây gia phả.');
   });
 });

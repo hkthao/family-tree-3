@@ -120,7 +120,6 @@ test.describe('Relationship Management - View Relationship Details', () => {
     await expect(page.getByTestId('relationship-source-member-autocomplete')).toContainText(`${member1FirstName} ${member1LastName}`);
     await expect(page.getByTestId('relationship-target-member-autocomplete')).toContainText(`${member2FirstName} ${member2LastName}`);
     await expect(page.getByTestId('relationship-type-select')).toContainText(relationshipType);
-    await page.pause(); // Add pause for debugging
     console.log('Đã xác minh thông tin chi tiết mối quan hệ.');
   });
 });

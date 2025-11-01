@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../login.setup';
-import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure } from '../helpers/vuetify';
+import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, waitForVDataTableLoaded } from '../helpers/vuetify';
 
 test.describe('Family Management - Update Family - Success Case', () => {
   test.beforeEach(async ({ page }) => {
@@ -21,13 +21,17 @@ test.describe('Family Management - Update Family - Success Case', () => {
     const originalDescription = `e2e Original Description ${new Date().getTime()}`;
     const updatedDescription = `e2e Updated Description ${new Date().getTime()}`;
 
-    console.log('Điều hướng đến trang quản lý gia đình/dòng họ để tạo gia đình gốc.');
-    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
+    console.log('Bước 1: Tạo dữ liệu gia đình gốc.');
+    await Promise.all([
+      page.waitForURL('**/family'),
+      page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click(),
+    ]);
 
-    console.log('Click nút "Thêm mới gia đình".');
-    await page.getByTestId('add-new-family-button').click();
+    await Promise.all([
+      page.waitForURL('**/family/add'),
+      page.getByTestId('add-new-family-button').click(),
+    ]);
 
-    console.log('Điền thông tin gia đình gốc.');
     await fillVuetifyInput(page, 'family-name-input', originalFamilyName);
     await fillVuetifyInput(page, 'family-address-input', originalAddress);
     await fillVuetifyTextarea(page, 'family-description-input', originalDescription);
@@ -35,54 +39,44 @@ test.describe('Family Management - Update Family - Success Case', () => {
     await selectVuetifyOption(page, 'family-managers-select', 0);
     await selectVuetifyOption(page, 'family-viewers-select', 0);
 
-    console.log('Click nút "Lưu" để tạo gia đình gốc.');
     await page.getByTestId('button-save').click();
     await waitForSnackbar(page, 'success');
-    await page.waitForLoadState('networkidle');
-    console.log('Đã tạo gia đình gốc thành công.');
+    console.log('✅ Đã tạo gia đình gốc thành công.');
 
-    console.log('Mở rộng bộ lọc tìm kiếm.');
+    console.log('Bước 2: Tìm và điều hướng đến trang chỉnh sửa gia đình.');
     await page.getByTestId('family-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    console.log('Điền tên gia đình gốc vào ô tìm kiếm và áp dụng bộ lọc.');
     await fillVuetifyInput(page, 'family-search-input', originalFamilyName);
     await page.getByTestId('apply-filters-button').click();
-    await page.waitForLoadState('networkidle');
-    await expect(page.getByText(originalFamilyName)).toBeVisible();
-    console.log('Đã tìm thấy gia đình gốc.');
+    await waitForVDataTableLoaded(page);
+    const familyRow = page.locator('tr', { has: page.getByText(originalFamilyName) });
+    await expect(familyRow).toBeVisible();
 
-    console.log('Click vào gia đình gốc để xem chi tiết.');
-    await page.getByText(originalFamilyName).click();
-    await page.waitForLoadState('networkidle');
+    await Promise.all([
+      page.waitForURL(/.*\/family\/detail\/.*/),
+      familyRow.getByText(originalFamilyName).click(),
+    ]);
 
-    console.log('Click nút "Cập nhật".');
-    await page.getByTestId('button-edit').click();
-    await page.waitForLoadState('networkidle');
+    await Promise.all([
+      page.waitForURL(/.*\/family\/edit\/.*/),
+      page.getByTestId('button-edit').click(),
+    ]);
+    console.log('Đã vào trang chỉnh sửa gia đình.');
 
-    console.log('Điền dữ liệu cập nhật.');
+    console.log('Bước 3: Cập nhật thông tin gia đình.');
     await fillVuetifyInput(page, 'family-name-input', updatedFamilyName);
     await fillVuetifyInput(page, 'family-address-input', updatedAddress);
     await fillVuetifyTextarea(page, 'family-description-input', updatedDescription);
-    // No need to re-select visibility, managers, viewers unless we want to change them
 
-    console.log('Click nút "Lưu" để cập nhật gia đình.');
     await page.getByTestId('button-save').click();
     await waitForSnackbar(page, 'success');
-    await page.waitForLoadState('networkidle');
-    console.log('Đã lưu dữ liệu cập nhật thành công.');
+    console.log('✅ Đã lưu dữ liệu cập nhật thành công.');
 
-    console.log('Mở rộng bộ lọc tìm kiếm.');
+    console.log('Bước 4: Xác minh gia đình đã được cập nhật trong danh sách.');
     await page.getByTestId('family-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    console.log('Điền tên gia đình đã cập nhật vào ô tìm kiếm và áp dụng bộ lọc.');
     await fillVuetifyInput(page, 'family-search-input', updatedFamilyName);
     await page.getByTestId('apply-filters-button').click();
-    await page.waitForLoadState('networkidle');
-
-    console.log('Xác minh gia đình đã được cập nhật hiển thị trong danh sách.');
+    await waitForVDataTableLoaded(page);
     await expect(page.getByText(updatedFamilyName)).toBeVisible();
-    console.log('Đã cập nhật cây gia phả thành công.');
+    console.log('✅ Đã cập nhật cây gia phả thành công.');
   });
 });

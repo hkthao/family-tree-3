@@ -14,18 +14,21 @@ test.describe('Family Management - Create Family - Validation Case', () => {
   });
 
   test('should show validation errors for empty required fields', async ({ page }) => {
-    console.log('Điều hướng đến trang quản lý Gia đình.');
-    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
-    await page.waitForLoadState('networkidle');
+    console.log('Bước 1: Điều hướng đến trang quản lý Gia đình và tạo mới.');
+    await Promise.all([
+      page.waitForURL('**/family'),
+      page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click(),
+    ]);
 
-    console.log('Click nút "Thêm gia đình mới".');
-    await page.getByTestId('add-new-family-button').click();
-    await page.waitForLoadState('networkidle');
+    await Promise.all([
+      page.waitForURL('**/family/add'),
+      page.getByTestId('add-new-family-button').click(),
+    ]);
 
-    console.log('Click nút "Lưu" mà không điền bất kỳ trường nào.');
+    console.log('Bước 2: Click nút "Lưu" mà không điền bất kỳ trường nào.');
     await page.getByTestId('button-save').click();
 
-    console.log('Kiểm tra thông báo lỗi cho các trường bắt buộc.');
+    console.log('Bước 3: Kiểm tra thông báo lỗi cho các trường bắt buộc.');
     await assertValidationMessage(page, 'family-name-input');
     await assertValidationMessage(page, 'family-address-input');
     await assertValidationMessage(page, 'family-description-input');
@@ -33,6 +36,6 @@ test.describe('Family Management - Create Family - Validation Case', () => {
     await assertValidationMessage(page, 'family-managers-select');
     await assertValidationMessage(page, 'family-viewers-select');
 
-    console.log('Đã xác minh các thông báo lỗi validation.');
+    console.log('✅ Đã xác minh các thông báo lỗi validation.');
   });
 });

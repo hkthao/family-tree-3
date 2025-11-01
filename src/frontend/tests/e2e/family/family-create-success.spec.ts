@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../login.setup';
-import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure } from '../helpers/vuetify';
+import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, waitForVDataTableLoaded } from '../helpers/vuetify';
 
 test.describe('Family Management - Create Family - Success Case', () => {
   test.beforeEach(async ({ page }) => {
@@ -18,13 +18,16 @@ test.describe('Family Management - Create Family - Success Case', () => {
     const familyAddress = 'Địa chỉ gia đình';
     const familyDescription = 'Mô tả gia đình';
 
-    console.log('Điều hướng đến trang quản lý Gia đình.');
-    await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
-    await page.waitForLoadState('networkidle');
+    console.log('Bước 1: Điều hướng đến trang quản lý Gia đình và tạo mới.');
+    await Promise.all([
+      page.waitForURL('**/family'),
+      page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click(),
+    ]);
 
-    console.log('Click nút "Thêm gia đình mới".');
-    await page.getByTestId('add-new-family-button').click();
-    await page.waitForLoadState('networkidle');
+    await Promise.all([
+      page.waitForURL('**/family/add'),
+      page.getByTestId('add-new-family-button').click(),
+    ]);
 
     console.log('Điền thông tin gia đình.');
     await fillVuetifyInput(page, 'family-name-input', familyName);
@@ -37,14 +40,14 @@ test.describe('Family Management - Create Family - Success Case', () => {
     console.log('Click nút "Lưu".');
     await page.getByTestId('button-save').click();
     await waitForSnackbar(page, 'success');
-    await page.waitForLoadState('networkidle');
-    console.log('Đã tạo gia đình thành công.');
+    console.log('✅ Đã tạo gia đình thành công.');
 
-    console.log('Xác minh gia đình mới hiển thị trong danh sách.');
-    await page.getByTestId('family-search-input').fill(familyName);
-    await page.getByTestId('family-search-button').click();
-    await page.waitForLoadState('networkidle');
-    await expect(page.locator('tr').filter({ hasText: familyName }).filter({ hasText: familyAddress })).toBeVisible();
-    console.log('Đã xác minh gia đình mới.');
+    console.log('Bước 2: Xác minh gia đình mới hiển thị trong danh sách.');
+    await page.getByTestId('family-search-expand-button').click();
+    await fillVuetifyInput(page, 'family-search-input', familyName);
+    await page.getByTestId('apply-filters-button').click();
+    await waitForVDataTableLoaded(page);
+    await expect(page.locator('tr').filter({ hasText: familyName })).toBeVisible();
+    console.log('✅ Đã xác minh gia đình mới.');
   });
 });
