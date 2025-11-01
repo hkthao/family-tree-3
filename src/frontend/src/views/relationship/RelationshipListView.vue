@@ -1,28 +1,28 @@
 <template>
-  <RelationshipSearch @update:filters="handleFilterUpdate" />
+  <div data-testid="relationship-list-view">
+    <RelationshipSearch @update:filters="handleFilterUpdate" />
 
-  <RelationshipList
-    @update:options="handleListOptionsUpdate"
-    @view="navigateToDetailView"
-    @edit="navigateToEditRelationship"
-    @delete="confirmDelete"
-    @create="navigateToAddRelationship"
-    @view-member="navigateToMemberDetailView"
-  />
+    <RelationshipList
+      @update:options="handleListOptionsUpdate"
+      @view="navigateToDetailView"
+      @edit="navigateToEditRelationship"
+      @delete="confirmDelete"
+      @create="navigateToAddRelationship"
+      @view-member="navigateToMemberDetailView"
+    />
 
-  <!-- Confirm Delete Dialog -->
-  <ConfirmDeleteDialog
-    :model-value="deleteConfirmDialog"
-    :title="t('confirmDelete.title')"
-    :message="
-      t('relationship.list.confirmDelete', { name: relationshipToDelete?.sourceMember?.fullName || '' })
-    "
-    @confirm="handleDeleteConfirm"
-    @cancel="handleDeleteCancel"
-    data-testid="relationship-list-view-confirm-delete-dialog"
-  />
-
-
+    <!-- Confirm Delete Dialog -->
+    <ConfirmDeleteDialog
+      :model-value="deleteConfirmDialog"
+      :title="t('confirmDelete.title')"
+      :message="
+        t('relationship.list.confirmDelete', { name: relationshipToDelete?.sourceMember?.fullName || '' })
+      "
+      @confirm="handleDeleteConfirm"
+      @cancel="handleDeleteCancel"
+      data-testid="relationship-list-view-confirm-delete-dialog"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">

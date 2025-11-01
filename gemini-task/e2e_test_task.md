@@ -1,51 +1,44 @@
-Bạn là một trợ lý kiểm thử chuyên nghiệp. Viết **mã E2E test bằng Playwright Test Runner với TypeScript** cho ứng dụng **Gia Phả** (Family Tree App) với các yêu cầu sau:
+Refactor file test Playwright E2E cho feature 'Create Family' trong app Vue + Vuetify 3.
 
-1. **Chỉ test các case quan trọng**, không cần cover 100% chức năng.  
-   - Các case quan trọng gồm: 
-     1. Đăng nhập bằng Auth0 với test account hợp lệ.  
-     2. Tạo một cây gia phả mới.  
-     3. Thêm thành viên (cha/mẹ/con) vào cây gia phả.  
-     4. Cập nhật thông tin thành viên.  
-     5. Xem chi tiết cây gia phả.  
-     6. Xóa cây gia phả.  
-     7. Đăng xuất.
+Yêu cầu chi tiết:
 
-2. **Chạy sequential thật sự:**  
-   - Implement một test case, nếu pass thì mới chạy test case kế tiếp.  
-   - Sử dụng `test.describe.serial` hoặc cách tương đương trong Playwright để đảm bảo tuần tự.  
-   - Không tràn chạy nhiều test cùng lúc.
+1. Chia test thành 2 nhóm:
+   - Nhóm 1: 'Success case' - người dùng nhập dữ liệu hợp lệ và lưu thành công.
+   - Nhóm 2: 'Validation case' - hiển thị lỗi khi bỏ trống các trường bắt buộc.
 
-3. **Selector / test-id:**  
-   - Luôn ưu tiên sử dụng `data-testid` để truy cập component, vì id hoặc tag có thể thay đổi theo implement.  
-   - Nếu component chưa có `data-testid`, comment kiểu:  
-     ```ts
-     // TODO: cần thêm data-testid để truy cập component này và đảm bảo test ổn định
-     ```  
-   - Không nên dùng selector dựa trên class, id hoặc tag trực tiếp trừ khi không còn lựa chọn nào khác.
+2. Viết helper functions tái sử dụng:
+   - fillVuetifyInput(page, testId, value)
+   - fillVuetifyTextarea(page, testId, value)
+   - selectVuetifyOption(page, testId, optionIndex)
+   - assertValidationMessage(page, testId, expectedText)
+   - waitForSnackbar(page, type = 'success')
+   - takeScreenshotOnFailure(page, testInfo)
 
-4. **Auth0 login:**  
-   - Thực hiện login bằng UI với test account Auth0.  
-   - Nếu cần mock token, ghi comment giải thích cách làm.
+3. Trong 'Success case':
+   - Nhập tất cả các trường bắt buộc: name, address, description.
+   - Chọn dropdown: visibility, managers, viewers.
+   - Click nút 'Save'.
+   - Kiểm tra snackbar 'success' hiển thị.
+   - Quay lại danh sách, filter theo tên vừa tạo và assert dòng hiển thị đúng.
+   - Chụp screenshot khi test fail.
 
-5. **Dựa trên implement thật và docs/**:  
-   - Không bịa selector, API hay luồng nghiệp vụ mới.  
-   - Tham khảo `docs/` để hiểu business rule và luồng dữ liệu.
-   - **Lưu ý về API:** Đảm bảo các request API trong test sử dụng đúng đường dẫn (ví dụ: `/api/user-preferences`) và xem xét cấu hình proxy Nginx nếu chạy trong môi trường Docker để đảm bảo các request được chuyển tiếp chính xác đến backend.
+4. Trong 'Validation case':
+   - Bỏ trống các trường bắt buộc.
+   - Click 'Save'.
+   - Kiểm tra thông báo lỗi hiển thị đúng từng trường.
+   - Chụp screenshot khi validation fail.
 
-6. **Comment bằng tiếng Việt chi tiết:**  
-   - Giải thích mục đích từng bước, dữ liệu input và kỳ vọng output.  
-   - Ví dụ:  
-     ```ts
-     // Kiểm tra bước đăng nhập: nhập email và mật khẩu hợp lệ
-     // Nếu đăng nhập thành công thì chuyển sang trang dashboard
-     ```
+5. Sử dụng cấu trúc BDD rõ ràng:
+   - test.describe('Family Management - Create Family')
+   - test('should create family successfully', ...)
+   - test('should show validation errors', ...)
 
-7. **Cấu trúc file test:**  
-   - File TypeScript `.spec.ts`  
-   - Đặt tên: `family-tree.e2e.spec.ts`  
-   - Có setup/teardown hợp lý nếu cần reset state hoặc cleanup.
-
-8. **Output:**  
-   - Một file test hoàn chỉnh, có thể copy vào `tests/e2e/` và chạy trực tiếp với Playwright.
-
-Hãy viết mã **E2E test hoàn chỉnh** theo hướng dẫn trên, có comment tiếng Việt, chạy tuần tự, ưu tiên `data-testid`, chỉ test các case quan trọng.
+6. Mỗi bước test đều có comment giải thích.
+7. Dùng data-testid để thao tác, tránh dùng text hoặc role.
+8. Chờ component Vuetify render xong trước khi thao tác (locator.waitFor, waitForSelector).
+9. Tối ưu chờ networkidle, tránh timeout cứng.
+10. Format code chuẩn Prettier, dùng async/await an toàn.
+11. Output: 
+    - File test: 'family-create-success.spec.ts'
+    - File test: 'family-create-validation.spec.ts'
+    - Helper file: 'helpers/vuetify.ts' chứa tất cả helper function trên, có tích hợp screenshot khi fail.

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 
 import type { Family, FamilyFilter } from '@/types/family';
-import { IdCache } from '@/utils/cacheUtils';
 import i18n from '@/plugins/i18n';
 import type { ApiError } from '@/plugins/axios';
 
@@ -12,7 +11,6 @@ export const useFamilyAutocompleteStore = defineStore('familyAutocomplete', {
     families: [] as Family[],
     loading: false,
     error: null as string | null,
-    familyCache: new IdCache<Family>(),
   }),
   getters: {
     items: (state) => state.families,
@@ -31,7 +29,6 @@ export const useFamilyAutocompleteStore = defineStore('familyAutocomplete', {
 
       if (result.ok && result.value) {
         this.families.splice(0, this.families.length, ...result.value.items);
-        this.familyCache.setMany(result.value.items);
       } else {
         this.error = (result as { ok: false; error: ApiError }).error?.message || i18n.global.t('family.errors.load');
         this.families.splice(0, this.families.length); // Clear items on error
@@ -43,10 +40,7 @@ export const useFamilyAutocompleteStore = defineStore('familyAutocomplete', {
       this.loading = true;
       this.error = null;
       try {
-        const result = await this.familyCache.getMany(ids, (missingIds) =>
-          this.services.family.getByIds(missingIds),
-        );
-
+        const result = await this.services.family.getByIds(ids);
         if (result.ok && result.value) {
           return result.value;
         } else {

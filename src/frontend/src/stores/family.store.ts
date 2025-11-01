@@ -2,7 +2,6 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { Family, FamilyFilter, Result } from '@/types';
 import { defineStore } from 'pinia';
-import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 import type { ApiError } from '@/plugins/axios';
 
 export const useFamilyStore = defineStore('family', {
@@ -17,7 +16,6 @@ export const useFamilyStore = defineStore('family', {
     itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
     totalPages: 1,
     sortBy: [] as { key: string; order: string }[], // Sorting key and order
-    familyCache: new IdCache<Family>(), // Add familyCache to state
   }),
   getters: {},
   actions: {
@@ -42,7 +40,6 @@ export const useFamilyStore = defineStore('family', {
         this.items.splice(0, this.items.length, ...result.value.items);
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
-        this.familyCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('family.errors.load');
         this.items.splice(0, this.items.length); // Clear items on error
@@ -58,7 +55,6 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       const result = await this.services.family.add(newItem);
       if (result.ok) {
-        this.familyCache.clear(); // Invalidate cache on add
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('family.errors.add');
@@ -73,7 +69,6 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       const result = await this.services.family.addItems(newItems);
       if (result.ok) {
-        this.familyCache.clear(); // Invalidate cache on add
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('family.errors.add');
@@ -88,7 +83,6 @@ export const useFamilyStore = defineStore('family', {
       this.error = null;
       const result = await this.services.family.update(updatedItem);
       if (result.ok) {
-        this.familyCache.clear(); // Invalidate cache on update
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('family.errors.update');
@@ -105,7 +99,6 @@ export const useFamilyStore = defineStore('family', {
         this.error = i18n.global.t('family.errors.delete');
         console.error(result.error);
       } else {
-        this.familyCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       }
       this.loading = false;
@@ -141,19 +134,18 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       this.error = null;
 
-      const cachedFamily = this.familyCache.get(id);
-      if (cachedFamily) {
-        this.loading = false;
-        this.currentItem = cachedFamily;
-        return cachedFamily;
-      }
+      // const cachedFamily = this.familyCache.get(id);
+      // if (cachedFamily) {
+      //   this.loading = false;
+      //   this.currentItem = cachedFamily;
+      //   return cachedFamily;
+      // }
 
       const result = await this.services.family.getById(id);
       this.loading = false;
       if (result.ok) {
         if (result.value) {
           this.currentItem = result.value;
-          this.familyCache.set(result.value); // Cache the fetched family
           return result.value;
         }
       } else {
@@ -167,10 +159,7 @@ export const useFamilyStore = defineStore('family', {
       this.loading = true;
       this.error = null;
 
-      const result = await this.familyCache.getMany(ids, (missingIds) =>
-        this.services.family.getByIds(missingIds),
-      );
-
+      const result = await this.services.family.getByIds(ids);
       this.loading = false;
       if (result.ok) {
         return result.value;

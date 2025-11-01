@@ -5,7 +5,7 @@ public class Member : BaseAuditableEntity
     public string LastName { get; set; } = null!; // Last name
     public string FirstName { get; set; } = null!; // First name
     public string Code { get; set; } = null!; // New property
-    public string FullName => $"{LastName} {FirstName}"; // Full name (derived)
+    public string FullName => $"{FirstName} {LastName}"; // Full name (derived)
     public string? Nickname { get; set; } // New
     public string? Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }

@@ -2,7 +2,6 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
 import type { Member, MemberFilter, Result } from '@/types';
 import { defineStore } from 'pinia';
-import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 import type { ApiError } from '@/plugins/axios';
 
 export const useMemberStore = defineStore('member', {
@@ -22,7 +21,6 @@ export const useMemberStore = defineStore('member', {
     totalPages: 1,
     sortBy: [] as { key: string; order: string }[], // Sorting key and order
     editableMembers: [] as Member[], // New state for editable members
-    memberCache: new IdCache<Member>(), // Add memberCache to state
   }),
 
   getters: {},
@@ -43,7 +41,6 @@ export const useMemberStore = defineStore('member', {
 
       if (result.ok) {
         this.editableMembers = result.value.items; // Extract items from paginated result
-        this.memberCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('member.errors.load');
         console.error(result.error);
@@ -67,7 +64,6 @@ export const useMemberStore = defineStore('member', {
         this.items = result.value.items;
         this.totalItems = result.value.totalItems;
         this.totalPages = result.value.totalPages;
-        this.memberCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('member.errors.load');
         this.items = [];
@@ -83,7 +79,6 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.add(newItem);
       if (result.ok) {
-        this.memberCache.clear(); // Invalidate cache on add
         await this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.add');
@@ -98,7 +93,6 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.addItems(newItems);
       if (result.ok) {
-        this.memberCache.clear(); // Invalidate cache on add
         await this._loadItems(); // Re-fetch to update pagination and filters
       } else {
         this.error = i18n.global.t('member.errors.add');
@@ -113,7 +107,6 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.update(updatedItem);
       if (result.ok) {
-        this.memberCache.clear(); // Invalidate cache on update
        await this._loadItems();
       } else {
         this.error = i18n.global.t('member.errors.update');
@@ -127,7 +120,6 @@ export const useMemberStore = defineStore('member', {
       this.error = null;
       const result = await this.services.member.delete(id);
       if (result.ok) {
-        this.memberCache.clear(); // Invalidate cache on delete
         await this._loadItems();
       } else {
         this.error = result.error.message || 'Failed to delete member.';
@@ -178,7 +170,6 @@ export const useMemberStore = defineStore('member', {
       if (result.ok) {
         if (result.value) {
           this.currentItem = result.value;
-          this.memberCache.set(result.value); // Cache the fetched member
           return result.value;
         }
       } else {
@@ -198,11 +189,7 @@ export const useMemberStore = defineStore('member', {
     async getByIds(ids: string[]): Promise<Member[]> {
       this.loading = true;
       this.error = null;
-
-      const result = await this.memberCache.getMany(ids, (missingIds) =>
-        this.services.member.getByIds(missingIds),
-      );
-
+      const result = await this.services.member.getByIds(ids);
       this.loading = false;
       if (result.ok) {
         return result.value;

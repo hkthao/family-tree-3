@@ -17,7 +17,7 @@ export async function selectVuetifyAutocompleteOption(page: Page, testId: string
 
   // 2. Chờ cho thanh tiến trình (loading) của autocomplete biến mất,
   //    đảm bảo rằng quá trình tìm kiếm đã hoàn tất.
-  await expect(autocomplete.locator('.v-progress-linear')).toBeHidden({ timeout: 10000 });
+  await expect(autocomplete.locator('.v-field__loader')).toBeHidden({ timeout: 10000 });
 
   // 3. Tìm và nhấp vào tùy chọn mong muốn trong danh sách kết quả.
   //    Sử dụng locator('.v-overlay-container') để đảm bảo chúng ta đang tìm trong dropdown đang mở.

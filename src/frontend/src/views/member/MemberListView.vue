@@ -1,20 +1,20 @@
 <template>
-  <MemberSearch @update:filters="handleFilterUpdate" />
+  <div data-testid="member-list-view">
+    <MemberSearch @update:filters="handleFilterUpdate" />
 
-  <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
-    @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
-    @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" />
+    <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
+      @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
+      @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" />
 
-  <!-- Confirm Delete Dialog -->
-  <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
-    fullName: memberToDelete?.fullName || '',
-  })
-    " @confirm="handleDeleteConfirm" @cancel="handleDeleteCancel" />
+    <!-- Confirm Delete Dialog -->
+    <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
+      fullName: memberToDelete?.fullName || '',
+    })
+      " @confirm="handleDeleteConfirm" @cancel="handleDeleteCancel" />
 
-  <!-- AI Input Dialog -->
-  <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
-
-
+    <!-- AI Input Dialog -->
+    <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
+  </div>
 </template>
 
 <script setup lang="ts">

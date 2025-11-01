@@ -89,7 +89,7 @@
 
     <!-- Loading state -->
     <template #loading>
-      <v-skeleton-loader type="table-row@5" />
+      <v-skeleton-loader type="table-row@5" data-testid="family-list-loading" />
     </template>
   </v-data-table-server>
 </template>
