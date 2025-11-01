@@ -8,4 +8,5 @@ public abstract record RelationshipInput
     public Guid TargetMemberId { get; set; }
     public RelationshipType Type { get; set; }
     public int? Order { get; set; }
+    public Guid FamilyId { get; set; }
 }

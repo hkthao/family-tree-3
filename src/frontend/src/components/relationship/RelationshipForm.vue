@@ -3,11 +3,13 @@
     <v-row>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="editableRelationship.sourceMemberId" :label="t('relationship.form.sourceMember')"
-          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId" data-testid="relationship-source-member-autocomplete" />
+          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId"
+          data-testid="relationship-source-member-autocomplete" />
       </v-col>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="editableRelationship.targetMemberId" :label="t('relationship.form.targetMember')"
-          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId" data-testid="relationship-target-member-autocomplete" />
+          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId"
+          data-testid="relationship-target-member-autocomplete" />
       </v-col>
     </v-row>
     <v-row>
@@ -30,14 +32,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import { useRelationshipStore } from '@/stores/relationship.store';
-
 import type { Relationship } from '@/types';
 import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes';
-
 import { MemberAutocomplete, FamilyAutocomplete } from '@/components/common';
 
 const props = defineProps<{
@@ -46,12 +44,8 @@ const props = defineProps<{
   initialRelationshipData?: Relationship;
 }>();
 
-
 const { t } = useI18n();
-const relationshipStore = useRelationshipStore();
-
 const form = ref<HTMLFormElement | null>(null);
-
 const editableRelationship = ref<Partial<Relationship>>(
   props.initialRelationshipData
     ? { ...props.initialRelationshipData }
@@ -71,13 +65,6 @@ const relationshipTypes = RELATIONSHIP_TYPE_OPTIONS;
 const rules = {
   required: (value: any) => (value !== null && value !== undefined && value !== '') || t('validation.required'),
 };
-
-onMounted(async () => {
-  if (props.id && !props.initialRelationshipData) {
-    await relationshipStore.getById(props.id);
-    editableRelationship.value = { ...relationshipStore.currentItem };
-  }
-});
 
 const validate = async () => {
   if (form.value) {

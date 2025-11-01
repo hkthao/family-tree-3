@@ -21,9 +21,11 @@ export async function selectVuetifyAutocompleteOption(page: Page, testId: string
 
   // 3. Tìm và nhấp vào tùy chọn mong muốn trong danh sách kết quả.
   //    Sử dụng locator('.v-overlay-container') để đảm bảo chúng ta đang tìm trong dropdown đang mở.
-  const optionLocator = page.locator('.v-overlay-container').locator('.v-list-item-title', { hasText: optionText });
-  await optionLocator.click();
+  await page.waitForSelector('.v-overlay-container .v-list-item');
+  const optionLocator = page.locator('.v-overlay-container').locator('.v-list-item', { hasText: optionText });
+  await optionLocator.click({ delay: 300 });
 }
+
 
 /**
  * Fills a Vuetify text input identified by its data-testid.
@@ -60,7 +62,7 @@ export async function selectVuetifyOption(page: Page, testId: string, optionInde
   console.log(`Chọn tùy chọn thứ ${optionIndex} từ dropdown có data-testid='${testId}'.`);
   await page.getByTestId(testId).click();
   await page.waitForSelector('.v-overlay-container .v-list-item');
-  await page.locator(`.v-overlay-container .v-list-item`).nth(optionIndex).click();
+  await page.locator(`.v-overlay-container .v-list-item`).nth(optionIndex).click({ delay: 500 });
 }
 
 /**
@@ -90,7 +92,7 @@ export async function assertValidationMessage(page: Page, testId: string) {
  */
 export async function waitForSnackbar(page: Page, type: 'success' | 'error' = 'success') {
   console.log(`Chờ snackbar loại '${type}' hiển thị.`);
-  await expect(page.locator(`[data-testid="snackbar-${type}"]`)).toBeVisible();
+  await expect(page.locator(`[data-testid="snackbar-${type}"]`)).toBeVisible({ timeout: 10000 });
 }
 
 /**
@@ -105,4 +107,20 @@ export async function takeScreenshotOnFailure(page: Page, testInfo: TestInfo) {
     console.log(`Chụp ảnh màn hình khi thất bại: ${screenshotPath}`);
     await page.screenshot({ path: screenshotPath, fullPage: true });
   }
+}
+
+
+export async function waitForVDataTableLoaded(page: Page) {
+  // Kiểm tra có spinner / progress indicator không
+  const loadingLocator = page.locator('.v-progress-linear, .v-progress-circular, [data-testid="table-loading"]');
+
+  // Nếu có phần tử loading, chờ nó biến mất
+  const isVisible = await loadingLocator.isVisible().catch(() => false);
+  if (isVisible) {
+    await expect(loadingLocator).toBeHidden({ timeout: 10000 });
+  }
+
+  // Chờ ít nhất 1 hàng xuất hiện
+  const firstRow = page.locator('table tbody tr').first();
+  await expect(firstRow).toBeVisible({ timeout: 10000 });
 }

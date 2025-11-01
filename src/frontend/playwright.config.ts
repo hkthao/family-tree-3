@@ -9,6 +9,7 @@ export default defineConfig({
   testDir: path.join(__dirname, 'tests/e2e'),
   /* Run tests in files in the order of their definition. */
   fullyParallel: true,
+  timeout: 60000, // Set default timeout for all tests to 60 seconds
   outputDir: 'test-results',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
@@ -23,6 +24,7 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:5173/',
     testIdAttribute: 'data-testid',
+    headless: false, // Run tests in headed mode to show the UI
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

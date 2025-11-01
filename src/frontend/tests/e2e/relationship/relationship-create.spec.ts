@@ -75,11 +75,9 @@ test.describe('Relationship Management - Create Relationship', () => {
 
     // Bước 3: Điền thông tin mối quan hệ
     console.log('Bước 3: Điền thông tin mối quan hệ.');
-    await page.waitForTimeout(1000); // Give some time for results to populate
-
     await selectVuetifyAutocompleteOption(page, 'relationship-family-autocomplete', familyName, familyName);
-    await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
-    await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1FirstName} ${member1LastName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2FirstName} ${member2LastName}`);
     await selectVuetifyOption(page, 'relationship-type-select', 0); // Chọn loại quan hệ đầu tiên
     console.log('Đã điền thông tin mối quan hệ.');
 
@@ -95,21 +93,21 @@ test.describe('Relationship Management - Create Relationship', () => {
     await page.getByTestId('relationship-search').getByTestId('relationship-search-expand-button').click();
     await page.waitForTimeout(500); // Chờ animation
     console.log('Chọn thành viên nguồn trong bộ lọc tìm kiếm.');
-    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1FirstName} ${member1LastName}`);
 
     await page.getByTestId('relationship-search').getByTestId('relationship-search-target-member-autocomplete').click();
     await page.getByTestId('relationship-search').getByTestId('relationship-search-target-member-autocomplete').locator('input').pressSequentially(member2LastName, { delay: 100 });
     await page.waitForTimeout(500);
     await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member2LastName} ${member2FirstName}` }).click();
+    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member2FirstName} ${member2LastName}` }).click();
 
     console.log('Click nút "Áp dụng bộ lọc".');
     await page.getByTestId('relationship-search').getByTestId('relationship-search-apply-button').click();
     await page.waitForLoadState('networkidle');
 
     console.log('Xác minh mối quan hệ vừa tạo hiển thị trong danh sách.');
-    const text_1 = `${member1LastName} ${member1FirstName}`;
-    const text_2 = `${member2LastName} ${member2FirstName}`;
+    const text_1 = `${member1FirstName} ${member1LastName}`;
+    const text_2 = `${member2FirstName} ${member2LastName}`;
     await expect(page.locator('tr').filter({ hasText: text_1 })).toBeVisible();
     await expect(page.locator('tr').filter({ hasText: text_2 })).toBeVisible();
     console.log('Đã xác minh mối quan hệ mới trong danh sách.');

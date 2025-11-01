@@ -78,8 +78,8 @@ test.describe('Relationship Management - Delete Relationship', () => {
     await expect(page).toHaveURL(/.*\/relationship/);
     await page.getByTestId('relationship-create-button').click();
     await selectVuetifyAutocompleteOption(page, 'relationship-family-autocomplete', familyName, familyName);
-    await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
-    await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1FirstName} ${member1LastName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2FirstName} ${member2LastName}`);
     await selectVuetifyOption(page, 'relationship-type-select', 0);
     await page.getByTestId('relationship-add-save-button').click();
     await waitForSnackbar(page, 'success');
@@ -91,11 +91,11 @@ test.describe('Relationship Management - Delete Relationship', () => {
     console.log('Bước 2: Tìm mối quan hệ cần xóa.');
     await page.getByTestId('relationship-search').getByTestId('relationship-search-expand-button').click();
     await expect(page.getByTestId('relationship-search-source-member-autocomplete')).toBeVisible();
-    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
-    await selectVuetifyAutocompleteOption(page, 'relationship-search-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1FirstName} ${member1LastName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-target-member-autocomplete', member2LastName, `${member2FirstName} ${member2LastName}`);
     await page.getByTestId('relationship-search').getByTestId('relationship-search-apply-button').click();
     
-    const rowLocator = page.locator('tr', { has: page.getByText(`${member1LastName} ${member1FirstName}`) }).filter({ has: page.getByText(`${member2LastName} ${member2FirstName}`) });
+    const rowLocator = page.locator('tr', { has: page.getByText(`${member1FirstName} ${member1LastName}`) }).filter({ has: page.getByText(`${member2FirstName} ${member2LastName}`) });
     await expect(rowLocator).toBeVisible();
     console.log('Đã tìm thấy mối quan hệ.');
 

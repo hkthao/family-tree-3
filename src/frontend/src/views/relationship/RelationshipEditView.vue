@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container v-if="relationshipStore.currentItem">
     <v-row>
       <v-col cols="12">
         <v-card data-testid="relationship-edit-view">
