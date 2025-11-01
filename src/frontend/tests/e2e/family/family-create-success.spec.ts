@@ -14,48 +14,37 @@ test.describe('Family Management - Create Family - Success Case', () => {
   });
 
   test('should create family successfully', async ({ page }) => {
-    const familyName = `e2e Family ${new Date().getTime()}`;
-    const address = `e2e address ${new Date().getTime()}`;
-    const description = `e2e descriptions ${new Date().getTime()}`;
+    const familyName = `Gia đình ${new Date().getTime()}`;
+    const familyAddress = 'Địa chỉ gia đình';
+    const familyDescription = 'Mô tả gia đình';
 
-    console.log('Điều hướng đến trang quản lý gia đình/dòng họ.');
+    console.log('Điều hướng đến trang quản lý Gia đình.');
     await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
+    await page.waitForLoadState('networkidle');
 
-    console.log('Click nút "Thêm mới gia đình".');
+    console.log('Click nút "Thêm gia đình mới".');
     await page.getByTestId('add-new-family-button').click();
+    await page.waitForLoadState('networkidle');
 
     console.log('Điền thông tin gia đình.');
     await fillVuetifyInput(page, 'family-name-input', familyName);
-    await fillVuetifyInput(page, 'family-address-input', address);
-    await fillVuetifyTextarea(page, 'family-description-input', description);
-
-    console.log('Chọn chế độ hiển thị, người quản lý và người xem.');
+    await fillVuetifyInput(page, 'family-address-input', familyAddress);
+    await fillVuetifyTextarea(page, 'family-description-input', familyDescription);
     await selectVuetifyOption(page, 'family-visibility-select', 0); // Chọn tùy chọn đầu tiên
     await selectVuetifyOption(page, 'family-managers-select', 0); // Chọn tùy chọn đầu tiên
     await selectVuetifyOption(page, 'family-viewers-select', 0); // Chọn tùy chọn đầu tiên
 
     console.log('Click nút "Lưu".');
     await page.getByTestId('button-save').click();
-
-    console.log('Chờ snackbar thành công hiển thị.');
     await waitForSnackbar(page, 'success');
-
-    console.log('Chờ trạng thái mạng ổn định sau khi lưu.');
     await page.waitForLoadState('networkidle');
+    console.log('Đã tạo gia đình thành công.');
 
-    console.log('Mở rộng bộ lọc tìm kiếm.');
-    await page.getByTestId('family-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    console.log('Điền tên gia đình vào ô tìm kiếm và áp dụng bộ lọc.');
-    await fillVuetifyInput(page, 'family-search-input', familyName);
-    await page.getByTestId('apply-filters-button').click();
-
-    console.log('Chờ trạng thái mạng ổn định sau khi áp dụng bộ lọc.');
+    console.log('Xác minh gia đình mới hiển thị trong danh sách.');
+    await page.getByTestId('family-search-input').fill(familyName);
+    await page.getByTestId('family-search-button').click();
     await page.waitForLoadState('networkidle');
-
-    console.log('Xác minh gia đình mới được tạo hiển thị trong danh sách.');
-    await expect(page.getByText(familyName)).toBeVisible();
-    console.log('Đã tạo mới cây gia phả thành công.');
+    await expect(page.locator('tr').filter({ hasText: familyName }).filter({ hasText: familyAddress })).toBeVisible();
+    console.log('Đã xác minh gia đình mới.');
   });
 });

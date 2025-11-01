@@ -14,11 +14,13 @@ test.describe('Family Management - Create Family - Validation Case', () => {
   });
 
   test('should show validation errors for empty required fields', async ({ page }) => {
-    console.log('Điều hướng đến trang quản lý gia đình/dòng họ.');
+    console.log('Điều hướng đến trang quản lý Gia đình.');
     await page.getByRole('link', { name: 'Quản lý gia đình/dòng họ' }).click();
+    await page.waitForLoadState('networkidle');
 
-    console.log('Click nút "Thêm mới gia đình" để mở form.');
+    console.log('Click nút "Thêm gia đình mới".');
     await page.getByTestId('add-new-family-button').click();
+    await page.waitForLoadState('networkidle');
 
     console.log('Click nút "Lưu" mà không điền bất kỳ trường nào.');
     await page.getByTestId('button-save').click();

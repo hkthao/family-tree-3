@@ -1,6 +1,22 @@
 import { Page, expect, TestInfo } from '@playwright/test';
 
 /**
+ * Selects an option from a Vuetify autocomplete component identified by its data-testid.
+ * @param page Playwright Page object.
+ * @param testId The data-testid of the Vuetify autocomplete component.
+ * @param searchValue The value to type into the autocomplete input.
+ * @param optionText The text of the option to select.
+ */
+export async function selectVuetifyAutocompleteOption(page: Page, testId: string, searchValue: string, optionText: string) {
+  console.log(`Chọn tùy chọn '${optionText}' từ autocomplete có data-testid='${testId}' sau khi tìm kiếm '${searchValue}'.`);
+  await page.getByTestId(testId).click();
+  await page.getByTestId(testId).locator('input').pressSequentially(searchValue, { delay: 100 });
+  await page.waitForSelector('.v-overlay-container .v-list-item');
+  await page.waitForLoadState('networkidle');
+  await page.locator('.v-overlay-container .v-list-item').filter({ hasText: optionText }).click();
+}
+
+/**
  * Fills a Vuetify text input identified by its data-testid.
  * @param page Playwright Page object.
  * @param testId The data-testid of the Vuetify input component.

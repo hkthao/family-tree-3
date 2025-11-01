@@ -5,6 +5,9 @@
     "tests/e2e/**/*.d.ts"
   ],
   "compilerOptions": {
-    "types": ["node", "@playwright/test"]
+    "types": ["node", "@playwright/test"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   }
 }
