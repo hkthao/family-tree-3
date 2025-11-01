@@ -40,9 +40,10 @@ interface MemberAutocompleteProps {
   clearable?: boolean;
   multiple?: boolean; // New prop for multiple selection
   hideDetails?: boolean | "auto";
+  familyId?: string;
 }
 
-const { modelValue, label, rules, readOnly, clearable, multiple, hideDetails } = defineProps<MemberAutocompleteProps>();
+const props = defineProps<MemberAutocompleteProps>();
 
 const emit = defineEmits(['update:modelValue']);
 
@@ -56,7 +57,7 @@ const members = computed(() => memberAutocompleteStore.items);
 const fetchMembers = async (query: string = '') => {
   loading.value = true;
   try {
-    await memberAutocompleteStore.searchMembers({ searchQuery: query }); // Use new store's action
+    await memberAutocompleteStore.searchMembers({ searchQuery: query, familyId: props.familyId }); // Use new store's action
   } catch (error) {
     console.error('Error fetching members:', error);
   } finally {
@@ -72,7 +73,7 @@ const onSearchInput = (query: string) => {
 };
 
 const handleAutocompleteUpdate = (newValues: any | any[]) => {
-  if (multiple) {
+  if (props.multiple) {
     internalSelectedItems.value = newValues; // newValues is an array of objects
     emit('update:modelValue', newValues.map((item: any) => item.id)); // Emit array of IDs
   } else {
@@ -83,13 +84,13 @@ const handleAutocompleteUpdate = (newValues: any | any[]) => {
 
 // Preload selected member based on modelValue (IDs)
 watch(
-  () => modelValue,
+  () => props.modelValue,
   async (newModelValue) => {
     internalSelectedItems.value = []; // Clear current selections
 
     let idsToFetch: string[] = [];
 
-    if (multiple) {
+    if (props.multiple) {
       if (Array.isArray(newModelValue) && newModelValue.length > 0) {
         idsToFetch = newModelValue.map(id => String(id));
       }
@@ -113,6 +114,13 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+watch(() => props.familyId, () => {
+    // Clear the selection when familyId changes
+    internalSelectedItems.value = [];
+    emit('update:modelValue', props.multiple ? [] : undefined);
+    fetchMembers();
+});
 
 // Initial fetch for empty search to show some options
 onMounted(() => {

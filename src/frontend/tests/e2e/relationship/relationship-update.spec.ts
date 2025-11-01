@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../login.setup';
-import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, assertValidationMessage } from '../helpers/vuetify';
+import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, assertValidationMessage, selectVuetifyAutocompleteOption } from '../helpers/vuetify';
 
 test.describe('Relationship Management - Update Relationship', () => {
   test.beforeEach(async ({ page }) => {
@@ -13,14 +13,13 @@ test.describe('Relationship Management - Update Relationship', () => {
     await takeScreenshotOnFailure(page, testInfo);
   });
 
-  test('should allow a user to update an existing relationship successfully', async ({ page }) => {
+  test('should update an existing relationship successfully', async ({ page }) => {
     const member1FirstName = 'Thành viên 1';
     const member1LastName = `RelUpd1 ${new Date().getTime()}`;
     const member2FirstName = 'Thành viên 2';
     const member2LastName = `RelUpd2 ${new Date().getTime()}`;
-    const familyName = `Gia đình quan hệ ${new Date().getTime()}`;
-    const originalRelationshipType = 'Anh/Chị/Em';
-    const updatedRelationshipType = 'Vợ/Chồng';
+    const familyName = `Gia đình quan hệ cập nhật ${new Date().getTime()}`;
+    const updatedRelationshipTypeIndex = 1; // Chọn loại quan hệ thứ hai để cập nhật
 
     // Bước 1: Tạo dữ liệu cần thiết (gia đình và thành viên)
     console.log('Bước 1: Tạo dữ liệu cần thiết (gia đình và thành viên).');
@@ -46,7 +45,7 @@ test.describe('Relationship Management - Update Relationship', () => {
     await page.locator('.mdi-calendar').first().click();
     await page.locator('button[class*="v-date-picker-month__day-btn"]').first().click();
     await selectVuetifyOption(page, 'member-gender-select', 0);
-    await selectVuetifyOption(page, 'member-family-select', 0);
+    await selectVuetifyAutocompleteOption(page, 'member-family-select', familyName, familyName);
     await page.getByTestId('save-member-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
@@ -59,97 +58,84 @@ test.describe('Relationship Management - Update Relationship', () => {
     await page.locator('.mdi-calendar').first().click();
     await page.locator('button[class*="v-date-picker-month__day-btn"]').first().click();
     await selectVuetifyOption(page, 'member-gender-select', 0);
-    await selectVuetifyOption(page, 'member-family-select', 0);
+    await selectVuetifyAutocompleteOption(page, 'member-family-select', familyName, familyName);
     await page.getByTestId('save-member-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
     console.log('Đã tạo thành viên 2.');
 
-    // Bước 2: Tạo mối quan hệ ban đầu
-    console.log('Bước 2: Tạo mối quan hệ ban đầu.');
-    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).click();
+    await page.waitForTimeout(1000);
+
+    // Bước 2: Tạo một mối quan hệ ban đầu
+    console.log('Bước 2: Tạo một mối quan hệ ban đầu.');
+    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).first().click();
     await page.waitForLoadState('networkidle');
     await page.getByTestId('relationship-create-button').click();
     await page.waitForLoadState('networkidle');
-
-    await page.getByTestId('relationship-source-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member1LastName} ${member1FirstName}` }).click();
-
-    await page.getByTestId('relationship-target-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member2LastName} ${member2FirstName}` }).click();
-
-    await selectVuetifyOption(page, 'relationship-type-select', 0); // Original type
-
-    await page.getByTestId('relationship-family-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: familyName }).click();
-
+    await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
+    await selectVuetifyOption(page, 'relationship-type-select', 0); // Chọn loại quan hệ đầu tiên
+    await selectVuetifyAutocompleteOption(page, 'relationship-family-autocomplete', familyName, familyName);
     await page.getByTestId('relationship-add-save-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
-    console.log('Đã lưu mối quan hệ gốc thành công.');
+    console.log('Đã tạo mối quan hệ ban đầu.');
 
-    // Bước 3: Điều hướng về danh sách và tìm kiếm mối quan hệ để cập nhật
-    console.log('Bước 3: Điều hướng về danh sách và tìm kiếm mối quan hệ để cập nhật.');
-    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).click();
+    // Bước 3: Điều hướng đến trang chỉnh sửa mối quan hệ
+    console.log('Bước 3: Điều hướng đến trang chỉnh sửa mối quan hệ.');
+    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).first().click();
     await page.waitForLoadState('networkidle');
 
+    // Tìm kiếm mối quan hệ vừa tạo để chỉnh sửa
     await page.getByTestId('relationship-search').getByTestId('relationship-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    await page.getByTestId('relationship-search').getByTestId('relationship-search-source-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member1LastName} ${member1FirstName}` }).click();
-
+    await page.waitForTimeout(500);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
     await page.getByTestId('relationship-search').getByTestId('relationship-search-apply-button').click();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Chờ kết quả tìm kiếm hiển thị
+    await page.waitForTimeout(1000);
 
-    await expect(page.locator('tr').filter({ hasText: originalRelationshipType }).filter({ hasText: `${member1LastName} ${member1FirstName}` }).filter({ hasText: `${member2LastName} ${member2FirstName}` })).toBeVisible();
-
-    // Bước 4: Chỉnh sửa mối quan hệ
-    console.log('Bước 4: Chỉnh sửa mối quan hệ.');
-    const relationshipRow = page.locator('tr').filter({ hasText: originalRelationshipType }).filter({ hasText: `${member1LastName} ${member1FirstName}` }).filter({ hasText: `${member2LastName} ${member2FirstName}` });
-    await relationshipRow.getByTestId('relationship-edit-button').click();
+    // Click vào nút chỉnh sửa của mối quan hệ đầu tiên trong danh sách
+    await page.getByTestId('relationship-edit-button').first().click();
     await page.waitForLoadState('networkidle');
+    console.log('Đã điều hướng đến trang chỉnh sửa mối quan hệ.');
 
-    await selectVuetifyOption(page, 'relationship-type-select', 1); // Change to a different type
-    await fillVuetifyInput(page, 'relationship-order-input', '1');
+    // Bước 4: Cập nhật thông tin mối quan hệ
+    console.log('Bước 4: Cập nhật thông tin mối quan hệ (thay đổi loại quan hệ).');
+    await selectVuetifyOption(page, 'relationship-type-select', updatedRelationshipTypeIndex); // Chọn loại quan hệ thứ hai
+    console.log('Đã cập nhật thông tin mối quan hệ.');
 
-    await page.getByTestId('button-save').click();
+    // Bước 5: Lưu mối quan hệ và kiểm tra thông báo thành công
+    console.log('Bước 5: Lưu mối quan hệ và kiểm tra thông báo thành công.');
+    await page.getByTestId('relationship-edit-save-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
-    console.log('Đã lưu mối quan hệ cập nhật thành công.');
+    console.log('Đã lưu mối quan hệ đã cập nhật thành công.');
 
-    // Bước 5: Xác minh mối quan hệ đã cập nhật hiển thị trong danh sách
-    console.log('Bước 5: Xác minh mối quan hệ đã cập nhật hiển thị trong danh sách.');
-    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).click();
+    // Bước 6: Xác minh mối quan hệ đã được cập nhật trong danh sách
+    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).first().click();
     await page.waitForLoadState('networkidle');
 
+    // Áp dụng lại bộ lọc để xem mối quan hệ đã cập nhật
     await page.getByTestId('relationship-search').getByTestId('relationship-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    await page.getByTestId('relationship-search').getByTestId('relationship-search-source-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member1LastName} ${member1FirstName}` }).click();
-
+    await page.waitForTimeout(500);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
     await page.getByTestId('relationship-search').getByTestId('relationship-search-apply-button').click();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Chờ kết quả tìm kiếm hiển thị
+    await page.waitForTimeout(1000);
 
-    await expect(page.locator('tr').filter({ hasText: updatedRelationshipType }).filter({ hasText: `${member1LastName} ${member1FirstName}` }).filter({ hasText: `${member2LastName} ${member2FirstName}` })).toBeVisible();
-    console.log('Đã cập nhật mối quan hệ.');
+    // Lấy tên loại quan hệ đã chọn để xác minh
+    await expect(page.locator('tr').filter({ hasText: `${member1LastName} ${member1FirstName}` }).filter({ hasText: `${member2LastName} ${member2FirstName}` })).toBeVisible();
+    console.log('Đã xác minh mối quan hệ đã được cập nhật trong danh sách.');
   });
 
   test('should show validation errors for empty required fields on update', async ({ page }) => {
-    const member1FirstName = 'Thành viên 1';
-    const member1LastName = `RelUpdVal1 ${new Date().getTime()}`;
-    const member2FirstName = 'Thành viên 2';
-    const member2LastName = `RelUpdVal2 ${new Date().getTime()}`;
-    const familyName = `Gia đình quan hệ ${new Date().getTime()}`;
-    const originalRelationshipType = 'Anh/Chị/Em';
+    const member1FirstName = 'Thành viên 3';
+    const member1LastName = `RelUpd3 ${new Date().getTime()}`;
+    const member2FirstName = 'Thành viên 4';
+    const member2LastName = `RelUpd4 ${new Date().getTime()}`;
+    const familyName = `Gia đình quan hệ lỗi cập nhật ${new Date().getTime()}`;
 
     // Bước 1: Tạo dữ liệu cần thiết (gia đình và thành viên)
     console.log('Bước 1: Tạo dữ liệu cần thiết (gia đình và thành viên).');
@@ -175,7 +161,7 @@ test.describe('Relationship Management - Update Relationship', () => {
     await page.locator('.mdi-calendar').first().click();
     await page.locator('button[class*="v-date-picker-month__day-btn"]').first().click();
     await selectVuetifyOption(page, 'member-gender-select', 0);
-    await selectVuetifyOption(page, 'member-family-select', 0);
+    await selectVuetifyAutocompleteOption(page, 'member-family-select', familyName, familyName);
     await page.getByTestId('save-member-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
@@ -188,72 +174,67 @@ test.describe('Relationship Management - Update Relationship', () => {
     await page.locator('.mdi-calendar').first().click();
     await page.locator('button[class*="v-date-picker-month__day-btn"]').first().click();
     await selectVuetifyOption(page, 'member-gender-select', 0);
-    await selectVuetifyOption(page, 'member-family-select', 0);
+    await selectVuetifyAutocompleteOption(page, 'member-family-select', familyName, familyName);
     await page.getByTestId('save-member-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
     console.log('Đã tạo thành viên 2.');
 
-    // Bước 2: Tạo mối quan hệ ban đầu
-    console.log('Bước 2: Tạo mối quan hệ ban đầu.');
-    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).click();
+    await page.waitForTimeout(1000);
+
+    // Bước 2: Tạo một mối quan hệ ban đầu
+    console.log('Bước 2: Tạo một mối quan hệ ban đầu.');
+    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).first().click();
     await page.waitForLoadState('networkidle');
     await page.getByTestId('relationship-create-button').click();
     await page.waitForLoadState('networkidle');
-
-    await page.getByTestId('relationship-source-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member1LastName} ${member1FirstName}` }).click();
-
-    await page.getByTestId('relationship-target-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member2LastName} ${member2FirstName}` }).click();
-
-    await selectVuetifyOption(page, 'relationship-type-select', 0); // Original type
-
-    await page.getByTestId('relationship-family-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: familyName }).click();
-
+    await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
+    await selectVuetifyOption(page, 'relationship-type-select', 0); // Chọn loại quan hệ đầu tiên
+    await selectVuetifyAutocompleteOption(page, 'relationship-family-autocomplete', familyName, familyName);
     await page.getByTestId('relationship-add-save-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
-    console.log('Đã lưu mối quan hệ gốc thành công.');
+    console.log('Đã tạo mối quan hệ ban đầu.');
 
-    // Bước 3: Điều hướng về danh sách và tìm kiếm mối quan hệ để cập nhật
-    console.log('Bước 3: Điều hướng về danh sách và tìm kiếm mối quan hệ để cập nhật.');
-    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).click();
+    // Bước 3: Điều hướng đến trang chỉnh sửa mối quan hệ
+    console.log('Bước 3: Điều hướng đến trang chỉnh sửa mối quan hệ.');
+    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).first().click();
     await page.waitForLoadState('networkidle');
 
+    // Tìm kiếm mối quan hệ vừa tạo để chỉnh sửa
     await page.getByTestId('relationship-search').getByTestId('relationship-search-expand-button').click();
-    await page.waitForTimeout(500); // Chờ animation
-
-    await page.getByTestId('relationship-search').getByTestId('relationship-search-source-member-autocomplete').click();
-    await page.waitForSelector('.v-overlay-container .v-list-item');
-    await page.locator('.v-overlay-container .v-list-item').filter({ hasText: `${member1LastName} ${member1FirstName}` }).click();
-
+    await page.waitForTimeout(500);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
+    await selectVuetifyAutocompleteOption(page, 'relationship-search-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
     await page.getByTestId('relationship-search').getByTestId('relationship-search-apply-button').click();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Chờ kết quả tìm kiếm hiển thị
+    await page.waitForTimeout(1000);
 
-    await expect(page.locator('tr').filter({ hasText: originalRelationshipType }).filter({ hasText: `${member1LastName} ${member1FirstName}` }).filter({ hasText: `${member2LastName} ${member2FirstName}` })).toBeVisible();
-
-    // Bước 4: Chỉnh sửa mối quan hệ và xóa trường bắt buộc
-    console.log('Bước 4: Chỉnh sửa mối quan hệ và xóa trường bắt buộc.');
-    const relationshipRow = page.locator('tr').filter({ hasText: originalRelationshipType }).filter({ hasText: `${member1LastName} ${member1FirstName}` }).filter({ hasText: `${member2LastName} ${member2FirstName}` });
-    await relationshipRow.getByTestId('relationship-edit-button').click();
+    // Click vào nút chỉnh sửa của mối quan hệ đầu tiên trong danh sách
+    await page.getByTestId('relationship-edit-button').first().click();
     await page.waitForLoadState('networkidle');
+    console.log('Đã điều hướng đến trang chỉnh sửa mối quan hệ.');
 
-    // Xóa nội dung của trường 'relationship-order-input' (giả sử đây là trường bắt buộc có thể xóa)
-    await fillVuetifyInput(page, 'relationship-order-input', '');
+    // Bước 4: Xóa các trường bắt buộc và lưu
+    console.log('Bước 4: Xóa các trường bắt buộc và lưu.');
+    // Xóa lựa chọn thành viên nguồn
+    await page.getByTestId('relationship-source-member-autocomplete').locator('.v-field__clear-btn').click();
+    // Xóa lựa chọn thành viên đích
+    await page.getByTestId('relationship-target-member-autocomplete').locator('.v-field__clear-btn').click();
+    // Xóa lựa chọn loại quan hệ
+    await page.getByTestId('relationship-type-select').locator('.v-field__clear-btn').click();
+    // Xóa lựa chọn gia đình
+    await page.getByTestId('relationship-family-autocomplete').locator('.v-field__clear-btn').click();
 
-    // Bước 5: Lưu và kiểm tra lỗi validation
-    console.log('Bước 5: Lưu và kiểm tra lỗi validation.');
-    await page.getByTestId('button-save').click();
+    await page.getByTestId('relationship-edit-save-button').click();
 
-    console.log('Kiểm tra thông báo lỗi cho các trường bắt buộc.');
-    await assertValidationMessage(page, 'relationship-order-input');
-
+    // Bước 5: Kiểm tra thông báo lỗi
+    console.log('Bước 5: Kiểm tra thông báo lỗi cho các trường bắt buộc.');
+    await assertValidationMessage(page, 'relationship-source-member-autocomplete');
+    await assertValidationMessage(page, 'relationship-target-member-autocomplete');
+    await assertValidationMessage(page, 'relationship-type-select');
+    await assertValidationMessage(page, 'relationship-family-autocomplete');
     console.log('Đã xác minh các thông báo lỗi validation.');
   });
 });

@@ -61,8 +61,6 @@ test.describe('Relationship Management - Create Relationship', () => {
     await page.getByTestId('save-member-button').click();
     await waitForSnackbar(page, 'success');
     await page.waitForLoadState('networkidle');
-    console.log('Đã tạo thành viên 2.');
-
     await page.waitForTimeout(1000);
     // Bước 2: Điều hướng đến trang tạo mối quan hệ
     console.log('Bước 2: Điều hướng đến trang tạo mối quan hệ.');
@@ -77,10 +75,12 @@ test.describe('Relationship Management - Create Relationship', () => {
 
     // Bước 3: Điền thông tin mối quan hệ
     console.log('Bước 3: Điền thông tin mối quan hệ.');
+    await page.waitForTimeout(1000); // Give some time for results to populate
+
+    await selectVuetifyAutocompleteOption(page, 'relationship-family-autocomplete', familyName, familyName);
     await selectVuetifyAutocompleteOption(page, 'relationship-source-member-autocomplete', member1LastName, `${member1LastName} ${member1FirstName}`);
     await selectVuetifyAutocompleteOption(page, 'relationship-target-member-autocomplete', member2LastName, `${member2LastName} ${member2FirstName}`);
     await selectVuetifyOption(page, 'relationship-type-select', 0); // Chọn loại quan hệ đầu tiên
-    await selectVuetifyAutocompleteOption(page, 'relationship-family-autocomplete', familyName, familyName);
     console.log('Đã điền thông tin mối quan hệ.');
 
     // Bước 4: Lưu mối quan hệ và kiểm tra thông báo thành công
@@ -106,7 +106,6 @@ test.describe('Relationship Management - Create Relationship', () => {
     console.log('Click nút "Áp dụng bộ lọc".');
     await page.getByTestId('relationship-search').getByTestId('relationship-search-apply-button').click();
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000); // Chờ kết quả tìm kiếm hiển thị
 
     console.log('Xác minh mối quan hệ vừa tạo hiển thị trong danh sách.');
     const text_1 = `${member1LastName} ${member1FirstName}`;

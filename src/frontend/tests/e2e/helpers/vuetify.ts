@@ -9,11 +9,20 @@ import { Page, expect, TestInfo } from '@playwright/test';
  */
 export async function selectVuetifyAutocompleteOption(page: Page, testId: string, searchValue: string, optionText: string) {
   console.log(`Chọn tùy chọn '${optionText}' từ autocomplete có data-testid='${testId}' sau khi tìm kiếm '${searchValue}'.`);
-  await page.getByTestId(testId).click();
-  await page.getByTestId(testId).locator('input').pressSequentially(searchValue, { delay: 100 });
-  await page.waitForSelector('.v-overlay-container .v-list-item');
-  await page.waitForLoadState('networkidle');
-  await page.locator('.v-overlay-container .v-list-item').filter({ hasText: optionText }).click();
+  const autocomplete = page.getByTestId(testId);
+  const autocompleteInput = autocomplete.locator('input');
+
+  // 1. Điền toàn bộ giá trị tìm kiếm vào ô input một cách đáng tin cậy.
+  await autocompleteInput.fill(searchValue);
+
+  // 2. Chờ cho thanh tiến trình (loading) của autocomplete biến mất,
+  //    đảm bảo rằng quá trình tìm kiếm đã hoàn tất.
+  await expect(autocomplete.locator('.v-progress-linear')).toBeHidden({ timeout: 10000 });
+
+  // 3. Tìm và nhấp vào tùy chọn mong muốn trong danh sách kết quả.
+  //    Sử dụng locator('.v-overlay-container') để đảm bảo chúng ta đang tìm trong dropdown đang mở.
+  const optionLocator = page.locator('.v-overlay-container').locator('.v-list-item-title', { hasText: optionText });
+  await optionLocator.click();
 }
 
 /**

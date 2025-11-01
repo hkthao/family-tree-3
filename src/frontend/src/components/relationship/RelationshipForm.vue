@@ -3,11 +3,11 @@
     <v-row>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="editableRelationship.sourceMemberId" :label="t('relationship.form.sourceMember')"
-          :rules="[rules.required]" :readonly="props.readOnly" data-testid="relationship-source-member-autocomplete" />
+          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId" data-testid="relationship-source-member-autocomplete" />
       </v-col>
       <v-col cols="12" md="6">
         <MemberAutocomplete v-model="editableRelationship.targetMemberId" :label="t('relationship.form.targetMember')"
-          :rules="[rules.required]" :readonly="props.readOnly" data-testid="relationship-target-member-autocomplete" />
+          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId" data-testid="relationship-target-member-autocomplete" />
       </v-col>
     </v-row>
     <v-row>
