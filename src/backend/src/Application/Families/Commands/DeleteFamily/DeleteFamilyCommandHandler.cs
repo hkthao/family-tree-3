@@ -7,10 +7,12 @@ using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.DeleteFamily;
 
-public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteFamilyCommand, Result>
+public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteFamilyCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result> Handle(DeleteFamilyCommand request, CancellationToken cancellationToken)
     {
@@ -25,8 +27,11 @@ public class DeleteFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             if (entity == null)
                 return Result.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
 
+            entity.IsDeleted = true;
+            entity.DeletedBy = _currentUser.Id?.ToString();
+            entity.DeletedDate = _dateTime.Now;
+
             entity.AddDomainEvent(new FamilyDeletedEvent(entity));
-            _context.Families.Remove(entity);
 
             await _context.SaveChangesAsync(cancellationToken);
 

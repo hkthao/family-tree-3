@@ -2,9 +2,14 @@
 
 namespace backend.Domain.Common;
 
-public abstract class BaseEntity
+public abstract class BaseEntity : ISoftDelete
 {
     public Guid Id { get; set; } = Guid.NewGuid();
+
+    // ISoftDelete properties
+    public bool IsDeleted { get; set; }
+    public string? DeletedBy { get; set; }
+    public DateTime? DeletedDate { get; set; }
 
     private readonly List<BaseEvent> _domainEvents = [];
 

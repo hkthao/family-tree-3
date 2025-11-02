@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using System;
 using System.IO;
 using System.Reflection;
+using backend.Application.Common.Interfaces;
 
 namespace backend.Infrastructure.Data
 {
@@ -26,7 +27,28 @@ namespace backend.Infrastructure.Data
             builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
 
-            return new ApplicationDbContext(builder.Options);
+            // Provide mock implementations for IUser and IDateTime for design-time
+            var mockUser = new DesignTimeUserService();
+            var mockDateTime = new DesignTimeDateTimeService();
+
+            return new ApplicationDbContext(builder.Options, mockUser, mockDateTime);
+        }
+
+        // Simple mock implementation of IUser for design-time
+        private class DesignTimeUserService : IUser
+        {
+            public Guid? Id => Guid.Empty;
+            public string? ExternalId => "design-time-user";
+            public string? Email => "design@time.com";
+            public string? DisplayName => "Design Time User";
+            public bool IsAuthenticated => true;
+            public List<string>? Roles => new List<string> { "Administrator" };
+        }
+
+        // Simple mock implementation of IDateTime for design-time
+        private class DesignTimeDateTimeService : IDateTime
+        {
+            public DateTime Now => DateTime.UtcNow;
         }
     }
 }

@@ -51,8 +51,15 @@ public class FileMetadataConfiguration : IEntityTypeConfiguration<FileMetadata>
         builder.Property(fm => fm.UsedById)
             .HasColumnName("used_by_id");
 
-        builder.Property(fm => fm.IsActive)
-            .HasColumnName("is_active")
+        builder.Property(fm => fm.IsDeleted)
+            .HasColumnName("is_deleted")
             .IsRequired();
+
+        builder.Property(fm => fm.DeletedBy)
+            .HasColumnName("deleted_by")
+            .HasMaxLength(36); // GUID string length
+
+        builder.Property(fm => fm.DeletedDate)
+            .HasColumnName("deleted_date");
     }
 }

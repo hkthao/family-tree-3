@@ -15,14 +15,12 @@ public class UploadFileCommandHandlerTests : TestBase
 {
     private readonly Mock<IFileStorage> _mockFileStorage;
     private readonly Mock<IConfigProvider> _mockConfigProvider;
-    private readonly Mock<IDateTime> _mockDateTime;
     private readonly UploadFileCommandHandler _handler;
 
     public UploadFileCommandHandlerTests()
     {
         _mockFileStorage = new Mock<IFileStorage>();
         _mockConfigProvider = new Mock<IConfigProvider>();
-        _mockDateTime = new Mock<IDateTime>();
 
         // Setup default config provider behavior
         _mockConfigProvider.Setup(c => c.GetSection<StorageSettings>())
@@ -237,7 +235,7 @@ public class UploadFileCommandHandlerTests : TestBase
         savedMetadata.ContentType.Should().Be(command.ContentType);
         savedMetadata.FileSize.Should().Be(command.Length);
         savedMetadata.UploadedBy.Should().Be(userId.ToString());
-        savedMetadata.IsActive.Should().BeTrue();
+        savedMetadata.IsDeleted.Should().BeFalse();
         savedMetadata.Created.Should().Be(now);
         savedMetadata.LastModified.Should().Be(now);
     }

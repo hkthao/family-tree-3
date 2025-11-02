@@ -19,6 +19,7 @@ public abstract class TestBase : IDisposable
     protected readonly ApplicationDbContext _context;
     protected readonly IFixture _fixture;
     protected readonly Mock<IUser> _mockUser;
+    protected readonly Mock<IDateTime> _mockDateTime;
     protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
     protected readonly IMapper _mapper;
     protected readonly string _databaseName;
@@ -37,11 +38,13 @@ public abstract class TestBase : IDisposable
             .UseInMemoryDatabase(_databaseName)
             .Options;
 
-        _context = new ApplicationDbContext(options);
+        // Mock ICurrentUserService and IDateTime
+        _mockUser = _fixture.Freeze<Mock<IUser>>();
+        _mockDateTime = _fixture.Freeze<Mock<IDateTime>>();
+
+        _context = new ApplicationDbContext(options, _mockUser.Object, _mockDateTime.Object);
         _context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
-        // Mock ICurrentUserService
-        _mockUser = _fixture.Freeze<Mock<IUser>>();
         // Mock IAuthorizationService
         _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
 

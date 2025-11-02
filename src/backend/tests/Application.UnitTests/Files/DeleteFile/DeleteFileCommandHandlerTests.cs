@@ -20,7 +20,8 @@ public class DeleteFileCommandHandlerTests : TestBase
         _handler = new DeleteFileCommandHandler(
             _context,
             _mockFileStorage.Object,
-            _mockUser.Object
+            _mockUser.Object,
+            _mockDateTime.Object
         );
     }
 
@@ -69,7 +70,7 @@ public class DeleteFileCommandHandlerTests : TestBase
             Url = "http://example.com/test.jpg",
             UploadedBy = Guid.NewGuid().ToString(), // Different user
             ContentType = "image/jpeg", // Thêm ContentType
-            IsActive = true
+            IsDeleted = false
         };
         _context.FileMetadata.Add(fileMetadata);
         await _context.SaveChangesAsync();
@@ -110,7 +111,7 @@ public class DeleteFileCommandHandlerTests : TestBase
             Url = "http://example.com/test.jpg",
             UploadedBy = userId.ToString(),
             ContentType = "image/jpeg", // Thêm ContentType
-            IsActive = true
+            IsDeleted = false
         };
         _context.FileMetadata.Add(fileMetadata);
         await _context.SaveChangesAsync();
@@ -156,7 +157,7 @@ public class DeleteFileCommandHandlerTests : TestBase
             Url = "http://example.com/test.jpg",
             UploadedBy = userId.ToString(),
             ContentType = "image/jpeg", // Thêm ContentType
-            IsActive = true
+            IsDeleted = false
         };
         _context.FileMetadata.Add(fileMetadata);
         await _context.SaveChangesAsync();

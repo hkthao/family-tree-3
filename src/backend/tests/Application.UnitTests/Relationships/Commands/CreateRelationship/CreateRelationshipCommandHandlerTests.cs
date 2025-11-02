@@ -47,7 +47,6 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Source member with ID {command.SourceMemberId}"));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
-        // 💡 Giải thích: Không thể tạo mối quan hệ nếu không tìm thấy hồ sơ người dùng hiện tại.
     }
 
     [Fact]
@@ -161,7 +160,8 @@ public class CreateRelationshipCommandHandlerTests : TestBase
             SourceMemberId = retrievedSourceMember!.Id,
             TargetMemberId = retrievedTargetMember!.Id,
             Type = RelationshipType.Father,
-            Order = 1
+            Order = 1,
+            FamilyId = familyId
         };
 
         var result = await _handler.Handle(command, CancellationToken.None);

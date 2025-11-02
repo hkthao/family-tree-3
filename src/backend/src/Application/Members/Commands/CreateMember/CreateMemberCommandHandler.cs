@@ -42,7 +42,9 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
                 .Where(m => m.FamilyId == request.FamilyId && m.IsRoot)
                 .FirstOrDefaultAsync(cancellationToken);
             if (currentRoot != null)
+            {
                 currentRoot.IsRoot = false;
+            }
         }
 
         _context.Members.Add(entity);

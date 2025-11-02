@@ -11,6 +11,5 @@ public class FileMetadata : BaseAuditableEntity
     public long FileSize { get; set; } // in bytes
     public string UploadedBy { get; set; } = null!; // UserProfile.Id of the uploader
     public string? UsedByEntity { get; set; } // e.g., "UserProfile", "Member", "Family"
-    public Guid? UsedById { get; set; }
-    public bool IsActive { get; set; } = true; // For soft delete or marking as in use
+    public Guid? UsedById;
 }

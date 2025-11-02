@@ -2,15 +2,21 @@ using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
+using backend.Domain.Common;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using backend.Infrastructure.Persistence.Extensions;
 
 namespace backend.Infrastructure.Data;
 
 /// <summary>
 /// Đại diện cho cơ sở dữ liệu ứng dụng và là điểm truy cập chính để tương tác với dữ liệu.
 /// </summary>
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUser currentUser, IDateTime dateTime) : DbContext(options), IApplicationDbContext
 {
+    private readonly IUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
+
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
@@ -57,6 +63,48 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
 
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    if (entry.Entity is BaseAuditableEntity auditableEntity)
+                    {
+                        auditableEntity.CreatedBy = _currentUser.Id?.ToString();
+                        auditableEntity.Created = _dateTime.Now;
+                    }
+                    break;
+
+                case EntityState.Modified:
+                    if (entry.Entity is BaseAuditableEntity auditableEntityModified)
+                    {
+                        auditableEntityModified.LastModifiedBy = _currentUser.Id?.ToString();
+                        auditableEntityModified.LastModified = _dateTime.Now;
+                    }
+                    break;
+
+                case EntityState.Deleted:
+                    if (entry.Entity is ISoftDelete softDeleteEntity)
+                    {
+                        softDeleteEntity.IsDeleted = true;
+                        softDeleteEntity.DeletedBy = _currentUser.Id?.ToString();
+                        softDeleteEntity.DeletedDate = _dateTime.Now;
+                        entry.State = EntityState.Modified;
+                    }
+                    break;
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        return SaveChangesAsync().GetAwaiter().GetResult();
+    }
+
     /// <summary>
     /// Cấu hình mô hình được phát hiện bởi DbContext.
     /// </summary>
@@ -67,6 +115,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Ignore<JsonDocument>();
 
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+            {
+                entityType.AddSoftDeleteQueryFilter();
+            }
+        }
+
         base.OnModelCreating(builder);
     }
 }
+

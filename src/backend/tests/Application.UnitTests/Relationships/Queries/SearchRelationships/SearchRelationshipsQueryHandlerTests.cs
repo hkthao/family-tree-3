@@ -45,8 +45,8 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         _context.Relationships.AddRange(relationship1, relationship2);
         await _context.SaveChangesAsync();
 
-        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FullName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FullName } };
-        var expectedDto2 = new RelationshipListDto { Id = relationship2.Id, SourceMemberId = relationship2.SourceMemberId, TargetMemberId = relationship2.TargetMemberId, Type = relationship2.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember2.Id, FullName = sourceMember2.FullName }, TargetMember = new RelationshipMemberDto { Id = targetMember2.Id, FullName = targetMember2.FullName } };
+        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FirstName + " " + sourceMember1.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FirstName + " " + targetMember1.LastName } };
+        var expectedDto2 = new RelationshipListDto { Id = relationship2.Id, SourceMemberId = relationship2.SourceMemberId, TargetMemberId = relationship2.TargetMemberId, Type = relationship2.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember2.Id, FullName = sourceMember2.FirstName + " " + sourceMember2.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember2.Id, FullName = targetMember2.FirstName + " " + targetMember2.LastName } };
 
         var query = new SearchRelationshipsQuery();
 
@@ -64,15 +64,10 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
     public async Task Handle_ShouldFilterRelationshipsBySourceMemberId()
     {
         // 🎯 Mục tiêu của test: Xác minh handler lọc các mối quan hệ theo SourceMemberId.
-
         // ⚙️ Các bước (Arrange, Act, Assert):
-
-        // 1. Arrange: Thêm các mối quan hệ với SourceMemberId khác nhau vào _context.
-
+        // 1. Arrange: Thêm một số mối quan hệ vào _context.
         // 2. Act: Gọi phương thức Handle với một SearchRelationshipsQuery có SourceMemberId được chỉ định.
-
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa các mối quan hệ có SourceMemberId đó.
-
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Code = "FAM001", Name = "Test Family" };
         _context.Families.Add(family);
@@ -88,7 +83,7 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         _context.Relationships.AddRange(relationship1, relationship2);
         await _context.SaveChangesAsync();
 
-        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FullName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FullName } };
+        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FirstName + " " + sourceMember1.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FirstName + " " + targetMember1.LastName } };
 
         var query = new SearchRelationshipsQuery { SourceMemberId = sourceMember1.Id };
 
@@ -105,15 +100,10 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
     public async Task Handle_ShouldFilterRelationshipsByTargetMemberId()
     {
         // 🎯 Mục tiêu của test: Xác minh handler lọc các mối quan hệ theo TargetMemberId.
-
         // ⚙️ Các bước (Arrange, Act, Assert):
-
-        // 1. Arrange: Thêm các mối quan hệ với TargetMemberId khác nhau vào _context.
-
+        // 1. Arrange: Thêm một số mối quan hệ vào _context.
         // 2. Act: Gọi phương thức Handle với một SearchRelationshipsQuery có TargetMemberId được chỉ định.
-
         // 3. Assert: Kiểm tra kết quả trả về là thành công và chỉ chứa các mối quan hệ có TargetMemberId đó.
-
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Code = "FAM001", Name = "Test Family" };
         _context.Families.Add(family);
@@ -129,7 +119,7 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         _context.Relationships.AddRange(relationship1, relationship2);
         await _context.SaveChangesAsync();
 
-        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FullName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FullName } };
+        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FirstName + " " + sourceMember1.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FirstName + " " + targetMember1.LastName } };
 
         var query = new SearchRelationshipsQuery { TargetMemberId = targetMember1.Id };
 
@@ -170,7 +160,7 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         _context.Relationships.AddRange(relationship1, relationship2);
         await _context.SaveChangesAsync();
 
-        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FullName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FullName } };
+        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMember1.Id, FullName = sourceMember1.FirstName + " " + sourceMember1.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember1.Id, FullName = targetMember1.FirstName + " " + targetMember1.LastName } };
 
         var query = new SearchRelationshipsQuery { Type = RelationshipType.Father.ToString() };
 
@@ -210,8 +200,8 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         _context.Relationships.AddRange(relationship1, relationship2);
         await _context.SaveChangesAsync();
 
-        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberB.Id, FullName = sourceMemberB.LastName + " " + sourceMemberB.FirstName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.LastName + " " + targetMember.FirstName } };
-        var expectedDto2 = new RelationshipListDto { Id = relationship2.Id, SourceMemberId = relationship2.SourceMemberId, TargetMemberId = relationship2.TargetMemberId, Type = relationship2.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberA.Id, FullName = sourceMemberA.LastName + " " + sourceMemberA.FirstName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.LastName + " " + targetMember.FirstName } };
+        var expectedDto1 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberB.Id, FullName = sourceMemberB.FirstName + " " + sourceMemberB.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.FirstName + " " + targetMember.LastName } };
+        var expectedDto2 = new RelationshipListDto { Id = relationship2.Id, SourceMemberId = relationship2.SourceMemberId, TargetMemberId = relationship2.TargetMemberId, Type = relationship2.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberA.Id, FullName = sourceMemberA.FirstName + " " + sourceMemberA.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.FirstName + " " + targetMember.LastName } };
 
         var query = new SearchRelationshipsQuery { SortBy = "SourceMemberFullName", SortOrder = "asc" };
 
@@ -251,8 +241,8 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         _context.Relationships.AddRange(relationship1, relationship2);
         await _context.SaveChangesAsync();
 
-        var expectedDto1 = new RelationshipListDto { Id = relationship2.Id, SourceMemberId = relationship2.SourceMemberId, TargetMemberId = relationship2.TargetMemberId, Type = relationship2.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberA.Id, FullName = sourceMemberA.LastName + " " + sourceMemberA.FirstName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.LastName + " " + targetMember.FirstName } };
-        var expectedDto2 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberB.Id, FullName = sourceMemberB.LastName + " " + sourceMemberB.FirstName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.LastName + " " + targetMember.FirstName } };
+        var expectedDto1 = new RelationshipListDto { Id = relationship2.Id, SourceMemberId = relationship2.SourceMemberId, TargetMemberId = relationship2.TargetMemberId, Type = relationship2.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberA.Id, FullName = sourceMemberA.FirstName + " " + sourceMemberA.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.FirstName + " " + targetMember.LastName } };
+        var expectedDto2 = new RelationshipListDto { Id = relationship1.Id, SourceMemberId = relationship1.SourceMemberId, TargetMemberId = relationship1.TargetMemberId, Type = relationship1.Type, SourceMember = new RelationshipMemberDto { Id = sourceMemberB.Id, FullName = sourceMemberB.FirstName + " " + sourceMemberB.LastName }, TargetMember = new RelationshipMemberDto { Id = targetMember.Id, FullName = targetMember.FirstName + " " + targetMember.LastName } };
 
         var query = new SearchRelationshipsQuery { SortBy = "SourceMemberFullName", SortOrder = "desc" };
 

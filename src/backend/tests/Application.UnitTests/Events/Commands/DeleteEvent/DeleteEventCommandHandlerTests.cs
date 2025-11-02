@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using AutoFixture;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Models;
@@ -21,7 +22,7 @@ public class DeleteEventCommandHandlerTests : TestBase
     public DeleteEventCommandHandlerTests()
     {
         _mockMediator = _fixture.Freeze<Mock<IMediator>>();
-        _handler = new DeleteEventCommandHandler(_context, _mockAuthorizationService.Object);
+        _handler = new DeleteEventCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mockDateTime.Object);
     }
 
 
@@ -142,11 +143,9 @@ public class DeleteEventCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        var deletedEvent = await _context.Events.FindAsync(existingEvent.Id);
-        deletedEvent.Should().BeNull();
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một quản trị viên có thể xóa thành công một sự kiện hiện có
+        var deletedEvent = await _context.Events.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == existingEvent.Id);
+        deletedEvent.Should().NotBeNull();
+        deletedEvent!.IsDeleted.Should().BeTrue();
         // và các hoạt động liên quan được ghi lại.
     }
 
@@ -191,9 +190,7 @@ public class DeleteEventCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
 
         var deletedEvent = await _context.Events.FindAsync(existingEvent.Id);
-        deletedEvent.Should().BeNull();
-
-
+        deletedEvent?.IsDeleted.Should().BeTrue();
 
         // 💡 Giải thích:
         // Test này xác minh rằng một người quản lý gia đình có thể xóa thành công một sự kiện hiện có

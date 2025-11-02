@@ -6,10 +6,12 @@ using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteMemberCommand, Result>
+public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteMemberCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
@@ -29,8 +31,11 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             var memberFullName = memberToDelete.FullName; // Capture full name for activity summary
             var familyId = memberToDelete.FamilyId; // Capture familyId before deletion
 
+            memberToDelete.IsDeleted = true;
+            memberToDelete.DeletedBy = _currentUser.Id?.ToString();
+            memberToDelete.DeletedDate = _dateTime.Now;
+
             memberToDelete.AddDomainEvent(new MemberDeletedEvent(memberToDelete));
-            _context.Members.Remove(memberToDelete);
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats via domain event

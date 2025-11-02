@@ -13,8 +13,15 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
 
     public async Task<Result<Guid>> Handle(CreateRelationshipCommand request, CancellationToken cancellationToken)
     {
+        var sourceMember = await _context.Members.FindAsync(request.SourceMemberId, cancellationToken);
+
+        if (sourceMember == null)
+        {
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Source member with ID {request.SourceMemberId}"), ErrorSources.NotFound);
+        }
+
         // Authorization check: Get family ID from source member
-        if (!_authorizationService.CanManageFamily(request.FamilyId))
+        if (!_authorizationService.CanManageFamily(sourceMember.FamilyId))
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         var entity = new Relationship
@@ -23,7 +30,7 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
             TargetMemberId = request.TargetMemberId,
             Type = request.Type,
             Order = request.Order,
-            FamilyId = request.FamilyId // Set FamilyId from source member
+            FamilyId = sourceMember.FamilyId // Set FamilyId from source member
         };
 
         _context.Relationships.Add(entity);

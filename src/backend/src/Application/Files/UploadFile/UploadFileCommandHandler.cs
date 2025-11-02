@@ -65,7 +65,7 @@ public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider 
                 ContentType = request.ContentType,
                 FileSize = request.Length,
                 UploadedBy = _user.Id?.ToString() ?? "",
-                IsActive = true,
+                // IsDeleted defaults to false from BaseEntity
                 Created = _dateTime.Now,
                 LastModified = _dateTime.Now
             };

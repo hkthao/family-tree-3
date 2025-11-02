@@ -5,10 +5,12 @@ using backend.Domain.Events.Relationships;
 
 namespace backend.Application.Relationships.Commands.DeleteRelationship;
 
-public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
+public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteRelationshipCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<bool>> Handle(DeleteRelationshipCommand request, CancellationToken cancellationToken)
     {
@@ -28,8 +30,11 @@ public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
+        entity.IsDeleted = true;
+        entity.DeletedBy = _currentUser.Id?.ToString();
+        entity.DeletedDate = _dateTime.Now;
+
         entity.AddDomainEvent(new RelationshipDeletedEvent(entity));
-        _context.Relationships.Remove(entity);
 
         await _context.SaveChangesAsync(cancellationToken);
 

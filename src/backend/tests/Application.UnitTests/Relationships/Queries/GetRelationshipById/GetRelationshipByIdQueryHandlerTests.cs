@@ -81,12 +81,12 @@ public class GetRelationshipByIdQueryHandlerTests : TestBase
         var expectedSourceMemberDto = new RelationshipMemberDto
         {
             Id = sourceMemberId,
-            FullName = $"{sourceMember.LastName} {sourceMember.FirstName}"
+            FullName = $"{sourceMember.FirstName} {sourceMember.LastName}"
         };
         var expectedTargetMemberDto = new RelationshipMemberDto
         {
             Id = targetMemberId,
-            FullName = $"{targetMember.LastName} {targetMember.FirstName}"
+            FullName = $"{targetMember.FirstName} {targetMember.LastName}"
         };
 
         var expectedDto = new RelationshipDto

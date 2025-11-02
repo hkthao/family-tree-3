@@ -42,8 +42,8 @@ public class GetRelationshipsQueryHandler(IApplicationDbContext context, IMapper
             bool isDescending = request.SortOrder?.ToLower() == "desc";
             query = request.SortBy.ToLower() switch
             {
-                "sourcememberfullname" => isDescending ? query.OrderByDescending(r => r.SourceMember!.LastName).ThenByDescending(r => r.SourceMember!.FirstName) : query.OrderBy(r => r.SourceMember!.LastName).ThenBy(r => r.SourceMember!.FirstName),
-                "targetmemberfullname" => isDescending ? query.OrderByDescending(r => r.TargetMember!.LastName).ThenByDescending(r => r.TargetMember!.FirstName) : query.OrderBy(r => r.TargetMember!.LastName).ThenBy(r => r.TargetMember!.FirstName),
+                "sourcememberfullname" => isDescending ? query.OrderByDescending(r => r.SourceMember!.FirstName).ThenByDescending(r => r.SourceMember!.LastName) : query.OrderBy(r => r.SourceMember!.FirstName).ThenBy(r => r.SourceMember!.LastName),
+                "targetmemberfullname" => isDescending ? query.OrderByDescending(r => r.TargetMember!.FirstName).ThenByDescending(r => r.TargetMember!.LastName) : query.OrderBy(r => r.TargetMember!.FirstName).ThenBy(r => r.TargetMember!.LastName),
                 "type" => isDescending ? query.OrderByDescending(r => r.Type) : query.OrderBy(r => r.Type),
                 _ => query.OrderBy(r => r.Id) // Default sort
             };

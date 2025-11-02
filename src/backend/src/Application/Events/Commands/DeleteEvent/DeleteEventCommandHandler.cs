@@ -4,10 +4,12 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Events.Commands.DeleteEvent;
 
-public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<DeleteEventCommand, Result<bool>>
+public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteEventCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IUser _currentUser = currentUser;
+    private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<bool>> Handle(DeleteEventCommand request, CancellationToken cancellationToken)
     {
@@ -18,9 +20,11 @@ public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthoriza
         if (!_authorizationService.CanManageFamily(entity.FamilyId!.Value))
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        entity.AddDomainEvent(new Domain.Events.Events.EventDeletedEvent(entity));
+        entity.IsDeleted = true;
+        entity.DeletedBy = _currentUser.Id?.ToString();
+        entity.DeletedDate = _dateTime.Now;
 
-        _context.Events.Remove(entity);
+        entity.AddDomainEvent(new Domain.Events.Events.EventDeletedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
         

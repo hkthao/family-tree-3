@@ -25,7 +25,9 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
 
         _handler = new DeleteRelationshipCommandHandler(
             _context,
-            _mockAuthorizationService.Object
+            _mockAuthorizationService.Object,
+            _mockUser.Object,
+            _mockDateTime.Object
         );
     }
 

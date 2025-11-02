@@ -17,7 +17,7 @@ public class DeleteFamilyCommandHandlerTests : TestBase
 
     public DeleteFamilyCommandHandlerTests()
     {
-        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object);
+        _handler = new DeleteFamilyCommandHandler(_context, _mockAuthorizationService.Object, _mockUser.Object, _mockDateTime.Object);
     }
 
 
@@ -127,8 +127,9 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        var deletedFamily = await _context.Families.FirstOrDefaultAsync(e => e.Id == existingFamily.Id);
-        deletedFamily.Should().BeNull();
+        var deletedFamily = await _context.Families.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == existingFamily.Id);
+        deletedFamily.Should().NotBeNull();
+        deletedFamily!.IsDeleted.Should().BeTrue();
 
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
@@ -170,8 +171,9 @@ public class DeleteFamilyCommandHandlerTests : TestBase
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        var deletedFamily = await _context.Families.FindAsync(existingFamily.Id);
-        deletedFamily.Should().BeNull();
+        var deletedFamily = await _context.Families.IgnoreQueryFilters().FirstOrDefaultAsync(e => e.Id == existingFamily.Id);
+        deletedFamily.Should().NotBeNull();
+        deletedFamily!.IsDeleted.Should().BeTrue();
 
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyDeletedEvent);
         existingFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);

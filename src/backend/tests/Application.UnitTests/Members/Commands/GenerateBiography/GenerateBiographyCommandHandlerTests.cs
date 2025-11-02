@@ -202,7 +202,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         capturedMessages[0].Role.Should().Be("system");
         capturedMessages[0].Content.Should().Contain("historical and factual tone");
         capturedMessages[1].Role.Should().Be("user");
-        capturedMessages[1].Content.Should().Contain("Doe John");
+        capturedMessages[1].Content.Should().Contain("John Doe");
 
         _mockChatProvider.Verify(c => c.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()), Times.Once);
     }
@@ -265,7 +265,7 @@ public class GenerateBiographyCommandHandlerTests : TestBase
         capturedMessages[0].Role.Should().Be("system");
         capturedMessages[0].Content.Should().Contain("neutral, objective, and informative tone");
         capturedMessages[1].Role.Should().Be("user");
-        capturedMessages[1].Content.Should().Contain("Doe Jane");
+        capturedMessages[1].Content.Should().Contain("Jane Doe");
         capturedMessages[1].Content.Should().NotContain("Here is additional system data");
 
         _mockChatProvider.Verify(c => c.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()), Times.Once);

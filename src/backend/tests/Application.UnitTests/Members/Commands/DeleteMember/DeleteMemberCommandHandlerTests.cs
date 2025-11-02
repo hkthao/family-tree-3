@@ -17,7 +17,9 @@ public class DeleteMemberCommandHandlerTests : TestBase
     {
         _handler = new DeleteMemberCommandHandler(
             _context,
-            _mockAuthorizationService.Object
+            _mockAuthorizationService.Object,
+            _mockUser.Object,
+            _mockDateTime.Object
         );
     }
 
