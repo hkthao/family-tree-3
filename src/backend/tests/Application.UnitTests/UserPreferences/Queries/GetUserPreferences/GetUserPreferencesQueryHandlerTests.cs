@@ -34,14 +34,23 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var userProfile = _fixture.Build<UserProfile>()
-            .With(up => up.Id, userId)
-            .Without(up => up.UserPreference) // Đảm bảo không có UserPreference
-            .Create();
-
         _mockUser.Setup(u => u.Id).Returns(userId);
+
+        var userProfile = new UserProfile
+        {
+            Id = userId,
+            ExternalId = userId.ToString(),
+            Email = "test@example.com",
+            Name = "Test User",
+            Phone = "1234567890",
+            UserPreference = null
+        };
+
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync();
+
+        var retrievedUserProfile = await _context.UserProfiles.FindAsync(userId);
+        retrievedUserProfile.Should().NotBeNull();
 
         var query = new GetUserPreferencesQuery();
 
@@ -68,21 +77,30 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
+        _mockUser.Setup(u => u.Id).Returns(userId);
+
         var userPreference = _fixture.Build<UserPreference>()
             .With(up => up.Theme, Theme.Dark)
             .With(up => up.Language, Language.Vietnamese)
             .Create();
 
-        var userProfile = _fixture.Build<UserProfile>()
-            .With(up => up.Id, userId)
-            .With(up => up.UserPreference, userPreference)
-            .Create();
+        var userProfile = new UserProfile
+        {
+            Id = userId,
+            ExternalId = userId.ToString(),
+            Email = "test@example.com",
+            Name = "Test User",
+            Phone = "1234567890",
+            UserPreference = userPreference
+        };
         userPreference.UserProfile = userProfile; // Đảm bảo liên kết hai chiều
 
-        _mockUser.Setup(u => u.Id).Returns(userId);
         _context.UserProfiles.Add(userProfile);
         _context.UserPreferences.Add(userPreference);
         await _context.SaveChangesAsync();
+
+        var retrievedUserProfile = await _context.UserProfiles.FindAsync(userId);
+        retrievedUserProfile.Should().NotBeNull();
 
         var query = new GetUserPreferencesQuery();
 

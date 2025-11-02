@@ -61,7 +61,7 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
             .Without(r => r.SourceMember) // Ensure SourceMember is not loaded
             .Create();
         _context.Relationships.Add(relationship);
-        await _context.SaveChangesAsync();
+        _mockAuthorizationService.Setup(s => s.CanManageFamily(relationship.FamilyId)).Returns(true);
 
         var command = new UpdateRelationshipCommand
         {
@@ -69,7 +69,8 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
             SourceMemberId = relationship.SourceMemberId,
             TargetMemberId = relationship.TargetMemberId,
             Type = relationship.Type,
-            Order = relationship.Order
+            Order = relationship.Order,
+            FamilyId = relationship.FamilyId
         };
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -177,18 +178,17 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
         _mockAuthorizationService.Setup(s => s.CanManageFamily(familyId)).Returns(true);
 
-        var updatedSourceMemberId = Guid.NewGuid();
-        var updatedTargetMemberId = Guid.NewGuid();
         var updatedType = RelationshipType.Wife;
         var updatedOrder = 2;
 
         var command = new UpdateRelationshipCommand
         {
             Id = relationship.Id,
-            SourceMemberId = updatedSourceMemberId,
-            TargetMemberId = updatedTargetMemberId,
+            SourceMemberId = sourceMember.Id,
+            TargetMemberId = targetMember.Id,
             Type = updatedType,
-            Order = updatedOrder
+            Order = updatedOrder,
+            FamilyId = familyId
         };
 
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -199,8 +199,8 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
 
         var updatedRelationship = await _context.Relationships.FindAsync(relationship.Id);
         updatedRelationship.Should().NotBeNull();
-        updatedRelationship!.SourceMemberId.Should().Be(updatedSourceMemberId);
-        updatedRelationship.TargetMemberId.Should().Be(updatedTargetMemberId);
+        updatedRelationship!.SourceMemberId.Should().Be(sourceMember.Id);
+        updatedRelationship.TargetMemberId.Should().Be(targetMember.Id);
         updatedRelationship.Type.Should().Be(updatedType);
         updatedRelationship.Order.Should().Be(updatedOrder);
         // 💡 Giải thích: Handler phải cập nhật mối quan hệ và ghi lại hoạt động.

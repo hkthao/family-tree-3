@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using AutoFixture;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;
@@ -169,18 +170,32 @@ public class CreateMemberCommandHandlerTests : TestBase
         _mockAuthorizationService.Setup(a => a.IsAdmin()).Returns(true);
         _mockAuthorizationService.Setup(a => a.CanManageFamily(It.IsAny<Guid>())).Returns(true);
 
-        var existingRoot = _fixture.Build<Member>()
-            .With(m => m.FamilyId, Guid.NewGuid())
-            .With(m => m.IsRoot, true)
-            .Create();
+        var familyId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Code = "FAM001", Name = "Test Family" };
+        _context.Families.Add(family);
+
+        var existingRootId = Guid.NewGuid();
+        var existingRoot = new Member
+        {
+            Id = existingRootId,
+            FamilyId = familyId,
+            IsRoot = true,
+            FirstName = "Existing",
+            LastName = "Root",
+            Code = "ER001"
+        };
 
         _context.Members.Add(existingRoot);
         await _context.SaveChangesAsync();
 
-        var command = _fixture.Build<CreateMemberCommand>()
-            .With(c => c.FamilyId, existingRoot.FamilyId)
-            .With(c => c.IsRoot, true)
-            .Create();
+        var command = new CreateMemberCommand
+        {
+            FamilyId = familyId,
+            IsRoot = true,
+            FirstName = "New",
+            LastName = "Member",
+            Code = "NM001"
+        };
 
         var result = await _handler.Handle(command, CancellationToken.None);
 
@@ -188,6 +203,7 @@ public class CreateMemberCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty(); // Should return the ID of the created member
 
+        // Re-fetch the existing root to ensure its state is updated
         var updatedExistingRoot = await _context.Members.FindAsync(existingRoot.Id);
         updatedExistingRoot.Should().NotBeNull();
         updatedExistingRoot!.IsRoot.Should().BeFalse();

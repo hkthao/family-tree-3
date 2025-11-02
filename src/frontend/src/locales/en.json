@@ -317,6 +317,8 @@
   "relationship.list.headers.sourceMemberFullName": "Source Member Full Name",
   "relationship.list.headers.targetMemberFullName": "Target Member Full Name",
   "relationship.list.headers.relationship": "Relationship",
+  "relationship.detail.noRelationshipSelected": "No relationship selected.", 
+  "relationship.validation.notSame": "Source and target members cannot be the same.",
   "common.name": "Name",
   "common.language.en": "English",
   "common.language.vi": "Vietnamese",

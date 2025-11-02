@@ -13,9 +13,10 @@ public class CleanupUnusedFilesCommandHandler(IApplicationDbContext context, IFi
     {
         var cutoffDate = _dateTime.Now.Subtract(request.OlderThan);
 
-        // Find unused files: not active, not linked to any entity, and older than cutoffDate
+        // Find unused files: not deleted, not linked to any entity, and older than cutoffDate
         var unusedFiles = await _context.FileMetadata
-            .Where(fm => !fm.IsActive && fm.UsedById == null && fm.Created < cutoffDate)
+            .IgnoreQueryFilters()
+            .Where(fm => !fm.IsDeleted && fm.UsedById == null && fm.Created < cutoffDate)
             .ToListAsync(cancellationToken);
 
         if (unusedFiles.Count == 0)
@@ -30,8 +31,8 @@ public class CleanupUnusedFilesCommandHandler(IApplicationDbContext context, IFi
             var deleteResult = await _fileStorage.DeleteFileAsync(file.Url, cancellationToken);
             if (deleteResult.IsSuccess)
             {
-                // Remove metadata from DB only if successfully deleted from storage
-                _context.FileMetadata.Remove(file);
+                file.IsDeleted = true;
+                file.DeletedDate = _dateTime.Now;
                 deletedCount++;
             }
             else

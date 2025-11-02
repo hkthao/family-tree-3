@@ -1,4 +1,5 @@
 
+using Microsoft.EntityFrameworkCore;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
@@ -17,8 +18,8 @@ public class GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
     {
         var userProfile = await _context.UserProfiles
+            .Where(up => up.Id == _user.Id!.Value)
             .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)

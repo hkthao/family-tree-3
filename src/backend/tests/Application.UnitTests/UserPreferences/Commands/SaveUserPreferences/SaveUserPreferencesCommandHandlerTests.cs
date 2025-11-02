@@ -38,11 +38,15 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
 
         // Arrange
         var userId = Guid.NewGuid();
-        var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.Id, userId)
-                                  .With(up => up.ExternalId, userId.ToString())
-                                  .Without(up => up.UserPreference) // Đảm bảo UserPreference là null
-                                  .Create();
+        var userProfile = new UserProfile
+        {
+            Id = userId,
+            ExternalId = userId.ToString(),
+            Email = "test@example.com",
+            Name = "Test User",
+            Phone = "1234567890",
+            UserPreference = null
+        };
         _context.UserProfiles.Add(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 
@@ -92,14 +96,20 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
 
         // Arrange
         var userId = Guid.NewGuid();
-        var userProfile = _fixture.Build<UserProfile>()
-                                  .With(up => up.Id, userId)
-                                  .With(up => up.ExternalId, userId.ToString())
-                                  .Create();
         var existingUserPreference = _fixture.Build<UserPreference>()
                                              .With(up => up.Theme, Theme.Light)
                                              .With(up => up.Language, Language.Vietnamese)
                                              .Create();
+
+        var userProfile = new UserProfile
+        {
+            Id = userId,
+            ExternalId = userId.ToString(),
+            Email = "test@example.com",
+            Name = "Test User",
+            Phone = "1234567890",
+            UserPreference = existingUserPreference
+        };
 
         _context.UserProfiles.Add(userProfile);
         _context.UserPreferences.Add(existingUserPreference);

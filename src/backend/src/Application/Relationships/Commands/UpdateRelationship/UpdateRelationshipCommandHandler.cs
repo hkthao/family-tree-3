@@ -16,6 +16,10 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
         if (entity == null)
             return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound);
 
+        var sourceMember = await _context.Members.FindAsync(request.SourceMemberId);
+        if (sourceMember == null)
+            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Source member for relationship {request.Id}"), ErrorSources.NotFound);
+
         if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 

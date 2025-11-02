@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
@@ -16,8 +17,7 @@ public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IU
     {
         var userProfile = await _context.UserProfiles
             .Include(up => up.UserPreference)
-            .WithSpecification(new UserProfileByIdSpecification(_user.Id!.Value))
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(up => up.Id == _user.Id!.Value, cancellationToken);
 
         if (userProfile == null)
         {
