@@ -1,30 +1,30 @@
 <template>
-  <v-form ref="form" @submit.prevent="submitForm" :disabled="props.readOnly">
-    <AvatarInput v-if="!props.readOnly" v-model="form.avatarUrl" :size="96" />
+  <v-form ref="formRef" @submit.prevent="submitForm" :disabled="props.readOnly">
+    <AvatarInput v-if="!props.readOnly" v-model="formData.avatarUrl" :size="96" />
     <div v-else class="d-flex justify-center mb-4">
-      <AvatarDisplay :src="form.avatarUrl" :size="96" />
+      <AvatarDisplay :src="formData.avatarUrl" :size="96" />
     </div>
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.name" :label="$t('family.form.nameLabel')" 
+        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" 
           @blur="v$.name.$touch()" @input="v$.name.$touch()"
           :error-messages="v$.name.$errors.map(e => e.$message as string)"
           required data-testid="family-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select v-model="form.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
+        <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
           required data-testid="family-visibility-select"></v-select>
       </v-col>
     </v-row>
-    <v-text-field v-model="form.address" :label="$t('family.form.addressLabel')" data-testid="family-address-input"></v-text-field>
-    <v-textarea v-model="form.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
+    <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')" data-testid="family-address-input"></v-text-field>
+    <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
     <FamilyPermissions :readOnly="props.readOnly" v-model="familyUsers" />
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
@@ -41,7 +41,9 @@ const props = defineProps<{
 const emit = defineEmits(['submit', 'cancel']);
 const { t } = useI18n();
 
-const form = reactive<Family | Omit<Family, 'id'>>(
+const formRef = ref<HTMLFormElement | null>(null);
+
+const formData = reactive<Family | Omit<Family, 'id'>>(
   props.initialFamilyData || {
     name: '',
     description: '',
@@ -52,7 +54,7 @@ const form = reactive<Family | Omit<Family, 'id'>>(
 );
 
 const state = reactive({
-  name: form.name,
+  name: formData.name,
 });
 
 const rules = useFamilyRules();
@@ -72,7 +74,7 @@ const visibilityItems = computed(() => [
 const submitForm = async () => {
   const result = await v$.value.$validate();
   if (result) {
-    emit('submit', form);
+    emit('submit', formData);
   }
 };
 
@@ -83,7 +85,7 @@ const validate = async () => {
 };
 
 const getFormData = () => {
-  return form;
+  return formData;
 };
 
 defineExpose({

@@ -1,62 +1,68 @@
 <template>
-  <v-form class="mt-3" ref="form" :disabled="props.readOnly">
+  <v-form class="mt-3" ref="formRef" :disabled="props.readOnly">
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.name" :label="t('event.form.name')" @blur="v$.name.$touch()"
-          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)"
+        <v-text-field v-model="formData.name" :label="t('event.form.name')" 
+          @blur="v$.name.$touch()" @input="v$.name.$touch()"
+          :error-messages="v$.name.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="event-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select v-model="form.type" :items="eventTypes" :label="t('event.form.type')" @blur="v$.type.$touch()"
-          @input="v$.type.$touch()" :error-messages="v$.type.$errors.map(e => e.$message as string)"
+        <v-select v-model="formData.type" :items="eventTypes" :label="t('event.form.type')" 
+          @blur="v$.type.$touch()" @input="v$.type.$touch()"
+          :error-messages="v$.type.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="event-type-select"></v-select>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <family-auto-complete v-model="form.familyId" :label="t('event.form.family')" @blur="v$.familyId.$touch()"
-          @update:modelValue="v$.familyId.$touch()" :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
+        <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" 
+          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
+          :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
           :read-only="props.readOnly" :multiple="false" data-testid="event-family-autocomplete" />
       </v-col>
       <v-col cols="12" md="6">
-        <member-auto-complete v-model="form.relatedMembers" :label="t('event.form.relatedMembers')"
+        <member-auto-complete v-model="formData.relatedMembers" :label="t('event.form.relatedMembers')"
           :read-only="props.readOnly" clearable multiple data-testid="event-related-members-autocomplete" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-date-input v-model="form.startDate" :label="t('event.form.startDate')" @blur="v$.startDate.$touch()"
-          @input="v$.startDate.$touch()" :error-messages="v$.startDate.$errors.map(e => e.$message as string)"
+        <VDateInput v-model="formData.startDate" :label="t('event.form.startDate')" 
+          @blur="v$.startDate.$touch()" @input="v$.startDate.$touch()"
+          :error-messages="v$.startDate.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
-          data-testid="event-start-date-input" />
+          data-testid="event-start-date-input"
+          />
       </v-col>
       <v-col cols="12" md="6">
-        <v-date-input v-model="form.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
+        <VDateInput v-model="formData.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
           @blur="v$.endDate.$touch()" @input="v$.endDate.$touch()"
-          :error-messages="v$.endDate.$errors.map(e => e.$message as string)" data-testid="event-end-date-input"
-          prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy" />
+          :error-messages="v$.endDate.$errors.map(e => e.$message as string)"
+          data-testid="event-end-date-input" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
+           />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="form.location" :label="t('event.form.location')" :readonly="props.readOnly"
+        <v-text-field v-model="formData.location" :label="t('event.form.location')" :readonly="props.readOnly"
           data-testid="event-location-input"></v-text-field>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-textarea v-model="form.description" :label="t('event.form.description')" :readonly="props.readOnly"
+        <v-textarea v-model="formData.description" :label="t('event.form.description')" :readonly="props.readOnly"
           data-testid="event-description-input"></v-textarea>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="6">
-        <VColorInput v-model="form.color" :label="t('event.form.color')" :readonly="props.readOnly"
+        <VColorInput v-model="formData.color" :label="t('event.form.color')" :readonly="props.readOnly"
           data-testid="event-color-picker" pip-location="append-inner">
         </VColorInput>
       </v-col>
@@ -65,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs } from 'vue';
+import { reactive, toRefs, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { EventType } from '@/types';
@@ -80,7 +86,9 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const form = reactive<Omit<Event, 'id'> | Event>(
+const formRef = ref<HTMLFormElement | null>(null);
+
+const formData = reactive<Omit<Event, 'id'> | Event>(
   props.initialEventData || {
     name: '',
     type: EventType.Other,
@@ -95,11 +103,11 @@ const form = reactive<Omit<Event, 'id'> | Event>(
 );
 
 const state = reactive({
-  name: form.name,
-  type: form.type,
-  familyId: form.familyId,
-  startDate: form.startDate,
-  endDate: form.endDate,
+  name: formData.name,
+  type: formData.type,
+  familyId: formData.familyId,
+  startDate: formData.startDate,
+  endDate: formData.endDate,
 });
 
 const eventTypes = [
@@ -121,8 +129,9 @@ const validate = async () => {
 };
 
 const getFormData = () => {
-  return form;
+  return formData;
 };
+
 
 defineExpose({
   validate,

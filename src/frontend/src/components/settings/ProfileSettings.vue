@@ -1,29 +1,29 @@
 <template>
-  <v-form ref="profileFormRef" @submit.prevent="saveProfile">
+  <v-form ref="formRef" @submit.prevent="saveProfile">
     <v-row>
       <v-col cols="12">
-        <AvatarInput v-model="form.avatar" :size="128" />
+        <AvatarInput v-model="formData.avatar" :size="128" />
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.firstName" :label="t('userSettings.profile.firstName')"
+        <v-text-field v-model="formData.firstName" :label="t('userSettings.profile.firstName')"
           @blur="v$.firstName.$touch()" @input="v$.firstName.$touch()"
           :error-messages="v$.firstName.$errors.map(e => e.$message as string)"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.lastName" :label="t('userSettings.profile.lastName')"
+        <v-text-field v-model="formData.lastName" :label="t('userSettings.profile.lastName')"
           @blur="v$.lastName.$touch()" @input="v$.lastName.$touch()"
           :error-messages="v$.lastName.$errors.map(e => e.$message as string)"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.email" :label="t('userSettings.profile.email')"
+        <v-text-field v-model="formData.email" :label="t('userSettings.profile.email')"
           @blur="v$.email.$touch()" @input="v$.email.$touch()"
           :error-messages="v$.email.$errors.map(e => e.$message as string)" />
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.phone" :label="t('userSettings.profile.phone')"></v-text-field>
+        <v-text-field v-model="formData.phone" :label="t('userSettings.profile.phone')"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="form.externalId" :label="t('userSettings.profile.externalId')"
+        <v-text-field v-model="formData.externalId" :label="t('userSettings.profile.externalId')"
           readonly></v-text-field>
       </v-col>
     </v-row>
@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, computed, reactive } from 'vue';
+import { onMounted, computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNotificationStore } from '@/stores/notification.store';
 import { AvatarInput } from '@/components/common';
@@ -49,7 +49,9 @@ const { t } = useI18n();
 const notificationStore = useNotificationStore();
 const userProfileStore = useUserProfileStore();
 
-const form = reactive({
+const formRef = ref<HTMLFormElement | null>(null);
+
+const formData = reactive({
   name: '',
   firstName: '',
   lastName: '',
@@ -60,9 +62,9 @@ const form = reactive({
 });
 
 const state = reactive({
-  firstName: form.firstName,
-  lastName: form.lastName,
-  email: form.email,
+  firstName: formData.firstName,
+  lastName: formData.lastName,
+  email: formData.email,
 });
 
 const rules = useProfileSettingsRules();
@@ -70,19 +72,19 @@ const rules = useProfileSettingsRules();
 const v$ = useVuelidate(rules, state);
 
 const generatedFullName = computed(() => {
-  return `${form.firstName} ${form.lastName}`.trim();
+  return `${formData.firstName} ${formData.lastName}`.trim();
 });
 
 onMounted(async () => {
   await userProfileStore.fetchCurrentUserProfile();
   if (userProfileStore.userProfile) {
-    form.name = userProfileStore.userProfile.name;
-    form.firstName = userProfileStore.userProfile.firstName || '';
-    form.lastName = userProfileStore.userProfile.lastName || '';
-    form.email = userProfileStore.userProfile.email;
-    form.phone = userProfileStore.userProfile.phone || '';
-    form.avatar = userProfileStore.userProfile.avatar || null;
-    form.externalId = userProfileStore.userProfile.externalId;
+    formData.name = userProfileStore.userProfile.name;
+    formData.firstName = userProfileStore.userProfile.firstName || '';
+    formData.lastName = userProfileStore.userProfile.lastName || '';
+    formData.email = userProfileStore.userProfile.email;
+    formData.phone = userProfileStore.userProfile.phone || '';
+    formData.avatar = userProfileStore.userProfile.avatar || null;
+    formData.externalId = userProfileStore.userProfile.externalId;
   } else if (userProfileStore.error) {
     notificationStore.showSnackbar(userProfileStore.error, 'error');
   }
@@ -94,12 +96,12 @@ const saveProfile = async () => {
     const updatedProfile: UserProfile = {
       id: userProfileStore.userProfile.id,
       externalId: userProfileStore.userProfile.externalId,
-      email: form.email,
+      email: formData.email,
       name: generatedFullName.value,
-      firstName: form.firstName,
-      lastName: form.lastName,
-      phone: form.phone,
-      avatar: form.avatar === null ? undefined : form.avatar,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      avatar: formData.avatar === null ? undefined : formData.avatar,
     };
 
     const success = await userProfileStore.updateUserProfile(updatedProfile);
