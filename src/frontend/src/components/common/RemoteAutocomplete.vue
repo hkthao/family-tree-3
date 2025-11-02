@@ -3,6 +3,9 @@
     :items="items" :item-title="itemTitle" :item-value="itemValue" :label="label" :rules="rules" :readonly="readOnly"
     :clearable="clearable" :loading="loading || internalLoading" :search="searchQuery" @update:search="onSearchChange"
     :multiple="multiple" :chips="chips" :closable-chips="closableChips" :return-object="returnObject">
+    <template v-if="$slots.chip" #chip="scope">
+      <slot name="chip" v-bind="scope"></slot>
+    </template>
     <template v-if="$slots.item" #item="scope">
       <slot name="item" v-bind="scope"></slot>
     </template>
@@ -34,7 +37,7 @@ interface RemoteAutocompleteProps {
 const props = withDefaults(defineProps<RemoteAutocompleteProps>(), {
   itemTitle: 'title',
   itemValue: 'value',
-  chips: true,
+  chips: false, // Default to false, chips should only be true when multiple is true
   closableChips: true,
   returnObject: true,
   loading: false, // Default value for the prop
