@@ -13,7 +13,7 @@
       <v-btn color="grey"  @click="closeForm" data-testid="relationship-add-cancel-button">{{
         t('common.cancel')
       }}</v-btn>
-      <v-btn color="blue-darken-1"  @click="handleAddItem" data-testid="relationship-add-save-button">{{
+      <v-btn color="primary"  @click="handleAddItem" data-testid="relationship-add-save-button">{{
         t('common.save')
       }}</v-btn>
     </v-card-actions>

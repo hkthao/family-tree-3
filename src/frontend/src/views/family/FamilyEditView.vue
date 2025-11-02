@@ -13,7 +13,7 @@
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
       <v-btn
-        color="blue-darken-1"
+        color="primary"
         data-testid="button-save"
         @click="handleUpdateItem"
         >{{

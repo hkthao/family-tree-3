@@ -13,7 +13,7 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey"  @click="closeForm" data-testid="event-add-cancel-button">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1"  @click="handleAddEvent" data-testid="event-add-save-button">{{ t('common.save') }}</v-btn>
+      <v-btn color="primary"  @click="handleAddEvent" data-testid="event-add-save-button">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

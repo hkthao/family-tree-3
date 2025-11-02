@@ -14,7 +14,7 @@
         t('common.cancel')
       }}</v-btn>
       <v-btn
-        color="blue-darken-1"
+        color="primary"
         data-testid="button-save"
         @click="handleAddItem"
         >{{ t('common.save') }}</v-btn
