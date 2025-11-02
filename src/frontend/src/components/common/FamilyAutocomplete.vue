@@ -2,7 +2,7 @@
   <RemoteAutocomplete
     v-bind="$attrs"
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="handleRemoteAutocompleteUpdate"
     :label="label"
     :rules="rules"
     :read-only="readOnly"
@@ -10,8 +10,8 @@
     :multiple="multiple"
     item-title="name"
     item-value="id"
-    :search-function="searchFamiliesFunction"
-    :preload-function="getFamiliesByIdsFunction"
+    :search-function="searchFunction"
+    :preload-function="getByIdsFunction"
     :clear-items-function="clearItemsFunction"
     :loading="composableLoading"
     :items="items"
@@ -53,12 +53,12 @@ const { items, selectedItems, onSearchChange, preloadById, loading: composableLo
   initialValue: props.modelValue ?? undefined,
 });
 
-const searchFamiliesFunction = async (query: string): Promise<Family[]> => {
+const searchFunction = async (query: string): Promise<Family[]> => {
   onSearchChange(query);
   return items.value;
 };
 
-const getFamiliesByIdsFunction = async (ids: string[]): Promise<Family[]> => {
+const getByIdsFunction = async (ids: string[]): Promise<Family[]> => {
   await preloadById(ids);
   return selectedItems.value;
 };
@@ -66,5 +66,15 @@ const getFamiliesByIdsFunction = async (ids: string[]): Promise<Family[]> => {
 const clearItemsFunction = () => {
   items.value = [];
   selectedItems.value = [];
+};
+
+const handleRemoteAutocompleteUpdate = (newValues: Family | Family[] | null) => {
+  if (props.multiple) {
+    const ids = Array.isArray(newValues) ? newValues.map((item: Family) => item.id) : [];
+    emit('update:modelValue', ids);
+  } else {
+    const id = newValues ? (newValues as Family).id : undefined;
+    emit('update:modelValue', id);
+  }
 };
 </script>
