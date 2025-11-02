@@ -1,26 +1,8 @@
 <template>
-  <v-autocomplete
-    v-bind="$attrs"
-    v-model="internalSelectedItems"
-    @update:model-value="handleUpdateModelValue"
-    :items="items"
-    :item-title="itemTitle"
-    :item-value="itemValue"
-    :label="label"
-    :rules="rules"
-    :readonly="readOnly"
-    :clearable="clearable"
-    :loading="loading || internalLoading"
-    :search="searchQuery"
-    @update:search="onSearchChange"
-    :multiple="multiple"
-    :chips="chips"
-    :closable-chips="closableChips"
-    :return-object="returnObject"
-  >
-    <template v-if="$slots.chip" #chip="scope">
-      <slot name="chip" v-bind="scope"></slot>
-    </template>
+  <v-autocomplete v-bind="$attrs" v-model="internalSelectedItems" @update:model-value="handleUpdateModelValue"
+    :items="items" :item-title="itemTitle" :item-value="itemValue" :label="label" :rules="rules" :readonly="readOnly"
+    :clearable="clearable" :loading="loading || internalLoading" :search="searchQuery" @update:search="onSearchChange"
+    :multiple="multiple" :chips="chips" :closable-chips="closableChips" :return-object="returnObject">
     <template v-if="$slots.item" #item="scope">
       <slot name="item" v-bind="scope"></slot>
     </template>
@@ -101,12 +83,11 @@ const preloadSelectedItems = async (value: any | any[]) => {
 
   internalLoading.value = true;
   try {
-    const idsToPreload = Array.isArray(value)
-      ? value.map((item: any) => item[props.itemValue])
-      : [value[props.itemValue]];
 
+    const idsToPreload = Array.isArray(value) ? value : [value];
     const preloaded = await props.preloadFunction(idsToPreload);
     internalSelectedItems.value = props.multiple ? preloaded : preloaded[0] || null;
+    
     // Ensure preloaded items are also in the general items list if not already present
     preloaded.forEach((item: any) => {
       if (!items.value.some(existingItem => existingItem[props.itemValue] === item[props.itemValue])) {

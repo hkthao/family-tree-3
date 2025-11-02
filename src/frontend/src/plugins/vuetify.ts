@@ -91,5 +91,14 @@ export default createVuetify({
     VBtn: {
       variant: 'outlined',
     },
+    VPagination: {
+      density: 'compact',
+    },
+    VTimeline: {
+      density: 'compact',
+    },
+    VProgressLinear: {
+      color: 'primary'
+    }
   },
 });

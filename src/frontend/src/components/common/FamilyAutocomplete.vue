@@ -1,25 +1,8 @@
 <template>
-  <RemoteAutocomplete
-    v-bind="$attrs"
-    :model-value="modelValue"
-    @update:model-value="handleRemoteAutocompleteUpdate"
-    :label="label"
-    :rules="rules"
-    :read-only="readOnly"
-    :clearable="clearable"
-    :multiple="multiple"
-    item-title="name"
-    item-value="id"
-    :search-function="searchFunction"
-    :preload-function="getByIdsFunction"
-    :clear-items-function="clearItemsFunction"
-    :loading="composableLoading"
-    :items="items"
-  >
-    <template #chip="{ props, item }">
-      <v-chip v-bind="props" size="small" v-if="item.raw"
-        :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.name"></v-chip>
-    </template>
+  <RemoteAutocomplete v-bind="$attrs" :model-value="modelValue" @update:model-value="handleRemoteAutocompleteUpdate"
+    :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="false" item-title="name"
+    item-value="id" :search-function="searchFunction" :preload-function="getByIdsFunction"
+    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items">
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw.address">
         <template #prepend>

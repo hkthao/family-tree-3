@@ -5,16 +5,13 @@
       <span class="ml-2">{{ t('dashboard.recentActivity.title') }}</span>
     </v-card-title>
     <v-card-text class="scrollable-card-content">
+      <v-progress-linear v-if="userActivityStore.loading" indeterminate class="mb-4" ></v-progress-linear>
       <v-alert v-if="userActivityStore.error" type="error" dense dismissible class="mb-4">
         {{ userActivityStore.error }}
       </v-alert>
-      <v-timeline v-else  align="start" truncate-line="both">
-        <v-timeline-item
-          v-for="item in userActivityStore.items"
-          :key="item.id"
-          :dot-color="getDotColor(item.targetType)"
-          size="small"
-        >
+      <v-timeline v-else align="start" truncate-line="both">
+        <v-timeline-item v-for="item in userActivityStore.items" :key="item.id"
+          :dot-color="getDotColor(item.targetType)" size="small">
           <template v-slot:opposite>
             <div class="text-caption">{{ new Date(item.created).toLocaleDateString() }}</div>
           </template>
@@ -36,19 +33,11 @@
           </v-timeline-item>
         </template>
       </v-timeline>
-      <div v-if="userActivityStore.loading" class="text-center pa-4">
-        <v-progress-circular indeterminate color="primary"></v-progress-circular>
-      </div>
+
     </v-card-text>
     <v-card-actions class="justify-center">
-      <v-pagination
-        v-if="userActivityStore.totalPages > 1"
-        :model-value="userActivityStore.page"
-        :length="userActivityStore.totalPages"
-        :total-visible="4"
-        
-        @update:modelValue="handlePageChange"
-      ></v-pagination>
+      <v-pagination v-if="userActivityStore.totalPages > 1" :model-value="userActivityStore.page"
+        :length="userActivityStore.totalPages" :total-visible="4" @update:modelValue="handlePageChange"></v-pagination>
     </v-card-actions>
   </v-card>
 </template>
@@ -101,7 +90,8 @@ watch(() => props.familyId, (newFamilyId) => {
 
 <style scoped>
 .scrollable-card-content {
-  max-height: 400px; /* Adjust as needed */
+  max-height: 400px;
+  /* Adjust as needed */
   overflow-y: auto;
 }
 </style>
