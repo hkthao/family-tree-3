@@ -52,7 +52,7 @@ export class ApiEventService implements IEventService {
     const params = new URLSearchParams();
     // Add filters to params if they exist
     if (filters.familyId) params.append('familyId', filters.familyId);
-    if (filters.eventType) params.append('eventType', filters.eventType);
+    if (filters.eventType) params.append('eventType', filters.eventType.toString());
     if (filters.startDate)
       params.append('startDate', filters.startDate.toISOString());
     if (filters.endDate)

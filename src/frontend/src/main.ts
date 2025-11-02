@@ -12,9 +12,15 @@ import i18n from './plugins/i18n';
 import { ServicesPlugin } from './plugins/services.plugin'; // Import ServicesPlugin
 import { setAuthService } from '@/services/auth/authService';
 import { auth0Service } from '@/services/auth/auth0Service';
-import { fakeAuthService } from '@/services/auth/fakeAuthService'; // Import fakeAuthService
+
+// Globally register common components
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
+import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 
 const app = createApp(App);
+
+app.component('member-auto-complete', MemberAutocomplete);
+app.component('family-auto-complete', FamilyAutocomplete);
 
 const pinia = createPinia(); // Create pinia instance
 pinia.use(ServicesPlugin()); // Use the services plugin
@@ -24,11 +30,5 @@ app.use(vuetify);
 app.use(i18n);
 i18n.global.locale.value = 'vi';
 app.directive('resize', Resize);
-// Conditionally set auth service for E2E tests
-if (import.meta.env.VITE_APP_E2E_TESTING === 'true') {
-  setAuthService(fakeAuthService);
-} else {
-  setAuthService(auth0Service);
-}
-
+setAuthService(auth0Service);
 app.mount('#app');

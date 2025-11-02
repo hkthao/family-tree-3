@@ -6,8 +6,6 @@ export { default as FamilyListView } from './family/FamilyListView.vue';
 export { default as FamilyAddView } from './family/FamilyAddView.vue';
 export { default as FamilyEditView } from './family/FamilyEditView.vue';
 export { default as EventListView } from './event/EventListView.vue';
-export { default as LoginView } from './auth/LoginView.vue';
-export { default as RegisterView } from './auth/RegisterView.vue';
 export { default as NotFoundView } from './misc/NotFoundView.vue';
 export { default as MainRouterView } from './MainRouterView.vue';
 

@@ -2,7 +2,7 @@
   <v-container fluid>
     <v-row >
       <v-col cols="12" md="4">
-        <FamilyAutocomplete
+        <family-auto-complete
           v-model="selectedFamilyId"
           :label="t('dashboard.filterByFamily')"
           clearable

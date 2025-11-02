@@ -1,13 +1,15 @@
 <template>
-  <v-dialog elevation="10" :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="800px">
-    <v-card >
+  <v-dialog elevation="10" :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)"
+    max-width="800px">
+    <v-card>
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>
-        <v-form ref="form">
-          <v-textarea v-model="prompt" :label="t('aiInput.promptLabelEvent')" rows="3" outlined clearable counter
-            :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
+        <v-form>
+          <v-textarea v-model="state.prompt" :label="t('aiInput.promptLabelEvent')" rows="3" outlined clearable counter
+            :auto-grow="true" @blur="v$.prompt.$touch()" @input="v$.prompt.$touch()"
+            :error-messages="v$.prompt.$errors.map(e => e.$message as string)"></v-textarea>
         </v-form>
-        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
+        <v-btn color="primary" :loading="loading" :disabled="loading || v$.$invalid" @click="generateData" class="mb-4">
           {{ t('aiInput.generateButton') }}
         </v-btn>
         <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
@@ -37,7 +39,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
-        }}</v-btn>
+          }}</v-btn>
         <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors"
           @click="save">{{
             t('aiInput.saveButton') }}</v-btn>
@@ -48,8 +50,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useVuelidate } from '@vuelidate/core';
+import { useNLEventRules } from '@/validations/nl-event.validation';
 import { useNaturalLanguageInputStore } from '@/stores';
 import { useEventStore } from '@/stores/event.store'; // Assuming an event store exists
 import { useNotificationStore } from '@/stores/notification.store';
@@ -69,10 +73,16 @@ const naturalLanguageInputStore = useNaturalLanguageInputStore();
 const eventStore = useEventStore(); // Use the event store
 const notificationStore = useNotificationStore();
 
-const prompt = ref('');
+const state = reactive({
+  prompt: '',
+});
+
+const rules = useNLEventRules();
+
+const v$ = useVuelidate(rules, state);
+
 const generatedData = ref<Event[] | null>(null);
 const loading = ref(false);
-const form = ref<HTMLFormElement | null>(null);
 
 const displayKeys = [
   'name',
@@ -105,30 +115,24 @@ const formatValue = (value: any, key: string) => {
   return value;
 };
 
-const rules = {
-  required: (value: string) => !!value || t('aiInput.promptRequired'),
-  length: (len: number) => (value: string) =>
-    (value || '').length <= len ||
-    t('aiInput.promptLength', { length: len }),
-};
-
 watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
-    // Reset state when dialog is closed
-    prompt.value = '';
+  if (newValue) {
+    state.prompt = '';
     generatedData.value = null;
+    v$.value.$reset();
   }
 });
 
 const generateData = async () => {
-  if (!form.value) return;
-  const { valid } = await form.value.validate();
-  if (!valid) return;
+  const result = await v$.value.$validate();
+  if (!result) {
+    return;
+  }
 
   loading.value = true;
   naturalLanguageInputStore.error = null; // Clear previous errors
   try {
-    const result = await naturalLanguageInputStore.generateEventData(prompt.value);
+    const result = await naturalLanguageInputStore.generateEventData(state.prompt);
     if (result) {
       generatedData.value = result;
     } else {
@@ -175,6 +179,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Thêm sự kiện tên "Lễ kỷ niệm 50 năm thành lập gia đình Nguyễn", loại "Other", bắt đầu vào ngày "2025-10-26" và kết thúc vào ngày "2025-10-27", tại "Trung tâm hội nghị Quốc gia, Hà Nội". Mô tả: "Sự kiện trọng đại kỷ niệm nửa thế kỷ hình thành và phát triển của gia đình Nguyễn, với sự tham gia của đông đảo thành viên và khách quý.". Thuộc gia đình "Nguyễn". Thành viên liên quan: "Trần Văn A", "Nguyễn Thị B".`;
+  state.prompt = `Thêm sự kiện tên "Lễ kỷ niệm 50 năm thành lập gia đình Nguyễn", loại "Other", bắt đầu vào ngày "2025-10-26" và kết thúc vào ngày "2025-10-27", tại "Trung tâm hội nghị Quốc gia, Hà Nội". Mô tả: "Sự kiện trọng đại kỷ niệm nửa thế kỷ hình thành và phát triển của gia đình Nguyễn, với sự tham gia của đông đảo thành viên và khách quý.". Thuộc gia đình "Nguyễn". Thành viên liên quan: "Trần Văn A", "Nguyễn Thị B".`;
 };
 </script>

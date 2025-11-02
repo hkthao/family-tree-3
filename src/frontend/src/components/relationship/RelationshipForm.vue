@@ -2,29 +2,37 @@
   <v-form ref="form" :disabled="props.readOnly" data-testid="relationship-form">
     <v-row>
       <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="editableRelationship.sourceMemberId" :label="t('relationship.form.sourceMember')"
-          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId"
+        <member-auto-complete v-model="form.sourceMemberId" :label="t('relationship.form.sourceMember')"
+          @blur="v$.sourceMemberId.$touch()" @update:modelValue="v$.sourceMemberId.$touch()"
+          :error-messages="v$.sourceMemberId.$errors.map(e => e.$message as string)"
+          :readonly="props.readOnly" :family-id="form.familyId"
           data-testid="relationship-source-member-autocomplete" />
       </v-col>
       <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="editableRelationship.targetMemberId" :label="t('relationship.form.targetMember')"
-          :rules="[rules.required]" :readonly="props.readOnly" :family-id="editableRelationship.familyId"
+        <member-auto-complete v-model="form.targetMemberId" :label="t('relationship.form.targetMember')"
+          @blur="v$.targetMemberId.$touch()" @update:modelValue="v$.targetMemberId.$touch()"
+          :error-messages="v$.targetMemberId.$errors.map(e => e.$message as string)"
+          :readonly="props.readOnly" :family-id="form.familyId"
           data-testid="relationship-target-member-autocomplete" />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" md="6">
-        <v-select v-model="editableRelationship.type" :items="relationshipTypes" :label="t('relationship.form.type')"
-          :rules="[rules.required]" :readonly="props.readOnly" data-testid="relationship-type-select"></v-select>
+        <v-select v-model="form.type" :items="relationshipTypes" :label="t('relationship.form.type')"
+          @blur="v$.type.$touch()" @input="v$.type.$touch()"
+          :error-messages="v$.type.$errors.map(e => e.$message as string)"
+          :readonly="props.readOnly" data-testid="relationship-type-select"></v-select>
       </v-col>
       <v-col cols="12" md="6">
-        <FamilyAutocomplete v-model="editableRelationship.familyId" :label="t('relationship.form.family')"
-          :rules="[rules.required]" :readonly="props.readOnly" data-testid="relationship-family-autocomplete" />
+        <family-auto-complete v-model="form.familyId" :label="t('relationship.form.family')"
+          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
+          :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
+          :readonly="props.readOnly" data-testid="relationship-family-autocomplete" />
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model.number="editableRelationship.order" :label="t('relationship.form.order')" type="number"
+        <v-text-field v-model.number="form.order" :label="t('relationship.form.order')" type="number"
           :readonly="props.readOnly" data-testid="relationship-order-input"></v-text-field>
       </v-col>
     </v-row>
@@ -32,12 +40,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { reactive, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Relationship } from '@/types';
 import { RELATIONSHIP_TYPE_OPTIONS } from '@/constants/relationshipTypes';
-import { MemberAutocomplete, FamilyAutocomplete } from '@/components/common';
+import { useVuelidate } from '@vuelidate/core';
+import { useRelationshipRules } from '@/validations/relationship.validation';
 
+const relationshipTypes = RELATIONSHIP_TYPE_OPTIONS;
 const props = defineProps<{
   id?: string;
   readOnly?: boolean;
@@ -45,8 +55,8 @@ const props = defineProps<{
 }>();
 
 const { t } = useI18n();
-const form = ref<HTMLFormElement | null>(null);
-const editableRelationship = ref<Partial<Relationship>>(
+
+const form = reactive<Partial<Relationship>>(
   props.initialRelationshipData
     ? { ...props.initialRelationshipData }
     : {
@@ -54,28 +64,28 @@ const editableRelationship = ref<Partial<Relationship>>(
       targetMemberId: '',
       type: undefined,
       order: undefined,
-      familyId: undefined
+      familyId: undefined,
     },
 );
 
-// formTitle is removed
+const state = reactive({
+  sourceMemberId: form.sourceMemberId,
+  targetMemberId: form.targetMemberId,
+  type: form.type,
+  familyId: form.familyId,
+});
 
-const relationshipTypes = RELATIONSHIP_TYPE_OPTIONS;
+const rules = useRelationshipRules(toRefs(state));
 
-const rules = {
-  required: (value: any) => (value !== null && value !== undefined && value !== '') || t('validation.required'),
-};
+const v$ = useVuelidate(rules, state);
 
 const validate = async () => {
-  if (form.value) {
-    const { valid } = await form.value.validate();
-    return valid;
-  }
-  return false;
+  const result = await v$.value.$validate();
+  return result;
 };
 
 const getFormData = () => {
-  return editableRelationship.value;
+  return form;
 };
 
 // save and cancel methods are removed

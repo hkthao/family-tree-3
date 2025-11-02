@@ -101,7 +101,7 @@ Phản hồi sẽ có cấu trúc `PaginatedList<T>` với các trường:
 -   `items`: Một mảng chứa các đối tượng dữ liệu của trang hiện tại.
 -   `page`: Số trang hiện tại.
 -   `totalPages`: Tổng số trang có sẵn.
--   `totalCount`: Tổng số mục trên tất cả các trang.
+-   `totalItems`: Tổng số mục trên tất cả các trang.
 
 ## 4. Lọc và Tìm kiếm
 

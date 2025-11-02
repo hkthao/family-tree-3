@@ -76,13 +76,17 @@ export default createVuetify({
     VDateInput: {
       variant: 'outlined',
       density: 'compact',
-      hideDetails: true
+      hideDetails: true,
+      prependIcon: ""
     },
     VColorInput: {
       variant: 'outlined',
       density: 'compact',
       colorPip: true,
       hideDetails: true
+    },
+    VFileUpload: {
+      density: 'compact',
     },
     VBtn: {
       variant: 'outlined',

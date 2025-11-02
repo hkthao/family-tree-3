@@ -23,7 +23,7 @@
               <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable data-testid="member-gender-filter" />
             </v-col>
             <v-col cols="12" md="4">
-              <FamilyAutocomplete v-model="filters.familyId" :label="t('member.search.family')" clearable data-testid="member-family-filter" />
+              <family-auto-complete v-model="filters.familyId" :label="t('member.search.family')" clearable data-testid="member-family-filter" />
             </v-col>
           </v-row>
         </v-card-text>

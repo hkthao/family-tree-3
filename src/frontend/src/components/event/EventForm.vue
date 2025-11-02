@@ -2,57 +2,61 @@
   <v-form class="mt-3" ref="form" :disabled="props.readOnly">
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="eventForm.name" :label="t('event.form.name')" :rules="[rules.required]"
+        <v-text-field v-model="form.name" :label="t('event.form.name')" @blur="v$.name.$touch()"
+          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="event-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select v-model="eventForm.type" :items="eventTypes" :label="t('event.form.type')" :rules="[rules.required]"
+        <v-select v-model="form.type" :items="eventTypes" :label="t('event.form.type')" @blur="v$.type.$touch()"
+          @input="v$.type.$touch()" :error-messages="v$.type.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="event-type-select"></v-select>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <FamilyAutocomplete v-model="computedFamilyId" :label="t('event.form.family')" :rules="[rules.required]"
+        <family-auto-complete v-model="form.familyId" :label="t('event.form.family')" @blur="v$.familyId.$touch()"
+          @update:modelValue="v$.familyId.$touch()" :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
           :read-only="props.readOnly" :multiple="false" data-testid="event-family-autocomplete" />
       </v-col>
       <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="eventForm.relatedMembers" :label="t('event.form.relatedMembers')"
+        <member-auto-complete v-model="form.relatedMembers" :label="t('event.form.relatedMembers')"
           :read-only="props.readOnly" clearable multiple data-testid="event-related-members-autocomplete" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <VDateInput v-model="eventForm.startDate" :label="t('event.form.startDate')" :rules="[rules.required]"
+        <v-date-input v-model="form.startDate" :label="t('event.form.startDate')" @blur="v$.startDate.$touch()"
+          @input="v$.startDate.$touch()" :error-messages="v$.startDate.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
-          data-testid="event-start-date-input"
-          />
+          data-testid="event-start-date-input" />
       </v-col>
       <v-col cols="12" md="6">
-        <VDateInput v-model="eventForm.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
-          data-testid="event-end-date-input" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
-          :rules="[rules.endDateAfterStartDate]" />
+        <v-date-input v-model="form.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
+          @blur="v$.endDate.$touch()" @input="v$.endDate.$touch()"
+          :error-messages="v$.endDate.$errors.map(e => e.$message as string)" data-testid="event-end-date-input"
+          prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="eventForm.location" :label="t('event.form.location')" :readonly="props.readOnly"
+        <v-text-field v-model="form.location" :label="t('event.form.location')" :readonly="props.readOnly"
           data-testid="event-location-input"></v-text-field>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-textarea v-model="eventForm.description" :label="t('event.form.description')" :readonly="props.readOnly"
+        <v-textarea v-model="form.description" :label="t('event.form.description')" :readonly="props.readOnly"
           data-testid="event-description-input"></v-textarea>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="6">
-        <VColorInput v-model="eventForm.color" :label="t('event.form.color')" :readonly="props.readOnly"
+        <VColorInput v-model="form.color" :label="t('event.form.color')" :readonly="props.readOnly"
           data-testid="event-color-picker" pip-location="append-inner">
         </VColorInput>
       </v-col>
@@ -61,14 +65,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { reactive, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { EventType } from '@/types';
-import {
-  FamilyAutocomplete,
-  MemberAutocomplete,
-} from '@/components/common';
+import { VColorInput } from 'vuetify/labs/VColorInput';
+import { useVuelidate } from '@vuelidate/core';
+import { useEventRules } from '@/validations/event.validation';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -77,12 +80,10 @@ const props = defineProps<{
 
 const { t } = useI18n();
 
-const form = ref<HTMLFormElement | null>(null);
-
-const eventForm = ref<Omit<Event, 'id'> | Event>(
+const form = reactive<Omit<Event, 'id'> | Event>(
   props.initialEventData || {
     name: '',
-    type: EventType.Other, // Use enum value
+    type: EventType.Other,
     familyId: null,
     startDate: null,
     endDate: null,
@@ -93,47 +94,35 @@ const eventForm = ref<Omit<Event, 'id'> | Event>(
   },
 );
 
+const state = reactive({
+  name: form.name,
+  type: form.type,
+  familyId: form.familyId,
+  startDate: form.startDate,
+  endDate: form.endDate,
+});
+
 const eventTypes = [
-  { title: t('event.type.birth'), value: EventType.Birth }, // Use enum value
-  { title: t('event.type.marriage'), value: EventType.Marriage }, // Use enum value
-  { title: t('event.type.death'), value: EventType.Death }, // Use enum value
-  { title: t('event.type.migration'), value: EventType.Migration }, // Use enum value
-  { title: t('event.type.other'), value: EventType.Other }, // Use enum value
+  { title: t('event.type.birth'), value: EventType.Birth },
+  { title: t('event.type.marriage'), value: EventType.Marriage },
+  { title: t('event.type.death'), value: EventType.Death },
+  { title: t('event.type.migration'), value: EventType.Migration },
+  { title: t('event.type.other'), value: EventType.Other },
 ];
 
-const rules = {
-  required: (value: unknown) => (value !== null && value !== undefined && value !== '') || t('validation.required'),
-  endDateAfterStartDate: (value: string | null) => {
-    if (!value || !eventForm.value.startDate) return true;
-    const endDate = new Date(value);
-    const startDate = new Date(eventForm.value.startDate);
-    return endDate >= startDate || t('event.validation.endDateAfterStartDate');
-  },
-};
+const rules = useEventRules(toRefs(state));
 
-onMounted(async () => { });
-
-const computedFamilyId = computed<string | undefined>({
-  get: () => eventForm.value.familyId ?? undefined,
-  set: (value) => {
-    eventForm.value.familyId = value ?? null;
-  },
-});
+const v$ = useVuelidate(rules, state);
 
 // Expose form validation and data for parent component
 const validate = async () => {
-  if (form.value) {
-    const { valid } = await form.value.validate();
-    return valid;
-  }
-  return false;
+  const result = await v$.value.$validate();
+  return result;
 };
 
 const getFormData = () => {
-  return eventForm.value;
+  return form;
 };
-
-
 
 defineExpose({
   validate,

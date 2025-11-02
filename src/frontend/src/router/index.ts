@@ -18,21 +18,6 @@ import { settingRoutes } from './features/setting.routes';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    { 
-      path: '/login',
-      name: 'Login',
-      component: () => import('@/views/auth/LoginView.vue'),
-    },
-    {
-      path: '/register',
-      name: 'Register',
-      component: () => import('@/views/auth/RegisterView.vue'),
-    },
-    {
-      path: '/callback',
-      name: 'Auth0Callback',
-      redirect: '/', // Redirect to home after callback
-    },
     {
       path: '/',
       redirect: '/dashboard',

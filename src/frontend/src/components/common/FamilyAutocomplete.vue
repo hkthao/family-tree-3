@@ -1,30 +1,11 @@
 <template>
-  <v-autocomplete
-    v-model="internalSelectedItems"
-    @update:model-value="handleAutocompleteUpdate"
-    :items="families"
-    item-title="name"
-    item-value="id"
-    :label="label"
-    :rules="rules"
-    :readonly="readOnly"
-    :clearable="clearable"
-    :loading="loading"
-    :search="searchTerm"
-    @update:search="onSearchInput"
-    :multiple="multiple"
-    :chips="multiple"
-    :closable-chips="multiple"
-    return-object
-  >
+  <v-autocomplete v-model="internalSelectedItems" @update:model-value="handleAutocompleteUpdate" :items="families"
+    item-title="name" item-value="id" :label="label" :rules="rules" :readonly="readOnly" :clearable="clearable"
+    :loading="loading" :search="searchTerm" @update:search="onSearchInput" :multiple="multiple" :chips="multiple"
+    :closable-chips="multiple" return-object>
     <template #chip="{ props, item }">
-      <v-chip
-        v-bind="props"
-        size="small"
-        v-if="item.raw"
-        :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined"
-        :text="item.raw.name"
-      ></v-chip>
+      <v-chip v-bind="props" size="small" v-if="item.raw"
+        :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.name"></v-chip>
     </template>
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw.address">
@@ -61,7 +42,7 @@ interface FamilyAutocompleteProps {
   hideDetails?: boolean | "auto";
 }
 
-const { modelValue, label, rules, readOnly, clearable, multiple, hideDetails } = defineProps<FamilyAutocompleteProps>();
+const { modelValue, label, rules, readOnly, clearable, multiple } = defineProps<FamilyAutocompleteProps>();
 
 const emit = defineEmits(['update:modelValue']);
 

@@ -9,7 +9,7 @@ export const useUserActivityStore = defineStore('userActivity', {
     page: 1,
     pageSize: 10,
     totalPages: 0,
-    totalCount: 0,
+    totalItems: 0,
   }),
   actions: {
     async fetchRecentActivities(pageSize = 10, targetType?: TargetType, targetId?: string, groupId?: string, page = 1) {
@@ -21,7 +21,7 @@ export const useUserActivityStore = defineStore('userActivity', {
           this.items = response.value.items;
           this.page = response.value.page;
           this.totalPages = response.value.totalPages;
-          this.totalCount = response.value.totalCount;
+          this.totalItems = response.value.totalItems;
         } else {
           this.error = response.error?.message || 'Failed to fetch recent activities.';
         }

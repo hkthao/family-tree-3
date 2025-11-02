@@ -17,22 +17,24 @@
         </v-col>
         <v-col>
           <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
-            item-title="text" item-value="value"  ></v-select>
+            item-title="text" item-value="value"></v-select>
           <v-checkbox v-model="aiBiographyStore.generatedFromDB" :label="t('aiBiography.input.useSystemData')"
             ></v-checkbox>
         </v-col>
       </v-row>
-      <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
+      <v-textarea v-model="state.userPrompt" :label="t('aiBiography.input.promptLabel')"
         :placeholder="t('aiBiography.input.promptPlaceholder')" :auto-grow="true" clearable counter
-        :rules="[rules.userPromptLength]"></v-textarea>
+        @blur="v$.userPrompt.$touch()" @input="v$.userPrompt.$touch()"
+        :error-messages="v$.userPrompt.$errors.map(e => e.$message as string)"></v-textarea>
     </v-card-text>
 
     <v-card-actions>
       <v-btn color="primary" class="mr-2" :loading="aiBiographyStore.loading"
-        @click="aiBiographyStore.generateBiography()">
+        :disabled="v$.$invalid"
+        @click="generateBiography">
         {{ t('aiBiography.input.generateButton') }}
       </v-btn>
-      <v-btn color="grey" class="mr-2" @click="aiBiographyStore.clearForm()">
+      <v-btn color="grey" class="mr-2" @click="clearForm">
         {{ t('aiBiography.input.clearButton') }}
       </v-btn>
     </v-card-actions>
@@ -40,14 +42,25 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAIBiographyStore } from '@/stores/ai-biography.store';
 import { BiographyStyle } from '@/types';
-
+import { useVuelidate } from '@vuelidate/core';
+import { useAIBiographyRules } from '@/validations/ai-biography.validation';
 
 const { t } = useI18n();
 const aiBiographyStore = useAIBiographyStore();
+
+const state = reactive({
+  userPrompt: ''
+});
+
+aiBiographyStore.userPrompt = state.userPrompt;
+
+const rules = useAIBiographyRules();
+
+const v$ = useVuelidate(rules, state);
 
 const biographyStyles = computed(() => [
   { text: t('aiBiography.styles.emotional'), value: BiographyStyle.Emotional },
@@ -57,13 +70,25 @@ const biographyStyles = computed(() => [
   { text: t('aiBiography.styles.informal'), value: BiographyStyle.Informal },
 ]);
 
-const rules = {
-  userPromptLength: (value: string) => (value && value.length <= 1000) || t('aiBiography.input.validation.userPromptLength'),
-};
-
 const formatDate = (dateString: string | undefined | null) => {
   if (!dateString) return t('common.unknown');
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return t('common.unknown'); // Handle invalid date strings
   return date.toLocaleDateString('en-GB'); // 'en-GB' formats as dd/MM/yyyy
-};</script>
+};
+
+const generateBiography = async () => {
+  const result = await v$.value.$validate();
+  if (!result) {
+    return;
+  }
+  aiBiographyStore.generateBiography();
+}
+
+const clearForm = () => {
+  state.userPrompt = '';
+  v$.value.$reset();
+  aiBiographyStore.clearForm();
+}
+
+</script>

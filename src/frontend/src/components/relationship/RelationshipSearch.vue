@@ -16,7 +16,7 @@
         <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
-              <MemberAutocomplete
+              <member-auto-complete
                 v-model="filters.sourceMemberId"
                 :label="t('relationship.search.sourceMember')"
                 clearable
@@ -24,7 +24,7 @@
               />
             </v-col>
             <v-col cols="12" md="4">
-              <MemberAutocomplete
+              <member-auto-complete
                 v-model="filters.targetMemberId"
                 :label="t('relationship.search.targetMember')"
                 clearable

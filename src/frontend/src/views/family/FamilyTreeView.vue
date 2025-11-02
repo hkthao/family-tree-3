@@ -5,7 +5,7 @@
         <h1 class="text-h5 flex-grow-1">
           {{ t('family.tree.title') }}
         </h1>
-        <FamilyAutocomplete v-model="selectedFamilyId" class="tree-filter-input"
+        <family-auto-complete v-model="selectedFamilyId" class="tree-filter-input"
           :label="t('family.tree.filterByFamily')" clearable @update:modelValue="onFamilyChange" hideDetails />
       </div>
     </v-card-title>

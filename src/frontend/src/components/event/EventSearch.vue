@@ -34,7 +34,7 @@
               ></v-select>
             </v-col>
             <v-col cols="12" md="4">
-              <FamilyAutocomplete
+              <family-auto-complete
                 v-model="computedFamilyId"
                 :label="t('event.search.family')"
                 clearable
@@ -43,19 +43,21 @@
               />
             </v-col>
             <v-col cols="12" md="4">
-              <DateInputField
+              <v-date-input
                 v-model="filters.startDate"
                 :label="t('event.search.startDate')"
                 optional
                 data-testid="event-search-start-date-input"
+                append-inner-icon="mdi-calendar"
               />
             </v-col>
             <v-col cols="12" md="4">
-              <DateInputField
+              <v-date-input
                 v-model="filters.endDate"
                 :label="t('event.search.endDate')"
                 optional
                 data-testid="event-search-end-date-input"
+                append-inner-icon="mdi-calendar"
               />
             </v-col>
 
@@ -78,7 +80,8 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/types';
 import { EventType } from '@/types'; // Import EventType enum
-import { DateInputField, FamilyAutocomplete } from '@/components/common';
+import { VDateInput } from 'vuetify/labs/VDateInput';
+import { FamilyAutocomplete } from '@/components/common';
 
 const emit = defineEmits(['update:filters']);
 

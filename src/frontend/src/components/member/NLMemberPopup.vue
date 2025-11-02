@@ -1,13 +1,15 @@
 <template>
-  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="800px" data-testid="nl-member-popup">
+  <v-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" max-width="800px"
+    data-testid="nl-member-popup">
     <v-card>
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>
-        <v-form ref="form">
-          <v-textarea v-model="prompt" :label="t('aiInput.promptLabelMember')" rows="3" outlined clearable counter
-            :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
+        <v-form>
+          <v-textarea v-model="state.prompt" :label="t('aiInput.promptLabelMember')" rows="3" outlined clearable counter
+            :auto-grow="true" @blur="v$.prompt.$touch()" @input="v$.prompt.$touch()"
+            :error-messages="v$.prompt.$errors.map(e => e.$message as string)"></v-textarea>
         </v-form>
-        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
+        <v-btn color="primary" :loading="loading" :disabled="loading || v$.$invalid" @click="generateData" class="mb-4">
           {{ t('aiInput.generateButton') }}
         </v-btn>
         <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
@@ -37,24 +39,21 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="grey-darken-1" @click="cancel" :disabled="loading">{{ t('aiInput.cancelButton')
-          }}</v-btn>
-        <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors" @click="save">{{
-          t('aiInput.saveButton') }}</v-btn>
+        }}</v-btn>
+        <v-btn color="primary" :disabled="!generatedData || !generatedData.length || loading || hasValidationErrors"
+          @click="save">{{
+            t('aiInput.saveButton') }}</v-btn>
       </v-card-actions>
-      <v-progress-linear
-        v-if="loading"
-        indeterminate
-        color="primary"
-        height="4"
-        class="mb-0"
-      ></v-progress-linear>
+      <v-progress-linear v-if="loading" indeterminate color="primary" height="4" class="mb-0"></v-progress-linear>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useVuelidate } from '@vuelidate/core';
+import { useNLMemberRules } from '@/validations/nl-member.validation';
 import { useNaturalLanguageInputStore } from '@/stores';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -74,10 +73,16 @@ const naturalLanguageInputStore = useNaturalLanguageInputStore();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
-const prompt = ref(``);
+const state = reactive({
+  prompt: '',
+});
+
+const rules = useNLMemberRules();
+
+const v$ = useVuelidate(rules, state);
+
 const generatedData = ref<Member[] | null>(null);
 const loading = ref(false);
-const form = ref<HTMLFormElement | null>(null);
 
 const displayKeys = [
   'firstName',
@@ -109,30 +114,24 @@ const formatValue = (value: any, key: string) => {
   return value;
 };
 
-const rules = {
-  required: (value: string) => !!value || t('aiInput.promptRequired'),
-  length: (len: number) => (value: string) =>
-    (value || '').length <= len ||
-    t('aiInput.promptLength', { length: len }),
-};
-
 watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
-    // Reset state when dialog is closed
-    prompt.value = '';
+  if (newValue) {
+    state.prompt = '';
     generatedData.value = null;
+    v$.value.$reset();
   }
 });
 
 const generateData = async () => {
-  if (!form.value) return;
-  const { valid } = await form.value.validate();
-  if (!valid) return;
+  const result = await v$.value.$validate();
+  if (!result) {
+    return;
+  }
 
   loading.value = true;
   naturalLanguageInputStore.error = null; // Clear previous errors
   try {
-    const result = await naturalLanguageInputStore.generateMemberData(prompt.value);
+    const result = await naturalLanguageInputStore.generateMemberData(state.prompt);
     if (result) {
       generatedData.value = result;
     } else {
@@ -178,6 +177,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Tạo thành viên Nguyễn Văn An. Biệt danh: An Béo. Giới tính: Nam. Ngày sinh: 15/03/1985. Ngày mất: 20/11/2020. Nơi sinh: Hà Nội, Việt Nam. Nơi mất: Thành phố Hồ Chí Minh, Việt Nam. Nghề nghiệp: Kiến trúc sư. Tiểu sử: Nguyễn Văn An là một kiến trúc sư tài năng, nổi tiếng với các công trình xanh và bền vững. Anh đã có nhiều đóng góp cho sự phát triển kiến trúc đô thị Việt Nam. Thuộc gia đình: Gia đình Nguyễn. Ảnh đại diện: https://example.com/nguyenvanan.jpg`;
+  state.prompt = `Tạo thành viên Nguyễn Văn An. Biệt danh: An Béo. Giới tính: Nam. Ngày sinh: 15/03/1985. Ngày mất: 20/11/2020. Nơi sinh: Hà Nội, Việt Nam. Nơi mất: Thành phố Hồ Chí Minh, Việt Nam. Nghề nghiệp: Kiến trúc sư. Tiểu sử: Nguyễn Văn An là một kiến trúc sư tài năng, nổi tiếng với các công trình xanh và bền vững. Anh đã có nhiều đóng góp cho sự phát triển kiến trúc đô thị Việt Nam. Thuộc gia đình: Gia đình Nguyễn. Ảnh đại diện: https://example.com/nguyenvanan.jpg`;
 };
 </script>

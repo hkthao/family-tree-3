@@ -3,11 +3,12 @@
     <v-card>
       <v-card-title class="headline">{{ t('aiInput.title') }}</v-card-title>
       <v-card-text>
-        <v-form ref="form">
-          <v-textarea v-model="prompt" :label="t('aiInput.promptLabelFamily')" rows="3" outlined clearable counter
-            :auto-grow="true" :rules="[rules.required, rules.length(1000)]"></v-textarea>
+        <v-form>
+          <v-textarea v-model="state.prompt" :label="t('aiInput.promptLabelFamily')" rows="3" outlined clearable counter
+            :auto-grow="true" @blur="v$.prompt.$touch()" @input="v$.prompt.$touch()"
+            :error-messages="v$.prompt.$errors.map(e => e.$message as string)"></v-textarea>
         </v-form>
-        <v-btn color="primary" :loading="loading" :disabled="loading" @click="generateData" class="mb-4">
+        <v-btn color="primary" :loading="loading" :disabled="loading || v$.$invalid" @click="generateData" class="mb-4">
           {{ t('aiInput.generateButton') }}
         </v-btn>
         <v-btn color="info" @click="fillSamplePrompt" class="mb-4 ml-2">
@@ -48,8 +49,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useVuelidate } from '@vuelidate/core';
+import { useNLFamilyRules } from '@/validations/nl-family.validation';
 import { useNaturalLanguageInputStore } from '@/stores';
 import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -69,10 +72,16 @@ const naturalLanguageInputStore = useNaturalLanguageInputStore();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
-const prompt = ref('');
+const state = reactive({
+  prompt: '',
+});
+
+const rules = useNLFamilyRules();
+
+const v$ = useVuelidate(rules, state);
+
 const generatedData = ref<Family[] | null>(null);
 const loading = ref(false);
-const form = ref<HTMLFormElement | null>(null);
 
 const displayKeys = [
   'name',
@@ -98,30 +107,24 @@ const formatValue = (value: any, key: string) => {
   return value;
 };
 
-const rules = {
-  required: (value: string) => !!value || t('aiInput.promptRequired'),
-  length: (len: number) => (value: string) =>
-    (value || '').length <= len ||
-    t('aiInput.promptLength', { length: len }),
-};
-
 watch(() => props.modelValue, (newValue) => {
-  if (!newValue) {
-    // Reset state when dialog is closed
-    prompt.value = '';
+  if (newValue) {
+    state.prompt = '';
     generatedData.value = null;
+    v$.value.$reset();
   }
 });
 
 const generateData = async () => {
-  if (!form.value) return;
-  const { valid } = await form.value.validate();
-  if (!valid) return;
+  const result = await v$.value.$validate();
+  if (!result) {
+    return;
+  }
 
   loading.value = true;
   naturalLanguageInputStore.error = null; // Clear previous errors
   try {
-    const result = await naturalLanguageInputStore.generateFamilyData(prompt.value);
+    const result = await naturalLanguageInputStore.generateFamilyData(state.prompt);
     if (result) {
       generatedData.value = result;
     } else {
@@ -167,6 +170,6 @@ const cancel = () => {
 };
 
 const fillSamplePrompt = () => {
-  prompt.value = `Tôi muốn tạo một gia đình mới. Tên gia đình là "Gia đình An Khang". Mã gia đình là "AK001". Mô tả là "Một gia đình hạnh phúc và thịnh vượng với nhiều thế hệ". Địa chỉ là "Số 1, Đường Hạnh Phúc, Quận 1, TP.HCM". Gia đình này sẽ công khai. Ảnh đại diện là "https://example.com/ankhang_family.jpg". Gia đình có khoảng 50 thành viên và 5 thế hệ.`;
+  state.prompt = `Tôi muốn tạo một gia đình mới. Tên gia đình là "Gia đình An Khang". Mã gia đình là "AK001". Mô tả là "Một gia đình hạnh phúc và thịnh vượng với nhiều thế hệ". Địa chỉ là "Số 1, Đường Hạnh Phúc, Quận 1, TP.HCM". Gia đình này sẽ công khai. Ảnh đại diện là "https://example.com/ankhang_family.jpg". Gia đình có khoảng 50 thành viên và 5 thế hệ.`;
 };
 </script>

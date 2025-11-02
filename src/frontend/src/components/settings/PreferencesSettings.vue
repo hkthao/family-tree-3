@@ -4,8 +4,8 @@
       <v-col cols="12">
         <VListSubheader>{{
           t('userSettings.preferences.theme')
-          }}</VListSubheader>
-        <v-radio-group v-model="preferencesForm.theme" inline >
+        }}</VListSubheader>
+        <v-radio-group v-model="preferencesForm.theme" inline>
           <v-radio v-for="option in themeOptions" :key="option.value" :label="option.text"
             :value="option.value"></v-radio>
         </v-radio-group>
@@ -16,8 +16,8 @@
       <v-col cols="12">
         <VListSubheader>{{
           t('userSettings.preferences.language')
-          }}</VListSubheader>
-        <v-select v-model="preferencesForm.language" :items="languageOptions" 
+        }}</VListSubheader>
+        <v-select v-model="preferencesForm.language" :items="languageOptions"
           :label="t('userSettings.preferences.language')" item-title="text" item-value="value"></v-select>
       </v-col>
     </v-row>
@@ -45,9 +45,6 @@ const notificationStore = useNotificationStore();
 
 const preferencesForm = ref({
   theme: userSettingsStore.preferences.theme,
-  emailNotificationsEnabled: userSettingsStore.preferences.emailNotificationsEnabled,
-  smsNotificationsEnabled: userSettingsStore.preferences.smsNotificationsEnabled,
-  inAppNotificationsEnabled: userSettingsStore.preferences.inAppNotificationsEnabled,
   language: userSettingsStore.preferences.language,
 });
 
@@ -56,12 +53,6 @@ const themeOptions = computed(() => getThemeOptions(t));
 
 const savePreferences = async () => {
   // Update store state
-  userSettingsStore.preferences.emailNotificationsEnabled =
-    preferencesForm.value.emailNotificationsEnabled;
-  userSettingsStore.preferences.smsNotificationsEnabled =
-    preferencesForm.value.smsNotificationsEnabled;
-  userSettingsStore.preferences.inAppNotificationsEnabled =
-    preferencesForm.value.inAppNotificationsEnabled;
   userSettingsStore.setLanguage(preferencesForm.value.language);
   userSettingsStore.setTheme(preferencesForm.value.theme);
   const success = await userSettingsStore.saveUserSettings();
@@ -76,9 +67,6 @@ onMounted(async () => {
   await userSettingsStore.fetchUserSettings();
   preferencesForm.value = {
     theme: userSettingsStore.preferences.theme,
-    emailNotificationsEnabled: userSettingsStore.preferences.emailNotificationsEnabled,
-    smsNotificationsEnabled: userSettingsStore.preferences.smsNotificationsEnabled,
-    inAppNotificationsEnabled: userSettingsStore.preferences.inAppNotificationsEnabled,
     language: userSettingsStore.preferences.language,
   };
 });
