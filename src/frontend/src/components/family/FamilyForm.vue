@@ -17,8 +17,16 @@
           required data-testid="family-visibility-select"></v-select>
       </v-col>
     </v-row>
-    <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')" data-testid="family-address-input"></v-text-field>
-    <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')" data-testid="family-address-input"></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
+      </v-col>
+    </v-row>
     <FamilyPermissions :readOnly="props.readOnly" v-model="familyUsers" />
   </v-form>
 </template>
