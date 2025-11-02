@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../login.setup';
-import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure } from '../helpers/vuetify';
+import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, waitForVDataTableLoaded } from '../helpers/vuetify';
 
 test.describe('Family Management - Delete Family', () => {
   test.beforeEach(async ({ page }) => {
@@ -54,9 +54,9 @@ test.describe('Family Management - Delete Family', () => {
     const confirmationDialog = page.locator('.v-dialog');
     await expect(confirmationDialog).toBeVisible();
     await confirmationDialog.getByTestId('confirm-delete-button').click();
-
     console.log('Bước 4: Xác minh gia đình đã bị xóa.');
     await waitForSnackbar(page, 'success');
+    await expect(confirmationDialog).toBeHidden();
     await expect(page.getByText(familyName)).not.toBeVisible();
     console.log('✅ Đã xóa cây gia phả.');
   });

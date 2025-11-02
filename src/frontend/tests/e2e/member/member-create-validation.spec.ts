@@ -14,23 +14,26 @@ test.describe('Member Management - Create Member - Validation Case', () => {
   });
 
   test('should show validation errors for empty required fields', async ({ page }) => {
-    console.log('Điều hướng đến trang quản lý thành viên.');
-    await page.getByRole('link', { name: 'Quản lý thành viên' }).click();
-    await page.waitForLoadState('networkidle');
+    console.log('Bước 1: Điều hướng đến trang quản lý thành viên và tạo mới.');
+    await Promise.all([
+      page.waitForURL('**/member'),
+      page.getByRole('link', { name: 'Quản lý thành viên' }).click(),
+    ]);
 
-    console.log('Click nút "Thêm thành viên mới".');
-    await page.getByTestId('add-new-member-button').click();
-    await page.waitForLoadState('networkidle');
+    await Promise.all([
+      page.waitForURL('**/member/add'),
+      page.getByTestId('add-new-member-button').click(),
+    ]);
 
-    console.log('Click nút "Lưu thành viên" mà không điền bất kỳ trường nào.');
+    console.log('Bước 2: Click nút "Lưu thành viên" mà không điền bất kỳ trường nào.');
     await page.getByTestId('save-member-button').click();
 
-    console.log('Kiểm tra thông báo lỗi cho các trường bắt buộc.');
+    console.log('Bước 3: Kiểm tra thông báo lỗi cho các trường bắt buộc.');
     await assertValidationMessage(page, 'member-first-name-input');
     await assertValidationMessage(page, 'member-last-name-input');
     await assertValidationMessage(page, 'member-gender-select');
     await assertValidationMessage(page, 'member-family-select');
 
-    console.log('Đã xác minh các thông báo lỗi validation.');
+    console.log('✅ Đã xác minh các thông báo lỗi validation.');
   });
 });
