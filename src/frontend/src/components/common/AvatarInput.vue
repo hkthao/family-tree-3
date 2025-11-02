@@ -9,7 +9,7 @@
     <VFileUpload v-model="selectedFile" :label="t('avatarInput.uploadArea.clickOrDrag')"
       :hint="t('avatarInput.uploadArea.supportedFormats')" accept="image/*" show-size counter
       :loading="fileUploadStore.loading" :disabled="fileUploadStore.loading" prepend-icon="mdi-cloud-upload-outline"
-      @update:modelValue="onFileSelected" density="compact" />
+      @update:modelValue="onFileSelected"  />
     <!-- Cropper Dialog -->
     <v-dialog v-model="cropperDialog" max-width="800px" persistent>
       <v-card>

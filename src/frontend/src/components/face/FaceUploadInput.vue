@@ -8,7 +8,7 @@
     counter
     show-size
     clearable 
-    density="compact" 
+     
     @change="handleFileChange"
   ></VFileUpload>
 </template>

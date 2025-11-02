@@ -2,18 +2,18 @@
   <v-row>
     <v-col cols="12" md="6">
       <v-text-field v-model="internalFileId" :label="$t('chunkUpload.fileIdLabel')"
-        :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]" required :hide-details="true"></v-text-field>
+        :rules="[v => !!v || $t('chunkUpload.fileIdRequired')]" required ></v-text-field>
     </v-col>
     <v-col cols="12" md="6">
       <v-text-field v-model="internalFamilyId" :label="$t('chunkUpload.familyIdLabel')"
-        :hide-details="true"></v-text-field>
+        ></v-text-field>
     </v-col>
     <v-col cols="12" md="6">
       <v-text-field
         v-model="internalCategory"
         :label="$t('chunkUpload.categoryLabel')"
         :rules="[v => !!v || $t('chunkUpload.categoryRequired')]"
-        :hide-details="true"
+        
         clearable
       >
         <v-menu
@@ -35,7 +35,7 @@
     </v-col>
     <v-col cols="12" md="6">
       <v-text-field v-model="internalCreatedBy" :label="$t('chunkUpload.createdByLabel')" :readonly="true"
-        :hide-details="true" :rules="[v => !!v || $t('chunkUpload.createdByRequired')]"
+         :rules="[v => !!v || $t('chunkUpload.createdByRequired')]"
         required></v-text-field>
     </v-col>
   </v-row>

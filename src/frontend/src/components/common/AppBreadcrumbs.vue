@@ -1,5 +1,5 @@
 <template>
-  <v-breadcrumbs :items="breadcrumbs" density="compact">
+  <v-breadcrumbs :items="breadcrumbs" >
     <template v-slot:item="{ item }">
       <v-breadcrumbs-item v-bind="item">
         {{ item.title }}

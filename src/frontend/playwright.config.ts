@@ -54,7 +54,7 @@ export default defineConfig({
     url: 'http://localhost:5173/',
     reuseExistingServer: !process.env.CI,
     env: {
-      // VITE_APP_E2E_TESTING: 'true',
+      // VITE_E2E_TESTING: 'true',
     },
   },
 });

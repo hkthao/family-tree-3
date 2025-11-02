@@ -16,7 +16,6 @@
     :chips="multiple"
     :closable-chips="multiple"
     return-object
-    :hide-details="hideDetails"
   >
     <template #chip="{ props, item }">
       <v-chip

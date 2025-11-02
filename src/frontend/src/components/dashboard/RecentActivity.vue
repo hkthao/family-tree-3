@@ -8,7 +8,7 @@
       <v-alert v-if="userActivityStore.error" type="error" dense dismissible class="mb-4">
         {{ userActivityStore.error }}
       </v-alert>
-      <v-timeline v-else density="compact" align="start" truncate-line="both">
+      <v-timeline v-else  align="start" truncate-line="both">
         <v-timeline-item
           v-for="item in userActivityStore.items"
           :key="item.id"
@@ -46,7 +46,7 @@
         :model-value="userActivityStore.page"
         :length="userActivityStore.totalPages"
         :total-visible="4"
-        density="compact"
+        
         @update:modelValue="handlePageChange"
       ></v-pagination>
     </v-card-actions>

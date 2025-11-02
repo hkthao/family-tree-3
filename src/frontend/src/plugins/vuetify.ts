@@ -57,17 +57,32 @@ export default createVuetify({
     VTextField: {
       variant: 'outlined',
       density: 'compact',
+      hideDetails: true
     },
     VAutocomplete: {
       variant: 'outlined',
       density: 'compact',
+      hideDetails: true
     },
     VSelect: {
       variant: 'outlined',
       density: 'compact',
+      hideDetails: true
     },
     VTextarea: {
       variant: 'outlined',
+      hideDetails: true
+    },
+    VDateInput: {
+      variant: 'outlined',
+      density: 'compact',
+      hideDetails: true
+    },
+    VColorInput: {
+      variant: 'outlined',
+      density: 'compact',
+      colorPip: true,
+      hideDetails: true
     },
     VBtn: {
       variant: 'outlined',

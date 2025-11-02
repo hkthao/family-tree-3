@@ -1,7 +1,7 @@
 <template>
   <v-row class="align-center mb-1" justify="space-between">
     <v-col cols="12" md="auto" class="text-md-right">
-      <v-btn-toggle v-model="chartMode" mandatory variant="outlined" density="compact">
+      <v-btn-toggle v-model="chartMode" mandatory >
         <v-btn size="small" value="hierarchical">
           <v-icon start>mdi-file-tree</v-icon>
           {{ t('family.tree.view.hierarchical') }}

@@ -26,7 +26,7 @@
                 v-model="visibility"
                 :items="visibilityItems"
                 :label="$t('family.management.filterLabel')"
-                density="compact"
+                
                 data-testid="family-visibility-filter"
               />
             </v-col>

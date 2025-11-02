@@ -1,4 +1,4 @@
-import { Page, expect, TestInfo } from '@playwright/test';
+import { Page, expect, TestInfo, Locator } from '@playwright/test';
 
 /**
  * Selects an option from a Vuetify autocomplete component identified by its data-testid.
@@ -123,4 +123,28 @@ export async function waitForVDataTableLoaded(page: Page) {
   // Chờ ít nhất 1 hàng xuất hiện
   const firstRow = page.locator('table tbody tr').first();
   await expect(firstRow).toBeVisible({ timeout: 10000 });
+}
+
+/**
+ * Fills a Vuetify date input field identified by its data-testid.
+ * Assumes the date input uses a v-text-field and expects a 'YYYY-MM-DD' format.
+ * @param page Playwright Page object.
+ * @param testId The data-testid of the Vuetify date input component.
+ * @param value The date value to fill into the input (format: 'YYYY-MM-DD').
+ */
+/**
+ * Fills a Vuetify date input field identified by its data-testid by interacting with the date picker.
+ * Assumes the date input uses a v-text-field that opens a v-menu with a v-date-picker.
+ * @param page Playwright Page object.
+ * @param testId The data-testid of the Vuetify date input component (the v-text-field).
+ * @param value The date value to select (format: 'YYYY-MM-DD').
+ */
+export async function fillVuetifyDateInput(page: Page, testId: string, value: string) {
+  console.log(`Chọn ngày '${value}' từ trường ngày có data-testid='${testId}'.`);
+  const vDateInputLocator = page.locator(`[data-testid="${testId}"]`);
+  await expect(vDateInputLocator).toBeVisible({ timeout: 10000 });
+  // VDateInput directly renders an input element
+  const inputLocator = vDateInputLocator.locator('input');
+  await inputLocator.click();
+  await inputLocator.fill(value);
 }

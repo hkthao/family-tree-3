@@ -46,7 +46,7 @@
 
       <v-divider class="my-4"></v-divider>
 
-      <v-btn block variant="outlined" @click="showCreateMemberDialog = true">
+      <v-btn block @click="showCreateMemberDialog = true">
         {{ t('face.labelCard.createNewMemberButton') }}
       </v-btn>
     </v-card-text>

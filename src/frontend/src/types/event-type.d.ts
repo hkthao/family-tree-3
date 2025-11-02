@@ -1,7 +1,7 @@
 export enum EventType {
-  Birth = 'Birth',
-  Marriage = 'Marriage',
-  Death = 'Death',
-  Migration = 'Migration',
-  Other = 'Other',
+  Birth = 0,
+  Marriage = 1,
+  Death = 2,
+  Migration = 3,
+  Other = 4
 }

@@ -1,18 +1,19 @@
 <template>
   <v-card>
     <v-card-title class="text-center">
-      <span class="text-h5 text-uppercase">{{ t('event.form.addTitle') }}</span>
+      <span class="text-h5 text-uppercase" data-testid="event-add-title">{{ t('event.form.addTitle') }}</span>
     </v-card-title>
     <v-card-text>
       <EventForm
         ref="eventFormRef"
         @close="closeForm"
+        data-testid="event-form"
       />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey"  @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="blue-darken-1"  @click="handleAddEvent">{{ t('common.save') }}</v-btn>
+      <v-btn color="grey"  @click="closeForm" data-testid="event-add-cancel-button">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="blue-darken-1"  @click="handleAddEvent" data-testid="event-add-save-button">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -24,6 +25,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import type { Event } from '@/types';
+import EventForm from '@/components/event/EventForm.vue'; 
 
 interface EventFormExposed {
   validate: () => Promise<boolean>;

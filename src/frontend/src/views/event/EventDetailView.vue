@@ -1,31 +1,31 @@
 <template>
   <v-card v-if="event" class="mb-4">
-    <v-card-title class="text-h6 d-flex align-center">
+    <v-card-title class="text-h6 d-flex align-center" data-testid="event-detail-title">
       {{ event.name }}
       <v-spacer></v-spacer>
     </v-card-title>
     <v-card-text>
       <v-tabs v-model="selectedTab" class="mb-4">
-        <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
+        <v-tab value="general" data-testid="event-detail-general-tab">{{ t('member.form.tab.general') }}</v-tab>
       </v-tabs>
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <EventForm :initial-event-data="event" :read-only="true" :title="t('event.detail.title')" />
+          <EventForm :initial-event-data="event" :read-only="true" :title="t('event.detail.title')" data-testid="event-detail-form" />
         </v-window-item>
       </v-window>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="gray" @click="closeView">
+      <v-btn color="gray" @click="closeView" data-testid="event-detail-close-button">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="navigateToEditEvent(event.id!)">
+      <v-btn color="primary" @click="navigateToEditEvent(event.id!)" data-testid="event-detail-edit-button">
         {{ t('common.edit') }}
       </v-btn>
 
     </v-card-actions>
   </v-card>
-  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
+  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal" data-testid="event-detail-no-data-alert">
     {{ t('common.noData') }}
   </v-alert>
 </template>

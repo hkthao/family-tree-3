@@ -23,7 +23,7 @@
       </v-toolbar>
       <v-card-text class="chat-messages-container">
         <v-list class="chat-messages-list">
-          <v-list-item density="compact" v-for="message in chatStore.currentChatMessages" :key="message.id"
+          <v-list-item  v-for="message in chatStore.currentChatMessages" :key="message.id"
             class="message-item" :class="{
               'message-outgoing': message.direction === 'outgoing',
               'message-incoming': message.direction === 'incoming',
@@ -33,7 +33,7 @@
                 <v-icon color="primary">mdi-robot</v-icon>
               </v-avatar>
             </template>
-            <v-card density="compact" :color="message.direction === 'outgoing' ? 'primary' : 'grey lighten-2'"
+            <v-card  :color="message.direction === 'outgoing' ? 'primary' : 'grey lighten-2'"
               :dark="message.direction === 'outgoing'" class="message-bubble ">
               <v-card-text class="py-2 message-content">
                 <div v-html="formattedContent(message.content)"></div>
@@ -49,7 +49,7 @@
         </v-list>
       </v-card-text>
       <v-card-actions class="chat-input-container">
-        <v-text-field v-model="newMessageText" :label="t('chat.inputPlaceholder')" variant="outlined" dense hide-details
+        <v-text-field v-model="newMessageText" :label="t('chat.inputPlaceholder')" dense hide-details
           @keydown.enter="sendMessage" class="mr-2 text-black"></v-text-field>
         <v-btn color="primary" :loading="chatStore.isLoading" @click="sendMessage">
           <v-icon>mdi-send</v-icon>

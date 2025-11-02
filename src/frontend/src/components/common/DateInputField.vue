@@ -1,28 +1,11 @@
 <template>
-  <v-menu
-    v-model="menu"
-    :close-on-content-click="false"
-    transition="scale-transition"
-    offset-y
-    min-width="auto"
-    :disabled="props.readonly"
-  >
+  <v-menu v-model="menu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="auto"
+    :disabled="props.readonly">
     <template v-slot:activator="{ props: activatorProps }">
-      <v-text-field
-        :model-value="formattedDate"
-        @click="menu = true"
-        :label="label"
-        append-inner-icon="mdi-calendar"
-        :readonly="props.readonly"
-        v-bind="activatorProps"
-        :rules="rules"
-        data-testid="date-input-field"
-      ></v-text-field>
-    </template>
-    <v-date-picker
-      :model-value="modelValue"
-      @update:model-value="handleDateUpdate"
-    ></v-date-picker>
+      <v-text-field :model-value="formattedDate" @click="menu = true" :label="label" append-inner-icon="mdi-calendar"
+        :readonly="props.readonly" v-bind="activatorProps" :rules="rules"
+        data-testid="date-input-field-text-input"></v-text-field> </template>
+    <v-date-picker :model-value="modelValue" @update:model-value="handleDateUpdate"></v-date-picker>
   </v-menu>
 </template>
 

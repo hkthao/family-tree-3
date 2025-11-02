@@ -1,5 +1,5 @@
 <template>
-  <v-file-upload :label="$t('chunkUpload.fileInputLabel')" :accept="acceptTypes" density="compact" :rules="fileRules"
+  <v-file-upload :label="$t('chunkUpload.fileInputLabel')" :accept="acceptTypes"  :rules="fileRules"
     @update:modelValue="onFileChange" clearable />
 </template>
 

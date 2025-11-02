@@ -46,7 +46,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của sự kiện cần lấy.</param>
     /// <returns>Thông tin chi tiết của sự kiện.</returns>
     [HttpGet("{id}")]
-    public async Task<ActionResult<EventDto>> GetEventById(Guid id)
+    public async Task<ActionResult<EventDto>> GetEventById([FromRoute]Guid id)
     {
         var result = await _mediator.Send(new GetEventByIdQuery(id));
         if (result.IsSuccess)
@@ -62,8 +62,12 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh tạo sự kiện với thông tin chi tiết.</param>
     /// <returns>ID của sự kiện vừa được tạo.</returns>
     [HttpPost]
-    public async Task<ActionResult<Guid>> Create(CreateEventCommand command)
+    public async Task<ActionResult<Guid>> Create([FromBody]CreateEventCommand command)
     {
+        if (command == null)
+        {
+            return BadRequest("Request body is empty or could not be deserialized into CreateEventCommand.");
+        }
         var result = await _mediator.Send(command);
         return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetEventById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
     }
@@ -75,7 +79,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh cập nhật sự kiện với thông tin mới.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(Guid id, UpdateEventCommand command)
+    public async Task<ActionResult> Update([FromRoute]Guid id, [FromBody]UpdateEventCommand command)
     {
         if (id != command.Id)
         {
@@ -92,7 +96,7 @@ public class EventController(IMediator mediator) : ControllerBase
     /// <param name="id">ID của sự kiện cần xóa.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpDelete("{id}")]
-    public async Task<ActionResult> Delete(Guid id)
+    public async Task<ActionResult> Delete([FromRoute]Guid id)
     {
         var result = await _mediator.Send(new DeleteEventCommand(id));
         return result.IsSuccess ? NoContent() : BadRequest(result.Error);

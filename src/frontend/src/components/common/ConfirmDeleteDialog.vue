@@ -7,7 +7,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="grey" text @click="$emit('cancel')">{{ $t('common.cancel') }}</v-btn>
+        <v-btn color="grey" text @click="$emit('cancel')" data-testid="cancel-delete-button">{{ $t('common.cancel') }}</v-btn>
         <v-btn color="red-darken-1" text @click="$emit('confirm')" data-testid="confirm-delete-button">{{ $t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>

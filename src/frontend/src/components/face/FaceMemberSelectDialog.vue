@@ -4,7 +4,7 @@
       <v-card-title class="text-h6">{{ t('face.selectMemberDialog.title') }}</v-card-title>
       <v-card-text>
         <MemberAutocomplete v-model="selectedMemberId" :label="t('face.selectMemberDialog.selectMember')"
-          :hide-details="true" :clearable="true" />
+           :clearable="true" />
         <v-card v-if="selectedMemberDetails" class="mt-4 pa-3" variant="outlined">
           <div class="d-flex align-center">
             <v-avatar size="48" rounded="lg" class="mr-3">

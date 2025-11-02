@@ -11,16 +11,16 @@
   >
     <template #top>
       <v-toolbar flat>
-        <v-toolbar-title>{{ t('event.list.title') }}</v-toolbar-title>
+        <v-toolbar-title data-testid="event-list-title">{{ t('event.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn color="primary" icon @click="$emit('ai-create')">
+        <v-btn color="primary" icon @click="$emit('ai-create')" data-testid="ai-create-event-button">
           <v-tooltip :text="t('event.list.action.aiCreate')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn color="primary" icon @click="$emit('create')">
+        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-event-button">
           <v-tooltip :text="t('event.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -40,6 +40,7 @@
       <a
         @click="$emit('view', item)"
         class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
+        data-testid="event-name-link"
       >
         {{ item.name }}
       </a>
@@ -71,14 +72,14 @@
     <template #item.actions="{ item }">
       <v-tooltip :text="t('event.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item)">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="editEvent(item)" data-testid="edit-event-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="t('event.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-event-button">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>

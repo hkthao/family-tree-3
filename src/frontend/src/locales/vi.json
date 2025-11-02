@@ -320,6 +320,7 @@
   "event.messages.saveError": "Lỗi khi lưu sự kiện.",
   "event.messages.deleteError": "Lỗi khi xóa sự kiện.",
   "event.messages.selectFamily": "Vui lòng chọn một gia đình để xem cây gia phả.",
+  "event.validation.endDateAfterStartDate": "Ngày kết thúc phải sau ngày bắt đầu.",
   "event.search.title": "Tìm kiếm Nâng cao",
   "event.search.searchQueryPlaceholder": "Tìm kiếm theo tên hoặc mô tả sự kiện...",
   "event.search.type": "Loại Sự kiện",

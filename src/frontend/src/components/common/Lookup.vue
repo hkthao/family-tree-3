@@ -11,7 +11,7 @@
       :rules="rules"
       :disabled="props.disabled"
       variant="outlined"
-      density="compact"
+      
       hide-dropdown-icon
       @click="openDialog"
     >

@@ -2,94 +2,59 @@
   <v-form class="mt-3" ref="form" :disabled="props.readOnly">
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field
-          v-model="eventForm.name"
-          :label="t('event.form.name')"
-          :rules="[rules.required]"
-          :readonly="props.readOnly"
-        ></v-text-field>
+        <v-text-field v-model="eventForm.name" :label="t('event.form.name')" :rules="[rules.required]"
+          :readonly="props.readOnly" data-testid="event-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-select
-          v-model="eventForm.type"
-          :items="eventTypes"
-          :label="t('event.form.type')"
-          :rules="[rules.required]"
-          :readonly="props.readOnly"
-        ></v-select>
+        <v-select v-model="eventForm.type" :items="eventTypes" :label="t('event.form.type')" :rules="[rules.required]"
+          :readonly="props.readOnly" data-testid="event-type-select"></v-select>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <FamilyAutocomplete
-          v-model="computedFamilyId"
-          :label="t('event.form.family')"
-          :rules="[rules.required]"
-          :read-only="props.readOnly"
-          :multiple="false"
-        />
+        <FamilyAutocomplete v-model="computedFamilyId" :label="t('event.form.family')" :rules="[rules.required]"
+          :read-only="props.readOnly" :multiple="false" data-testid="event-family-autocomplete" />
       </v-col>
       <v-col cols="12" md="6">
-        <MemberAutocomplete
-          v-model="eventForm.relatedMembers"
-          :label="t('event.form.relatedMembers')"
-          :read-only="props.readOnly"
-          clearable
-          multiple
-        />
+        <MemberAutocomplete v-model="eventForm.relatedMembers" :label="t('event.form.relatedMembers')"
+          :read-only="props.readOnly" clearable multiple data-testid="event-related-members-autocomplete" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12" md="6">
-        <DateInputField
-          v-model="eventForm.startDate"
-          :label="t('event.form.startDate')"
-          :rules="[rules.required]"
-          :readonly="props.readOnly"
-        />
+        <VDateInput v-model="eventForm.startDate" :label="t('event.form.startDate')" :rules="[rules.required]"
+          :readonly="props.readOnly" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
+          data-testid="event-start-date-input"
+          />
       </v-col>
       <v-col cols="12" md="6">
-        <DateInputField
-          v-model="eventForm.endDate"
-          :label="t('event.form.endDate')"
-          optional
-          :readonly="props.readOnly"
-        />
+        <VDateInput v-model="eventForm.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
+          data-testid="event-end-date-input" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
+          :rules="[rules.endDateAfterStartDate]" />
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-text-field
-          v-model="eventForm.location"
-          :label="t('event.form.location')"
-          :readonly="props.readOnly"
-        ></v-text-field>
+        <v-text-field v-model="eventForm.location" :label="t('event.form.location')" :readonly="props.readOnly"
+          data-testid="event-location-input"></v-text-field>
       </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
-        <v-textarea
-          v-model="eventForm.description"
-          :label="t('event.form.description')"
-          :readonly="props.readOnly"
-        ></v-textarea>
+        <v-textarea v-model="eventForm.description" :label="t('event.form.description')" :readonly="props.readOnly"
+          data-testid="event-description-input"></v-textarea>
       </v-col>
     </v-row>
 
     <v-row>
-      <v-col cols="12">
-        <v-color-picker
-          v-model="eventForm.color"
-          :label="t('event.form.color')"
-          :readonly="props.readOnly"
-          hide-canvas
-          hide-sliders
-          show-swatches
-        ></v-color-picker>
+      <v-col cols="6">
+        <VColorInput v-model="eventForm.color" :label="t('event.form.color')" :readonly="props.readOnly"
+          data-testid="event-color-picker" pip-location="append-inner">
+        </VColorInput>
       </v-col>
     </v-row>
   </v-form>
@@ -99,9 +64,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
-import { EventType } from '@/types'; // Import EventType enum
+import { EventType } from '@/types';
 import {
-  DateInputField,
   FamilyAutocomplete,
   MemberAutocomplete,
 } from '@/components/common';
@@ -138,10 +102,16 @@ const eventTypes = [
 ];
 
 const rules = {
-  required: (value: unknown) => !!value || t('validation.required'),
+  required: (value: unknown) => (value !== null && value !== undefined && value !== '') || t('validation.required'),
+  endDateAfterStartDate: (value: string | null) => {
+    if (!value || !eventForm.value.startDate) return true;
+    const endDate = new Date(value);
+    const startDate = new Date(eventForm.value.startDate);
+    return endDate >= startDate || t('event.validation.endDateAfterStartDate');
+  },
 };
 
-onMounted(async () => {});
+onMounted(async () => { });
 
 const computedFamilyId = computed<string | undefined>({
   get: () => eventForm.value.familyId ?? undefined,

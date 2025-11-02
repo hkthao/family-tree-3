@@ -1,9 +1,9 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 d-flex align-center">
-      {{ t('event.search.title') }}
+      <span data-testid="event-search-title">{{ t('event.search.title') }}</span>
       <v-spacer></v-spacer>
-      <v-btn variant="text" icon size="small" @click="expanded = !expanded">
+      <v-btn variant="text" icon size="small" @click="expanded = !expanded" data-testid="event-search-expand-button">
         <v-tooltip :text="expanded ? t('common.collapse') : t('common.expand')">
           <template v-slot:activator="{ props }">
             <v-icon v-bind="props">{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
@@ -21,6 +21,7 @@
                 :label="t('event.search.searchQueryPlaceholder')"
                 clearable
                 prepend-inner-icon="mdi-magnify"
+                data-testid="event-search-query-input"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
@@ -29,6 +30,7 @@
                 :items="eventTypes"
                 :label="t('event.search.type')"
                 clearable
+                data-testid="event-search-type-select"
               ></v-select>
             </v-col>
             <v-col cols="12" md="4">
@@ -37,6 +39,7 @@
                 :label="t('event.search.family')"
                 clearable
                 :multiple="false"
+                data-testid="event-search-family-autocomplete"
               />
             </v-col>
             <v-col cols="12" md="4">
@@ -44,6 +47,7 @@
                 v-model="filters.startDate"
                 :label="t('event.search.startDate')"
                 optional
+                data-testid="event-search-start-date-input"
               />
             </v-col>
             <v-col cols="12" md="4">
@@ -51,6 +55,7 @@
                 v-model="filters.endDate"
                 :label="t('event.search.endDate')"
                 optional
+                data-testid="event-search-end-date-input"
               />
             </v-col>
 
@@ -58,10 +63,10 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" @click="applyFilters">{{
+          <v-btn color="primary" @click="applyFilters" data-testid="event-search-apply-button">{{
             t('event.search.apply')
           }}</v-btn>
-          <v-btn @click="resetFilters">{{ t('event.search.reset') }}</v-btn>
+          <v-btn @click="resetFilters" data-testid="event-search-reset-button">{{ t('event.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
     </v-expand-transition>

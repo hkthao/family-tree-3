@@ -5,7 +5,7 @@
         <VListSubheader>{{
           t('userSettings.preferences.theme')
           }}</VListSubheader>
-        <v-radio-group v-model="preferencesForm.theme" inline :hide-details="true">
+        <v-radio-group v-model="preferencesForm.theme" inline >
           <v-radio v-for="option in themeOptions" :key="option.value" :label="option.text"
             :value="option.value"></v-radio>
         </v-radio-group>
@@ -17,7 +17,7 @@
         <VListSubheader>{{
           t('userSettings.preferences.language')
           }}</VListSubheader>
-        <v-select v-model="preferencesForm.language" :items="languageOptions" :hide-details="true"
+        <v-select v-model="preferencesForm.language" :items="languageOptions" 
           :label="t('userSettings.preferences.language')" item-title="text" item-value="value"></v-select>
       </v-col>
     </v-row>

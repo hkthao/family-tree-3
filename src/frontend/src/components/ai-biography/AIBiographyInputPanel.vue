@@ -17,13 +17,13 @@
         </v-col>
         <v-col>
           <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
-            item-title="text" item-value="value" variant="outlined" density="compact" :hide-details="true"></v-select>
+            item-title="text" item-value="value"  ></v-select>
           <v-checkbox v-model="aiBiographyStore.generatedFromDB" :label="t('aiBiography.input.useSystemData')"
-            :hide-details="true"></v-checkbox>
+            ></v-checkbox>
         </v-col>
       </v-row>
       <v-textarea v-model="aiBiographyStore.userPrompt" :label="t('aiBiography.input.promptLabel')"
-        :placeholder="t('aiBiography.input.promptPlaceholder')" :auto-grow="true" variant="outlined" clearable counter
+        :placeholder="t('aiBiography.input.promptPlaceholder')" :auto-grow="true" clearable counter
         :rules="[rules.userPromptLength]"></v-textarea>
     </v-card-text>
 
