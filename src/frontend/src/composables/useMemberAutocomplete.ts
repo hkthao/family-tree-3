@@ -1,0 +1,85 @@
+import { ref, watch } from 'vue';
+import { useMemberAutocompleteStore } from '@/stores/member-autocomplete.store';
+import { debounce } from 'lodash';
+import type { Member } from '@/types';
+
+interface UseMemberAutocompleteOptions {
+  familyId?: string;
+  multiple?: boolean;
+  initialValue?: string | string[];
+}
+
+export function useMemberAutocomplete(options?: UseMemberAutocompleteOptions) {
+  const memberAutocompleteStore = useMemberAutocompleteStore();
+  const search = ref('');
+  const loading = ref(false);
+  const items = ref<Member[]>([]); // Local items state
+  const selectedItems = ref<Member[]>([]);
+
+  const loadItems = async (query: string) => {
+    loading.value = true;
+    try {
+      const result = await memberAutocompleteStore.search({
+        searchQuery: query,
+        familyId: options?.familyId,
+      });
+      items.value = result;
+    } catch (error) {
+      console.error('Error loading members:', error);
+      items.value = [];
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const debouncedLoadItems = debounce(loadItems, 300);
+
+  const onSearchChange = (query: string) => {
+    search.value = query;
+    if (query) {
+      debouncedLoadItems(query);
+    } else {
+      memberAutocompleteStore.clearItems();
+      items.value = []; // Clear local items
+    }
+  };
+
+  const preloadById = async (ids: string | string[] | undefined) => {
+    if (!ids || (Array.isArray(ids) && ids.length === 0)) {
+      selectedItems.value = [];
+      return;
+    }
+
+    const idsArray = Array.isArray(ids) ? ids : [ids];
+    try {
+      const preloadedMembers = await memberAutocompleteStore.getByIds(idsArray);
+      selectedItems.value = preloadedMembers;
+      // Ensure preloaded items are also in the local items list if not already present
+      preloadedMembers.forEach((member: Member) => {
+        if (!items.value.some(item => item.id === member.id)) {
+          items.value.push(member);
+        }
+      });
+    } catch (error) {
+      console.error('Error preloading members:', error);
+    }
+  };
+
+  // Watch for initialValue changes to preload members
+  watch(() => options?.initialValue, (newVal) => {
+    if (newVal) {
+      preloadById(newVal);
+    } else {
+      selectedItems.value = [];
+    }
+  }, { immediate: true });
+
+  return {
+    search,
+    loading,
+    items,
+    selectedItems,
+    onSearchChange,
+    preloadById,
+  };
+}

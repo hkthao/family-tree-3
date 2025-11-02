@@ -200,5 +200,11 @@ export const useMemberStore = defineStore('member', {
         return [];
       }
     },
+
+    clearItems() {
+      this.items = [];
+      this.totalItems = 0;
+      this.totalPages = 1;
+    },
   },
 });
