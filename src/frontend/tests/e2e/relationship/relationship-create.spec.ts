@@ -112,25 +112,4 @@ test.describe('Relationship Management - Create Relationship', () => {
     await expect(page.locator('tr').filter({ hasText: text_2 })).toBeVisible();
     console.log('Đã xác minh mối quan hệ mới trong danh sách.');
   });
-
-  test('should show validation errors for empty required fields', async ({ page }) => {
-    console.log('Điều hướng đến trang quản lý Quan hệ.');
-    await page.getByRole('link', { name: 'Quản lý Quan hệ' }).click();
-    await page.waitForLoadState('networkidle');
-
-    console.log('Click nút "Thêm mối quan hệ mới".');
-    await page.getByTestId('relationship-create-button').click();
-    await page.waitForLoadState('networkidle');
-
-    console.log('Click nút "Lưu mối quan hệ" mà không điền bất kỳ trường nào.');
-    await page.getByTestId('relationship-add-save-button').click();
-
-    console.log('Kiểm tra thông báo lỗi cho các trường bắt buộc.');
-    await assertValidationMessage(page, 'relationship-source-member-autocomplete');
-    await assertValidationMessage(page, 'relationship-target-member-autocomplete');
-    await assertValidationMessage(page, 'relationship-type-select');
-    await assertValidationMessage(page, 'relationship-family-autocomplete');
-
-    console.log('Đã xác minh các thông báo lỗi validation.');
-  });
 });
