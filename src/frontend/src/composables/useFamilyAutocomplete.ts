@@ -15,16 +15,18 @@ export function useFamilyAutocomplete(options?: UseFamilyAutocompleteOptions) {
   const items = ref<Family[]>([]); // Local items state
   const selectedItems = ref<Family[]>([]);
 
-  const loadItems = async (query: string) => {
+  const loadItems = async (query: string): Promise<Family[]> => {
     loading.value = true;
     try {
       const result = await familyAutocompleteStore.search({
         searchQuery: query,
       });
       items.value = result;
+      return result;
     } catch (error) {
       console.error('Error loading families:', error);
       items.value = [];
+      return [];
     } finally {
       loading.value = false;
     }
@@ -32,13 +34,13 @@ export function useFamilyAutocomplete(options?: UseFamilyAutocompleteOptions) {
 
   const debouncedLoadItems = debounce(loadItems, 300);
 
-  const onSearchChange = (query: string) => {
+  const onSearchChange = async (query: string): Promise<Family[]> => {
     search.value = query;
     if (query) {
-      debouncedLoadItems(query);
+      return await debouncedLoadItems(query) || [];
     } else {
-      familyAutocompleteStore.clearItems();
-      items.value = []; // Clear local items
+      // When search query is empty, load the first page of items
+      return await loadItems('');
     }
   };
 

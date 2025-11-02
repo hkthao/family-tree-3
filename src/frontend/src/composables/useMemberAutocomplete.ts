@@ -16,7 +16,7 @@ export function useMemberAutocomplete(options?: UseMemberAutocompleteOptions) {
   const items = ref<Member[]>([]); // Local items state
   const selectedItems = ref<Member[]>([]);
 
-  const loadItems = async (query: string) => {
+  const loadItems = async (query: string): Promise<Member[]> => {
     loading.value = true;
     try {
       const result = await memberAutocompleteStore.search({
@@ -24,9 +24,11 @@ export function useMemberAutocomplete(options?: UseMemberAutocompleteOptions) {
         familyId: options?.familyId,
       });
       items.value = result;
+      return result;
     } catch (error) {
       console.error('Error loading members:', error);
       items.value = [];
+      return [];
     } finally {
       loading.value = false;
     }
@@ -34,13 +36,13 @@ export function useMemberAutocomplete(options?: UseMemberAutocompleteOptions) {
 
   const debouncedLoadItems = debounce(loadItems, 300);
 
-  const onSearchChange = (query: string) => {
+  const onSearchChange = async (query: string): Promise<Member[]> => {
     search.value = query;
     if (query) {
-      debouncedLoadItems(query);
+      return await debouncedLoadItems(query) || [];
     } else {
-      memberAutocompleteStore.clearItems();
-      items.value = []; // Clear local items
+      // When search query is empty, load the first page of items
+      return await loadItems('');
     }
   };
 

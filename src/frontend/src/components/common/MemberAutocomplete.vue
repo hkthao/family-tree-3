@@ -57,12 +57,12 @@ const { items, selectedItems, onSearchChange, preloadById, loading: composableLo
 });
 
 const searchMembersFunction = async (query: string): Promise<Member[]> => {
-  onSearchChange(query);
+  await onSearchChange(query);
   return items.value;
 };
 
 const getMembersByIdsFunction = async (ids: string[]): Promise<Member[]> => {
-  await preloadById(ids);
+   preloadById(ids);
   return selectedItems.value;
 };
 
