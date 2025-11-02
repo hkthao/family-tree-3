@@ -1,10 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+dotenv.config({ path: path.resolve(__dirname, '.env.e2e') });
 export default defineConfig({
   testDir: path.join(__dirname, 'tests/e2e'),
   /* Run tests in files in the order of their definition. */
