@@ -1,59 +1,44 @@
 import { defineStore } from 'pinia';
-
-import type { Family, FamilyFilter } from '@/types/family';
-import i18n from '@/plugins/i18n';
+import type { Family, FamilyFilter, Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
-
-
+import i18n from '@/plugins/i18n';
 
 export const useFamilyAutocompleteStore = defineStore('familyAutocomplete', {
   state: () => ({
-    families: [] as Family[],
+    items: [] as Family[],
     loading: false,
     error: null as string | null,
   }),
-  getters: {
-    items: (state) => state.families,
-  },
+
   actions: {
-    async searchFamilies(filter: FamilyFilter, page: number = 1, itemsPerPage: number = 20) {
+    async search(filters: FamilyFilter): Promise<Family[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.family.loadItems(
-        {
-          ...filter,
-        },
-        page,
-        itemsPerPage,
-      );
+      const result = await this.services.family.loadItems(filters, 1, 50); // Assuming page 1, 50 items per page
 
-      if (result.ok && result.value) {
-        this.families.splice(0, this.families.length, ...result.value.items);
+      if (result.ok) {
+        this.items = result.value.items;
+        return result.value.items;
       } else {
-        this.error = (result as { ok: false; error: ApiError }).error?.message || i18n.global.t('family.errors.load');
-        this.families.splice(0, this.families.length); // Clear items on error
+        this.error = i18n.global.t('family.errors.load');
+        console.error(result.error);
+        this.items = [];
+        return [];
       }
-      this.loading = false;
     },
 
-    async getFamilyByIds(ids: string[]): Promise<Family[]> {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result = await this.services.family.getByIds(ids);
-        if (result.ok && result.value) {
-          return result.value;
-        } else {
-          this.error = (result as { ok: false; error: ApiError }).error?.message || i18n.global.t('family.errors.loadById');
-          return [];
-        }
-      } catch (error: any) {
-        this.error = error.message || i18n.global.t('family.errors.loadById');
-        console.error('Error fetching families by IDs:', error);
+    async getByIds(ids: string[]): Promise<Family[]> {
+      const result = await this.services.family.getByIds(ids);
+      if (result.ok) {
+        return result.value;
+      } else {
+        console.error(result.error);
         return [];
-      } finally {
-        this.loading = false;
       }
+    },
+
+    clearItems() {
+      this.items = [];
     },
   },
 });
