@@ -4,12 +4,13 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Files.DeleteFile;
 
-public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteFileCommand, Result>
+public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorage fileStorage, IUser currentUser, IDateTime dateTime, IAuthorizationService authorizationService) : IRequestHandler<DeleteFileCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IFileStorage _fileStorage = fileStorage;
     private readonly IUser _currentUser = currentUser;
     private readonly IDateTime _dateTime = dateTime;
+    private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {
@@ -21,10 +22,8 @@ public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorag
             return Result.Failure(string.Format(ErrorMessages.NotFound, "File metadata"), ErrorSources.NotFound);
         }
 
-        if (fileMetadata.UploadedBy != _currentUser.Id?.ToString())
-        {
+        if (fileMetadata.CreatedBy != _currentUser.Id?.ToString() && !_authorizationService.IsAdmin())
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
-        }
 
         // For files, we still want to delete the actual file from storage
         var deleteResult = await _fileStorage.DeleteFileAsync(fileMetadata.Url, cancellationToken);

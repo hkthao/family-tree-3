@@ -39,18 +39,6 @@ public class FileMetadataConfiguration : IEntityTypeConfiguration<FileMetadata>
             .HasColumnName("file_size")
             .IsRequired();
 
-        builder.Property(fm => fm.UploadedBy)
-            .HasColumnName("uploaded_by")
-            .HasMaxLength(36) // GUID string length
-            .IsRequired();
-
-        builder.Property(fm => fm.UsedByEntity)
-            .HasColumnName("used_by_entity")
-            .HasMaxLength(100);
-
-        builder.Property(fm => fm.UsedById)
-            .HasColumnName("used_by_id");
-
         builder.Property(fm => fm.IsDeleted)
             .HasColumnName("is_deleted")
             .IsRequired();

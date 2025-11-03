@@ -21,7 +21,8 @@ public class DeleteFileCommandHandlerTests : TestBase
             _context,
             _mockFileStorage.Object,
             _mockUser.Object,
-            _mockDateTime.Object
+            _mockDateTime.Object,
+            _mockAuthorizationService.Object
         );
     }
 
@@ -68,7 +69,6 @@ public class DeleteFileCommandHandlerTests : TestBase
             Id = fileId,
             FileName = "test.jpg",
             Url = "http://example.com/test.jpg",
-            UploadedBy = Guid.NewGuid().ToString(), // Different user
             ContentType = "image/jpeg", // Thêm ContentType
             IsDeleted = false
         };
@@ -104,19 +104,19 @@ public class DeleteFileCommandHandlerTests : TestBase
 
         var fileId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        _mockUser.Setup(u => u.Id).Returns(userId);
         var fileMetadata = new FileMetadata
         {
             Id = fileId,
             FileName = "test.jpg",
             Url = "http://example.com/test.jpg",
-            UploadedBy = userId.ToString(),
             ContentType = "image/jpeg", // Thêm ContentType
-            IsDeleted = false
+            IsDeleted = false,
+            CreatedBy = userId.ToString()
         };
         _context.FileMetadata.Add(fileMetadata);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(userId);
         _mockFileStorage.Setup(fs => fs.DeleteFileAsync(
                 It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Failure("Storage deletion failed.", "FileStorage"));
@@ -150,19 +150,19 @@ public class DeleteFileCommandHandlerTests : TestBase
 
         var fileId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        _mockUser.Setup(u => u.Id).Returns(userId);
         var fileMetadata = new FileMetadata
         {
             Id = fileId,
             FileName = "test.jpg",
             Url = "http://example.com/test.jpg",
-            UploadedBy = userId.ToString(),
             ContentType = "image/jpeg", // Thêm ContentType
-            IsDeleted = false
+            IsDeleted = false,
+            CreatedBy = userId.ToString()
         };
         _context.FileMetadata.Add(fileMetadata);
         await _context.SaveChangesAsync();
 
-        _mockUser.Setup(u => u.Id).Returns(userId);
         _mockFileStorage.Setup(fs => fs.DeleteFileAsync(
                 It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result.Success());

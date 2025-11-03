@@ -234,7 +234,6 @@ public class UploadFileCommandHandlerTests : TestBase
         savedMetadata.StorageProvider.Should().Be(StorageProvider.Local);
         savedMetadata.ContentType.Should().Be(command.ContentType);
         savedMetadata.FileSize.Should().Be(command.Length);
-        savedMetadata.UploadedBy.Should().Be(userId.ToString());
         savedMetadata.IsDeleted.Should().BeFalse();
         savedMetadata.Created.Should().Be(now);
         savedMetadata.LastModified.Should().Be(now);
