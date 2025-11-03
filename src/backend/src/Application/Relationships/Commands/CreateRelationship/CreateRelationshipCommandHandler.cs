@@ -35,6 +35,7 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
 
         var relationship = family.AddRelationship(request.SourceMemberId, request.TargetMemberId, request.Type);
         relationship.Order = request.Order;
+        _context.Relationships.Add(relationship);
 
         relationship.AddDomainEvent(new RelationshipCreatedEvent(relationship));
 
