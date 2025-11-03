@@ -22,33 +22,36 @@ public class FamilyUpdatedEventHandler(ILogger<FamilyUpdatedEventHandler> logger
             notification.Family.Name, notification.Family.Id);
 
         // Record activity for family update
-        await _mediator.Send(new RecordActivityCommand
+        if (_user.UserId != Guid.Empty)
         {
-            UserId = _user.UserId,
-            ActionType = UserActionType.UpdateFamily,
-            TargetType = TargetType.Family,
-            TargetId = notification.Family.Id.ToString(),
-            ActivitySummary = $"Updated family '{notification.Family.Name}'."
-        }, cancellationToken);
-
-        // Publish notification for family update
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
-
-        // Update family data in Vector DB for search via GlobalSearchService
-        await _globalSearchService.UpsertEntityAsync(
-            notification.Family,
-            "Family",
-            family => $"Family Name: {family.Name}. Description: {family.Description}. Address: {family.Address}",
-            family => new Dictionary<string, string>
+            await _mediator.Send(new RecordActivityCommand
             {
-                { "EntityType", "Family" },
-                { "EntityId", family.Id.ToString() },
-                { "Name", family.Name },
-                { "Description", family.Description ?? "" },
-                { "DeepLink", $"/family/{family.Id}" }
-            },
-            cancellationToken
-        );
+                UserId = _user.UserId,
+                ActionType = UserActionType.UpdateFamily,
+                TargetType = TargetType.Family,
+                TargetId = notification.Family.Id.ToString(),
+                ActivitySummary = $"Updated family '{notification.Family.Name}'."
+            }, cancellationToken);
+
+            // Publish notification for family update
+            await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
+
+            // Update family data in Vector DB for search via GlobalSearchService
+            await _globalSearchService.UpsertEntityAsync(
+                notification.Family,
+                "Family",
+                family => $"Family Name: {family.Name}. Description: {family.Description}. Address: {family.Address}",
+                family => new Dictionary<string, string>
+                {
+                    { "EntityType", "Family" },
+                    { "EntityId", family.Id.ToString() },
+                    { "Name", family.Name },
+                    { "Description", family.Description ?? "" },
+                    { "DeepLink", $"/family/{family.Id}" }
+                },
+                cancellationToken
+            );
+        }
     }
 }
 

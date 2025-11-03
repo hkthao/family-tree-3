@@ -44,10 +44,6 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
 
             return Result.Success();
         }
-        catch (DbUpdateException ex)
-        {
-            return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database);
-        }
         catch (Exception ex)
         {
             return Result.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Exception);

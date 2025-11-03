@@ -1,27 +1,28 @@
 using backend.Application.Families;
 using backend.Application.Families.Commands.CreateFamilies;
-using FluentAssertions;
+using FluentValidation;
 using FluentValidation.TestHelper;
+using Moq;
 using Xunit;
+using FluentAssertions;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamilies;
 
 public class CreateFamiliesCommandValidatorTests
 {
     private readonly CreateFamiliesCommandValidator _validator;
-    private readonly FamilyDtoValidator _familyDtoValidator;
+
 
     public CreateFamiliesCommandValidatorTests()
     {
-        _familyDtoValidator = new FamilyDtoValidator();
-        _validator = new CreateFamiliesCommandValidator(_familyDtoValidator);
+        _validator = new CreateFamiliesCommandValidator(new FamilyDtoValidator());
     }
 
     [Fact]
     public void ShouldHaveError_WhenFamiliesListIsEmpty()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi danh sách Families rỗng.
-        var command = new CreateFamiliesCommand([]);
+        var command = new CreateFamiliesCommand(new List<FamilyDto>());
         var result = _validator.TestValidate(command);
         result.ShouldHaveValidationErrorFor(x => x.Families)
               .WithErrorMessage("At least one family is required.");
@@ -31,7 +32,10 @@ public class CreateFamiliesCommandValidatorTests
     public void ShouldNotHaveError_WhenFamiliesListIsNotEmptyAndValid()
     {
         // 🎯 Mục tiêu của test: Xác minh không có lỗi khi danh sách Families không rỗng và hợp lệ.
-        var command = new CreateFamiliesCommand([new() { Name = "Test Family", Visibility = "Public" }]);
+        var validFamilyDto = new FamilyDto { Name = "Valid Family", Visibility = "Public" };
+
+
+        var command = new CreateFamiliesCommand(new List<FamilyDto> { validFamilyDto });
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -40,11 +44,13 @@ public class CreateFamiliesCommandValidatorTests
     public void ShouldHaveError_WhenAnyFamilyDtoIsInvalid()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi bất kỳ FamilyDto nào trong danh sách không hợp lệ.
-        var invalidFamilyDto = new FamilyDto { Name = "" }; // Invalid name
+        var invalidFamilyDto = new FamilyDto { Name = string.Empty, Visibility = "Public" }; // Invalid name
+        var validFamilyDto = new FamilyDto { Name = "Valid Family", Visibility = "Public" };
 
-        var command = new CreateFamiliesCommand([invalidFamilyDto]);
+
+
+        var command = new CreateFamiliesCommand(new List<FamilyDto> { validFamilyDto, invalidFamilyDto });
         var result = _validator.TestValidate(command);
-        result.IsValid.Should().BeFalse(); // Overall validation should fail
-        result.Errors.Should().Contain(e => e.PropertyName == "Families[0].Name" && e.ErrorMessage == "Name is required.");
+        result.Errors.Should().Contain(e => e.PropertyName == "Families[1].Name" && e.ErrorMessage == "Name is required.");
     }
 }

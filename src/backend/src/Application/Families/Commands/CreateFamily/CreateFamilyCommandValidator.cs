@@ -16,7 +16,7 @@ public class CreateFamilyCommandValidator : AbstractValidator<CreateFamilyComman
             .MaximumLength(500).WithMessage("Address must not exceed 500 characters.");
 
         RuleFor(v => v.AvatarUrl)
-            .MaximumLength(2048).WithMessage("AvatarUrl must not exceed 2048 characters.")
+            .MaximumLength(2048).WithMessage("AvatarUrl không được vượt quá 2048 ký tự.")
             .Matches(@"^(https?://)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*/?$").When(v => !string.IsNullOrEmpty(v.AvatarUrl))
             .WithMessage("AvatarUrl must be a valid URL.");
 

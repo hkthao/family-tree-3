@@ -1,28 +1,28 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
+using backend.Domain.Enums;
+using backend.Domain.Events.Families;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-using backend.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Families.Commands.CreateFamily;
 
 public class CreateFamilyCommandHandlerTests : TestBase
 {
     private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly CreateFamilyCommandHandler _handler;
 
     public CreateFamilyCommandHandlerTests()
     {
         _currentUserMock = new Mock<ICurrentUser>();
-        _authorizationServiceMock = new Mock<IAuthorizationService>();
+        _handler = new CreateFamilyCommandHandler(_context, _currentUserMock.Object);
     }
 
     [Fact]
-    public async Task Handle_ShouldCreateFamily_WhenValidCommand()
+    public async Task Handle_ShouldCreateFamilyAndReturnSuccess()
     {
         // Arrange
         var userId = Guid.NewGuid();
@@ -31,33 +31,54 @@ public class CreateFamilyCommandHandlerTests : TestBase
         var command = new CreateFamilyCommand
         {
             Name = "Test Family",
-            Code = "TF001",
-            Description = "A test family",
+            Description = "A family for testing",
             Address = "123 Test St",
+            AvatarUrl = "http://example.com/avatar.png",
+            Visibility = "Public"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdFamily = await _context.Families
+                                        .Include(f => f.FamilyUsers)
+                                        .FirstOrDefaultAsync(f => f.Id == result.Value);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeEmpty();
+        createdFamily.Should().NotBeNull();
+        createdFamily!.Name.Should().Be(command.Name);
+        createdFamily.Description.Should().Be(command.Description);
+        createdFamily.Address.Should().Be(command.Address);
+        createdFamily.AvatarUrl.Should().Be(command.AvatarUrl);
+        createdFamily.Visibility.Should().Be(command.Visibility);
+        createdFamily.Code.Should().StartWith("FAM-");
+        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyCreatedEvent);
+        createdFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
+        createdFamily.FamilyUsers.Should().ContainSingle(fu => fu.UserId == userId && fu.Role == FamilyRole.Manager);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldGenerateCode_WhenCodeIsNotProvided()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        _currentUserMock.Setup(x => x.UserId).Returns(userId);
+
+        var command = new CreateFamilyCommand
+        {
+            Name = "Family without code",
             Visibility = "Private"
         };
 
-        var handlerContext = new ApplicationDbContext(_dbContextOptions);
-        var handler = new CreateFamilyCommandHandler(handlerContext, _currentUserMock.Object);
-
         // Act
-        var result = await handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var createdFamily = await _context.Families.FindAsync(result.Value);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeEmpty();
-
-        var family = await handlerContext.Families.FindAsync(result.Value);
-        family.Should().NotBeNull();
-        family!.Name.Should().Be(command.Name);
-        family.Code.Should().Be(command.Code);
-        family.Description.Should().Be(command.Description);
-        family.Address.Should().Be(command.Address);
-        family.Visibility.Should().Be(command.Visibility);
-
-        var familyUser = await handlerContext.FamilyUsers.FirstOrDefaultAsync(fu => fu.FamilyId == family.Id && fu.UserId == userId);
-        familyUser.Should().NotBeNull();
-        familyUser!.Role.Should().Be(Domain.Enums.FamilyRole.Manager);
+        createdFamily.Should().NotBeNull();
+        createdFamily!.Code.Should().NotBeNullOrEmpty();
+        createdFamily.Code.Should().StartWith("FAM-");
     }
 }

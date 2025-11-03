@@ -17,8 +17,8 @@ public class FamilyDtoValidatorTests
     public void ShouldHaveError_WhenNameIsEmpty()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi Name là chuỗi rỗng.
-        var familyDto = new FamilyDto { Name = string.Empty };
-        var result = _validator.TestValidate(familyDto);
+        var dto = new FamilyDto { Name = string.Empty, Visibility = "Public" };
+        var result = _validator.TestValidate(dto);
         result.ShouldHaveValidationErrorFor(x => x.Name)
               .WithErrorMessage("Name is required.");
     }
@@ -27,8 +27,8 @@ public class FamilyDtoValidatorTests
     public void ShouldNotHaveError_WhenNameIsValid()
     {
         // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Name hợp lệ.
-        var familyDto = new FamilyDto { Name = "Valid Family Name" };
-        var result = _validator.TestValidate(familyDto);
+        var dto = new FamilyDto { Name = "Valid Name", Visibility = "Public" };
+        var result = _validator.TestValidate(dto);
         result.ShouldNotHaveValidationErrorFor(x => x.Name);
     }
 
@@ -36,8 +36,18 @@ public class FamilyDtoValidatorTests
     public void ShouldHaveError_WhenVisibilityIsNull()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility là null.
-        var familyDto = new FamilyDto { Name = "Test Name", Visibility = null! };
-        var result = _validator.TestValidate(familyDto);
+        var dto = new FamilyDto { Name = "Valid Name", Visibility = null! };
+        var result = _validator.TestValidate(dto);
+        result.ShouldHaveValidationErrorFor(x => x.Visibility)
+              .WithErrorMessage("Visibility is required.");
+    }
+
+    [Fact]
+    public void ShouldHaveError_WhenVisibilityIsEmpty()
+    {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Visibility là chuỗi rỗng.
+        var dto = new FamilyDto { Name = "Valid Name", Visibility = string.Empty };
+        var result = _validator.TestValidate(dto);
         result.ShouldHaveValidationErrorFor(x => x.Visibility)
               .WithErrorMessage("Visibility is required.");
     }
@@ -46,8 +56,12 @@ public class FamilyDtoValidatorTests
     public void ShouldNotHaveError_WhenVisibilityIsValid()
     {
         // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Visibility hợp lệ.
-        var familyDto = new FamilyDto { Name = "Test Name", Visibility = "Public" };
-        var result = _validator.TestValidate(familyDto);
+        var dto = new FamilyDto { Name = "Valid Name", Visibility = "Public" };
+        var result = _validator.TestValidate(dto);
+        result.ShouldNotHaveValidationErrorFor(x => x.Visibility);
+
+        dto = new FamilyDto { Name = "Valid Name", Visibility = "Private" };
+        result = _validator.TestValidate(dto);
         result.ShouldNotHaveValidationErrorFor(x => x.Visibility);
     }
 }

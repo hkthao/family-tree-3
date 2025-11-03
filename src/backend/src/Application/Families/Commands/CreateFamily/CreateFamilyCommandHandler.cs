@@ -38,11 +38,6 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
 
             return Result<Guid>.Success(entity.Id);
         }
-        catch (DbUpdateException ex)
-        {
-            // Log the exception details here if a logger is available
-            return Result<Guid>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message), ErrorSources.Database);
-        }
         catch (Exception ex)
         {
             // Log the exception details here if a logger is available

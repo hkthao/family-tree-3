@@ -1,62 +1,93 @@
-using backend.Application.Common.Interfaces;
+using AutoMapper;
+using backend.Application.Families;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
-using AutoMapper;
 
 namespace backend.Application.UnitTests.Families.Queries.GetFamiliesByIds;
 
 public class GetFamiliesByIdsQueryHandlerTests : TestBase
 {
-    private readonly Mock<ICurrentUser> _currentUserMock;
-    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly Mock<IMapper> _mapperMock;
+    private readonly GetFamiliesByIdsQueryHandler _handler;
 
     public GetFamiliesByIdsQueryHandlerTests()
     {
-        _currentUserMock = new Mock<ICurrentUser>();
-        _authorizationServiceMock = new Mock<IAuthorizationService>();
+        _mapperMock = new Mock<IMapper>();
+        _handler = new GetFamiliesByIdsQueryHandler(_context, _mapperMock.Object);
     }
 
-    /// <summary>
-    /// Kiểm tra xem handler có trả về danh sách các gia đình chính xác khi cung cấp một danh sách các ID hợp lệ.
-    /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnFamilies_WhenValidIdsProvided()
+    public async Task Handle_ShouldReturnCorrectFamilies_WhenGivenValidIds()
     {
         // Arrange
-        var familyId1 = Guid.NewGuid();
-        var familyId2 = Guid.NewGuid();
-        var familyId3 = Guid.NewGuid();
-
-        var family1 = new Family { Id = familyId1, Name = "Family 1", Code = "FAM001", TotalMembers = 10, TotalGenerations = 3 };
-        var family2 = new Family { Id = familyId2, Name = "Family 2", Code = "FAM002", TotalMembers = 5, TotalGenerations = 2 };
-        var family3 = new Family { Id = familyId3, Name = "Family 3", Code = "FAM003", TotalMembers = 7, TotalGenerations = 4 };
-
-        _context.Families.Add(family1);
-        _context.Families.Add(family2);
-        _context.Families.Add(family3);
+        var family1 = new Family { Id = Guid.NewGuid(), Name = "Family 1", Code = "F1" };
+        var family2 = new Family { Id = Guid.NewGuid(), Name = "Family 2", Code = "F2" };
+        var family3 = new Family { Id = Guid.NewGuid(), Name = "Family 3", Code = "F3" };
+        _context.Families.AddRange(family1, family2, family3);
         await _context.SaveChangesAsync();
 
-        var query = new GetFamiliesByIdsQuery(new List<Guid> { familyId1, familyId2 });
+        var query = new GetFamiliesByIdsQuery(new List<Guid> { family1.Id, family3.Id });
 
-        var handlerContext = new ApplicationDbContext(_dbContextOptions);
-        var handler = new GetFamiliesByIdsQueryHandler(handlerContext, _mapper);
+        // Setup mapper to return FamilyDto
+        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<Family, FamilyDto>();
+        }));
 
         // Act
-        var result = await handler.Handle(query, CancellationToken.None);
+        var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value.Should().HaveCount(2);
-        result.Value.Should().Contain(f => f.Id == familyId1);
-        result.Value.Should().Contain(f => f.Id == familyId2);
-        result.Value.Should().NotContain(f => f.Id == familyId3);
+        result.Value!.Select(f => f.Id).Should().Contain(family1.Id);
+        result.Value!.Select(f => f.Id).Should().Contain(family3.Id);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnEmptyList_WhenGivenNoIds()
+    {
+        // Arrange
+        var query = new GetFamiliesByIdsQuery(new List<Guid>());
+
+        // Setup mapper to return FamilyDto
+        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<Family, FamilyDto>();
+        }));
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnEmptyList_WhenGivenNonExistentIds()
+    {
+        // Arrange
+        var query = new GetFamiliesByIdsQuery(new List<Guid> { Guid.NewGuid(), Guid.NewGuid() });
+
+        // Setup mapper to return FamilyDto
+        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<Family, FamilyDto>();
+        }));
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().NotBeNull();
+        result.Value.Should().BeEmpty();
     }
 }
