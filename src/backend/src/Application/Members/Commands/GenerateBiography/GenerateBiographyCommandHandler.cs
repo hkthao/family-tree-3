@@ -148,6 +148,9 @@ public class GenerateBiographyCommandHandler(
             biographyText = string.Join(" ", words.Take(1490)) + "...";
         }
 
+        member.Biography = biographyText;
+        await _context.SaveChangesAsync(cancellationToken);
+
         return Result<BiographyResultDto>.Success(new BiographyResultDto { Content = biographyText });
     }
 }

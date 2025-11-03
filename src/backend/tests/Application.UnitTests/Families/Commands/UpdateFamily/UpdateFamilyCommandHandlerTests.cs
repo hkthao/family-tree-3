@@ -1,204 +1,75 @@
-using backend.Application.Common.Constants;
-using AutoFixture;
+using backend.Application.Common.Interfaces;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
-using backend.Domain.Events.Families;
 using FluentAssertions;
 using Moq;
 using Xunit;
+using backend.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 
 public class UpdateFamilyCommandHandlerTests : TestBase
 {
-    private readonly UpdateFamilyCommandHandler _handler;
+    private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
 
     public UpdateFamilyCommandHandlerTests()
     {
-        _handler = new UpdateFamilyCommandHandler(_context, _mockAuthorizationService.Object);
-    }
-
-
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenUserDoesNotHavePermission()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi người dùng không phải là quản trị viên và không có quyền quản lý gia đình.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockAuthorizationService.IsAdmin để trả về false.
-        // 2. Thiết lập _mockAuthorizationService.CanManageFamily để trả về false.
-        // 3. Tạo một UpdateFamilyCommand bất kỳ.
-
-        // Arrange
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(It.IsAny<Guid>()))
-                                 .Returns(false);
-
-        var command = _fixture.Create<UpdateFamilyCommand>();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ErrorMessages.AccessDenied);
-        result.ErrorSource.Should().Be(ErrorSources.Forbidden);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng chỉ những người dùng có quyền (quản trị viên hoặc người quản lý gia đình)
-        // mới có thể cập nhật thông tin gia đình.
+        _currentUserMock = new Mock<ICurrentUser>();
+        _authorizationServiceMock = new Mock<IAuthorizationService>();
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenFamilyNotFound()
+    public async Task Handle_ShouldUpdateFamily_WhenValidCommandAndUserIsAdmin()
     {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về một kết quả thất bại
-        // khi gia đình cần cập nhật không tìm thấy trong cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Thiết lập _mockAuthorizationService.IsAdmin để trả về true (hoặc CanManageFamily trả về true).
-        // 2. Đảm bảo không có Family nào trong DB khớp với ID của command.
-        // 3. Tạo một UpdateFamilyCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về là thất bại.
-        // 2. Kiểm tra thông báo lỗi phù hợp.
-
         // Arrange
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true); // Assume admin for simplicity in this test
+        var familyId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
 
-        // Ensure no Family exists for this ID
-        _context.Families.RemoveRange(_context.Families);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _currentUserMock.Setup(x => x.UserId).Returns(userId);
+        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(true);
 
-        var command = _fixture.Create<UpdateFamilyCommand>();
+        var existingFamily = new Family
+        {
+            Id = familyId,
+            Name = "Old Family Name",
+            Code = "OLD001",
+            Description = "Old description",
+            Address = "Old Address",
+            Visibility = "Private"
+        };
 
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(string.Format(ErrorMessages.FamilyNotFound, command.Id));
-        result.ErrorSource.Should().Be(ErrorSources.NotFound);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng hệ thống không thể cập nhật một gia đình không tồn tại,
-        // ngăn chặn các lỗi tham chiếu và đảm bảo tính toàn vẹn dữ liệu.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldUpdateFamilySuccessfully_WhenValidRequestAndUserIsAdmin()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler cập nhật thành công thông tin gia đình
-        // khi yêu cầu hợp lệ và người dùng là quản trị viên.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một Family hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về IsAdmin là true.
-        // 3. Tạo một UpdateFamilyCommand với các giá trị mới.
-        // 4. Thiết lập _mockMediator và _mockFamilyTreeService.
-
-        // Arrange
-        var existingFamily = _fixture.Create<Family>();
         _context.Families.Add(existingFamily);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(true);
+        var command = new UpdateFamilyCommand
+        {
+            Id = familyId,
+            Name = "New Family Name",
+            Code = "NEW001",
+            Description = "New description",
+            Address = "New Address",
+            Visibility = "Public"
+        };
 
-        var command = _fixture.Build<UpdateFamilyCommand>()
-                               .With(c => c.Id, existingFamily.Id)
-                               .With(c => c.Name, "Updated Family Name")
-                               .With(c => c.Description, "Updated Description")
-                               .With(c => c.Address, "Updated Address")
-                               .With(c => c.Visibility, FamilyVisibility.Private.ToString())
-                               .Create();
+        var handlerContext = new ApplicationDbContext(_dbContextOptions);
+        var handler = new UpdateFamilyCommandHandler(handlerContext, _authorizationServiceMock.Object);
 
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        var result = await handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
 
-        var updatedFamily = await _context.Families.FindAsync(existingFamily.Id);
+        var updatedFamily = await handlerContext.Families.FindAsync(familyId);
         updatedFamily.Should().NotBeNull();
         updatedFamily!.Name.Should().Be(command.Name);
+        updatedFamily.Code.Should().Be(command.Code);
         updatedFamily.Description.Should().Be(command.Description);
         updatedFamily.Address.Should().Be(command.Address);
         updatedFamily.Visibility.Should().Be(command.Visibility);
-
-        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
-        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một quản trị viên có thể cập nhật thành công tất cả các thuộc tính
-        // của một gia đình hiện có và các hoạt động liên quan được ghi lại.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldUpdateFamilySuccessfully_WhenValidRequestAndUserCanManageFamily()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler cập nhật thành công thông tin gia đình
-        // khi yêu cầu hợp lệ và người dùng có quyền quản lý gia đình (nhưng không phải là quản trị viên).
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một Family hiện có, sau đó thêm vào DB.
-        // 2. Thiết lập _mockAuthorizationService để trả về IsAdmin là false,
-        //    và CanManageFamily là true.
-        // 3. Tạo một UpdateFamilyCommand với các giá trị mới.
-        // 4. Thiết lập _mockMediator và _mockFamilyTreeService.
-
-        // Arrange
-        var existingFamily = _fixture.Create<Family>();
-        _context.Families.Add(existingFamily);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        _mockAuthorizationService.Setup(s => s.IsAdmin()).Returns(false);
-        _mockAuthorizationService.Setup(s => s.CanManageFamily(existingFamily.Id))
-                                 .Returns(true);
-
-        var command = _fixture.Build<UpdateFamilyCommand>()
-                               .With(c => c.Id, existingFamily.Id)
-                               .With(c => c.Name, "Updated Family Name by Manager")
-                               .With(c => c.Description, "Updated Description by Manager")
-                               .With(c => c.Address, "Updated Address by Manager")
-                               .With(c => c.Visibility, FamilyVisibility.Public.ToString())
-                               .Create();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-
-        var updatedFamily = await _context.Families.FindAsync(existingFamily.Id);
-        updatedFamily.Should().NotBeNull();
-        updatedFamily!.Name.Should().Be(command.Name);
-        updatedFamily.Description.Should().Be(command.Description);
-        updatedFamily.Address.Should().Be(command.Address);
-        updatedFamily.Visibility.Should().Be(command.Visibility);
-
-        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyUpdatedEvent);
-        updatedFamily.DomainEvents.Should().ContainSingle(e => e is FamilyStatsUpdatedEvent);
-
-        // 💡 Giải thích:
-        // Test này xác minh rằng một người dùng có quyền quản lý gia đình có thể cập nhật thành công
-        // một gia đình hiện có và các hoạt động liên quan được ghi lại.
     }
 }

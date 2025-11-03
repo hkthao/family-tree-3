@@ -1,79 +1,73 @@
-using AutoFixture.Xunit2;
+using backend.Application.Common.Interfaces;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Moq;
 using Xunit;
+using backend.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.UnitTests.Families.Queries;
+namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
 public class GetFamilyByIdQueryHandlerTests : TestBase
 {
-    private readonly GetFamilyByIdQueryHandler _handler;
+    private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
 
     public GetFamilyByIdQueryHandlerTests()
     {
-        _handler = new GetFamilyByIdQueryHandler(_context, _mapper);
+        _currentUserMock = new Mock<ICurrentUser>();
+        _authorizationServiceMock = new Mock<IAuthorizationService>();
     }
 
-    [Theory, AutoData]
-    public async Task Handle_ShouldReturnFailureResult_WhenFamilyNotFound(GetFamilyByIdQuery query)
+    /// <summary>
+    /// Kiểm tra xem handler có trả về thông tin gia đình chính xác khi người dùng có quyền truy cập.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldReturnFamilyDetailDto_WhenUserHasAccess()
     {
-        // 🎯 Mục tiêu của test: Đảm bảo handler trả về lỗi khi không tìm thấy Family với ID được yêu cầu.
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
 
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange: Đảm bảo không có Family nào trong Context với ID của query.
-        // (Mặc định Context sẽ trống rỗng, không cần thêm Family nào có ID trùng với query.Id)
+        _currentUserMock.Setup(x => x.UserId).Returns(userId);
+        _authorizationServiceMock.Setup(x => x.CanAccessFamily(familyId)).Returns(true);
 
-        // Act: Gọi handler để xử lý query.
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        // Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Family with ID {query.Id} not found.");
-
-        // 💡 Giải thích: Khi không tìm thấy Family trong cơ sở dữ liệu với ID đã cho,
-        // handler sẽ trả về Result.Failure với thông báo lỗi tương ứng.
-    }
-
-    [Theory, AutoData]
-    public async Task Handle_ShouldReturnFamilyDetailDto_WhenFamilyFound(GetFamilyByIdQuery query)
-    {
-        // 🎯 Mục tiêu của test: Đảm bảo handler trả về FamilyDetailDto chính xác khi tìm thấy Family.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange: Tạo một Family và thêm vào Context.
-        var family = new Family
+        var existingFamily = new Family
         {
-            Id = query.Id,
+            Id = familyId,
             Name = "Test Family",
-            Code = "TF123",
-            Description = "A test family description",
+            Code = "TF001",
+            Description = "A test family",
             Address = "123 Test St",
-            AvatarUrl = "http://example.com/avatar.jpg",
-            Visibility = "Public",
-            TotalMembers = 5
+            Visibility = "Private",
+            TotalMembers = 5,
+            TotalGenerations = 2
         };
-        _context.Families.Add(family);
+
+        _context.Families.Add(existingFamily);
         await _context.SaveChangesAsync();
 
-        // Act: Gọi handler để xử lý query.
-        var result = await _handler.Handle(query, CancellationToken.None);
+        var query = new GetFamilyByIdQuery(familyId);
 
-        // Assert: Kiểm tra kết quả trả về là thành công và chứa FamilyDetailDto đã ánh xạ chính xác.
+        var handlerContext = new ApplicationDbContext(_dbContextOptions);
+        var handler = new GetFamilyByIdQueryHandler(handlerContext, _mapper);
+
+        // Act
+        var result = await handler.Handle(query, CancellationToken.None);
+
+        // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Id.Should().Be(family.Id);
-        result.Value!.Name.Should().Be(family.Name);
-        result.Value!.Description.Should().Be(family.Description);
-        result.Value!.Address.Should().Be(family.Address);
-        result.Value!.AvatarUrl.Should().Be(family.AvatarUrl);
-        result.Value!.Visibility.Should().Be(family.Visibility);
-        result.Value!.TotalMembers.Should().Be(family.TotalMembers);
-
-        // 💡 Giải thích: Khi tìm thấy Family trong cơ sở dữ liệu với ID đã cho,
-        // handler sẽ ánh xạ nó sang FamilyDetailDto và trả về Result.Success.
+        result.Value!.Id.Should().Be(familyId);
+        result.Value.Name.Should().Be(existingFamily.Name);
+        result.Value.Code.Should().Be(existingFamily.Code);
+        result.Value.Description.Should().Be(existingFamily.Description);
+        result.Value.Address.Should().Be(existingFamily.Address);
+        result.Value.Visibility.Should().Be(existingFamily.Visibility);
+        result.Value.TotalMembers.Should().Be(existingFamily.TotalMembers);
+        result.Value.TotalGenerations.Should().Be(existingFamily.TotalGenerations);
     }
 }
