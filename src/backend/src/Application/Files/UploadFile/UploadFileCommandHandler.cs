@@ -8,12 +8,11 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Files.UploadFile;
 
-public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider configProvider, IApplicationDbContext context, ICurrentUser user, IDateTime dateTime) : IRequestHandler<UploadFileCommand, Result<string>>
+public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider configProvider, IApplicationDbContext context, IDateTime dateTime) : IRequestHandler<UploadFileCommand, Result<string>>
 {
     private readonly IFileStorage _fileStorage = fileStorage;
     private readonly IConfigProvider _configProvider = configProvider;
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser _user = user;
     private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
@@ -69,6 +68,12 @@ public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider 
             };
 
             _context.FileMetadata.Add(fileMetadata);
+
+            if (request.EntityType != null && request.EntityId != null)
+            {
+                fileMetadata.AddFileUsage(request.EntityType, request.EntityId.Value);
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
 
             return Result<string>.Success(uploadResult.Value);

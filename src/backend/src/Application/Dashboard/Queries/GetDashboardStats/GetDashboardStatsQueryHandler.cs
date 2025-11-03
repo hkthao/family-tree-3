@@ -33,8 +33,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         var totalMembers = await _context.Members.Where(m => familiesQuery.Select(f => f.Id).Contains(m.FamilyId)).CountAsync(cancellationToken);
         var totalRelationships = await _context.Relationships.Where(r => familiesQuery.Select(f => f.Id).Contains(r.SourceMember.FamilyId)).CountAsync(cancellationToken);
 
-        // Placeholder for total generations - this would require more complex tree traversal logic
-        var totalGenerations = 0;
+        var totalGenerations = await familiesQuery.SumAsync(e=>e.TotalGenerations, cancellationToken);
 
         var stats = new DashboardStatsDto
         {
@@ -47,3 +46,4 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         return Result<DashboardStatsDto>.Success(stats);
     }
 }
+

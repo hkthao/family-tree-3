@@ -32,6 +32,15 @@ public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorag
             fileMetadata.IsDeleted = true;
             fileMetadata.DeletedDate = _dateTime.Now;
             fileMetadata.DeletedBy = _currentUser.UserId.ToString();
+
+            // Soft delete associated FileUsage records
+            foreach (var fileUsage in fileMetadata.FileUsages)
+            {
+                fileUsage.IsDeleted = true;
+                fileUsage.DeletedDate = _dateTime.Now;
+                fileUsage.DeletedBy = _currentUser.UserId.ToString();
+            }
+
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }

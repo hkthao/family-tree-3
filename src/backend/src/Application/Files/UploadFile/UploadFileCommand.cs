@@ -26,4 +26,14 @@ public record UploadFileCommand : IRequest<Result<string>>
     /// The length of the file in bytes.
     /// </summary>
     public long Length { get; init; }
+
+    /// <summary>
+    /// Optional: The type of the entity that this file is associated with (e.g., "Member", "Family").
+    /// </summary>
+    public string? EntityType { get; init; }
+
+    /// <summary>
+    /// Optional: The ID of the entity that this file is associated with.
+    /// </summary>
+    public Guid? EntityId { get; init; }
 }
