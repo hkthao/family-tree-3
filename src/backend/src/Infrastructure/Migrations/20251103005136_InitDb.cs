@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace backend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -33,6 +33,10 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     total_members = table.Column<int>(type: "int", nullable: false),
                     total_generations = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -59,12 +63,10 @@ namespace backend.Infrastructure.Migrations
                     content_type = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     file_size = table.Column<long>(type: "bigint", nullable: false),
-                    uploaded_by = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    used_by_entity = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    used_by_id = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    is_active = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -88,6 +90,10 @@ namespace backend.Infrastructure.Migrations
                     channel = table.Column<int>(type: "int", nullable: false),
                     enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     notification_type = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedBy = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -98,31 +104,6 @@ namespace backend.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_notification_preference", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "text_chunk",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    content = table.Column<string>(type: "varchar(4000)", maxLength: 4000, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    category = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    source = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    metadata = table.Column<string>(type: "json", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    embedding = table.Column<string>(type: "json", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    score = table.Column<float>(type: "float", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_text_chunk", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -145,6 +126,10 @@ namespace backend.Infrastructure.Migrations
                     type = table.Column<int>(type: "int", nullable: false),
                     color = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -193,6 +178,10 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     is_root = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -247,6 +236,10 @@ namespace backend.Infrastructure.Migrations
                     type = table.Column<int>(type: "int", nullable: false),
                     order = table.Column<int>(type: "int", nullable: true),
                     family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -285,7 +278,11 @@ namespace backend.Infrastructure.Migrations
                     family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     user_profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     role = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -314,6 +311,10 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     activity_summary = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     CreatedBy = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -334,10 +335,11 @@ namespace backend.Infrastructure.Migrations
                     user_profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     theme = table.Column<int>(type: "int", nullable: false),
                     language = table.Column<int>(type: "int", nullable: false),
-                    email_notifications_enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    sms_notifications_enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    in_app_notifications_enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -362,9 +364,19 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    first_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    phone = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     avatar = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     UserPreferenceUserProfileId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -504,9 +516,6 @@ namespace backend.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "relationship");
-
-            migrationBuilder.DropTable(
-                name: "text_chunk");
 
             migrationBuilder.DropTable(
                 name: "user_activity");
