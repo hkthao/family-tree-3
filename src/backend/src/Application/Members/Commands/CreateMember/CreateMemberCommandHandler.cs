@@ -25,6 +25,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         }
 
         var member = family.AddMember(request.LastName, request.FirstName, request.Code ?? GenerateUniqueCode("MEM"));
+        _context.Members.Add(member);
         member.Nickname = request.Nickname;
         member.DateOfBirth = request.DateOfBirth;
         member.DateOfDeath = request.DateOfDeath;
@@ -38,7 +39,7 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         if (request.IsRoot)
         {
-            var currentRoot = family.Members.FirstOrDefault(m => m.IsRoot);
+            var currentRoot = await _context.Members.FirstOrDefaultAsync(m => m.FamilyId == request.FamilyId && m.IsRoot, cancellationToken);
             if (currentRoot != null)
             {
                 currentRoot.IsRoot = false;

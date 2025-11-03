@@ -32,6 +32,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         member.FirstName = request.FirstName;
         member.LastName = request.LastName;
+        member.Code = request.Code!;
         member.Nickname = request.Nickname;
         member.DateOfBirth = request.DateOfBirth;
         member.DateOfDeath = request.DateOfDeath;

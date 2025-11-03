@@ -1,5 +1,3 @@
-using AutoFixture;
-using AutoFixture.AutoMoq;
 using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Identity.UserProfiles.Queries;
@@ -14,10 +12,10 @@ namespace backend.Application.UnitTests.Common;
 /// Lớp cơ sở cho các bài kiểm thử đơn vị.
 /// Cung cấp môi trường cơ sở dữ liệu trong bộ nhớ, AutoFixture và AutoMoq để thiết lập dữ liệu và mock các dependency.
 /// </summary>
-public abstract class TestBase : IDisposable
+    public abstract class TestBase : IDisposable
 {
     protected readonly ApplicationDbContext _context;
-    protected readonly IFixture _fixture;
+    protected readonly DbContextOptions<ApplicationDbContext> _dbContextOptions;
     protected readonly Mock<ICurrentUser> _mockUser;
     protected readonly Mock<IDateTime> _mockDateTime;
     protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
@@ -26,27 +24,21 @@ public abstract class TestBase : IDisposable
 
     protected TestBase()
     {
-        // Cấu hình AutoFixture với AutoMoq để tự động tạo đối tượng và mock interface
-        _fixture = new Fixture().Customize(new AutoMoqCustomization());
-        _fixture.Behaviors.OfType<ThrowingRecursionBehavior>().ToList()
-            .ForEach(b => _fixture.Behaviors.Remove(b));
-        _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
         // Thiết lập InMemoryDatabase cho mỗi test để đảm bảo tính độc lập
         _databaseName = Guid.NewGuid().ToString();
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        _dbContextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(_databaseName)
             .Options;
 
         // Mock ICurrentUserService and IDateTime
-        _mockUser = _fixture.Freeze<Mock<ICurrentUser>>();
-        _mockDateTime = _fixture.Freeze<Mock<IDateTime>>();
+        _mockUser = new Mock<ICurrentUser>();
+        _mockDateTime = new Mock<IDateTime>();
 
-        _context = new ApplicationDbContext(options);
+        _context = new ApplicationDbContext(_dbContextOptions);
         _context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
         // Mock IAuthorizationService
-        _mockAuthorizationService = _fixture.Freeze<Mock<IAuthorizationService>>();
+        _mockAuthorizationService = new Mock<IAuthorizationService>();
 
         // Cấu hình AutoMapper
         var mapperConfiguration = new MapperConfiguration(cfg =>

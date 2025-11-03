@@ -33,6 +33,7 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             entity.Address = request.Address;
             entity.AvatarUrl = request.AvatarUrl;
             entity.Visibility = request.Visibility;
+            entity.Code = request.Code!;
 
             entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
 
