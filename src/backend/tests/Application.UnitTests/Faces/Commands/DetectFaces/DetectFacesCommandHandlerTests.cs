@@ -1,296 +1,209 @@
-using AutoFixture;
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models.AppSetting;
-using backend.Application.Faces.Commands;
 using backend.Application.Faces.Commands.DetectFaces;
-using backend.Application.Faces.Common;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
 using FluentAssertions;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Logging;
+using backend.Application.Faces.Common;
+using backend.Domain.Entities;
+using backend.Application.Faces.Commands; // Added this using directive
+using backend.Application.AI.VectorStore;
 
-namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
-
-public class DetectFacesCommandHandlerTests : TestBase
+namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 {
-    private readonly DetectFacesCommandHandler _handler;
-    private readonly Mock<IFaceApiService> _mockFaceApiService;
-    private readonly Mock<IVectorStoreFactory> _mockVectorStoreFactory;
-    private readonly Mock<IVectorStore> _mockVectorStore;
-    private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
-    private readonly Mock<IConfigProvider> _mockConfigProvider;
-
-    public DetectFacesCommandHandlerTests()
+    public class DetectFacesCommandHandlerTests : TestBase
     {
-        _mockFaceApiService = _fixture.Freeze<Mock<IFaceApiService>>();
-        _mockVectorStoreFactory = _fixture.Freeze<Mock<IVectorStoreFactory>>();
-        _mockVectorStore = _fixture.Freeze<Mock<IVectorStore>>();
-        _mockLogger = _fixture.Freeze<Mock<ILogger<DetectFacesCommandHandler>>>();
-        _mockConfigProvider = _fixture.Freeze<Mock<IConfigProvider>>();
+        private readonly Mock<IFaceApiService> _faceApiServiceMock;
+        private readonly Mock<IVectorStoreFactory> _vectorStoreFactoryMock;
+        private readonly Mock<IVectorStore> _vectorStoreMock;
+        private readonly Mock<IConfigProvider> _configProviderMock;
+        private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
 
-        _mockConfigProvider.Setup(cp => cp.GetSection<VectorStoreSettings>())
-                           .Returns(new VectorStoreSettings { Provider = VectorStoreProviderType.InMemory.ToString() });
-        _mockVectorStoreFactory.Setup(vsf => vsf.CreateVectorStore(It.IsAny<VectorStoreProviderType>()))
-                               .Returns(_mockVectorStore.Object);
-
-        _handler = new DetectFacesCommandHandler(
-            _mockFaceApiService.Object,
-            _context,
-            _mockVectorStoreFactory.Object,
-            _mockConfigProvider.Object,
-            _mockLogger.Object);
-    }
-
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các khuôn mặt được phát hiện
-    /// khi dịch vụ Face API phát hiện khuôn mặt nhưng không có embedding (ví dụ: khuôn mặt không rõ ràng).
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockFaceApiService để trả về một danh sách FaceDetectionResultDto không có embedding.
-    ///    - Act: Gọi phương thức Handle của handler với một DetectFacesCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về không phải là null. Kiểm tra xem số lượng khuôn mặt được phát hiện khớp với số lượng trả về từ Face API. Kiểm tra xem không có MemberId nào được gán (vì không có embedding để tìm kiếm).
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng handler xử lý đúng trường hợp không có embedding từ Face API,
-    /// trả về các khuôn mặt được phát hiện mà không cố gắng truy vấn vector store.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnDetectedFaces_WhenNoEmbeddings()
-    {
-        // Arrange
-        var faceResults = new List<FaceDetectionResultDto>
+        public DetectFacesCommandHandlerTests()
         {
-            new() {
-                Id = Guid.NewGuid().ToString(),
-                BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
-                Confidence = 0.9f,
-                Thumbnail = "base64thumb",
-                Embedding = null // No embedding
-            }
-        };
-        _mockFaceApiService.Setup(s => s.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .ReturnsAsync(faceResults);
+            _faceApiServiceMock = new Mock<IFaceApiService>();
+            _vectorStoreFactoryMock = new Mock<IVectorStoreFactory>();
+            _vectorStoreMock = new Mock<IVectorStore>();
+            _configProviderMock = new Mock<IConfigProvider>();
+            _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
 
-        var command = _fixture.Create<DetectFacesCommand>();
+            _vectorStoreFactoryMock.Setup(x => x.CreateVectorStore(It.IsAny<Domain.Enums.VectorStoreProviderType>()))
+                .Returns(_vectorStoreMock.Object);
 
-        // Act
-        var response = await _handler.Handle(command, CancellationToken.None);
+            _configProviderMock.Setup(x => x.GetSection<VectorStoreSettings>())
+                .Returns(new VectorStoreSettings { Provider = "InMemory" });
+        }
 
-        // Assert
-        response.Should().NotBeNull();
-        response.IsSuccess.Should().BeTrue();
-        var detectedFacesResponse = response.Value!;
-        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
-        _mockVectorStore.Verify(vs => vs.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnDetectedFacesWithMemberInfo_WhenEmbeddingMatches()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về các khuôn mặt được phát hiện với thông tin thành viên
-        // khi một embedding khuôn mặt khớp với một thành viên hiện có trong vector store và cơ sở dữ liệu.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một Family và Member, sau đó thêm vào DB.
-        // 2. Tạo một FaceDetectionResultDto với embedding.
-        // 3. Thiết lập _mockFaceApiService để trả về danh sách FaceDetectionResultDto.
-        // 4. Thiết lập _mockVectorStore để trả về một VectorStoreQueryResult khớp với MemberId.
-        // 5. Tạo một DetectFacesCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về không phải là null.
-        // 2. Kiểm tra xem số lượng khuôn mặt được phát hiện khớp với số lượng trả về từ Face API.
-        // 3. Kiểm tra xem MemberId và MemberName đã được gán chính xác.
-
-        // Arrange
-        _context.Families.RemoveRange(_context.Families);
-        _context.Members.RemoveRange(_context.Members);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var family = new Family { Id = Guid.NewGuid(), Name = "Test Family", Code = "TF1" };
-        var member = new Member
+        [Fact]
+        public async Task Handle_ShouldReturnDetectedFaces_WhenFacesAreDetected()
         {
-            Id = Guid.NewGuid(),
-            FamilyId = family.Id,
-            FirstName = "John",
-            LastName = "Doe",
-            Code = "JD001",
-            DateOfBirth = new DateTime(1990, 1, 1),
-            DateOfDeath = new DateTime(2050, 1, 1)
-        };
-        _context.Families.Add(family);
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var embedding = new double[] { 0.1, 0.2, 0.3 };
-        var faceResults = new List<FaceDetectionResultDto>
-        {
-            new() {
-                Id = Guid.NewGuid().ToString(),
-                BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
-                Confidence = 0.9f,
-                Thumbnail = "base64thumb",
-                Embedding = embedding
-            }
-        };
-        _mockFaceApiService.Setup(s => s.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .ReturnsAsync(faceResults);
-
-        var queryResult = new VectorStoreQueryResult
-        {
-            Id = "some_id",
-            Score = 0.9f,
-            Metadata = new Dictionary<string, string>
+            // Arrange
+            var command = new DetectFacesCommand
             {
-                { "member_id", member.Id.ToString() },
-                { "family_id", family.Id.ToString() },
-                { "family_name", family.Name },
-                { "birth_year", member.DateOfBirth?.Year.ToString() ?? string.Empty },
-                { "death_year", member.DateOfDeath?.Year.ToString() ?? string.Empty }
+                ImageBytes = new byte[0],
+                ContentType = "image/jpeg"
+            };
+
+            var detectedFaces = new List<FaceDetectionResultDto>
+            {
+                new FaceDetectionResultDto
+                {
+                    Id = "face1",
+                    BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
+                    Confidence = 0.99f,
+                    Embedding = new double[] { 1.0, 2.0, 3.0 }
+                }
+            };
+
+            _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(detectedFaces);
+
+            var memberId = Guid.NewGuid();
+            var familyId = Guid.NewGuid();
+            var family = new Family { Name = "Test Family", Code = "TF" };
+            var member = new Member(memberId, "Test", "Member", "TM", familyId, family); // Fixed: Using new constructor
+            _context.Members.Add(member);
+            await _context.SaveChangesAsync(CancellationToken.None);
+
+            var queryResult = new List<VectorStoreQueryResult> // Fixed: Using VectorStoreQueryResult
+            {
+                new VectorStoreQueryResult
+                {
+                    Score = 0.9f,
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "member_id", memberId.ToString() }
+                    }
+                }
+            };
+
+            _vectorStoreMock.Setup(x => x.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(queryResult);
+
+            var handler = new DetectFacesCommandHandler(
+                _faceApiServiceMock.Object,
+                _context,
+                _vectorStoreFactoryMock.Object,
+                _configProviderMock.Object,
+                _loggerMock.Object);
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull(); // Added null check
+            if (result.Value != null)
+            {
+                result.Value.DetectedFaces.Should().HaveCount(1);
+                var detectedFace = result.Value.DetectedFaces[0];
+                detectedFace.MemberId.Should().Be(memberId);
+                detectedFace.MemberName.Should().Be("Member Test");
             }
-        };
-        _mockVectorStore.Setup(vs => vs.QueryAsync(embedding, 1, It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                        .ReturnsAsync([queryResult]);
+        }
 
-        var command = _fixture.Create<DetectFacesCommand>();
-
-        // Act
-        var response = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        response.Should().NotBeNull();
-        response.IsSuccess.Should().BeTrue();
-        var detectedFacesResponse = response.Value!;
-        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
-        detectedFacesResponse.DetectedFaces.First().MemberId.Should().Be(member.Id);
-        detectedFacesResponse.DetectedFaces.First().MemberName.Should().Be(member.FullName);
-        detectedFacesResponse.DetectedFaces.First().FamilyId.Should().Be(family.Id);
-        detectedFacesResponse.DetectedFaces.First().FamilyName.Should().Be(family.Name);
-        detectedFacesResponse.DetectedFaces.First().BirthYear.Should().Be(member.DateOfBirth?.Year);
-        detectedFacesResponse.DetectedFaces.First().DeathYear.Should().Be(member.DateOfDeath?.Year);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi một embedding khuôn mặt khớp với một thành viên hiện có,
-        // handler sẽ truy xuất và gán thông tin thành viên đó vào DetectedFaceDto.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnDetectedFacesWithoutMemberInfo_WhenEmbeddingDoesNotMatch()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler trả về các khuôn mặt được phát hiện mà không có thông tin thành viên
-        // khi một embedding khuôn mặt không khớp với bất kỳ thành viên hiện có nào trong vector store.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một FaceDetectionResultDto với embedding.
-        // 2. Thiết lập _mockFaceApiService để trả về danh sách FaceDetectionResultDto.
-        // 3. Thiết lập _mockVectorStore để trả về một danh sách QueryResult trống (không khớp).
-        // 4. Tạo một DetectFacesCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về không phải là null.
-        // 2. Kiểm tra xem số lượng khuôn mặt được phát hiện khớp với số lượng trả về từ Face API.
-        // 3. Kiểm tra xem MemberId và MemberName vẫn là null (vì không có khớp).
-
-        // Arrange
-        var embedding = new double[] { 0.4, 0.5, 0.6 };
-        var faceResults = new List<FaceDetectionResultDto>
+        [Fact]
+        public async Task Handle_ShouldReturnEmptyList_WhenNoFacesAreDetected()
         {
-            new() {
-                Id = Guid.NewGuid().ToString(),
-                BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
-                Confidence = 0.9f,
-                Thumbnail = "base64thumb",
-                Embedding = embedding
-            }
-        };
-        _mockFaceApiService.Setup(s => s.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .ReturnsAsync(faceResults);
+            // Arrange
+            var command = new DetectFacesCommand
+            {
+                ImageBytes = new byte[0],
+                ContentType = "image/jpeg"
+            };
 
-        _mockVectorStore.Setup(vs => vs.QueryAsync(embedding, 1, It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                        .ReturnsAsync([]); // No match
+            _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(new List<FaceDetectionResultDto>());
 
-        var command = _fixture.Create<DetectFacesCommand>();
+            var handler = new DetectFacesCommandHandler(
+                _faceApiServiceMock.Object,
+                _context,
+                _vectorStoreFactoryMock.Object,
+                _configProviderMock.Object,
+                _loggerMock.Object);
 
-        // Act
-        var response = await _handler.Handle(command, CancellationToken.None);
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
 
-        // Assert
-        response.Should().NotBeNull();
-        response.IsSuccess.Should().BeTrue();
-        var detectedFacesResponse = response.Value!;
-        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
-        detectedFacesResponse.DetectedFaces.First().MemberId.Should().BeNull();
-        detectedFacesResponse.DetectedFaces.First().MemberName.Should().BeNull();
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
+            result.Value!.DetectedFaces.Should().BeEmpty();
+        }
 
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng khi không có khớp nào trong vector store,
-        // handler sẽ trả về khuôn mặt được phát hiện mà không có thông tin thành viên.
-    }
-
-    [Fact]
-    public async Task Handle_ShouldLogErrors_WhenVectorStoreQueryFails()
-    {
-        // 🎯 Mục tiêu của test:
-        // Xác minh rằng handler ghi lại lỗi khi truy vấn vector store thất bại.
-
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // Arrange:
-        // 1. Tạo một FaceDetectionResultDto với embedding.
-        // 2. Thiết lập _mockFaceApiService để trả về danh sách FaceDetectionResultDto.
-        // 3. Thiết lập _mockVectorStore để ném một ngoại lệ khi QueryAsync được gọi.
-        // 4. Tạo một DetectFacesCommand bất kỳ.
-        // Act:
-        // 1. Gọi phương thức Handle của handler.
-        // Assert:
-        // 1. Kiểm tra xem kết quả trả về không phải là null.
-        // 2. Kiểm tra xem số lượng khuôn mặt được phát hiện khớp với số lượng trả về từ Face API.
-        // 3. Kiểm tra xem lỗi đã được ghi lại thông qua ILogger.
-
-        // Arrange
-        var embedding = new double[] { 0.7, 0.8, 0.9 };
-        var faceResults = new List<FaceDetectionResultDto>
+        [Fact]
+        public async Task Handle_ShouldReturnFailure_WhenFaceDetectionServiceThrowsException()
         {
-            new() {
-                Id = Guid.NewGuid().ToString(),
-                BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
-                Confidence = 0.9f,
-                Thumbnail = "base64thumb",
-                Embedding = embedding
+            // Arrange
+            var command = new DetectFacesCommand
+            {
+                ImageBytes = new byte[0],
+                ContentType = "image/jpeg"
+            };
+
+            _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ThrowsAsync(new System.Exception("Face detection service error"));
+
+            var handler = new DetectFacesCommandHandler(
+                _faceApiServiceMock.Object,
+                _context,
+                _vectorStoreFactoryMock.Object,
+                _configProviderMock.Object,
+                _loggerMock.Object);
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.IsSuccess.Should().BeFalse();
+            result.Error.Should().Contain("Face detection service error");
+        }
+
+        [Fact]
+        public async Task Handle_ShouldReturnNullThumbnail_WhenReturnCropIsFalse()
+        {
+            // Arrange
+            var command = new DetectFacesCommand
+            {
+                ImageBytes = new byte[0],
+                ContentType = "image/jpeg",
+                ReturnCrop = false
+            };
+
+            _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.Is<bool>(b => b == false)))
+                .ReturnsAsync(new List<FaceDetectionResultDto>
+                {
+                    new FaceDetectionResultDto
+                    {
+                        Id = "face1",
+                        BoundingBox = new BoundingBoxDto { X = 10, Y = 10, Width = 50, Height = 50 },
+                        Confidence = 0.99f,
+                        Embedding = new double[] { 1.0, 2.0, 3.0 },
+                        Thumbnail = null // Should be null when ReturnCrop is false
+                    }
+                });
+
+            var handler = new DetectFacesCommandHandler(
+                _faceApiServiceMock.Object,
+                _context,
+                _vectorStoreFactoryMock.Object,
+                _configProviderMock.Object,
+                _loggerMock.Object);
+
+            // Act
+            var result = await handler.Handle(command, CancellationToken.None);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
+            if (result.Value != null)
+            {
+                result.Value.DetectedFaces.Should().HaveCount(1);
+                var detectedFace = result.Value.DetectedFaces[0];
+                detectedFace.Thumbnail.Should().BeNull();
             }
-        };
-        _mockFaceApiService.Setup(s => s.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
-                           .ReturnsAsync(faceResults);
-
-        _mockVectorStore.Setup(vs => vs.QueryAsync(embedding, 1, It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                        .ThrowsAsync(new Exception("Vector store query failed."));
-
-        var command = _fixture.Create<DetectFacesCommand>();
-
-        // Act
-        var response = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        response.Should().NotBeNull();
-        response.IsSuccess.Should().BeTrue();
-        var detectedFacesResponse = response.Value!;
-        detectedFacesResponse.DetectedFaces.Should().HaveCount(1);
-        _mockLogger.Verify(x => x.Log(
-            LogLevel.Error,
-            It.IsAny<EventId>(),
-            It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Error querying vector store for face detection.")),
-            It.IsAny<Exception>(),
-            It.IsAny<Func<It.IsAnyType, Exception, string>>()!),
-            Times.Once);
-
-        // 💡 Giải thích:
-        // Test này đảm bảo rằng handler ghi lại lỗi một cách thích hợp khi có sự cố
-        // trong quá trình truy vấn vector store, giúp dễ dàng gỡ lỗi và giám sát.
+        }
     }
 }

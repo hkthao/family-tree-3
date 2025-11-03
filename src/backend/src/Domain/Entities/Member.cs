@@ -33,6 +33,13 @@ public class Member : BaseAuditableEntity
         FamilyId = familyId;
     }
 
+    public Member(Guid id, string lastName, string firstName, string code, Guid familyId, Family family)
+        : this(lastName, firstName, code, familyId)
+    {
+        Id = id;
+        Family = family;
+    }
+
     public Member(Guid familyId)
     {
         FamilyId = familyId;

@@ -1,14 +1,8 @@
-using AutoMapper;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.Events.Queries.GetEvents
