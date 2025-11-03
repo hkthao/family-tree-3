@@ -7,7 +7,7 @@ import type { ApiError } from '@/plugins/axios';
 import { Theme, Language } from '@/types';
 import { createServices } from '@/services/service.factory';
 
-// Mock the IUserPreferenceService
+// Mock the ICurrentUserPreferenceService
 const mockGetUserPreferences = vi.fn();
 const mockSaveUserPreferences = vi.fn();
 

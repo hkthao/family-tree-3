@@ -6,13 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser _user) : INotificationHandler<RelationshipUpdatedEvent>
+public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser  _user) : INotificationHandler<RelationshipUpdatedEvent>
 {
     private readonly ILogger<RelationshipUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = _user;
+    private readonly ICurrentUser  _user = _user;
 
     public async Task Handle(RelationshipUpdatedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
         // Record activity for relationship update
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id!.Value,
+            UserId = _user.UserId,
             ActionType = UserActionType.UpdateRelationship,
             TargetType = TargetType.Relationship,
             TargetId = notification.Relationship.Id.ToString(),

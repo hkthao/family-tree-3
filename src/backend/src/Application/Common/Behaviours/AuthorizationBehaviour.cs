@@ -11,13 +11,13 @@ namespace backend.Application.Common.Behaviours;
 /// <typeparam name="TRequest">Kiểu của yêu cầu.</typeparam>
 /// <typeparam name="TResponse">Kiểu của phản hồi.</typeparam>
 public class AuthorizationBehaviour<TRequest, TResponse>(
-    IUser user) : IPipelineBehavior<TRequest, TResponse>
+    ICurrentUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     /// <summary>
     /// Thông tin người dùng hiện tại.
     /// </summary>
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     /// <summary>
     /// Xử lý ủy quyền cho yêu cầu.
@@ -35,7 +35,7 @@ public class AuthorizationBehaviour<TRequest, TResponse>(
         if (authorizeAttributes.Any())
         {
             // Must be authenticated user
-            if (!_user.Id.HasValue)
+            if (_user.UserId == Guid.Empty)
             {
                 throw new UnauthorizedAccessException();
             }

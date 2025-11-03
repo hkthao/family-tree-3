@@ -58,7 +58,6 @@ public class GenerateMemberDataCommandHandler(IChatProviderFactory chatProviderF
                 if (!string.IsNullOrWhiteSpace(memberDto.FamilyName))
                 {
                     var families = await _context.Families
-                        .Include(x => x.FamilyUsers)
                         .Where(f => f.Name == memberDto.FamilyName)
                         .ToListAsync(cancellationToken);
 

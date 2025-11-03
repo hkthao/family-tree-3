@@ -1,24 +1,20 @@
-
-using Microsoft.EntityFrameworkCore;
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Enums;
 
 namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
 
-public class GetUserPreferencesQueryHandler(IApplicationDbContext context, IUser user, IMapper mapper) : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
+public class GetUserPreferencesQueryHandler(IApplicationDbContext context, ICurrentUser user, IMapper mapper) : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser  _user = user;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
     {
         var userProfile = await _context.UserProfiles
-            .Where(up => up.Id == _user.Id!.Value)
+            .Where(up => up.Id == _user.ProfileId!.Value)
             .Include(up => up.UserPreference)
             .FirstOrDefaultAsync(cancellationToken);
 

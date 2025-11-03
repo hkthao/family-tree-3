@@ -1,8 +1,7 @@
 ﻿
 using backend.Application.Common.Interfaces;
-using backend.Application.Services;
 using backend.Infrastructure.Auth;
-using backend.Web.Services;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
@@ -14,13 +13,6 @@ public static class DependencyInjection
 {
     public static void AddWebServices(this IServiceCollection services)
     {
-        services.AddScoped<IUser, CurrentUser>(provider =>
-        {
-            var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
-            var context = provider.GetRequiredService<IApplicationDbContext>();
-            return new CurrentUser(httpContextAccessor, context);
-        });
-        services.AddHttpContextAccessor();
         services.AddHealthChecks();
         services.AddExceptionHandler<CustomExceptionHandler>();
         // Customise default API behaviour

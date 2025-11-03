@@ -6,16 +6,16 @@ import type { IEventService } from './event/event.service.interface';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
-import type { IUserProfileService } from './user-profile/user-profile.service.interface';
+import type { ICurrentUserProfileService } from './user-profile/user-profile.service.interface';
 import { UserProfileApiService } from './user-profile/api.user-profile.service';
-import type { IUserActivityService } from './user-activity/user-activity.service.interface';
-import { ApiUserActivityService } from './user-activity/api.user-activity.service';
+import type { ICurrentUserActivityService } from './user-activity/user-activity.service.interface';
+import { ApICurrentUserActivityService } from './user-activity/api.user-activity.service';
 import type { IDashboardService } from './dashboard/dashboard.service.interface';
 import { ApiDashboardService } from './dashboard/api.dashboard.service';
 import type { IAIBiographyService } from './ai-biography/ai-biography.service.interface';
 import { ApiAIBiographyService } from './ai-biography/api.ai-biography.service';
-import type { IUserPreferenceService } from './user-preference/user-preference.service.interface';
-import { ApiUserPreferenceService } from './user-preference/api.user-preference.service';
+import type { ICurrentUserPreferenceService } from './user-preference/user-preference.service.interface';
+import { ApICurrentUserPreferenceService } from './user-preference/api.user-preference.service';
 import type { IFileUploadService } from './file-upload/file-upload.service.interface';
 import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
@@ -35,11 +35,11 @@ export interface AppServices {
   member: IMemberService; 
   event: IEventService;
   relationship: IRelationshipService;
-  userProfile: IUserProfileService;
-  userActivity: IUserActivityService;
+  userProfile: ICurrentUserProfileService;
+  userActivity: ICurrentUserActivityService;
   dashboard: IDashboardService;
   aiBiography: IAIBiographyService;
-  userPreference: IUserPreferenceService;
+  userPreference: ICurrentUserPreferenceService;
   fileUpload: IFileUploadService;
   chat: IChatService;
   naturalLanguageInput: INaturalLanguageInputService;
@@ -75,8 +75,8 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : testServices?.userProfile || new UserProfileApiService(apiClient),
     userActivity:
       mode === 'real'
-        ? new ApiUserActivityService(apiClient)
-        : testServices?.userActivity || new ApiUserActivityService(apiClient),
+        ? new ApICurrentUserActivityService(apiClient)
+        : testServices?.userActivity || new ApICurrentUserActivityService(apiClient),
     dashboard:
       mode === 'real'
         ? new ApiDashboardService(apiClient)
@@ -87,8 +87,8 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
         : testServices?.aiBiography || new ApiAIBiographyService(apiClient),
     userPreference:
       mode === 'real'
-        ? new ApiUserPreferenceService(apiClient)
-        : testServices?.userPreference || new ApiUserPreferenceService(apiClient),
+        ? new ApICurrentUserPreferenceService(apiClient)
+        : testServices?.userPreference || new ApICurrentUserPreferenceService(apiClient),
     fileUpload:
       mode === 'real'
         ? new FileUploadApiService(apiClient)

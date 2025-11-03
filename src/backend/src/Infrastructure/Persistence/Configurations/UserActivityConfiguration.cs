@@ -8,35 +8,32 @@ public class UserActivityConfiguration : IEntityTypeConfiguration<UserActivity>
 {
     public void Configure(EntityTypeBuilder<UserActivity> builder)
     {
-        builder.ToTable("user_activity");
 
-        builder.Property(t => t.UserProfileId)
-            .HasColumnName("user_profile_id")
+        builder.Property(t => t.UserId)
             .IsRequired();
 
+        builder.HasOne(ua => ua.User)
+            .WithMany(u => u.UserActivities) // Specify the navigation property in User
+            .HasForeignKey(ua => ua.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // If a User is deleted, their activities are also deleted
+
         builder.Property(t => t.ActionType)
-            .HasColumnName("action_type")
             .IsRequired();
 
         builder.Property(t => t.ActivitySummary)
-            .HasColumnName("activity_summary")
             .HasMaxLength(500)
             .IsRequired();
 
         builder.Property(t => t.TargetId)
-            .HasColumnName("target_id")
             .HasMaxLength(36);
 
         builder.Property(t => t.TargetType)
-            .HasColumnName("target_type")
             .HasMaxLength(100);
 
         builder.Property(t => t.GroupId)
-            .HasColumnName("group_id")
             .HasMaxLength(36);
 
         builder.Property(t => t.Metadata)
-            .HasColumnName("metadata")
             .HasColumnType("json")
             .HasConversion(
                 v => v == null ? null : System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),

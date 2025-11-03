@@ -9,7 +9,7 @@ namespace backend.Application.Common.Behaviours;
 /// </summary>
 /// <typeparam name="TRequest">Kiểu của yêu cầu.</typeparam>
 /// <typeparam name="TResponse">Kiểu của phản hồi.</typeparam>
-public class PerformanceBehaviour<TRequest, TResponse>(ILogger<TRequest> logger, IUser user) : IPipelineBehavior<TRequest, TResponse>
+public class PerformanceBehaviour<TRequest, TResponse>(ILogger<TRequest> logger, ICurrentUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
     /// <summary>
@@ -19,7 +19,7 @@ public class PerformanceBehaviour<TRequest, TResponse>(ILogger<TRequest> logger,
     /// <summary>
     /// Thông tin người dùng hiện tại.
     /// </summary>
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     /// <summary>
     /// Xử lý yêu cầu và ghi log nếu thời gian xử lý vượt quá ngưỡng.
@@ -41,10 +41,10 @@ public class PerformanceBehaviour<TRequest, TResponse>(ILogger<TRequest> logger,
         if (elapsedMilliseconds > 500)
         {
             var requestName = typeof(TRequest).Name;
-            var userId = _user.Id;
+            var userId = _user.UserId;
 
             _logger.LogWarning("backend Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@Request}",
-                requestName, elapsedMilliseconds, userId?.ToString(), request);
+                requestName, elapsedMilliseconds, userId.ToString(), request);
         }
 
         return response;

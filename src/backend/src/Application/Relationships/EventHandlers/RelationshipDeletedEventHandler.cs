@@ -6,13 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser _user) : INotificationHandler<RelationshipDeletedEvent>
+public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser  _user) : INotificationHandler<RelationshipDeletedEvent>
 {
     private readonly ILogger<RelationshipDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = _user;
+    private readonly ICurrentUser  _user = _user;
 
     public async Task Handle(RelationshipDeletedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHan
         // Record activity for relationship deletion
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id!.Value,
+            UserId = _user.UserId,
             ActionType = UserActionType.DeleteRelationship,
             TargetType = TargetType.Relationship,
             TargetId = notification.Relationship.Id.ToString(),

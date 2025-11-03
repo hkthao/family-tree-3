@@ -8,7 +8,7 @@ namespace backend.Application.Common.Behaviours;
 /// Hành vi pipeline để ghi log thông tin yêu cầu trước khi xử lý.
 /// </summary>
 /// <typeparam name="TRequest">Kiểu của yêu cầu.</typeparam>
-public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user) : IRequestPreProcessor<TRequest>
+public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, ICurrentUser user) : IRequestPreProcessor<TRequest>
     where TRequest : notnull
 {
     /// <summary>
@@ -18,7 +18,7 @@ public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user) : 
     /// <summary>
     /// Thông tin người dùng hiện tại.
     /// </summary>
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     /// <summary>
     /// Xử lý yêu cầu trước khi nó được gửi đến handler.
@@ -29,10 +29,10 @@ public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, IUser user) : 
     public Task Process(TRequest request, CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        var userId = _user.Id;
+        var userId = _user.UserId;
 
         _logger.LogInformation("backend Request: {Name} {@UserId} {@Request}",
-            requestName, userId?.ToString(), request);
+            requestName, userId.ToString(), request);
 
         return Task.CompletedTask;
     }

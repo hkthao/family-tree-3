@@ -6,7 +6,7 @@ namespace backend.Application.UserActivities.Queries;
 public class UserActivityDto
 {
     public Guid Id { get; set; }
-    public Guid UserProfileId { get; set; }
+    public Guid UserId { get; set; }
     public UserActionType ActionType { get; set; }
     public TargetType TargetType { get; set; }
     public string TargetId { get; set; } = null!;

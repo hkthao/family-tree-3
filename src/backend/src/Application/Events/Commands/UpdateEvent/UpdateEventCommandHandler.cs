@@ -30,20 +30,34 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             .Where(m => request.RelatedMembers.Contains(m.Id))
             .ToListAsync(cancellationToken);
 
-        entity.Name = request.Name;
-        entity.Description = request.Description;
-        entity.StartDate = request.StartDate;
-        entity.EndDate = request.EndDate;
-        entity.Location = request.Location;
-        entity.FamilyId = request.FamilyId;
-        entity.Type = request.Type;
-        entity.Color = request.Color;
+        entity.UpdateEvent(
+            request.Name,
+            entity.Code, // Code is not updated via this command
+            request.Description,
+            request.StartDate,
+            request.EndDate,
+            request.Location,
+            request.Type,
+            request.Color
+        );
 
         // Update related members
-        entity.EventMembers.Clear();
-        foreach (var member in relatedMembers)
+        // Remove members not in the new list
+        foreach (var existingMember in entity.EventMembers.ToList())
         {
-            entity.EventMembers.Add(new EventMember { EventId = entity.Id, MemberId = member.Id });
+            if (!request.RelatedMembers.Contains(existingMember.MemberId))
+            {
+                entity.RemoveEventMember(existingMember.MemberId);
+            }
+        }
+
+        // Add new members
+        foreach (var memberId in request.RelatedMembers)
+        {
+            if (!entity.EventMembers.Any(em => em.MemberId == memberId))
+            {
+                entity.AddEventMember(memberId);
+            }
         }
 
         entity.AddDomainEvent(new Domain.Events.Events.EventUpdatedEvent(entity));

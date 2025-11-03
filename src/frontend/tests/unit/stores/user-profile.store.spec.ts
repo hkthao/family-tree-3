@@ -6,7 +6,7 @@ import type { UserProfile } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
-// Mock the IUserProfileService
+// Mock the ICurrentUserProfileService
 const mockGetCurrentUserProfile = vi.fn();
 const mockGetUserProfile = vi.fn();
 const mockGetUserProfileByExternalId = vi.fn();

@@ -8,11 +8,21 @@ namespace backend.Domain.Entities;
 /// </summary>
 public class FamilyUser : BaseEntity
 {
-    public Guid FamilyId { get; set; } // Changed from string to Guid
-    public Family Family { get; set; } = null!;
+    public Guid FamilyId { get; private set; }
+    public Family Family { get; private set; } = null!;
 
-    public Guid UserProfileId { get; set; } // Changed from string to Guid
-    public UserProfile UserProfile { get; set; } = null!;
+    public Guid UserId { get; private set; }
+    public User User { get; private set; } = null!;
 
     public FamilyRole Role { get; set; }
+
+    // Private constructor for EF Core
+    private FamilyUser() { }
+
+    public FamilyUser(Guid familyId, Guid userId, FamilyRole role)
+    {
+        FamilyId = familyId;
+        UserId = userId;
+        Role = role;
+    }
 }

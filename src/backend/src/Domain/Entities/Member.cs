@@ -15,8 +15,8 @@ public class Member : BaseAuditableEntity
     public string? Occupation { get; set; } // New
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; } // New
-    public Guid FamilyId { get; set; }
-    public Family Family { get; set; } = null!;
+    public Guid FamilyId { get; private set; }
+    public Family Family { get; private set; } = null!;
     public bool IsRoot { get; set; } = false;
 
     // Relationships
@@ -30,6 +30,11 @@ public class Member : BaseAuditableEntity
         LastName = lastName;
         FirstName = firstName;
         Code = code;
+        FamilyId = familyId;
+    }
+
+    public Member(Guid familyId)
+    {
         FamilyId = familyId;
     }
 }

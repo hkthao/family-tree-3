@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using AutoFixture;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;

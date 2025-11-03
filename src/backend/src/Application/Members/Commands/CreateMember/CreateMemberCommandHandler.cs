@@ -18,42 +18,39 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        var entity = new Member
+        var family = await _context.Families.FindAsync(request.FamilyId);
+        if (family == null)
         {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Code = request.Code ?? GenerateUniqueCode("MEM"),
-            Nickname = request.Nickname,
-            DateOfBirth = request.DateOfBirth,
-            DateOfDeath = request.DateOfDeath,
-            PlaceOfBirth = request.PlaceOfBirth,
-            PlaceOfDeath = request.PlaceOfDeath,
-            Gender = request.Gender,
-            AvatarUrl = request.AvatarUrl,
-            Occupation = request.Occupation,
-            Biography = request.Biography,
-            FamilyId = request.FamilyId,
-            IsRoot = request.IsRoot
-        };
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
+        }
+
+        var member = family.AddMember(request.LastName, request.FirstName, request.Code ?? GenerateUniqueCode("MEM"));
+        member.Nickname = request.Nickname;
+        member.DateOfBirth = request.DateOfBirth;
+        member.DateOfDeath = request.DateOfDeath;
+        member.PlaceOfBirth = request.PlaceOfBirth;
+        member.PlaceOfDeath = request.PlaceOfDeath;
+        member.Gender = request.Gender;
+        member.AvatarUrl = request.AvatarUrl;
+        member.Occupation = request.Occupation;
+        member.Biography = request.Biography;
+        member.IsRoot = request.IsRoot;
 
         if (request.IsRoot)
         {
-            var currentRoot = await _context.Members
-                .Where(m => m.FamilyId == request.FamilyId && m.IsRoot)
-                .FirstOrDefaultAsync(cancellationToken);
+            var currentRoot = family.Members.FirstOrDefault(m => m.IsRoot);
             if (currentRoot != null)
             {
                 currentRoot.IsRoot = false;
             }
         }
 
-        _context.Members.Add(entity);
-        entity.AddDomainEvent(new MemberCreatedEvent(entity));
-        entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.FamilyId));
+        member.AddDomainEvent(new MemberCreatedEvent(member));
+        family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(entity.Id);
+        return Result<Guid>.Success(member.Id);
     }
 
     private string GenerateUniqueCode(string prefix)

@@ -1,7 +1,6 @@
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Commands.SaveFaceLabels;
-using backend.Application.Faces.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;

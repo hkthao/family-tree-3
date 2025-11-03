@@ -7,7 +7,7 @@ import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock the IUserActivityService
+// Mock the ICurrentUserActivityService
 const mockGetRecentActivities = vi.fn();
 
 // Mock the entire service factory to control service injection

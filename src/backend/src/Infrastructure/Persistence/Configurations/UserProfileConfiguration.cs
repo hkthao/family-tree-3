@@ -8,16 +8,8 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 {
     public void Configure(EntityTypeBuilder<UserProfile> builder)
     {
-        builder.ToTable("user_profile");
-
-        builder.Property(up => up.Id).HasColumnName("id");
-        builder.Property(up => up.Created).HasColumnName("created");
-        builder.Property(up => up.CreatedBy).HasColumnName("created_by");
-        builder.Property(up => up.LastModified).HasColumnName("last_modified");
-        builder.Property(up => up.LastModifiedBy).HasColumnName("last_modified_by");
 
         builder.Property(up => up.ExternalId)
-            .HasColumnName("external_id")
             .HasMaxLength(256)
             .IsRequired();
 
@@ -25,36 +17,32 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
             .IsUnique();
 
         builder.Property(up => up.Email)
-            .HasColumnName("email")
             .HasMaxLength(256)
             .IsRequired();
 
         builder.Property(up => up.Name)
-            .HasColumnName("name")
             .HasMaxLength(256)
             .IsRequired();
 
         builder.Property(up => up.FirstName)
-            .HasColumnName("first_name")
             .HasMaxLength(256);
 
         builder.Property(up => up.LastName)
-            .HasColumnName("last_name")
             .HasMaxLength(256);
 
         builder.Property(up => up.Phone)
-            .HasColumnName("phone")
-            .HasMaxLength(256)
-            .IsRequired();
+            .HasMaxLength(256);
 
         builder.Property(up => up.Avatar)
-            .HasColumnName("avatar")
             .HasMaxLength(500);
 
-        // Configure the one-to-many relationship with FamilyUser
-        builder.HasMany(up => up.FamilyUsers)
-            .WithOne(fu => fu.UserProfile)
-            .HasForeignKey(fu => fu.UserProfileId)
-            .OnDelete(DeleteBehavior.Cascade); // If a user profile is deleted, their family associations are also deleted
+        builder.Property(up => up.UserId)
+            .IsRequired();
+
+        builder.HasOne(up => up.User)
+            .WithOne(u => u.Profile) // Specify the navigation property in User
+            .HasForeignKey<UserProfile>(up => up.UserId)
+            .OnDelete(DeleteBehavior.Cascade); // If User is deleted, delete UserProfile
+
     }
 }

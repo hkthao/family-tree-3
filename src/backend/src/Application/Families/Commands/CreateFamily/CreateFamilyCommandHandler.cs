@@ -7,10 +7,10 @@ using backend.Domain.Events.Families;
 
 namespace backend.Application.Families.Commands.CreateFamily;
 
-public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<CreateFamilyCommand, Result<Guid>>
+public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentUser user) : IRequestHandler<CreateFamilyCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     public async Task<Result<Guid>> Handle(CreateFamilyCommand request, CancellationToken cancellationToken)
     {
@@ -29,17 +29,8 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, IUser use
             _context.Families.Add(entity);
             entity.AddDomainEvent(new FamilyCreatedEvent(entity));
 
-            await _context.SaveChangesAsync(cancellationToken);
+            entity.AddFamilyUser(_user.UserId, FamilyRole.Manager); // Use the aggregate method
 
-            // Assign the creating user as a Manager of the new family
-            var familyUser = new FamilyUser
-            {
-                FamilyId = entity.Id,
-                UserProfileId = _user.Id!.Value,
-                Role = FamilyRole.Manager
-            };
-
-            _context.FamilyUsers.Add(familyUser);
             await _context.SaveChangesAsync(cancellationToken);
 
             // Update family stats

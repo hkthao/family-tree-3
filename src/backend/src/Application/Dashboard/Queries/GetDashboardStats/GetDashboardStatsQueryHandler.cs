@@ -3,11 +3,11 @@ using backend.Application.Common.Models;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
-public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser user) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
+public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser user) : IRequestHandler<GetDashboardStatsQuery, Result<DashboardStatsDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
@@ -17,7 +17,7 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
         {
             // Filter families by user access if not admin
             var accessibleFamilyIds = await _context.FamilyUsers
-                .Where(fu => fu.UserProfileId == _user.Id)
+                .Where(fu => fu.UserId == _user.UserId)
                 .Select(fu => fu.FamilyId)
                 .ToListAsync(cancellationToken);
 

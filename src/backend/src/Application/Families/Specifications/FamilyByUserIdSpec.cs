@@ -8,9 +8,9 @@ namespace backend.Application.Families.Specifications;
 /// </summary>
 public class FamilyByUserIdSpec : Specification<Family>
 {
-    public FamilyByUserIdSpec(Guid userProfileId)
+    public FamilyByUserIdSpec(Guid userId)
     {
         Query
-            .Where(f => f.FamilyUsers.Any(fu => fu.UserProfileId == userProfileId));
+            .Where(f => f.FamilyUsers.Any(fu => fu.UserId == userId));
     }
 }

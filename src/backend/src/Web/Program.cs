@@ -1,4 +1,3 @@
-
 using backend.CompositionRoot;
 using Microsoft.Extensions.FileProviders;
 
@@ -91,13 +90,13 @@ public class Startup
         if (env.IsDevelopment())
         {
             // Initialise and seed database
-            Task.Run(async () =>
-            {
-                using var scope = app.ApplicationServices.CreateScope();
-                var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
-                await initialiser.InitialiseAsync();
-                await initialiser.SeedAsync();
-            });
+            // Task.Run(async () =>
+            // {
+            //     using var scope = app.ApplicationServices.CreateScope();
+            //     var initialiser = scope.ServiceProvider.GetRequiredService<backend.Infrastructure.Data.ApplicationDbContextInitialiser>();
+            //     await initialiser.InitialiseAsync();
+            //     await initialiser.SeedAsync();
+            // });
         }
         else
         {
@@ -124,6 +123,7 @@ public class Startup
         app.UseRouting();
 
         app.UseAuthentication();
+        app.UseMiddleware<EnsureUserExistsMiddleware>();
         app.UseAuthorization();
         app.UseExceptionHandler(options => { });
 

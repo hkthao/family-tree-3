@@ -12,23 +12,30 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
 
     public async Task<Result<bool>> Handle(UpdateRelationshipCommand request, CancellationToken cancellationToken)
     {
-        var entity = await _context.Relationships.FindAsync(request.Id);
-        if (entity == null)
-            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound);
-
-        var sourceMember = await _context.Members.FindAsync(request.SourceMemberId);
-        if (sourceMember == null)
-            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Source member for relationship {request.Id}"), ErrorSources.NotFound);
-
         if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        entity.SourceMemberId = request.SourceMemberId;
-        entity.TargetMemberId = request.TargetMemberId;
-        entity.Type = request.Type;
-        entity.Order = request.Order;
+        var family = await _context.Families
+            .Include(f => f.Relationships)
+            .FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
 
-        entity.AddDomainEvent(new RelationshipUpdatedEvent(entity));
+        if (family == null)
+        {
+            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
+        }
+
+        var relationship = family.Relationships.FirstOrDefault(r => r.Id == request.Id);
+        if (relationship == null)
+        {
+            return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound);
+        }
+
+        relationship.SourceMemberId = request.SourceMemberId;
+        relationship.TargetMemberId = request.TargetMemberId;
+        relationship.Type = request.Type;
+        relationship.Order = request.Order;
+
+        relationship.AddDomainEvent(new RelationshipUpdatedEvent(relationship));
 
         await _context.SaveChangesAsync(cancellationToken);
 

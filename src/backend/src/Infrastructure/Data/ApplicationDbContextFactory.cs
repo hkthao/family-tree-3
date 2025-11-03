@@ -1,8 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using System;
-using System.IO;
-using System.Reflection;
 using backend.Application.Common.Interfaces;
 
 namespace backend.Infrastructure.Data
@@ -27,20 +24,20 @@ namespace backend.Infrastructure.Data
             builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
 
-            // Provide mock implementations for IUser and IDateTime for design-time
+            // Provide mock implementations for ICurrentUser and IDateTime for design-time
             var mockUser = new DesignTimeUserService();
             var mockDateTime = new DesignTimeDateTimeService();
 
-            return new ApplicationDbContext(builder.Options, mockUser, mockDateTime);
+            return new ApplicationDbContext(builder.Options);
         }
 
-        // Simple mock implementation of IUser for design-time
-        private class DesignTimeUserService : IUser
+        // Simple mock implementation of ICurrentUser for design-time
+        private class DesignTimeUserService : ICurrentUser
         {
-            public Guid? Id => Guid.Empty;
-            public string? ExternalId => "design-time-user";
+            public Guid UserId => Guid.Empty;
+            public Guid? ProfileId => Guid.Empty;
             public string? Email => "design@time.com";
-            public string? DisplayName => "Design Time User";
+            public string? Name => "Design Time User";
             public bool IsAuthenticated => true;
             public List<string>? Roles => new List<string> { "Administrator" };
         }

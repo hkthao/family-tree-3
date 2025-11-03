@@ -1,10 +1,10 @@
-import type { IUserPreferenceService } from './user-preference.service.interface';
+import type { ICurrentUserPreferenceService } from './user-preference.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { Result, UserPreference } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-export class ApiUserPreferenceService implements IUserPreferenceService {
+export class ApICurrentUserPreferenceService implements ICurrentUserPreferenceService {
   private apiUrl = `${API_BASE_URL}/user-preference`;
 
   constructor(private http: ApiClientMethods) {}

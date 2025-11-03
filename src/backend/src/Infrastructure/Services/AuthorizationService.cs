@@ -3,9 +3,9 @@ using backend.Domain.Enums;
 
 namespace backend.Infrastructure.Services;
 
-public class AuthorizationService(IUser user, IApplicationDbContext context) : IAuthorizationService
+public class AuthorizationService(ICurrentUser user, IApplicationDbContext context) : IAuthorizationService
 {
-    private readonly IUser _user = user;
+    private readonly ICurrentUser  _user = user;
     private readonly IApplicationDbContext _context = context;
 
     public bool IsAdmin()

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using backend.Domain.Common;
 
 namespace backend.Domain.Events;
 

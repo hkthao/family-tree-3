@@ -1,52 +1,27 @@
-using Microsoft.EntityFrameworkCore;
-using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Identity.UserProfiles.Specifications;
 using backend.Domain.Entities;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 
-public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<SaveUserPreferencesCommand, Result>
+public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, ICurrentUser user) : IRequestHandler<SaveUserPreferencesCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser  _user = user;
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {
-        var userProfile = await _context.UserProfiles
-            .Include(up => up.UserPreference)
-            .FirstOrDefaultAsync(up => up.Id == _user.Id!.Value, cancellationToken);
+        var user = await _context.Users
+            .Include(u => u.Preference)
+            .FirstOrDefaultAsync(u => u.Id == _user.UserId, cancellationToken);
 
-        if (userProfile == null)
+        if (user == null)
         {
-            return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
+            return Result.Failure($"User with ID {_user.UserId} not found.");
         }
 
-        if (userProfile.UserPreference == null)
-        {
-            // Check if a UserPreference already exists for this UserProfileId (in case Include failed or was not sufficient)
-            var existingUserPreference = await _context.UserPreferences
-                .FirstOrDefaultAsync(up => up.UserProfileId == userProfile.Id, cancellationToken);
-
-            if (existingUserPreference == null)
-            {
-                userProfile.UserPreference = new UserPreference
-                {
-                    UserProfileId = userProfile.Id,
-                };
-                _context.UserPreferences.Add(userProfile.UserPreference);
-            }
-            else
-            {
-                // If an existing preference is found, use it instead of creating a new one
-                userProfile.UserPreference = existingUserPreference;
-            }
-        }
-
-        userProfile.UserPreference.Theme = request.Theme;
-        userProfile.UserPreference.Language = request.Language;
+        user.UpdatePreference(request.Theme.ToString(), request.Language.ToString());
 
         await _context.SaveChangesAsync(cancellationToken);
 

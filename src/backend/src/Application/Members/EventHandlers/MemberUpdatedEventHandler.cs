@@ -6,13 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,IUser _user) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = _user;
+    private readonly ICurrentUser _user = _user;
 
     public async Task Handle(MemberUpdatedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
         // Record activity for member update
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id!.Value,
+            UserId = _user.ProfileId!.Value,
             ActionType = UserActionType.UpdateMember,
             TargetType = TargetType.Member,
             TargetId = notification.Member.Id.ToString(),

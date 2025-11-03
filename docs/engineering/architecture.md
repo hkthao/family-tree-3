@@ -85,7 +85,7 @@ graph TD
         C -->|Tương tác| D(IApplicationDbContext)
         C -->|Sử dụng| E(IFileTextExtractorFactory)
         C -->|Sử dụng| F(ChunkingPolicy)
-        C -->|Sử dụng| UP(IUserPreferenceService)
+        C -->|Sử dụng| UP(ICurrentUserPreferenceService)
         C -->|Sử dụng| AI(AI Service)
     end
 
@@ -119,7 +119,7 @@ graph TD
 -   **IFileTextExtractorFactory**: Interface trong Application Layer để lấy đúng trình trích xuất văn bản.
 -   **PdfTextExtractor/TxtTextExtractor**: Triển khai cụ thể của `IFileTextExtractor` trong Infrastructure Layer để trích xuất văn bản từ PDF/TXT.
 -   **ChunkingPolicy**: Domain Service chứa logic làm sạch và chia nhỏ văn bản thành các chunk.
--   **IUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
+-   **ICurrentUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
 
 ## 4.1. Kiến trúc AI (AI Architecture)
 
@@ -220,7 +220,7 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 
 #### Khả năng thay thế
 
-Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài. Thông tin người dùng hiện tại được truy cập thông qua interface `IUser`.
+Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài. Thông tin người dùng hiện tại được truy cập thông qua interface `ICurrentUser`.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 

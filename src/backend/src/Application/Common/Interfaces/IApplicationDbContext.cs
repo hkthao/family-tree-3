@@ -8,6 +8,10 @@ namespace backend.Application.Common.Interfaces;
 public interface IApplicationDbContext
 {
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể User.
+    /// </summary>
+    DbSet<User> Users { get; }
+    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
     DbSet<Family> Families { get; }
@@ -39,10 +43,6 @@ public interface IApplicationDbContext
     /// Lấy hoặc thiết lập DbSet cho các thực thể UserPreference.
     /// </summary>
     DbSet<UserPreference> UserPreferences { get; }
-    /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationPreference.
-    /// </summary>
-    DbSet<NotificationPreference> NotificationPreferences { get; }
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>

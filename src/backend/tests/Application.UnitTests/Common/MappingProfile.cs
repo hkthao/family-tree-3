@@ -22,7 +22,6 @@ public class MappingProfile : Profile
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>();
         CreateMap<Member, RelationshipMemberDto>();
-        CreateMap<UserActivity, UserActivityDto>()
-            .ForMember(dest => dest.UserProfileId, opt => opt.MapFrom(src => src.UserProfileId));
+        CreateMap<UserActivity, UserActivityDto>();
     }
 }

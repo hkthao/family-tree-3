@@ -7,9 +7,9 @@ namespace backend.Infrastructure.Data.Interceptors;
 
 public class AuditableEntitySaveChangesInterceptor : SaveChangesInterceptor
 {
-    private readonly IUser _user;
+    private readonly ICurrentUser _user;
 
-    public AuditableEntitySaveChangesInterceptor(IUser user)
+    public AuditableEntitySaveChangesInterceptor(ICurrentUser user)
     {
         _user = user;
     }
@@ -36,13 +36,13 @@ public class AuditableEntitySaveChangesInterceptor : SaveChangesInterceptor
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedBy = _user.Id?.ToString();
+                entry.Entity.CreatedBy = _user.UserId.ToString();
                 entry.Entity.Created = DateTime.UtcNow;
             }
 
             if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
             {
-                entry.Entity.LastModifiedBy = _user.Id?.ToString();
+                entry.Entity.LastModifiedBy = _user.UserId.ToString();
                 entry.Entity.LastModified = DateTime.UtcNow;
             }
         }

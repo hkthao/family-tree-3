@@ -13,6 +13,7 @@ using backend.Infrastructure.Services;
 using Novu;
 using backend.Infrastructure.Novu;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -39,14 +40,17 @@ public static class DependencyInjection
         services.AddScoped<DispatchDomainEventsInterceptor>();
         services.AddScoped<AuditableEntitySaveChangesInterceptor>();
 
+        services.AddHttpContextAccessor(); // Required for ICurrentUser
+        services.AddScoped<ICurrentUser, CurrentUser>(); // Register ICurrentUser with its implementation
+
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))
         {
             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
                 options.UseInMemoryDatabase("FamilyTreeDb")
-                       .AddInterceptors(
+                           .AddInterceptors(
                            serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
-                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>())
-                           );
+                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
+                           ;
         }
         else
         {
@@ -54,10 +58,9 @@ public static class DependencyInjection
             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
                 options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
                        .AddInterceptors(
-                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>()
-                          // serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()
-                           )
-                           );
+                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
+                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
+                           ;
         }
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
@@ -70,7 +73,6 @@ public static class DependencyInjection
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IDomainEventNotificationPublisher, DomainEventNotificationPublisher>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
-        services.AddScoped<ITemplateRenderer, FluidTemplateRenderer>();
 
         // Register Background Task Queue
         services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
@@ -153,20 +155,20 @@ public static class DependencyInjection
         configuration.GetSection(NovuSettings.SectionName).Bind(novuSettings);
         services.AddSingleton(Options.Create(novuSettings));
 
-            // 2. Register NovuSDK
-            services.AddSingleton<NovuSDK>(provider =>
+        // 2. Register NovuSDK
+        services.AddSingleton<NovuSDK>(provider =>
+        {
+            var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
+            var logger = provider.GetRequiredService<ILogger<NovuSDK>>();
+
+            if (string.IsNullOrEmpty(settings.ApiKey))
             {
-                var settings = provider.GetRequiredService<IOptions<NovuSettings>>().Value;
-                var logger = provider.GetRequiredService<ILogger<NovuSDK>>();
+                throw new ArgumentNullException(nameof(settings.ApiKey), "Novu API Key is not configured. Please check NovuSettings in appsettings.json or environment variables.");
+            }
 
-                if (string.IsNullOrEmpty(settings.ApiKey))
-                {
-                    throw new ArgumentNullException(nameof(settings.ApiKey), "Novu API Key is not configured. Please check NovuSettings in appsettings.json or environment variables.");
-                }
-
-                // logger.LogInformation("NovuSDK secretKey: ", settings.ApiKey);
-                return new NovuSDK(secretKey: settings.ApiKey);
-            });
+            // logger.LogInformation("NovuSDK secretKey: ", settings.ApiKey);
+            return new NovuSDK(secretKey: settings.ApiKey);
+        });
 
         // 3. Register NovuNotificationProvider as INotificationProvider
         services.AddScoped<INotificationProvider, NovuNotificationProvider>();

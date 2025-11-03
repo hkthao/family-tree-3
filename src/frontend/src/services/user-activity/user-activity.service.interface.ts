@@ -1,7 +1,7 @@
 import type { Paginated, RecentActivity, Result, TargetType } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 
-export interface IUserActivityService {
+export interface ICurrentUserActivityService {
   getRecentActivities(
     page: number,
     pageSize?: number,

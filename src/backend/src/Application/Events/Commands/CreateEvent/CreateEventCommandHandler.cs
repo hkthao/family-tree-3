@@ -21,19 +21,22 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             .Where(m => request.RelatedMembers.Contains(m.Id))
             .ToListAsync(cancellationToken);
 
-        var entity = new Event
+        var entity = new Event(request.Name, request.Code ?? GenerateUniqueCode("EVT"), request.Type, request.FamilyId);
+        entity.UpdateEvent(
+            request.Name,
+            entity.Code, // Code is not updated via this command
+            request.Description,
+            request.StartDate,
+            request.EndDate,
+            request.Location,
+            request.Type,
+            request.Color
+        );
+
+        foreach (var memberId in request.RelatedMembers)
         {
-            Name = request.Name,
-            Code = request.Code ?? GenerateUniqueCode("EVT"),
-            Description = request.Description,
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
-            Location = request.Location,
-            FamilyId = request.FamilyId,
-            Type = request.Type,
-            Color = request.Color,
-            EventMembers = [.. relatedMembers.Select(m => new EventMember { MemberId = m.Id })]
-        };
+            entity.AddEventMember(memberId);
+        }
 
         _context.Events.Add(entity);
 

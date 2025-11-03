@@ -15,43 +15,48 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        var entity = await _context.Members
-            .Include(m => m.Relationships)
-            .FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
-        if (entity == null)
-            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
+        var family = await _context.Families
+            .Include(f => f.Members)
+            .FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
 
-        entity.FirstName = request.FirstName;
-        entity.LastName = request.LastName;
-        entity.Nickname = request.Nickname;
-        entity.DateOfBirth = request.DateOfBirth;
-        entity.DateOfDeath = request.DateOfDeath;
-        entity.PlaceOfBirth = request.PlaceOfBirth;
-        entity.PlaceOfDeath = request.PlaceOfDeath;
-        entity.Gender = request.Gender;
-        entity.AvatarUrl = request.AvatarUrl;
-        entity.Occupation = request.Occupation;
-        entity.Biography = request.Biography;
-        entity.FamilyId = request.FamilyId;
-        entity.IsRoot = request.IsRoot;
+        if (family == null)
+        {
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
+        }
+
+        var member = family.Members.FirstOrDefault(m => m.Id == request.Id);
+        if (member == null)
+        {
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
+        }
+
+        member.FirstName = request.FirstName;
+        member.LastName = request.LastName;
+        member.Nickname = request.Nickname;
+        member.DateOfBirth = request.DateOfBirth;
+        member.DateOfDeath = request.DateOfDeath;
+        member.PlaceOfBirth = request.PlaceOfBirth;
+        member.PlaceOfDeath = request.PlaceOfDeath;
+        member.Gender = request.Gender;
+        member.AvatarUrl = request.AvatarUrl;
+        member.Occupation = request.Occupation;
+        member.Biography = request.Biography;
+        member.IsRoot = request.IsRoot;
 
         if (request.IsRoot)
         {
-            var currentRoot = await _context.Members
-                .Where(m => m.FamilyId == request.FamilyId && m.IsRoot && m.Id != request.Id)
-                .FirstOrDefaultAsync(cancellationToken);
+            var currentRoot = family.Members.FirstOrDefault(m => m.IsRoot && m.Id != request.Id);
             if (currentRoot != null)
             {
                 currentRoot.IsRoot = false;
-                _context.Members.Update(currentRoot);
             }
         }
 
-        entity.AddDomainEvent(new MemberUpdatedEvent(entity));
-        entity.AddDomainEvent(new FamilyStatsUpdatedEvent(request.FamilyId)); // Moved before SaveChangesAsync
+        member.AddDomainEvent(new MemberUpdatedEvent(member));
+        family.AddDomainEvent(new FamilyStatsUpdatedEvent(request.FamilyId));
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(entity.Id);
+        return Result<Guid>.Success(member.Id);
     }
 }

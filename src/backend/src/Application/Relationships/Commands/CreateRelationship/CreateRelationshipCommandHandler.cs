@@ -24,20 +24,22 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
         if (!_authorizationService.CanManageFamily(sourceMember.FamilyId))
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        var entity = new Relationship
-        {
-            SourceMemberId = request.SourceMemberId,
-            TargetMemberId = request.TargetMemberId,
-            Type = request.Type,
-            Order = request.Order,
-            FamilyId = sourceMember.FamilyId // Set FamilyId from source member
-        };
+        var family = await _context.Families
+            .Include(f => f.Members)
+            .FirstOrDefaultAsync(f => f.Id == sourceMember.FamilyId, cancellationToken);
 
-        _context.Relationships.Add(entity);
-        entity.AddDomainEvent(new RelationshipCreatedEvent(entity));
+        if (family == null)
+        {
+            return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {sourceMember.FamilyId}"), ErrorSources.NotFound);
+        }
+
+        var relationship = family.AddRelationship(request.SourceMemberId, request.TargetMemberId, request.Type);
+        relationship.Order = request.Order;
+
+        relationship.AddDomainEvent(new RelationshipCreatedEvent(relationship));
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(entity.Id);
+        return Result<Guid>.Success(relationship.Id);
     }
 }

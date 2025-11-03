@@ -6,13 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser user) : INotificationHandler<EventCreatedEvent>
+public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser user) : INotificationHandler<EventCreatedEvent>
 {
     private readonly ILogger<EventCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     public async Task Handle(EventCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
         // Record activity for event creation
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id!.Value,
+            UserId = _user.UserId,
             ActionType = UserActionType.CreateEvent,
             TargetType = TargetType.Event,
             TargetId = notification.Event.Id.ToString(),

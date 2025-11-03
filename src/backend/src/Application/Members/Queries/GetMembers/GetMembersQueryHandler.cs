@@ -6,11 +6,11 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMembers;
 
-public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService) : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
+public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser user, IAuthorizationService authorizationService) : IRequestHandler<GetMembersQuery, Result<IReadOnlyList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser  _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
         else
         {
             // Get IDs of families the user has access to
-            var accessibleFamilyIds = _context.FamilyUsers.Where(e=>e.UserProfileId == _user.Id!.Value).Select(fu => fu.FamilyId).ToList();
+            var accessibleFamilyIds = _context.FamilyUsers.Where(e=>e.UserId == _user.UserId).Select(fu => fu.FamilyId).ToList();
 
             // Apply family access filter if a specific FamilyId is requested
             if (request.FamilyId.HasValue && request.FamilyId.Value != Guid.Empty)

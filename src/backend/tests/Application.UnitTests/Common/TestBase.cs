@@ -18,7 +18,7 @@ public abstract class TestBase : IDisposable
 {
     protected readonly ApplicationDbContext _context;
     protected readonly IFixture _fixture;
-    protected readonly Mock<IUser> _mockUser;
+    protected readonly Mock<ICurrentUser> _mockUser;
     protected readonly Mock<IDateTime> _mockDateTime;
     protected readonly Mock<IAuthorizationService> _mockAuthorizationService;
     protected readonly IMapper _mapper;
@@ -39,10 +39,10 @@ public abstract class TestBase : IDisposable
             .Options;
 
         // Mock ICurrentUserService and IDateTime
-        _mockUser = _fixture.Freeze<Mock<IUser>>();
+        _mockUser = _fixture.Freeze<Mock<ICurrentUser>>();
         _mockDateTime = _fixture.Freeze<Mock<IDateTime>>();
 
-        _context = new ApplicationDbContext(options, _mockUser.Object, _mockDateTime.Object);
+        _context = new ApplicationDbContext(options);
         _context.Database.EnsureCreated(); // Đảm bảo database được tạo
 
         // Mock IAuthorizationService

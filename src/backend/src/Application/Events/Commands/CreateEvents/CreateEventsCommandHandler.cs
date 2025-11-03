@@ -28,23 +28,24 @@ public class CreateEventsCommandHandler(IApplicationDbContext context, IAuthoriz
                 return Result<List<Guid>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
-            var entity = new Event
-            {
-                Name = command.Name,
-                Type = command.Type,
-                StartDate = command.StartDate,
-                EndDate = command.EndDate,
-                Location = command.Location,
-                Description = command.Description,
-                FamilyId = command.FamilyId,
-            };
+            var entity = new Event(command.Name, "", command.Type, command.FamilyId); // Code is empty for now, will be generated or set later
+            entity.UpdateEvent(
+                command.Name,
+                entity.Code, // Code is not updated via this command
+                command.Description,
+                command.StartDate,
+                command.EndDate,
+                command.Location,
+                command.Type,
+                entity.Color // Color is not updated via this command
+            );
 
             // Handle related members
             if (command.RelatedMembers != null && command.RelatedMembers.Any())
             {
                 foreach (var memberId in command.RelatedMembers)
                 {
-                    entity.EventMembers.Add(new EventMember { EventId = entity.Id, MemberId = Guid.Parse(memberId) });
+                    entity.AddEventMember(Guid.Parse(memberId));
                 }
             }
 

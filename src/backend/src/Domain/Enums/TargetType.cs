@@ -5,9 +5,10 @@ namespace backend.Domain.Enums;
 /// </summary>
 public enum TargetType
 {
-    Family = 0,
-    Member = 1,
-    UserProfile = 2,
-    Event = 3,
-    Relationship = 4,
+    None = 0,
+    Family = 1,
+    Member = 2,
+    UserProfile = 3,
+    Event = 4,
+    Relationship = 5,
 }

@@ -11,29 +11,29 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context) : IR
 
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {
-        // Retrieve UserProfile from DB to get ExternalId
         if (!Guid.TryParse(request.Id, out var userId))
         {
             return Result.Failure(ErrorMessages.InvalidUserIdFormat, ErrorSources.Validation);
         }
-        var userProfile = await _context.UserProfiles
-            .FirstOrDefaultAsync(up => up.Id == userId, cancellationToken);
 
-        if (userProfile == null)
+        var user = await _context.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        if (user == null || user.Profile == null)
         {
             return Result.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
-        if (request.FirstName != null) userProfile.FirstName = request.FirstName;
-        if (request.LastName != null) userProfile.LastName = request.LastName;
-        if (request.FirstName != null || request.LastName != null)
-        {
-            userProfile.Name = $"{userProfile.FirstName} {userProfile.LastName}".Trim();
-        }
-        if (request.Email != null) userProfile.Email = request.Email;
-        if (request.Phone != null) userProfile.Phone = request.Phone;
-        if (request.Avatar != null) userProfile.Avatar = request.Avatar;
-        // Other fields like Picture or UserMetadata are managed by Auth0 directly
+        user.UpdateProfile(
+            user.Profile.ExternalId, // ExternalId should not be updated here
+            request.Email ?? user.Profile.Email,
+            (request.FirstName != null || request.LastName != null) ? $"{request.FirstName ?? user.Profile.FirstName} {request.LastName ?? user.Profile.LastName}".Trim() : user.Profile.Name,
+            request.FirstName ?? user.Profile.FirstName ?? string.Empty, // Provide empty string if null
+            request.LastName ?? user.Profile.LastName ?? string.Empty, // Provide empty string if null
+            request.Phone ?? user.Profile.Phone ?? string.Empty, // Provide empty string if null
+            request.Avatar ?? user.Profile.Avatar ?? string.Empty // Provide empty string if null
+        );
 
         await _context.SaveChangesAsync(cancellationToken);
 

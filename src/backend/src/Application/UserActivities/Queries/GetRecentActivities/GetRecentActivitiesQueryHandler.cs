@@ -9,11 +9,11 @@ namespace backend.Application.UserActivities.Queries.GetRecentActivities;
 /// <summary>
 /// Handler for fetching recent user activities.
 /// </summary>
-public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService) : IRequestHandler<GetRecentActivitiesQuery, Result<PaginatedList<UserActivityDto>>>
+public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser user, IAuthorizationService authorizationService) : IRequestHandler<GetRecentActivitiesQuery, Result<PaginatedList<UserActivityDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser  _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<PaginatedList<UserActivityDto>>> Handle(GetRecentActivitiesQuery request, CancellationToken cancellationToken)
@@ -21,7 +21,7 @@ public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMap
         var query = _context.UserActivities.AsNoTracking();
 
         // Apply specifications
-        query = query.WithSpecification(new UserActivityByProfileIdSpec(_user.Id!.Value));
+        query = query.WithSpecification(new UserActivityByUserIdSpec(_user.UserId));
 
         if (request.GroupId.HasValue)
         {

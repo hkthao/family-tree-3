@@ -1,9 +1,6 @@
-using System.Collections.Concurrent;
-using System.Security.Claims;
 using backend.Application;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Identity.UserProfiles.Commands.SyncUserProfile;
 using backend.Domain.Enums;
 using backend.Infrastructure;
 using backend.Infrastructure.Data;
@@ -13,9 +10,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using backend.Domain.Events;
-using MediatR;
-using Microsoft.AspNetCore.Authentication;
 
 namespace backend.CompositionRoot;
 
@@ -71,28 +65,7 @@ public static class DependencyInjection
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true
                 };
-                options.Events = new JwtBearerEvents
-                {
-                    OnTokenValidated = async (context) =>
-                    {
-                        var externalId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                        using var scope = context.HttpContext.RequestServices.CreateScope();
-                        var scopedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                        var claimsTransformation = scope.ServiceProvider.GetRequiredService<IClaimsTransformation>();
-                        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-                        try
-                        {
-                            var principal = await claimsTransformation.TransformAsync(context.Principal!);
-                            var userLoggedInEvent = new UserLoggedInEvent(principal); // Create the event
-                            await mediator.Publish(userLoggedInEvent); // Publish the event
-                        }
-                        catch (Exception ex)
-                        {
-                            scopedLogger.LogError(ex, "Error publishing UserLoggedInEvent for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
-                        }
-                    },
 
-                };
             });
 
         services.AddAuthorization(options =>

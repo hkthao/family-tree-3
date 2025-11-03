@@ -15,7 +15,7 @@ namespace backend.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "family",
+                name: "families",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -33,10 +33,10 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     total_members = table.Column<int>(type: "int", nullable: false),
                     total_generations = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -46,7 +46,7 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_family", x => x.id);
+                    table.PrimaryKey("pk_families", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -76,39 +76,38 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_file_metadata", x => x.id);
+                    table.PrimaryKey("pk_file_metadata", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "notification_preference",
+                name: "users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    user_id = table.Column<string>(type: "varchar(255)", nullable: false)
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    auth_provider_id = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    channel = table.Column<int>(type: "int", nullable: false),
-                    enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    notification_type = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                    email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    created_by = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_modified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    last_modified_by = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_notification_preference", x => x.Id);
+                    table.PrimaryKey("pk_users", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "event",
+                name: "events",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -126,10 +125,10 @@ namespace backend.Infrastructure.Migrations
                     type = table.Column<int>(type: "int", nullable: false),
                     color = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -139,18 +138,18 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_event", x => x.id);
+                    table.PrimaryKey("pk_events", x => x.id);
                     table.ForeignKey(
-                        name: "FK_event_family_family_id",
+                        name: "fk_events_families_family_id",
                         column: x => x.family_id,
-                        principalTable: "family",
+                        principalTable: "families",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "member",
+                name: "members",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -178,10 +177,10 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     is_root = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -191,117 +190,53 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_member", x => x.id);
+                    table.PrimaryKey("pk_members", x => x.id);
                     table.ForeignKey(
-                        name: "FK_member_family_family_id",
+                        name: "fk_members_families_family_id",
                         column: x => x.family_id,
-                        principalTable: "family",
+                        principalTable: "families",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "event_member",
+                name: "family_users",
                 columns: table => new
                 {
-                    event_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    member_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                    family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    role = table.Column<int>(type: "int", nullable: false),
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_event_member", x => new { x.event_id, x.member_id });
+                    table.PrimaryKey("pk_family_users", x => new { x.family_id, x.user_id });
                     table.ForeignKey(
-                        name: "FK_event_member_event_event_id",
-                        column: x => x.event_id,
-                        principalTable: "event",
+                        name: "fk_family_users_families_family_id",
+                        column: x => x.family_id,
+                        principalTable: "families",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_event_member_member_member_id",
-                        column: x => x.member_id,
-                        principalTable: "member",
+                        name: "fk_family_users_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "relationship",
+                name: "user_activities",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    source_member_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    target_member_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    type = table.Column<int>(type: "int", nullable: false),
-                    order = table.Column<int>(type: "int", nullable: true),
-                    family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    created_by = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    last_modified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    last_modified_by = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_relationship", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_relationship_family_family_id",
-                        column: x => x.family_id,
-                        principalTable: "family",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_relationship_member_source_member_id",
-                        column: x => x.source_member_id,
-                        principalTable: "member",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_relationship_member_target_member_id",
-                        column: x => x.target_member_id,
-                        principalTable: "member",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "family_user",
-                columns: table => new
-                {
-                    family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    user_profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    role = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_family_user", x => new { x.family_id, x.user_profile_id });
-                    table.ForeignKey(
-                        name: "FK_family_user_family_family_id",
-                        column: x => x.family_id,
-                        principalTable: "family",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "user_activity",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    user_profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     action_type = table.Column<int>(type: "int", nullable: false),
                     target_type = table.Column<int>(type: "int", maxLength: 100, nullable: false),
                     target_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
@@ -311,35 +246,10 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     activity_summary = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    CreatedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    LastModifiedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_user_activity", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "user_preference",
-                columns: table => new
-                {
-                    user_profile_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    theme = table.Column<int>(type: "int", nullable: false),
-                    language = table.Column<int>(type: "int", nullable: false),
-                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -349,15 +259,123 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user_preference", x => x.user_profile_id);
+                    table.PrimaryKey("pk_user_activities", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_user_activities_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "user_profile",
+                name: "user_preferences",
+                columns: table => new
+                {
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    theme = table.Column<int>(type: "int", nullable: false),
+                    language = table.Column<int>(type: "int", nullable: false),
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    created_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_modified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    last_modified_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_user_preferences", x => x.user_id);
+                    table.ForeignKey(
+                        name: "fk_user_preferences_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "event_members",
+                columns: table => new
+                {
+                    event_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    member_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_event_members", x => new { x.event_id, x.member_id });
+                    table.ForeignKey(
+                        name: "fk_event_members_events_event_id",
+                        column: x => x.event_id,
+                        principalTable: "events",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_event_members_members_member_id",
+                        column: x => x.member_id,
+                        principalTable: "members",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "relationships",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    source_member_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    target_member_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    type = table.Column<int>(type: "int", nullable: false),
+                    order = table.Column<int>(type: "int", nullable: true),
+                    family_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    created_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_modified = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    last_modified_by = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_relationships", x => x.id);
+                    table.ForeignKey(
+                        name: "fk_relationships_families_family_id",
+                        column: x => x.family_id,
+                        principalTable: "families",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_relationships_members_source_member_id",
+                        column: x => x.source_member_id,
+                        principalTable: "members",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "fk_relationships_members_target_member_id",
+                        column: x => x.target_member_id,
+                        principalTable: "members",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "user_profiles",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    user_id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     external_id = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
@@ -368,15 +386,15 @@ namespace backend.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     last_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    phone = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                    phone = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     avatar = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserPreferenceUserProfileId = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
-                    IsDeleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    DeletedBy = table.Column<string>(type: "longtext", nullable: true)
+                    user_preference_user_id = table.Column<Guid>(type: "char(36)", nullable: true, collation: "ascii_general_ci"),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleted_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DeletedDate = table.Column<DateTime>(type: "datetime(6)", nullable: true),
+                    deleted_date = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     created_by = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -386,154 +404,138 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_user_profile", x => x.id);
+                    table.PrimaryKey("pk_user_profiles", x => x.id);
                     table.ForeignKey(
-                        name: "FK_user_profile_user_preference_UserPreferenceUserProfileId",
-                        column: x => x.UserPreferenceUserProfileId,
-                        principalTable: "user_preference",
-                        principalColumn: "user_profile_id");
+                        name: "fk_user_profiles_user_preferences_user_preference_user_id",
+                        column: x => x.user_preference_user_id,
+                        principalTable: "user_preferences",
+                        principalColumn: "user_id");
+                    table.ForeignKey(
+                        name: "fk_user_profiles_users_user_id",
+                        column: x => x.user_id,
+                        principalTable: "users",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_event_code",
-                table: "event",
-                column: "code",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_event_family_id",
-                table: "event",
-                column: "family_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_event_member_member_id",
-                table: "event_member",
+                name: "ix_event_members_member_id",
+                table: "event_members",
                 column: "member_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_family_code",
-                table: "family",
+                name: "ix_events_code",
+                table: "events",
                 column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_family_user_user_profile_id",
-                table: "family_user",
-                column: "user_profile_id");
+                name: "ix_events_family_id",
+                table: "events",
+                column: "family_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_member_code",
-                table: "member",
+                name: "ix_families_code",
+                table: "families",
                 column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_member_family_id",
-                table: "member",
-                column: "family_id");
+                name: "ix_family_users_user_id",
+                table: "family_users",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_notification_preference_user_id_notification_type_channel",
-                table: "notification_preference",
-                columns: new[] { "user_id", "notification_type", "channel" },
+                name: "ix_members_code",
+                table: "members",
+                column: "code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_relationship_family_id",
-                table: "relationship",
+                name: "ix_members_family_id",
+                table: "members",
                 column: "family_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_relationship_source_member_id",
-                table: "relationship",
+                name: "ix_relationships_family_id",
+                table: "relationships",
+                column: "family_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_relationships_source_member_id",
+                table: "relationships",
                 column: "source_member_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_relationship_target_member_id",
-                table: "relationship",
+                name: "ix_relationships_target_member_id",
+                table: "relationships",
                 column: "target_member_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_user_activity_user_profile_id",
-                table: "user_activity",
-                column: "user_profile_id");
+                name: "ix_user_activities_user_id",
+                table: "user_activities",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_user_profile_external_id",
-                table: "user_profile",
+                name: "ix_user_profiles_external_id",
+                table: "user_profiles",
                 column: "external_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_user_profile_UserPreferenceUserProfileId",
-                table: "user_profile",
-                column: "UserPreferenceUserProfileId");
+                name: "ix_user_profiles_user_id",
+                table: "user_profiles",
+                column: "user_id",
+                unique: true);
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_family_user_user_profile_user_profile_id",
-                table: "family_user",
-                column: "user_profile_id",
-                principalTable: "user_profile",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "ix_user_profiles_user_preference_user_id",
+                table: "user_profiles",
+                column: "user_preference_user_id");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_user_activity_user_profile_user_profile_id",
-                table: "user_activity",
-                column: "user_profile_id",
-                principalTable: "user_profile",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_user_preference_user_profile_user_profile_id",
-                table: "user_preference",
-                column: "user_profile_id",
-                principalTable: "user_profile",
-                principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "ix_users_auth_provider_id",
+                table: "users",
+                column: "auth_provider_id",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_user_preference_user_profile_user_profile_id",
-                table: "user_preference");
+            migrationBuilder.DropTable(
+                name: "event_members");
 
             migrationBuilder.DropTable(
-                name: "event_member");
-
-            migrationBuilder.DropTable(
-                name: "family_user");
+                name: "family_users");
 
             migrationBuilder.DropTable(
                 name: "file_metadata");
 
             migrationBuilder.DropTable(
-                name: "notification_preference");
+                name: "relationships");
 
             migrationBuilder.DropTable(
-                name: "relationship");
+                name: "user_activities");
 
             migrationBuilder.DropTable(
-                name: "user_activity");
+                name: "user_profiles");
 
             migrationBuilder.DropTable(
-                name: "event");
+                name: "events");
 
             migrationBuilder.DropTable(
-                name: "member");
+                name: "members");
 
             migrationBuilder.DropTable(
-                name: "family");
+                name: "user_preferences");
 
             migrationBuilder.DropTable(
-                name: "user_profile");
+                name: "families");
 
             migrationBuilder.DropTable(
-                name: "user_preference");
+                name: "users");
         }
     }
 }

@@ -6,13 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,IUser _user) : INotificationHandler<FamilyCreatedEvent>
+public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<FamilyCreatedEvent>
 {
     private readonly ILogger<FamilyCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = _user;
+    private readonly ICurrentUser _user = _user;
 
     public async Task Handle(FamilyCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         // Record activity for family creation
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id!.Value,
+            UserId = _user.UserId,
             ActionType = UserActionType.CreateFamily,
             TargetType = TargetType.Family,
             TargetId = notification.Family.Id.ToString(),

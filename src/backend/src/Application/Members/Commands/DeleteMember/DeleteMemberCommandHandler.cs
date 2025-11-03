@@ -6,40 +6,42 @@ using backend.Domain.Events.Families;
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
-public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteMemberCommand, Result>
+public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, ICurrentUser currentUser, IDateTime dateTime) : IRequestHandler<DeleteMemberCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly IUser _currentUser = currentUser;
+    private readonly ICurrentUser _currentUser = currentUser;
     private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            var memberToDelete = await _context.Members.FirstOrDefaultAsync(m => m.Id == request.Id, cancellationToken);
-            if (memberToDelete == null)
+            var member = await _context.Members.FindAsync(request.Id);
+            if (member == null)
             {
                 return Result.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
             }
 
-            if (!_authorizationService.CanManageFamily(memberToDelete.FamilyId))
+            if (!_authorizationService.CanManageFamily(member.FamilyId))
             {
                 return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
-            var memberFullName = memberToDelete.FullName; // Capture full name for activity summary
-            var familyId = memberToDelete.FamilyId; // Capture familyId before deletion
+            var family = await _context.Families
+                .Include(f => f.Members)
+                .Include(f => f.Relationships)
+                .FirstOrDefaultAsync(f => f.Id == member.FamilyId, cancellationToken);
 
-            memberToDelete.IsDeleted = true;
-            memberToDelete.DeletedBy = _currentUser.Id?.ToString();
-            memberToDelete.DeletedDate = _dateTime.Now;
+            if (family == null)
+            {
+                return Result.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {member.FamilyId}"), ErrorSources.NotFound);
+            }
 
-            memberToDelete.AddDomainEvent(new MemberDeletedEvent(memberToDelete));
+            family.RemoveMember(request.Id);
+            family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));
+
             await _context.SaveChangesAsync(cancellationToken);
-
-            // Update family stats via domain event
-            memberToDelete.AddDomainEvent(new FamilyStatsUpdatedEvent(familyId));
 
             return Result.Success();
         }

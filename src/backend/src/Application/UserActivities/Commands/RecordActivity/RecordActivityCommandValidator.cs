@@ -4,8 +4,8 @@ public class RecordActivityCommandValidator : AbstractValidator<RecordActivityCo
 {
     public RecordActivityCommandValidator()
     {
-        RuleFor(v => v.UserProfileId)
-            .NotEmpty().WithMessage("UserProfileId cannot be empty.");
+        RuleFor(v => v.UserId)
+            .NotEmpty().WithMessage("UserId cannot be empty.");
 
         RuleFor(v => v.ActionType)
             .IsInEnum().WithMessage("Invalid ActionType value.");

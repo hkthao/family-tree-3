@@ -4,7 +4,6 @@ using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
 using backend.Domain.Common;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using backend.Infrastructure.Persistence.Extensions;
 
 namespace backend.Infrastructure.Data;
@@ -12,15 +11,17 @@ namespace backend.Infrastructure.Data;
 /// <summary>
 /// Đại diện cho cơ sở dữ liệu ứng dụng và là điểm truy cập chính để tương tác với dữ liệu.
 /// </summary>
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUser currentUser, IDateTime dateTime) : DbContext(options), IApplicationDbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
 {
-    private readonly IUser _currentUser = currentUser;
-    private readonly IDateTime _dateTime = dateTime;
 
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Family.
     /// </summary>
     public DbSet<Family> Families => Set<Family>();
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể User.
+    /// </summary>
+    public DbSet<User> Users => Set<User>();
     /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể Member.
     /// </summary>
@@ -50,10 +51,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<UserPreference> UserPreferences => Set<UserPreference>();
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể NotificationPreference.
-    /// </summary>
-    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
-    /// <summary>
     /// Lấy hoặc thiết lập DbSet cho các thực thể FileMetadata.
     /// </summary>
     public DbSet<FileMetadata> FileMetadata { get; set; } = null!;
@@ -63,47 +60,42 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
-        {
-            switch (entry.State)
-            {
-                case EntityState.Added:
-                    if (entry.Entity is BaseAuditableEntity auditableEntity)
-                    {
-                        auditableEntity.CreatedBy = _currentUser.Id?.ToString();
-                        auditableEntity.Created = _dateTime.Now;
-                    }
-                    break;
+    //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    //{
+        // foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
+        // {
+        //     switch (entry.State)
+        //     {
+        //         case EntityState.Added:
+        //             if (entry.Entity is BaseAuditableEntity auditableEntity)
+        //             {
+        //                 auditableEntity.CreatedBy = _currentUser.Id?.ToString();
+        //                 auditableEntity.Created = _dateTime.Now;
+        //             }
+        //             break;
 
-                case EntityState.Modified:
-                    if (entry.Entity is BaseAuditableEntity auditableEntityModified)
-                    {
-                        auditableEntityModified.LastModifiedBy = _currentUser.Id?.ToString();
-                        auditableEntityModified.LastModified = _dateTime.Now;
-                    }
-                    break;
+        //         case EntityState.Modified:
+        //             if (entry.Entity is BaseAuditableEntity auditableEntityModified)
+        //             {
+        //                 auditableEntityModified.LastModifiedBy = _currentUser.Id?.ToString();
+        //                 auditableEntityModified.LastModified = _dateTime.Now;
+        //             }
+        //             break;
 
-                case EntityState.Deleted:
-                    if (entry.Entity is ISoftDelete softDeleteEntity)
-                    {
-                        softDeleteEntity.IsDeleted = true;
-                        softDeleteEntity.DeletedBy = _currentUser.Id?.ToString();
-                        softDeleteEntity.DeletedDate = _dateTime.Now;
-                        entry.State = EntityState.Modified;
-                    }
-                    break;
-            }
-        }
+        //         case EntityState.Deleted:
+        //             if (entry.Entity is ISoftDelete softDeleteEntity)
+        //             {
+        //                 softDeleteEntity.IsDeleted = true;
+        //                 softDeleteEntity.DeletedBy = _currentUser.Id?.ToString();
+        //                 softDeleteEntity.DeletedDate = _dateTime.Now;
+        //                 entry.State = EntityState.Modified;
+        //             }
+        //             break;
+        //     }
+        // }
 
-        return await base.SaveChangesAsync(cancellationToken);
-    }
-
-    public override int SaveChanges()
-    {
-        return SaveChangesAsync().GetAwaiter().GetResult();
-    }
+        // return await base.SaveChangesAsync(cancellationToken);
+   // }
 
     /// <summary>
     /// Cấu hình mô hình được phát hiện bởi DbContext.
@@ -124,6 +116,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         }
 
         base.OnModelCreating(builder);
+
+        builder.ApplySnakeCaseNamingConvention();
     }
 }
 

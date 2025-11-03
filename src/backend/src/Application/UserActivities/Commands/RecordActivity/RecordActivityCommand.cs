@@ -10,9 +10,9 @@ namespace backend.Application.UserActivities.Commands.RecordActivity;
 public record RecordActivityCommand : IRequest<Result<Guid>>
 {
     /// <summary>
-    /// The ID of the UserProfile who performed the action.
+    /// The ID of the User who performed the action.
     /// </summary>
-    public Guid UserProfileId { get; init; }
+    public Guid UserId { get; init; }
 
     /// <summary>
     /// The type of action performed (e.g., CreateFamily, UpdateMember, Login).

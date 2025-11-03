@@ -5,10 +5,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.Commands.CreateFamilies;
 
-public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser user) : IRequestHandler<CreateFamiliesCommand, Result<List<Guid>>>
+public class CreateFamiliesCommandHandler(IApplicationDbContext context, ICurrentUser user) : IRequestHandler<CreateFamiliesCommand, Result<List<Guid>>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser _user = user;
 
     public async Task<Result<List<Guid>>> Handle(CreateFamiliesCommand request, CancellationToken cancellationToken)
     {
@@ -27,13 +27,8 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, IUser u
                 Code = familyDto.Code,
                 TotalMembers = familyDto.TotalMembers,
                 TotalGenerations = familyDto.TotalGenerations ?? 0,
-                FamilyUsers = [new FamilyUser()
-                {
-                    FamilyId = familyId,
-                    UserProfileId = _user.Id!.Value,
-                    Role = FamilyRole.Manager
-                }]
             };
+            entity.AddFamilyUser(_user.UserId, FamilyRole.Manager);
             _context.Families.Add(entity);
             createdFamilyIds.Add(entity.Id);
         }

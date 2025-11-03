@@ -5,11 +5,11 @@ using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamilies;
 
-public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user, IAuthorizationService authorizationService) : IRequestHandler<GetFamiliesQuery, Result<IReadOnlyList<FamilyListDto>>>
+public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapper, ICurrentUser user, IAuthorizationService authorizationService) : IRequestHandler<GetFamiliesQuery, Result<IReadOnlyList<FamilyListDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly IUser _user = user;
+    private readonly ICurrentUser  _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<IReadOnlyList<FamilyListDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
@@ -25,7 +25,7 @@ public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapp
         {
             // For non-admin users, apply family-specific access checks
             // Apply user access specification
-            query = query.WithSpecification(new FamilyByUserIdSpec(_user.Id!.Value));
+            query = query.WithSpecification(new FamilyByUserIdSpec(_user.UserId));
 
         }
         // Apply other specifications

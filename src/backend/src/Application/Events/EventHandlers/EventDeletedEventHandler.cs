@@ -6,13 +6,13 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IUser _user) : INotificationHandler<EventDeletedEvent>
+public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<EventDeletedEvent>
 {
     private readonly ILogger<EventDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly IUser _user = _user;
+    private readonly ICurrentUser _user = _user;
 
     public async Task Handle(EventDeletedEvent notification, CancellationToken cancellationToken)
     {
@@ -24,7 +24,7 @@ public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, 
         // Record activity for event deletion
         await _mediator.Send(new RecordActivityCommand
         {
-            UserProfileId = _user.Id!.Value,
+            UserId = _user.UserId,
             ActionType = UserActionType.DeleteEvent,
             TargetType = TargetType.Event,
             TargetId = notification.Event.Id.ToString(),

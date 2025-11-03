@@ -1,10 +1,10 @@
 import type { Paginated, RecentActivity, Result, TargetType } from '@/types';
-import type { IUserActivityService } from './user-activity.service.interface';
+import type { ICurrentUserActivityService } from './user-activity.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export class ApiUserActivityService implements IUserActivityService {
+export class ApICurrentUserActivityService implements ICurrentUserActivityService {
   private apiUrl = `${API_BASE_URL}/activity`;
 
   constructor(private http: ApiClientMethods) { }
