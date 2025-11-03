@@ -1,254 +1,132 @@
-using AutoFixture;
 using backend.Application.Files.UploadFile;
 using FluentValidation.TestHelper;
 using Xunit;
+using System.IO;
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 
 public class UploadFileCommandValidatorTests
 {
     private readonly UploadFileCommandValidator _validator;
-    private readonly IFixture _fixture;
 
     public UploadFileCommandValidatorTests()
     {
         _validator = new UploadFileCommandValidator();
-        _fixture = new Fixture();
-        _fixture.Register<Stream>(() => new MemoryStream());
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi FileStream của UploadFileCommand là null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với FileStream được đặt thành null.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính FileStream với thông báo lỗi cụ thể "FileStream cannot be null.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: FileStream là một trường bắt buộc và không được phép có giá trị null để đảm bảo tệp có thể được xử lý.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenFileStreamIsNull()
+    public void ShouldHaveError_WhenFileStreamIsNull()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.FileStream, (Stream)null!)
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi FileStream là null.
+        var command = new UploadFileCommand { FileStream = null!, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.FileStream)
-            .WithErrorMessage("FileStream cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.FileStream)
+              .WithErrorMessage("FileStream cannot be null.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator không báo lỗi khi FileStream của UploadFileCommand được cung cấp hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với FileStream được đặt thành một MemoryStream hợp lệ.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng không có lỗi xác thực nào cho thuộc tính FileStream.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một FileStream hợp lệ nên vượt qua quá trình xác thực mà không có bất kỳ lỗi nào.
-    /// </summary>
     [Fact]
-    public void ShouldNotHaveErrorWhenFileStreamIsProvided()
+    public void ShouldNotHaveError_WhenFileStreamIsValid()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi FileStream hợp lệ.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldNotHaveValidationErrorFor(c => c.FileStream);
+        result.ShouldNotHaveValidationErrorFor(x => x.FileStream);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi FileName của UploadFileCommand là null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với FileName được đặt thành null.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính FileName với thông báo lỗi cụ thể "FileName cannot be null.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: FileName là một trường bắt buộc và không được phép có giá trị null để đảm bảo tệp có tên hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenFileNameIsNull()
+    public void ShouldHaveError_WhenFileNameIsNull()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.FileName, (string)null!)
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi FileName là null.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = null!, ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.FileName)
-            .WithErrorMessage("FileName cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.FileName)
+              .WithErrorMessage("FileName cannot be null.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi FileName của UploadFileCommand là một chuỗi rỗng.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với FileName được đặt thành string.Empty.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính FileName với thông báo lỗi cụ thể "FileName cannot be empty.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: FileName là một trường bắt buộc và không được phép có giá trị rỗng để đảm bảo tệp có tên hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenFileNameIsEmpty()
+    public void ShouldHaveError_WhenFileNameIsEmpty()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.FileName, string.Empty)
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi FileName là chuỗi rỗng.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = string.Empty, ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.FileName)
-            .WithErrorMessage("FileName cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.FileName)
+              .WithErrorMessage("FileName cannot be empty.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator không báo lỗi khi FileName của UploadFileCommand được cung cấp hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với FileName được đặt thành một chuỗi hợp lệ.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng không có lỗi xác thực nào cho thuộc tính FileName.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một FileName hợp lệ nên vượt qua quá trình xác thực mà không có bất kỳ lỗi nào.
-    /// </summary>
     [Fact]
-    public void ShouldNotHaveErrorWhenFileNameIsProvided()
+    public void ShouldNotHaveError_WhenFileNameIsValid()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.FileName, _fixture.Create<string>())
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi FileName hợp lệ.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldNotHaveValidationErrorFor(c => c.FileName);
+        result.ShouldNotHaveValidationErrorFor(x => x.FileName);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi ContentType của UploadFileCommand là null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với ContentType được đặt thành null.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính ContentType với thông báo lỗi cụ thể "ContentType cannot be null.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: ContentType là một trường bắt buộc và không được phép có giá trị null để đảm bảo tệp có kiểu nội dung hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenContentTypeIsNull()
+    public void ShouldHaveError_WhenContentTypeIsNull()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.ContentType, (string)null!)
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi ContentType là null.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = null!, Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.ContentType)
-            .WithErrorMessage("ContentType cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.ContentType)
+              .WithErrorMessage("ContentType cannot be null.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi ContentType của UploadFileCommand là một chuỗi rỗng.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với ContentType được đặt thành string.Empty.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính ContentType với thông báo lỗi cụ thể "ContentType cannot be empty.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: ContentType là một trường bắt buộc và không được phép có giá trị rỗng để đảm bảo tệp có kiểu nội dung hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenContentTypeIsEmpty()
+    public void ShouldHaveError_WhenContentTypeIsEmpty()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.ContentType, string.Empty)
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi ContentType là chuỗi rỗng.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = string.Empty, Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.ContentType)
-            .WithErrorMessage("ContentType cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.ContentType)
+              .WithErrorMessage("ContentType cannot be empty.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator không báo lỗi khi ContentType của UploadFileCommand được cung cấp hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với ContentType được đặt thành một chuỗi hợp lệ.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng không có lỗi xác thực nào cho thuộc tính ContentType.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một ContentType hợp lệ nên vượt qua quá trình xác thực mà không có bất kỳ lỗi nào.
-    /// </summary>
     [Fact]
-    public void ShouldNotHaveErrorWhenContentTypeIsProvided()
+    public void ShouldNotHaveError_WhenContentTypeIsValid()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.ContentType, _fixture.Create<string>())
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi ContentType hợp lệ.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldNotHaveValidationErrorFor(c => c.ContentType);
+        result.ShouldNotHaveValidationErrorFor(x => x.ContentType);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi Length của UploadFileCommand là 0.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với Length được đặt thành 0L.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Length với thông báo lỗi cụ thể "File length must be greater than 0.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Length của tệp phải lớn hơn 0 để đảm bảo tệp không rỗng.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenLengthIsZero()
+    public void ShouldHaveError_WhenLengthIsZero()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.Length, 0L)
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Length là 0.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 0 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Length)
-            .WithErrorMessage("File length must be greater than 0.");
+        result.ShouldHaveValidationErrorFor(x => x.Length)
+              .WithErrorMessage("File length must be greater than 0.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi Length của UploadFileCommand là một số âm.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với Length được đặt thành một số âm (ví dụ: -1L).
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Length với thông báo lỗi cụ thể "File length must be greater than 0.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Length của tệp phải là một số dương để đảm bảo tính hợp lệ của kích thước tệp.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenLengthIsNegative()
+    public void ShouldHaveError_WhenLengthIsNegative()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.Length, -1L)
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Length là số âm.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = -1 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Length)
-            .WithErrorMessage("File length must be greater than 0.");
+        result.ShouldHaveValidationErrorFor(x => x.Length)
+              .WithErrorMessage("File length must be greater than 0.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator không báo lỗi khi Length của UploadFileCommand là một số dương.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UploadFileCommand với Length được đặt thành một số dương (ví dụ: 100L).
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng không có lỗi xác thực nào cho thuộc tính Length.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một Length dương hợp lệ nên vượt qua quá trình xác thực mà không có bất kỳ lỗi nào.
-    /// </summary>
     [Fact]
-    public void ShouldNotHaveErrorWhenLengthIsPositive()
+    public void ShouldNotHaveError_WhenLengthIsValid()
     {
-        var command = _fixture.Build<UploadFileCommand>()
-                              .With(c => c.Length, 100L)
-                              .With(c => c.FileStream, new MemoryStream())
-                              .Create();
-
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Length hợp lệ.
+        using var stream = new MemoryStream();
+        var command = new UploadFileCommand { FileStream = stream, FileName = "test.txt", ContentType = "text/plain", Length = 10 };
         var result = _validator.TestValidate(command);
-
-        result.ShouldNotHaveValidationErrorFor(c => c.Length);
+        result.ShouldNotHaveValidationErrorFor(x => x.Length);
     }
 }

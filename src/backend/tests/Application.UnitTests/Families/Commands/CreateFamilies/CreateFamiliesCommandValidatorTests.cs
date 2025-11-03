@@ -13,6 +13,7 @@ public class CreateFamiliesCommandValidatorTests
     private readonly CreateFamiliesCommandValidator _validator;
 
 
+
     public CreateFamiliesCommandValidatorTests()
     {
         _validator = new CreateFamiliesCommandValidator(new FamilyDtoValidator());
@@ -33,8 +34,6 @@ public class CreateFamiliesCommandValidatorTests
     {
         // 🎯 Mục tiêu của test: Xác minh không có lỗi khi danh sách Families không rỗng và hợp lệ.
         var validFamilyDto = new FamilyDto { Name = "Valid Family", Visibility = "Public" };
-
-
         var command = new CreateFamiliesCommand(new List<FamilyDto> { validFamilyDto });
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
@@ -46,8 +45,6 @@ public class CreateFamiliesCommandValidatorTests
         // 🎯 Mục tiêu của test: Xác minh lỗi khi bất kỳ FamilyDto nào trong danh sách không hợp lệ.
         var invalidFamilyDto = new FamilyDto { Name = string.Empty, Visibility = "Public" }; // Invalid name
         var validFamilyDto = new FamilyDto { Name = "Valid Family", Visibility = "Public" };
-
-
 
         var command = new CreateFamiliesCommand(new List<FamilyDto> { validFamilyDto, invalidFamilyDto });
         var result = _validator.TestValidate(command);

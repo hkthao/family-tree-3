@@ -1,123 +1,107 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.Queries.GetUploadedFile;
-using backend.Application.UnitTests.Common;
 using FluentAssertions;
 using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 
-public class GetUploadedFileQueryHandlerTests : TestBase
+public class GetUploadedFileQueryHandlerTests : IDisposable
 {
-    private readonly Mock<IConfigProvider> _mockConfigProvider;
+    private readonly Mock<IConfigProvider> _configProviderMock;
     private readonly GetUploadedFileQueryHandler _handler;
     private readonly string _testStoragePath;
 
     public GetUploadedFileQueryHandlerTests()
     {
-        _mockConfigProvider = new Mock<IConfigProvider>();
+        _configProviderMock = new Mock<IConfigProvider>();
+        _testStoragePath = Path.Combine(Path.GetTempPath(), "TestLocalStorage");
 
+        if (!Directory.Exists(_testStoragePath))
+        {
+            Directory.CreateDirectory(_testStoragePath);
+        }
 
-        // Create a temporary directory for testing file storage
-        _testStoragePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        Directory.CreateDirectory(_testStoragePath);
+        _configProviderMock.Setup(x => x.GetSection<StorageSettings>()).Returns(new StorageSettings
+        {
+            Provider = "Local",
+            Local = new LocalStorageSettings { LocalStoragePath = _testStoragePath }
+        });
 
-        _mockConfigProvider.Setup(cp => cp.GetSection<StorageSettings>())
-            .Returns(new StorageSettings { Local = new LocalStorageSettings { LocalStoragePath = _testStoragePath } });
-
-        _handler = new GetUploadedFileQueryHandler(
-            _mockConfigProvider.Object
-        );
+        _handler = new GetUploadedFileQueryHandler(_configProviderMock.Object);
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
-        // Clean up the temporary directory after tests
         if (Directory.Exists(_testStoragePath))
         {
             Directory.Delete(_testStoragePath, true);
         }
-        base.Dispose();
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi tệp không tồn tại.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một GetUploadedFileQuery với tên tệp không tồn tại.
-    ///    - Act: Gọi phương thức Handle.
-    ///    - Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler phải báo lỗi khi tệp được yêu cầu không có trên hệ thống.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnFailureWhenFileNotFound()
+    private async Task CreateTestFile(string fileName, string content = "test content")
     {
+        var filePath = Path.Combine(_testStoragePath, fileName);
+        await File.WriteAllTextAsync(filePath, content);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFailure_WhenFileDoesNotExist()
+    {
+        // Arrange
         var query = new GetUploadedFileQuery { FileName = "nonexistent.txt" };
 
+        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        result.Should().NotBeNull();
+        // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("File not found.");
-        result.ErrorSource.Should().Be("NotFound");
+        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, "File"));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh handler trả về nội dung tệp và kiểu nội dung chính xác khi tệp tồn tại.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một tệp vật lý trong thư mục lưu trữ tạm thời. Tạo một GetUploadedFileQuery với tên tệp đó.
-    ///    - Act: Gọi phương thức Handle.
-    ///    - Assert: Kiểm tra kết quả trả về là thành công. Xác minh nội dung tệp và kiểu nội dung khớp với mong đợi.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler phải đọc đúng nội dung tệp và xác định kiểu nội dung mặc định cho tệp .txt.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnFileContentSuccessfully()
-    {
-        var fileName = "testfile.txt";
-        var fileContent = "Hello, this is a test file.";
-        var filePath = Path.Combine(_testStoragePath, fileName);
-        await File.WriteAllTextAsync(filePath, fileContent);
-
-        var query = new GetUploadedFileQuery { FileName = fileName };
-
-        var result = await _handler.Handle(query, CancellationToken.None);
-
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value!.Content.Should().Equal(System.Text.Encoding.UTF8.GetBytes(fileContent));
-        result.Value.ContentType.Should().Be("application/octet-stream"); // Default for .txt
-
-    }
-
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh handler trả về kiểu nội dung chính xác cho các phần mở rộng tệp khác nhau.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một tệp vật lý với phần mở rộng cụ thể trong thư mục lưu trữ tạm thời. Tạo một GetUploadedFileQuery với tên tệp đó.
-    ///    - Act: Gọi phương thức Handle.
-    ///    - Assert: Kiểm tra kết quả trả về là thành công và kiểu nội dung khớp với mong đợi.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Handler phải xác định đúng kiểu nội dung dựa trên phần mở rộng tệp.
-    /// </summary>
     [Theory]
-    [InlineData("image.jpg", "image/jpeg")]
-    [InlineData("photo.jpeg", "image/jpeg")]
-    [InlineData("document.png", "image/png")]
-    [InlineData("report.pdf", "application/pdf")]
-    [InlineData("letter.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")]
-    [InlineData("archive.zip", "application/octet-stream")] // Default for unknown types
-        public async Task ShouldReturnCorrectContentTypeForKnownFileTypes(string fileName, string expectedContentType)
+    [InlineData("test.jpg", "image/jpeg")]
+    [InlineData("test.jpeg", "image/jpeg")]
+    [InlineData("test.png", "image/png")]
+    [InlineData("test.pdf", "application/pdf")]
+    [InlineData("test.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")]
+    [InlineData("test.txt", "application/octet-stream")] // Default type
+    public async Task Handle_ShouldReturnFileContent_WhenFileExists(string fileName, string expectedContentType)
     {
-        var filePath = Path.Combine(_testStoragePath, fileName);
-        await File.WriteAllTextAsync(filePath, "dummy content");
-
+        // Arrange
+        var fileContent = "Hello, world!";
+        await CreateTestFile(fileName, fileContent);
         var query = new GetUploadedFileQuery { FileName = fileName };
 
+        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        result.Should().NotBeNull();
+        // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
         result.Value!.ContentType.Should().Be(expectedContentType);
+        result.Value.Content.Should().BeEquivalentTo(System.Text.Encoding.UTF8.GetBytes(fileContent));
+    }
 
+    [Fact]
+    public async Task Handle_ShouldSanitizeFileName_ToPreventPathTraversal()
+    {
+        // Arrange
+        var maliciousFileName = "../../../../etc/passwd";
+        var query = new GetUploadedFileQuery { FileName = maliciousFileName };
+
+        // Act
+        var result = await _handler.Handle(query, CancellationToken.None);
+
+        // Assert
+        // The handler should sanitize the filename, so File.Exists will still look in the designated folder
+        // and thus not find the file, resulting in a NotFound error.
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().Be(string.Format(ErrorMessages.NotFound, "File"));
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
 }
