@@ -1,78 +1,83 @@
-using AutoFixture;
+using AutoMapper;
+using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventsByIds;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
-namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds;
-
-public class GetEventsByIdsQueryHandlerTests : TestBase
+namespace backend.Application.UnitTests.Events.Queries.GetEventsByIds
 {
-    private readonly GetEventsByIdsQueryHandler _handler;
-
-    public GetEventsByIdsQueryHandlerTests()
+    public class GetEventsByIdsQueryHandlerTests : TestBase
     {
-        _handler = new GetEventsByIdsQueryHandler(
-            _context,
-            _mapper
-        );
-    }
+        public GetEventsByIdsQueryHandlerTests()
+        {
+        }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một danh sách sự kiện rỗng
-    /// khi không có sự kiện nào khớp với các ID được cung cấp.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một GetEventsByIdsQuery với một danh sách ID không tồn tại.
-    ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và danh sách sự kiện là rỗng.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
-    /// trường hợp không tìm thấy sự kiện nào với các ID đã cho, trả về một danh sách rỗng thay vì lỗi.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnEmptyList_WhenNoEventsMatchIds()
-    {
-        // Arrange
-        var query = new GetEventsByIdsQuery([Guid.NewGuid(), Guid.NewGuid()]);
+        [Fact]
+        public async Task Handle_ShouldReturnCorrectEvents_WhenGivenValidIds()
+        {
+            // Arrange
+            var familyId = Guid.NewGuid();
+            var event1 = new Event("Event 1", "EVT1", EventType.Birth, familyId);
+            var event2 = new Event("Event 2", "EVT2", EventType.Death, familyId);
+            var event3 = new Event("Event 3", "EVT3", EventType.Marriage, familyId);
+            _context.Events.AddRange(event1, event2, event3);
+            await _context.SaveChangesAsync(CancellationToken.None);
 
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper);
+            var query = new GetEventsByIdsQuery(new List<Guid> { event1.Id, event3.Id });
 
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().BeEmpty();
-    }
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện khớp với danh sách ID được cung cấp.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thêm một số sự kiện vào DB. Tạo một GetEventsByIdsQuery với danh sách ID của các sự kiện đó.
-    ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và danh sách sự kiện chứa các sự kiện mong đợi.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống có thể truy xuất
-    /// nhiều sự kiện cụ thể bằng danh sách ID của chúng một cách chính xác.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnEvents_WhenEventsMatchIds()
-    {
-        // Arrange
-        var event1 = _fixture.Create<Event>();
-        var event2 = _fixture.Create<Event>();
-        _context.Events.AddRange(event1, event2);
-        await _context.SaveChangesAsync(CancellationToken.None);
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
+            if (result.Value != null)
+            {
+                result.Value.Should().HaveCount(2);
+                result.Value.Select(e => e.Id).Should().Contain(event1.Id);
+                result.Value.Select(e => e.Id).Should().Contain(event3.Id);
+            }
+        }
 
-        var query = new GetEventsByIdsQuery([event1.Id, event2.Id]);
+        [Fact]
+        public async Task Handle_ShouldReturnEmptyList_WhenGivenNoIds()
+        {
+            // Arrange
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper);
+            var query = new GetEventsByIdsQuery(new List<Guid>());
 
-        // Act
-        var result = await _handler.Handle(query, CancellationToken.None);
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
 
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(2);
-        result.Value!.Should().Contain(e => e.Id == event1.Id);
-        result.Value!.Should().Contain(e => e.Id == event2.Id);
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeEmpty();
+        }
+
+        [Fact]
+        public async Task Handle_ShouldReturnEmptyList_WhenGivenNonExistentIds()
+        {
+            // Arrange
+            var handler = new GetEventsByIdsQueryHandler(_context, _mapper);
+            var query = new GetEventsByIdsQuery(new List<Guid> { Guid.NewGuid(), Guid.NewGuid() });
+
+            // Act
+            var result = await handler.Handle(query, CancellationToken.None);
+
+            // Assert
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
+            result.Value.Should().BeEmpty();
+        }
     }
 }

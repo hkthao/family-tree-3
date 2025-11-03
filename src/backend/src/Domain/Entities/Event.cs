@@ -34,6 +34,11 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         FamilyId = familyId;
     }
 
+    public Event(string name, string code, EventType type, Guid? familyId, DateTime? startDate) : this(name, code, type, familyId)
+    {
+        StartDate = startDate;
+    }
+
     public void UpdateEvent(string name, string code, string? description, DateTime? startDate, DateTime? endDate, string? location, EventType type, string? color)
     {
         Name = name;
