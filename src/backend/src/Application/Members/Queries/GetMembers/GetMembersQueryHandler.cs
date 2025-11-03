@@ -10,27 +10,25 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Members.AsQueryable();
+        var query = _context.Members.Include(e => e.Family).AsNoTracking();
 
         // If the user has the 'Admin' role, bypass family-specific access checks
         if (_authorizationService.IsAdmin())
         {
             // Admin has access to all members, no further filtering by user profile needed
             // If a specific FamilyId is requested, still apply that filter
-            if (request.FamilyId != Guid.Empty)
-            {
+            if (request.FamilyId.HasValue)
                 query = query.WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId));
-            }
         }
         else
         {
             // Get IDs of families the user has access to
-            var accessibleFamilyIds = _context.FamilyUsers.Where(e=>e.UserId == _user.UserId).Select(fu => fu.FamilyId).ToList();
+            var accessibleFamilyIds = _context.FamilyUsers.Where(e => e.UserId == _user.UserId).Select(fu => fu.FamilyId).ToList();
 
             // Apply family access filter if a specific FamilyId is requested
             if (request.FamilyId.HasValue && request.FamilyId.Value != Guid.Empty)
@@ -52,9 +50,9 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
         // Apply other specifications
         query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchTerm));
 
-        var memberList = await query
-            .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+        var rows = await query.ToListAsync(cancellationToken);
+
+        var memberList = _mapper.Map<IReadOnlyList<MemberListDto>>(rows);
 
         return Result<IReadOnlyList<MemberListDto>>.Success(memberList);
     }

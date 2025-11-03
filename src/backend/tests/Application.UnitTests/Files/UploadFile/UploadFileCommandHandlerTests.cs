@@ -4,7 +4,6 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;

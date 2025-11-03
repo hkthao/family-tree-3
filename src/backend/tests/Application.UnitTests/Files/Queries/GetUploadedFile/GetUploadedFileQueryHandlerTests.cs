@@ -1,6 +1,5 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.Queries.GetUploadedFile;
 using FluentAssertions;
