@@ -13,236 +13,164 @@ public class UpdateUserProfileCommandValidatorTests
         _validator = new UpdateUserProfileCommandValidator();
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Id của UpdateUserProfileCommand là null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Id được đặt thành null.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Id với thông báo lỗi cụ thể "Id cannot be null.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Id là một trường bắt buộc và không được phép có giá trị null để xác định hồ sơ người dùng cần cập nhật.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenIdIsNull()
+    public void ShouldHaveError_WhenIdIsNull()
     {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Id là null.
         var command = new UpdateUserProfileCommand { Id = null! };
-
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Id)
-            .WithErrorMessage("Id cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.Id)
+              .WithErrorMessage("Id cannot be null.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Id của UpdateUserProfileCommand là một chuỗi rỗng.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Id được đặt thành string.Empty.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Id với thông báo lỗi cụ thể "Id cannot be empty.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Id là một trường bắt buộc và không được phép có giá trị rỗng để xác định hồ sơ người dùng cần cập nhật.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenIdIsEmpty()
+    public void ShouldHaveError_WhenIdIsEmpty()
     {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Id là chuỗi rỗng.
         var command = new UpdateUserProfileCommand { Id = string.Empty };
-
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Id)
-            .WithErrorMessage("Id cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.Id)
+              .WithErrorMessage("Id cannot be empty.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Name của UpdateUserProfileCommand là null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Name được đặt thành null.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Name với thông báo lỗi cụ thể "Name cannot be null.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Name là một trường bắt buộc và không được phép có giá trị null để đảm bảo hồ sơ người dùng có tên hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenNameIsNull()
+    public void ShouldNotHaveError_WhenIdIsValid()
     {
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Id hợp lệ.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString() };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.Id);
+    }
+
+    [Fact]
+    public void ShouldHaveError_WhenNameIsNull()
+    {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Name là null.
         var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = null! };
-
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Name)
-            .WithErrorMessage("Name cannot be null.");
+        result.ShouldHaveValidationErrorFor(x => x.Name)
+              .WithErrorMessage("Name cannot be null.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Name của UpdateUserProfileCommand là một chuỗi rỗng.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Name được đặt thành string.Empty.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Name với thông báo lỗi cụ thể "Name cannot be empty.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Name là một trường bắt buộc và không được phép có giá trị rỗng để đảm bảo hồ sơ người dùng có tên hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenNameIsEmpty()
+    public void ShouldHaveError_WhenNameIsEmpty()
     {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Name là chuỗi rỗng.
         var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = string.Empty };
-
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Name)
-            .WithErrorMessage("Name cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.Name)
+              .WithErrorMessage("Name cannot be empty.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Name của UpdateUserProfileCommand vượt quá độ dài tối đa cho phép (256 ký tự).
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Name là một chuỗi dài hơn 256 ký tự.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Name với thông báo lỗi cụ thể "Name must not exceed 256 characters.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Name có giới hạn độ dài để đảm bảo tính nhất quán và hiệu quả lưu trữ dữ liệu.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenNameExceedsMaxLength()
+    public void ShouldHaveError_WhenNameExceedsMaxLength()
     {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Name vượt quá 256 ký tự.
         var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = new string('a', 257) };
-
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Name)
-            .WithErrorMessage("Name must not exceed 256 characters.");
+        result.ShouldHaveValidationErrorFor(x => x.Name)
+              .WithErrorMessage("Name must not exceed 256 characters.");
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Email của UpdateUserProfileCommand là null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Email được đặt thành null.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Email với thông báo lỗi cụ thể "Email cannot be null.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Email là một trường bắt buộc và không được phép có giá trị null để đảm bảo hồ sơ người dùng có địa chỉ email hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenEmailIsNull()
+    public void ShouldNotHaveError_WhenNameIsValid()
     {
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test Name", Email = null! };
-
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Name hợp lệ.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Valid Name" };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Email)
-            .WithErrorMessage("Email cannot be null.");
+        result.ShouldNotHaveValidationErrorFor(x => x.Name);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Email của UpdateUserProfileCommand là một chuỗi rỗng.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Email được đặt thành string.Empty.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Email với thông báo lỗi cụ thể "Email cannot be empty.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Email là một trường bắt buộc và không được phép có giá trị rỗng để đảm bảo hồ sơ người dùng có địa chỉ email hợp lệ.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenEmailIsEmpty()
+    public void ShouldHaveError_WhenEmailIsNull()
     {
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test Name", Email = string.Empty };
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Email là null.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Email = null! };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Email)
-            .WithErrorMessage("Email cannot be empty.");
+        result.ShouldHaveValidationErrorFor(x => x.Email)
+              .WithErrorMessage("Email cannot be null.");
     }
 
-        /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Email của UpdateUserProfileCommand không phải là một địa chỉ email hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Email được đặt thành một chuỗi không phải là định dạng email hợp lệ (ví dụ: "invalid-email").
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Email với thông báo lỗi cụ thể "Email must be a valid email address.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Email phải tuân thủ định dạng email chuẩn để đảm bảo tính hợp lệ và khả năng gửi thông báo.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenEmailIsInvalid()
+    public void ShouldHaveError_WhenEmailIsEmpty()
     {
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test Name", Email = "invalid-email" };
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Email là chuỗi rỗng.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Email = string.Empty };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Email)
-            .WithErrorMessage("Email must be a valid email address.");
+        result.ShouldHaveValidationErrorFor(x => x.Email)
+              .WithErrorMessage("Email cannot be empty.");
     }
 
-        /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Email của UpdateUserProfileCommand vượt quá độ dài tối đa cho phép (256 ký tự).
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Email là một chuỗi dài hơn 256 ký tự.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Email với thông báo lỗi cụ thể "Email must not exceed 256 characters.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Email có giới hạn độ dài để đảm bảo tính nhất quán và hiệu quả lưu trữ dữ liệu.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenEmailExceedsMaxLength()
+    public void ShouldHaveError_WhenEmailIsInvalid()
     {
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test Name", Email = new string('a', 250) + "@example.com" };
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Email không hợp lệ.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Email = "invalid-email" };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Email)
-            .WithErrorMessage("Email must not exceed 256 characters.");
+        result.ShouldHaveValidationErrorFor(x => x.Email)
+              .WithErrorMessage("Email must be a valid email address.");
     }
 
-        /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Avatar của UpdateUserProfileCommand vượt quá độ dài tối đa cho phép (2048 ký tự).
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Avatar là một chuỗi URL dài hơn 2048 ký tự.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Avatar với thông báo lỗi cụ thể "Avatar URL must not exceed 2048 characters.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Avatar URL có giới hạn độ dài để đảm bảo tính nhất quán và hiệu quả lưu trữ dữ liệu.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenAvatarExceedsMaxLength()
+    public void ShouldHaveError_WhenEmailExceedsMaxLength()
     {
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test Name", Email = "test@example.com", Avatar = "http://example.com/" + new string('a', 2030) + ".jpg" };
-
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Email vượt quá 256 ký tự.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Email = new string('a', 250) + "@example.com" };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Avatar)
-            .WithErrorMessage("Avatar URL must not exceed 2048 characters.");
+        result.ShouldHaveValidationErrorFor(x => x.Email)
+              .WithErrorMessage("Email must not exceed 256 characters.");
     }
 
-        /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator báo lỗi khi thuộc tính Avatar của UpdateUserProfileCommand không phải là một URL hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Avatar được đặt thành một chuỗi không phải là URL hợp lệ (ví dụ: "invalid-url").
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng có một lỗi xác thực cho thuộc tính Avatar với thông báo lỗi cụ thể "Avatar URL must be a valid URL.".
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Avatar URL phải tuân thủ định dạng URL chuẩn để đảm bảo tính hợp lệ và khả năng truy cập.
-    /// </summary>
     [Fact]
-    public void ShouldHaveErrorWhenAvatarIsInvalidUrl()
+    public void ShouldNotHaveError_WhenEmailIsValid()
     {
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test Name", Email = "test@example.com", Avatar = "invalid-url" };
-
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Email hợp lệ.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Email = "test@example.com" };
         var result = _validator.TestValidate(command);
-
-        result.ShouldHaveValidationErrorFor(c => c.Avatar)
-            .WithErrorMessage("Avatar URL must be a valid URL.");
+        result.ShouldNotHaveValidationErrorFor(x => x.Email);
     }
 
-        /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng validator không báo lỗi khi tất cả các thuộc tính của UpdateUserProfileCommand đều hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với tất cả các thuộc tính (Id, Name, Email, Avatar) được đặt thành các giá trị hợp lệ.
-    ///    - Act: Gọi phương thức TestValidate của validator trên command đã tạo.
-    ///    - Assert: Kiểm tra rằng không có bất kỳ lỗi xác thực nào được báo cáo.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Một command hợp lệ với tất cả các trường tuân thủ quy tắc xác thực nên được chấp nhận mà không có lỗi.
-    /// </summary>
     [Fact]
-    public void ShouldNotHaveErrorWhenValidCommand()
+    public void ShouldHaveError_WhenAvatarExceedsMaxLength()
     {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Avatar URL vượt quá 2048 ký tự.
         var command = new UpdateUserProfileCommand
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Valid Name",
             Email = "valid@example.com",
-            Avatar = "http://valid.com/avatar.jpg"
+            Avatar = new string('a', 2049)
         };
-
         var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Avatar)
+              .WithErrorMessage("Avatar URL must not exceed 2048 characters.");
+    }
 
-        result.ShouldNotHaveAnyValidationErrors();
+    [Fact]
+    public void ShouldHaveError_WhenAvatarIsInvalidUrl()
+    {
+        // 🎯 Mục tiêu của test: Xác minh lỗi khi Avatar URL không hợp lệ.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Avatar = "invalid-url" };
+        var result = _validator.TestValidate(command);
+        result.ShouldHaveValidationErrorFor(x => x.Avatar)
+              .WithErrorMessage("Avatar URL must be a valid URL.");
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenAvatarIsValidUrl()
+    {
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Avatar URL hợp lệ.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Avatar = "http://example.com/avatar.png" };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.Avatar);
+    }
+
+    [Fact]
+    public void ShouldNotHaveError_WhenAvatarIsNull()
+    {
+        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Avatar là null.
+        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Avatar = null };
+        var result = _validator.TestValidate(command);
+        result.ShouldNotHaveValidationErrorFor(x => x.Avatar);
     }
 }

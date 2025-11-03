@@ -14,7 +14,7 @@ public class GetCurrentUserProfileQueryHandler(IApplicationDbContext context, IC
     {
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.Id == _user.ProfileId!.Value, cancellationToken);
+            .FirstOrDefaultAsync(up => up.UserId == _user.UserId, cancellationToken);
 
         if (userProfile == null)
         {

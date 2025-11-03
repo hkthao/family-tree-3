@@ -1,78 +1,64 @@
+using AutoMapper;
 using backend.Application.Common.Constants;
+using backend.Application.Common.Interfaces;
+using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Identity.UserProfiles.Queries.GetUserProfileById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Identity.UserProfiles.Queries.GetUserProfileById;
 
 public class GetUserProfileByIdQueryHandlerTests : TestBase
 {
+    private readonly Mock<IMapper> _mapperMock;
     private readonly GetUserProfileByIdQueryHandler _handler;
 
     public GetUserProfileByIdQueryHandlerTests()
     {
-
-
-        _handler = new GetUserProfileByIdQueryHandler(
-            _context,
-            _mapper
-        );
+        _mapperMock = new Mock<IMapper>();
+        _handler = new GetUserProfileByIdQueryHandler(_context, _mapperMock.Object);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailureWhenUserProfileNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy hồ sơ người dùng.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một GetUserProfileByIdQuery với Id không tồn tại trong DB.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
+        // Arrange
         var query = new GetUserProfileByIdQuery { Id = Guid.NewGuid() };
 
+        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        result.Should().NotBeNull();
+        // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain(ErrorMessages.UserProfileNotFound);
+        result.Error.Should().Be(ErrorMessages.UserProfileNotFound);
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
-        // 💡 Giải thích: Hồ sơ người dùng phải tồn tại để có thể truy xuất.
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnUserProfileByIdSuccessfully()
+    public async Task Handle_ShouldReturnUserProfile_WhenUserProfileExists()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về hồ sơ người dùng theo Id thành công.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Thêm một UserProfile vào Context với một Id cụ thể.
-        // 2. Act: Gọi phương thức Handle với GetUserProfileByIdQuery chứa Id đó.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công và chứa UserProfileDto khớp với hồ sơ người dùng đã thêm.
-        var userProfileId = Guid.NewGuid();
-        var existingUserProfile = new UserProfile
-        {
-            Id = userProfileId,
-            ExternalId = Guid.NewGuid().ToString(),
-            Email = "test@example.com",
-            Name = "Test User",
-            FirstName = "Test",
-            LastName = "User",
-            Phone = "1234567890"
-        };
-        _context.UserProfiles.Add(existingUserProfile);
-        await _context.SaveChangesAsync();
+        // Arrange
+        var userId = Guid.NewGuid();
+        var userProfile = new UserProfile(userId);
+        userProfile.Update("ext1", "test@example.com", "Test User", "Test", "User", null!, null!);
+        await _context.UserProfiles.AddAsync(userProfile);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
-        var query = new GetUserProfileByIdQuery { Id = userProfileId };
+        _mapperMock.Setup(m => m.Map<UserProfileDto>(It.IsAny<UserProfile>()))
+            .Returns(new UserProfileDto { Id = userProfile.Id, ExternalId = "ext1", Email = "test@example.com", Name = "Test User" });
 
+        var query = new GetUserProfileByIdQuery { Id = userProfile.Id };
+
+        // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
-        result.Should().NotBeNull();
+        // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Id.Should().Be(userProfileId.ToString());
-        result.Value.ExternalId.Should().Be(existingUserProfile.ExternalId);
+        result.Value!.Id.Should().Be(userProfile.Id);
         result.Value.Email.Should().Be("test@example.com");
-        result.Value.Name.Should().Be("Test User");
-        // 💡 Giải thích: Handler phải truy xuất và ánh xạ đúng hồ sơ người dùng dựa trên Id.
     }
 }

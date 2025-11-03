@@ -1,122 +1,180 @@
 using backend.Application.Common.Constants;
-using AutoFixture.AutoMoq;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Identity.Commands.UpdateUserProfile;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Identity.UserProfiles.Commands.UpdateUserProfile;
 
-/// <summary>
-/// Bộ test cho UpdateUserProfileCommandHandler.
-/// </summary>
 public class UpdateUserProfileCommandHandlerTests : TestBase
 {
     private readonly UpdateUserProfileCommandHandler _handler;
 
     public UpdateUserProfileCommandHandlerTests()
     {
-        _fixture.Customize(new AutoMoqCustomization());
-
-        _handler = new UpdateUserProfileCommandHandler(
-            _context
-        );
+        _handler = new UpdateUserProfileCommandHandler(_context);
     }
 
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi định dạng Id không hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UpdateUserProfileCommand với Id có định dạng không phải GUID.
-    ///    - Act: Gọi phương thức Handle của handler.
-    ///    - Assert: Kiểm tra kết quả trả về là thất bại, với thông báo lỗi là ErrorMessages.InvalidUserIdFormat
-    ///              và ErrorSource là ErrorSources.Validation.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Id phải là một GUID hợp lệ để tìm kiếm hồ sơ người dùng.
-    /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnFailureWhenInvalidIdFormat()
+    public async Task Handle_ShouldReturnFailure_WhenInvalidUserIdFormat()
     {
         // Arrange
-        var command = new UpdateUserProfileCommand { Id = "invalid-guid", Name = "Test", Email = "test@example.com" };
+        var command = new UpdateUserProfileCommand { Id = "invalid-guid" };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain(ErrorMessages.InvalidUserIdFormat);
+        result.Error.Should().Be(ErrorMessages.InvalidUserIdFormat);
         result.ErrorSource.Should().Be(ErrorSources.Validation);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailureWhenUserProfileNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler trả về lỗi khi không tìm thấy hồ sơ người dùng.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UpdateUserProfileCommand với Id hợp lệ nhưng không tồn tại trong DB.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-        var command = new UpdateUserProfileCommand { Id = Guid.NewGuid().ToString(), Name = "Test", Email = "test@example.com" };
+        // Arrange
+        var userId = Guid.NewGuid();
+        var command = new UpdateUserProfileCommand { Id = userId.ToString() };
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().NotBeNull();
+        // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain("User profile not found.");
-        result.ErrorSource.Should().Be("NotFound");
-        // 💡 Giải thích: Không thể cập nhật hồ sơ người dùng nếu không tìm thấy nó.
+        result.Error.Should().Be(ErrorMessages.UserProfileNotFound);
+        result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
 
     [Fact]
-    public async Task Handle_ShouldUpdateUserProfileSuccessfully()
+    public async Task Handle_ShouldUpdateUserProfile_WhenValidCommand()
     {
-        // 🎯 Mục tiêu của test: Xác minh handler cập nhật thành công hồ sơ người dùng hiện có.
-        // ⚙️ Các bước (Arrange, Act, Assert):
-        // 1. Arrange: Tạo một UserProfile hiện có trong Context. Tạo một UpdateUserProfileCommand với Id của UserProfile đó và các giá trị mới.
-        // 2. Act: Gọi phương thức Handle.
-        // 3. Assert: Kiểm tra kết quả trả về là thành công. Xác minh UserProfile trong Context đã được cập nhật với các giá trị mới.
-        var userProfileId = Guid.NewGuid();
-        var existingUserProfile = new UserProfile
-        {
-            Id = userProfileId,
-            ExternalId = Guid.NewGuid().ToString(),
-            Email = "old@example.com",
-            Name = "Old Name",
-            FirstName = "Old",
-            LastName = "Name",
-            Phone = "1234567890",
-            Avatar = "http://old.com/avatar.jpg"
-        };
-        _context.UserProfiles.Add(existingUserProfile);
-        await _context.SaveChangesAsync();
-
-        var newName = "New Name";
-        var newFirstName = "New";
-        var newLastName = "Name";
-        var newEmail = "new@example.com";
-        var newAvatar = "http://new.com/avatar.jpg";
+        // Arrange
+        var userId = Guid.NewGuid();
+        var user = new User("auth0|123", "old@example.com");
+        user.Id = userId; // Set the ID after construction
+        user.Profile!.Update(
+            "external-id",
+            "old@example.com",
+            "Old Name",
+            "Old",
+            "Name",
+            "111",
+            "old_avatar.png"
+        );
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync(CancellationToken.None);
 
         var command = new UpdateUserProfileCommand
         {
-            Id = userProfileId.ToString(),
-            FirstName = newFirstName,
-            LastName = newLastName,
-            Email = newEmail,
-            Avatar = newAvatar
+            Id = userId.ToString(),
+            Email = "new@example.com",
+            FirstName = "New",
+            LastName = "User",
+            Phone = "222",
+            Avatar = "new_avatar.png"
         };
 
+        // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
-        result.Should().NotBeNull();
+        // Assert
         result.IsSuccess.Should().BeTrue();
+        user.Profile.Email.Should().Be(command.Email);
+        user.Profile.Name.Should().Be("New User");
+        user.Profile.FirstName.Should().Be(command.FirstName);
+        user.Profile.LastName.Should().Be(command.LastName);
+        user.Profile.Phone.Should().Be(command.Phone);
+        user.Profile.Avatar.Should().Be(command.Avatar);
+    }
 
-        var updatedUserProfile = await _context.UserProfiles.FindAsync(userProfileId);
-        updatedUserProfile.Should().NotBeNull();
-        updatedUserProfile!.Name.Should().Be(newName);
-        updatedUserProfile.Email.Should().Be(newEmail);
-        updatedUserProfile.Avatar.Should().Be(newAvatar);
-        // 💡 Giải thích: Handler phải cập nhật thành công các thuộc tính của hồ sơ người dùng và lưu các thay đổi vào cơ sở dữ liệu.
+    [Fact]
+    public async Task Handle_ShouldUpdateUserProfileWithPartialData_WhenSomeFieldsAreNull()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var user = new User("auth0|123", "old@example.com");
+        user.Id = userId; // Set the ID after construction
+        user.Profile!.Update(
+            "external-id",
+            "old@example.com",
+            "Old Name",
+            "Old",
+            "Name",
+            "111",
+            "old_avatar.png"
+        );
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        var command = new UpdateUserProfileCommand
+        {
+            Id = userId.ToString(),
+            Email = "new@example.com",
+            FirstName = null, // Should retain old value
+            LastName = "Updated",
+            Phone = null, // Should retain old value
+            Avatar = "new_avatar.png"
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.Profile.Email.Should().Be(command.Email);
+        user.Profile.Name.Should().Be("Old Updated"); // FirstName is null, so it uses old FirstName + new LastName
+        user.Profile.FirstName.Should().Be("Old");
+        user.Profile.LastName.Should().Be(command.LastName);
+        user.Profile.Phone.Should().Be("111");
+        user.Profile.Avatar.Should().Be(command.Avatar);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldUpdateUserProfileWithEmptyStrings_WhenFieldsAreEmpty()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+        var user = new User("auth0|123", "old@example.com");
+        user.Id = userId; // Set the ID after construction
+        user.Profile!.Update(
+            "external-id",
+            "old@example.com",
+            "Old Name",
+            "Old",
+            "Name",
+            "111",
+            "old_avatar.png"
+        );
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        var command = new UpdateUserProfileCommand
+        {
+            Id = userId.ToString(),
+            Email = "new@example.com",
+            FirstName = string.Empty,
+            LastName = string.Empty,
+            Phone = string.Empty,
+            Avatar = string.Empty
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        user.Profile.Email.Should().Be(command.Email);
+        user.Profile.Name.Should().Be(""); // Both FirstName and LastName are empty
+        user.Profile.FirstName.Should().Be(string.Empty);
+        user.Profile.LastName.Should().Be(string.Empty);
+        user.Profile.Phone.Should().Be(string.Empty);
+        user.Profile.Avatar.Should().Be(string.Empty);
     }
 }
