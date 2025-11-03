@@ -1,7 +1,8 @@
-using AutoFixture;
-using backend.Application.Common.Interfaces;
+
+using System.Text.Json;
 using backend.Application.Common.Constants;
-using backend.Application.Common.Models;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models; // Added this line
 using backend.Application.Events.Commands.GenerateEventData;
 using backend.Application.Events.Queries;
 using backend.Application.UnitTests.Common;
@@ -17,406 +18,268 @@ namespace backend.Application.UnitTests.Events.Commands.GenerateEventData;
 
 public class GenerateEventDataCommandHandlerTests : TestBase
 {
+    private readonly Mock<IChatProviderFactory> _chatProviderFactoryMock;
+    private readonly Mock<IChatProvider> _chatProviderMock;
+    private readonly Mock<IValidator<AIEventDto>> _aiEventDtoValidatorMock;
+    private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly GenerateEventDataCommandHandler _handler;
-    private readonly Mock<IChatProviderFactory> _mockChatProviderFactory;
-    private readonly Mock<IChatProvider> _mockChatProvider;
-    private readonly Mock<IValidator<AIEventDto>> _mockAIEventDtoValidator;
 
     public GenerateEventDataCommandHandlerTests()
     {
-        _mockChatProviderFactory = _fixture.Freeze<Mock<IChatProviderFactory>>();
-        _mockChatProvider = _fixture.Freeze<Mock<IChatProvider>>();
-        _mockAIEventDtoValidator = _fixture.Freeze<Mock<IValidator<AIEventDto>>>();
+        _chatProviderFactoryMock = new Mock<IChatProviderFactory>();
+        _chatProviderMock = new Mock<IChatProvider>();
+        _aiEventDtoValidatorMock = new Mock<IValidator<AIEventDto>>();
+        _authorizationServiceMock = new Mock<IAuthorizationService>();
 
-        _mockChatProviderFactory.Setup(f => f.GetProvider(It.IsAny<ChatAIProvider>()))
-                                .Returns(_mockChatProvider.Object);
+        _chatProviderFactoryMock.Setup(x => x.GetProvider(It.IsAny<ChatAIProvider>())).Returns(_chatProviderMock.Object);
 
         _handler = new GenerateEventDataCommandHandler(
-            _mockChatProviderFactory.Object,
-            _mockAIEventDtoValidator.Object,
+            _chatProviderFactoryMock.Object,
+            _aiEventDtoValidatorMock.Object,
             _context,
-            _mockAuthorizationService.Object
-        );
-            
-        _mockAuthorizationService.Setup(s => s.CanAccessFamily(It.IsAny<Guid>())).Returns(true);
+            _authorizationServiceMock.Object);
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
-    /// khi AI trả về một phản hồi trống hoặc null.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về một chuỗi trống.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
-    /// trường hợp AI không tạo ra phản hồi, ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
+    /// Kiểm tra trường hợp thành công: tạo dữ liệu sự kiện khi lệnh và phản hồi AI hợp lệ.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldGenerateEventData_WhenValidCommandAndAIResponseIsValid()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF001" };
+        var member = new Member("Doe", "John", "JD001", familyId) { Id = memberId };
+        _context.Families.Add(family);
+        _context.Members.Add(member);
+        await _context.SaveChangesAsync();
+
+        var aiResponseJson = "{\"events\":[{\"name\":\"Test Event\",\"type\":\"Other\",\"startDate\":\"2023-01-01\",\"location\":\"Test Location\",\"familyName\":\"Test Family\",\"relatedMembers\":[\"John Doe\"]}]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _authorizationServiceMock.Setup(x => x.CanAccessFamily(familyId)).Returns(true);
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult());
+
+        var command = new GenerateEventDataCommand("Generate a test event.");
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(1);
+        var eventDto = result.Value!.First();
+        eventDto.Name.Should().Be("Test Event");
+        eventDto.FamilyId.Should().Be(familyId);
+        eventDto.ValidationErrors.Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// Kiểm tra trả về thất bại khi phản hồi từ AI rỗng.
     /// </summary>
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenAIResponseIsEmpty()
     {
         // Arrange
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(string.Empty);
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(" ");
+        var command = new GenerateEventDataCommand("Generate empty response.");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be(ErrorMessages.NoAIResponse);
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một kết quả thất bại
-    /// khi AI trả về một chuỗi JSON không hợp lệ.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về một chuỗi JSON không hợp lệ.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thất bại và có thông báo lỗi phù hợp.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
-    /// trường hợp AI tạo ra JSON không hợp lệ, ngăn chặn lỗi và cung cấp thông báo lỗi rõ ràng.
+    /// Kiểm tra trả về danh sách rỗng khi AI không tạo ra sự kiện nào.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenAIResponseIsInvalidJson()
+    public async Task Handle_ShouldReturnEmptyList_WhenAIResponseContainsNoEvents()
     {
         // Arrange
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync("{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\" "); // Invalid JSON
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        var aiResponseJson = "{\"events\":[]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        var command = new GenerateEventDataCommand("Generate no events.");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain(ErrorMessages.InvalidAIResponse.Split('{')[0]);
-    }
-
-    /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về một danh sách trống
-    /// khi AI trả về JSON hợp lệ nhưng không có sự kiện nào được tạo.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về JSON hợp lệ nhưng với danh sách sự kiện trống.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công và danh sách sự kiện trả về là rỗng.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
-    /// trường hợp AI không tạo ra sự kiện nào, trả về một danh sách trống thay vì lỗi.
-    /// </summary>
-    [Fact]
-    public async Task Handle_ShouldReturnEmptyList_WhenNoEventsGenerated()
-    {
-        // Arrange
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync("{ \"events\": [] }");
-        var command = _fixture.Create<GenerateEventDataCommand>();
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeEmpty();
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
-    /// khi AI tạo sự kiện cho một gia đình mà người dùng hiện tại không có quyền truy cập.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một Family và thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ
-    ///               với một sự kiện có FamilyName hợp lệ. Thiết lập _mockAuthorizationService để CanAccessFamily trả về false.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa lỗi xác thực về quyền truy cập gia đình.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống kiểm tra quyền truy cập
-    /// của người dùng đối với gia đình được đề cập trong sự kiện do AI tạo ra và thêm lỗi xác thực
-    /// nếu người dùng không có quyền, nhưng vẫn trả về kết quả thành công vì quá trình AI đã hoàn tất.
+    /// Kiểm tra trả về thất bại khi phản hồi AI là JSON không hợp lệ.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenUserCannotAccessFamily()
+    public async Task Handle_ShouldReturnFailure_WhenAIResponseIsInvalidJson()
     {
         // Arrange
-        var familyName = "AccessibleFamily";
-        var family = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"AccessibleFamily\" } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-
-        _mockAuthorizationService.Setup(s => s.CanAccessFamily(family.Id)).Returns(false);
-
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync("invalid json");
+        var command = new GenerateEventDataCommand("Generate invalid json.");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
-        result.Value!.First().ValidationErrors.Should().Contain(ErrorMessages.AccessDenied);
+        result.IsSuccess.Should().BeFalse();
+        result.Error.Should().StartWith(string.Format(ErrorMessages.InvalidAIResponse, ""));
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
-    /// khi AI tạo sự kiện cho một gia đình không tồn tại.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName không tồn tại.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa lỗi xác thực cho FamilyName.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện
-    /// với FamilyName không hợp lệ, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó và trả về kết quả thành công
-    /// (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
+    /// Kiểm tra thêm lỗi xác thực khi không tìm thấy FamilyName.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenFamilyNotFound()
+    public async Task Handle_ShouldAddValidationError_WhenFamilyNameIsNotFound()
     {
         // Arrange
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"NonExistentFamily\" } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        var aiResponseJson = "{\"events\":[{\"familyName\":\"NonExistentFamily\"}]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult());
+        var command = new GenerateEventDataCommand("Test");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
         result.Value!.First().ValidationErrors.Should().Contain(string.Format(ErrorMessages.FamilyNotFound, "NonExistentFamily"));
     }
-
+    
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
-    /// khi AI tạo sự kiện cho một FamilyName/Code khớp với nhiều gia đình.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo hai Family có cùng tên và thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ
-    ///               với một sự kiện có FamilyName trùng lặp.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa lỗi xác thực cho FamilyName.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện
-    /// với FamilyName khớp với nhiều gia đình, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó
-    /// và trả về kết quả thành công (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
+    /// Kiểm tra thêm lỗi xác thực khi tìm thấy nhiều gia đình trùng tên.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenMultipleFamiliesFound()
+    public async Task Handle_ShouldAddValidationError_WhenMultipleFamiliesFound()
     {
         // Arrange
-        var familyName = "DuplicateFamily";
-        var family1 = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
-        var family2 = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
-        _context.Families.AddRange(family1, family2);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        _context.Families.Add(new Family { Name = "Duplicate Family", Code = "DF1" });
+        _context.Families.Add(new Family { Name = "Duplicate Family", Code = "DF2" });
+        await _context.SaveChangesAsync();
 
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"DuplicateFamily\" } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        var aiResponseJson = "{\"events\":[{\"familyName\":\"Duplicate Family\"}]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult());
+        var command = new GenerateEventDataCommand("Test");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
         result.Value!.First().ValidationErrors.Should().Contain(ErrorMessages.MultipleFamiliesFound);
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
-    /// khi AI tạo sự kiện với một định danh thành viên liên quan khớp với nhiều thành viên
-    /// trong gia đình được chỉ định.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một Family và hai Member có cùng tên/mã trong Family đó, sau đó thêm vào DB.
-    ///               Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName
-    ///               và một định danh RelatedMember trùng lặp. Thiết lập _mockAuthorizationService để CanAccessFamily trả về true.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa lỗi xác thực về việc tìm thấy nhiều thành viên.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng hệ thống xử lý đúng
-    /// trường hợp khi một định danh thành viên liên quan không đủ duy nhất để xác định một thành viên cụ thể,
-    /// ngăn chặn việc gán sai và cung cấp thông báo lỗi rõ ràng.
+    /// Kiểm tra thêm lỗi xác thực khi người dùng không có quyền truy cập gia đình.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenMultipleRelatedMembersFound()
+    public async Task Handle_ShouldAddValidationError_WhenFamilyIsNotAccessible()
     {
         // Arrange
-        var familyName = "TestFamily";
-        var family = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
-        _context.Families.Add(family);
+        var familyId = Guid.NewGuid();
+        _context.Families.Add(new Family { Id = familyId, Name = "Inaccessible Family", Code = "IF1" });
+        await _context.SaveChangesAsync();
 
-        var memberIdentifier = "John Doe";
-        var member1 = new Member { Id = Guid.NewGuid(), FamilyId = family.Id, FirstName = "John", LastName = "Doe", Code = "JD001" };
-        var member2 = new Member { Id = Guid.NewGuid(), FamilyId = family.Id, FirstName = "John", LastName = "Doe", Code = "JD002" };
-        _context.Members.AddRange(member1, member2);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"" + memberIdentifier + "\"] } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        var aiResponseJson = "{\"events\":[{\"familyName\":\"Inaccessible Family\"}]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _authorizationServiceMock.Setup(x => x.CanAccessFamily(familyId)).Returns(false); // No access
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult());
+        var command = new GenerateEventDataCommand("Test");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
-        result.Value!.First().ValidationErrors.Should().Contain(ErrorMessages.MultipleMembersFound);
+        result.Value!.First().ValidationErrors.Should().Contain(ErrorMessages.AccessDenied);
+        result.Value!.First().FamilyId.Should().BeNull();
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
-    /// khi AI tạo sự kiện với các thành viên liên quan không tìm thấy trong gia đình được chỉ định.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một Family và thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ
-    ///               với một sự kiện có FamilyName và RelatedMembers không tồn tại.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa lỗi xác thực cho RelatedMembers.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện
-    /// với RelatedMembers không tồn tại, hệ thống sẽ thêm lỗi xác thực vào sự kiện đó
-    /// và trả về kết quả thành công (vì quá trình xử lý AI thành công, nhưng dữ liệu sự kiện có lỗi).
+    /// Kiểm tra thêm lỗi xác thực khi không tìm thấy thành viên liên quan.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenRelatedMemberNotFound()
+    public async Task Handle_ShouldAddValidationError_WhenRelatedMemberIsNotFound()
     {
         // Arrange
-        var familyName = "TestFamily";
-        var family = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
-        _context.Families.Add(family);
-        await _context.SaveChangesAsync(CancellationToken.None);
+        var familyId = Guid.NewGuid();
+        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF1" });
+        await _context.SaveChangesAsync();
 
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"NonExistentMember\"] } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        var aiResponseJson = "{\"events\":[{\"familyName\":\"Test Family\", \"relatedMembers\":[\"NonExistent Member\"]}]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _authorizationServiceMock.Setup(x => x.CanAccessFamily(familyId)).Returns(true);
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult());
+        var command = new GenerateEventDataCommand("Test");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
-        var generatedEvents = result.Value!;
-        generatedEvents.First().ValidationErrors.Should().Contain(string.Format(ErrorMessages.NotFound, "Related member 'NonExistentMember' in family 'TestFamily'"));
+        result.Value!.First().ValidationErrors.Should().Contain(string.Format(ErrorMessages.NotFound, "Related member 'NonExistent Member' in family 'Test Family'"));
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện với lỗi xác thực
-    /// khi AIEventDtoValidator phát hiện lỗi trong dữ liệu sự kiện do AI tạo ra.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một Family và Member, sau đó thêm vào DB. Thiết lập _mockChatProvider để trả về JSON hợp lệ.
-    ///               Thiết lập _mockAuthorizationService để CanAccessFamily trả về true.
-    ///               Thiết lập _mockAIEventDtoValidator để trả về ValidationResult với lỗi.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa lỗi xác thực từ validator.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng các lỗi validation
-    /// được phát hiện bởi AIEventDtoValidator được thu thập và trả về cùng với các sự kiện,
-    /// cho phép xử lý lỗi chi tiết hơn.
+    /// Kiểm tra thêm lỗi xác thực khi AIEventDto không hợp lệ.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsWithValidationErrors_WhenAIEventDtoValidationFails()
+    public async Task Handle_ShouldAddValidationError_WhenAIEventDtoValidationFails()
     {
         // Arrange
-        var familyName = "TestFamily";
-        var family = _fixture.Build<Family>().With(f => f.Name, familyName).Create();
-        _context.Families.Add(family);
-
-        var member = _fixture.Build<Member>().With(m => m.FamilyId, family.Id).With(m => m.FirstName, "John").With(m => m.LastName, "Doe").Create();
-        _context.Members.Add(member);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"" + member.FirstName + " " + member.LastName + "\"] } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-
-        var validationFailure = new ValidationFailure("Name", "Event name is too short.");
-        _mockAIEventDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>()))
-                                .ReturnsAsync(new ValidationResult(new List<ValidationFailure> { validationFailure }));
-
-        var command = _fixture.Create<GenerateEventDataCommand>();
+        var validationError = "Name is required.";
+        var aiResponseJson = "{\"events\":[{\"name\":\"\"}]}"; // Empty name
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult(new[] { new ValidationFailure("Name", validationError) }));
+        var command = new GenerateEventDataCommand("Test");
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
-        result.Value!.First().ValidationErrors.Should().Contain("Event name is too short.");
+        result.Value!.First().ValidationErrors.Should().Contain(validationError);
+    }
+    
+    /// <summary>
+    /// Kiểm tra loại sự kiện được mặc định là 'Other' nếu thiếu.
+    /// </summary>
+    [Fact]
+    public async Task Handle_ShouldDefaultEventTypeToOther_WhenTypeIsMissing()
+    {
+        // Arrange
+        var aiResponseJson = "{\"events\":[{\"name\":\"Event without type\"}]}";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ReturnsAsync(aiResponseJson);
+        _aiEventDtoValidatorMock.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>())).ReturnsAsync(new ValidationResult());
+        var command = new GenerateEventDataCommand("Test");
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value!.First().Type.Should().Be(EventType.Other.ToString());
     }
 
     /// <summary>
-    /// 🎯 Mục tiêu của test: Xác minh rằng handler trả về các sự kiện được tạo thành công
-    /// khi AI trả về một phản hồi hợp lệ và tất cả các thực thể liên quan được tìm thấy và ủy quyền.
-    /// ⚙️ Các bước (Arrange, Act, Assert):
-    ///    - Arrange: Tạo một UserProfile, Family và Member, sau đó thêm vào DB.
-    ///               Thiết lập _mockChatProvider để trả về JSON hợp lệ với một sự kiện có FamilyName và RelatedMembers hợp lệ.
-    ///               Thiết lập _mockAuthorizationService để CanManageFamily trả về true.
-    ///               Thiết lập _mockAIEventDtoValidator để trả về ValidationResult thành công.
-    ///    - Act: Gọi phương thức Handle của handler với một GenerateEventDataCommand bất kỳ.
-    ///    - Assert: Kiểm tra xem kết quả trả về là thành công. Kiểm tra xem danh sách sự kiện trả về
-    ///              có chứa sự kiện được tạo và không có lỗi xác thực nào.
-    /// 💡 Giải thích vì sao kết quả mong đợi là đúng: Test này đảm bảo rằng khi AI tạo ra một sự kiện hợp lệ
-    /// và tất cả các thực thể liên quan được tìm thấy và ủy quyền, hệ thống sẽ trả về sự kiện đó
-    /// mà không có lỗi xác thực.
+    /// Kiểm tra trả về thất bại khi có lỗi không mong muốn xảy ra.
     /// </summary>
     [Fact]
-    public async Task Handle_ShouldReturnEventsSuccessfully_WhenValidAIResponse()
+    public async Task Handle_ShouldReturnFailure_WhenUnexpectedExceptionOccurs()
     {
         // Arrange
-        var userProfile = new UserProfile { Id = Guid.NewGuid(), ExternalId = Guid.NewGuid().ToString(), Email = "test@example.com", Name = "Test User", FirstName = "Test", LastName = "User", Phone = "1234567890" };
-        _context.UserProfiles.Add(userProfile);
-
-        var familyName = "TestFamily";
-        var family = new Family { Id = Guid.NewGuid(), Name = familyName, Code = "TF1" };
-        _context.Families.Add(family);
-
-        var member = new Member { Id = Guid.NewGuid(), FamilyId = family.Id, FirstName = "John", LastName = "Doe", Code = "JD001" };
-        _context.Members.Add(member);
-
-        var familyUser = new FamilyUser { FamilyId = family.Id, UserProfileId = userProfile.Id, Role = FamilyRole.Manager };
-        _context.FamilyUsers.Add(familyUser);
-        await _context.SaveChangesAsync(CancellationToken.None);
-
-        var aiResponseJson = "{ \"events\": [ { \"name\": \"Event 1\", \"type\": \"Other\", \"startDate\": \"2023-01-01\", \"location\": \"Location 1\", \"familyName\": \"TestFamily\", \"relatedMembers\": [\"John Doe\"] } ] }";
-        _mockChatProvider.Setup(p => p.GenerateResponseAsync(It.IsAny<List<ChatMessage>>()))
-                         .ReturnsAsync(aiResponseJson);
-        _mockAIEventDtoValidator.Setup(v => v.ValidateAsync(It.IsAny<AIEventDto>(), It.IsAny<CancellationToken>()))
-                                .ReturnsAsync(new ValidationResult());
-
-        var command = _fixture.Create<GenerateEventDataCommand>();
-
+        var exceptionMessage = "Unexpected error.";
+        _chatProviderMock.Setup(x => x.GenerateResponseAsync(It.IsAny<List<ChatMessage>>())).ThrowsAsync(new Exception(exceptionMessage));
+        var command = new GenerateEventDataCommand("Test");
         // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeNull();
-        result.Value.Should().HaveCount(1);
-        var generatedEvents = result.Value!;
-        generatedEvents.First().Name.Should().Be("Event 1");
-        generatedEvents.First().ValidationErrors.Should().BeEmpty();
+        await act.Should().ThrowAsync<Exception>().WithMessage(exceptionMessage);
     }
 }

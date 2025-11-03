@@ -10,6 +10,6 @@ public class AIEventDto
     public string? Description { get; set; }
     public string? FamilyName { get; set; }
     public Guid? FamilyId { get; set; }
-    public List<string> RelatedMembers { get; set; } = []; // Can be name or code
+    public List<string> RelatedMembers { get; set; } = new List<string>(); // Can be name or code
     public List<string> ValidationErrors { get; set; } = [];
 }

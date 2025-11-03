@@ -1,3 +1,4 @@
+
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Events.Commands.DeleteEvent;
@@ -10,14 +11,14 @@ using Xunit;
 
 namespace backend.Application.UnitTests.Events.Commands.DeleteEvent;
 
-public class DeleteEventCommandHandlerTests : TestBase
+public class DeleteEventHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IDateTime> _dateTimeMock;
     private readonly DeleteEventCommandHandler _handler;
 
-    public DeleteEventCommandHandlerTests()
+    public DeleteEventHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _currentUserMock = new Mock<ICurrentUser>();
