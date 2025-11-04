@@ -17,29 +17,23 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnSuccess_WhenRequestIsValid()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-        var relationshipId = Guid.NewGuid();
-
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF" };
-        var sourceMember = family.CreateMember("Source", "Member", "SM");
-        var targetMember = family.CreateMember("Target", "Member", "TM");
-        family.AddMember(sourceMember);
-        family.AddMember(targetMember);
-        var relationship = new Relationship(familyId, sourceMember.Id, targetMember.Id, RelationshipType.Father) { Id = relationshipId };
+        var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
+        var sourceMember = family.AddMember(new Member("Source", "Member", "SM", family.Id));
+        var targetMember = family.AddMember(new Member("Target", "Member", "TM", family.Id));
+        var relationship = family.AddRelationship(sourceMember.Id, targetMember.Id, RelationshipType.Father);
         _context.Families.Add(family);
-        _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(family.Id)).Returns(true);
 
         var handler = new UpdateRelationshipCommandHandler(_context, _mockAuthorizationService.Object);
         var command = new UpdateRelationshipCommand
         {
-            Id = relationshipId,
+            Id = relationship.Id,
             SourceMemberId = sourceMember.Id,
             TargetMemberId = targetMember.Id,
             Type = RelationshipType.Mother,
-            FamilyId = familyId
+            FamilyId = family.Id
         };
 
         // Act
@@ -48,6 +42,10 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeTrue();
+        var updatedRelationship = await _context.Relationships.FindAsync(relationship.Id);
+        updatedRelationship.Should().NotBeNull();
+        updatedRelationship!.Type.Should().Be(RelationshipType.Mother);
+        updatedRelationship.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipUpdatedEvent);
     }
 
     [Fact]

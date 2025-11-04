@@ -17,17 +17,13 @@ public class CreateRelationshipCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnSuccess_WhenRequestIsValid()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-
-        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF" };
-        var sourceMember = new Member("Source", "Member", "SM", family.Id);
-        var targetMember = new Member("Target", "Member", "TM",family.Id);
-        _context.Members.Add(sourceMember);
-        _context.Members.Add(targetMember);
+        var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
+        var sourceMember = family.AddMember(new Member("Source", "Member", "SM", family.Id));
+        var targetMember = family.AddMember(new Member("Target", "Member", "TM", family.Id));
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
 
-        _mockAuthorizationService.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+        _mockAuthorizationService.Setup(x => x.CanManageFamily(family.Id)).Returns(true);
 
         var handler = new CreateRelationshipCommandHandler(_context, _mockAuthorizationService.Object);
         var command = new CreateRelationshipCommand
@@ -35,7 +31,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
             SourceMemberId = sourceMember.Id,
             TargetMemberId = targetMember.Id,
             Type = RelationshipType.Father,
-            FamilyId = familyId
+            FamilyId = family.Id
         };
 
         // Act
@@ -44,6 +40,9 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeEmpty();
+        var relationship = await _context.Relationships.FindAsync(result.Value);
+        relationship.Should().NotBeNull();
+        relationship!.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipCreatedEvent);
     }
 
     [Fact]

@@ -27,17 +27,17 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnSuccess_WhenRequestIsValid()
     {
         // Arrange
-        var familyId = Guid.NewGuid();
-        var relationshipId = Guid.NewGuid();
-
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF" });
-        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father) { Id = relationshipId });
+        var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
+        var sourceMember = family.AddMember(new Member("Source", "Member", "SM", family.Id));
+        var targetMember = family.AddMember(new Member("Target", "Member", "TM", family.Id));
+        var relationship = family.AddRelationship(sourceMember.Id, targetMember.Id, RelationshipType.Father);
+        _context.Families.Add(family);
         await _context.SaveChangesAsync();
 
-        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(family.Id)).Returns(true);
 
         var handler = new DeleteRelationshipCommandHandler(_context, _authorizationServiceMock.Object, _currentUserMock.Object, _dateTimeMock.Object);
-        var command = new DeleteRelationshipCommand(relationshipId);
+        var command = new DeleteRelationshipCommand(relationship.Id);
 
         // Act
         var result = await handler.Handle(command, CancellationToken.None);
@@ -45,6 +45,9 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().BeTrue();
+        var deletedRelationship = await _context.Relationships.FindAsync(relationship.Id);
+        deletedRelationship.Should().BeNull();
+        family.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipDeletedEvent);
     }
 
     [Fact]
