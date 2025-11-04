@@ -69,7 +69,6 @@ public static class DependencyInjection
         services.AddSingleton<IDateTime, DateTimeService>();
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
-        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
         // Register Background Task Queue
@@ -81,7 +80,6 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.AddScoped<IAuthorizationService, AuthorizationService>();
-
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>

@@ -70,7 +70,7 @@ public class EnsureUserExistsMiddleware
                         await dbContext.SaveChangesAsync(CancellationToken.None);
                         _logger.LogInformation("EnsureUserExistsMiddleware: Created new User with ID: {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
                     }
-                    catch (DbUpdateException ex) when (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
+                    catch (DbUpdateException ex) when (ex.InnerException is MySqlException mysqlEx && mysqlEx.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
                     {
                         // Race condition: user was created by another request. Fetch the existing user.
                         _logger.LogWarning("EnsureUserExistsMiddleware: Race condition detected. User with external ID {ExternalId} already exists. Fetching existing user.", externalId);

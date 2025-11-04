@@ -1,4 +1,5 @@
 using backend.CompositionRoot;
+using backend.Web.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 
 /// <summary>
@@ -124,6 +125,7 @@ public class Startup
 
         app.UseAuthentication();
         app.UseMiddleware<EnsureUserExistsMiddleware>();
+        app.UseMiddleware<NovuSubscriberCreationMiddleware>();
         app.UseAuthorization();
         app.UseExceptionHandler(options => { });
 
