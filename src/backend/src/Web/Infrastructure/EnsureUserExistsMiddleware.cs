@@ -87,24 +87,6 @@ public class EnsureUserExistsMiddleware
                         }
                     }
                 }
-                else
-                {
-                    // Update existing profile with latest info from claims if needed
-                    user.UpdateProfile(
-                        externalId,
-                        email ?? "",
-                        name ?? "",
-                        claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value ?? "",
-                        claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value ?? "",
-                        claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value ?? "",
-                        claimsPrincipal.FindFirst("picture")?.Value ?? ""
-                    );
-                    // No need to explicitly update preference here, as it's created with default values
-                    // and can be updated by the user later.
-
-                    await dbContext.SaveChangesAsync(CancellationToken.None);
-                    _logger.LogInformation("EnsureUserExistsMiddleware: Updated existing User {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
-                }
 
                 // Store UserId and ProfileId in HttpContext.Items
                 context.Items[HttpContextItemKeys.UserId] = user.Id;

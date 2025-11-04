@@ -7,8 +7,8 @@ public class UserPreference : BaseAuditableEntity
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
-    public Theme Theme { get; private set; } = Theme.Light;
-    public Language Language { get; private set; } = Language.English;
+    public Theme Theme { get; private set; } = Theme.Dark;
+    public Language Language { get; private set; } = Language.Vietnamese;
 
     // Private constructor for EF Core
     private UserPreference() { }

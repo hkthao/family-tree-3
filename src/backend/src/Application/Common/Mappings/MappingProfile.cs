@@ -55,6 +55,5 @@ public class MappingProfile : Profile
         CreateMap<UserProfile, UserProfileDto>();
         CreateMap<UserActivity, UserActivityDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
-        CreateMap<UserProfile, UserProfileDto>();
     }
 }
