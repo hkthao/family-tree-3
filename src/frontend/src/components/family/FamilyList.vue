@@ -45,15 +45,9 @@
       {{ item.code }}
     </template>
 
-    <!-- totalMembers column -->
-    <template #item.totalMembers="{ item }">
-      {{ item.totalMembers }}
-    </template>
 
-    <!-- totalGenerations column -->
-    <template #item.totalGenerations="{ item }">
-      {{ item.totalGenerations }}
-    </template>
+
+
 
     <!-- visibility column -->
     <template #item.visibility="{ item }">
@@ -140,18 +134,8 @@ const headers = computed<DataTableHeader[]>(() => [
     width: '120px',
     align: 'start',
   },
-  {
-    title: t('family.management.headers.totalMembers'),
-    key: 'totalMembers',
-    width: '120px',
-    align: 'center',
-  },
-  {
-    title: t('family.management.headers.totalGenerations'),
-    key: 'totalGenerations',
-    width: '120px',
-    align: 'center',
-  },
+
+
   {
     title: t('family.management.headers.visibility'),
     key: 'visibility',

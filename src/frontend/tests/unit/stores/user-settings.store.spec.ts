@@ -59,9 +59,6 @@ describe('user-settings.store', () => {
     userProfileId: 'user-1',
     theme: Theme.Dark,
     language: Language.English,
-    emailNotificationsEnabled: true,
-    smsNotificationsEnabled: false,
-    inAppNotificationsEnabled: true,
     created: '2023-01-01T00:00:00Z',
     createdBy: 'user-1',
     lastModified: null,
@@ -86,9 +83,6 @@ describe('user-settings.store', () => {
   it('should have correct initial state', () => {
     expect(store.preferences.theme).toBe(Theme.Dark);
     expect(store.preferences.language).toBe(Language.English);
-    expect(store.preferences.emailNotificationsEnabled).toBe(true);
-    expect(store.preferences.smsNotificationsEnabled).toBe(false);
-    expect(store.preferences.inAppNotificationsEnabled).toBe(true);
     expect(store.loading).toBe(false);
     expect(store.error).toBeNull();
   });
@@ -155,29 +149,5 @@ describe('user-settings.store', () => {
     store.setLanguage(Language.English);
     expect(store.preferences.language).toBe(Language.English);
     expect(i18n.global.locale.value).toBe('en');
-  });
-
-  it('should toggle email notifications correctly', () => {
-    store.preferences.emailNotificationsEnabled = true; // Ensure initial state for toggle
-    store.toggleEmailNotifications();
-    expect(store.preferences.emailNotificationsEnabled).toBe(false);
-    store.toggleEmailNotifications();
-    expect(store.preferences.emailNotificationsEnabled).toBe(true);
-  });
-
-  it('should toggle sms notifications correctly', () => {
-    store.preferences.smsNotificationsEnabled = false; // Ensure initial state for toggle
-    store.toggleSmsNotifications();
-    expect(store.preferences.smsNotificationsEnabled).toBe(true);
-    store.toggleSmsNotifications();
-    expect(store.preferences.smsNotificationsEnabled).toBe(false);
-  });
-
-  it('should toggle in-app notifications correctly', () => {
-    store.preferences.inAppNotificationsEnabled = true; // Ensure initial state for toggle
-    store.toggleInAppNotifications();
-    expect(store.preferences.inAppNotificationsEnabled).toBe(false);
-    store.toggleInAppNotifications();
-    expect(store.preferences.inAppNotificationsEnabled).toBe(true);
   });
 });

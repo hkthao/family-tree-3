@@ -70,7 +70,7 @@ const formData = reactive<Partial<Relationship>>(
     },
 );
 
-const rules = useRelationshipRules(toRefs(formData));
+const rules = useRelationshipRules(formData);
 
 const v$ = useVuelidate(rules, formData);
 

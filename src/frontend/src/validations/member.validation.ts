@@ -1,7 +1,7 @@
 import { useI18n } from 'vue-i18n';
 import { required, helpers } from '@vuelidate/validators';
-import { computed } from 'vue';
-import type { Ref } from 'vue';
+import { computed, type Ref } from 'vue';
+import type { Member } from '@/types';
 
 export function useMemberRules(state: { [key: string]: Ref<any> }) {
   const { t } = useI18n();

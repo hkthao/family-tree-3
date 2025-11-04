@@ -55,13 +55,13 @@ describe('member-autocomplete.store', () => {
   });
 
   it('should have initial state values', () => {
-    expect(store.members).toEqual([]);
+    expect(store.items).toEqual([]);
     expect(store.loading).toBe(false);
     expect(store.error).toBeNull();
     expect(store.items).toEqual([]);
   });
 
-  describe('searchMembers', () => {
+  describe('search', () => {
     it('should fetch members successfully', async () => {
       const mockMembers: Member[] = [
         { id: '1', fullName: 'Member A', lastName: 'A', firstName: 'Member', familyId: 'family-1' },
@@ -69,13 +69,11 @@ describe('member-autocomplete.store', () => {
       ];
       mockLoadItems.mockResolvedValue(ok({ items: mockMembers, totalItems: 2, totalPages: 1 }));
 
-      await store.searchMembers({ searchQuery: 'Member' });
+      await store.search({ searchQuery: 'Member' });
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.members).toEqual(mockMembers);
-      expect(store.memberCache.get('1')).toEqual(mockMembers[0]);
-      expect(store.memberCache.get('2')).toEqual(mockMembers[1]);
+      expect(store.items).toEqual(mockMembers);
       expect(mockLoadItems).toHaveBeenCalledWith(
         { searchQuery: 'Member' },
         1,
@@ -86,16 +84,16 @@ describe('member-autocomplete.store', () => {
     it('should handle fetch members failure', async () => {
       mockLoadItems.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
 
-      await store.searchMembers({ searchQuery: 'Member' });
+      await store.search({ searchQuery: 'Member' });
 
       expect(store.loading).toBe(false);
       expect(store.error).toBe('member.errors.load');
-      expect(store.members).toEqual([]);
+      expect(store.items).toEqual([]);
       expect(i18n.global.t).toHaveBeenCalledWith('member.errors.load');
     });
   });
 
-  describe('getMemberByIds', () => {
+  describe('getByIds', () => {
     it('should fetch members by IDs successfully', async () => {
       const mockMembers: Member[] = [
         { id: '1', fullName: 'Member A', lastName: 'A', firstName: 'Member', familyId: 'family-1' },
@@ -103,7 +101,7 @@ describe('member-autocomplete.store', () => {
       ];
       mockGetByIds.mockResolvedValue(ok(mockMembers));
 
-      const fetchedMembers = await store.getMemberByIds(['1', '2']);
+      const fetchedMembers = await store.getByIds(['1', '2']);
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
@@ -114,25 +112,12 @@ describe('member-autocomplete.store', () => {
     it('should handle fetch members by IDs failure', async () => {
       mockGetByIds.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
 
-      const fetchedMembers = await store.getMemberByIds(['1', '2']);
+      const fetchedMembers = await store.getByIds(['1', '2']);
 
       expect(store.loading).toBe(false);
       expect(store.error).toBe('member.errors.loadById');
       expect(fetchedMembers).toEqual([]);
       expect(i18n.global.t).toHaveBeenCalledWith('member.errors.loadById');
-    });
-
-    it('should return cached members if available', async () => {
-      const cachedMember: Member = { id: '3', fullName: 'Member C', lastName: 'C', firstName: 'Member', familyId: 'family-1' };
-      store.memberCache.set(cachedMember); // Correct usage of IdCache.set
-      mockGetByIds.mockResolvedValue(ok([])); // Should not be called for cached item
-
-      const fetchedMembers = await store.getMemberByIds(['3']);
-
-      expect(store.loading).toBe(false);
-      expect(store.error).toBeNull();
-      expect(fetchedMembers).toEqual([cachedMember]);
-      expect(mockGetByIds).not.toHaveBeenCalled();
     });
   });
 });

@@ -88,6 +88,7 @@ describe('family.store', () => {
     items: [mockFamily],
     totalItems: 1,
     totalPages: 1,
+    page: 1
   };
 
   // --- Actions Tests ---

@@ -55,7 +55,7 @@ describe('family-autocomplete.store', () => {
   });
 
   it('should have initial state values', () => {
-    expect(store.families).toEqual([]);
+    expect(store.items).toEqual([]);
     expect(store.loading).toBe(false);
     expect(store.error).toBeNull();
     expect(store.items).toEqual([]);
@@ -69,13 +69,11 @@ describe('family-autocomplete.store', () => {
       ];
       mockLoadItems.mockResolvedValue(ok({ items: mockFamilies, totalItems: 2, totalPages: 1 }));
 
-      await store.searchFamilies({ searchQuery: 'Family' });
+      await store.search({ searchQuery: 'Family' });
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.families).toEqual(mockFamilies);
-      expect(store.familyCache.get('1')).toEqual(mockFamilies[0]);
-      expect(store.familyCache.get('2')).toEqual(mockFamilies[1]);
+      expect(store.items).toEqual(mockFamilies);
       expect(mockLoadItems).toHaveBeenCalledWith(
         { searchQuery: 'Family' },
         1,
@@ -86,16 +84,16 @@ describe('family-autocomplete.store', () => {
     it('should handle fetch families failure', async () => {
       mockLoadItems.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
 
-      await store.searchFamilies({ searchQuery: 'Family' });
+      await store.search({ searchQuery: 'Family' });
 
       expect(store.loading).toBe(false);
       expect(store.error).toBe('family.errors.load');
-      expect(store.families).toEqual([]);
+      expect(store.items).toEqual([]);
       expect(i18n.global.t).toHaveBeenCalledWith('family.errors.load');
     });
   });
 
-  describe('getFamilyByIds', () => {
+  describe('getByIds', () => {
     it('should fetch families by IDs successfully', async () => {
       const mockFamilies: Family[] = [
         { id: '1', name: 'Family A' },
@@ -103,7 +101,7 @@ describe('family-autocomplete.store', () => {
       ];
       mockGetByIds.mockResolvedValue(ok(mockFamilies));
 
-      const fetchedFamilies = await store.getFamilyByIds(['1', '2']);
+      const fetchedFamilies = await store.getByIds(['1', '2']);
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
@@ -114,7 +112,7 @@ describe('family-autocomplete.store', () => {
     it('should handle fetch families by IDs failure', async () => {
       mockGetByIds.mockResolvedValue(err({} as ApiError)); // No message, so i18n.global.t will be called
 
-      const fetchedFamilies = await store.getFamilyByIds(['1', '2']);
+      const fetchedFamilies = await store.getByIds(['1', '2']);
 
       expect(store.loading).toBe(false);
       expect(store.error).toBe('family.errors.loadById');
@@ -124,10 +122,9 @@ describe('family-autocomplete.store', () => {
 
     it('should return cached families if available', async () => {
       const cachedFamily: Family = { id: '3', name: 'Family C' };
-      store.familyCache.set(cachedFamily); // Correct usage of IdCache.set
       mockGetByIds.mockResolvedValue(ok([])); // Should not be called for cached item
 
-      const fetchedFamilies = await store.getFamilyByIds(['3']);
+      const fetchedFamilies = await store.getByIds(['3']);
 
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();

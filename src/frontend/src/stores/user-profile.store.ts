@@ -28,57 +28,6 @@ export const useUserProfileStore = defineStore('userProfile', {
       }
     },
 
-    async fetchUserProfile(id: string) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result = await this.services.userProfile.getUserProfile(id);
-        if (result.ok) {
-          this.userProfile = result.value;
-        } else {
-          this.error = i18n.global.t('userSettings.profile.fetchError');
-        }
-      } catch (err: any) {
-        this.error = i18n.global.t('userSettings.profile.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async fetchUserProfileByExternalId(externalId: string) {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result = await this.services.userProfile.getUserProfileByExternalId(externalId);
-        if (result.ok) {
-          this.userProfile = result.value;
-        } else {
-          this.error = i18n.global.t('userSettings.profile.fetchError');
-        }
-      } catch (err: any) {
-        this.error = i18n.global.t('userSettings.profile.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async fetchAllUserProfiles() {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result = await this.services.userProfile.getAllUserProfiles();
-        if (result.ok) {
-          this.allUserProfiles = result.value;
-        } else {
-          this.error = i18n.global.t('userSettings.profile.fetchAllError');
-        }
-      } catch (err: any) {
-        this.error = i18n.global.t('userSettings.profile.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
-
     async updateUserProfile(profile: UserProfile): Promise<boolean> {
       this.loading = true;
       this.error = null;

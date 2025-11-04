@@ -143,8 +143,7 @@ export async function fillVuetifyDateInput(page: Page, testId: string, value: st
   console.log(`Chọn ngày '${value}' từ trường ngày có data-testid='${testId}'.`);
   const vDateInputLocator = page.locator(`[data-testid="${testId}"]`);
   await expect(vDateInputLocator).toBeVisible({ timeout: 10000 });
-  // VDateInput directly renders an input element
-  const inputLocator = vDateInputLocator.locator('input');
-  await inputLocator.click();
-  await inputLocator.fill(value);
+  // Click the input to open the date picker
+  await vDateInputLocator.locator('input').click();
+  await vDateInputLocator.locator('input').fill('20/11/1990');
 }

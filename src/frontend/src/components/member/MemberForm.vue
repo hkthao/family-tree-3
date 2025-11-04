@@ -117,9 +117,17 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
     },
 );
 
-const rules = useMemberRules(toRefs(formData));
+const state = reactive({
+  lastName: formData.lastName,
+  firstName: formData.firstName,
+  dateOfBirth: formData.dateOfBirth,
+  familyId: formData.familyId,
+  dateOfDeath: formData.dateOfDeath,
+});
 
-const v$ = useVuelidate(rules, formData);
+const rules = useMemberRules(toRefs(state));
+
+const v$ = useVuelidate(rules, state);
 
 // Expose form validation and data for parent component
 const validate = async () => {

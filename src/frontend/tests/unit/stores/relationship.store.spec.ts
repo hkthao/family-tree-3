@@ -100,6 +100,7 @@ describe('relationship.store', () => {
     items: [mockRelationship],
     totalItems: 1,
     totalPages: 1,
+    page: 1
   };
 
   // --- Actions Tests ---
