@@ -19,12 +19,9 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
     {
         try
         {
-            if (!_authorizationService.IsAdmin())
+            if (!_authorizationService.CanManageFamily(request.Id))
             {
-                if (!_authorizationService.CanManageFamily(request.Id))
-                {
-                    return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
-                }
+                return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
             }
 
             var entity = await _context.Families.WithSpecification(new FamilyByIdSpecification(request.Id)).FirstOrDefaultAsync(cancellationToken);

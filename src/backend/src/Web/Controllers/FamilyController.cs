@@ -98,8 +98,12 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh cập nhật gia đình với thông tin mới.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateFamily(Guid id, [FromBody] UpdateFamilyCommand command)
+    public async Task<IActionResult> UpdateFamily([FromRoute]Guid id, [FromBody] UpdateFamilyCommand command)
     {
+        if (command == null)
+        {
+            return BadRequest("Request body is empty.");
+        }
         if (id != command.Id)
         {
             return BadRequest();

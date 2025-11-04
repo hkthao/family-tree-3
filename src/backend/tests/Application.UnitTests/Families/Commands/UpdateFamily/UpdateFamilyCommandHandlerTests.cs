@@ -13,12 +13,10 @@ namespace backend.Application.UnitTests.Families.Commands.UpdateFamily;
 public class UpdateFamilyCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
-    private readonly UpdateFamilyCommandHandler _handler;
 
     public UpdateFamilyCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
     }
 
     [Fact]
@@ -31,6 +29,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(true);
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
 
         var command = new UpdateFamilyCommand
         {
@@ -44,6 +43,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         };
 
         // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
         var updatedFamily = await _context.Families.FindAsync(familyId);
 
@@ -80,6 +80,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         };
 
         // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
         var updatedFamily = await _context.Families.FindAsync(familyId);
 
@@ -95,9 +96,11 @@ public class UpdateFamilyCommandHandlerTests : TestBase
     {
         // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Any Name", Visibility = "Public" };
-        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(true);
+         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(command.Id)).Returns(true);
 
         // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
@@ -121,6 +124,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(false);
 
         // Act
+        var _handler = new UpdateFamilyCommandHandler(_context, _authorizationServiceMock.Object);
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert

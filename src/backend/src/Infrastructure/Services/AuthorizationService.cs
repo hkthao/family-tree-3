@@ -16,20 +16,20 @@ public class AuthorizationService(ICurrentUser user, IApplicationDbContext conte
     public bool CanAccessFamily(Guid familyId)
     {
         if (IsAdmin()) return true; // Admin bypasses family-specific role checks
-        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId);
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId);
     }
 
     public bool CanManageFamily(Guid familyId)
     {
         if (IsAdmin()) return true; // Admin bypasses family-specific role checks
-        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.Role == FamilyRole.Manager);
+        return _context.FamilyUsers.Any(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId && fu.Role == FamilyRole.Manager);
     }
 
     public bool HasFamilyRole(Guid familyId, FamilyRole requiredRole)
     {
         if (IsAdmin()) return true; // Admin bypasses family-specific role checks
 
-        var familyUser = _context.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId);
+        var familyUser = _context.FamilyUsers.FirstOrDefault(fu => fu.FamilyId == familyId && fu.UserId == _user.UserId);
         if (familyUser == null) return false;
 
         return familyUser.Role <= requiredRole; // Assuming enum values are ordered by privilege
