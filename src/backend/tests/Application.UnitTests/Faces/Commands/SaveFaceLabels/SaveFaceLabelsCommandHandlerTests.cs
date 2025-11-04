@@ -1,13 +1,13 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands.SaveFaceLabels;
+using backend.Application.Faces.Common;
+using backend.Application.Faces.Queries;
 using backend.Application.UnitTests.Common;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.Common.Models.AppSetting;
-using Microsoft.Extensions.Logging;
-using backend.Application.Faces.Queries;
-using backend.Application.Faces.Common;
 
 namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
 {

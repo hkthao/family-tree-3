@@ -26,7 +26,7 @@ public class FamilyUpdatedEventHandlerTests : TestBase
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new FamilyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new FamilyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -44,10 +44,10 @@ public class FamilyUpdatedEventHandlerTests : TestBase
 
         // Assert
         _mediatorMock.Verify(m => m.Send(
-            It.Is<RecordActivityCommand>(cmd => 
+            It.Is<RecordActivityCommand>(cmd =>
                 cmd.UserId == userId &&
                 cmd.ActionType == UserActionType.UpdateFamily &&
-                cmd.TargetId == testFamily.Id.ToString()), 
+                cmd.TargetId == testFamily.Id.ToString()),
             CancellationToken.None), Times.Once);
 
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(

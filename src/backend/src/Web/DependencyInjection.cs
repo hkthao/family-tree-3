@@ -1,6 +1,4 @@
-﻿
-using backend.Application.Common.Interfaces;
-using backend.Infrastructure.Auth;
+﻿using backend.Infrastructure.Auth;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;

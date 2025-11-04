@@ -16,7 +16,7 @@ public class UserPreferenceConfiguration : IEntityTypeConfiguration<UserPreferen
             .IsRequired();
 
         builder.HasKey(up => up.UserId);
-        
+
         builder.HasOne(up => up.User)
             .WithOne(u => u.Preference) // Specify the navigation property in User
             .HasForeignKey<UserPreference>(up => up.UserId)

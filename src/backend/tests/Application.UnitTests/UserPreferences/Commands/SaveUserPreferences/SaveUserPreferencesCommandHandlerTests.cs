@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
-using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserPreferences.Commands.SaveUserPreferences;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -33,7 +33,7 @@ public class SaveUserPreferencesCommandHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User(userId.ToString(), "test@example.com");
+        var user = new User(userId.ToString(), "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         user.Id = userId;
         user.UpdateProfile(userId.ToString(), "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         user.UpdatePreference(Theme.Light, Language.English);

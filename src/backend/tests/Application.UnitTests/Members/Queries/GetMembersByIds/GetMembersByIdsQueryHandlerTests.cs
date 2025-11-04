@@ -15,7 +15,7 @@ public class GetMembersByIdsQueryHandlerTests : TestBase
     [Fact]
     public async Task Handle_ShouldReturnCorrectMembers_WhenGivenValidIds()
     {
-         // Arrange
+        // Arrange
         var familyId1 = Guid.NewGuid();
         var familyId2 = Guid.NewGuid();
         var familyId3 = Guid.NewGuid();

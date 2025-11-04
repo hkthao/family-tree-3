@@ -10,7 +10,7 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
     private readonly IAuthorizationService _authorizationService = authorizationService;
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser _user = user;
 
     public async Task<Result<List<EventDto>>> Handle(GetUpcomingEventsQuery request, CancellationToken cancellationToken)
     {

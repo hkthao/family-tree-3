@@ -47,10 +47,10 @@ public class EventCreatedEventHandlerTests : TestBase
 
         // Verify that RecordActivityCommand was sent
         _mediatorMock.Verify(m => m.Send(
-            It.Is<RecordActivityCommand>(cmd => 
+            It.Is<RecordActivityCommand>(cmd =>
                 cmd.UserId == userId &&
                 cmd.ActionType == UserActionType.CreateEvent &&
-                cmd.TargetId == testEvent.Id.ToString()), 
+                cmd.TargetId == testEvent.Id.ToString()),
             CancellationToken.None), Times.Once);
 
         // Verify that entity was upserted to global search

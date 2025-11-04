@@ -1,6 +1,6 @@
 using backend.Application.Common.Constants;
-using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserPreferences.Queries.GetUserPreferences;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -29,7 +29,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // Arrange
         var authProviderId = Guid.NewGuid().ToString();
         var profileId = Guid.NewGuid();
-        var user = new User(authProviderId, "test@example.com");
+        var user = new User(authProviderId, "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         user.UpdateProfile(authProviderId, "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         //user.Profile!.Id = profileId;
         user!.UpdatePreference(Theme.Light, Language.English);
@@ -60,7 +60,7 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // Arrange
         var userId = Guid.NewGuid();
         var profileId = Guid.NewGuid();
-        var user = new User(userId.ToString(), "test@example.com");
+        var user = new User(userId.ToString(), "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         user.Id = userId;
         user.UpdateProfile(userId.ToString(), "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         user.Profile!.Id = profileId;

@@ -70,7 +70,7 @@ public class GlobalSearchService(ILogger<GlobalSearchService> logger, IEmbedding
                 return Result<List<GlobalSearchResult>>.Failure($"Failed to generate embedding for search query: {queryEmbeddingResult.Error}");
             }
 
-            var queryResults = await vectorStore.QueryAsync(queryEmbeddingResult.Value!, 10, new Dictionary<string, string>(), "families", cancellationToken); 
+            var queryResults = await vectorStore.QueryAsync(queryEmbeddingResult.Value!, 10, new Dictionary<string, string>(), "families", cancellationToken);
 
             var results = queryResults.Select(qr => new GlobalSearchResult
             {

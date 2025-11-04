@@ -1,14 +1,14 @@
 using backend.Application.AI.Chat.Queries;
+using backend.Application.AI.VectorStore; // Added for VectorStoreResult
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.AI.VectorStore; // Added for VectorStoreResult
-using FluentAssertions;
 
 namespace backend.Application.UnitTests.AI.Chat.Queries;
 

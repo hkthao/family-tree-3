@@ -29,7 +29,7 @@ public class ProcessFileCommandValidatorTests
     public void ShouldHaveValidationError_WhenFileStreamIsNull()
     {
         // Arrange
-        var command = new ProcessFileCommand { FileName = "test.txt", FileId = Guid.NewGuid().ToString(), FamilyId = Guid.NewGuid().ToString(), Category = "category", CreatedBy = "createdBy"};
+        var command = new ProcessFileCommand { FileName = "test.txt", FileId = Guid.NewGuid().ToString(), FamilyId = Guid.NewGuid().ToString(), Category = "category", CreatedBy = "createdBy" };
 
         // Act
         var result = _validator.TestValidate(command);

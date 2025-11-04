@@ -28,7 +28,7 @@ public class MemberCreatedEventHandlerTests
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _familyTreeServiceMock = new Mock<IFamilyTreeService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object);
+        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]

@@ -3,9 +3,9 @@ using System.Security.Claims;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Constants;
 using backend.Domain.Entities;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 namespace backend.Web.Infrastructure;
 
@@ -34,10 +34,10 @@ public class EnsureUserExistsMiddleware
             using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
             var claimsTransformation = scope.ServiceProvider.GetRequiredService<IClaimsTransformation>();
-            // var mediator = scope.ServiceProvider.GetRequiredService<IMediator>(); // Removed for now
-            var externalId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var email = context.User.FindFirst(ClaimTypes.Email)?.Value;
-            var name = context.User.FindFirst(ClaimTypes.Name)?.Value;
+            var claimsPrincipal = await claimsTransformation.TransformAsync(context.User);
+            var externalId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrEmpty(externalId))
             {
@@ -59,42 +59,68 @@ public class EnsureUserExistsMiddleware
 
                 if (user == null)
                 {
-                    user = new User(externalId, email ?? "");
+                    var userEmail = string.IsNullOrEmpty(email) ? $"{externalId}@temp.com" : email;
+                    var firstName = claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value;
+                    var lastName = claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value;
+                    var phone = claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value;
+                    var avatar = claimsPrincipal.FindFirst("picture")?.Value;
+
+                    user = new User(externalId, userEmail, name ?? "", firstName, lastName, phone, avatar);
                     dbContext.Users.Add(user);
+                    try
+                    {
+                        await dbContext.SaveChangesAsync(CancellationToken.None);
+                        _logger.LogInformation("EnsureUserExistsMiddleware: Created new User with ID: {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
+                    }
+                    catch (DbUpdateException ex) when (ex.InnerException is MySqlConnector.MySqlException mysqlEx && mysqlEx.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
+                    {
+                        // Race condition: user was created by another request. Fetch the existing user.
+                        _logger.LogWarning("EnsureUserExistsMiddleware: Race condition detected. User with external ID {ExternalId} already exists. Fetching existing user.", externalId);
+                        user = await dbContext.Users
+                            .Include(u => u.Profile)
+                            .Include(u => u.Preference)
+                            .FirstOrDefaultAsync(u => u.AuthProviderId == externalId);
+
+                        if (user == null)
+                        {
+                            // This should ideally not happen if the previous check failed due to a race condition.
+                            // Re-throw if we still can't find the user.
+                            throw;
+                        }
+                    }
+                }
+                else
+                {
+                    // Update existing profile with latest info from claims if needed
+                    user.UpdateProfile(
+                        externalId,
+                        email ?? "",
+                        name ?? "",
+                        claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value ?? "",
+                        claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value ?? "",
+                        claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value ?? "",
+                        claimsPrincipal.FindFirst("picture")?.Value ?? ""
+                    );
+                    // No need to explicitly update preference here, as it's created with default values
+                    // and can be updated by the user later.
+
                     await dbContext.SaveChangesAsync(CancellationToken.None);
-                                    _logger.LogInformation("EnsureUserExistsMiddleware: Created new User with ID: {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
-                                }
-                                else
-                                {
-                                    // Update existing profile with latest info from claims if needed
-                                    user.UpdateProfile(
-                                        externalId,
-                                        email ?? "",
-                                        name ?? "",
-                                        context.User.FindFirst(ClaimTypes.GivenName)?.Value ?? "",
-                                        context.User.FindFirst(ClaimTypes.Surname)?.Value ?? "",
-                                        context.User.FindFirst(ClaimTypes.MobilePhone)?.Value ?? "",
-                                        context.User.FindFirst("picture")?.Value ?? ""
-                                    );
-                                    // No need to explicitly update preference here, as it's created with default values
-                                    // and can be updated by the user later.
-                    
-                                    await dbContext.SaveChangesAsync(CancellationToken.None);
-                                    _logger.LogInformation("EnsureUserExistsMiddleware: Updated existing User {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
-                                }
-                    
-                                // Store UserId and ProfileId in HttpContext.Items
-                                context.Items[HttpContextItemKeys.UserId] = user.Id;
-                                context.Items[HttpContextItemKeys.ProfileId] = user.Profile?.Id;
-                    
-                                // Transform claims
-                                var principal = await claimsTransformation.TransformAsync(context.User);
-                                context.User = principal; // Update User principal in HttpContext
-                    
-                                _logger.LogInformation("EnsureUserExistsMiddleware: Successfully processed user {UserId} and profile {ProfileId}", user.Id, user.Profile?.Id);
-                    
-                                // Đánh dấu là đã xử lý để tránh chạy lại trong cùng một request
-                                context.Items[HttpContextItemKeys.UserInfoProcessed] = true;            }
+                    _logger.LogInformation("EnsureUserExistsMiddleware: Updated existing User {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
+                }
+
+                // Store UserId and ProfileId in HttpContext.Items
+                context.Items[HttpContextItemKeys.UserId] = user.Id;
+                context.Items[HttpContextItemKeys.ProfileId] = user.Profile?.Id;
+
+                // Transform claims
+                var principal = await claimsTransformation.TransformAsync(context.User);
+                context.User = principal; // Update User principal in HttpContext
+
+                _logger.LogInformation("EnsureUserExistsMiddleware: Successfully processed user {UserId} and profile {ProfileId}", user.Id, user.Profile?.Id);
+
+                // Đánh dấu là đã xử lý để tránh chạy lại trong cùng một request
+                context.Items[HttpContextItemKeys.UserInfoProcessed] = true;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in EnsureUserExistsMiddleware for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);

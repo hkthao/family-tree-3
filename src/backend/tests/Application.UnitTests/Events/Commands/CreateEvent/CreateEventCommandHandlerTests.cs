@@ -97,7 +97,7 @@ public class CreateEventCommandHandlerTests : TestBase
         createdEvent!.Code.Should().NotBeNullOrEmpty();
         createdEvent.Code.Should().StartWith("EVT-");
     }
-    
+
     [Fact]
     public async Task Handle_ShouldAddRelatedMembers_WhenProvided()
     {

@@ -93,7 +93,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var relationshipId = Guid.NewGuid();
 
-        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father,1) { Id = relationshipId });
+        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, 1) { Id = relationshipId });
         // Not saving the family to the context
         await _context.SaveChangesAsync();
 

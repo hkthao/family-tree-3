@@ -1,6 +1,6 @@
 
-using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Application.UnitTests.Common;
+using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using FluentAssertions;
@@ -15,7 +15,7 @@ public class RecordActivityCommandHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User("test_auth_id", "test@example.com") { Id = userId };
+        var user = new User("test_auth_id", "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png") { Id = userId };
         user.UpdateProfile("test_external_id", "test@example.com", "Test User", "Test", "User", "123456789", "avatar.png");
         _context.Users.Add(user);
         await _context.SaveChangesAsync();

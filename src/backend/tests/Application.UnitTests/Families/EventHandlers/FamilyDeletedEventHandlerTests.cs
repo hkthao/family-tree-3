@@ -26,7 +26,7 @@ public class FamilyDeletedEventHandlerTests : TestBase
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new FamilyDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new FamilyDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]

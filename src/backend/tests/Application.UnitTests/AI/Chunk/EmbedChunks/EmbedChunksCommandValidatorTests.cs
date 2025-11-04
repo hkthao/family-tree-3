@@ -1,7 +1,7 @@
 using backend.Application.AI.Chunk.EmbedChunks;
+using backend.Domain.Entities;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Domain.Entities;
 
 namespace backend.Application.UnitTests.AI.Chunk.EmbedChunks;
 
@@ -51,7 +51,7 @@ public class EmbedChunksCommandValidatorTests
     public void ShouldHaveValidationError_WhenChunksIsEmpty()
     {
         // Arrange
-        var command = new EmbedChunksCommand ();
+        var command = new EmbedChunksCommand();
 
         // Act
         var result = _validator.TestValidate(command);

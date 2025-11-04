@@ -1,7 +1,7 @@
-using backend.Domain.Common;
-using backend.Domain.Events;
 using System.Text.Json; // Added
+using backend.Domain.Common;
 using backend.Domain.Enums;
+using backend.Domain.Events;
 
 namespace backend.Domain.Entities;
 
@@ -46,6 +46,14 @@ public class User : BaseAuditableEntity, IAggregateRoot
         AuthProviderId = authProviderId;
         Email = email;
         Profile = new UserProfile(Id); // Initialize with default profile
+        Preference = new UserPreference(Id); // Initialize with default preference
+    }
+
+    public User(string authProviderId, string email, string name, string? firstName, string? lastName, string? phone, string? avatar)
+    {
+        AuthProviderId = authProviderId;
+        Email = email;
+        Profile = new UserProfile(Id, authProviderId, email, name, firstName, lastName, phone, avatar); // Initialize with default profile
         Preference = new UserPreference(Id); // Initialize with default preference
     }
 

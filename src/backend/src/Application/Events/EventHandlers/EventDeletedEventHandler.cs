@@ -1,12 +1,12 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 using backend.Domain.Events.Events;
 using Microsoft.Extensions.Logging;
-using backend.Domain.Enums;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, IMediator mediator,  IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<EventDeletedEvent>
+public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<EventDeletedEvent>
 {
     private readonly ILogger<EventDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;

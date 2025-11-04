@@ -8,7 +8,7 @@ namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
 public class GetUserPreferencesQueryHandler(IApplicationDbContext context, ICurrentUser currentUser, IMapper mapper) : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser  _currentUser = currentUser;
+    private readonly ICurrentUser _currentUser = currentUser;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)

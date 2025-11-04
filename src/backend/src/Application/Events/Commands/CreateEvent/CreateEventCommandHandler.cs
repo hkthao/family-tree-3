@@ -43,7 +43,7 @@ public class CreateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         entity.AddDomainEvent(new Domain.Events.Events.EventCreatedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Result<Guid>.Success(entity.Id);
     }
 

@@ -146,7 +146,7 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value!.First().ValidationErrors.Should().Contain(string.Format(ErrorMessages.FamilyNotFound, "NonExistentFamily"));
     }
-    
+
     /// <summary>
     /// Kiểm tra thêm lỗi xác thực khi tìm thấy nhiều gia đình trùng tên.
     /// </summary>
@@ -243,7 +243,7 @@ public class GenerateEventDataCommandHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue();
         result.Value!.First().ValidationErrors.Should().Contain(validationError);
     }
-    
+
     /// <summary>
     /// Kiểm tra loại sự kiện được mặc định là 'Other' nếu thiếu.
     /// </summary>

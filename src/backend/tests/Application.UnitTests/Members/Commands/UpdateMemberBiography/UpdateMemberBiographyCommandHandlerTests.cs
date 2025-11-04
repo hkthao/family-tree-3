@@ -27,7 +27,7 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId};
+        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
         member.UpdateBiography("Old biography.");
         _context.Members.Add(member);
         await _context.SaveChangesAsync();

@@ -1,7 +1,7 @@
+using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Application.Common.Constants;
 
 namespace backend.Application.Families.Commands.CreateFamilies;
 

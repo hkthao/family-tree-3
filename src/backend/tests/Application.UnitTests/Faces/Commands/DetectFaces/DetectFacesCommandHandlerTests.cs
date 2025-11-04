@@ -1,15 +1,15 @@
+using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models.AppSetting;
+using backend.Application.Faces.Commands; // Added this using directive
 using backend.Application.Faces.Commands.DetectFaces;
+using backend.Application.Faces.Common;
 using backend.Application.UnitTests.Common;
+using backend.Domain.Entities;
 using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
-using backend.Application.Common.Models.AppSetting;
-using Microsoft.Extensions.Logging;
-using backend.Application.Faces.Common;
-using backend.Domain.Entities;
-using backend.Application.Faces.Commands; // Added this using directive
-using backend.Application.AI.VectorStore;
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
 {

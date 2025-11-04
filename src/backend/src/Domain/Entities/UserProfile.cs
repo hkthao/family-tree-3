@@ -22,6 +22,18 @@ public class UserProfile : BaseAuditableEntity
     {
         UserId = userId;
     }
+
+    public UserProfile(Guid userId, string externalId, string email, string name, string? firstName, string? lastName, string? phone, string? avatar)
+    {
+        UserId = userId;
+        ExternalId = externalId;
+        Email = email;
+        Name = name;
+        FirstName = firstName;
+        LastName = lastName;
+        Phone = phone;
+        Avatar = avatar;
+    }
     /// <summary>
     /// The unique identifier for the user from the external authentication provider.
     /// </summary>

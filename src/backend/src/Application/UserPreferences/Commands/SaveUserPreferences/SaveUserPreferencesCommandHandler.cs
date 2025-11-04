@@ -6,7 +6,7 @@ namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, ICurrentUser user) : IRequestHandler<SaveUserPreferencesCommand, Result>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser _user = user;
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {

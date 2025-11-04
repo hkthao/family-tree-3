@@ -26,7 +26,7 @@ public class MemberDeletedEventHandlerTests
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new MemberDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]

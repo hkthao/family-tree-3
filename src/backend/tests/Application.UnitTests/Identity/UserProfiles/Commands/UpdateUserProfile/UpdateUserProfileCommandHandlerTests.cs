@@ -53,7 +53,7 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var user = new User("auth0|123", "old@example.com");
+        var user = new User("auth0|123", "old@example.com", "Test User", "Test", "User", null, null);
         user.Id = userId; // Set the ID after construction
         user.Profile!.Update(
             "external-id",

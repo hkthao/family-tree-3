@@ -9,15 +9,15 @@ using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Files;
-using backend.Infrastructure.Services;
-using Novu;
 using backend.Infrastructure.Novu;
+using backend.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Novu;
 
 
 namespace backend.Infrastructure;
@@ -54,7 +54,8 @@ public static class DependencyInjection
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+                           mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null))
                        .AddInterceptors(
                            serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
                            serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))

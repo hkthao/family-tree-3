@@ -1,7 +1,7 @@
-using backend.Domain.Common;
-using Microsoft.EntityFrameworkCore.Metadata;
 using System.Linq.Expressions;
 using System.Reflection;
+using backend.Domain.Common;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace backend.Infrastructure.Persistence.Extensions
 {

@@ -99,7 +99,7 @@ public class GenerateEventDataCommandHandler(IChatProviderFactory chatProviderFa
                             eventDto.ValidationErrors.Add(ErrorMessages.MultipleMembersFound);
                     }
                 }
-                
+
                 ValidationResult validationResult = await _aiEventDtoValidator.ValidateAsync(eventDto, cancellationToken);
                 if (!validationResult.IsValid)
                 {

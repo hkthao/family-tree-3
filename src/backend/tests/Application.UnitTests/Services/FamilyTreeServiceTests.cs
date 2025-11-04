@@ -1,14 +1,14 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using backend.Application.Services;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
-using FluentAssertions;
-using Xunit;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using backend.Domain.Enums;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace backend.Application.UnitTests.Services;
 

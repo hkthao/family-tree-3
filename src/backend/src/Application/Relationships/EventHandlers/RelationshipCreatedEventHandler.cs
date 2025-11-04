@@ -1,17 +1,17 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 using backend.Domain.Events.Relationships;
 using Microsoft.Extensions.Logging;
-using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator,IGlobalSearchService globalSearchService,ICurrentUser  _user) : INotificationHandler<RelationshipCreatedEvent>
+public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<RelationshipCreatedEvent>
 {
     private readonly ILogger<RelationshipCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
-    private readonly ICurrentUser  _user = _user;
+    private readonly ICurrentUser _user = _user;
 
     public async Task Handle(RelationshipCreatedEvent notification, CancellationToken cancellationToken)
     {

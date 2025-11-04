@@ -27,7 +27,7 @@ public class DeleteEventCommandHandler(IApplicationDbContext context, IAuthoriza
         entity.AddDomainEvent(new Domain.Events.Events.EventDeletedEvent(entity));
 
         await _context.SaveChangesAsync(cancellationToken);
-        
+
         return Result<bool>.Success(true);
     }
 }

@@ -5,7 +5,7 @@ namespace backend.Infrastructure.Services;
 
 public class AuthorizationService(ICurrentUser user, IApplicationDbContext context) : IAuthorizationService
 {
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser _user = user;
     private readonly IApplicationDbContext _context = context;
 
     public bool IsAdmin()

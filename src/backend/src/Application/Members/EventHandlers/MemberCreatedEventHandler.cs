@@ -1,12 +1,12 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 using backend.Domain.Events.Members;
 using Microsoft.Extensions.Logging;
-using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator,  IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService,ICurrentUser _user) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService, ICurrentUser _user) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;

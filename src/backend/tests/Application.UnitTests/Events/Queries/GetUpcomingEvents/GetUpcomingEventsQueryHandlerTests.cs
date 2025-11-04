@@ -76,7 +76,8 @@ namespace backend.Application.UnitTests.Events.Queries.GetUpcomingEvents
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBeNull();
             result.Value.Should().HaveCount(1);
-            if (result.Value != null) {
+            if (result.Value != null)
+            {
                 result.Value.First().Name.Should().Be("Accessible Event");
             }
         }

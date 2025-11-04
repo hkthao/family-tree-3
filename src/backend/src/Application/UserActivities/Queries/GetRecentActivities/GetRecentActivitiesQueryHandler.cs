@@ -13,7 +13,7 @@ public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMap
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<PaginatedList<UserActivityDto>>> Handle(GetRecentActivitiesQuery request, CancellationToken cancellationToken)

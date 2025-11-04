@@ -26,7 +26,7 @@ public class FamilyCreatedEventHandlerTests : TestBase
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new FamilyCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new FamilyCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -46,10 +46,10 @@ public class FamilyCreatedEventHandlerTests : TestBase
 
         // Verify that RecordActivityCommand was sent
         _mediatorMock.Verify(m => m.Send(
-            It.Is<RecordActivityCommand>(cmd => 
+            It.Is<RecordActivityCommand>(cmd =>
                 cmd.UserId == userId &&
                 cmd.ActionType == UserActionType.CreateFamily &&
-                cmd.TargetId == testFamily.Id.ToString()), 
+                cmd.TargetId == testFamily.Id.ToString()),
             CancellationToken.None), Times.Once);
 
         // Verify that entity was upserted to global search

@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Persistence.Extensions;
 

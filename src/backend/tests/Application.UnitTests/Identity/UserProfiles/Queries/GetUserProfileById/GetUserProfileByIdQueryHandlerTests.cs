@@ -41,8 +41,7 @@ public class GetUserProfileByIdQueryHandlerTests : TestBase
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var userProfile = new UserProfile(userId);
-        userProfile.Update("ext1", "test@example.com", "Test User", "Test", "User", null!, null!);
+        var userProfile = new UserProfile(userId, "ext1", "test@example.com", "Test User", "Test", "User", null, null);
         await _context.UserProfiles.AddAsync(userProfile);
         await _context.SaveChangesAsync(CancellationToken.None);
 

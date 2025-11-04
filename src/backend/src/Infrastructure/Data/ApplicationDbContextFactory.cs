@@ -1,6 +1,6 @@
+using backend.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using backend.Application.Common.Interfaces;
 
 namespace backend.Infrastructure.Data
 {

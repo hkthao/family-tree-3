@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
 using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
 using backend.Domain.Common;
-using Microsoft.EntityFrameworkCore;
+using backend.Domain.Entities;
 using backend.Infrastructure.Persistence.Extensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Infrastructure.Data;
 
@@ -67,40 +67,40 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     //{
-        // foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
-        // {
-        //     switch (entry.State)
-        //     {
-        //         case EntityState.Added:
-        //             if (entry.Entity is BaseAuditableEntity auditableEntity)
-        //             {
-        //                 auditableEntity.CreatedBy = _currentUser.Id?.ToString();
-        //                 auditableEntity.Created = _dateTime.Now;
-        //             }
-        //             break;
+    // foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())
+    // {
+    //     switch (entry.State)
+    //     {
+    //         case EntityState.Added:
+    //             if (entry.Entity is BaseAuditableEntity auditableEntity)
+    //             {
+    //                 auditableEntity.CreatedBy = _currentUser.Id?.ToString();
+    //                 auditableEntity.Created = _dateTime.Now;
+    //             }
+    //             break;
 
-        //         case EntityState.Modified:
-        //             if (entry.Entity is BaseAuditableEntity auditableEntityModified)
-        //             {
-        //                 auditableEntityModified.LastModifiedBy = _currentUser.Id?.ToString();
-        //                 auditableEntityModified.LastModified = _dateTime.Now;
-        //             }
-        //             break;
+    //         case EntityState.Modified:
+    //             if (entry.Entity is BaseAuditableEntity auditableEntityModified)
+    //             {
+    //                 auditableEntityModified.LastModifiedBy = _currentUser.Id?.ToString();
+    //                 auditableEntityModified.LastModified = _dateTime.Now;
+    //             }
+    //             break;
 
-        //         case EntityState.Deleted:
-        //             if (entry.Entity is ISoftDelete softDeleteEntity)
-        //             {
-        //                 softDeleteEntity.IsDeleted = true;
-        //                 softDeleteEntity.DeletedBy = _currentUser.Id?.ToString();
-        //                 softDeleteEntity.DeletedDate = _dateTime.Now;
-        //                 entry.State = EntityState.Modified;
-        //             }
-        //             break;
-        //     }
-        // }
+    //         case EntityState.Deleted:
+    //             if (entry.Entity is ISoftDelete softDeleteEntity)
+    //             {
+    //                 softDeleteEntity.IsDeleted = true;
+    //                 softDeleteEntity.DeletedBy = _currentUser.Id?.ToString();
+    //                 softDeleteEntity.DeletedDate = _dateTime.Now;
+    //                 entry.State = EntityState.Modified;
+    //             }
+    //             break;
+    //     }
+    // }
 
-        // return await base.SaveChangesAsync(cancellationToken);
-   // }
+    // return await base.SaveChangesAsync(cancellationToken);
+    // }
 
     /// <summary>
     /// Cấu hình mô hình được phát hiện bởi DbContext.

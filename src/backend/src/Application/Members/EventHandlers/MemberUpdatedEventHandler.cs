@@ -1,12 +1,12 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
 using backend.Domain.Events.Members;
 using Microsoft.Extensions.Logging;
-using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;

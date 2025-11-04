@@ -9,7 +9,7 @@ public class GetFamiliesQueryHandler(IApplicationDbContext context, IMapper mapp
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser _user = user;
     private readonly IAuthorizationService _authorizationService = authorizationService;
 
     public async Task<Result<IReadOnlyList<FamilyListDto>>> Handle(GetFamiliesQuery request, CancellationToken cancellationToken)
