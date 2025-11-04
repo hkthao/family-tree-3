@@ -56,7 +56,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Members.Add(relMember1_f1);
         _context.Members.Add(relMember2_f1);
 
-        _context.Relationships.Add(new Relationship(family1.Id, relMember1_f1.Id, relMember2_f1.Id, RelationshipType.Father));
+        _context.Relationships.Add(new Relationship(family1.Id, relMember1_f1.Id, relMember2_f1.Id, RelationshipType.Father, null));
 
         await _context.SaveChangesAsync();
 
@@ -120,7 +120,7 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Members.Add(accRelMember1);
         _context.Members.Add(accRelMember2);
 
-        _context.Relationships.Add(new Relationship(accessibleFamily1.Id, accRelMember1.Id, accRelMember2.Id, RelationshipType.Father));
+        _context.Relationships.Add(new Relationship(accessibleFamily1.Id, accRelMember1.Id, accRelMember2.Id, RelationshipType.Father, null));
 
         await _context.SaveChangesAsync();
 
@@ -217,8 +217,8 @@ public class GetDashboardStatsQueryHandlerTests : TestBase
         _context.Members.Add(targetRelMember1);
         _context.Members.Add(targetRelMember2);
 
-        _context.Relationships.Add(new Relationship(targetFamily.Id, targetRelMember1.Id, targetRelMember2.Id, RelationshipType.Father));
-        _context.Relationships.Add(new Relationship(otherFamily1.Id, otherMember1.Id, otherMember1.Id, RelationshipType.Mother)); // Relationship in other family
+        _context.Relationships.Add(new Relationship(targetFamily.Id, targetRelMember1.Id, targetRelMember2.Id, RelationshipType.Father, null));
+        _context.Relationships.Add(new Relationship(otherFamily1.Id, otherMember1.Id, otherMember1.Id, RelationshipType.Mother, null)); // Relationship in other family
 
         await _context.SaveChangesAsync();
 

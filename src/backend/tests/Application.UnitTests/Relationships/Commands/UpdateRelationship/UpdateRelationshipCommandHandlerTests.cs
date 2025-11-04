@@ -20,7 +20,7 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
         var sourceMember = family.AddMember(new Member("Source", "Member", "SM", family.Id));
         var targetMember = family.AddMember(new Member("Target", "Member", "TM", family.Id));
-        var relationship = family.AddRelationship(sourceMember.Id, targetMember.Id, RelationshipType.Father);
+        var relationship = family.AddRelationship(sourceMember.Id, targetMember.Id, RelationshipType.Father, null);
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
 

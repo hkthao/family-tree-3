@@ -1,6 +1,7 @@
 ﻿using backend.Domain.Enums;
 using backend.Domain.Events.Families;
 using backend.Domain.Events.Members;
+using backend.Domain.Events.Relationships;
 
 namespace backend.Domain.Entities;
 
@@ -105,7 +106,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         }
     }
 
-    public Relationship AddRelationship(Guid sourceMemberId, Guid targetMemberId, RelationshipType type)
+    public Relationship AddRelationship(Guid sourceMemberId, Guid targetMemberId, RelationshipType type, int? order)
     {
         if (!_members.Any(m => m.Id == sourceMemberId))
         {
@@ -116,8 +117,9 @@ public class Family : BaseAuditableEntity, IAggregateRoot
             throw new InvalidOperationException($"Target member with ID {targetMemberId} not found in this family.");
         }
         // Add validation for duplicate relationships if needed
-        var relationship = new Relationship(Id, sourceMemberId, targetMemberId, type);
+        var relationship = new Relationship(Id, sourceMemberId, targetMemberId, type, order);
         _relationships.Add(relationship);
+        AddDomainEvent(new RelationshipCreatedEvent(relationship));
         return relationship;
     }
 
@@ -127,6 +129,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         if (relationship != null)
         {
             _relationships.Remove(relationship);
+            AddDomainEvent(new RelationshipDeletedEvent(relationship));
         }
     }
 

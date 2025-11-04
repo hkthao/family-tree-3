@@ -32,7 +32,7 @@ public class RelationshipUpdatedEventHandlerTests
     {
         // Arrange
         var handler = new RelationshipUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
-        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
+        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, null));
 
         // Act
         await handler.Handle(notification, CancellationToken.None);
@@ -46,7 +46,7 @@ public class RelationshipUpdatedEventHandlerTests
     {
         // Arrange
         var handler = new RelationshipUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
-        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
+        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, null));
 
         // Act
         await handler.Handle(notification, CancellationToken.None);
@@ -57,7 +57,7 @@ public class RelationshipUpdatedEventHandlerTests
     {
         // Arrange
         var handler = new RelationshipUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
-        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
+        var notification = new RelationshipUpdatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, null));
 
         // Act
         await handler.Handle(notification, CancellationToken.None);

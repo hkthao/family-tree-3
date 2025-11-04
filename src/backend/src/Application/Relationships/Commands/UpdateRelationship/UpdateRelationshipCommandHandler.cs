@@ -30,12 +30,7 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<bool>.Failure(string.Format(ErrorMessages.NotFound, $"Relationship with ID {request.Id}"), ErrorSources.NotFound);
         }
 
-        relationship.SourceMemberId = request.SourceMemberId;
-        relationship.TargetMemberId = request.TargetMemberId;
-        relationship.Type = request.Type;
-        relationship.Order = request.Order;
-
-        relationship.AddDomainEvent(new RelationshipUpdatedEvent(relationship));
+        relationship.Update(request.SourceMemberId, request.TargetMemberId, request.Type, request.Order);
 
         await _context.SaveChangesAsync(cancellationToken);
 

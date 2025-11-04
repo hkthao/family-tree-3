@@ -42,7 +42,7 @@ public class CreateRelationshipCommandHandlerTests : TestBase
         result.Value.Should().NotBeEmpty();
         var relationship = await _context.Relationships.FindAsync(result.Value);
         relationship.Should().NotBeNull();
-        relationship!.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipCreatedEvent);
+        family.DomainEvents.Should().ContainSingle(e => e is Domain.Events.Relationships.RelationshipCreatedEvent);
     }
 
     [Fact]

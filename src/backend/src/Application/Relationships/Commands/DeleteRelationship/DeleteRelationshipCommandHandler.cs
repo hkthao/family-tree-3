@@ -35,7 +35,6 @@ public class DeleteRelationshipCommandHandler(IApplicationDbContext context, IAu
         }
 
         family.RemoveRelationship(request.Id);
-        family.AddDomainEvent(new RelationshipDeletedEvent(relationship));
 
         await _context.SaveChangesAsync(cancellationToken);
 

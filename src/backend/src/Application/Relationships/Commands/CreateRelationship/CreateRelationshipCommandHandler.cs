@@ -32,11 +32,8 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {sourceMember.FamilyId}"), ErrorSources.NotFound);
         }
 
-        var relationship = family.AddRelationship(request.SourceMemberId, request.TargetMemberId, request.Type);
-        relationship.Order = request.Order;
+        var relationship = family.AddRelationship(request.SourceMemberId, request.TargetMemberId, request.Type, request.Order);
         _context.Relationships.Add(relationship);
-
-        relationship.AddDomainEvent(new RelationshipCreatedEvent(relationship));
 
         await _context.SaveChangesAsync(cancellationToken);
 

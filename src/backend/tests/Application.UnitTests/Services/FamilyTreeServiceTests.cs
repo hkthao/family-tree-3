@@ -68,8 +68,8 @@ public class FamilyTreeServiceTests : TestBase
         var child = new Member("Child", "Grandchild", "GC1", familyId) { Id = Guid.NewGuid() };
 
         _context.Members.AddRange(grandParent, parent, child);
-        _context.Relationships.Add(new Relationship(familyId, grandParent.Id, parent.Id, RelationshipType.Father) { Id = Guid.NewGuid() });
-        _context.Relationships.Add(new Relationship(familyId, parent.Id, child.Id, RelationshipType.Mother) { Id = Guid.NewGuid() });
+        _context.Relationships.Add(new Relationship(familyId, grandParent.Id, parent.Id, RelationshipType.Father, null) { Id = Guid.NewGuid() });
+        _context.Relationships.Add(new Relationship(familyId, parent.Id, child.Id, RelationshipType.Mother, null) { Id = Guid.NewGuid() });
         await _context.SaveChangesAsync();
 
         // Act

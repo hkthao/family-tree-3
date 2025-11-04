@@ -30,7 +30,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
         var sourceMember = family.AddMember(new Member("Source", "Member", "SM", family.Id));
         var targetMember = family.AddMember(new Member("Target", "Member", "TM", family.Id));
-        var relationship = family.AddRelationship(sourceMember.Id, targetMember.Id, RelationshipType.Father);
+        var relationship = family.AddRelationship(sourceMember.Id, targetMember.Id, RelationshipType.Father, null);
         _context.Families.Add(family);
         await _context.SaveChangesAsync();
 
@@ -71,7 +71,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var relationshipId = Guid.NewGuid();
 
-        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father) { Id = relationshipId });
+        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father, 1) { Id = relationshipId });
         await _context.SaveChangesAsync();
 
         _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(false);
@@ -93,7 +93,7 @@ public class DeleteRelationshipCommandHandlerTests : TestBase
         var familyId = Guid.NewGuid();
         var relationshipId = Guid.NewGuid();
 
-        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father) { Id = relationshipId });
+        _context.Relationships.Add(new Relationship(familyId, Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father,1) { Id = relationshipId });
         // Not saving the family to the context
         await _context.SaveChangesAsync();
 

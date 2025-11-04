@@ -19,15 +19,16 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         var sourceMemberId2 = Guid.NewGuid();
         var targetMemberId2 = Guid.NewGuid();
 
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF" });
-        var sourceMember1 = new Member("Source1", "Member1", "SM1", familyId) { Id = sourceMemberId1 };
-        var targetMember1 = new Member("Target1", "Member1", "TM1", familyId) { Id = targetMemberId1 };
-        var sourceMember2 = new Member("Source2", "Member2", "SM2", familyId) { Id = sourceMemberId2 };
-        var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
-        _context.Members.AddRange(sourceMember1, targetMember1, sourceMember2, targetMember2);
+        var family = Family.Create("Test Family", "TF", null, null, null, "Public", Guid.NewGuid());
+        family.Id = familyId; // Set the ID to match the test's expectation
+        var sourceMember1 = family.AddMember(new Member("Source1", "Member1", "SM1", family.Id) { Id = sourceMemberId1 });
+        var targetMember1 = family.AddMember(new Member("Target1", "Member1", "TM1", family.Id) { Id = targetMemberId1 });
+        var sourceMember2 = family.AddMember(new Member("Source2", "Member2", "SM2", family.Id) { Id = sourceMemberId2 });
+        var targetMember2 = family.AddMember(new Member("Target2", "Member2", "TM2", family.Id) { Id = targetMemberId2 });
+        _context.Families.Add(family);
         _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId1, targetMemberId1, RelationshipType.Father) { SourceMember = sourceMember1, TargetMember = targetMember1 },
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother) { SourceMember = sourceMember2, TargetMember = targetMember2 }
+            new Relationship(familyId, sourceMemberId1, targetMemberId1, RelationshipType.Father, null),
+            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, null)
         );
         await _context.SaveChangesAsync();
 
@@ -60,8 +61,8 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
         _context.Members.AddRange(sourceMember, targetMember1, sourceMember2, targetMember2);
         _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId, targetMemberId1, RelationshipType.Father) { SourceMember = sourceMember, TargetMember = targetMember1 },
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother) { SourceMember = sourceMember2, TargetMember = targetMember2 }
+            new Relationship(familyId, sourceMemberId, targetMemberId1, RelationshipType.Father, 1),
+            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, 2)
         );
         await _context.SaveChangesAsync();
 
@@ -93,8 +94,8 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
         _context.Members.AddRange(sourceMember1, targetMember, sourceMember2, targetMember2);
         _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId1, targetMemberId, RelationshipType.Father) { SourceMember = sourceMember1, TargetMember = targetMember },
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother) { SourceMember = sourceMember2, TargetMember = targetMember2 }
+            new Relationship(familyId, sourceMemberId1, targetMemberId, RelationshipType.Father, 1),
+            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, 2)
         );
         await _context.SaveChangesAsync();
 
@@ -126,8 +127,8 @@ public class SearchRelationshipsQueryHandlerTests : TestBase
         var targetMember2 = new Member("Target2", "Member2", "TM2", familyId) { Id = targetMemberId2 };
         _context.Members.AddRange(sourceMember1, targetMember1, sourceMember2, targetMember2);
         _context.Relationships.AddRange(
-            new Relationship(familyId, sourceMemberId1, targetMemberId1, RelationshipType.Father) { SourceMember = sourceMember1, TargetMember = targetMember1 },
-            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother) { SourceMember = sourceMember2, TargetMember = targetMember2 }
+            new Relationship(familyId, sourceMemberId1, targetMemberId1, RelationshipType.Father, 1),
+            new Relationship(familyId, sourceMemberId2, targetMemberId2, RelationshipType.Mother, 2)
         );
         await _context.SaveChangesAsync();
 

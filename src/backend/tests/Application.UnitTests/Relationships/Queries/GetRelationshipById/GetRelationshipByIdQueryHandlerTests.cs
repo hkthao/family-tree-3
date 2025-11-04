@@ -18,11 +18,12 @@ public class GetRelationshipByIdQueryHandlerTests : TestBase
         var targetMemberId = Guid.NewGuid();
         var relationshipId = Guid.NewGuid();
 
-        _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF" });
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF" };
         var sourceMember = new Member("Source", "Member", "SM", familyId) { Id = sourceMemberId };
         var targetMember = new Member("Target", "Member", "TM", familyId) { Id = targetMemberId };
+        var relationship = new Relationship(familyId, sourceMemberId, targetMemberId, RelationshipType.Father, 1) { Id = relationshipId };
+        _context.Families.Add(family);
         _context.Members.AddRange(sourceMember, targetMember);
-        var relationship = new Relationship(familyId, sourceMemberId, targetMemberId, RelationshipType.Father) { Id = relationshipId, SourceMember = sourceMember, TargetMember = targetMember };
         _context.Relationships.Add(relationship);
         await _context.SaveChangesAsync();
 
