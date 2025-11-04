@@ -38,6 +38,10 @@ public class EnsureUserExistsMiddleware
             var externalId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
             var name = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
+            var firstName = claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value;
+            var lastName = claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value;
+            var phone = claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value;
+            var avatar = claimsPrincipal.FindFirst("picture")?.Value;
 
             if (string.IsNullOrEmpty(externalId))
             {
@@ -59,13 +63,7 @@ public class EnsureUserExistsMiddleware
 
                 if (user == null)
                 {
-                    var userEmail = string.IsNullOrEmpty(email) ? $"{externalId}@temp.com" : email;
-                    var firstName = claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value;
-                    var lastName = claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value;
-                    var phone = claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value;
-                    var avatar = claimsPrincipal.FindFirst("picture")?.Value;
-
-                    user = new User(externalId, userEmail, name ?? "", firstName, lastName, phone, avatar);
+                    user = new User(externalId, email ?? $"{externalId}@temp.com", name ?? "", firstName, lastName, phone, avatar);
                     dbContext.Users.Add(user);
                     try
                     {

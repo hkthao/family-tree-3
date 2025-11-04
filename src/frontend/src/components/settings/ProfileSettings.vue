@@ -15,8 +15,8 @@
           :error-messages="v$.lastName.$errors.map(e => e.$message as string)"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
-        <v-text-field v-model="formData.email" :label="t('userSettings.profile.email')"
-          @blur="v$.email.$touch()" @input="v$.email.$touch()"
+        <v-text-field v-model="formData.email" :label="t('userSettings.profile.email')" @blur="v$.email.$touch()"
+          @input="v$.email.$touch()" :disabled="true"
           :error-messages="v$.email.$errors.map(e => e.$message as string)" />
       </v-col>
       <v-col cols="12" md="6">
@@ -24,7 +24,7 @@
       </v-col>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.externalId" :label="t('userSettings.profile.externalId')"
-          readonly></v-text-field>
+          disabled></v-text-field>
       </v-col>
     </v-row>
     <v-row>

@@ -16,7 +16,7 @@ namespace backend.Infrastructure.Auth
             _logger.LogInformation("IClaimsTransformation running for user");
             var identity = (ClaimsIdentity)principal.Identity!;
             var authConfig = _configProvider.GetSection<JwtSettings>();
-
+            _logger.LogInformation("IClaimsTransformation Namespace {Namespace}", authConfig.Namespace);
             // Map Auth0 claims to standard .NET Core claims
             // Example: Map 'name' claim from Auth0 to ClaimTypes.Name
             var nameClaim = identity.FindFirst("name") ?? identity.FindFirst($"{authConfig.Namespace}name");
