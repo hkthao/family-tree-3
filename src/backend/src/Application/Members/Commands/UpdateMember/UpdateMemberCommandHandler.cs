@@ -42,15 +42,18 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         member.AvatarUrl = request.AvatarUrl;
         member.Occupation = request.Occupation;
         member.Biography = request.Biography;
-        member.IsRoot = request.IsRoot;
 
+        // Handle IsRoot property update
         if (request.IsRoot)
         {
-            var currentRoot = family.Members.FirstOrDefault(m => m.IsRoot && m.Id != request.Id);
-            if (currentRoot != null)
-            {
-                currentRoot.IsRoot = false;
-            }
+            // If the updated member should be the root
+            var currentRoot = family.Members.FirstOrDefault(m => m.IsRoot && m.Id != member.Id);
+            currentRoot?.UnsetAsRoot(); // Unset the old root if it exists
+            member.SetAsRoot(); // Set the current member as the new root
+        }
+        else if (member.IsRoot) // If the member was previously a root but now shouldn't be
+        {
+            member.UnsetAsRoot();
         }
 
         member.AddDomainEvent(new MemberUpdatedEvent(member));

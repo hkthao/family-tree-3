@@ -123,7 +123,8 @@ public class CreateMemberCommandHandlerTests : TestBase
         // Arrange
         var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object);
         var familyId = Guid.NewGuid();
-        var oldRoot = new Member("Old", "Root", "OR", familyId) { IsRoot = true };
+        var oldRoot = new Member("Old", "Root", "OR", familyId);
+        oldRoot.SetAsRoot();
         _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF1" });
         _context.Members.Add(oldRoot);
         await _context.SaveChangesAsync();

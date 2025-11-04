@@ -21,8 +21,10 @@ public class UpdateRelationshipCommandHandlerTests : TestBase
         var relationshipId = Guid.NewGuid();
 
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF" };
-        var sourceMember = family.AddMember("Source", "Member", "SM");
-        var targetMember = family.AddMember("Target", "Member", "TM");
+        var sourceMember = family.CreateMember("Source", "Member", "SM");
+        var targetMember = family.CreateMember("Target", "Member", "TM");
+        family.AddMember(sourceMember);
+        family.AddMember(targetMember);
         var relationship = new Relationship(familyId, sourceMember.Id, targetMember.Id, RelationshipType.Father) { Id = relationshipId };
         _context.Families.Add(family);
         _context.Relationships.Add(relationship);

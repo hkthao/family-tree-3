@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 

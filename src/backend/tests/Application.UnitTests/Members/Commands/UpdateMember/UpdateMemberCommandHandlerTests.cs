@@ -29,7 +29,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var memberId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        family.AddMember(member.LastName, member.FirstName, member.Code);
+        family.AddMember(member);
         _context.Families.Add(family);
         _context.Members.Add(member);
         await _context.SaveChangesAsync();

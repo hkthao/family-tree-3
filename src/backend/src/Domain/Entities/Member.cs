@@ -17,7 +17,17 @@ public class Member : BaseAuditableEntity
     public string? Biography { get; set; } // New
     public Guid FamilyId { get; private set; }
     public Family Family { get; private set; } = null!;
-    public bool IsRoot { get; set; } = false;
+    public bool IsRoot { get; private set; } = false;
+
+    public void SetAsRoot()
+    {
+        IsRoot = true;
+    }
+
+    public void UnsetAsRoot()
+    {
+        IsRoot = false;
+    }
 
     // Relationships
     public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();

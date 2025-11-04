@@ -1,6 +1,3 @@
-using backend.Application.Identity.UserProfiles.Commands.SyncNotificationSubscriber;
-using FluentValidation;
-
 namespace backend.Application.Identity.UserProfiles.Commands.SyncNotificationSubscriber;
 
 public class SyncNotificationSubscriberCommandValidator : AbstractValidator<SyncNotificationSubscriberCommand>

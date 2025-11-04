@@ -1,8 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 
 namespace backend.Application.Families.Commands.CreateFamilies;

@@ -1,7 +1,6 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
 using backend.Domain.Events.Members;
 using backend.Domain.Events.Families;
 
@@ -24,27 +23,26 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
         }
 
-        var member = family.AddMember(request.LastName, request.FirstName, request.Code ?? GenerateUniqueCode("MEM"));
-        _context.Members.Add(member);
-        member.Nickname = request.Nickname;
-        member.DateOfBirth = request.DateOfBirth;
-        member.DateOfDeath = request.DateOfDeath;
-        member.PlaceOfBirth = request.PlaceOfBirth;
-        member.PlaceOfDeath = request.PlaceOfDeath;
-        member.Gender = request.Gender;
-        member.AvatarUrl = request.AvatarUrl;
-        member.Occupation = request.Occupation;
-        member.Biography = request.Biography;
-        member.IsRoot = request.IsRoot;
+        var newMember = new Domain.Entities.Member(
+            request.LastName,
+            request.FirstName,
+            request.Code ?? GenerateUniqueCode("MEM"),
+            request.FamilyId
+        );
 
-        if (request.IsRoot)
-        {
-            var currentRoot = await _context.Members.FirstOrDefaultAsync(m => m.FamilyId == request.FamilyId && m.IsRoot, cancellationToken);
-            if (currentRoot != null)
-            {
-                currentRoot.IsRoot = false;
-            }
-        }
+        newMember.Nickname = request.Nickname;
+        newMember.DateOfBirth = request.DateOfBirth;
+        newMember.DateOfDeath = request.DateOfDeath;
+        newMember.PlaceOfBirth = request.PlaceOfBirth;
+        newMember.PlaceOfDeath = request.PlaceOfDeath;
+        newMember.Gender = request.Gender;
+        newMember.AvatarUrl = request.AvatarUrl;
+        newMember.Occupation = request.Occupation;
+        newMember.Biography = request.Biography;
+
+        var member = family.AddMember(newMember, request.IsRoot);
+
+        _context.Members.Add(member);
 
         member.AddDomainEvent(new MemberCreatedEvent(member));
         family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));

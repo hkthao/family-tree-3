@@ -2,7 +2,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
 
 namespace backend.Application.UserActivities.Commands.RecordActivity;

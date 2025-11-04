@@ -61,15 +61,28 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         }
     }
 
-    public Member AddMember(string lastName, string firstName, string code)
+    public Member CreateMember(string lastName, string firstName, string code)
     {
-        if (_members.Any(m => m.Code == code))
-        {
-            throw new InvalidOperationException($"Member with code {code} already exists in this family.");
-        }
         var member = new Member(lastName, firstName, code, Id);
-        _members.Add(member);
         return member;
+    }
+
+    public Member AddMember(Member newMember, bool isRoot = false)
+    {
+        if (_members.Any(m => m.Code == newMember.Code))
+        {
+            throw new InvalidOperationException($"Member with code {newMember.Code} already exists in this family.");
+        }
+
+        if (isRoot)
+        {
+            var currentRoot = _members.FirstOrDefault(m => m.IsRoot);
+            currentRoot?.UnsetAsRoot();
+            newMember.SetAsRoot();
+        }
+
+        _members.Add(newMember);
+        return newMember;
     }
 
     public void RemoveMember(Guid memberId)
