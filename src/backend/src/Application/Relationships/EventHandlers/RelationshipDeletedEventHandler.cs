@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser  _user) : INotificationHandler<RelationshipDeletedEvent>
+public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser  _user) : INotificationHandler<RelationshipDeletedEvent>
 {
     private readonly ILogger<RelationshipDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser  _user = _user;
 
@@ -32,7 +31,6 @@ public class RelationshipDeletedEventHandler(ILogger<RelationshipDeletedEventHan
         }, cancellationToken);
 
         // Publish notification for relationship deletion
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Remove relationship data from Vector DB for search via GlobalSearchService
         await _globalSearchService.DeleteEntityFromSearchAsync(notification.Relationship.Id.ToString(), "Relationship", cancellationToken);

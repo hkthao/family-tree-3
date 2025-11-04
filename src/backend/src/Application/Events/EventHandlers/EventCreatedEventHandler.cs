@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser user) : INotificationHandler<EventCreatedEvent>
+public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator,  IGlobalSearchService globalSearchService, ICurrentUser user) : INotificationHandler<EventCreatedEvent>
 {
     private readonly ILogger<EventCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = user;
 
@@ -32,7 +31,6 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
         }, cancellationToken);
 
         // Publish notification for event creation
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Store event data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

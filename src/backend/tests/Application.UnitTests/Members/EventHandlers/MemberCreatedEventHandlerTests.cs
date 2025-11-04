@@ -16,7 +16,6 @@ public class MemberCreatedEventHandlerTests
 {
     private readonly Mock<ILogger<MemberCreatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IDomainEventNotificationPublisher> _notificationPublisherMock;
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<IFamilyTreeService> _familyTreeServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
@@ -26,11 +25,10 @@ public class MemberCreatedEventHandlerTests
     {
         _loggerMock = new Mock<ILogger<MemberCreatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _notificationPublisherMock = new Mock<IDomainEventNotificationPublisher>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _familyTreeServiceMock = new Mock<IFamilyTreeService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _notificationPublisherMock.Object, _globalSearchServiceMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object);
+        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -47,7 +45,6 @@ public class MemberCreatedEventHandlerTests
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.CreateMember), CancellationToken.None), Times.Once);
-        _notificationPublisherMock.Verify(p => p.PublishNotificationForEventAsync(notification, CancellationToken.None), Times.Once);
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(member, "Member", It.IsAny<Func<Member, string>>(), It.IsAny<Func<Member, Dictionary<string, string>>>(), CancellationToken.None), Times.Once);
     }
 }

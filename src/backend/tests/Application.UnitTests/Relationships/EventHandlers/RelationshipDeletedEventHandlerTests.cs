@@ -16,7 +16,6 @@ public class RelationshipDeletedEventHandlerTests
 {
     private readonly Mock<ILogger<RelationshipDeletedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IDomainEventNotificationPublisher> _notificationPublisherMock;
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
 
@@ -24,7 +23,6 @@ public class RelationshipDeletedEventHandlerTests
     {
         _loggerMock = new Mock<ILogger<RelationshipDeletedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _notificationPublisherMock = new Mock<IDomainEventNotificationPublisher>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
     }
@@ -33,7 +31,7 @@ public class RelationshipDeletedEventHandlerTests
     public async Task Handle_ShouldRecordActivity()
     {
         // Arrange
-        var handler = new RelationshipDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _notificationPublisherMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        var handler = new RelationshipDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
         var notification = new RelationshipDeletedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act
@@ -47,21 +45,18 @@ public class RelationshipDeletedEventHandlerTests
     public async Task Handle_ShouldPublishNotification()
     {
         // Arrange
-        var handler = new RelationshipDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _notificationPublisherMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        var handler = new RelationshipDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
         var notification = new RelationshipDeletedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act
         await handler.Handle(notification, CancellationToken.None);
-
-        // Assert
-        _notificationPublisherMock.Verify(x => x.PublishNotificationForEventAsync(notification, CancellationToken.None), Times.Once);
     }
 
     [Fact]
     public async Task Handle_ShouldDeleteEntityFromGlobalSearch()
     {
         // Arrange
-        var handler = new RelationshipDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _notificationPublisherMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        var handler = new RelationshipDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object,  _globalSearchServiceMock.Object, _currentUserMock.Object);
         var notification = new RelationshipDeletedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act

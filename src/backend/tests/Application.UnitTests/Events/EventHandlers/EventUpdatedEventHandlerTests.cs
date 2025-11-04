@@ -17,7 +17,6 @@ public class EventUpdatedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<EventUpdatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IDomainEventNotificationPublisher> _notificationPublisherMock;
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly EventUpdatedEventHandler _handler;
@@ -26,10 +25,9 @@ public class EventUpdatedEventHandlerTests : TestBase
     {
         _loggerMock = new Mock<ILogger<EventUpdatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _notificationPublisherMock = new Mock<IDomainEventNotificationPublisher>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new EventUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _notificationPublisherMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new EventUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -47,7 +45,6 @@ public class EventUpdatedEventHandlerTests : TestBase
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
-        _notificationPublisherMock.Verify(p => p.PublishNotificationForEventAsync(notification, CancellationToken.None), Times.Once);
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(testEvent, "Event", It.IsAny<Func<Event, string>>(), It.IsAny<Func<Event, Dictionary<string, string>>>(), CancellationToken.None), Times.Once);
     }
 
@@ -65,7 +62,6 @@ public class EventUpdatedEventHandlerTests : TestBase
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.IsAny<IRequest>(), CancellationToken.None), Times.Never);
-        _notificationPublisherMock.Verify(p => p.PublishNotificationForEventAsync(It.IsAny<EventUpdatedEvent>(), CancellationToken.None), Times.Never);
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(It.IsAny<Event>(), It.IsAny<string>(), It.IsAny<Func<Event, string>>(), It.IsAny<Func<Event, Dictionary<string, string>>>(), CancellationToken.None), Times.Never);
     }
 }

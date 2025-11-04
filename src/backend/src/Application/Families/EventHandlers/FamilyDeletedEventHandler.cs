@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<FamilyDeletedEvent>
+public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger, IMediator mediator,  IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<FamilyDeletedEvent>
 {
     private readonly ILogger<FamilyDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
 
@@ -32,7 +31,6 @@ public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for family deletion
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Remove family data from Vector DB for search via GlobalSearchService
         await _globalSearchService.DeleteEntityFromSearchAsync(notification.Family.Id.ToString(), "Family", cancellationToken);

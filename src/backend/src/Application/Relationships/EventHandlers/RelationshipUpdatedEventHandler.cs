@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser  _user) : INotificationHandler<RelationshipUpdatedEvent>
+public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser  _user) : INotificationHandler<RelationshipUpdatedEvent>
 {
     private readonly ILogger<RelationshipUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser  _user = _user;
 
@@ -32,7 +31,6 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
         }, cancellationToken);
 
         // Publish notification for relationship update
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Update relationship data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

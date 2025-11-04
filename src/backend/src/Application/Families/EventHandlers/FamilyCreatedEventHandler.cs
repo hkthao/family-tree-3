@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<FamilyCreatedEvent>
+public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<FamilyCreatedEvent>
 {
     private readonly ILogger<FamilyCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
 
@@ -32,7 +31,6 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for family creation
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Store family data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

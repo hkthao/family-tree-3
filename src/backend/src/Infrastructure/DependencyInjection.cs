@@ -69,7 +69,6 @@ public static class DependencyInjection
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
         services.AddScoped<INotificationService, NotificationService>();
-        services.AddScoped<IDomainEventNotificationPublisher, DomainEventNotificationPublisher>();
         services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
         // Register Background Task Queue

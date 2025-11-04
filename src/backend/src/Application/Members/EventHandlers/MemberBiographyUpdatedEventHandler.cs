@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberBiographyUpdatedEventHandler(ILogger<MemberBiographyUpdatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<MemberBiographyUpdatedEvent>
+public class MemberBiographyUpdatedEventHandler(ILogger<MemberBiographyUpdatedEventHandler> logger, IMediator mediator,IGlobalSearchService globalSearchService,ICurrentUser _user) : INotificationHandler<MemberBiographyUpdatedEvent>
 {
     private readonly ILogger<MemberBiographyUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
 
@@ -32,7 +31,6 @@ public class MemberBiographyUpdatedEventHandler(ILogger<MemberBiographyUpdatedEv
         }, cancellationToken);
 
         // Publish notification for member biography update
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Update member data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(

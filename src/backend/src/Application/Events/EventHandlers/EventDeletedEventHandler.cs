@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<EventDeletedEvent>
+public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, IMediator mediator,  IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<EventDeletedEvent>
 {
     private readonly ILogger<EventDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
 
@@ -32,7 +31,6 @@ public class EventDeletedEventHandler(ILogger<EventDeletedEventHandler> logger, 
         }, cancellationToken);
 
         // Publish notification for event deletion
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Remove event data from Vector DB for search via GlobalSearchService
         await _globalSearchService.DeleteEntityFromSearchAsync(notification.Event.Id.ToString(), "Event", cancellationToken);

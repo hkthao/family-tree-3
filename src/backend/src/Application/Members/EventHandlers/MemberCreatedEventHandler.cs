@@ -6,11 +6,10 @@ using backend.Domain.Enums;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IDomainEventNotificationPublisher notificationPublisher, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService,ICurrentUser _user) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator,  IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService,ICurrentUser _user) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IDomainEventNotificationPublisher _notificationPublisher = notificationPublisher;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
     private readonly ICurrentUser _user = _user;
@@ -33,7 +32,6 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member creation
-        await _notificationPublisher.PublishNotificationForEventAsync(notification, cancellationToken);
 
         // Store member data in Vector DB for search via GlobalSearchService
         await _globalSearchService.UpsertEntityAsync(
