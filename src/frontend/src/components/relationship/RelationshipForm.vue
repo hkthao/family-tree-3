@@ -70,16 +70,9 @@ const formData = reactive<Partial<Relationship>>(
     },
 );
 
-const state = reactive({
-  sourceMemberId: formData.sourceMemberId,
-  targetMemberId: formData.targetMemberId,
-  type: formData.type,
-  familyId: formData.familyId,
-});
+const rules = useRelationshipRules(toRefs(formData));
 
-const rules = useRelationshipRules(toRefs(state));
-
-const v$ = useVuelidate(rules, state);
+const v$ = useVuelidate(rules, formData);
 
 const validate = async () => {
   const result = await v$.value.$validate();

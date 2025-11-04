@@ -102,14 +102,6 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
   },
 );
 
-const state = reactive({
-  name: formData.name,
-  type: formData.type,
-  familyId: formData.familyId,
-  startDate: formData.startDate,
-  endDate: formData.endDate,
-});
-
 const eventTypes = [
   { title: t('event.type.birth'), value: EventType.Birth },
   { title: t('event.type.marriage'), value: EventType.Marriage },
@@ -118,9 +110,9 @@ const eventTypes = [
   { title: t('event.type.other'), value: EventType.Other },
 ];
 
-const rules = useEventRules(toRefs(state));
+const rules = useEventRules(toRefs(formData));
 
-const v$ = useVuelidate(rules, state);
+const v$ = useVuelidate(rules, formData);
 
 // Expose form validation and data for parent component
 const validate = async () => {

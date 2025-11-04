@@ -61,13 +61,9 @@ const formData = reactive<Family | Omit<Family, 'id'>>(
   },
 );
 
-const state = reactive({
-  name: formData.name,
-});
-
 const rules = useFamilyRules();
 
-const v$ = useVuelidate(rules, state);
+const v$ = useVuelidate(rules, formData);
 
 const familyUsers = ref<FamilyUser[]>(props.initialFamilyUsers || []);
 const visibilityItems = computed(() => [
