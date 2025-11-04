@@ -49,12 +49,14 @@ public class User : BaseAuditableEntity, IAggregateRoot
         Preference = new UserPreference(Id); // Initialize with default preference
     }
 
-    public void AddUserActivity(string activityType, string description, TargetType targetType = TargetType.None, string? targetId = null, Guid? groupId = null, JsonDocument? metadata = null)
+    public UserActivity AddUserActivity(string activityType, string description, TargetType targetType = TargetType.None, string? targetId = null, Guid? groupId = null, JsonDocument? metadata = null)
     {
-        _userActivities.Add(new UserActivity(Id, activityType, description, targetType, targetId, groupId, metadata));
+        var _userActivity = new UserActivity(Id, activityType, description, targetType, targetId, groupId, metadata);
+        _userActivities.Add(_userActivity);
+        return _userActivity;
     }
 
-    public void UpdateProfile(string externalId, string email, string name, string firstName, string lastName, string phone, string avatar)
+    public UserProfile? UpdateProfile(string externalId, string email, string name, string firstName, string lastName, string phone, string avatar)
     {
         if (Profile == null)
         {
@@ -62,9 +64,10 @@ public class User : BaseAuditableEntity, IAggregateRoot
         }
 
         Profile.Update(externalId, email, name, firstName, lastName, phone, avatar);
+        return Profile;
     }
 
-    public void UpdatePreference(string theme, string language)
+    public void UpdatePreference(Theme theme, Language language)
     {
         if (Preference == null)
         {

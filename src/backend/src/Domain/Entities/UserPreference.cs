@@ -18,9 +18,9 @@ public class UserPreference : BaseAuditableEntity
         UserId = userId;
     }
 
-    public void Update(string theme, string language)
+    public void Update(Theme theme, Language language)
     {
-        Theme = Enum.Parse<Theme>(theme);
-        Language = Enum.Parse<Language>(language);
+        Theme = theme;
+        Language = language;
     }
 }

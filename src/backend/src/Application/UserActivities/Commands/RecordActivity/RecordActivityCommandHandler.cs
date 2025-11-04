@@ -55,14 +55,15 @@ public class RecordActivityCommandHandler(IApplicationDbContext context) : IRequ
             return Result<Guid>.Failure($"User with ID {request.UserId} not found.");
         }
 
-        user.AddUserActivity(
-            request.ActionType.ToString(),
-            request.ActivitySummary,
-            request.TargetType,
-            request.TargetId,
-            groupId,
-            request.Metadata
-        );
+        var userActivity = user.AddUserActivity(
+             request.ActionType.ToString(),
+             request.ActivitySummary,
+             request.TargetType,
+             request.TargetId,
+             groupId,
+             request.Metadata
+         );
+        _context.UserActivities.Add(userActivity);
 
         // The other properties of UserActivity (TargetType, TargetId, GroupId, Metadata)
         // are not directly set by the AddUserActivity method in the User aggregate.

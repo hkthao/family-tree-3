@@ -21,7 +21,7 @@ public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IC
             return Result.Failure($"User with ID {_user.UserId} not found.");
         }
 
-        user.UpdatePreference(request.Theme.ToString(), request.Language.ToString());
+        user.UpdatePreference(request.Theme, request.Language);
 
         await _context.SaveChangesAsync(cancellationToken);
 

@@ -7,7 +7,6 @@ public class UserProfileByIdSpecification : SingleResultSpecification<UserProfil
 {
     public UserProfileByIdSpecification(Guid userProfileId)
     {
-        Query.Where(up => up.Id == userProfileId)
-             .Include(up => up.UserPreference);
+        Query.Where(up => up.Id == userProfileId);
     }
 }

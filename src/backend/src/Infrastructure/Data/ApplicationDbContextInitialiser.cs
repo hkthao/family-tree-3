@@ -52,12 +52,12 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
             var user1 = new Domain.Entities.User("auth0|testuser1", "testuser1@example.com");
             user1.Id = Guid.NewGuid(); // Assign a new GUID for the User
             user1.Profile?.Update("auth0|testuser1", "testuser1@example.com", "Test User One", "", "", "", ""); // Update profile using the method
-            user1.Preference?.Update(Domain.Enums.Theme.Light.ToString(), Domain.Enums.Language.English.ToString()); // Update preference using the method
+            user1.Preference?.Update(Domain.Enums.Theme.Light, Domain.Enums.Language.English); // Update preference using the method
 
             var user2 = new Domain.Entities.User("auth0|testuser2", "testuser2@example.com");
             user2.Id = Guid.NewGuid(); // Assign a new GUID for the User
             user2.Profile?.Update("auth0|testuser2", "testuser2@example.com", "Test User Two", "", "", "", ""); // Update profile using the method
-            user2.Preference?.Update(Domain.Enums.Theme.Light.ToString(), Domain.Enums.Language.English.ToString()); // Update preference using the method
+            user2.Preference?.Update(Domain.Enums.Theme.Light, Domain.Enums.Language.English); // Update preference using the method
 
             _context.Users.AddRange(user1, user2);
             await _context.SaveChangesAsync();

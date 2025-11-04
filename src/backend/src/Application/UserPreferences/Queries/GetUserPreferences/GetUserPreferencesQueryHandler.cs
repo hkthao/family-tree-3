@@ -5,34 +5,34 @@ using backend.Domain.Enums;
 
 namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
 
-public class GetUserPreferencesQueryHandler(IApplicationDbContext context, ICurrentUser user, IMapper mapper) : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
+public class GetUserPreferencesQueryHandler(IApplicationDbContext context, ICurrentUser currentUser, IMapper mapper) : IRequestHandler<GetUserPreferencesQuery, Result<UserPreferenceDto>>
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly ICurrentUser  _user = user;
+    private readonly ICurrentUser  _currentUser = currentUser;
     private readonly IMapper _mapper = mapper;
 
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
     {
-        var userProfile = await _context.UserProfiles
-            .Where(up => up.Id == _user.ProfileId!.Value)
-            .Include(up => up.UserPreference)
+        var user = await _context.Users
+            .Where(up => up.Id == _currentUser.UserId)
+            .Include(up => up.Preference)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (userProfile == null)
+        if (user == null)
         {
             return Result<UserPreferenceDto>.Failure(ErrorMessages.UserProfileNotFound, ErrorSources.NotFound);
         }
 
-        if (userProfile.UserPreference == null)
+        if (user.Preference == null)
         {
             // Return default preferences if none exist
             return Result<UserPreferenceDto>.Success(new UserPreferenceDto
             {
-                Theme = Theme.Light,
-                Language = Language.English,
+                Theme = Theme.Dark,
+                Language = Language.Vietnamese,
             });
         }
 
-        return Result<UserPreferenceDto>.Success(_mapper.Map<UserPreferenceDto>(userProfile.UserPreference));
+        return Result<UserPreferenceDto>.Success(_mapper.Map<UserPreferenceDto>(user.Preference));
     }
 }

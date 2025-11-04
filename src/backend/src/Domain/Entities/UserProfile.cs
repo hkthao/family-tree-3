@@ -45,13 +45,6 @@ public class UserProfile : BaseAuditableEntity
     /// </summary>
     public string? Avatar { get; private set; }
 
-
-
-    /// <summary>
-    /// Navigation property for user preferences.
-    /// </summary>
-    public UserPreference? UserPreference { get; private set; }
-
     public void Update(string externalId, string email, string name, string firstName, string lastName, string phone, string avatar)
     {
         ExternalId = externalId;
