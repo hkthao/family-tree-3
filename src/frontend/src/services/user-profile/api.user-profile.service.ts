@@ -10,18 +10,6 @@ export class UserProfileApiService implements ICurrentUserProfileService {
 
   constructor(private http: ApiClientMethods) {}
 
-  public async getAllUserProfiles(): Promise<Result<UserProfile[], ApiError>> {
-    return this.http.get<UserProfile[]>(this.apiUrl);
-  }
-
-  public async getUserProfile(id: string): Promise<Result<UserProfile, ApiError>> {
-    return this.http.get<UserProfile>(`${this.apiUrl}/${id}`);
-  }
-
-  public async getUserProfileByExternalId(externalId: string): Promise<Result<UserProfile, ApiError>> {
-    return this.http.get<UserProfile>(`${this.apiUrl}/byExternalId/${externalId}`);
-  }
-
   public async updateUserProfile(profile: UserProfile): Promise<Result<UserProfile, ApiError>> {
     return this.http.put<UserProfile>(`${this.apiUrl}/${profile.id}`, profile);
   }
