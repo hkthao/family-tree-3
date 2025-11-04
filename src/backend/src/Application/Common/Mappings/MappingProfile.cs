@@ -2,6 +2,7 @@ using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Families;
+using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Identity.UserProfiles.Queries;
@@ -27,7 +28,8 @@ public class MappingProfile : Profile
     public MappingProfile()
     {
         CreateMap<Family, FamilyDto>();
-        CreateMap<Family, FamilyDetailDto>();
+        CreateMap<Family, FamilyDetailDto>()
+            .ForMember(dest => dest.FamilyUsers, opt => opt.MapFrom(src => src.FamilyUsers)); // Modified mapping
         CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
@@ -57,5 +59,7 @@ public class MappingProfile : Profile
         CreateMap<UserActivity, UserActivityDto>();
         CreateMap<UserPreference, UserPreferenceDto>();
         CreateMap<User, UserDto>();
+        CreateMap<FamilyUser, FamilyUserDto>() // New mapping
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
     }
 }

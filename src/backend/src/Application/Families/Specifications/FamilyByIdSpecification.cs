@@ -7,6 +7,8 @@ public class FamilyByIdSpecification : Specification<Family>, ISingleResultSpeci
 {
     public FamilyByIdSpecification(Guid id)
     {
-        Query.Where(f => f.Id == id);
+        Query.Where(f => f.Id == id)
+             .Include(f => f.FamilyUsers)
+                 .ThenInclude(fu => fu.User);
     }
 }

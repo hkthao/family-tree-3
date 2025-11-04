@@ -1,4 +1,5 @@
 using backend.Application.Common.Dtos;
+using backend.Application.Families.Dtos;
 
 namespace backend.Application.Families.Queries.GetFamilyById;
 
@@ -13,4 +14,5 @@ public class FamilyDetailDto : BaseAuditableDto
     public string Visibility { get; set; } = null!;
     public int TotalMembers { get; set; }
     public int TotalGenerations { get; set; }
+    public ICollection<FamilyUserDto> FamilyUsers { get; set; } = new List<FamilyUserDto>();
 }

@@ -11,6 +11,7 @@ export interface Family {
   totalMembers?: number;
   totalGenerations?: number;
   validationErrors?: string[];
+  familyUsers?: FamilyUser[];
 }
 
 export interface FamilyFilter {
@@ -23,6 +24,6 @@ export interface FamilyFilter {
 
 export interface FamilyUser {
     familyId: string;
-    userProfileId: string;
+    userId: string;
     role: string;
 }

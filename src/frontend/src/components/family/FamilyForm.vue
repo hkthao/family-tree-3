@@ -52,7 +52,6 @@ import { useFamilyRules } from '@/validations/family.validation';
 
 const props = defineProps<{
   initialFamilyData?: Family;
-  initialFamilyUsers?: FamilyUser[];
   readOnly?: boolean;
 }>();
 const emit = defineEmits(['submit', 'cancel']);
@@ -74,21 +73,21 @@ const rules = useFamilyRules();
 
 const v$ = useVuelidate(rules, formData);
 
-const familyUsers = ref<FamilyUser[]>(props.initialFamilyUsers || []);
+const familyUsers = ref<FamilyUser[]>(props.initialFamilyData?.familyUsers || []);
 
 const managers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === 'Manager').map(fu => fu.userProfileId),
-  set: (newUserProfileIds) => {
-    const newManagers = newUserProfileIds.map(id => ({ familyId: '', userProfileId: id, role: 'Manager' }));
+  get: () => familyUsers.value.filter(fu => fu.role === 'Manager').map(fu => fu.userId),
+  set: (newuserIds) => {
+    const newManagers = newuserIds.map(id => ({ familyId: '', userId: id, role: 'Manager' }));
     const otherUsers = familyUsers.value.filter(fu => fu.role !== 'Manager');
     familyUsers.value = [...otherUsers, ...newManagers];
   }
 });
 
 const viewers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === 'Viewer').map(fu => fu.userProfileId),
-  set: (newUserProfileIds) => {
-    const newViewers = newUserProfileIds.map(id => ({ familyId: '', userProfileId: id, role: 'Viewer' }));
+  get: () => familyUsers.value.filter(fu => fu.role === 'Viewer').map(fu => fu.userId),
+  set: (newuserIds) => {
+    const newViewers = newuserIds.map(id => ({ familyId: '', userId: id, role: 'Viewer' }));
     const otherUsers = familyUsers.value.filter(fu => fu.role !== 'Viewer');
     familyUsers.value = [...otherUsers, ...newViewers];
   }
