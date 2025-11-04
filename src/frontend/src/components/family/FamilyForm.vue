@@ -23,21 +23,30 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12">
+      <v-col cols="12"> 
         <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
-    <FamilyPermissions :readOnly="props.readOnly" v-model="familyUsers" />
+    <v-row>
+      <v-col>
+        <UserAutocomplete v-model="managers" chips closable-chips multiple :disabled="props.readOnly"
+          :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
+      </v-col>
+      <v-col>
+        <UserAutocomplete v-model="viewers" chips closable-chips multiple :disabled="props.readOnly"
+          :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></UserAutocomplete>
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, toRefs } from 'vue';
+import { ref, computed, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
-import FamilyPermissions from './FamilyPermissions.vue';
+import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
 import { useVuelidate } from '@vuelidate/core';
 import { useFamilyRules } from '@/validations/family.validation';
 
@@ -66,6 +75,25 @@ const rules = useFamilyRules();
 const v$ = useVuelidate(rules, formData);
 
 const familyUsers = ref<FamilyUser[]>(props.initialFamilyUsers || []);
+
+const managers = computed({
+  get: () => familyUsers.value.filter(fu => fu.role === 'Manager').map(fu => fu.userProfileId),
+  set: (newUserProfileIds) => {
+    const newManagers = newUserProfileIds.map(id => ({ familyId: '', userProfileId: id, role: 'Manager' }));
+    const otherUsers = familyUsers.value.filter(fu => fu.role !== 'Manager');
+    familyUsers.value = [...otherUsers, ...newManagers];
+  }
+});
+
+const viewers = computed({
+  get: () => familyUsers.value.filter(fu => fu.role === 'Viewer').map(fu => fu.userProfileId),
+  set: (newUserProfileIds) => {
+    const newViewers = newUserProfileIds.map(id => ({ familyId: '', userProfileId: id, role: 'Viewer' }));
+    const otherUsers = familyUsers.value.filter(fu => fu.role !== 'Viewer');
+    familyUsers.value = [...otherUsers, ...newViewers];
+  }
+});
+
 const visibilityItems = computed(() => [
   {
     title: t('family.form.visibility.private'),
