@@ -16,25 +16,19 @@ public class CreateFamilyCommandHandler(IApplicationDbContext context, ICurrentU
     {
         try
         {
-            var entity = new Family
-            {
-                Name = request.Name,
-                Description = request.Description,
-                Address = request.Address,
-                AvatarUrl = request.AvatarUrl,
-                Visibility = request.Visibility,
-                Code = request.Code ?? GenerateUniqueCode("FAM")
-            };
+            var entity = Family.Create(
+                request.Name,
+                request.Code ?? GenerateUniqueCode("FAM"),
+                request.Description,
+                request.Address,
+                request.AvatarUrl,
+                request.Visibility,
+                _user.UserId
+            );
 
             _context.Families.Add(entity);
-            entity.AddDomainEvent(new FamilyCreatedEvent(entity));
-
-            entity.AddFamilyUser(_user.UserId, FamilyRole.Manager); // Use the aggregate method
 
             await _context.SaveChangesAsync(cancellationToken);
-
-            // Update family stats
-            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
 
             return Result<Guid>.Success(entity.Id);
         }

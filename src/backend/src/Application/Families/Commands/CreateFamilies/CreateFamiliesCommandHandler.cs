@@ -19,20 +19,15 @@ public class CreateFamiliesCommandHandler(IApplicationDbContext context, ICurren
             var createdFamilyIds = new List<Guid>();
             foreach (var familyDto in request.Families)
             {
-                var familyId = Guid.NewGuid();
-                var entity = new Family
-                {
-                    Id = familyId,
-                    Name = familyDto.Name,
-                    Description = familyDto.Description,
-                    Address = familyDto.Address,
-                    AvatarUrl = familyDto.AvatarUrl,
-                    Visibility = familyDto.Visibility ?? "Public",
-                    Code = familyDto.Code,
-                    TotalMembers = familyDto.TotalMembers,
-                    TotalGenerations = familyDto.TotalGenerations ?? 0,
-                };
-                entity.AddFamilyUser(_user.UserId, FamilyRole.Manager);
+                var entity = Family.Create(
+                    familyDto.Name,
+                    familyDto.Code ?? Guid.NewGuid().ToString()[..5].ToUpper(), // Generate a simple code if not provided
+                    familyDto.Description,
+                    familyDto.Address,
+                    familyDto.AvatarUrl,
+                    familyDto.Visibility ?? "Public",
+                    _user.UserId
+                );
                 _context.Families.Add(entity);
                 createdFamilyIds.Add(entity.Id);
             }

@@ -1,4 +1,5 @@
 ﻿using backend.Domain.Enums;
+using backend.Domain.Events.Families;
 
 namespace backend.Domain.Entities;
 
@@ -109,5 +110,121 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         {
             _relationships.Remove(relationship);
         }
+    }
+
+    /// <summary>
+    /// Recalculates the total number of members in the family.
+    /// </summary>
+    public void RecalculateTotalMembers()
+    {
+        TotalMembers = _members.Count;
+    }
+
+    /// <summary>
+    /// Recalculates the total number of generations in the family.
+    /// </summary>
+    public void RecalculateTotalGenerations()
+    {
+        // Build a graph representation of the family tree
+        var graph = new Dictionary<Guid, List<Guid>>();
+        var parents = new Dictionary<Guid, List<Guid>>();
+
+        foreach (var member in _members)
+        {
+            graph[member.Id] = new List<Guid>();
+            parents[member.Id] = new List<Guid>();
+        }
+
+        foreach (var rel in _relationships)
+        {
+            if (rel.Type == RelationshipType.Father || rel.Type == RelationshipType.Mother)
+            {
+                // Parent -> Child
+                if (graph.ContainsKey(rel.SourceMemberId))
+                {
+                    graph[rel.SourceMemberId].Add(rel.TargetMemberId);
+                }
+                if (parents.ContainsKey(rel.TargetMemberId))
+                {
+                    parents[rel.TargetMemberId].Add(rel.SourceMemberId);
+                }
+            }
+        }
+
+        // Find all root members (members with no parents in the family)
+        var rootMembers = _members.Where(m => !parents.ContainsKey(m.Id) || parents[m.Id].Count == 0).ToList();
+
+        if (rootMembers.Count == 0 && _members.Count != 0) // If no explicit roots, consider members with no parents in the relationships as roots
+        {
+            rootMembers = _members.Where(m => !_relationships.Any(r => r.TargetMemberId == m.Id && (r.Type == RelationshipType.Father || r.Type == RelationshipType.Mother))).ToList();
+        }
+
+        if (rootMembers.Count == 0 && _members.Count != 0) // Fallback: if still no roots, just pick the first member
+        {
+            rootMembers.Add(_members.First());
+        }
+
+        int maxGenerations = 0;
+        foreach (var root in rootMembers)
+        {
+            maxGenerations = Math.Max(maxGenerations, GetGenerations(root.Id, graph, new HashSet<Guid>()));
+        }
+
+        TotalGenerations = maxGenerations;
+    }
+
+    /// <summary>
+    /// Recalculates all statistics for the family (e.g., total members, total generations).
+    /// </summary>
+    public void RecalculateStats()
+    {
+        RecalculateTotalMembers();
+        RecalculateTotalGenerations();
+    }
+
+    private int GetGenerations(Guid memberId, Dictionary<Guid, List<Guid>> graph, HashSet<Guid> visited)
+    {
+        if (visited.Contains(memberId)) return 0; // Avoid infinite loops in case of circular relationships
+        visited.Add(memberId);
+
+        if (!graph.ContainsKey(memberId) || graph[memberId].Count == 0)
+        {
+            return 1; // Base case: leaf member is 1 generation
+        }
+
+        int maxChildGenerations = 0;
+        foreach (var childId in graph[memberId])
+        {
+            maxChildGenerations = Math.Max(maxChildGenerations, GetGenerations(childId, graph, visited));
+        }
+
+        return 1 + maxChildGenerations;
+    }
+
+    // Public constructor for EF Core and seeding
+    public Family() { }
+
+    /// <summary>
+    /// Factory method to create a new Family aggregate.
+    /// </summary>
+    public static Family Create(string name, string code, string? description, string? address, string? avatarUrl, string visibility, Guid creatorUserId)
+    {
+        var family = new Family
+        {
+            Name = name,
+            Code = code,
+            Description = description,
+            Address = address,
+            AvatarUrl = avatarUrl,
+            Visibility = visibility,
+            TotalMembers = 0, // Initial value
+            TotalGenerations = 0 // Initial value
+        };
+
+        family.AddDomainEvent(new FamilyCreatedEvent(family));
+        family.AddFamilyUser(creatorUserId, FamilyRole.Manager);
+        family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));
+
+        return family;
     }
 }
