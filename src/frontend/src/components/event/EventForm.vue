@@ -30,7 +30,7 @@
 
     <v-row>
       <v-col cols="12" md="6">
-        <VDateInput v-model="formData.startDate" :label="t('event.form.startDate')" 
+        <v-date-input v-model="formData.startDate" :label="t('event.form.startDate')" 
           @blur="v$.startDate.$touch()" @input="v$.startDate.$touch()"
           :error-messages="v$.startDate.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"
@@ -38,7 +38,7 @@
           />
       </v-col>
       <v-col cols="12" md="6">
-        <VDateInput v-model="formData.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
+        <v-date-input v-model="formData.endDate" :label="t('event.form.endDate')" optional :readonly="props.readOnly"
           @blur="v$.endDate.$touch()" @input="v$.endDate.$touch()"
           :error-messages="v$.endDate.$errors.map(e => e.$message as string)"
           data-testid="event-end-date-input" prepend-icon="" append-inner-icon="mdi-calendar" format="dd/MM/yyyy"

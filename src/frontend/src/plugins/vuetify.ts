@@ -73,7 +73,7 @@ export default createVuetify({
       variant: 'outlined',
       hideDetails: true
     },
-    VDateInput: {
+    v-date-input: {
       variant: 'outlined',
       density: 'compact',
       hideDetails: true,

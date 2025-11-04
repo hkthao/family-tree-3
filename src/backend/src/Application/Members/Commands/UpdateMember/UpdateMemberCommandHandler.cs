@@ -31,7 +31,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         member.Update(
             request.FirstName,
             request.LastName,
-            request.Code!,
+            member.Code,
             request.Nickname,
             request.Gender,
             request.DateOfBirth,

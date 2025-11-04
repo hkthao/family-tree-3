@@ -34,18 +34,16 @@ test.describe('Member Management - Create Member - Success Case', () => {
       page.getByTestId('add-new-member-button').click(),
     ]);
 
-    const memberFormLocator = page.getByTestId('member-form');
-
     console.log('Điền thông tin thành viên.');
     await fillVuetifyInput(page, 'member-first-name-input', memberFirstName);
     await fillVuetifyInput(page, 'member-last-name-input', memberLastName);
     await fillVuetifyInput(page, 'member-nickname-input', memberNickname);
 
     console.log('Chọn ngày sinh.');
-    await fillVuetifyDateInput(page, 'member-date-of-birth-input', memberDateOfBirth, memberFormLocator);
+    await fillVuetifyDateInput(page, 'member-date-of-birth-input', memberDateOfBirth);
 
     console.log('Chọn ngày mất.');
-    await fillVuetifyDateInput(page, 'member-date-of-death-input', memberDateOfDeath, memberFormLocator);
+    await fillVuetifyDateInput(page, 'member-date-of-death-input', memberDateOfDeath);
 
     await fillVuetifyInput(page, 'member-place-of-birth-input', memberPlaceOfBirth);
     await fillVuetifyInput(page, 'member-place-of-death-input', memberPlaceOfDeath);

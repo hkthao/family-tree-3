@@ -80,8 +80,6 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventFilter } from '@/types';
 import { EventType } from '@/types'; // Import EventType enum
-import { VDateInput } from 'vuetify/labs/VDateInput';
-import { FamilyAutocomplete } from '@/components/common';
 
 const emit = defineEmits(['update:filters']);
 

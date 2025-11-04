@@ -141,9 +141,19 @@ export async function waitForVDataTableLoaded(page: Page) {
  */
 export async function fillVuetifyDateInput(page: Page, testId: string, value: string) {
   console.log(`Chọn ngày '${value}' từ trường ngày có data-testid='${testId}'.`);
-  const vDateInputLocator = page.locator(`[data-testid="${testId}"]`);
-  await expect(vDateInputLocator).toBeVisible({ timeout: 10000 });
-  // Click the input to open the date picker
-  await vDateInputLocator.locator('input').click();
-  await vDateInputLocator.locator('input').fill('20/11/1990');
+
+  // 1️⃣ Click vào input để mở date picker
+  await page.getByTestId(testId).locator('input').click();
+
+  // 2️⃣ Chờ overlay hiện ra
+  await page.waitForSelector('.v-overlay-container .v-date-picker-month__day-btn:visible');
+
+  // 3️⃣ Lấy số ngày từ value (format 'YYYY-MM-DD')
+  const day = parseInt(value.split('-')[2], 10);
+
+  // 4️⃣ Click vào nút ngày visible trong picker
+  await page
+    .locator('.v-overlay-container .v-date-picker-month__day-btn:visible', { hasText: day.toString() })
+    .first() // đảm bảo pick nút visible đầu tiên
+    .click();
 }

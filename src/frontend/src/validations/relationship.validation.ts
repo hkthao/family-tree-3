@@ -1,13 +1,13 @@
 import { useI18n } from 'vue-i18n';
 import { required, helpers } from '@vuelidate/validators';
 import { computed } from 'vue';
-import type { Relationship } from '@/types';
+import type { Ref } from 'vue';
 
-export function useRelationshipRules(state: Partial<Relationship>) {
+export function useRelationshipRules(state: { [key: string]: Ref<any> }) {
   const { t } = useI18n();
 
   const notSameAs = (value: any) => {
-    return value !== state.targetMemberId;
+    return value !== state.targetMemberId.value;
   };
 
   const rules = computed(() => {
