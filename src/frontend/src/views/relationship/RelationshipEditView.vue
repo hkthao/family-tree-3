@@ -26,13 +26,10 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { useNotificationStore } from '@/stores/notification.store';
-
 import type { Relationship } from '@/types';
-
-import RelationshipForm from '@/components/relationship/RelationshipForm.vue';
+import {RelationshipForm} from '@/components/relationship';
 
 const props = defineProps<{ id: string }>();
 const router = useRouter();

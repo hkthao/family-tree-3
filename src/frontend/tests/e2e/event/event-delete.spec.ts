@@ -18,7 +18,7 @@ test.describe('Event Management - Delete Event', () => {
     const eventLocation = `e2e location ${new Date().getTime()}`;
     const eventDescription = `e2e descriptions ${new Date().getTime()}`;
     const eventStartDate = '2025-01-01';
-    const eventEndDate = '2025-01-02';
+    const eventEndDate = '2025-02-28';
 
     console.log('Bước 1: Tạo dữ liệu sự kiện cần xóa.');
     await Promise.all([

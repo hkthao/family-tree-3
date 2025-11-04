@@ -62,16 +62,16 @@
 
     <v-row>
       <v-col cols="6">
-        <VColorInput v-model="formData.color" :label="t('event.form.color')" :readonly="props.readOnly"
+        <v-color-input v-model="formData.color" :label="t('event.form.color')" :readonly="props.readOnly"
           data-testid="event-color-picker" pip-location="append-inner">
-        </VColorInput>
+        </v-color-input>
       </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { reactive, toRefs, ref } from 'vue';
+import { reactive, toRefs, ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { EventType } from '@/types';
@@ -102,11 +102,11 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
 );
 
 const state = reactive({
-  name: formData.name,
-  type: formData.type,
-  familyId: formData.familyId,
-  startDate: formData.startDate,
-  endDate: formData.endDate,
+  name: toRef(formData, 'name'),
+  type: toRef(formData, 'type'),
+  familyId: toRef(formData, 'familyId'),
+  startDate: toRef(formData, 'startDate'),
+  endDate: toRef(formData, 'endDate'),
 });
 
 const eventTypes = [
@@ -123,8 +123,7 @@ const v$ = useVuelidate(rules, state);
 
 // Expose form validation and data for parent component
 const validate = async () => {
-  const result = await v$.value.$validate();
-  return result;
+  return await v$.value.$validate();
 };
 
 const getFormData = () => {

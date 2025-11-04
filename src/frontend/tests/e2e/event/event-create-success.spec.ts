@@ -2,6 +2,20 @@ import { test, expect } from '@playwright/test';
 import { login } from '../login.setup';
 import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, waitForVDataTableLoaded, fillVuetifyDateInput } from '../helpers/vuetify';
 
+function formatDate(date: string | Date): string {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, '0'); // month 0-based
+  const day = d.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(date: string | Date, days: number): string {
+  const d = typeof date === 'string' ? new Date(date) : new Date(date.getTime());
+  d.setDate(d.getDate() + days);
+  return formatDate(d);
+}
+
 test.describe('Event Management - Create Event - Success Case', () => {
   test.beforeEach(async ({ page }) => {
     console.log('Đăng nhập trước khi chạy mỗi bài kiểm thử.');
@@ -17,8 +31,8 @@ test.describe('Event Management - Create Event - Success Case', () => {
     const eventName = `Sự kiện ${new Date().getTime()}`;
     const eventLocation = 'Địa điểm sự kiện';
     const eventDescription = 'Mô tả sự kiện';
-    const eventStartDate = '01/01/2025';
-    const eventEndDate = '01/02/2025';
+    const eventStartDate = '2025-10-04';
+    const eventEndDate = '2025-10-30';
 
     console.log('Bước 1: Điều hướng đến trang quản lý Sự kiện và tạo mới.');
     await Promise.all([

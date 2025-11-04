@@ -153,7 +153,7 @@ export async function fillVuetifyDateInput(page: Page, testId: string, value: st
 
   // 4️⃣ Click vào nút ngày visible trong picker
   await page
-    .locator('.v-overlay-container .v-date-picker-month__day-btn:visible', { hasText: day.toString() })
-    .first() // đảm bảo pick nút visible đầu tiên
+    .locator('.v-overlay-container .v-date-picker-month__day-btn:visible')
+    .nth(day-1) // đảm bảo pick nút visible đầu tiên
     .click();
 }
