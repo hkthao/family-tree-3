@@ -1,4 +1,3 @@
-using backend.Application.AI.Chat;
 using backend.Application.AI.Chat.Queries;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;

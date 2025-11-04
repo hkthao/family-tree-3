@@ -8,6 +8,15 @@ namespace backend.Application.AI.Chunk.EmbedChunks;
 /// </summary>
 public class EmbedChunksCommand : IRequest<Result>
 {
+    public EmbedChunksCommand()
+    {
+    }
+
+    public EmbedChunksCommand(List<TextChunk> chunks)
+    {
+        Chunks = chunks;
+    }
+
     /// <summary>
     /// Danh sách các đoạn văn bản cần được nhúng.
     /// </summary>

@@ -1,7 +1,3 @@
-
-using AutoMapper;
-using backend.Application.Common.Interfaces;
-using backend.Application.Relationships.Queries;
 using backend.Application.Relationships.Queries.GetRelationshipById;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;

@@ -1,14 +1,9 @@
 using backend.Application.Common.Constants;
-using backend.Application.Common.Interfaces;
 using backend.Application.UserPreferences.Queries.GetUserPreferences;
-using backend.Application.UserPreferences.Queries;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using AutoMapper;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.UserPreferences;

@@ -12,7 +12,7 @@ namespace backend.Application.UnitTests.Common;
 /// Lớp cơ sở cho các bài kiểm thử đơn vị.
 /// Cung cấp môi trường cơ sở dữ liệu trong bộ nhớ, AutoFixture và AutoMoq để thiết lập dữ liệu và mock các dependency.
 /// </summary>
-    public abstract class TestBase : IDisposable
+public abstract class TestBase : IDisposable
 {
     protected readonly ApplicationDbContext _context;
     protected readonly DbContextOptions<ApplicationDbContext> _dbContextOptions;

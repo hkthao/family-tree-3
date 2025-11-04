@@ -1,6 +1,5 @@
 
 using backend.Application.Common.Interfaces;
-using backend.Application.UserActivities.Queries;
 using backend.Application.UserActivities.Queries.GetRecentActivities;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
