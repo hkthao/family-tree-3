@@ -11,8 +11,8 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251103050930_MakeFileUsageSoftDeletable")]
-    partial class MakeFileUsageSoftDeletable
+    [Migration("20251104061227_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -814,10 +814,6 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("user_id");
 
-                    b.Property<Guid?>("UserPreferenceUserId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("user_preference_user_id");
-
                     b.HasKey("Id")
                         .HasName("pk_user_profiles");
 
@@ -828,9 +824,6 @@ namespace backend.Infrastructure.Migrations
                     b.HasIndex("UserId")
                         .IsUnique()
                         .HasDatabaseName("ix_user_profiles_user_id");
-
-                    b.HasIndex("UserPreferenceUserId")
-                        .HasDatabaseName("ix_user_profiles_user_preference_user_id");
 
                     b.ToTable("user_profiles");
                 });
@@ -971,14 +964,7 @@ namespace backend.Infrastructure.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_user_profiles_users_user_id");
 
-                    b.HasOne("backend.Domain.Entities.UserPreference", "UserPreference")
-                        .WithMany()
-                        .HasForeignKey("UserPreferenceUserId")
-                        .HasConstraintName("fk_user_profiles_user_preferences_user_preference_user_id");
-
                     b.Navigation("User");
-
-                    b.Navigation("UserPreference");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Event", b =>

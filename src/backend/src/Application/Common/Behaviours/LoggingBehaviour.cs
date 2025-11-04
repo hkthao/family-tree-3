@@ -1,5 +1,4 @@
 ﻿using backend.Application.Common.Interfaces;
-using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Common.Behaviours;
@@ -8,32 +7,22 @@ namespace backend.Application.Common.Behaviours;
 /// Hành vi pipeline để ghi log thông tin yêu cầu trước khi xử lý.
 /// </summary>
 /// <typeparam name="TRequest">Kiểu của yêu cầu.</typeparam>
-public class LoggingBehaviour<TRequest>(ILogger<TRequest> logger, ICurrentUser user) : IRequestPreProcessor<TRequest>
+public class LoggingBehaviour<TRequest, TResponse>(ILogger<TRequest> logger, ICurrentUser user) : IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull
 {
-    /// <summary>
-    /// Đối tượng ghi log.
-    /// </summary>
     private readonly ILogger _logger = logger;
-    /// <summary>
-    /// Thông tin người dùng hiện tại.
-    /// </summary>
     private readonly ICurrentUser _user = user;
 
-    /// <summary>
-    /// Xử lý yêu cầu trước khi nó được gửi đến handler.
-    /// </summary>
-    /// <param name="request">Yêu cầu hiện tại.</param>
-    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
-    /// <returns>Một Task hoàn thành.</returns>
-    public Task Process(TRequest request, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
         var userId = _user.UserId;
 
         _logger.LogInformation("backend Request: {Name} {@UserId} {@Request}",
-            requestName, userId.ToString(), request);
+            requestName, userId, request);
 
-        return Task.CompletedTask;
+        var response = await next();
+
+        return response;
     }
 }
