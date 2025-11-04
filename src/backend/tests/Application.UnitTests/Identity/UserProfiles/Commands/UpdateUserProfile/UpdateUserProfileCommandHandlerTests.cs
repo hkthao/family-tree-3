@@ -18,26 +18,12 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnFailure_WhenInvalidUserIdFormat()
-    {
-        // Arrange
-        var command = new UpdateUserProfileCommand { Id = "invalid-guid" };
-
-        // Act
-        var result = await _handler.Handle(command, CancellationToken.None);
-
-        // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Be(ErrorMessages.InvalidUserIdFormat);
-        result.ErrorSource.Should().Be(ErrorSources.Validation);
-    }
-
-    [Fact]
     public async Task Handle_ShouldReturnFailure_WhenUserProfileNotFound()
     {
         // Arrange
         var userId = Guid.NewGuid();
-        var command = new UpdateUserProfileCommand { Id = userId.ToString() };
+        var command = new UpdateUserProfileCommand();
+        command.SetId(userId);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -69,13 +55,13 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
 
         var command = new UpdateUserProfileCommand
         {
-            Id = userId.ToString(),
             Email = "new@example.com",
             FirstName = "New",
             LastName = "User",
             Phone = "222",
             Avatar = "new_avatar.png"
         };
+        command.SetId(userId);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -111,13 +97,14 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
 
         var command = new UpdateUserProfileCommand
         {
-            Id = userId.ToString(),
             Email = "new@example.com",
             FirstName = null, // Should retain old value
             LastName = "Updated",
             Phone = null, // Should retain old value
             Avatar = "new_avatar.png"
         };
+
+        command.SetId(userId);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -153,13 +140,13 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
 
         var command = new UpdateUserProfileCommand
         {
-            Id = userId.ToString(),
             Email = "new@example.com",
             FirstName = string.Empty,
             LastName = string.Empty,
             Phone = string.Empty,
             Avatar = string.Empty
         };
+        command.SetId(userId);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

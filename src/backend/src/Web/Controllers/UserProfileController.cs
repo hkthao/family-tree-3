@@ -39,14 +39,10 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     /// <param name="userId">ID của người dùng cần cập nhật.</param>
     /// <param name="command">Lệnh chứa dữ liệu hồ sơ người dùng đã cập nhật.</param>
     /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
-    [HttpPut("{userId}")]
-    public async Task<ActionResult<Result>> UpdateUserProfile(string userId, [FromBody] UpdateUserProfileCommand command)
+    [HttpPut("{id}")]
+    public async Task<ActionResult<Result>> UpdateUserProfile([FromRoute]Guid id, [FromBody] UpdateUserProfileCommand command)
     {
-        if (userId != command.Id)
-        {
-            return BadRequest(Result.Failure("User ID in URL must match user ID in request body.", "BadRequest"));
-        }
-
+        command.SetId(id);
         var result = await _mediator.Send(command);
         return result.IsSuccess ? (ActionResult<Result>)Ok(result) : (ActionResult<Result>)BadRequest(result);
     }

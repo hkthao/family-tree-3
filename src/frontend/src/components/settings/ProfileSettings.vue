@@ -61,15 +61,9 @@ const formData = reactive({
   externalId: '',
 });
 
-const state = reactive({
-  firstName: formData.firstName,
-  lastName: formData.lastName,
-  email: formData.email,
-});
-
 const rules = useProfileSettingsRules();
 
-const v$ = useVuelidate(rules, state);
+const v$ = useVuelidate(rules, formData);
 
 const generatedFullName = computed(() => {
   return `${formData.firstName} ${formData.lastName}`.trim();

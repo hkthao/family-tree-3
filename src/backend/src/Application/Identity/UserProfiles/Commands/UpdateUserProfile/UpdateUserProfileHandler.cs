@@ -11,14 +11,9 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context) : IR
 
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(request.Id, out var userId))
-        {
-            return Result.Failure(ErrorMessages.InvalidUserIdFormat, ErrorSources.Validation);
-        }
-
         var user = await _context.Users
             .Include(u => u.Profile)
-            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+            .FirstOrDefaultAsync(u => u.Profile != null && u.Profile.Id == request.Id, cancellationToken);
 
         if (user == null || user.Profile == null)
         {

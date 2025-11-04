@@ -455,7 +455,7 @@
   "userSettings.profile.email": "Email",
   "userSettings.profile.saveSuccess": "Cập nhật hồ sơ thành công!",
   "userSettings.profile.saveError": "Lỗi khi cập nhật hồ sơ.",
-  "userSettings.profile.validationError": "Lỗi xác thực. Vui lòng kiểm tra lại thông tin.",
+  "userSettings.profile.validationError": "Vui lòng điền đầy đủ thông tin bắt buộc.",
   "avatarInput.uploadArea.clickOrDrag": "Nhấp hoặc kéo tệp vào đây để tải lên",
   "avatarInput.uploadArea.supportedFormats": "Định dạng được hỗ trợ: JPG, PNG, GIF",
   "avatarInput.cropper.title": "Cắt ảnh đại diện",
