@@ -2,8 +2,11 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Commands.Inputs;
 using backend.Application.Families.Specifications;
+using backend.Domain.Enums;
 using backend.Domain.Events.Families;
+using backend.Domain.ValueObjects;
 
 namespace backend.Application.Families.Commands.UpdateFamily;
 
@@ -28,14 +31,10 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
             if (entity == null)
                 return Result.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
 
-            entity.Name = request.Name;
-            entity.Description = request.Description;
-            entity.Address = request.Address;
-            entity.AvatarUrl = request.AvatarUrl;
-            entity.Visibility = request.Visibility;
-            entity.Code = request.Code!;
+            entity.UpdateFamilyDetails(request.Name, request.Description, request.Address, request.AvatarUrl, request.Visibility, request.Code!);
 
-            entity.AddDomainEvent(new FamilyUpdatedEvent(entity));
+            var familyUserUpdateInfos = request.FamilyUsers.Select(fu => new FamilyUserUpdateInfo(fu.UserId, (FamilyRole)fu.Role));
+            entity.UpdateFamilyUsers(familyUserUpdateInfos);
 
             await _context.SaveChangesAsync(cancellationToken);
 

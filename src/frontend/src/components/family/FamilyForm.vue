@@ -7,10 +7,9 @@
 
     <v-row>
       <v-col cols="12" md="6">
-        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" 
-          @blur="v$.name.$touch()" @input="v$.name.$touch()"
-          :error-messages="v$.name.$errors.map(e => e.$message as string)"
-          required data-testid="family-name-input"></v-text-field>
+        <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" @blur="v$.name.$touch()"
+          @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)" required
+          data-testid="family-name-input"></v-text-field>
       </v-col>
       <v-col cols="12" md="6">
         <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
@@ -19,12 +18,14 @@
     </v-row>
     <v-row>
       <v-col cols="12">
-        <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')" data-testid="family-address-input"></v-text-field>
+        <v-text-field v-model="formData.address" :label="$t('family.form.addressLabel')"
+          data-testid="family-address-input"></v-text-field>
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12"> 
-        <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')" data-testid="family-description-input"></v-textarea>
+      <v-col cols="12">
+        <v-textarea v-model="formData.description" :label="$t('family.form.descriptionLabel')"
+          data-testid="family-description-input"></v-textarea>
       </v-col>
     </v-row>
     <v-row>
@@ -66,6 +67,7 @@ const formData = reactive<Family | Omit<Family, 'id'>>(
     address: '',
     avatarUrl: '',
     visibility: FamilyVisibility.Public,
+    familyUsers: []
   },
 );
 
@@ -73,7 +75,23 @@ const rules = useFamilyRules();
 
 const v$ = useVuelidate(rules, formData);
 
-const familyUsers = ref<FamilyUser[]>(props.initialFamilyData?.familyUsers || []);
+const mapFamilyRole = (role: number): string => {
+  switch (role) {
+    case 0:
+      return 'Manager';
+    case 1:
+      return 'Viewer';
+    case 2:
+      return 'Admin';
+    default:
+      return '';
+  }
+};
+
+const familyUsers = ref<FamilyUser[]>(props.initialFamilyData?.familyUsers?.map(fu => ({
+  ...fu,
+  role: mapFamilyRole(fu.role as unknown as number) // Cast to unknown first, then to number
+})) || []);
 
 const managers = computed({
   get: () => familyUsers.value.filter(fu => fu.role === 'Manager').map(fu => fu.userId),
@@ -116,6 +134,7 @@ const validate = async () => {
 };
 
 const getFormData = () => {
+  formData.familyUsers = familyUsers.value;
   return formData;
 };
 

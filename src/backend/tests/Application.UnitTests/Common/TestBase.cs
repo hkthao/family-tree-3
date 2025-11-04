@@ -43,8 +43,7 @@ public abstract class TestBase : IDisposable
         // Cấu hình AutoMapper
         var mapperConfiguration = new MapperConfiguration(cfg =>
         {
-            cfg.AddMaps(typeof(backend.Application.Common.Mappings.MappingProfile).Assembly);
-            cfg.CreateMap<UserProfile, UserProfileDto>();
+            cfg.AddProfile<Application.Common.Mappings.MappingProfile>(); // Explicitly add the profile
             // Add other profiles if needed
         });
         _mapper = mapperConfiguration.CreateMapper();

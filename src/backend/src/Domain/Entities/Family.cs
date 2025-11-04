@@ -2,6 +2,7 @@
 using backend.Domain.Events.Families;
 using backend.Domain.Events.Members;
 using backend.Domain.Events.Relationships;
+using backend.Domain.ValueObjects;
 
 namespace backend.Domain.Entities;
 
@@ -60,6 +61,52 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         if (familyUser != null)
         {
             _familyUsers.Remove(familyUser);
+        }
+    }
+
+    public void UpdateFamilyDetails(string name, string? description, string? address, string? avatarUrl, string visibility, string code)
+    {
+        Name = name;
+        Description = description;
+        Address = address;
+        AvatarUrl = avatarUrl;
+        Visibility = visibility;
+        Code = code;
+
+        AddDomainEvent(new FamilyUpdatedEvent(this));
+    }
+
+    public void UpdateFamilyUsers(IEnumerable<FamilyUserUpdateInfo> newFamilyUsers)
+    {
+        var currentFamilyUsers = _familyUsers.ToList();
+        var newFamilyUsersList = newFamilyUsers.ToList();
+
+        // Remove users not in the new list
+        foreach (var currentUser in currentFamilyUsers)
+        {
+            if (!newFamilyUsersList.Any(nf => nf.UserId == currentUser.UserId))
+            {
+                _familyUsers.Remove(currentUser);
+            }
+        }
+
+        // Add or update users from the new list
+        foreach (var newFamilyUser in newFamilyUsersList)
+        {
+            var existingUser = _familyUsers.FirstOrDefault(fu => fu.UserId == newFamilyUser.UserId);
+            if (existingUser == null)
+            {
+                // Add new user
+                _familyUsers.Add(new FamilyUser(Id, newFamilyUser.UserId, newFamilyUser.Role));
+            }
+            else
+            {
+                // Update existing user's role if changed
+                if (existingUser.Role != newFamilyUser.Role)
+                {
+                    existingUser.Role = newFamilyUser.Role;
+                }
+            }
         }
     }
 

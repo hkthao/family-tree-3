@@ -1,6 +1,6 @@
 import { ref, watch } from 'vue';
 import { debounce } from 'lodash';
-import type { UserProfile } from '@/types';
+import type { User } from '@/types';
 import { useUserAutocompleteStore } from '@/stores/user-autocomplete.store';
 
 interface UseUserAutocompleteOptions {
@@ -12,10 +12,10 @@ export function useUserAutocomplete(options?: UseUserAutocompleteOptions) {
   const userAutocompleteStore = useUserAutocompleteStore();
   const search = ref('');
   const loading = ref(false);
-  const items = ref<UserProfile[]>([]); // Local items state
-  const selectedItems = ref<UserProfile[]>([]);
+  const items = ref<User[]>([]); // Local items state
+  const selectedItems = ref<User[]>([]);
 
-  const loadItems = async (query: string): Promise<UserProfile[]> => {
+  const loadItems = async (query: string): Promise<User[]> => {
     loading.value = true;
     try {
       const result = await userAutocompleteStore.search({ searchQuery: query });
@@ -32,7 +32,7 @@ export function useUserAutocomplete(options?: UseUserAutocompleteOptions) {
 
   const debouncedLoadItems = debounce(loadItems, 300);
 
-  const onSearchChange = async (query: string): Promise<UserProfile[]> => {
+  const onSearchChange = async (query: string): Promise<User[]> => {
     search.value = query;
     if (query) {
       return await debouncedLoadItems(query) || [];
@@ -53,7 +53,7 @@ export function useUserAutocomplete(options?: UseUserAutocompleteOptions) {
       const preloadedUsers = await userAutocompleteStore.getByIds(idsArray);
       selectedItems.value = preloadedUsers;
       // Ensure preloaded items are also in the local items list if not already present
-      preloadedUsers.forEach((user: UserProfile) => {
+      preloadedUsers.forEach((user: User) => {
         if (!items.value.some(item => item.id === user.id)) {
           items.value.push(user);
         }

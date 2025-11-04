@@ -1,8 +1,23 @@
 <template>
-  <RemoteAutocomplete v-bind="$attrs" :model-value="modelValue" @update:model-value="handleRemoteAutocompleteUpdate"
-    :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple" item-title="name"
-    item-value="id" :search-function="searchFunction" :preload-function="getByIdsFunction"
-    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items">
+  <v-autocomplete
+    v-bind="$attrs"
+    v-model="internalSelectedItems"
+    @update:model-value="handleUpdateModelValue"
+    :label="label"
+    :rules="rules"
+    :readonly="readOnly"
+    :clearable="clearable"
+    :multiple="multiple"
+    item-title="name"
+    item-value="id"
+    :loading="composableLoading"
+    :items="combinedItems"
+    :search="searchQuery"
+    @update:search="onSearchChange"
+    chips
+    closable-chips
+    return-object
+  >
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw.email">
         <template #prepend>
@@ -10,13 +25,13 @@
         </template>
       </v-list-item>
     </template>
-  </RemoteAutocomplete>
+  </v-autocomplete>
 </template>
 
 <script setup lang="ts">
 import type { UserProfile } from '@/types';
-import RemoteAutocomplete from './RemoteAutocomplete.vue';
 import { useUserAutocomplete } from '@/composables/useUserAutocomplete';
+import { ref, watch, onMounted, computed } from 'vue';
 
 interface UserAutocompleteProps {
   modelValue: string | string[] | undefined | null;
@@ -36,22 +51,10 @@ const { items, selectedItems, onSearchChange, preloadById, loading: composableLo
   initialValue: props.modelValue ?? undefined,
 });
 
-const searchFunction = async (query: string): Promise<UserProfile[]> => {
-  onSearchChange(query);
-  return items.value;
-};
+const searchQuery = ref('');
+const internalSelectedItems = ref<UserProfile | UserProfile[] | null>(props.multiple ? [] : null);
 
-const getByIdsFunction = async (ids: string[]): Promise<UserProfile[]> => {
-  await preloadById(ids);
-  return selectedItems.value;
-};
-
-const clearItemsFunction = () => {
-  items.value = [];
-  selectedItems.value = [];
-};
-
-const handleRemoteAutocompleteUpdate = (newValues: UserProfile | UserProfile[] | null) => {
+const handleUpdateModelValue = (newValues: UserProfile | UserProfile[] | null) => {
   if (props.multiple) {
     const ids = Array.isArray(newValues) ? newValues.map((item: UserProfile) => item.id) : [];
     emit('update:modelValue', ids);
@@ -60,4 +63,23 @@ const handleRemoteAutocompleteUpdate = (newValues: UserProfile | UserProfile[] |
     emit('update:modelValue', id);
   }
 };
-</script>
+
+const combinedItems = computed(() => {
+  const allItems = [...items.value, ...selectedItems.value];
+  // Remove duplicates based on 'id'
+  const uniqueItems = Array.from(new Map(allItems.map(item => [item.id, item])).values());
+  return uniqueItems;
+});
+
+watch(() => props.modelValue, async (newVal) => {
+  if (newVal) {
+    await preloadById(Array.isArray(newVal) ? newVal : [newVal]);
+    internalSelectedItems.value = props.multiple ? selectedItems.value : selectedItems.value[0] || null;
+  } else {
+    internalSelectedItems.value = props.multiple ? [] : null;
+  }
+}, { immediate: true });
+
+onMounted(() => {
+  onSearchChange('');
+});</script>

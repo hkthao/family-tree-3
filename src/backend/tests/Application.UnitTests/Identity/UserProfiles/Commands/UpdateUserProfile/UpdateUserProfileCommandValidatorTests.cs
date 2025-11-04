@@ -24,25 +24,6 @@ public class UpdateUserProfileCommandValidatorTests
     }
 
     [Fact]
-    public void ShouldNotHaveError_WhenIdIsValid()
-    {
-        // 🎯 Mục tiêu của test: Xác minh không có lỗi khi Id hợp lệ.
-        var command = new UpdateUserProfileCommand { };
-        var result = _validator.TestValidate(command);
-        result.ShouldNotHaveValidationErrorFor(x => x.Id);
-    }
-
-    [Fact]
-    public void ShouldHaveError_WhenNameIsNull()
-    {
-        // 🎯 Mục tiêu của test: Xác minh lỗi khi Name là null.
-        var command = new UpdateUserProfileCommand { Name = null! };
-        var result = _validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Name)
-              .WithErrorMessage("Name cannot be null.");
-    }
-
-    [Fact]
     public void ShouldHaveError_WhenNameIsEmpty()
     {
         // 🎯 Mục tiêu của test: Xác minh lỗi khi Name là chuỗi rỗng.

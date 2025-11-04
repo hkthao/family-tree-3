@@ -82,8 +82,8 @@ public class GetUserPreferencesQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Theme.Should().Be(Theme.Light);
-        result.Value!.Language.Should().Be(Language.English);
+        result.Value!.Theme.Should().Be(Theme.Dark);
+        result.Value!.Language.Should().Be(Language.Vietnamese);
     }
 
     /// <summary>

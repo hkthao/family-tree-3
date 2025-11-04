@@ -61,7 +61,7 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
             Phone = "222",
             Avatar = "new_avatar.png"
         };
-        command.SetId(userId);
+        command.SetId(user.Profile.Id);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -104,7 +104,7 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
             Avatar = "new_avatar.png"
         };
 
-        command.SetId(userId);
+        command.SetId(user.Profile.Id);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -146,7 +146,7 @@ public class UpdateUserProfileCommandHandlerTests : TestBase
             Phone = string.Empty,
             Avatar = string.Empty
         };
-        command.SetId(userId);
+        command.SetId(user.Profile.Id);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

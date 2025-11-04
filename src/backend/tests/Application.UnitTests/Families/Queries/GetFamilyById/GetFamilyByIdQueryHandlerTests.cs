@@ -11,13 +11,11 @@ namespace backend.Application.UnitTests.Families.Queries.GetFamilyById;
 
 public class GetFamilyByIdQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
     private readonly GetFamilyByIdQueryHandler _handler;
 
     public GetFamilyByIdQueryHandlerTests()
     {
-        _mapperMock = new Mock<IMapper>();
-        _handler = new GetFamilyByIdQueryHandler(_context, _mapperMock.Object);
+        _handler = new GetFamilyByIdQueryHandler(_context, _mapper);
     }
 
     [Fact]
@@ -30,13 +28,6 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
         await _context.SaveChangesAsync();
 
         var query = new GetFamilyByIdQuery(familyId);
-
-        // Setup mapper to return FamilyDetailDto
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Family, FamilyDetailDto>();
-        }));
-
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
@@ -52,13 +43,6 @@ public class GetFamilyByIdQueryHandlerTests : TestBase
     {
         // Arrange
         var query = new GetFamilyByIdQuery(Guid.NewGuid());
-
-        // Setup mapper to return FamilyDetailDto
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Family, FamilyDetailDto>();
-        }));
-
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 

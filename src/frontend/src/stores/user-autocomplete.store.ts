@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import i18n from '@/plugins/i18n';
-import type { User } from '@auth0/auth0-spa-js';
+import type { User } from '@/types';
 
 interface UserFilter {
   searchQuery?: string;
