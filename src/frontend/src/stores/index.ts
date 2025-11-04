@@ -18,4 +18,4 @@ export * from './user-activity.store';
 export * from './user-preference.store';
 export * from './user-profile.store';
 export * from './user-settings.store';
-export * from './user.store';
+export * from './user-autocomplete.store';

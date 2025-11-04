@@ -1,8 +1,7 @@
 import { ref, watch } from 'vue';
 import { debounce } from 'lodash';
 import type { UserProfile } from '@/types';
-import { serviceFactory } from '@/services/service.factory';
-import type { ICurrentUserProfileService } from '@/services/user-profile/user-profile.service.interface';
+import { useUserAutocompleteStore } from '@/stores/user-autocomplete.store';
 
 interface UseUserAutocompleteOptions {
   multiple?: boolean;
@@ -10,7 +9,7 @@ interface UseUserAutocompleteOptions {
 }
 
 export function useUserAutocomplete(options?: UseUserAutocompleteOptions) {
-  const userProfileService = serviceFactory.get('IUserProfileService') as ICurrentUserProfileService;
+  const userAutocompleteStore = useUserAutocompleteStore();
   const search = ref('');
   const loading = ref(false);
   const items = ref<UserProfile[]>([]); // Local items state
@@ -19,16 +18,9 @@ export function useUserAutocomplete(options?: UseUserAutocompleteOptions) {
   const loadItems = async (query: string): Promise<UserProfile[]> => {
     loading.value = true;
     try {
-      const result = await userProfileService.getAllUserProfiles();
-      if (result.success) {
-        const filteredUsers = result.data.filter(user =>
-          user.name.toLowerCase().includes(query.toLowerCase())
-        );
-        items.value = filteredUsers;
-        return filteredUsers;
-      }
-      items.value = [];
-      return [];
+      const result = await userAutocompleteStore.search({ searchQuery: query });
+      items.value = result;
+      return result;
     } catch (error) {
       console.error('Error loading users:', error);
       items.value = [];
@@ -58,13 +50,7 @@ export function useUserAutocomplete(options?: UseUserAutocompleteOptions) {
 
     const idsArray = Array.isArray(ids) ? ids : [ids];
     try {
-      const preloadedUsers: UserProfile[] = [];
-      for (const id of idsArray) {
-        const result = await userProfileService.getUserProfile(id);
-        if (result.success) {
-          preloadedUsers.push(result.data);
-        }
-      }
+      const preloadedUsers = await userAutocompleteStore.getByIds(idsArray);
       selectedItems.value = preloadedUsers;
       // Ensure preloaded items are also in the local items list if not already present
       preloadedUsers.forEach((user: UserProfile) => {
