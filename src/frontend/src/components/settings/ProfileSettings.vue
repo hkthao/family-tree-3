@@ -29,7 +29,7 @@
     </v-row>
     <v-row>
       <v-col cols="12" class="text-right">
-        <v-btn color="primary" type="submit">{{ t('common.save') }}</v-btn>
+        <v-btn color="primary" type="submit" :loading="loading">{{ t('common.save') }}</v-btn>
       </v-col>
     </v-row>
   </v-form>
@@ -50,6 +50,7 @@ const notificationStore = useNotificationStore();
 const userProfileStore = useUserProfileStore();
 
 const formRef = ref<HTMLFormElement | null>(null);
+const loading = ref(false);
 
 const formData = reactive({
   name: '',
@@ -85,36 +86,43 @@ onMounted(async () => {
 });
 
 const saveProfile = async () => {
-  const result = await v$.value.$validate();
-  if (result && userProfileStore.userProfile) {
-    const updatedProfile: UserProfile = {
-      id: userProfileStore.userProfile.id,
-      externalId: userProfileStore.userProfile.externalId,
-      email: formData.email,
-      name: generatedFullName.value,
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phone: formData.phone,
-      avatar: formData.avatar === null ? undefined : formData.avatar,
-    };
+  loading.value = true;
+  try {
+    const result = await v$.value.$validate();
+    console.log(v$.value);
 
-    const success = await userProfileStore.updateUserProfile(updatedProfile);
-    if (success) {
+    if (result && userProfileStore.userProfile) {
+      const updatedProfile: UserProfile = {
+        id: userProfileStore.userProfile.id,
+        externalId: userProfileStore.userProfile.externalId,
+        email: formData.email,
+        name: generatedFullName.value,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+        avatar: formData.avatar === null ? undefined : formData.avatar,
+      };
+
+      const success = await userProfileStore.updateUserProfile(updatedProfile);
+      if (success) {
+        notificationStore.showSnackbar(
+          t('userSettings.profile.saveSuccess'),
+          'success',
+        );
+      } else {
+        notificationStore.showSnackbar(
+          userProfileStore.error || t('userSettings.profile.saveError'),
+          'error',
+        );
+      }
+    } else if (!result) {
       notificationStore.showSnackbar(
-        t('userSettings.profile.saveSuccess'),
-        'success',
-      );
-    } else {
-      notificationStore.showSnackbar(
-        userProfileStore.error || t('userSettings.profile.saveError'),
+        t('userSettings.profile.validationError'),
         'error',
       );
     }
-  } else if (!result) {
-    notificationStore.showSnackbar(
-      t('userSettings.profile.validationError'),
-      'error',
-    );
+  } finally {
+    loading.value = false;
   }
 };
 </script>
