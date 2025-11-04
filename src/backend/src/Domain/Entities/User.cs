@@ -18,6 +18,11 @@ public class User : BaseAuditableEntity, IAggregateRoot
     public string AuthProviderId { get; set; } = null!;
 
     /// <summary>
+    /// ID của người đăng ký trên Novu Cloud để gửi/nhận thông báo.
+    /// </summary>
+    public string? SubscriberId { get; set; }
+
+    /// <summary>
     /// Địa chỉ email của người dùng.
     /// </summary>
     public string Email { get; set; } = null!;
