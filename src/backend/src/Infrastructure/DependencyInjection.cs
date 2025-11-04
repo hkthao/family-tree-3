@@ -12,8 +12,6 @@ using backend.Infrastructure.Files;
 using backend.Infrastructure.Services;
 using Novu;
 using backend.Infrastructure.Novu;
-
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
