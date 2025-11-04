@@ -15,7 +15,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { Sidebar, TopBar } from '@/components/layout';
 import AppBreadcrumbs from '@/components/common/AppBreadcrumbs.vue';
-import ChatWidget from '@/components/ChatWidget.vue';
+// import ChatWidget from '@/components/ChatWidget.vue';
 import GlobalSnackbar from '@/components/common/GlobalSnackbar.vue';
 import { useAuthStore } from '@/stores';
 

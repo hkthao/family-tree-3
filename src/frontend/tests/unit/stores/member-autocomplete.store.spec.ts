@@ -77,7 +77,7 @@ describe('member-autocomplete.store', () => {
       expect(mockLoadItems).toHaveBeenCalledWith(
         { searchQuery: 'Member' },
         1,
-        20,
+        50,
       );
     });
 

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../login.setup';
-import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure, assertValidationMessage, selectVuetifyAutocompleteOption } from '../helpers/vuetify';
+import { fillVuetifyInput, fillVuetifyTextarea, selectVuetifyOption, waitForSnackbar, takeScreenshotOnFailure,  selectVuetifyAutocompleteOption } from '../helpers/vuetify';
 
 test.describe('Relationship Management - Create Relationship', () => {
   test.beforeEach(async ({ page }) => {

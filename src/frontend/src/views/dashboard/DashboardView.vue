@@ -46,7 +46,6 @@ import { useDashboardStore } from '@/stores/dashboard.store';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
-import FamilyAutocomplete from '@/components/common/FamilyAutocomplete.vue';
 import UpcomingEvents from '@/components/dashboard/UpcomingEvents.vue';
 
 const { t } = useI18n();

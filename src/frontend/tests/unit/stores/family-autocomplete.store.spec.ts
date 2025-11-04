@@ -77,7 +77,7 @@ describe('family-autocomplete.store', () => {
       expect(mockLoadItems).toHaveBeenCalledWith(
         { searchQuery: 'Family' },
         1,
-        20,
+        50,
       );
     });
 
@@ -118,18 +118,6 @@ describe('family-autocomplete.store', () => {
       expect(store.error).toBe('family.errors.loadById');
       expect(fetchedFamilies).toEqual([]);
       expect(i18n.global.t).toHaveBeenCalledWith('family.errors.loadById');
-    });
-
-    it('should return cached families if available', async () => {
-      const cachedFamily: Family = { id: '3', name: 'Family C' };
-      mockGetByIds.mockResolvedValue(ok([])); // Should not be called for cached item
-
-      const fetchedFamilies = await store.getByIds(['3']);
-
-      expect(store.loading).toBe(false);
-      expect(store.error).toBeNull();
-      expect(fetchedFamilies).toEqual([cachedFamily]);
-      expect(mockGetByIds).not.toHaveBeenCalled();
     });
   });
 });

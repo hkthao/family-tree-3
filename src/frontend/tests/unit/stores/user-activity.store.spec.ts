@@ -84,7 +84,7 @@ describe('user-activity.store', () => {
           created: '2023-01-01T11:00:00Z',
         },
       ];
-      mockGetRecentActivities.mockResolvedValue(ok(mockActivities));
+      mockGetRecentActivities.mockResolvedValue(ok({ items: mockActivities, page: 1, totalPages: 1, totalItems: 2 }));
 
       // Act: Gọi action fetchRecentActivities.
       await store.fetchRecentActivities();
@@ -95,7 +95,8 @@ describe('user-activity.store', () => {
       expect(store.items).toEqual(mockActivities);
       expect(mockGetRecentActivities).toHaveBeenCalledTimes(1);
       expect(mockGetRecentActivities).toHaveBeenCalledWith(
-        undefined,
+        1, // page
+        10, // pageSize
         undefined,
         undefined,
         undefined,
@@ -164,13 +165,15 @@ describe('user-activity.store', () => {
       const targetType: TargetType = TargetType.Family;
       const targetId = 'fam123';
       const groupId = 'group456';
-      mockGetRecentActivities.mockResolvedValue(ok([]));
+      const page = 1;
+      mockGetRecentActivities.mockResolvedValue(ok({ items: [], page: 1, totalPages: 1, totalItems: 0 }));
 
       // Act: Gọi action fetchRecentActivities với các tham số.
-      await store.fetchRecentActivities(limit, targetType, targetId, groupId);
+      await store.fetchRecentActivities(limit, targetType, targetId, groupId, page);
 
       // Assert: Kiểm tra rằng service được gọi với các tham số chính xác.
       expect(mockGetRecentActivities).toHaveBeenCalledWith(
+        page,
         limit,
         targetType,
         targetId,

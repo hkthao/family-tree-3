@@ -1,4 +1,4 @@
-import { Page, expect, TestInfo, Locator } from '@playwright/test';
+import { Page, expect, TestInfo } from '@playwright/test';
 
 /**
  * Selects an option from a Vuetify autocomplete component identified by its data-testid.

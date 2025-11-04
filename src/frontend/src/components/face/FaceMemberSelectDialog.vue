@@ -30,7 +30,6 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, Member } from '@/types';
-import { MemberAutocomplete } from '@/components/common';
 import { useMemberStore } from '@/stores/member.store';
 
 const { t } = useI18n();

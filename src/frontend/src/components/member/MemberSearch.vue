@@ -20,10 +20,12 @@
                 prepend-inner-icon="mdi-magnify" data-testid="member-search-input"></v-text-field>
             </v-col>
             <v-col cols="12" md="4">
-              <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable data-testid="member-gender-filter" />
+              <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable
+                data-testid="member-gender-filter" />
             </v-col>
             <v-col cols="12" md="4">
-              <family-auto-complete v-model="filters.familyId" :label="t('member.search.family')" clearable data-testid="member-family-filter" />
+              <family-auto-complete v-model="filters.familyId" :label="t('member.search.family')" clearable
+                data-testid="member-family-filter" />
             </v-col>
           </v-row>
         </v-card-text>
@@ -31,7 +33,7 @@
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="applyFilters" data-testid="apply-filters-button">{{
             t('member.search.apply')
-          }}</v-btn>
+            }}</v-btn>
           <v-btn @click="resetFilters" data-testid="reset-filters-button">{{ t('member.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
@@ -43,7 +45,7 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types';
-import { GenderSelect, FamilyAutocomplete } from '@/components/common';
+import { GenderSelect } from '@/components/common';
 
 const emit = defineEmits(['update:filters']);
 
