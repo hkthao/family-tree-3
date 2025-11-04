@@ -48,12 +48,14 @@ public class Family : BaseAuditableEntity, IAggregateRoot
 
     public void AddFamilyUser(Guid userId, FamilyRole role)
     {
-        if (_familyUsers.Any(fu => fu.UserId == userId))
+        if (_familyUsers.Any(fu => fu.UserId == userId && fu.Role == role))
         {
             throw new InvalidOperationException($"User with ID {userId} is already part of this family.");
         }
         _familyUsers.Add(new FamilyUser(Id, userId, role));
     }
+
+
 
     public void RemoveFamilyUser(Guid userId)
     {
@@ -74,6 +76,7 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         Code = code;
 
         AddDomainEvent(new FamilyUpdatedEvent(this));
+        AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
     }
 
     public void UpdateFamilyUsers(IEnumerable<FamilyUserUpdateInfo> newFamilyUsers)

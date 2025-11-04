@@ -29,14 +29,12 @@ public class UpdateFamilyCommandHandler(IApplicationDbContext context, IAuthoriz
                 return Result.Failure(string.Format(ErrorMessages.FamilyNotFound, request.Id), ErrorSources.NotFound);
 
             entity.UpdateFamilyDetails(request.Name, request.Description, request.Address, request.AvatarUrl, request.Visibility, request.Code!);
+            _context.FamilyUsers.RemoveRange(entity.FamilyUsers);
+            var familyUserUpdateInfos = request.FamilyUsers.Select(fu => new FamilyUserUpdateInfo(fu.UserId, fu.Role));
 
-            var familyUserUpdateInfos = request.FamilyUsers.Select(fu => new FamilyUserUpdateInfo(fu.UserId, (FamilyRole)fu.Role));
             entity.UpdateFamilyUsers(familyUserUpdateInfos);
 
             await _context.SaveChangesAsync(cancellationToken);
-
-            // Update family stats
-            entity.AddDomainEvent(new FamilyStatsUpdatedEvent(entity.Id));
 
             return Result.Success();
         }

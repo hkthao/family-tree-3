@@ -75,38 +75,24 @@ const rules = useFamilyRules();
 
 const v$ = useVuelidate(rules, formData);
 
-const mapFamilyRole = (role: number): string => {
-  switch (role) {
-    case 0:
-      return 'Manager';
-    case 1:
-      return 'Viewer';
-    case 2:
-      return 'Admin';
-    default:
-      return '';
-  }
-};
-
-const familyUsers = ref<FamilyUser[]>(props.initialFamilyData?.familyUsers?.map(fu => ({
-  ...fu,
-  role: mapFamilyRole(fu.role as unknown as number) // Cast to unknown first, then to number
-})) || []);
+const familyUsers = ref<FamilyUser[]>(props.initialFamilyData?.familyUsers || []);
+const Manager = 0;
+const Viewer = 1;
 
 const managers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === 'Manager').map(fu => fu.userId),
+  get: () => familyUsers.value.filter(fu => fu.role === 0).map(fu => fu.userId),
   set: (newuserIds) => {
-    const newManagers = newuserIds.map(id => ({ familyId: '', userId: id, role: 'Manager' }));
-    const otherUsers = familyUsers.value.filter(fu => fu.role !== 'Manager');
+    const newManagers = newuserIds.map(id => ({ userId: id, role: Manager }));
+    const otherUsers = familyUsers.value.filter(fu => fu.role !== Manager);
     familyUsers.value = [...otherUsers, ...newManagers];
   }
 });
 
 const viewers = computed({
-  get: () => familyUsers.value.filter(fu => fu.role === 'Viewer').map(fu => fu.userId),
+  get: () => familyUsers.value.filter(fu => fu.role === Viewer).map(fu => fu.userId),
   set: (newuserIds) => {
-    const newViewers = newuserIds.map(id => ({ familyId: '', userId: id, role: 'Viewer' }));
-    const otherUsers = familyUsers.value.filter(fu => fu.role !== 'Viewer');
+    const newViewers = newuserIds.map(id => ({ userId: id, role: Viewer }));
+    const otherUsers = familyUsers.value.filter(fu => fu.role !== Viewer);
     familyUsers.value = [...otherUsers, ...newViewers];
   }
 });

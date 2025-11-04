@@ -8,9 +8,6 @@ export interface Family {
   avatarUrl?: string;
   address?: string;
   visibility?: FamilyVisibility;
-  totalMembers?: number;
-  totalGenerations?: number;
-  validationErrors?: string[];
   familyUsers?: FamilyUser[];
 }
 
@@ -23,7 +20,6 @@ export interface FamilyFilter {
 }
 
 export interface FamilyUser {
-    familyId: string;
     userId: string;
-    role: string;
+    role: number;
 }
