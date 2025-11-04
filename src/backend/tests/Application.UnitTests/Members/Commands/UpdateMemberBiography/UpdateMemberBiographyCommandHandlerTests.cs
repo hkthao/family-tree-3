@@ -27,9 +27,11 @@ public class UpdateMemberBiographyCommandHandlerTests : TestBase
         // Arrange
         var familyId = Guid.NewGuid();
         var memberId = Guid.NewGuid();
-        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId, Biography = "Old biography." };
+        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId};
+        member.UpdateBiography("Old biography.");
         _context.Members.Add(member);
         await _context.SaveChangesAsync();
+        member.ClearDomainEvents(); // Clear events from initial setup
 
         _authorizationServiceMock.Setup(x => x.CanAccessFamily(familyId)).Returns(true);
 

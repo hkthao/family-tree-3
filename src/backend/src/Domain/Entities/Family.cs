@@ -1,5 +1,6 @@
 ﻿using backend.Domain.Enums;
 using backend.Domain.Events.Families;
+using backend.Domain.Events.Members;
 
 namespace backend.Domain.Entities;
 
@@ -82,6 +83,8 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         }
 
         _members.Add(newMember);
+        newMember.AddDomainEvent(new MemberCreatedEvent(newMember));
+        AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
         return newMember;
     }
 
@@ -91,6 +94,8 @@ public class Family : BaseAuditableEntity, IAggregateRoot
         if (member != null)
         {
             _members.Remove(member);
+            member.AddDomainEvent(new MemberDeletedEvent(member));
+            AddDomainEvent(new FamilyStatsUpdatedEvent(Id));
             // Also remove any relationships involving this member
             var relationshipsToRemove = _relationships.Where(r => r.SourceMemberId == memberId || r.TargetMemberId == memberId).ToList();
             foreach (var relationship in relationshipsToRemove)

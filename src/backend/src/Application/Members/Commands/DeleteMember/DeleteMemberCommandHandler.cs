@@ -39,7 +39,6 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
             family.RemoveMember(request.Id);
             _context.Members.Remove(member);
-            family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));
 
             await _context.SaveChangesAsync(cancellationToken);
 

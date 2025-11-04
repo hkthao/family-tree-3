@@ -27,25 +27,21 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.LastName,
             request.FirstName,
             request.Code ?? GenerateUniqueCode("MEM"),
-            request.FamilyId
+            request.FamilyId,
+            request.Nickname,
+            request.Gender,
+            request.DateOfBirth,
+            request.DateOfDeath,
+            request.PlaceOfBirth,
+            request.PlaceOfDeath,
+            request.Occupation,
+            request.AvatarUrl,
+            request.Biography
         );
-
-        newMember.Nickname = request.Nickname;
-        newMember.DateOfBirth = request.DateOfBirth;
-        newMember.DateOfDeath = request.DateOfDeath;
-        newMember.PlaceOfBirth = request.PlaceOfBirth;
-        newMember.PlaceOfDeath = request.PlaceOfDeath;
-        newMember.Gender = request.Gender;
-        newMember.AvatarUrl = request.AvatarUrl;
-        newMember.Occupation = request.Occupation;
-        newMember.Biography = request.Biography;
 
         var member = family.AddMember(newMember, request.IsRoot);
 
         _context.Members.Add(member);
-
-        member.AddDomainEvent(new MemberCreatedEvent(member));
-        family.AddDomainEvent(new FamilyStatsUpdatedEvent(family.Id));
 
         await _context.SaveChangesAsync(cancellationToken);
 

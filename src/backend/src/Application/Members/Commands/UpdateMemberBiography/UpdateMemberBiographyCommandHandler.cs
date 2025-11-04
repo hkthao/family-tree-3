@@ -23,8 +23,7 @@ public class UpdateMemberBiographyCommandHandler(
         if (!canAccess)
             return Result.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        member.Biography = request.BiographyContent;
-        member.AddDomainEvent(new MemberBiographyUpdatedEvent(member));
+        member.UpdateBiography(request.BiographyContent);
 
         await _context.SaveChangesAsync(cancellationToken);
 

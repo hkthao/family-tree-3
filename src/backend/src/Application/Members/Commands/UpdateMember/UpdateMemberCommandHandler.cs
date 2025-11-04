@@ -30,18 +30,20 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
         }
 
-        member.FirstName = request.FirstName;
-        member.LastName = request.LastName;
-        member.Code = request.Code!;
-        member.Nickname = request.Nickname;
-        member.DateOfBirth = request.DateOfBirth;
-        member.DateOfDeath = request.DateOfDeath;
-        member.PlaceOfBirth = request.PlaceOfBirth;
-        member.PlaceOfDeath = request.PlaceOfDeath;
-        member.Gender = request.Gender;
-        member.AvatarUrl = request.AvatarUrl;
-        member.Occupation = request.Occupation;
-        member.Biography = request.Biography;
+        member.Update(
+            request.FirstName,
+            request.LastName,
+            request.Code!,
+            request.Nickname,
+            request.Gender,
+            request.DateOfBirth,
+            request.DateOfDeath,
+            request.PlaceOfBirth,
+            request.PlaceOfDeath,
+            request.Occupation,
+            request.AvatarUrl,
+            request.Biography
+        );
 
         // Handle IsRoot property update
         if (request.IsRoot)
@@ -55,9 +57,6 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         {
             member.UnsetAsRoot();
         }
-
-        member.AddDomainEvent(new MemberUpdatedEvent(member));
-        family.AddDomainEvent(new FamilyStatsUpdatedEvent(request.FamilyId));
 
         await _context.SaveChangesAsync(cancellationToken);
 
