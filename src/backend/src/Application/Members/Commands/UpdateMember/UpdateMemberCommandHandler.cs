@@ -13,16 +13,13 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        var family = await _context.Families
-            .Include(f => f.Members)
-            .FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
-
+        var family = await _context.Families.FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
         if (family == null)
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);
         }
 
-        var member = family.Members.FirstOrDefault(m => m.Id == request.Id);
+        var member = _context.Members.FirstOrDefault(m => m.Id == request.Id);
         if (member == null)
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
@@ -47,7 +44,7 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         if (request.IsRoot)
         {
             // If the updated member should be the root
-            var currentRoot = family.Members.FirstOrDefault(m => m.IsRoot && m.Id != member.Id);
+            var currentRoot = _context.Members.FirstOrDefault(m => m.IsRoot && m.Id != member.Id);
             currentRoot?.UnsetAsRoot(); // Unset the old root if it exists
             member.SetAsRoot(); // Set the current member as the new root
         }

@@ -1,21 +1,8 @@
 <template>
-  <RemoteAutocomplete
-    v-bind="$attrs"
-    :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    :label="label"
-    :rules="rules"
-    :read-only="readOnly"
-    :clearable="clearable"
-    :multiple="multiple"
-    item-title="fullName"
-    item-value="id"
-    :search-function="searchMembersFunction"
-    :preload-function="getMembersByIdsFunction"
-    :clear-items-function="clearItemsFunction"
-    :loading="composableLoading"
-    :items="items"
-  >
+  <RemoteAutocomplete v-bind="$attrs" :model-value="modelValue" @update:model-value="handleRemoteAutocompleteUpdate"
+    :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple"
+    item-title="fullName" item-value="id" :search-function="searchFunction" :preload-function="getByIdsFunction"
+    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items">
     <template #chip="{ props, item }">
       <v-chip v-bind="props" size="small" v-if="item.raw"
         :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.fullName"></v-chip>
@@ -56,18 +43,28 @@ const { items, selectedItems, onSearchChange, preloadById, loading: composableLo
   initialValue: props.modelValue ?? undefined,
 });
 
-const searchMembersFunction = async (query: string): Promise<Member[]> => {
-  await onSearchChange(query);
+const searchFunction = async (query: string): Promise<Member[]> => {
+  onSearchChange(query);
   return items.value;
 };
 
-const getMembersByIdsFunction = async (ids: string[]): Promise<Member[]> => {
-   preloadById(ids);
+const getByIdsFunction = async (ids: string[]): Promise<Member[]> => {
+  await preloadById(ids);
   return selectedItems.value;
 };
 
 const clearItemsFunction = () => {
   items.value = [];
   selectedItems.value = [];
+};
+
+const handleRemoteAutocompleteUpdate = (newValues: Member | Member[] | null) => {
+  if (props.multiple) {
+    const ids = Array.isArray(newValues) ? newValues.map((item: Member) => item.id) : [];
+    emit('update:modelValue', ids);
+  } else {
+    const id = newValues ? (newValues as Member).id : undefined;
+    emit('update:modelValue', id);
+  }
 };
 </script>
