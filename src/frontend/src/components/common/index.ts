@@ -9,3 +9,4 @@ export { default as ChipLookup } from './ChipLookup.vue';
 export { default as ConfirmDeleteDialog } from './ConfirmDeleteDialog.vue';
 export { default as NovuInbox } from './NovuInbox.vue';
 export { default as NotificationBell } from './NotificationBell.vue';
+export { default as UserAutocomplete } from './UserAutocomplete.vue';
