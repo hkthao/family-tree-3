@@ -28,19 +28,6 @@ public class FamilyController(IMediator mediator) : ControllerBase
     private readonly IMediator _mediator = mediator;
 
     /// <summary>
-    /// Xử lý GET request để lấy danh sách tất cả các gia đình.
-    /// </summary>
-    /// <param name="ids">Chuỗi chứa các ID gia đình, phân tách bằng dấu phẩy.</param>
-    /// <returns>Danh sách các đối tượng FamilyDto.</returns>
-    [HttpGet]
-    public async Task<ActionResult<List<FamilyDto>>> GetAllFamilies([FromQuery] string ids)
-    {
-        var guids = ids.Split(',').Select(Guid.Parse).ToList();
-        var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
-        return result.IsSuccess ? (ActionResult<List<FamilyDto>>)Ok(result.Value) : (ActionResult<List<FamilyDto>>)BadRequest(result.Error);
-    }
-
-    /// <summary>
     /// Xử lý GET request để lấy thông tin chi tiết của một gia đình theo ID.
     /// </summary>
     /// <param name="id">ID của gia đình cần lấy.</param>

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
-import type { UserProfile, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
+import type { User } from '@auth0/auth0-spa-js';
 
 interface UserFilter {
   searchQuery?: string;
@@ -9,16 +8,16 @@ interface UserFilter {
 
 export const useUserAutocompleteStore = defineStore('userAutocomplete', {
   state: () => ({
-    items: [] as UserProfile[],
+    items: [] as User[],
     loading: false,
     error: null as string | null,
   }),
 
   actions: {
-    async search(filters: UserFilter): Promise<UserProfile[]> {
+    async search(filters: UserFilter): Promise<User[]> {
       this.loading = true;
       this.error = null;
-      const result = await this.services.user.searchUsers(filters.searchQuery || '', 1, 50); // Use new IUserService
+      const result = await this.services.user.search(filters.searchQuery || '', 1, 50); // Use new IUserService
 
       if (result.ok) {
         this.items = result.value.items;
@@ -31,8 +30,8 @@ export const useUserAutocompleteStore = defineStore('userAutocomplete', {
       }
     },
 
-    async getByIds(ids: string[]): Promise<UserProfile[]> {
-      const result = await this.services.user.getUsersByIds(ids);
+    async getByIds(ids: string[]): Promise<User[]> {
+      const result = await this.services.user.getByIds(ids);
       if (result.ok) {
         return result.value;
       } else {

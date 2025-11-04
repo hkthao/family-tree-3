@@ -1,45 +1,33 @@
 import type { IUserService } from './user.service.interface';
-import type { UserProfile, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
-import { ApiClient } from '@/plugins/axios';
+import type { UserProfile, Result, Paginated, User } from '@/types';
+import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ApiUserService implements IUserService {
-  constructor(private apiClient: ApiClient) {}
+  constructor(private http: ApiClientMethods) { }
+  private apiUrl = `${API_BASE_URL}/user`;
 
-  async searchUsers(searchQuery: string, page: number, itemsPerPage: number): Promise<Result<{ items: UserProfile[]; totalItems: number; totalPages: number; }, ApiError>> {
-    try {
-      // Simulate API call to a new backend endpoint for searching users
-      // This endpoint would handle filtering, pagination, and sorting on the server.
-      const response = await this.apiClient.get('/api/users/search', {
-        params: {
-          searchQuery,
-          page,
-          itemsPerPage,
-        },
-      });
-      return { ok: true, value: response.data };
-    } catch (error: any) {
-      return { ok: false, error: error };
-    }
+  async search(searchQuery: string, page: number, itemsPerPage: number): Promise<Result<{ items: UserProfile[]; totalItems: number; totalPages: number; }, ApiError>> {
+    return await this.http.get<Paginated<User>>(`${this.apiUrl}/search`, {
+      params: {
+        searchQuery,
+        page,
+        itemsPerPage,
+      },
+    });
   }
 
-  async getUsersByIds(ids: string[]): Promise<Result<UserProfile[], ApiError>> {
-    try {
-      const response = await this.apiClient.get('/api/users/by-ids', {
-        params: { ids: ids.join(',') },
-      });
-      return { ok: true, value: response.data };
-    } catch (error: any) {
-      return { ok: false, error: error };
-    }
+  async getByIds(ids: string[]): Promise<Result<User[], ApiError>> {
+    const params = new URLSearchParams();
+    params.append('ids', ids.join(','));
+    return this.http.get<User[]>(
+      `${this.apiUrl}/by-ids?${params.toString()}`,
+    );
   }
 
-  async getUserById(id: string): Promise<Result<UserProfile, ApiError>> {
-    try {
-      const response = await this.apiClient.get(`/api/users/${id}`);
-      return { ok: true, value: response.data };
-    } catch (error: any) {
-      return { ok: false, error: error };
-    }
+  async getById(id: string): Promise<Result<User, ApiError>> {
+    return this.http.get<User>(
+      `${this.apiUrl}/${id}`,
+    );
   }
 }
