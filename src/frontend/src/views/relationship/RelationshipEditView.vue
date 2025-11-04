@@ -13,8 +13,8 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn color="primary" @click="save" data-testid="relationship-edit-save-button">{{ t('common.save') }}</v-btn>
             <v-btn @click="cancel" data-testid="relationship-edit-cancel-button">{{ t('common.cancel') }}</v-btn>
+            <v-btn color="primary" @click="save" data-testid="relationship-edit-save-button">{{ t('common.save') }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -52,7 +52,7 @@ const save = async () => {
   const isValid = await relationshipForm.value?.validate();
   if (isValid) {
     const formData = relationshipForm.value?.getFormData();
-    if (formData && formData.id) {
+    if (formData && props.id) {
       await relationshipStore.updateItem(formData as Relationship);
       if (!relationshipStore.error) {
         notificationStore.showSnackbar(t('relationship.messages.updateSuccess'), 'success');

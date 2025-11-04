@@ -1,6 +1,5 @@
 <template>
   <v-form ref="formRef" :disabled="props.readOnly" data-testid="relationship-form">
-
     <v-row>
       <v-col cols="12" md="6">
         <family-auto-complete v-model="formData.familyId" :label="t('relationship.form.family')"
