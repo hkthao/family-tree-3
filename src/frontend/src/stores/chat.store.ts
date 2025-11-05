@@ -12,6 +12,7 @@ interface ChatMessage {
   username: string; // Display name of the sender
   timestamp: string; // Unix timestamp as string
   date: string; // Formatted date string
+  isError?: boolean; // Optional flag for error messages
 }
 
 interface ChatListItem {
@@ -82,34 +83,41 @@ export const useChatStore = defineStore('chat', {
       };
       this.addMessage(this.selectedChatId, userMessage);
 
-      let assistantMessage: ChatMessage | undefined; // Declare outside try block
+      // A plain object for the assistant's message to be added to the store.
+      const assistantMessageData: ChatMessage = {
+        _id: (Date.now() + 1).toString(),
+        content: '',
+        senderId: 'assistant',
+        username: 'AI Assistant',
+        timestamp: new Date().toTimeString().substring(0, 5),
+        date: new Date().toLocaleDateString(),
+      };
+      this.addMessage(this.selectedChatId, assistantMessageData);
+
+      // Get the reactive message object from the state array.
+      // This is the key to making UI updates work.
+      const assistantMessage = this.currentChatMessages[this.currentChatMessages.length - 1];
 
       try {
-        assistantMessage = { // Assign here
-          _id: (Date.now() + 1).toString(),
-          content: '',
-          senderId: 'assistant',
-          username: 'AI Assistant',
-          timestamp: new Date().toTimeString().substring(0, 5),
-          date: new Date().toLocaleDateString(),
-        };
-        this.addMessage(this.selectedChatId, assistantMessage);
-
         // Access chatService via this.services
         const chatService = this.services.chat as IChatService;
         const responseStream = chatService.sendMessageStream(messageContent);
+        
+        let chunkReceived = false;
         for await (const chunk of responseStream) {
+          chunkReceived = true;
           assistantMessage.content += chunk;
           // Update the last message in chatList for the current chat
           this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp, assistantMessage.date);
         }
       } catch (err: any) {
-        console.error('Error sending message:', err);
-        this.error = i18nTranslator('chat.errors.sendMessageFailed', { message: err.message });
-        // Remove the assistant's empty message if an error occurred before any content was streamed
-        if (this.currentChatMessages[this.currentChatMessages.length - 1] === assistantMessage && assistantMessage.content === '') {
-          this.messages[this.selectedChatId].pop();
-        }
+        console.error('Error sending message or processing stream:', err);
+        const errorMessage = err.message || 'An unknown error occurred.';
+
+        // Update the message content with the error.
+        assistantMessage.content = errorMessage;
+        assistantMessage.isError = true; // Mark the message as an error
+        this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp, assistantMessage.date);
       } finally {
         this.isLoading = false;
       }

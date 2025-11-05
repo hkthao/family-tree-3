@@ -9,7 +9,7 @@
     </v-toolbar>
     <v-card flat class="fill-height d-flex flex-column">
       <v-card-text class="chat-messages-container pa-0">
-        <vue-advanced-chat :messages="JSON.stringify(formattedMessages)" :current-user-id="currentUserId"
+        <vue-advanced-chat :messages="formattedMessages" :current-user-id="currentUserId"
           :is-loading="chatStore.isLoading" :show-footer="true" :messages-loaded="messagesLoaded"
           :rooms="JSON.stringify([{ roomId: 'ai-assistant', roomName: 'AI Assistant', users: [{ _id: currentUserId, username: authStore.user?.id || 'You' }, { _id: 'assistant', username: 'AI Assistant' }] }])"
           :rooms-loaded="true"

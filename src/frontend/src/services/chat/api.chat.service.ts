@@ -1,7 +1,8 @@
 import type { IChatService } from './chat.service.interface';
 import type { ApiClientMethods, ApiError } from '@/plugins/axios';
-import { ok, err } from '@/types'; // Import ok and err functions
+import { err } from '@/types'; // Import ok and err functions
 import type {  Result } from '@/types'; // Import types
+import { useAuthService } from '../auth/authService';
 
 export class ApiChatService implements IChatService {
   private readonly API_URL = `${import.meta.env.VITE_MCP_SERVER_URL}/api/ai/query`; // MCP server endpoint
@@ -31,7 +32,7 @@ export class ApiChatService implements IChatService {
         headers: {
           'Content-Type': 'application/json',
           // Add authorization header if needed
-          // 'Authorization': `Bearer ${yourAuthToken}`
+           'Authorization': `Bearer ${await useAuthService().getAccessToken()}`
         },
         body: JSON.stringify({ prompt: message }),
       });
@@ -58,7 +59,6 @@ export class ApiChatService implements IChatService {
       }
 
       const decoder = new TextDecoder('utf-8');
-      let buffer = '';
 
       while (true) {
         const { value, done } = await reader.read();
@@ -66,27 +66,23 @@ export class ApiChatService implements IChatService {
           break;
         }
 
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.substring(6);
-            if (data === '[DONE]') {
-              return;
+        const chunkText = decoder.decode(value);
+        
+        try {
+          // The backend sends the whole response as a single JSON array of strings.
+          const parsedArray = JSON.parse(chunkText);
+          if (Array.isArray(parsedArray)) {
+            for (const item of parsedArray) {
+              yield String(item);
             }
-            try {
-              const json = JSON.parse(data);
-              yield json.response;
-            } catch (e: any) {
-              console.warn('Could not parse JSON from stream chunk:', data, e);
-              yield data;
-            }
-          } else if (line.trim() !== '') {
-            yield line;
+            // The entire response has been processed, so we can exit.
+            return;
           }
+        } catch (e) {
+          // If parsing fails, it might be a plain text stream or SSE.
+          // For simplicity in this specific case, we can try to handle it as a plain chunk.
+          // The previous logic for SSE (`data:`) can be added here if needed in the future.
+          yield chunkText;
         }
       }
     } catch (error: any) {
