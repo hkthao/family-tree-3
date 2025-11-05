@@ -39,7 +39,7 @@ public class ToolExecutorTests
             "search_family",
             JsonSerializer.Serialize(new { query = query })
         );
-        var expectedResult = new { families = new[] { new { id = Guid.NewGuid(), name = query } } };
+        var expectedResult = new List<McpServer.Services.FamilyDto> { new McpServer.Services.FamilyDto { Id = 1, Name = query, History = "Some history" } };
 
         _mockFamilyTreeBackendService
             .Setup(s => s.SearchFamiliesAsync(jwtToken, query))
@@ -109,7 +109,7 @@ public class ToolExecutorTests
             "get_family_details",
             JsonSerializer.Serialize(new { id = familyId })
         );
-        var expectedResult = new { id = familyId, name = "DetailedFamily" };
+        var expectedResult = new McpServer.Services.FamilyDto { Id = familyId.GetHashCode(), Name = "DetailedFamily", History = "Detailed history" };
 
         _mockFamilyTreeBackendService
             .Setup(s => s.GetFamilyByIdAsync(familyId, jwtToken))

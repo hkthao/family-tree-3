@@ -63,7 +63,7 @@ namespace McpServer.Services
         /// <param name="jwtToken">JWT Token để xác thực.</param>
         /// <param name="query">Chuỗi truy vấn để tìm kiếm (tên, mã, v.v.).</param>
         /// <returns>Danh sách các gia đình phù hợp hoặc null nếu có lỗi.</returns>
-        public async Task<List<FamilyDto>?> SearchFamiliesAsync(string jwtToken, string query)
+        public virtual async Task<List<McpServer.Services.FamilyDto>?> SearchFamiliesAsync(string jwtToken, string query)
         {
             try
             {
@@ -72,8 +72,8 @@ namespace McpServer.Services
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<Result<PaginatedList<FamilyDto>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                return result?.Value?.Items;
+                var result = JsonSerializer.Deserialize<Result<ExternalPaginatedList<ExternalFamilyDto>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return result?.Value?.Items?.Select(f => new McpServer.Services.FamilyDto { Id = f.Id.GetHashCode(), Name = f.Name, History = f.Description }).ToList();
             }
             catch (HttpRequestException ex)
             {
@@ -90,7 +90,7 @@ namespace McpServer.Services
         /// <summary>
         /// Lấy thông tin chi tiết của một gia đình theo ID.
         /// </summary>
-        public async Task<FamilyDto?> GetFamilyByIdAsync(Guid id, string jwtToken)
+        public virtual async Task<McpServer.Services.FamilyDto?> GetFamilyByIdAsync(Guid id, string jwtToken)
         {
             try
             {
@@ -99,7 +99,8 @@ namespace McpServer.Services
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<FamilyDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var externalFamilyDto = JsonSerializer.Deserialize<ExternalFamilyDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return externalFamilyDto != null ? new McpServer.Services.FamilyDto { Id = externalFamilyDto.Id.GetHashCode(), Name = externalFamilyDto.Name, History = externalFamilyDto.Description } : null;
             }
             catch (HttpRequestException ex)
             {
@@ -278,6 +279,28 @@ namespace McpServer.Services
         public string? Name { get; set; }
         public string? History { get; set; }
         // Add other properties as needed
+    }
+
+    public class ExternalFamilyDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = null!;
+        public string Code { get; set; } = null!;
+        public string? Description { get; set; }
+        public string? Address { get; set; }
+        public int TotalMembers { get; set; } = 0;
+        public int? TotalGenerations { get; set; } = null;
+        public string? Visibility { get; set; }
+        public string? AvatarUrl { get; set; }
+        public List<string> ValidationErrors { get; set; } = new List<string>();
+    }
+
+    public class ExternalPaginatedList<T>
+    {
+        public List<T> Items { get; set; } = new List<T>();
+        public int PageNumber { get; set; }
+        public int TotalPages { get; set; }
+        public int TotalCount { get; set; }
     }
 
     /// <summary>

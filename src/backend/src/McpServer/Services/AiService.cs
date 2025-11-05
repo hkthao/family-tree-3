@@ -111,26 +111,45 @@ public class AiService
                                     toolResults.Add(toolResult);
                                 }
         
-                                // Re-prompt the LLM with the new tool results
-                                var rePromptResponseParts = aiProvider.GenerateResponseStreamAsync(prompt, tools, toolResults);
-                                await foreach (var rePromptPart in rePromptResponseParts)
-                                {
-                                    if (rePromptPart is AiTextResponsePart rePromptTextPart)
-                                    {
-                                        finalResponseChunks.Add(rePromptTextPart.Text);
-                                    }
-                                    else if (rePromptPart is AiToolCallResponsePart rePromptToolCallPart)
-                                    {
-                                        // If it still tries to call tools, then we log an error and break to prevent infinite loops
-                                        if (rePromptToolCallPart.ToolCalls.Any())
-                                        {
-                                            _logger.LogError("LLM still attempted to call tools after re-prompting. This indicates a persistent issue.");
-                                            finalResponseChunks.Add("Error: The AI is persistently trying to call tools. Please try rephrasing your request or contact support.");
-                                            break; // Exit the loop
-                                        }
-                                    }
-                                }
-                            }
+                                                        // Re-prompt the LLM with the new tool results
+                                                        int rePromptAttempt = 0;
+                                                        const int maxRePromptAttempts = 2; // Allow 2 additional re-prompts
+                                
+                                                        bool textResponseReceived = false;
+                                                        while (rePromptAttempt < maxRePromptAttempts && !textResponseReceived)
+                                                        {
+                                                            var rePromptResponseParts = aiProvider.GenerateResponseStreamAsync(prompt, tools, toolResults);
+                                                            await foreach (var rePromptPart in rePromptResponseParts)
+                                                            {
+                                                                if (rePromptPart is AiTextResponsePart rePromptTextPart)
+                                                                {
+                                                                    finalResponseChunks.Add(rePromptTextPart.Text);
+                                                                    textResponseReceived = true;
+                                                                    break; // Exit inner foreach
+                                                                }
+                                                                else if (rePromptPart is AiToolCallResponsePart rePromptToolCallPart)
+                                                                {
+                                                                    if (rePromptToolCallPart.ToolCalls.Any())
+                                                                    {
+                                                                        _logger.LogWarning("LLM still attempted to call tools after re-prompt attempt {Attempt}. Executing them and re-prompting again.", rePromptAttempt + 1);
+                                                                        foreach (var furtherUnexpectedToolCall in rePromptToolCallPart.ToolCalls)
+                                                                        {
+                                                                            var toolResult = await _toolExecutor.ExecuteToolCallAsync(furtherUnexpectedToolCall, jwtToken);
+                                                                            toolResults.Add(toolResult);
+                                                                        }
+                                                                        rePromptAttempt++;
+                                                                        // Continue to next iteration of while loop to re-prompt
+                                                                        break; // Exit inner foreach
+                                                                    }
+                                                                }
+                                                            }
+                                
+                                                            if (!textResponseReceived && rePromptAttempt >= maxRePromptAttempts)
+                                                            {
+                                                                _logger.LogError("LLM persistently attempted to call tools after {MaxAttempts} re-prompts. Returning a fallback error.", maxRePromptAttempts);
+                                                                finalResponseChunks.Add("Error: The AI is unable to provide a definitive answer at this time as it's repeatedly trying to use tools. Please try rephrasing your request or contact support.");
+                                                            }
+                                                        }                            }
                         }
                     }
                     _logger.LogInformation("Finished streaming final response from LLM.");
