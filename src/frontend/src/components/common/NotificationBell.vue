@@ -38,7 +38,7 @@ const updateUnReadCount = async (novu: Novu) => {
 
 onMounted(async () => {
   await userProfileStore.fetchCurrentUserProfile();
-  const subscriberId = userProfileStore.userProfile?.id;
+  const subscriberId = userProfileStore.userProfile?.userId;
 
   if (!subscriberId) {
     console.warn('Subscriber ID not found. Novu notifications will not be initialized.');

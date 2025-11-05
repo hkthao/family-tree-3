@@ -10,8 +10,6 @@ using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using Microsoft.Extensions.Logging;
 
 namespace backend.Web.Controllers;
 

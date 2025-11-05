@@ -1,5 +1,4 @@
 using backend.CompositionRoot;
-using backend.Web.Infrastructure;
 using Microsoft.Extensions.FileProviders;
 
 /// <summary>

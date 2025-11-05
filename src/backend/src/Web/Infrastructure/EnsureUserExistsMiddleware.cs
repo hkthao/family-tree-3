@@ -1,11 +1,10 @@
 
 using System.Security.Claims;
 using backend.Application.Common.Interfaces;
+using backend.Application.Identity.Commands.EnsureUserExists;
 using backend.Domain.Constants;
-using backend.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 
 namespace backend.Web.Infrastructure;
 
@@ -32,78 +31,53 @@ public class EnsureUserExistsMiddleware
         if (context.User.Identity?.IsAuthenticated == true && !context.Items.ContainsKey(HttpContextItemKeys.UserInfoProcessed))
         {
             using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
             var claimsTransformation = scope.ServiceProvider.GetRequiredService<IClaimsTransformation>();
             var claimsPrincipal = await claimsTransformation.TransformAsync(context.User);
+            
             var externalId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value;
-            var name = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value;
-            var firstName = claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value;
-            var lastName = claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value;
-            var phone = claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value;
-            var avatar = claimsPrincipal.FindFirst("picture")?.Value;
 
             if (string.IsNullOrEmpty(externalId))
             {
-                _logger.LogWarning("EnsureUserExistsMiddleware: External ID (sub claim) not found for authenticated user.");
+                _logger.LogWarning("EnsureUserExistsMiddleware: External ID (sub claim) không tìm thấy cho người dùng đã xác thực.");
                 await _next(context);
                 return;
             }
 
             try
             {
-                _logger.LogInformation("EnsureUserExistsMiddleware: Processing authenticated user with external ID: {ExternalId}", externalId);
+                _logger.LogInformation("EnsureUserExistsMiddleware: Đang xử lý người dùng đã xác thực với external ID: {ExternalId}", externalId);
 
-                // Find or Create UserProfile entity (default profile)
-                // Assuming User entity is created implicitly or handled elsewhere
-                var user = await dbContext.Users
-                    .Include(u => u.Profile)
-                    .Include(u => u.Preference)
-                    .FirstOrDefaultAsync(u => u.AuthProviderId == externalId);
+                var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
 
-                if (user == null)
+                var command = new EnsureUserExistsCommand
                 {
-                    user = new User(externalId, email ?? $"{externalId}@temp.com", name ?? "", firstName, lastName, phone, avatar);
-                    dbContext.Users.Add(user);
-                    try
-                    {
-                        await dbContext.SaveChangesAsync(CancellationToken.None);
-                        _logger.LogInformation("EnsureUserExistsMiddleware: Created new User with ID: {UserId}. Profile ID: {ProfileId}. Preference ID: {PreferenceId}", user.Id, user.Profile?.Id, user.Preference?.Id);
-                    }
-                    catch (DbUpdateException ex) when (ex.InnerException is MySqlException mysqlEx && mysqlEx.ErrorCode == MySqlErrorCode.DuplicateKeyEntry)
-                    {
-                        // Race condition: user was created by another request. Fetch the existing user.
-                        _logger.LogWarning("EnsureUserExistsMiddleware: Race condition detected. User with external ID {ExternalId} already exists. Fetching existing user.", externalId);
-                        user = await dbContext.Users
-                            .Include(u => u.Profile)
-                            .Include(u => u.Preference)
-                            .FirstOrDefaultAsync(u => u.AuthProviderId == externalId);
+                    ExternalId = externalId,
+                    Email = claimsPrincipal.FindFirst(ClaimTypes.Email)?.Value,
+                    Name = claimsPrincipal.FindFirst(ClaimTypes.Name)?.Value,
+                    FirstName = claimsPrincipal.FindFirst(ClaimTypes.GivenName)?.Value,
+                    LastName = claimsPrincipal.FindFirst(ClaimTypes.Surname)?.Value,
+                    Phone = claimsPrincipal.FindFirst(ClaimTypes.MobilePhone)?.Value,
+                    Avatar = claimsPrincipal.FindFirst("picture")?.Value
+                };
 
-                        if (user == null)
-                        {
-                            // This should ideally not happen if the previous check failed due to a race condition.
-                            // Re-throw if we still can't find the user.
-                            throw;
-                        }
-                    }
-                }
+                var result = await mediator.Send(command);
 
-                // Store UserId and ProfileId in HttpContext.Items
-                context.Items[HttpContextItemKeys.UserId] = user.Id;
-                context.Items[HttpContextItemKeys.ProfileId] = user.Profile?.Id;
+                // Lưu UserId và ProfileId vào HttpContext.Items
+                context.Items[HttpContextItemKeys.UserId] = result.UserId;
+                context.Items[HttpContextItemKeys.ProfileId] = result.ProfileId;
 
-                // Transform claims
+                // Chuyển đổi claims
                 var principal = await claimsTransformation.TransformAsync(context.User);
-                context.User = principal; // Update User principal in HttpContext
+                context.User = principal; // Cập nhật User principal trong HttpContext
 
-                _logger.LogInformation("EnsureUserExistsMiddleware: Successfully processed user {UserId} and profile {ProfileId}", user.Id, user.Profile?.Id);
+                _logger.LogInformation("EnsureUserExistsMiddleware: Đã xử lý thành công user {UserId} và profile {ProfileId}", result.UserId, result.ProfileId);
 
                 // Đánh dấu là đã xử lý để tránh chạy lại trong cùng một request
                 context.Items[HttpContextItemKeys.UserInfoProcessed] = true;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in EnsureUserExistsMiddleware for external ID: {ExternalId}. Details: {Error}", externalId, ex.Message);
+                _logger.LogError(ex, "Lỗi trong EnsureUserExistsMiddleware cho external ID: {ExternalId}. Chi tiết: {Error}", externalId, ex.Message);
             }
         }
 

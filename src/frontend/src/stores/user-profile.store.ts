@@ -7,7 +7,6 @@ export const useUserProfileStore = defineStore('userProfile', {
     loading: false,
     error: null as string | null,
     userProfile: null as UserProfile | null,
-    allUserProfiles: [] as UserProfile[],
   }),
 
   actions: {
@@ -50,7 +49,6 @@ export const useUserProfileStore = defineStore('userProfile', {
 
     reset() {
       this.userProfile = null;
-      this.allUserProfiles = [];
       this.loading = false;
       this.error = null;
     },

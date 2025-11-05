@@ -19,4 +19,5 @@ public static class HttpContextItemKeys
     /// Khóa để đánh dấu rằng thông tin người dùng đã được xử lý bởi middleware.
     /// </summary>
     public const string UserInfoProcessed = "UserInfoProcessed";
+    public const string NovuSubscriberProcessed = "NovuSubscriberProcessed";
 }

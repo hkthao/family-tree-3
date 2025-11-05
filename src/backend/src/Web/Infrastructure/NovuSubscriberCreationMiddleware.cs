@@ -1,10 +1,13 @@
-using System.Security.Claims;
-using backend.Application.Common.Interfaces;
-using backend.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using backend.Application.Identity.Commands.CreateNovuSubscriber;
+using backend.Domain.Constants;
+using MediatR;
 
 namespace backend.Web.Infrastructure;
 
+/// <summary>
+/// Middleware để đảm bảo người dùng được đăng ký làm subscriber trên Novu.
+/// Middleware này chạy sau EnsureUserExistsMiddleware và sử dụng UserId đã được xác định.
+/// </summary>
 public class NovuSubscriberCreationMiddleware
 {
     private readonly RequestDelegate _next;
@@ -16,56 +19,28 @@ public class NovuSubscriberCreationMiddleware
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, IApplicationDbContext dbContext, INotificationProviderFactory notificationProviderFactory, IServiceProvider serviceProvider)
+    public async Task InvokeAsync(HttpContext context, IServiceProvider serviceProvider)
     {
-        // 1. Check if user is authenticated and user object is present
-        // 2. Check if we haven't already processed this for the current request
-        if (context.User.Identity?.IsAuthenticated == true &&
-            !context.Items.ContainsKey("NovuSubscriberProcessed"))
+        // Chỉ chạy nếu UserId đã được xác định và chưa được xử lý trong request này
+        if (context.Items.TryGetValue(HttpContextItemKeys.UserId, out var userIdObj) && userIdObj is Guid userId && userId != Guid.Empty && !context.Items.ContainsKey(HttpContextItemKeys.NovuSubscriberProcessed))
         {
-            // Mark as processed for this request to avoid re-entry
-            context.Items["NovuSubscriberProcessed"] = true;
-
-            var externalId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = await dbContext.Users
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.AuthProviderId == externalId);
-
-            // 3. Check if SubscriberId is missing
-            if (user != null && string.IsNullOrEmpty(user.SubscriberId))
+            try
             {
-                try
-                {
-                    _logger.LogInformation("User {UserId} does not have a Novu SubscriberId. Attempting to create one.", user.Id);
+                using var scope = serviceProvider.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<ISender>();
 
-                    var novuProvider = notificationProviderFactory.GetProvider("Novu");
-                    var subscriberId = $"user_{user.Id}"; // Or some other unique identifier
+                _logger.LogInformation("NovuSubscriberCreationMiddleware: Kích hoạt tạo subscriber cho User ID: {UserId}", userId);
 
-                    await novuProvider.SyncSubscriberAsync(
-                        subscriberId,
-                        user.Profile?.FirstName,
-                        user.Profile?.LastName,
-                        user.Email,
-                        user.Profile?.Phone
-                    );
+                var command = new CreateNovuSubscriberCommand { UserId = userId };
+                await mediator.Send(command);
 
-                    // Re-fetch the user entity to ensure it's tracked by the current DbContext
-                    var trackedUser = await dbContext.Users.FindAsync(user.Id);
-                    if (trackedUser != null)
-                    {
-                        trackedUser.SubscriberId = subscriberId;
-                        await dbContext.SaveChangesAsync(context.RequestAborted);
-                        _logger.LogInformation("Successfully created Novu subscriber for user {UserId}", user.Id);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Could not find user {UserId} in DbContext to update SubscriberId.", user.Id);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error creating Novu subscriber for user {UserId}", user.Id);
-                }
+                // Đánh dấu là đã xử lý để tránh chạy lại
+                context.Items[HttpContextItemKeys.NovuSubscriberProcessed] = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi trong NovuSubscriberCreationMiddleware cho user ID: {UserId}. Chi tiết: {Error}", userIdObj, ex.Message);
+                // Không re-throw để tránh làm gián đoạn request chính
             }
         }
 
