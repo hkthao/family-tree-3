@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using McpServer.Config; // For app settings classes
-using McpServer.Services; // For AiService and FamilyTreeBackendService
+using McpServer.Services; // For AiService, IAiProvider, AiProviderFactory, and concrete providers
 using Microsoft.AspNetCore.Authorization; // For [Authorize] attribute
+using System.Net.Http.Json; // For PostAsJsonAsync in providers
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure App Settings
 builder.Services.Configure<FamilyTreeBackendSettings>(builder.Configuration.GetSection("FamilyTreeBackend"));
 builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("Gemini"));
+builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAI")); // New
+builder.Services.Configure<LocalLlmSettings>(builder.Configuration.GetSection("LocalLLM")); // New
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -92,7 +95,15 @@ builder.Services.AddHttpClient<FamilyTreeBackendService>(client =>
     client.BaseAddress = new Uri(familyTreeBackendSettings.BaseUrl);
 });
 
-// Register AI Service
+// Register concrete AI Providers
+builder.Services.AddHttpClient<GeminiProvider>(); // GeminiProvider uses HttpClient
+builder.Services.AddHttpClient<OpenAiProvider>(); // OpenAIProvider uses HttpClient
+builder.Services.AddHttpClient<LocalLlmProvider>(); // LocalLlmProvider uses HttpClient
+
+// Register AI Provider Factory
+builder.Services.AddSingleton<AiProviderFactory>();
+
+// Register main AiService
 builder.Services.AddScoped<AiService>();
 
 var app = builder.Build();

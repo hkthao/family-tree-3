@@ -1,38 +1,52 @@
-using Google.Cloud.AIPlatform.V1; // For Vertex AI Gemini API
-using Google.Apis.Auth.OAuth2; // For authentication
-using Grpc.Auth; // For gRPC authentication
-using Grpc.Core; // For Channel
 using McpServer.Config;
 using Microsoft.Extensions.Options;
-using System.Text;
 using System.Text.Json;
 
 namespace McpServer.Services
 {
     /// <summary>
-    /// Dịch vụ tương tác với AI Assistant (Gemini).
+    /// Dịch vụ chính để tương tác với AI Assistant, sử dụng một nhà cung cấp AI được cấu hình.
     /// </summary>
     public class AiService
     {
-        private readonly GeminiSettings _geminiSettings;
         private readonly FamilyTreeBackendService _familyTreeBackendService;
+        private readonly AiProviderFactory _aiProviderFactory;
         private readonly ILogger<AiService> _logger;
+        private readonly string _defaultAiProvider; // To store the default provider name
 
-        public AiService(IOptions<GeminiSettings> geminiSettings, FamilyTreeBackendService familyTreeBackendService, ILogger<AiService> logger)
+        public AiService(
+            FamilyTreeBackendService familyTreeBackendService,
+            AiProviderFactory aiProviderFactory,
+            ILogger<AiService> logger,
+            IConfiguration configuration) // Inject IConfiguration to get default provider
         {
-            _geminiSettings = geminiSettings.Value;
             _familyTreeBackendService = familyTreeBackendService;
+            _aiProviderFactory = aiProviderFactory;
             _logger = logger;
+            _defaultAiProvider = configuration["DefaultAiProvider"] ?? "Gemini"; // Get from config, default to Gemini
         }
 
         /// <summary>
-        /// Gửi prompt đến AI Assistant và nhận kết quả.
+        /// Gửi prompt đến AI Assistant được cấu hình và nhận kết quả.
         /// </summary>
         /// <param name="prompt">Prompt từ người dùng.</param>
         /// <param name="jwtToken">JWT Token để truy vấn dữ liệu backend.</param>
+        /// <param name="providerName">Tên của nhà cung cấp AI cụ thể để sử dụng (tùy chọn).</param>
         /// <returns>Kết quả từ AI Assistant.</returns>
-        public async Task<string> GetAiResponseAsync(string prompt, string? jwtToken)
+        public async Task<string> GetAiResponseAsync(string prompt, string? jwtToken, string? providerName = null)
         {
+            var selectedProviderName = providerName ?? _defaultAiProvider;
+            IAiProvider aiProvider;
+            try
+            {
+                aiProvider = _aiProviderFactory.GetProvider(selectedProviderName);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Invalid AI provider specified: {ProviderName}", selectedProviderName);
+                return $"Error: Invalid AI provider '{selectedProviderName}'.";
+            }
+
             // Example of RAG: Fetching data from Family Tree backend
             List<MemberDto>? members = null;
             if (!string.IsNullOrEmpty(jwtToken))
@@ -46,37 +60,29 @@ namespace McpServer.Services
                 }
             }
 
-            // Initialize Gemini client
-            // For simplicity, using a direct API key. For production, consider more secure authentication.
-            // The Google.Cloud.AIPlatform.V1 library is for Vertex AI.
-            // If using the direct Gemini API (generativeai.dev), you might use a different client.
-            // For this example, we'll simulate a response or use a placeholder.
-
-            // Placeholder for actual Gemini API call
-            _logger.LogInformation("Calling Gemini API with prompt: {Prompt}", prompt);
-
-            // In a real scenario, you would use the Google.Cloud.AIPlatform.V1 client
-            // or Google.GenerativeAI client here.
-            // Example using Google.Cloud.AIPlatform.V1 (Vertex AI Gemini API):
-            // var predictionServiceClient = new PredictionServiceClientBuilder
-            // {
-            //     Endpoint = "us-central1-aiplatform.googleapis.com", // Or your region
-            //     // Credentials = GoogleCredential.GetApplicationDefault() // For service account auth
-            // }.Build();
-            // var response = await predictionServiceClient.PredictAsync(...);
-
-            // For now, return a mock response
-            return $"AI Assistant's response to: '{prompt}'. (Simulated with {members?.Count ?? 0} members referenced)";
+            return await aiProvider.GenerateResponseAsync(prompt, members != null && members.Any() ? JsonSerializer.Serialize(members) : null);
         }
 
         /// <summary>
-        /// Kiểm tra trạng thái của AI Assistant.
+        /// Kiểm tra trạng thái của AI Assistant được cấu hình.
         /// </summary>
+        /// <param name="providerName">Tên của nhà cung cấp AI cụ thể để kiểm tra (tùy chọn).</param>
         /// <returns>Trạng thái của AI Assistant.</returns>
-        public Task<string> GetStatusAsync()
+        public async Task<string> GetStatusAsync(string? providerName = null)
         {
-            // In a real scenario, you might ping the Gemini API or check credentials.
-            return Task.FromResult("AI Assistant is operational.");
+            var selectedProviderName = providerName ?? _defaultAiProvider;
+            IAiProvider aiProvider;
+            try
+            {
+                aiProvider = _aiProviderFactory.GetProvider(selectedProviderName);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, "Invalid AI provider specified for status check: {ProviderName}", selectedProviderName);
+                return $"Error: Invalid AI provider '{selectedProviderName}'.";
+            }
+
+            return await aiProvider.GetStatusAsync();
         }
     }
 }
