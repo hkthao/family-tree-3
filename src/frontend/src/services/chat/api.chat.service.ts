@@ -4,7 +4,7 @@ import { ok, err } from '@/types'; // Import ok and err functions
 import type {  Result } from '@/types'; // Import types
 
 export class ApiChatService implements IChatService {
-  private readonly API_URL = '/api/ai/query'; // MCP server endpoint
+  private readonly API_URL = `${import.meta.env.VITE_MCP_SERVER_URL}/api/ai/query`; // MCP server endpoint
 
   constructor(private apiClient: ApiClientMethods) {}
 

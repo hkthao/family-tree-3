@@ -38,74 +38,82 @@ namespace McpServer.Services
                 prompt = string.Format("Context: {0}\n\nUser Query: {1}", context, prompt);
             }
 
-            // Initialize Gemini client
-            // For local development, ensure GOOGLE_APPLICATION_CREDENTIALS environment variable is set
-            // or gcloud auth application-default login has been run.
-            // For deployment, service account key should be handled securely (e.g., Kubernetes secrets, environment variables).
-            var credential = GoogleCredential.GetApplicationDefault();
-            var client = new PredictionServiceClientBuilder
-            { 
-                Endpoint = "aiplatform.googleapis.com",
-                Credential = credential // Assign the GoogleCredential directly
-            }.Build();
-
-            // Construct the request for the Gemini model
-            var instance = new Google.Protobuf.WellKnownTypes.Value
+            // Local function to handle the actual streaming logic
+            async IAsyncEnumerable<string> StreamResponse(string currentPrompt)
             {
-                StructValue = new Struct
+                List<string> chunks = new List<string>();
+                try
                 {
-                    Fields =
+                    // Initialize Gemini client
+                    var credential = GoogleCredential.GetApplicationDefault();
+                    var client = new PredictionServiceClientBuilder
                     {
-                        { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = prompt } }
+                        Endpoint = "aiplatform.googleapis.com",
+                        Credential = credential
+                    }.Build();
+
+                    // Construct the request for the Gemini model
+                    var instance = new Google.Protobuf.WellKnownTypes.Value
+                    {
+                        StructValue = new Struct
+                        {
+                            Fields =
+                            {
+                                { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = currentPrompt } }
+                            }
+                        }
+                    };
+
+                    var parameters = new Google.Protobuf.WellKnownTypes.Value
+                    {
+                        StructValue = new Struct
+                        {
+                            Fields =
+                            {
+                                { "temperature", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 0.7 } },
+                                { "maxOutputTokens", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 1024 } },
+                                { "topP", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 0.95 } },
+                                { "topK", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 40 } }
+                            }
+                        }
+                    };
+
+                    var endpoint = EndpointName.FromProjectLocationPublisherModel(_geminiSettings.ProjectId, _geminiSettings.Location, "google", _geminiSettings.ModelId);
+
+                    // The Google.Cloud.AIPlatform.V1 library's PredictAsync does not directly support streaming.
+                    // For now, I will return the full response as a single chunk.
+                    var response = await client.PredictAsync(endpoint, new[] { instance }, parameters);
+
+                    if (response.Predictions.Any())
+                    {
+                        var prediction = response.Predictions.First();
+                        if (prediction.StructValue.Fields.TryGetValue("content", out var contentValue))
+                        {
+                            chunks.Add(contentValue.StringValue);
+                        }
+                    }
+                    else
+                    {
+                        chunks.Add("Không có phản hồi từ Gemini AI.");
                     }
                 }
-            };
-
-            var parameters = new Google.Protobuf.WellKnownTypes.Value
-            {
-                StructValue = new Struct
+                catch (Exception ex)
                 {
-                    Fields =
-                    {
-                        { "temperature", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 0.7 } },
-                        { "maxOutputTokens", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 1024 } },
-                        { "topP", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 0.95 } },
-                        { "topK", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 40 } }
-                    }
+                    _logger.LogError(ex, "Lỗi khi gọi Gemini AI: {Message}", ex.Message);
+                    chunks.Add($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}");
                 }
-            };
 
-            // The model name should be configured in appsettings.json
-            var endpoint = EndpointName.FromProjectLocationPublisherModel(_geminiSettings.ProjectId, _geminiSettings.Location, "google", _geminiSettings.ModelId);
-
-            try
-            {
-                // For streaming, we need to use a different method if available, or simulate streaming
-                // The Google.Cloud.AIPlatform.V1 library's PredictAsync does not directly support streaming.
-                // For now, I will return the full response as a single chunk.
-                // If true streaming is required, the client library or API call needs to be adjusted.
-                var response = await client.PredictAsync(endpoint, new[] { instance }, parameters);
-
-                if (response.Predictions.Any())
+                foreach (var chunk in chunks)
                 {
-                    var prediction = response.Predictions.First();
-                    if (prediction.StructValue.Fields.TryGetValue("content", out var contentValue))
-                    {
-                        yield return contentValue.StringValue;
-                    }
-                }
-                else
-                {
-                    yield return "Không có phản hồi từ Gemini AI.";
+                    yield return chunk;
                 }
             }
-            catch (Exception ex)
+
+            await foreach (var chunk in StreamResponse(prompt))
             {
-                _logger.LogError(ex, "Lỗi khi gọi Gemini AI: {Message}", ex.Message);
-                yield return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}";
+                yield return chunk;
             }
         }
-
         /// <summary>
         /// Kiểm tra trạng thái hoạt động của nhà cung cấp AI.
         /// </summary>

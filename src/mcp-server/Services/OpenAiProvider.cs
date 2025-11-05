@@ -39,73 +39,94 @@ namespace McpServer.Services
                 prompt = $"Context: {context}\n\nUser Query: {prompt}";
             }
 
-            var requestBody = new
+            // Local function to handle the actual streaming logic
+            async IAsyncEnumerable<string> StreamResponse(string currentPrompt)
             {
-                model = _openAiSettings.Model,
-                messages = new[]
+                List<string> chunks = new List<string>();
+                try
                 {
-                    new { role = "user", content = prompt }
-                },
-                temperature = 0.7,
-                max_tokens = 1024,
-                top_p = 0.95,
-                frequency_penalty = 0,
-                presence_penalty = 0,
-                stream = true // Enable streaming
-            };
-
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiSettings.ApiKey);
-
-            try
-            {
-                var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
-                {
-                    Content = JsonContent.Create(requestBody)
-                };
-
-                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
-
-                await using var responseStream = await response.Content.ReadAsStreamAsync();
-                using var reader = new StreamReader(responseStream);
-
-                while (!reader.EndOfStream)
-                {
-                    var line = await reader.ReadLineAsync();
-                    if (string.IsNullOrEmpty(line)) continue;
-
-                    if (line.StartsWith("data: "))
+                    var requestBody = new
                     {
-                        var data = line.Substring("data: ".Length);
-                        if (data == "[DONE]")
+                        model = _openAiSettings.Model,
+                        messages = new[]
                         {
-                            yield break;
-                        }
+                            new { role = "user", content = currentPrompt }
+                        },
+                        temperature = 0.7,
+                        max_tokens = 1024,
+                        top_p = 0.95,
+                        frequency_penalty = 0,
+                        presence_penalty = 0,
+                        stream = true // Enable streaming
+                    };
 
-                        try
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiSettings.ApiKey);
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
+                    {
+                        Content = JsonContent.Create(requestBody)
+                    };
+
+                    var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                    response.EnsureSuccessStatusCode();
+
+                    await using var responseStream = await response.Content.ReadAsStreamAsync();
+                    using var reader = new StreamReader(responseStream);
+
+                    while (!reader.EndOfStream)
+                    {
+                        var line = await reader.ReadLineAsync();
+                        if (string.IsNullOrEmpty(line)) continue;
+
+                        if (line.StartsWith("data: "))
                         {
-                            using var doc = JsonDocument.Parse(data);
-                            var choices = doc.RootElement.GetProperty("choices");
-                            if (choices.GetArrayLength() > 0)
+                            var data = line.Substring("data: ".Length);
+                            if (data == "[DONE]")
                             {
-                                var delta = choices[0].GetProperty("delta");
-                                if (delta.TryGetProperty("content", out var content))
+                                break; // Exit while loop, not yield break
+                            }
+
+                            string? contentToYield = null;
+                            try
+                            {
+                                using var doc = JsonDocument.Parse(data);
+                                var choices = doc.RootElement.GetProperty("choices");
+                                if (choices.GetArrayLength() > 0)
                                 {
-                                    yield return content.GetString() ?? "";
+                                    var delta = choices[0].GetProperty("delta");
+                                    if (delta.TryGetProperty("content", out var content))
+                                    {
+                                        contentToYield = content.GetString() ?? "";
+                                    }
                                 }
                             }
-                        }
-                        catch (JsonException ex)
-                        {
-                            _logger.LogWarning(ex, "Failed to parse JSON from OpenAI stream: {Data}", data);
+                            catch (JsonException ex)
+                            {
+                                _logger.LogWarning(ex, "Failed to parse JSON from OpenAI stream: {Data}", data);
+                            }
+
+                            if (contentToYield != null)
+                            {
+                                chunks.Add(contentToYield);
+                            }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Lỗi khi gọi OpenAI API: {Message}", ex.Message);
+                    chunks.Add($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với OpenAI API: {ex.Message}");
+                }
+
+                foreach (var chunk in chunks)
+                {
+                    yield return chunk;
+                }
             }
-            catch (Exception ex)
+
+            await foreach (var chunk in StreamResponse(prompt))
             {
-                _logger.LogError(ex, "Lỗi khi gọi OpenAI API: {Message}", ex.Message);
-                yield return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với OpenAI API: {ex.Message}";
+                yield return chunk;
             }
         }
 

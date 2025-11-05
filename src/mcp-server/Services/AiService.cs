@@ -36,31 +36,42 @@ namespace McpServer.Services
         public async IAsyncEnumerable<string> GetAiResponseStreamAsync(string prompt, string? jwtToken, string? providerName = null)
         {
             var selectedProviderName = providerName ?? _defaultAiProvider;
-            IAiProvider aiProvider;
+            IAiProvider? aiProvider = null; // Initialize to null
+            string? errorMessage = null;
+            List<MemberDto>? members = null; // Declare members here
             try
             {
                 aiProvider = _aiProviderFactory.GetProvider(selectedProviderName);
+
+                // Example of RAG: Fetching data from Family Tree backend
+                if (!string.IsNullOrEmpty(jwtToken))
+                {
+                    members = await _familyTreeBackendService.GetMembersAsync(jwtToken);
+                    if (members != null && members.Any())
+                    {
+                        // Incorporate member data into the prompt
+                        var memberData = JsonSerializer.Serialize(members.Take(5), new JsonSerializerOptions { WriteIndented = true }); // Take first 5 members as example
+                        prompt = $"Consider the following family members: {memberData}\n\n{prompt}";
+                    }
+                }
+
             }
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Invalid AI provider specified: {ProviderName}", selectedProviderName);
-                yield return $"Error: Invalid AI provider '{selectedProviderName}'.";
+                errorMessage = $"Error: Invalid AI provider '{selectedProviderName}'.";
+            }
+
+            if (aiProvider == null) // If provider could not be initialized due to an error
+            {
+                if (errorMessage != null)
+                {
+                    yield return errorMessage;
+                }
                 yield break;
             }
 
-            // Example of RAG: Fetching data from Family Tree backend
-            List<MemberDto>? members = null;
-            if (!string.IsNullOrEmpty(jwtToken))
-            {
-                members = await _familyTreeBackendService.GetMembersAsync(jwtToken);
-                if (members != null && members.Any())
-                {
-                    // Incorporate member data into the prompt
-                    var memberData = JsonSerializer.Serialize(members.Take(5), new JsonSerializerOptions { WriteIndented = true }); // Take first 5 members as example
-                    prompt = $"Consider the following family members: {memberData}\n\n{prompt}";
-                }
-            }
-
+            // Now, outside the try-catch, iterate and yield
             await foreach (var chunk in aiProvider.GenerateResponseStreamAsync(prompt, members != null && members.Any() ? JsonSerializer.Serialize(members) : null))
             {
                 yield return chunk;

@@ -45,56 +45,77 @@ namespace McpServer.Services
                 prompt = $"Context: {context}\n\nUser Query: {prompt}";
             }
 
-            var requestBody = new
+            // Local function to handle the actual streaming logic
+            async IAsyncEnumerable<string> StreamResponse(string currentPrompt)
             {
-                model = _localLlmSettings.Model,
-                prompt = prompt,
-                stream = true // Enable streaming
-            };
-
-            try
-            {
-                var request = new HttpRequestMessage(HttpMethod.Post, _localLlmSettings.BaseUrl)
+                List<string> chunks = new List<string>();
+                try
                 {
-                    Content = JsonContent.Create(requestBody)
-                };
-
-                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                response.EnsureSuccessStatusCode();
-
-                await using var responseStream = await response.Content.ReadAsStreamAsync();
-                using var reader = new StreamReader(responseStream);
-
-                while (!reader.EndOfStream)
-                {
-                    var line = await reader.ReadLineAsync();
-                    if (string.IsNullOrEmpty(line)) continue;
-
-                    // Ollama typically sends JSON objects for each chunk
-                    try
+                    var requestBody = new
                     {
-                        using var doc = JsonDocument.Parse(line);
-                        if (doc.RootElement.TryGetProperty("response", out var responseProperty))
-                        {
-                            yield return responseProperty.GetString() ?? "";
-                        }
-                        if (doc.RootElement.TryGetProperty("done", out var doneProperty) && doneProperty.GetBoolean())
-                        {
-                            yield break; // Stream finished
-                        }
-                    }
-                    catch (JsonException ex)
+                        model = _localLlmSettings.Model,
+                        prompt = currentPrompt,
+                        stream = true // Enable streaming
+                    };
+
+                    var request = new HttpRequestMessage(HttpMethod.Post, _localLlmSettings.BaseUrl)
                     {
-                        _logger.LogWarning(ex, "Failed to parse JSON from Local LLM stream: {Line}", line);
-                        // If it's not JSON, yield the raw line
-                        yield return line;
+                        Content = JsonContent.Create(requestBody)
+                    };
+
+                    var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                    response.EnsureSuccessStatusCode();
+
+                    await using var responseStream = await response.Content.ReadAsStreamAsync();
+                    using var reader = new StreamReader(responseStream);
+
+                    while (!reader.EndOfStream)
+                    {
+                        var line = await reader.ReadLineAsync();
+                        if (string.IsNullOrEmpty(line)) continue;
+
+                        // Ollama typically sends JSON objects for each chunk
+                        string? chunkToYield = null;
+                        try
+                        {
+                            using var doc = JsonDocument.Parse(line);
+                            if (doc.RootElement.TryGetProperty("response", out var responseProperty))
+                            {
+                                chunkToYield = responseProperty.GetString() ?? "";
+                            }
+                            if (doc.RootElement.TryGetProperty("done", out var doneProperty) && doneProperty.GetBoolean())
+                            {
+                                break; // Exit while loop, not yield break
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to parse JSON from Local LLM stream: {Line}", line);
+                            // If it's not JSON, yield the raw line
+                            chunkToYield = line;
+                        }
+
+                        if (chunkToYield != null)
+                        {
+                            chunks.Add(chunkToYield);
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Lỗi khi gọi Local LLM API: {Message}", ex.Message);
+                    chunks.Add($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Local LLM API: {ex.Message}");
+                }
+
+                foreach (var chunk in chunks)
+                {
+                    yield return chunk;
+                }
             }
-            catch (Exception ex)
+
+            await foreach (var chunk in StreamResponse(prompt))
             {
-                _logger.LogError(ex, "Lỗi khi gọi Local LLM API: {Message}", ex.Message);
-                yield return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Local LLM API: {ex.Message}";
+                yield return chunk;
             }
         }
 

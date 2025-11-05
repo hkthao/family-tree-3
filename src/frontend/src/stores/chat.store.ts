@@ -62,14 +62,12 @@ export const useChatStore = defineStore('chat', {
     },
 
     // Action to send a message
-    async sendMessage(messageContent: string, currentUserId: string) {
-      const { t } = useI18n(); // Get i18n instance within action
-
+    async sendMessage(messageContent: string, currentUserId: string, i18nTranslator: any) {
       this.isLoading = true;
       this.error = null;
 
       if (!this.selectedChatId) {
-        this.error = t('chat.errors.noChatSelected');
+        this.error = i18nTranslator('chat.errors.noChatSelected');
         this.isLoading = false;
         return;
       }
@@ -103,11 +101,11 @@ export const useChatStore = defineStore('chat', {
         for await (const chunk of responseStream) {
           assistantMessage.content += chunk;
           // Update the last message in chatList for the current chat
-          this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp);
+          this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp, assistantMessage.date);
         }
       } catch (err: any) {
         console.error('Error sending message:', err);
-        this.error = t('chat.errors.sendMessageFailed', { message: err.message });
+        this.error = i18nTranslator('chat.errors.sendMessageFailed', { message: err.message });
         // Remove the assistant's empty message if an error occurred before any content was streamed
         if (this.currentChatMessages[this.currentChatMessages.length - 1] === assistantMessage && assistantMessage.content === '') {
           this.messages[this.selectedChatId].pop();
@@ -124,21 +122,22 @@ export const useChatStore = defineStore('chat', {
       }
       this.messages[chatId].push(message);
       // Update the last message in chatList
-      this.updateLastMessage(chatId, message.content, message.timestamp);
+      this.updateLastMessage(chatId, message.content, message.timestamp, message.date);
     },
 
     // Helper to update the last message in chatList
-    updateLastMessage(chatId: string, content: string, timestamp: string) {
+    updateLastMessage(chatId: string, content: string, timestamp: string, date: string) {
       const chatItem = this.chatList.find(chat => chat.id === chatId);
       if (chatItem) {
         chatItem.lastMessage = content;
-        chatItem.updatedAt = new Date(parseInt(timestamp)).toLocaleTimeString();
+        // Combine date and timestamp to create a proper Date object
+        const fullDateTimeString = `${date} ${timestamp}`;
+        chatItem.updatedAt = new Date(fullDateTimeString).toLocaleTimeString();
       }
     },
 
     // Action to fetch chat list (placeholder for now)
-    async fetchChatList() {
-      const { t } = useI18n(); // Get i18n instance within action
+    async fetchChatList(i18nTranslator: any) {
       // In a real app, this would fetch from a backend
       // For now, we'll just ensure the AI assistant chat exists
       if (!this.chatList.some(chat => chat.id === 'ai-assistant')) {
@@ -146,7 +145,7 @@ export const useChatStore = defineStore('chat', {
           id: 'ai-assistant',
           name: 'AI Assistant',
           avatar: '', // Placeholder
-          lastMessage: t('chat.initialMessage'),
+          lastMessage: i18nTranslator('chat.initialMessage'),
           updatedAt: new Date().toLocaleTimeString(),
         });
       }

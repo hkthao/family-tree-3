@@ -18,6 +18,20 @@ builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("Ope
 builder.Services.Configure<LocalLlmSettings>(builder.Configuration.GetSection("LocalLLM")); // New
 
 builder.Services.AddControllers();
+
+const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      builder =>
+                      {
+                          builder.WithOrigins("http://localhost", "http://localhost:5173") // Allow requests from your frontend
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                      });
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -116,6 +130,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication(); // Use authentication middleware
 app.UseAuthorization(); // Use authorization middleware

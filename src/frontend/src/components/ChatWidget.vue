@@ -74,14 +74,15 @@ const toggleChat = () => {
   emit('update:modelValue', chatOpen.value); // Emit update to parent
 }
 
-const handleSendMessage = async (message: { text: string }) => {
-  if (message.text.trim()) {
-    await chatStore.sendMessage(message.text, currentUserId.value);
+const handleSendMessage = async (message: CustomEvent<{ content: string }[]>) => {
+  const messageContent = message.detail[0].content;
+  if (messageContent && messageContent.trim()) {
+    await chatStore.sendMessage(messageContent, currentUserId.value, t);
   }
 };
 
 onMounted(() => {
-  chatStore.fetchChatList();
+  chatStore.fetchChatList(t);
   messagesLoaded.value = true;
 });
 </script>
