@@ -40,14 +40,12 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
           fetchedMembers = memberResult.value;
         } else {
           this.error[familyId] = memberResult.error;
-          console.error(`Failed to fetch members for family ${familyId}:`, memberResult.error);
         }
 
         if (relationshipResult.ok) {
           fetchedRelationships = relationshipResult.value.items;
         } else {
           this.error[familyId] = relationshipResult.error;
-          console.error(`Failed to fetch relationships for family ${familyId}:`, relationshipResult.error);
         }
 
         this.trees[familyId] = {
@@ -56,7 +54,6 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
         };
       } catch (err) {
         this.error[familyId] = err;
-        console.error(`An unexpected error occurred while fetching tree data for family ${familyId}:`, err);
       } finally {
         this.loading[familyId] = false;
       }

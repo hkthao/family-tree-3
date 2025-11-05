@@ -10,6 +10,9 @@ import type { Member, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 
+import maleAvatar from '@/assets/images/male_avatar.png';
+import femaleAvatar from '@/assets/images/female_avatar.png';
+
 const { t } = useI18n();
 
 const props = defineProps({
@@ -44,7 +47,7 @@ const transformData = (members: Member[], relationships: Relationship[]): { node
     id: String(m.id),
     name: m.fullName || `${m.firstName} ${m.lastName}`,
     gender: m.gender,
-    avatarUrl: m.avatarUrl,
+    avatarUrl: m.avatarUrl || (m.gender === Gender.Male ? maleAvatar : femaleAvatar),
     depth: -1, // Initialize depth
     isRoot: m.isRoot,
   }));
@@ -117,7 +120,14 @@ const transformData = (members: Member[], relationships: Relationship[]): { node
     if (n.depth === -1) n.depth = 0; // Assign a default depth
   });
 
-  return { nodes, links };
+  // Filter out links that refer to non-existent nodes
+  const validLinks = links.filter(link => {
+    const sourceNode = nodeMap.get(String(link.source));
+    const targetNode = nodeMap.get(String(link.target));
+    return sourceNode && targetNode;
+  });
+
+  return { nodes, links: validLinks };
 };
 
 const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {

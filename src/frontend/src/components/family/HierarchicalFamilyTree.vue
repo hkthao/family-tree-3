@@ -24,6 +24,9 @@ import type { Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 
+import maleAvatar from '@/assets/images/male_avatar.png';
+import femaleAvatar from '@/assets/images/female_avatar.png';
+
 // Define the type for the data used in the family chart cards
 interface CardData {
   data: {
@@ -63,7 +66,7 @@ const transformData = (members: Member[], relationships: Relationship[]) => {
         fullName: person.fullName || `${person.firstName} ${person.lastName}`,
         birthYear: person.dateOfBirth ? new Date(person.dateOfBirth).getFullYear() : '',
         deathYear: person.dateOfDeath ? new Date(person.dateOfDeath).getFullYear() : '',
-        avatar: person.avatarUrl,
+        avatar: person.avatarUrl || (person.gender === Gender.Male ? maleAvatar : femaleAvatar),
         gender: person.gender === Gender.Male ? 'M' : 'F',
       },
       rels: {
@@ -253,15 +256,15 @@ watch(() => props.familyId, async (newFamilyId) => {
   pointer-events: auto;
   color: rgb(var(--v-theme-on-surface));
   position: relative;
-  margin-top: -50px;
-  margin-left: -50px;
+  margin-top: -30px;
+  margin-left: -30px;
 }
 
 .f3 div.card-image {
   border-radius: 50%;
   padding: 5px;
-  width: 90px;
-  height: 90px;
+  width: 60px;
+  height: 60px;
 }
 
 .f3 div.card-image div.card-label,
