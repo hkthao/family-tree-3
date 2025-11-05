@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Users.Queries;
 
 namespace backend.Application.Users.Queries;
 

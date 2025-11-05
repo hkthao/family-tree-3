@@ -1,8 +1,6 @@
 
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Identity.Commands.EnsureUserExists;

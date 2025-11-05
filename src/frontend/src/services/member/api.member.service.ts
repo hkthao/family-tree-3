@@ -52,7 +52,7 @@ export class ApiMemberService implements IMemberService {
     familyId: string,
   ): Promise<Result<Member[], ApiError>> {
     const result = await this.http.get<Member[]>(
-      `${this.apiUrl}?familyId=${familyId}`,
+      `${this.apiUrl}/by-family/${familyId}`,
     );
     if (result.ok) {
       return ok(result.value.map((m) => transformMemberDates(m)));

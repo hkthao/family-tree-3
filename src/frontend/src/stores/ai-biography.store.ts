@@ -11,7 +11,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     loading: false,
     error: null as string | null,
     biographyResult: null as BiographyResultDto | null,
-
     aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
     currentMember: null as Member | null,

@@ -3,12 +3,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
 import * as d3 from 'd3';
-import { useMemberStore } from '@/stores/member.store';
-import { useRelationshipStore } from '@/stores/relationship.store';
-import type { Member } from '@/types';
-import type { Relationship } from '@/types';
+import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
+import type { Member, Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
 import { useI18n } from 'vue-i18n';
 
@@ -21,8 +19,10 @@ const props = defineProps({
 const chartContainer = ref<HTMLDivElement | null>(null);
 let simulation: d3.Simulation<GraphNode, GraphLink> | null = null;
 
-const memberStore = useMemberStore();
-const relationshipStore = useRelationshipStore();
+const treeVisualizationStore = useTreeVisualizationStore();
+
+const members = computed(() => treeVisualizationStore.getMembers(props.familyId));
+const relationships = computed(() => treeVisualizationStore.getRelationships(props.familyId));
 
 interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
@@ -280,16 +280,10 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
 
 const initialize = async () => {
   if (props.familyId) {
-    await Promise.all([
-      memberStore.getByFamilyId(props.familyId),
-      relationshipStore.getByFamilyId(props.familyId),
-    ]);
+    await treeVisualizationStore.fetchTreeData(props.familyId);
 
-    const members = memberStore.items;
-    const relationships = relationshipStore.items;
-
-    if (members.length > 0) {
-      const { nodes, links } = transformData(members, relationships);
+    if (members.value.length > 0) {
+      const { nodes, links } = transformData(members.value, relationships.value);
       renderChart(nodes, links);
     } else {
       if (!chartContainer.value) return;

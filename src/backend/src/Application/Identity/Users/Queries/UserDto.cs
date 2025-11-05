@@ -1,6 +1,3 @@
-using backend.Application.Common.Mappings;
-using backend.Domain.Entities;
-
 namespace backend.Application.Users.Queries;
 
 public class UserDto

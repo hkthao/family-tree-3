@@ -2,10 +2,7 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Families.Commands.Inputs;
 using backend.Application.Families.Specifications;
-using backend.Domain.Enums;
-using backend.Domain.Events.Families;
 using backend.Domain.ValueObjects;
 
 namespace backend.Application.Families.Commands.UpdateFamily;

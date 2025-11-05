@@ -1,6 +1,3 @@
-
-using MediatR;
-
 namespace backend.Application.Identity.Commands.CreateNovuSubscriber;
 
 /// <summary>

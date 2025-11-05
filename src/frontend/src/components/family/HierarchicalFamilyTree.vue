@@ -15,11 +15,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
-import { useMemberStore } from '@/stores/member.store';
-import { useRelationshipStore } from '@/stores/relationship.store';
+import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
 import type { Member } from '@/types';
 import type { Relationship } from '@/types';
 import { Gender, RelationshipType } from '@/types';
@@ -46,8 +45,11 @@ const props = defineProps({
 
 const chartContainer = ref<HTMLDivElement | null>(null);
 let chart: any = null; // To hold the chart instance
-const memberStore = useMemberStore();
-const relationshipStore = useRelationshipStore();
+
+const treeVisualizationStore = useTreeVisualizationStore();
+
+const members = computed(() => treeVisualizationStore.getMembers(props.familyId));
+const relationships = computed(() => treeVisualizationStore.getRelationships(props.familyId));
 
 // --- DATA TRANSFORMATION ---
 const transformData = (members: Member[], relationships: Relationship[]) => {
@@ -134,7 +136,7 @@ const renderChart = (members: Member[], relationships: Relationship[]) => {
     .setCardDim({ w: 150, h: 200 })
     .setOnCardUpdate(Card());
 
-  const rootMember = memberStore.items.find((m: Member) => m.isRoot);
+  const rootMember = members.find((m: Member) => m.isRoot);
   if (rootMember) {
     chart.updateMainId(rootMember.id);
     chart.updateTree({
@@ -149,17 +151,16 @@ const renderChart = (members: Member[], relationships: Relationship[]) => {
   }
 };
 
-const fetchDataAndRender = async (familyId: string) => {
-  await Promise.all([
-    memberStore.getByFamilyId(familyId),
-    relationshipStore.getByFamilyId(familyId),
-  ]);
-  renderChart(memberStore.items, relationshipStore.items);
+const initialize = async (familyId: string) => {
+  if (familyId) {
+    await treeVisualizationStore.fetchTreeData(familyId);
+    renderChart(members.value, relationships.value);
+  }
 };
 
 onMounted(async () => {
   if (props.familyId) {
-    await fetchDataAndRender(props.familyId);
+    await initialize(props.familyId);
   }
 });
 
@@ -219,7 +220,7 @@ function Card() {
 
 watch(() => props.familyId, async (newFamilyId) => {
   if (newFamilyId) {
-    await fetchDataAndRender(newFamilyId);
+    await initialize(newFamilyId);
   } else {
     renderChart([], []);
   }
@@ -280,11 +281,11 @@ watch(() => props.familyId, async (newFamilyId) => {
   font-size: 12px;
 }
 
-.f3 div.card-image div.card-label {
+.f3 div.card-image div.card-dates {
   bottom: -20px;
 }
 
-.f3 div.card-image div.card-dates {
+.f3 div.card-image div.card-label {
   bottom: -35px;
 }
 
