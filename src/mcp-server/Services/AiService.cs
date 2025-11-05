@@ -93,24 +93,48 @@ public class AiService
 
         var finalResponseParts = aiProvider.GenerateResponseStreamAsync(prompt, tools, toolResults);
 
-        await foreach (var part in finalResponseParts)
-        {
-            if (part is AiTextResponsePart textPart)
-            {
-                finalResponseChunks.Add(textPart.Text);
-            }
-            else if (part is AiToolCallResponsePart toolCallPart)
-            {
-                if (toolCallPart.ToolCalls.Any())
-                {
-                    _logger.LogError("LLM attempted to call tools in the final response phase. This should not happen.");
-                    finalResponseChunks.Add("Error: The AI tried to call a tool again unexpectedly. Please try rephrasing your request.");
-                }
-            }
-        }
-        _logger.LogInformation("Finished streaming final response from LLM.");
-        foreach (var chunk in finalResponseChunks) yield return chunk;
-    }
+                    await foreach (var part in finalResponseParts)
+                    {
+                        if (part is AiTextResponsePart textPart)
+                        {
+                            finalResponseChunks.Add(textPart.Text);
+                        }
+                        else if (part is AiToolCallResponsePart toolCallPart)
+                        {
+                            if (toolCallPart.ToolCalls.Any())
+                            {
+                                _logger.LogWarning("LLM attempted to call tools in the final response phase. Executing them and re-prompting.");
+                                // Execute these unexpected tool calls
+                                foreach (var unexpectedToolCall in toolCallPart.ToolCalls)
+                                {
+                                    var toolResult = await _toolExecutor.ExecuteToolCallAsync(unexpectedToolCall, jwtToken);
+                                    toolResults.Add(toolResult);
+                                }
+        
+                                // Re-prompt the LLM with the new tool results
+                                var rePromptResponseParts = aiProvider.GenerateResponseStreamAsync(prompt, tools, toolResults);
+                                await foreach (var rePromptPart in rePromptResponseParts)
+                                {
+                                    if (rePromptPart is AiTextResponsePart rePromptTextPart)
+                                    {
+                                        finalResponseChunks.Add(rePromptTextPart.Text);
+                                    }
+                                    else if (rePromptPart is AiToolCallResponsePart rePromptToolCallPart)
+                                    {
+                                        // If it still tries to call tools, then we log an error and break to prevent infinite loops
+                                        if (rePromptToolCallPart.ToolCalls.Any())
+                                        {
+                                            _logger.LogError("LLM still attempted to call tools after re-prompting. This indicates a persistent issue.");
+                                            finalResponseChunks.Add("Error: The AI is persistently trying to call tools. Please try rephrasing your request or contact support.");
+                                            break; // Exit the loop
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _logger.LogInformation("Finished streaming final response from LLM.");
+                    foreach (var chunk in finalResponseChunks) yield return chunk;    }
 
     private List<AiToolDefinition> DefineTools()
     {
