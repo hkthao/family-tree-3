@@ -30,7 +30,7 @@ namespace McpServer.Services
         /// <param name="prompt">Prompt từ người dùng.</param>
         /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
         /// <returns>Phản hồi từ Gemini AI.</returns>
-        public async Task<string> GenerateResponseAsync(string prompt, string? context = null)
+        public async IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null)
         {
             // Combine prompt and context if context is provided
             if (!string.IsNullOrEmpty(context))
@@ -44,7 +44,7 @@ namespace McpServer.Services
             // For deployment, service account key should be handled securely (e.g., Kubernetes secrets, environment variables).
             var credential = GoogleCredential.GetApplicationDefault();
             var client = new PredictionServiceClientBuilder
-            {
+            { 
                 Endpoint = "aiplatform.googleapis.com",
                 Credential = credential // Assign the GoogleCredential directly
             }.Build();
@@ -80,23 +80,29 @@ namespace McpServer.Services
 
             try
             {
+                // For streaming, we need to use a different method if available, or simulate streaming
+                // The Google.Cloud.AIPlatform.V1 library's PredictAsync does not directly support streaming.
+                // For now, I will return the full response as a single chunk.
+                // If true streaming is required, the client library or API call needs to be adjusted.
                 var response = await client.PredictAsync(endpoint, new[] { instance }, parameters);
 
-                // Extract the generated text from the response
                 if (response.Predictions.Any())
                 {
                     var prediction = response.Predictions.First();
                     if (prediction.StructValue.Fields.TryGetValue("content", out var contentValue))
                     {
-                        return contentValue.StringValue;
+                        yield return contentValue.StringValue;
                     }
                 }
-                return "Không có phản hồi từ Gemini AI.";
+                else
+                {
+                    yield return "Không có phản hồi từ Gemini AI.";
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi gọi Gemini AI: {Message}", ex.Message);
-                return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}";
+                yield return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}";
             }
         }
 

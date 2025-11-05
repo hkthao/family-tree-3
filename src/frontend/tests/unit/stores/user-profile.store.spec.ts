@@ -8,9 +8,6 @@ import { createServices } from '@/services/service.factory';
 
 // Mock the ICurrentUserProfileService
 const mockGetCurrentUserProfile = vi.fn();
-const mockGetUserProfile = vi.fn();
-const mockGetUserProfileByExternalId = vi.fn();
-const mockGetAllUserProfiles = vi.fn();
 const mockUpdateUserProfile = vi.fn();
 
 // Mock the entire service factory to control service injection
@@ -18,9 +15,6 @@ vi.mock('@/services/service.factory', () => ({
   createServices: vi.fn(() => ({
     userProfile: {
       getCurrentUserProfile: mockGetCurrentUserProfile,
-      getUserProfile: mockGetUserProfile,
-      getUserProfileByExternalId: mockGetUserProfileByExternalId,
-      getAllUserProfiles: mockGetAllUserProfiles,
       updateUserProfile: mockUpdateUserProfile,
     },
     // Add other services as empty objects if they are not directly used by user-profile.store
@@ -62,6 +56,7 @@ describe('user-profile.store', () => {
     email: 'test@example.com',
     name: 'Test User',
     avatar: 'http://example.com/avatar.jpg',
+    userId: ''
   };
 
   beforeEach(() => {
@@ -74,16 +69,10 @@ describe('user-profile.store', () => {
 
     // Reset mocks before each test
     mockGetCurrentUserProfile.mockReset();
-    mockGetUserProfile.mockReset();
-    mockGetUserProfileByExternalId.mockReset();
-    mockGetAllUserProfiles.mockReset();
     mockUpdateUserProfile.mockReset();
 
     // Set default mock resolved values
     mockGetCurrentUserProfile.mockResolvedValue(ok(mockUserProfile));
-    mockGetUserProfile.mockResolvedValue(ok(mockUserProfile));
-    mockGetUserProfileByExternalId.mockResolvedValue(ok(mockUserProfile));
-    mockGetAllUserProfiles.mockResolvedValue(ok([mockUserProfile]));
     mockUpdateUserProfile.mockResolvedValue(ok(mockUserProfile));
   });
 
@@ -91,7 +80,6 @@ describe('user-profile.store', () => {
     expect(store.loading).toBe(false);
     expect(store.error).toBeNull();
     expect(store.userProfile).toBeNull();
-    expect(store.allUserProfiles).toEqual([]);
   });
 
   describe('fetchCurrentUserProfile', () => {
@@ -255,7 +243,6 @@ describe('user-profile.store', () => {
       store.loading = true;
       store.error = 'Some error';
       store.userProfile = mockUserProfile;
-      store.allUserProfiles = [mockUserProfile];
 
       // Act: Gọi action reset.
       store.reset();
@@ -264,7 +251,6 @@ describe('user-profile.store', () => {
       expect(store.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(store.userProfile).toBeNull();
-      expect(store.allUserProfiles).toEqual([]);
       // Giải thích vì sao kết quả mong đợi là đúng:
       // - loading, error, userProfile và allUserProfiles phải trở về giá trị mặc định của chúng.
     });

@@ -41,25 +41,26 @@ namespace McpServer.Controllers
         /// <param name="request">Đối tượng chứa prompt từ người dùng.</param>
         /// <returns>Kết quả phản hồi từ AI Assistant.</returns>
         [HttpPost("query")]
-        public async Task<ActionResult<string>> QueryAi([FromBody] AiQueryRequest request)
+        public async IAsyncEnumerable<string> QueryAi([FromBody] AiQueryRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Prompt))
             {
-                return BadRequest("Prompt cannot be empty.");
+                yield return "Prompt cannot be empty."; // Or throw an exception
+                yield break;
             }
 
-            // Lấy JWT token từ header yêu cầu để truyền xuống FamilyTreeBackendService
             var jwtToken = HttpContext.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
             if (string.IsNullOrEmpty(jwtToken))
             {
                 _logger.LogWarning("JWT Token not found in Authorization header for AI query.");
-                // Depending on your security policy, you might return Unauthorized or proceed without RAG
-                // For now, we'll proceed, but RAG will be limited.
             }
 
             _logger.LogInformation("Received AI query: {Prompt} from user {User}", request.Prompt, User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
-            var aiResponse = await _aiService.GetAiResponseAsync(request.Prompt, jwtToken);
-            return Ok(aiResponse);
+
+            await foreach (var chunk in _aiService.GetAiResponseStreamAsync(request.Prompt, jwtToken))
+            {
+                yield return chunk;
+            }
         }
     }
 

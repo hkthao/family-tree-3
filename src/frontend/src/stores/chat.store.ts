@@ -1,156 +1,154 @@
 import { defineStore } from 'pinia';
-import type { ChatListItem, MessageItem, Result } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { IChatService } from '@/services/chat/chat.service.interface';
+// No longer need to import useServiceContainer directly here
 
-interface ChatState {
-  chatList: ChatListItem[];
-  selectedChatId: string | null;
-  messages: { [chatId: string]: MessageItem[] };
-  isLoading: boolean;
-  error: string | null;
+// Define message structure for vue-advanced-chat
+interface ChatMessage {
+  _id: string;
+  content: string;
+  senderId: string; // 'user' or 'assistant'
+  username: string; // Display name of the sender
+  timestamp: string; // Unix timestamp as string
+  date: string; // Formatted date string
+}
+
+interface ChatListItem {
+  id: string;
+  name: string;
+  avatar: string;
+  lastMessage: string;
+  updatedAt: string;
 }
 
 export const useChatStore = defineStore('chat', {
-  state: (): ChatState => ({
-    chatList: [],
-    selectedChatId: null,
-    messages: {},
-    isLoading: false,
-    error: null,
+  state: () => ({
+    // State for the currently active chat
+    selectedChatId: ref<string | null>(null),
+    messages: ref<Record<string, ChatMessage[]>>({}), // Messages grouped by chat ID
+    isLoading: ref(false),
+    error: ref<string | null>(null),
+
+    // State for the chat list (if multiple chats are supported)
+    chatList: ref<ChatListItem[]>([]),
   }),
 
   getters: {
-    currentChatMessages: (state) => {
-      return state.selectedChatId
-        ? state.messages[state.selectedChatId] || []
-        : [];
-    },
-    currentChat: (state) => {
-      return state.chatList.find((chat) => chat.id === state.selectedChatId);
+    // Computed property for messages of the currently selected chat
+    currentChatMessages(state): ChatMessage[] {
+      return state.selectedChatId ? state.messages[state.selectedChatId] || [] : [];
     },
   },
 
   actions: {
-    async fetchChatList(): Promise<Result<void, string>> {
-      // In a real application, this would fetch from an API
-      // For now, we use dummy data
-      // this.chatList = await this.services.chat.fetchChats(); // Example usage
-      if (this.chatList.length > 0 && !this.selectedChatId) {
-        this.selectedChatId = this.chatList[0].id;
-      }
-      return { ok: true, value: undefined };
-    },
-
-    selectChat(chatId: string, t: (key: string) => string) {
+    // Action to select a chat
+    selectChat(chatId: string, i18nTranslator: any) {
       this.selectedChatId = chatId;
       if (!this.messages[chatId]) {
         this.messages[chatId] = [];
-        // If it's the AI assistant chat and no messages exist, add an initial greeting
+        // Add initial message for AI assistant if it's a new chat
         if (chatId === 'ai-assistant' && this.messages[chatId].length === 0) {
           this.messages[chatId].push({
-            id: Date.now().toString() + '_initial',
-            senderId: 'ai-assistant',
-            content: t('chat.initialMessage'),
-            timestamp: new Date().toLocaleTimeString(),
-            direction: 'incoming',
+            _id: 'initial-ai-message',
+            content: i18nTranslator('chat.initialMessage'),
+            senderId: 'assistant',
+            username: 'AI Assistant',
+            timestamp: new Date().toTimeString().substring(0, 5),
+            date: new Date().toLocaleDateString(),
           });
         }
       }
     },
 
-    async sendMessage(userMessage: string, currentUserId: string): Promise<Result<void, ApiError>> {
-      if (!this.selectedChatId) {
-        const errorMessage = 'No chat selected.';
-        this.error = errorMessage;
-        return { ok: false, error: { message: errorMessage } as ApiError };
-      }
+    // Action to send a message
+    async sendMessage(messageContent: string, currentUserId: string) {
+      const { t } = useI18n(); // Get i18n instance within action
 
       this.isLoading = true;
       this.error = null;
 
-      const newMessage: MessageItem = {
-        id: Date.now().toString(),
-        senderId: currentUserId,
-        content: userMessage,
-        timestamp: new Date().toLocaleTimeString(),
-        direction: 'outgoing',
-      };
-
-      if (!this.messages[this.selectedChatId]) {
-        this.messages[this.selectedChatId] = [];
+      if (!this.selectedChatId) {
+        this.error = t('chat.errors.noChatSelected');
+        this.isLoading = false;
+        return;
       }
-      this.messages[this.selectedChatId].push(newMessage);
+
+      const userMessage: ChatMessage = {
+        _id: Date.now().toString(),
+        content: messageContent,
+        senderId: currentUserId,
+        timestamp: new Date().toTimeString().substring(0, 5),
+        date: new Date().toLocaleDateString(),
+        username: ''
+      };
+      this.addMessage(this.selectedChatId, userMessage);
+
+      let assistantMessage: ChatMessage | undefined; // Declare outside try block
 
       try {
-        const result = await this.services.chat.sendMessage(
-          userMessage,
-          this.selectedChatId,
-        );
-
-        if (result.ok) {
-          const botResponse = result.value;
-          const botMessage: MessageItem = {
-            id: Date.now().toString() + '_bot',
-            senderId: this.selectedChatId, // Bot's ID is the chat ID
-            content: botResponse.response,
-            timestamp: new Date().toLocaleTimeString(),
-            direction: 'incoming',
-          };
-          this.messages[this.selectedChatId].push(botMessage);
-
-          // Update last message in chat list
-          const chatIndex = this.chatList.findIndex(
-            (chat) => chat.id === this.selectedChatId,
-          );
-          if (chatIndex !== -1) {
-            this.chatList[chatIndex].lastMessage = botResponse.response;
-            this.chatList[chatIndex].updatedAt = botResponse.createdAt
-              ? new Date(botResponse.createdAt).toLocaleTimeString()
-              : new Date().toLocaleTimeString();
-          }
-          return { ok: true, value: undefined };
-        } else {
-          this.error = result.error?.message || 'Failed to send message.';
-          console.error('Error sending message:', result.error);
-          const errorMessage: MessageItem = {
-            id: Date.now().toString() + '_error',
-            senderId: this.selectedChatId,
-            content: 'Error: Could not get a response from the bot.',
-            timestamp: new Date().toLocaleTimeString(),
-            direction: 'incoming',
-          };
-          this.messages[this.selectedChatId].push(errorMessage);
-          return { ok: false, error: result.error };
-        }
-      } catch (error: any) {
-        this.error = error.message || 'Failed to send message.';
-        console.error('Error sending message:', error);
-        const errorMessage: MessageItem = {
-          id: Date.now().toString() + '_error',
-          senderId: this.selectedChatId,
-          content: 'Error: Could not get a response from the bot.',
-          timestamp: new Date().toLocaleTimeString(),
-          direction: 'incoming',
+        assistantMessage = { // Assign here
+          _id: (Date.now() + 1).toString(),
+          content: '',
+          senderId: 'assistant',
+          username: 'AI Assistant',
+          timestamp: new Date().toTimeString().substring(0, 5),
+          date: new Date().toLocaleDateString(),
         };
-        this.messages[this.selectedChatId].push(errorMessage);
-        return { ok: false, error: { message: this.error } as ApiError };
+        this.addMessage(this.selectedChatId, assistantMessage);
+
+        // Access chatService via this.services
+        const chatService = this.services.chat as IChatService;
+        const responseStream = chatService.sendMessageStream(messageContent);
+        for await (const chunk of responseStream) {
+          assistantMessage.content += chunk;
+          // Update the last message in chatList for the current chat
+          this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp);
+        }
+      } catch (err: any) {
+        console.error('Error sending message:', err);
+        this.error = t('chat.errors.sendMessageFailed', { message: err.message });
+        // Remove the assistant's empty message if an error occurred before any content was streamed
+        if (this.currentChatMessages[this.currentChatMessages.length - 1] === assistantMessage && assistantMessage.content === '') {
+          this.messages[this.selectedChatId].pop();
+        }
       } finally {
         this.isLoading = false;
       }
     },
 
-    addMessage(chatId: string, message: MessageItem) {
+    // Helper to add a message to a specific chat
+    addMessage(chatId: string, message: ChatMessage) {
       if (!this.messages[chatId]) {
         this.messages[chatId] = [];
       }
       this.messages[chatId].push(message);
+      // Update the last message in chatList
+      this.updateLastMessage(chatId, message.content, message.timestamp);
     },
 
-    updateLastMessage(chatId: string, lastMessage: string, updatedAt: string) {
-      const chatIndex = this.chatList.findIndex((chat) => chat.id === chatId);
-      if (chatIndex !== -1) {
-        this.chatList[chatIndex].lastMessage = lastMessage;
-        this.chatList[chatIndex].updatedAt = updatedAt;
+    // Helper to update the last message in chatList
+    updateLastMessage(chatId: string, content: string, timestamp: string) {
+      const chatItem = this.chatList.find(chat => chat.id === chatId);
+      if (chatItem) {
+        chatItem.lastMessage = content;
+        chatItem.updatedAt = new Date(parseInt(timestamp)).toLocaleTimeString();
+      }
+    },
+
+    // Action to fetch chat list (placeholder for now)
+    async fetchChatList() {
+      const { t } = useI18n(); // Get i18n instance within action
+      // In a real app, this would fetch from a backend
+      // For now, we'll just ensure the AI assistant chat exists
+      if (!this.chatList.some(chat => chat.id === 'ai-assistant')) {
+        this.chatList.push({
+          id: 'ai-assistant',
+          name: 'AI Assistant',
+          avatar: '', // Placeholder
+          lastMessage: t('chat.initialMessage'),
+          updatedAt: new Date().toLocaleTimeString(),
+        });
       }
     },
   },

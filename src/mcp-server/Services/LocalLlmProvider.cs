@@ -37,52 +37,64 @@ namespace McpServer.Services
         /// <param name="prompt">Prompt từ người dùng.</param>
         /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
         /// <returns>Phản hồi từ Local LLM.</returns>
-        public async Task<string> GenerateResponseAsync(string prompt, string? context = null)
+        public async IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null)
         {
-            if (string.IsNullOrEmpty(_localLlmSettings.BaseUrl))
-            {
-                return "Error: Local LLM BaseUrl is not configured.";
-            }
-
+            // Combine prompt and context if context is provided
             if (!string.IsNullOrEmpty(context))
             {
                 prompt = $"Context: {context}\n\nUser Query: {prompt}";
             }
 
-            _logger.LogInformation("Calling Local LLM API with prompt: {Prompt}", prompt);
-
-            // Placeholder for actual Local LLM API call (e.g., Ollama)
-            // This example assumes an Ollama-like API structure
             var requestBody = new
             {
                 model = _localLlmSettings.Model,
                 prompt = prompt,
-                stream = false
+                stream = true // Enable streaming
             };
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("api/generate", requestBody); // Ollama generate endpoint
-                response.EnsureSuccessStatusCode();
-                var responseContent = await response.Content.ReadAsStringAsync();
-                using (JsonDocument doc = JsonDocument.Parse(responseContent))
+                var request = new HttpRequestMessage(HttpMethod.Post, _localLlmSettings.BaseUrl)
                 {
-                    if (doc.RootElement.TryGetProperty("response", out JsonElement content))
+                    Content = JsonContent.Create(requestBody)
+                };
+
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
+                await using var responseStream = await response.Content.ReadAsStreamAsync();
+                using var reader = new StreamReader(responseStream);
+
+                while (!reader.EndOfStream)
+                {
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrEmpty(line)) continue;
+
+                    // Ollama typically sends JSON objects for each chunk
+                    try
                     {
-                        return content.GetString() ?? "No content from Local LLM.";
+                        using var doc = JsonDocument.Parse(line);
+                        if (doc.RootElement.TryGetProperty("response", out var responseProperty))
+                        {
+                            yield return responseProperty.GetString() ?? "";
+                        }
+                        if (doc.RootElement.TryGetProperty("done", out var doneProperty) && doneProperty.GetBoolean())
+                        {
+                            yield break; // Stream finished
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to parse JSON from Local LLM stream: {Line}", line);
+                        // If it's not JSON, yield the raw line
+                        yield return line;
                     }
                 }
-                return "Failed to parse Local LLM response.";
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calling Local LLM API.");
-                return $"Error: Failed to connect to Local LLM API. {ex.Message}";
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, "Error deserializing Local LLM response.");
-                return $"Error: Failed to parse Local LLM response. {ex.Message}";
+                _logger.LogError(ex, "Lỗi khi gọi Local LLM API: {Message}", ex.Message);
+                yield return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Local LLM API: {ex.Message}";
             }
         }
 

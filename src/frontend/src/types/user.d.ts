@@ -18,7 +18,7 @@ export interface UserMenuItem {
 export interface UserProfile {
     id: string;
     externalId: string;
-    userId:string;
+    userId?: string;
     email: string;
     name: string;
     firstName?: string;

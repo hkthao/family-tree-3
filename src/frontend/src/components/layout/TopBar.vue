@@ -9,10 +9,16 @@
       <v-icon>mdi-theme-light-dark</v-icon>
     </v-btn>
     <NotificationBell />
+    <!-- Chat Assistant Button -->
+    <v-btn icon @click="showChatWidget = !showChatWidget">
+      <v-icon>mdi-chat-processing</v-icon>
+    </v-btn>
     <div class="mx-2">
       <UserMenu @navigate="handleNavigation" />
     </div>
   </v-app-bar>
+  <!-- Chat Widget Component -->
+  <ChatWidget v-model="showChatWidget" />
 </template>
 
 <script setup lang="ts">
@@ -27,12 +33,15 @@ import { useUserSettingsStore } from '@/stores';
 import { Theme } from '@/types';
 import { getThemeOptions } from '@/constants/theme.constants';
 import NotificationBell from '@/components/common/NotificationBell.vue';
+import ChatWidget from '@/components/ChatWidget.vue'; // Import ChatWidget
 
 const { t } = useI18n();
 const theme = useTheme();
 const searchField = ref<VTextField | null>(null);
 const router = useRouter();
 const userSettingsStore = useUserSettingsStore();
+
+const showChatWidget = ref(false); // Reactive variable to control chat widget visibility
 
 defineProps({
   currentUser: {

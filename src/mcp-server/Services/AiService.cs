@@ -33,7 +33,7 @@ namespace McpServer.Services
         /// <param name="jwtToken">JWT Token để truy vấn dữ liệu backend.</param>
         /// <param name="providerName">Tên của nhà cung cấp AI cụ thể để sử dụng (tùy chọn).</param>
         /// <returns>Kết quả từ AI Assistant.</returns>
-        public async Task<string> GetAiResponseAsync(string prompt, string? jwtToken, string? providerName = null)
+        public async IAsyncEnumerable<string> GetAiResponseStreamAsync(string prompt, string? jwtToken, string? providerName = null)
         {
             var selectedProviderName = providerName ?? _defaultAiProvider;
             IAiProvider aiProvider;
@@ -44,7 +44,8 @@ namespace McpServer.Services
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, "Invalid AI provider specified: {ProviderName}", selectedProviderName);
-                return $"Error: Invalid AI provider '{selectedProviderName}'.";
+                yield return $"Error: Invalid AI provider '{selectedProviderName}'.";
+                yield break;
             }
 
             // Example of RAG: Fetching data from Family Tree backend
@@ -60,7 +61,10 @@ namespace McpServer.Services
                 }
             }
 
-            return await aiProvider.GenerateResponseAsync(prompt, members != null && members.Any() ? JsonSerializer.Serialize(members) : null);
+            await foreach (var chunk in aiProvider.GenerateResponseStreamAsync(prompt, members != null && members.Any() ? JsonSerializer.Serialize(members) : null))
+            {
+                yield return chunk;
+            }
         }
 
         /// <summary>

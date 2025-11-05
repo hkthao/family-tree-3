@@ -11,7 +11,7 @@ namespace McpServer.Services
         /// <param name="prompt">Prompt từ người dùng.</param>
         /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
         /// <returns>Phản hồi từ AI Assistant.</returns>
-        Task<string> GenerateResponseAsync(string prompt, string? context = null);
+        IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null);
 
         /// <summary>
         /// Kiểm tra trạng thái hoạt động của nhà cung cấp AI.

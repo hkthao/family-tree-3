@@ -31,52 +31,81 @@ namespace McpServer.Services
         /// <param name="prompt">Prompt từ người dùng.</param>
         /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
         /// <returns>Phản hồi từ OpenAI.</returns>
-        public async Task<string> GenerateResponseAsync(string prompt, string? context = null)
+        public async IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null)
         {
+            // Combine prompt and context if context is provided
             if (!string.IsNullOrEmpty(context))
             {
                 prompt = $"Context: {context}\n\nUser Query: {prompt}";
             }
 
-            _logger.LogInformation("Calling OpenAI API with prompt: {Prompt}", prompt);
-
-            // Placeholder for actual OpenAI API call
-            // Example using System.Net.Http.Json
             var requestBody = new
             {
                 model = _openAiSettings.Model,
                 messages = new[]
                 {
-                    new { role = "system", content = "You are a helpful AI assistant for family tree data." },
                     new { role = "user", content = prompt }
-                }
+                },
+                temperature = 0.7,
+                max_tokens = 1024,
+                top_p = 0.95,
+                frequency_penalty = 0,
+                presence_penalty = 0,
+                stream = true // Enable streaming
             };
+
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiSettings.ApiKey);
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("chat/completions", requestBody);
-                response.EnsureSuccessStatusCode();
-                var responseContent = await response.Content.ReadAsStringAsync();
-                using (JsonDocument doc = JsonDocument.Parse(responseContent))
+                var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
                 {
-                    if (doc.RootElement.TryGetProperty("choices", out JsonElement choices) &&
-                        choices.EnumerateArray().FirstOrDefault().TryGetProperty("message", out JsonElement message) &&
-                        message.TryGetProperty("content", out JsonElement content))
+                    Content = JsonContent.Create(requestBody)
+                };
+
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
+                await using var responseStream = await response.Content.ReadAsStreamAsync();
+                using var reader = new StreamReader(responseStream);
+
+                while (!reader.EndOfStream)
+                {
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrEmpty(line)) continue;
+
+                    if (line.StartsWith("data: "))
                     {
-                        return content.GetString() ?? "No content from OpenAI.";
+                        var data = line.Substring("data: ".Length);
+                        if (data == "[DONE]")
+                        {
+                            yield break;
+                        }
+
+                        try
+                        {
+                            using var doc = JsonDocument.Parse(data);
+                            var choices = doc.RootElement.GetProperty("choices");
+                            if (choices.GetArrayLength() > 0)
+                            {
+                                var delta = choices[0].GetProperty("delta");
+                                if (delta.TryGetProperty("content", out var content))
+                                {
+                                    yield return content.GetString() ?? "";
+                                }
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to parse JSON from OpenAI stream: {Data}", data);
+                        }
                     }
                 }
-                return "Failed to parse OpenAI response.";
             }
-            catch (HttpRequestException ex)
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calling OpenAI API.");
-                return $"Error: Failed to connect to OpenAI API. {ex.Message}";
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, "Error deserializing OpenAI response.");
-                return $"Error: Failed to parse OpenAI response. {ex.Message}";
+                _logger.LogError(ex, "Lỗi khi gọi OpenAI API: {Message}", ex.Message);
+                yield return $"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với OpenAI API: {ex.Message}";
             }
         }
 
