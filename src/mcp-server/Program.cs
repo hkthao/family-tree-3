@@ -124,6 +124,9 @@ builder.Services.AddHttpClient<LocalLlmProvider>(client =>
 // Register AI Provider Factory
 builder.Services.AddSingleton<AiProviderFactory>();
 
+// Register ToolExecutor
+builder.Services.AddScoped<ToolExecutor>();
+
 // Register main AiService
 builder.Services.AddScoped<AiService>();
 
