@@ -70,7 +70,19 @@ public class ToolExecutor
                 }
                 break;
             case "get_family_details":
-                var idGetFamilyDetails = args.TryGetProperty("id", out var igfd) ? igfd.GetGuid() : Guid.Empty;
+                Guid idGetFamilyDetails = Guid.Empty;
+                if (args.TryGetProperty("id", out var igfd))
+                {
+                    if (Guid.TryParse(igfd.GetString(), out Guid parsedGuid))
+                    {
+                        idGetFamilyDetails = parsedGuid;
+                    }
+                    else
+                    {
+                        result = new { error = "Invalid 'id' argument for get_family_details. A valid GUID string is required." };
+                        break; // Exit switch case
+                    }
+                }
                 if (idGetFamilyDetails == Guid.Empty)
                 {
                     result = new { error = "Missing or invalid 'id' argument for get_family_details. A valid GUID is required." };
@@ -82,7 +94,19 @@ public class ToolExecutor
                 break;
             case "search_members":
                 var querySearchMembers = args.TryGetProperty("query", out var qsm) ? qsm.GetString() : string.Empty;
-                var familyIdSearchMembers = args.TryGetProperty("familyId", out var fism) ? fism.GetGuid() : (Guid?)null;
+                Guid? familyIdSearchMembers = null;
+                if (args.TryGetProperty("familyId", out var fism))
+                {
+                    if (Guid.TryParse(fism.GetString(), out Guid parsedGuid))
+                    {
+                        familyIdSearchMembers = parsedGuid;
+                    }
+                    else
+                    {
+                        result = new { error = "Invalid 'familyId' argument for search_members. A valid GUID string is required." };
+                        break; // Exit switch case
+                    }
+                }
                 if (string.IsNullOrEmpty(querySearchMembers))
                 {
                     result = new { error = "Missing 'query' argument for search_members." };
@@ -93,7 +117,19 @@ public class ToolExecutor
                 }
                 break;
             case "get_member_details":
-                var idGetMemberDetails = args.TryGetProperty("id", out var igmd) ? igmd.GetGuid() : Guid.Empty;
+                Guid idGetMemberDetails = Guid.Empty;
+                if (args.TryGetProperty("id", out var igmd))
+                {
+                    if (Guid.TryParse(igmd.GetString(), out Guid parsedGuid))
+                    {
+                        idGetMemberDetails = parsedGuid;
+                    }
+                    else
+                    {
+                        result = new { error = "Invalid 'id' argument for get_member_details. A valid GUID string is required." };
+                        break; // Exit switch case
+                    }
+                }
                 if (idGetMemberDetails == Guid.Empty)
                 {
                     result = new { error = "Missing or invalid 'id' argument for get_member_details. A valid GUID is required." };
@@ -105,7 +141,19 @@ public class ToolExecutor
                 break;
             case "search_events":
                 var querySearchEvents = args.TryGetProperty("query", out var qse) ? qse.GetString() : string.Empty;
-                var familyIdSearchEvents = args.TryGetProperty("familyId", out var fise) ? fise.GetGuid() : (Guid?)null;
+                Guid? familyIdSearchEvents = null;
+                if (args.TryGetProperty("familyId", out var fise))
+                {
+                    if (Guid.TryParse(fise.GetString(), out Guid parsedGuid))
+                    {
+                        familyIdSearchEvents = parsedGuid;
+                    }
+                    else
+                    {
+                        result = new { error = "Invalid 'familyId' argument for search_events. A valid GUID string is required." };
+                        break; // Exit switch case
+                    }
+                }
                 var startDateSearchEvents = args.TryGetProperty("startDate", out var sdese) ? sdese.GetDateTime() : (DateTime?)null;
                 var endDateSearchEvents = args.TryGetProperty("endDate", out var edese) ? edese.GetDateTime() : (DateTime?)null;
                 if (string.IsNullOrEmpty(querySearchEvents))
@@ -118,7 +166,19 @@ public class ToolExecutor
                 }
                 break;
             case "get_upcoming_events":
-                var familyIdGetUpcomingEvents = args.TryGetProperty("familyId", out var figue) ? figue.GetGuid() : (Guid?)null;
+                Guid? familyIdGetUpcomingEvents = null;
+                if (args.TryGetProperty("familyId", out var figue))
+                {
+                    if (Guid.TryParse(figue.GetString(), out Guid parsedGuid))
+                    {
+                        familyIdGetUpcomingEvents = parsedGuid;
+                    }
+                    else
+                    {
+                        result = new { error = "Invalid 'familyId' argument for get_upcoming_events. A valid GUID string is required." };
+                        break; // Exit switch case
+                    }
+                }
                 result = await _familyTreeBackendService.GetUpcomingEventsAsync(jwtToken!, familyIdGetUpcomingEvents);
                 break;
             default:

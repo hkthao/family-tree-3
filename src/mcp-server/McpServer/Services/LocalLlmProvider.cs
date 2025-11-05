@@ -27,8 +27,8 @@ public class LocalLlmProvider : IAiProvider
                 List<AiToolDefinition>? tools = null,
                 List<AiToolResult>? toolResults = null)
             {
-                List<AiResponsePart> parts = new List<AiResponsePart>();
                 var fullPrompt = BuildPrompt(prompt, tools, toolResults);
+                var parts = new List<AiResponsePart>();
     
                 var requestBody = new
                 {
@@ -38,7 +38,7 @@ public class LocalLlmProvider : IAiProvider
                     format = "json" // Yêu cầu Ollama trả về JSON
                 };
     
-                var request = new HttpRequestMessage(HttpMethod.Post, _settings.BaseUrl)
+                var request = new HttpRequestMessage(HttpMethod.Post, _httpClient.BaseAddress) // Use BaseAddress directly
                 {
                     Content = JsonContent.Create(requestBody)
                 };
@@ -51,7 +51,9 @@ public class LocalLlmProvider : IAiProvider
                     await using var responseStream = await response.Content.ReadAsStreamAsync();
                     using var reader = new StreamReader(responseStream);
     
-                    var fullResponseJson = new StringBuilder();
+                    var fullTextResponse = new StringBuilder();
+                    bool toolCallDetected = false;
+    
                     while (!reader.EndOfStream)
                     {
                         var line = await reader.ReadLineAsync();
@@ -59,10 +61,24 @@ public class LocalLlmProvider : IAiProvider
     
                         try
                         {
-                            var doc = JsonDocument.Parse(line);
-                            if (doc.RootElement.TryGetProperty("response", out var responseProperty))
+                            using var doc = JsonDocument.Parse(line);
+                            if (doc.RootElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
                             {
-                                fullResponseJson.Append(responseProperty.GetString());
+                                var toolCalls = new List<AiToolCall>();
+                                foreach (var toolCallElement in toolCallsElement.EnumerateArray())
+                                {
+                                    var id = toolCallElement.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
+                                    var function = toolCallElement.GetProperty("function");
+                                    var name = function.GetProperty("name").GetString() ?? string.Empty;
+                                    var args = function.GetProperty("arguments").GetString() ?? string.Empty;
+                                    toolCalls.Add(new AiToolCall(id, name, args));
+                                }
+                                parts.Add(new AiToolCallResponsePart(toolCalls));
+                                toolCallDetected = true;
+                            }
+                            else if (doc.RootElement.TryGetProperty("response", out var responseProperty))
+                            {
+                                fullTextResponse.Append(responseProperty.GetString());
                             }
                         }
                         catch (JsonException ex)
@@ -71,19 +87,9 @@ public class LocalLlmProvider : IAiProvider
                         }
                     }
     
-                    // Khi stream kết thúc, phân tích toàn bộ JSON đã nhận
-                    var finalJson = fullResponseJson.ToString();
-                    _logger.LogInformation("Full JSON response from Local LLM: {Json}", finalJson);
-    
-                    var parsedResponse = TryParseToolCall(finalJson);
-                    if (parsedResponse != null)
+                    if (!toolCallDetected && fullTextResponse.Length > 0)
                     {
-                        parts.Add(parsedResponse);
-                    }
-                    else
-                    {
-                        // Nếu không phải tool call, trả về toàn bộ text
-                        parts.Add(new AiTextResponsePart(finalJson));
+                        parts.Add(new AiTextResponsePart(fullTextResponse.ToString()));
                     }
                 }
                 catch (Exception ex)
@@ -91,7 +97,7 @@ public class LocalLlmProvider : IAiProvider
                     _logger.LogError(ex, "Error calling Local LLM API: {Message}", ex.Message);
                     parts.Add(new AiTextResponsePart($"Error calling Local LLM: {ex.Message}"));
                 }
-    
+
                 foreach (var part in parts)
                 {
                     yield return part;
@@ -124,35 +130,7 @@ public class LocalLlmProvider : IAiProvider
         return sb.ToString();
     }
 
-    private AiToolCallResponsePart? TryParseToolCall(string jsonResponse)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(jsonResponse);
-            if (doc.RootElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
-            {
-                var toolCalls = new List<AiToolCall>();
-                foreach (var toolCallElement in toolCallsElement.EnumerateArray())
-                {
-                    var id = toolCallElement.GetProperty("id").GetString() ?? string.Empty;
-                    var functionElement = toolCallElement.GetProperty("function");
-                    var name = functionElement.GetProperty("name").GetString() ?? string.Empty;
-                    var args = functionElement.GetProperty("arguments").GetString() ?? string.Empty;
-                    toolCalls.Add(new AiToolCall(id, name, args));
-                }
-                return new AiToolCallResponsePart(toolCalls);
-            }
-        }
-        catch (JsonException jsonEx)
-        {
-            _logger.LogWarning(jsonEx, "Failed to parse JSON for tool call. Response: {JsonResponse}", jsonResponse);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "An unexpected error occurred while parsing tool call. Response: {JsonResponse}", jsonResponse);
-        }
-        return null;
-    }
+
 
     public async Task<string> GetStatusAsync()
     {

@@ -39,21 +39,17 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "MCP Server API", Version = "v1" });
 
-    // Define the security scheme
-    var securityScheme = new OpenApiSecurityScheme
+    // Configure JWT authentication for Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer"
-    };
+    });
 
-    // Add the security definition
-    c.AddSecurityDefinition("Bearer", securityScheme);
-
-    // Define the security requirement
-    var securityRequirement = new OpenApiSecurityRequirement
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -66,10 +62,7 @@ builder.Services.AddSwaggerGen(c =>
             },
             new string[] { }
         }
-    };
-
-    // Add the security requirement
-    c.AddSecurityRequirement(securityRequirement);
+    });
 });
 
 // Configure JWT Authentication
@@ -136,7 +129,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => {});
 }
 
 app.UseHttpsRedirection();

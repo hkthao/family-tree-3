@@ -54,11 +54,11 @@ namespace McpServer.Services
             {
                 // Initialize Gemini client
                 var credential = GoogleCredential.GetApplicationDefault();
-                var client = new PredictionServiceClientBuilder
+                var client = await new PredictionServiceClientBuilder
                 {
                     Endpoint = "aiplatform.googleapis.com",
                     Credential = credential
-                }.Build();
+                }.BuildAsync();
 
                 // Construct the request for the Gemini model
                 var instance = new Google.Protobuf.WellKnownTypes.Value
@@ -86,7 +86,8 @@ namespace McpServer.Services
                     }
                 };
 
-                var endpoint = EndpointName.FromProjectLocationPublisherModel(_settings.ProjectId, _settings.Location, "google", _settings.ModelId);
+                var endpointNameString = $"projects/{_settings.ProjectId}/locations/{_settings.Location}/publishers/google/models/{_settings.ModelId}";
+                var endpoint = EndpointName.Parse(endpointNameString);
 
                 // The Google.Cloud.AIPlatform.V1 library's PredictAsync does not directly support streaming.
                 // For now, I will return the full response as a single chunk.

@@ -2,14 +2,17 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy the McpServer project file and restore dependencies
-COPY McpServer.csproj ./
-RUN dotnet restore ./McpServer.csproj
+# Clear NuGet cache to ensure fresh package download
+RUN dotnet nuget locals all --clear
 
-# Copy the remaining source code and build the application
-COPY . .
-WORKDIR /app
-RUN dotnet publish -c Release -o /app/publish
+# Copy the entire backend directory into the container
+COPY src/mcp-server/ .
+
+# Restore dependencies
+RUN dotnet restore McpServer.sln --verbosity minimal --source https://api.nuget.org/v3/index.json
+
+# Build the application
+RUN dotnet publish ./McpServer/McpServer.csproj -c Release -o /app/publish
 
 # Use the official .NET ASP.NET Core runtime image to run the application
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final

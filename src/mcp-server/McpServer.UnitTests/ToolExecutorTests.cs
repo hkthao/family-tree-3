@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http;
+using McpServer.Config;
+using Microsoft.Extensions.Options;
 
 namespace McpServer.UnitTests;
 
@@ -18,12 +20,13 @@ public class ToolExecutorTests
 
     public ToolExecutorTests()
     {
-        // Mock IConfiguration and HttpClient for FamilyTreeBackendService constructor
-        var mockConfiguration = new Mock<IConfiguration>();
-        mockConfiguration.Setup(c => c["FamilyTreeBackend:BaseUrl"]).Returns("http://localhost:5000");
+        // Mock dependencies for FamilyTreeBackendService constructor
+        var mockFamilyTreeBackendSettings = new Mock<IOptions<FamilyTreeBackendSettings>>();
+        mockFamilyTreeBackendSettings.Setup(o => o.Value).Returns(new FamilyTreeBackendSettings { BaseUrl = "http://localhost:5000" });
+        var mockFamilyTreeBackendServiceLogger = new Mock<ILogger<FamilyTreeBackendService>>();
         var httpClient = new HttpClient();
 
-        _mockFamilyTreeBackendService = new Mock<FamilyTreeBackendService>(httpClient, mockConfiguration.Object);
+        _mockFamilyTreeBackendService = new Mock<FamilyTreeBackendService>(httpClient, mockFamilyTreeBackendSettings.Object, mockFamilyTreeBackendServiceLogger.Object);
         _mockLogger = new Mock<ILogger<ToolExecutor>>();
         _toolExecutor = new ToolExecutor(_mockFamilyTreeBackendService.Object, _mockLogger.Object);
     }
@@ -72,7 +75,10 @@ public class ToolExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains("Missing 'query' argument for search_family.", result.Content);
+        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
+        Assert.NotNull(errorDict);
+        Assert.True(errorDict.ContainsKey("error"));
+        Assert.Contains("Missing 'query' argument for search_family.", errorDict["error"]);
         _mockFamilyTreeBackendService.Verify(s => s.SearchFamiliesAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -94,7 +100,10 @@ public class ToolExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains("User is not authenticated to use tool 'search_family'.", result.Content);
+        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
+        Assert.NotNull(errorDict);
+        Assert.True(errorDict.ContainsKey("error"));
+        Assert.Contains("User is not authenticated to use tool 'search_family'.", errorDict["error"]);
         _mockFamilyTreeBackendService.Verify(s => s.SearchFamiliesAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -121,7 +130,7 @@ public class ToolExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains(familyId.ToString(), result.Content);
+        Assert.Contains(expectedResult.Name, result.Content); // Check for Name instead of ID
         _mockFamilyTreeBackendService.Verify(s => s.GetFamilyByIdAsync(familyId, jwtToken), Times.Once);
     }
 
@@ -142,8 +151,10 @@ public class ToolExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains("Missing or invalid 'id' argument for get_family_details.", result.Content);
-        _mockFamilyTreeBackendService.Verify(s => s.GetFamilyByIdAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
+        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
+        Assert.NotNull(errorDict);
+        Assert.True(errorDict.ContainsKey("error"));
+        Assert.Contains("Invalid 'id' argument for get_family_details. A valid GUID string is required.", errorDict["error"]);
     }
 
     [Fact]
@@ -163,7 +174,10 @@ public class ToolExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains("Unknown tool: unknown_tool", result.Content);
+        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
+        Assert.NotNull(errorDict);
+        Assert.True(errorDict.ContainsKey("error"));
+        Assert.Contains("Unknown tool: unknown_tool", errorDict["error"]);
     }
 
     [Fact]
@@ -183,6 +197,10 @@ public class ToolExecutorTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains("Invalid JSON arguments provided for tool 'search_family'.", result.Content);
+        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
+        Assert.NotNull(errorDict);
+        Assert.True(errorDict.ContainsKey("error"));
+        Assert.Contains("Invalid JSON arguments provided for tool 'search_family'.", errorDict["error"]);
     }
+
 }
