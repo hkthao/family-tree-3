@@ -285,11 +285,11 @@ watch(() => props.familyId, async (newFamilyId) => {
 }
 
 .f3 div.card-image div.card-dates {
-  bottom: -20px;
+  bottom: -35px;;
 }
 
 .f3 div.card-image div.card-label {
-  bottom: -35px;
+  bottom: -20px;
 }
 
 .f3 div.card-image img {

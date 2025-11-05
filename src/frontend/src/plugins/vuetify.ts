@@ -97,6 +97,9 @@ export default createVuetify({
     VTimeline: {
       density: 'compact',
     },
+    VBtnToggle:{
+      density: 'compact',
+    },
     VProgressLinear: {
       color: 'primary'
     }
