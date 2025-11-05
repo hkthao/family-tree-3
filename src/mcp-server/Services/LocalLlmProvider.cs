@@ -105,6 +105,9 @@ public class LocalLlmProvider : IAiProvider
         sb.AppendLine("To use a tool, you must respond with a JSON object matching the following schema:");
         sb.AppendLine("{\"tool_calls\": [{\"id\": \"<unique_id>\", \"function\": {\"name\": \"<tool_name>\", \"arguments\": \"<json_escaped_arguments>\"}}]}");
         sb.AppendLine("If you don't need to use a tool, just respond with a regular text message.");
+        sb.AppendLine("\nIMPORTANT TOOL USAGE GUIDELINES:");
+        sb.AppendLine("- Use the 'search_family' tool when the user provides a family name, keyword, or any general query to find families.");
+        sb.AppendLine("- ONLY use the 'get_family_details' tool when you have a specific, confirmed family ID (GUID). Do NOT use it with a family name or general query.");
         sb.AppendLine("\nHere are the available tools:");
         sb.AppendLine(JsonSerializer.Serialize(tools, new JsonSerializerOptions { WriteIndented = true }));
 
@@ -112,7 +115,7 @@ public class LocalLlmProvider : IAiProvider
         {
             sb.AppendLine("\nYou have previously called tools and received these results:");
             sb.AppendLine(JsonSerializer.Serialize(toolResults, new JsonSerializerOptions { WriteIndented = true }));
-            sb.AppendLine("\nBased on these results, please provide a final answer to the user's original query.");
+            sb.AppendLine("\nBased on these results, please provide a final answer to the user's original query. DO NOT call any more tools.");
         }
 
         sb.AppendLine("\nUser Query:");
@@ -140,9 +143,13 @@ public class LocalLlmProvider : IAiProvider
                 return new AiToolCallResponsePart(toolCalls);
             }
         }
+        catch (JsonException jsonEx)
+        {
+            _logger.LogWarning(jsonEx, "Failed to parse JSON for tool call. Response: {JsonResponse}", jsonResponse);
+        }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not parse response as a tool call object.");
+            _logger.LogWarning(ex, "An unexpected error occurred while parsing tool call. Response: {JsonResponse}", jsonResponse);
         }
         return null;
     }

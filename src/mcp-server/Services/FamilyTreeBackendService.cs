@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 using McpServer.Config;
+using McpServer.Common.Models;
 using Microsoft.Extensions.Options;
 
 namespace McpServer.Services
@@ -67,11 +68,12 @@ namespace McpServer.Services
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwtToken);
-                var response = await _httpClient.GetAsync($"api/family?q={Uri.EscapeDataString(query)}");
+                var response = await _httpClient.GetAsync($"api/Family/search?keyword={Uri.EscapeDataString(query)}");
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<FamilyDto>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                var result = JsonSerializer.Deserialize<Result<PaginatedList<FamilyDto>>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return result?.Value?.Items;
             }
             catch (HttpRequestException ex)
             {
