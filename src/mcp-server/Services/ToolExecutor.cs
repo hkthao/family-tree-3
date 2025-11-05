@@ -26,18 +26,22 @@ public class ToolExecutor
     {
         _logger.LogInformation("Executing tool: {FunctionName}", toolCall.FunctionName);
         object? result = null;
-        JsonElement args;
-
-        try
-        {
-            args = JsonSerializer.Deserialize<JsonElement>(toolCall.FunctionArgs);
-        }
-        catch (JsonException ex)
-        {
-            _logger.LogError(ex, "Failed to deserialize function arguments for tool '{FunctionName}': {FunctionArgs}. Invalid JSON.", toolCall.FunctionName, toolCall.FunctionArgs);
-            result = new { error = $"Invalid JSON arguments provided for tool '{toolCall.FunctionName}'. Details: {ex.Message}" };
-            return new AiToolResult(toolCall.Id, JsonSerializer.Serialize(result));
-        }
+                    JsonElement args;
+                    try
+                    {
+                        // Use JsonDocument.Parse to handle potential trailing characters or malformed JSON more robustly
+                        // and then get the RootElement. Trim the string to remove any leading/trailing whitespace.
+                        using (JsonDocument doc = JsonDocument.Parse(toolCall.FunctionArgs.Trim()))
+                        {
+                            args = doc.RootElement.Clone();
+                        }
+                    }
+                    catch (JsonException ex)
+                    {
+                        _logger.LogError(ex, "Failed to deserialize function arguments for tool '{FunctionName}': {FunctionArgs}. Invalid JSON. Details: {ErrorMessage}", toolCall.FunctionName, toolCall.FunctionArgs, ex.Message);
+                        result = new { error = $"Invalid JSON arguments provided for tool '{toolCall.FunctionName}'. Details: {ex.Message}" };
+                        return new AiToolResult(toolCall.Id, JsonSerializer.Serialize(result));
+                    }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unexpected error occurred while parsing function arguments for tool '{FunctionName}': {FunctionArgs}", toolCall.FunctionName, toolCall.FunctionArgs);
