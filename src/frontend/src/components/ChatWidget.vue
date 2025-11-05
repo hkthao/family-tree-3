@@ -1,12 +1,6 @@
 <template>
   <v-navigation-drawer v-model="chatOpen" location="right" temporary width="400" class="chat-window">
-    <v-toolbar density="compact">
-      <v-toolbar-title>{{ t('chat.title') }}</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click="toggleChat">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-toolbar>
+
     <v-card flat class="fill-height d-flex flex-column">
       <v-card-text class="chat-messages-container pa-0">
         <vue-advanced-chat :messages="formattedMessages" :current-user-id="currentUserId"
@@ -21,7 +15,12 @@
               new: false,
               newAfterScrollUp: true
             }
-          })" @send-message="handleSendMessage" />
+          })" @send-message="handleSendMessage">
+        </vue-advanced-chat>
+
+        <v-btn class="btn-close" variant="text" density="compact" icon @click="toggleChat">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
       </v-card-text>
       <v-alert v-if="chatStore.error" type="error" dense dismissible class="ma-2">
         {{ chatStore.error }}
@@ -110,17 +109,14 @@ onMounted(() => {
   flex-direction: column;
   border-radius: 8px;
   overflow: hidden;
+  position: relative;
 }
 
-.chat-messages-container {
-  flex-grow: 1;
-  overflow-y: auto;
-  background-color: #f5f5f5;
-}
-
-/* Adjust vue-advanced-chat styles */
-.vac-container {
-  height: 100%;
-  width: 100%;
+.btn-close {
+  position: absolute;
+  z-index: 10;
+  top: 15px;
+  right: 15px;
+  color: rgb(var(--v-theme-primary));
 }
 </style>

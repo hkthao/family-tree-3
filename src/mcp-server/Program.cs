@@ -16,6 +16,7 @@ builder.Services.Configure<FamilyTreeBackendSettings>(builder.Configuration.GetS
 builder.Services.Configure<GeminiSettings>(builder.Configuration.GetSection("Gemini"));
 builder.Services.Configure<OpenAiSettings>(builder.Configuration.GetSection("OpenAI")); // New
 builder.Services.Configure<LocalLlmSettings>(builder.Configuration.GetSection("LocalLLM")); // New
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings")); // New
 
 builder.Services.AddControllers();
 
@@ -75,24 +76,22 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var familyTreeBackendSettings = builder.Configuration.GetSection("FamilyTreeBackend").Get<FamilyTreeBackendSettings>();
-        if (familyTreeBackendSettings == null)
+        var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+        if (jwtSettings == null)
         {
-            throw new InvalidOperationException("FamilyTreeBackend settings are not configured.");
+            throw new InvalidOperationException("JwtSettings are not configured.");
         }
 
+        options.Authority = $"https://{jwtSettings.Authority}";
+        options.Audience = jwtSettings.Audience;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuer = $"https://{jwtSettings.Authority}",
             ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
             ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = familyTreeBackendSettings.JwtIssuer,
-            ValidAudience = familyTreeBackendSettings.JwtAudience,
-            // For a real-world scenario with asymmetric keys, you'd need to fetch the public key
-            // or configure options.MetadataAddress or options.ConfigurationManager.
-            // For this example, we're assuming a symmetric key for simplicity.
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(familyTreeBackendSettings.JwtSecretKey))
+            ValidateIssuerSigningKey = true
         };
     });
 

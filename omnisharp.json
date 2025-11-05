@@ -1,0 +1,8 @@
+{
+  "MsBuild": {
+    "Projects": [
+      "src/backend/backend.sln",
+      "src/mcp-server/McpServer.csproj"
+    ]
+  }
+}
