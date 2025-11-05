@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ApiFaceService implements IFaceService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/faces`;
+  private apiUrl = `${API_BASE_URL}/face`;
 
   async detect(imageFile: File): Promise<Result<{ imageId: string; detectedFaces: DetectedFace[] }, ApiError>> {
     const formData = new FormData();
