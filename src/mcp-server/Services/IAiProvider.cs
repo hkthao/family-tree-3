@@ -6,12 +6,16 @@ namespace McpServer.Services
     public interface IAiProvider
     {
         /// <summary>
-        /// Lấy phản hồi từ AI Assistant dựa trên prompt.
+        /// Tạo phản hồi từ AI, có thể bao gồm các yêu cầu gọi tool.
         /// </summary>
         /// <param name="prompt">Prompt từ người dùng.</param>
-        /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
-        /// <returns>Phản hồi từ AI Assistant.</returns>
-        IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null);
+        /// <param name="tools">Danh sách các tool có sẵn để LLM sử dụng.</param>
+        /// <param name="toolResults">Kết quả từ các lần gọi tool trước đó (nếu có).</param>
+        /// <returns>Một stream các phần phản hồi, có thể là text hoặc yêu cầu gọi tool.</returns>
+        IAsyncEnumerable<AiResponsePart> GenerateResponseStreamAsync(
+            string prompt, 
+            List<AiToolDefinition>? tools = null, 
+            List<AiToolResult>? toolResults = null);
 
         /// <summary>
         /// Kiểm tra trạng thái hoạt động của nhà cung cấp AI.

@@ -2,145 +2,168 @@ using McpServer.Config;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Net.Http.Headers;
+using System.Text;
 
-namespace McpServer.Services
+namespace McpServer.Services;
+
+/// <summary>
+/// Nhà cung cấp AI sử dụng Local LLM (ví dụ: Ollama), có khả năng giả lập tool-calling.
+/// </summary>
+public class LocalLlmProvider : IAiProvider
 {
-    /// <summary>
-    /// Nhà cung cấp AI Assistant sử dụng Local LLM (ví dụ: Ollama).
-    /// </summary>
-    public class LocalLlmProvider : IAiProvider
+    private readonly LocalLlmSettings _settings;
+    private readonly ILogger<LocalLlmProvider> _logger;
+    private readonly HttpClient _httpClient;
+
+    public LocalLlmProvider(IOptions<LocalLlmSettings> settings, ILogger<LocalLlmProvider> logger, HttpClient httpClient)
     {
-        private readonly LocalLlmSettings _localLlmSettings;
-        private readonly ILogger<LocalLlmProvider> _logger;
-        private readonly HttpClient _httpClient; // For Local LLM API calls
+        _settings = settings.Value;
+        _logger = logger;
+        _httpClient = httpClient;
+    }
 
-        public LocalLlmProvider(IOptions<LocalLlmSettings> localLlmSettings, ILogger<LocalLlmProvider> logger, HttpClient httpClient)
-        {
-            _localLlmSettings = localLlmSettings.Value;
-            _logger = logger;
-            _httpClient = httpClient;
-
-            if (string.IsNullOrEmpty(_localLlmSettings.BaseUrl))
+            public async IAsyncEnumerable<AiResponsePart> GenerateResponseStreamAsync(
+                string prompt,
+                List<AiToolDefinition>? tools = null,
+                List<AiToolResult>? toolResults = null)
             {
-                _logger.LogWarning("LocalLlmSettings:BaseUrl is not configured. LocalLlmProvider might not function correctly.");
-            }
-            else
-            {
-                _httpClient.BaseAddress = new Uri(_localLlmSettings.BaseUrl);
-            }
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-        }
-
-        /// <summary>
-        /// Gửi prompt đến Local LLM và nhận kết quả.
-        /// </summary>
-        /// <param name="prompt">Prompt từ người dùng.</param>
-        /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
-        /// <returns>Phản hồi từ Local LLM.</returns>
-        public async IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null)
-        {
-            // Combine prompt and context if context is provided
-            if (!string.IsNullOrEmpty(context))
-            {
-                prompt = $"Context: {context}\n\nUser Query: {prompt}";
-            }
-
-            // Local function to handle the actual streaming logic
-            async IAsyncEnumerable<string> StreamResponse(string currentPrompt)
-            {
-                List<string> chunks = new List<string>();
+                List<AiResponsePart> parts = new List<AiResponsePart>();
+                var fullPrompt = BuildPrompt(prompt, tools, toolResults);
+    
+                var requestBody = new
+                {
+                    model = _settings.Model,
+                    prompt = fullPrompt,
+                    stream = true,
+                    format = "json" // Yêu cầu Ollama trả về JSON
+                };
+    
+                var request = new HttpRequestMessage(HttpMethod.Post, _settings.BaseUrl)
+                {
+                    Content = JsonContent.Create(requestBody)
+                };
+    
                 try
                 {
-                    var requestBody = new
-                    {
-                        model = _localLlmSettings.Model,
-                        prompt = currentPrompt,
-                        stream = true // Enable streaming
-                    };
-
-                    var request = new HttpRequestMessage(HttpMethod.Post, _localLlmSettings.BaseUrl)
-                    {
-                        Content = JsonContent.Create(requestBody)
-                    };
-
                     var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
                     response.EnsureSuccessStatusCode();
-
+    
                     await using var responseStream = await response.Content.ReadAsStreamAsync();
                     using var reader = new StreamReader(responseStream);
-
+    
+                    var fullResponseJson = new StringBuilder();
                     while (!reader.EndOfStream)
                     {
                         var line = await reader.ReadLineAsync();
                         if (string.IsNullOrEmpty(line)) continue;
-
-                        // Ollama typically sends JSON objects for each chunk
-                        string? chunkToYield = null;
+    
                         try
                         {
-                            using var doc = JsonDocument.Parse(line);
+                            var doc = JsonDocument.Parse(line);
                             if (doc.RootElement.TryGetProperty("response", out var responseProperty))
                             {
-                                chunkToYield = responseProperty.GetString() ?? "";
-                            }
-                            if (doc.RootElement.TryGetProperty("done", out var doneProperty) && doneProperty.GetBoolean())
-                            {
-                                break; // Exit while loop, not yield break
+                                fullResponseJson.Append(responseProperty.GetString());
                             }
                         }
                         catch (JsonException ex)
                         {
-                            _logger.LogWarning(ex, "Failed to parse JSON from Local LLM stream: {Line}", line);
-                            // If it's not JSON, yield the raw line
-                            chunkToYield = line;
+                            _logger.LogWarning(ex, "Failed to parse JSON chunk from Local LLM stream: {Line}", line);
                         }
-
-                        if (chunkToYield != null)
-                        {
-                            chunks.Add(chunkToYield);
-                        }
+                    }
+    
+                    // Khi stream kết thúc, phân tích toàn bộ JSON đã nhận
+                    var finalJson = fullResponseJson.ToString();
+                    _logger.LogInformation("Full JSON response from Local LLM: {Json}", finalJson);
+    
+                    var parsedResponse = TryParseToolCall(finalJson);
+                    if (parsedResponse != null)
+                    {
+                        parts.Add(parsedResponse);
+                    }
+                    else
+                    {
+                        // Nếu không phải tool call, trả về toàn bộ text
+                        parts.Add(new AiTextResponsePart(finalJson));
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Lỗi khi gọi Local LLM API: {Message}", ex.Message);
-                    chunks.Add($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Local LLM API: {ex.Message}");
+                    _logger.LogError(ex, "Error calling Local LLM API: {Message}", ex.Message);
+                    parts.Add(new AiTextResponsePart($"Error calling Local LLM: {ex.Message}"));
                 }
-
-                foreach (var chunk in chunks)
+    
+                foreach (var part in parts)
                 {
-                    yield return chunk;
+                    yield return part;
                 }
             }
 
-            await foreach (var chunk in StreamResponse(prompt))
-            {
-                yield return chunk;
-            }
+    private string BuildPrompt(string userPrompt, List<AiToolDefinition>? tools, List<AiToolResult>? toolResults)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("You are a helpful assistant with access to the following tools.");
+        sb.AppendLine("To use a tool, you must respond with a JSON object matching the following schema:");
+        sb.AppendLine("{\"tool_calls\": [{\"id\": \"<unique_id>\", \"function\": {\"name\": \"<tool_name>\", \"arguments\": \"<json_escaped_arguments>\"}}]}");
+        sb.AppendLine("If you don't need to use a tool, just respond with a regular text message.");
+        sb.AppendLine("\nHere are the available tools:");
+        sb.AppendLine(JsonSerializer.Serialize(tools, new JsonSerializerOptions { WriteIndented = true }));
+
+        if (toolResults != null && toolResults.Any())
+        {
+            sb.AppendLine("\nYou have previously called tools and received these results:");
+            sb.AppendLine(JsonSerializer.Serialize(toolResults, new JsonSerializerOptions { WriteIndented = true }));
+            sb.AppendLine("\nBased on these results, please provide a final answer to the user's original query.");
         }
 
-        /// <summary>
-        /// Kiểm tra trạng thái của Local LLM.
-        /// </summary>
-        /// <returns>Trạng thái của Local LLM.</returns>
-        public async Task<string> GetStatusAsync()
+        sb.AppendLine("\nUser Query:");
+        sb.AppendLine(userPrompt);
+
+        return sb.ToString();
+    }
+
+    private AiToolCallResponsePart? TryParseToolCall(string jsonResponse)
+    {
+        try
         {
-            if (string.IsNullOrEmpty(_localLlmSettings.BaseUrl))
+            using var doc = JsonDocument.Parse(jsonResponse);
+            if (doc.RootElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
             {
-                return "Local LLM BaseUrl is not configured.";
+                var toolCalls = new List<AiToolCall>();
+                foreach (var toolCallElement in toolCallsElement.EnumerateArray())
+                {
+                    var id = toolCallElement.GetProperty("id").GetString() ?? string.Empty;
+                    var functionElement = toolCallElement.GetProperty("function");
+                    var name = functionElement.GetProperty("name").GetString() ?? string.Empty;
+                    var args = functionElement.GetProperty("arguments").GetString() ?? string.Empty;
+                    toolCalls.Add(new AiToolCall(id, name, args));
+                }
+                return new AiToolCallResponsePart(toolCalls);
             }
-            try
-            {
-                // Assuming a simple GET request to the base URL can indicate status
-                var response = await _httpClient.GetAsync("/");
-                response.EnsureSuccessStatusCode();
-                return "Local LLM is operational.";
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Error checking Local LLM status.");
-                return $"Local LLM is not reachable. {ex.Message}";
-            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not parse response as a tool call object.");
+        }
+        return null;
+    }
+
+    public async Task<string> GetStatusAsync()
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            return "Local LLM BaseUrl is not configured.";
+        }
+        try
+        {
+            // Assuming a simple GET request to the base URL can indicate status
+            var response = await _httpClient.GetAsync("/");
+            response.EnsureSuccessStatusCode();
+            return "Local LLM is operational.";
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Error checking Local LLM status.");
+            return $"Local LLM is not reachable. {ex.Message}";
         }
     }
 }

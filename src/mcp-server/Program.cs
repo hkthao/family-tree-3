@@ -111,7 +111,15 @@ builder.Services.AddHttpClient<FamilyTreeBackendService>(client =>
 // Register concrete AI Providers
 builder.Services.AddHttpClient<GeminiProvider>(); // GeminiProvider uses HttpClient
 builder.Services.AddHttpClient<OpenAiProvider>(); // OpenAIProvider uses HttpClient
-builder.Services.AddHttpClient<LocalLlmProvider>(); // LocalLlmProvider uses HttpClient
+builder.Services.AddHttpClient<LocalLlmProvider>(client =>
+{
+    var localLlmSettings = builder.Configuration.GetSection("LocalLLM").Get<LocalLlmSettings>();
+    if (localLlmSettings == null || string.IsNullOrEmpty(localLlmSettings.BaseUrl))
+    {
+        throw new InvalidOperationException("LocalLLM:BaseUrl is not configured.");
+    }
+    client.BaseAddress = new Uri(localLlmSettings.BaseUrl);
+}); // LocalLlmProvider uses HttpClient
 
 // Register AI Provider Factory
 builder.Services.AddSingleton<AiProviderFactory>();

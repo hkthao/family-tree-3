@@ -2,138 +2,179 @@ using McpServer.Config;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Net.Http.Headers;
+using System.Text;
 
 namespace McpServer.Services
 {
     /// <summary>
-    /// Nhà cung cấp AI Assistant sử dụng OpenAI API.
+    /// Nhà cung cấp AI sử dụng OpenAI API, có hỗ trợ tool-calling.
     /// </summary>
     public class OpenAiProvider : IAiProvider
     {
-        private readonly OpenAiSettings _openAiSettings;
+        private readonly OpenAiSettings _settings;
         private readonly ILogger<OpenAiProvider> _logger;
-        private readonly HttpClient _httpClient; // For OpenAI API calls
+        private readonly HttpClient _httpClient;
 
-        public OpenAiProvider(IOptions<OpenAiSettings> openAiSettings, ILogger<OpenAiProvider> logger, HttpClient httpClient)
+        public OpenAiProvider(IOptions<OpenAiSettings> settings, ILogger<OpenAiProvider> logger, HttpClient httpClient)
         {
-            _openAiSettings = openAiSettings.Value;
+            _settings = settings.Value;
             _logger = logger;
             _httpClient = httpClient;
 
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiSettings.ApiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _settings.ApiKey);
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _httpClient.BaseAddress = new Uri("https://api.openai.com/v1/"); // OpenAI Base URL
         }
 
-        /// <summary>
-        /// Gửi prompt đến OpenAI và nhận kết quả.
-        /// </summary>
-        /// <param name="prompt">Prompt từ người dùng.</param>
-        /// <param name="context">Ngữ cảnh bổ sung (ví dụ: dữ liệu backend đã được truy xuất).</param>
-        /// <returns>Phản hồi từ OpenAI.</returns>
-        public async IAsyncEnumerable<string> GenerateResponseStreamAsync(string prompt, string? context = null)
+        public async IAsyncEnumerable<AiResponsePart> GenerateResponseStreamAsync(
+            string prompt,
+            List<AiToolDefinition>? tools = null,
+            List<AiToolResult>? toolResults = null)
         {
-            // Combine prompt and context if context is provided
-            if (!string.IsNullOrEmpty(context))
+            List<AiResponsePart> parts = new List<AiResponsePart>();
+            var messages = new List<object>
             {
-                prompt = $"Context: {context}\n\nUser Query: {prompt}";
+                new { role = "user", content = prompt }
+            };
+
+            if (toolResults != null && toolResults.Any())
+            {
+                foreach (var toolResult in toolResults)
+                {
+                    messages.Add(new
+                    {
+                        role = "tool",
+                        tool_call_id = toolResult.ToolCallId,
+                        content = toolResult.Content
+                    });
+                }
             }
 
-            // Local function to handle the actual streaming logic
-            async IAsyncEnumerable<string> StreamResponse(string currentPrompt)
+            var requestBody = new
             {
-                List<string> chunks = new List<string>();
-                try
+                model = _settings.Model,
+                messages = messages,
+                temperature = 0.7,
+                max_tokens = 1024,
+                top_p = 0.95,
+                frequency_penalty = 0,
+                presence_penalty = 0,
+                stream = true,
+                tools = tools?.Select(t => new { type = "function", function = t }).ToList() // OpenAI expects 'type: function'
+            };
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "chat/completions")
+            {
+                Content = JsonContent.Create(requestBody)
+            };
+
+            try
+            {
+                var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                response.EnsureSuccessStatusCode();
+
+                await using var responseStream = await response.Content.ReadAsStreamAsync();
+                using var reader = new StreamReader(responseStream);
+
+                var toolCallBuffer = new StringBuilder();
+                var isToolCall = false;
+
+                while (!reader.EndOfStream)
                 {
-                    var requestBody = new
+                    var line = await reader.ReadLineAsync();
+                    if (string.IsNullOrEmpty(line)) continue;
+
+                    if (line.StartsWith("data: "))
                     {
-                        model = _openAiSettings.Model,
-                        messages = new[]
+                        var data = line.Substring("data: ".Length);
+                        if (data == "[DONE]")
                         {
-                            new { role = "user", content = currentPrompt }
-                        },
-                        temperature = 0.7,
-                        max_tokens = 1024,
-                        top_p = 0.95,
-                        frequency_penalty = 0,
-                        presence_penalty = 0,
-                        stream = true // Enable streaming
-                    };
+                            break;
+                        }
 
-                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _openAiSettings.ApiKey);
-
-                    var request = new HttpRequestMessage(HttpMethod.Post, "v1/chat/completions")
-                    {
-                        Content = JsonContent.Create(requestBody)
-                    };
-
-                    var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-                    response.EnsureSuccessStatusCode();
-
-                    await using var responseStream = await response.Content.ReadAsStreamAsync();
-                    using var reader = new StreamReader(responseStream);
-
-                    while (!reader.EndOfStream)
-                    {
-                        var line = await reader.ReadLineAsync();
-                        if (string.IsNullOrEmpty(line)) continue;
-
-                        if (line.StartsWith("data: "))
+                        using var doc = JsonDocument.Parse(data);
+                        var choices = doc.RootElement.GetProperty("choices");
+                        if (choices.GetArrayLength() > 0)
                         {
-                            var data = line.Substring("data: ".Length);
-                            if (data == "[DONE]")
-                            {
-                                break; // Exit while loop, not yield break
-                            }
+                            var choice = choices[0];
+                            var delta = choice.GetProperty("delta");
 
-                            string? contentToYield = null;
-                            try
+                            // Check for tool calls
+                            if (delta.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
                             {
-                                using var doc = JsonDocument.Parse(data);
-                                var choices = doc.RootElement.GetProperty("choices");
-                                if (choices.GetArrayLength() > 0)
+                                isToolCall = true;
+                                foreach (var toolCallDelta in toolCallsElement.EnumerateArray())
                                 {
-                                    var delta = choices[0].GetProperty("delta");
-                                    if (delta.TryGetProperty("content", out var content))
-                                    {
-                                        contentToYield = content.GetString() ?? "";
-                                    }
+                                    toolCallBuffer.Append(toolCallDelta.GetRawText());
                                 }
                             }
-                            catch (JsonException ex)
+                            else if (delta.TryGetProperty("content", out var contentElement))
                             {
-                                _logger.LogWarning(ex, "Failed to parse JSON from OpenAI stream: {Data}", data);
-                            }
-
-                            if (contentToYield != null)
-                            {
-                                chunks.Add(contentToYield);
+                                if (isToolCall && toolCallBuffer.Length > 0) // End of tool call, yield it
+                                {
+                                    var openAiToolCalls = ParseOpenAiToolCalls(toolCallBuffer.ToString());
+                                    if (openAiToolCalls != null && openAiToolCalls.Any())
+                                    {
+                                        parts.Add(new AiToolCallResponsePart(openAiToolCalls));
+                                    }
+                                    toolCallBuffer.Clear();
+                                    isToolCall = false;
+                                }
+                                parts.Add(new AiTextResponsePart(contentElement.GetString() ?? string.Empty));
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Lỗi khi gọi OpenAI API: {Message}", ex.Message);
-                    chunks.Add($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với OpenAI API: {ex.Message}");
-                }
 
-                foreach (var chunk in chunks)
+                // Yield any remaining tool call buffer at the end of the stream
+                if (isToolCall && toolCallBuffer.Length > 0)
                 {
-                    yield return chunk;
+                    var openAiToolCalls = ParseOpenAiToolCalls(toolCallBuffer.ToString());
+                    if (openAiToolCalls != null && openAiToolCalls.Any())
+                    {
+                        parts.Add(new AiToolCallResponsePart(openAiToolCalls));
+                    }
                 }
             }
-
-            await foreach (var chunk in StreamResponse(prompt))
+            catch (Exception ex)
             {
-                yield return chunk;
+                _logger.LogError(ex, "Error calling OpenAI API: {Message}", ex.Message);
+                parts.Add(new AiTextResponsePart($"Error calling OpenAI: {ex.Message}"));
+            }
+
+            foreach (var part in parts)
+            {
+                yield return part;
             }
         }
 
-        /// <summary>
-        /// Kiểm tra trạng thái của OpenAI.
-        /// </summary>
-        /// <returns>Trạng thái của OpenAI.</returns>
+        private List<AiToolCall>? ParseOpenAiToolCalls(string toolCallJson)
+        {
+            try
+            {
+                // OpenAI sends tool calls as a list of objects, each with id, type, function { name, arguments }
+                // The 'arguments' field is a JSON string itself.
+                var doc = JsonDocument.Parse($"[{{{toolCallJson}}}]"); // Wrap in array for easier parsing if it's a single object
+                var toolCalls = new List<AiToolCall>();
+
+                foreach (var element in doc.RootElement.EnumerateArray())
+                {
+                    var id = element.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
+                    var function = element.GetProperty("function");
+                    var name = function.GetProperty("name").GetString() ?? string.Empty;
+                    var args = function.GetProperty("arguments").GetString() ?? string.Empty; // Arguments are already a JSON string
+
+                    toolCalls.Add(new AiToolCall(id, name, args));
+                }
+                return toolCalls;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse OpenAI tool call JSON: {Json}", toolCallJson);
+                return null;
+            }
+        }
+
         public Task<string> GetStatusAsync()
         {
             // In a real scenario, you might ping the OpenAI API or check credentials.
