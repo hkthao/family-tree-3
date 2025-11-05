@@ -32,7 +32,7 @@ onMounted(async () => {
     return;
   }
   await userProfileStore.fetchCurrentUserProfile()
-  const subscriberId = userProfileStore.userProfile?.id
+  const subscriberId = userProfileStore.userProfile?.userId
   if (!subscriberId)
     return
 
@@ -86,3 +86,8 @@ onUnmounted(() => {
   }
 });
 </script>
+<style lang="css" scoped>
+.novu-inbox-container{
+  min-width: 320px;
+}
+</style>

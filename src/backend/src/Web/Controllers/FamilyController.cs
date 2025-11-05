@@ -20,13 +20,12 @@ namespace backend.Web.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/family")]
-public class FamilyController(IMediator mediator, ILogger<FamilyController> logger) : ControllerBase
+public class FamilyController(IMediator mediator) : ControllerBase
 {
     /// <summary>
     /// Đối tượng IMediator để gửi các lệnh và truy vấn.
     /// </summary>
     private readonly IMediator _mediator = mediator;
-    private readonly ILogger<FamilyController> _logger = logger;
 
     /// <summary>
     /// Xử lý GET request để lấy thông tin chi tiết của một gia đình theo ID.
