@@ -83,41 +83,67 @@ export const useChatStore = defineStore('chat', {
       };
       this.addMessage(this.selectedChatId, userMessage);
 
-      // A plain object for the assistant's message to be added to the store.
-      const assistantMessageData: ChatMessage = {
-        _id: (Date.now() + 1).toString(),
-        content: '',
+      // 1. Add a temporary placeholder message
+      const tempMessageId = `temp_${Date.now()}`;
+      const tempMessage: ChatMessage = {
+        _id: tempMessageId,
+        content: '...',
         senderId: 'assistant',
         username: 'AI Assistant',
         timestamp: new Date().toTimeString().substring(0, 5),
         date: new Date().toLocaleDateString(),
       };
-      this.addMessage(this.selectedChatId, assistantMessageData);
-
-      // Get the reactive message object from the state array.
-      // This is the key to making UI updates work.
-      const assistantMessage = this.currentChatMessages[this.currentChatMessages.length - 1];
+      this.addMessage(this.selectedChatId, tempMessage);
 
       try {
-        // Access chatService via this.services
         const chatService = this.services.chat as IChatService;
         const responseStream = chatService.sendMessageStream(messageContent);
         
-        let chunkReceived = false;
+        // 2. Accumulate the full response in a variable
+        let fullContent = '';
         for await (const chunk of responseStream) {
-          chunkReceived = true;
-          assistantMessage.content += chunk;
-          // Update the last message in chatList for the current chat
-          this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp, assistantMessage.date);
+          fullContent += chunk;
         }
+
+        // 3. Remove the temporary message
+        const tempMessageIndex = this.messages[this.selectedChatId].findIndex(m => m._id === tempMessageId);
+        if (tempMessageIndex !== -1) {
+          this.messages[this.selectedChatId].splice(tempMessageIndex, 1);
+        }
+
+        // 4. Add the final message with the complete content
+        const finalMessage: ChatMessage = {
+          _id: (Date.now() + 1).toString(),
+          content: fullContent || i18nTranslator('chat.errors.emptyResponse'),
+          senderId: 'assistant',
+          username: 'AI Assistant',
+          timestamp: new Date().toTimeString().substring(0, 5),
+          date: new Date().toLocaleDateString(),
+        };
+        this.addMessage(this.selectedChatId, finalMessage);
+
       } catch (err: any) {
         console.error('Error sending message or processing stream:', err);
         const errorMessage = err.message || 'An unknown error occurred.';
 
-        // Update the message content with the error.
-        assistantMessage.content = errorMessage;
-        assistantMessage.isError = true; // Mark the message as an error
-        this.updateLastMessage(this.selectedChatId, assistantMessage.content, assistantMessage.timestamp, assistantMessage.date);
+        // In case of an error, replace the temp message with an error message
+        const tempMessageIndex = this.messages[this.selectedChatId].findIndex(m => m._id === tempMessageId);
+        if (tempMessageIndex !== -1) {
+          this.messages[this.selectedChatId][tempMessageIndex].content = errorMessage;
+          this.messages[this.selectedChatId][tempMessageIndex].isError = true;
+        } else {
+          // If temp message not found for some reason, add a new error message
+          const errorMsg: ChatMessage = {
+            _id: (Date.now() + 1).toString(),
+            content: errorMessage,
+            senderId: 'assistant',
+            username: 'AI Assistant',
+            timestamp: new Date().toTimeString().substring(0, 5),
+            date: new Date().toLocaleDateString(),
+            isError: true,
+          };
+          this.addMessage(this.selectedChatId, errorMsg);
+        }
       } finally {
         this.isLoading = false;
       }

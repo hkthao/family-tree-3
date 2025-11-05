@@ -12,9 +12,16 @@
         <vue-advanced-chat :messages="formattedMessages" :current-user-id="currentUserId"
           :is-loading="chatStore.isLoading" :show-footer="true" :messages-loaded="messagesLoaded"
           :rooms="JSON.stringify([{ roomId: 'ai-assistant', roomName: 'AI Assistant', users: [{ _id: currentUserId, username: authStore.user?.id || 'You' }, { _id: 'assistant', username: 'AI Assistant' }] }])"
-          :rooms-loaded="true"
-          :single-room="true"
-          @send-message="handleSendMessage"/>
+          :rooms-loaded="true" :single-room="true" :typing-users="typingUsers" :show-audio="false" :auto-scroll="JSON.stringify({
+            send: {
+              new: true,
+              newAfterScrollUp: false
+            },
+            receive: {
+              new: false,
+              newAfterScrollUp: true
+            }
+          })" @send-message="handleSendMessage" />
       </v-card-text>
       <v-alert v-if="chatStore.error" type="error" dense dismissible class="ma-2">
         {{ chatStore.error }}
@@ -65,8 +72,16 @@ const formattedMessages = computed(() => {
     username: msg.senderId === currentUserId.value ? authStore.user?.id || 'You' : 'AI Assistant',
     timestamp: msg.timestamp,
     date: msg.date,
+    isError: msg.isError, // Pass the isError flag
   }));
   return messages;
+});
+
+const typingUsers = computed(() => {
+  if (chatStore.isLoading) {
+    return [{ _id: 'assistant', username: 'AI Assistant' }];
+  }
+  return [];
 });
 
 const toggleChat = () => {
