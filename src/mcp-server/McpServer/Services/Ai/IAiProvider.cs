@@ -1,4 +1,6 @@
-namespace McpServer.Services
+using McpServer.Services.Ai.Tools;
+
+namespace McpServer.Services.Ai
 {
     /// <summary>
     /// Định nghĩa giao diện cho các nhà cung cấp AI Assistant.

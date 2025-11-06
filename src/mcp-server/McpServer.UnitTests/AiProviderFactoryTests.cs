@@ -1,12 +1,10 @@
-using Xunit;
 using Moq;
-using Microsoft.Extensions.DependencyInjection;
-using McpServer.Services;
-using System;
 using McpServer.Config;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
-using System.Net.Http;
+using McpServer.Services.Ai;
+using McpServer.Services.Ai.Providers;
+using McpServer.Services.Ai.Prompt;
 namespace McpServer.UnitTests;
 
 /// <summary>

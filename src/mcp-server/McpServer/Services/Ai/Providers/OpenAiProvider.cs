@@ -3,8 +3,11 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Net.Http.Headers;
 using System.Text;
+using McpServer.Services.Ai; // For IAiProvider
+using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
+using McpServer.Services.Ai.Tools; // For AiTool related types
 
-namespace McpServer.Services
+namespace McpServer.Services.Ai.Providers
 {
     /// <summary>
     /// Nhà cung cấp AI sử dụng OpenAI API, có hỗ trợ tool-calling.

@@ -1,4 +1,6 @@
-namespace McpServer.Services;
+using McpServer.Services.Ai.Tools;
+
+namespace McpServer.Services.Ai;
 
 /// <summary>
 /// Dịch vụ chính để tương tác với AI, điều phối luồng tool-use.

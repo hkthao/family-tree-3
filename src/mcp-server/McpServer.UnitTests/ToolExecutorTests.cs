@@ -1,14 +1,10 @@
-using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
-using McpServer.Services;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System;
-using Microsoft.Extensions.Configuration;
-using System.Net.Http;
 using McpServer.Config;
 using Microsoft.Extensions.Options;
+using McpServer.Services.Integrations;
+using McpServer.Services.Ai.Tools;
 
 namespace McpServer.UnitTests;
 
@@ -42,7 +38,7 @@ public class ToolExecutorTests
             "search_family",
             JsonSerializer.Serialize(new { query = query })
         );
-        var expectedResult = new List<McpServer.Services.FamilyDto> { new McpServer.Services.FamilyDto { Id = 1, Name = query, History = "Some history" } };
+        var expectedResult = new List<FamilyDto> { new FamilyDto { Id = 1, Name = query, History = "Some history" } };
 
         _mockFamilyTreeBackendService
             .Setup(s => s.SearchFamiliesAsync(jwtToken, query))
@@ -118,7 +114,7 @@ public class ToolExecutorTests
             "get_family_details",
             JsonSerializer.Serialize(new { id = familyId })
         );
-        var expectedResult = new McpServer.Services.FamilyDto { Id = familyId.GetHashCode(), Name = "DetailedFamily", History = "Detailed history" };
+        var expectedResult = new FamilyDto { Id = familyId.GetHashCode(), Name = "DetailedFamily", History = "Detailed history" };
 
         _mockFamilyTreeBackendService
             .Setup(s => s.GetFamilyByIdAsync(familyId, jwtToken))
@@ -215,7 +211,7 @@ public class ToolExecutorTests
             "search_members",
             JsonSerializer.Serialize(new { query = query, familyId = familyId })
         );
-        var expectedResult = new List<McpServer.Services.MemberDetailDto> { new McpServer.Services.MemberDetailDto { Id = Guid.NewGuid(), FullName = query } };
+        var expectedResult = new List<MemberDetailDto> { new MemberDetailDto { Id = Guid.NewGuid(), FullName = query } };
 
         _mockFamilyTreeBackendService
             .Setup(s => s.SearchMembersAsync(jwtToken, query, familyId))

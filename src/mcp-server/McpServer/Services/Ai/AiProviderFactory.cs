@@ -1,4 +1,6 @@
-namespace McpServer.Services
+using McpServer.Services.Ai.Providers;
+
+namespace McpServer.Services.Ai
 {
     /// <summary>
     /// Factory để tạo và trả về các nhà cung cấp AI Assistant khác nhau.

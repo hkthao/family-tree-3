@@ -1,6 +1,10 @@
 using System.Text.Json;
+using McpServer.Models;
+using McpServer.Services.Ai; // For IAiProvider
+using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
+using McpServer.Services.Ai.Tools; // For AiTool related types
 
-namespace McpServer.Services;
+namespace McpServer.Services.Ai.Tools;
 
 /// <summary>
 /// Xử lý các tương tác AI liên quan đến việc gọi và thực thi công cụ.
@@ -10,12 +14,14 @@ public class ToolInteractionHandler
     private readonly IAiProvider _aiProvider;
     private readonly ToolExecutor _toolExecutor;
     private readonly ILogger<ToolInteractionHandler> _logger;
+    private readonly IAiPromptBuilder _promptBuilder;
 
-    public ToolInteractionHandler(IAiProvider aiProvider, ToolExecutor toolExecutor, ILogger<ToolInteractionHandler> logger)
+    public ToolInteractionHandler(IAiProvider aiProvider, ToolExecutor toolExecutor, ILogger<ToolInteractionHandler> logger, IAiPromptBuilder promptBuilder)
     {
         _aiProvider = aiProvider;
         _toolExecutor = toolExecutor;
         _logger = logger;
+        _promptBuilder = promptBuilder;
     }
 
     /// <summary>
@@ -113,14 +119,14 @@ public class ToolInteractionHandler
     /// <summary>
     /// Xử lý luồng tương tác AI có gọi công cụ.
     /// </summary>
-    public virtual async IAsyncEnumerable<string> HandleToolInteractionAsync(string prompt, string? jwtToken)
+    public virtual async IAsyncEnumerable<string> HandleToolInteractionAsync(string userPrompt, string? jwtToken)
     {
         List<string> finalResponseChunks = [];
         var tools = DefineTools();
 
         // Gửi prompt và danh sách tool đến LLM
         _logger.LogInformation("Phase 1: Sending prompt and tool definitions to LLM.");
-        var responseParts = _aiProvider.GenerateToolUseResponseStreamAsync(prompt, tools);
+        var responseParts = _aiProvider.GenerateToolUseResponseStreamAsync(userPrompt, tools);
 
         var toolCalls = new List<AiToolCall>();
         await foreach (var part in responseParts)
@@ -160,12 +166,8 @@ public class ToolInteractionHandler
         _logger.LogInformation("Phase 2: Sending tool results back to LLM for final response.");
 
         // Construct a new prompt for the LLM to generate a natural language response based on tool results
-        var toolResultsJson = JsonSerializer.Serialize(toolResults);
-        var followUpPrompt = $"Dựa trên yêu cầu ban đầu của người dùng: '{prompt}' và các kết quả từ việc thực thi công cụ: {toolResultsJson}, hãy tạo một phản hồi tự nhiên và hữu ích cho người dùng.";
-
-        _logger.LogInformation("followUpPrompt: {followUpPrompt}", followUpPrompt);
-
-        var finalResponseParts = _aiProvider.GenerateChatResponseStreamAsync(followUpPrompt);
+        // The promptBuilder will now handle the full message construction including system and tool roles.
+        var finalResponseParts = _aiProvider.GenerateToolUseResponseStreamAsync(userPrompt, tools, toolResults);
 
         await foreach (var part in finalResponseParts)
         {
@@ -192,7 +194,7 @@ public class ToolInteractionHandler
                     bool textResponseReceived = false;
                     while (rePromptAttempt < maxRePromptAttempts && !textResponseReceived)
                     {
-                        var rePromptResponseParts = _aiProvider.GenerateChatResponseStreamAsync(followUpPrompt);
+                        var rePromptResponseParts = _aiProvider.GenerateToolUseResponseStreamAsync(userPrompt, tools, toolResults);
                         await foreach (var rePromptPart in rePromptResponseParts)
                         {
                             if (rePromptPart is AiTextResponsePart rePromptTextPart)

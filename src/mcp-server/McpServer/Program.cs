@@ -2,7 +2,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using McpServer.Config; // For app settings classes
-using McpServer.Services; // For AiService, IAiProvider, AiProviderFactory, and concrete providers
+using McpServer.Services.Ai; // For AiService, IAiProvider, AiProviderFactory
+using McpServer.Services.Ai.Providers; // For concrete AI providers
+using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder, ISystemPromptManager
+using McpServer.Services.Ai.Tools; // For ToolExecutor, ToolInteractionHandler
+using McpServer.Services.Integrations; // For FamilyTreeBackendService
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,6 +119,7 @@ builder.Services.AddHttpClient<LocalLlmProvider>(client =>
 builder.Services.AddSingleton<AiProviderFactory>();
 
 // Register AI Prompt Builder
+builder.Services.AddSingleton<ISystemPromptManager, SystemPromptManager>();
 builder.Services.AddSingleton<IAiPromptBuilder, AiPromptBuilder>();
 
 // Register ToolExecutor

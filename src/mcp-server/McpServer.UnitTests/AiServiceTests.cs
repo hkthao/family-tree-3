@@ -1,15 +1,12 @@
-using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using McpServer.Services;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Text.Json;
-using System.Linq;
-using System;
 using Microsoft.Extensions.Options;
 using McpServer.Config;
+using McpServer.Services.Ai;
+using McpServer.Services.Ai.Tools;
+using McpServer.Services.Integrations;
+using McpServer.Services.Ai.Prompt;
 
 namespace McpServer.UnitTests;
 
@@ -47,7 +44,7 @@ public class AiServiceTests
 
 
 
-        _mockToolInteractionHandler = new Mock<ToolInteractionHandler>(MockBehavior.Strict, _mockAiProvider.Object, _mockToolExecutor.Object, new Mock<ILogger<ToolInteractionHandler>>().Object); // Instantiate mock for ToolInteractionHandler
+                _mockToolInteractionHandler = new Mock<ToolInteractionHandler>(MockBehavior.Strict, _mockAiProvider.Object, _mockToolExecutor.Object, new Mock<ILogger<ToolInteractionHandler>>().Object, new Mock<IAiPromptBuilder>().Object); // Instantiate mock for ToolInteractionHandler
 
         _aiService = new AiService(
             _mockAiProviderFactory.Object,

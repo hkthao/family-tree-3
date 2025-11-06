@@ -1,6 +1,8 @@
 using System.Text.Json;
+using McpServer.Services.Integrations; // For FamilyTreeBackendService
+using McpServer.Services.Ai.Tools; // For AiTool related types
 
-namespace McpServer.Services;
+namespace McpServer.Services.Ai.Tools;
 
 /// <summary>
 /// Thực thi các lời gọi tool từ AI, bao gồm xác thực đối số và gọi backend service.

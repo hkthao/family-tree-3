@@ -7,8 +7,11 @@ using McpServer.Config;
 using Microsoft.Extensions.Options;
 using System.Text;
 using System.Text.Json;
+using McpServer.Services.Ai; // For IAiProvider
+using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
+using McpServer.Services.Ai.Tools; // For AiTool related types
 
-namespace McpServer.Services
+namespace McpServer.Services.Ai.Providers
 {
     /// <summary>
     /// Nhà cung cấp AI Assistant sử dụng Gemini API.
@@ -27,14 +30,14 @@ namespace McpServer.Services
         }
 
         public async IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(
-            string prompt,
+            string userPrompt,
             List<AiToolDefinition>? tools = null,
             List<AiToolResult>? toolResults = null)
         {
-            var fullPrompt = _promptBuilder.BuildPromptForToolUse(prompt, tools, toolResults);
-            List<AiResponsePart> parts = new List<AiResponsePart>();
+            List<AiResponsePart> partsToYield = new List<AiResponsePart>();
             try
             {
+                var messages = _promptBuilder.BuildPromptForToolUse(userPrompt, tools, toolResults);
                 var credential = GoogleCredential.GetApplicationDefault();
                 var client = await new PredictionServiceClientBuilder
                 {
@@ -48,7 +51,7 @@ namespace McpServer.Services
                     {
                         Fields =
                         {
-                            { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = fullPrompt.ToString() } }
+                            { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = messages.First().Content } } // Assuming the first message is the main prompt
                         }
                     }
                 };
@@ -77,32 +80,36 @@ namespace McpServer.Services
                     var prediction = response.Predictions.First();
                     if (prediction.StructValue.Fields.TryGetValue("content", out var contentValue))
                     {
-                        parts.Add(new AiTextResponsePart(contentValue.StringValue));
+                        partsToYield.Add(new AiTextResponsePart(contentValue.StringValue));
+                    }
+                    else
+                    {
+                        partsToYield.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
                     }
                 }
                 else
                 {
-                    parts.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
+                    partsToYield.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi gọi Gemini AI: {Message}", ex.Message);
-                parts.Add(new AiTextResponsePart($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}"));
+                partsToYield.Add(new AiTextResponsePart($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}"));
             }
 
-            foreach (var part in parts)
+            foreach (var part in partsToYield)
             {
                 yield return part;
             }
         }
 
-        public async IAsyncEnumerable<AiResponsePart> GenerateChatResponseStreamAsync(string prompt)
+        public async IAsyncEnumerable<AiResponsePart> GenerateChatResponseStreamAsync(string userPrompt)
         {
-            var fullPrompt = _promptBuilder.BuildPromptForChat(prompt);
-            List<AiResponsePart> parts = new List<AiResponsePart>();
+            List<AiResponsePart> partsToYield = new List<AiResponsePart>();
             try
             {
+                var messages = _promptBuilder.BuildPromptForChat(userPrompt);
                 var credential = GoogleCredential.GetApplicationDefault();
                 var client = await new PredictionServiceClientBuilder
                 {
@@ -116,7 +123,7 @@ namespace McpServer.Services
                     {
                         Fields =
                         {
-                            { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = fullPrompt.ToString() } }
+                            { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = messages.First().Content } } // Assuming the first message is the main prompt
                         }
                     }
                 };
@@ -145,26 +152,29 @@ namespace McpServer.Services
                     var prediction = response.Predictions.First();
                     if (prediction.StructValue.Fields.TryGetValue("content", out var contentValue))
                     {
-                        parts.Add(new AiTextResponsePart(contentValue.StringValue));
+                        partsToYield.Add(new AiTextResponsePart(contentValue.StringValue));
+                    }
+                    else
+                    {
+                        partsToYield.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
                     }
                 }
                 else
                 {
-                    parts.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
+                    partsToYield.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi gọi Gemini AI: {Message}", ex.Message);
-                parts.Add(new AiTextResponsePart($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}"));
+                partsToYield.Add(new AiTextResponsePart($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}"));
             }
 
-            foreach (var part in parts)
+            foreach (var part in partsToYield)
             {
                 yield return part;
             }
         }
-
         public Task<string> GetStatusAsync()
         {
             // For now, just return "OK" as a placeholder.

@@ -1,16 +1,11 @@
-using Xunit;
 using Moq;
 using Microsoft.Extensions.Logging;
-using McpServer.Services;
-using System.Net.Http;
-using System.Threading.Tasks;
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using McpServer.Config;
-using System.Collections.Generic;
-using System;
 using Moq.Protected;
+using McpServer.Services.Integrations;
 
 namespace McpServer.UnitTests;
 

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using McpServer.Services;
+using McpServer.Services.Ai;
 using System.Security.Claims;
 
 namespace McpServer.Controllers

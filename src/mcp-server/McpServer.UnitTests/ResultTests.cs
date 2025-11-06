@@ -1,4 +1,3 @@
-using Xunit;
 using McpServer.Common.Models;
 
 namespace McpServer.UnitTests;

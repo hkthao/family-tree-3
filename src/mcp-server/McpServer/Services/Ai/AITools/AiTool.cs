@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace McpServer.Services;
+namespace McpServer.Services.Ai.Tools;
 
 // Lớp cơ sở cho các phản hồi từ AI, có thể là text hoặc tool call
 public abstract record AiResponsePart;
