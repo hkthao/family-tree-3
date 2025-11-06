@@ -10,10 +10,10 @@ public enum AiMessageRole
 
 public class AiMessage
 {
-    public AiMessageRole Role { get; set; }
+    public string Role { get; set; }
     public string Content { get; set; }
 
-    public AiMessage(AiMessageRole role, string content)
+    public AiMessage(string role, string content)
     {
         Role = role;
         Content = content;

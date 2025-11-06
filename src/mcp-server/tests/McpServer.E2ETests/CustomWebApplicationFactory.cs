@@ -34,9 +34,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             // Mock IAiProvider to simulate a tool call
             var mockAiProvider = new Mock<IAiProvider>();
             mockAiProvider.Setup(p => p.GenerateToolUseResponseStreamAsync(
-                It.Is<string>(prompt => prompt.Contains("show me detail family with id")),
-                It.IsAny<List<AiToolDefinition>>(),
-                It.IsAny<List<AiToolResult>>()))
+                It.Is<List<AiMessage>>(messages => messages.Any(m => m.Content.Contains("show me detail family with id")))))
                 .Returns(() =>
                 {
                     var toolCalls = new List<AiToolCall>

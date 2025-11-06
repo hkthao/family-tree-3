@@ -5,25 +5,22 @@ namespace McpServer.Services.Ai;
 /// <summary>
 /// Dịch vụ chính để tương tác với AI, điều phối luồng tool-use.
 /// </summary>
-    public class AiService
+public class AiService
 {
     private readonly AiProviderFactory _aiProviderFactory;
     private readonly ILogger<AiService> _logger;
     private readonly string _defaultAiProvider;
-    private readonly ToolExecutor _toolExecutor;
     private readonly ToolInteractionHandler _toolInteractionHandler; // Inject ToolInteractionHandler
 
     public AiService(
         AiProviderFactory aiProviderFactory,
         ILogger<AiService> logger,
         IConfiguration configuration,
-        ToolExecutor toolExecutor,
         ToolInteractionHandler toolInteractionHandler) // Inject ToolInteractionHandler
     {
         _aiProviderFactory = aiProviderFactory;
         _logger = logger;
         _defaultAiProvider = configuration["DefaultAiProvider"] ?? "Gemini";
-        _toolExecutor = toolExecutor;
         _toolInteractionHandler = toolInteractionHandler; // Assign ToolInteractionHandler
     }
     /// <summary>
@@ -32,11 +29,10 @@ namespace McpServer.Services.Ai;
     public async IAsyncEnumerable<string> GetAiResponseStreamAsync(string prompt, string? jwtToken, string? providerName = null)
     {
         var selectedProviderName = providerName ?? _defaultAiProvider;
-        IAiProvider? aiProvider = null;
         string? errorMessage = null;
         try
         {
-            aiProvider = _aiProviderFactory.GetProvider(selectedProviderName);
+            _aiProviderFactory.GetProvider(selectedProviderName);
         }
         catch (ArgumentException ex)
         {

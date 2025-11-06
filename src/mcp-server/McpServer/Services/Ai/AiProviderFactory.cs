@@ -24,8 +24,8 @@ namespace McpServer.Services.Ai
         {
             return providerName.ToLowerInvariant() switch
             {
-                "gemini" => _serviceProvider.GetRequiredService<GeminiProvider>(),
-                "openai" => _serviceProvider.GetRequiredService<OpenAiProvider>(),
+                // "gemini" => _serviceProvider.GetRequiredService<GeminiProvider>(),
+                // "openai" => _serviceProvider.GetRequiredService<OpenAiProvider>(),
                 "localllm" => _serviceProvider.GetRequiredService<LocalLlmProvider>(),
                 _ => throw new ArgumentException($"AI provider '{providerName}' not found.")
             };

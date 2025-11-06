@@ -3,7 +3,6 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text;
 using McpServer.Models;
-using McpServer.Services.Ai; // For IAiProvider
 using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
 using McpServer.Services.Ai.Tools; // For AiTool related types
 
@@ -25,13 +24,9 @@ public class LocalLlmProvider : IAiProvider
         _promptBuilder = promptBuilder;
     }
 
-    public async IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(
-        string userPrompt,
-        List<AiToolDefinition>? tools = null,
-        List<AiToolResult>? toolResults = null)
+    public async IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(List<AiMessage> messages)
     {
         List<AiResponsePart> partsToYield = new List<AiResponsePart>();
-        var messages = _promptBuilder.BuildPromptForToolUse(userPrompt, tools, toolResults);
         var requestBody = new
         {
             model = _settings.Model,

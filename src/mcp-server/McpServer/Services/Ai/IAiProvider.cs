@@ -1,3 +1,4 @@
+using McpServer.Models; // Add this using statement
 using McpServer.Services.Ai.Tools;
 
 namespace McpServer.Services.Ai
@@ -10,14 +11,9 @@ namespace McpServer.Services.Ai
         /// <summary>
         /// Tạo phản hồi từ AI, có thể bao gồm các yêu cầu gọi tool.
         /// </summary>
-        /// <param name="prompt">Prompt từ người dùng.</param>
-        /// <param name="tools">Danh sách các tool có sẵn để LLM sử dụng.</param>
-        /// <param name="toolResults">Kết quả từ các lần gọi tool trước đó (nếu có).</param>
+        /// <param name="messages">Lịch sử trò chuyện và prompt hiện tại.</param>
         /// <returns>Một stream các phần phản hồi, có thể là text hoặc yêu cầu gọi tool.</returns>
-        IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(
-            string prompt, 
-            List<AiToolDefinition>? tools = null, 
-            List<AiToolResult>? toolResults = null);
+        IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(List<AiMessage> messages);
 
         /// <summary>
         /// Tạo phản hồi từ AI chỉ dựa trên prompt, không liên quan đến tool.

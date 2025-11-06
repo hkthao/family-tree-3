@@ -1,6 +1,5 @@
 using System.Text.Json;
 using McpServer.Services.Integrations; // For FamilyTreeBackendService
-using McpServer.Services.Ai.Tools; // For AiTool related types
 
 namespace McpServer.Services.Ai.Tools;
 

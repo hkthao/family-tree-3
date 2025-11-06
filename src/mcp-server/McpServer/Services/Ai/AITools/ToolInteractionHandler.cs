@@ -1,8 +1,5 @@
 using System.Text.Json;
-using McpServer.Models;
-using McpServer.Services.Ai; // For IAiProvider
 using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
-using McpServer.Services.Ai.Tools; // For AiTool related types
 
 namespace McpServer.Services.Ai.Tools;
 
@@ -124,21 +121,19 @@ public class ToolInteractionHandler
         List<string> finalResponseChunks = [];
         var tools = DefineTools();
 
+        // Build the initial prompt
+        var messages = _promptBuilder.BuildPromptForToolUse(userPrompt, tools);
+        _logger.LogInformation("BuildPromptForToolUse: ${messages}", JsonSerializer.Serialize(messages));
+
         // Gửi prompt và danh sách tool đến LLM
         _logger.LogInformation("Phase 1: Sending prompt and tool definitions to LLM.");
-        var responseParts = _aiProvider.GenerateToolUseResponseStreamAsync(userPrompt, tools);
+        var responseParts = _aiProvider.GenerateToolUseResponseStreamAsync(messages);
 
         var toolCalls = new List<AiToolCall>();
         await foreach (var part in responseParts)
         {
             _logger.LogInformation("Received AiResponsePart of type: {PartType}", part.GetType().Name);
-            if (part is AiTextResponsePart textPart)
-            {
-                // Nếu LLM trả lời thẳng bằng text (không gọi tool), stream nó ra ngay
-                _logger.LogInformation("LLM responded with text directly. Streaming response.");
-                finalResponseChunks.Add(textPart.Text);
-            }
-            else if (part is AiToolCallResponsePart toolCallPart)
+            if (part is AiToolCallResponsePart toolCallPart)
             {
                 _logger.LogInformation("LLM requested to call {ToolCount} tools.", toolCallPart.ToolCalls.Count);
                 toolCalls.AddRange(toolCallPart.ToolCalls);
@@ -165,68 +160,17 @@ public class ToolInteractionHandler
         // Gửi kết quả tool call lại cho LLM để tổng hợp câu trả lời
         _logger.LogInformation("Phase 2: Sending tool results back to LLM for final response.");
 
-        // Construct a new prompt for the LLM to generate a natural language response based on tool results
-        // The promptBuilder will now handle the full message construction including system and tool roles.
-        var finalResponseParts = _aiProvider.GenerateToolUseResponseStreamAsync(userPrompt, tools, toolResults);
+        // Build the prompt with tool results
+        var finalMessages = _promptBuilder.BuildPromptForChat(userPrompt, toolResults);
+        _logger.LogInformation("BuildPromptForToolUse: ${messages}", JsonSerializer.Serialize(messages));
+
+        var finalResponseParts = _aiProvider.GenerateToolUseResponseStreamAsync(finalMessages);
 
         await foreach (var part in finalResponseParts)
         {
             if (part is AiTextResponsePart textPart)
             {
                 finalResponseChunks.Add(textPart.Text);
-            }
-            else if (part is AiToolCallResponsePart toolCallPart)
-            {
-                if (toolCallPart.ToolCalls.Any())
-                {
-                    _logger.LogWarning("LLM attempted to call tools in the final response phase. Executing them and re-prompting.");
-                    // Execute these unexpected tool calls
-                    foreach (var unexpectedToolCall in toolCallPart.ToolCalls)
-                    {
-                        var toolResult = await _toolExecutor.ExecuteToolCallAsync(unexpectedToolCall, jwtToken);
-                        toolResults.Add(toolResult);
-                    }
-
-                    // Re-prompt the LLM with the new tool results
-                    int rePromptAttempt = 0;
-                    const int maxRePromptAttempts = 2; // Allow 2 additional re-prompts
-
-                    bool textResponseReceived = false;
-                    while (rePromptAttempt < maxRePromptAttempts && !textResponseReceived)
-                    {
-                        var rePromptResponseParts = _aiProvider.GenerateToolUseResponseStreamAsync(userPrompt, tools, toolResults);
-                        await foreach (var rePromptPart in rePromptResponseParts)
-                        {
-                            if (rePromptPart is AiTextResponsePart rePromptTextPart)
-                            {
-                                finalResponseChunks.Add(rePromptTextPart.Text);
-                                textResponseReceived = true;
-                                break; // Exit inner foreach
-                            }
-                            else if (rePromptPart is AiToolCallResponsePart rePromptToolCallPart)
-                            {
-                                if (rePromptToolCallPart.ToolCalls.Any())
-                                {
-                                    _logger.LogWarning("LLM still attempted to call tools after re-prompt attempt {Attempt}. Executing them and re-prompting again.", rePromptAttempt + 1);
-                                    foreach (var furtherUnexpectedToolCall in rePromptToolCallPart.ToolCalls)
-                                    {
-                                        var toolResult = await _toolExecutor.ExecuteToolCallAsync(furtherUnexpectedToolCall, jwtToken);
-                                        toolResults.Add(toolResult);
-                                    }
-                                    rePromptAttempt++;
-                                    // Continue to next iteration of while loop to re-prompt
-                                    break; // Exit inner foreach
-                                }
-                            }
-                        }
-
-                        if (!textResponseReceived && rePromptAttempt >= maxRePromptAttempts)
-                        {
-                            _logger.LogError("LLM persistently attempted to call tools after {MaxAttempts} re-prompts. Returning a fallback error.", maxRePromptAttempts);
-                            finalResponseChunks.Add("Error: The AI is unable to provide a definitive answer at this time as it's repeatedly trying to use tools. Please try rephrasing your request or contact support.");
-                        }
-                    }
-                }
             }
         }
         _logger.LogInformation("Finished streaming final response from LLM.");
