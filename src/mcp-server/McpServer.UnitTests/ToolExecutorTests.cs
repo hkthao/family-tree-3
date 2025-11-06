@@ -1,30 +1,55 @@
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using McpServer.Config;
 using Microsoft.Extensions.Options;
 using McpServer.Services.Integrations;
-using McpServer.Services.Ai.Tools;
+using McpServer.Services.Ai.AITools;
+using McpServer.Models;
 
 namespace McpServer.UnitTests;
 
 public class ToolExecutorTests
 {
+    private readonly Mock<IServiceProvider> _mockServiceProvider;
     private readonly Mock<FamilyTreeBackendService> _mockFamilyTreeBackendService;
     private readonly Mock<ILogger<ToolExecutor>> _mockLogger;
     private readonly ToolExecutor _toolExecutor;
 
     public ToolExecutorTests()
     {
-        // Mock dependencies for FamilyTreeBackendService constructor
-        var mockFamilyTreeBackendSettings = new Mock<IOptions<FamilyTreeBackendSettings>>();
-        mockFamilyTreeBackendSettings.Setup(o => o.Value).Returns(new FamilyTreeBackendSettings { BaseUrl = "http://localhost:5000" });
-        var mockFamilyTreeBackendServiceLogger = new Mock<ILogger<FamilyTreeBackendService>>();
-        var httpClient = new HttpClient();
-
-        _mockFamilyTreeBackendService = new Mock<FamilyTreeBackendService>(httpClient, mockFamilyTreeBackendSettings.Object, mockFamilyTreeBackendServiceLogger.Object);
+        _mockServiceProvider = new Mock<IServiceProvider>();
         _mockLogger = new Mock<ILogger<ToolExecutor>>();
-        _toolExecutor = new ToolExecutor(_mockFamilyTreeBackendService.Object, _mockLogger.Object);
+
+        // Mock dependencies for FamilyTreeBackendService
+        var mockHttpClient = new Mock<HttpClient>();
+        var mockFamilyTreeBackendSettings = new Mock<IOptions<FamilyTreeBackendSettings>>();
+        var mockFamilyTreeBackendServiceLogger = new Mock<ILogger<FamilyTreeBackendService>>();
+
+        // Create a mock for FamilyTreeBackendService using its mocked dependencies
+        _mockFamilyTreeBackendService = new Mock<FamilyTreeBackendService>(
+            mockHttpClient.Object,
+            mockFamilyTreeBackendSettings.Object,
+            mockFamilyTreeBackendServiceLogger.Object
+        );
+
+        // Setup IServiceProvider to return the mocked FamilyTreeBackendService
+        _mockServiceProvider.Setup(sp => sp.GetService(typeof(FamilyTreeBackendService)))
+                            .Returns(_mockFamilyTreeBackendService.Object);
+        // Setup a mock IServiceScopeFactory
+        var mockServiceScopeFactory = new Mock<IServiceScopeFactory>();
+        _mockServiceProvider.Setup(sp => sp.GetService(typeof(IServiceScopeFactory)))
+                            .Returns(mockServiceScopeFactory.Object);
+
+        // Setup a mock IServiceScope
+        var mockServiceScope = new Mock<IServiceScope>();
+        mockServiceScopeFactory.Setup(f => f.CreateScope()).Returns(mockServiceScope.Object);
+
+        // Setup the IServiceScope to return the main _mockServiceProvider
+        mockServiceScope.Setup(s => s.ServiceProvider).Returns(_mockServiceProvider.Object);
+
+        _toolExecutor = new ToolExecutor(_mockServiceProvider.Object, _mockLogger.Object);
     }
 
     [Fact]
@@ -33,11 +58,15 @@ public class ToolExecutorTests
         // Arrange
         var jwtToken = "test_jwt";
         var query = "TestFamily";
-        var toolCall = new AiToolCall(
-            "call_id_1",
-            "search_family",
-            JsonSerializer.Serialize(new { query = query })
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_1",
+            Function = new AiToolFunction
+            {
+                Name = "search_families",
+                Arguments = JsonSerializer.Serialize(new { query = query })
+            }
+        };
         var expectedResult = new List<FamilyDto> { new FamilyDto { Id = 1, Name = query, History = "Some history" } };
 
         _mockFamilyTreeBackendService
@@ -45,12 +74,15 @@ public class ToolExecutorTests
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains(query, result.Content); // Check if the content contains the query
+        var actualResult = Assert.IsType<List<FamilyDto>>(result.Output);
+        Assert.Single(actualResult);
+        Assert.Equal(expectedResult.First().Name, actualResult.First().Name);
         _mockFamilyTreeBackendService.Verify(s => s.SearchFamiliesAsync(jwtToken, query), Times.Once);
     }
 
@@ -59,22 +91,24 @@ public class ToolExecutorTests
     {
         // Arrange
         var jwtToken = "test_jwt";
-        var toolCall = new AiToolCall(
-            "call_id_2",
-            "search_family",
-            JsonSerializer.Serialize(new { }) // Missing query
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_2",
+            Function = new AiToolFunction
+            {
+                Name = "search_families",
+                Arguments = JsonSerializer.Serialize(new { }) // Missing query
+            }
+        };
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.False(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
-        Assert.NotNull(errorDict);
-        Assert.True(errorDict.ContainsKey("error"));
-        Assert.Contains("Missing 'query' argument for search_family.", errorDict["error"]);
+        Assert.Contains("key was not present", result.ErrorMessage);
         _mockFamilyTreeBackendService.Verify(s => s.SearchFamiliesAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     }
 
@@ -82,25 +116,31 @@ public class ToolExecutorTests
     public async Task ExecuteToolCallAsync_SearchFamily_NoAuth_ReturnsError()
     {
         // Arrange
-        string? jwtToken = null;
+        string jwtToken = string.Empty;
         var query = "TestFamily";
-        var toolCall = new AiToolCall(
-            "call_id_3",
-            "search_family",
-            JsonSerializer.Serialize(new { query = query })
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_3",
+            Function = new AiToolFunction
+            {
+                Name = "search_families",
+                Arguments = JsonSerializer.Serialize(new { query = query })
+            }
+        };
+
+        _mockFamilyTreeBackendService
+            .Setup(s => s.SearchFamiliesAsync(jwtToken, query))
+            .ReturnsAsync((List<FamilyDto>?)null); // Return null for no auth
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.False(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
-        Assert.NotNull(errorDict);
-        Assert.True(errorDict.ContainsKey("error"));
-        Assert.Contains("User is not authenticated to use tool 'search_family'.", errorDict["error"]);
-        _mockFamilyTreeBackendService.Verify(s => s.SearchFamiliesAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        Assert.Contains("Tool execution failed or returned no data.", result.ErrorMessage);
+        _mockFamilyTreeBackendService.Verify(s => s.SearchFamiliesAsync(jwtToken, query), Times.Once);
     }
 
     [Fact]
@@ -109,11 +149,15 @@ public class ToolExecutorTests
         // Arrange
         var jwtToken = "test_jwt";
         var familyId = Guid.NewGuid();
-        var toolCall = new AiToolCall(
-            "call_id_4",
-            "get_family_details",
-            JsonSerializer.Serialize(new { id = familyId })
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_4",
+            Function = new AiToolFunction
+            {
+                Name = "get_family_details",
+                Arguments = JsonSerializer.Serialize(new { familyId = familyId })
+            }
+        };
         var expectedResult = new FamilyDto { Id = familyId.GetHashCode(), Name = "DetailedFamily", History = "Detailed history" };
 
         _mockFamilyTreeBackendService
@@ -121,12 +165,14 @@ public class ToolExecutorTests
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains(expectedResult.Name, result.Content); // Check for Name instead of ID
+        var actualResult = Assert.IsType<FamilyDto>(result.Output);
+        Assert.Equal(expectedResult.Name, actualResult.Name);
         _mockFamilyTreeBackendService.Verify(s => s.GetFamilyByIdAsync(familyId, jwtToken), Times.Once);
     }
 
@@ -135,22 +181,24 @@ public class ToolExecutorTests
     {
         // Arrange
         var jwtToken = "test_jwt";
-        var toolCall = new AiToolCall(
-            "call_id_5",
-            "get_family_details",
-            JsonSerializer.Serialize(new { id = "invalid-guid" }) // Invalid GUID
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_5",
+            Function = new AiToolFunction
+            {
+                Name = "get_family_details",
+                Arguments = JsonSerializer.Serialize(new { familyId = "invalid-guid" }) // Invalid GUID
+            }
+        };
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.False(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
-        Assert.NotNull(errorDict);
-        Assert.True(errorDict.ContainsKey("error"));
-        Assert.Contains("Invalid 'id' argument for get_family_details. A valid GUID string is required.", errorDict["error"]);
+        Assert.Contains("invalid", result.ErrorMessage);
     }
 
     [Fact]
@@ -158,22 +206,24 @@ public class ToolExecutorTests
     {
         // Arrange
         var jwtToken = "test_jwt";
-        var toolCall = new AiToolCall(
-            "call_id_6",
-            "unknown_tool",
-            JsonSerializer.Serialize(new { param = "value" })
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_6",
+            Function = new AiToolFunction
+            {
+                Name = "unknown_tool",
+                Arguments = JsonSerializer.Serialize(new { param = "value" })
+            }
+        };
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.False(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
-        Assert.NotNull(errorDict);
-        Assert.True(errorDict.ContainsKey("error"));
-        Assert.Contains("Unknown tool: unknown_tool", errorDict["error"]);
+        Assert.Contains("not found", result.ErrorMessage);
     }
 
     [Fact]
@@ -181,22 +231,24 @@ public class ToolExecutorTests
     {
         // Arrange
         var jwtToken = "test_jwt";
-        var toolCall = new AiToolCall(
-            "call_id_7",
-            "search_family",
-            "invalid json string"
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_7",
+            Function = new AiToolFunction
+            {
+                Name = "search_families",
+                Arguments = "invalid json string"
+            }
+        };
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.False(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        var errorDict = JsonSerializer.Deserialize<Dictionary<string, string>>(result.Content);
-        Assert.NotNull(errorDict);
-        Assert.True(errorDict.ContainsKey("error"));
-        Assert.Contains("Invalid JSON arguments provided for tool 'search_family'.", errorDict["error"]);
+        Assert.Contains("invalid start of a value", result.ErrorMessage);
     }
 
     [Fact]
@@ -206,11 +258,15 @@ public class ToolExecutorTests
         var jwtToken = "test_jwt";
         var query = "TestMember";
         var familyId = Guid.NewGuid();
-        var toolCall = new AiToolCall(
-            "call_id_8",
-            "search_members",
-            JsonSerializer.Serialize(new { query = query, familyId = familyId })
-        );
+        var toolCall = new AiToolCall
+        {
+            Id = "call_id_8",
+            Function = new AiToolFunction
+            {
+                Name = "search_members",
+                Arguments = JsonSerializer.Serialize(new { query = query, familyId = familyId })
+            }
+        };
         var expectedResult = new List<MemberDetailDto> { new MemberDetailDto { Id = Guid.NewGuid(), FullName = query } };
 
         _mockFamilyTreeBackendService
@@ -218,12 +274,15 @@ public class ToolExecutorTests
             .ReturnsAsync(expectedResult);
 
         // Act
-        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+        var result = await _toolExecutor.ExecuteAsync(toolCall, jwtToken);
 
         // Assert
         Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
         Assert.Equal(toolCall.Id, result.ToolCallId);
-        Assert.Contains(query, result.Content);
+        var actualResult = Assert.IsType<List<MemberDetailDto>>(result.Output);
+        Assert.Single(actualResult);
+        Assert.Equal(expectedResult.First().FullName, actualResult.First().FullName);
         _mockFamilyTreeBackendService.Verify(s => s.SearchMembersAsync(jwtToken, query, familyId), Times.Once);
     }
 }
