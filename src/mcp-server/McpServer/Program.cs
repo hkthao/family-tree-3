@@ -120,6 +120,15 @@ builder.Services.AddSingleton<AiProviderFactory>();
 // Register ToolExecutor
 builder.Services.AddScoped<ToolExecutor>();
 
+// Register IAiProvider using the factory
+builder.Services.AddScoped<IAiProvider>(sp =>
+{
+    var factory = sp.GetRequiredService<AiProviderFactory>();
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    var defaultProvider = configuration["DefaultAiProvider"] ?? "Gemini";
+    return factory.GetProvider(defaultProvider);
+});
+
 // Register ToolInteractionHandler
 builder.Services.AddScoped<ToolInteractionHandler>();
 

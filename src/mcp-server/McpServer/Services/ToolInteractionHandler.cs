@@ -159,7 +159,11 @@ public class ToolInteractionHandler
         // Gửi kết quả tool call lại cho LLM để tổng hợp câu trả lời
         _logger.LogInformation("Phase 2: Sending tool results back to LLM for final response.");
 
-        var finalResponseParts = _aiProvider.GenerateResponseStreamAsync(prompt, tools, toolResults);
+        // Construct a new prompt for the LLM to generate a natural language response based on tool results
+        var toolResultsJson = JsonSerializer.Serialize(toolResults);
+        var followUpPrompt = $"Dựa trên yêu cầu ban đầu của người dùng: '{prompt}' và các kết quả từ việc thực thi công cụ: {toolResultsJson}, hãy tạo một phản hồi tự nhiên và hữu ích cho người dùng.";
+
+        var finalResponseParts = _aiProvider.GenerateResponseStreamAsync(followUpPrompt, tools, toolResults);
 
         await foreach (var part in finalResponseParts)
         {
@@ -186,7 +190,7 @@ public class ToolInteractionHandler
                     bool textResponseReceived = false;
                     while (rePromptAttempt < maxRePromptAttempts && !textResponseReceived)
                     {
-                        var rePromptResponseParts = _aiProvider.GenerateResponseStreamAsync(prompt, tools, toolResults);
+                        var rePromptResponseParts = _aiProvider.GenerateResponseAsync(followUpPrompt, tools, toolResults);
                         await foreach (var rePromptPart in rePromptResponseParts)
                         {
                             if (rePromptPart is AiTextResponsePart rePromptTextPart)
