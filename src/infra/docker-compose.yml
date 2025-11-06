@@ -50,22 +50,20 @@ services:
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
     mem_limit: 4g # Increase memory limit
-  mcp-server:
-    build:
-      context: ../..
-      dockerfile: src/infra/Dockerfile.mcp-server
-    container_name: family-tree-mcp-server
+  n8n:
+    image: n8nio/n8n
+    container_name: family-tree-n8n
     ports:
-      - "8081:8080" # Expose on host port 8081, internal container port 8080
+      - "5678:5678"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      # Pass the JWT Secret Key as an environment variable for production
-      # - FamilyTreeBackend__JwtSecretKey=YOUR_PRODUCTION_JWT_SECRET_KEY
-      # Pass Gemini API Key as an environment variable
-      # - Gemini__ApiKey=YOUR_PRODUCTION_GEMINI_API_KEY
-    depends_on:
-      - backend # MCP server depends on the main backend for data
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+    volumes:
+      - n8n-data:/home/node/.n8n
 
 volumes:
   mysql-data:
   backend-dataprotection-keys:
+  n8n-data:
