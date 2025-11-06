@@ -29,6 +29,9 @@ public class AiPromptBuilder : IAiPromptBuilder
         toolInstructions.AppendLine("\nIMPORTANT TOOL USAGE GUIDELINES:");
         toolInstructions.AppendLine("- Use the 'search_family' tool when the user provides a family name, keyword, or any general query to find families.");
         toolInstructions.AppendLine("- ONLY use the 'get_family_details' tool when you have a specific, confirmed family ID (GUID). Do NOT use it with a family name or general query.");
+        toolInstructions.AppendLine("\nFor example:");
+        toolInstructions.AppendLine("User prompt: 'show me detail family with id 1a955fff-ce01-422f-8bb3-02ab14e8ec47'");
+        toolInstructions.AppendLine("Expected response: {\"tool_calls\": [{\"id\": \"call_123\", \"function\": {\"name\": \"get_family_details\", \"arguments\": \"{\\\"id\\\": \\\"1a955fff-ce01-422f-8bb3-02ab14e8ec47\\\"}\"}}]}");
         toolInstructions.AppendLine("\nHere are the available tools:");
         toolInstructions.AppendLine(JsonSerializer.Serialize(tools, new JsonSerializerOptions { WriteIndented = true }));
 

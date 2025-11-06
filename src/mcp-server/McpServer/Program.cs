@@ -159,3 +159,5 @@ app.UseAuthorization(); // Use authorization middleware
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
