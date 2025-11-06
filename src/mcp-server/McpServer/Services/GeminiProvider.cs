@@ -12,47 +12,29 @@ namespace McpServer.Services
 {
     /// <summary>
     /// Nhà cung cấp AI Assistant sử dụng Gemini API.
-    /// Tạm thời không hỗ trợ streaming và tool-calling đầy đủ do hạn chế của thư viện hiện tại.
     /// </summary>
     public class GeminiProvider : IAiProvider
     {
         private readonly GeminiSettings _settings;
         private readonly ILogger<GeminiProvider> _logger;
+        private readonly IAiPromptBuilder _promptBuilder; // Inject IAiPromptBuilder
 
-        public GeminiProvider(IOptions<GeminiSettings> settings, ILogger<GeminiProvider> logger)
+        public GeminiProvider(IOptions<GeminiSettings> settings, ILogger<GeminiProvider> logger, IAiPromptBuilder promptBuilder)
         {
             _settings = settings.Value;
             _logger = logger;
+            _promptBuilder = promptBuilder;
         }
 
-        public async IAsyncEnumerable<AiResponsePart> GenerateResponseStreamAsync(
+        public async IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(
             string prompt,
             List<AiToolDefinition>? tools = null,
             List<AiToolResult>? toolResults = null)
         {
-            // Combine prompt and context if context is provided
-            // For now, GeminiProvider will not fully implement tool use or streaming.
-            // It will return a single text response.
-
-            var fullPrompt = new StringBuilder();
-            fullPrompt.AppendLine(prompt);
-
-            if (tools != null && tools.Any())
-            {
-                fullPrompt.AppendLine("\nAvailable tools: ");
-                fullPrompt.AppendLine(JsonSerializer.Serialize(tools, new JsonSerializerOptions { WriteIndented = true }));
-            }
-
-            if (toolResults != null && toolResults.Any())
-            {
-                fullPrompt.AppendLine("\nTool results: ");
-                fullPrompt.AppendLine(JsonSerializer.Serialize(toolResults, new JsonSerializerOptions { WriteIndented = true }));
-            }
-
+            var fullPrompt = _promptBuilder.BuildPromptForToolUse(prompt, tools, toolResults);
             List<AiResponsePart> parts = new List<AiResponsePart>();
             try
             {
-                // Initialize Gemini client
                 var credential = GoogleCredential.GetApplicationDefault();
                 var client = await new PredictionServiceClientBuilder
                 {
@@ -60,7 +42,6 @@ namespace McpServer.Services
                     Credential = credential
                 }.BuildAsync();
 
-                // Construct the request for the Gemini model
                 var instance = new Google.Protobuf.WellKnownTypes.Value
                 {
                     StructValue = new Struct
@@ -89,8 +70,6 @@ namespace McpServer.Services
                 var endpointNameString = $"projects/{_settings.ProjectId}/locations/{_settings.Location}/publishers/google/models/{_settings.ModelId}";
                 var endpoint = EndpointName.Parse(endpointNameString);
 
-                // The Google.Cloud.AIPlatform.V1 library's PredictAsync does not directly support streaming.
-                // For now, I will return the full response as a single chunk.
                 var response = await client.PredictAsync(endpoint, new[] { instance }, parameters);
 
                 if (response.Predictions.Any())
@@ -118,10 +97,74 @@ namespace McpServer.Services
             }
         }
 
-        /// <summary>
-        /// Kiểm tra trạng thái hoạt động của nhà cung cấp AI.
-        /// </summary>
-        /// <returns>Trạng thái hoạt động.</returns>
+        public async IAsyncEnumerable<AiResponsePart> GenerateChatResponseStreamAsync(string prompt)
+        {
+            var fullPrompt = _promptBuilder.BuildPromptForChat(prompt);
+            List<AiResponsePart> parts = new List<AiResponsePart>();
+            try
+            {
+                var credential = GoogleCredential.GetApplicationDefault();
+                var client = await new PredictionServiceClientBuilder
+                {
+                    Endpoint = "aiplatform.googleapis.com",
+                    Credential = credential
+                }.BuildAsync();
+
+                var instance = new Google.Protobuf.WellKnownTypes.Value
+                {
+                    StructValue = new Struct
+                    {
+                        Fields =
+                        {
+                            { "prompt", new Google.Protobuf.WellKnownTypes.Value { StringValue = fullPrompt.ToString() } }
+                        }
+                    }
+                };
+
+                var parameters = new Google.Protobuf.WellKnownTypes.Value
+                {
+                    StructValue = new Struct
+                    {
+                        Fields =
+                        {
+                            { "temperature", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 0.7 } },
+                            { "maxOutputTokens", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 1024 } },
+                            { "topP", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 0.95 } },
+                            { "topK", new Google.Protobuf.WellKnownTypes.Value { NumberValue = 40 } }
+                        }
+                    }
+                };
+
+                var endpointNameString = $"projects/{_settings.ProjectId}/locations/{_settings.Location}/publishers/google/models/{_settings.ModelId}";
+                var endpoint = EndpointName.Parse(endpointNameString);
+
+                var response = await client.PredictAsync(endpoint, new[] { instance }, parameters);
+
+                if (response.Predictions.Any())
+                {
+                    var prediction = response.Predictions.First();
+                    if (prediction.StructValue.Fields.TryGetValue("content", out var contentValue))
+                    {
+                        parts.Add(new AiTextResponsePart(contentValue.StringValue));
+                    }
+                }
+                else
+                {
+                    parts.Add(new AiTextResponsePart("Không có phản hồi từ Gemini AI."));
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi gọi Gemini AI: {Message}", ex.Message);
+                parts.Add(new AiTextResponsePart($"Đã xảy ra lỗi khi xử lý yêu cầu của bạn với Gemini AI: {ex.Message}"));
+            }
+
+            foreach (var part in parts)
+            {
+                yield return part;
+            }
+        }
+
         public Task<string> GetStatusAsync()
         {
             // For now, just return "OK" as a placeholder.

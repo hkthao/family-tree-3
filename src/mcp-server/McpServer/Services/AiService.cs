@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace McpServer.Services;
 
 /// <summary>
@@ -56,8 +54,6 @@ namespace McpServer.Services;
             yield return chunk;
         }
     }
-
-
 
     public async Task<string> GetStatusAsync(string? providerName = null)
     {

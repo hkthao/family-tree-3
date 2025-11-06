@@ -45,12 +45,7 @@ public class AiServiceTests
 
         _mockToolExecutor = new Mock<ToolExecutor>(MockBehavior.Strict, mockFamilyTreeBackendService.Object, mockToolExecutorLogger.Object);
 
-        // Set up a default behavior for _mockAiProvider. This can be overridden in specific tests.
-        _mockAiProvider.Setup(p => p.GenerateResponseStreamAsync(
-            It.IsAny<string>(),
-            It.IsAny<List<AiToolDefinition>>(),
-            It.IsAny<List<AiToolResult>>())
-        ).Returns(GetAiResponsePartAsyncEnumerable(new AiTextResponsePart("Default AI response.")));
+
 
         _mockToolInteractionHandler = new Mock<ToolInteractionHandler>(MockBehavior.Strict, _mockAiProvider.Object, _mockToolExecutor.Object, new Mock<ILogger<ToolInteractionHandler>>().Object); // Instantiate mock for ToolInteractionHandler
 

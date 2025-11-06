@@ -33,7 +33,8 @@ public class AiProviderFactoryTests
         var mockGeminiSettings = new Mock<IOptions<GeminiSettings>>();
         mockGeminiSettings.Setup(o => o.Value).Returns(new GeminiSettings());
         var mockGeminiLogger = new Mock<ILogger<GeminiProvider>>();
-        var mockGeminiProvider = new GeminiProvider(mockGeminiSettings.Object, mockGeminiLogger.Object);
+        var mockAiPromptBuilder = new Mock<IAiPromptBuilder>();
+        var mockGeminiProvider = new GeminiProvider(mockGeminiSettings.Object, mockGeminiLogger.Object, mockAiPromptBuilder.Object);
         _mockServiceProvider.Setup(sp => sp.GetService(typeof(GeminiProvider)))
                             .Returns(mockGeminiProvider);
 
@@ -56,7 +57,8 @@ public class AiProviderFactoryTests
         mockOpenAiSettings.Setup(o => o.Value).Returns(new OpenAiSettings());
         var mockOpenAiLogger = new Mock<ILogger<OpenAiProvider>>();
         var mockHttpClient = new Mock<HttpClient>();
-        var mockOpenAiProvider = new OpenAiProvider(mockOpenAiSettings.Object, mockOpenAiLogger.Object, mockHttpClient.Object);
+        var mockAiPromptBuilder = new Mock<IAiPromptBuilder>();
+        var mockOpenAiProvider = new OpenAiProvider(mockOpenAiSettings.Object, mockOpenAiLogger.Object, mockHttpClient.Object, mockAiPromptBuilder.Object);
         _mockServiceProvider.Setup(sp => sp.GetService(typeof(OpenAiProvider)))
                             .Returns(mockOpenAiProvider);
 
@@ -79,7 +81,8 @@ public class AiProviderFactoryTests
         mockLocalLlmSettings.Setup(o => o.Value).Returns(new LocalLlmSettings());
         var mockLocalLlmLogger = new Mock<ILogger<LocalLlmProvider>>();
         var mockHttpClient = new Mock<HttpClient>();
-        var mockLocalLlmProvider = new LocalLlmProvider(mockLocalLlmSettings.Object, mockLocalLlmLogger.Object, mockHttpClient.Object);
+        var mockAiPromptBuilder = new Mock<IAiPromptBuilder>();
+        var mockLocalLlmProvider = new LocalLlmProvider(mockLocalLlmSettings.Object, mockLocalLlmLogger.Object, mockHttpClient.Object, mockAiPromptBuilder.Object);
         _mockServiceProvider.Setup(sp => sp.GetService(typeof(LocalLlmProvider)))
                             .Returns(mockLocalLlmProvider);
 

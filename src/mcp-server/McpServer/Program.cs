@@ -1,11 +1,8 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using McpServer.Config; // For app settings classes
 using McpServer.Services; // For AiService, IAiProvider, AiProviderFactory, and concrete providers
-using Microsoft.AspNetCore.Authorization; // For [Authorize] attribute
-using System.Net.Http.Json; // For PostAsJsonAsync in providers
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,6 +113,9 @@ builder.Services.AddHttpClient<LocalLlmProvider>(client =>
 
 // Register AI Provider Factory
 builder.Services.AddSingleton<AiProviderFactory>();
+
+// Register AI Prompt Builder
+builder.Services.AddSingleton<IAiPromptBuilder, AiPromptBuilder>();
 
 // Register ToolExecutor
 builder.Services.AddScoped<ToolExecutor>();

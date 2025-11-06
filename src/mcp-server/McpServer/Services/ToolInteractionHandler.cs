@@ -115,12 +115,12 @@ public class ToolInteractionHandler
     /// </summary>
     public virtual async IAsyncEnumerable<string> HandleToolInteractionAsync(string prompt, string? jwtToken)
     {
-        List<string> finalResponseChunks = new List<string>();
+        List<string> finalResponseChunks = [];
         var tools = DefineTools();
 
         // Gửi prompt và danh sách tool đến LLM
         _logger.LogInformation("Phase 1: Sending prompt and tool definitions to LLM.");
-        var responseParts = _aiProvider.GenerateResponseStreamAsync(prompt, tools);
+        var responseParts = _aiProvider.GenerateToolUseResponseStreamAsync(prompt, tools);
 
         var toolCalls = new List<AiToolCall>();
         await foreach (var part in responseParts)
@@ -163,7 +163,9 @@ public class ToolInteractionHandler
         var toolResultsJson = JsonSerializer.Serialize(toolResults);
         var followUpPrompt = $"Dựa trên yêu cầu ban đầu của người dùng: '{prompt}' và các kết quả từ việc thực thi công cụ: {toolResultsJson}, hãy tạo một phản hồi tự nhiên và hữu ích cho người dùng.";
 
-        var finalResponseParts = _aiProvider.GenerateResponseStreamAsync(followUpPrompt, tools, toolResults);
+        _logger.LogInformation("followUpPrompt: {followUpPrompt}", followUpPrompt);
+
+        var finalResponseParts = _aiProvider.GenerateChatResponseStreamAsync(followUpPrompt);
 
         await foreach (var part in finalResponseParts)
         {
@@ -190,7 +192,7 @@ public class ToolInteractionHandler
                     bool textResponseReceived = false;
                     while (rePromptAttempt < maxRePromptAttempts && !textResponseReceived)
                     {
-                        var rePromptResponseParts = _aiProvider.GenerateResponseAsync(followUpPrompt, tools, toolResults);
+                        var rePromptResponseParts = _aiProvider.GenerateChatResponseStreamAsync(followUpPrompt);
                         await foreach (var rePromptPart in rePromptResponseParts)
                         {
                             if (rePromptPart is AiTextResponsePart rePromptTextPart)
