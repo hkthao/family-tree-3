@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using McpServer.Models;
 
@@ -8,21 +9,24 @@ namespace McpServer.Services.Ai.AITools;
 /// </summary>
 public class ToolInteractionHandler
 {
-    private readonly IAiProvider _aiProvider;
+    private readonly AiProviderFactory _aiProviderFactory;
     private readonly ToolExecutor _toolExecutor;
     private readonly ToolRegistry _toolRegistry;
     private readonly ILogger<ToolInteractionHandler> _logger;
+    private readonly string _defaultAiProvider;
 
     public ToolInteractionHandler(
-        IAiProvider aiProvider,
+        AiProviderFactory aiProviderFactory,
         ToolExecutor toolExecutor,
         ToolRegistry toolRegistry,
-        ILogger<ToolInteractionHandler> logger)
+        ILogger<ToolInteractionHandler> logger,
+        IConfiguration configuration)
     {
-        _aiProvider = aiProvider;
+        _aiProviderFactory = aiProviderFactory;
         _toolExecutor = toolExecutor;
         _toolRegistry = toolRegistry;
         _logger = logger;
+        _defaultAiProvider = configuration["DefaultAiProvider"] ?? "localllm";
     }
 
     /// <summary>
@@ -40,7 +44,7 @@ public class ToolInteractionHandler
 
         // Step 1: LLM suggests tool calls
         _logger.LogInformation("Step 1: Requesting tool suggestions from AI for prompt: {UserPrompt}", userPrompt);
-        var toolSuggestionResponse = _aiProvider.GenerateToolUseResponseStreamAsync(messages, _toolRegistry);
+        var toolSuggestionResponse = _aiProviderFactory.GetProvider(_defaultAiProvider).GenerateToolUseResponseStreamAsync(messages, _toolRegistry);
 
         List<AiToolCall> toolCalls = new List<AiToolCall>();
         await foreach (var part in toolSuggestionResponse)
@@ -84,7 +88,7 @@ public class ToolInteractionHandler
 
             // Step 3: LLM generates natural language response based on tool results
             _logger.LogInformation("Step 3: Requesting natural language response from AI after tool execution.");
-            var chatResponse = _aiProvider.GenerateChatResponseStreamAsync(userPrompt); // Pass original prompt for context
+            var chatResponse = _aiProviderFactory.GetProvider(_defaultAiProvider).GenerateChatResponseStreamAsync(userPrompt); // Pass original prompt for context
 
             await foreach (var part in chatResponse)
             {
