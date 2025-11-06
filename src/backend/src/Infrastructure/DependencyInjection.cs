@@ -123,6 +123,9 @@ public static class DependencyInjection
 
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
+        // Register n8n Service
+        services.AddScoped<IN8nService, N8nService>();
+
         // Register Notification Provider Factory
         services.AddScoped<INotificationProviderFactory, NotificationProviderFactory>();
 

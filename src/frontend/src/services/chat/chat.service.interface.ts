@@ -1,7 +1,6 @@
 import type { ApiError } from "@/plugins/axios";
-import type { Result } from "@/types";
+import type { ChatMessage, Result } from "@/types";
 
 export interface IChatService {
-  sendMessage(message: string): Promise<Result<string, ApiError>>;
-  sendMessageStream(message: string): AsyncGenerator<string, void, unknown>;
+  sendMessage(message: string, history: ChatMessage[]): Promise<Result<string, ApiError>>;
 }

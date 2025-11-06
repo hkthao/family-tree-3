@@ -27,3 +27,4 @@ export * from './user-preference.d';
 export * from './notification.d';
 export * from './notification-template.d';
 export * from './template-format.d';
+export * from './chat.d';

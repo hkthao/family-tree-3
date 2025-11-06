@@ -35,6 +35,10 @@ public class AppSettings
     /// </summary>
     public NotificationSettings NotificationSettings { get; set; } = new NotificationSettings();
     /// <summary>
+    /// Cài đặt cho dịch vụ n8n.
+    /// </summary>
+    public N8nSettings N8nSettings { get; set; } = new N8nSettings();
+    /// <summary>
     /// Các nguồn gốc (origins) được phép cho CORS (Cross-Origin Resource Sharing).
     /// </summary>
     public string CORS_ORIGINS { get; set; } = null!;
