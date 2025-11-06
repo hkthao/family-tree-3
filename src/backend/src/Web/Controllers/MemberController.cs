@@ -2,11 +2,8 @@ using backend.Application.Common.Models;
 using backend.Application.Members.Commands.CreateMember;
 using backend.Application.Members.Commands.CreateMembers;
 using backend.Application.Members.Commands.DeleteMember;
-using backend.Application.Members.Commands.GenerateBiography;
-using backend.Application.Members.Commands.GenerateMemberData;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Commands.UpdateMemberBiography;
-using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetMembersByIds;
@@ -35,23 +32,6 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     /// Đối tượng ILogger để ghi log.
     /// </summary>
     private readonly ILogger<MemberController> _logger = logger;
-
-    /// <summary>
-    /// Tạo tiểu sử cho một thành viên bằng AI.
-    /// </summary>
-    /// <param name="id">ID của thành viên.</param>
-    /// <param name="command">Lệnh tạo tiểu sử.</param>
-    /// <returns>Nội dung tiểu sử được tạo và siêu dữ liệu.</returns>
-    [HttpPost("{id}/biography/generate")]
-    public async Task<ActionResult<BiographyResultDto>> GenerateBiography(Guid id, [FromBody] GenerateBiographyCommand command)
-    {
-        if (id != command.MemberId)
-        {
-            return BadRequest();
-        }
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<BiographyResultDto>)Ok(result.Value) : (ActionResult<BiographyResultDto>)BadRequest(result.Error);
-    }
 
     /// <summary>
     /// Xử lý GET request để tìm kiếm thành viên dựa trên các tiêu chí được cung cấp.
@@ -133,18 +113,6 @@ public class MemberController(IMediator mediator, ILogger<MemberController> logg
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? (ActionResult<Guid>)CreatedAtAction(nameof(GetMemberById), new { id = result.Value }, result.Value) : (ActionResult<Guid>)BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý POST request để tạo dữ liệu thành viên mẫu.
-    /// </summary>
-    /// <param name="command">Lệnh tạo dữ liệu thành viên.</param>
-    /// <returns>Danh sách các thành viên được tạo.</returns>
-    [HttpPost("generate-member-data")]
-    public async Task<ActionResult<List<MemberDto>>> GenerateMemberData([FromBody] GenerateMemberDataCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<MemberDto>>)Ok(result.Value) : (ActionResult<List<MemberDto>>)BadRequest(result.Error);
     }
 
     /// <summary>

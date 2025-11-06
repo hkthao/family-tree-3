@@ -3,9 +3,7 @@ using backend.Application.Events;
 using backend.Application.Events.Commands.CreateEvent;
 using backend.Application.Events.Commands.CreateEvents;
 using backend.Application.Events.Commands.DeleteEvent;
-using backend.Application.Events.Commands.GenerateEventData;
 using backend.Application.Events.Commands.UpdateEvent;
-using backend.Application.Events.Queries;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Events.Queries.SearchEvents;
@@ -130,18 +128,6 @@ public class EventController(IMediator mediator) : ControllerBase
         };
         var result = await _mediator.Send(query);
         return result.IsSuccess ? (ActionResult<List<EventDto>>)Ok(result.Value) : (ActionResult<List<EventDto>>)BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý POST request để tạo dữ liệu sự kiện mẫu.
-    /// </summary>
-    /// <param name="command">Lệnh tạo dữ liệu sự kiện.</param>
-    /// <returns>Danh sách các sự kiện được tạo.</returns>
-    [HttpPost("generate-event-data")]
-    public async Task<ActionResult<List<AIEventDto>>> GenerateEventData([FromBody] GenerateEventDataCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<AIEventDto>>)Ok(result.Value) : (ActionResult<List<AIEventDto>>)BadRequest(result.Error);
     }
 
     /// <summary>

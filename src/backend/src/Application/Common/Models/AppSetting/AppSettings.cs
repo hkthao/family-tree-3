@@ -5,10 +5,7 @@ namespace backend.Application.Common.Models.AppSetting;
 /// </summary>
 public class AppSettings
 {
-    /// <summary>
-    /// Cài đặt cho dịch vụ trò chuyện AI.
-    /// </summary>
-    public AIChatSettings AIChatSettings { get; set; } = new AIChatSettings();
+
     /// <summary>
     /// Cài đặt cho dịch vụ tạo embedding.
     /// </summary>

@@ -65,6 +65,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
 
+
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     //{
     // foreach (EntityEntry<BaseEntity> entry in ChangeTracker.Entries<BaseEntity>())

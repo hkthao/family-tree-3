@@ -1,6 +1,5 @@
 using backend.Application.Identity.Commands.CreateNovuSubscriber;
 using backend.Domain.Constants;
-using MediatR;
 
 namespace backend.Web.Infrastructure;
 

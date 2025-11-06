@@ -2,7 +2,6 @@ using backend.Application.Common.Models;
 using backend.Application.Relationships.Commands.CreateRelationship;
 using backend.Application.Relationships.Commands.CreateRelationships;
 using backend.Application.Relationships.Commands.DeleteRelationship;
-using backend.Application.Relationships.Commands.GenerateRelationshipData;
 using backend.Application.Relationships.Commands.UpdateRelationship;
 using backend.Application.Relationships.Queries;
 using backend.Application.Relationships.Queries.GetRelationshipById;
@@ -75,18 +74,6 @@ public class RelationshipController(IMediator mediator) : ControllerBase
         return result.IsSuccess
             ? (ActionResult<Guid>)CreatedAtAction(nameof(GetRelationshipById), new { id = result.Value }, result.Value)
             : (ActionResult<Guid>)BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý POST request để tạo dữ liệu mối quan hệ mẫu.
-    /// </summary>
-    /// <param name="command">Lệnh tạo dữ liệu mối quan hệ.</param>
-    /// <returns>Danh sách các mối quan hệ được tạo.</returns>
-    [HttpPost("generate-relationship-data")]
-    public async Task<ActionResult<List<RelationshipDto>>> GenerateRelationshipData([FromBody] GenerateRelationshipDataCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<RelationshipDto>>)Ok(result.Value) : (ActionResult<List<RelationshipDto>>)BadRequest(result.Error);
     }
 
     /// <summary>

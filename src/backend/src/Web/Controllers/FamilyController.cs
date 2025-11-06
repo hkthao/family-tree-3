@@ -3,7 +3,6 @@ using backend.Application.Families;
 using backend.Application.Families.Commands.CreateFamilies;
 using backend.Application.Families.Commands.CreateFamily;
 using backend.Application.Families.Commands.DeleteFamily;
-using backend.Application.Families.Commands.GenerateFamilyData;
 using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
@@ -77,18 +76,6 @@ public class FamilyController(IMediator mediator) : ControllerBase
     {
         var result = await _mediator.Send(command);
         return result.IsSuccess ? (ActionResult<List<Guid>>)Ok(result.Value) : (ActionResult<List<Guid>>)BadRequest(result.Error);
-    }
-
-    /// <summary>
-    /// Xử lý POST request để tạo dữ liệu gia đình mẫu.
-    /// </summary>
-    /// <param name="command">Lệnh tạo dữ liệu gia đình.</param>
-    /// <returns>Danh sách các gia đình được tạo.</returns>
-    [HttpPost("generate-family-data")]
-    public async Task<ActionResult<List<FamilyDto>>> GenerateFamilyData([FromBody] GenerateFamilyDataCommand command)
-    {
-        var result = await _mediator.Send(command);
-        return result.IsSuccess ? (ActionResult<List<FamilyDto>>)Ok(result.Value) : (ActionResult<List<FamilyDto>>)BadRequest(result.Error);
     }
 
     /// <summary>

@@ -1,4 +1,3 @@
-export * from './chat.d';
 export * from './natural-language-input.d';
 export * from './text-chunk.d';
 export * from './family-visibility.d';

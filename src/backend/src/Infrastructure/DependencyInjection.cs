@@ -1,7 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Application.Services;
-using backend.Infrastructure.AI.Chat;
 using backend.Infrastructure.AI.Embeddings;
 using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.AI.VectorStore;
@@ -93,13 +91,6 @@ public static class DependencyInjection
 
         services.AddHttpClient<FaceApiService>(); // Register for HttpClient injection
 
-        // Register Chat Module
-
-        services.AddTransient<GeminiChatProvider>(); // Register concrete providers
-        services.AddTransient<OpenAIChatProvider>();
-        services.AddTransient<LocalChatProvider>();
-
-        services.AddSingleton<IChatProviderFactory, ChatProviderFactory>();
 
 
         // Register AI Content Generator

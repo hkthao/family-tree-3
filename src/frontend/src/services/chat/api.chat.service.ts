@@ -5,13 +5,13 @@ import type {  Result } from '@/types'; // Import types
 import { useAuthService } from '../auth/authService';
 
 export class ApiChatService implements IChatService {
-  private readonly API_URL = `${import.meta.env.VITE_MCP_SERVER_URL}/api/ai/query`; // MCP server endpoint
+  private readonly API_URL = `/api/chat/assistant`; // AI assistant endpoint
 
   constructor(private apiClient: ApiClientMethods) {}
 
   async sendMessage(message: string): Promise<Result<string, ApiError>> {
     try {
-      const response = await this.apiClient.post<string>(this.API_URL, { prompt: message });
+      const response = await this.apiClient.post<string>(this.API_URL, { message: message });
       return response; // Directly return the response, which is already a Result
     } catch (error: any) {
       // Create a plain object conforming to ApiError interface
@@ -34,7 +34,7 @@ export class ApiChatService implements IChatService {
           // Add authorization header if needed
            'Authorization': `Bearer ${await useAuthService().getAccessToken()}`
         },
-        body: JSON.stringify({ prompt: message }),
+        body: JSON.stringify({ message: message }),
       });
 
       if (!response.ok) {
@@ -67,23 +67,7 @@ export class ApiChatService implements IChatService {
         }
 
         const chunkText = decoder.decode(value);
-        
-        try {
-          // The backend sends the whole response as a single JSON array of strings.
-          const parsedArray = JSON.parse(chunkText);
-          if (Array.isArray(parsedArray)) {
-            for (const item of parsedArray) {
-              yield String(item);
-            }
-            // The entire response has been processed, so we can exit.
-            return;
-          }
-        } catch (e) {
-          // If parsing fails, it might be a plain text stream or SSE.
-          // For simplicity in this specific case, we can try to handle it as a plain chunk.
-          // The previous logic for SSE (`data:`) can be added here if needed in the future.
-          yield chunkText;
-        }
+        yield chunkText;
       }
     } catch (error: any) {
       console.error('Streaming error:', error);

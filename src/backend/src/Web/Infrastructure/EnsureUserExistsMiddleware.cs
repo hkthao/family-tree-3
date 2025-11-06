@@ -1,9 +1,7 @@
 
 using System.Security.Claims;
-using backend.Application.Common.Interfaces;
 using backend.Application.Identity.Commands.EnsureUserExists;
 using backend.Domain.Constants;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 
 namespace backend.Web.Infrastructure;
