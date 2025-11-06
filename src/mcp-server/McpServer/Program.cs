@@ -120,6 +120,9 @@ builder.Services.AddSingleton<AiProviderFactory>();
 // Register ToolExecutor
 builder.Services.AddScoped<ToolExecutor>();
 
+// Register ToolInteractionHandler
+builder.Services.AddScoped<ToolInteractionHandler>();
+
 // Register main AiService
 builder.Services.AddScoped<AiService>();
 

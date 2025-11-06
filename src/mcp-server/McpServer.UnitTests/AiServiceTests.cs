@@ -19,13 +19,17 @@ public class AiServiceTests
     private readonly Mock<ILogger<AiService>> _mockLogger;
     private readonly Mock<IConfiguration> _mockConfiguration;
     private readonly Mock<ToolExecutor> _mockToolExecutor;
+    private readonly Mock<ToolInteractionHandler> _mockToolInteractionHandler; // Add mock for ToolInteractionHandler
+    private readonly Mock<IAiProvider> _mockAiProvider; // Add mock for IAiProvider
     private readonly Mock<IServiceProvider> _mockServiceProvider;
     private readonly AiService _aiService;
 
     public AiServiceTests()
     {
         _mockServiceProvider = new Mock<IServiceProvider>();
+        _mockAiProvider = new Mock<IAiProvider>(); // Instantiate mock for IAiProvider first
         _mockAiProviderFactory = new Mock<AiProviderFactory>(MockBehavior.Strict, _mockServiceProvider.Object);
+        _mockAiProviderFactory.Setup(f => f.GetProvider(It.IsAny<string>())).Returns(_mockAiProvider.Object!); // Setup AiProviderFactory
         _mockLogger = new Mock<ILogger<AiService>>();
         _mockConfiguration = new Mock<IConfiguration>();
         _mockConfiguration.Setup(c => c["DefaultAiProvider"]).Returns("Gemini");
@@ -41,11 +45,21 @@ public class AiServiceTests
 
         _mockToolExecutor = new Mock<ToolExecutor>(MockBehavior.Strict, mockFamilyTreeBackendService.Object, mockToolExecutorLogger.Object);
 
+        // Set up a default behavior for _mockAiProvider. This can be overridden in specific tests.
+        _mockAiProvider.Setup(p => p.GenerateResponseStreamAsync(
+            It.IsAny<string>(),
+            It.IsAny<List<AiToolDefinition>>(),
+            It.IsAny<List<AiToolResult>>())
+        ).Returns(GetAiResponsePartAsyncEnumerable(new AiTextResponsePart("Default AI response.")));
+
+        _mockToolInteractionHandler = new Mock<ToolInteractionHandler>(MockBehavior.Strict, _mockAiProvider.Object, _mockToolExecutor.Object, new Mock<ILogger<ToolInteractionHandler>>().Object); // Instantiate mock for ToolInteractionHandler
+
         _aiService = new AiService(
             _mockAiProviderFactory.Object,
             _mockLogger.Object,
             _mockConfiguration.Object,
-            _mockToolExecutor.Object);
+            _mockToolExecutor.Object,
+            _mockToolInteractionHandler.Object); // Pass mock to AiService constructor
     }
 
     [Fact]
@@ -54,14 +68,12 @@ public class AiServiceTests
         // Arrange
         var prompt = "Hello AI";
         var expectedText = "Hello user!";
-        var mockAiProvider = new Mock<IAiProvider>();
-        mockAiProvider.Setup(p => p.GenerateResponseStreamAsync(
-            It.IsAny<string>(),
-            It.IsAny<List<AiToolDefinition>>(),
-            It.IsAny<List<AiToolResult>>())
-        ).Returns(GetAsyncEnumerable(new AiTextResponsePart(expectedText)));
 
-        _mockAiProviderFactory.Setup(f => f.GetProvider("Gemini")).Returns(mockAiProvider.Object);
+        // Override the default behavior for _mockToolInteractionHandler for this specific test
+        _mockToolInteractionHandler.Setup(h => h.HandleToolInteractionAsync(
+            It.IsAny<string>(),
+            It.IsAny<string>()))
+            .Returns(GetAsyncEnumerable(expectedText));
 
         // Act
         var resultChunks = new List<string>();
@@ -73,10 +85,9 @@ public class AiServiceTests
         // Assert
         Assert.Single(resultChunks);
         Assert.Equal(expectedText, resultChunks.First());
-        mockAiProvider.Verify(p => p.GenerateResponseStreamAsync(
+        _mockToolInteractionHandler.Verify(h => h.HandleToolInteractionAsync(
             prompt,
-            It.IsAny<List<AiToolDefinition>>(),
-            It.IsAny<List<AiToolResult>>()),
+            null),
             Times.Once);
     }
 
@@ -109,7 +120,16 @@ public class AiServiceTests
             Times.Once);
     }
 
-    private static async IAsyncEnumerable<AiResponsePart> GetAsyncEnumerable(params AiResponsePart[] parts)
+    private static async IAsyncEnumerable<string> GetAsyncEnumerable(params string[] parts)
+    {
+        foreach (var part in parts)
+        {
+            await Task.Yield(); // To make it truly asynchronous
+            yield return part;
+        }
+    }
+
+    private static async IAsyncEnumerable<AiResponsePart> GetAiResponsePartAsyncEnumerable(params AiResponsePart[] parts)
     {
         foreach (var part in parts)
         {
@@ -124,40 +144,13 @@ public class AiServiceTests
         // Arrange
         var prompt = "Tìm thông tin gia đình có ID là 1a955fff-ce01-422f-8bb3-02ab14e8ec47.";
         var jwtToken = "test_jwt";
-        var familyId = Guid.Parse("1a955fff-ce01-422f-8bb3-02ab14e8ec47");
-        var toolCallId = "call_id_123";
-        var toolName = "get_family_details";
-        var toolArgs = JsonSerializer.Serialize(new { id = familyId.ToString() });
-        var toolResultContent = JsonSerializer.Serialize(new { Name = "Gia đình ABC", History = "Lịch sử gia đình ABC" });
         var finalAiResponseText = "Thông tin gia đình ABC đã được tìm thấy.";
 
-        var aiToolCall = new AiToolCall(toolCallId, toolName, toolArgs);
-        var aiToolResult = new AiToolResult(toolCallId, toolResultContent);
-
-        var mockAiProvider = new Mock<IAiProvider>();
-
-        // Setup for the first call to GenerateResponseStreamAsync (LLM returns tool call)
-        mockAiProvider.SetupSequence(p => p.GenerateResponseStreamAsync(
+        // Setup ToolInteractionHandler to return the expected sequence of events
+        _mockToolInteractionHandler.Setup(h => h.HandleToolInteractionAsync(
             It.IsAny<string>(),
-            It.IsAny<List<AiToolDefinition>>(),
-            It.IsAny<List<AiToolResult>>() // Expect no tool results in the first call
-        ))
-        .Returns(GetAsyncEnumerable(new AiToolCallResponsePart(new List<AiToolCall> { aiToolCall })));
-
-        // Setup for the second call to GenerateResponseStreamAsync (LLM returns final text after tool result)
-        mockAiProvider.SetupSequence(p => p.GenerateResponseStreamAsync(
-            It.IsAny<string>(),
-            It.IsAny<List<AiToolDefinition>>(),
-            It.Is<List<AiToolResult>>(tr => tr != null && tr.Any(r => r.ToolCallId == toolCallId && r.Content == toolResultContent)) // Expect tool result in the second call
-        ))
-        .Returns(GetAsyncEnumerable(new AiTextResponsePart(finalAiResponseText)));
-
-        _mockAiProviderFactory.Setup(f => f.GetProvider("Gemini")).Returns(mockAiProvider.Object);
-
-        _mockToolExecutor.Setup(te => te.ExecuteToolCallAsync(
-            It.Is<AiToolCall>(tc => tc.Id == toolCallId && tc.FunctionName == toolName && tc.FunctionArgs == toolArgs),
-            jwtToken
-        )).ReturnsAsync(aiToolResult);
+            It.IsAny<string>()))
+            .Returns(GetAsyncEnumerable(finalAiResponseText));
 
         // Act
         var resultChunks = new List<string>();
@@ -170,15 +163,9 @@ public class AiServiceTests
         Assert.Single(resultChunks);
         Assert.Equal(finalAiResponseText, resultChunks.First());
 
-        _mockToolExecutor.Verify(te => te.ExecuteToolCallAsync(
-            It.Is<AiToolCall>(tc => tc.Id == toolCallId && tc.FunctionName == toolName && tc.FunctionArgs == toolArgs),
+        _mockToolInteractionHandler.Verify(h => h.HandleToolInteractionAsync(
+            prompt,
             jwtToken
         ), Times.Once);
-
-        mockAiProvider.Verify(p => p.GenerateResponseStreamAsync(
-            prompt,
-            It.IsAny<List<AiToolDefinition>>(),
-            It.IsAny<List<AiToolResult>>()),
-            Times.Exactly(2)); // Called twice: once for tool call, once for final response
     }
 }
