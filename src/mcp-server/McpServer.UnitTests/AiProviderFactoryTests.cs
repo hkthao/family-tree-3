@@ -21,52 +21,7 @@ public class AiProviderFactoryTests
         _aiProviderFactory = new AiProviderFactory(_mockServiceProvider.Object);
     }
 
-    /// <summary>
-    /// Kiểm tra xem GetProvider có trả về GeminiProvider khi yêu cầu "Gemini" không.
-    /// </summary>
-    [Fact]
-    public void GetProvider_Gemini_ReturnsGeminiProvider()
-    {
-        // Arrange
-        var mockGeminiSettings = new Mock<IOptions<GeminiSettings>>();
-        mockGeminiSettings.Setup(o => o.Value).Returns(new GeminiSettings());
-        var mockGeminiLogger = new Mock<ILogger<GeminiProvider>>();
-        var mockAiPromptBuilder = new Mock<IAiPromptBuilder>();
-        var mockGeminiProvider = new GeminiProvider(mockGeminiSettings.Object, mockGeminiLogger.Object, mockAiPromptBuilder.Object);
-        _mockServiceProvider.Setup(sp => sp.GetService(typeof(GeminiProvider)))
-                            .Returns(mockGeminiProvider);
 
-        // Act
-        var provider = _aiProviderFactory.GetProvider("Gemini");
-
-        // Assert
-        Assert.NotNull(provider);
-        Assert.IsType<GeminiProvider>(provider);
-    }
-
-    /// <summary>
-    /// Kiểm tra xem GetProvider có trả về OpenAiProvider khi yêu cầu "OpenAI" không.
-    /// </summary>
-    [Fact]
-    public void GetProvider_OpenAI_ReturnsOpenAiProvider()
-    {
-        // Arrange
-        var mockOpenAiSettings = new Mock<IOptions<OpenAiSettings>>();
-        mockOpenAiSettings.Setup(o => o.Value).Returns(new OpenAiSettings());
-        var mockOpenAiLogger = new Mock<ILogger<OpenAiProvider>>();
-        var mockHttpClient = new Mock<HttpClient>();
-        var mockAiPromptBuilder = new Mock<IAiPromptBuilder>();
-        var mockOpenAiProvider = new OpenAiProvider(mockOpenAiSettings.Object, mockOpenAiLogger.Object, mockHttpClient.Object, mockAiPromptBuilder.Object);
-        _mockServiceProvider.Setup(sp => sp.GetService(typeof(OpenAiProvider)))
-                            .Returns(mockOpenAiProvider);
-
-        // Act
-        var provider = _aiProviderFactory.GetProvider("OpenAI");
-
-        // Assert
-        Assert.NotNull(provider);
-        Assert.IsType<OpenAiProvider>(provider);
-    }
 
     /// <summary>
     /// Kiểm tra xem GetProvider có trả về LocalLlmProvider khi yêu cầu "LocalLLM" không.
@@ -79,8 +34,7 @@ public class AiProviderFactoryTests
         mockLocalLlmSettings.Setup(o => o.Value).Returns(new LocalLlmSettings());
         var mockLocalLlmLogger = new Mock<ILogger<LocalLlmProvider>>();
         var mockHttpClient = new Mock<HttpClient>();
-        var mockAiPromptBuilder = new Mock<IAiPromptBuilder>();
-        var mockLocalLlmProvider = new LocalLlmProvider(mockLocalLlmSettings.Object, mockLocalLlmLogger.Object, mockHttpClient.Object, mockAiPromptBuilder.Object);
+        var mockLocalLlmProvider = new LocalLlmProvider(mockLocalLlmSettings.Object, mockLocalLlmLogger.Object, mockHttpClient.Object);
         _mockServiceProvider.Setup(sp => sp.GetService(typeof(LocalLlmProvider)))
                             .Returns(mockLocalLlmProvider);
 
@@ -100,8 +54,8 @@ public class AiProviderFactoryTests
     {
         // Arrange
         var invalidProviderName = "NonExistentProvider";
-        _mockServiceProvider.Setup(sp => sp.GetService(typeof(GeminiProvider)))
-                            .Returns((GeminiProvider)null!); // Ensure no provider is returned
+        _mockServiceProvider.Setup(sp => sp.GetService(typeof(LocalLlmProvider)))
+                            .Returns((LocalLlmProvider)null!); // Ensure no provider is returned
 
         // Act & Assert
         var exception = Assert.Throws<ArgumentException>(

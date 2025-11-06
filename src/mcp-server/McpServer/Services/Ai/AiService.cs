@@ -1,4 +1,4 @@
-using McpServer.Services.Ai.Tools;
+using McpServer.Services.Ai.AITools;
 
 namespace McpServer.Services.Ai;
 
@@ -20,7 +20,7 @@ public class AiService
     {
         _aiProviderFactory = aiProviderFactory;
         _logger = logger;
-        _defaultAiProvider = configuration["DefaultAiProvider"] ?? "Gemini";
+        _defaultAiProvider = configuration["DefaultAiProvider"] ?? "localllm";
         _toolInteractionHandler = toolInteractionHandler; // Assign ToolInteractionHandler
     }
     /// <summary>

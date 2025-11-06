@@ -4,9 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using McpServer.Config;
 using McpServer.Services.Ai;
-using McpServer.Services.Ai.Tools;
+using McpServer.Services.Ai.AITools;
 using McpServer.Services.Integrations;
 using McpServer.Services.Ai.Prompt;
+using McpServer.Models;
 
 namespace McpServer.UnitTests;
 
@@ -15,7 +16,7 @@ public class AiServiceTests
     private readonly Mock<AiProviderFactory> _mockAiProviderFactory;
     private readonly Mock<ILogger<AiService>> _mockLogger;
     private readonly Mock<IConfiguration> _mockConfiguration;
-    private readonly Mock<ToolExecutor> _mockToolExecutor;
+ // This is now a local mock within the constructor
     private readonly Mock<ToolInteractionHandler> _mockToolInteractionHandler; // Add mock for ToolInteractionHandler
     private readonly Mock<IAiProvider> _mockAiProvider; // Add mock for IAiProvider
     private readonly Mock<IServiceProvider> _mockServiceProvider;
@@ -29,28 +30,22 @@ public class AiServiceTests
         _mockAiProviderFactory.Setup(f => f.GetProvider(It.IsAny<string>())).Returns(_mockAiProvider.Object!); // Setup AiProviderFactory
         _mockLogger = new Mock<ILogger<AiService>>();
         _mockConfiguration = new Mock<IConfiguration>();
-        _mockConfiguration.Setup(c => c["DefaultAiProvider"]).Returns("Gemini");
+        _mockConfiguration.Setup(c => c["DefaultAiProvider"]).Returns("localllm");
 
-        // Create mocks for ToolExecutor's dependencies
-        var mockHttpClient = new Mock<HttpClient>();
-        var mockFamilyTreeBackendSettings = new Mock<IOptions<FamilyTreeBackendSettings>>();
-        mockFamilyTreeBackendSettings.Setup(o => o.Value).Returns(new FamilyTreeBackendSettings { BaseUrl = "http://localhost:5000" });
-        var mockFamilyTreeBackendServiceLogger = new Mock<ILogger<FamilyTreeBackendService>>();
 
-        var mockFamilyTreeBackendService = new Mock<FamilyTreeBackendService>(MockBehavior.Strict, mockHttpClient.Object, mockFamilyTreeBackendSettings.Object, mockFamilyTreeBackendServiceLogger.Object);
         var mockToolExecutorLogger = new Mock<ILogger<ToolExecutor>>();
 
-        _mockToolExecutor = new Mock<ToolExecutor>(MockBehavior.Strict, mockFamilyTreeBackendService.Object, mockToolExecutorLogger.Object);
+        // Simplistic ToolExecutor mock - it's a dependency of ToolInteractionHandler, not AiService directly
+        // The actual ToolExecutor tests should cover its functionality
+        var mockToolExecutor = new Mock<ToolExecutor>(MockBehavior.Loose, _mockServiceProvider.Object, new Mock<ILogger<ToolExecutor>>().Object); 
+        var mockToolRegistry = new Mock<McpServer.Services.Ai.AITools.ToolRegistry>();
 
-
-
-                _mockToolInteractionHandler = new Mock<ToolInteractionHandler>(MockBehavior.Strict, _mockAiProvider.Object, _mockToolExecutor.Object, new Mock<ILogger<ToolInteractionHandler>>().Object, new Mock<IAiPromptBuilder>().Object); // Instantiate mock for ToolInteractionHandler
+        _mockToolInteractionHandler = new Mock<ToolInteractionHandler>(MockBehavior.Strict, _mockAiProvider.Object, mockToolExecutor.Object, mockToolRegistry.Object ,new Mock<ILogger<ToolInteractionHandler>>().Object); // Instantiate mock for ToolInteractionHandler
 
         _aiService = new AiService(
             _mockAiProviderFactory.Object,
             _mockLogger.Object,
             _mockConfiguration.Object,
-            _mockToolExecutor.Object,
             _mockToolInteractionHandler.Object); // Pass mock to AiService constructor
     }
 

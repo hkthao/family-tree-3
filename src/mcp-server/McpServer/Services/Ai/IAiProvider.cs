@@ -1,5 +1,5 @@
 using McpServer.Models; // Add this using statement
-using McpServer.Services.Ai.Tools;
+using McpServer.Services.Ai.AITools;
 
 namespace McpServer.Services.Ai
 {
@@ -13,7 +13,7 @@ namespace McpServer.Services.Ai
         /// </summary>
         /// <param name="messages">Lịch sử trò chuyện và prompt hiện tại.</param>
         /// <returns>Một stream các phần phản hồi, có thể là text hoặc yêu cầu gọi tool.</returns>
-        IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(List<AiMessage> messages);
+        IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(List<AiMessage> messages, ToolRegistry toolRegistry);
 
         /// <summary>
         /// Tạo phản hồi từ AI chỉ dựa trên prompt, không liên quan đến tool.

@@ -5,7 +5,7 @@ using McpServer.Config; // For app settings classes
 using McpServer.Services.Ai; // For AiService, IAiProvider, AiProviderFactory
 using McpServer.Services.Ai.Providers; // For concrete AI providers
 using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder, ISystemPromptManager
-using McpServer.Services.Ai.Tools; // For ToolExecutor, ToolInteractionHandler
+using McpServer.Services.Ai.AITools; // For ToolExecutor, ToolInteractionHandler, ToolRegistry
 using McpServer.Services.Integrations; // For FamilyTreeBackendService
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,14 +123,8 @@ builder.Services.AddSingleton<IAiPromptBuilder, AiPromptBuilder>();
 // Register ToolExecutor
 builder.Services.AddScoped<ToolExecutor>();
 
-// Register IAiProvider using the factory
-builder.Services.AddScoped<IAiProvider>(sp =>
-{
-    var factory = sp.GetRequiredService<AiProviderFactory>();
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    var defaultProvider = configuration["DefaultAiProvider"] ?? "Gemini";
-    return factory.GetProvider(defaultProvider);
-});
+// Register ToolRegistry
+builder.Services.AddSingleton<ToolRegistry>();
 
 // Register ToolInteractionHandler
 builder.Services.AddScoped<ToolInteractionHandler>();

@@ -1,179 +1,219 @@
-using McpServer.Config;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
-using System.Text;
+using McpServer.Config;
 using McpServer.Models;
-using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
-using McpServer.Services.Ai.Tools; // For AiTool related types
+using McpServer.Services.Ai.AITools;
+using Microsoft.Extensions.Options;
 
 namespace McpServer.Services.Ai.Providers;
+
 /// <summary>
-/// Nhà cung cấp AI sử dụng Local LLM (ví dụ: Ollama), có khả năng giả lập tool-calling.
+/// Provides AI services using a local LLM (e.g., Ollama).
 /// </summary>
 public class LocalLlmProvider : IAiProvider
 {
     private readonly LocalLlmSettings _settings;
     private readonly ILogger<LocalLlmProvider> _logger;
     private readonly HttpClient _httpClient;
-    private readonly IAiPromptBuilder _promptBuilder;
-    public LocalLlmProvider(IOptions<LocalLlmSettings> settings, ILogger<LocalLlmProvider> logger, HttpClient httpClient, IAiPromptBuilder promptBuilder)
+
+    public LocalLlmProvider(IOptions<LocalLlmSettings> settings, ILogger<LocalLlmProvider> logger, HttpClient httpClient)
     {
         _settings = settings.Value;
         _logger = logger;
         _httpClient = httpClient;
-        _promptBuilder = promptBuilder;
+
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            _logger.LogWarning("Local LLM BaseUrl is not configured.");
+        }
     }
 
-    public async IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(List<AiMessage> messages)
+    /// <summary>
+    /// Generates a response from the local LLM, potentially including tool calls.
+    /// </summary>
+    /// <param name="messages">The conversation history and current prompt.</param>
+    /// <param name="toolRegistry">The registry of available tools.</param>
+    /// <returns>An async enumerable of AI response parts (text or tool calls).</returns>
+    public async IAsyncEnumerable<AiResponsePart> GenerateToolUseResponseStreamAsync(List<AiMessage> messages, ToolRegistry toolRegistry)
     {
-        List<AiResponsePart> partsToYield = new List<AiResponsePart>();
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            yield return AiResponsePart.FromText("Error: Local LLM BaseUrl is not configured.");
+            yield break;
+        }
+
+        // Simplified request for local LLM, assuming it can handle tool definitions in a specific format
+        // This part might need significant adjustment based on the actual local LLM API.
         var requestBody = new
         {
-            model = _settings.Model,
-            messages = messages.Select(m => new { role = m.Role.ToString().ToLower(), content = m.Content }).ToList(),
-            stream = true,
-            format = "json" // Yêu cầu Ollama trả về JSON
-        };
-        var request = new HttpRequestMessage(HttpMethod.Post, $"{_httpClient.BaseAddress}/generate") // Use BaseAddress directly
-        {
-            Content = JsonContent.Create(requestBody)
+            model = _settings.Model, // e.g., "llama3"
+            messages = messages.Select(m => new { role = m.Role, content = m.Content }),
+            tools = toolRegistry.Tools.Select(t => new
+            {
+                type = "function",
+                function = new
+                {
+                    name = t.Name,
+                    description = t.Description,
+                    parameters = t.Parameters
+                }
+            }),
+            stream = true
         };
 
-        var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        var requestJson = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        _logger.LogInformation("Sending request to Local LLM: {RequestJson}", requestJson);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/api/chat")
+        {
+            Content = new StringContent(requestJson, System.Text.Encoding.UTF8, "application/json")
+        };
+
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
-        await using var responseStream = await response.Content.ReadAsStreamAsync();
-        using var reader = new StreamReader(responseStream);
-        var fullTextResponse = new StringBuilder();
+
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream);
+
+        var responseParts = new List<AiResponsePart>();
         while (!reader.EndOfStream)
         {
             var line = await reader.ReadLineAsync();
-            if (string.IsNullOrEmpty(line)) continue;
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
             try
             {
-                using var doc = JsonDocument.Parse(line);
-                if (doc.RootElement.TryGetProperty("response", out var responseProperty))
+                var jsonDoc = JsonDocument.Parse(line);
+                if (jsonDoc.RootElement.TryGetProperty("message", out var messageElement))
                 {
-                    fullTextResponse.Append(responseProperty.GetString());
+                    if (messageElement.TryGetProperty("content", out var contentElement) && contentElement.ValueKind == JsonValueKind.String)
+                    {
+                        responseParts.Add(AiResponsePart.FromText(contentElement.GetString() ?? string.Empty));
+                    }
+                    if (messageElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var toolCallElement in toolCallsElement.EnumerateArray())
+                        {
+                            var id = toolCallElement.TryGetProperty("id", out var idElement) ? idElement.GetString() : Guid.NewGuid().ToString();
+                            var functionElement = toolCallElement.GetProperty("function");
+                            var name = functionElement.TryGetProperty("name", out var nameElement) ? nameElement.GetString() : string.Empty;
+                            var arguments = functionElement.TryGetProperty("arguments", out var argsElement) ? argsElement.GetRawText() : string.Empty;
+
+                            var toolCall = new AiToolCall
+                            {
+                                Id = id ?? Guid.NewGuid().ToString(),
+                                Function = new AiToolFunction
+                                {
+                                    Name = name ?? string.Empty,
+                                    Arguments = arguments ?? string.Empty
+                                }
+                            };
+                            responseParts.Add(AiResponsePart.FromToolCall(toolCall));
+                        }
+                    }
                 }
-                // We no longer check for "tool_calls" directly here, as Ollama fragments it within "response"
             }
             catch (JsonException ex)
             {
-                _logger.LogWarning(ex, "Failed to parse JSON chunk from Local LLM stream: {Line}", line);
+                _logger.LogError(ex, "Error parsing Local LLM response line: {Line}", line);
+                responseParts.Add(AiResponsePart.FromText($"Error parsing AI response: {ex.Message}"));
             }
         }
-        // After the stream ends, try to parse the accumulated fullTextResponse for tool calls
-        if (fullTextResponse.Length > 0)
-        {
-            try
-            {
-                using var doc = JsonDocument.Parse(fullTextResponse.ToString());
-                if (doc.RootElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
-                {
-                    var toolCalls = new List<AiToolCall>();
-                    foreach (var toolCallElement in toolCallsElement.EnumerateArray())
-                    {
-                        var id = toolCallElement.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
-                        var function = toolCallElement.GetProperty("function");
-                        var name = function.GetProperty("name").GetString() ?? string.Empty;
-                        var args = function.GetProperty("arguments").GetString() ?? string.Empty;
-                        toolCalls.Add(new AiToolCall(id, name, args));
-                    }
-                    partsToYield.Add(new AiToolCallResponsePart(toolCalls));
-                }
-                else
-                {
-                    // If it's valid JSON but not tool calls, treat as text
-                    partsToYield.Add(new AiTextResponsePart(fullTextResponse.ToString()));
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error calling Local LLM API: {Message}", ex.Message);
-                partsToYield.Add(new AiTextResponsePart($"Error calling Local LLM: {ex.Message}"));
-            }
 
-            foreach (var part in partsToYield)
-            {
-                yield return part;
-            }
-        }
-    }
-
-    public async IAsyncEnumerable<AiResponsePart> GenerateChatResponseStreamAsync(string userPrompt)
-    {
-        List<AiResponsePart> partsToYield = new List<AiResponsePart>();
-        try
-        {
-            var messages = _promptBuilder.BuildPromptForChat(userPrompt);
-            var requestBody = new
-            {
-                model = _settings.Model,
-                messages = messages.Select(m => new { role = m.Role.ToString().ToLower(), content = m.Content }).ToList(),
-                stream = true,
-                format = "json" // Yêu cầu Ollama trả về JSON
-            };
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{_httpClient.BaseAddress}/chat") // Use BaseAddress directly
-            {
-                Content = JsonContent.Create(requestBody)
-            };
-
-            var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
-            response.EnsureSuccessStatusCode();
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-            using var reader = new StreamReader(responseStream);
-            var fullTextResponse = new StringBuilder();
-            while (!reader.EndOfStream)
-            {
-                var line = await reader.ReadLineAsync();
-                if (string.IsNullOrEmpty(line)) continue;
-                try
-                {
-                    using var doc = JsonDocument.Parse(line);
-                    if (doc.RootElement.TryGetProperty("response", out var responseProperty))
-                    {
-                        fullTextResponse.Append(responseProperty.GetString());
-                    }
-                }
-                catch (JsonException ex)
-                {
-                    _logger.LogWarning(ex, "Failed to parse JSON chunk from Local LLM stream: {Line}", line);
-                }
-            }
-            if (fullTextResponse.Length > 0)
-            {
-                partsToYield.Add(new AiTextResponsePart(fullTextResponse.ToString()));
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error calling Local LLM API: {Message}", ex.Message);
-            partsToYield.Add(new AiTextResponsePart($"Error calling Local LLM: {ex.Message}"));
-        }
-
-        foreach (var part in partsToYield)
+        foreach (var part in responseParts)
         {
             yield return part;
         }
     }
 
+    /// <summary>
+    /// </summary>
+    /// <param name="prompt">The user's prompt.</param>
+    /// <returns>An async enumerable of AI response parts (text only).</returns>
+    public async IAsyncEnumerable<AiResponsePart> GenerateChatResponseStreamAsync(string prompt)
+    {
+        if (string.IsNullOrEmpty(_settings.BaseUrl))
+        {
+            yield return AiResponsePart.FromText("Error: Local LLM BaseUrl is not configured.");
+            yield break;
+        }
+
+        var requestBody = new
+        {
+            model = _settings.Model, // e.g., "llama3"
+            messages = new[] { new { role = "user", content = prompt } },
+            stream = true
+        };
+
+        var requestJson = JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        _logger.LogInformation("Sending chat request to Local LLM: {RequestJson}", requestJson);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/api/chat")
+        {
+            Content = new StringContent(requestJson, System.Text.Encoding.UTF8, "application/json")
+        };
+
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
+
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        using var reader = new StreamReader(stream);
+
+        var responseParts = new List<AiResponsePart>();
+        while (!reader.EndOfStream)
+        {
+            var line = await reader.ReadLineAsync();
+            if (string.IsNullOrWhiteSpace(line)) continue;
+
+            try
+            {
+                var jsonDoc = JsonDocument.Parse(line);
+                if (jsonDoc.RootElement.TryGetProperty("message", out var messageElement) && messageElement.TryGetProperty("content", out var contentElement) && contentElement.ValueKind == JsonValueKind.String)
+                {
+                    responseParts.Add(AiResponsePart.FromText(contentElement.GetString() ?? string.Empty));
+                }
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Error parsing Local LLM chat response line: {Line}", line);
+                responseParts.Add(AiResponsePart.FromText($"Error parsing AI chat response: {ex.Message}"));
+            }
+        }
+
+        foreach (var part in responseParts)
+        {
+            yield return part;
+        }
+    }
+
+    /// <summary>
+    /// Checks the status of the local LLM API.
+    /// </summary>
+    /// <returns>The status of the API.</returns>
     public async Task<string> GetStatusAsync()
     {
         if (string.IsNullOrEmpty(_settings.BaseUrl))
         {
             return "Local LLM BaseUrl is not configured.";
         }
+
         try
         {
-            // Assuming a simple GET request to the base URL can indicate status
-            var response = await _httpClient.GetAsync("/");
-            response.EnsureSuccessStatusCode();
-            return "Local LLM is operational.";
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_settings.BaseUrl}/api/tags"); // Example endpoint for Ollama
+            using var response = await _httpClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return "Local LLM is accessible.";
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                return $"Local LLM returned an error: {response.StatusCode} - {errorContent}";
+            }
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking Local LLM status.");
-            return $"Local LLM is not reachable. {ex.Message}";
+            return $"Error checking Local LLM status: {ex.Message}";
         }
     }
 }

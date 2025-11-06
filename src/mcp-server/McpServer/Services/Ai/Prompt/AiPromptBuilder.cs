@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using McpServer.Models;
-using McpServer.Services.Ai.Tools; // For AiTool related types
+using McpServer.Services.Ai.AITools; // For ToolDefinition
 
 namespace McpServer.Services.Ai.Prompt;
 
@@ -16,7 +16,7 @@ public class AiPromptBuilder : IAiPromptBuilder
         _logger = logger; // Assign logger
     }
 
-    public List<AiMessage> BuildPromptForToolUse(string userPrompt, List<AiToolDefinition>? tools)
+    public List<AiMessage> BuildPromptForToolUse(string userPrompt, List<ToolDefinition>? tools)
     {
         var messages = new List<AiMessage>
         {
@@ -46,7 +46,7 @@ public class AiPromptBuilder : IAiPromptBuilder
         return messages;
     }
 
-    public List<AiMessage> BuildPromptForChat(string userPrompt, List<AiToolResult>? toolResults)
+    public List<AiMessage> BuildPromptForChat(string userPrompt, List<McpServer.Models.AiToolResult>? toolResults)
     {
         var messages = new List<AiMessage>
         {

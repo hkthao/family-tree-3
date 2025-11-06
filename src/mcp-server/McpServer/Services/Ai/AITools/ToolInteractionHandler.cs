@@ -1,179 +1,105 @@
 using System.Text.Json;
-using McpServer.Services.Ai.Prompt; // For IAiPromptBuilder
+using McpServer.Models;
 
-namespace McpServer.Services.Ai.Tools;
+namespace McpServer.Services.Ai.AITools;
 
 /// <summary>
-/// Xử lý các tương tác AI liên quan đến việc gọi và thực thi công cụ.
+/// Handles the interaction flow for AI tool calls, including execution and response generation.
 /// </summary>
 public class ToolInteractionHandler
 {
     private readonly IAiProvider _aiProvider;
     private readonly ToolExecutor _toolExecutor;
+    private readonly ToolRegistry _toolRegistry;
     private readonly ILogger<ToolInteractionHandler> _logger;
-    private readonly IAiPromptBuilder _promptBuilder;
 
-    public ToolInteractionHandler(IAiProvider aiProvider, ToolExecutor toolExecutor, ILogger<ToolInteractionHandler> logger, IAiPromptBuilder promptBuilder)
+    public ToolInteractionHandler(
+        IAiProvider aiProvider,
+        ToolExecutor toolExecutor,
+        ToolRegistry toolRegistry,
+        ILogger<ToolInteractionHandler> logger)
     {
         _aiProvider = aiProvider;
         _toolExecutor = toolExecutor;
+        _toolRegistry = toolRegistry;
         _logger = logger;
-        _promptBuilder = promptBuilder;
     }
 
     /// <summary>
-    /// Định nghĩa các tool có sẵn cho LLM.
+    /// Handles the AI interaction, potentially involving tool calls and subsequent natural language responses.
     /// </summary>
-    private List<AiToolDefinition> DefineTools()
-    {
-        return new List<AiToolDefinition>
-        {
-            new AiToolDefinition
-            {
-                Name = "search_family",
-                Description = "Search for family information by name, code, or ID.",
-                Parameters = new AiToolParameters
-                {
-                    Properties = new Dictionary<string, AiToolParameterProperty>
-                    {
-                        ["query"] = new AiToolParameterProperty { Type = "string", Description = "The name, code, or ID of the family to search for." }
-                    },
-                    Required = new List<string> { "query" }
-                }
-            },
-            new AiToolDefinition
-            {
-                Name = "get_family_details",
-                Description = "Retrieve detailed information about a specific family by its unique ID.",
-                Parameters = new AiToolParameters
-                {
-                    Properties = new Dictionary<string, AiToolParameterProperty>
-                    {
-                        ["id"] = new AiToolParameterProperty { Type = "string", Description = "The unique ID (GUID) of the family." }
-                    },
-                    Required = new List<string> { "id" }
-                }
-            },
-            new AiToolDefinition
-            {
-                Name = "search_members",
-                Description = "Search for family members by name, role, or other criteria.",
-                Parameters = new AiToolParameters
-                {
-                    Properties = new Dictionary<string, AiToolParameterProperty>
-                    {
-                        ["query"] = new AiToolParameterProperty { Type = "string", Description = "The name, role, or other criteria to search for." },
-                        ["familyId"] = new AiToolParameterProperty { Type = "string", Description = "Optional: The unique ID (GUID) of the family to filter members by." }
-                    },
-                    Required = new List<string> { "query" }
-                }
-            },
-            new AiToolDefinition
-            {
-                Name = "get_member_details",
-                Description = "Retrieve detailed information about a specific family member by their unique ID.",
-                Parameters = new AiToolParameters
-                {
-                    Properties = new Dictionary<string, AiToolParameterProperty>
-                    {
-                        ["id"] = new AiToolParameterProperty { Type = "string", Description = "The unique ID (GUID) of the member." }
-                    },
-                    Required = new List<string> { "id" }
-                }
-            },
-            new AiToolDefinition
-            {
-                Name = "search_events",
-                Description = "Search for family events by name, type, date range, or family ID.",
-                Parameters = new AiToolParameters
-                {
-                    Properties = new Dictionary<string, AiToolParameterProperty>
-                    {
-                        ["query"] = new AiToolParameterProperty { Type = "string", Description = "The name, type, or other criteria to search for." },
-                        ["familyId"] = new AiToolParameterProperty { Type = "string", Description = "Optional: The unique ID (GUID) of the family to filter events by." },
-                        ["startDate"] = new AiToolParameterProperty { Type = "string", Description = "Optional: The start date for the event search (YYYY-MM-DD format)." },
-                        ["endDate"] = new AiToolParameterProperty { Type = "string", Description = "Optional: The end date for the event search (YYYY-MM-DD format)." }
-                    },
-                    Required = new List<string> { "query" }
-                }
-            },
-            new AiToolDefinition
-            {
-                Name = "get_upcoming_events",
-                Description = "Retrieve a list of upcoming family events for a specific family.",
-                Parameters = new AiToolParameters
-                {
-                    Properties = new Dictionary<string, AiToolParameterProperty>
-                    {
-                        ["familyId"] = new AiToolParameterProperty { Type = "string", Description = "Optional: The unique ID (GUID) of the family to filter upcoming events by." }
-                    },
-                    Required = new List<string> { }
-                }
-            }
-        };
-    }
-
-    /// <summary>
-    /// Xử lý luồng tương tác AI có gọi công cụ.
-    /// </summary>
+    /// <param name="userPrompt">The initial prompt from the user.</param>
+    /// <param name="jwtToken">The JWT token for authorization.</param>
+    /// <returns>An async enumerable of string chunks representing the AI's response.</returns>
     public virtual async IAsyncEnumerable<string> HandleToolInteractionAsync(string userPrompt, string? jwtToken)
     {
-        List<string> finalResponseChunks = [];
-        var tools = DefineTools();
-
-        // Build the initial prompt
-        var messages = _promptBuilder.BuildPromptForToolUse(userPrompt, tools);
-        _logger.LogInformation("BuildPromptForToolUse: ${messages}", JsonSerializer.Serialize(messages));
-
-        // Gửi prompt và danh sách tool đến LLM
-        _logger.LogInformation("Phase 1: Sending prompt and tool definitions to LLM.");
-        var responseParts = _aiProvider.GenerateToolUseResponseStreamAsync(messages);
-
-        var toolCalls = new List<AiToolCall>();
-        await foreach (var part in responseParts)
+        var messages = new List<AiMessage>
         {
-            _logger.LogInformation("Received AiResponsePart of type: {PartType}", part.GetType().Name);
-            if (part is AiToolCallResponsePart toolCallPart)
+            new AiMessage { Role = "user", Content = userPrompt }
+        };
+
+        // Step 1: LLM suggests tool calls
+        _logger.LogInformation("Step 1: Requesting tool suggestions from AI for prompt: {UserPrompt}", userPrompt);
+        var toolSuggestionResponse = _aiProvider.GenerateToolUseResponseStreamAsync(messages, _toolRegistry);
+
+        List<AiToolCall> toolCalls = new List<AiToolCall>();
+        await foreach (var part in toolSuggestionResponse)
+        {
+            if (part.Type == "tool_call" && part.ToolCall != null)
             {
-                _logger.LogInformation("LLM requested to call {ToolCount} tools.", toolCallPart.ToolCalls.Count);
-                toolCalls.AddRange(toolCallPart.ToolCalls);
+                toolCalls.Add(part.ToolCall);
+            }
+            // If the AI directly responds with text, yield it immediately.
+            else if (part.Type == "text" && part.Text != null)
+            {
+                yield return part.Text;
+                yield break; // Exit if AI provides a direct text response
             }
         }
 
-        // Nếu không có tool nào được gọi, kết thúc
-        if (toolCalls.Count == 0)
+        if (toolCalls.Any())
         {
-            _logger.LogInformation("No tools were called by the LLM. Finishing.");
-            foreach (var chunk in finalResponseChunks) yield return chunk;
-            yield break;
-        }
-
-        // Thực thi các tool call
-        var toolResults = new List<AiToolResult>();
-        foreach (var toolCall in toolCalls)
-        {
-            var toolResult = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
-            _logger.LogInformation("Tool execution result for {ToolName}: {ToolResultContent}", toolCall.FunctionName, toolResult.Content);
-            toolResults.Add(toolResult);
-        }
-
-        // Gửi kết quả tool call lại cho LLM để tổng hợp câu trả lời
-        _logger.LogInformation("Phase 2: Sending tool results back to LLM for final response.");
-
-        // Build the prompt with tool results
-        var finalMessages = _promptBuilder.BuildPromptForChat(userPrompt, toolResults);
-        _logger.LogInformation("BuildPromptForToolUse: ${messages}", JsonSerializer.Serialize(messages));
-
-        var finalResponseParts = _aiProvider.GenerateToolUseResponseStreamAsync(finalMessages);
-
-        await foreach (var part in finalResponseParts)
-        {
-            if (part is AiTextResponsePart textPart)
+            _logger.LogInformation("Step 2: AI suggested {ToolCallCount} tool calls.", toolCalls.Count);
+            // Step 2: Execute tool calls
+            foreach (var toolCall in toolCalls)
             {
-                finalResponseChunks.Add(textPart.Text);
+                _logger.LogInformation("Executing tool: {ToolName} with arguments: {ToolArguments}", toolCall.Function.Name, toolCall.Function.Arguments);
+                var toolResult = await _toolExecutor.ExecuteAsync(toolCall, jwtToken ?? string.Empty);
+
+                // Add tool result to messages for the next AI call
+                messages.Add(new AiMessage
+                {
+                    Role = "tool",
+                    Content = JsonSerializer.Serialize(toolResult.Output),
+                    ToolCallId = toolResult.ToolCallId
+                });
+
+                if (!toolResult.IsSuccess)
+                {
+                    _logger.LogError("Tool execution failed for {ToolName}: {ErrorMessage}", toolResult.ToolName, toolResult.ErrorMessage);
+                    yield return $"Error executing tool {toolResult.ToolName}: {toolResult.ErrorMessage}";
+                    yield break; // Stop if a tool fails
+                }
+            }
+
+            // Step 3: LLM generates natural language response based on tool results
+            _logger.LogInformation("Step 3: Requesting natural language response from AI after tool execution.");
+            var chatResponse = _aiProvider.GenerateChatResponseStreamAsync(userPrompt); // Pass original prompt for context
+
+            await foreach (var part in chatResponse)
+            {
+                if (part.Type == "text" && part.Text != null)
+                {
+                    yield return part.Text;
+                }
             }
         }
-        _logger.LogInformation("Finished streaming final response from LLM.");
-        foreach (var chunk in finalResponseChunks) yield return chunk;
+        else
+        {
+            // If no tool calls were suggested and no direct text response was given initially,
+            // it means the AI couldn't find a relevant tool or generate a direct response.
+            _logger.LogWarning("AI did not suggest any tools and did not provide a direct text response for prompt: {UserPrompt}", userPrompt);
+            yield return "I couldn't find a relevant tool or generate a direct response for your request.";
+        }
     }
 }
