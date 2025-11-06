@@ -20,7 +20,7 @@ namespace McpServer.Services
         /// <param name="providerName">Tên của nhà cung cấp AI (ví dụ: "Gemini", "OpenAI", "LocalLLM").</param>
         /// <returns>Một thể hiện của IAiProvider.</returns>
         /// <exception cref="ArgumentException">Ném ra nếu không tìm thấy nhà cung cấp AI.</exception>
-        public IAiProvider GetProvider(string providerName)
+        public virtual IAiProvider GetProvider(string providerName)
         {
             return providerName.ToLowerInvariant() switch
             {

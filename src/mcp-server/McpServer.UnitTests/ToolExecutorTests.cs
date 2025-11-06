@@ -203,4 +203,31 @@ public class ToolExecutorTests
         Assert.Contains("Invalid JSON arguments provided for tool 'search_family'.", errorDict["error"]);
     }
 
+    [Fact]
+    public async Task ExecuteToolCallAsync_SearchMembers_ReturnsMemberData()
+    {
+        // Arrange
+        var jwtToken = "test_jwt";
+        var query = "TestMember";
+        var familyId = Guid.NewGuid();
+        var toolCall = new AiToolCall(
+            "call_id_8",
+            "search_members",
+            JsonSerializer.Serialize(new { query = query, familyId = familyId })
+        );
+        var expectedResult = new List<McpServer.Services.MemberDetailDto> { new McpServer.Services.MemberDetailDto { Id = Guid.NewGuid(), FullName = query } };
+
+        _mockFamilyTreeBackendService
+            .Setup(s => s.SearchMembersAsync(jwtToken, query, familyId))
+            .ReturnsAsync(expectedResult);
+
+        // Act
+        var result = await _toolExecutor.ExecuteToolCallAsync(toolCall, jwtToken);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(toolCall.Id, result.ToolCallId);
+        Assert.Contains(query, result.Content);
+        _mockFamilyTreeBackendService.Verify(s => s.SearchMembersAsync(jwtToken, query, familyId), Times.Once);
+    }
 }

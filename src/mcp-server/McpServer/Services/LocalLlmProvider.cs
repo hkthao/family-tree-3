@@ -51,58 +51,135 @@ public class LocalLlmProvider : IAiProvider
                     await using var responseStream = await response.Content.ReadAsStreamAsync();
                     using var reader = new StreamReader(responseStream);
     
-                    var fullTextResponse = new StringBuilder();
-                    bool toolCallDetected = false;
+                                        var fullTextResponse = new StringBuilder();
     
-                    while (!reader.EndOfStream)
-                    {
-                        var line = await reader.ReadLineAsync();
-                        if (string.IsNullOrEmpty(line)) continue;
+                    
     
-                        try
-                        {
-                            using var doc = JsonDocument.Parse(line);
-                            if (doc.RootElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
-                            {
-                                var toolCalls = new List<AiToolCall>();
-                                foreach (var toolCallElement in toolCallsElement.EnumerateArray())
-                                {
-                                    var id = toolCallElement.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
-                                    var function = toolCallElement.GetProperty("function");
-                                    var name = function.GetProperty("name").GetString() ?? string.Empty;
-                                    var args = function.GetProperty("arguments").GetString() ?? string.Empty;
-                                    toolCalls.Add(new AiToolCall(id, name, args));
+                                        while (!reader.EndOfStream)
+    
+                                        {
+    
+                                            var line = await reader.ReadLineAsync();
+    
+                                            if (string.IsNullOrEmpty(line)) continue;
+    
+                    
+    
+                                            try
+    
+                                            {
+    
+                                                using var doc = JsonDocument.Parse(line);
+    
+                                                if (doc.RootElement.TryGetProperty("response", out var responseProperty))
+    
+                                                {
+    
+                                                    fullTextResponse.Append(responseProperty.GetString());
+    
+                                                }
+    
+                                                // We no longer check for "tool_calls" directly here, as Ollama fragments it within "response"
+    
+                                            }
+    
+                                            catch (JsonException ex)
+    
+                                            {
+    
+                                                _logger.LogWarning(ex, "Failed to parse JSON chunk from Local LLM stream: {Line}", line);
+    
+                                            }
+    
+                                        }
+    
+                    
+    
+                                        // After the stream ends, try to parse the accumulated fullTextResponse for tool calls
+    
+                                        if (fullTextResponse.Length > 0)
+    
+                                        {
+    
+                                            try
+    
+                                            {
+    
+                                                using var doc = JsonDocument.Parse(fullTextResponse.ToString());
+    
+                                                if (doc.RootElement.TryGetProperty("tool_calls", out var toolCallsElement) && toolCallsElement.ValueKind == JsonValueKind.Array)
+    
+                                                {
+    
+                                                    var toolCalls = new List<AiToolCall>();
+    
+                                                    foreach (var toolCallElement in toolCallsElement.EnumerateArray())
+    
+                                                    {
+    
+                                                        var id = toolCallElement.GetProperty("id").GetString() ?? Guid.NewGuid().ToString();
+    
+                                                        var function = toolCallElement.GetProperty("function");
+    
+                                                        var name = function.GetProperty("name").GetString() ?? string.Empty;
+    
+                                                        var args = function.GetProperty("arguments").GetString() ?? string.Empty;
+    
+                                                        toolCalls.Add(new AiToolCall(id, name, args));
+    
+                                                    }
+    
+                                                    parts.Add(new AiToolCallResponsePart(toolCalls));
+    
+                                                }
+    
+                                                else
+    
+                                                {
+    
+                                                    // If it's valid JSON but not tool calls, treat as text
+    
+                                                    parts.Add(new AiTextResponsePart(fullTextResponse.ToString()));
+    
+                                                }
+    
+                                            }
+    
+                                            catch (JsonException)
+    
+                                            {
+    
+                                                // If it's not valid JSON, treat the whole thing as plain text
+    
+                                                parts.Add(new AiTextResponsePart(fullTextResponse.ToString()));
+    
+                                            }
+    
+                                        }
+    
+                                    }
+    
+                                    catch (Exception ex)
+    
+                                    {
+    
+                                        _logger.LogError(ex, "Error calling Local LLM API: {Message}", ex.Message);
+    
+                                        parts.Add(new AiTextResponsePart($"Error calling Local LLM: {ex.Message}"));
+    
+                                    }
+    
+                    
+    
+                                    foreach (var part in parts)
+    
+                                    {
+    
+                                        yield return part;
+    
+                                    }
+    
                                 }
-                                parts.Add(new AiToolCallResponsePart(toolCalls));
-                                toolCallDetected = true;
-                            }
-                            else if (doc.RootElement.TryGetProperty("response", out var responseProperty))
-                            {
-                                fullTextResponse.Append(responseProperty.GetString());
-                            }
-                        }
-                        catch (JsonException ex)
-                        {
-                            _logger.LogWarning(ex, "Failed to parse JSON chunk from Local LLM stream: {Line}", line);
-                        }
-                    }
-    
-                    if (!toolCallDetected && fullTextResponse.Length > 0)
-                    {
-                        parts.Add(new AiTextResponsePart(fullTextResponse.ToString()));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error calling Local LLM API: {Message}", ex.Message);
-                    parts.Add(new AiTextResponsePart($"Error calling Local LLM: {ex.Message}"));
-                }
-
-                foreach (var part in parts)
-                {
-                    yield return part;
-                }
-            }
 
     private string BuildPrompt(string userPrompt, List<AiToolDefinition>? tools, List<AiToolResult>? toolResults)
     {

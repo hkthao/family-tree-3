@@ -143,7 +143,7 @@ namespace McpServer.Services
         /// <summary>
         /// Tìm kiếm thành viên từ backend Family Tree.
         /// </summary>
-        public async Task<List<MemberDetailDto>?> SearchMembersAsync(string jwtToken, string query, Guid? familyId = null)
+        public virtual async Task<List<MemberDetailDto>?> SearchMembersAsync(string jwtToken, string query, Guid? familyId = null)
         {
             try
             {

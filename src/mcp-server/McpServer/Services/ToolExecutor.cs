@@ -22,7 +22,7 @@ public class ToolExecutor
     /// <param name="toolCall">Thông tin về lời gọi tool.</param>
     /// <param name="jwtToken">JWT token của người dùng để xác thực các cuộc gọi backend.</param>
     /// <returns>Kết quả của lời gọi tool dưới dạng AiToolResult.</returns>
-    public async Task<AiToolResult> ExecuteToolCallAsync(AiToolCall toolCall, string? jwtToken)
+    public virtual async Task<AiToolResult> ExecuteToolCallAsync(AiToolCall toolCall, string? jwtToken)
     {
         _logger.LogInformation("Executing tool: {FunctionName}", toolCall.FunctionName);
         object? result = null;
