@@ -74,7 +74,6 @@ public static class DependencyInjection
             options.AddPolicy("write:messages", policy => policy.RequireClaim("permissions", "write:messages"));
         });
 
-        services.AddScoped<backend.Domain.Services.IChunkingPolicy, backend.Domain.Services.ChunkingPolicy>();
 
         services.AddScoped<ApplicationDbContextInitialiser>();
 
