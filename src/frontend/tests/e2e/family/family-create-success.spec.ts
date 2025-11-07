@@ -43,9 +43,7 @@ test.describe('Family Management - Create Family - Success Case', () => {
     console.log('✅ Đã tạo gia đình thành công.');
 
     console.log('Bước 2: Xác minh gia đình mới hiển thị trong danh sách.');
-    await page.getByTestId('family-search-expand-button').click();
-    await fillVuetifyInput(page, 'family-search-input', familyName);
-    await page.getByTestId('apply-filters-button').click();
+    await fillVuetifyInput(page, 'family-list-search-input', familyName);
     await waitForVDataTableLoaded(page);
     await expect(page.locator('tr').filter({ hasText: familyName })).toBeVisible();
     console.log('✅ Đã xác minh gia đình mới.');

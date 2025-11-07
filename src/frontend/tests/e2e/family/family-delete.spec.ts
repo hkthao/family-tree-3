@@ -42,7 +42,7 @@ test.describe('Family Management - Delete Family', () => {
 
     console.log('Bước 2: Tìm gia đình vừa tạo.');
     await page.getByTestId('family-search-expand-button').click();
-    await fillVuetifyInput(page, 'family-search-input', familyName);
+    await fillVuetifyInput(page, 'family-list-search-input', familyName);
     await page.getByTestId('apply-filters-button').click();
     await waitForVDataTableLoaded(page);
     await expect(page.getByText(familyName)).toBeVisible();

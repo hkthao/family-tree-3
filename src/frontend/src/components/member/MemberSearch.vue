@@ -15,15 +15,11 @@
       <div v-show="expanded">
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="4">
-              <v-text-field v-model="filters.searchQuery" :label="t('member.search.search')" clearable
-                prepend-inner-icon="mdi-magnify" data-testid="member-search-input"></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="6">
               <GenderSelect v-model="filters.gender" :label="t('member.search.gender')" clearable
                 data-testid="member-gender-filter" />
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col cols="12" md="6">
               <family-auto-complete v-model="filters.familyId" :label="t('member.search.family')" clearable
                 data-testid="member-family-filter" />
             </v-col>
@@ -54,7 +50,6 @@ const { t } = useI18n();
 const expanded = ref(false); // Default to collapsed
 
 const filters = ref<MemberFilter>({
-  searchQuery: '',
   gender: undefined,
   familyId: null,
 });
@@ -74,7 +69,6 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filters.value = {
-    searchQuery: '',
     gender: undefined,
     familyId: null,
   };

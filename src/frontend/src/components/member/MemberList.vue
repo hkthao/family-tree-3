@@ -19,6 +19,16 @@
             </template>
           </v-tooltip>
         </v-btn>
+        <v-text-field
+          v-model="debouncedSearch"
+          :label="t('common.search')"
+          append-inner-icon="mdi-magnify"
+          single-line
+          hide-details
+          clearable
+          class="mr-2"
+          data-test-id="member-list-search-input"
+        ></v-text-field>
       </v-toolbar>
     </template>
     <!-- Avatar column -->
@@ -93,7 +103,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
@@ -104,20 +114,12 @@ import { getGenderTitle } from '@/constants/genders';
 
 const familyStore = useFamilyStore();
 
-defineProps({
-  items: {
-    type: Array as () => Member[],
-    required: true,
-  },
-  totalItems: {
-    type: Number,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    required: true,
-  },
-});
+const props = defineProps<{
+  items: Member[];
+  totalItems: number;
+  loading: boolean;
+  search: string;
+}>();
 
 const emit = defineEmits([
   'update:options',
@@ -127,8 +129,32 @@ const emit = defineEmits([
   'create',
   'ai-biography',
   'ai-create',
+  'update:search',
 ]);
+
 const { t } = useI18n();
+
+const searchQuery = ref(props.search);
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+const debouncedSearch = computed({
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+watch(() => props.search, (newSearch) => {
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 // ... (rest of the file)

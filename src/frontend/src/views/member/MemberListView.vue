@@ -3,7 +3,7 @@
     <MemberSearch @update:filters="handleFilterUpdate" />
 
     <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
-      @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
+      :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
       @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" />
 
     <!-- Confirm Delete Dialog -->
@@ -35,6 +35,7 @@ const { loading } = storeToRefs(memberStore);
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 const aiInputDialog = ref(false);
+const searchQuery = ref('');
 
 const notificationStore = useNotificationStore();
 
@@ -55,8 +56,14 @@ const navigateToAIBiography = (member: Member) => {
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
-  memberStore.filters = filters;
+  memberStore.filters = { ...filters, searchQuery: searchQuery.value };
   await memberStore._loadItems()
+};
+
+const handleSearchUpdate = async (search: string) => {
+  searchQuery.value = search;
+  memberStore.filters = { ...memberStore.filters, searchQuery: searchQuery.value };
+  await memberStore._loadItems();
 };
 
 const handleListOptionsUpdate = async (options: {

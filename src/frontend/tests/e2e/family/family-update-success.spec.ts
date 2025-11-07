@@ -45,7 +45,7 @@ test.describe('Family Management - Update Family - Success Case', () => {
 
     console.log('Bước 2: Tìm và điều hướng đến trang chỉnh sửa gia đình.');
     await page.getByTestId('family-search-expand-button').click();
-    await fillVuetifyInput(page, 'family-search-input', originalFamilyName);
+    await fillVuetifyInput(page, 'family-list-search-input', originalFamilyName);
     await page.getByTestId('apply-filters-button').click();
     await waitForVDataTableLoaded(page);
     const familyRow = page.locator('tr', { has: page.getByText(originalFamilyName) });
@@ -73,7 +73,7 @@ test.describe('Family Management - Update Family - Success Case', () => {
 
     console.log('Bước 4: Xác minh gia đình đã được cập nhật trong danh sách.');
     await page.getByTestId('family-search-expand-button').click();
-    await fillVuetifyInput(page, 'family-search-input', updatedFamilyName);
+    await fillVuetifyInput(page, 'family-list-search-input', updatedFamilyName);
     await page.getByTestId('apply-filters-button').click();
     await waitForVDataTableLoaded(page);
     await expect(page.getByText(updatedFamilyName)).toBeVisible();

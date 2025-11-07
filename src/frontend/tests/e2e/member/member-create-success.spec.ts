@@ -62,7 +62,7 @@ test.describe('Member Management - Create Member - Success Case', () => {
 
     console.log('Bước 2: Xác minh thành viên mới được tạo hiển thị trong danh sách.');
     await page.getByTestId('member-search-expand-button').click();
-    await fillVuetifyInput(page, 'member-search-input', memberLastName);
+    await fillVuetifyInput(page, 'member-list-search-input', memberLastName);
     await page.getByTestId('apply-filters-button').click();
     await waitForVDataTableLoaded(page);
     await expect(page.getByText(`${memberFirstName} ${memberLastName}`)).toBeVisible();

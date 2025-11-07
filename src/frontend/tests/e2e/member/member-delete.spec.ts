@@ -60,7 +60,7 @@ test.describe('Member Management - Delete Member', () => {
     ]);
 
     await page.getByTestId('member-search-expand-button').click();
-    await fillVuetifyInput(page, 'member-search-input', memberLastName);
+    await fillVuetifyInput(page, 'member-list-search-input', memberLastName);
     await page.getByTestId('apply-filters-button').click();
     await waitForVDataTableLoaded(page);
 

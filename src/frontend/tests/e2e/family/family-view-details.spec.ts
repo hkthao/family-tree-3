@@ -42,7 +42,7 @@ test.describe('Family Management - View Family Details', () => {
 
     console.log('Bước 2: Tìm và điều hướng đến trang chi tiết gia đình.');
     await page.getByTestId('family-search-expand-button').click();
-    await fillVuetifyInput(page, 'family-search-input', familyName);
+    await fillVuetifyInput(page, 'family-list-search-input', familyName);
     await page.getByTestId('apply-filters-button').click();
     await waitForVDataTableLoaded(page);
     const familyRow = page.locator('tr', { has: page.getByText(familyName) });
