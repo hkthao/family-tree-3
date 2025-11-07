@@ -1,6 +1,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Dashboard.Specifications;
 using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetUpcomingEvents;
@@ -24,24 +25,31 @@ public class GetUpcomingEventsQueryHandler(IApplicationDbContext context, IMappe
                 return Result<List<EventDto>>.Success([]); // No user ID, no accessible families
             }
 
+            var familyUsersSpec = new FamilyUsersByUserIdSpec(_user.UserId);
             var accessibleFamilyIds = await _context.FamilyUsers
-                .Where(fu => fu.UserId == _user.UserId)
+                .WithSpecification(familyUsersSpec)
                 .Select(fu => fu.FamilyId)
                 .ToListAsync(cancellationToken);
 
-            eventsQuery = eventsQuery.Where(e => e.FamilyId.HasValue && accessibleFamilyIds.Contains(e.FamilyId.Value));
+            // If no accessible families, return empty list
+            if (!accessibleFamilyIds.Any())
+            {
+                return Result<List<EventDto>>.Success([]);
+            }
+
+            eventsQuery = eventsQuery.WithSpecification(new EventsByFamilyIdsSpec(accessibleFamilyIds));
         }
 
         if (request.FamilyId.HasValue)
         {
-            eventsQuery = eventsQuery.Where(e => e.FamilyId == request.FamilyId.Value);
+            eventsQuery = eventsQuery.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
         }
 
         // Apply date range filter
         eventsQuery = eventsQuery.WithSpecification(new EventDateRangeSpecification(request.StartDate, request.EndDate));
 
         var upcomingEvents = await eventsQuery
-            .OrderBy(e => e.StartDate)
+            .WithSpecification(new EventOrderByStartDateSpec())
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

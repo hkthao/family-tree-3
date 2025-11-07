@@ -1,5 +1,7 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetEventsByIds;
 
@@ -10,8 +12,9 @@ public class GetEventsByIdsQueryHandler(IApplicationDbContext context, IMapper m
 
     public async Task<Result<List<EventDto>>> Handle(GetEventsByIdsQuery request, CancellationToken cancellationToken)
     {
+        var eventsByIdsSpec = new EventsByIdsSpec(request.Ids);
         var eventList = await _context.Events
-            .Where(f => request.Ids.Contains(f.Id))
+            .WithSpecification(eventsByIdsSpec)
             .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

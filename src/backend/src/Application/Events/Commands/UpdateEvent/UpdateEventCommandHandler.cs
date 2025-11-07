@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Commands.UpdateEvent;
 
@@ -16,17 +18,19 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
+        var eventSpec = new EventByIdSpecification(request.Id, true);
         var entity = await _context.Events
-            .Include(e => e.EventMembers)
-            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+            .WithSpecification(eventSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (entity == null)
         {
             return Result<bool>.Failure(string.Format(ErrorMessages.EventNotFound, request.Id), ErrorSources.NotFound);
         }
 
+        var membersSpec = new MembersByIdsSpec(request.RelatedMembers);
         var relatedMembers = await _context.Members
-            .Where(m => request.RelatedMembers.Contains(m.Id))
+            .WithSpecification(membersSpec)
             .ToListAsync(cancellationToken);
 
         entity.UpdateEvent(

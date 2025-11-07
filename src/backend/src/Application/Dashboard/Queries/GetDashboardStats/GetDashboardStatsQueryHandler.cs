@@ -1,5 +1,8 @@
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Dashboard.Specifications;
 
 namespace backend.Application.Dashboard.Queries.GetDashboardStats;
 
@@ -12,28 +15,32 @@ public class GetDashboardStatsQueryHandler(IApplicationDbContext context, IAutho
     public async Task<Result<DashboardStatsDto>> Handle(GetDashboardStatsQuery request, CancellationToken cancellationToken)
     {
 
-        IQueryable<Domain.Entities.Family> familiesQuery = _context.Families;
+        IEnumerable<Guid>? accessibleFamilyIds = null;
         if (!_authorizationService.IsAdmin())
         {
-            // Filter families by user access if not admin
-            var accessibleFamilyIds = await _context.FamilyUsers
-                .Where(fu => fu.UserId == _user.UserId)
+            // Lọc các gia đình mà người dùng có quyền truy cập nếu không phải là admin
+            var familyUsersSpec = new FamilyUsersByUserIdSpec(_user.UserId);
+            accessibleFamilyIds = await _context.FamilyUsers
+                .WithSpecification(familyUsersSpec)
                 .Select(fu => fu.FamilyId)
                 .ToListAsync(cancellationToken);
-
-            familiesQuery = familiesQuery.Where(f => accessibleFamilyIds.Contains(f.Id));
         }
 
-        if (request.FamilyId.HasValue)
-        {
-            familiesQuery = familiesQuery.Where(f => f.Id == request.FamilyId.Value);
-        }
+        // Áp dụng Specification để lọc các gia đình
+        var familiesSpec = new FamiliesCountSpec(accessibleFamilyIds, request.FamilyId);
+        var filteredFamiliesQuery = _context.Families.WithSpecification(familiesSpec);
 
-        var totalFamilies = await familiesQuery.CountAsync(cancellationToken);
-        var totalMembers = await _context.Members.Where(m => familiesQuery.Select(f => f.Id).Contains(m.FamilyId)).CountAsync(cancellationToken);
-        var totalRelationships = await _context.Relationships.Where(r => familiesQuery.Select(f => f.Id).Contains(r.SourceMember.FamilyId)).CountAsync(cancellationToken);
+        var totalFamilies = await filteredFamiliesQuery.CountAsync(cancellationToken);
 
-        var totalGenerations = await familiesQuery.SumAsync(e => e.TotalGenerations, cancellationToken);
+        // Áp dụng Specification để lọc thành viên trong các gia đình đã lọc
+        var membersInFamiliesSpec = new MembersInFamiliesSpec(filteredFamiliesQuery);
+        var totalMembers = await _context.Members.WithSpecification(membersInFamiliesSpec).CountAsync(cancellationToken);
+
+        // Áp dụng Specification để lọc mối quan hệ trong các gia đình đã lọc
+        var relationshipsInFamiliesSpec = new RelationshipsInFamiliesSpec(filteredFamiliesQuery);
+        var totalRelationships = await _context.Relationships.WithSpecification(relationshipsInFamiliesSpec).CountAsync(cancellationToken);
+
+        var totalGenerations = await filteredFamiliesQuery.SumAsync(e => e.TotalGenerations, cancellationToken);
 
         var stats = new DashboardStatsDto
         {
