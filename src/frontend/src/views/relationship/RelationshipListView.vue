@@ -3,7 +3,9 @@
     <RelationshipSearch @update:filters="handleFilterUpdate" />
 
     <RelationshipList
+      :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate"
+      @update:search="handleSearchUpdate"
       @view="navigateToDetailView"
       @edit="navigateToEditRelationship"
       @delete="confirmDelete"
@@ -75,7 +77,12 @@ const navigateToMemberDetailView = (memberId: string) => {
 };
 
 const handleFilterUpdate = (filters: RelationshipFilter) => {
-  currentFilters.value = filters;
+  currentFilters.value = { ...currentFilters.value, ...filters };
+  loadRelationships();
+};
+
+const handleSearchUpdate = (searchQuery: string) => {
+  currentFilters.value.searchQuery = searchQuery;
   loadRelationships();
 };
 

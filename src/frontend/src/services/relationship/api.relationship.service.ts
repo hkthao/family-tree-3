@@ -62,6 +62,7 @@ export class ApiRelationshipService implements IRelationshipService {
   ): Promise<Result<Paginated<Relationship>, ApiError>> {
     const params = new URLSearchParams();
     // Add filters to params if they exist
+    if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
     if (filters.sourceMemberId)
       params.append('sourceMemberId', filters.sourceMemberId);
     if (filters.targetMemberId)

@@ -21,6 +21,16 @@
               </template>
             </v-tooltip>
           </v-btn>
+          <v-text-field
+            v-model="debouncedSearch"
+            :label="t('common.search')"
+            append-inner-icon="mdi-magnify"
+            single-line
+            hide-details
+            clearable
+            class="mr-2"
+            data-test-id="relationship-list-search-input"
+          ></v-text-field>
         </v-toolbar>
       </template>
       <template v-slot:item.formattedRelationship="{ item }">
@@ -44,12 +54,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import type { Relationship } from '@/types';
 import { getRelationshipTypeTitle } from '@/constants/relationshipTypes';
 import NLRelationshipPopup from './NLRelationshipPopup.vue';
+
+const props = defineProps<{
+  search: string;
+}>();
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
@@ -84,7 +98,30 @@ const emit = defineEmits([
   'create',
   'ai-create',
   'view-member',
+  'update:search',
 ]);
+
+const searchQuery = ref(props.search);
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+const debouncedSearch = computed({
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+watch(() => props.search, (newSearch) => {
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
 
 const loadItems = async (options: { page: number; itemsPerPage: number; sortBy: any[] }) => {
   emit('update:options', options);
