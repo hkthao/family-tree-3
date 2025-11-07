@@ -1,5 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
+using backend.Domain.Enums;
 
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
@@ -104,6 +105,21 @@ public static class DependencyInjection
         services.AddTransient<S3FileStorage>();
         services.AddTransient<CloudinaryFileStorage>();
 
+        // Register IFileStorage based on configuration
+        services.AddScoped<IFileStorage>(sp =>
+        {
+            var configProvider = sp.GetRequiredService<IConfigProvider>();
+            var storageSettings = configProvider.GetSection<StorageSettings>();
+            var storageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true);
+
+            return storageProvider switch
+            {
+                StorageProvider.Local => sp.GetRequiredService<LocalFileStorage>(),
+                StorageProvider.Cloudinary => sp.GetRequiredService<CloudinaryFileStorage>(),
+                StorageProvider.S3 => sp.GetRequiredService<S3FileStorage>(),
+                _ => throw new InvalidOperationException($"No file storage provider configured for: {storageProvider}")
+            };
+        });
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 
         // Register n8n Service
