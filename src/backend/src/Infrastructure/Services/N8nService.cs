@@ -28,10 +28,10 @@ public class N8nService : IN8nService
     public async Task<Result<string>> CallChatWebhookAsync(string message, List<ChatMessage> history, CancellationToken cancellationToken)
     {
         var n8nSettings = _configProvider.GetSection<N8nSettings>();
-        if (string.IsNullOrEmpty(n8nSettings.WebhookUrl) || n8nSettings.WebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        if (string.IsNullOrEmpty(n8nSettings.ChatWebhookUrl) || n8nSettings.ChatWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
-            _logger.LogWarning("n8n webhook URL is not configured.");
-            return Result<string>.Failure("n8n integration is not configured.", "Configuration");
+            _logger.LogWarning("n8n chat webhook URL is not configured.");
+            return Result<string>.Failure("n8n chat integration is not configured.", "Configuration");
         }
 
         if (string.IsNullOrEmpty(n8nSettings.OllamaModel))
@@ -58,8 +58,8 @@ public class N8nService : IN8nService
 
         try
         {
-            _logger.LogInformation("Calling n8n chat webhook at {Url}", n8nSettings.WebhookUrl);
-            var response = await httpClient.PostAsync(n8nSettings.WebhookUrl, content, cancellationToken);
+            _logger.LogInformation("Calling n8n chat webhook at {Url}", n8nSettings.ChatWebhookUrl);
+            var response = await httpClient.PostAsync(n8nSettings.ChatWebhookUrl, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -113,9 +113,9 @@ public class N8nService : IN8nService
     public async Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken)
     {
         var n8nSettings = _configProvider.GetSection<N8nSettings>();
-        if (string.IsNullOrEmpty(n8nSettings.WebhookUrl) || n8nSettings.WebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        if (string.IsNullOrEmpty(n8nSettings.EmbeddingWebhookUrl) || n8nSettings.EmbeddingWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
-            _logger.LogWarning("n8n webhook URL is not configured for embedding updates.");
+            _logger.LogWarning("n8n embedding webhook URL is not configured.");
             return Result<string>.Failure("n8n embedding integration is not configured.", "Configuration");
         }
 
@@ -135,8 +135,8 @@ public class N8nService : IN8nService
 
         try
         {
-            _logger.LogInformation("Calling n8n embedding webhook at {Url} with payload: {Payload}", n8nSettings.WebhookUrl, jsonPayload);
-            var response = await httpClient.PostAsync(n8nSettings.WebhookUrl, content, cancellationToken);
+            _logger.LogInformation("Calling n8n embedding webhook at {Url} with payload: {Payload}", n8nSettings.EmbeddingWebhookUrl, jsonPayload);
+            var response = await httpClient.PostAsync(n8nSettings.EmbeddingWebhookUrl, content, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {

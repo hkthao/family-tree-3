@@ -13,7 +13,11 @@ public class N8nSettings
     /// <summary>
     /// URL của webhook để kích hoạt quy trình chat AI trên n8n.
     /// </summary>
-    public string WebhookUrl { get; set; } = null!;
+    public string ChatWebhookUrl { get; set; } = null!;
+    /// <summary>
+    /// URL của webhook để kích hoạt quy trình embedding trên n8n.
+    /// </summary>
+    public string EmbeddingWebhookUrl { get; set; } = null!;
     /// <summary>
     /// Tên model Ollama sẽ được sử dụng cho các cuộc trò chuyện.
     /// </summary>
