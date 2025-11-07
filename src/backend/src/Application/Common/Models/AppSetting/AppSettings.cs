@@ -8,10 +8,6 @@ public class AppSettings
 
 
     /// <summary>
-    /// Cài đặt cho kho lưu trữ vector.
-    /// </summary>
-    public VectorStoreSettings VectorStoreSettings { get; set; } = new VectorStoreSettings();
-    /// <summary>
     /// Chuỗi kết nối cơ sở dữ liệu.
     /// </summary>
     public ConnectionStrings ConnectionStrings { get; set; } = new ConnectionStrings();
