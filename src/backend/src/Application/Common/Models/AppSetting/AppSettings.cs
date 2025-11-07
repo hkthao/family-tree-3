@@ -6,10 +6,7 @@ namespace backend.Application.Common.Models.AppSetting;
 public class AppSettings
 {
 
-    /// <summary>
-    /// Cài đặt cho dịch vụ tạo embedding.
-    /// </summary>
-    public EmbeddingSettings EmbeddingSettings { get; set; } = new EmbeddingSettings();
+
     /// <summary>
     /// Cài đặt cho kho lưu trữ vector.
     /// </summary>

@@ -1,6 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
-using backend.Infrastructure.AI.Embeddings;
+
 using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.Auth;
@@ -96,14 +96,6 @@ public static class DependencyInjection
         // Register AI Content Generator
 
         // Register Embedding Settings and Providers
-        services.AddTransient<OpenAIEmbeddingProvider>();
-        services.AddTransient<CohereEmbeddingProvider>();
-        services.AddTransient<LocalEmbeddingProvider>();
-        services.AddScoped<IEmbeddingProviderFactory, EmbeddingProviderFactory>();
-        // Register Vector Store
-        services.AddTransient<InMemoryVectorStore>();
-        services.AddTransient<PineconeVectorStore>();
-        services.AddTransient<QdrantVectorStore>();
         services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
 
         services.AddTransient<PdfTextExtractor>();
