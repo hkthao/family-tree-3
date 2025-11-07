@@ -16,6 +16,7 @@ public class SearchRelationshipsQueryHandler(IApplicationDbContext context, IMap
         var query = _context.Relationships.AsQueryable();
 
         // Apply individual specifications
+        query = query.WithSpecification(new RelationshipBySearchQuerySpecification(request.SearchQuery));
         query = query.WithSpecification(new RelationshipBySourceMemberIdSpecification(request.SourceMemberId));
         query = query.WithSpecification(new RelationshipByTargetMemberIdSpecification(request.TargetMemberId));
         query = query.WithSpecification(new RelationshipByTypeSpecification(request.Type));
