@@ -31,7 +31,7 @@ public class EnsureUserExistsMiddleware
             using var scope = serviceProvider.CreateScope();
             var claimsTransformation = scope.ServiceProvider.GetRequiredService<IClaimsTransformation>();
             var claimsPrincipal = await claimsTransformation.TransformAsync(context.User);
-            
+
             var externalId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(externalId))

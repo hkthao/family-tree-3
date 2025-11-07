@@ -22,7 +22,7 @@ public class EnsureUserExistsCommandHandler : IRequestHandler<EnsureUserExistsCo
     public async Task<EnsureUserExistsResult> Handle(EnsureUserExistsCommand request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(request.ExternalId))
-        { 
+        {
             throw new ArgumentException("External ID không được rỗng.", nameof(request.ExternalId));
         }
 
@@ -59,7 +59,7 @@ public class EnsureUserExistsCommandHandler : IRequestHandler<EnsureUserExistsCo
                 throw;
             }
         }
-        
+
         return new EnsureUserExistsResult { UserId = user.Id, ProfileId = user.Profile?.Id };
     }
 }

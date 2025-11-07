@@ -43,7 +43,7 @@ public class CreateNovuSubscriberCommandHandler : IRequestHandler<CreateNovuSubs
         {
             var subscriberId = user.Id.ToString();
             _logger.LogInformation("Đang đồng bộ Novu subscriber cho User ID: {UserId} với Subscriber ID: {SubscriberId}", user.Id, subscriberId);
-            
+
             await _notificationProvider.SyncSubscriberAsync(
                 subscriberId,
                 user.Profile?.FirstName, // Truy cập qua Profile

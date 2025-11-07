@@ -40,7 +40,7 @@ public class UserProfileController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh chứa dữ liệu hồ sơ người dùng đã cập nhật.</param>
     /// <returns>Một đối tượng Result cho biết thành công hay thất bại.</returns>
     [HttpPut("{id}")]
-    public async Task<ActionResult<Result>> UpdateUserProfile([FromRoute]Guid id, [FromBody] UpdateUserProfileCommand command)
+    public async Task<ActionResult<Result>> UpdateUserProfile([FromRoute] Guid id, [FromBody] UpdateUserProfileCommand command)
     {
         command.SetId(id);
         var result = await _mediator.Send(command);

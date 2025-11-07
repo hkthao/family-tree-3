@@ -85,7 +85,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="command">Lệnh cập nhật gia đình với thông tin mới.</param>
     /// <returns>IActionResult cho biết kết quả của thao tác.</returns>
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateFamily([FromRoute]Guid id, [FromBody] UpdateFamilyCommand command)
+    public async Task<IActionResult> UpdateFamily([FromRoute] Guid id, [FromBody] UpdateFamilyCommand command)
     {
         if (id != command.Id)
         {

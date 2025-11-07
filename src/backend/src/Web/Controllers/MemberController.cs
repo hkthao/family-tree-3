@@ -6,8 +6,8 @@ using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.Members.Commands.UpdateMemberBiography;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.GetMembersByFamilyId; // Added missing using directive
+using backend.Application.Members.Queries.GetMembersByIds;
 using backend.Application.Members.Queries.SearchMembers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

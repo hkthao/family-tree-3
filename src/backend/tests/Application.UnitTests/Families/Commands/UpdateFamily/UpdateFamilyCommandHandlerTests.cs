@@ -96,7 +96,7 @@ public class UpdateFamilyCommandHandlerTests : TestBase
     {
         // Arrange
         var command = new UpdateFamilyCommand { Id = Guid.NewGuid(), Name = "Any Name", Visibility = "Public" };
-         _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
+        _authorizationServiceMock.Setup(x => x.IsAdmin()).Returns(false);
         _authorizationServiceMock.Setup(x => x.CanManageFamily(command.Id)).Returns(true);
 
         // Act

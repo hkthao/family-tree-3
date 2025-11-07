@@ -24,11 +24,7 @@ public class GetEventsQueryHandler(IApplicationDbContext context, IMapper mapper
         query = query.WithSpecification(new EventTypeSpecification(request.EventType?.ToString())); // Convert EventType enum to string
         query = query.WithSpecification(new EventByFamilyIdSpecification(request.FamilyId));
         query = query.WithSpecification(new EventByMemberIdSpecification(request.RelatedMemberId)); // Use RelatedMemberId for member filter
-
-        if (!string.IsNullOrEmpty(request.Location))
-        {
-            query = query.Where(e => e.Location != null && e.Location.Contains(request.Location));
-        }
+        query = query.WithSpecification(new EventByLocationSpecification(request.Location));
 
         // Note: GetEventsQuery does not have explicit sorting or pagination parameters beyond what PaginatedQuery provides.
         // If sorting is needed, a separate EventOrderingSpecification would be applied here.

@@ -1,8 +1,8 @@
 using Ardalis.Specification.EntityFrameworkCore;
-using backend.Application.Members.Specifications;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMembersByIds;
 
