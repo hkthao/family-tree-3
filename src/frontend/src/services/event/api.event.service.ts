@@ -51,6 +51,7 @@ export class ApiEventService implements IEventService {
     console.log('Searching events via API');
     const params = new URLSearchParams();
     // Add filters to params if they exist
+    if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
     if (filters.familyId) params.append('familyId', filters.familyId);
     if (filters.eventType) params.append('eventType', filters.eventType.toString());
     if (filters.startDate)

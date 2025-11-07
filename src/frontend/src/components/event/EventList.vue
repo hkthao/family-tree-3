@@ -27,6 +27,16 @@
             </template>
           </v-tooltip>
         </v-btn>
+        <v-text-field
+          v-model="debouncedSearch"
+          :label="t('common.search')"
+          append-inner-icon="mdi-magnify"
+          single-line
+          hide-details
+          clearable
+          class="mr-2"
+          data-test-id="event-list-search-input"
+        ></v-text-field>
       </v-toolbar>
     </template>
 
@@ -94,7 +104,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import type { DataTableHeader } from 'vuetify';
@@ -104,20 +114,12 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import ChipLookup from '@/components/common/ChipLookup.vue';
 import { formatDate } from '@/utils/dateUtils';
 
-defineProps({
-  events: {
-    type: Array as () => Event[],
-    required: true,
-  },
-  totalEvents: {
-    type: Number,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    required: true,
-  },
-});
+const props = defineProps<{
+  events: Event[];
+  totalEvents: number;
+  loading: boolean;
+  search: string;
+}>();
 
 const emit = defineEmits([
   'update:options',
@@ -126,11 +128,34 @@ const emit = defineEmits([
   'delete',
   'create',
   'ai-create',
+  'update:search',
 ]);
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const familyStore = useFamilyStore();
+
+const searchQuery = ref(props.search);
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+const debouncedSearch = computed({
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+watch(() => props.search, (newSearch) => {
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 

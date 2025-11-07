@@ -16,15 +16,6 @@
         <v-card-text>
           <v-row>
             <v-col cols="12" md="4">
-              <v-text-field
-                v-model="filters.searchQuery"
-                :label="t('event.search.searchQueryPlaceholder')"
-                clearable
-                prepend-inner-icon="mdi-magnify"
-                data-testid="event-search-query-input"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="4">
               <v-select
                 v-model="filters.type"
                 :items="eventTypes"
@@ -87,8 +78,7 @@ const { t } = useI18n();
 
 const expanded = ref(false); // Default to collapsed
 
-const filters = ref<EventFilter>({
-  searchQuery: '',
+const filters = ref<Omit<EventFilter, 'searchQuery'>>({
   type: undefined,
   familyId: null, // familyId should be string or null, not undefined
   startDate: undefined,
@@ -118,7 +108,6 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   filters.value = {
-    searchQuery: '',
     type: undefined,
     familyId: null, // familyId should be string or null, not undefined
     startDate: undefined,

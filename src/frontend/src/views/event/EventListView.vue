@@ -4,7 +4,9 @@
     :events="eventStore.items"
     :total-events="eventStore.totalItems"
     :loading="eventStore.loading"
+    :search="currentFilters.searchQuery || ''"
     @update:options="handleListOptionsUpdate"
+    @update:search="handleSearchUpdate"
     @view="navigateToDetailView"
     @edit="navigateToEditEvent"
     @delete="confirmDelete"
@@ -56,7 +58,6 @@ const loadEvents = async (
   itemsPerPageCount: number = itemsPerPage.value,
 ) => {
   eventStore.filter = {
-    ...eventStore.filter,
     ...currentFilters.value,
     searchQuery: currentFilters.value.searchQuery || '',
   };
@@ -78,8 +79,13 @@ const navigateToEditEvent = (event: Event) => {
   router.push(`/event/edit/${event.id}`);
 };
 
-const handleFilterUpdate = (filters: EventFilter) => {
-  currentFilters.value = filters;
+const handleFilterUpdate = (filters: Omit<EventFilter, 'searchQuery'>) => {
+  currentFilters.value = { ...currentFilters.value, ...filters };
+  loadEvents();
+};
+
+const handleSearchUpdate = (searchQuery: string) => {
+  currentFilters.value.searchQuery = searchQuery;
   loadEvents();
 };
 
