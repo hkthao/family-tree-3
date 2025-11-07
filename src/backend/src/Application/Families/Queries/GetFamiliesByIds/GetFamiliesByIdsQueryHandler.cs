@@ -1,5 +1,7 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Specifications;
 
 namespace backend.Application.Families.Queries.GetFamiliesByIds;
 
@@ -11,7 +13,7 @@ public class GetFamiliesByIdsQueryHandler(IApplicationDbContext context, IMapper
     public async Task<Result<List<FamilyDto>>> Handle(GetFamiliesByIdsQuery request, CancellationToken cancellationToken)
     {
         var familyList = await _context.Families
-            .Where(f => request.Ids.Contains(f.Id))
+            .WithSpecification(new FamiliesByIdsSpecification(request.Ids))
             .ProjectTo<FamilyDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
