@@ -1,4 +1,5 @@
 using backend.Domain.Enums;
+using backend.Domain.Events.Events;
 
 namespace backend.Domain.Entities;
 
@@ -49,6 +50,7 @@ public class Event : BaseAuditableEntity, IAggregateRoot
         Location = location;
         Type = type;
         Color = color;
+        AddDomainEvent(new EventUpdatedEvent(this));
     }
 
     public void AddEventMember(Guid memberId)

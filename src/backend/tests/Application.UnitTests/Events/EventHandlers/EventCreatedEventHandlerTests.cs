@@ -1,5 +1,6 @@
 
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Events.EventHandlers;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
@@ -19,6 +20,7 @@ public class EventCreatedEventHandlerTests : TestBase
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly EventCreatedEventHandler _handler;
 
     public EventCreatedEventHandlerTests()
@@ -27,7 +29,8 @@ public class EventCreatedEventHandlerTests : TestBase
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new EventCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _n8nServiceMock = new Mock<IN8nService>();
+        _handler = new EventCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
@@ -60,5 +63,7 @@ public class EventCreatedEventHandlerTests : TestBase
             It.IsAny<Func<Event, string>>(),
             It.IsAny<Func<Event, Dictionary<string, string>>>(),
             CancellationToken.None), Times.Once);
+
+        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

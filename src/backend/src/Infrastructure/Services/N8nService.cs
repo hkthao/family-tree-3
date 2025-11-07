@@ -105,7 +105,53 @@ public class N8nService : IN8nService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An exception occurred while calling the n8n webhook.");
-            return Result<string>.Failure($"An error occurred: {ex.Message}", "Exception");
+            return Result<string>.Failure("An error occurred: {ex.Message}", "Exception");
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken)
+    {
+        var n8nSettings = _configProvider.GetSection<N8nSettings>();
+        if (string.IsNullOrEmpty(n8nSettings.WebhookUrl) || n8nSettings.WebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
+        {
+            _logger.LogWarning("n8n webhook URL is not configured for embedding updates.");
+            return Result<string>.Failure("n8n embedding integration is not configured.", "Configuration");
+        }
+
+        var httpClient = _httpClientFactory.CreateClient();
+
+        var payload = new
+        {
+            dto.EntityType,
+            dto.EntityId,
+            dto.ActionType,
+            dto.EntityData,
+            dto.Description
+        };
+
+        var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+        try
+        {
+            _logger.LogInformation("Calling n8n embedding webhook at {Url} with payload: {Payload}", n8nSettings.WebhookUrl, jsonPayload);
+            var response = await httpClient.PostAsync(n8nSettings.WebhookUrl, content, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogError("Failed to call n8n embedding webhook. Status: {StatusCode}, Response: {ErrorContent}", response.StatusCode, errorContent);
+                return Result<string>.Failure($"Failed to trigger n8n embedding workflow. Status: {response.StatusCode}", "ExternalService");
+            }
+
+            _logger.LogInformation("Successfully triggered n8n embedding workflow for {EntityType} {EntityId} ({ActionType}).", dto.EntityType, dto.EntityId, dto.ActionType);
+            return Result<string>.Success("n8n embedding workflow triggered successfully.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred while calling the n8n embedding webhook.");
+            return Result<string>.Failure($"An error occurred while triggering n8n embedding workflow: {ex.Message}", "Exception");
         }
     }
 }

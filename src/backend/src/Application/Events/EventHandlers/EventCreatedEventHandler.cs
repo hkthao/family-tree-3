@@ -1,4 +1,6 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Helpers;
+using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Events;
@@ -6,12 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser user) : INotificationHandler<EventCreatedEvent>
+public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser user, IN8nService n8nService) : INotificationHandler<EventCreatedEvent>
 {
     private readonly ILogger<EventCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = user;
+    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(EventCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -47,5 +50,17 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
             },
             cancellationToken
         );
+
+        // Call n8n webhook for embedding update
+        var (entityData, description) = EmbeddingDescriptionFactory.CreateEventData(notification.Event);
+        var embeddingDto = new EmbeddingWebhookDto
+        {
+            EntityType = "Event",
+            EntityId = notification.Event.Id.ToString(),
+            ActionType = "Created",
+            EntityData = entityData,
+            Description = description
+        };
+        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

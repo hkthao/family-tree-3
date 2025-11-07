@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Families.EventHandlers;
 using backend.Application.UnitTests.Common;
 using backend.Application.UserActivities.Commands.RecordActivity;
@@ -18,6 +19,7 @@ public class FamilyUpdatedEventHandlerTests : TestBase
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly FamilyUpdatedEventHandler _handler;
 
     public FamilyUpdatedEventHandlerTests()
@@ -26,7 +28,8 @@ public class FamilyUpdatedEventHandlerTests : TestBase
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new FamilyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _n8nServiceMock = new Mock<IN8nService>();
+        _handler = new FamilyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
@@ -56,6 +59,8 @@ public class FamilyUpdatedEventHandlerTests : TestBase
             It.IsAny<Func<Family, string>>(),
             It.IsAny<Func<Family, Dictionary<string, string>>>(),
             CancellationToken.None), Times.Once);
+
+        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -73,5 +78,6 @@ public class FamilyUpdatedEventHandlerTests : TestBase
         // Assert
         _mediatorMock.Verify(m => m.Send(It.IsAny<IRequest>(), CancellationToken.None), Times.Never);
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(It.IsAny<Family>(), It.IsAny<string>(), It.IsAny<Func<Family, string>>(), It.IsAny<Func<Family, Dictionary<string, string>>>(), CancellationToken.None), Times.Never);
+        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Never);
     }
 }

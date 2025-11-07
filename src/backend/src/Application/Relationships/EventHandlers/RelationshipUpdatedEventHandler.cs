@@ -1,4 +1,6 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Helpers;
+using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Relationships;
@@ -6,12 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<RelationshipUpdatedEvent>
+public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<RelationshipUpdatedEvent>
 {
     private readonly ILogger<RelationshipUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
+    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(RelationshipUpdatedEvent notification, CancellationToken cancellationToken)
     {
@@ -48,5 +51,17 @@ public class RelationshipUpdatedEventHandler(ILogger<RelationshipUpdatedEventHan
             },
             cancellationToken
         );
+
+        // Call n8n webhook for embedding update
+        var (entityData, description) = EmbeddingDescriptionFactory.CreateRelationshipData(notification.Relationship);
+        var embeddingDto = new EmbeddingWebhookDto
+        {
+            EntityType = "Relationship",
+            EntityId = notification.Relationship.Id.ToString(),
+            ActionType = "Updated",
+            EntityData = entityData,
+            Description = description
+        };
+        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

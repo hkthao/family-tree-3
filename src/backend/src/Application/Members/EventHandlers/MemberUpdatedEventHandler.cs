@@ -1,4 +1,6 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Helpers;
+using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
@@ -6,12 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
+    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(MemberUpdatedEvent notification, CancellationToken cancellationToken)
     {
@@ -47,5 +50,17 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
             },
             cancellationToken
         );
+
+        // Call n8n webhook for embedding update
+        var (entityData, description) = EmbeddingDescriptionFactory.CreateMemberData(notification.Member);
+        var embeddingDto = new EmbeddingWebhookDto
+        {
+            EntityType = "Member",
+            EntityId = notification.Member.Id.ToString(),
+            ActionType = "Updated",
+            EntityData = entityData,
+            Description = description
+        };
+        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }

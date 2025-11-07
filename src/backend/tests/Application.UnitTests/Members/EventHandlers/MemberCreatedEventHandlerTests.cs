@@ -1,5 +1,6 @@
 
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Members.EventHandlers;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
@@ -19,6 +20,7 @@ public class MemberCreatedEventHandlerTests
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<IFamilyTreeService> _familyTreeServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly MemberCreatedEventHandler _handler;
 
     public MemberCreatedEventHandlerTests()
@@ -28,7 +30,8 @@ public class MemberCreatedEventHandlerTests
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _familyTreeServiceMock = new Mock<IFamilyTreeService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object);
+        _n8nServiceMock = new Mock<IN8nService>();
+        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
@@ -46,5 +49,6 @@ public class MemberCreatedEventHandlerTests
         // Assert
         _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.CreateMember), CancellationToken.None), Times.Once);
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(member, "Member", It.IsAny<Func<Member, string>>(), It.IsAny<Func<Member, Dictionary<string, string>>>(), CancellationToken.None), Times.Once);
+        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

@@ -1,5 +1,6 @@
 
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Members.EventHandlers;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
@@ -18,6 +19,7 @@ public class MemberUpdatedEventHandlerTests
     private readonly Mock<IMediator> _mediatorMock;
     private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
+    private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly MemberUpdatedEventHandler _handler;
 
     public MemberUpdatedEventHandlerTests()
@@ -26,7 +28,8 @@ public class MemberUpdatedEventHandlerTests
         _mediatorMock = new Mock<IMediator>();
         _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _n8nServiceMock = new Mock<IN8nService>();
+        _handler = new MemberUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
@@ -44,5 +47,6 @@ public class MemberUpdatedEventHandlerTests
         // Assert
         _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.UpdateMember), CancellationToken.None), Times.Once);
         _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(member, "Member", It.IsAny<Func<Member, string>>(), It.IsAny<Func<Member, Dictionary<string, string>>>(), CancellationToken.None), Times.Once);
+        _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

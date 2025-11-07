@@ -1,4 +1,6 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Helpers;
+using backend.Application.Common.Models;
 using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
@@ -6,13 +8,14 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService, ICurrentUser _user) : INotificationHandler<MemberCreatedEvent>
+public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, IFamilyTreeService familyTreeService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberCreatedEvent>
 {
     private readonly ILogger<MemberCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
     private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly IFamilyTreeService _familyTreeService = familyTreeService;
     private readonly ICurrentUser _user = _user;
+    private readonly IN8nService _n8nService = n8nService;
 
     public async Task Handle(MemberCreatedEvent notification, CancellationToken cancellationToken)
     {
@@ -48,5 +51,17 @@ public class MemberCreatedEventHandler(ILogger<MemberCreatedEventHandler> logger
             },
             cancellationToken
         );
+
+        // Call n8n webhook for embedding update
+        var (entityData, description) = EmbeddingDescriptionFactory.CreateMemberData(notification.Member);
+        var embeddingDto = new EmbeddingWebhookDto
+        {
+            EntityType = "Member",
+            EntityId = notification.Member.Id.ToString(),
+            ActionType = "Created",
+            EntityData = entityData,
+            Description = description
+        };
+        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
     }
 }
