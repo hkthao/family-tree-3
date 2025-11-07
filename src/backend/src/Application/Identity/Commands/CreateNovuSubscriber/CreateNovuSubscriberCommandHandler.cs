@@ -1,5 +1,7 @@
 
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Users.Specifications;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Identity.Commands.CreateNovuSubscriber;
@@ -22,9 +24,10 @@ public class CreateNovuSubscriberCommandHandler : IRequestHandler<CreateNovuSubs
 
     public async Task Handle(CreateNovuSubscriberCommand request, CancellationToken cancellationToken)
     {
+        var userSpec = new UserByIdWithProfileSpec(request.UserId);
         var user = await _dbContext.Users
-            .Include(u => u.Profile) // Tải thông tin Profile
-            .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
+            .WithSpecification(userSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (user == null)
         {

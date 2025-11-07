@@ -1,4 +1,6 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Families.Specifications;
 
 namespace backend.Application.Services;
 
@@ -8,10 +10,10 @@ public class FamilyTreeService(IApplicationDbContext context) : IFamilyTreeServi
 
     public async Task UpdateFamilyStats(Guid familyId, CancellationToken cancellationToken = default)
     {
+        var familySpec = new FamilyByIdWithMembersAndRelationshipsSpec(familyId);
         var family = await _context.Families
-            .Include(f => f.Members)
-            .Include(f => f.Relationships)
-            .FirstOrDefaultAsync(f => f.Id == familyId, cancellationToken);
+            .WithSpecification(familySpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (family == null) return; // Family not found
 

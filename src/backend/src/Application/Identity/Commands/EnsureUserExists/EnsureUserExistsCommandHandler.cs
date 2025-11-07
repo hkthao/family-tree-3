@@ -1,6 +1,9 @@
 
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
+using backend.Application.Users.Specifications;
 using backend.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Identity.Commands.EnsureUserExists;
@@ -26,9 +29,10 @@ public class EnsureUserExistsCommandHandler : IRequestHandler<EnsureUserExistsCo
             throw new ArgumentException("External ID không được rỗng.", nameof(request.ExternalId));
         }
 
+        var userSpec = new UserByAuthProviderIdWithProfileSpec(request.ExternalId);
         var user = await _dbContext.Users
-            .Include(u => u.Profile)
-            .FirstOrDefaultAsync(u => u.AuthProviderId == request.ExternalId, cancellationToken);
+            .WithSpecification(userSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (user != null)
         {
@@ -49,9 +53,9 @@ public class EnsureUserExistsCommandHandler : IRequestHandler<EnsureUserExistsCo
         {
             _logger.LogWarning(ex, "DbUpdateException xảy ra, có thể do race condition. Người dùng với external ID {ExternalId} có thể đã tồn tại. Đang lấy lại thông tin.", request.ExternalId);
             user = await _dbContext.Users
-                .Include(u => u.Profile)
+                .WithSpecification(userSpec)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.AuthProviderId == request.ExternalId, cancellationToken);
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (user == null)
             {

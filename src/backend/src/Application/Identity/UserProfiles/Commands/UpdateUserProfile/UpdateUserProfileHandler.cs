@@ -1,7 +1,9 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Identity.UserProfiles.Commands.UpdateUserProfile;
+using backend.Application.Users.Specifications;
 
 namespace backend.Application.Identity.Commands.UpdateUserProfile;
 
@@ -11,9 +13,10 @@ public class UpdateUserProfileCommandHandler(IApplicationDbContext context) : IR
 
     public async Task<Result> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
     {
+        var userSpec = new UserByProfileIdWithProfileSpec(request.Id);
         var user = await _context.Users
-            .Include(u => u.Profile)
-            .FirstOrDefaultAsync(u => u.Profile != null && u.Profile.Id == request.Id, cancellationToken);
+            .WithSpecification(userSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (user == null || user.Profile == null)
         {

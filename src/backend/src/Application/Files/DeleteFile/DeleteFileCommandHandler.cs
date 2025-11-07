@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Files.Specifications;
 
 namespace backend.Application.Files.DeleteFile;
 
@@ -14,7 +16,10 @@ public class DeleteFileCommandHandler(IApplicationDbContext context, IFileStorag
 
     public async Task<Result> Handle(DeleteFileCommand request, CancellationToken cancellationToken)
     {
-        var fileMetadata = await _context.FileMetadata.FindAsync(request.FileId, cancellationToken);
+        var fileMetadataSpec = new FileMetadataByIdSpec(request.FileId);
+        var fileMetadata = await _context.FileMetadata
+            .WithSpecification(fileMetadataSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (fileMetadata == null)
         {

@@ -1,5 +1,7 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Users.Specifications;
 
 namespace backend.Application.Users.Queries;
 
@@ -12,8 +14,9 @@ public class GetUsersByIdsQueryHandler(IApplicationDbContext context, ICurrentUs
 
     public async Task<Result<List<UserDto>>> Handle(GetUsersByIdsQuery request, CancellationToken cancellationToken)
     {
+        var usersSpec = new UsersByIdsSpec(request.Ids);
         var users = await _context.Users
-            .Where(u => request.Ids.Contains(u.Id))
+            .WithSpecification(usersSpec)
             .Select(u => new UserDto
             {
                 Id = u.Id.ToString(),

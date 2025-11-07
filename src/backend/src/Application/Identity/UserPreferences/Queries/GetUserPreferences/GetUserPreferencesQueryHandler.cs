@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Users.Specifications;
 using backend.Domain.Enums;
 
 namespace backend.Application.UserPreferences.Queries.GetUserPreferences;
@@ -13,9 +15,9 @@ public class GetUserPreferencesQueryHandler(IApplicationDbContext context, ICurr
 
     public async Task<Result<UserPreferenceDto>> Handle(GetUserPreferencesQuery request, CancellationToken cancellationToken)
     {
+        var userSpec = new UserByIdWithPreferenceSpec(_currentUser.UserId);
         var user = await _context.Users
-            .Where(up => up.Id == _currentUser.UserId)
-            .Include(up => up.Preference)
+            .WithSpecification(userSpec)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (user == null)

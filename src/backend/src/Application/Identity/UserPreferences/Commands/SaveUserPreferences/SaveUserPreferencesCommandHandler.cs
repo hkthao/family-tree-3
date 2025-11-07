@@ -1,5 +1,7 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Users.Specifications;
 
 namespace backend.Application.UserPreferences.Commands.SaveUserPreferences;
 
@@ -10,9 +12,10 @@ public class SaveUserPreferencesCommandHandler(IApplicationDbContext context, IC
 
     public async Task<Result> Handle(SaveUserPreferencesCommand request, CancellationToken cancellationToken)
     {
+        var userSpec = new UserByIdWithPreferenceSpec(_user.UserId);
         var user = await _context.Users
-            .Include(u => u.Preference)
-            .FirstOrDefaultAsync(u => u.Id == _user.UserId, cancellationToken);
+            .WithSpecification(userSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (user == null)
         {

@@ -2,6 +2,9 @@ using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Specifications;
+using backend.Application.Events.Specifications;
+using backend.Application.Members.Specifications;
+using backend.Application.Relationships.Specifications;
 using backend.Domain.Enums;
 
 namespace backend.Application.UserActivities.Commands.RecordActivity;
@@ -25,18 +28,22 @@ public class RecordActivityCommandHandler(IApplicationDbContext context) : IRequ
                     groupId = Guid.Parse(request.TargetId);
                     break;
                 case TargetType.Member:
-                    var member = await _context.Members.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
+                    var memberSpec = new MemberByIdSpec(Guid.Parse(request.TargetId));
+                    var member = await _context.Members.WithSpecification(memberSpec).FirstOrDefaultAsync(cancellationToken);
                     groupId = member?.FamilyId;
                     break;
                 case TargetType.Event:
-                    var @event = await _context.Events.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
+                    var eventSpec = new EventByIdSpecification(Guid.Parse(request.TargetId));
+                    var @event = await _context.Events.WithSpecification(eventSpec).FirstOrDefaultAsync(cancellationToken);
                     groupId = @event?.FamilyId;
                     break;
                 case TargetType.Relationship:
-                    var relationship = await _context.Relationships.FindAsync(Guid.Parse(request.TargetId), cancellationToken);
+                    var relationshipSpec = new RelationshipByIdSpec(Guid.Parse(request.TargetId));
+                    var relationship = await _context.Relationships.WithSpecification(relationshipSpec).FirstOrDefaultAsync(cancellationToken);
                     if (relationship != null)
                     {
-                        var sourceMember = await _context.Members.FindAsync(relationship.SourceMemberId, cancellationToken);
+                        var sourceMemberSpec = new MemberByIdSpec(relationship.SourceMemberId);
+                        var sourceMember = await _context.Members.WithSpecification(sourceMemberSpec).FirstOrDefaultAsync(cancellationToken);
                         groupId = sourceMember?.FamilyId;
                     }
                     break;

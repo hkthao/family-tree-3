@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Identity.UserProfiles.Specifications;
 
 namespace backend.Application.Identity.UserProfiles.Queries.GetCurrentUserProfile;
 
@@ -12,9 +14,11 @@ public class GetCurrentUserProfileQueryHandler(IApplicationDbContext context, IC
 
     public async Task<Result<UserProfileDto>> Handle(GetCurrentUserProfileQuery request, CancellationToken cancellationToken)
     {
+        var userProfileSpec = new UserProfileByUserIdSpec(_user.UserId);
         var userProfile = await _context.UserProfiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(up => up.UserId == _user.UserId, cancellationToken);
+            .WithSpecification(userProfileSpec)
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (userProfile == null)
         {
