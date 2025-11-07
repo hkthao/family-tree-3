@@ -1,3 +1,5 @@
+using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Members.Specifications;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries.GetMembers;
@@ -12,8 +14,7 @@ public class GetMembersByIdsQueryHandler(IApplicationDbContext context, IMapper 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersByIdsQuery request, CancellationToken cancellationToken)
     {
         var memberList = await _context.Members
-            .Where(m => request.Ids.Contains(m.Id))
-            .Include(m => m.Relationships)
+            .WithSpecification(new MembersByIdsSpecification(request.Ids))
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

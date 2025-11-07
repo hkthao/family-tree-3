@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Members.Queries.GetMembers; // Added missing using directive
+using backend.Application.Members.Queries.GetMembers;
+using backend.Application.Members.Specifications; // Added missing using directive
 
 namespace backend.Application.Members.Queries.GetMembersByFamilyId;
 
@@ -18,7 +20,7 @@ public class GetMembersByFamilyIdQueryHandler : IRequestHandler<GetMembersByFami
     public async Task<Result<List<MemberListDto>>> Handle(GetMembersByFamilyIdQuery request, CancellationToken cancellationToken)
     {
         var members = await _context.Members
-            .Where(m => m.FamilyId == request.FamilyId)
+            .WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId))
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

@@ -15,7 +15,10 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
 
     public async Task<Result<IReadOnlyList<MemberListDto>>> Handle(GetMembersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Members.Include(e => e.Family).AsNoTracking();
+        var query = _context.Members.AsQueryable();
+
+        query = query.WithSpecification(new MemberIncludeFamilySpecification());
+        query = query.AsNoTracking();
 
         // If the user has the 'Admin' role, bypass family-specific access checks
         if (_authorizationService.IsAdmin())
@@ -43,7 +46,7 @@ public class GetMembersQueryHandler(IApplicationDbContext context, IMapper mappe
             else
             {
                 // If no specific FamilyId is requested, filter by all families the user has access to
-                query = query.Where(m => accessibleFamilyIds.Contains(m.FamilyId));
+                query = query.WithSpecification(new MembersByFamilyIdsSpecification(accessibleFamilyIds));
             }
         }
 
