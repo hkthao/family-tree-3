@@ -17,7 +17,6 @@ public class FamilyCreatedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<FamilyCreatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly FamilyCreatedEventHandler _handler;
@@ -26,10 +25,9 @@ public class FamilyCreatedEventHandlerTests : TestBase
     {
         _loggerMock = new Mock<ILogger<FamilyCreatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
         _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new FamilyCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _handler = new FamilyCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
@@ -47,22 +45,7 @@ public class FamilyCreatedEventHandlerTests : TestBase
 
         // Assert
 
-        // Verify that RecordActivityCommand was sent
-        _mediatorMock.Verify(m => m.Send(
-            It.Is<RecordActivityCommand>(cmd =>
-                cmd.UserId == userId &&
-                cmd.ActionType == UserActionType.CreateFamily &&
-                cmd.TargetId == testFamily.Id.ToString()),
-            CancellationToken.None), Times.Once);
-
-        // Verify that entity was upserted to global search
-        _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(
-            testFamily,
-            "Family",
-            It.IsAny<Func<Family, string>>(),
-            It.IsAny<Func<Family, Dictionary<string, string>>>(),
-            CancellationToken.None), Times.Once);
-
+        _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
         _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

@@ -13,23 +13,14 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
 {
     public class SaveFaceLabelsCommandHandlerTests : TestBase
     {
-        private readonly Mock<IVectorStoreFactory> _vectorStoreFactoryMock;
-        private readonly Mock<IVectorStore> _vectorStoreMock;
         private readonly Mock<IConfigProvider> _configProviderMock;
         private readonly Mock<ILogger<SaveFaceLabelsCommandHandler>> _loggerMock;
 
         public SaveFaceLabelsCommandHandlerTests()
         {
-            _vectorStoreFactoryMock = new Mock<IVectorStoreFactory>();
-            _vectorStoreMock = new Mock<IVectorStore>();
             _configProviderMock = new Mock<IConfigProvider>();
             _loggerMock = new Mock<ILogger<SaveFaceLabelsCommandHandler>>();
 
-            _vectorStoreFactoryMock.Setup(x => x.CreateVectorStore(It.IsAny<Domain.Enums.VectorStoreProviderType>()))
-                .Returns(_vectorStoreMock.Object);
-
-            _configProviderMock.Setup(x => x.GetSection<VectorStoreSettings>())
-                .Returns(new VectorStoreSettings { Provider = "InMemory" });
         }
 
         [Fact]
@@ -66,16 +57,15 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
             };
 
             var handler = new SaveFaceLabelsCommandHandler(
-                _loggerMock.Object,
-                _vectorStoreFactoryMock.Object,
-                _configProviderMock.Object);
+                _context,
+                _configProviderMock.Object,
+                _loggerMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            _vectorStoreMock.Verify(x => x.UpsertAsync(It.IsAny<List<double>>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<CancellationToken>()), Times.Exactly(2)); // Fixed: Changed double[] to List<double>
         }
     }
 }

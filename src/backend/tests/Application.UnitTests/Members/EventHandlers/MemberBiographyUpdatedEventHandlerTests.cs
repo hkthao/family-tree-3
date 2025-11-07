@@ -16,7 +16,6 @@ public class MemberBiographyUpdatedEventHandlerTests
 {
     private readonly Mock<ILogger<MemberBiographyUpdatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly MemberBiographyUpdatedEventHandler _handler;
 
@@ -24,9 +23,8 @@ public class MemberBiographyUpdatedEventHandlerTests
     {
         _loggerMock = new Mock<ILogger<MemberBiographyUpdatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new MemberBiographyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new MemberBiographyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -43,6 +41,5 @@ public class MemberBiographyUpdatedEventHandlerTests
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.UpdateMember), CancellationToken.None), Times.Once);
-        _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(member, "Member", It.IsAny<Func<Member, string>>(), It.IsAny<Func<Member, Dictionary<string, string>>>(), CancellationToken.None), Times.Once);
     }
 }

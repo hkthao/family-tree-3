@@ -6,11 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<FamilyDeletedEvent>
+public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger, IMediator mediator, ICurrentUser _user) : INotificationHandler<FamilyDeletedEvent>
 {
     private readonly ILogger<FamilyDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
 
     public async Task Handle(FamilyDeletedEvent notification, CancellationToken cancellationToken)
@@ -33,7 +32,7 @@ public class FamilyDeletedEventHandler(ILogger<FamilyDeletedEventHandler> logger
         // Publish notification for family deletion
 
         // Remove family data from Vector DB for search via GlobalSearchService
-        await _globalSearchService.DeleteEntityFromSearchAsync(notification.Family.Id.ToString(), "Family", cancellationToken);
+        _logger.LogInformation("Family Deleted: {FamilyId}", notification.Family.Id);
     }
 }
 

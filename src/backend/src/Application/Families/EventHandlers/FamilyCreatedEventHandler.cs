@@ -8,11 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Families.EventHandlers;
 
-public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<FamilyCreatedEvent>
+public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<FamilyCreatedEvent>
 {
     private readonly ILogger<FamilyCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
     private readonly IN8nService _n8nService = n8nService;
 
@@ -34,22 +33,6 @@ public class FamilyCreatedEventHandler(ILogger<FamilyCreatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for family creation
-
-        // Store family data in Vector DB for search via GlobalSearchService
-        await _globalSearchService.UpsertEntityAsync(
-            notification.Family,
-            "Family",
-            family => $"Family Name: {family.Name}. Description: {family.Description}. Address: {family.Address}",
-            family => new Dictionary<string, string>
-            {
-                { "EntityType", "Family" },
-                { "EntityId", family.Id.ToString() },
-                { "Name", family.Name },
-                { "Description", family.Description ?? "" },
-                { "DeepLink", $"/family/{family.Id}" }
-            },
-            cancellationToken
-        );
 
         // Call n8n webhook for embedding update
         var (entityData, description) = EmbeddingDescriptionFactory.CreateFamilyData(notification.Family);

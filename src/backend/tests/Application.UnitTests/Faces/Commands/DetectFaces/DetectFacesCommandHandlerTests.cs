@@ -1,4 +1,3 @@
-using backend.Application.AI.VectorStore;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands; // Added this using directive
@@ -16,24 +15,15 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
     public class DetectFacesCommandHandlerTests : TestBase
     {
         private readonly Mock<IFaceApiService> _faceApiServiceMock;
-        private readonly Mock<IVectorStoreFactory> _vectorStoreFactoryMock;
-        private readonly Mock<IVectorStore> _vectorStoreMock;
         private readonly Mock<IConfigProvider> _configProviderMock;
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
 
         public DetectFacesCommandHandlerTests()
         {
             _faceApiServiceMock = new Mock<IFaceApiService>();
-            _vectorStoreFactoryMock = new Mock<IVectorStoreFactory>();
-            _vectorStoreMock = new Mock<IVectorStore>();
             _configProviderMock = new Mock<IConfigProvider>();
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
 
-            _vectorStoreFactoryMock.Setup(x => x.CreateVectorStore(It.IsAny<Domain.Enums.VectorStoreProviderType>()))
-                .Returns(_vectorStoreMock.Object);
-
-            _configProviderMock.Setup(x => x.GetSection<VectorStoreSettings>())
-                .Returns(new VectorStoreSettings { Provider = "InMemory" });
         }
 
         [Fact]
@@ -67,25 +57,10 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _context.Members.Add(member);
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var queryResult = new List<VectorStoreQueryResult> // Fixed: Using VectorStoreQueryResult
-            {
-                new VectorStoreQueryResult
-                {
-                    Score = 0.9f,
-                    Metadata = new Dictionary<string, string>
-                    {
-                        { "member_id", memberId.ToString() }
-                    }
-                }
-            };
-
-            _vectorStoreMock.Setup(x => x.QueryAsync(It.IsAny<double[]>(), It.IsAny<int>(), It.IsAny<Dictionary<string, string>>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(queryResult);
 
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _vectorStoreFactoryMock.Object,
                 _configProviderMock.Object,
                 _loggerMock.Object);
 
@@ -99,8 +74,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             {
                 result.Value.DetectedFaces.Should().HaveCount(1);
                 var detectedFace = result.Value.DetectedFaces[0];
-                detectedFace.MemberId.Should().Be(memberId);
-                detectedFace.MemberName.Should().Be("Member Test");
+
             }
         }
 
@@ -120,7 +94,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _vectorStoreFactoryMock.Object,
                 _configProviderMock.Object,
                 _loggerMock.Object);
 
@@ -149,7 +122,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _vectorStoreFactoryMock.Object,
                 _configProviderMock.Object,
                 _loggerMock.Object);
 
@@ -188,7 +160,6 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _vectorStoreFactoryMock.Object,
                 _configProviderMock.Object,
                 _loggerMock.Object);
 

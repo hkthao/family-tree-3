@@ -8,11 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
 {
     private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
     private readonly IN8nService _n8nService = n8nService;
 
@@ -34,22 +33,6 @@ public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger
         }, cancellationToken);
 
         // Publish notification for member update
-
-        // Update member data in Vector DB for search via GlobalSearchService
-        await _globalSearchService.UpsertEntityAsync(
-            notification.Member,
-            "Member",
-            member => $"Member Name: {member.FullName}. Biography: {member.Biography}. Occupation: {member.Occupation}. Place of birth: {member.PlaceOfBirth}.",
-            member => new Dictionary<string, string>
-            {
-                { "EntityType", "Member" },
-                { "EntityId", member.Id.ToString() },
-                { "Name", member.FullName },
-                { "Description", member.Biography ?? "" },
-                { "DeepLink", $"/family/{member.FamilyId}/member/{member.Id}" }
-            },
-            cancellationToken
-        );
 
         // Call n8n webhook for embedding update
         var (entityData, description) = EmbeddingDescriptionFactory.CreateMemberData(notification.Member);

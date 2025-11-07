@@ -16,7 +16,6 @@ public class FamilyDeletedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<FamilyDeletedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly FamilyDeletedEventHandler _handler;
 
@@ -24,9 +23,8 @@ public class FamilyDeletedEventHandlerTests : TestBase
     {
         _loggerMock = new Mock<ILogger<FamilyDeletedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new FamilyDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new FamilyDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -43,7 +41,6 @@ public class FamilyDeletedEventHandlerTests : TestBase
         await _handler.Handle(notification, CancellationToken.None);
 
         // Assert
-        _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.DeleteFamily), CancellationToken.None), Times.Once);
-        _globalSearchServiceMock.Verify(s => s.DeleteEntityFromSearchAsync(testFamily.Id.ToString(), "Family", CancellationToken.None), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
     }
 }

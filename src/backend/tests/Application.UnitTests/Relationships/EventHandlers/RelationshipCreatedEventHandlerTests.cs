@@ -17,7 +17,6 @@ public class RelationshipCreatedEventHandlerTests
 {
     private readonly Mock<ILogger<RelationshipCreatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IN8nService> _n8nServiceMock;
 
@@ -25,7 +24,6 @@ public class RelationshipCreatedEventHandlerTests
     {
         _loggerMock = new Mock<ILogger<RelationshipCreatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
         _n8nServiceMock = new Mock<IN8nService>();
     }
@@ -34,7 +32,7 @@ public class RelationshipCreatedEventHandlerTests
     public async Task Handle_ShouldRecordActivity()
     {
         // Arrange
-        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
         var notification = new RelationshipCreatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act
@@ -49,7 +47,7 @@ public class RelationshipCreatedEventHandlerTests
     public async Task Handle_ShouldPublishNotification()
     {
         // Arrange
-        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
         var notification = new RelationshipCreatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act
@@ -60,14 +58,13 @@ public class RelationshipCreatedEventHandlerTests
     public async Task Handle_ShouldUpsertEntityInGlobalSearch()
     {
         // Arrange
-        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        var handler = new RelationshipCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
         var notification = new RelationshipCreatedEvent(new Relationship(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), RelationshipType.Father));
 
         // Act
         await handler.Handle(notification, CancellationToken.None);
 
         // Assert
-        _globalSearchServiceMock.Verify(x => x.UpsertEntityAsync(notification.Relationship, "Relationship", It.IsAny<Func<Relationship, string>>(), It.IsAny<Func<Relationship, Dictionary<string, string>>>(), CancellationToken.None), Times.Once);
         _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }

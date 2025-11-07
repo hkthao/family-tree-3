@@ -2,7 +2,6 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 
 using backend.Infrastructure.AI.TextExtractors;
-using backend.Infrastructure.AI.VectorStore;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
@@ -67,7 +66,6 @@ public static class DependencyInjection
         services.AddSingleton<IDateTime, DateTimeService>();
         // Register NotificationSettings
         services.Configure<NotificationSettings>(configuration.GetSection(NotificationSettings.SectionName));
-        services.AddScoped<IGlobalSearchService, GlobalSearchService>();
 
         // Register Background Task Queue
         services.AddSingleton<IBackgroundTaskQueue>(new BackgroundTaskQueue(100)); // Capacity of 100
@@ -96,7 +94,6 @@ public static class DependencyInjection
         // Register AI Content Generator
 
         // Register Embedding Settings and Providers
-        services.AddScoped<IVectorStoreFactory, VectorStoreFactory>();
 
         services.AddTransient<PdfTextExtractor>();
         services.AddTransient<TxtTextExtractor>();

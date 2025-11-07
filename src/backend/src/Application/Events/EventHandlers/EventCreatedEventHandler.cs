@@ -8,11 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Events.EventHandlers;
 
-public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser user, IN8nService n8nService) : INotificationHandler<EventCreatedEvent>
+public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, IMediator mediator, ICurrentUser user, IN8nService n8nService) : INotificationHandler<EventCreatedEvent>
 {
     private readonly ILogger<EventCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = user;
     private readonly IN8nService _n8nService = n8nService;
 
@@ -36,21 +35,6 @@ public class EventCreatedEventHandler(ILogger<EventCreatedEventHandler> logger, 
         // Publish notification for event creation
 
         // Store event data in Vector DB for search via GlobalSearchService
-        await _globalSearchService.UpsertEntityAsync(
-            notification.Event,
-            "Event",
-            @event => $"Event Name: {@event.Name}. Description: {@event.Description}. Location: {@event.Location}",
-            @event => new Dictionary<string, string>
-            {
-                { "EntityType", "Event" },
-                { "EntityId", @event.Id.ToString() },
-                { "Name", @event.Name },
-                { "Description", @event.Description ?? "" },
-                { "DeepLink", $"/event/{@event.Id}" }
-            },
-            cancellationToken
-        );
-
         // Call n8n webhook for embedding update
         var (entityData, description) = EmbeddingDescriptionFactory.CreateEventData(notification.Event);
         var embeddingDto = new EmbeddingWebhookDto

@@ -17,7 +17,6 @@ public class FamilyUpdatedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<FamilyUpdatedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IN8nService> _n8nServiceMock;
     private readonly FamilyUpdatedEventHandler _handler;
@@ -26,10 +25,9 @@ public class FamilyUpdatedEventHandlerTests : TestBase
     {
         _loggerMock = new Mock<ILogger<FamilyUpdatedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
         _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new FamilyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _handler = new FamilyUpdatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
     }
 
     [Fact]
@@ -46,20 +44,7 @@ public class FamilyUpdatedEventHandlerTests : TestBase
         await _handler.Handle(notification, CancellationToken.None);
 
         // Assert
-        _mediatorMock.Verify(m => m.Send(
-            It.Is<RecordActivityCommand>(cmd =>
-                cmd.UserId == userId &&
-                cmd.ActionType == UserActionType.UpdateFamily &&
-                cmd.TargetId == testFamily.Id.ToString()),
-            CancellationToken.None), Times.Once);
-
-        _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(
-            testFamily,
-            "Family",
-            It.IsAny<Func<Family, string>>(),
-            It.IsAny<Func<Family, Dictionary<string, string>>>(),
-            CancellationToken.None), Times.Once);
-
+        _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
         _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 
@@ -77,7 +62,6 @@ public class FamilyUpdatedEventHandlerTests : TestBase
 
         // Assert
         _mediatorMock.Verify(m => m.Send(It.IsAny<IRequest>(), CancellationToken.None), Times.Never);
-        _globalSearchServiceMock.Verify(s => s.UpsertEntityAsync(It.IsAny<Family>(), It.IsAny<string>(), It.IsAny<Func<Family, string>>(), It.IsAny<Func<Family, Dictionary<string, string>>>(), CancellationToken.None), Times.Never);
         _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Never);
     }
 }

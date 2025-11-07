@@ -6,11 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
-public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user) : INotificationHandler<MemberDeletedEvent>
+public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger, IMediator mediator, ICurrentUser _user) : INotificationHandler<MemberDeletedEvent>
 {
     private readonly ILogger<MemberDeletedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
 
     public async Task Handle(MemberDeletedEvent notification, CancellationToken cancellationToken)
@@ -33,6 +32,6 @@ public class MemberDeletedEventHandler(ILogger<MemberDeletedEventHandler> logger
         // Publish notification for member deletion
 
         // Remove member data from Vector DB for search via GlobalSearchService
-        await _globalSearchService.DeleteEntityFromSearchAsync(notification.Member.Id.ToString(), "Member", cancellationToken);
+        _logger.LogInformation("Member Deleted: {MemberId}", notification.Member.Id);
     }
 }

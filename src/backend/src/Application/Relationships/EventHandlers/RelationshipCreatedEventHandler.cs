@@ -8,11 +8,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Relationships.EventHandlers;
 
-public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, IGlobalSearchService globalSearchService, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<RelationshipCreatedEvent>
+public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<RelationshipCreatedEvent>
 {
     private readonly ILogger<RelationshipCreatedEventHandler> _logger = logger;
     private readonly IMediator _mediator = mediator;
-    private readonly IGlobalSearchService _globalSearchService = globalSearchService;
     private readonly ICurrentUser _user = _user;
     private readonly IN8nService _n8nService = n8nService;
 
@@ -35,22 +34,6 @@ public class RelationshipCreatedEventHandler(ILogger<RelationshipCreatedEventHan
 
 
         // Store relationship data in Vector DB for search via GlobalSearchService
-        await _globalSearchService.UpsertEntityAsync(
-            notification.Relationship,
-            "Relationship",
-            relationship => $"Relationship Type: {relationship.Type}. Source Member: {relationship.SourceMemberId}. Target Member: {relationship.TargetMemberId}.",
-            relationship => new Dictionary<string, string>
-            {
-                { "EntityType", "Relationship" },
-                { "EntityId", relationship.Id.ToString() },
-                { "Type", relationship.Type.ToString() },
-                { "SourceMemberId", relationship.SourceMemberId.ToString() },
-                { "TargetMemberId", relationship.TargetMemberId.ToString() },
-                { "DeepLink", $"/relationship/{relationship.Id}" }
-            },
-            cancellationToken
-        );
-
         // Call n8n webhook for embedding update
         var (entityData, description) = EmbeddingDescriptionFactory.CreateRelationshipData(notification.Relationship);
         var embeddingDto = new EmbeddingWebhookDto

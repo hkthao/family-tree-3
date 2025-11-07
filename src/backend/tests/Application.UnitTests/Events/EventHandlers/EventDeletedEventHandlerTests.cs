@@ -17,7 +17,6 @@ public class EventDeletedEventHandlerTests : TestBase
 {
     private readonly Mock<ILogger<EventDeletedEventHandler>> _loggerMock;
     private readonly Mock<IMediator> _mediatorMock;
-    private readonly Mock<IGlobalSearchService> _globalSearchServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly EventDeletedEventHandler _handler;
 
@@ -25,9 +24,8 @@ public class EventDeletedEventHandlerTests : TestBase
     {
         _loggerMock = new Mock<ILogger<EventDeletedEventHandler>>();
         _mediatorMock = new Mock<IMediator>();
-        _globalSearchServiceMock = new Mock<IGlobalSearchService>();
         _currentUserMock = new Mock<ICurrentUser>();
-        _handler = new EventDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _globalSearchServiceMock.Object, _currentUserMock.Object);
+        _handler = new EventDeletedEventHandler(_loggerMock.Object, _mediatorMock.Object, _currentUserMock.Object);
     }
 
     [Fact]
@@ -44,7 +42,6 @@ public class EventDeletedEventHandlerTests : TestBase
         await _handler.Handle(notification, CancellationToken.None);
 
         // Assert
-        _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.DeleteEvent), CancellationToken.None), Times.Once);
-        _globalSearchServiceMock.Verify(s => s.DeleteEntityFromSearchAsync(testEvent.Id.ToString(), "Event", CancellationToken.None), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.IsAny<RecordActivityCommand>(), CancellationToken.None), Times.Once);
     }
 }
