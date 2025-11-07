@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 
-using backend.Infrastructure.AI.TextExtractors;
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;
@@ -95,10 +94,6 @@ public static class DependencyInjection
 
         // Register Embedding Settings and Providers
 
-        services.AddTransient<PdfTextExtractor>();
-        services.AddTransient<TxtTextExtractor>();
-        services.AddTransient<MdTextExtractor>();
-        services.AddScoped<IFileTextExtractorFactory, FileTextExtractorFactory>();
 
         // Register Configuration Provider
         services.AddMemoryCache();
@@ -108,7 +103,6 @@ public static class DependencyInjection
         services.AddTransient<LocalFileStorage>();
         services.AddTransient<S3FileStorage>();
         services.AddTransient<CloudinaryFileStorage>();
-        services.AddSingleton<IFileStorageFactory, FileStorageFactory>();
 
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
 

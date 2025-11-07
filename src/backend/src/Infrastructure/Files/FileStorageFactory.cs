@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace backend.Infrastructure.Files;
 
-public class FileStorageFactory(IServiceScopeFactory serviceScopeFactory) : IFileStorageFactory
+public class FileStorageFactory(IServiceScopeFactory serviceScopeFactory)
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
 
