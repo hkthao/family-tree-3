@@ -24,7 +24,7 @@ vi.mock('@/services/service.factory', () => ({
       getById: vi.fn(),
       addItems: vi.fn(),
     },
-    ai: {}, auth: {}, chat: {}, chunk: {}, dashboard: {}, event: {}, face: {}, faceMember: {},
+    ai: {}, auth: {}, chat: {},  dashboard: {}, event: {}, face: {}, faceMember: {},
     fileUpload: {}, family: {}, naturalLanguageInput: {}, notification: {}, relationship: {},
     systemConfig: {}, userActivity: {}, userPreference: {}, userProfile: {}, userSettings: {},
   })),

@@ -1,5 +1,4 @@
 export * from './natural-language-input.d';
-export * from './text-chunk.d';
 export * from './family-visibility.d';
 export * from './family.d';
 export * from './member.d';

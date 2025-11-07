@@ -22,7 +22,6 @@ vi.mock('@/services/service.factory', () => ({
     ai: {},
     auth: {},
     chat: {},
-    chunk: {},
     dashboard: {},
     event: {},
     face: {},

@@ -11,7 +11,6 @@ import { memberRoutes } from './features/member.routes';
 import { familyRoutes } from './features/family.routes';
 import { eventRoutes } from './features/event.routes';
 import { relationshipRoutes } from './features/relationship.routes';
-import { adminRoutes } from './features/admin.routes';
 import { faceRoutes } from './features/face.routes';
 import { settingRoutes } from './features/setting.routes';
 
@@ -34,7 +33,6 @@ const router = createRouter({
         ...familyRoutes,
         ...eventRoutes,
         ...relationshipRoutes,
-        ...adminRoutes,
         ...faceRoutes,
         ...settingRoutes,
 

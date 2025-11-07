@@ -22,8 +22,6 @@ import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
 import type { INaturalLanguageInputService } from './natural-language-input/natural-language-input.service.interface';
 import { ApiNaturalLanguageInputService } from './natural-language-input/api.natural-language-input.service';
-import type { IChunkService } from './chunk/chunk.service.interface';
-import { ApiChunkService } from './chunk/api.chunk.service';
 import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { IUserService } from './user/user.service.interface';
@@ -45,7 +43,6 @@ export interface AppServices {
   fileUpload: IFileUploadService;
   chat: IChatService;
   naturalLanguageInput: INaturalLanguageInputService;
-  chunk: IChunkService;
   face: IFaceService;
   user: IUserService;
 
@@ -104,10 +101,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiNaturalLanguageInputService(apiClient)
         : testServices?.naturalLanguageInput || new ApiNaturalLanguageInputService(apiClient),
-    chunk:
-      mode === 'real'
-        ? new ApiChunkService(apiClient)
-        : testServices?.chunk || new ApiChunkService(apiClient),
     face:
       mode === 'real'
         ? new ApiFaceService(apiClient)

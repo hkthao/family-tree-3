@@ -18,7 +18,6 @@ vi.mock('@/services/service.factory', () => ({
     // Add other services as empty objects if they are not directly used by chat.store
     ai: {},
     auth: {},
-    chunk: {},
     dashboard: {},
     event: {},
     face: {},
