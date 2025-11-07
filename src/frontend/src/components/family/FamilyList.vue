@@ -1,11 +1,12 @@
 <template>
-  <v-data-table-server :items-per-page="itemsPerPage" @update:itemsPerPage="$emit('update:itemsPerPage', $event)"
-    :headers="headers" :items="items" :items-length="totalItems" :loading="loading" item-value="id"
-    @update:options="$emit('update:options', $event)" elevation="1">
+  <v-data-table-server :items-per-page="props.itemsPerPage" @update:itemsPerPage="emit('update:itemsPerPage', $event)"
+    :headers="headers" :items="props.items" :items-length="props.totalItems" :loading="props.loading" item-value="id"
+    @update:options="emit('update:options', $event)" elevation="1">
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
+
         <v-btn color="primary" icon @click="$emit('ai-create')">
           <v-tooltip :text="t('family.list.action.aiCreate')">
             <template v-slot:activator="{ props }">
@@ -20,6 +21,8 @@
             </template>
           </v-tooltip>
         </v-btn>
+        <v-text-field v-model="debouncedSearch" :label="t('common.search')" data-test-id="family-list-search-input"
+          append-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-2"></v-text-field>
       </v-toolbar>
     </template>
     <!-- Avatar column -->
@@ -45,15 +48,11 @@
       {{ item.code }}
     </template>
 
-
-
-
-
     <!-- visibility column -->
     <template #item.visibility="{ item }">
       <v-chip :color="item.visibility && item.visibility.toLowerCase() === 'public'
-          ? 'success'
-          : 'error'
+        ? 'success'
+        : 'error'
         " label size="small" class="text-capitalize">
         {{
           $t(
@@ -67,14 +66,16 @@
     <template #item.actions="{ item }">
       <v-tooltip :text="t('family.list.action.edit')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('edit', item)" data-testid="edit-family-button">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('edit', item)"
+            data-testid="edit-family-button">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="t('family.list.action.delete')">
         <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)" data-testid="delete-family-button" :data-family-name="item.name">
+          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)"
+            data-testid="delete-family-button" :data-family-name="item.name">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -89,20 +90,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Family } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 
-const { items, totalItems, loading, itemsPerPage } =
-  defineProps<{
-    items: Family[];
-    totalItems: number;
-    loading: boolean;
-    itemsPerPage: number;
-  }>();
+const props = defineProps<{
+  items: Family[];
+  totalItems: number;
+  loading: boolean;
+  itemsPerPage: number;
+  search: string;
+}>();
 
-defineEmits([
+const emit = defineEmits([
   'update:options',
   'view',
   'edit',
@@ -110,9 +111,32 @@ defineEmits([
   'update:itemsPerPage',
   'create',
   'ai-create',
+  'update:search',
 ]);
 
 const { t } = useI18n();
+
+const searchQuery = ref(props.search);
+let debounceTimer: ReturnType<typeof setTimeout>;
+
+const debouncedSearch = computed({
+  get() {
+    return searchQuery.value;
+  },
+  set(newValue: string) {
+    searchQuery.value = newValue;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      emit('update:search', newValue);
+    }, 300);
+  },
+});
+
+watch(() => props.search, (newSearch) => {
+  if (newSearch !== searchQuery.value) {
+    searchQuery.value = newSearch;
+  }
+});
 
 const headers = computed<DataTableHeader[]>(() => [
   {

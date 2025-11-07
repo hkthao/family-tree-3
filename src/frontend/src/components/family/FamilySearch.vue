@@ -12,16 +12,7 @@
         <v-card-text>
           <!-- Search + Filter -->
           <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                v-model="searchQuery"
-                :label="$t('family.management.searchLabel')"
-                clearable
-                prepend-inner-icon="mdi-magnify"
-                data-testid="family-search-input"
-              />
-            </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12">
               <v-select
                 v-model="visibility"
                 :items="visibilityItems"
@@ -53,7 +44,6 @@ const { t } = useI18n();
 
 const expanded = ref(false); // Default to collapsed
 
-const searchQuery = ref('');
 const visibility = ref<'All' | 'Private' | 'Public'>('All');
 
 const visibilityItems = computed(() => [
@@ -64,19 +54,17 @@ const visibilityItems = computed(() => [
 
 const applyFilters = () => {
   emit('update:filters', {
-    searchQuery: searchQuery.value,
     visibility: visibility.value === 'All' ? undefined : visibility.value,
   } as FamilyFilter);
 };
 
 const resetFilters = () => {
-  searchQuery.value = '';
   visibility.value = 'All';
   // applyFilters(); // No need to call here, watch will handle it
 };
 
 // Watch for changes in filters and apply them automatically
-watch([searchQuery, visibility], () => {
+watch([visibility], () => {
   applyFilters();
 }, { immediate: true }); // immediate: true to apply filters on initial load
 

@@ -2,8 +2,8 @@
   <div data-testid="family-list-view">
     <FamilySearch @update:filters="handleFilterUpdate" />
     <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
-      :items-per-page="itemsPerPage" @update:options="handleListOptionsUpdate"
-      @update:itemsPerPage="itemsPerPage = $event" @view="navigateToViewFamily" @edit="navigateToEditFamily"
+      :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''" @update:options="handleListOptionsUpdate"
+      @update:itemsPerPage="itemsPerPage = $event" @update:search="handleSearchUpdate" @view="navigateToViewFamily" @edit="navigateToEditFamily"
       @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
@@ -44,6 +44,12 @@ const handleFilterUpdate = async (filters: FamilyFilter) => {
   currentFilters.value = filters;
   familyStore.filter = currentFilters.value;
   await familyStore._loadItems()
+};
+
+const handleSearchUpdate = async (search: string) => {
+  currentFilters.value.searchQuery = search;
+  familyStore.filter = currentFilters.value;
+  await familyStore._loadItems();
 };
 
 const handleListOptionsUpdate = (options: {
