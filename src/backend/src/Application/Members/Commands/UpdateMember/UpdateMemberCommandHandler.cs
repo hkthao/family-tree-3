@@ -1,6 +1,9 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Specifications;
+using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
@@ -13,7 +16,9 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         if (!_authorizationService.CanManageFamily(request.FamilyId))
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
-        var family = await _context.Families.FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
+        var family = await _context.Families
+            .WithSpecification(new FamilyByIdSpecification(request.FamilyId))
+            .FirstOrDefaultAsync(cancellationToken);
         if (family == null)
         {
             return Result<Guid>.Failure(string.Format(ErrorMessages.NotFound, $"Family with ID {request.FamilyId}"), ErrorSources.NotFound);

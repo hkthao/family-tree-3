@@ -1,6 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Specifications; // Added for FamilyByIdWithMembersAndRelationshipsSpecification
+using Ardalis.Specification.EntityFrameworkCore; // Added for WithSpecification
 
 namespace backend.Application.Members.Commands.DeleteMember;
 
@@ -27,9 +29,8 @@ public class DeleteMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
 
             var family = await _context.Families
-                .Include(f => f.Members)
-                .Include(f => f.Relationships)
-                .FirstOrDefaultAsync(f => f.Id == member.FamilyId, cancellationToken);
+                .WithSpecification(new FamilyByIdWithMembersAndRelationshipsSpecification(member.FamilyId))
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (family == null)
             {
