@@ -31,15 +31,6 @@ public static class DependencyInjection
         services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
-        services.AddScoped<IFileStorageFactory, FileStorageFactory>();
-        // Register IFileStorage based on configuration
-        services.AddTransient(sp =>
-        {
-            var factory = sp.GetRequiredService<IFileStorageFactory>();
-            var configProvider = sp.GetRequiredService<IConfigProvider>();
-            var storageSettings = configProvider.GetSection<StorageSettings>();
-            return factory.CreateFileStorage(Enum.Parse<StorageProvider>(storageSettings.Provider, true));
-        });
 
         var configProvider = services.BuildServiceProvider().GetRequiredService<IConfigProvider>();
         var jwtSettings = configProvider.GetSection<JwtSettings>();
