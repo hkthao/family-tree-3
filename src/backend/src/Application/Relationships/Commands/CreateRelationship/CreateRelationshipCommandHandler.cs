@@ -1,6 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Specifications; // Added for FamilyByIdWithMembersAndRelationshipsSpecification
+using Ardalis.Specification.EntityFrameworkCore; // Added for WithSpecification
 
 namespace backend.Application.Relationships.Commands.CreateRelationship;
 
@@ -23,8 +25,8 @@ public class CreateRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<Guid>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         var family = await _context.Families
-            .Include(f => f.Members)
-            .FirstOrDefaultAsync(f => f.Id == sourceMember.FamilyId, cancellationToken);
+            .WithSpecification(new FamilyByIdWithMembersAndRelationshipsSpecification(sourceMember.FamilyId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (family == null)
         {

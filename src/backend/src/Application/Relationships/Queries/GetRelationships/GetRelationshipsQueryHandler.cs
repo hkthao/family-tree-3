@@ -1,6 +1,8 @@
+using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Common.Extensions;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Relationships.Specifications;
 using backend.Domain.Enums;
 
 namespace backend.Application.Relationships.Queries.GetRelationships;
@@ -12,46 +14,17 @@ public class GetRelationshipsQueryHandler(IApplicationDbContext context, IMapper
 
     public async Task<Result<PaginatedList<RelationshipListDto>>> Handle(GetRelationshipsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Relationships
-            .Include(r => r.SourceMember)
-            .Include(r => r.TargetMember)
-            .AsQueryable();
+        var query = _context.Relationships.AsQueryable();
 
-        if (request.FamilyId.HasValue)
-        {
-            query = query.Where(r => r.SourceMember.FamilyId == request.FamilyId.Value);
-        }
+        // Apply individual specifications
+        query = query.WithSpecification(new RelationshipByFamilyIdSpecification(request.FamilyId));
+        query = query.WithSpecification(new RelationshipBySourceMemberIdSpecification(request.SourceMemberId));
+        query = query.WithSpecification(new RelationshipByTargetMemberIdSpecification(request.TargetMemberId));
+        query = query.WithSpecification(new RelationshipByTypeSpecification(request.Type));
+        query = query.WithSpecification(new RelationshipIncludeSpecifications());
 
-        if (request.SourceMemberId.HasValue)
-        {
-            query = query.Where(r => r.SourceMemberId == request.SourceMemberId.Value);
-        }
-
-        if (request.TargetMemberId.HasValue)
-        {
-            query = query.Where(r => r.TargetMemberId == request.TargetMemberId.Value);
-        }
-
-        if (!string.IsNullOrEmpty(request.Type) && Enum.TryParse<RelationshipType>(request.Type, true, out var relationshipType))
-        {
-            query = query.Where(r => r.Type == relationshipType);
-        }
-
-        if (!string.IsNullOrEmpty(request.SortBy))
-        {
-            bool isDescending = request.SortOrder?.ToLower() == "desc";
-            query = request.SortBy.ToLower() switch
-            {
-                "sourcememberfullname" => isDescending ? query.OrderByDescending(r => r.SourceMember!.FirstName).ThenByDescending(r => r.SourceMember!.LastName) : query.OrderBy(r => r.SourceMember!.FirstName).ThenBy(r => r.SourceMember!.LastName),
-                "targetmemberfullname" => isDescending ? query.OrderByDescending(r => r.TargetMember!.FirstName).ThenByDescending(r => r.TargetMember!.LastName) : query.OrderBy(r => r.TargetMember!.FirstName).ThenBy(r => r.TargetMember!.LastName),
-                "type" => isDescending ? query.OrderByDescending(r => r.Type) : query.OrderBy(r => r.Type),
-                _ => query.OrderBy(r => r.Id) // Default sort
-            };
-        }
-        else
-        {
-            query = query.OrderBy(r => r.Id); // Default sort
-        }
+        // Apply ordering specification
+        query = query.WithSpecification(new RelationshipOrderingSpecification(request.SortBy, request.SortOrder));
 
         var paginatedList = await query
             .ProjectTo<RelationshipListDto>(_mapper.ConfigurationProvider)

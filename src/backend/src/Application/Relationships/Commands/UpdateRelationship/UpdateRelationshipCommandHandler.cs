@@ -1,6 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Application.Families.Specifications; // Added for FamilyByIdWithRelationshipsSpecification
+using Ardalis.Specification.EntityFrameworkCore; // Added for WithSpecification
 
 namespace backend.Application.Relationships.Commands.UpdateRelationship;
 
@@ -15,8 +17,8 @@ public class UpdateRelationshipCommandHandler(IApplicationDbContext context, IAu
             return Result<bool>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
 
         var family = await _context.Families
-            .Include(f => f.Relationships)
-            .FirstOrDefaultAsync(f => f.Id == request.FamilyId, cancellationToken);
+            .WithSpecification(new FamilyByIdWithRelationshipsSpecification(request.FamilyId))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (family == null)
         {
