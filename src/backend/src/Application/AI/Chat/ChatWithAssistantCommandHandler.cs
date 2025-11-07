@@ -17,6 +17,6 @@ public class ChatWithAssistantCommandHandler : IRequestHandler<ChatWithAssistant
 
     public async Task<Result<string>> Handle(ChatWithAssistantCommand request, CancellationToken cancellationToken)
     {
-        return await _n8nService.CallChatWebhookAsync(request.Message, request.History, cancellationToken);
+        return await _n8nService.CallChatWebhookAsync(request.SessionId, request.Message, cancellationToken);
     }
 }

@@ -91,7 +91,7 @@ const toggleChat = () => {
 const handleSendMessage = async (message: CustomEvent<{ content: string }[]>) => {
   const messageContent = message.detail[0].content;
   if (messageContent && messageContent.trim()) {
-    await chatStore.sendMessage(messageContent, currentUserId.value, t);
+    await chatStore.sendMessage(chatStore.aiAssistantSessionId, messageContent, currentUserId.value, t);
   }
 };
 

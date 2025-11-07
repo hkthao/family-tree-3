@@ -8,12 +8,12 @@ namespace backend.Application.AI.Chat;
 public record ChatWithAssistantCommand : IRequest<Result<string>>
 {
     /// <summary>
+    /// ID phiên trò chuyện.
+    /// </summary>
+    public string SessionId { get; init; } = null!;
+
+    /// <summary>
     /// Tin nhắn từ người dùng.
     /// </summary>
     public string Message { get; init; } = null!;
-
-    /// <summary>
-    /// Lịch sử của cuộc trò chuyện (tùy chọn).
-    /// </summary>
-    public List<ChatMessage> History { get; init; } = [];
 }

@@ -9,19 +9,8 @@ export class ApiChatService implements IChatService {
 
   constructor(private apiClient: ApiClientMethods) {}
 
-  async sendMessage(message: string, history: ChatMessage[]): Promise<Result<string, ApiError>> {
-    try {
-      const response = await this.apiClient.post<string>(this.apiUrl, { message: message, history: history });
-      return response; // The apiClient already returns a Result
-    } catch (error: any) {
-      // Create a plain object conforming to ApiError interface
-      const apiError: ApiError = {
-        name: 'ApiError',
-        message: error.message,
-        statusCode: error.response?.status || 500,
-        details: error.response?.data,
-      };
-      return err(apiError); // Use err function
+    async sendMessage(sessionId: string, message: string): Promise<Result<string, ApiError>> {
+        const response = await this.apiClient.post<string>(this.apiUrl, { sessionId: sessionId, message: message });
+      return response;
     }
-  }
 }

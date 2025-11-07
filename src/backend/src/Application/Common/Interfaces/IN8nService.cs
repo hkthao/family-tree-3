@@ -14,7 +14,7 @@ public interface IN8nService
     /// <param name="history">Lịch sử cuộc trò chuyện.</param>
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
     /// <returns>Kết quả chứa câu trả lời từ AI.</returns>
-    Task<Result<string>> CallChatWebhookAsync(string message, List<ChatMessage> history, CancellationToken cancellationToken);
+    Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken);
     /// <summary>
     /// Gọi webhook embedding trên n8n để xử lý dữ liệu nhúng.
     /// </summary>

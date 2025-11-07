@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { IChatService } from '@/services/chat/chat.service.interface';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid
+
 // No longer need to import useServiceContainer directly here
 
 // Define message structure for vue-advanced-chat
@@ -30,6 +32,7 @@ export const useChatStore = defineStore('chat', {
     messages: ref<Record<string, ChatMessage[]>>({}), // Messages grouped by chat ID
     isLoading: ref(false),
     error: ref<string | null>(null),
+    aiAssistantSessionId: ref<string>(uuidv4()), // New: Session ID for AI assistant chat
 
     // State for the chat list (if multiple chats are supported)
     chatList: ref<ChatListItem[]>([]),
@@ -63,7 +66,7 @@ export const useChatStore = defineStore('chat', {
     },
 
     // Action to send a message
-    async sendMessage(messageContent: string, currentUserId: string, i18nTranslator: any) {
+    async sendMessage(sessionId: string, messageContent: string, currentUserId: string, i18nTranslator: any) {
       this.isLoading = true;
       this.error = null;
 
@@ -97,15 +100,7 @@ export const useChatStore = defineStore('chat', {
       try {
         const chatService = this.services.chat as IChatService;
         
-        // Map store messages to the format required by the service
-        const history = this.messages[this.selectedChatId]
-          .filter(m => m._id !== tempMessageId && !m.isError) // Exclude temp/error messages
-          .map(m => ({
-            role: (m.senderId === currentUserId ? 'user' : 'assistant') as 'user' | 'assistant',
-            content: m.content,
-          }));
-
-        const result = await chatService.sendMessage(messageContent, history);
+        const result = await chatService.sendMessage(sessionId, messageContent);
 
         const tempMessageIndex = this.messages[this.selectedChatId].findIndex(m => m._id === tempMessageId);
         if (tempMessageIndex !== -1) {

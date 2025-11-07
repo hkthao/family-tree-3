@@ -25,7 +25,7 @@ public class N8nService : IN8nService
     }
 
     /// <inheritdoc />
-    public async Task<Result<string>> CallChatWebhookAsync(string message, List<ChatMessage> history, CancellationToken cancellationToken)
+    public async Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken)
     {
         var n8nSettings = _configProvider.GetSection<N8nSettings>();
         if (string.IsNullOrEmpty(n8nSettings.ChatWebhookUrl) || n8nSettings.ChatWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
@@ -42,15 +42,14 @@ public class N8nService : IN8nService
 
         var httpClient = _httpClientFactory.CreateClient();
 
-        var ollamaMessages = new List<ChatMessage>();
-        ollamaMessages.AddRange(history);
-        ollamaMessages.Add(new ChatMessage { Role = "user", Content = message });
-
-        var payload = new
+        var payload = new[]
         {
-            model = n8nSettings.OllamaModel,
-            messages = ollamaMessages,
-            stream = false
+            new
+            {
+                sessionId = sessionId,
+                action = "sendMessage",
+                chatInput = message
+            }
         };
 
         var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
@@ -71,36 +70,31 @@ public class N8nService : IN8nService
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogInformation("Received from n8n: {ResponseContent}", responseContent);
             _logger.LogInformation("Received successful response from n8n webhook.");
+            _logger.LogDebug("Raw n8n chat webhook response: {ResponseContent}", responseContent); // Log raw response
 
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
             };
 
-            OllamaChatResponse? chatResponse = null;
+            ChatResponse? chatResponse = null;
 
-            // Use a try-catch block to handle different JSON structures (array vs. object)
             try
             {
-                // First, try to deserialize as an array of responses
-                var responseList = JsonSerializer.Deserialize<List<OllamaChatResponse>>(responseContent, options);
-                if (responseList != null && responseList.Count > 0)
-                {
-                    chatResponse = responseList[0];
-                }
+                chatResponse = JsonSerializer.Deserialize<ChatResponse>(responseContent, options);
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
-                // If it fails, try to deserialize as a single response object
-                chatResponse = JsonSerializer.Deserialize<OllamaChatResponse>(responseContent, options);
+                _logger.LogError(ex, "Failed to deserialize n8n chat webhook response as ChatResponse.");
+                return Result<string>.Failure("Invalid response format from n8n: Failed to deserialize chat response.", "ExternalService");
             }
 
-            if (chatResponse != null && !string.IsNullOrEmpty(chatResponse.Message?.Content))
+            if (chatResponse != null && !string.IsNullOrEmpty(chatResponse.Output))
             {
-                return Result<string>.Success(chatResponse.Message.Content);
+                return Result<string>.Success(chatResponse.Output ?? string.Empty);
             }
 
-            return Result<string>.Failure("Invalid response format from Ollama via n8n.", "ExternalService");
+            return Result<string>.Failure("Invalid response format from n8n: Empty or invalid chat response.", "ExternalService");
         }
         catch (Exception ex)
         {
