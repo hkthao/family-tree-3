@@ -21,18 +21,30 @@
     <v-text-field v-model="treeVisualizationStore.searchQuery" label="Tìm kiếm thành viên"
       prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field>
   </v-toolbar>
-  <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId"
-    @add-member="emit('add-member')" @edit-member="emit('edit-member', $event)"
-    @delete-member="emit('delete-member', $event)" @add-father="emit('add-father', $event)"
-    @add-mother="emit('add-mother', $event)" @add-child="emit('add-child', $event)" />
+  <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
+    :relationships="relationships" @update:selected-member-id="selectedMemberId = $event"
+    @show-member-detail-drawer="handleShowMemberDetailDrawer" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" />
+
+  <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650">
+    <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId" @close="addMemberDrawer = false"
+      @saved="handleMemberAdded" />
+  </v-navigation-drawer>
+
+  <!-- New v-navigation-drawer for member details -->
+  <v-navigation-drawer v-model="memberDetailDrawer" location="right" temporary width="650">
+    <MemberDetailView v-if="memberDetailDrawer && selectedMemberId" :member-id="selectedMemberId"
+      @close="memberDetailDrawer = false" />
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { HierarchicalFamilyTree, ForceDirectedFamilyTree } from '@/components/family';
 import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
+import MemberAddView from '@/views/member/MemberAddView.vue';
+import MemberDetailView from '@/views/member/MemberDetailView.vue';
 
 const props = defineProps({
   familyId: { type: String, default: null },
@@ -48,7 +60,52 @@ const emit = defineEmits([
 const { t } = useI18n();
 const chartMode = ref('hierarchical'); // Default view
 const treeVisualizationStore = useTreeVisualizationStore();
-const handleAddMember = () => {
-  emit('add-member');
+
+const addMemberDrawer = ref(false); // Control visibility of the add member drawer
+const selectedMemberId = ref<string | null>(null); // New ref for selected member ID
+const memberDetailDrawer = ref(false); // New ref for member detail drawer visibility
+
+// New computed properties for members and relationships from the store
+const members = computed(() => treeVisualizationStore.getFilteredMembers(props.familyId));
+const relationships = computed(() => treeVisualizationStore.getFilteredRelationships(props.familyId));
+
+// New initialize function to fetch data
+const initialize = async (familyId: string) => {
+  if (familyId) {
+    await treeVisualizationStore.fetchTreeData(familyId);
+  }
 };
+
+const handleAddMember = () => {
+  addMemberDrawer.value = true;
+};
+
+const handleMemberAdded = () => {
+  addMemberDrawer.value = false;
+  // Refresh tree data after a new member is added
+  if (props.familyId) {
+    treeVisualizationStore.fetchTreeData(props.familyId);
+  }
+};
+
+// New handler for showing member detail drawer
+const handleShowMemberDetailDrawer = (memberId: string) => {
+  selectedMemberId.value = memberId;
+  memberDetailDrawer.value = true;
+};
+
+// Call initialize on mounted
+onMounted(async () => {
+  console.log('TreeChart mounted, familyId:', props.familyId);
+  if (props.familyId) {
+    await initialize(props.familyId);
+  }
+});
+
+// Watch for familyId changes and re-initialize
+watch(() => props.familyId, async (newFamilyId) => {
+  if (newFamilyId) {
+    await initialize(newFamilyId);
+  }
+});
 </script>

@@ -23,26 +23,12 @@ interface CardData {
 }
 
 export function useHierarchicalTreeChart(
-  familyId: string | null,
-  members: Member[],
-  relationships: Relationship[],
-  emit: (event: 'add-member' | 'edit-member' | 'delete-member' | 'add-father' | 'add-mother' | 'add-child', ...args: any[]) => void
+  props: { familyId: string | null; members: Member[]; relationships: Relationship[] },
+  emit: (event: 'add-member' | 'edit-member' | 'delete-member' | 'add-father' | 'add-mother' | 'add-child' | 'update:selected-member-id' | 'show-member-detail-drawer', ...args: any[]) => void
 ) {
   const { t } = useI18n();
   const chartContainer = ref<HTMLDivElement | null>(null);
   let chart: any = null; // To hold the chart instance
-
-  // Bottom Sheet State (kept here for now, might be moved if it's purely UI related to the chart)
-  const showBottomSheet = ref(false);
-  const selectedMemberId = ref<string | null>(null);
-
-  const openBottomSheet = (_: MouseEvent, memberId: string) => {
-    showBottomSheet.value = false; // Close any existing sheet
-    selectedMemberId.value = memberId;
-    nextTick(() => {
-      showBottomSheet.value = true;
-    });
-  };
 
   // --- DATA TRANSFORMATION ---
   const transformData = (members: Member[], relationships: Relationship[]) => {
@@ -83,7 +69,7 @@ export function useHierarchicalTreeChart(
             sourcePerson.rels.spouses.push(targetPerson.id);
           }
           if (!targetPerson.rels.spouses.includes(sourcePerson.id)) {
-            targetPerson.rels.spouses.push(targetPerson.id);
+            targetPerson.rels.spouses.push(sourcePerson.id);
           }
           break;
 
@@ -102,12 +88,13 @@ export function useHierarchicalTreeChart(
           break;
       }
     });
-
     return Array.from(personMap.values());
   };
 
   const renderChart = (currentMembers: Member[], currentRelationships: Relationship[]) => {
-    if (!chartContainer.value) return;
+    if (!chartContainer.value) {
+      return;
+    }
 
     chartContainer.value.innerHTML = '';
     const transformedData = transformData(currentMembers, currentRelationships);
@@ -147,29 +134,17 @@ export function useHierarchicalTreeChart(
   // --- CUSTOM CARD RENDERING ---
   function Card() {
     return function (this: HTMLElement, d: CardData) {
-      const menuButtonId = `menu-button-${d.data.id}`; // Generate unique ID
       this.innerHTML = `
         <div class="card">
           ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
-          <div class="card-menu-button" id="${menuButtonId}">
-            <i class="mdi mdi-dots-vertical"></i>
-          </div>
         </div>
         `;
       // Re-add the card click listener
       this.addEventListener('click', (e: MouseEvent) => onCardClick(e, d));
-
-      // Attach click listener directly to the menu button using its unique ID
-      const menuButton = this.querySelector(`#${menuButtonId}`);
-      if (menuButton) {
-        menuButton.addEventListener('click', (e: Event) => {
-          e.stopPropagation(); // Prevent card click from triggering
-          openBottomSheet(e as MouseEvent, d.data.id);
-        });
-      }
     };
 
     function onCardClick(_: Event, d: CardData) {
+      emit('show-member-detail-drawer', d.data.id); // Emit event to show member detail drawer
       chart.updateMainId(d.data.id);
       chart.updateTree({});
     }
@@ -206,8 +181,8 @@ export function useHierarchicalTreeChart(
   }
 
   onMounted(() => {
-    if (familyId) {
-      renderChart(members, relationships);
+    if (props.familyId) {
+      renderChart(props.members, props.relationships);
     }
   });
 
@@ -218,9 +193,9 @@ export function useHierarchicalTreeChart(
     }
   });
 
-  watch([() => familyId, () => members, () => relationships], () => {
-    if (familyId) {
-      renderChart(members, relationships);
+  watch([() => props.familyId, () => props.members, () => props.relationships], ([newFamilyId, newMembers, newRelationships]) => {
+    if (newFamilyId) {
+      renderChart(newMembers, newRelationships);
     } else {
       renderChart([], []);
     }
@@ -228,9 +203,6 @@ export function useHierarchicalTreeChart(
 
   return {
     chartContainer,
-    showBottomSheet,
-    selectedMemberId,
-    openBottomSheet,
     renderChart // Expose renderChart if needed for external triggers
   };
 }

@@ -15,51 +15,50 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch, computed } from 'vue';
-import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
+import { onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useHierarchicalTreeChart } from '@/composables/useHierarchicalTreeChart';
+import type { Member, Relationship } from '@/types';
 
 const { t } = useI18n();
-const emit = defineEmits(['add-member', 'edit-member', 'delete-member', 'add-father', 'add-mother', 'add-child']);
+const emit = defineEmits([
+  'add-member',
+  'edit-member',
+  'delete-member',
+  'add-father',
+  'add-mother',
+  'add-child',
+  'show-bottom-sheet',
+  'update:selected-member-id',
+  'show-member-detail-drawer', // New emit event
+]);
 
 const props = defineProps({
   familyId: { type: String, default: null },
+  members: { type: Array<Member>, default: () => [] },
+  relationships: { type: Array<Relationship>, default: () => [] },
 });
 
-const treeVisualizationStore = useTreeVisualizationStore();
-
-const members = computed(() => treeVisualizationStore.getFilteredMembers(props.familyId));
-const relationships = computed(() => treeVisualizationStore.getFilteredRelationships(props.familyId));
-
-const { chartContainer, openBottomSheet, showBottomSheet, selectedMemberId } = useHierarchicalTreeChart(
-  props.familyId,
-  members.value,
-  relationships.value,
+const { chartContainer } = useHierarchicalTreeChart(
+  props,
   emit
 );
 
-const initialize = async (familyId: string) => {
-  if (familyId) {
-    await treeVisualizationStore.fetchTreeData(familyId);
-  }
+// New function to handle card click and emit event for detail drawer
+const handleCardClickForDetail = (memberId: string) => {
+  emit('show-member-detail-drawer', memberId);
 };
 
-onMounted(async () => {
-  if (props.familyId) {
-    await initialize(props.familyId);
-  }
+onMounted(() => {
+  // Chart rendering is now handled by the composable's watch effect
 });
 
 onUnmounted(() => {
   // The composable handles chart cleanup
 });
 
-watch(() => props.familyId, async (newFamilyId) => {
-  if (newFamilyId) {
-    await initialize(newFamilyId);
-  }
-});
+// No need to watch familyId here, as members and relationships are passed directly
+// The composable's internal watch will react to changes in props.members and props.relationships
 </script>
 
 <style>
