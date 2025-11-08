@@ -1,16 +1,19 @@
 <template>
-  <v-card>
+  <v-card :elevation="0">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase" data-testid="event-edit-title">{{ t('event.form.editTitle') }}</span>
     </v-card-title>
     <v-card-text>
-      <EventForm ref="eventFormRef" v-if="props.initialEvent" :initial-event-data="props.initialEvent" :read-only="false" data-testid="event-edit-form" />
-      <v-progress-circular v-else indeterminate color="primary" data-testid="event-edit-loading-spinner"></v-progress-circular>
+      <EventForm ref="eventFormRef" v-if="props.initialEvent" :initial-event-data="props.initialEvent"
+        :read-only="false" data-testid="event-edit-form" />
+      <v-progress-circular v-else indeterminate color="primary"
+        data-testid="event-edit-loading-spinner"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" @click="closeForm" data-testid="event-edit-cancel-button">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleUpdateEvent" data-testid="event-edit-save-button">{{ t('common.save') }}</v-btn>
+      <v-btn color="primary" @click="handleUpdateEvent" data-testid="event-edit-save-button">{{ t('common.save')
+        }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

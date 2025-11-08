@@ -1,61 +1,32 @@
 <template>
-  <v-card class="mb-4">
-    <v-card-title class="text-h6 d-flex align-center">
-      <v-btn @click="setToday">{{ t('common.today') }}</v-btn>
-      <v-btn size="small" icon class="ma-2" @click="prev">
-        <v-icon>mdi-chevron-left</v-icon>
-      </v-btn>
-      <v-toolbar-title class="text-center">{{ calendarTitle }}</v-toolbar-title>
-      <v-btn size="small" icon class="ma-2" @click="next">
-        <v-icon>mdi-chevron-right</v-icon>
-      </v-btn>
-      <v-spacer></v-spacer>
-      <v-select
-        v-model="calendarType"
-        :items="calendarTypes"
-        class="ma-2"
-        density="comfortable"
-        :label="t('event.calendar.viewMode')"
-        variant="outlined"
-        hide-details
-      ></v-select>
-    </v-card-title>
-    <v-card-text>
-      <v-sheet>
-        <v-calendar
-          ref="calendarRef"
-          v-model="selectedDate"
-          :events="formattedEvents"
-          :event-color="getEventColor"
-          :type="calendarType"
-          event-overlap-mode="stack"
-          :locale="locale"
-          :key="locale"
-          :weekdays="weekdays"
-        >
-          <template #event="{ event }">
-            <div
-              class="v-event-summary"
-              @click="showEventDetails(event.eventObject)"
-            >
-              {{ event.title }}
-            </div>
-            <div class="v-event-description">
-              {{ event.eventObject.description }}
-            </div>
-          </template>
-        </v-calendar>
-      </v-sheet>
-    </v-card-text>
-  </v-card>
+  <v-toolbar>
+    <v-btn variant="text" @click="setToday">{{ t('common.today') }}</v-btn>
+    <v-btn variant="text" size="small" icon @click="prev">
+      <v-icon>mdi-chevron-left</v-icon>
+    </v-btn>
+    <v-toolbar-title class="text-center">{{ calendarTitle }}</v-toolbar-title>
+    <v-btn variant="text" size="small" icon @click="next">
+      <v-icon>mdi-chevron-right</v-icon>
+    </v-btn>
+    <v-spacer></v-spacer>
+    <v-select v-model="calendarType" :items="calendarTypes" class="me-2" :label="t('event.calendar.viewMode')"
+      variant="outlined" hide-details></v-select>
+  </v-toolbar>
+  <v-calendar class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents" :event-color="getEventColor"
+    :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale" :weekdays="weekdays">
+    <template #event="{ event }">
+      <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
+        {{ event.title }}
+      </div>
+      <div class="v-event-description">
+        {{ event.eventObject.description }}
+      </div>
+    </template>
+  </v-calendar>
 
   <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-    <EventEditView
-      v-if="editableEvent && editDrawer"
-      :initial-event="editableEvent"
-      @close="handleEventClosed"
-      @saved="handleEventSaved"
-    />
+    <EventEditView v-if="editableEvent && editDrawer" :initial-event="editableEvent" @close="handleEventClosed"
+      @saved="handleEventSaved" />
   </v-navigation-drawer>
 </template>
 
