@@ -59,7 +59,7 @@ interface MemberDetailViewProps {
 }
 
 const props = defineProps<MemberDetailViewProps>();
-const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship']);
+const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship', 'edit-member']);
 
 const { t } = useI18n();
 const router = useRouter();
@@ -99,8 +99,7 @@ const handleClose = () => {
 
 const handleEdit = () => {
   if (member.value) {
-    router.push({ name: 'EditMember', params: { id: member.value.id } });
-    emit('close'); // Close the detail drawer after navigating
+    emit('edit-member', member.value.id);
   }
 };
 

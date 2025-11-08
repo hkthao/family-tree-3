@@ -147,4 +147,12 @@ export class ApiMemberService implements IMemberService {
     const payload = { memberId, biographyContent };
     return this.http.put<void>(`${this.apiUrl}/${memberId}/biography`, payload);
   }
+
+  async getRelatives(memberId: string): Promise<Result<Member[], ApiError>> {
+    const result = await this.http.get<Member[]>(`${this.apiUrl}/${memberId}/relatives`);
+    if (result.ok) {
+      return ok(result.value.map((m) => transformMemberDates(m)));
+    }
+    return result;
+  }
 }

@@ -52,31 +52,59 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
   },
 
   actions: {
-    async fetchTreeData(familyId: string) {
+    async fetchTreeData(familyId: string, memberId?: string) {
       if (!familyId) return;
 
       this.loading[familyId] = true;
       this.error[familyId] = null;
 
       try {
-        const [memberResult, relationshipResult] = await Promise.all([
-          this.services.member.fetchMembersByFamilyId(familyId), // Use this.services.member
-          this.services.relationship.loadItems({ familyId: familyId }, 1, 1000), // Use this.services.relationship
-        ]);
-
         let fetchedMembers: Member[] = [];
         let fetchedRelationships: Relationship[] = [];
 
-        if (memberResult.ok) {
-          fetchedMembers = memberResult.value;
-        } else {
-          this.error[familyId] = memberResult.error;
-        }
+        if (memberId) {
+          // Fetch data for a specific member and their direct relatives
+          const memberResult = await this.services.member.getById(memberId);
+          if (memberResult.ok && memberResult.value) {
+            fetchedMembers.push(memberResult.value);
+            // Assuming a service method to get relatives by memberId
+            const relativesResult = await this.services.member.getRelatives(memberId);
+            if (relativesResult.ok && relativesResult.value) {
+              fetchedMembers = [...fetchedMembers, ...relativesResult.value];
+            } else if (!relativesResult.ok) {
+              this.error[familyId] = relativesResult.error;
+            }
+          } else if (!memberResult.ok) {
+            this.error[familyId] = memberResult.error;
+          }
 
-        if (relationshipResult.ok) {
-          fetchedRelationships = relationshipResult.value.items;
+          // Fetch relationships for the fetched members
+          const memberIds = fetchedMembers.map(m => m.id);
+          const relationshipResult = await this.services.relationship.loadItems({ familyId: familyId, memberIds: memberIds }, 1, 1000);
+          if (relationshipResult.ok) {
+            fetchedRelationships = relationshipResult.value.items;
+          } else {
+            this.error[familyId] = relationshipResult.error;
+          }
+
         } else {
-          this.error[familyId] = relationshipResult.error;
+          // Original logic: Fetch all members and relationships for the family
+          const [memberResult, relationshipResult] = await Promise.all([
+            this.services.member.fetchMembersByFamilyId(familyId),
+            this.services.relationship.loadItems({ familyId: familyId }, 1, 1000),
+          ]);
+
+          if (memberResult.ok) {
+            fetchedMembers = memberResult.value;
+          } else {
+            this.error[familyId] = memberResult.error;
+          }
+
+          if (relationshipResult.ok) {
+            fetchedRelationships = relationshipResult.value.items;
+          } else {
+            this.error[familyId] = relationshipResult.error;
+          }
         }
 
         this.trees[familyId] = {

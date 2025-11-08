@@ -7,6 +7,9 @@ interface ConfirmDialogOptions {
   confirmText?: string;
   cancelText?: string;
   color?: string;
+  width?: string; // New
+  cancelColor?: string; // New
+  confirmColor?: string; // New
 }
 
 const isDialogOpen = ref(false);

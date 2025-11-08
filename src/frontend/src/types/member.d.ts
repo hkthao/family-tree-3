@@ -1,4 +1,5 @@
 import { Gender } from '@/types';
+import type { Relationship } from './relationship';
 
 export interface Member {
   id: string;
@@ -20,6 +21,9 @@ export interface Member {
   biography?: string; // New
   isRoot?: boolean;
   validationErrors?: string[];
+  relationships?: Relationship[]; // New: List of relationships for the member
+  fatherId?: string; // New: ID of the father
+  motherId?: string; // New: ID of the mother
 }
 
 export interface MemberFilter {
