@@ -9,6 +9,16 @@
         </div>
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-col cols="12">
+        <family-auto-complete v-model="formData.familyId" :label="t('member.form.familyId')"
+          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
+          :error-messages="v$.familyId.$errors.map(e => e.$message as string)" :readonly="props.readOnly"
+          :multiple="false" :disabled="true" data-testid="member-family-select" />
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
@@ -60,23 +70,6 @@
           data-testid="member-occupation-input"></v-text-field>
       </v-col>
     </v-row>
-
-    <v-row>
-      <v-col cols="12">
-        <family-auto-complete v-model="formData.familyId" :label="t('member.form.familyId')"
-          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
-          :error-messages="v$.familyId.$errors.map(e => e.$message as string)" :readonly="props.readOnly"
-          :multiple="false" data-testid="member-family-select" />
-      </v-col>
-    </v-row>
-
-    <!-- Thông tin khác -->
-    <v-row>
-      <v-col cols="12">
-        <v-textarea :auto-grow="true" v-model="formData.biography" :label="t('member.form.biography')"
-          :readonly="props.readOnly" data-testid="member-biography-input"></v-textarea>
-      </v-col>
-    </v-row>
   </v-form>
 </template>
 
@@ -92,6 +85,7 @@ import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 const props = defineProps<{
   readOnly?: boolean;
   initialMemberData?: Member;
+  familyId?: string; // Add familyId prop
 }>();
 
 const { t } = useI18n();
@@ -108,7 +102,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       firstName: '',
       dateOfBirth: undefined,
       gender: Gender.Male,
-      familyId: '',
+      familyId: props.familyId || '', // Initialize familyId from prop
     },
 );
 

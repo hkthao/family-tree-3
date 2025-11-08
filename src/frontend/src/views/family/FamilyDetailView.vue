@@ -31,7 +31,7 @@
         </v-window-item>
 
         <v-window-item value="members">
-          <MemberListView :family-id="family.id" />
+          <MemberListView :family-id="family.id" :hide-search="true" />
         </v-window-item>
       </v-window>
     </v-card-text>

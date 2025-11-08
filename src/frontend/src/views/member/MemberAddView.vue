@@ -1,5 +1,5 @@
 <template>
-  <v-card data-testid="member-add-view">
+  <v-card :elevation="0" data-testid="member-add-view">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('member.form.addTitle') }}</span>
     </v-card-title>
@@ -7,6 +7,7 @@
       <MemberForm
         ref="memberFormRef"
         @close="closeForm"
+        :family-id="props.familyId"
       />
     </v-card-text>
     <v-card-actions>

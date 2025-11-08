@@ -29,7 +29,7 @@
           <v-spacer></v-spacer>
           <v-btn color="primary" @click="applyFilters" data-testid="apply-filters-button">{{
             t('member.search.apply')
-            }}</v-btn>
+          }}</v-btn>
           <v-btn @click="resetFilters" data-testid="reset-filters-button">{{ t('member.search.reset') }}</v-btn>
         </v-card-actions>
       </div>
@@ -42,13 +42,9 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { MemberFilter } from '@/types';
 import { GenderSelect } from '@/components/common';
-
 const emit = defineEmits(['update:filters']);
-
 const { t } = useI18n();
-
 const expanded = ref(false); // Default to collapsed
-
 const filters = ref<MemberFilter>({
   gender: undefined,
   familyId: null,

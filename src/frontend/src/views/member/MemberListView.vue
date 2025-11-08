@@ -1,6 +1,6 @@
 <template>
   <div data-testid="member-list-view">
-    <MemberSearch @update:filters="handleFilterUpdate" />
+    <MemberSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
 
     <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
@@ -47,6 +47,7 @@ import type { MemberFilter, Member } from '@/types';
 interface MemberListViewProps {
   familyId?: string;
   readOnly?: boolean; // Add readOnly prop
+  hideSearch?: boolean; // Add hideSearch prop
 }
 
 const props = defineProps<MemberListViewProps>();

@@ -1,10 +1,10 @@
 <template>
-  <v-card>
+  <v-card :elevation="0">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('member.form.editTitle') }}</span>
     </v-card-title>
     <v-card-text>
-      <MemberForm ref="memberFormRef" v-if="member" :initial-member-data="member" @close="closeForm" />
+      <MemberForm ref="memberFormRef" v-if="member" :initial-member-data="member" @close="closeForm" :family-id="member.familyId" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
@@ -21,11 +21,6 @@ import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
-
-interface MemberFormExposed {
-  validate: () => Promise<boolean>;
-  getFormData: () => Member | Omit<Member, 'id'>;
-}
 
 interface MemberEditViewProps {
   memberId: string;
