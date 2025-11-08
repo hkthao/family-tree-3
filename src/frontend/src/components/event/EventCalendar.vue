@@ -51,8 +51,8 @@
 
   <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
     <EventEditView
-      v-if="selectedEventId && editDrawer"
-      :event-id="selectedEventId"
+      v-if="editableEvent && editDrawer"
+      :initial-event="editableEvent"
       @close="handleEventClosed"
       @saved="handleEventSaved"
     />
@@ -83,6 +83,7 @@ const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 const selectedDate = ref(new Date());
 const editDrawer = ref(false); // Control visibility of the edit drawer
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
+const editableEvent = ref<Event | undefined>(undefined); // Copy of event for editing
 
 const calendarRef = ref<{
   title: string;
@@ -175,18 +176,21 @@ const getEventColor: CalendarEventColorFunction = (event: {
 
 const showEventDetails = (eventSlotScope: Event) => {
   selectedEventId.value = eventSlotScope.id;
+  editableEvent.value = JSON.parse(JSON.stringify(eventSlotScope)); // Deep copy the event object
   editDrawer.value = true;
 };
 
 const handleEventSaved = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
+  editableEvent.value = undefined;
   loadEvents(); // Reload events after saving
 };
 
 const handleEventClosed = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
+  editableEvent.value = undefined;
 };
 
 watch(

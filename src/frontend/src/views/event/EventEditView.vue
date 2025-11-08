@@ -1,10 +1,10 @@
 <template>
-  <v-card :elevation="0">
+  <v-card>
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase" data-testid="event-edit-title">{{ t('event.form.editTitle') }}</span>
     </v-card-title>
     <v-card-text>
-      <EventForm ref="eventFormRef" v-if="event" :initial-event-data="event" :read-only="false" data-testid="event-edit-form" />
+      <EventForm ref="eventFormRef" v-if="props.initialEvent" :initial-event-data="props.initialEvent" :read-only="false" data-testid="event-edit-form" />
       <v-progress-circular v-else indeterminate color="primary" data-testid="event-edit-loading-spinner"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -29,7 +29,7 @@ interface EventFormExposed {
 }
 
 interface EventEditViewProps {
-  eventId: string;
+  initialEvent: Event;
 }
 
 const props = defineProps<EventEditViewProps>();
@@ -41,35 +41,13 @@ const { t } = useI18n();
 const eventStore = useEventStore();
 const notificationStore = useNotificationStore();
 
-const event = ref<Event | undefined>(undefined);
-
-const loadEvent = async (id: string) => {
-  await eventStore.getById(id);
-  event.value = eventStore.currentItem;
-};
-
-onMounted(async () => {
-  if (props.eventId) {
-    await loadEvent(props.eventId);
-  }
-});
-
-watch(
-  () => props.eventId,
-  async (newId) => {
-    if (newId) {
-      await loadEvent(newId);
-    }
-  },
-);
-
 const handleUpdateEvent = async () => {
   if (!eventFormRef.value) return;
   const isValid = await eventFormRef.value.validate();
   if (!isValid) return;
 
   const eventData = eventFormRef.value.getFormData() as Event;
-  if (!eventData.id) {
+  if (!props.initialEvent.id) { // Use props.initialEvent.id for the check
     notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
     return;
   }
