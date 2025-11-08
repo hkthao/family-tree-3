@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card :elevation="0">
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase" data-testid="event-edit-title">{{ t('event.form.editTitle') }}</span>
     </v-card-title>

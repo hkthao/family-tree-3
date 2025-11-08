@@ -1,6 +1,15 @@
 <template>
   <v-form class="mt-3" ref="formRef" :disabled="props.readOnly">
     <v-row>
+      <v-col cols="12">
+        <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" 
+          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
+          :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
+          :read-only="props.readOnly" :multiple="false" :disabled="true" data-testid="event-family-autocomplete" />
+      </v-col>
+    </v-row>
+
+    <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.name" :label="t('event.form.name')" 
           @blur="v$.name.$touch()" @input="v$.name.$touch()"
@@ -12,19 +21,6 @@
           @blur="v$.type.$touch()" @input="v$.type.$touch()"
           :error-messages="v$.type.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="event-type-select"></v-select>
-      </v-col>
-    </v-row>
-
-    <v-row>
-      <v-col cols="12" md="6">
-        <family-auto-complete v-model="formData.familyId" :label="t('event.form.family')" 
-          @blur="v$.familyId.$touch()" @update:modelValue="v$.familyId.$touch()"
-          :error-messages="v$.familyId.$errors.map(e => e.$message as string)"
-          :read-only="props.readOnly" :multiple="false" data-testid="event-family-autocomplete" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <member-auto-complete v-model="formData.relatedMembers" :label="t('event.form.relatedMembers')"
-          :read-only="props.readOnly" clearable multiple data-testid="event-related-members-autocomplete" />
       </v-col>
     </v-row>
 
@@ -61,7 +57,7 @@
     </v-row>
 
     <v-row>
-      <v-col cols="6">
+      <v-col cols="12">
         <v-color-input v-model="formData.color" :label="t('event.form.color')" :readonly="props.readOnly"
           data-testid="event-color-picker" pip-location="append-inner">
         </v-color-input>
