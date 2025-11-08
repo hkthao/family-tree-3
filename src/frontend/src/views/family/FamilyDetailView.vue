@@ -1,8 +1,7 @@
 <template>
   <v-card :elevation="0" v-if="family" class="mb-4" data-testid="family-detail-view">
-    <v-card-title class="text-h6 d-flex align-center">
+    <v-card-title class="text-h6 d-flex text-center justify-center">
       {{ family.name }}
-      <v-spacer></v-spacer>
     </v-card-title>
     <v-card-text>
       <v-tabs v-model="selectedTab" class="mb-4">
