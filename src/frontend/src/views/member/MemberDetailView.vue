@@ -19,12 +19,21 @@
         </template>
         <v-list>
           <v-list-item @click="handleAddFather" :disabled="!member">
+            <template v-slot:prepend>
+              <v-icon>mdi-human-male</v-icon>
+            </template>
             <v-list-item-title>{{ t('familyTree.addFather') }}</v-list-item-title>
           </v-list-item>
           <v-list-item @click="handleAddMother" :disabled="!member">
+            <template v-slot:prepend>
+              <v-icon>mdi-human-female</v-icon>
+            </template>
             <v-list-item-title>{{ t('familyTree.addMother') }}</v-list-item-title>
           </v-list-item>
           <v-list-item @click="handleAddChild" :disabled="!member">
+            <template v-slot:prepend>
+              <v-icon>mdi-human-child</v-icon>
+            </template>
             <v-list-item-title>{{ t('familyTree.addChild') }}</v-list-item-title>
           </v-list-item>
         </v-list>
