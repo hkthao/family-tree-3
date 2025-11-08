@@ -2,9 +2,10 @@
   <div data-testid="member-list-view">
     <MemberSearch @update:filters="handleFilterUpdate" />
 
-          <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
-          :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
-          @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly" />
+    <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
+      :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
+      @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView"
+      @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly" />
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
       fullName: memberToDelete?.fullName || '',
@@ -15,23 +16,18 @@
     <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
 
     <!-- Edit Member Drawer -->
+
     <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-      <MemberEditView
-        v-if="editableMember && editDrawer"
-        :initial-member="editableMember"
-        @close="handleMemberClosed"
-        @saved="handleMemberSaved"
-      />
+
+      <MemberEditView v-if="selectedMemberId && editDrawer" :member-id="selectedMemberId" @close="handleMemberClosed"
+        @saved="handleMemberSaved" />
+
     </v-navigation-drawer>
 
     <!-- Add Member Drawer -->
     <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
-      <MemberAddView
-        v-if="addDrawer"
-        :family-id="props.familyId"
-        @close="handleMemberClosed"
-        @saved="handleMemberSaved"
-      />
+      <MemberAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMemberClosed"
+        @saved="handleMemberSaved" />
     </v-navigation-drawer>
   </div>
 </template>
@@ -65,7 +61,6 @@ const searchQuery = ref('');
 const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
 const selectedMemberId = ref<string | null>(null); // Store the ID of the member being edited
-const editableMember = ref<Member | undefined>(undefined); // Copy of member for editing
 
 const notificationStore = useNotificationStore();
 
@@ -80,7 +75,6 @@ const navigateToCreateView = () => {
 
 const navigateToEditMember = (member: Member) => {
   selectedMemberId.value = member.id;
-  editableMember.value = JSON.parse(JSON.stringify(member)); // Deep copy the member object
   editDrawer.value = true;
 };
 
@@ -102,7 +96,7 @@ const handleSearchUpdate = async (search: string) => {
 const handleListOptionsUpdate = async (options: {
   page: number;
   itemsPerPage: number;
-  sortBy: { key: string; order: string }[];  
+  sortBy: { key: string; order: string }[];
 }) => {
   await memberStore.setPage(options.page);
   await memberStore.setItemsPerPage(options.itemsPerPage);
@@ -156,7 +150,6 @@ const handleMemberSaved = () => {
   editDrawer.value = false;
   addDrawer.value = false;
   selectedMemberId.value = null;
-  editableMember.value = undefined;
   memberStore._loadItems(); // Refresh the member list after saving
 };
 
@@ -164,9 +157,7 @@ const handleMemberClosed = () => {
   editDrawer.value = false;
   addDrawer.value = false;
   selectedMemberId.value = null;
-  editableMember.value = undefined;
 };
-
 onMounted(() => {
   if (props.familyId) {
     memberStore.getByFamilyId(props.familyId);

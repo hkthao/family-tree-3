@@ -4,23 +4,18 @@
       <span class="text-h5 text-uppercase">{{ t('member.form.editTitle') }}</span>
     </v-card-title>
     <v-card-text>
-      <MemberForm
-        ref="memberFormRef"
-        v-if="props.initialMember"
-        :initial-member-data="props.initialMember"
-        @close="closeForm"
-      />
+      <MemberForm ref="memberFormRef" v-if="member" :initial-member-data="member" @close="closeForm" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="grey"  @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary"  @click="handleUpdateMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
+      <v-btn color="grey" @click="closeForm">{{ t('common.cancel') }}</v-btn>
+      <v-btn color="primary" @click="handleUpdateMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -33,7 +28,7 @@ interface MemberFormExposed {
 }
 
 interface MemberEditViewProps {
-  initialMember: Member;
+  memberId: string;
 }
 
 const props = defineProps<MemberEditViewProps>();
@@ -45,13 +40,36 @@ const { t } = useI18n();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
+const member = ref<Member | undefined>(undefined);
+
+const loadMember = async (id: string) => {
+  await memberStore.getById(id);
+  if (memberStore.currentItem)
+    member.value = memberStore.currentItem;
+};
+
+onMounted(async () => {
+  if (props.memberId) {
+    await loadMember(props.memberId);
+  }
+});
+
+watch(
+  () => props.memberId,
+  async (newId) => {
+    if (newId) {
+      await loadMember(newId);
+    }
+  },
+);
+
 const handleUpdateMember = async () => {
   if (!memberFormRef.value) return;
   const isValid = await memberFormRef.value.validate();
   if (!isValid) return;
 
   const memberData = memberFormRef.value.getFormData() as Member;
-  if (!props.initialMember.id) { // Use props.initialMember.id for the check
+  if (!memberData.id) { // Use memberData.id for the check
     notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
     return;
   }
