@@ -5,14 +5,14 @@
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn color="primary" icon @click="$emit('ai-create')">
+        <v-btn v-if="!props.readOnly" color="primary" icon @click="$emit('ai-create')">
           <v-tooltip :text="t('member.list.action.aiCreate')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
+        <v-btn v-if="!props.readOnly" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -119,6 +119,7 @@ const props = defineProps<{
   totalItems: number;
   loading: boolean;
   search: string;
+  readOnly?: boolean; // Add readOnly prop
 }>();
 
 const emit = defineEmits([

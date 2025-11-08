@@ -6,8 +6,8 @@
     <v-card-text>
       <MemberForm
         ref="memberFormRef"
-        v-if="member"
-        :initial-member-data="member"
+        v-if="props.initialMember"
+        :initial-member-data="props.initialMember"
         @close="closeForm"
       />
     </v-card-text>
@@ -20,30 +20,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 
-const { t } = useI18n();
-const router = useRouter();
-const route = useRoute();
-const memberStore = useMemberStore();
-const notificationStore = useNotificationStore();
+interface MemberFormExposed {
+  validate: () => Promise<boolean>;
+  getFormData: () => Member | Omit<Member, 'id'>;
+}
 
-const member = ref<Member | undefined>(undefined);
+interface MemberEditViewProps {
+  initialMember: Member;
+}
+
+const props = defineProps<MemberEditViewProps>();
+const emit = defineEmits(['close', 'saved']);
+
 const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 
-onMounted(async () => {
-  const memberId = route.params.id as string;
-  if (memberId) {
-    await memberStore.getById(memberId);
-    member.value =  memberStore.currentItem as Member;
-  }
-});
+const { t } = useI18n();
+const memberStore = useMemberStore();
+const notificationStore = useNotificationStore();
 
 const handleUpdateMember = async () => {
   if (!memberFormRef.value) return;
@@ -51,7 +51,7 @@ const handleUpdateMember = async () => {
   if (!isValid) return;
 
   const memberData = memberFormRef.value.getFormData() as Member;
-  if (!memberData.id) {
+  if (!props.initialMember.id) { // Use props.initialMember.id for the check
     notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
     return;
   }
@@ -60,7 +60,7 @@ const handleUpdateMember = async () => {
     await memberStore.updateItem(memberData as Member);
     if (!memberStore.error) {
       notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
-      closeForm();
+      emit('saved'); // Emit saved event
     } else {
       notificationStore.showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
     }
@@ -70,6 +70,6 @@ const handleUpdateMember = async () => {
 };
 
 const closeForm = () => {
-  router.push('/member');
+  emit('close'); // Emit close event
 };
 </script>

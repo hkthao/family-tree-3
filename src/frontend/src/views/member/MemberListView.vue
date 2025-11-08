@@ -2,10 +2,9 @@
   <div data-testid="member-list-view">
     <MemberSearch @update:filters="handleFilterUpdate" />
 
-    <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
-      :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
-      @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" />
-
+          <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
+          :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditMember"
+          @delete="confirmDelete" @create="navigateToCreateView" @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly" />
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
       fullName: memberToDelete?.fullName || '',
@@ -14,6 +13,26 @@
 
     <!-- AI Input Dialog -->
     <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
+
+    <!-- Edit Member Drawer -->
+    <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
+      <MemberEditView
+        v-if="editableMember && editDrawer"
+        :initial-member="editableMember"
+        @close="handleMemberClosed"
+        @saved="handleMemberSaved"
+      />
+    </v-navigation-drawer>
+
+    <!-- Add Member Drawer -->
+    <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
+      <MemberAddView
+        v-if="addDrawer"
+        :family-id="props.familyId"
+        @close="handleMemberClosed"
+        @saved="handleMemberSaved"
+      />
+    </v-navigation-drawer>
   </div>
 </template>
 
@@ -25,44 +44,48 @@ import { useMemberStore } from '@/stores/member.store';
 import { MemberSearch, MemberList, NLMemberPopup } from '@/components/member';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
-import { useRouter } from 'vue-router';
+import MemberEditView from '@/views/member/MemberEditView.vue';
+import MemberAddView from '@/views/member/MemberAddView.vue';
 import type { MemberFilter, Member } from '@/types';
 
 interface MemberListViewProps {
   familyId?: string;
+  readOnly?: boolean; // Add readOnly prop
 }
 
 const props = defineProps<MemberListViewProps>();
 
 const { t } = useI18n();
-const router = useRouter();
 const memberStore = useMemberStore();
 const { loading } = storeToRefs(memberStore);
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 const aiInputDialog = ref(false);
 const searchQuery = ref('');
+const editDrawer = ref(false); // Control visibility of the edit drawer
+const addDrawer = ref(false); // Control visibility of the add drawer
+const selectedMemberId = ref<string | null>(null); // Store the ID of the member being edited
+const editableMember = ref<Member | undefined>(undefined); // Copy of member for editing
 
 const notificationStore = useNotificationStore();
 
 const navigateToDetailView = (member: Member) => {
-  router.push(`/member/detail/${member.id}`);
+  // Still navigate to detail view, as it's a separate full page view
+  // router.push(`/member/detail/${member.id}`);
 };
 
 const navigateToCreateView = () => {
-  if (props.familyId) {
-    router.push(`/member/add?familyId=${props.familyId}`);
-  } else {
-    router.push('/member/add');
-  }
+  addDrawer.value = true;
 };
 
 const navigateToEditMember = (member: Member) => {
-  router.push(`/member/edit/${member.id}`);
+  selectedMemberId.value = member.id;
+  editableMember.value = JSON.parse(JSON.stringify(member)); // Deep copy the member object
+  editDrawer.value = true;
 };
 
 const navigateToAIBiography = (member: Member) => {
-  router.push(`/member/biography/${member.id}`);
+  // router.push(`/member/biography/${member.id}`);
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
@@ -113,6 +136,7 @@ const handleDeleteConfirm = async () => {
   }
   deleteConfirmDialog.value = false;
   memberToDelete.value = undefined;
+  memberStore._loadItems(); // Refresh the member list after deleting
 };
 
 const handleDeleteCancel = () => {
@@ -126,6 +150,21 @@ const openAiInputDialog = () => {
 
 const handleAiSaved = () => {
   memberStore._loadItems(); // Refresh the member list after saving
+};
+
+const handleMemberSaved = () => {
+  editDrawer.value = false;
+  addDrawer.value = false;
+  selectedMemberId.value = null;
+  editableMember.value = undefined;
+  memberStore._loadItems(); // Refresh the member list after saving
+};
+
+const handleMemberClosed = () => {
+  editDrawer.value = false;
+  addDrawer.value = false;
+  selectedMemberId.value = null;
+  editableMember.value = undefined;
 };
 
 onMounted(() => {

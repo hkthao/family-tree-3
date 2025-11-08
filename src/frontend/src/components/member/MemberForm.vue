@@ -10,17 +10,17 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="6">
         <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
           @input="v$.lastName.$touch()" :error-messages="v$.lastName.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="member-last-name-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12" md="6">
         <v-text-field v-model="formData.firstName" :label="t('member.form.firstName')" @blur="v$.firstName.$touch()"
           @input="v$.firstName.$touch()" :error-messages="v$.firstName.$errors.map(e => e.$message as string)"
           :readonly="props.readOnly" data-testid="member-first-name-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12">
         <v-text-field v-model="formData.nickname" :label="t('member.form.nickname')" :readonly="props.readOnly"
           data-testid="member-nickname-input"></v-text-field>
       </v-col>

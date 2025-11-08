@@ -20,16 +20,21 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 
+interface MemberAddViewProps {
+  familyId?: string;
+}
+
+const props = defineProps<MemberAddViewProps>();
+const emit = defineEmits(['close', 'saved']);
+
 const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 
 const { t } = useI18n();
-const router = useRouter();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
@@ -39,12 +44,15 @@ const handleAddMember = async () => {
   if (!isValid) return;
 
   const memberData = memberFormRef.value.getFormData();
+  if (props.familyId) {
+    memberData.familyId = props.familyId;
+  }
 
   try {
     await memberStore.addItem(memberData as Omit<Member, 'id'>);
     if (!memberStore.error) {
       notificationStore.showSnackbar(t('member.messages.addSuccess'), 'success');
-      closeForm();
+      emit('saved'); // Emit saved event
     } else {
       notificationStore.showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
     }
@@ -54,6 +62,6 @@ const handleAddMember = async () => {
 };
 
 const closeForm = () => {
-  router.push('/member');
+  emit('close'); // Emit close event
 };
 </script>
