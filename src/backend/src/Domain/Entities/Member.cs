@@ -70,19 +70,18 @@ public class Member : BaseAuditableEntity
         return relationship;
     }
 
-    public (Relationship, Relationship) AddSpouseRelationship(Guid spouseId, backend.Domain.Enums.Gender currentMemberGender)
+    public Relationship AddHusbandRelationship(Guid husbandId)
     {
-        RelationshipType currentToSpouseType = currentMemberGender == backend.Domain.Enums.Gender.Male ? RelationshipType.Husband : RelationshipType.Wife;
-        RelationshipType spouseToCurrentType = currentMemberGender == backend.Domain.Enums.Gender.Male ? RelationshipType.Wife : RelationshipType.Husband;
-
-        var currentToSpouse = new Relationship(FamilyId, Id, spouseId, currentToSpouseType);
-        var spouseToCurrent = new Relationship(FamilyId, spouseId, Id, spouseToCurrentType);
-
+        var currentToSpouse = new Relationship(FamilyId, Id, husbandId, RelationshipType.Wife); // Current member (female) is wife of husbandId
         SourceRelationships.Add(currentToSpouse);
-        // We don't add spouseToCurrent to current member's relationships, as it belongs to the spouse's relationships.
-        // It will be added to the context directly in the command handler.
+        return currentToSpouse;
+    }
 
-        return (currentToSpouse, spouseToCurrent);
+    public Relationship AddWifeRelationship(Guid wifeId)
+    {
+        var currentToSpouse = new Relationship(FamilyId, Id, wifeId, RelationshipType.Husband); // Current member (male) is husband of wifeId
+        SourceRelationships.Add(currentToSpouse);
+        return currentToSpouse;
     }
 
     // Relationships

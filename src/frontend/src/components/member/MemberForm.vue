@@ -19,30 +19,6 @@
       </v-col>
     </v-row>
 
-    <!-- Thông tin Cha Mẹ -->
-    <v-row>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :read-only="props.readOnly"
-          :family-id="formData.familyId" data-testid="member-father-autocomplete" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.motherId" :label="t('member.form.mother')" :read-only="props.readOnly"
-          :family-id="formData.familyId" data-testid="member-mother-autocomplete" />
-      </v-col>
-    </v-row>
-
-    <!-- Thông tin Vợ/Chồng -->
-    <v-row>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.husbandId" :label="t('member.form.husband')" :read-only="props.readOnly"
-          :family-id="formData.familyId" data-testid="member-husband-autocomplete" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.wifeId" :label="t('member.form.wife')" :read-only="props.readOnly"
-          :family-id="formData.familyId" data-testid="member-wife-autocomplete" />
-      </v-col>
-    </v-row>
-
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
@@ -95,6 +71,36 @@
           data-testid="member-occupation-input"></v-text-field>
       </v-col>
     </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-checkbox v-model="formData.isRoot" :label="t('member.form.isRoot')" :readonly="props.readOnly"
+          data-testid="member-is-root-checkbox"></v-checkbox>
+      </v-col>
+    </v-row>
+
+     <!-- Thông tin Cha Mẹ -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-father-autocomplete" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.motherId" :label="t('member.form.mother')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-mother-autocomplete" />
+      </v-col>
+    </v-row>
+
+    <!-- Thông tin Vợ/Chồng -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.husbandId" :label="t('member.form.husband')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-husband-autocomplete" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.wifeId" :label="t('member.form.wife')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-wife-autocomplete" />
+      </v-col>
+    </v-row>
 
 
   </v-form>
@@ -128,6 +134,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       motherId: props.initialMemberData.motherId,
       husbandId: props.initialMemberData.husbandId,
       wifeId: props.initialMemberData.wifeId,
+      isRoot: props.initialMemberData.isRoot, // Add isRoot here
     }
     : {
       lastName: '',
@@ -139,6 +146,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       motherId: undefined, // Initialize motherId
       husbandId: undefined, // Initialize husbandId
       wifeId: undefined, // Initialize wifeId
+      isRoot: false, // Initialize isRoot for new members
     },
 );
 
@@ -152,6 +160,7 @@ const state = reactive({
   motherId: toRef(formData, 'motherId'), // Add motherId to state
   husbandId: toRef(formData, 'husbandId'), // Add husbandId to state
   wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
+  isRoot: toRef(formData, 'isRoot'), // Add isRoot to state
 });
 
 const rules = useMemberRules(toRefs(state));

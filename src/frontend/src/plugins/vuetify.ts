@@ -102,6 +102,10 @@ export default createVuetify({
     },
     VProgressLinear: {
       color: 'primary'
+    },
+    VCheckbox:{
+      density: 'compact',
+      hideDetails: true
     }
   },
 });

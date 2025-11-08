@@ -159,8 +159,8 @@ public class UpdateMemberCommandHandlerTests : TestBase
         family.AddMember(member);
         family.AddMember(initialSpouse);
         family.AddMember(newSpouse);
-        var (rel1, rel2) = member.AddSpouseRelationship(initialSpouse.Id, (backend.Domain.Enums.Gender)Enum.Parse(typeof(backend.Domain.Enums.Gender), member.Gender!));
-        _context.Relationships.Add(rel2);
+        var rel1 = member.AddWifeRelationship(initialSpouse.Id); // Changed
+        _context.Relationships.Add(rel1); // Added rel1 to context
 
 
         _context.Families.Add(family);
@@ -174,22 +174,26 @@ public class UpdateMemberCommandHandlerTests : TestBase
             FirstName = "John",
             LastName = "Doe",
             FamilyId = familyId,
-            WifeId = newSpouseId,
-            Gender = member.Gender
+            WifeId = newSpouseId // Changed to WifeId
         };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
-        var updatedMember = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == memberId);
-        var newSpouseFromDb = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == newSpouseId);
 
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+
+        // Reload members after the command has completed and saved changes
+        var updatedMember = await _context.Members
+            .Include(m => m.SourceRelationships)
+            .Include(m => m.TargetRelationships)
+            .FirstOrDefaultAsync(m => m.Id == memberId);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         updatedMember.Should().NotBeNull();
-        updatedMember!.SourceRelationships.Should().ContainSingle(r => r.TargetMemberId == newSpouseId && r.Type == backend.Domain.Enums.RelationshipType.Husband);
-        _context.Relationships.Should().ContainSingle(r => r.SourceMemberId == newSpouseId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Wife);
-        updatedMember.SourceRelationships.Should().NotContain(r => r.TargetMemberId == initialSpouseId);
+        updatedMember!.SourceRelationships.Should().ContainSingle(r => r.SourceMemberId == memberId && r.TargetMemberId == newSpouseId && r.Type == backend.Domain.Enums.RelationshipType.Husband); // Changed assertion
+        updatedMember.SourceRelationships.Should().NotContain(r => r.SourceMemberId == memberId && r.TargetMemberId == initialSpouseId); // Changed assertion
     }
 
     [Fact]

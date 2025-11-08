@@ -62,84 +62,127 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             member.UnsetAsRoot();
         }
 
-        // --- Simplify Relationship Handling ---
-        // Remove all existing parent and spouse relationships for the member
-        var relationshipsToRemove = _context.Relationships
-            .Where(r => (r.TargetMemberId == member.Id && (r.Type == RelationshipType.Father || r.Type == RelationshipType.Mother)) ||
-                        (r.SourceMemberId == member.Id && (r.Type == RelationshipType.Husband || r.Type == RelationshipType.Wife)) ||
-                        (r.TargetMemberId == member.Id && (r.Type == RelationshipType.Husband || r.Type == RelationshipType.Wife)))
-            .ToList();
+        // Get existing relationship IDs
+        var existingFatherId = member.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father)?.SourceMemberId;
+        var existingMotherId = member.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother)?.SourceMemberId;
+        var existingHusbandId = member.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife)?.TargetMemberId; // Corrected: current member is wife of husband
+        var existingWifeId = member.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband)?.TargetMemberId; // Corrected: current member is husband of wife
 
-        _context.Relationships.RemoveRange(relationshipsToRemove);
-
-        // Re-add relationships from the request
-        if (request.FatherId.HasValue)
+        // Handle Father relationship
+        if (request.FatherId != existingFatherId)
         {
-            if (request.FatherId.Value == member.Id)
+            // Remove old father relationship
+            if (existingFatherId.HasValue)
             {
-                return Result<Guid>.Failure("A member cannot be their own father.", ErrorSources.BadRequest);
-            }
-            var father = await _context.Members.FindAsync(request.FatherId.Value);
-            if (father != null)
-            {
-                var newFatherRelationship = member.AddFatherRelationship(request.FatherId.Value);
-                _context.Relationships.Add(newFatherRelationship);
-            }
-        }
-
-        if (request.MotherId.HasValue)
-        {
-            if (request.MotherId.Value == member.Id)
-            {
-                return Result<Guid>.Failure("A member cannot be their own mother.", ErrorSources.BadRequest);
-            }
-            var mother = await _context.Members.FindAsync(request.MotherId.Value);
-            if (mother != null)
-            {
-                var newMotherRelationship = member.AddMotherRelationship(request.MotherId.Value);
-                _context.Relationships.Add(newMotherRelationship);
-            }
-        }
-
-        if (request.HusbandId.HasValue)
-        {
-            var husband = await _context.Members.FindAsync(request.HusbandId.Value);
-            if (husband != null)
-            {
-                if (member.Gender == null)
+                var oldFatherRelationship = _context.Relationships
+                    .FirstOrDefault(r => r.SourceMemberId == existingFatherId.Value && r.TargetMemberId == member.Id && r.Type == RelationshipType.Father);
+                if (oldFatherRelationship != null)
                 {
-                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                    member.TargetRelationships.Remove(oldFatherRelationship); // Explicitly remove from navigation property
+                    _context.Relationships.Remove(oldFatherRelationship);
                 }
-                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(husband.Id, (Gender)Enum.Parse(typeof(Gender), member.Gender));
-                _context.Relationships.Add(currentToSpouse);
-                _context.Relationships.Add(spouseToCurrent);
             }
-        }
-
-        if (request.WifeId.HasValue)
-        {
-            var wife = await _context.Members.FindAsync(request.WifeId.Value);
-            if (wife != null)
+            // Add new father relationship
+            if (request.FatherId.HasValue)
             {
-                if (member.Gender == null)
+                if (request.FatherId.Value == member.Id)
                 {
-                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                    return Result<Guid>.Failure("A member cannot be their own father.", ErrorSources.BadRequest);
                 }
-                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(wife.Id, (Gender)Enum.Parse(typeof(Gender), member.Gender));
-                _context.Relationships.Add(currentToSpouse);
-                _context.Relationships.Add(spouseToCurrent);
+                var father = await _context.Members.FindAsync(request.FatherId.Value);
+                if (father != null)
+                {
+                    var newFatherRelationship = member.AddFatherRelationship(request.FatherId.Value);
+                    _context.Relationships.Add(newFatherRelationship);
+                }
             }
         }
 
-        try
+        // Handle Mother relationship
+        if (request.MotherId != existingMotherId)
         {
-            await _context.SaveChangesAsync(cancellationToken);
+            // Remove old mother relationship
+            if (existingMotherId.HasValue)
+            {
+                var oldMotherRelationship = _context.Relationships
+                    .FirstOrDefault(r => r.SourceMemberId == existingMotherId.Value && r.TargetMemberId == member.Id && r.Type == RelationshipType.Mother);
+                if (oldMotherRelationship != null)
+                {
+                    member.TargetRelationships.Remove(oldMotherRelationship); // Explicitly remove from navigation property
+                    _context.Relationships.Remove(oldMotherRelationship);
+                }
+            }
+            // Add new mother relationship
+            if (request.MotherId.HasValue)
+            {
+                if (request.MotherId.Value == member.Id)
+                {
+                    return Result<Guid>.Failure("A member cannot be their own mother.", ErrorSources.BadRequest);
+                }
+                var mother = await _context.Members.FindAsync(request.MotherId.Value);
+                if (mother != null)
+                {
+                    var newMotherRelationship = member.AddMotherRelationship(request.MotherId.Value);
+                    _context.Relationships.Add(newMotherRelationship);
+                }
+            }
         }
-        catch (Exception ex)
+
+        // Handle Husband relationship
+        if (request.HusbandId != existingHusbandId)
         {
-            return Result<Guid>.Failure(ex.Message, "DbUpdate");
+            // Remove old husband relationship
+            if (existingHusbandId.HasValue)
+            {
+                var oldHusbandRelationship = _context.Relationships
+                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingHusbandId.Value && r.Type == RelationshipType.Wife);
+                if (oldHusbandRelationship != null)
+                {
+                    member.SourceRelationships.Remove(oldHusbandRelationship); // Explicitly remove from navigation property
+                    _context.Relationships.Remove(oldHusbandRelationship);
+                }
+            }
+            // Add new husband relationship
+            if (request.HusbandId.HasValue)
+            {
+                var husband = await _context.Members.FindAsync(request.HusbandId.Value);
+                if (husband != null)
+                {
+                    var newHusbandRelationship = member.AddHusbandRelationship(husband.Id);
+                    _context.Relationships.Add(newHusbandRelationship);
+                }
+            }
         }
+
+        // Handle Wife relationship
+        if (request.WifeId != existingWifeId)
+        {
+            // Remove old wife relationship
+            if (existingWifeId.HasValue)
+            {
+                var oldWifeRelationship = _context.Relationships
+                    .FirstOrDefault(r => r.SourceMemberId == member.Id && r.TargetMemberId == existingWifeId.Value && r.Type == RelationshipType.Husband);
+                if (oldWifeRelationship != null)
+                {
+                    member.SourceRelationships.Remove(oldWifeRelationship); // Explicitly remove from navigation property
+                    _context.Relationships.Remove(oldWifeRelationship);
+                }
+            }
+            // Add new wife relationship
+            if (request.WifeId.HasValue)
+            {
+                var wife = await _context.Members.FindAsync(request.WifeId.Value);
+                if (wife != null)
+                {
+                    var newWifeRelationship = member.AddWifeRelationship(wife.Id);
+                    _context.Relationships.Add(newWifeRelationship);
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(member.Id);
     }
+
 }

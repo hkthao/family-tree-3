@@ -79,13 +79,8 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             var husband = await _context.Members.FindAsync(request.HusbandId.Value);
             if (husband != null)
             {
-                if (member.Gender == null)
-                {
-                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
-                }
-                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(husband.Id, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                var currentToSpouse = member.AddHusbandRelationship(husband.Id);
                 _context.Relationships.Add(currentToSpouse);
-                _context.Relationships.Add(spouseToCurrent);
             }
         }
 
@@ -95,13 +90,8 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             var wife = await _context.Members.FindAsync(request.WifeId.Value);
             if (wife != null)
             {
-                if (member.Gender == null)
-                {
-                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
-                }
-                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(wife.Id, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                var currentToSpouse = member.AddWifeRelationship(wife.Id);
                 _context.Relationships.Add(currentToSpouse);
-                _context.Relationships.Add(spouseToCurrent);
             }
         }
 

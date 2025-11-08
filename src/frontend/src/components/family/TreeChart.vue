@@ -18,7 +18,7 @@
         </v-btn>
       </template>
     </v-tooltip>
-    <v-text-field v-model="treeVisualizationStore.searchQuery" label="Tìm kiếm thành viên"
+    <v-text-field v-model="treeVisualizationStore.searchQuery" :label="t('family.tree.searchMember')"
       prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field>
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
@@ -61,14 +61,7 @@ const props = defineProps({
   familyId: { type: String, default: null },
   initialMemberId: { type: String, default: null }, // New prop for initial member ID
 });
-const emit = defineEmits([
-  'add-member',
-  'edit-member',
-  'delete-member',
-  'add-father',
-  'add-mother',
-  'add-child',
-]); const { t } = useI18n();
+ const { t } = useI18n();
 const chartMode = ref('hierarchical'); // Default view
 const treeVisualizationStore = useTreeVisualizationStore();
 
