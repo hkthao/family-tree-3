@@ -22,9 +22,11 @@
       prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field>
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
-    :relationships="relationships" @update:selected-member-id="selectedMemberId = $event"
+    :relationships="relationships"
     @show-member-detail-drawer="handleShowMemberDetailDrawer" />
-  <ForceDirectedFamilyTree v-else :family-id="props.familyId" />
+  <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
+    @show-member-detail-drawer="handleShowMemberDetailDrawer"
+    @edit-member="handleEditMember" />
 
   <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650">
     <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId"

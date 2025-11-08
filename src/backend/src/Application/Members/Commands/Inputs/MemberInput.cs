@@ -18,4 +18,6 @@ public record MemberInput
     public bool IsRoot { get; set; }
     public Guid? FatherId { get; set; }
     public Guid? MotherId { get; set; }
+    public Guid? HusbandId { get; set; }
+    public Guid? WifeId { get; set; }
 }

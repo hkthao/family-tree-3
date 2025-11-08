@@ -17,15 +17,17 @@ const { t } = useI18n();
 
 const props = defineProps({
   familyId: { type: String, required: true },
+  members: { type: Array<Member>, default: () => [] },
+  relationships: { type: Array<Relationship>, default: () => [] },
 });
+
+const emit = defineEmits([
+  'show-member-detail-drawer',
+  'edit-member',
+]);
 
 const chartContainer = ref<HTMLDivElement | null>(null);
 let simulation: d3.Simulation<GraphNode, GraphLink> | null = null;
-
-const treeVisualizationStore = useTreeVisualizationStore();
-
-const members = computed(() => treeVisualizationStore.getMembers(props.familyId));
-const relationships = computed(() => treeVisualizationStore.getRelationships(props.familyId));
 
 interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
@@ -259,6 +261,11 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     link.transition().duration(200).style('stroke-opacity', 0.5);
   });
 
+  node.on('click', (event, d) => {
+    emit('show-member-detail-drawer', d.id);
+    emit('edit-member', d.id);
+  });
+
   simulation.on('tick', () => {
     link
       .attr('x1', d => (d.source as GraphNode).x!)
@@ -288,28 +295,27 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
   }
 };
 
-const initialize = async () => {
-  if (props.familyId) {
-    await treeVisualizationStore.fetchTreeData(props.familyId);
-
-    if (members.value.length > 0) {
-      const { nodes, links } = transformData(members.value, relationships.value);
-      renderChart(nodes, links);
-    } else {
-      if (!chartContainer.value) return;
-      d3.select(chartContainer.value).select('svg').remove();
-      d3.select(chartContainer.value).html(`<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`);
-    }
-  }
-};
-
 onMounted(() => {
-  initialize();
+  if (props.members && props.members.length > 0) {
+    const { nodes, links } = transformData(props.members, props.relationships);
+    renderChart(nodes, links);
+  } else {
+    if (!chartContainer.value) return;
+    d3.select(chartContainer.value).select('svg').remove();
+    d3.select(chartContainer.value).html(`<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`);
+  }
 });
 
-watch(() => props.familyId, () => {
-  initialize();
-});
+watch([() => props.members, () => props.relationships], ([newMembers, newRelationships]) => {
+  if (newMembers && newMembers.length > 0) {
+    const { nodes, links } = transformData(newMembers, newRelationships);
+    renderChart(nodes, links);
+  } else {
+    if (!chartContainer.value) return;
+    d3.select(chartContainer.value).select('svg').remove();
+    d3.select(chartContainer.value).html(`<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`);
+  }
+}, { deep: true });
 
 onUnmounted(() => {
   if (simulation) {

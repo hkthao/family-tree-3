@@ -24,7 +24,7 @@ interface CardData {
 
 export function useHierarchicalTreeChart(
   props: { familyId: string | null; members: Member[]; relationships: Relationship[] },
-  emit: (event: 'add-member' | 'edit-member' | 'delete-member' | 'add-father' | 'add-mother' | 'add-child' | 'update:selected-member-id' | 'show-member-detail-drawer', ...args: any[]) => void
+  emit: (event: 'show-member-detail-drawer', ...args: any[]) => void
 ) {
   const { t } = useI18n();
   const chartContainer = ref<HTMLDivElement | null>(null);
@@ -96,39 +96,41 @@ export function useHierarchicalTreeChart(
       return;
     }
 
-    chartContainer.value.innerHTML = '';
-    const transformedData = transformData(currentMembers, currentRelationships);
-    if (transformedData.length === 0) {
-      chartContainer.value.innerHTML =
-        `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
-      chart = null;
-      return;
-    }
+    nextTick(() => { // Wrap the rendering logic in nextTick
+      chartContainer.value!.innerHTML = ''; // Use ! for non-null assertion after check
+      const transformedData = transformData(currentMembers, currentRelationships);
+      if (transformedData.length === 0) {
+        chartContainer.value!.innerHTML =
+          `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;
+        chart = null;
+        return;
+      }
 
-    chart = f3
-      .createChart(chartContainer.value, transformedData)
-      .setTransitionTime(1000)
-      .setCardXSpacing(200)
-      .setCardYSpacing(250);
+      chart = f3
+        .createChart(chartContainer.value!, transformedData) // Use ! for non-null assertion
+        .setTransitionTime(1000)
+        .setCardXSpacing(200)
+        .setCardYSpacing(250);
 
-    chart
-      .setCardHtml()
-      .setCardDim({ w: 150, h: 200 })
-      .setOnCardUpdate(Card());
+      chart
+        .setCardHtml()
+        .setCardDim({ w: 150, h: 200 })
+        .setOnCardUpdate(Card());
 
-    const rootMember = currentMembers.find((m: Member) => m.isRoot);
-    if (rootMember) {
-      chart.updateMainId(rootMember.id);
-      chart.updateTree({
-        initial: true
-      });
-    }
-    else {
-      chart.updateMainId(transformedData[0].id);
-      chart.updateTree({
-        initial: true
-      });
-    }
+      const rootMember = currentMembers.find((m: Member) => m.isRoot);
+      if (rootMember) {
+        chart.updateMainId(rootMember.id);
+        chart.updateTree({
+          initial: true
+        });
+      }
+      else {
+        chart.updateMainId(transformedData[0].id);
+        chart.updateTree({
+          initial: true
+        });
+      }
+    });
   };
 
   // --- CUSTOM CARD RENDERING ---

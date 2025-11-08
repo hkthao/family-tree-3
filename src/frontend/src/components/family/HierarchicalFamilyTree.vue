@@ -21,14 +21,6 @@ import type { Member, Relationship } from '@/types';
 
 const { t } = useI18n();
 const emit = defineEmits([
-  'add-member',
-  'edit-member',
-  'delete-member',
-  'add-father',
-  'add-mother',
-  'add-child',
-  'show-bottom-sheet',
-  'update:selected-member-id',
   'show-member-detail-drawer', // New emit event
 ]);
 

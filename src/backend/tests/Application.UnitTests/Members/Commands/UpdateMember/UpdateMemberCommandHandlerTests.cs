@@ -1,10 +1,10 @@
-
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -75,6 +75,7 @@ public class UpdateMemberCommandHandlerTests : TestBase
         result.Error.Should().Be(string.Format(ErrorMessages.NotFound, $"Member with ID {command.Id}"));
         result.ErrorSource.Should().Be(ErrorSources.NotFound);
     }
+
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenNotAuthorized()

@@ -31,6 +31,18 @@
       </v-col>
     </v-row>
 
+    <!-- Thông tin Vợ/Chồng -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.husbandId" :label="t('member.form.husband')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-husband-autocomplete" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.wifeId" :label="t('member.form.wife')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-wife-autocomplete" />
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
@@ -92,7 +104,7 @@
 import { reactive, toRefs, ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
-import { Gender } from '@/types';
+import { Gender, RelationshipType } from '@/types'; // Import RelationshipType
 import { useVuelidate } from '@vuelidate/core';
 import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
@@ -112,6 +124,30 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
   props.initialMemberData
     ? {
       ...props.initialMemberData,
+      husbandId: props.initialMemberData.relationships?.find(r =>
+        (r.type === RelationshipType.Husband) &&
+        (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
+      )?.sourceMemberId === props.initialMemberData.id
+        ? props.initialMemberData.relationships?.find(r =>
+          (r.type === RelationshipType.Husband) &&
+          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
+        )?.targetMemberId
+        : props.initialMemberData.relationships?.find(r =>
+          (r.type === RelationshipType.Husband) &&
+          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
+        )?.sourceMemberId,
+      wifeId: props.initialMemberData.relationships?.find(r =>
+        (r.type === RelationshipType.Wife) &&
+        (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
+      )?.sourceMemberId === props.initialMemberData.id
+        ? props.initialMemberData.relationships?.find(r =>
+          (r.type === RelationshipType.Wife) &&
+          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
+        )?.targetMemberId
+        : props.initialMemberData.relationships?.find(r =>
+          (r.type === RelationshipType.Wife) &&
+          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
+        )?.sourceMemberId,
     }
     : {
       lastName: '',
@@ -121,6 +157,8 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       familyId: props.familyId || '', // Initialize familyId from prop, ensure it's a string
       fatherId: undefined, // Initialize fatherId
       motherId: undefined, // Initialize motherId
+      husbandId: undefined, // Initialize husbandId
+      wifeId: undefined, // Initialize wifeId
     },
 );
 
@@ -132,6 +170,8 @@ const state = reactive({
   familyId: toRef(formData, 'familyId'),
   fatherId: toRef(formData, 'fatherId'), // Add fatherId to state
   motherId: toRef(formData, 'motherId'), // Add motherId to state
+  husbandId: toRef(formData, 'husbandId'), // Add husbandId to state
+  wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
 });
 
 const rules = useMemberRules(toRefs(state));

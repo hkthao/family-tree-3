@@ -46,6 +46,10 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         // Handle FatherId
         if (request.FatherId.HasValue)
         {
+            if (request.FatherId.Value == member.Id)
+            {
+                return Result<Guid>.Failure("A member cannot be their own father.", ErrorSources.BadRequest);
+            }
             var father = await _context.Members.FindAsync(request.FatherId.Value);
             if (father != null)
             {
@@ -57,11 +61,47 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         // Handle MotherId
         if (request.MotherId.HasValue)
         {
+            if (request.MotherId.Value == member.Id)
+            {
+                return Result<Guid>.Failure("A member cannot be their own mother.", ErrorSources.BadRequest);
+            }
             var mother = await _context.Members.FindAsync(request.MotherId.Value);
             if (mother != null)
             {
                 var motherChildRelationship = member.AddMotherRelationship(mother.Id);
                 _context.Relationships.Add(motherChildRelationship);
+            }
+        }
+
+        // Handle HusbandId
+        if (request.HusbandId.HasValue)
+        {
+            var husband = await _context.Members.FindAsync(request.HusbandId.Value);
+            if (husband != null)
+            {
+                if (member.Gender == null)
+                {
+                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                }
+                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(husband.Id, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                _context.Relationships.Add(currentToSpouse);
+                _context.Relationships.Add(spouseToCurrent);
+            }
+        }
+
+        // Handle WifeId
+        if (request.WifeId.HasValue)
+        {
+            var wife = await _context.Members.FindAsync(request.WifeId.Value);
+            if (wife != null)
+            {
+                if (member.Gender == null)
+                {
+                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                }
+                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(wife.Id, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                _context.Relationships.Add(currentToSpouse);
+                _context.Relationships.Add(spouseToCurrent);
             }
         }
 

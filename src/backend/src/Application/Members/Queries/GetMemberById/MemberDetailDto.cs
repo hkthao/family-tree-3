@@ -27,5 +27,7 @@ public class MemberDetailDto : BaseAuditableDto
     ;
     public Guid? FatherId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Father)?.SourceMemberId;
     public Guid? MotherId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Mother)?.SourceMemberId;
+    public Guid? HusbandId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Husband)?.SourceMemberId;
+    public Guid? WifeId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Wife)?.SourceMemberId;
     public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }

@@ -70,6 +70,10 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         if (request.FatherId.HasValue)
         {
+            if (request.FatherId.Value == member.Id)
+            {
+                return Result<Guid>.Failure("A member cannot be their own father.", ErrorSources.BadRequest);
+            }
             if (existingFatherRelationship != null)
             {
                 // Update existing relationship if father changed
@@ -99,6 +103,10 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         if (request.MotherId.HasValue)
         {
+            if (request.MotherId.Value == member.Id)
+            {
+                return Result<Guid>.Failure("A member cannot be their own mother.", ErrorSources.BadRequest);
+            }
             if (existingMotherRelationship != null)
             {
                 // Update existing relationship if mother changed
@@ -120,6 +128,100 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         {
             // Remove existing mother relationship if MotherId is no longer provided
             _context.Relationships.Remove(existingMotherRelationship);
+        }
+
+        // --- Handle Husband Relationship ---
+        var existingHusbandRelationships = member.Relationships
+            .Where(r => (r.SourceMemberId == member.Id && r.Type == RelationshipType.Husband) ||
+                        (r.TargetMemberId == member.Id && r.Type == RelationshipType.Husband))
+            .ToList();
+
+        Guid? existingHusbandId = existingHusbandRelationships.FirstOrDefault(r => r.SourceMemberId == member.Id)?.TargetMemberId ??
+                                  existingHusbandRelationships.FirstOrDefault(r => r.TargetMemberId == member.Id)?.SourceMemberId;
+
+        if (request.HusbandId.HasValue)
+        {
+            if (existingHusbandId.HasValue)
+            {
+                if (existingHusbandId.Value != request.HusbandId.Value)
+                {
+                    foreach (var rel in existingHusbandRelationships)
+                    {
+                        _context.Relationships.Remove(rel);
+                    }
+                    if (member.Gender == null)
+                    {
+                        return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                    }
+                    var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(request.HusbandId.Value, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                    _context.Relationships.Add(currentToSpouse);
+                    _context.Relationships.Add(spouseToCurrent);
+                }
+            }
+            else
+            {
+                if (member.Gender == null)
+                {
+                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                }
+                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(request.HusbandId.Value, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                _context.Relationships.Add(currentToSpouse);
+                _context.Relationships.Add(spouseToCurrent);
+            }
+        }
+        else if (existingHusbandId.HasValue)
+        {
+            foreach (var rel in existingHusbandRelationships)
+            {
+                _context.Relationships.Remove(rel);
+            }
+        }
+
+        // --- Handle Wife Relationship ---
+        var existingWifeRelationships = member.Relationships
+            .Where(r => (r.SourceMemberId == member.Id && r.Type == RelationshipType.Wife) ||
+                        (r.TargetMemberId == member.Id && r.Type == RelationshipType.Wife))
+            .ToList();
+
+        Guid? existingWifeId = existingWifeRelationships.FirstOrDefault(r => r.SourceMemberId == member.Id)?.TargetMemberId ??
+                               existingWifeRelationships.FirstOrDefault(r => r.TargetMemberId == member.Id)?.SourceMemberId;
+
+        if (request.WifeId.HasValue)
+        {
+            if (existingWifeId.HasValue)
+            {
+                if (existingWifeId.Value != request.WifeId.Value)
+                {
+                    foreach (var rel in existingWifeRelationships)
+                    {
+                        _context.Relationships.Remove(rel);
+                    }
+                    if (member.Gender == null)
+                    {
+                        return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                    }
+                    var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(request.WifeId.Value, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                    _context.Relationships.Add(currentToSpouse);
+                    _context.Relationships.Add(spouseToCurrent);
+                }
+            }
+            else
+            {
+                if (member.Gender == null)
+                {
+                    return Result<Guid>.Failure("Member gender is required to establish spouse relationship.", ErrorSources.BadRequest);
+                }
+                var (currentToSpouse, spouseToCurrent) = member.AddSpouseRelationship(request.WifeId.Value, (Gender)Enum.Parse(typeof(Gender), member.Gender));
+                _context.Relationships.Add(currentToSpouse);
+                _context.Relationships.Add(spouseToCurrent);
+            }
+        }
+        else if (existingWifeId.HasValue)
+        {
+            foreach (var rel in existingWifeRelationships)
+            {
+                _context.Relationships.Remove(rel);
+            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);

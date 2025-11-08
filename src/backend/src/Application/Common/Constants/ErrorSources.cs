@@ -10,4 +10,5 @@ public static class ErrorSources
     public const string FileStorage = "FileStorage";
     public const string Validation = "Validation";
     public const string NoContent = "NoContent";
+    public const string BadRequest = "BadRequest";
 }

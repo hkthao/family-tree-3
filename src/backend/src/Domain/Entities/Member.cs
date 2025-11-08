@@ -70,6 +70,21 @@ public class Member : BaseAuditableEntity
         return relationship;
     }
 
+    public (Relationship, Relationship) AddSpouseRelationship(Guid spouseId, backend.Domain.Enums.Gender currentMemberGender)
+    {
+        RelationshipType currentToSpouseType = currentMemberGender == backend.Domain.Enums.Gender.Male ? RelationshipType.Husband : RelationshipType.Wife;
+        RelationshipType spouseToCurrentType = currentMemberGender == backend.Domain.Enums.Gender.Male ? RelationshipType.Wife : RelationshipType.Husband;
+
+        var currentToSpouse = new Relationship(FamilyId, Id, spouseId, currentToSpouseType);
+        var spouseToCurrent = new Relationship(FamilyId, spouseId, Id, spouseToCurrentType);
+
+        Relationships.Add(currentToSpouse);
+        // We don't add spouseToCurrent to current member's relationships, as it belongs to the spouse's relationships.
+        // It will be added to the context directly in the command handler.
+
+        return (currentToSpouse, spouseToCurrent);
+    }
+
     // Relationships
     public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
