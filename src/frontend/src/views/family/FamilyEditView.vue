@@ -6,7 +6,7 @@
         }}</span>
     </v-card-title>
     <v-card-text>
-      <FamilyForm ref="familyFormRef" v-if="family" :initial-family-data="family" :read-only="false" />
+      <FamilyForm ref="familyFormRef" v-if="props.initialFamily" :initial-family-data="props.initialFamily" :read-only="false" />
       <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
     </v-card-text>
     <v-card-actions>
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
@@ -38,40 +38,17 @@ interface FamilyFormExposed {
 }
 
 interface FamilyEditViewProps {
-  familyId: string;
+  initialFamily: Family;
 }
 
 const props = defineProps<FamilyEditViewProps>();
 const emit = defineEmits(['close', 'saved']);
 
-const family = ref<Family | undefined>(undefined);
 const familyFormRef = ref<FamilyFormExposed | null>(null);
 
 const { t } = useI18n();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
-
-const loadFamily = async (id: string) => {
-  await familyStore.getById(id);
-  if (!familyStore.error) {
-    family.value = familyStore.currentItem as Family;
-  }
-};
-
-onMounted(async () => {
-  if (props.familyId) {
-    await loadFamily(props.familyId);
-  }
-});
-
-watch(
-  () => props.familyId,
-  async (newId) => {
-    if (newId) {
-      await loadFamily(newId);
-    }
-  },
-);
 
 const handleUpdateItem = async () => {
   if (!familyFormRef.value) return;

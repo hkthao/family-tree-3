@@ -15,11 +15,7 @@
 
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyForm
-            :initial-family-data="family"
-            :read-only="true"
-            :title="t('family.detail.title')"
-          />
+          <FamilyForm :initial-family-data="family" :read-only="true" :title="t('family.detail.title')" />
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -53,13 +49,13 @@
     {{ t('common.noData') }}
   </v-alert>
 
-  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="500">
-    <FamilyEditView
-      v-if="family && editDrawer"
-      :family-id="family.id"
-      @close="editDrawer = false"
-      @saved="handleFamilySaved"
-    />
+  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
+        <FamilyEditView
+          v-if="editableFamily && editDrawer"
+          :initial-family="editableFamily"
+          @close="editDrawer = false"
+          @saved="handleFamilySaved"
+        />
   </v-navigation-drawer>
 </template>
 
@@ -80,6 +76,7 @@ const router = useRouter();
 const familyStore = useFamilyStore();
 
 const family = ref<Family | undefined>(undefined);
+const editableFamily = ref<Family | undefined>(undefined); // Copy of family for editing
 const loading = ref(false);
 const selectedTab = ref('general');
 const readOnly = ref(true); // FamilyDetailView is primarily for viewing
@@ -102,6 +99,7 @@ const loadFamily = async () => {
 const handleFamilySaved = async () => {
   editDrawer.value = false;
   await loadFamily(); // Reload family data after saving
+  selectedTab.value = 'general'; // Ensure 'general' tab is active
 };
 
 const closeView = () => {
@@ -120,4 +118,10 @@ watch(
     }
   },
 );
+
+watch(editDrawer, (newVal) => {
+  if (newVal && family.value) {
+    editableFamily.value = JSON.parse(JSON.stringify(family.value));
+  }
+});
 </script>
