@@ -104,6 +104,14 @@ const closeView = () => {
 
 onMounted(() => {
   loadFamily();
+  const savedTab = localStorage.getItem('familyDetailSelectedTab');
+  if (savedTab) {
+    selectedTab.value = savedTab;
+  }
+});
+
+watch(selectedTab, (newTab) => {
+  localStorage.setItem('familyDetailSelectedTab', newTab);
 });
 
 watch(
