@@ -7,16 +7,12 @@
       <v-alert v-if="initialRelationshipData && targetMember" type="info" class="mb-4">
         {{ getRelationshipMessage() }}
       </v-alert>
-      <MemberForm
-        ref="memberFormRef"
-        @close="closeForm"
-        :family-id="props.familyId"
-      />
+      <MemberForm ref="memberFormRef" @close="closeForm" :family-id="props.familyId" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary"  @click="handleAddMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
+      <v-btn color="primary" @click="handleAddMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -58,7 +54,8 @@ onMounted(async () => {
     const memberIdToFetch = props.initialRelationshipData.targetMemberId || props.initialRelationshipData.sourceMemberId;
     if (memberIdToFetch) {
       await memberStore.getById(memberIdToFetch);
-      targetMember.value = memberStore.currentItem;
+      if (memberStore.currentItem)
+        targetMember.value = memberStore.currentItem;
     }
   }
 });
@@ -99,7 +96,7 @@ const handleAddMember = async () => {
         const newMemberId = memberStore.currentItem.id;
         let sourceMemberId = '';
         let targetMemberId = '';
-        let relationshipType = props.initialRelationshipData.relationshipType;
+        const relationshipType = props.initialRelationshipData.relationshipType;
 
         if (relationshipType === RelationshipType.Father || relationshipType === RelationshipType.Mother) {
           sourceMemberId = newMemberId;

@@ -70,6 +70,18 @@
           data-testid="member-occupation-input"></v-text-field>
       </v-col>
     </v-row>
+
+    <!-- Thông tin Cha Mẹ -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-father-autocomplete" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.motherId" :label="t('member.form.mother')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-mother-autocomplete" />
+      </v-col>
+    </v-row>
   </v-form>
 </template>
 
@@ -81,6 +93,7 @@ import { Gender } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -103,6 +116,8 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       dateOfBirth: undefined,
       gender: Gender.Male,
       familyId: props.familyId || '', // Initialize familyId from prop, ensure it's a string
+      fatherId: undefined, // Initialize fatherId
+      motherId: undefined, // Initialize motherId
     },
 );
 
@@ -112,6 +127,8 @@ const state = reactive({
   dateOfBirth: toRef(formData, 'dateOfBirth'),
   dateOfDeath: toRef(formData, 'dateOfDeath'),
   familyId: toRef(formData, 'familyId'),
+  fatherId: toRef(formData, 'fatherId'), // Add fatherId to state
+  motherId: toRef(formData, 'motherId'), // Add motherId to state
 });
 
 const rules = useMemberRules(toRefs(state));

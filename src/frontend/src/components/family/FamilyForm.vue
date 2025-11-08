@@ -29,16 +29,6 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.fatherId" :label="t('family.form.father')"
-          :family-id="formData.id || null" :read-only="props.readOnly" data-testid="family-father-select" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.motherId" :label="t('family.form.mother')"
-          :family-id="formData.id || null" :read-only="props.readOnly" data-testid="family-mother-select" />
-      </v-col>
-    </v-row>
-    <v-row>
       <v-col>
         <UserAutocomplete v-model="managers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
@@ -58,7 +48,6 @@ import type { Family, FamilyUser } from '@/types';
 import { FamilyVisibility } from '@/types';
 import { AvatarInput, AvatarDisplay } from '@/components/common';
 import UserAutocomplete from '@/components/common/UserAutocomplete.vue';
-import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 import { useVuelidate } from '@vuelidate/core';
 import { useFamilyRules } from '@/validations/family.validation';
 
@@ -79,8 +68,6 @@ const formData = reactive<Family | Omit<Family, 'id'>>(
     avatarUrl: '',
     visibility: FamilyVisibility.Public,
     familyUsers: [],
-    fatherId: null, // Initialize fatherId
-    motherId: null, // Initialize motherId
   },
 );
 
@@ -90,8 +77,6 @@ watch(
     if (newVal) {
       Object.assign(formData, newVal);
       familyUsers.value = newVal.familyUsers || [];
-      formData.fatherId = newVal.fatherId || null; // Update fatherId
-      formData.motherId = newVal.motherId || null; // Update motherId
     }
   },
   { deep: true }
