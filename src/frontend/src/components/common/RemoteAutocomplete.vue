@@ -2,7 +2,7 @@
   <v-autocomplete v-bind="$attrs" v-model="internalSelectedItems" @update:model-value="handleUpdateModelValue"
     :items="items" :item-title="itemTitle" :item-value="itemValue" :label="label" :rules="rules" :readonly="readOnly"
     :clearable="clearable" :loading="loading || internalLoading" :search="searchQuery" @update:search="onSearchChange"
-    :multiple="multiple" :chips="chips" :closable-chips="closableChips" :return-object="true">
+    :multiple="multiple" :chips="chips" :closable-chips="closableChips" :return-object="true" :disabled="disabled">
     <template v-if="$slots.chip" #chip="scope">
       <slot name="chip" v-bind="scope"></slot>
     </template>
@@ -32,6 +32,7 @@ interface RemoteAutocompleteProps {
   closableChips?: boolean;
   returnObject?: boolean;
   loading?: boolean; // Add loading prop
+  disabled?: boolean; // Add disabled prop
 }
 
 const props = withDefaults(defineProps<RemoteAutocompleteProps>(), {
@@ -65,10 +66,19 @@ const debouncedLoadItems = debounce(loadItems, 300);
 
 const onSearchChange = (query: string) => {
   searchQuery.value = query;
+
+  // Trong chế độ chọn đơn, nếu một mục đã được chọn và truy vấn khớp với tiêu đề của nó,
+  // điều đó có nghĩa là người dùng chưa nhập bất kỳ thứ gì mới, vì vậy chúng ta không nên lọc lại.
+  if (!props.multiple && internalSelectedItems.value && query === internalSelectedItems.value[props.itemTitle]) {
+    // Không kích hoạt tìm kiếm mới, vì truy vấn chỉ phản ánh mục đã chọn.
+    // Mảng `items` phải chứa các mục đã tải trước hoặc được điền bởi `loadItems('')` khi mount.
+    return;
+  }
+
   if (query) {
     debouncedLoadItems(query);
   } else {
-    // When search query is cleared, reload with empty query to show default items
+    // Nếu truy vấn trống, tải tất cả các mục (hoặc một tập hợp mặc định)
     loadItems('');
   }
 };

@@ -2,7 +2,7 @@
   <RemoteAutocomplete v-bind="$attrs" :model-value="modelValue" @update:model-value="handleRemoteAutocompleteUpdate"
     :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple"
     item-title="fullName" item-value="id" :search-function="searchFunction" :preload-function="getByIdsFunction"
-    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items">
+    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items" :disabled="disabled">
     <template #chip="{ props, item }">
       <v-chip v-bind="props" size="small" v-if="item.raw"
         :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.fullName"></v-chip>
@@ -31,6 +31,7 @@ interface MemberAutocompleteProps {
   multiple?: boolean;
   familyId?: string;
   loading?: boolean; // Add loading prop
+  disabled?: boolean; // Add disabled prop
 }
 
 const props = defineProps<MemberAutocompleteProps>();
