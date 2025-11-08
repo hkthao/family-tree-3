@@ -1,9 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useChatStore } from '@/stores/chat.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ChatListItem, MessageItem, ChatResponse } from '@/types';
-import { ok, err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
+import type { ChatResponse } from '@/types';
 import { createServices } from '@/services/service.factory';
 
 // Mock the IChatService
@@ -39,13 +37,13 @@ vi.mock('@/services/service.factory', () => ({
 describe('chat.store', () => {
   let store: ReturnType<typeof useChatStore>;
 
-  const mockChatListItem: ChatListItem = {
-    id: 'chat-1',
-    name: 'Test Chat',
-    avatar: 'test-avatar',
-    lastMessage: 'Hello',
-    updatedAt: 'now',
-  };
+  // const mockChatListItem: ChatListItem = {
+  //   id: 'chat-1',
+  //   name: 'Test Chat',
+  //   avatar: 'test-avatar',
+  //   lastMessage: 'Hello',
+  //   updatedAt: 'now',
+  // };
 
   const mockChatResponse: ChatResponse = {
     response: 'Bot response',

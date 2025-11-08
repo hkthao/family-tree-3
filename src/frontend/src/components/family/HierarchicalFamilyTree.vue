@@ -1,5 +1,24 @@
 <template>
   <div class="hierarchical-tree-container">
+    <v-toolbar  class="mb-4 px-2">
+      <v-text-field
+        v-model="searchQuery"
+        :label="t('familyTree.searchMember')"
+        prepend-inner-icon="mdi-magnify"
+        single-line
+        hide-details
+        clearable
+        @update:model-value="handleSearch"
+      ></v-text-field>
+      <v-spacer></v-spacer>
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="emit('add-member')"
+      >
+        {{ t('familyTree.addMember') }}
+      </v-btn>
+    </v-toolbar>
     <div ref="chartContainer" class="f3 flex-grow-1" data-testid="family-tree-canvas"></div>
     <div class="legend">
       <div class="legend-item">
@@ -11,11 +30,31 @@
         <span>{{ t('member.gender.female') }}</span>
       </div>
     </div>
+
+    <v-bottom-sheet width="320" v-model="showBottomSheet">
+      <v-list>
+        <v-list-item prepend-icon="mdi-pencil" @click="emit('edit-member', selectedMemberId); showBottomSheet = false;">
+          <v-list-item-title>{{ t('common.edit') }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item prepend-icon="mdi-delete" @click="emit('delete-member', selectedMemberId); showBottomSheet = false;">
+          <v-list-item-title>{{ t('common.delete') }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item prepend-icon="mdi-human-male-child" @click="emit('add-child', selectedMemberId); showBottomSheet = false;">
+          <v-list-item-title>{{ t('familyTree.addChild') }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item prepend-icon="mdi-human-male" @click="emit('add-father', selectedMemberId); showBottomSheet = false;">
+          <v-list-item-title>{{ t('familyTree.addFather') }}</v-list-item-title>
+        </v-list-item>
+        <v-list-item prepend-icon="mdi-human-female" @click="emit('add-mother', selectedMemberId); showBottomSheet = false;">
+          <v-list-item-title>{{ t('familyTree.addMother') }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-bottom-sheet>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed, nextTick } from 'vue';
 import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
 import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
@@ -41,6 +80,21 @@ interface CardData {
 }
 
 const { t } = useI18n();
+const emit = defineEmits(['add-member', 'edit-member', 'delete-member', 'add-father', 'add-mother', 'add-child']);
+
+const searchQuery = ref('');
+
+// Bottom Sheet State
+const showBottomSheet = ref(false);
+const selectedMemberId = ref<string | null>(null);
+
+const openBottomSheet = (_: MouseEvent, memberId: string) => {
+  showBottomSheet.value = false; // Close any existing sheet
+  selectedMemberId.value = memberId;
+  nextTick(() => {
+    showBottomSheet.value = true;
+  });
+};
 
 const props = defineProps({
   familyId: { type: String, default: null },
@@ -53,6 +107,31 @@ const treeVisualizationStore = useTreeVisualizationStore();
 
 const members = computed(() => treeVisualizationStore.getMembers(props.familyId));
 const relationships = computed(() => treeVisualizationStore.getRelationships(props.familyId));
+
+const filteredMembers = computed(() => {
+  if (!searchQuery.value) {
+    return members.value;
+  }
+  const lowerCaseQuery = searchQuery.value.toLowerCase();
+  return members.value.filter(member =>
+    member.firstName.toLowerCase().includes(lowerCaseQuery) ||
+    member.lastName.toLowerCase().includes(lowerCaseQuery)
+  );
+});
+
+const filteredRelationships = computed(() => {
+  if (!searchQuery.value) {
+    return relationships.value;
+  }
+  const filteredMemberIds = new Set(filteredMembers.value.map(m => m.id));
+  return relationships.value.filter(rel =>
+    filteredMemberIds.has(rel.sourceMemberId) && filteredMemberIds.has(rel.targetMemberId)
+  );
+});
+
+const handleSearch = () => {
+  renderChart(filteredMembers.value, filteredRelationships.value);
+};
 
 // --- DATA TRANSFORMATION ---
 const transformData = (members: Member[], relationships: Relationship[]) => {
@@ -164,6 +243,7 @@ const initialize = async (familyId: string) => {
 onMounted(async () => {
   if (props.familyId) {
     await initialize(props.familyId);
+    renderChart(filteredMembers.value, filteredRelationships.value);
   }
 });
 
@@ -180,9 +260,26 @@ function Card() {
     this.innerHTML = `
       <div class="card">
         ${d.data.data.avatar ? getCardInnerImage(d) : getCardInnerText(d)}
+        <div class="card-menu-button">
+          <i class="mdi mdi-square-edit-outline"></i>
+        </div>
       </div>
       `;
-    this.addEventListener('click', (e: Event) => onCardClick(e, d));
+    // Use event delegation for both card click and menu button click
+    this.addEventListener('click', (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+
+      // Check if the clicked element or any of its parents is the menu button
+      const menuButton = target.closest('.card-menu-button');
+
+      if (menuButton) {
+        e.stopPropagation(); // Prevent card click from triggering
+        openBottomSheet(e, d.data.id);
+      } else {
+        // If it's not the menu button, it's a regular card click
+        onCardClick(e, d);
+      }
+    });
   };
 
   function onCardClick(_: Event, d: CardData) {
@@ -224,6 +321,7 @@ function Card() {
 watch(() => props.familyId, async (newFamilyId) => {
   if (newFamilyId) {
     await initialize(newFamilyId);
+    renderChart(filteredMembers.value, filteredRelationships.value);
   } else {
     renderChart([], []);
   }
@@ -258,6 +356,19 @@ watch(() => props.familyId, async (newFamilyId) => {
   position: relative;
   margin-top: -30px;
   margin-left: -30px;
+}
+
+.card-menu-button {
+  position: absolute;
+  top: 0px;
+  left: -10px;
+  cursor: pointer;
+  z-index: 10; 
+  font-size: 18px;
+}
+
+.card-menu-button:hover {
+  color: rgb(var(--v-theme-primary)) !important;
 }
 
 .f3 div.card-image {
@@ -358,8 +469,8 @@ watch(() => props.familyId, async (newFamilyId) => {
 /* Legend Styles */
 .legend {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 80px;
+  left: 0px;
   background: rgba(var(--v-theme-surface-variant-rgb), 0.8);
   padding: 10px;
   border-radius: 5px;

@@ -1,7 +1,6 @@
 import type { IChatService } from './chat.service.interface';
 import type { ApiClientMethods, ApiError } from '@/plugins/axios';
-import { err } from '@/types'; // Import ok and err functions
-import type { ChatMessage, Result } from '@/types'; // Import types
+import type { Result } from '@/types'; // Import types
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export class ApiChatService implements IChatService {

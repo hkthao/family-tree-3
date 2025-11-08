@@ -65,7 +65,7 @@ const selectedMemberId = ref<string | null>(null); // Store the ID of the member
 
 const notificationStore = useNotificationStore();
 
-const navigateToDetailView = (member: Member) => {
+const navigateToDetailView = (_member: Member) => {
   // Still navigate to detail view, as it's a separate full page view
   // router.push(`/member/detail/${member.id}`);
 };
@@ -79,7 +79,7 @@ const navigateToEditMember = (member: Member) => {
   editDrawer.value = true;
 };
 
-const navigateToAIBiography = (member: Member) => {
+const navigateToAIBiography = (_member: Member) => {
   // router.push(`/member/biography/${member.id}`);
 };
 

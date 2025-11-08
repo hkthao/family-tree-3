@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+import { ref } from 'vue';
 import type { IChatService } from '@/services/chat/chat.service.interface';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid
 
