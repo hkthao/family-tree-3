@@ -369,6 +369,7 @@
   "relationship.list.confirmDelete": "Bạn có chắc muốn xoá quan hệ {name} không?",
   "relationship.list.action.edit": "Chỉnh sửa quan hệ",
   "member.list.action.create": "Thêm mới thành viên",
+  "member.add": "Thêm thành viên",
   "relationship.list.action.create": "Thêm mới quan hệ",
   "relationship.list.action.delete": "Xóa quan hệ",
   "relationship.messages.addSuccess": "Thêm quan hệ thành công!",
