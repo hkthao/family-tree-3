@@ -20,13 +20,20 @@
     </v-tooltip>
     <v-text-field v-model="treeVisualizationStore.searchQuery" :label="t('family.tree.searchMember')"
       prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field>
+    <MemberAutocomplete
+      v-model="selectedRootMemberId"
+      :label="t('family.tree.filterByRootMember')"
+      :family-id="props.familyId"
+      clearable
+      hide-details
+      class="mr-4"
+      style="max-width: 250px;"
+    />
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
-    :relationships="relationships"
-    @show-member-detail-drawer="handleShowMemberDetailDrawer" />
+    :relationships="relationships" @show-member-detail-drawer="handleShowMemberDetailDrawer" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
-    @show-member-detail-drawer="handleShowMemberDetailDrawer"
-    @edit-member="handleEditMember" />
+    @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember" />
 
   <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650">
     <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId"
@@ -55,13 +62,14 @@ import { HierarchicalFamilyTree, ForceDirectedFamilyTree } from '@/components/fa
 import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-import MemberEditView from '@/views/member/MemberEditView.vue'; // Import MemberEditView
+import MemberEditView from '@/views/member/MemberEditView.vue';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
 
 const props = defineProps({
   familyId: { type: String, default: null },
   initialMemberId: { type: String, default: null }, // New prop for initial member ID
 });
- const { t } = useI18n();
+const { t } = useI18n();
 const chartMode = ref('hierarchical'); // Default view
 const treeVisualizationStore = useTreeVisualizationStore();
 
@@ -70,6 +78,7 @@ const selectedMemberId = ref<string | null>(null); // New ref for selected membe
 const memberDetailDrawer = ref(false); // New ref for member detail drawer visibility
 const editMemberDrawer = ref(false); // New ref for member edit drawer visibility
 const initialRelationshipData = ref<any | null>(null); // New ref for initial relationship data
+const selectedRootMemberId = ref<string | null>(null); // New ref for selected root member ID
 
 // New computed properties for members and relationships from the store
 const members = computed(() => treeVisualizationStore.getFilteredMembers(props.familyId));
@@ -132,6 +141,13 @@ onMounted(async () => {
   console.log('TreeChart mounted, familyId:', props.familyId, 'initialMemberId:', props.initialMemberId);
   if (props.familyId) {
     await initialize(props.familyId, props.initialMemberId);
+  }
+});
+
+// Watch for selectedRootMemberId changes and re-initialize the tree
+watch(selectedRootMemberId, async (newVal) => {
+  if (props.familyId) {
+    await initialize(props.familyId, newVal || null);
   }
 });
 

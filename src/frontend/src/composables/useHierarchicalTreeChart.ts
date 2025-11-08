@@ -1,8 +1,8 @@
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
-import type { Member } from '@/types';
-import { Gender } from '@/types';
+import type { Member, Relationship } from '@/types';
+import { Gender, RelationshipType } from '@/types';
 
 import maleAvatar from '@/assets/images/male_avatar.png';
 import femaleAvatar from '@/assets/images/female_avatar.png';
@@ -21,7 +21,7 @@ interface CardData {
 }
 
 export function useHierarchicalTreeChart(
-  props: { familyId: string | null; members: Member[] },
+  props: { familyId: string | null; members: Member[]; relationships: Relationship[] },
   emit: (event: 'show-member-detail-drawer', ...args: any[]) => void,
   t: (key: string) => string
 ) {
@@ -29,61 +29,66 @@ export function useHierarchicalTreeChart(
   let chart: any = null; // To hold the chart instance
 
   // --- DATA TRANSFORMATION ---
-  const transformData = (members: Member[]) => {
-    const personMap = new Map<string, any>();
+    const transformData = (members: Member[], relationships: Relationship[]) => {
+      const personMap = new Map<string, any>();
 
-    // 1. Initialize all members in a map for quick access
-    members.forEach((person) => {
-      const personData: any = {
-        id: String(person.id),
-        data: {
-          fullName: person.fullName || `${person.firstName} ${person.lastName}`,
-          birthYear: person.dateOfBirth ? new Date(person.dateOfBirth).getFullYear() : '',
-          deathYear: person.dateOfDeath ? new Date(person.dateOfDeath).getFullYear() : '',
-          avatar: person.avatarUrl || (person.gender === Gender.Male ? maleAvatar : femaleAvatar),
-          gender: person.gender === Gender.Male ? 'M' : 'F',
-        },
-        rels: {
-          spouses: [],
-          children: [],
-        },
-      };
+      // 1. Initialize all members in a map for quick access
+      members.forEach((person) => {
+        personMap.set(String(person.id), {
+          id: String(person.id),
+          data: {
+            fullName: person.fullName || `${person.firstName} ${person.lastName}`,
+            birthYear: person.dateOfBirth ? new Date(person.dateOfBirth).getFullYear() : '',
+            deathYear: person.dateOfDeath ? new Date(person.dateOfDeath).getFullYear() : '',
+            avatar: person.avatarUrl || (person.gender === Gender.Male ? maleAvatar : femaleAvatar),
+            gender: person.gender === Gender.Male ? 'M' : 'F',
+          },
+          rels: {
+            spouses: [],
+            children: [],
+          },
+        });
+      });
 
-      if (person.fatherId) {
-        personData.rels.father = String(person.fatherId);
-      }
-      if (person.motherId) {
-        personData.rels.mother = String(person.motherId);
-      }
-      // Handle spouses
-      if (person.husbandId) {
-        personData.rels.spouses.push(String(person.husbandId));
-      }
-      if (person.wifeId) {
-        personData.rels.spouses.push(String(person.wifeId));
-      }
+      // 2. Process relationships to build the tree structure
+      relationships.forEach((rel) => {
+        const sourcePerson = personMap.get(String(rel.sourceMemberId));
+        const targetPerson = personMap.get(String(rel.targetMemberId));
 
-      personMap.set(String(person.id), personData);
-    });
-
-    // 2. Build children relationships (since parents are set, children can be derived)
-    members.forEach((person) => {
-      if (person.fatherId) {
-        const father = personMap.get(String(person.fatherId));
-        if (father && !father.rels.children.includes(String(person.id))) {
-          father.rels.children.push(String(person.id));
+        if (!sourcePerson || !targetPerson) {
+          // console.warn('Could not find person for relationship:', rel);
+          return; // Skip if a person in the relationship doesn't exist in the member list
         }
-      }
-      if (person.motherId) {
-        const mother = personMap.get(String(person.motherId));
-        if (mother && !mother.rels.children.includes(String(person.id))) {
-          mother.rels.children.push(String(person.id));
-        }
-      }
-    });
 
-    return Array.from(personMap.values());
-  };
+        switch (rel.type) {
+          case RelationshipType.Wife:
+          case RelationshipType.Husband:
+            if (!sourcePerson.rels.spouses.includes(targetPerson.id)) {
+              sourcePerson.rels.spouses.push(targetPerson.id);
+            }
+            if (!targetPerson.rels.spouses.includes(sourcePerson.id)) {
+              targetPerson.rels.spouses.push(sourcePerson.id);
+            }
+            break;
+
+          case RelationshipType.Father:
+            targetPerson.rels.father = sourcePerson.id;
+            if (!sourcePerson.rels.children.includes(targetPerson.id)) {
+              sourcePerson.rels.children.push(targetPerson.id);
+            }
+            break;
+
+          case RelationshipType.Mother:
+            targetPerson.rels.mother = sourcePerson.id;
+            if (!sourcePerson.rels.children.includes(targetPerson.id)) {
+              sourcePerson.rels.children.push(targetPerson.id);
+            }
+            break;
+        }
+      });
+
+      return Array.from(personMap.values());
+    };
 
   const renderChart = (currentMembers: Member[]) => {
     if (!chartContainer.value) {
@@ -92,7 +97,7 @@ export function useHierarchicalTreeChart(
 
     nextTick(() => { // Wrap the rendering logic in nextTick
       chartContainer.value!.innerHTML = ''; // Use ! for non-null assertion after check
-      const transformedData = transformData(currentMembers);
+      const transformedData = transformData(currentMembers, props.relationships);
       if (transformedData.length === 0) {
         chartContainer.value!.innerHTML =
           `<div class="empty-message">${t('familyTree.noMembersMessage')}</div>`;

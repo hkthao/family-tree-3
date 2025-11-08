@@ -506,6 +506,7 @@
   "family.tree.view.hierarchical": "Phân cấp",
   "family.tree.view.network": "Mạng lưới",
   "family.tree.searchMember": "Tìm kiếm thành viên",
+  "family.tree.filterByRootMember": "Lọc theo thành viên gốc",
   "event.errors.load": "Không thể tải danh sách sự kiện.",
   "event.errors.add": "Không thể thêm sự kiện.",
   "event.errors.notFound": "Không tìm thấy sự kiện để cập nhật trong kho.",

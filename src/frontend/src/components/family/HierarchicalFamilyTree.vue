@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useHierarchicalTreeChart } from '@/composables/useHierarchicalTreeChart';
-import type { Member } from '@/types';
+import type { Member, Relationship } from '@/types';
 
 const { t } = useI18n();
 const emit = defineEmits([
@@ -27,6 +27,7 @@ const emit = defineEmits([
 const props = defineProps({
   familyId: { type: String, default: null },
   members: { type: Array<Member>, default: () => [] },
+  relationships: { type: Array<Relationship>, default: () => [] }, // New prop
 });
 
 const { chartContainer } = useHierarchicalTreeChart(
@@ -178,7 +179,7 @@ const { chartContainer } = useHierarchicalTreeChart(
 /* Legend Styles */
 .legend {
   position: absolute;
-  top: 80px;
+  top: 10px;
   left: 0px;
   background: rgba(var(--v-theme-surface-variant-rgb), 0.8);
   padding: 10px;

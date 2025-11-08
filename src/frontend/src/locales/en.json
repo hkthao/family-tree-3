@@ -416,6 +416,7 @@
   "family.tree.view.hierarchical": "Hierarchical",
   "family.tree.view.network": "Network",
   "family.tree.searchMember": "Search Member",
+  "family.tree.filterByRootMember": "Filter by Root Member",
   "event.errors.load": "Failed to load events.",
   "event.errors.add": "Failed to add event.",
   "event.errors.notFound": "Event not found in store for update.",
