@@ -48,6 +48,15 @@
       </v-sheet>
     </v-card-text>
   </v-card>
+
+  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
+    <EventEditView
+      v-if="selectedEventId && editDrawer"
+      :event-id="selectedEventId"
+      @close="handleEventClosed"
+      @saved="handleEventSaved"
+    />
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
@@ -55,8 +64,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { useEventStore } from '@/stores/event.store'; // Import event store
-import { useRouter } from 'vue-router';
-const router = useRouter();
+import EventEditView from '@/views/event/EventEditView.vue';
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
@@ -64,6 +72,7 @@ type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
 const props = defineProps<{
   familyId?: string; // Optional prop for family ID
   memberId?: string; // Optional prop for member ID
+  readOnly?: boolean; // Add readOnly prop
 }>();
 
 const { t, locale } = useI18n();
@@ -72,6 +81,8 @@ const eventStore = useEventStore(); // Initialize event store
 const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
 const selectedDate = ref(new Date());
+const editDrawer = ref(false); // Control visibility of the edit drawer
+const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
 
 const calendarRef = ref<{
   title: string;
@@ -163,7 +174,19 @@ const getEventColor: CalendarEventColorFunction = (event: {
 };
 
 const showEventDetails = (eventSlotScope: Event) => {
-  router.push(`/event/detail/${eventSlotScope.id}`);
+  selectedEventId.value = eventSlotScope.id;
+  editDrawer.value = true;
+};
+
+const handleEventSaved = () => {
+  editDrawer.value = false;
+  selectedEventId.value = null;
+  loadEvents(); // Reload events after saving
+};
+
+const handleEventClosed = () => {
+  editDrawer.value = false;
+  selectedEventId.value = null;
 };
 
 watch(

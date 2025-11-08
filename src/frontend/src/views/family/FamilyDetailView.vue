@@ -50,12 +50,8 @@
   </v-alert>
 
   <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-        <FamilyEditView
-          v-if="editableFamily && editDrawer"
-          :initial-family="editableFamily"
-          @close="editDrawer = false"
-          @saved="handleFamilySaved"
-        />
+    <FamilyEditView v-if="editableFamily && editDrawer" :initial-family="editableFamily" @close="editDrawer = false"
+      @saved="handleFamilySaved" />
   </v-navigation-drawer>
 </template>
 

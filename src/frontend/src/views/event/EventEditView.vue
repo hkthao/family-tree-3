@@ -16,9 +16,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter, useRoute } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { EventForm } from '@/components/event';
@@ -29,23 +28,40 @@ interface EventFormExposed {
   getFormData: () => Event | Omit<Event, 'id'>;
 }
 
+interface EventEditViewProps {
+  eventId: string;
+}
+
+const props = defineProps<EventEditViewProps>();
+const emit = defineEmits(['close', 'saved']);
+
 const eventFormRef = ref<EventFormExposed | null>(null);
 
 const { t } = useI18n();
-const router = useRouter();
-const route = useRoute();
 const eventStore = useEventStore();
 const notificationStore = useNotificationStore();
 
 const event = ref<Event | undefined>(undefined);
 
+const loadEvent = async (id: string) => {
+  await eventStore.getById(id);
+  event.value = eventStore.currentItem;
+};
+
 onMounted(async () => {
-  const eventId = route.params.id as string;
-  if (eventId) {
-    await eventStore.getById(eventId);
-    event.value = eventStore.currentItem
+  if (props.eventId) {
+    await loadEvent(props.eventId);
   }
 });
+
+watch(
+  () => props.eventId,
+  async (newId) => {
+    if (newId) {
+      await loadEvent(newId);
+    }
+  },
+);
 
 const handleUpdateEvent = async () => {
   if (!eventFormRef.value) return;
@@ -62,7 +78,7 @@ const handleUpdateEvent = async () => {
     await eventStore.updateItem(eventData);
     if (!eventStore.error) {
       notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');
-      closeForm();
+      emit('saved'); // Emit saved event
     } else {
       notificationStore.showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
     }
@@ -72,6 +88,6 @@ const handleUpdateEvent = async () => {
 };
 
 const closeForm = () => {
-  router.push('/event');
+  emit('close'); // Emit close event
 };
 </script>
