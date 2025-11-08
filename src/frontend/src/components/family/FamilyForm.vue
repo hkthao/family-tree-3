@@ -6,12 +6,12 @@
     </div>
 
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col cols="12">
         <v-text-field v-model="formData.name" :label="$t('family.form.nameLabel')" @blur="v$.name.$touch()"
           @input="v$.name.$touch()" :error-messages="v$.name.$errors.map(e => e.$message as string)" required
           data-testid="family-name-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12">
         <v-select v-model="formData.visibility" :items="visibilityItems" :label="$t('family.form.visibilityLabel')"
           required data-testid="family-visibility-select"></v-select>
       </v-col>
@@ -29,11 +29,11 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col>
+      <v-col cols="12">
         <UserAutocomplete v-model="managers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.managers')" data-testid="family-managers-select"></UserAutocomplete>
       </v-col>
-      <v-col>
+      <v-col cols="12">
         <UserAutocomplete v-model="viewers" chips closable-chips multiple :disabled="props.readOnly"
           :label="t('family.permissions.viewers')" data-testid="family-viewers-select"></UserAutocomplete>
       </v-col>
