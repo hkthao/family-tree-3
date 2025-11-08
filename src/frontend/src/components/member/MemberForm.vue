@@ -19,6 +19,18 @@
       </v-col>
     </v-row>
 
+    <!-- Thông tin Cha Mẹ -->
+    <v-row>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-father-autocomplete" />
+      </v-col>
+      <v-col cols="12" md="6">
+        <MemberAutocomplete v-model="formData.motherId" :label="t('member.form.mother')" :read-only="props.readOnly"
+          :family-id="formData.familyId" data-testid="member-mother-autocomplete" />
+      </v-col>
+    </v-row>
+
     <v-row>
       <v-col cols="12" md="6">
         <v-text-field v-model="formData.lastName" :label="t('member.form.lastName')" @blur="v$.lastName.$touch()"
@@ -36,12 +48,17 @@
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" md="6">
-        <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')" @blur="v$.dateOfBirth.$touch()"
-          @input="v$.dateOfBirth.$touch()" :error-messages="v$.dateOfBirth.$errors.map(e => e.$message as string)"
-          :readonly="props.readOnly" data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
+      <v-col cols="12" md="4">
+        <GenderSelect v-model="formData.gender" :label="t('member.form.gender')" :read-only="props.readOnly"
+          data-testid="member-gender-select" />
       </v-col>
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="4">
+        <v-date-input v-model="formData.dateOfBirth" :label="t('member.form.dateOfBirth')"
+          @blur="v$.dateOfBirth.$touch()" @input="v$.dateOfBirth.$touch()"
+          :error-messages="v$.dateOfBirth.$errors.map(e => e.$message as string)" :readonly="props.readOnly"
+          data-testid="member-date-of-birth-input" append-inner-icon="mdi-calendar" />
+      </v-col>
+      <v-col cols="12" md="4">
         <v-date-input v-model="formData.dateOfDeath" :label="t('member.form.dateOfDeath')" optional
           @blur="v$.dateOfDeath.$touch()" @input="v$.dateOfDeath.$touch()"
           :error-messages="v$.dateOfDeath.$errors.map(e => e.$message as string)" :readonly="props.readOnly"
@@ -51,15 +68,11 @@
 
     <!-- Thông tin cá nhân -->
     <v-row>
-      <v-col cols="12" md="4">
-        <GenderSelect v-model="formData.gender" :label="t('member.form.gender')" :read-only="props.readOnly"
-          data-testid="member-gender-select" />
-      </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12">
         <v-text-field v-model="formData.placeOfBirth" :label="t('member.form.placeOfBirth')" :readonly="props.readOnly"
           data-testid="member-place-of-birth-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12">
         <v-text-field v-model="formData.placeOfDeath" :label="t('member.form.placeOfDeath')" :readonly="props.readOnly"
           data-testid="member-place-of-death-input"></v-text-field>
       </v-col>
@@ -71,17 +84,7 @@
       </v-col>
     </v-row>
 
-    <!-- Thông tin Cha Mẹ -->
-    <v-row>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.fatherId" :label="t('member.form.father')" :read-only="props.readOnly"
-          :family-id="formData.familyId" data-testid="member-father-autocomplete" />
-      </v-col>
-      <v-col cols="12" md="6">
-        <MemberAutocomplete v-model="formData.motherId" :label="t('member.form.mother')" :read-only="props.readOnly"
-          :family-id="formData.familyId" data-testid="member-mother-autocomplete" />
-      </v-col>
-    </v-row>
+
   </v-form>
 </template>
 

@@ -10,34 +10,6 @@
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
       <v-btn color="primary" @click="handleEdit" :disabled="!member">{{ t('common.edit') }}</v-btn>
-      <v-menu>
-        <template v-slot:activator="{ props }">
-          <v-btn color="success" v-bind="props" :disabled="!member">
-            {{ t('common.add') }}
-            <v-icon right>mdi-menu-down</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="handleAddFather" :disabled="!member">
-            <template v-slot:prepend>
-              <v-icon>mdi-human-male</v-icon>
-            </template>
-            <v-list-item-title>{{ t('familyTree.addFather') }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="handleAddMother" :disabled="!member">
-            <template v-slot:prepend>
-              <v-icon>mdi-human-female</v-icon>
-            </template>
-            <v-list-item-title>{{ t('familyTree.addMother') }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="handleAddChild" :disabled="!member">
-            <template v-slot:prepend>
-              <v-icon>mdi-human-child</v-icon>
-            </template>
-            <v-list-item-title>{{ t('familyTree.addChild') }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
       <v-btn color="error" @click="handleDelete" :disabled="!member">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
@@ -51,7 +23,6 @@ import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
-import { RelationshipType } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 
 interface MemberDetailViewProps {
@@ -100,39 +71,6 @@ const handleClose = () => {
 const handleEdit = () => {
   if (member.value) {
     emit('edit-member', member.value.id);
-  }
-};
-
-const handleAddFather = () => {
-  if (member.value) {
-    emit('add-member-with-relationship', {
-      targetMemberId: member.value.id,
-      relationshipType: RelationshipType.Father,
-      familyId: member.value.familyId,
-    });
-    emit('close');
-  }
-};
-
-const handleAddMother = () => {
-  if (member.value) {
-    emit('add-member-with-relationship', {
-      targetMemberId: member.value.id,
-      relationshipType: RelationshipType.Mother,
-      familyId: member.value.familyId,
-    });
-    emit('close');
-  }
-};
-
-const handleAddChild = () => {
-  if (member.value) {
-    emit('add-member-with-relationship', {
-      sourceMemberId: member.value.id,
-      relationshipType: RelationshipType.Child, // Assuming Child relationship type exists
-      familyId: member.value.familyId,
-    });
-    emit('close');
   }
 };
 
