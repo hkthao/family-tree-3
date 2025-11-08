@@ -10,6 +10,7 @@
         <v-tab value="timeline" data-testid="tab-timeline">{{ t('member.form.tab.timeline') }}</v-tab>
         <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
         <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
+        <v-tab value="members" data-testid="tab-members">{{ t('family.members.title') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="selectedTab">
@@ -32,6 +33,10 @@
         <v-window-item value="family-tree">
           <TreeChart :family-id="family.id" />
         </v-window-item>
+
+        <v-window-item value="members">
+          <MemberListView :family-id="family.id" />
+        </v-window-item>
       </v-window>
     </v-card-text>
     <v-card-actions>
@@ -39,7 +44,7 @@
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
-      <v-btn color="primary" @click="navigateToEditFamily(family.id)" data-testid="button-edit">
+      <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit">
         {{ t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -47,6 +52,15 @@
   <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
     {{ t('common.noData') }}
   </v-alert>
+
+  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="500">
+    <FamilyEditView
+      v-if="family && editDrawer"
+      :family-id="family.id"
+      @close="editDrawer = false"
+      @saved="handleFamilySaved"
+    />
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
@@ -56,6 +70,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm, TreeChart } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/event';
+import MemberListView from '@/views/member/MemberListView.vue';
+import FamilyEditView from '@/views/family/FamilyEditView.vue';
 import type { Family } from '@/types';
 
 const { t } = useI18n();
@@ -67,6 +83,7 @@ const family = ref<Family | undefined>(undefined);
 const loading = ref(false);
 const selectedTab = ref('general');
 const readOnly = ref(true); // FamilyDetailView is primarily for viewing
+const editDrawer = ref(false); // Control visibility of the edit drawer
 
 const loadFamily = async () => {
   loading.value = true;
@@ -82,8 +99,9 @@ const loadFamily = async () => {
   loading.value = false;
 };
 
-const navigateToEditFamily = (id: string) => {
-  router.push(`/family/edit/${id}`);
+const handleFamilySaved = async () => {
+  editDrawer.value = false;
+  await loadFamily(); // Reload family data after saving
 };
 
 const closeView = () => {

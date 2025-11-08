@@ -25,9 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyForm } from '@/components/family';
@@ -38,24 +37,41 @@ interface FamilyFormExposed {
   getFormData: () => Family | Omit<Family, 'id'>;
 }
 
+interface FamilyEditViewProps {
+  familyId: string;
+}
+
+const props = defineProps<FamilyEditViewProps>();
+const emit = defineEmits(['close', 'saved']);
+
 const family = ref<Family | undefined>(undefined);
 const familyFormRef = ref<FamilyFormExposed | null>(null);
 
 const { t } = useI18n();
-const route = useRoute();
-const router = useRouter();
 const familyStore = useFamilyStore();
 const notificationStore = useNotificationStore();
 
+const loadFamily = async (id: string) => {
+  await familyStore.getById(id);
+  if (!familyStore.error) {
+    family.value = familyStore.currentItem as Family;
+  }
+};
+
 onMounted(async () => {
-  const itemId = route.params.id as string;
-  if (itemId) {
-    await familyStore.getById(itemId);
-    if (!familyStore.error) {
-      family.value = familyStore.currentItem as Family;
-    }
+  if (props.familyId) {
+    await loadFamily(props.familyId);
   }
 });
+
+watch(
+  () => props.familyId,
+  async (newId) => {
+    if (newId) {
+      await loadFamily(newId);
+    }
+  },
+);
 
 const handleUpdateItem = async () => {
   if (!familyFormRef.value) return;
@@ -78,7 +94,7 @@ const handleUpdateItem = async () => {
         t('family.management.messages.updateSuccess'),
         'success',
       );
-      closeForm();
+      emit('saved'); // Emit saved event
     } else {
       notificationStore.showSnackbar(
         familyStore.error || t('family.management.messages.saveError'),
@@ -94,6 +110,6 @@ const handleUpdateItem = async () => {
 };
 
 const closeForm = () => {
-  router.push('/family');
+  emit('close'); // Emit close event
 };
 </script>

@@ -28,6 +28,12 @@ import { useNotificationStore } from '@/stores/notification.store';
 import { useRouter } from 'vue-router';
 import type { MemberFilter, Member } from '@/types';
 
+interface MemberListViewProps {
+  familyId?: string;
+}
+
+const props = defineProps<MemberListViewProps>();
+
 const { t } = useI18n();
 const router = useRouter();
 const memberStore = useMemberStore();
@@ -44,7 +50,11 @@ const navigateToDetailView = (member: Member) => {
 };
 
 const navigateToCreateView = () => {
-  router.push('/member/add');
+  if (props.familyId) {
+    router.push(`/member/add?familyId=${props.familyId}`);
+  } else {
+    router.push('/member/add');
+  }
 };
 
 const navigateToEditMember = (member: Member) => {
@@ -56,13 +66,13 @@ const navigateToAIBiography = (member: Member) => {
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
-  memberStore.filters = { ...filters, searchQuery: searchQuery.value };
+  memberStore.filters = { ...filters, searchQuery: searchQuery.value, familyId: props.familyId };
   await memberStore._loadItems()
 };
 
 const handleSearchUpdate = async (search: string) => {
   searchQuery.value = search;
-  memberStore.filters = { ...memberStore.filters, searchQuery: searchQuery.value };
+  memberStore.filters = { ...memberStore.filters, searchQuery: searchQuery.value, familyId: props.familyId };
   await memberStore._loadItems();
 };
 
@@ -119,7 +129,11 @@ const handleAiSaved = () => {
 };
 
 onMounted(() => {
-  memberStore._loadItems();
+  if (props.familyId) {
+    memberStore.getByFamilyId(props.familyId);
+  } else {
+    memberStore._loadItems();
+  }
 })
 
 </script>

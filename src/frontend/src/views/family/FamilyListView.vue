@@ -2,8 +2,9 @@
   <div data-testid="family-list-view">
     <FamilySearch @update:filters="handleFilterUpdate" />
     <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
-      :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''" @update:options="handleListOptionsUpdate"
-      @update:itemsPerPage="itemsPerPage = $event" @update:search="handleSearchUpdate" @view="navigateToViewFamily" @edit="navigateToEditFamily"
+      :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
+      @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
+      @update:search="handleSearchUpdate" @view="navigateToViewFamily" @edit="navigateToEditFamily"
       @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
