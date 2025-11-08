@@ -1,5 +1,5 @@
 <template>
-  <v-form ref="formRef" @submit.prevent="submitForm" :readonly="props.readOnly">
+  <v-form ref="formRef" @submit.prevent="submitForm" :disabled="props.readOnly">
     <AvatarInput v-if="!props.readOnly" v-model="formData.avatarUrl" :size="96" />
     <div v-else class="d-flex justify-center mb-4">
       <AvatarDisplay :src="formData.avatarUrl" :size="96" />
