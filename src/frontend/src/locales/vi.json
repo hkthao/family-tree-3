@@ -219,6 +219,8 @@
   "family.form.visibility.private": "Riêng tư",
   "family.form.visibility.public": "Công khai",
   "family.form.rules.nameRequired": "Tên là bắt buộc.",
+  "family.form.father": "Cha",
+  "family.form.mother": "Mẹ",,
   "family.permissions.managers": "Người quản lý",
   "family.permissions.viewers": "Người xem",
   "family.detail.title": "Chi tiết Gia đình",
