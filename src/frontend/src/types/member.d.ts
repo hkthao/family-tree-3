@@ -24,6 +24,8 @@ export interface Member {
   relationships?: Relationship[]; // New: List of relationships for the member
   fatherId?: string; // New: ID of the father
   motherId?: string; // New: ID of the mother
+  husbandId?: string; // New: ID of the husband
+  wifeId?: string; // New: ID of the wife
 }
 
 export interface MemberFilter {

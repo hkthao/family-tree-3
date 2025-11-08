@@ -281,6 +281,8 @@
   "member.form.familyId": "Family",
   "member.form.father": "Father",
   "member.form.mother": "Mother",
+  "member.form.husband": "Husband",
+  "member.form.wife": "Wife",
   "member.form.spouse": "Spouse",
   "member.form.parents": "Parents (Optional)",
   "member.form.spouses": "Spouses (Optional)",

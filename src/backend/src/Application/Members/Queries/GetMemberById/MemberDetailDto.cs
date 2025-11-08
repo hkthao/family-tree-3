@@ -25,9 +25,10 @@ public class MemberDetailDto : BaseAuditableDto
         (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +
         (DateOfDeath.HasValue ? DateOfDeath.Value.Year.ToString() : "")
     ;
-    public Guid? FatherId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Father)?.SourceMemberId;
-    public Guid? MotherId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Mother)?.SourceMemberId;
-    public Guid? HusbandId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Husband)?.SourceMemberId;
-    public Guid? WifeId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Wife)?.SourceMemberId;
-    public ICollection<RelationshipDto> Relationships { get; set; } = [];
+    public Guid? FatherId => TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father)?.SourceMemberId;
+    public Guid? MotherId => TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother)?.SourceMemberId;
+    public Guid? HusbandId => SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband)?.TargetMemberId;
+    public Guid? WifeId => SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife)?.TargetMemberId;
+    public ICollection<RelationshipDto> SourceRelationships { get; set; } = [];
+    public ICollection<RelationshipDto> TargetRelationships { get; set; } = [];
 }

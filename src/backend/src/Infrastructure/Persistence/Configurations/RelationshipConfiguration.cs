@@ -26,13 +26,13 @@ public class RelationshipConfiguration : IEntityTypeConfiguration<Relationship>
             .OnDelete(DeleteBehavior.Cascade); // Cascade delete relationships when family is deleted
 
         builder.HasOne(r => r.SourceMember)
-            .WithMany(m => m.Relationships)
+            .WithMany(m => m.SourceRelationships)
             .HasForeignKey(r => r.SourceMemberId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(r => r.TargetMember)
-            .WithMany()
+            .WithMany(m => m.TargetRelationships)
             .HasForeignKey(r => r.TargetMemberId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

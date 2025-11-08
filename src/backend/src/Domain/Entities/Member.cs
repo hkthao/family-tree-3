@@ -59,14 +59,14 @@ public class Member : BaseAuditableEntity
     public Relationship AddFatherRelationship(Guid fatherId)
     {
         var relationship = new Relationship(FamilyId, fatherId, Id, RelationshipType.Father);
-        Relationships.Add(relationship);
+        TargetRelationships.Add(relationship);
         return relationship;
     }
 
     public Relationship AddMotherRelationship(Guid motherId)
     {
         var relationship = new Relationship(FamilyId, motherId, Id, RelationshipType.Mother);
-        Relationships.Add(relationship);
+        TargetRelationships.Add(relationship);
         return relationship;
     }
 
@@ -78,7 +78,7 @@ public class Member : BaseAuditableEntity
         var currentToSpouse = new Relationship(FamilyId, Id, spouseId, currentToSpouseType);
         var spouseToCurrent = new Relationship(FamilyId, spouseId, Id, spouseToCurrentType);
 
-        Relationships.Add(currentToSpouse);
+        SourceRelationships.Add(currentToSpouse);
         // We don't add spouseToCurrent to current member's relationships, as it belongs to the spouse's relationships.
         // It will be added to the context directly in the command handler.
 
@@ -86,7 +86,8 @@ public class Member : BaseAuditableEntity
     }
 
     // Relationships
-    public ICollection<Relationship> Relationships { get; set; } = new List<Relationship>();
+    public ICollection<Relationship> SourceRelationships { get; set; } = new List<Relationship>();
+    public ICollection<Relationship> TargetRelationships { get; set; } = new List<Relationship>();
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
 
     public Member() { }

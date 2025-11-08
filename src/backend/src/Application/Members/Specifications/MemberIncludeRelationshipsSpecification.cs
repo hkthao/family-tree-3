@@ -7,6 +7,7 @@ public class MemberIncludeRelationshipsSpecification : Specification<Member>
 {
     public MemberIncludeRelationshipsSpecification()
     {
-        Query.Include(m => m.Relationships);
+        Query.Include(m => m.SourceRelationships);
+        Query.Include(m => m.TargetRelationships);
     }
 }

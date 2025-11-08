@@ -27,12 +27,12 @@ const emit = defineEmits([
 const props = defineProps({
   familyId: { type: String, default: null },
   members: { type: Array<Member>, default: () => [] },
-  relationships: { type: Array<Relationship>, default: () => [] },
 });
 
 const { chartContainer } = useHierarchicalTreeChart(
   props,
-  emit
+  emit,
+  t
 );
 </script>
 

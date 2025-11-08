@@ -15,7 +15,8 @@ public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper ma
     public async Task<Result<MemberDetailDto>> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
         var spec = new MemberByIdSpecification(request.Id);
-        spec.Query.Include(m => m.Relationships);
+        spec.Query.Include(m => m.SourceRelationships);
+        spec.Query.Include(m => m.TargetRelationships);
 
         // Comment: Specification pattern is applied here to filter the result by ID at the database level.
         var query = _context.Members.AsQueryable().WithSpecification(spec);

@@ -124,30 +124,10 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
   props.initialMemberData
     ? {
       ...props.initialMemberData,
-      husbandId: props.initialMemberData.relationships?.find(r =>
-        (r.type === RelationshipType.Husband) &&
-        (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
-      )?.sourceMemberId === props.initialMemberData.id
-        ? props.initialMemberData.relationships?.find(r =>
-          (r.type === RelationshipType.Husband) &&
-          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
-        )?.targetMemberId
-        : props.initialMemberData.relationships?.find(r =>
-          (r.type === RelationshipType.Husband) &&
-          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
-        )?.sourceMemberId,
-      wifeId: props.initialMemberData.relationships?.find(r =>
-        (r.type === RelationshipType.Wife) &&
-        (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
-      )?.sourceMemberId === props.initialMemberData.id
-        ? props.initialMemberData.relationships?.find(r =>
-          (r.type === RelationshipType.Wife) &&
-          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
-        )?.targetMemberId
-        : props.initialMemberData.relationships?.find(r =>
-          (r.type === RelationshipType.Wife) &&
-          (r.sourceMemberId === props.initialMemberData.id || r.targetMemberId === props.initialMemberData.id)
-        )?.sourceMemberId,
+      fatherId: props.initialMemberData.fatherId,
+      motherId: props.initialMemberData.motherId,
+      husbandId: props.initialMemberData.husbandId,
+      wifeId: props.initialMemberData.wifeId,
     }
     : {
       lastName: '',

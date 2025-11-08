@@ -57,6 +57,142 @@ public class UpdateMemberCommandHandlerTests : TestBase
     }
 
     [Fact]
+    public async Task Handle_ShouldUpdateFatherRelationship_WhenFatherIdIsChanged()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var initialFatherId = Guid.NewGuid();
+        var newFatherId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
+        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
+        var initialFather = new Member("Initial", "Father", "IF", familyId) { Id = initialFatherId };
+        var newFather = new Member("New", "Father", "NF", familyId) { Id = newFatherId };
+
+        family.AddMember(member);
+        family.AddMember(initialFather);
+        family.AddMember(newFather);
+        member.AddFatherRelationship(initialFather.Id);
+
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateMemberCommand
+        {
+            Id = memberId,
+            FirstName = "John",
+            LastName = "Doe",
+            FamilyId = familyId,
+            FatherId = newFatherId
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedMember = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == memberId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedMember.Should().NotBeNull();
+        updatedMember!.TargetRelationships.Should().ContainSingle(r => r.SourceMemberId == newFatherId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Father);
+        updatedMember.TargetRelationships.Should().NotContain(r => r.SourceMemberId == initialFatherId);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldUpdateMotherRelationship_WhenMotherIdIsChanged()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var initialMotherId = Guid.NewGuid();
+        var newMotherId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
+        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
+        var initialMother = new Member("Initial", "Mother", "IM", familyId) { Id = initialMotherId };
+        var newMother = new Member("New", "Mother", "NM", familyId) { Id = newMotherId };
+
+        family.AddMember(member);
+        family.AddMember(initialMother);
+        family.AddMember(newMother);
+        member.AddMotherRelationship(initialMother.Id);
+
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateMemberCommand
+        {
+            Id = memberId,
+            FirstName = "John",
+            LastName = "Doe",
+            FamilyId = familyId,
+            MotherId = newMotherId
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedMember = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == memberId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedMember.Should().NotBeNull();
+        updatedMember!.TargetRelationships.Should().ContainSingle(r => r.SourceMemberId == newMotherId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Mother);
+        updatedMember.TargetRelationships.Should().NotContain(r => r.SourceMemberId == initialMotherId);
+    }
+
+    [Fact]
+    public async Task Handle_ShouldUpdateSpouseRelationship_WhenSpouseIdIsChanged()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var memberId = Guid.NewGuid();
+        var initialSpouseId = Guid.NewGuid();
+        var newSpouseId = Guid.NewGuid();
+        var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
+        var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
+        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null);
+        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null) { Id = initialSpouseId };
+        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null) { Id = newSpouseId };
+
+        family.AddMember(member);
+        family.AddMember(initialSpouse);
+        family.AddMember(newSpouse);
+        var (rel1, rel2) = member.AddSpouseRelationship(initialSpouse.Id, (backend.Domain.Enums.Gender)Enum.Parse(typeof(backend.Domain.Enums.Gender), member.Gender!));
+        _context.Relationships.Add(rel2);
+
+
+        _context.Families.Add(family);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateMemberCommand
+        {
+            Id = memberId,
+            FirstName = "John",
+            LastName = "Doe",
+            FamilyId = familyId,
+            WifeId = newSpouseId,
+            Gender = member.Gender
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedMember = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == memberId);
+        var newSpouseFromDb = await _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefaultAsync(m => m.Id == newSpouseId);
+
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedMember.Should().NotBeNull();
+        updatedMember!.SourceRelationships.Should().ContainSingle(r => r.TargetMemberId == newSpouseId && r.Type == backend.Domain.Enums.RelationshipType.Husband);
+        _context.Relationships.Should().ContainSingle(r => r.SourceMemberId == newSpouseId && r.TargetMemberId == memberId && r.Type == backend.Domain.Enums.RelationshipType.Wife);
+        updatedMember.SourceRelationships.Should().NotContain(r => r.TargetMemberId == initialSpouseId);
+    }
+
+    [Fact]
     public async Task Handle_ShouldReturnFailure_WhenMemberNotFound()
     {
         // Arrange
