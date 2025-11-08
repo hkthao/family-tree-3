@@ -27,7 +27,7 @@ import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 
 interface MemberAddViewProps {
-  familyId?: string;
+  familyId: string | null;
 }
 
 const props = defineProps<MemberAddViewProps>();

@@ -11,6 +11,7 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
     trees: {} as Record<string, TreeData>,
     loading: {} as Record<string, boolean>,
     error: {} as Record<string, any>,
+    searchQuery: '' as string, // Add searchQuery to state
   }),
 
   getters: {
@@ -18,6 +19,36 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
     getRelationships: (state) => (familyId: string) => state.trees[familyId]?.relationships || [],
     isLoading: (state) => (familyId: string) => state.loading[familyId] || false,
     getError: (state) => (familyId: string) => state.error[familyId] || null,
+
+    // New getters for filtered members and relationships
+    getFilteredMembers: (state) => (familyId: string) => {
+      const members = state.trees[familyId]?.members || [];
+      if (!state.searchQuery) {
+        return members;
+      }
+      const lowerCaseQuery = state.searchQuery.toLowerCase();
+      return members.filter(member =>
+        member.firstName.toLowerCase().includes(lowerCaseQuery) ||
+        member.lastName.toLowerCase().includes(lowerCaseQuery)
+      );
+    },
+    getFilteredRelationships: (state) => (familyId: string) => {
+      const relationships = state.trees[familyId]?.relationships || [];
+      const members = state.trees[familyId]?.members || [];
+      if (!state.searchQuery) {
+        return relationships;
+      }
+      const lowerCaseQuery = state.searchQuery.toLowerCase();
+      const filteredMemberIds = new Set(
+        members.filter(member =>
+          member.firstName.toLowerCase().includes(lowerCaseQuery) ||
+          member.lastName.toLowerCase().includes(lowerCaseQuery)
+        ).map(m => m.id)
+      );
+      return relationships.filter(rel =>
+        filteredMemberIds.has(rel.sourceMemberId) && filteredMemberIds.has(rel.targetMemberId)
+      );
+    },
   },
 
   actions: {
@@ -57,6 +88,9 @@ export const useTreeVisualizationStore = defineStore('tree-visualization', {
       } finally {
         this.loading[familyId] = false;
       }
+    },
+    setSearchQuery(query: string) {
+      this.searchQuery = query;
     },
   },
 });

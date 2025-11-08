@@ -3,4 +3,5 @@ export enum RelationshipType {
   Mother = 1,
   Husband = 2,
   Wife = 3,
+  Child = 4,
 }

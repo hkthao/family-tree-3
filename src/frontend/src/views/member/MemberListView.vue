@@ -26,7 +26,7 @@
 
     <!-- Add Member Drawer -->
     <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
-      <MemberAddView v-if="addDrawer" :family-id="props.familyId" @close="handleMemberClosed"
+      <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId" @close="handleMemberClosed"
         @saved="handleMemberSaved" />
     </v-navigation-drawer>
   </div>

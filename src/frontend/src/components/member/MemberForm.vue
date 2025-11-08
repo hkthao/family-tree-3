@@ -85,7 +85,7 @@ import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 const props = defineProps<{
   readOnly?: boolean;
   initialMemberData?: Member;
-  familyId?: string; // Add familyId prop
+  familyId: string | null;
 }>();
 
 const { t } = useI18n();
@@ -102,7 +102,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       firstName: '',
       dateOfBirth: undefined,
       gender: Gender.Male,
-      familyId: props.familyId || '', // Initialize familyId from prop
+      familyId: props.familyId || '', // Initialize familyId from prop, ensure it's a string
     },
 );
 

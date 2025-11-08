@@ -14,7 +14,7 @@
 
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <MemberForm :initial-member-data="member" :read-only="true" :title="t('member.detail.title')" />
+          <MemberForm :initial-member-data="member" :read-only="true" :title="t('member.detail.title')" :family-id="member.familyId" />
         </v-window-item>
 
         <v-window-item value="timeline">
