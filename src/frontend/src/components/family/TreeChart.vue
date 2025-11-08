@@ -27,14 +27,15 @@
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" />
 
   <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650">
-    <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId" @close="addMemberDrawer = false"
-      @saved="handleMemberAdded" />
+    <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId" :initial-relationship-data="initialRelationshipData"
+      @close="addMemberDrawer = false" @saved="handleMemberAdded" />
   </v-navigation-drawer>
 
   <!-- New v-navigation-drawer for member details -->
   <v-navigation-drawer v-model="memberDetailDrawer" location="right" temporary width="650">
     <MemberDetailView v-if="memberDetailDrawer && selectedMemberId" :member-id="selectedMemberId"
-      @close="memberDetailDrawer = false" />
+      @close="memberDetailDrawer = false" @member-deleted="handleMemberDeleted"
+      @add-member-with-relationship="handleAddMemberWithRelationship" />
   </v-navigation-drawer>
 </template>
 
@@ -64,6 +65,7 @@ const treeVisualizationStore = useTreeVisualizationStore();
 const addMemberDrawer = ref(false); // Control visibility of the add member drawer
 const selectedMemberId = ref<string | null>(null); // New ref for selected member ID
 const memberDetailDrawer = ref(false); // New ref for member detail drawer visibility
+const initialRelationshipData = ref<any | null>(null); // New ref for initial relationship data
 
 // New computed properties for members and relationships from the store
 const members = computed(() => treeVisualizationStore.getFilteredMembers(props.familyId));
@@ -77,6 +79,7 @@ const initialize = async (familyId: string) => {
 };
 
 const handleAddMember = () => {
+  initialRelationshipData.value = null; // Clear any previous relationship data
   addMemberDrawer.value = true;
 };
 
@@ -92,6 +95,19 @@ const handleMemberAdded = () => {
 const handleShowMemberDetailDrawer = (memberId: string) => {
   selectedMemberId.value = memberId;
   memberDetailDrawer.value = true;
+};
+
+const handleMemberDeleted = () => {
+  memberDetailDrawer.value = false;
+  if (props.familyId) {
+    treeVisualizationStore.fetchTreeData(props.familyId);
+  }
+};
+
+const handleAddMemberWithRelationship = (data: any) => {
+  initialRelationshipData.value = data;
+  memberDetailDrawer.value = false;
+  addMemberDrawer.value = true;
 };
 
 // Call initialize on mounted

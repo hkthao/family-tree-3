@@ -1,102 +1,158 @@
 <template>
-  <v-card v-if="member" class="mb-4">
-    <v-card-title class="text-h6 d-flex align-center">
-      {{ member.fullName }}
-      <v-spacer></v-spacer>
+  <v-card :elevation="0">
+    <v-card-title class="text-center">
+      <span class="text-h5 text-uppercase">{{ t('member.detail.title') }}</span>
     </v-card-title>
     <v-card-text>
-      <v-tabs v-model="selectedTab" class="mb-4">
-        <v-tab value="general">{{ t('member.form.tab.general') }}</v-tab>
-        <v-tab value="timeline">{{ t('member.form.tab.timeline') }}</v-tab>
-        <v-tab value="calendar">{{ t('event.view.calendar') }}</v-tab>
-        <v-tab value="relationships">{{ t('relationship.list.title') }}</v-tab>
-      </v-tabs>
-
-      <v-window v-model="selectedTab">
-        <v-window-item value="general">
-          <MemberForm :initial-member-data="member" :read-only="true" :title="t('member.detail.title')" :family-id="member.familyId" />
-        </v-window-item>
-
-        <v-window-item value="timeline">
-          <EventTimeline :member-id="member.id" :read-only="readOnly" />
-        </v-window-item>
-
-        <v-window-item value="calendar">
-          <EventCalendar :member-id="member.id" :read-only="readOnly" />
-        </v-window-item>
-
-        <v-window-item value="relationships">
-          <MemberRelationships :member-id="member.id" @view-member="navigateToMemberDetailView" />
-        </v-window-item>
-      </v-window>
+      <MemberForm v-if="member" :initial-member-data="member" :family-id="member.familyId" :read-only="true" />
+      <v-alert v-else type="info" class="mt-4">{{ t('member.detail.notFound') }}</v-alert>
     </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="gray" @click="closeView">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="navigateToEditMember(member.id)">{{ t('common.edit') }}</v-btn>
+    <v-card-actions class="justify-end">
+      <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
+      <v-btn color="primary" @click="handleEdit" :disabled="!member">{{ t('common.edit') }}</v-btn>
+      <v-menu>
+        <template v-slot:activator="{ props }">
+          <v-btn color="success" v-bind="props" :disabled="!member">
+            {{ t('common.add') }}
+            <v-icon right>mdi-menu-down</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="handleAddFather" :disabled="!member">
+            <v-list-item-title>{{ t('familyTree.addFather') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="handleAddMother" :disabled="!member">
+            <v-list-item-title>{{ t('familyTree.addMother') }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="handleAddChild" :disabled="!member">
+            <v-list-item-title>{{ t('familyTree.addChild') }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+      <v-btn color="error" @click="handleDelete" :disabled="!member">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
-  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
-    {{ t('common.noData') }}
-  </v-alert>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useMemberStore } from '@/stores/member.store';
+import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
-import { EventTimeline, EventCalendar } from '@/components/event';
-import MemberRelationships from '@/components/member/MemberRelationships.vue';
 import type { Member } from '@/types';
+import { RelationshipType } from '@/types';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
+
+interface MemberDetailViewProps {
+  memberId: string;
+}
+
+const props = defineProps<MemberDetailViewProps>();
+const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship']);
 
 const { t } = useI18n();
-const route = useRoute();
 const router = useRouter();
 const memberStore = useMemberStore();
+const notificationStore = useNotificationStore();
+const { showConfirmDialog } = useConfirmDialog();
 
 const member = ref<Member | undefined>(undefined);
-const loading = ref(false);
-const selectedTab = ref('general');
-const readOnly = ref(true); // MemberDetailView is primarily for viewing
 
-const loadMember = async () => {
-  loading.value = true;
-  const memberId = route.params.id as string;
-  if (memberId) {
-    await memberStore.getById(memberId);
-    if (!memberStore.error) {
-      member.value = memberStore.currentItem as Member;
-    } else {
-      member.value = undefined; // Clear member on error
-    }
+const loadMember = async (id: string) => {
+  await memberStore.getById(id);
+  if (memberStore.currentItem) {
+    member.value = memberStore.currentItem;
+  } else {
+    member.value = undefined;
   }
-  loading.value = false;
 };
 
-const navigateToEditMember = (id: string) => {
-  router.push(`/member/edit/${id}`);
-};
-
-const navigateToMemberDetailView = (memberId: string) => {
-  router.push(`/member/detail/${memberId}`);
-};
-
-const closeView = () => {
-  router.push('/member');
-};
-
-onMounted(() => {
-  loadMember();
+onMounted(async () => {
+  if (props.memberId) {
+    await loadMember(props.memberId);
+  }
 });
 
 watch(
-  () => route.params.id,
-  (newId) => {
+  () => props.memberId,
+  async (newId) => {
     if (newId) {
-      loadMember();
+      await loadMember(newId);
     }
   },
 );
+
+const handleClose = () => {
+  emit('close');
+};
+
+const handleEdit = () => {
+  if (member.value) {
+    router.push({ name: 'EditMember', params: { id: member.value.id } });
+    emit('close'); // Close the detail drawer after navigating
+  }
+};
+
+const handleAddFather = () => {
+  if (member.value) {
+    emit('add-member-with-relationship', {
+      targetMemberId: member.value.id,
+      relationshipType: RelationshipType.Father,
+      familyId: member.value.familyId,
+    });
+    emit('close');
+  }
+};
+
+const handleAddMother = () => {
+  if (member.value) {
+    emit('add-member-with-relationship', {
+      targetMemberId: member.value.id,
+      relationshipType: RelationshipType.Mother,
+      familyId: member.value.familyId,
+    });
+    emit('close');
+  }
+};
+
+const handleAddChild = () => {
+  if (member.value) {
+    emit('add-member-with-relationship', {
+      sourceMemberId: member.value.id,
+      relationshipType: RelationshipType.Child, // Assuming Child relationship type exists
+      familyId: member.value.familyId,
+    });
+    emit('close');
+  }
+};
+
+const handleDelete = async () => {
+  if (!member.value) return;
+
+  const confirmed = await showConfirmDialog(
+    t('confirmDelete.title'),
+    t('member.list.confirmDelete', { fullName: member.value.fullName })
+  );
+
+  if (confirmed) {
+    try {
+      await memberStore.deleteItem(member.value.id);
+      if (!memberStore.error) {
+        notificationStore.showSnackbar(t('member.messages.deleteSuccess'), 'success');
+        emit('member-deleted'); // Notify parent that member was deleted
+        emit('close'); // Close the detail drawer
+      } else {
+        notificationStore.showSnackbar(memberStore.error || t('member.messages.deleteError'), 'error');
+      }
+    } catch (error) {
+      notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
+    }
+  }
+};
 </script>
+
+<style scoped>
+/* Add any specific styles for MemberDetailView here if needed */
+</style>

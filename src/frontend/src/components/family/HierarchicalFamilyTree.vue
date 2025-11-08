@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useHierarchicalTreeChart } from '@/composables/useHierarchicalTreeChart';
 import type { Member, Relationship } from '@/types';
@@ -43,22 +42,6 @@ const { chartContainer } = useHierarchicalTreeChart(
   props,
   emit
 );
-
-// New function to handle card click and emit event for detail drawer
-const handleCardClickForDetail = (memberId: string) => {
-  emit('show-member-detail-drawer', memberId);
-};
-
-onMounted(() => {
-  // Chart rendering is now handled by the composable's watch effect
-});
-
-onUnmounted(() => {
-  // The composable handles chart cleanup
-});
-
-// No need to watch familyId here, as members and relationships are passed directly
-// The composable's internal watch will react to changes in props.members and props.relationships
 </script>
 
 <style>
