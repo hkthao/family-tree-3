@@ -1,6 +1,8 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
+using backend.Domain.Entities; // Import Relationship
+using backend.Domain.Enums; // Import RelationshipType
 
 namespace backend.Application.Members.Commands.CreateMember;
 
@@ -40,6 +42,28 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         var member = family.AddMember(newMember, request.IsRoot);
 
         _context.Members.Add(member);
+
+        // Handle FatherId
+        if (request.FatherId.HasValue)
+        {
+            var father = await _context.Members.FindAsync(request.FatherId.Value);
+            if (father != null)
+            {
+                var fatherChildRelationship = member.AddFatherRelationship(father.Id);
+                _context.Relationships.Add(fatherChildRelationship);
+            }
+        }
+
+        // Handle MotherId
+        if (request.MotherId.HasValue)
+        {
+            var mother = await _context.Members.FindAsync(request.MotherId.Value);
+            if (mother != null)
+            {
+                var motherChildRelationship = member.AddMotherRelationship(mother.Id);
+                _context.Relationships.Add(motherChildRelationship);
+            }
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

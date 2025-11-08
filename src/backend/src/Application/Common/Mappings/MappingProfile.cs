@@ -14,6 +14,7 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
 using backend.Domain.Entities;
+using backend.Domain.Enums; // Add this for RelationshipType
 
 namespace backend.Application.Common.Mappings;
 
@@ -33,18 +34,8 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.BirthDeathYears, opt => opt.MapFrom(src =>
-                (src.DateOfBirth.HasValue ? src.DateOfBirth.Value.Year.ToString() : "") +
-                (src.DateOfBirth.HasValue && src.DateOfDeath.HasValue ? " - " : "") +
-                (src.DateOfDeath.HasValue ? src.DateOfDeath.Value.Year.ToString() : "")
-            ));
-        CreateMap<Member, MemberDetailDto>()
-            .ForMember(dest => dest.BirthDeathYears, opt => opt.MapFrom(src =>
-                (src.DateOfBirth.HasValue ? src.DateOfBirth.Value.Year.ToString() : "") +
-                (src.DateOfBirth.HasValue && src.DateOfDeath.HasValue ? " - " : "") +
-                (src.DateOfDeath.HasValue ? src.DateOfDeath.Value.Year.ToString() : "")
-            ));
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
+        CreateMap<Member, MemberDetailDto>();
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));

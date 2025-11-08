@@ -15,6 +15,9 @@ public class MemberListDto : BaseAuditableDto
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
     public string? Gender { get; set; }
-    public string? BirthDeathYears { get; set; }
+    public string? BirthDeathYears =>
+        (DateOfBirth.HasValue ? DateOfBirth.Value.Year.ToString() : "") +
+        (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +
+        (DateOfDeath.HasValue ? DateOfDeath.Value.Year.ToString() : "");
     public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }

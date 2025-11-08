@@ -1,4 +1,5 @@
 using backend.Domain.Events.Members;
+using backend.Domain.Enums; // Add this for RelationshipType
 
 namespace backend.Domain.Entities;
 
@@ -53,6 +54,20 @@ public class Member : BaseAuditableEntity
     {
         Biography = biography;
         AddDomainEvent(new MemberBiographyUpdatedEvent(this));
+    }
+
+    public Relationship AddFatherRelationship(Guid fatherId)
+    {
+        var relationship = new Relationship(FamilyId, fatherId, Id, RelationshipType.Father);
+        Relationships.Add(relationship);
+        return relationship;
+    }
+
+    public Relationship AddMotherRelationship(Guid motherId)
+    {
+        var relationship = new Relationship(FamilyId, motherId, Id, RelationshipType.Mother);
+        Relationships.Add(relationship);
+        return relationship;
     }
 
     // Relationships

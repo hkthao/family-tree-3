@@ -1,5 +1,6 @@
 using backend.Application.Common.Dtos;
 using backend.Application.Relationships.Queries;
+using backend.Domain.Enums; // Add this for RelationshipType
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
@@ -19,6 +20,12 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
-    public string? BirthDeathYears { get; set; }
+    public string? BirthDeathYears =>
+        (DateOfBirth.HasValue ? DateOfBirth.Value.Year.ToString() : "") +
+        (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +
+        (DateOfDeath.HasValue ? DateOfDeath.Value.Year.ToString() : "")
+    ;
+    public Guid? FatherId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Father)?.SourceMemberId;
+    public Guid? MotherId => Relationships.FirstOrDefault(r => r.TargetMemberId == Id && r.Type == RelationshipType.Mother)?.SourceMemberId;
     public ICollection<RelationshipDto> Relationships { get; set; } = [];
 }
