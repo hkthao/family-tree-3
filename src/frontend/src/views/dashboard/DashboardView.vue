@@ -29,11 +29,10 @@
     <!-- Middle Section: Recent Activity -->
     <v-row>
       <v-col cols="12" md="6">
-        <RecentActivity :family-id="selectedFamilyId || undefined" />
+        <EventCalendar :family-id="selectedFamilyId || undefined" :read-only="true" />
       </v-col>
-
       <v-col cols="12" md="6">
-        <UpcomingEvents :family-id="selectedFamilyId || undefined" />
+        <RecentActivity :family-id="selectedFamilyId || undefined" />
       </v-col>
     </v-row>
 
@@ -47,7 +46,7 @@ import { useDashboardStore } from '@/stores/dashboard.store';
 import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
-import UpcomingEvents from '@/components/dashboard/UpcomingEvents.vue';
+import EventCalendar from '@/components/event/EventCalendar.vue';
 
 const { t } = useI18n();
 

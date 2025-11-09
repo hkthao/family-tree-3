@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-toolbar>
     <v-btn variant="text" @click="setToday">{{ t('common.today') }}</v-btn>
     <v-btn variant="text" size="small" icon @click="prev">
@@ -11,7 +12,7 @@
     <v-spacer></v-spacer>
     <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
       :label="t('event.calendar.viewMode')" hide-details></v-select>
-    <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button">
+    <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="!props.readOnly">
       <v-tooltip :text="t('event.list.action.create')">
         <template v-slot:activator="{ props }">
           <v-icon v-bind="props">mdi-plus</v-icon>
@@ -32,14 +33,15 @@
     </template>
   </v-calendar>
 
-  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
+  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650" v-if="!props.readOnly">
     <EventEditView v-if="editableEvent && editDrawer" :initial-event="editableEvent" @close="handleEventClosed"
       @saved="handleEventSaved" />
   </v-navigation-drawer>
 
-  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
+  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650" v-if="!props.readOnly">
     <EventAddView v-if="addDrawer" :family-id="props.familyId" @close="handleAddClosed" @saved="handleAddSaved" />
   </v-navigation-drawer>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -160,9 +162,11 @@ const getEventColor: CalendarEventColorFunction = (event: {
 };
 
 const showEventDetails = (eventSlotScope: Event) => {
-  selectedEventId.value = eventSlotScope.id;
-  editableEvent.value = JSON.parse(JSON.stringify(eventSlotScope)); // Deep copy the event object
-  editDrawer.value = true;
+  if (!props.readOnly) {
+    selectedEventId.value = eventSlotScope.id;
+    editableEvent.value = JSON.parse(JSON.stringify(eventSlotScope)); // Deep copy the event object
+    editDrawer.value = true;
+  }
 };
 
 const handleEventSaved = () => {

@@ -1,5 +1,5 @@
 <template>
-  <v-card :elevation="0">
+  <v-card :elevation="0" >
     <v-card-title class="d-flex align-center">
       <v-icon left>mdi-family-tree</v-icon>
       <span class="ml-2">{{ t('dashboard.familyTreeOverview.title') }}</span>
