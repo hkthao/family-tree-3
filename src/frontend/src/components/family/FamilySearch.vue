@@ -1,7 +1,7 @@
 <template>
   <v-card class="mb-4">
     <v-card-title class="text-h6 d-flex align-center">
-      {{ $t('member.search.title') }}
+      {{ $t('family.management.searchLabel') }}
       <v-spacer></v-spacer>
       <v-btn variant="text" icon size="small"  @click="expanded = !expanded" data-testid="family-search-expand-button">
         <v-icon>{{ expanded ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
@@ -10,14 +10,13 @@
     <v-expand-transition>
       <div v-show="expanded">
         <v-card-text>
-          <!-- Search + Filter -->
           <v-row>
-            <v-col cols="12">
+            <v-col cols="4">
               <v-select
                 v-model="visibility"
                 :items="visibilityItems"
                 :label="$t('family.management.filterLabel')"
-                
+                clearable
                 data-testid="family-visibility-filter"
               />
             </v-col>
@@ -60,7 +59,7 @@ const applyFilters = () => {
 
 const resetFilters = () => {
   visibility.value = 'All';
-  // applyFilters(); // No need to call here, watch will handle it
+  // applyFilters(); // Watch will handle it
 };
 
 // Watch for changes in filters and apply them automatically
