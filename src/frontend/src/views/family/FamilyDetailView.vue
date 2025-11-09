@@ -15,6 +15,15 @@
       <v-window v-model="selectedTab">
         <v-window-item value="general">
           <FamilyForm :initial-family-data="family" :read-only="true" :title="t('family.detail.title')" />
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="gray" @click="closeView" data-testid="button-close">
+              {{ t('common.close') }}
+            </v-btn>
+            <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit">
+              {{ t('common.edit') }}
+            </v-btn>
+          </v-card-actions>
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -34,15 +43,7 @@
         </v-window-item>
       </v-window>
     </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="gray" @click="closeView" data-testid="button-close">
-        {{ t('common.close') }}
-      </v-btn>
-      <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit">
-        {{ t('common.edit') }}
-      </v-btn>
-    </v-card-actions>
+
   </v-card>
   <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
     {{ t('common.noData') }}

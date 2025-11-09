@@ -3,7 +3,7 @@
     :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="multiple"
     item-title="fullName" item-value="id" :search-function="searchFunction" :preload-function="getByIdsFunction"
     :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items" :disabled="disabled">
-    <template #chip="{ props, item }">
+    <template #chip="{ props, item }" v-if="!hideChips">
       <v-chip v-bind="props" size="small" v-if="item.raw"
         :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.fullName"></v-chip>
     </template>
@@ -32,6 +32,7 @@ interface MemberAutocompleteProps {
   familyId?: string;
   loading?: boolean; // Add loading prop
   disabled?: boolean; // Add disabled prop
+  hideChips?: boolean; // New prop to hide selected chips
 }
 
 const props = defineProps<MemberAutocompleteProps>();

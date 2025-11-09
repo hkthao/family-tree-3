@@ -54,6 +54,16 @@ const { chartContainer } = useHierarchicalTreeChart(
   stroke: rgb(var(--v-theme-on-surface));
 }
 
+.main_svg path.link.link-spouse {
+  stroke: rgb(var(--v-theme-error));
+  stroke-width: 3px;
+}
+
+.main_svg path.link.link-parent-child {
+  stroke: rgb(var(--v-theme-on-surface));
+  stroke-width: 1.5px;
+}
+
 .f3 {
   cursor: pointer;
   height: 100%;

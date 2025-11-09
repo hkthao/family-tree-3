@@ -18,20 +18,21 @@
         </v-btn>
       </template>
     </v-tooltip>
-    <v-text-field v-model="treeVisualizationStore.searchQuery" :label="t('family.tree.searchMember')"
-      prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field>
+    <!-- <v-text-field v-model="treeVisualizationStore.searchQuery" :label="t('family.tree.searchMember')"
+      prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field> -->
     <MemberAutocomplete
       v-model="selectedRootMemberId"
       :label="t('family.tree.filterByRootMember')"
       :family-id="props.familyId"
       clearable
       hide-details
+      hide-chips
       class="mr-4"
       style="max-width: 250px;"
     />
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
-    :relationships="relationships" :root-id="selectedRootMemberId" @show-member-detail-drawer="handleShowMemberDetailDrawer" />
+    :relationships="relationships" :root-id="selectedRootMemberId ?? undefined" @show-member-detail-drawer="handleShowMemberDetailDrawer" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
     @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember" />
 

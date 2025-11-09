@@ -18,16 +18,20 @@
     <!-- Edit Member Drawer -->
 
     <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
-
       <MemberEditView v-if="selectedMemberId && editDrawer" :member-id="selectedMemberId" @close="handleMemberClosed"
         @saved="handleMemberSaved" />
-
     </v-navigation-drawer>
 
     <!-- Add Member Drawer -->
     <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
-      <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId" @close="handleMemberClosed"
-        @saved="handleMemberSaved" />
+      <MemberAddView v-if="addDrawer" :family-id="props.familyId === undefined ? null : props.familyId"
+        @close="handleMemberClosed" @saved="handleMemberSaved" />
+    </v-navigation-drawer>
+
+    <!-- Detail Member Drawer -->
+    <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
+      <MemberDetailView v-if="selectedMemberId && detailDrawer" :member-id="selectedMemberId"
+        @close="handleDetailClosed" @edit-member="navigateToEditMember" />
     </v-navigation-drawer>
   </div>
 </template>
@@ -42,6 +46,7 @@ import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
+import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import type { MemberFilter, Member } from '@/types';
 
 interface MemberListViewProps {
@@ -62,12 +67,13 @@ const searchQuery = ref('');
 const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
 const selectedMemberId = ref<string | null>(null); // Store the ID of the member being edited
+const detailDrawer = ref(false); // Control visibility of the detail drawer
 
 const notificationStore = useNotificationStore();
 
-const navigateToDetailView = (_member: Member) => {
-  // Still navigate to detail view, as it's a separate full page view
-  // router.push(`/member/detail/${member.id}`);
+const navigateToDetailView = (member: Member) => {
+  selectedMemberId.value = member.id;
+  detailDrawer.value = true;
 };
 
 const navigateToCreateView = () => {
@@ -76,6 +82,7 @@ const navigateToCreateView = () => {
 
 const navigateToEditMember = (member: Member) => {
   selectedMemberId.value = member.id;
+  detailDrawer.value = false;
   editDrawer.value = true;
 };
 
@@ -157,6 +164,11 @@ const handleMemberSaved = () => {
 const handleMemberClosed = () => {
   editDrawer.value = false;
   addDrawer.value = false;
+  selectedMemberId.value = null;
+};
+
+const handleDetailClosed = () => {
+  detailDrawer.value = false;
   selectedMemberId.value = null;
 };
 onMounted(() => {
