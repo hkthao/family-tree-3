@@ -81,12 +81,6 @@ const selectedMemberIdForEdit = ref<string | null>(null);
 const deleteConfirmDialog = ref(false);
 const memberToDelete = ref<Member | undefined>(undefined);
 
-const onFamilyChange = (familyId: string | null) => {
-  selectedFamilyId.value = familyId;
-  // Optionally, refresh the tree data when family changes
-  // memberStore.fetchTreeData(familyId); // Assuming such a method exists
-};
-
 // --- Add Member Handlers ---
 const openAddMemberDrawer = () => {
   console.log('fire');

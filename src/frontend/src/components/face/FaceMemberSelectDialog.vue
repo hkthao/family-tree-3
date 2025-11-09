@@ -52,7 +52,7 @@ watch(() => props.selectedFace, (newFace) => {
 watch(selectedMemberId, async (newMemberId) => {
   if (newMemberId) {
     await memberStore.getById(newMemberId);
-    selectedMemberDetails.value = memberStore.currentItem || null;
+    selectedMemberDetails.value = memberStore.detail.item || null;
   } else {
     selectedMemberDetails.value = null;
   }

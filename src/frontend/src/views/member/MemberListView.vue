@@ -2,10 +2,11 @@
   <div data-testid="member-list-view">
     <MemberSearch v-if="!props.hideSearch" @update:filters="handleFilterUpdate" />
 
-    <MemberList :items="memberStore.items" :total-items="memberStore.totalItems" :loading="loading"
+    <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView"
       @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly" />
+      
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
       fullName: memberToDelete?.fullName || '',
@@ -59,7 +60,7 @@ const props = defineProps<MemberListViewProps>();
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const { loading } = storeToRefs(memberStore);
+const { list } = storeToRefs(memberStore);
 const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
 const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 const aiInputDialog = ref(false);
@@ -91,13 +92,13 @@ const navigateToAIBiography = (_member: Member) => {
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
-  memberStore.filters = { ...filters, searchQuery: searchQuery.value, familyId: props.familyId };
+  memberStore.list.filters = { ...filters, searchQuery: searchQuery.value, familyId: props.familyId };
   await memberStore._loadItems()
 };
 
 const handleSearchUpdate = async (search: string) => {
   searchQuery.value = search;
-  memberStore.filters = { ...memberStore.filters, searchQuery: searchQuery.value, familyId: props.familyId };
+  memberStore.list.filters = { ...memberStore.list.filters, searchQuery: searchQuery.value, familyId: props.familyId };
   await memberStore._loadItems();
 };
 

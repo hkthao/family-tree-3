@@ -3,15 +3,14 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('member.form.addTitle') }}</span>
     </v-card-title>
-    <v-progress-linear v-if="list.loading" indeterminate color="primary"></v-progress-linear>
+    <v-progress-linear v-if="add.loading" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <MemberForm ref="memberFormRef" @close="closeForm" :family-id="props.familyId" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" data-testid="button-cancel" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleAddMember" data-testid="save-member-button" :loading="list.loading">{{
-        t('common.save') }}</v-btn>
+      <v-btn color="primary" @click="handleAddMember" data-testid="save-member-button" :loading="add.loading">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -38,7 +37,7 @@ const { t } = useI18n();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
-const { list } = storeToRefs(memberStore);
+const { add } = storeToRefs(memberStore);
 
 onMounted(async () => {
   // No initialRelationshipData to process

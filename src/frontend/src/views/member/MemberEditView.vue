@@ -3,13 +3,14 @@
     <v-card-title class="text-center">
       <span class="text-h5 text-uppercase">{{ t('member.form.editTitle') }}</span>
     </v-card-title>
+    <v-progress-linear v-if="detail.loading || update.loading" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <MemberForm ref="memberFormRef" v-if="member" :initial-member-data="member" @close="closeForm" :family-id="member.familyId" />
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" @click="closeForm">{{ t('common.cancel') }}</v-btn>
-      <v-btn color="primary" @click="handleUpdateMember" data-testid="save-member-button">{{ t('common.save') }}</v-btn>
+      <v-btn color="primary" @click="handleUpdateMember" data-testid="save-member-button" :loading="update.loading">{{ t('common.save') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -21,6 +22,7 @@ import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
+import { storeToRefs } from 'pinia';
 
 interface MemberEditViewProps {
   memberId: string;
@@ -35,12 +37,14 @@ const { t } = useI18n();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
 
+const { detail, update } = storeToRefs(memberStore);
+
 const member = ref<Member | undefined>(undefined);
 
 const loadMember = async (id: string) => {
   await memberStore.getById(id);
-  if (memberStore.currentItem)
-    member.value = memberStore.currentItem;
+  if (memberStore.detail.item)
+    member.value = memberStore.detail.item;
 };
 
 onMounted(async () => {
