@@ -99,11 +99,11 @@ describe('event.store', () => {
 
       await store._loadItems();
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.items).toEqual([mockEvent]);
-      expect(store.totalItems).toBe(1);
-      expect(store.totalPages).toBe(1);
+      expect(store.list.items).toEqual([mockEvent]);
+      expect(store.list.totalItems).toBe(1);
+      expect(store.list.totalPages).toBe(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
     });
 
@@ -113,9 +113,9 @@ describe('event.store', () => {
 
       await store._loadItems();
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBeTruthy();
-      expect(store.items).toEqual([]);
+      expect(store.list.items).toEqual([]);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
     });
   });
@@ -126,7 +126,7 @@ describe('event.store', () => {
       mockLoadItems.mockResolvedValue(ok(mockPaginatedEvents)); // _loadItems is called after successful add
       await store.addItem({ ...mockEvent });
 
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -138,7 +138,7 @@ describe('event.store', () => {
 
       await store.addItem({ ...mockEvent });
 
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).not.toHaveBeenCalled();
@@ -152,7 +152,7 @@ describe('event.store', () => {
 
       await store.updateItem(mockEvent);
 
-      expect(store.loading).toBe(false);
+      expect(store.update.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -164,7 +164,7 @@ describe('event.store', () => {
 
       await store.updateItem(mockEvent);
 
-      expect(store.loading).toBe(false);
+      expect(store.update.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).not.toHaveBeenCalled();
@@ -179,7 +179,7 @@ describe('event.store', () => {
       const result = await store.deleteItem(mockEvent.id!);
 
       expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
+      expect(store._delete.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockDelete).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -192,7 +192,7 @@ describe('event.store', () => {
       const result = await store.deleteItem(mockEvent.id!);
 
       expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
+      expect(store._delete.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockDelete).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).not.toHaveBeenCalled();
@@ -205,9 +205,9 @@ describe('event.store', () => {
 
       const result = await store.getById(mockEvent.id!);
 
-      expect(store.loading).toBe(false);
+      expect(store.detail.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.currentItem).toEqual(mockEvent);
+      expect(store.detail.item).toEqual(mockEvent);
       expect(result).toEqual(mockEvent);
       expect(mockGetById).toHaveBeenCalledTimes(1);
     });
@@ -218,9 +218,9 @@ describe('event.store', () => {
 
       const result = await store.getById(mockEvent.id!);
 
-      expect(store.loading).toBe(false);
+      expect(store.detail.loading).toBe(false);
       expect(store.error).toBeTruthy();
-      expect(store.currentItem).toBeNull();
+      expect(store.detail.item).toBeNull();
       expect(result).toBeUndefined();
       expect(mockGetById).toHaveBeenCalledTimes(1);
     });
@@ -232,7 +232,7 @@ describe('event.store', () => {
 
       const result = await store.getByIds([mockEvent.id!]);
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(result).toEqual([mockEvent]);
       expect(mockGetByIds).toHaveBeenCalledTimes(1);
@@ -244,7 +244,7 @@ describe('event.store', () => {
 
       const result = await store.getByIds([mockEvent.id!]);
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
       expect(result).toEqual([]);
       expect(mockGetByIds).toHaveBeenCalledTimes(1);
@@ -263,7 +263,7 @@ describe('event.store', () => {
       const result = await store.addItems(newEvents);
 
       expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAddItems).toHaveBeenCalledWith(newEvents);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -279,7 +279,7 @@ describe('event.store', () => {
       const result = await store.addItems(newEvents);
 
       expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAddItems).toHaveBeenCalledWith(newEvents);
       expect(mockLoadItems).not.toHaveBeenCalled();

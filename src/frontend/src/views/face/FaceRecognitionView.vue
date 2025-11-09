@@ -71,7 +71,13 @@ const openSelectMemberDialog = (faceId: string) => {
 };
 
 const canSaveLabels = computed(() => {
-  return faceStore.detectedFaces.length > 0 && faceStore.detectedFaces.every(face => face.memberId !== null && face.memberId !== undefined);
+  return faceStore.detectedFaces.some(
+    (face) =>
+      face.memberId && // Must have a memberId assigned
+      (face.originalMemberId === null || // Was unlabeled, now labeled
+        face.originalMemberId === undefined || // Was unlabeled, now labeled
+        face.memberId !== face.originalMemberId), // Label has changed
+  );
 });
 
 const handleLabelFaceAndCloseDialog = (faceId: string, memberDetails: Member) => {

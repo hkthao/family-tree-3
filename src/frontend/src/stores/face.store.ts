@@ -49,13 +49,14 @@ export const useFaceStore = defineStore('face', {
             boundingBox: face.boundingBox,
             thumbnail: face.thumbnail,
             memberId: face.memberId,
+            originalMemberId: face.memberId, // Store the original memberId
             memberName: face.memberName,
             familyId: face.familyId,
             familyName: face.familyName,
             birthYear: face.birthYear,
             deathYear: face.deathYear,
             embedding: face.embedding, // Include embedding
-            status: face.memberId ? 'recognized' : 'unrecognized',
+            status: face.memberId ? 'original-recognized' : 'unrecognized', // Set initial status
           }));
           return { ok: true, value: undefined };
         } else {
@@ -87,7 +88,7 @@ export const useFaceStore = defineStore('face', {
       const faceIndex = this.detectedFaces.findIndex((f) => f.id === faceId);
       if (faceIndex !== -1) {
         this.detectedFaces[faceIndex].memberId = memberId;
-        this.detectedFaces[faceIndex].status = 'labeled';
+        this.detectedFaces[faceIndex].status = 'labeled'; // Set status to labeled
         if (memberDetails) {
           this.detectedFaces[faceIndex].memberName = memberDetails.fullName;
           this.detectedFaces[faceIndex].familyId = memberDetails.familyId;
@@ -114,22 +115,33 @@ export const useFaceStore = defineStore('face', {
       this.loading = true;
       this.error = null;
       try {
-        // Prepare data for API call
-        const faceLabels = this.detectedFaces
-          .filter((face) => face.memberId)
-          .map((face) => ({
-            id: face.id,
-            boundingBox: face.boundingBox,
-            thumbnail: face.thumbnail,
-            memberId: face.memberId,
-            memberName: face.memberName,
-            familyId: face.familyId,
-            familyName: face.familyName,
-            birthYear: face.birthYear,
-            deathYear: face.deathYear,
-            embedding: face.embedding, // Include embedding
-            status: face.status, // Include status
-          }));
+        // Filter for faces that have been newly labeled or had their labels changed
+        const facesToSave = this.detectedFaces.filter(
+          (face) =>
+            face.memberId && // Must have a memberId assigned
+            (face.originalMemberId === null || // Was unlabeled, now labeled
+              face.originalMemberId === undefined || // Was unlabeled, now labeled
+              face.memberId !== face.originalMemberId), // Label has changed
+        );
+
+        if (facesToSave.length === 0) {
+          this.loading = false;
+          return { ok: true, value: undefined }; // Nothing to save
+        }
+
+        const faceLabels = facesToSave.map((face) => ({
+          id: face.id,
+          boundingBox: face.boundingBox,
+          thumbnail: face.thumbnail,
+          memberId: face.memberId,
+          memberName: face.memberName,
+          familyId: face.familyId,
+          familyName: face.familyName,
+          birthYear: face.birthYear,
+          deathYear: face.deathYear,
+          embedding: face.embedding, // Include embedding
+          status: face.status, // Include status
+        }));
 
         // Assuming imageId is stored somewhere, e.g., in the store state or passed as a prop
         // For now, let's assume it's available in the store as uploadedImageId
@@ -144,9 +156,10 @@ export const useFaceStore = defineStore('face', {
         const result = await this.services.face.saveLabels(faceLabels, imageId);
 
         if (result.ok) {
-          // Optionally update status of faces after successful save
-          this.detectedFaces.forEach((face) => {
-            if (face.memberId) face.status = 'recognized';
+          // After successful save, update originalMemberId for saved faces
+          facesToSave.forEach((face) => {
+            face.originalMemberId = face.memberId;
+            face.status = 'original-recognized'; // Update status to reflect saved state
           });
           return { ok: true, value: undefined };
         } else {
@@ -163,8 +176,6 @@ export const useFaceStore = defineStore('face', {
         this.loading = false;
       }
     },
-
-
 
     // Reset the store state
     resetState(): void {

@@ -97,11 +97,11 @@ describe('family.store', () => {
 
       await store._loadItems();
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.items).toEqual([mockFamily]);
-      expect(store.totalItems).toBe(1);
-      expect(store.totalPages).toBe(1);
+      expect(store.list.items).toEqual([mockFamily]);
+      expect(store.list.totalItems).toBe(1);
+      expect(store.list.totalPages).toBe(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
     });
 
@@ -111,9 +111,9 @@ describe('family.store', () => {
 
       await store._loadItems();
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBeTruthy();
-      expect(store.items).toEqual([]);
+      expect(store.list.items).toEqual([]);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
     });
   });
@@ -124,7 +124,7 @@ describe('family.store', () => {
       const result = await store.addItem({ ...mockFamily });
 
       expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -137,7 +137,7 @@ describe('family.store', () => {
       const result = await store.addItem({ ...mockFamily });
 
       expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAdd).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).not.toHaveBeenCalled();
@@ -151,7 +151,7 @@ describe('family.store', () => {
 
       await store.updateItem(mockFamily);
 
-      expect(store.loading).toBe(false);
+      expect(store.update.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -163,7 +163,7 @@ describe('family.store', () => {
 
       await store.updateItem(mockFamily);
 
-      expect(store.loading).toBe(false);
+      expect(store.update.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockUpdate).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).not.toHaveBeenCalled();
@@ -178,7 +178,7 @@ describe('family.store', () => {
       const result = await store.deleteItem(mockFamily.id!);
 
       expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
+      expect(store._delete.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockDelete).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -191,7 +191,7 @@ describe('family.store', () => {
       const result = await store.deleteItem(mockFamily.id!);
 
       expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
+      expect(store._delete.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockDelete).toHaveBeenCalledTimes(1);
       expect(mockLoadItems).not.toHaveBeenCalled();
@@ -204,9 +204,9 @@ describe('family.store', () => {
 
       const result = await store.getById(mockFamily.id!);
 
-      expect(store.loading).toBe(false);
+      expect(store.detail.loading).toBe(false);
       expect(store.error).toBeNull();
-      expect(store.currentItem).toEqual(mockFamily);
+      expect(store.detail.item).toEqual(mockFamily);
       expect(result).toEqual(mockFamily);
       expect(mockGetById).toHaveBeenCalledTimes(1);
     });
@@ -217,9 +217,9 @@ describe('family.store', () => {
 
       const result = await store.getById(mockFamily.id!);
 
-      expect(store.loading).toBe(false);
+      expect(store.detail.loading).toBe(false);
       expect(store.error).toBeTruthy();
-      expect(store.currentItem).toBeNull();
+      expect(store.detail.item).toBeNull();
       expect(result).toBeUndefined();
       expect(mockGetById).toHaveBeenCalledTimes(1);
     });
@@ -231,7 +231,7 @@ describe('family.store', () => {
 
       const result = await store.getByIds([mockFamily.id!]);
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(result).toEqual([mockFamily]);
       expect(mockGetByIds).toHaveBeenCalledTimes(1);
@@ -243,7 +243,7 @@ describe('family.store', () => {
 
       const result = await store.getByIds([mockFamily.id!]);
 
-      expect(store.loading).toBe(false);
+      expect(store.list.loading).toBe(false);
       expect(store.error).toBe(errorMessage);
       expect(result).toEqual([]);
       expect(mockGetByIds).toHaveBeenCalledTimes(1);
@@ -262,7 +262,7 @@ describe('family.store', () => {
       const result = await store.addItems(newFamilies);
 
       expect(result.ok).toBe(true);
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeNull();
       expect(mockAddItems).toHaveBeenCalledWith(newFamilies);
       expect(mockLoadItems).toHaveBeenCalledTimes(1);
@@ -278,7 +278,7 @@ describe('family.store', () => {
       const result = await store.addItems(newFamilies);
 
       expect(result.ok).toBe(false);
-      expect(store.loading).toBe(false);
+      expect(store.add.loading).toBe(false);
       expect(store.error).toBeTruthy();
       expect(mockAddItems).toHaveBeenCalledWith(newFamilies);
       expect(mockLoadItems).not.toHaveBeenCalled();
