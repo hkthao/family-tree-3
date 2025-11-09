@@ -13,6 +13,7 @@ public static class BiographyPromptBuilder
         promptBuilder.AppendLine("Generate a biography for the following family member.");
         promptBuilder.AppendLine($"Style: {request.Style}");
         promptBuilder.AppendLine("Output language: Vietnamese");
+        promptBuilder.AppendLine("Please limit the biography to approximately 500 words.");
 
         if (!string.IsNullOrEmpty(request.UserPrompt))
         {
