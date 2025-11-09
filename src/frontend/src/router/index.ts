@@ -9,6 +9,7 @@ import type { AppState } from '@/types';
 // Import feature routes
 import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
+import { settingRoutes } from './features/setting.routes';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -27,6 +28,7 @@ const router = createRouter({
         },
         ...familyRoutes,
         ...faceRoutes,
+        ...settingRoutes,
       ],
     },
     {
