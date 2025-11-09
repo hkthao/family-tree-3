@@ -12,18 +12,6 @@
       @create="navigateToAddRelationship"
       @view-member="navigateToMemberDetailView"
     />
-
-    <!-- Confirm Delete Dialog -->
-    <ConfirmDeleteDialog
-      :model-value="deleteConfirmDialog"
-      :title="t('confirmDelete.title')"
-      :message="
-        t('relationship.list.confirmDelete', { name: relationshipToDelete?.sourceMember?.fullName || '' })
-      "
-      @confirm="handleDeleteConfirm"
-      @cancel="handleDeleteCancel"
-      data-testid="relationship-list-view-confirm-delete-dialog"
-    />
   </div>
 </template>
 
@@ -33,7 +21,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipSearch, RelationshipList } from '@/components/relationship';
-import { ConfirmDeleteDialog } from '@/components/common';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { RelationshipFilter, Relationship } from '@/types';
@@ -43,12 +31,10 @@ const router = useRouter();
 
 const relationshipStore = useRelationshipStore();
 const notificationStore = useNotificationStore();
+const { showConfirmDialog } = useConfirmDialog();
 
 const currentFilters = ref<RelationshipFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
-
-const deleteConfirmDialog = ref(false);
-const relationshipToDelete = ref<Relationship | undefined>(undefined);
 
 const loadRelationships = async () => {
   relationshipStore.filter = {
@@ -100,14 +86,17 @@ const handleListOptionsUpdate = (options: {
   }
 };
 
-const confirmDelete = (relationship: Relationship) => {
-  relationshipToDelete.value = relationship;
-  deleteConfirmDialog.value = true;
-};
+const confirmDelete = async (relationship: Relationship) => {
+  const confirmed = await showConfirmDialog({
+    title: t('confirmDelete.title'),
+    message: t('relationship.list.confirmDelete', { name: relationship.sourceMember?.fullName || '' }),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    confirmColor: 'error',
+  });
 
-const handleDeleteConfirm = async () => {
-  if (relationshipToDelete.value) {
-    const result = await relationshipStore.deleteItem(relationshipToDelete.value.id!);
+  if (confirmed) {
+    const result = await relationshipStore.deleteItem(relationship.id!);
     if (result.ok) {
       notificationStore.showSnackbar(
         t('relationship.messages.deleteSuccess'),
@@ -121,13 +110,6 @@ const handleDeleteConfirm = async () => {
       );
     }
   }
-  deleteConfirmDialog.value = false;
-  relationshipToDelete.value = undefined;
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  relationshipToDelete.value = undefined;
 };
 
 onMounted(() => {

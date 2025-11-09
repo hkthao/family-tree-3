@@ -25,19 +25,16 @@ let resolvePromise: ((confirm: boolean) => void) | null = null;
 export function useConfirmDialog() {
   const { t } = useI18n();
 
-  const showConfirmDialog = (
-    title: string,
-    message: string,
-    confirmText?: string,
-    cancelText?: string,
-    color?: string
-  ): Promise<boolean> => {
+  const showConfirmDialog = (options: ConfirmDialogOptions): Promise<boolean> => {
     dialogOptions.value = {
-      title,
-      message,
-      confirmText: confirmText || t('common.confirm'),
-      cancelText: cancelText || t('common.cancel'),
-      color: color || 'primary',
+      title: options.title,
+      message: String(options.message), // Explicitly cast to string
+      confirmText: options.confirmText || t('common.confirm'),
+      cancelText: options.cancelText || t('common.cancel'),
+      color: options.color || 'primary',
+      width: options.width,
+      cancelColor: options.cancelColor,
+      confirmColor: options.confirmColor,
     };
     isDialogOpen.value = true;
 

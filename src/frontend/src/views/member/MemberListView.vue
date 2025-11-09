@@ -7,12 +7,6 @@
       @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView"
       @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly" />
       
-    <!-- Confirm Delete Dialog -->
-    <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')" :message="t('member.list.confirmDelete', {
-      fullName: memberToDelete?.fullName || '',
-    })
-      " @confirm="handleDeleteConfirm" @cancel="handleDeleteCancel" />
-
     <!-- AI Input Dialog -->
     <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
 
@@ -43,7 +37,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { MemberSearch, MemberList, NLMemberPopup } from '@/components/member';
-import { ConfirmDeleteDialog } from '@/components/common';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
@@ -61,8 +55,6 @@ const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const { list } = storeToRefs(memberStore);
-const deleteConfirmDialog = ref(false); // Re-add deleteConfirmDialog
-const memberToDelete = ref<Member | undefined>(undefined); // Add memberToDelete ref
 const aiInputDialog = ref(false);
 const searchQuery = ref('');
 const editDrawer = ref(false); // Control visibility of the edit drawer
@@ -71,6 +63,7 @@ const selectedMemberId = ref<string | null>(null); // Store the ID of the member
 const detailDrawer = ref(false); // Control visibility of the detail drawer
 
 const notificationStore = useNotificationStore();
+const { showConfirmDialog } = useConfirmDialog();
 
 const navigateToDetailView = (member: Member) => {
   selectedMemberId.value = member.id;
@@ -117,14 +110,23 @@ const handleListOptionsUpdate = async (options: {
   }
 };
 
-const confirmDelete = (member: Member) => {
-  memberToDelete.value = member;
-  deleteConfirmDialog.value = true;
+const confirmDelete = async (member: Member) => {
+  const confirmed = await showConfirmDialog({
+    title: t('confirmDelete.title'),
+    message: t('member.list.confirmDelete', { fullName: member.fullName || '' }),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    confirmColor: 'error',
+  });
+
+  if (confirmed) {
+    await handleDeleteConfirm(member);
+  }
 };
 
-const handleDeleteConfirm = async () => {
-  if (memberToDelete.value) {
-    await memberStore.deleteItem(memberToDelete.value.id);
+const handleDeleteConfirm = async (member: Member) => {
+  if (member) {
+    await memberStore.deleteItem(member.id);
     if (memberStore.error) {
       notificationStore.showSnackbar(
         t('member.messages.deleteError', { error: memberStore.error }),
@@ -137,14 +139,7 @@ const handleDeleteConfirm = async () => {
       );
     }
   }
-  deleteConfirmDialog.value = false;
-  memberToDelete.value = undefined;
   memberStore._loadItems(); // Refresh the member list after deleting
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  memberToDelete.value = undefined;
 };
 
 const openAiInputDialog = () => {

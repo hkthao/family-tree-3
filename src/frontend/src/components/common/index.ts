@@ -5,7 +5,6 @@ export { default as AvatarInput } from './AvatarInput.vue';
 export { default as AvatarDisplay } from './AvatarDisplay.vue';
 export { default as AppNameDisplay } from './AppNameDisplay.vue';
 export { default as ChipLookup } from './ChipLookup.vue';
-export { default as ConfirmDeleteDialog } from './ConfirmDeleteDialog.vue';
 export { default as NovuInbox } from './NovuInbox.vue';
 export { default as NotificationBell } from './NotificationBell.vue';
 export { default as UserAutocomplete } from './UserAutocomplete.vue';

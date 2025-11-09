@@ -6,10 +6,6 @@
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToViewFamily"
       @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
-    <!-- Confirm Delete Dialog -->
-    <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
-      :message="t('confirmDelete.message', { name: familyToDelete?.name || '' })" @confirm="handleDeleteConfirm"
-      @cancel="handleDeleteCancel" />
     <!-- AI Input Dialog -->
     <NLFamilyPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @save="handleAiSave" />
   </div>
@@ -22,7 +18,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilySearch, FamilyList, NLFamilyPopup } from '@/components/family';
-import { ConfirmDeleteDialog } from '@/components/common';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family, GeneratedDataResponse } from '@/types';
@@ -33,12 +29,11 @@ const router = useRouter();
 const familyStore = useFamilyStore();
 const { list } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
+const { showConfirmDialog } = useConfirmDialog();
 
 const currentFilters = ref<FamilyFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
-const deleteConfirmDialog = ref(false);
-const familyToDelete = ref<Family | undefined>(undefined);
 const aiInputDialog = ref(false);
 
 const handleFilterUpdate = async (filters: FamilyFilter) => {
@@ -71,15 +66,18 @@ const navigateToViewFamily = (family: Family) => {
   router.push(`/family/detail/${family.id}`);
 };
 
-const confirmDelete = (family: Family) => {
-  familyToDelete.value = family;
-  deleteConfirmDialog.value = true;
-};
+const confirmDelete = async (family: Family) => {
+  const confirmed = await showConfirmDialog({
+    title: t('confirmDelete.title'),
+    message: t('confirmDelete.message', { name: family.name || '' }),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    confirmColor: 'error',
+  });
 
-const handleDeleteConfirm = async () => {
-  if (familyToDelete.value) {
+  if (confirmed) {
     try {
-      await familyStore.deleteItem(familyToDelete.value.id);
+      await familyStore.deleteItem(family.id);
       notificationStore.showSnackbar(
         t('family.management.messages.deleteSuccess'),
         'success',
@@ -91,13 +89,6 @@ const handleDeleteConfirm = async () => {
       );
     }
   }
-  deleteConfirmDialog.value = false;
-  familyToDelete.value = undefined;
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  familyToDelete.value = undefined;
 };
 
 const openAiInputDialog = () => {

@@ -38,15 +38,6 @@
         @saved="handleMemberSaved"
       />
     </v-navigation-drawer>
-
-    <!-- Confirm Delete Dialog -->
-    <ConfirmDeleteDialog
-      :model-value="deleteConfirmDialog"
-      :title="t('confirmDelete.title')"
-      :message="t('member.list.confirmDelete', { fullName: memberToDelete?.fullName || '' })"
-      @confirm="handleDeleteConfirm"
-      @cancel="handleDeleteCancel"
-    />
   </v-card>
 </template>
 
@@ -56,7 +47,7 @@ import { useI18n } from 'vue-i18n';
 import { TreeChart } from '@/components/family';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberEditView from '@/views/member/MemberEditView.vue';
-import { ConfirmDeleteDialog } from '@/components/common';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import type { Member } from '@/types';
@@ -65,6 +56,7 @@ import { RelationshipType } from '@/types';
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const notificationStore = useNotificationStore();
+const { showConfirmDialog } = useConfirmDialog();
 
 const selectedFamilyId = ref<string | null>(null);
 
@@ -76,10 +68,6 @@ const addRelationshipType = ref<RelationshipType | null>(null);
 // State for Edit Member Drawer
 const editMemberDrawer = ref(false);
 const selectedMemberIdForEdit = ref<string | null>(null);
-
-// State for Delete Member Dialog
-const deleteConfirmDialog = ref(false);
-const memberToDelete = ref<Member | undefined>(undefined);
 
 // --- Add Member Handlers ---
 const openAddMemberDrawer = () => {
@@ -130,16 +118,25 @@ const confirmDeleteMember = async (memberId: string) => {
   // Fetch member details to display name in confirmation dialog
   const member = await memberStore.getById(memberId);
   if (member) {
-    memberToDelete.value = member;
-    deleteConfirmDialog.value = true;
+    const confirmed = await showConfirmDialog({
+      title: t('confirmDelete.title'),
+      message: t('member.list.confirmDelete', { fullName: member.fullName || '' }),
+      confirmText: t('common.delete'),
+      cancelText: t('common.cancel'),
+      confirmColor: 'error',
+    });
+
+    if (confirmed) {
+      await handleDeleteConfirm(member);
+    }
   } else {
     notificationStore.showSnackbar(t('member.errors.loadById'), 'error');
   }
 };
 
-const handleDeleteConfirm = async () => {
-  if (memberToDelete.value && memberToDelete.value.id) {
-    await memberStore.deleteItem(memberToDelete.value.id);
+const handleDeleteConfirm = async (member: Member) => {
+  if (member && member.id) {
+    await memberStore.deleteItem(member.id);
     if (memberStore.error) {
       notificationStore.showSnackbar(
         memberStore.error || t('member.messages.deleteError'),
@@ -154,13 +151,6 @@ const handleDeleteConfirm = async () => {
       // memberStore.fetchTreeData(selectedFamilyId.value); // Assuming such a method exists
     }
   }
-  deleteConfirmDialog.value = false;
-  memberToDelete.value = undefined;
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  memberToDelete.value = undefined;
 };
 
 // --- General Handlers ---

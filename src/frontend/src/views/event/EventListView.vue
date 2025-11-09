@@ -14,17 +14,6 @@
     @ai-create="showNLEventPopup = true"
   />
   <NLEventPopup v-model="showNLEventPopup" @saved="handleNLEventSaved" />
-  <!-- Confirm Delete Dialog -->
-  <ConfirmDeleteDialog
-    :model-value="deleteConfirmDialog"
-    :title="t('confirmDelete.title')"
-    :message="
-      t('event.list.confirmDelete', { name: eventToDelete?.name || '' })
-    "
-    @confirm="handleDeleteConfirm"
-    @cancel="handleDeleteCancel"
-  />
-
 </template>
 
 <script setup lang="ts">
@@ -34,7 +23,7 @@ import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList, NLEventPopup } from '@/components/event';
-import { ConfirmDeleteDialog } from '@/components/common';
+import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { storeToRefs } from 'pinia';
@@ -43,6 +32,7 @@ const { t } = useI18n();
 const router = useRouter();
 const eventStore = useEventStore();
 const notificationStore = useNotificationStore();
+const { showConfirmDialog } = useConfirmDialog();
 
 const { list } = storeToRefs(eventStore);
 
@@ -52,9 +42,6 @@ const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
-
-const deleteConfirmDialog = ref(false);
-const eventToDelete = ref<Event | undefined>(undefined);
 
 const loadEvents = async (
   page: number = currentPage.value,
@@ -107,30 +94,30 @@ const handleListOptionsUpdate = (options: {
   }
 };
 
-const confirmDelete = (event: Event) => {
-  eventToDelete.value = event;
-  deleteConfirmDialog.value = true;
-};
+const confirmDelete = async (event: Event) => {
+  const confirmed = await showConfirmDialog({
+    title: t('confirmDelete.title'),
+    message: t('event.list.confirmDelete', { name: event.name || '' }),
+    confirmText: t('common.delete'),
+    cancelText: t('common.cancel'),
+    confirmColor: 'error',
+  });
 
-const handleDeleteConfirm = async () => {
-  if (eventToDelete.value) {
+  if (confirmed) {
     try {
-      await eventStore.deleteItem(eventToDelete.value.id!);
+      await eventStore.deleteItem(event.id!);
       notificationStore.showSnackbar(
         t('event.messages.deleteSuccess'),
         'success',
       );
       await loadEvents(); // Reload events after deletion
-    } finally {
-      deleteConfirmDialog.value = false;
-      eventToDelete.value = undefined;
+    } catch (error) {
+      notificationStore.showSnackbar(
+        t('event.messages.deleteError'),
+        'error',
+      );
     }
   }
-};
-
-const handleDeleteCancel = () => {
-  deleteConfirmDialog.value = false;
-  eventToDelete.value = undefined;
 };
 
 const handleNLEventSaved = async () => {
