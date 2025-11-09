@@ -6,28 +6,38 @@ import type { ApiError } from '@/plugins/axios';
 
 export const useMemberStore = defineStore('member', {
   state: () => ({
-    items: [] as Member[],
-    currentItem: null as Member | null,
-    loading: false,
+    // General state
     error: null as string | null,
-    filters: {
-      searchQuery: '',
-      familyId: undefined,
-      gender: undefined,
-    } as MemberFilter,
-    currentPage: 1,
-    itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
-    totalItems: 0,
-    totalPages: 1,
-    sortBy: [] as { key: string; order: string }[], // Sorting key and order
-    editableMembers: [] as Member[], // New state for editable members
+
+    // State for list operations
+    list: {
+      items: [] as Member[],
+      loading: false, // Loading state for the list of members
+      filters: {
+        searchQuery: '',
+        familyId: undefined,
+        gender: undefined,
+      } as MemberFilter,
+      currentPage: 1,
+      itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
+      totalItems: 0,
+      totalPages: 1,
+      sortBy: [] as { key: string; order: string }[], // Sorting key and order
+      editableMembers: [] as Member[], // New state for editable members
+    },
+
+    // State for single item operations
+    detail: {
+      item: null as Member | null,
+      loading: false, // Loading state for a single member
+    },
   }),
 
   getters: {},
 
   actions: {
     async loadEditableMembers() {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.loadItems(
         {
@@ -40,42 +50,42 @@ export const useMemberStore = defineStore('member', {
       );
 
       if (result.ok) {
-        this.editableMembers = result.value.items; // Extract items from paginated result
+        this.list.editableMembers = result.value.items; // Extract items from paginated result
       } else {
         this.error = i18n.global.t('member.errors.load');
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
     },
 
     async _loadItems() {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.loadItems({
-        ...this.filters,
-        sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
-        sortOrder: this.sortBy.length > 0 ? (this.sortBy[0].order as 'asc' | 'desc') : undefined,
+        ...this.list.filters,
+        sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
+        sortOrder: this.list.sortBy.length > 0 ? (this.list.sortBy[0].order as 'asc' | 'desc') : undefined,
       },
-        this.currentPage,
-        this.itemsPerPage,
+        this.list.currentPage,
+        this.list.itemsPerPage,
       );
 
       if (result.ok) {
-        this.items = result.value.items;
-        this.totalItems = result.value.totalItems;
-        this.totalPages = result.value.totalPages;
+        this.list.items = result.value.items;
+        this.list.totalItems = result.value.totalItems;
+        this.list.totalPages = result.value.totalPages;
       } else {
         this.error = i18n.global.t('member.errors.load');
-        this.items = [];
-        this.totalItems = 0;
-        this.totalPages = 1;
+        this.list.items = [];
+        this.list.totalItems = 0;
+        this.list.totalPages = 1;
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
     },
 
     async addItem(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.add(newItem);
       if (result.ok) {
@@ -84,12 +94,12 @@ export const useMemberStore = defineStore('member', {
         this.error = i18n.global.t('member.errors.add');
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
       return result;
     },
 
     async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.addItems(newItems);
       if (result.ok) {
@@ -98,12 +108,12 @@ export const useMemberStore = defineStore('member', {
         this.error = i18n.global.t('member.errors.add');
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
       return result;
     },
 
     async updateItem(updatedItem: Member): Promise<void> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.update(updatedItem);
       if (result.ok) {
@@ -112,11 +122,11 @@ export const useMemberStore = defineStore('member', {
         this.error = i18n.global.t('member.errors.update');
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
     },
 
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.delete(id);
       if (result.ok) {
@@ -125,51 +135,51 @@ export const useMemberStore = defineStore('member', {
         this.error = result.error.message || 'Failed to delete member.';
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
       return result;
     },
 
     async setPage(page: number) {
-      if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
-        this.currentPage = page;
+      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
+        this.list.currentPage = page;
         await this._loadItems();
       }
     },
 
     async setItemsPerPage(count: number) {
-      if (count > 0 && this.itemsPerPage !== count) {
-        this.itemsPerPage = count;
-        this.currentPage = 1; // Reset to first page when items per page changes
+      if (count > 0 && this.list.itemsPerPage !== count) {
+        this.list.itemsPerPage = count;
+        this.list.currentPage = 1; // Reset to first page when items per page changes
         await this._loadItems();
       }
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
-      this.sortBy = sortBy;
-      this.currentPage = 1; // Reset to first page on sort change
+      this.list.sortBy = sortBy;
+      this.list.currentPage = 1; // Reset to first page on sort change
       this._loadItems();
     },
 
     async setCurrentItem(item: Member | null) {
-      this.currentItem = item;
+      this.detail.item = item;
     },
 
     async getById(id: string): Promise<Member | undefined> {
-      this.loading = true;
+      this.detail.loading = true;
       this.error = null;
 
       // const cachedMember = this.memberCache.get(id);
       // if (cachedMember) {
-      //   this.loading = false;
-      //   this.currentItem = cachedMember;
+      //   this.detail.loading = false;
+      //   this.detail.item = cachedMember;
       //   return cachedMember;
       // }
 
       const result = await this.services.member.getById(id);
-      this.loading = false;
+      this.detail.loading = false;
       if (result.ok) {
         if (result.value) {
-          this.currentItem = result.value;
+          this.detail.item = result.value;
           return result.value;
         }
       } else {
@@ -180,17 +190,17 @@ export const useMemberStore = defineStore('member', {
     },
 
     async getByFamilyId(familyId: string): Promise<void> {
-      this.filters.familyId = familyId;
+      this.list.filters.familyId = familyId;
       this.setPage(1);
       this.setItemsPerPage(5000);
       await this._loadItems();
     },
 
     async getByIds(ids: string[]): Promise<Member[]> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.member.getByIds(ids);
-      this.loading = false;
+      this.list.loading = false;
       if (result.ok) {
         return result.value;
       } else {
@@ -202,9 +212,9 @@ export const useMemberStore = defineStore('member', {
     },
 
     clearItems() {
-      this.items = [];
-      this.totalItems = 0;
-      this.totalPages = 1;
+      this.list.items = [];
+      this.list.totalItems = 0;
+      this.list.totalPages = 1;
     },
   },
 });
