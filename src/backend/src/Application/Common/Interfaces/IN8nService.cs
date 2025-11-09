@@ -1,4 +1,5 @@
 using backend.Application.Common.Models;
+using backend.Application.Common.Models.AI;
 
 namespace backend.Application.Common.Interfaces;
 
@@ -8,18 +9,19 @@ namespace backend.Application.Common.Interfaces;
 public interface IN8nService
 {
     /// <summary>
-    /// Gọi webhook chat trên n8n với tin nhắn và lịch sử cuộc trò chuyện.
+    /// Gọi webhook chat của n8n để gửi tin nhắn và nhận phản hồi từ AI Assistant.
     /// </summary>
-    /// <param name="message">Tin nhắn của người dùng.</param>
-    /// <param name="history">Lịch sử cuộc trò chuyện.</param>
-    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
-    /// <returns>Kết quả chứa câu trả lời từ AI.</returns>
+    /// <param name="sessionId">ID phiên trò chuyện.</param>
+    /// <param name="message">Tin nhắn người dùng.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả chứa phản hồi từ AI Assistant.</returns>
     Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken);
+
     /// <summary>
-    /// Gọi webhook embedding trên n8n để xử lý dữ liệu nhúng.
+    /// Gọi webhook embedding của n8n để xử lý dữ liệu và tạo embedding.
     /// </summary>
-    /// <param name="dto">Dữ liệu webhook embedding.</param>
-    /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
-    /// <returns>Kết quả chứa thông báo thành công hoặc thất bại.</returns>
+    /// <param name="dto">Đối tượng chứa dữ liệu embedding.</param>
+    /// <param name="cancellationToken">Token hủy bỏ.</param>
+    /// <returns>Kết quả chứa ID thành viên hoặc thông báo lỗi.</returns>
     Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken);
 }

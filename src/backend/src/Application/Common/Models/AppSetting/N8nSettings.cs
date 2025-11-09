@@ -18,8 +18,4 @@ public class N8nSettings
     /// URL của webhook để kích hoạt quy trình embedding trên n8n.
     /// </summary>
     public string EmbeddingWebhookUrl { get; set; } = null!;
-    /// <summary>
-    /// Tên model Ollama sẽ được sử dụng cho các cuộc trò chuyện.
-    /// </summary>
-    public string OllamaModel { get; set; } = null!;
 }

@@ -34,12 +34,6 @@ public class N8nService : IN8nService
             return Result<string>.Failure("n8n chat integration is not configured.", "Configuration");
         }
 
-        if (string.IsNullOrEmpty(n8nSettings.OllamaModel))
-        {
-            _logger.LogWarning("Ollama model is not configured in N8nSettings.");
-            return Result<string>.Failure("Ollama model is not configured.", "Configuration");
-        }
-
         var httpClient = _httpClientFactory.CreateClient();
 
         var payload = new[]

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, Member, Result } from '@/types';
+import type { BiographyResultDto, AIProviderDto, Member, Result, AIBiography } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 import { useNotificationStore } from './notification.store';
@@ -31,13 +31,57 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         const result = await this.services.member.getById(memberId);
         if (result.ok) {
           this.currentMember = result.value!;
-          if (this.currentMember.biography) {
-            this.biographyResult = { content: this.currentMember.biography };
-          }
+          // if (this.currentMember.biography) {
+          //   this.biographyResult = { content: this.currentMember.biography };
+          // }
+          await this.fetchLastAIBiography(memberId); // Fetch last AI biography after member details
         } else {
           this.error =
             result.error?.message ||
             i18n.global.t('aiBiography.errors.fetchMemberFailed');
+        }
+      } catch (err: any) {
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchAIProviders() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.aiBiography.getAIProviders();
+        if (result.ok) {
+          this.aiProviders = result.value;
+        } else {
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.fetchProvidersFailed');
+        }
+      } catch (err: any) {
+        this.error =
+          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchLastAIBiography(memberId: string) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.aiBiography.getLastAIBiography(memberId);
+        if (result.ok && result.value) {
+          this.biographyResult = { content: result.value.content };
+          this.userPrompt = result.value.userPrompt;
+          this.style = result.value.style;
+          this.generatedFromDB = result.value.generatedFromDB;
+        } else if (!result.ok) {
+          this.error =
+            result.error?.message ||
+            i18n.global.t('aiBiography.errors.fetchLastPromptFailed');
         }
       } catch (err: any) {
         this.error =
@@ -63,6 +107,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
           this.style,
           this.generatedFromDB,
           this.userPrompt || undefined,
+          this.language, // Pass language parameter
         );
 
         if (result.ok) {
@@ -79,8 +124,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         this.loading = false;
       }
     },
-
-
 
     clearForm() {
       this.userPrompt = null;
