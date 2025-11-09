@@ -1,6 +1,7 @@
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace backend.Infrastructure.Persistence.Configurations;
 
@@ -19,11 +20,19 @@ public class FaceConfiguration : IEntityTypeConfiguration<Face>
         builder.Property(f => f.Thumbnail)
             .HasMaxLength(2000); // Assuming thumbnail is a base64 string or URL
 
-        builder.Property(f => f.Embedding)
-            .HasConversion(
-                v => string.Join(",", v ?? new List<double>()), // Convert List<double> to comma-separated string, handle null
-                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(double.Parse).ToList() // Convert string back to List<double>
-            )
-            .HasColumnType("longtext"); // Use longtext for potentially large embeddings
+        var listDoubleComparer = new ValueComparer<List<double>>(
+            (l1, l2) => l1 != null && l2 != null && l1.SequenceEqual(l2),
+            l => l.Aggregate(0, (hash, d) => HashCode.Combine(hash, d.GetHashCode())),
+            l => l.ToList());
+
+        var embeddingPropertyBuilder = builder.Property(f => f.Embedding);
+
+        embeddingPropertyBuilder.HasConversion(
+            v => string.Join(",", v ?? new List<double>()), // Convert List<double> to comma-separated string, handle null
+            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(double.Parse).ToList() // Convert string back to List<double>
+        );
+
+        embeddingPropertyBuilder.Metadata.SetValueComparer(listDoubleComparer);
+        embeddingPropertyBuilder.HasColumnType("longtext");
     }
 }
