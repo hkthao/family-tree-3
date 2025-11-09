@@ -33,6 +33,14 @@
       />
     </v-timeline-item>
   </v-timeline>
+  <v-alert
+    v-if="totalEvents === 0 && !list.loading"
+    type="info"
+    class="mt-4"
+    variant="tonal"
+  >
+    {{ t('event.timeline.noEvents') }}
+  </v-alert>
   <v-pagination
     v-if="totalEvents > 0"
     v-model="page"
@@ -49,6 +57,8 @@ import { useMemberStore } from '@/stores/member.store';
 import { useEventStore } from '@/stores/event.store'; // Import event store
 import ChipLookup from '@/components/common/ChipLookup.vue';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   familyId?: string; // Optional prop for family ID
@@ -59,11 +69,14 @@ const props = defineProps<{
 const memberStore = useMemberStore();
 const eventStore = useEventStore(); // Initialize event store
 
+const { list } = storeToRefs(eventStore);
+const { t } = useI18n();
+
 const page = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const totalEvents = ref(0);
 
-const paginatedEvents = computed(() => eventStore.items);
+const paginatedEvents = computed(() => eventStore.list.items);
 
 const paginationLength = computed(() => {
   if (typeof totalEvents.value !== 'number' || typeof itemsPerPage.value !== 'number' || itemsPerPage.value <= 0) {
@@ -74,8 +87,8 @@ const paginationLength = computed(() => {
 
 const loadEvents = async () => {
   if (!props.familyId && !props.memberId) {
-    eventStore.items = [];
-    eventStore.totalItems = 0;
+    eventStore.list.items = [];
+    eventStore.list.totalItems = 0;
     return;
   }
 
@@ -86,11 +99,11 @@ const loadEvents = async () => {
     filters.familyId = props.familyId;
   }
 
-  eventStore.filter = { ...eventStore.filter, ...filters }; // Directly update filter
+  eventStore.list.filter = { ...eventStore.list.filter, ...filters }; // Directly update filter
   eventStore.setPage(page.value);
   eventStore.setItemsPerPage(itemsPerPage.value);
   await eventStore._loadItems(); // Call _loadItems directly
-  totalEvents.value = eventStore.totalItems;
+  totalEvents.value = eventStore.list.totalItems;
 };
 
 watch(

@@ -25,7 +25,7 @@
 
     </v-card-actions>
   </v-card>
-  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal" data-testid="event-detail-no-data-alert">
+  <v-alert v-else-if="!detail.loading" type="info" class="mt-4" variant="tonal" data-testid="event-detail-no-data-alert">
     {{ t('common.noData') }}
   </v-alert>
 </template>
@@ -37,28 +37,28 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import type { Event } from '@/types';
 import { EventForm } from '@/components/event';
+import { storeToRefs } from 'pinia';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const eventStore = useEventStore();
 
+const { detail } = storeToRefs(eventStore);
+
 const event = ref<Event | undefined>(undefined);
-const loading = ref(false);
 const selectedTab = ref('general');
 
 const loadEvent = async () => {
-  loading.value = true;
   const eventId = route.params.id as string;
   if (eventId) {
     await eventStore.getById(eventId);
     if (!eventStore.error) {
-      event.value = eventStore.currentItem;
+      event.value = eventStore.detail.item;
     } else {
       event.value = undefined; // Clear event on error
     }
   }
-  loading.value = false;
 };
 
 const navigateToEditEvent = (id: string) => {

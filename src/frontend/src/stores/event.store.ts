@@ -7,41 +7,61 @@ import { IdCache } from '@/utils/cacheUtils'; // Import IdCache
 
 export const useEventStore = defineStore('event', {
   state: () => ({
-    items: [] as Event[],
-    currentItem: null as unknown as Event,
-    loading: false,
     error: null as string | null,
-    filter: {} as EventFilter,
-    totalItems: 0,
-    currentPage: 1,
-    itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
-    totalPages: 1,
+
+    list: {
+      items: [] as Event[],
+      loading: false,
+      filter: {} as EventFilter,
+      totalItems: 0,
+      currentPage: 1,
+      itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
+      totalPages: 1,
+    },
+
+    detail: {
+      item: null as unknown as Event,
+      loading: false,
+    },
+
+    add: {
+      loading: false,
+    },
+
+    update: {
+      loading: false,
+    },
+
+    _delete: {
+      loading: false,
+    },
+
     eventCache: new IdCache<Event>(), // Add eventCache to state
   }),
   getters: {},
   actions: {
     async _loadItems() {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.event.loadItems(
-        this.filter,
-        this.currentPage,
-        this.itemsPerPage,
+        this.list.filter,
+        this.list.currentPage,
+        this.list.itemsPerPage,
       );
       if (result.ok) {
-        this.items = result.value.items;
-        this.totalItems = result.value.totalItems;
-        this.totalPages = result.value.totalPages;
+        this.list.items = result.value.items;
+        this.list.totalItems = result.value.totalItems;
+        this.list.totalPages = result.value.totalPages;
         this.eventCache.setMany(result.value.items); // Cache fetched items
       } else {
         this.error = i18n.global.t('event.errors.load');
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
     },
 
     async addItem(newItem: Omit<Event, 'id'>): Promise<void> {
-      this.loading = true;
+      this.add.loading = true;
       this.error = null;
       const result = await this.services.event.add(newItem);
       if (result.ok) {
@@ -51,11 +71,11 @@ export const useEventStore = defineStore('event', {
         this.error = i18n.global.t('event.errors.add');
         console.error(result.error);
       }
-      this.loading = false;
+      this.add.loading = false;
     },
 
     async addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
-      this.loading = true;
+      this.add.loading = true;
       this.error = null;
       try {
         const createCommands = newItems.map(item => ({
@@ -85,12 +105,12 @@ export const useEventStore = defineStore('event', {
         console.error(err);
         return { ok: false, error: { message: this.error } } as Result<string[], ApiError>; // Return a failure result
       } finally {
-        this.loading = false;
+        this.add.loading = false;
       }
     },
 
     async updateItem(updatedItem: Event): Promise<void> {
-      this.loading = true;
+      this.update.loading = true;
       this.error = null;
       const result = await this.services.event.update(updatedItem);
       if (result.ok) {
@@ -100,11 +120,11 @@ export const useEventStore = defineStore('event', {
         this.error = i18n.global.t('event.errors.update');
         console.error(result.error);
       }
-      this.loading = false;
+      this.update.loading = false;
     },
 
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
-      this.loading = true;
+      this._delete.loading = true;
       this.error = null;
       const result = await this.services.event.delete(id);
       if (result.ok) {
@@ -114,54 +134,54 @@ export const useEventStore = defineStore('event', {
         this.error = i18n.global.t('event.errors.delete');
         console.error(result.error);
       }
-      this.loading = false;
+      this._delete.loading = false;
       return result;
     },
 
     async setPage(page: number) {
-      if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
-        this.currentPage = page;
+      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
+        this.list.currentPage = page;
         this._loadItems();
       }
     },
 
     async setItemsPerPage(count: number) {
-      if (count > 0 && this.itemsPerPage !== count) {
-        this.itemsPerPage = count;
-        this.currentPage = 1; // Reset to first page when items per page changes
+      if (count > 0 && this.list.itemsPerPage !== count) {
+        this.list.itemsPerPage = count;
+        this.list.currentPage = 1; // Reset to first page when items per page changes
         this._loadItems();
       }
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
       // Assuming EventFilter has sortBy and sortOrder properties
-      this.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
-      this.filter.sortOrder =
+      this.list.filter.sortBy = sortBy.length > 0 ? sortBy[0].key : undefined;
+      this.list.filter.sortOrder =
         sortBy.length > 0 ? (sortBy[0].order as 'asc' | 'desc') : undefined;
-      this.currentPage = 1; // Reset to first page on sort change
+      this.list.currentPage = 1; // Reset to first page on sort change
       this._loadItems();
     },
 
     setCurrentItem(item: Event) {
-      this.currentItem = item;
+      this.detail.item = item;
     },
 
     async getById(id: string): Promise<Event | undefined> {
-      this.loading = true;
+      this.detail.loading = true;
       this.error = null;
 
       const cachedEvent = this.eventCache.get(id);
       if (cachedEvent) {
-        this.loading = false;
-        this.currentItem = cachedEvent;
+        this.detail.loading = false;
+        this.detail.item = cachedEvent;
         return cachedEvent;
       }
 
       const result = await this.services.event.getById(id);
-      this.loading = false;
+      this.detail.loading = false;
       if (result.ok) {
         if (result.value) {
-          this.currentItem = result.value;
+          this.detail.item = result.value;
           this.eventCache.set(result.value); // Cache the fetched event
           return result.value;
         }
@@ -173,14 +193,14 @@ export const useEventStore = defineStore('event', {
     },
 
     async getByIds(ids: string[]): Promise<Event[]> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
 
       const result = await this.eventCache.getMany(ids, (missingIds) =>
         this.services.event.getByIds(missingIds),
       );
 
-      this.loading = false;
+      this.list.loading = false;
       if (result.ok) {
         return result.value;
       } else {
@@ -191,10 +211,10 @@ export const useEventStore = defineStore('event', {
     },
 
     async fetchUpcomingEvents(familyId?: string): Promise<Event[]> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.event.getUpcomingEvents(familyId);
-      this.loading = false;
+      this.list.loading = false;
       if (result.ok) {
         return result.value;
       } else {

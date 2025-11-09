@@ -105,8 +105,8 @@ const setToday = () => {
 
 const loadEvents = async () => {
   if (!props.familyId && !props.memberId) {
-    eventStore.items = [];
-    eventStore.totalItems = 0;
+    eventStore.list.items = [];
+    eventStore.list.totalItems = 0;
     return;
   }
 
@@ -119,12 +119,12 @@ const loadEvents = async () => {
   } else if (props.familyId) {
     filters.familyId = props.familyId;
   }
-  eventStore.filter = filters;
+  eventStore.list.filter = filters;
   await eventStore._loadItems();
 };
 
 const formattedEvents = computed(() => {
-  const events = eventStore.items
+  const events = eventStore.list.items
     .filter((event) => event.startDate) // Only include events with a valid startDate
     .map((event) => ({
       title: event.name,

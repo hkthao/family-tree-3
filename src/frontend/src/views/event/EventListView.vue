@@ -1,9 +1,9 @@
 <template>
   <EventSearch @update:filters="handleFilterUpdate" />
   <EventList
-    :events="eventStore.items"
-    :total-events="eventStore.totalItems"
-    :loading="eventStore.loading"
+    :events="list.items"
+    :total-events="list.totalItems"
+    :loading="list.loading"
     :search="currentFilters.searchQuery || ''"
     @update:options="handleListOptionsUpdate"
     @update:search="handleSearchUpdate"
@@ -37,11 +37,14 @@ import { EventSearch, EventList, NLEventPopup } from '@/components/event';
 import { ConfirmDeleteDialog } from '@/components/common';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
+import { storeToRefs } from 'pinia';
 
 const { t } = useI18n();
 const router = useRouter();
 const eventStore = useEventStore();
 const notificationStore = useNotificationStore();
+
+const { list } = storeToRefs(eventStore);
 
 const showNLEventPopup = ref(false);
 
@@ -57,7 +60,7 @@ const loadEvents = async (
   page: number = currentPage.value,
   itemsPerPageCount: number = itemsPerPage.value,
 ) => {
-  eventStore.filter = {
+  eventStore.list.filter = {
     ...currentFilters.value,
     searchQuery: currentFilters.value.searchQuery || '',
   };

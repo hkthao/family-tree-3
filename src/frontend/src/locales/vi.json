@@ -421,6 +421,7 @@
   "event.view.calendar": "Lịch",
   "event.calendar.title": "Lịch Sự kiện",
   "event.timeline.title": "Dòng thời gian Sự kiện",
+  "event.timeline.noEvents": "Không có sự kiện nào để hiển thị.",
   "member.timeline.title": "Dòng Thời Gian",
   "timeline.form.year": "Năm",
   "timeline.form.title": "Tiêu đề Sự kiện",
