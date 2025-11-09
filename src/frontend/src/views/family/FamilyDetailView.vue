@@ -10,6 +10,7 @@
         <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
         <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
         <v-tab value="members" data-testid="tab-members">{{ t('family.members.title') }}</v-tab>
+        <v-tab value="face-recognition" data-testid="tab-face-recognition">{{ t('face.recognition') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="selectedTab">
@@ -41,6 +42,10 @@
         <v-window-item value="members">
           <MemberListView :family-id="family.id" :hide-search="true" />
         </v-window-item>
+
+        <v-window-item value="face-recognition">
+          <FaceRecognitionView :family-id="family.id" />
+        </v-window-item>
       </v-window>
     </v-card-text>
 
@@ -64,6 +69,7 @@ import { FamilyForm, TreeChart } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import FamilyEditView from '@/views/family/FamilyEditView.vue';
+import FaceRecognitionView from '@/views/face/FaceRecognitionView.vue';
 import type { Family } from '@/types';
 import { storeToRefs } from 'pinia';
 

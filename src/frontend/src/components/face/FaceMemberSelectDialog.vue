@@ -4,7 +4,7 @@
       <v-card-title class="text-h6">{{ t('face.selectMemberDialog.title') }}</v-card-title>
       <v-card-text>
         <member-auto-complete v-model="selectedMemberId" :label="t('face.selectMemberDialog.selectMember')"
-           :clearable="true" />
+           :clearable="true" :family-id="props.familyId" />
         <v-card v-if="selectedMemberDetails" class="mt-4 pa-3" variant="outlined">
           <div class="d-flex align-center">
             <v-avatar size="48" rounded="lg" class="mr-3">
@@ -38,6 +38,7 @@ const memberStore = useMemberStore();
 const props = defineProps({
   show: { type: Boolean, required: true },
   selectedFace: { type: Object as () => DetectedFace | null, default: null },
+  familyId: { type: String, default: undefined }, // New prop
 });
 
 const emit = defineEmits<{ (e: 'update:show', value: boolean): void; (e: 'label-face', faceId: string, memberDetails: Member): void; }>();
