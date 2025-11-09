@@ -9,7 +9,6 @@
     counter
     show-size
     clearable
-    @change="handleFileChange"
     @click:clear="reset"
   ></VFileUpload>
 </template>
@@ -32,20 +31,14 @@ const emit = defineEmits(['file-uploaded']);
 const fileUploadRef = ref<InstanceType<typeof VFileUpload> | null>(null);
 const files = ref<File[]>([]);
 
-const handleFileChange = () => {
-  if (files.value && files.value.length > 0) {
+watch(files, (newFiles) => {
+  if (newFiles && newFiles.length > 0) {
     if (props.multiple) {
-      emit('file-uploaded', files.value);
+      emit('file-uploaded', newFiles);
     } else {
-      emit('file-uploaded', files.value[0]);
+      emit('file-uploaded', newFiles[0]);
     }
   } else {
-    emit('file-uploaded', null);
-  }
-};
-
-watch(files, (newFiles) => {
-  if (!newFiles || newFiles.length === 0) {
     emit('file-uploaded', null);
   }
 });

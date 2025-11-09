@@ -37,6 +37,10 @@ public class DeleteFacesByMemberIdCommandHandler : IRequestHandler<DeleteFacesBy
                 EntityType = "Face",
                 EntityId = face.Id.ToString(),
                 ActionType = "DeleteFaceEmbedding",
+                EntityData = new
+                {
+                    MemberId = face.MemberId
+                },
                 Description = $"Delete face embedding for FaceId {face.Id}"
             };
 
