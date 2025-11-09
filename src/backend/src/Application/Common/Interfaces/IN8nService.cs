@@ -21,5 +21,5 @@ public interface IN8nService
     /// <param name="dto">Dữ liệu webhook embedding.</param>
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>
     /// <returns>Kết quả chứa thông báo thành công hoặc thất bại.</returns>
-    Task<Result<double[]>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken);
+    Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken);
 }

@@ -59,7 +59,7 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
             };
 
             _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<double[]>.Success(Array.Empty<double>()));
+                .ReturnsAsync(Result<string>.Success(string.Empty));
 
             var handler = new SaveFaceLabelsCommandHandler(
                 _context,

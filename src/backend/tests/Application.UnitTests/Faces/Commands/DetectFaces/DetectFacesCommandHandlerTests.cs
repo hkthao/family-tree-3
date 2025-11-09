@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands; // Added this using directive
 using backend.Application.Faces.Commands.DetectFaces;
@@ -17,13 +18,14 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
         private readonly Mock<IFaceApiService> _faceApiServiceMock;
         private readonly Mock<IConfigProvider> _configProviderMock;
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
+        private readonly Mock<IN8nService> _n8nServiceMock;
 
         public DetectFacesCommandHandlerTests()
         {
             _faceApiServiceMock = new Mock<IFaceApiService>();
             _configProviderMock = new Mock<IConfigProvider>();
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
-
+            _n8nServiceMock = new Mock<IN8nService>();
         }
 
         [Fact]
@@ -54,15 +56,40 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var familyId = Guid.NewGuid();
             var family = new Family { Name = "Test Family", Code = "TF" };
             var member = new Member(memberId, "Test", "Member", "TM", familyId, family); // Fixed: Using new constructor
+            family.Id = familyId; // Ensure family ID matches the one used for the member
+            _context.Families.Add(family); // Add family to context
             _context.Members.Add(member);
             await _context.SaveChangesAsync(CancellationToken.None);
 
+            var n8nResponseJson = $@"{{
+                ""result"": {{
+                    ""points"": [
+                        {{
+                            ""id"": ""some_face_id"",
+                            ""version"": 1,
+                            ""score"": 0.9,
+                            ""payload"": {{
+                                ""memberId"": ""{memberId}"",
+                                ""actionType"": ""SearchFaceEmbedding"",
+                                ""entityType"": ""Face"",
+                                ""description"": ""Search face embedding for FaceId some_face_id""
+                            }}
+                        }}
+                    ]
+                }},
+                ""status"": ""ok"",
+                ""time"": 0.001
+            }}";
+
+            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result<string>.Success(n8nResponseJson)); // Return JSON string from n8n
 
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _configProviderMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _n8nServiceMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -74,7 +101,12 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             {
                 result.Value.DetectedFaces.Should().HaveCount(1);
                 var detectedFace = result.Value.DetectedFaces[0];
-
+                detectedFace.MemberId.Should().Be(memberId);
+                detectedFace.MemberName.Should().Be(member.FullName);
+                detectedFace.FamilyId.Should().Be(familyId);
+                detectedFace.FamilyName.Should().Be(family.Name);
+                detectedFace.BirthYear.Should().Be(member.DateOfBirth?.Year);
+                detectedFace.DeathYear.Should().Be(member.DateOfDeath?.Year);
             }
         }
 
@@ -91,11 +123,15 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _faceApiServiceMock.Setup(x => x.DetectFacesAsync(It.IsAny<byte[]>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(new List<FaceDetectionResultDto>());
 
+            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result<string>.Success(string.Empty)); // No member found
+
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _configProviderMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _n8nServiceMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -123,7 +159,8 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                 _faceApiServiceMock.Object,
                 _context,
                 _configProviderMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _n8nServiceMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -157,11 +194,15 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
                     }
                 });
 
+            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result<string>.Success(string.Empty)); // Not relevant for this test, but needed for constructor
+
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
                 _configProviderMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _n8nServiceMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);

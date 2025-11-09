@@ -104,13 +104,13 @@ public class N8nService : IN8nService
     }
 
     /// <inheritdoc />
-    public async Task<Result<double[]>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken)
+    public async Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken)
     {
         var n8nSettings = _configProvider.GetSection<N8nSettings>();
         if (string.IsNullOrEmpty(n8nSettings.EmbeddingWebhookUrl) || n8nSettings.EmbeddingWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
             _logger.LogWarning("n8n embedding webhook URL is not configured.");
-            return Result<double[]>.Failure("n8n embedding integration is not configured.", "Configuration");
+            return Result<string>.Failure("n8n embedding integration is not configured.", "Configuration");
         }
 
         var httpClient = _httpClientFactory.CreateClient();
@@ -136,30 +136,46 @@ public class N8nService : IN8nService
             {
                 var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
                 _logger.LogError("Failed to call n8n embedding webhook. Status: {StatusCode}, Response: {ErrorContent}", response.StatusCode, errorContent);
-                return Result<double[]>.Failure($"Failed to trigger n8n embedding workflow. Status: {response.StatusCode}", "ExternalService");
+                return Result<string>.Failure($"Failed to trigger n8n embedding workflow. Status: {response.StatusCode}", "ExternalService");
             }
 
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogInformation("Received from n8n embedding webhook: {ResponseContent}", responseContent);
 
-            // Assuming n8n returns a JSON object with an 'embedding' property that is an array of doubles
+            // Assuming n8n returns a JSON object with a 'result' property, which contains a 'points' array,
+            // and each point has a 'payload' with a 'member_id' or 'memberId' property.
             var jsonDocument = JsonDocument.Parse(responseContent);
-            if (jsonDocument.RootElement.TryGetProperty("embedding", out var embeddingElement) && embeddingElement.ValueKind == JsonValueKind.Array)
+            if (jsonDocument.RootElement.ValueKind == JsonValueKind.Object)
             {
-                var embedding = embeddingElement.EnumerateArray().Select(e => e.GetDouble()).ToArray();
-                _logger.LogInformation("Successfully received embedding from n8n for {EntityType} {EntityId} ({ActionType}).", dto.EntityType, dto.EntityId, dto.ActionType);
-                return Result<double[]>.Success(embedding);
+                if (jsonDocument.RootElement.TryGetProperty("result", out var resultElement) && resultElement.TryGetProperty("points", out var pointsElement) && pointsElement.ValueKind == JsonValueKind.Array && pointsElement.GetArrayLength() > 0)
+                {
+                    var firstPoint = pointsElement[0];
+                    if (firstPoint.TryGetProperty("payload", out var payloadElement))
+                    {
+                        // Try to get "member_id" (snake_case) first, then "memberId" (camelCase)
+                        if (payloadElement.TryGetProperty("member_id", out var memberIdElement) && memberIdElement.ValueKind == JsonValueKind.String)
+                        {
+                            var memberId = memberIdElement.GetString();
+                            _logger.LogInformation("Successfully received memberId '{MemberId}' from n8n for {EntityType} {EntityId} ({ActionType}).", memberId, dto.EntityType, dto.EntityId, dto.ActionType);
+                            return Result<string>.Success(memberId ?? string.Empty);
+                        }
+                        else if (payloadElement.TryGetProperty("memberId", out memberIdElement) && memberIdElement.ValueKind == JsonValueKind.String)
+                        {
+                            var memberId = memberIdElement.GetString();
+                            _logger.LogInformation("Successfully received memberId '{MemberId}' from n8n for {EntityType} {EntityId} ({ActionType}).", memberId, dto.EntityType, dto.EntityId, dto.ActionType);
+                            return Result<string>.Success(memberId ?? string.Empty);
+                        }
+                    }
+                }
             }
-            else
-            {
-                _logger.LogError("Invalid response format from n8n embedding webhook: 'embedding' property not found or not an array.");
-                return Result<double[]>.Failure("Invalid response format from n8n embedding webhook.", "ExternalService");
-            }
+
+            _logger.LogInformation("No memberId found or invalid format in n8n embedding webhook response for {EntityType} {EntityId} ({ActionType}).", dto.EntityType, dto.EntityId, dto.ActionType);
+            return Result<string>.Success(string.Empty); // No member found, return empty string
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An exception occurred while calling the n8n embedding webhook.");
-            return Result<double[]>.Failure($"An error occurred while triggering n8n embedding workflow: {ex.Message}", "Exception");
+            return Result<string>.Failure($"An error occurred while triggering n8n embedding workflow: {ex.Message}", "Exception");
         }
     }
 }
