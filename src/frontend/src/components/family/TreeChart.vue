@@ -31,7 +31,7 @@
     />
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
-    :relationships="relationships" @show-member-detail-drawer="handleShowMemberDetailDrawer" />
+    :relationships="relationships" :root-id="selectedRootMemberId" @show-member-detail-drawer="handleShowMemberDetailDrawer" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
     @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember" />
 
@@ -138,16 +138,8 @@ const handleMemberEdited = () => {
 
 // Call initialize on mounted
 onMounted(async () => {
-  console.log('TreeChart mounted, familyId:', props.familyId, 'initialMemberId:', props.initialMemberId);
   if (props.familyId) {
     await initialize(props.familyId, props.initialMemberId);
-  }
-});
-
-// Watch for selectedRootMemberId changes and re-initialize the tree
-watch(selectedRootMemberId, async (newVal) => {
-  if (props.familyId) {
-    await initialize(props.familyId, newVal || null);
   }
 });
 

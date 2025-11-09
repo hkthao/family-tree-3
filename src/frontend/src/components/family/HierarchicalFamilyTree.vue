@@ -27,7 +27,8 @@ const emit = defineEmits([
 const props = defineProps({
   familyId: { type: String, default: null },
   members: { type: Array<Member>, default: () => [] },
-  relationships: { type: Array<Relationship>, default: () => [] }, // New prop
+  relationships: { type: Array<Relationship>, default: () => [] },
+  rootId: { type: String, default: null }, // New prop for specifying the root member ID
 });
 
 const { chartContainer } = useHierarchicalTreeChart(
