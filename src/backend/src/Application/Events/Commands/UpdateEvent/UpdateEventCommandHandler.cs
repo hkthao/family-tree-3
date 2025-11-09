@@ -45,22 +45,14 @@ public class UpdateEventCommandHandler(IApplicationDbContext context, IAuthoriza
         );
 
         // Update related members
-        // Remove members not in the new list
-        foreach (var existingMember in entity.EventMembers.ToList())
-        {
-            if (!request.RelatedMembers.Contains(existingMember.MemberId))
-            {
-                entity.RemoveEventMember(existingMember.MemberId);
-            }
-        }
+        // Remove existing EventMembers from the context
+        _context.EventMembers.RemoveRange(entity.EventMembers);
+        entity.ClearEventMembers(); // Clear the in-memory collection
 
         // Add new members
         foreach (var memberId in request.RelatedMembers)
         {
-            if (!entity.EventMembers.Any(em => em.MemberId == memberId))
-            {
-                entity.AddEventMember(memberId);
-            }
+            entity.AddEventMember(memberId);
         }
 
         await _context.SaveChangesAsync(cancellationToken);

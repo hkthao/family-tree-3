@@ -52,6 +52,19 @@
 
     <v-row>
       <v-col cols="12">
+        <MemberAutocomplete
+          v-model="formData.relatedMembers"
+          :label="t('event.form.relatedMembers')"
+          :family-id="formData.familyId || undefined"
+          :read-only="props.readOnly"
+          :multiple="true"
+          data-testid="event-related-members-autocomplete"
+        />
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12">
         <v-color-input v-model="formData.color" :label="t('event.form.color')" :readonly="props.readOnly"
           data-testid="event-color-picker" pip-location="append-inner">
         </v-color-input>
@@ -67,6 +80,7 @@ import type { Event } from '@/types';
 import { EventType } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useEventRules } from '@/validations/event.validation';
+import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -98,6 +112,7 @@ const state = reactive({
   familyId: toRef(formData, 'familyId'),
   startDate: toRef(formData, 'startDate'),
   endDate: toRef(formData, 'endDate'),
+  relatedMembers: toRef(formData, 'relatedMembers'),
 });
 
 const eventTypes = [

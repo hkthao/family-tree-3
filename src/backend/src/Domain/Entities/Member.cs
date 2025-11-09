@@ -1,5 +1,5 @@
-using backend.Domain.Events.Members;
 using backend.Domain.Enums; // Add this for RelationshipType
+using backend.Domain.Events.Members;
 
 namespace backend.Domain.Entities;
 

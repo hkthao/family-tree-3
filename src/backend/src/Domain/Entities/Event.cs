@@ -70,4 +70,9 @@ public class Event : BaseAuditableEntity, IAggregateRoot
             _eventMembers.Remove(eventMember);
         }
     }
+
+    public void ClearEventMembers()
+    {
+        _eventMembers.Clear();
+    }
 }

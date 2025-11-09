@@ -130,4 +130,80 @@ public class UpdateEventCommandHandlerTests : TestBase
         updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member2Id);
         updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member3Id);
     }
+
+    [Fact]
+    public async Task Handle_ShouldRemoveAllMembers_WhenRelatedMembersListIsEmpty()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var eventId = Guid.NewGuid();
+        var member1Id = Guid.NewGuid();
+        var member2Id = Guid.NewGuid();
+
+        var existingEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = eventId };
+        existingEvent.AddEventMember(member1Id);
+        existingEvent.AddEventMember(member2Id);
+        _context.Events.Add(existingEvent);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateEventCommand
+        {
+            Id = eventId,
+            FamilyId = familyId,
+            Name = "Updated Event",
+            RelatedMembers = new List<Guid>() // Empty list
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedEvent = await _context.Events.Include(e => e.EventMembers).FirstOrDefaultAsync(e => e.Id == eventId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedEvent.Should().NotBeNull();
+        updatedEvent!.EventMembers.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Handle_ShouldRemoveOneMember_WhenUpdatingRelatedMembers()
+    {
+        // Arrange
+        var familyId = Guid.NewGuid();
+        var eventId = Guid.NewGuid();
+        var member1Id = Guid.NewGuid();
+        var member2Id = Guid.NewGuid();
+        var member3Id = Guid.NewGuid();
+
+        var existingEvent = new Event("Test Event", "EVT-TEST", EventType.Other, familyId) { Id = eventId };
+        existingEvent.AddEventMember(member1Id);
+        existingEvent.AddEventMember(member2Id);
+        existingEvent.AddEventMember(member3Id);
+        _context.Events.Add(existingEvent);
+        await _context.SaveChangesAsync();
+
+        _authorizationServiceMock.Setup(x => x.CanManageFamily(familyId)).Returns(true);
+
+        var command = new UpdateEventCommand
+        {
+            Id = eventId,
+            FamilyId = familyId,
+            Name = "Updated Event",
+            RelatedMembers = new List<Guid> { member1Id, member3Id } // Remove member2Id
+        };
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+        var updatedEvent = await _context.Events.Include(e => e.EventMembers).FirstOrDefaultAsync(e => e.Id == eventId);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        updatedEvent.Should().NotBeNull();
+        updatedEvent!.EventMembers.Should().HaveCount(2);
+        updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member1Id);
+        updatedEvent.EventMembers.Select(em => em.MemberId).Should().NotContain(member2Id);
+        updatedEvent.EventMembers.Select(em => em.MemberId).Should().Contain(member3Id);
+    }
 }
+
