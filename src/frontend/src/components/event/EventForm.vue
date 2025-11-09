@@ -71,6 +71,7 @@ import { useEventRules } from '@/validations/event.validation';
 const props = defineProps<{
   readOnly?: boolean;
   initialEventData?: Event;
+  familyId?: string; // New prop
 }>();
 
 const { t } = useI18n();
@@ -81,7 +82,7 @@ const formData = reactive<Omit<Event, 'id'> | Event>(
   props.initialEventData || {
     name: '',
     type: EventType.Other,
-    familyId: null,
+    familyId: props.familyId || null, // Use prop familyId if provided
     startDate: null,
     endDate: null,
     location: '',

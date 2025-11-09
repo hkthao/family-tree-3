@@ -9,11 +9,19 @@
       <v-icon>mdi-chevron-right</v-icon>
     </v-btn>
     <v-spacer></v-spacer>
-    <v-select v-model="calendarType" :items="calendarTypes" class="me-2" :label="t('event.calendar.viewMode')"
-      variant="outlined" hide-details></v-select>
+    <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
+      :label="t('event.calendar.viewMode')" hide-details></v-select>
+    <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button">
+      <v-tooltip :text="t('event.list.action.create')">
+        <template v-slot:activator="{ props }">
+          <v-icon v-bind="props">mdi-plus</v-icon>
+        </template>
+      </v-tooltip>
+    </v-btn>
   </v-toolbar>
-  <v-calendar class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents" :event-color="getEventColor"
-    :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale" :weekdays="weekdays">
+  <v-calendar class="mt-2" ref="calendarRef" v-model="selectedDate" :events="formattedEvents"
+    :event-color="getEventColor" :type="calendarType" event-overlap-mode="stack" :locale="locale" :key="locale"
+    :weekdays="weekdays">
     <template #event="{ event }">
       <div class="v-event-summary" @click="showEventDetails(event.eventObject)">
         {{ event.title }}
@@ -28,6 +36,10 @@
     <EventEditView v-if="editableEvent && editDrawer" :initial-event="editableEvent" @close="handleEventClosed"
       @saved="handleEventSaved" />
   </v-navigation-drawer>
+
+  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650">
+    <EventAddView v-if="addDrawer" :family-id="props.familyId" @close="handleAddClosed" @saved="handleAddSaved" />
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
@@ -36,6 +48,7 @@ import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import { useEventStore } from '@/stores/event.store'; // Import event store
 import EventEditView from '@/views/event/EventEditView.vue';
+import EventAddView from '@/views/event/EventAddView.vue';
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
@@ -53,6 +66,7 @@ const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
 const selectedDate = ref(new Date());
 const editDrawer = ref(false); // Control visibility of the edit drawer
+const addDrawer = ref(false); // Control visibility of the add drawer
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
 const editableEvent = ref<Event | undefined>(undefined); // Copy of event for editing
 
@@ -162,6 +176,15 @@ const handleEventClosed = () => {
   editDrawer.value = false;
   selectedEventId.value = null;
   editableEvent.value = undefined;
+};
+
+const handleAddSaved = () => {
+  addDrawer.value = false;
+  loadEvents(); // Reload events after adding
+};
+
+const handleAddClosed = () => {
+  addDrawer.value = false;
 };
 
 watch(
