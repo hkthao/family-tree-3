@@ -11,8 +11,8 @@
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
       <v-btn color="primary" @click="handleEdit" :disabled="!member || detail.loading">{{ t('common.edit') }}</v-btn>
-      <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading">{{ t('ai.bioSuggest') }}</v-btn>
-      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading">{{ t('face.deleteFaceData') }}</v-btn>
+      <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading">{{ t('ai.bioSuggestShort') }}</v-btn>
+      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading">{{ t('face.deleteFaceDataShort') }}</v-btn>
       <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
