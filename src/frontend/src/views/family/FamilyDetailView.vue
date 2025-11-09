@@ -45,7 +45,7 @@
     </v-card-text>
 
   </v-card>
-  <v-alert v-else-if="!loading" type="info" class="mt-4" variant="tonal">
+  <v-alert v-else-if="!detail.loading" type="info" class="mt-4" variant="tonal">
     {{ t('common.noData') }}
   </v-alert>
 
@@ -65,31 +65,31 @@ import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import FamilyEditView from '@/views/family/FamilyEditView.vue';
 import type { Family } from '@/types';
+import { storeToRefs } from 'pinia';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const familyStore = useFamilyStore();
 
+const { detail } = storeToRefs(familyStore);
+
 const family = ref<Family | undefined>(undefined);
 const editableFamily = ref<Family | undefined>(undefined); // Copy of family for editing
-const loading = ref(false);
 const selectedTab = ref('general');
 const readOnly = ref(true); // FamilyDetailView is primarily for viewing
 const editDrawer = ref(false); // Control visibility of the edit drawer
 
 const loadFamily = async () => {
-  loading.value = true;
   const familyId = route.params.id as string;
   if (familyId) {
     await familyStore.getById(familyId);
     if (!familyStore.error) {
-      family.value = familyStore.currentItem as Family;
+      family.value = familyStore.detail.item as Family;
     } else {
       family.value = undefined; // Clear family on error
     }
   }
-  loading.value = false;
 };
 
 const handleFamilySaved = async () => {

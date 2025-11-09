@@ -1,7 +1,7 @@
 <template>
   <div data-testid="family-list-view">
     <FamilySearch @update:filters="handleFilterUpdate" />
-    <FamilyList :items="items" :total-items="familyStore.totalItems" :loading="familyStore.loading"
+    <FamilyList :items="list.items" :total-items="familyStore.list.totalItems" :loading="familyStore.list.loading"
       :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToViewFamily" @edit="navigateToEditFamily"
@@ -31,7 +31,7 @@ const { t } = useI18n();
 const router = useRouter();
 
 const familyStore = useFamilyStore();
-const { items } = storeToRefs(familyStore);
+const { list } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
 
 const currentFilters = ref<FamilyFilter>({});
@@ -43,13 +43,13 @@ const aiInputDialog = ref(false);
 
 const handleFilterUpdate = async (filters: FamilyFilter) => {
   currentFilters.value = filters;
-  familyStore.filter = currentFilters.value;
+  familyStore.list.filter = currentFilters.value;
   await familyStore._loadItems()
 };
 
 const handleSearchUpdate = async (search: string) => {
   currentFilters.value.searchQuery = search;
-  familyStore.filter = currentFilters.value;
+  familyStore.list.filter = currentFilters.value;
   await familyStore._loadItems();
 };
 

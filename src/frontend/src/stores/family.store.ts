@@ -6,52 +6,71 @@ import type { ApiError } from '@/plugins/axios';
 
 export const useFamilyStore = defineStore('family', {
   state: () => ({
-    items: [] as Family[],
-    currentItem: null as Family | null,
-    loading: false,
     error: null as string | null,
-    filter: {} as FamilyFilter, // New filter object
-    totalItems: 0,
-    currentPage: 1,
-    itemsPerPage: DEFAULT_ITEMS_PER_PAGE, // Default items per page
-    totalPages: 1,
-    sortBy: [] as { key: string; order: string }[], // Sorting key and order
+
+    list: {
+      items: [] as Family[],
+      loading: false,
+      filter: {} as FamilyFilter,
+      totalItems: 0,
+      currentPage: 1,
+      itemsPerPage: DEFAULT_ITEMS_PER_PAGE,
+      totalPages: 1,
+      sortBy: [] as { key: string; order: string }[],
+    },
+
+    detail: {
+      item: null as Family | null,
+      loading: false,
+    },
+
+    add: {
+      loading: false,
+    },
+
+    update: {
+      loading: false,
+    },
+
+    _delete: {
+      loading: false,
+    },
   }),
   getters: {},
   actions: {
     async _loadItems() {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
       const result = await this.services.family.loadItems(
         {
-          ...this.filter,
-          sortBy: this.sortBy.length > 0 ? this.sortBy[0].key : undefined,
+          ...this.list.filter,
+          sortBy: this.list.sortBy.length > 0 ? this.list.sortBy[0].key : undefined,
           sortOrder:
-            this.sortBy.length > 0
-              ? (this.sortBy[0].order as 'asc' | 'desc')
+            this.list.sortBy.length > 0
+              ? (this.list.sortBy[0].order as 'asc' | 'desc')
               : undefined,
         },
-        this.currentPage,
-        this.itemsPerPage,
+        this.list.currentPage,
+        this.list.itemsPerPage,
       );
 
       if (result.ok) {
         // Clear existing items and add new ones using splice to preserve array reference
-        this.items.splice(0, this.items.length, ...result.value.items);
-        this.totalItems = result.value.totalItems;
-        this.totalPages = result.value.totalPages;
+        this.list.items.splice(0, this.list.items.length, ...result.value.items);
+        this.list.totalItems = result.value.totalItems;
+        this.list.totalPages = result.value.totalPages;
       } else {
         this.error = i18n.global.t('family.errors.load');
-        this.items.splice(0, this.items.length); // Clear items on error
-        this.totalItems = 0; // Reset totalItems on error
-        this.totalPages = 1; // Reset totalPages on error
+        this.list.items.splice(0, this.list.items.length); // Clear items on error
+        this.list.totalItems = 0; // Reset totalItems on error
+        this.list.totalPages = 1; // Reset totalPages on error
         console.error(result.error);
       }
-      this.loading = false;
+      this.list.loading = false;
     },
 
     async addItem(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
-      this.loading = true;
+      this.add.loading = true;
       this.error = null;
       const result = await this.services.family.add(newItem);
       if (result.ok) {
@@ -60,12 +79,12 @@ export const useFamilyStore = defineStore('family', {
         this.error = i18n.global.t('family.errors.add');
         console.error(result.error);
       }
-      this.loading = false;
+      this.add.loading = false;
       return result;
     },
 
     async addItems(newItems: Omit<Family, 'id'>[]): Promise<Result<string[], ApiError>> {
-      this.loading = true;
+      this.add.loading = true;
       this.error = null;
       const result = await this.services.family.addItems(newItems);
       if (result.ok) {
@@ -74,12 +93,12 @@ export const useFamilyStore = defineStore('family', {
         this.error = i18n.global.t('family.errors.add');
         console.error(result.error);
       }
-      this.loading = false;
+      this.add.loading = false;
       return result;
     },
 
     async updateItem(updatedItem: Family): Promise<void> {
-      this.loading = true;
+      this.update.loading = true;
       this.error = null;
       const result = await this.services.family.update(updatedItem);
       if (result.ok) {
@@ -88,11 +107,11 @@ export const useFamilyStore = defineStore('family', {
         this.error = i18n.global.t('family.errors.update');
         console.error(result.error);
       }
-      this.loading = false;
+      this.update.loading = false;
     },
 
     async deleteItem(id: string): Promise<Result<void, ApiError>> {
-      this.loading = true;
+      this._delete.loading = true;
       this.error = null;
       const result = await this.services.family.delete(id);
       if (!result.ok) {
@@ -101,51 +120,51 @@ export const useFamilyStore = defineStore('family', {
       } else {
         await this._loadItems();
       }
-      this.loading = false;
+      this._delete.loading = false;
       return result;
     },
 
     async setPage(page: number) {
-      if (page >= 1 && page <= this.totalPages && this.currentPage !== page) {
-        this.currentPage = page;
+      if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
+        this.list.currentPage = page;
         this._loadItems();
       }
     },
 
     async setItemsPerPage(count: number) {
-      if (count > 0 && this.itemsPerPage !== count) {
-        this.itemsPerPage = count;
-        this.currentPage = 1; // Reset to first page when items per page changes
+      if (count > 0 && this.list.itemsPerPage !== count) {
+        this.list.itemsPerPage = count;
+        this.list.currentPage = 1; // Reset to first page when items per page changes
         this._loadItems();
       }
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
-      this.sortBy = sortBy;
-      this.currentPage = 1; // Reset to first page on sort change
+      this.list.sortBy = sortBy;
+      this.list.currentPage = 1; // Reset to first page on sort change
       this._loadItems();
     },
 
     setCurrentItem(item: Family | null) {
-      this.currentItem = item;
+      this.detail.item = item;
     },
 
     async getById(id: string): Promise<Family | undefined> {
-      this.loading = true;
+      this.detail.loading = true;
       this.error = null;
 
       // const cachedFamily = this.familyCache.get(id);
       // if (cachedFamily) {
-      //   this.loading = false;
-      //   this.currentItem = cachedFamily;
+      //   this.detail.loading = false;
+      //   this.detail.item = cachedFamily;
       //   return cachedFamily;
       // }
 
       const result = await this.services.family.getById(id);
-      this.loading = false;
+      this.detail.loading = false;
       if (result.ok) {
         if (result.value) {
-          this.currentItem = result.value;
+          this.detail.item = result.value;
           return result.value;
         }
       } else {
@@ -156,11 +175,11 @@ export const useFamilyStore = defineStore('family', {
     },
 
     async getByIds(ids: string[]): Promise<Family[]> {
-      this.loading = true;
+      this.list.loading = true;
       this.error = null;
 
       const result = await this.services.family.getByIds(ids);
-      this.loading = false;
+      this.list.loading = false;
       if (result.ok) {
         return result.value;
       } else {
