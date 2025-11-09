@@ -17,11 +17,11 @@
         </div>
       </v-col>
 
-      <v-col cols="12">
+      <v-col cols="6">
         <v-select v-model="aiBiographyStore.style" :items="biographyStyles" :label="t('aiBiography.input.styleLabel')"
           item-title="text" item-value="value"></v-select>
       </v-col>
-      <v-col cols="12">
+      <v-col cols="6">
         <v-checkbox v-model="aiBiographyStore.generatedFromDB" :label="t('aiBiography.input.useSystemData')"
           hide-details></v-checkbox>
       </v-col>
@@ -83,18 +83,21 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watch, computed, reactive } from 'vue';
-import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAIBiographyStore } from '@/stores/ai-biography.store';
 import { BiographyStyle } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useAIBiographyRules } from '@/validations/ai-biography.validation';
 
-const route = useRoute();
+const props = defineProps<{
+  memberId: string;
+}>();
+
 const aiBiographyStore = useAIBiographyStore();
 const { t } = useI18n();
+
 const biographyContent = ref(''); // Managed in parent
-const memberId = route.params.memberId as string;
+
 const state = reactive({
   userPrompt: ''
 });
@@ -128,7 +131,7 @@ const fetchAndSetMemberDetails = async (id: string) => {
 };
 
 watch(
-  () => route.params.memberId,
+  () => props.memberId,
   (newMemberId) => {
     if (newMemberId) {
       aiBiographyStore.memberId = newMemberId as string;
@@ -148,9 +151,9 @@ watch(
 );
 
 onMounted(() => {
-  if (memberId) {
-    aiBiographyStore.memberId = memberId;
-    fetchAndSetMemberDetails(memberId);
+  if (props.memberId) {
+    aiBiographyStore.memberId = props.memberId;
+    fetchAndSetMemberDetails(props.memberId);
   }
 });
 
