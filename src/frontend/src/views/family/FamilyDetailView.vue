@@ -32,7 +32,7 @@
         </v-window-item>
 
         <v-window-item value="calendar">
-          <EventCalendar :family-id="family.id" :read-only="readOnly" />
+          <EventCalendar :family-id="family.id" />
         </v-window-item>
 
         <v-window-item value="family-tree">

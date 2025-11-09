@@ -7,12 +7,8 @@ import { useAuthService } from '@/services/auth/authService';
 import type { AppState } from '@/types';
 
 // Import feature routes
-import { memberRoutes } from './features/member.routes';
 import { familyRoutes } from './features/family.routes';
-import { eventRoutes } from './features/event.routes';
-import { relationshipRoutes } from './features/relationship.routes';
 import { faceRoutes } from './features/face.routes';
-import { settingRoutes } from './features/setting.routes';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,13 +25,8 @@ const router = createRouter({
           component: () => import('@/views/dashboard/DashboardView.vue'),
           meta: { breadcrumb: 'dashboard.title' },
         },
-        ...memberRoutes,
         ...familyRoutes,
-        ...eventRoutes,
-        ...relationshipRoutes,
         ...faceRoutes,
-        ...settingRoutes,
-
       ],
     },
     {

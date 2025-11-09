@@ -33,47 +33,11 @@ const menu: MenuSection[] = [
     titleKey: 'menu.family',
     items: [
       {
-        titleKey: 'family.view',
-        icon: 'mdi-family-tree',
-        to: '/family/tree',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
-      },
-
-      {
-        titleKey: 'family.manageMembers',
-        icon: 'mdi-account-multiple',
-        to: '/member',
-        roles: ['Admin', 'FamilyManager', 'Editor'],
-      },
-      {
         titleKey: 'family.manageFamilies',
         icon: 'mdi-home-group',
         to: '/family',
         roles: ['Admin', 'FamilyManager'],
         exact: true,
-      },
-      {
-        titleKey: 'event.list.title',
-        icon: 'mdi-calendar-month',
-        to: '/event',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
-      },
-      {
-        titleKey: 'relationship.list.title',
-        icon: 'mdi-relation-many-to-many',
-        to: '/relationship',
-        roles: ['Admin', 'FamilyManager', 'Editor'],
-      },
-    ],
-  },
-  {
-    titleKey: 'face.sidebar.title',
-    items: [
-      {
-        titleKey: 'face.recognition.title',
-        icon: 'mdi-face-recognition',
-        to: '/face/recognition',
-        roles: ['Admin', 'FamilyManager', 'Editor', 'Viewer'],
       },
       {
         titleKey: 'search.face',
@@ -83,7 +47,6 @@ const menu: MenuSection[] = [
       },
     ],
   },
-
 ];
 
 export default menu;

@@ -43,7 +43,11 @@ watch(() => faceStore.error, (newError) => {
   }
 });
 
-const handleFileUpload = async (file: File) => {
+const handleFileUpload = async (file: File | null) => {
+  if (!file) {
+    faceStore.resetState();
+    return;
+  }
   await faceStore.detectFaces(file);
 };
 

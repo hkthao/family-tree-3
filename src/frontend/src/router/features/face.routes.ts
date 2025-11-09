@@ -11,12 +11,6 @@ export const faceRoutes: RouteRecordRaw[] = [
     meta: { breadcrumb: 'face.title', requiresAuth: true },
     children: [
       {
-        path: 'recognition',
-        name: 'FaceRecognition',
-        component: FaceRecognitionView,
-        meta: { breadcrumb: 'face.recognition.title', requiresAuth: true },
-      },
-      {
         path: 'search',
         name: 'FaceSearch',
         component: FaceSearchView,
