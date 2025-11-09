@@ -74,39 +74,14 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
                     {
                         try
                         {
-                            var n8nResponse = JsonSerializer.Deserialize<N8nWebhookResponse>(n8nResult.Value);
-
-                            if (n8nResponse == null)
-                            {
-                                _logger.LogWarning("n8n webhook response deserialized to null for FaceId {FaceId}: {N8nResultValue}", detectedFaceDto.Id, n8nResult.Value);
-                                continue;
-                            }
-
-                            if (n8nResponse.result == null || n8nResponse.result.points == null || !n8nResponse.result.points.Any())
-                            {
-                                _logger.LogWarning("n8n webhook response result or points are null or empty for FaceId {FaceId}: {N8nResultValue}", detectedFaceDto.Id, n8nResult.Value);
-                                continue;
-                            }
-
-                            var firstPoint = n8nResponse.result.points.First();
-                            if (firstPoint.payload == null || string.IsNullOrEmpty(firstPoint.payload.memberId))
-                            {
-                                _logger.LogWarning("n8n webhook response payload or memberId is null or empty for FaceId {FaceId}: {N8nResultValue}", detectedFaceDto.Id, n8nResult.Value);
-                                continue;
-                            }
-
-                            var memberIdFromN8n = Guid.Parse(firstPoint.payload.memberId);
+                            var memberIdFromN8n = Guid.Parse(n8nResult.Value);
                             detectedFaceDto.MemberId = memberIdFromN8n;
                             memberIdsToFetch.Add(memberIdFromN8n);
                             faceMemberMap[detectedFaceDto.Id] = memberIdFromN8n;
                         }
-                        catch (JsonException ex)
-                        {
-                            _logger.LogError(ex, "Failed to deserialize n8n result for FaceId {FaceId}: {N8nResultValue}", detectedFaceDto.Id, n8nResult.Value);
-                        }
                         catch (FormatException ex)
                         {
-                            _logger.LogError(ex, "Failed to parse MemberId from n8n result for FaceId {FaceId}: {N8nResultValue}", detectedFaceDto.Id, n8nResult.Value);
+                            _logger.LogError(ex, "Failed to parse MemberId from n8n result: {N8nResultValue}", n8nResult.Value);
                         }
                     }
                     else if (!n8nResult.IsSuccess)
@@ -153,34 +128,5 @@ public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicat
             _logger.LogError(ex, "An unexpected error occurred during face detection.");
             return Result<FaceDetectionResponseDto>.Failure(string.Format(ErrorMessages.UnexpectedError, ex.Message));
         }
-    }
-
-    // Internal classes for n8n webhook response deserialization
-    private class N8nWebhookResponse
-    {
-        public ResultData? result { get; set; }
-        public string? status { get; set; }
-        public double time { get; set; }
-    }
-
-    private class ResultData
-    {
-        public List<Point>? points { get; set; }
-    }
-
-    private class Point
-    {
-        public string? id { get; set; }
-        public int version { get; set; }
-        public double score { get; set; }
-        public Payload? payload { get; set; }
-    }
-
-    private class Payload
-    {
-        public string? memberId { get; set; }
-        public string? actionType { get; set; }
-        public string? entityType { get; set; }
-        public string? description { get; set; }
     }
 }

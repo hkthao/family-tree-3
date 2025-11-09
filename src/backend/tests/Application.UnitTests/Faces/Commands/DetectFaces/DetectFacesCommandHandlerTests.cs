@@ -61,28 +61,8 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             _context.Members.Add(member);
             await _context.SaveChangesAsync(CancellationToken.None);
 
-            var n8nResponseJson = $@"{{
-                ""result"": {{
-                    ""points"": [
-                        {{
-                            ""id"": ""some_face_id"",
-                            ""version"": 1,
-                            ""score"": 0.9,
-                            ""payload"": {{
-                                ""memberId"": ""{memberId}"",
-                                ""actionType"": ""SearchFaceEmbedding"",
-                                ""entityType"": ""Face"",
-                                ""description"": ""Search face embedding for FaceId some_face_id""
-                            }}
-                        }}
-                    ]
-                }},
-                ""status"": ""ok"",
-                ""time"": 0.001
-            }}";
-
             _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<string>.Success(n8nResponseJson)); // Return JSON string from n8n
+                .ReturnsAsync(Result<string>.Success(memberId.ToString())); // Return memberId from n8n
 
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
