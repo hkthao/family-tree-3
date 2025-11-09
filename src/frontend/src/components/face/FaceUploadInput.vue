@@ -1,22 +1,23 @@
 <template>
   <VFileUpload
     ref="fileUploadRef"
+    v-model="files"
     :label="label || t('face.uploadInput.selectImage')"
     :accept="accept"
     :multiple="multiple"
     prepend-icon="mdi-camera"
     counter
     show-size
-    clearable 
-     
+    clearable
     @change="handleFileChange"
+    @click:clear="reset"
   ></VFileUpload>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { VFileUpload } from 'vuetify/labs/VFileUpload'; // Correct import
+import { VFileUpload } from 'vuetify/labs/VFileUpload';
 
 const { t } = useI18n();
 
@@ -28,27 +29,30 @@ const props = defineProps({
 
 const emit = defineEmits(['file-uploaded']);
 
-const fileUploadRef = ref<HTMLInputElement | null>(null);
+const fileUploadRef = ref<InstanceType<typeof VFileUpload> | null>(null);
+const files = ref<File[]>([]);
 
-const handleFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement;
-  if (target.files && target.files.length > 0) {
+const handleFileChange = () => {
+  if (files.value && files.value.length > 0) {
     if (props.multiple) {
-      emit('file-uploaded', Array.from(target.files));
+      emit('file-uploaded', files.value);
     } else {
-      emit('file-uploaded', target.files[0]);
+      emit('file-uploaded', files.value[0]);
     }
   } else {
-    // When the clearable button is clicked, target.files will be empty
     emit('file-uploaded', null);
   }
 };
 
-const reset = () => {
-  if (fileUploadRef.value) {
-    fileUploadRef.value.value = ''; // Clear the input value
+watch(files, (newFiles) => {
+  if (!newFiles || newFiles.length === 0) {
+    emit('file-uploaded', null);
   }
-  emit('file-uploaded', null); // Also emit null to parent
+});
+
+const reset = () => {
+  files.value = [];
+  // The watch on `files` will emit the null value
 };
 
 defineExpose({

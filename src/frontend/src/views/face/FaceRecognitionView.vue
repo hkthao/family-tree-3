@@ -1,10 +1,8 @@
 <template>
   <v-card :elevation="0">
     <v-card-text>
-      <FaceUploadInput @file-uploaded="handleFileUpload" />
-
+      <FaceUploadInput ref="faceUploadInputRef" @file-uploaded="handleFileUpload" />
       <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
-
       <div v-if="faceStore.uploadedImage && faceStore.detectedFaces.length > 0" class="mt-4">
         <v-row>
           <v-col cols="12" md="8">
@@ -51,6 +49,7 @@ const faceStore = useFaceStore();
 const notificationStore = useNotificationStore();
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
+const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null); // Ref for FaceUploadInput
 
 watch(() => faceStore.error, (newError) => {
   if (newError) {
@@ -95,6 +94,9 @@ const saveLabels = async () => {
   if (success) {
     notificationStore.showSnackbar(t('face.recognition.saveSuccess'), 'success');
     faceStore.resetState(); // Reset face store after saving
+    if (faceUploadInputRef.value) {
+      faceUploadInputRef.value.reset(); // Clear the file input
+    }
   }
 };
 </script>
