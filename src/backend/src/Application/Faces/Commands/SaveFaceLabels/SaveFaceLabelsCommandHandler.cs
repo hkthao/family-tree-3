@@ -6,20 +6,45 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;
 
-public class SaveFaceLabelsCommandHandler(IApplicationDbContext context, IConfigProvider configProvider, ILogger<SaveFaceLabelsCommandHandler> logger) : IRequestHandler<SaveFaceLabelsCommand, Result<bool>>
+public class SaveFaceLabelsCommandHandler(IApplicationDbContext context, IConfigProvider configProvider, ILogger<SaveFaceLabelsCommandHandler> logger, IN8nService n8nService) : IRequestHandler<SaveFaceLabelsCommand, Result<bool>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IConfigProvider _configProvider = configProvider;
     private readonly ILogger<SaveFaceLabelsCommandHandler> _logger = logger;
+    private readonly IN8nService _n8nService = n8nService;
 
-    public Task<Result<bool>> Handle(SaveFaceLabelsCommand request, CancellationToken cancellationToken)
+    public async Task<Result<bool>> Handle(SaveFaceLabelsCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Handling SaveFaceLabelsCommand for ImageId {ImageId} with {FaceCount} faces.",
             request.ImageId, request.FaceLabels.Count);
 
-        // Vector store functionality removed as per refactoring.
-        // The face labels are still processed, but not stored in a vector database directly by this handler.
+        foreach (var faceLabel in request.FaceLabels)
+        {
+            if (faceLabel.Embedding != null && faceLabel.MemberId.HasValue)
+            {
+                var embeddingDto = new EmbeddingWebhookDto
+                {
+                    EntityType = "Face",
+                    EntityId = faceLabel.Id,
+                    ActionType = "SaveFaceEmbedding",
+                    EntityData = new
+                    {
+                        MemberId = faceLabel.MemberId.Value,
+                        Embedding = faceLabel.Embedding
+                    },
+                    Description = $"Face embedding for FaceId {faceLabel.Id} and MemberId {faceLabel.MemberId.Value}"
+                };
 
-        return Task.FromResult(Result<bool>.Success(true));
+                var n8nResult = await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
+
+                if (!n8nResult.IsSuccess)
+                {
+                    _logger.LogError("Failed to save face embedding for FaceId {FaceId} to n8n: {Error}", faceLabel.Id, n8nResult.Error);
+                    return Result<bool>.Failure($"Failed to save face embedding for FaceId {faceLabel.Id} to n8n: {n8nResult.Error}");
+                }
+            }
+        }
+
+        return Result<bool>.Success(true);
     }
 }

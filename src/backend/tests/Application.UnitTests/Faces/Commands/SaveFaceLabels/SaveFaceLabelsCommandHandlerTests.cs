@@ -1,4 +1,5 @@
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Commands.SaveFaceLabels;
 using backend.Application.Faces.Common;
@@ -15,12 +16,13 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
     {
         private readonly Mock<IConfigProvider> _configProviderMock;
         private readonly Mock<ILogger<SaveFaceLabelsCommandHandler>> _loggerMock;
+        private readonly Mock<IN8nService> _n8nServiceMock;
 
         public SaveFaceLabelsCommandHandlerTests()
         {
             _configProviderMock = new Mock<IConfigProvider>();
             _loggerMock = new Mock<ILogger<SaveFaceLabelsCommandHandler>>();
-
+            _n8nServiceMock = new Mock<IN8nService>();
         }
 
         [Fact]
@@ -56,16 +58,21 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
                 }
             };
 
+            _n8nServiceMock.Setup(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Result<double[]>.Success(Array.Empty<double>()));
+
             var handler = new SaveFaceLabelsCommandHandler(
                 _context,
                 _configProviderMock.Object,
-                _loggerMock.Object);
+                _loggerMock.Object,
+                _n8nServiceMock.Object);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
 
             // Assert
             result.IsSuccess.Should().BeTrue();
+            _n8nServiceMock.Verify(x => x.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), It.IsAny<CancellationToken>()), Times.Exactly(2));
         }
     }
 }
