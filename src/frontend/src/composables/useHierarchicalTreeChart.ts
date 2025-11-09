@@ -215,7 +215,7 @@ export function useHierarchicalTreeChart(
     }
   });
 
-  watch([() => props.familyId, () => props.members, () => props.rootId], ([newFamilyId, newMembers, newRootId]) => {
+  watch([() => props.familyId, () => props.members, () => props.rootId], ([newFamilyId, newMembers]) => {
     if (newFamilyId) {
       renderChart(newMembers);
     } else {

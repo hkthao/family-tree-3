@@ -110,7 +110,7 @@
 import { reactive, toRefs, ref, toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
-import { Gender, RelationshipType } from '@/types'; // Import RelationshipType
+import { Gender } from '@/types'; // Import RelationshipType
 import { useVuelidate } from '@vuelidate/core';
 import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';

@@ -4,7 +4,7 @@
     <FamilyList :items="list.items" :total-items="familyStore.list.totalItems" :loading="familyStore.list.loading"
       :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
-      @update:search="handleSearchUpdate" @view="navigateToViewFamily" @edit="navigateToEditFamily"
+      @update:search="handleSearchUpdate" @view="navigateToViewFamily"
       @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
     <!-- Confirm Delete Dialog -->
     <ConfirmDeleteDialog :model-value="deleteConfirmDialog" :title="t('confirmDelete.title')"
@@ -65,10 +65,6 @@ const handleListOptionsUpdate = (options: {
 
 const navigateToAddFamily = () => {
   router.push('/family/add');
-};
-
-const navigateToEditFamily = (family: Family) => {
-  router.push(`/family/edit/${family.id}`);
 };
 
 const navigateToViewFamily = (family: Family) => {

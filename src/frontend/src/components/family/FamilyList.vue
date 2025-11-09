@@ -64,14 +64,6 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-tooltip :text="t('family.list.action.edit')">
-        <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('edit', item)"
-            data-testid="edit-family-button">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-        </template>
-      </v-tooltip>
       <v-tooltip :text="t('family.list.action.delete')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)"
@@ -106,7 +98,6 @@ const props = defineProps<{
 const emit = defineEmits([
   'update:options',
   'view',
-  'edit',
   'delete',
   'update:itemsPerPage',
   'create',
