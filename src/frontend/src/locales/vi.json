@@ -1,4 +1,6 @@
 {
+  "dashboard.familyTreeOverview.title": "Tổng quan cây gia phả",
+  "dashboard.familyTreeOverview.selectFamilyPrompt": "Vui lòng chọn một gia đình để xem cây gia phả.",
   "dashboard.overview": "Tổng quan",
   "dashboard.filterByFamily": "Lọc theo Gia đình",
   "dashboard.stats.loading": "Đang tải thống kê...",

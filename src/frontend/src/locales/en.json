@@ -1,4 +1,6 @@
 {
+  "dashboard.familyTreeOverview.title": "Family Tree Overview",
+  "dashboard.familyTreeOverview.selectFamilyPrompt": "Please select a family to view the family tree.",
   "dashboard.overview": "Overview",
   "dashboard.filterByFamily": "Filter by Family",
   "dashboard.stats.loading": "Loading stats...",

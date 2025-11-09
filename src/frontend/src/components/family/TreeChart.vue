@@ -11,7 +11,7 @@
       </v-btn>
     </v-btn-toggle>
     <v-spacer></v-spacer>
-    <v-tooltip :text="t('member.add')">
+    <v-tooltip :text="t('member.add')" v-if="!props.readOnly">
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props" color="primary" @click="handleAddMember" class="mr-2">
           <v-icon>mdi-plus</v-icon>
@@ -20,23 +20,17 @@
     </v-tooltip>
     <!-- <v-text-field v-model="treeVisualizationStore.searchQuery" :label="t('family.tree.searchMember')"
       prepend-inner-icon="mdi-magnify" single-line hide-details clearable class="mr-4"></v-text-field> -->
-    <MemberAutocomplete
-      v-model="selectedRootMemberId"
-      :label="t('family.tree.filterByRootMember')"
-      :family-id="props.familyId"
-      clearable
-      hide-details
-      hide-chips
-      class="mr-4"
-      style="max-width: 250px;"
-    />
+    <MemberAutocomplete v-model="selectedRootMemberId" :label="t('family.tree.filterByRootMember')"
+      :family-id="props.familyId" clearable hide-details hide-chips class="mr-4" style="max-width: 250px;" />
   </v-toolbar>
   <HierarchicalFamilyTree v-if="chartMode === 'hierarchical'" :family-id="props.familyId" :members="members"
-    :relationships="relationships" :root-id="selectedRootMemberId ?? undefined" @show-member-detail-drawer="handleShowMemberDetailDrawer" />
+    :relationships="relationships" :root-id="selectedRootMemberId ?? undefined"
+    @show-member-detail-drawer="handleShowMemberDetailDrawer" :read-only="props.readOnly" />
   <ForceDirectedFamilyTree v-else :family-id="props.familyId" :members="members" :relationships="relationships"
-    @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember" />
+    @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember"
+    :read-only="props.readOnly" />
 
-  <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650">
+  <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650" v-if="!props.readOnly">
     <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId"
       :initial-relationship-data="initialRelationshipData" @close="addMemberDrawer = false"
       @saved="handleMemberAdded" />
@@ -46,11 +40,12 @@
   <v-navigation-drawer v-model="memberDetailDrawer" location="right" temporary width="650">
     <MemberDetailView v-if="memberDetailDrawer && selectedMemberId" :member-id="selectedMemberId"
       @close="memberDetailDrawer = false" @member-deleted="handleMemberDeleted"
-      @add-member-with-relationship="handleAddMemberWithRelationship" @edit-member="handleEditMember" />
+      @add-member-with-relationship="handleAddMemberWithRelationship" @edit-member="handleEditMember"
+      :read-only="props.readOnly" />
   </v-navigation-drawer>
 
   <!-- New v-navigation-drawer for member edit -->
-  <v-navigation-drawer v-model="editMemberDrawer" location="right" temporary width="650">
+  <v-navigation-drawer v-model="editMemberDrawer" location="right" temporary width="650" v-if="!props.readOnly">
     <MemberEditView v-if="editMemberDrawer && selectedMemberId" :member-id="selectedMemberId"
       @close="editMemberDrawer = false" @saved="handleMemberEdited" />
   </v-navigation-drawer>
@@ -69,6 +64,7 @@ import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // 
 const props = defineProps({
   familyId: { type: String, default: null },
   initialMemberId: { type: String, default: null }, // New prop for initial member ID
+  readOnly: { type: Boolean, default: false },
 });
 const { t } = useI18n();
 const chartMode = ref('hierarchical'); // Default view
@@ -106,8 +102,10 @@ const handleMemberAdded = () => {
 
 // New handler for showing member detail drawer
 const handleShowMemberDetailDrawer = (memberId: string) => {
-  selectedMemberId.value = memberId;
-  memberDetailDrawer.value = true;
+  if (!props.readOnly) {
+    selectedMemberId.value = memberId;
+    memberDetailDrawer.value = true;
+  }
 };
 
 const handleMemberDeleted = () => {
