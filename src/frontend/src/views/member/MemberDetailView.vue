@@ -11,6 +11,7 @@
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
       <v-btn color="primary" @click="handleEdit" :disabled="!member || detail.loading">{{ t('common.edit') }}</v-btn>
+      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading">{{ t('face.deleteFaceData') }}</v-btn>
       <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
@@ -20,6 +21,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
+import { useFaceStore } from '@/stores/face.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
@@ -35,6 +37,7 @@ const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationsh
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
+const faceStore = useFaceStore();
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
 
@@ -96,6 +99,28 @@ const handleDelete = async () => {
       }
     } catch (error) {
       notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
+    }
+  }
+};
+
+const handleDeleteFaceData = async () => {
+  if (!member.value) return;
+
+  const confirmed = await showConfirmDialog(
+    t('face.confirmDeleteFaceDataTitle'),
+    t('face.confirmDeleteFaceDataMessage', { fullName: member.value.fullName })
+  );
+
+  if (confirmed) {
+    try {
+      const result = await faceStore.deleteFacesByMemberId(member.value.id);
+      if (result.ok) {
+        notificationStore.showSnackbar(t('face.messages.deleteSuccess'), 'success');
+      } else {
+        notificationStore.showSnackbar(result.error?.message || t('face.messages.deleteError'), 'error');
+      }
+    } catch (error) {
+      notificationStore.showSnackbar(t('face.messages.deleteError'), 'error');
     }
   }
 };

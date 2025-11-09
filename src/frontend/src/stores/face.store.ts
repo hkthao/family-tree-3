@@ -187,5 +187,27 @@ export const useFaceStore = defineStore('face', {
       this.loading = false;
       this.error = null;
     },
+
+    async deleteFacesByMemberId(memberId: string): Promise<Result<void, ApiError>> {
+      this.loading = true;
+      this.error = null;
+      try {
+        const result = await this.services.face.deleteFacesByMemberId(memberId);
+        if (result.ok) {
+          return { ok: true, value: undefined };
+        } else {
+          this.error =
+            result.error?.message ||
+            i18n.global.t('face.errors.deleteFailed');
+          return { ok: false, error: result.error };
+        }
+      } catch (err: any) {
+        this.error =
+          err.message || i18n.global.t('face.errors.unexpectedError');
+        return { ok: false, error: { message: this.error } as ApiError };
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

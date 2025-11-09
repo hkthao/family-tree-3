@@ -35,22 +35,22 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
                 FaceLabels = new List<DetectedFaceDto>
                 {
                     new DetectedFaceDto
-                    {
-                        Id = "face1",
+                    {                       
+                        Id = Guid.NewGuid().ToString(),
                         MemberId = Guid.NewGuid(),
                         Embedding = new List<double> { 1.0, 2.0, 3.0 },
                         BoundingBox = new BoundingBoxDto()
                     },
                     new DetectedFaceDto
                     {
-                        Id = "face2",
+                        Id = Guid.NewGuid().ToString(),
                         MemberId = Guid.NewGuid(),
                         Embedding = new List<double> { 4.0, 5.0, 6.0 },
                         BoundingBox = new BoundingBoxDto()
                     },
                     new DetectedFaceDto
                     {
-                        Id = "face3",
+                        Id = Guid.NewGuid().ToString(),
                         MemberId = Guid.NewGuid(),
                         Embedding = null, // No embedding
                         BoundingBox = new BoundingBoxDto()
@@ -63,7 +63,6 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
 
             var handler = new SaveFaceLabelsCommandHandler(
                 _context,
-                _configProviderMock.Object,
                 _loggerMock.Object,
                 _n8nServiceMock.Object);
 

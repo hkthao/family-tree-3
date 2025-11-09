@@ -54,6 +54,11 @@ public interface IApplicationDbContext
     DbSet<EventMember> EventMembers { get; }
 
     /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Face.
+    /// </summary>
+    DbSet<Face> Faces { get; }
+
+    /// <summary>
     /// Lưu tất cả các thay đổi được thực hiện trong context vào cơ sở dữ liệu một cách không đồng bộ.
     /// </summary>
     /// <param name="cancellationToken">Token để hủy bỏ thao tác.</param>

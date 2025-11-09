@@ -88,6 +88,7 @@ public class Member : BaseAuditableEntity
     public ICollection<Relationship> SourceRelationships { get; set; } = new List<Relationship>();
     public ICollection<Relationship> TargetRelationships { get; set; } = new List<Relationship>();
     public ICollection<EventMember> EventMembers { get; set; } = new List<EventMember>();
+    public ICollection<Face> Faces { get; set; } = new List<Face>();
 
     public Member() { }
 

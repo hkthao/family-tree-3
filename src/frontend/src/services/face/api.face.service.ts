@@ -28,4 +28,8 @@ export class ApiFaceService implements IFaceService {
     };
     return this.http.post<void>(`${this.apiUrl}/labels`, payload);
   }
+
+  async deleteFacesByMemberId(memberId: string): Promise<Result<void, ApiError>> {
+    return this.http.delete<void>(`${this.apiUrl}/member/${memberId}`);
+  }
 }

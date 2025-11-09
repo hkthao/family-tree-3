@@ -591,5 +591,10 @@
   "novu.tabs.unread": "Unread",
   "settings.user.title": "Settings",
   "userSettings.preferences.languageEnglish": "English",
-  "userSettings.preferences.languageVietnamese": "Vietnamese"
+  "userSettings.preferences.languageVietnamese": "Vietnamese",
+  "face.deleteFaceData": "Delete Face Data",
+  "face.confirmDeleteFaceDataTitle": "Confirm Deletion of Face Data",
+  "face.confirmDeleteFaceDataMessage": "Are you sure you want to delete all face data for {fullName}?",
+  "face.messages.deleteSuccess": "Face data deleted successfully!",
+  "face.messages.deleteError": "Error deleting face data."
 }

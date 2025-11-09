@@ -605,5 +605,10 @@
   "novu.tabs.unread": "Chưa đọc",
   "settings.title": "Cài đặt",
   "userSettings.preferences.languageEnglish": "Tiếng Anh",
-  "userSettings.preferences.languageVietnamese": "Tiếng Việt"
+  "userSettings.preferences.languageVietnamese": "Tiếng Việt",
+  "face.deleteFaceData": "Xóa dữ liệu khuôn mặt",
+  "face.confirmDeleteFaceDataTitle": "Xác nhận xóa dữ liệu khuôn mặt",
+  "face.confirmDeleteFaceDataMessage": "Bạn có chắc chắn muốn xóa tất cả dữ liệu khuôn mặt của {fullName} không?",
+  "face.messages.deleteSuccess": "Xóa dữ liệu khuôn mặt thành công!",
+  "face.messages.deleteError": "Lỗi khi xóa dữ liệu khuôn mặt."
 }

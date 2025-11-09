@@ -65,6 +65,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     /// </summary>
     public DbSet<EventMember> EventMembers => Set<EventMember>();
 
+    /// <summary>
+    /// Lấy hoặc thiết lập DbSet cho các thực thể Face.
+    /// </summary>
+    public DbSet<Face> Faces => Set<Face>();
+
 
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     //{
