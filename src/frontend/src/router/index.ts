@@ -7,6 +7,7 @@ import { useAuthService } from '@/services/auth/authService';
 import type { AppState } from '@/types';
 
 // Import feature routes
+import { memberRoutes } from './features/member.routes';
 import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
 import { settingRoutes } from './features/setting.routes';
@@ -26,6 +27,7 @@ const router = createRouter({
           component: () => import('@/views/dashboard/DashboardView.vue'),
           meta: { breadcrumb: 'dashboard.title' },
         },
+        ...memberRoutes,
         ...familyRoutes,
         ...faceRoutes,
         ...settingRoutes,

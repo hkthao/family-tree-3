@@ -11,6 +11,7 @@
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
       <v-btn color="primary" @click="handleEdit" :disabled="!member || detail.loading">{{ t('common.edit') }}</v-btn>
+      <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading">{{ t('ai.bioSuggest') }}</v-btn>
       <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading">{{ t('face.deleteFaceData') }}</v-btn>
       <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
@@ -33,7 +34,7 @@ interface MemberDetailViewProps {
 }
 
 const props = defineProps<MemberDetailViewProps>();
-const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship', 'edit-member']);
+const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationship', 'edit-member', 'generate-biography']);
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
@@ -79,13 +80,19 @@ const handleEdit = () => {
   }
 };
 
+const handleGenerateBiography = () => {
+  if (member.value) {
+    emit('generate-biography', member.value);
+  }
+};
+
 const handleDelete = async () => {
   if (!member.value) return;
 
-  const confirmed = await showConfirmDialog(
-    t('confirmDelete.title'),
-    t('member.list.confirmDelete', { fullName: member.value.fullName })
-  );
+  const confirmed = await showConfirmDialog({
+    title: t('confirmDelete.title'),
+    message: t('member.list.confirmDelete', { fullName: member.value.fullName }),
+  });
 
   if (confirmed) {
     try {
@@ -106,10 +113,10 @@ const handleDelete = async () => {
 const handleDeleteFaceData = async () => {
   if (!member.value) return;
 
-  const confirmed = await showConfirmDialog(
-    t('face.confirmDeleteFaceDataTitle'),
-    t('face.confirmDeleteFaceDataMessage', { fullName: member.value.fullName })
-  );
+  const confirmed = await showConfirmDialog({
+    title: t('face.confirmDeleteFaceDataTitle'),
+    message: t('face.confirmDeleteFaceDataMessage', { fullName: member.value.fullName }),
+  });
 
   if (confirmed) {
     try {

@@ -5,7 +5,8 @@
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView"
-      @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly" />
+      @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly">
+    </MemberList>
       
     <!-- AI Input Dialog -->
     <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
@@ -26,7 +27,13 @@
     <!-- Detail Member Drawer -->
     <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
       <MemberDetailView v-if="selectedMemberId && detailDrawer" :member-id="selectedMemberId"
-        @close="handleDetailClosed" @edit-member="navigateToEditMember" />
+        @close="handleDetailClosed" @edit-member="navigateToEditMember" @generate-biography="handleGenerateBiography" />
+    </v-navigation-drawer>
+
+    <!-- Biography Drawer -->
+    <v-navigation-drawer v-model="biographyDrawer" location="right" temporary width="650">
+      <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
+        @close="handleBiographyClosed" />
     </v-navigation-drawer>
   </div>
 </template>
@@ -42,6 +49,7 @@ import { useNotificationStore } from '@/stores/notification.store';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
+import MemberBiographyView from '@/views/member/MemberBiographyView.vue'; // Import MemberBiographyView
 import type { MemberFilter, Member } from '@/types';
 
 interface MemberListViewProps {
@@ -61,6 +69,8 @@ const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
 const selectedMemberId = ref<string | null>(null); // Store the ID of the member being edited
 const detailDrawer = ref(false); // Control visibility of the detail drawer
+const biographyDrawer = ref(false); // Control visibility of the biography drawer
+const biographyMemberId = ref<string | null>(null); // Store the ID of the member for biography generation
 
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
@@ -167,6 +177,18 @@ const handleDetailClosed = () => {
   detailDrawer.value = false;
   selectedMemberId.value = null;
 };
+
+const handleGenerateBiography = (member: Member) => {
+  biographyMemberId.value = member.id;
+  detailDrawer.value = false; // Close detail drawer
+  biographyDrawer.value = true; // Open biography drawer
+};
+
+const handleBiographyClosed = () => {
+  biographyDrawer.value = false;
+  biographyMemberId.value = null;
+};
+
 onMounted(() => {
   if (props.familyId) {
     memberStore.getByFamilyId(props.familyId);
