@@ -25,35 +25,30 @@ public class DeleteFacesByMemberIdCommandHandler : IRequestHandler<DeleteFacesBy
         var spec = new FacesByMemberIdSpecification(request.MemberId);
         var faces = await _context.Faces.WithSpecification(spec).ToListAsync(cancellationToken);
 
-        if (faces == null || !faces.Any())
+        var embeddingDto = new EmbeddingWebhookDto
         {
-            return Result<Unit>.Success(Unit.Value);
+            EntityType = "Face",
+            EntityId = request.MemberId.ToString(),
+            ActionType = "DeleteFaceEmbedding",
+            EntityData = new
+            {
+                request.MemberId
+            },
+            Description = $"Delete face embedding for MemberId {request.MemberId}"
+        };
+
+        var n8nResult = await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
+        if (!n8nResult.IsSuccess)
+        {
+            _logger.LogError("Failed to delete face embedding for MemberId {MemberId} in n8n: {Error}", request.MemberId, n8nResult.Error);
+            // Continue deleting other faces even if one fails
         }
 
-        foreach (var face in faces)
+        if (faces != null && faces.Count > 0)
         {
-            var embeddingDto = new EmbeddingWebhookDto
-            {
-                EntityType = "Face",
-                EntityId = face.Id.ToString(),
-                ActionType = "DeleteFaceEmbedding",
-                EntityData = new
-                {
-                    MemberId = face.MemberId
-                },
-                Description = $"Delete face embedding for FaceId {face.Id}"
-            };
-
-            var n8nResult = await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
-            if (!n8nResult.IsSuccess)
-            {
-                _logger.LogError("Failed to delete face embedding for FaceId {FaceId} in n8n: {Error}", face.Id, n8nResult.Error);
-                // Continue deleting other faces even if one fails
-            }
+            _context.Faces.RemoveRange(faces);
+            await _context.SaveChangesAsync(cancellationToken);
         }
-
-        _context.Faces.RemoveRange(faces);
-        await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Unit>.Success(Unit.Value);
     }

@@ -18,7 +18,7 @@ public class FaceConfiguration : IEntityTypeConfiguration<Face>
             .OnDelete(DeleteBehavior.Cascade); // Cascade delete faces when a member is deleted
 
         builder.Property(f => f.Thumbnail)
-            .HasMaxLength(2000); // Assuming thumbnail is a base64 string or URL
+            .HasColumnType("longtext"); // Use longtext for potentially large thumbnails
 
         var listDoubleComparer = new ValueComparer<List<double>>(
             (l1, l2) => l1 != null && l2 != null && l1.SequenceEqual(l2),
