@@ -1,7 +1,4 @@
-import type { Result } from '@/types';
-import type { BiographyResultDto, AIProviderDto, AIBiography } from '@/types';
-import type { ApiError } from '@/plugins/axios';
-import type { BiographyStyle } from '@/types';
+import type { Result, ApiError, AIProviderDto, BiographyStyle } from '@/types';
 
 export interface IAIBiographyService {
   generateBiography(
@@ -10,12 +7,13 @@ export interface IAIBiographyService {
     generatedFromDB: boolean,
     userPrompt?: string,
     language?: string,
-  ): Promise<Result<BiographyResultDto, ApiError>>;
-  getLastAIBiography(memberId: string): Promise<Result<AIBiography | undefined, ApiError>>;
+  ): Promise<Result<string, ApiError>>;
+
   getAIProviders(): Promise<Result<AIProviderDto[], ApiError>>;
+
   saveBiography(command: {
     memberId: string;
     style: BiographyStyle;
     content: string;
-  }): Promise<Result<string, ApiError>>; // Returns ID of saved biography
+  }): Promise<Result<string, ApiError>>; 
 }

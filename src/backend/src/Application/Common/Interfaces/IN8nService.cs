@@ -1,5 +1,4 @@
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AI;
 
 namespace backend.Application.Common.Interfaces;
 

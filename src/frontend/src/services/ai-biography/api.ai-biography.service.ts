@@ -1,6 +1,6 @@
 import type { IAIBiographyService } from './ai-biography.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
-import type { Result, BiographyResultDto, AIProviderDto, BiographyStyle, AIBiography } from '@/types';
+import type { Result, AIProviderDto, BiographyStyle } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -15,7 +15,7 @@ export class ApiAIBiographyService implements IAIBiographyService {
     generatedFromDB: boolean,
     userPrompt?: string,
     language?: string,
-  ): Promise<Result<BiographyResultDto, ApiError>> {
+  ): Promise<Result<string, ApiError>> {
     const payload = {
       memberId,
       style,
@@ -23,11 +23,7 @@ export class ApiAIBiographyService implements IAIBiographyService {
       userPrompt,
       language,
     };
-    return this.http.post<BiographyResultDto>(`${this.apiUrl}/biography`, payload);
-  }
-
-  async getLastAIBiography(memberId: string): Promise<Result<AIBiography | undefined, ApiError>> {
-    return this.http.get<AIBiography | undefined>(`${this.apiUrl}/biography/last/${memberId}`);
+    return this.http.post<string>(`${this.apiUrl}/biography`, payload);
   }
 
   async getAIProviders(): Promise<Result<AIProviderDto[], ApiError>> {

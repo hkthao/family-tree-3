@@ -3,7 +3,6 @@ using backend.Application.Common.Models;
 using backend.Application.Faces.Specifications;
 using backend.Domain.Entities;
 using Ardalis.Specification.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.SaveFaceLabels;

@@ -1,7 +1,6 @@
 using backend.Application.AI.Commands;
 using backend.Domain.Entities;
 using System.Text;
-using System.Collections.Generic;
 
 namespace backend.Application.AI.Prompts;
 
@@ -14,6 +13,7 @@ public static class BiographyPromptBuilder
         promptBuilder.AppendLine($"Style: {request.Style}");
         promptBuilder.AppendLine("Output language: Vietnamese");
         promptBuilder.AppendLine("Please limit the biography to approximately 500 words.");
+        promptBuilder.AppendLine("Do not search for member information in Qdrant Vector Store.");
 
         if (!string.IsNullOrEmpty(request.UserPrompt))
         {

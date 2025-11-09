@@ -40,7 +40,7 @@ public class N8nService : IN8nService
         {
             new
             {
-                sessionId = sessionId,
+                sessionId,
                 action = "sendMessage",
                 chatInput = message
             }
@@ -63,6 +63,7 @@ public class N8nService : IN8nService
 
             var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
             _logger.LogInformation("Received from n8n: {ResponseContent}", responseContent);
+            _logger.LogDebug("Raw n8n chat webhook response: {ResponseContent}", responseContent); // Log raw response
             _logger.LogInformation("Received successful response from n8n webhook.");
             _logger.LogDebug("Raw n8n chat webhook response: {ResponseContent}", responseContent); // Log raw response
 

@@ -1,8 +1,5 @@
-using System.Text;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using backend.Application.AI.Prompts;
 using backend.Domain.Enums;
 using backend.Application.Members.Specifications; // Import the new specification

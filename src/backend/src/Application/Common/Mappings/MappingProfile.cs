@@ -14,7 +14,6 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
 using backend.Domain.Entities;
-using backend.Domain.Enums; // Add this for RelationshipType
 
 namespace backend.Application.Common.Mappings;
 

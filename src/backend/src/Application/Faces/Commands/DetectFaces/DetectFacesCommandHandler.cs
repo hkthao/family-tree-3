@@ -1,11 +1,8 @@
-using System.Text.Json;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AppSetting;
 using backend.Application.Faces.Common;
 using backend.Application.Faces.Queries;
-using backend.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.DetectFaces;

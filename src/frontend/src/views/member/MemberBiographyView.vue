@@ -65,17 +65,16 @@
         <div v-else class="text-center py-4">
           <p>{{ t('aiBiography.output.noBiographyYet') }}</p>
         </div>
-
-        <v-row justify="end" v-if="aiBiographyStore.biographyResult || biographyContent">
-          <v-col cols="auto">
-            <v-btn color="primary" class="mr-2" @click="saveBiography">
-              {{ t('aiBiography.output.saveButton') }}
-            </v-btn>
-            <v-btn color="secondary" @click="regenerateBiography">
-              {{ t('aiBiography.output.regenerateButton') }}
-            </v-btn>
-          </v-col>
-        </v-row>
+      </v-col>
+    </v-row>
+    <v-row justify="end" v-if="aiBiographyStore.biographyResult || biographyContent">
+      <v-col cols="auto">
+        <v-btn color="primary" class="mr-2" @click="saveBiography">
+          {{ t('aiBiography.output.saveButton') }}
+        </v-btn>
+        <v-btn color="secondary" @click="regenerateBiography">
+          {{ t('aiBiography.output.regenerateButton') }}
+        </v-btn>
       </v-col>
     </v-row>
   </v-container>

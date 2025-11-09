@@ -1,12 +1,12 @@
 using backend.Application.Common.Models;
-using MediatR;
+using backend.Domain.Enums; // Add this for BiographyStyle
 
 namespace backend.Application.AI.Commands;
 
 public record GenerateBiographyCommand : IRequest<Result<string>>
 {
     public Guid MemberId { get; init; }
-    public string Style { get; init; } = string.Empty;
+    public BiographyStyle Style { get; init; }
     public string UserPrompt { get; init; } = string.Empty;
     public bool GeneratedFromDB { get; init; }
 }
