@@ -7,6 +7,20 @@
     <v-card-text>
       <MemberForm v-if="member" :initial-member-data="member" :family-id="member.familyId" :read-only="true" />
       <v-alert v-else type="info" class="mt-4">{{ t('member.detail.notFound') }}</v-alert>
+
+      <v-card v-if="member?.biography" class="mt-4 pa-0" flat>
+        <v-card-title class="d-flex justify-space-between align-center px-0">
+          <span class="text-h6">{{ t('member.detail.biography') }}</span>
+          <v-btn icon size="small" variant="text" @click="showBiography = !showBiography">
+            <v-icon>{{ showBiography ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-expand-transition>
+          <v-card-text v-show="showBiography" class="text-body-2 px-0 biography-content">
+            {{ member.biography }}
+          </v-card-text>
+        </v-expand-transition>
+      </v-card>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
@@ -47,6 +61,7 @@ const { isAdmin, isFamilyManager } = useAuth();
 const { detail } = storeToRefs(memberStore);
 
 const member = ref<Member | undefined>(undefined);
+const showBiography = ref(false); // Add ref for biography visibility
 
 const canEditOrDelete = computed(() => {
   return isAdmin.value || isFamilyManager.value;
@@ -140,5 +155,7 @@ const handleDeleteFaceData = async () => {
 </script>
 
 <style scoped>
-/* Add any specific styles for MemberDetailView here if needed */
+.biography-content {
+  white-space: pre-wrap;
+}
 </style>
