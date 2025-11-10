@@ -1,12 +1,6 @@
 <template>
   <v-card>
-    <v-progress-linear
-      :active="loading"
-      :indeterminate="loading"
-      color="primary"
-      absolute
-      top
-    ></v-progress-linear>
+    <v-progress-linear :active="loading" :indeterminate="loading" color="primary" absolute top></v-progress-linear>
     <v-card-title>{{ t('naturalLanguage.editor.title') }}</v-card-title>
     <v-card-text class="pa-0">
       <div class="tiptap-editor">
@@ -77,7 +71,8 @@
     </v-card-text>
     <v-card-actions>
       <v-spacer></v-spacer>
-      <v-btn color="primary" @click="parseContent" :loading="loading" :disabled="loading">{{ t('naturalLanguage.editor.parseButton') }}</v-btn>
+      <v-btn color="primary" @click="emitContent" :loading="loading" :disabled="loading">{{
+        t('naturalLanguage.editor.parseButton') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -86,24 +81,20 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
-import { ref, onBeforeUnmount } from 'vue';
+import { onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { VueRenderer } from '@tiptap/vue-3';
 import tippy, { type Instance as TippyInstance } from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // For basic styling
 import MentionList from '@/components/natural-language-input/MentionList.vue';
-import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
-import { useServices } from '@/composables/useServices'; // Import useServices
-
 const { t } = useI18n();
 const memberStore = useMemberStore();
+defineProps<{
+  loading: boolean; // New prop for loading state
+}>();
 
-const emit = defineEmits(['parsed']);
-
-const loading = ref(false);
-
-const { naturalLanguage: naturalLanguageService } = useServices(); // Inject naturalLanguage service
+const emit = defineEmits(['parse-content']); // Changed emit event
 
 const editor = useEditor({
   content: `<p>Nguyễn Văn A sinh năm 1950, mất năm 2020. Ông là cha của Nguyễn Thị B và Nguyễn Văn C. Nguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D. Họ có một người con tên là Trần Thị E. Nguyễn Văn C sinh năm 1980, chưa kết hôn.</p>`,
@@ -181,30 +172,9 @@ const editor = useEditor({
   ],
 });
 
-const parseContent = async () => {
+const emitContent = () => {
   const content = editor.value?.getText();
-  if (!content) {
-    emit('parsed', null);
-    return;
-  }
-
-  const sessionId = uuidv4();
-
-  try {
-    loading.value = true;
-    const result = await naturalLanguageService.analyzeContent(content, sessionId);
-    if (result.ok) {
-      emit('parsed', result.value);
-    } else {
-      console.error(result.error);
-      emit('parsed', null);
-    }
-  } catch (error: any) {
-    console.error(error);
-    emit('parsed', null);
-  } finally {
-    loading.value = false;
-  }
+  emit('parse-content', content);
 };
 
 onBeforeUnmount(() => {
@@ -223,17 +193,19 @@ onBeforeUnmount(() => {
     font-size: medium;
   }
 }
-.tiptap.ProseMirror{
+
+.tiptap.ProseMirror {
   outline: none;
 }
 
 .tiptap-editor-content .mention {
-  background-color:  rgb(105,108,255);
-  color: #FFFFFF;  border-radius: 4px;
+  background-color: rgb(105, 108, 255);
+  color: #FFFFFF;
+  border-radius: 4px;
   padding: 2px 4px;
 }
 
 .v-btn.is-active {
-  background-color: rgb(105,108,255);
+  background-color: rgb(105, 108, 255);
 }
 </style>

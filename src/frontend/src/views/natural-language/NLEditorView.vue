@@ -1,9 +1,9 @@
 <template>
   <v-container>
-    <NLEditorInput @parsed="handleParsedResult" />
+    <NLEditorInput :loading="naturalLanguageStore.loading" @parse-content="parseContent" />
 
     <ParsedDataList
-      :parsed-result="parsedResult"
+      :parsed-result="naturalLanguageStore.parsedData"
       @delete-member="handleDeleteMember"
       @delete-event="handleDeleteEvent"
     />
@@ -11,27 +11,42 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted } from 'vue';
 import ParsedDataList from '@/components/natural-language-input/ParsedDataList.vue';
 import NLEditorInput from '@/components/natural-language-input/NLEditorInput.vue';
-import type { AnalyzedDataDto } from '@/types/natural-language.d'; // Import DTOs
+import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store';
 
-const parsedResult = ref<AnalyzedDataDto | null>(null);
+const props = defineProps<{
+  familyId: string;
+}>();
 
-const handleParsedResult = (result: AnalyzedDataDto | null) => {
-  parsedResult.value = result;
+const naturalLanguageStore = useNaturalLanguageStore();
+
+const parseContent = async (content: string | null) => {
+  if (!content) {
+    naturalLanguageStore.parsedData = null;
+    return;
+  }
+
+  naturalLanguageStore.familyId = props.familyId;
+  naturalLanguageStore.setInput(content);
+  await naturalLanguageStore.analyzeContent();
 };
 
 const handleDeleteMember = (index: number) => {
-  if (parsedResult.value) {
-    parsedResult.value.members.splice(index, 1);
+  if (naturalLanguageStore.parsedData) {
+    naturalLanguageStore.parsedData.members.splice(index, 1);
   }
 };
 
 const handleDeleteEvent = (index: number) => {
-  if (parsedResult.value) {
-    parsedResult.value.events.splice(index, 1);
+  if (naturalLanguageStore.parsedData) {
+    naturalLanguageStore.parsedData.events.splice(index, 1);
   }
 };
+
+onMounted(() => {
+  naturalLanguageStore.familyId = props.familyId;
+});
 </script>
 

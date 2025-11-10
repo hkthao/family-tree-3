@@ -11,7 +11,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
     parsedData: null as AnalyzedDataDto | null, // Update type
     loading: false as boolean,
     error: null as string | null,
-    currentFamilyId: null as string | null, // Add currentFamilyId to state
+    familyId: null as string | null, // Rename currentFamilyId to familyId
   }),
 
   actions: {
@@ -57,7 +57,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.loading = true;
       this.error = null;
       try {
-        if (!this.currentFamilyId) {
+        if (!this.familyId) { // Use this.familyId
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
           return;
         }
@@ -65,7 +65,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         const newMember: Omit<Member, 'id'> = {
           firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
           lastName: memberData.fullName.split(' ').pop() || '',
-          familyId: this.currentFamilyId,
+          familyId: this.familyId, // Use this.familyId
           gender: memberData.gender as Gender,
           dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
           dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
@@ -88,7 +88,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.loading = true;
       this.error = null;
       try {
-        if (!this.currentFamilyId) {
+        if (!this.familyId) { // Use this.familyId
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
           return;
         }
@@ -98,7 +98,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           description: eventData.description,
           startDate: eventData.date ? new Date(eventData.date) : null,
           location: eventData.location || undefined,
-          familyId: this.currentFamilyId,
+          familyId: this.familyId, // Use this.familyId
           type: eventData.type as unknown as EventType, // Cast as EventType, assuming string matches enum
           relatedMembers: eventData.relatedMemberIds,
         };

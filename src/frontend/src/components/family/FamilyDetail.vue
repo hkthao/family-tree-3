@@ -19,7 +19,7 @@
     </v-navigation-drawer>
 
     <v-navigation-drawer v-model="aiDrawer" location="right" temporary width="650">
-      <NLEditorView v-if="aiDrawer" @close="aiDrawer = false" />
+      <NLEditorView v-if="aiDrawer" :family-id="props.familyId" @close="aiDrawer = false" />
     </v-navigation-drawer>
   </div>
 </template>
