@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
-import type { AnalyzedDataDto } from '@/types/natural-language.d'; // Update import
+import type { AnalyzedDataDto, MemberDataDto, EventDataDto } from '@/types/natural-language.d'; // Update import
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
+import type { Member, Event, Gender, EventType } from '@/types'; // Import Member, Event, Gender, EventType
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
   state: () => ({
@@ -10,6 +11,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
     parsedData: null as AnalyzedDataDto | null, // Update type
     loading: false as boolean,
     error: null as string | null,
+    currentFamilyId: null as string | null, // Add currentFamilyId to state
   }),
 
   actions: {
@@ -49,6 +51,69 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
     setInput(newInput: string) {
       this.input = newInput;
+    },
+
+    async saveMember(memberData: MemberDataDto) {
+      this.loading = true;
+      this.error = null;
+      try {
+        if (!this.currentFamilyId) {
+          this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
+          return;
+        }
+
+        const newMember: Omit<Member, 'id'> = {
+          firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
+          lastName: memberData.fullName.split(' ').pop() || '',
+          familyId: this.currentFamilyId,
+          gender: memberData.gender as Gender,
+          dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
+          dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
+        };
+
+        const result = await this.services.member.add(newMember);
+        if (result.ok) {
+          // Optionally, handle success (e.g., show notification)
+        } else {
+          this.error = result.error?.message || 'Failed to save member';
+        }
+      } catch (e: any) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async saveEvent(eventData: EventDataDto) {
+      this.loading = true;
+      this.error = null;
+      try {
+        if (!this.currentFamilyId) {
+          this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
+          return;
+        }
+
+        const newEvent: Omit<Event, 'id'> = {
+          name: eventData.description, // Using description as name
+          description: eventData.description,
+          startDate: eventData.date ? new Date(eventData.date) : null,
+          location: eventData.location || undefined,
+          familyId: this.currentFamilyId,
+          type: eventData.type as unknown as EventType, // Cast as EventType, assuming string matches enum
+          relatedMembers: eventData.relatedMemberIds,
+        };
+
+        const result = await this.services.event.add(newEvent);
+        if (result.ok) {
+          // Optionally, handle success
+        } else {
+          this.error = result.error?.message || 'Failed to save event';
+        }
+      } catch (e: any) {
+        this.error = e.message;
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });

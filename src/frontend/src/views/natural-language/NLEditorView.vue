@@ -82,12 +82,11 @@
       </v-card-actions>
     </v-card>
 
-    <v-card v-if="parsedResult" class="mt-4">
-      <v-card-title>{{ t('naturalLanguage.editor.parsedResultTitle') }}</v-card-title>
-      <v-card-text>
-        <pre>{{ JSON.stringify(parsedResult, null, 2) }}</pre>
-      </v-card-text>
-    </v-card>
+    <ParsedDataList
+      :parsed-result="parsedResult"
+      @delete-member="handleDeleteMember"
+      @delete-event="handleDeleteEvent"
+    />
   </v-container>
 </template>
 
@@ -98,19 +97,22 @@ import Mention from '@tiptap/extension-mention';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
+import { useFamilyStore } from '@/stores/family.store'; // Import useFamilyStore
 import { VueRenderer } from '@tiptap/vue-3';
 import tippy, { type Instance as TippyInstance } from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // For basic styling
 import MentionList from '@/components/natural-language-input/MentionList.vue';
+import ParsedDataList from '@/components/natural-language-input/ParsedDataList.vue';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
 import { useServices } from '@/composables/useServices'; // Import useServices
-import type { AnalyzedDataDto } from '@/types/natural-language.d'; // Import AnalyzedDataDto
+import type { AnalyzedDataDto } from '@/types/natural-language.d'; // Import DTOs
 import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store'; // Import naturalLanguage store
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
+const familyStore = useFamilyStore(); // Use familyStore
 const naturalLanguageStore = useNaturalLanguageStore(); // Use naturalLanguage store
-const parsedResult = ref<AnalyzedDataDto | string | null>(null); // Update type to include AnalyzedDataDto
+const parsedResult = ref<AnalyzedDataDto | null>(null);
 
 const { naturalLanguage: naturalLanguageService } = useServices(); // Inject naturalLanguage service
 
@@ -193,7 +195,7 @@ const editor = useEditor({
 const parseContent = async () => { // Make parseContent async
   const content = editor.value?.getText(); // Get plain text content
   if (!content) {
-    parsedResult.value = 'Nội dung trống.';
+    parsedResult.value = null;
     return;
   }
 
@@ -206,17 +208,34 @@ const parseContent = async () => { // Make parseContent async
     if (result.ok) {
       parsedResult.value = result.value; // Directly assign the object
     } else {
-      parsedResult.value = `Lỗi: ${result.error?.message || 'Lỗi không xác định'}`;
+      // Handle error display appropriately
+      console.error(result.error);
+      parsedResult.value = null;
     }
   } catch (error: any) {
-    parsedResult.value = `Lỗi: ${error.response?.data?.title || error.message}`;
+    console.error(error);
+    parsedResult.value = null;
   } finally {
     naturalLanguageStore.loading = false; // Set loading to false
   }
 };
 
+const handleDeleteMember = (index: number) => {
+  if (parsedResult.value) {
+    parsedResult.value.members.splice(index, 1);
+  }
+};
+
+const handleDeleteEvent = (index: number) => {
+  if (parsedResult.value) {
+    parsedResult.value.events.splice(index, 1);
+  }
+};
+
 onMounted(() => {
-  //
+  if (familyStore.currentFamily) {
+    naturalLanguageStore.currentFamilyId = familyStore.currentFamily.id;
+  }
 });
 
 onBeforeUnmount(() => {
