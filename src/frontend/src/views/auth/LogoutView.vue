@@ -32,9 +32,8 @@ onMounted(async () => {
   authStore.token = null;
   localStorage.clear(); // Clear any local storage items
 
-  // Redirect to the Auth0 logout endpoint
-  // Auth0 will then redirect back to window.location.origin
-  await authStore.logout();
+  // Redirect to the login page or home page after frontend cleanup
+  router.push('/'); // Redirect to home page
 });
 </script>
 

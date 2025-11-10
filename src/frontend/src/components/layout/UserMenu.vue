@@ -91,7 +91,6 @@ const handleMenuItemClick = (route?: string) => {
 const handleLogoutConfirm = async () => {
   confirmLogoutDialog.value = false;
   await authStore.logout();
-  router.push({ name: 'Login' }); // Redirect to login page
 };</script>
 
 <style scoped>

@@ -63,7 +63,7 @@ router.beforeEach(async (to, from, next) => {
     } catch (error) {
       console.error('Error handling Auth0 redirect callback:', error);
       // Redirect to login or an error page
-      next({ name: 'Login' });
+      next('/');
       return;
     }
   }
