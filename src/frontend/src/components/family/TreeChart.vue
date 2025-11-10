@@ -11,7 +11,7 @@
       </v-btn>
     </v-btn-toggle>
     <v-spacer></v-spacer>
-    <v-tooltip :text="t('member.add')" v-if="!props.readOnly">
+    <v-tooltip :text="t('member.add')" v-if="canAddMember">
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props" color="primary" @click="handleAddMember" class="mr-2">
           <v-icon>mdi-plus</v-icon>
@@ -30,7 +30,7 @@
     @show-member-detail-drawer="handleShowMemberDetailDrawer" @edit-member="handleEditMember"
     :read-only="props.readOnly" />
 
-  <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650" v-if="!props.readOnly">
+  <v-navigation-drawer v-model="addMemberDrawer" location="right" temporary width="650" v-if="canAddMember">
     <MemberAddView v-if="addMemberDrawer" :family-id="props.familyId"
       :initial-relationship-data="initialRelationshipData" @close="addMemberDrawer = false"
       @saved="handleMemberAdded" />
@@ -45,7 +45,7 @@
   </v-navigation-drawer>
 
   <!-- New v-navigation-drawer for member edit -->
-  <v-navigation-drawer v-model="editMemberDrawer" location="right" temporary width="650" v-if="!props.readOnly">
+  <v-navigation-drawer v-model="editMemberDrawer" location="right" temporary width="650" v-if="canEditMember">
     <MemberEditView v-if="editMemberDrawer && selectedMemberId" :member-id="selectedMemberId"
       @close="editMemberDrawer = false" @saved="handleMemberEdited" />
   </v-navigation-drawer>
@@ -60,6 +60,7 @@ import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue'; // Import MemberAutocomplete
+import { useAuth } from '@/composables/useAuth';
 
 const props = defineProps({
   familyId: { type: String, default: null },
@@ -69,6 +70,15 @@ const props = defineProps({
 const { t } = useI18n();
 const chartMode = ref('hierarchical'); // Default view
 const treeVisualizationStore = useTreeVisualizationStore();
+const { isAdmin, isFamilyManager } = useAuth();
+
+const canAddMember = computed(() => {
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+});
+
+const canEditMember = computed(() => {
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+});
 
 const addMemberDrawer = ref(false); // Control visibility of the add member drawer
 const selectedMemberId = ref<string | null>(null); // New ref for selected member ID
@@ -102,7 +112,7 @@ const handleMemberAdded = () => {
 
 // New handler for showing member detail drawer
 const handleShowMemberDetailDrawer = (memberId: string) => {
-  if (!props.readOnly) {
+  if (canEditMember.value) {
     selectedMemberId.value = memberId;
     memberDetailDrawer.value = true;
   }
@@ -123,9 +133,11 @@ const handleAddMemberWithRelationship = (data: any) => {
 
 // New handler for editing a member
 const handleEditMember = (memberId: string) => {
-  selectedMemberId.value = memberId;
-  memberDetailDrawer.value = false; // Close detail drawer
-  editMemberDrawer.value = true; // Open edit drawer
+  if (canEditMember.value) {
+    selectedMemberId.value = memberId;
+    memberDetailDrawer.value = false; // Close detail drawer
+    editMemberDrawer.value = true; // Open edit drawer
+  }
 };
 
 const handleMemberEdited = () => {
