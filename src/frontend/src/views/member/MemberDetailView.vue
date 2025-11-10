@@ -10,16 +10,16 @@
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="handleEdit" :disabled="!member || detail.loading">{{ t('common.edit') }}</v-btn>
-      <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading">{{ t('ai.bioSuggestShort') }}</v-btn>
-      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading">{{ t('face.deleteFaceDataShort') }}</v-btn>
-      <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading">{{ t('common.delete') }}</v-btn>
+      <v-btn color="primary" @click="handleEdit" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{ t('common.edit') }}</v-btn>
+      <v-btn color="info" @click="handleGenerateBiography" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{ t('ai.bioSuggestShort') }}</v-btn>
+      <v-btn color="error" @click="handleDeleteFaceData" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{ t('face.deleteFaceDataShort') }}</v-btn>
+      <v-btn color="error" @click="handleDelete" :disabled="!member || detail.loading" v-if="canEditOrDelete">{{ t('common.delete') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { useFaceStore } from '@/stores/face.store';
@@ -28,6 +28,7 @@ import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { storeToRefs } from 'pinia';
+import { useAuth } from '@/composables/useAuth';
 
 interface MemberDetailViewProps {
   memberId: string;
@@ -41,10 +42,15 @@ const memberStore = useMemberStore();
 const faceStore = useFaceStore();
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { isAdmin, isFamilyManager } = useAuth();
 
 const { detail } = storeToRefs(memberStore);
 
 const member = ref<Member | undefined>(undefined);
+
+const canEditOrDelete = computed(() => {
+  return isAdmin.value || isFamilyManager.value;
+});
 
 const loadMember = async (id: string) => {
   await memberStore.getById(id);

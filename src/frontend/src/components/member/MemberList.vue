@@ -170,52 +170,58 @@ import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
-const headers = computed<DataTableHeader[]>(() => [
-  {
-    title: t('member.list.headers.avatar'),
-    key: 'avatarUrl',
-    sortable: false,
-    width: '80px',
-    align: 'center',
-  },
-  {
-    title: t('member.list.headers.fullName'),
-    key: 'fullName',
-    width: 'auto',
-    align: 'start',
-  },
-  {
-    title: t('member.list.headers.code'),
-    key: 'code',
-    width: '120px',
-    align: 'start',
-  },
-  {
-    title: t('member.list.headers.family'),
-    key: 'family',
-    width: 'auto',
-    align: 'start',
-  },
-  {
-    title: t('member.list.headers.dateOfBirth'),
-    key: 'dateOfBirth',
-    width: '120px',
-    align: 'center',
-  },
-  {
-    title: t('member.list.headers.gender'),
-    key: 'gender',
-    width: '100px',
-    align: 'center',
-  },
-  {
-    title: t('member.list.headers.actions'),
-    key: 'actions',
-    sortable: false,
-    width: '180px',
-    align: 'center',
-  },
-]);
+const headers = computed<DataTableHeader[]>(() => {
+  const baseHeaders: DataTableHeader[] = [
+    {
+      title: t('member.list.headers.avatar'),
+      key: 'avatarUrl',
+      sortable: false,
+      width: '80px',
+      align: 'center',
+    },
+    {
+      title: t('member.list.headers.fullName'),
+      key: 'fullName',
+      width: 'auto',
+      align: 'start',
+    },
+    {
+      title: t('member.list.headers.code'),
+      key: 'code',
+      width: '120px',
+      align: 'start',
+    },
+    {
+      title: t('member.list.headers.family'),
+      key: 'family',
+      width: 'auto',
+      align: 'start',
+    },
+    {
+      title: t('member.list.headers.dateOfBirth'),
+      key: 'dateOfBirth',
+      width: '120px',
+      align: 'center',
+    },
+    {
+      title: t('member.list.headers.gender'),
+      key: 'gender',
+      width: '100px',
+      align: 'center',
+    },
+  ];
+
+  if (canPerformActions.value) {
+    baseHeaders.push({
+      title: t('member.list.headers.actions'),
+      key: 'actions',
+      sortable: false,
+      width: '180px',
+      align: 'center',
+    });
+  }
+  return baseHeaders;
+});
 
 const loadMembers = (options: {
   page: number;
