@@ -5,9 +5,11 @@
       :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToViewFamily"
-      @delete="confirmDelete" @create="navigateToAddFamily" @ai-create="openAiInputDialog" />
+      @delete="confirmDelete" @create="navigateToAddFamily" />
     <!-- AI Input Dialog -->
-    <NLFamilyPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @save="handleAiSave" />
+    <v-navigation-drawer v-model="aiInputDialog" location="right" temporary width="650">
+      <NLInputDrawer v-if="aiInputDialog" v-model="aiInputDialog" @apply="handleNLApply" />
+    </v-navigation-drawer>
   </div>
 </template>
 
@@ -17,11 +19,12 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { FamilySearch, FamilyList, NLFamilyPopup } from '@/components/family';
+import { FamilySearch, FamilyList } from '@/components/family';
+import NLInputDrawer from '@/components/natural-language-input/NLInputDrawer.vue';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
-import type { FamilyFilter, Family, GeneratedDataResponse } from '@/types';
+import type { FamilyFilter, Family } from '@/types';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -93,26 +96,11 @@ const openAiInputDialog = () => {
   aiInputDialog.value = true;
 };
 
-const handleAiSave = async (generatedData: GeneratedDataResponse) => {
-  try {
-    if (generatedData.families.length > 0) {
-      for (const family of generatedData.families) {
-        await familyStore.addItem(family);
-      }
-    }
-    notificationStore.showSnackbar(
-      t('aiInput.saveSuccess'),
-      'success',
-    );
-    console.log('handleAiSave success path reached');
-  } catch (error) {
-    console.error('Error saving generated data:', error);
-    notificationStore.showSnackbar(
-      t('aiInput.saveError'),
-      'error',
-    );
-  } finally {
-    await familyStore._loadItems(); // Refresh the family list after saving
-  }
+const handleNLApply = () => {
+  // The actual saving logic is now handled in NLResultConfirmationView
+  // This function might not be needed anymore or can be simplified
+  // For now, we just close the drawer
+  aiInputDialog.value = false;
+  familyStore._loadItems(); // Refresh the family list after saving
 };
 </script>

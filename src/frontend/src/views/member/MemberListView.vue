@@ -5,7 +5,7 @@
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView()"
-      @ai-biography="navigateToAIBiography" @ai-create="openNLInputDialog" :read-only="props.readOnly">
+      @ai-biography="navigateToAIBiography" :read-only="props.readOnly">
     </MemberList>
       
     <!-- AI Input Drawer -->

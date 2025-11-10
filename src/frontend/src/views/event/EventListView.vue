@@ -11,9 +11,7 @@
     @edit="navigateToEditEvent"
     @delete="confirmDelete"
     @create="navigateToCreateView"
-    @ai-create="showNLEventPopup = true"
   />
-  <NLEventPopup v-model="showNLEventPopup" @saved="handleNLEventSaved" />
 </template>
 
 <script setup lang="ts">
@@ -22,7 +20,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
-import { EventSearch, EventList, NLEventPopup } from '@/components/event';
+import { EventSearch, EventList } from '@/components/event';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -35,8 +33,6 @@ const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
 
 const { list } = storeToRefs(eventStore);
-
-const showNLEventPopup = ref(false);
 
 const currentFilters = ref<EventFilter>({});
 const currentPage = ref(1);
@@ -118,11 +114,6 @@ const confirmDelete = async (event: Event) => {
       );
     }
   }
-};
-
-const handleNLEventSaved = async () => {
-  showNLEventPopup.value = false;
-  await loadEvents();
 };
 
 onMounted(() => {
