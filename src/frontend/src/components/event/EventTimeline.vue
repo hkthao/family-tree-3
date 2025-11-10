@@ -68,7 +68,6 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import EventDetailView from '@/views/event/EventDetailView.vue'; // Import EventDetailView
 import type { Event } from '@/types';
-import { EventType } from '@/types'; // Import EventType
 
 const props = defineProps<{
   familyId?: string; // Optional prop for family ID

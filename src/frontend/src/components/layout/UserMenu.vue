@@ -54,7 +54,6 @@
 <script setup lang="ts">
 import { userMenuItems } from '@/data/userMenuItems';
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useAuthStore, useUserProfileStore } from '@/stores';
 import { AvatarDisplay } from '@/components/common';
 
@@ -75,7 +74,6 @@ const confirmLogoutDialog = ref(false);
 const authStore = useAuthStore();
 const userProfileStore = useUserProfileStore();
 const currentUser = computed(() => userProfileStore.userProfile);
-const router = useRouter();
 
 onMounted(() => {
   userProfileStore.fetchCurrentUserProfile();

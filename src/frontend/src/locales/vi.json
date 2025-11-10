@@ -635,5 +635,18 @@
   "naturalLanguage.errors.emptyInput": "Vui lòng nhập mô tả.",
   "naturalLanguage.errors.parseFailed": "Không thể phân tích đầu vào. Vui lòng thử lại.",
   "naturalLanguage.errors.invalidEntityType": "Loại thực thể không hợp lệ.",
-  "naturalLanguage.errors.noDataParsed": "Không có dữ liệu nào được phân tích từ đầu vào."
+  "naturalLanguage.errors.noDataParsed": "Không có dữ liệu nào được phân tích từ đầu vào.",
+  "naturalLanguage.editor.title": "Trình soạn thảo ngôn ngữ tự nhiên",
+  "naturalLanguage.editor.parseButton": "Phân tích",
+  "naturalLanguage.editor.parsedResultTitle": "Kết quả phân tích",
+  "naturalLanguage.confirmation.newMembers": "Thành viên mới",
+  "naturalLanguage.confirmation.newRelationships": "Mối quan hệ mới",
+  "naturalLanguage.confirmation.mapSourceMember": "Ánh xạ thành viên nguồn",
+  "naturalLanguage.confirmation.mapTargetMember": "Ánh xạ thành viên đích",
+  "naturalLanguage.confirmation.mapToExisting": "Ánh xạ tới thành viên hiện có",
+  "naturalLanguage.confirmation.selectMemberToMap": "Chọn thành viên để ánh xạ",
+  "naturalLanguage.confirmation.selectSourceMember": "Chọn thành viên nguồn",
+  "naturalLanguage.confirmation.selectTargetMember": "Chọn thành viên đích",
+  "naturalLanguage.confirmation.noDataToDisplay": "Không có dữ liệu để hiển thị.",
+  "naturalLanguage.editor.noResult": "Không tìm thấy kết quả nào."
 }
