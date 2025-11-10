@@ -12,7 +12,7 @@
 
       <v-window v-model="selectedTab">
         <v-window-item value="general">
-          <FamilyGeneralTab :family-id="familyId" :read-only="readOnly" />
+          <FamilyDetail :family-id="familyId" :read-only="readOnly" />
         </v-window-item>
 
         <v-window-item value="timeline">
@@ -43,7 +43,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import { TreeChart, FamilyGeneralTab } from '@/components/family';
+import { TreeChart, FamilyDetail } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import FaceRecognitionView from '@/views/face/FaceRecognitionView.vue';

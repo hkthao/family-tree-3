@@ -5,4 +5,4 @@ export { default as ForceDirectedFamilyTree } from './ForceDirectedFamilyTree.vu
 export { default as TreeChart } from './TreeChart.vue';
 export { default as HierarchicalFamilyTree } from './HierarchicalFamilyTree.vue';
 export { default as NLFamilyPopup } from './NLFamilyPopup.vue';
-export { default as FamilyGeneralTab } from './FamilyGeneralTab.vue';
+export { default as FamilyDetail } from './FamilyDetail.vue';
