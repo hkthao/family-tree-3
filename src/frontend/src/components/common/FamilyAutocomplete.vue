@@ -2,7 +2,7 @@
   <RemoteAutocomplete v-bind="$attrs" :model-value="modelValue" @update:model-value="handleRemoteAutocompleteUpdate"
     :label="label" :rules="rules" :read-only="readOnly" :clearable="clearable" :multiple="false" item-title="name"
     item-value="id" :search-function="searchFunction" :preload-function="getByIdsFunction"
-    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items">
+    :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items" :disabled="disabled">
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw.address">
         <template #prepend>
@@ -25,6 +25,7 @@ interface FamilyAutocompleteProps {
   readOnly?: boolean;
   clearable?: boolean;
   multiple?: boolean;
+  disabled?: boolean;
 }
 
 const props = defineProps<FamilyAutocompleteProps>();

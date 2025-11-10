@@ -8,6 +8,7 @@
     :readonly="readOnly"
     :clearable="clearable"
     :multiple="multiple"
+    :disabled="disabled"
     item-title="name"
     item-value="id"
     :loading="composableLoading"
@@ -15,7 +16,7 @@
     :search="searchQuery"
     @update:search="onSearchChange"
     chips
-    closable-chips
+    :closable-chips="!disabled"
     return-object
   >
     <template #item="{ props, item }">
@@ -40,6 +41,7 @@ interface UserAutocompleteProps {
   readOnly?: boolean;
   clearable?: boolean;
   multiple?: boolean;
+  disabled?: boolean;
 }
 
 const props = defineProps<UserAutocompleteProps>();
