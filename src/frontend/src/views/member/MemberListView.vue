@@ -105,19 +105,12 @@ const handleSearchUpdate = async (search: string) => {
   await memberStore._loadItems();
 };
 
-const handleListOptionsUpdate = async (options: {
+const handleListOptionsUpdate = (options: {
   page: number;
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  await memberStore.setPage(options.page);
-  await memberStore.setItemsPerPage(options.itemsPerPage);
-  // Handle sorting
-  if (options.sortBy && options.sortBy.length > 0) {
-    memberStore.setSortBy(options.sortBy);
-  } else {
-    memberStore.setSortBy([]); // Clear sort if no sortBy is provided
-  }
+  memberStore.setListOptions(options);
 };
 
 const confirmDelete = async (member: Member) => {

@@ -134,7 +134,6 @@ export const useMemberStore = defineStore('member', {
     async setPage(page: number) {
       if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
         this.list.currentPage = page;
-        await this._loadItems();
       }
     },
 
@@ -142,13 +141,34 @@ export const useMemberStore = defineStore('member', {
       if (count > 0 && this.list.itemsPerPage !== count) {
         this.list.itemsPerPage = count;
         this.list.currentPage = 1; // Reset to first page when items per page changes
-        await this._loadItems();
       }
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
       this.list.sortBy = sortBy;
       this.list.currentPage = 1; // Reset to first page on sort change
+    },
+
+    setListOptions(options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) {
+      // Cập nhật trang hiện tại nếu nó thay đổi
+      if (this.list.currentPage !== options.page) {
+        this.list.currentPage = options.page;
+      }
+
+      // Cập nhật số lượng mục trên mỗi trang nếu nó thay đổi
+      if (this.list.itemsPerPage !== options.itemsPerPage) {
+        this.list.itemsPerPage = options.itemsPerPage;
+      }
+
+      // Cập nhật sắp xếp nếu nó thay đổi
+      // So sánh mảng sortBy để tránh cập nhật không cần thiết
+      const currentSortBy = JSON.stringify(this.list.sortBy);
+      const newSortBy = JSON.stringify(options.sortBy);
+      if (currentSortBy !== newSortBy) {
+        this.list.sortBy = options.sortBy;
+      }
+
+      // Sau khi tất cả các tùy chọn đã được cập nhật, gọi _loadItems một lần duy nhất
       this._loadItems();
     },
 
