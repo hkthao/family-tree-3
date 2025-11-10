@@ -26,7 +26,7 @@ import { ref, type PropType, watch } from 'vue';
 import { useTheme } from 'vuetify';
 import UserMenu from './UserMenu.vue';
 import { useRouter } from 'vue-router';
-import type { VTextField } from 'vuetify/components';
+
 import type { User } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores';
@@ -37,7 +37,7 @@ import ChatWidget from '@/components/ChatWidget.vue'; // Import ChatWidget
 
 const { t } = useI18n();
 const theme = useTheme();
-const searchField = ref<VTextField | null>(null);
+
 const router = useRouter();
 const userSettingsStore = useUserSettingsStore();
 
@@ -65,11 +65,7 @@ watch(() => userSettingsStore.preferences.theme, (newTheme) => {
   theme.change(getThemeCode(newTheme))
 }, { immediate: true });
 
-const focusSearch = () => {
-  if (searchField.value) {
-    searchField.value.focus();
-  }
-}
+
 
 const handleNavigation = (route: string) => {
   router.push(route);

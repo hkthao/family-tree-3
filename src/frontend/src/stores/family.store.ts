@@ -39,7 +39,6 @@ export const useFamilyStore = defineStore('family', {
   getters: {},
   actions: {
     async _loadItems() {
-      console.log('Loading items for page:', this.list.currentPage, 'and itemsPerPage:', this.list.itemsPerPage, 'with sortBy:', this.list.sortBy);
       this.list.loading = true;
       this.error = null;
       const result = await this.services.family.loadItems(
@@ -147,7 +146,6 @@ export const useFamilyStore = defineStore('family', {
     },
 
     setListOptions(options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) {
-      console.log('setListOptions called with options:', options);
       // Cập nhật trang hiện tại nếu nó thay đổi
       if (this.list.currentPage !== options.page) {
         this.list.currentPage = options.page;

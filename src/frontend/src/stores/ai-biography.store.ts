@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, Member, Result, AIBiography } from '@/types';
+import type { BiographyResultDto, AIProviderDto, Member, Result } from '@/types';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 import { useNotificationStore } from './notification.store';

@@ -90,8 +90,8 @@ const navigateToEditMember = (member: Member) => {
   editDrawer.value = true;
 };
 
-const navigateToAIBiography = (_member: Member) => {
-  // router.push(`/member/biography/${member.id}`);
+const navigateToAIBiography = (member: Member) => {
+  handleGenerateBiography(member);
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {

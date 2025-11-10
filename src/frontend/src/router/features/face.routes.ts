@@ -1,5 +1,5 @@
 import { MainRouterView } from '@/views';
-import FaceRecognitionView from '@/views/face/FaceRecognitionView.vue';
+
 import FaceSearchView from '@/views/face/FaceSearchView.vue';
 import type { RouteRecordRaw } from 'vue-router';
 
