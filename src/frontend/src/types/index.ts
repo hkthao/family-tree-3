@@ -1,4 +1,3 @@
-export * from './natural-language-input.d';
 export * from './family-visibility.d';
 export * from './family.d';
 export * from './member.d';
@@ -23,7 +22,4 @@ export * from './ai.d';
 export * from './auth.d';
 export * from './user.d';
 export * from './user-preference.d';
-export * from './notification.d';
-export * from './notification-template.d';
-export * from './template-format.d';
 export * from './chat.d';
