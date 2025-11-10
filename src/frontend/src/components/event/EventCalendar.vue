@@ -12,7 +12,7 @@
     <v-spacer></v-spacer>
     <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
       :label="t('event.calendar.viewMode')" hide-details></v-select>
-    <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="!props.readOnly">
+    <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
       <v-tooltip :text="t('event.list.action.create')">
         <template v-slot:activator="{ props }">
           <v-icon v-bind="props">mdi-plus</v-icon>
@@ -51,6 +51,7 @@ import type { Event } from '@/types';
 import { useEventStore } from '@/stores/event.store'; // Import event store
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
+import { useAuth } from '@/composables/useAuth';
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
 type CalendarEventColorFunction = (event: { [key: string]: any }) => string;
@@ -63,6 +64,11 @@ const props = defineProps<{
 
 const { t, locale } = useI18n();
 const eventStore = useEventStore(); // Initialize event store
+const { isAdmin, isFamilyManager } = useAuth();
+
+const canAddEvent = computed(() => {
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+});
 
 const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
