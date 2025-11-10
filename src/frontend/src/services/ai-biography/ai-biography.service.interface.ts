@@ -1,4 +1,4 @@
-import type { Result, AIProviderDto, BiographyStyle } from '@/types';
+import type { Result, BiographyStyle } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 
 export interface IAIBiographyService {
@@ -9,8 +9,6 @@ export interface IAIBiographyService {
     userPrompt?: string,
     language?: string,
   ): Promise<Result<string, ApiError>>;
-
-  getAIProviders(): Promise<Result<AIProviderDto[], ApiError>>;
 
   saveBiography(command: {
     memberId: string;
