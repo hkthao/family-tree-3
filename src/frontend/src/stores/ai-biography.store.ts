@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
-import type { BiographyResultDto, AIProviderDto, Member, Result } from '@/types';
+import type { BiographyResultDto, Member, Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
-import { BiographyStyle, AIProviderType } from '@/types';
+import { BiographyStyle } from '@/types';
 import i18n from '@/plugins/i18n';
 import { useNotificationStore } from './notification.store';
 import { err } from '@/types';
@@ -11,16 +11,12 @@ export const useAIBiographyStore = defineStore('aiBiography', {
     loading: false,
     error: null as string | null,
     biographyResult: null as BiographyResultDto | null,
-    aiProviders: [] as AIProviderDto[],
     memberId: null as string | null,
     currentMember: null as Member | null,
     style: BiographyStyle.Emotional as BiographyStyle,
     generatedFromDB: true,
     userPrompt: null as string | null,
     language: 'Vietnamese',
-    maxTokens: 500,
-    temperature: 0.7,
-    selectedProvider: AIProviderType.None as AIProviderType,
   }),
 
   actions: {
@@ -38,26 +34,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
           this.error =
             result.error?.message ||
             i18n.global.t('aiBiography.errors.fetchMemberFailed');
-        }
-      } catch (err: any) {
-        this.error =
-          err.message || i18n.global.t('aiBiography.errors.unexpectedError');
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    async fetchAIProviders() {
-      this.loading = true;
-      this.error = null;
-      try {
-        const result = await this.services.aiBiography.getAIProviders();
-        if (result.ok) {
-          this.aiProviders = result.value;
-        } else {
-          this.error =
-            result.error?.message ||
-            i18n.global.t('aiBiography.errors.fetchProvidersFailed');
         }
       } catch (err: any) {
         this.error =

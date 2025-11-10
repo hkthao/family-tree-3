@@ -1,3 +1,10 @@
+import { Theme } from '@/types';
+
+export enum Language {
+  English = 0,
+  Vietnamese = 1,
+}
+
 export interface User {
   id: string;
   externalId: string;
@@ -26,4 +33,15 @@ export interface UserProfile {
     phone?: string;
     avatar?: string;
     roles?: string[];
+}
+
+export interface UserPreference {
+  id: string;
+  userProfileId: string;
+  theme: Theme;
+  language: Language;
+  created: string;
+  createdBy: string | null;
+  lastModified: string | null;
+  lastModifiedBy: string | null;
 }

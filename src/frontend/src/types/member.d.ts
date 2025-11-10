@@ -1,5 +1,10 @@
-import { Gender } from '@/types';
 import type { Relationship } from './relationship';
+
+export enum Gender {
+  Male = 'Male',
+  Female = 'Female',
+  Other = 'Other',
+}
 
 export interface Member {
   id: string;

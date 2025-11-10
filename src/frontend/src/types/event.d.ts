@@ -1,4 +1,10 @@
-import { EventType } from './event-type.d.ts';
+export enum EventType {
+  Birth = 0,
+  Marriage = 1,
+  Death = 2,
+  Migration = 3,
+  Other = 4
+}
 
 export interface Event {
   id: string;

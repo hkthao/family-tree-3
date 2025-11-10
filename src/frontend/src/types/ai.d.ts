@@ -1,10 +1,3 @@
-export enum AIProviderType {
-  None = 0,
-  Gemini = 1,
-  OpenAI = 2,
-  LocalAI = 3,
-}
-
 export enum BiographyStyle {
   Emotional = 0,
   Historical = 1,
@@ -13,29 +6,6 @@ export enum BiographyStyle {
   Informal = 4,
 }
 
-export interface AIProviderDto {
-  providerType: AIProviderType;
-  name: string;
-  isEnabled: boolean;
-  dailyUsageLimit: number;
-  currentDailyUsage: number;
-  maxTokensPerRequest: number;
-}
-
 export interface BiographyResultDto {
   content: string;
-}
-
-export interface AIBiography {
-  id: string;
-  memberId: string;
-  style: BiographyStyle;
-  content: string;
-  provider: AIProviderType;
-  userPrompt: string;
-  generatedFromDB: boolean;
-  tokensUsed: number;
-  metadata?: any;
-  created: string;
-  language: string;
 }

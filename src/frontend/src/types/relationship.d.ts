@@ -1,5 +1,21 @@
-import type { RelationshipType } from '@/types';
+export enum RelationshipType {
+  Father = 0,
+  Mother = 1,
+  Husband = 2,
+  Wife = 3,
+  Child = 4,
+}
 
+export interface RelationshipFilter {
+  searchQuery?: string;
+  sourceMemberId?: string | null;
+  targetMemberId?: string | null;
+  familyId?: string | null;
+  type?: string | null;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  memberIds?: string[]; // New property for filtering relationships by a list of member IDs
+}
 
 export interface RelationshipMember {
   dateOfBirth?: Date;

@@ -3,7 +3,7 @@
     v-model="selectedMember"
     :items="memberStore.list.items"
     :loading="memberStore.list.loading"
-    :search-input.sync="search"
+    v-model:search="search"
     item-text="fullName"
     item-value="id"
     :label="label"

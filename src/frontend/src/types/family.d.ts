@@ -1,4 +1,8 @@
-import { FamilyVisibility } from "./family-visibility.d.ts";
+export enum FamilyVisibility {
+  Private = 'Private',
+  Public = 'Public',
+  Shared = 'Shared',
+}
 
 export interface Family {
   id: string;
