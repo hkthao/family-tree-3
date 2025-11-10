@@ -59,7 +59,13 @@ export const auth0Service: AuthService = {
   },
   logout: async (options?: LogoutOptions) => {
     const client = await initAuth0();
-    client.logout(options);
+    client.logout({
+      ...options,
+      logoutParams: {
+        returnTo: window.location.origin + '/logout',
+        ...options?.logoutParams,
+      },
+    });
   },
   getAccessToken: async () => {
     const client = await initAuth0();

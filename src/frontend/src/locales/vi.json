@@ -245,6 +245,8 @@
   "userMenu.ariaLabel": "Menu người dùng",
   "userMenu.role": "Vai trò",
   "userMenu.uploadPhoto": "Tải ảnh lên",
+  "logout.title": "Đang đăng xuất...",
+  "logout.message": "Vui lòng chờ trong giây lát...",
   "common.cancel": "Hủy",
   "common.confirm": "Xác nhận",
   "common.loadMore": "Tải thêm",

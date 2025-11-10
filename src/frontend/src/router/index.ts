@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { MainLayout } from '@/layouts';
+import LogoutView from '@/views/auth/LogoutView.vue'; // Import LogoutView
 
 import { canAccessMenu } from '@/utils/menuPermissions';
 import { useAuthStore } from '@/stores';
@@ -32,6 +33,12 @@ const router = createRouter({
         ...faceRoutes,
         ...settingRoutes,
       ],
+    },
+    {
+      path: '/logout',
+      name: 'Logout',
+      component: LogoutView,
+      meta: { requiresAuth: false }, // Logout page does not require authentication
     },
     {
       path: '/:pathMatch(.*)*',
