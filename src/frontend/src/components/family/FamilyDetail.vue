@@ -1,7 +1,7 @@
 <template>
   <div>
     <FamilyForm :initial-family-data="family" :read-only="props.readOnly" :title="t('family.detail.title')" />
-    <v-card-actions class="justify-end">
+    <v-card-actions class="justify-end pa-0">
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
