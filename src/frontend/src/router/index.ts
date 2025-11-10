@@ -32,6 +32,12 @@ const router = createRouter({
         ...familyRoutes,
         ...faceRoutes,
         ...settingRoutes,
+        {
+          path: 'nl-confirmation',
+          name: 'NLConfirmation',
+          component: () => import('@/views/natural-language/NLResultConfirmationView.vue'),
+          meta: { breadcrumb: 'naturalLanguage.confirmation.title' },
+        },
       ],
     },
     {

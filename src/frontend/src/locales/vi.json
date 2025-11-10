@@ -618,5 +618,22 @@
   "face.confirmDeleteFaceDataTitle": "Xác nhận xóa dữ liệu khuôn mặt",
   "face.confirmDeleteFaceDataMessage": "Bạn có chắc chắn muốn xóa tất cả dữ liệu khuôn mặt của {fullName} không?",
   "face.messages.deleteSuccess": "Xóa dữ liệu khuôn mặt thành công!",
-  "face.messages.deleteError": "Lỗi khi xóa dữ liệu khuôn mặt."
+  "face.messages.deleteError": "Lỗi khi xóa dữ liệu khuôn mặt.",
+  "naturalLanguage.title": "Nhập liệu bằng Ngôn ngữ Tự nhiên",
+  "naturalLanguage.inputLabel": "Mô tả của bạn",
+  "naturalLanguage.inputPlaceholder": "Ví dụ: 'Ông nội tôi tên là Nguyễn Văn A, sinh năm 1930 tại Hà Nội, mất năm 2000. Ông có một người con trai tên là Nguyễn Văn B.'",
+  "naturalLanguage.parseButton": "Phân tích",
+  "naturalLanguage.applyButton": "Áp dụng",
+  "naturalLanguage.closeButton": "Đóng",
+  "naturalLanguage.targetEntityTypeLabel": "Loại thực thể",
+  "naturalLanguage.entityType.member": "Thành viên",
+  "naturalLanguage.entityType.event": "Sự kiện",
+  "naturalLanguage.entityType.family": "Gia đình",
+  "naturalLanguage.entityType.relationship": "Mối quan hệ",
+  "naturalLanguage.parsedDataPreview": "Xem trước dữ liệu đã phân tích",
+  "naturalLanguage.noParsedData": "Chưa có dữ liệu nào được phân tích.",
+  "naturalLanguage.errors.emptyInput": "Vui lòng nhập mô tả.",
+  "naturalLanguage.errors.parseFailed": "Không thể phân tích đầu vào. Vui lòng thử lại.",
+  "naturalLanguage.errors.invalidEntityType": "Loại thực thể không hợp lệ.",
+  "naturalLanguage.errors.noDataParsed": "Không có dữ liệu nào được phân tích từ đầu vào."
 }

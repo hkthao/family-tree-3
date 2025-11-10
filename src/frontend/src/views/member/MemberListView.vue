@@ -4,12 +4,15 @@
 
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
-      @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView"
-      @ai-biography="navigateToAIBiography" @ai-create="openAiInputDialog" :read-only="props.readOnly">
+      @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView()"
+      @ai-biography="navigateToAIBiography" @ai-create="openNLInputDialog" :read-only="props.readOnly">
     </MemberList>
       
-    <!-- AI Input Dialog -->
-    <NLMemberPopup :model-value="aiInputDialog" @update:model-value="aiInputDialog = $event" @saved="handleAiSaved" />
+    <!-- AI Input Drawer -->
+    <v-navigation-drawer v-model="nlDrawer" location="right" temporary width="650">
+      <NLInputDrawer v-if="nlDrawer" v-model="nlDrawer" @apply="handleNLApply"
+        initial-target-entity-type="Member" />
+    </v-navigation-drawer>
 
     <!-- Edit Member Drawer -->
 
@@ -39,11 +42,9 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { MemberSearch, MemberList, NLMemberPopup } from '@/components/member';
+import { MemberSearch, MemberList } from '@/components/member'; // Removed NLMemberPopup
+import NLInputDrawer from '@/components/natural-language-input/NLInputDrawer.vue'; // Import NLInputDrawer
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import MemberEditView from '@/views/member/MemberEditView.vue';
@@ -51,6 +52,9 @@ import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import MemberBiographyView from '@/views/member/MemberBiographyView.vue'; // Import MemberBiographyView
 import type { MemberFilter, Member } from '@/types';
+import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
+import { onMounted, ref } from 'vue';
 
 interface MemberListViewProps {
   familyId?: string;
@@ -63,7 +67,7 @@ const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const { list } = storeToRefs(memberStore);
-const aiInputDialog = ref(false);
+const nlDrawer = ref(false); // Control visibility of the NLInputDrawer
 const searchQuery = ref('');
 const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
@@ -71,6 +75,7 @@ const selectedMemberId = ref<string | null>(null); // Store the ID of the member
 const detailDrawer = ref(false); // Control visibility of the detail drawer
 const biographyDrawer = ref(false); // Control visibility of the biography drawer
 const biographyMemberId = ref<string | null>(null); // Store the ID of the member for biography generation
+const initialMemberData = ref<Member | null>(null); // To pass pre-filled data to MemberAddView
 
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
@@ -80,7 +85,8 @@ const navigateToDetailView = (member: Member) => {
   detailDrawer.value = true;
 };
 
-const navigateToCreateView = () => {
+const navigateToCreateView = (initialData: Member | null = null) => {
+  initialMemberData.value = initialData;
   addDrawer.value = true;
 };
 
@@ -145,18 +151,21 @@ const handleDeleteConfirm = async (member: Member) => {
   memberStore._loadItems(); // Refresh the member list after deleting
 };
 
-const openAiInputDialog = () => {
-  aiInputDialog.value = true;
+const openNLInputDialog = () => {
+  nlDrawer.value = true;
 };
 
-const handleAiSaved = () => {
-  memberStore._loadItems(); // Refresh the member list after saving
+const handleNLApply = (payload: { entityType: string; data: any }) => {
+  if (payload.entityType === 'Member') {
+    navigateToCreateView(payload.data as Member);
+  }
 };
 
 const handleMemberSaved = () => {
   editDrawer.value = false;
   addDrawer.value = false;
   selectedMemberId.value = null;
+  initialMemberData.value = null; // Clear initial data
   memberStore._loadItems(); // Refresh the member list after saving
 };
 
@@ -164,6 +173,7 @@ const handleMemberClosed = () => {
   editDrawer.value = false;
   addDrawer.value = false;
   selectedMemberId.value = null;
+  initialMemberData.value = null; // Clear initial data
 };
 
 const handleDetailClosed = () => {

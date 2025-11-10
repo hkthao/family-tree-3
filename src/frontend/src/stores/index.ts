@@ -9,7 +9,7 @@ export * from './family.store';
 export * from './file-upload.store';
 export * from './member-autocomplete.store';
 export * from './member.store';
-export * from './natural-language-input.store';
+
 
 export * from './notification.store';
 export * from './relationship.store';
