@@ -1,36 +1,39 @@
 <template>
-  <v-timeline truncate-line="both">
+  <v-timeline density="default" truncate-line="both">
     <v-timeline-item
       v-for="event in paginatedEvents"
       :key="event.id"
       :dot-color="event.color || 'primary'"
       size="small"
-      side="end"
+      @click="showEventDetails(event)"
+      class="cursor-pointer"
     >
       <template v-slot:opposite>
-        <div
-          :style="{ color: event.color || 'primary' }"
-          class="text-subtitle-1"
-        >
-          {{ formatDate(event.startDate) }}
-        </div>
+        {{ formatDate(event.startDate) }}
       </template>
-      <div class="d-flex justify-space-between flex-wrap">
-        <div class="text-h6" :style="{ color: event.color || 'primary' }">
-          {{ event.name }}
-        </div>
-      </div>
-      <div v-if="event.location" class="text-caption text-grey">
-        <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
-      </div>
-      <ChipLookup
-        v-if="event.relatedMembers && event.relatedMembers.length > 0"
-        :model-value="event.relatedMembers"
-        :data-source="memberStore"
-        display-expr="fullName"
-        value-expr="id"
-        image-expr="avatarUrl"
-      />
+      <v-card :color="event.color || 'primary'" variant="tonal" class="pa-0">
+        <v-card-title class="d-flex align-center">
+          <span class="text-subtitle-1">{{ event.name }}</span>
+          <v-spacer></v-spacer>
+          <v-btn icon size="small" variant="text" :color="event.color || 'primary'">
+            <v-icon>mdi-arrow-right</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="py-1">
+          <div v-if="event.location" class="text-body-2 text-grey-darken-1">
+            <v-icon size="small">mdi-map-marker</v-icon> {{ event.location }}
+          </div>
+          <ChipLookup
+            v-if="event.relatedMembers && event.relatedMembers.length > 0"
+            :model-value="event.relatedMembers"
+            :data-source="memberStore"
+            display-expr="fullName"
+            value-expr="id"
+            image-expr="avatarUrl"
+            class="mt-1"
+          />
+        </v-card-text>
+      </v-card>
     </v-timeline-item>
   </v-timeline>
   <v-alert
@@ -48,6 +51,10 @@
     @update:model-value="loadEvents"
     class="mt-4"
   ></v-pagination>
+
+  <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
+    <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed" />
+  </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
@@ -59,6 +66,9 @@ import ChipLookup from '@/components/common/ChipLookup.vue';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
+import EventDetailView from '@/views/event/EventDetailView.vue'; // Import EventDetailView
+import type { Event } from '@/types';
+import { EventType } from '@/types'; // Import EventType
 
 const props = defineProps<{
   familyId?: string; // Optional prop for family ID
@@ -75,6 +85,16 @@ const { t } = useI18n();
 const page = ref(1);
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 const totalEvents = ref(0);
+const selectedEventId = ref<string | null>(null); // Store the ID of the event being viewed
+const detailDrawer = ref(false); // Control visibility of the detail drawer
+
+const eventTypeIcons = {
+  Birth: 'mdi-cake-variant',
+  Marriage: 'mdi-ring',
+  Death: 'mdi-coffin',
+  Migration: 'mdi-airplane',
+  Other: 'mdi-calendar-text',
+};
 
 const paginatedEvents = computed(() => eventStore.list.items);
 
@@ -84,6 +104,16 @@ const paginationLength = computed(() => {
   }
   return Math.max(1, Math.ceil(totalEvents.value / itemsPerPage.value));
 });
+
+const showEventDetails = (event: Event) => {
+  selectedEventId.value = event.id;
+  detailDrawer.value = true;
+};
+
+const handleDetailClosed = () => {
+  detailDrawer.value = false;
+  selectedEventId.value = null;
+};
 
 const loadEvents = async () => {
   if (!props.familyId && !props.memberId) {

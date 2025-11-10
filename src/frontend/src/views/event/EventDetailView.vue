@@ -12,9 +12,6 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="grey" @click="closeView" data-testid="event-detail-close-button">{{ t('common.close') }}</v-btn>
-      <v-btn color="primary" @click="editEvent" data-testid="event-detail-edit-button" v-if="canEditEvent">
-        {{ t('common.edit') }}
-      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
