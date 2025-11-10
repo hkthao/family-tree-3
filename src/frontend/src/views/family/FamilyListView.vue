@@ -6,10 +6,6 @@
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToViewFamily"
       @delete="confirmDelete" @create="navigateToAddFamily" />
-    <!-- AI Input Dialog -->
-    <v-navigation-drawer v-model="aiInputDialog" location="right" temporary width="650">
-      <NLInputDrawer v-if="aiInputDialog" v-model="aiInputDialog" @apply="handleNLApply" />
-    </v-navigation-drawer>
   </div>
 </template>
 
@@ -20,7 +16,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilySearch, FamilyList } from '@/components/family';
-import NLInputDrawer from '@/components/natural-language-input/NLInputDrawer.vue';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -36,8 +31,6 @@ const { showConfirmDialog } = useConfirmDialog();
 
 const currentFilters = ref<FamilyFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
-
-const aiInputDialog = ref(false);
 
 const handleFilterUpdate = async (filters: FamilyFilter) => {
   currentFilters.value = filters;
@@ -90,17 +83,5 @@ const confirmDelete = async (family: Family) => {
       );
     }
   }
-};
-
-const openAiInputDialog = () => {
-  aiInputDialog.value = true;
-};
-
-const handleNLApply = () => {
-  // The actual saving logic is now handled in NLResultConfirmationView
-  // This function might not be needed anymore or can be simplified
-  // For now, we just close the drawer
-  aiInputDialog.value = false;
-  familyStore._loadItems(); // Refresh the family list after saving
 };
 </script>

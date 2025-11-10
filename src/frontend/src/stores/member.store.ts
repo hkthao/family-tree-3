@@ -220,5 +220,22 @@ export const useMemberStore = defineStore('member', {
       this.list.totalItems = 0;
       this.list.totalPages = 1;
     },
+
+    async searchMembers(searchQuery: string) {
+      this.list.loading = true;
+      this.error = null;
+      const result = await this.services.member.loadItems({
+        searchQuery,
+      }, 1, 10); // Search top 10
+
+      if (result.ok) {
+        this.list.items = result.value.items;
+      } else {
+        this.error = i18n.global.t('member.errors.load');
+        this.list.items = [];
+        console.error(result.error);
+      }
+      this.list.loading = false;
+    },
   },
 });

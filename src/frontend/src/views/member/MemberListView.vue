@@ -8,12 +8,6 @@
       @ai-biography="navigateToAIBiography" :read-only="props.readOnly">
     </MemberList>
       
-    <!-- AI Input Drawer -->
-    <v-navigation-drawer v-model="nlDrawer" location="right" temporary width="650">
-      <NLInputDrawer v-if="nlDrawer" v-model="nlDrawer" @apply="handleNLApply"
-        initial-target-entity-type="Member" />
-    </v-navigation-drawer>
-
     <!-- Edit Member Drawer -->
 
     <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
@@ -43,14 +37,13 @@
 
 <script setup lang="ts">
 import { useMemberStore } from '@/stores/member.store';
-import { MemberSearch, MemberList } from '@/components/member'; // Removed NLMemberPopup
-import NLInputDrawer from '@/components/natural-language-input/NLInputDrawer.vue'; // Import NLInputDrawer
+import { MemberSearch, MemberList } from '@/components/member';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
-import MemberBiographyView from '@/views/member/MemberBiographyView.vue'; // Import MemberBiographyView
+import MemberBiographyView from '@/views/member/MemberBiographyView.vue';
 import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -58,8 +51,8 @@ import { onMounted, ref } from 'vue';
 
 interface MemberListViewProps {
   familyId?: string;
-  readOnly?: boolean; // Add readOnly prop
-  hideSearch?: boolean; // Add hideSearch prop
+  readOnly?: boolean;
+  hideSearch?: boolean;
 }
 
 const props = defineProps<MemberListViewProps>();
@@ -67,15 +60,14 @@ const props = defineProps<MemberListViewProps>();
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const { list } = storeToRefs(memberStore);
-const nlDrawer = ref(false); // Control visibility of the NLInputDrawer
 const searchQuery = ref('');
-const editDrawer = ref(false); // Control visibility of the edit drawer
-const addDrawer = ref(false); // Control visibility of the add drawer
-const selectedMemberId = ref<string | null>(null); // Store the ID of the member being edited
-const detailDrawer = ref(false); // Control visibility of the detail drawer
-const biographyDrawer = ref(false); // Control visibility of the biography drawer
-const biographyMemberId = ref<string | null>(null); // Store the ID of the member for biography generation
-const initialMemberData = ref<Member | null>(null); // To pass pre-filled data to MemberAddView
+const editDrawer = ref(false);
+const addDrawer = ref(false);
+const selectedMemberId = ref<string | null>(null);
+const detailDrawer = ref(false);
+const biographyDrawer = ref(false);
+const biographyMemberId = ref<string | null>(null);
+const initialMemberData = ref<Member | null>(null);
 
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
@@ -148,32 +140,22 @@ const handleDeleteConfirm = async (member: Member) => {
       );
     }
   }
-  memberStore._loadItems(); // Refresh the member list after deleting
-};
-
-const openNLInputDialog = () => {
-  nlDrawer.value = true;
-};
-
-const handleNLApply = (payload: { entityType: string; data: any }) => {
-  if (payload.entityType === 'Member') {
-    navigateToCreateView(payload.data as Member);
-  }
+  memberStore._loadItems();
 };
 
 const handleMemberSaved = () => {
   editDrawer.value = false;
   addDrawer.value = false;
   selectedMemberId.value = null;
-  initialMemberData.value = null; // Clear initial data
-  memberStore._loadItems(); // Refresh the member list after saving
+  initialMemberData.value = null;
+  memberStore._loadItems();
 };
 
 const handleMemberClosed = () => {
   editDrawer.value = false;
   addDrawer.value = false;
   selectedMemberId.value = null;
-  initialMemberData.value = null; // Clear initial data
+  initialMemberData.value = null;
 };
 
 const handleDetailClosed = () => {
@@ -183,8 +165,8 @@ const handleDetailClosed = () => {
 
 const handleGenerateBiography = (member: Member) => {
   biographyMemberId.value = member.id;
-  detailDrawer.value = false; // Close detail drawer
-  biographyDrawer.value = true; // Open biography drawer
+  detailDrawer.value = false;
+  biographyDrawer.value = true;
 };
 
 const handleBiographyClosed = () => {
