@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
 import type { BiographyResultDto, AIProviderDto, Member, Result } from '@/types';
+import type { ApiError } from '@/plugins/axios';
 import { BiographyStyle, AIProviderType } from '@/types';
 import i18n from '@/plugins/i18n';
 import { useNotificationStore } from './notification.store';
 import { err } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 
 export const useAIBiographyStore = defineStore('aiBiography', {
   state: () => ({

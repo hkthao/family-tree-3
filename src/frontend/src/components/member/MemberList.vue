@@ -5,14 +5,14 @@
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn v-if="!props.readOnly" color="primary" icon @click="$emit('ai-create')">
+        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('ai-create')">
           <v-tooltip :text="t('member.list.action.aiCreate')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn v-if="!props.readOnly" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
+        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -72,27 +72,29 @@
 
     <!-- Actions column -->
     <template #item.actions="{ item }">
-      <v-tooltip :text="t('member.list.action.aiBiography')">
-        <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('ai-biography', item)">
-            <v-icon>mdi-robot</v-icon>
-          </v-btn>
-        </template>
-      </v-tooltip>
-      <v-tooltip :text="t('member.list.action.edit')">
-        <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)" data-testid="edit-member-button">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-        </template>
-      </v-tooltip>
-      <v-tooltip :text="t('member.list.action.delete')">
-        <template v-slot:activator="{ props }">
-          <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-member-button">
-            <v-icon>mdi-delete</v-icon>
-          </v-btn>
-        </template>
-      </v-tooltip>
+      <div v-if="canPerformActions">
+        <v-tooltip :text="t('member.list.action.aiBiography')">
+          <template v-slot:activator="{ props }">
+            <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('ai-biography', item)">
+              <v-icon>mdi-robot</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="t('member.list.action.edit')">
+          <template v-slot:activator="{ props }">
+            <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)" data-testid="edit-member-button">
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+        <v-tooltip :text="t('member.list.action.delete')">
+          <template v-slot:activator="{ props }">
+            <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-member-button">
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+          </template>
+        </v-tooltip>
+      </div>
     </template>
 
     <!-- Loading state -->
@@ -111,8 +113,10 @@ import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
 import { ChipLookup } from '@/components/common';
 import { getGenderTitle } from '@/constants/genders'; 
+import { useAuth } from '@/composables/useAuth';
 
 const familyStore = useFamilyStore();
+const { isAdmin, isFamilyManager } = useAuth();
 
 const props = defineProps<{
   items: Member[];
@@ -121,6 +125,10 @@ const props = defineProps<{
   search: string;
   readOnly?: boolean; // Add readOnly prop
 }>();
+
+const canPerformActions = computed(() => {
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+});
 
 const emit = defineEmits([
   'update:options',

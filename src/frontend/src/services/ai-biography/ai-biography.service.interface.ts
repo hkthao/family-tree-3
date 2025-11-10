@@ -1,4 +1,5 @@
-import type { Result, ApiError, AIProviderDto, BiographyStyle } from '@/types';
+import type { Result, AIProviderDto, BiographyStyle } from '@/types';
+import type { ApiError } from '@/plugins/axios';
 
 export interface IAIBiographyService {
   generateBiography(
