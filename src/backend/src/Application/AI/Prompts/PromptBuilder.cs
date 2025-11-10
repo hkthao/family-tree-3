@@ -47,6 +47,7 @@ public static class PromptBuilder
 
         var promptBuilder = new StringBuilder();
         promptBuilder.AppendLine("Bạn là một AI Agent chuyên phân tích thông tin gia phả. Hãy phân tích văn bản sau:");
+        promptBuilder.AppendLine("Không tìm kiếm thông tin trong Vector Database.");
         promptBuilder.AppendLine($"Văn bản: \"{plainText}\"");
 
         if (mentions.Any())
@@ -69,17 +70,18 @@ public static class PromptBuilder
         promptBuilder.AppendLine("{");
         promptBuilder.AppendLine("  \"members\": [");
         promptBuilder.AppendLine("    {");
-        promptBuilder.AppendLine("      \"id\": \"string | null\", // ID thành viên nếu đã biết (Mã thành viên)");
-        promptBuilder.AppendLine("      \"fullName\": \"string\",");
+        promptBuilder.AppendLine("      \"id\": \"Guid | null\", // ID nội bộ của thành viên nếu đã tồn tại trong hệ thống");
+        promptBuilder.AppendLine("      \"code\": \"string | null\", // Mã (Code) của thành viên nếu đã tồn tại và được đề cập");
+        promptBuilder.AppendLine("      \"lastName\": \"string\", // Họ của thành viên");
+        promptBuilder.AppendLine("      \"firstName\": \"string\", // Tên của thành viên");
         promptBuilder.AppendLine("      \"dateOfBirth\": \"string | null\", // Định dạng YYYY-MM-DD hoặc mô tả (ví dụ: \"khoảng 1950\")");
         promptBuilder.AppendLine("      \"dateOfDeath\": \"string | null\",");
         promptBuilder.AppendLine("      \"gender\": \"string | null\", // \"Male\", \"Female\", \"Unknown\"");
-        promptBuilder.AppendLine("      \"relationships\": [");
-        promptBuilder.AppendLine("        {");
-        promptBuilder.AppendLine("          \"type\": \"string\", // \"Father\", \"Mother\", \"Husband\", \"Wife\", \"Child\"");
-        promptBuilder.AppendLine("          \"relatedMember\": { \"id\": \"string | null\", \"fullName\": \"string\", ... } // Thông tin thành viên liên quan (MemberDataDto)");
-        promptBuilder.AppendLine("        }");
-        promptBuilder.AppendLine("      ]");
+        promptBuilder.AppendLine("      \"fatherId\": \"string | null\", // ID của cha (nếu có)");
+        promptBuilder.AppendLine("      \"motherId\": \"string | null\", // ID của mẹ (nếu có)");
+        promptBuilder.AppendLine("      \"husbandId\": \"string | null\", // ID của chồng (nếu có)");
+        promptBuilder.AppendLine("      \"wifeId\": \"string | null\", // ID của vợ (nếu có)");
+        promptBuilder.AppendLine("      \"order\": \"number | null\" // Thứ tự của thành viên trong số các anh chị em (nếu là con)");
         promptBuilder.AppendLine("    }");
         promptBuilder.AppendLine("  ],");
         promptBuilder.AppendLine("  \"events\": [");

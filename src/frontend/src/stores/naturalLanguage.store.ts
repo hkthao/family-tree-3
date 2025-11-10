@@ -29,7 +29,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       const result = await this.services.naturalLanguage.analyzeContent(this.input, sessionId); // Use new service
 
       if (result.ok) {
-        this.parsedData = JSON.parse(result.value); // Assuming result.value is a JSON string
+        this.parsedData = result.value; // Directly assign the object
         this.loading = false;
         return true;
       } else {

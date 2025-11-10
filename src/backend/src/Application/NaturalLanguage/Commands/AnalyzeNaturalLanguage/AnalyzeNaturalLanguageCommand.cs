@@ -18,4 +18,5 @@ public record AnalyzeNaturalLanguageCommand : IRequest<Result<AnalyzedDataDto>>
     /// ID phiên làm việc từ client.
     /// </summary>
     public string SessionId { get; init; } = string.Empty;
+    public Guid FamilyId { get; init; }
 }

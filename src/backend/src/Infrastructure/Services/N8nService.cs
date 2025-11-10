@@ -80,8 +80,8 @@ public class N8nService : IN8nService
             }
             catch (JsonException ex)
             {
-                _logger.LogError(ex, "Failed to deserialize n8n chat webhook response as ChatResponse.");
-                return Result<string>.Failure("Invalid response format from n8n: Failed to deserialize chat response.", "ExternalService");
+                _logger.LogError(ex, "Failed to deserialize n8n chat webhook response as ChatResponse. Raw response: {RawResponse}", responseContent);
+                return Result<string>.Failure($"Invalid response format from n8n: Failed to deserialize chat response. Raw response: {responseContent}", "ExternalService");
             }
 
             if (chatResponse != null && !string.IsNullOrEmpty(chatResponse.Output))

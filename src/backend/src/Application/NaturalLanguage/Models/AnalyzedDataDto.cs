@@ -29,14 +29,29 @@ public class AnalyzedDataDto
 public class MemberDataDto
 {
     /// <summary>
-    /// ID của thành viên (nếu đã tồn tại và được xác định).
+    /// ID nội bộ của thành viên (nếu đã tồn tại trong hệ thống).
     /// </summary>
-    public string? Id { get; set; }
+    public Guid? Id { get; set; }
 
     /// <summary>
-    /// Tên đầy đủ của thành viên.
+    /// Mã (Code) của thành viên (nếu đã tồn tại và được đề cập).
     /// </summary>
-    public string FullName { get; set; } = string.Empty;
+    public string? Code { get; set; }
+
+    /// <summary>
+    /// Họ của thành viên.
+    /// </summary>
+    public string LastName { get; set; } = null!;
+
+    /// <summary>
+    /// Tên của thành viên.
+    /// </summary>
+    public string FirstName { get; set; } = null!;
+
+    /// <summary>
+    /// Tên đầy đủ của thành viên (tính toán từ LastName và FirstName).
+    /// </summary>
+    public string FullName => $"{FirstName} {LastName}".Trim();
 
     /// <summary>
     /// Ngày sinh của thành viên (có thể là chuỗi để AI dễ dàng trả về).
@@ -54,25 +69,39 @@ public class MemberDataDto
     public string? Gender { get; set; }
 
     /// <summary>
-    /// Danh sách các mối quan hệ được đề xuất cho thành viên này.
+    /// ID của cha (nếu có).
     /// </summary>
-    public List<RelationshipDataDto> Relationships { get; set; } = new List<RelationshipDataDto>();
-}
-
-/// <summary>
-/// Đại diện cho một mối quan hệ được AI đề xuất.
-/// </summary>
-public class RelationshipDataDto
-{
-    /// <summary>
-    /// Loại mối quan hệ (ví dụ: "Father", "Mother", "Husband", "Wife", "Child").
-    /// </summary>
-    public string Type { get; set; } = string.Empty;
+    public string? FatherId { get; set; }
 
     /// <summary>
-    /// Thông tin về thành viên liên quan đến mối quan hệ này.
+    /// ID của mẹ (nếu có).
     /// </summary>
-    public MemberDataDto RelatedMember { get; set; } = null!;
+    public string? MotherId { get; set; }
+
+    /// <summary>
+    /// ID của chồng (nếu có).
+    /// </summary>
+    public string? HusbandId { get; set; }
+
+    /// <summary>
+    /// ID của vợ (nếu có).
+    /// </summary>
+    public string? WifeId { get; set; }
+
+    /// <summary>
+    /// Thứ tự của thành viên trong số các anh chị em (nếu là con).
+    /// </summary>
+    public int? Order { get; set; }
+
+    /// <summary>
+    /// Cờ đánh dấu thành viên đã tồn tại trong cơ sở dữ liệu hay chưa.
+    /// </summary>
+    public bool IsExisting { get; set; } = false;
+
+    /// <summary>
+    /// Thông báo lỗi xác thực cụ thể cho thành viên này.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
 }
 
 /// <summary>
@@ -104,4 +133,9 @@ public class EventDataDto
     /// Danh sách các thành viên liên quan đến sự kiện này.
     /// </summary>
     public List<string> RelatedMemberIds { get; set; } = new List<string>();
+
+    /// <summary>
+    /// Thông báo lỗi xác thực cụ thể cho sự kiện này.
+    /// </summary>
+    public string? ErrorMessage { get; set; }
 }

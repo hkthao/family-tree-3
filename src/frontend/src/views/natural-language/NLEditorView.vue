@@ -111,7 +111,6 @@ const { t } = useI18n();
 const memberStore = useMemberStore();
 const naturalLanguageStore = useNaturalLanguageStore(); // Use naturalLanguage store
 const parsedResult = ref<AnalyzedDataDto | string | null>(null); // Update type to include AnalyzedDataDto
-let popup: TippyInstance | null = null;
 
 const { naturalLanguage: naturalLanguageService } = useServices(); // Inject naturalLanguage service
 
@@ -205,8 +204,7 @@ const parseContent = async () => { // Make parseContent async
     const result = await naturalLanguageService.analyzeContent(content, sessionId);
 
     if (result.ok) {
-      // Assuming result.value is the JSON string, parse it
-      parsedResult.value = JSON.parse(result.value);
+      parsedResult.value = result.value; // Directly assign the object
     } else {
       parsedResult.value = `Lỗi: ${result.error?.message || 'Lỗi không xác định'}`;
     }

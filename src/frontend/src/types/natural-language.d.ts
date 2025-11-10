@@ -5,17 +5,17 @@ export interface AnalyzedDataDto {
 }
 
 export interface MemberDataDto {
-  id?: string | null;
+  id?: string | null; // Internal ID (Guid) if existing
+  code?: string | null; // Human-readable code if existing and mentioned
   fullName: string;
   dateOfBirth?: string | null;
   dateOfDeath?: string | null;
   gender?: string | null;
-  relationships: RelationshipDataDto[];
-}
-
-export interface RelationshipDataDto {
-  type: string;
-  relatedMember: MemberDataDto;
+  fatherId?: string | null;
+  motherId?: string | null;
+  husbandId?: string | null;
+  wifeId?: string | null;
+  order?: number | null;
 }
 
 export interface EventDataDto {
