@@ -53,9 +53,7 @@ const handleListOptionsUpdate = (options: {
   itemsPerPage: number;
   sortBy: { key: string; order: string }[];
 }) => {
-  familyStore.setPage(options.page);
-  familyStore.setItemsPerPage(options.itemsPerPage);
-  familyStore.setSortBy(options.sortBy);
+  familyStore.setListOptions(options);
 };
 
 const navigateToAddFamily = () => {

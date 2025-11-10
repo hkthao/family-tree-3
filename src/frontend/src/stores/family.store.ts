@@ -39,6 +39,7 @@ export const useFamilyStore = defineStore('family', {
   getters: {},
   actions: {
     async _loadItems() {
+      console.log('Loading items for page:', this.list.currentPage, 'and itemsPerPage:', this.list.itemsPerPage, 'with sortBy:', this.list.sortBy);
       this.list.loading = true;
       this.error = null;
       const result = await this.services.family.loadItems(
@@ -127,21 +128,45 @@ export const useFamilyStore = defineStore('family', {
     async setPage(page: number) {
       if (page >= 1 && page <= this.list.totalPages && this.list.currentPage !== page) {
         this.list.currentPage = page;
-        this._loadItems();
+        // this._loadItems(); // Sẽ được gọi bởi setListOptions
       }
     },
 
     async setItemsPerPage(count: number) {
       if (count > 0 && this.list.itemsPerPage !== count) {
         this.list.itemsPerPage = count;
-        this.list.currentPage = 1; // Reset to first page when items per page changes
-        this._loadItems();
+        // this.list.currentPage = 1; // Sẽ được xử lý bởi setListOptions nếu cần
+        // this._loadItems(); // Sẽ được gọi bởi setListOptions
       }
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
       this.list.sortBy = sortBy;
-      this.list.currentPage = 1; // Reset to first page on sort change
+      // this.list.currentPage = 1; // Sẽ được xử lý bởi setListOptions nếu cần
+      // this._loadItems(); // Sẽ được gọi bởi setListOptions
+    },
+
+    setListOptions(options: { page: number; itemsPerPage: number; sortBy: { key: string; order: string }[] }) {
+      console.log('setListOptions called with options:', options);
+      // Cập nhật trang hiện tại nếu nó thay đổi
+      if (this.list.currentPage !== options.page) {
+        this.list.currentPage = options.page;
+      }
+
+      // Cập nhật số lượng mục trên mỗi trang nếu nó thay đổi
+      if (this.list.itemsPerPage !== options.itemsPerPage) {
+        this.list.itemsPerPage = options.itemsPerPage;
+      }
+
+      // Cập nhật sắp xếp nếu nó thay đổi
+      // So sánh mảng sortBy để tránh cập nhật không cần thiết
+      const currentSortBy = JSON.stringify(this.list.sortBy);
+      const newSortBy = JSON.stringify(options.sortBy);
+      if (currentSortBy !== newSortBy) {
+        this.list.sortBy = options.sortBy;
+      }
+
+      // Sau khi tất cả các tùy chọn đã được cập nhật, gọi _loadItems một lần duy nhất
       this._loadItems();
     },
 
