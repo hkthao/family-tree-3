@@ -49,13 +49,22 @@ export const auth0Service: AuthService = {
     const client = await initAuth0();
     await client.loginWithRedirect({
       appState: { target: '/' }, // Redirect to home after signup
+      authorizationParams: {
+        ui_locales: 'vi',
+      },
       // You might pass other parameters from 'data' if Auth0 supports them
     });
     return null; // User data will be available after redirect
   },
   login: async (options?: RedirectLoginOptions) => {
     const client = await initAuth0();
-    await client.loginWithRedirect(options);
+    await client.loginWithRedirect({
+      ...options,
+      authorizationParams: {
+        ui_locales: 'vi',
+        ...options?.authorizationParams,
+      },
+    });
   },
   logout: async (options?: LogoutOptions) => {
     const client = await initAuth0();
