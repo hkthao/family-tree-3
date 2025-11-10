@@ -5,6 +5,9 @@
       <v-btn color="gray" @click="closeView" data-testid="button-close">
         {{ t('common.close') }}
       </v-btn>
+      <v-btn color="secondary" @click="aiDrawer = true" data-testid="button-ai-input" v-if="canEditFamily">
+        {{ t('common.aiInput') }}
+      </v-btn>
       <v-btn color="primary" @click="editDrawer = true" data-testid="button-edit" v-if="canEditFamily">
         {{ t('common.edit') }}
       </v-btn>
@@ -13,6 +16,10 @@
     <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
       <FamilyEditView v-if="editableFamily && editDrawer" :initial-family="editableFamily" @close="editDrawer = false"
         @saved="handleFamilySaved" />
+    </v-navigation-drawer>
+
+    <v-navigation-drawer v-model="aiDrawer" location="right" temporary width="650">
+      <NLEditorView v-if="aiDrawer" @close="aiDrawer = false" />
     </v-navigation-drawer>
   </div>
 </template>
@@ -24,6 +31,7 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilyForm } from '@/components/family';
 import FamilyEditView from '@/views/family/FamilyEditView.vue';
+import NLEditorView from '@/views/natural-language/NLEditorView.vue';
 import type { Family } from '@/types';
 import { useAuth } from '@/composables/useAuth';
 
@@ -42,6 +50,7 @@ const emit = defineEmits(['familyUpdated']);
 const family = ref<Family | undefined>(undefined);
 const editableFamily = ref<Family | undefined>(undefined); // Copy of family for editing
 const editDrawer = ref(false); // Control visibility of the edit drawer
+const aiDrawer = ref(false); // Control visibility of the AI input drawer
 
 const canEditFamily = computed(() => {
   return isAdmin.value || isFamilyManager.value;
