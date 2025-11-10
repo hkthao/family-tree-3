@@ -7,7 +7,7 @@
         <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
         <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
         <v-tab value="members" data-testid="tab-members">{{ t('family.members.title') }}</v-tab>
-        <v-tab value="face-recognition" data-testid="tab-face-recognition">{{ t('face.recognition') }}</v-tab>
+        <v-tab v-if="canViewFaceDataTab" value="face-recognition" data-testid="tab-face-recognition">{{ t('face.face_data') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="selectedTab">
@@ -31,7 +31,7 @@
           <MemberListView :family-id="familyId" :hide-search="true" />
         </v-window-item>
 
-        <v-window-item value="face-recognition">
+        <v-window-item v-if="canViewFaceDataTab" value="face-recognition">
           <FaceRecognitionView :family-id="familyId" />
         </v-window-item>
       </v-window>
@@ -47,13 +47,19 @@ import { TreeChart, FamilyDetail } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import FaceRecognitionView from '@/views/face/FaceRecognitionView.vue';
+import { useAuth } from '@/composables/useAuth';
 
 const { t } = useI18n();
 const route = useRoute();
+const { isAdmin, isFamilyManager } = useAuth();
 
 const selectedTab = ref('general');
 const readOnly = ref(true);
 const familyId = computed(() => route.params.id as string);
+
+const canViewFaceDataTab = computed(() => {
+  return isAdmin.value || isFamilyManager.value;
+});
 onMounted(() => {
   const savedTab = localStorage.getItem('familyDetailSelectedTab');
   if (savedTab) {
