@@ -1,6 +1,13 @@
 <template>
   <v-container>
     <v-card>
+      <v-progress-linear
+        :active="naturalLanguageStore.loading"
+        :indeterminate="naturalLanguageStore.loading"
+        color="primary"
+        absolute
+        top
+      ></v-progress-linear>
       <v-card-title>{{ t('naturalLanguage.editor.title') }}</v-card-title>
       <v-card-text class="pa-0"> <!-- Remove padding from v-card-text -->
         <div class="tiptap-editor">
@@ -71,14 +78,14 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="primary" @click="parseContent">{{ t('naturalLanguage.editor.parseButton') }}</v-btn>
+        <v-btn color="primary" @click="parseContent" :loading="naturalLanguageStore.loading" :disabled="naturalLanguageStore.loading">{{ t('naturalLanguage.editor.parseButton') }}</v-btn>
       </v-card-actions>
     </v-card>
 
     <v-card v-if="parsedResult" class="mt-4">
       <v-card-title>{{ t('naturalLanguage.editor.parsedResultTitle') }}</v-card-title>
       <v-card-text>
-        <pre>{{ parsedResult }}</pre>
+        <pre>{{ JSON.stringify(parsedResult, null, 2) }}</pre>
       </v-card-text>
     </v-card>
   </v-container>
@@ -95,10 +102,18 @@ import { VueRenderer } from '@tiptap/vue-3';
 import tippy, { type Instance as TippyInstance } from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // For basic styling
 import MentionList from '@/components/natural-language-input/MentionList.vue';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
+import { useServices } from '@/composables/useServices'; // Import useServices
+import type { AnalyzedDataDto } from '@/types/natural-language.d'; // Import AnalyzedDataDto
+import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store'; // Import naturalLanguage store
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const parsedResult = ref<any>(null);
+const naturalLanguageStore = useNaturalLanguageStore(); // Use naturalLanguage store
+const parsedResult = ref<AnalyzedDataDto | string | null>(null); // Update type to include AnalyzedDataDto
+let popup: TippyInstance | null = null;
+
+const { naturalLanguage: naturalLanguageService } = useServices(); // Inject naturalLanguage service
 
 const editor = useEditor({
   content: `<p>Nguyễn Văn A sinh năm 1950, mất năm 2020. Ông là cha của Nguyễn Thị B và Nguyễn Văn C. Nguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D. Họ có một người con tên là Trần Thị E. Nguyễn Văn C sinh năm 1980, chưa kết hôn.</p>`,
@@ -108,15 +123,18 @@ const editor = useEditor({
       HTMLAttributes: {
         class: 'mention',
       },
-      renderText({ node }) {
-        return `@${node.attrs.label}`;
+      renderHTML({ node }) {
+        return ['span', {
+          style: 'background-color: #1976D2; color: #FFFFFF; border-radius: 4px; padding: 2px 4px;',
+          class: 'mention', // Keep the class for potential future use or other styling
+        }, `@${node.attrs.label}`];
       },
       suggestion: {
         items: async ({ query }) => {
           await memberStore.searchMembers(query);
           return memberStore.list.items.map(item => ({
             id: item.code || '',
-            label: item.fullName || '',
+            label: `[${item.fullName || ''}](${item.code || ''})`,
           }));
         },
         render: () => {
@@ -173,11 +191,30 @@ const editor = useEditor({
   ],
 });
 
-const parseContent = () => {
-  const content = editor.value?.getJSON();
-  // In a real implementation, this would be sent to the backend.
-  // For now, we'll just display the JSON content.
-  parsedResult.value = JSON.stringify(content, null, 2);
+const parseContent = async () => { // Make parseContent async
+  const content = editor.value?.getText(); // Get plain text content
+  if (!content) {
+    parsedResult.value = 'Nội dung trống.';
+    return;
+  }
+
+  const sessionId = uuidv4(); // Generate a new sessionId
+
+  try {
+    naturalLanguageStore.loading = true; // Set loading to true
+    const result = await naturalLanguageService.analyzeContent(content, sessionId);
+
+    if (result.ok) {
+      // Assuming result.value is the JSON string, parse it
+      parsedResult.value = JSON.parse(result.value);
+    } else {
+      parsedResult.value = `Lỗi: ${result.error?.message || 'Lỗi không xác định'}`;
+    }
+  } catch (error: any) {
+    parsedResult.value = `Lỗi: ${error.response?.data?.title || error.message}`;
+  } finally {
+    naturalLanguageStore.loading = false; // Set loading to false
+  }
 };
 
 onMounted(() => {
@@ -206,8 +243,7 @@ onBeforeUnmount(() => {
 
 .tiptap-editor-content .mention {
   background-color:  rgb(105,108,255);
-  color: #FFFFFF;
-  border-radius: 4px;
+  color: #FFFFFF;  border-radius: 4px;
   padding: 2px 4px;
 }
 

@@ -50,7 +50,7 @@ public class GenerateBiographyCommandHandler : IRequestHandler<GenerateBiography
             .Where(s => s != null)
             .ToList();
 
-        var message = BiographyPromptBuilder.BuildPrompt(request, member, family, father, mother, spouses!);
+        var message = PromptBuilder.BuildBiographyPrompt(request, member, family, father, mother, spouses!);
 
         var result = await _n8nService.CallChatWebhookAsync(request.MemberId.ToString(), message, cancellationToken);
 

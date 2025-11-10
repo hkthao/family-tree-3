@@ -1,24 +1,22 @@
 import { defineStore } from 'pinia';
-import type { ParsedMember, ParsedEvent } from '@/types/natural-language.d';
-import type { Family, Event, Member, Relationship } from '@/types';
+import type { AnalyzedDataDto } from '@/types/natural-language.d'; // Update import
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
+import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
   state: () => ({
     input: '' as string,
-    parsedData: null as (ParsedMember | ParsedEvent | Family | Event | Member | Relationship | null),
-    entityType: null as ('Member' | 'Event' | 'Family' | 'Relationship' | null),
+    parsedData: null as AnalyzedDataDto | null, // Update type
     loading: false as boolean,
     error: null as string | null,
   }),
 
   actions: {
-    async parseInput(): Promise<boolean> {
+    async analyzeContent(): Promise<boolean> { // Rename action to analyzeContent
       this.loading = true;
       this.error = null;
       this.parsedData = null;
-      this.entityType = null;
 
       if (!this.input.trim()) {
         this.error = i18n.global.t('naturalLanguage.errors.emptyInput');
@@ -26,11 +24,12 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         return false;
       }
 
-      const result = await this.services.naturalLanguageInput.parseInput(this.input);
+      const sessionId = uuidv4(); // Generate sessionId here
+
+      const result = await this.services.naturalLanguage.analyzeContent(this.input, sessionId); // Use new service
 
       if (result.ok) {
-        this.parsedData = result.value.data;
-        this.entityType = result.value.entityType as 'Member' | 'Event' | 'Family' | 'Relationship';
+        this.parsedData = JSON.parse(result.value); // Assuming result.value is a JSON string
         this.loading = false;
         return true;
       } else {
@@ -44,7 +43,6 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
     clearState() {
       this.input = '';
       this.parsedData = null;
-      this.entityType = null;
       this.error = null;
       this.loading = false;
     },

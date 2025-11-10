@@ -17,6 +17,16 @@ public class ValidationException : Exception
     }
 
     /// <summary>
+    /// Khởi tạo một phiên bản mới của lớp ValidationException với một thông báo lỗi cụ thể.
+    /// </summary>
+    /// <param name="message">Thông báo lỗi.</param>
+    public ValidationException(string message)
+        : base(message)
+    {
+        Errors = new Dictionary<string, string[]>();
+    }
+
+    /// <summary>
     /// Khởi tạo một phiên bản mới của lớp ValidationException với các lỗi xác thực cụ thể.
     /// </summary>
     /// <param name="failures">Danh sách các lỗi xác thực.</param>

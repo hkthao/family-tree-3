@@ -20,12 +20,12 @@ import type { IFileUploadService } from './file-upload/file-upload.service.inter
 import { FileUploadApiService } from './file-upload/api.file-upload.service';
 import type { IChatService } from './chat/chat.service.interface';
 import { ApiChatService } from './chat/api.chat.service';
-import type { INaturalLanguageInputService } from './natural-language-input/natural-language-input.service.interface';
-import { ApiNaturalLanguageInputService } from './natural-language-input/api.natural-language-input.service';
 import type { IFaceService } from './face/face.service.interface';
 import { ApiFaceService } from './face/api.face.service';
 import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
+import type { INaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service interface
+import { ApiNaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service implementation
 
 
 export type ServiceMode = 'real' | 'test';
@@ -42,9 +42,9 @@ export interface AppServices {
   userPreference: ICurrentUserPreferenceService;
   fileUpload: IFileUploadService;
   chat: IChatService;
-  naturalLanguageInput: INaturalLanguageInputService;
   face: IFaceService;
   user: IUserService;
+  naturalLanguage: INaturalLanguageService; // Add new service to interface
 
 }
 
@@ -97,10 +97,6 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiChatService(apiClient)
         : testServices?.chat || new ApiChatService(apiClient),
-    naturalLanguageInput:
-      mode === 'real'
-        ? new ApiNaturalLanguageInputService(apiClient)
-        : testServices?.naturalLanguageInput || new ApiNaturalLanguageInputService(apiClient),
     face:
       mode === 'real'
         ? new ApiFaceService(apiClient)
@@ -109,6 +105,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiUserService(apiClient)
         : testServices?.user || new ApiUserService(apiClient),
+    naturalLanguage: // Register new service
+      mode === 'real'
+        ? new ApiNaturalLanguageService(apiClient)
+        : testServices?.naturalLanguage || new ApiNaturalLanguageService(apiClient),
 
   };
 }

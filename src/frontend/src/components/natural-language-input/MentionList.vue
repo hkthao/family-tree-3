@@ -7,7 +7,7 @@
       :key="index"
       @click="selectItem(index)"
     >
-      {{ item.label }} ({{ item.id }})
+      {{ item.label }}
     </button>
   </div>
   <div class="item" v-else>
