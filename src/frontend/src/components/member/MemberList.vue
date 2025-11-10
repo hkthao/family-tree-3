@@ -35,8 +35,7 @@
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
         <v-avatar size="36" class="my-2">
-          <v-img v-if="item.avatarUrl" :src="item.avatarUrl" :alt="item.fullName" />
-          <v-icon v-else>mdi-account-circle</v-icon>
+          <v-img :src="getMemberAvatar(item)" :alt="item.fullName" />
         </v-avatar>
       </div>
     </template>
@@ -112,11 +111,26 @@ import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
 import { ChipLookup } from '@/components/common';
-import { getGenderTitle } from '@/constants/genders'; 
+import { getGenderTitle } from '@/constants/genders';
 import { useAuth } from '@/composables/useAuth';
+import maleAvatar from '@/assets/images/male_avatar.png';
+import femaleAvatar from '@/assets/images/female_avatar.png';
 
 const familyStore = useFamilyStore();
 const { isAdmin, isFamilyManager } = useAuth();
+
+const getMemberAvatar = (member: Member) => {
+  if (member.avatarUrl) {
+    return member.avatarUrl;
+  }
+  if (member.gender === 'Male') {
+    return maleAvatar;
+  }
+  if (member.gender === 'Female') {
+    return femaleAvatar;
+  }
+  return maleAvatar; // Fallback for 'Other' or undefined gender
+};
 
 const props = defineProps<{
   items: Member[];

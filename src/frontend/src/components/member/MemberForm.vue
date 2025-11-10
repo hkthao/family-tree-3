@@ -5,7 +5,7 @@
       <v-col cols="12">
         <AvatarInput v-if="!isFormReadOnly" v-model="formData.avatarUrl" :size="96" />
         <div v-else class="d-flex justify-center mb-4">
-          <AvatarDisplay :src="formData.avatarUrl" :size="96" />
+          <AvatarDisplay :src="memberAvatarSrc" :size="96" />
         </div>
       </v-col>
     </v-row>
@@ -116,6 +116,8 @@ import { useMemberRules } from '@/validations/member.validation';
 import { GenderSelect, AvatarInput, AvatarDisplay } from '@/components/common';
 import MemberAutocomplete from '@/components/common/MemberAutocomplete.vue';
 import { useAuth } from '@/composables/useAuth';
+import maleAvatar from '@/assets/images/male_avatar.png';
+import femaleAvatar from '@/assets/images/female_avatar.png';
 
 const props = defineProps<{
   readOnly?: boolean;
@@ -130,6 +132,19 @@ const formRef = ref<HTMLFormElement | null>(null);
 
 const isFormReadOnly = computed(() => {
   return props.readOnly || !(isAdmin.value || isFamilyManager.value);
+});
+
+const memberAvatarSrc = computed(() => {
+  if (formData.avatarUrl) {
+    return formData.avatarUrl;
+  }
+  if (formData.gender === Gender.Male) {
+    return maleAvatar;
+  }
+  if (formData.gender === Gender.Female) {
+    return femaleAvatar;
+  }
+  return maleAvatar; // Fallback for 'Other' or undefined gender
 });
 
 const formData = reactive<Omit<Member, 'id'> | Member>(

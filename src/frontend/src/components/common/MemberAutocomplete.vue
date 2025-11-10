@@ -5,12 +5,12 @@
     :clear-items-function="clearItemsFunction" :loading="composableLoading" :items="items" :disabled="disabled">
     <template #chip="{ props, item }" v-if="!hideChips">
       <v-chip v-bind="props" size="small" v-if="item.raw"
-        :prepend-avatar="item.raw.avatarUrl ? item.raw.avatarUrl : undefined" :text="item.raw.fullName"></v-chip>
+        :prepend-avatar="getMemberAvatar(item.raw)" :text="item.raw.fullName"></v-chip>
     </template>
     <template #item="{ props, item }">
       <v-list-item v-bind="props" :subtitle="item.raw?.birthDeathYears">
         <template #prepend>
-          <v-avatar v-if="item.raw?.avatarUrl" :image="item.raw.avatarUrl" size="small"></v-avatar>
+          <v-avatar :image="getMemberAvatar(item.raw)" size="small"></v-avatar>
         </template>
       </v-list-item>
     </template>
@@ -21,6 +21,9 @@
 import type { Member } from '@/types';
 import RemoteAutocomplete from './RemoteAutocomplete.vue';
 import { useMemberAutocomplete } from '@/composables/useMemberAutocomplete';
+import maleAvatar from '@/assets/images/male_avatar.png';
+import femaleAvatar from '@/assets/images/female_avatar.png';
+import { Gender } from '@/types';
 
 interface MemberAutocompleteProps {
   modelValue: string | string[] | undefined | null;
@@ -44,6 +47,19 @@ const { items, selectedItems, onSearchChange, preloadById, loading: composableLo
   multiple: props.multiple,
   initialValue: props.modelValue ?? undefined,
 });
+
+const getMemberAvatar = (member: Member) => {
+  if (member.avatarUrl) {
+    return member.avatarUrl;
+  }
+  if (member.gender === Gender.Male) {
+    return maleAvatar;
+  }
+  if (member.gender === Gender.Female) {
+    return femaleAvatar;
+  }
+  return maleAvatar; // Fallback for 'Other' or undefined gender
+};
 
 const searchFunction = async (query: string): Promise<Member[]> => {
   onSearchChange(query);
