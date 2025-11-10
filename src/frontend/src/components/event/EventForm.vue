@@ -56,7 +56,7 @@
           v-model="formData.relatedMembers"
           :label="t('event.form.relatedMembers')"
           :family-id="formData.familyId || undefined"
-          :read-only="props.readOnly"
+          :disabled="props.readOnly"
           :multiple="true"
           data-testid="event-related-members-autocomplete"
         />
@@ -65,7 +65,7 @@
 
     <v-row>
       <v-col cols="12">
-        <v-color-input v-model="formData.color" :label="t('event.form.color')" :readonly="props.readOnly"
+        <v-color-input v-model="formData.color" :label="t('event.form.color')" :disabled="props.readOnly"
           data-testid="event-color-picker" pip-location="append-inner">
         </v-color-input>
       </v-col>

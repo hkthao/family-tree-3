@@ -11,7 +11,7 @@
     </v-btn>
     <v-spacer></v-spacer>
     <v-select :width="50" v-model="calendarType" :items="calendarTypes" class="me-2"
-      :label="t('event.calendar.viewMode')" hide-details></v-select>
+      :label="t('event.calendar.viewMode')" hide-details :readonly="props.readOnly"></v-select>
     <v-btn color="primary" icon @click="addDrawer = true" data-testid="add-new-event-button" v-if="canAddEvent">
       <v-tooltip :text="t('event.list.action.create')">
         <template v-slot:activator="{ props }">
@@ -33,13 +33,18 @@
     </template>
   </v-calendar>
 
-  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650" v-if="!props.readOnly">
+  <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650" v-if="canEditEvent">
     <EventEditView v-if="editableEvent && editDrawer" :initial-event="editableEvent" @close="handleEventClosed"
       @saved="handleEventSaved" />
   </v-navigation-drawer>
 
-  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650" v-if="!props.readOnly">
+  <v-navigation-drawer v-model="addDrawer" location="right" temporary width="650" v-if="canAddEvent">
     <EventAddView v-if="addDrawer" :family-id="props.familyId" @close="handleAddClosed" @saved="handleAddSaved" />
+  </v-navigation-drawer>
+
+  <v-navigation-drawer v-model="detailDrawer" location="right" temporary width="650">
+    <EventDetailView v-if="detailDrawer && selectedEventId" :event-id="selectedEventId" @close="handleDetailClosed"
+      @edit="handleDetailEdit" />
   </v-navigation-drawer>
   </div>
 </template>
@@ -51,6 +56,7 @@ import type { Event } from '@/types';
 import { useEventStore } from '@/stores/event.store'; // Import event store
 import EventEditView from '@/views/event/EventEditView.vue';
 import EventAddView from '@/views/event/EventAddView.vue';
+import EventDetailView from '@/views/event/EventDetailView.vue'; // Import EventDetailView
 import { useAuth } from '@/composables/useAuth';
 
 // Define CalendarEventColorFunction type to match v-calendar's expectation
@@ -70,11 +76,16 @@ const canAddEvent = computed(() => {
   return !props.readOnly && (isAdmin.value || isFamilyManager.value);
 });
 
+const canEditEvent = computed(() => {
+  return !props.readOnly && (isAdmin.value || isFamilyManager.value);
+});
+
 const weekdays = computed(() => [0, 1, 2, 3, 4, 5, 6]); // Sunday to Saturday
 
 const selectedDate = ref(new Date());
 const editDrawer = ref(false); // Control visibility of the edit drawer
 const addDrawer = ref(false); // Control visibility of the add drawer
+const detailDrawer = ref(false); // Control visibility of the detail drawer
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being edited
 const editableEvent = ref<Event | undefined>(undefined); // Copy of event for editing
 
@@ -168,10 +179,12 @@ const getEventColor: CalendarEventColorFunction = (event: {
 };
 
 const showEventDetails = (eventSlotScope: Event) => {
-  if (!props.readOnly) {
-    selectedEventId.value = eventSlotScope.id;
+  selectedEventId.value = eventSlotScope.id;
+  if (canEditEvent.value) {
     editableEvent.value = JSON.parse(JSON.stringify(eventSlotScope)); // Deep copy the event object
     editDrawer.value = true;
+  } else {
+    detailDrawer.value = true;
   }
 };
 
@@ -195,6 +208,18 @@ const handleAddSaved = () => {
 
 const handleAddClosed = () => {
   addDrawer.value = false;
+};
+
+const handleDetailClosed = () => {
+  detailDrawer.value = false;
+  selectedEventId.value = null;
+};
+
+const handleDetailEdit = (event: Event) => {
+  detailDrawer.value = false;
+  selectedEventId.value = event.id;
+  editableEvent.value = JSON.parse(JSON.stringify(event));
+  editDrawer.value = true;
 };
 
 watch(
