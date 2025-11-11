@@ -1,5 +1,5 @@
 <template>
-  <v-card class="border" :elevation="0" fill-height>
+  <v-card class="border" :elevation="0" fill-height width="100%">
     <v-card-item>
       <v-card-title class="text-h6 text-center">
         <v-icon :icon="cardIcon" class="mr-2"></v-icon> {{ serialNumber }}. {{ title }}
