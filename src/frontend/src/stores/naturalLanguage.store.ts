@@ -3,7 +3,7 @@ import type { AnalyzedDataDto, MemberDataDto, EventDataDto } from '@/types/natur
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
-import type { Member, Event, Gender, EventType } from '@/types'; // Import Member, Event, Gender, EventType
+import type { Member, Event, Gender, EventType, Result } from '@/types'; // Import Member, Event, Gender, EventType, Result
 import { useMemberStore } from './member.store'; // Import member store
 import { useEventStore } from './event.store'; // Import event store
 
@@ -55,13 +55,13 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.input = newInput;
     },
 
-    async saveMember(memberData: MemberDataDto) {
+    async saveMember(memberData: MemberDataDto): Promise<Result<Member, ApiError>> { // Re-added function declaration
       this.loading = true;
       this.error = null;
       try {
         if (!this.familyId) {
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
-          return;
+          return { ok: false, error: { message: this.error } } as Result<Member, ApiError>;
         }
 
         const memberStore = useMemberStore(); // Access member store
@@ -88,13 +88,13 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       }
     },
 
-    async saveEvent(eventData: EventDataDto) {
+    async saveEvent(eventData: EventDataDto): Promise<Result<Event, ApiError>> { // Re-added function declaration
       this.loading = true;
       this.error = null;
       try {
         if (!this.familyId) {
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
-          return;
+          return { ok: false, error: { message: this.error } } as Result<Event, ApiError>;
         }
 
         const eventStore = useEventStore(); // Access event store
