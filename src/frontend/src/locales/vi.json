@@ -641,6 +641,7 @@
   "naturalLanguage.editor.parseButton": "Phân tích",
   "naturalLanguage.editor.parsedResultTitle": "Kết quả phân tích",
   "naturalLanguage.editor.parsedMembers": "Các thành viên được phân tích",
+  "naturalLanguage.editor.parsedEvents": "Các sự kiện được phân tích",
   "naturalLanguage.confirmation.newMembers": "Thành viên mới",
   "naturalLanguage.confirmation.newRelationships": "Mối quan hệ mới",
   "naturalLanguage.confirmation.mapSourceMember": "Ánh xạ thành viên nguồn",

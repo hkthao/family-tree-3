@@ -36,7 +36,8 @@ const title = computed(() => {
   if (props.type === 'member') {
     return (props.item as MemberDataDto).fullName;
   }
-  return (props.item as EventDataDto).type;
+  const eventType = (props.item as EventDataDto).type.toLowerCase();
+  return t(`event.type.${eventType}`);
 });
 
 const details = computed(() => {
