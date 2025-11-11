@@ -34,6 +34,26 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
       if (result.ok) {
         this.parsedData = result.value; // Directly assign the object
+
+        if (this.parsedData) {
+          this.parsedData.members.forEach(member => {
+            if (!member.id) {
+              member.id = uuidv4(); // Generate ID if missing
+            }
+            member.loading = false;
+            member.savedSuccessfully = false;
+            member.saveAlert = { show: false, type: 'success', message: '' };
+          });
+          this.parsedData.events.forEach(event => {
+            if (!event.id) {
+              event.id = uuidv4(); // Generate ID if missing
+            }
+            event.loading = false;
+            event.savedSuccessfully = false;
+            event.saveAlert = { show: false, type: 'success', message: '' };
+          });
+        }
+
         this.loading = false;
         return true;
       } else {
@@ -134,6 +154,18 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         return { ok: false, error: { message: this.error } } as Result<Event, ApiError>; // Return a failure result
       } finally {
         this.loading = false;
+      }
+    },
+
+    deleteParsedMember(index: number) {
+      if (this.parsedData && this.parsedData.members) {
+        this.parsedData.members.splice(index, 1);
+      }
+    },
+
+    deleteParsedEvent(index: number) {
+      if (this.parsedData && this.parsedData.events) {
+        this.parsedData.events.splice(index, 1);
       }
     },
   },

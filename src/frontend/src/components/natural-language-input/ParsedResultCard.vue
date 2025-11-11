@@ -1,21 +1,12 @@
 <template>
   <v-card class="border" :elevation="0" fill-height width="100%">
-    <v-progress-linear :active="loading" :indeterminate="loading" color="primary" absolute top></v-progress-linear>
+    <v-progress-linear :active="item.loading" :indeterminate="item.loading" color="primary" absolute
+      top></v-progress-linear>
     <v-card-item>
       <v-card-title class="text-h6 text-center">
         <v-icon :icon="cardIcon" class="mr-2"></v-icon> {{ serialNumber }}. {{ title }}
       </v-card-title>
     </v-card-item>
-
-    <v-alert
-      v-if="saveAlert.show"
-      :type="saveAlert.type"
-      density="compact"
-      class="mx-4 mt-2"
-      variant="tonal"
-    >
-      {{ saveAlert.message }}
-    </v-alert>
 
     <v-card-text class="py-0">
       <v-chip-group column>
@@ -24,40 +15,45 @@
         </v-chip>
       </v-chip-group>
 
-      <div v-if="recommendations.length > 0" color="orange">
+      <div v-if="recommendations.length > 0" >
         <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" color="warning" size="small">
           {{ rec }}
         </v-chip>
       </div>
 
-      <v-alert v-if="item.errorMessage" type="error" density="compact" class="mt-2">
-        {{ item.errorMessage }}
-      </v-alert>
     </v-card-text>
 
-    <v-card-actions v-if="!savedSuccessfully">
+    <v-alert v-if="item.errorMessage" type="error" density="compact" class="mt-2">
+      {{ item.errorMessage }}
+    </v-alert>
+    <v-alert v-if="item.saveAlert?.show" :type="item.saveAlert?.type" density="compact" class="mx-4 my-2"
+      variant="tonal">
+      {{ item.saveAlert?.message }}
+    </v-alert>
+
+    <v-card-actions v-if="!item.savedSuccessfully">
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteItem" size="small">{{ t('common.delete') }}</v-btn>
-      <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage || loading" :loading="loading" size="small">{{ t('common.save')
+      <v-btn color="primary" @click="emit('save-item', item)" :disabled="!!item.errorMessage || item.loading"
+        :loading="item.loading" size="small">{{ t('common.save')
         }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store';
 import type { MemberDataDto, EventDataDto } from '@/types/natural-language.d';
 
 const props = defineProps<{
   item: MemberDataDto | EventDataDto;
   type: 'member' | 'event';
   allMembers: MemberDataDto[];
-  serialNumber: number; // New prop
+  serialNumber: number;
 }>();
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['delete', 'save-item']); // Add save-item emit
 
 const { t } = useI18n();
 
@@ -146,53 +142,5 @@ const recommendations = computed(() => {
 
 const deleteItem = () => {
   emit('delete');
-};
-
-const naturalLanguageStore = useNaturalLanguageStore();
-const loading = ref(false); // New loading state
-const savedSuccessfully = ref(false); // New state to control card actions visibility
-const saveAlert = ref({
-  show: false,
-  type: 'success' as 'success' | 'error',
-  message: '',
-});
-
-const saveItem = async () => {
-  loading.value = true; // Set loading to true
-  saveAlert.value.show = false; // Hide previous alert
-  let saveResult;
-
-  try {
-    if (props.type === 'member') {
-      saveResult = await naturalLanguageStore.saveMember(props.item as MemberDataDto);
-    } else {
-      saveResult = await naturalLanguageStore.saveEvent(props.item as EventDataDto);
-    }
-
-    if (saveResult && saveResult.ok) {
-      saveAlert.value = {
-        show: true,
-        type: 'success',
-        message: t('common.saveSuccess'),
-      };
-      savedSuccessfully.value = true; // Mark as saved successfully
-    } else {
-      saveAlert.value = {
-        show: true,
-        type: 'error',
-        message: saveResult?.error?.message || t('common.saveError'),
-      };
-      savedSuccessfully.value = false;
-    }
-  } catch (e: any) {
-    saveAlert.value = {
-      show: true,
-      type: 'error',
-      message: e.message || t('common.saveError'),
-    };
-    savedSuccessfully.value = false;
-  } finally {
-    loading.value = false; // Reset loading state
-  }
 };
 </script>

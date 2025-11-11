@@ -1,10 +1,10 @@
 namespace backend.Application.Members.Inputs;
 
-public record MemberInput
+public class MemberInput
 {
-    public Guid? Id { get; set; } // Optional Id for existing members or AI-generated IDs
     public string LastName { get; set; } = null!;
     public string FirstName { get; set; } = null!;
+    public Guid? Id { get; set; }
     public string? Code { get; set; }
     public string? Nickname { get; set; }
     public DateTime? DateOfBirth { get; set; }
