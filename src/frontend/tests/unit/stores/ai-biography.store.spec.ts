@@ -95,7 +95,7 @@ describe('ai-biography.store', () => {
     // Set default mock resolved values
     mockGetById.mockResolvedValue(ok(mockMember));
     mockUpdateMemberBiography.mockResolvedValue(ok(undefined));
-    mockGenerateBiography.mockResolvedValue(ok(mockBiographyResult));
+    mockGenerateBiography.mockResolvedValue(ok(mockBiographyResult.content));
   });
 
   it('should have correct initial state', () => {
@@ -152,6 +152,7 @@ describe('ai-biography.store', () => {
         store.style,
         store.generatedFromDB,
         undefined, // userPrompt is null initially
+        store.language, // Add language parameter
       );
     });
 
