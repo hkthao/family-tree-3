@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-4" elevation="2">
+  <v-card elevation="2">
     <v-card-text>
       <FaceUploadInput @file-uploaded="handleFileUpload" />
       <v-progress-linear v-if="faceStore.loading" indeterminate color="primary" class="my-4"></v-progress-linear>
