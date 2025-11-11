@@ -96,7 +96,7 @@ onMounted(async () => {
 
   // Fetch backend version
   try {
-    const response = await axios.get(`${apiEndpoint.value}/api/version`); // Assuming an /api/version endpoint
+    const response = await axios.get(`${apiEndpoint.value}/version`); // Assuming an /api/version endpoint
     if (response.status === 200 && response.data && response.data.version) {
       backendVersion.value = response.data.version;
     } else {
