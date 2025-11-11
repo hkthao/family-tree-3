@@ -166,7 +166,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         const newRelationship = {
           sourceMemberId: relationshipData.sourceMemberId,
           targetMemberId: relationshipData.targetMemberId,
-          type: relationshipData.type as unknown as RelationshipType,
+          type: relationshipData.type,
           order: relationshipData.order,
           familyId: this.familyId,
         };

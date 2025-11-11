@@ -1,4 +1,5 @@
 import type { EventType } from './event';
+import type { RelationshipType } from './relationship';
 
 export interface AnalyzedDataDto {
   members: MemberDataDto[];
@@ -41,7 +42,7 @@ export interface RelationshipDataDto {
   id?: string | null; // For frontend tracking
   sourceMemberId: string;
   targetMemberId: string;
-  type: string; // e.g., "husband", "wife", "father", "mother"
+  type: RelationshipType; // e.g., "husband", "wife", "father", "mother"
   order?: number | null;
   errorMessage?: string | null;
   loading?: boolean;
