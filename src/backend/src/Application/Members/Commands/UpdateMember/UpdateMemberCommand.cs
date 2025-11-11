@@ -5,5 +5,4 @@ namespace backend.Application.Members.Commands.UpdateMember;
 
 public record UpdateMemberCommand : MemberInput, IRequest<Result<Guid>>
 {
-    public Guid Id { get; init; }
 }
