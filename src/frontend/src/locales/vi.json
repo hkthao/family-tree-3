@@ -252,6 +252,8 @@
   "common.loadMore": "Tải thêm",
   "common.add": "Thêm",
   "common.save": "Lưu",
+  "common.saveSuccess": "Lưu thành công!",
+  "common.saveError": "Lưu thất bại!",
   "common.aiInput": "Nhập liệu AI",
   "topbar.search": "Tìm kiếm...",
   "common.or": "hoặc",
