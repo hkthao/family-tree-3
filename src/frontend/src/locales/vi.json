@@ -307,6 +307,7 @@
   "member.gender.male": "Nam",
   "member.gender.female": "Nữ",
   "member.gender.other": "Khác",
+  "member.gender.unknown": "Không xác định",
   "member.messages.updateSuccess": "Cập nhật thành viên thành công!",
   "member.messages.addSuccess": "Thêm thành viên thành công!",
   "member.messages.addingFatherTo": "Thêm cha cho {memberName}",

@@ -262,6 +262,7 @@
   "member.gender.male": "Male",
   "member.gender.female": "Female",
   "member.gender.other": "Other",
+  "member.gender.unknown": "Unknown",
   "member.messages.updateSuccess": "Member updated successfully!",
   "member.messages.addSuccess": "Member added successfully!",
   "member.messages.saveError": "Error saving member.",
