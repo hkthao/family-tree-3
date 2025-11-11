@@ -65,11 +65,12 @@ public static class PromptBuilder
         promptBuilder.AppendLine("2. Xác định các mối quan hệ gia đình có thể có giữa các thành viên được đề cập hoặc với các thành viên khác không được đề cập trực tiếp nhưng có thể suy ra.");
         promptBuilder.AppendLine("3. Đề xuất các hành động tiếp theo để làm giàu dữ liệu gia phả (ví dụ: thêm thành viên mới, cập nhật thông tin, tạo mối quan hệ).");
         promptBuilder.AppendLine("4. Nếu có bất kỳ thông tin nào không rõ ràng hoặc cần làm rõ, hãy đặt câu hỏi để thu thập thêm thông tin.");
+        promptBuilder.AppendLine("QUAN TRỌNG: Đối với các thành viên được xác định trong văn bản, hãy gán một ID tạm thời duy nhất (ví dụ: \\\"temp_A\\\", \\\"temp_B\\\") cho mỗi thành viên. Sử dụng các ID tạm thời này để thiết lập mối quan hệ (chaId, mẹId, chồngId, vợId) giữa các thành viên trong phản hồi JSON. Nếu một thành viên được đề cập nhiều lần, hãy sử dụng cùng một ID tạm thời đã gán cho họ.");
         promptBuilder.AppendLine("\nPhản hồi của bạn phải là một đối tượng JSON duy nhất, tuân thủ cấu trúc sau:");
         promptBuilder.AppendLine("{");
         promptBuilder.AppendLine("  \"members\": [");
         promptBuilder.AppendLine("    {");
-        promptBuilder.AppendLine("      \"id\": \"string (unique identifier) | null\", // ID nội bộ của thành viên nếu đã tồn tại trong hệ thống. Phải là một chuỗi định danh duy nhất hoặc null. TUYỆT ĐỐI KHÔNG sử dụng các số nguyên như \\\"1\\\", \\\"2\\\", v.v. cho ID. Nếu ID không xác định hoặc thành viên mới, hãy sử dụng null.");
+        promptBuilder.AppendLine("      \"id\": \"string (temporary unique identifier) | null\", // ID tạm thời, duy nhất cho thành viên này trong phản hồi JSON. Nếu thành viên đã được đề cập trước đó trong văn bản, hãy sử dụng lại ID đã gán. Nếu là thành viên mới hoặc không xác định, hãy gán một ID duy nhất (ví dụ: \\\"temp_1\\\", \\\"temp_2\\\"). ID này sẽ được sử dụng để xác định mối quan hệ giữa các thành viên trong phản hồi này. TUYỆT ĐỐI KHÔNG sử dụng các số nguyên như \\\"1\\\", \\\"2\\\", v.v. cho ID. Nếu ID không xác định hoặc thành viên mới, hãy sử dụng null.");
         promptBuilder.AppendLine("      \"code\": \"string | null\", // Mã (Code) của thành viên nếu đã tồn tại và được đề cập");
         promptBuilder.AppendLine("      \"lastName\": \"string\", // Họ của thành viên");
         promptBuilder.AppendLine("      \"firstName\": \"string\", // Tên của thành viên");

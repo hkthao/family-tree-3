@@ -6,7 +6,7 @@ namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 /// <summary>
 /// Lệnh để phân tích văn bản ngôn ngữ tự nhiên và tạo prompt cho AI Agent.
 /// </summary>
-public record AnalyzeNaturalLanguageCommand : IRequest<Result<AnalyzedDataDto>>
+public record AnalyzeNaturalLanguageCommand : IRequest<Result<AnalyzedResultDto>>
 {
     /// <summary>
     /// Nội dung văn bản ngôn ngữ tự nhiên cần phân tích.

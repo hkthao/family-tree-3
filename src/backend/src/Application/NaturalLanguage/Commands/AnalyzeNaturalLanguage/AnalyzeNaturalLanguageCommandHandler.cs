@@ -4,13 +4,17 @@ using backend.Application.AI.Prompts;
 using backend.Application.NaturalLanguage.Models;
 using System.Text.Json;
 using backend.Application.Common.Models.AI;
+using backend.Application.Common.Exceptions; // Add using directive
+using Microsoft.EntityFrameworkCore; // Add using directive
+using System.Collections.Generic; // Add using directive
+using System.Linq; // Add using directive
 
 namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 
 /// <summary>
 /// Xử lý lệnh phân tích văn bản ngôn ngữ tự nhiên.
 /// </summary>
-public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNaturalLanguageCommand, Result<AnalyzedDataDto>>
+public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNaturalLanguageCommand, Result<AnalyzedResultDto>>
 {
     private readonly IN8nService _n8nService;
     private readonly IApplicationDbContext _context;
@@ -21,7 +25,7 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
         _context = context;
     }
 
-    public async Task<Result<AnalyzedDataDto>> Handle(AnalyzeNaturalLanguageCommand request, CancellationToken cancellationToken)
+    public async Task<Result<AnalyzedResultDto>> Handle(AnalyzeNaturalLanguageCommand request, CancellationToken cancellationToken)
     {
         var sessionId = request.SessionId;
 
@@ -39,7 +43,7 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
         // 3. Phân tích phản hồi từ AI (dự kiến là JSON)
         if (string.IsNullOrWhiteSpace(n8nResult.Value))
         {
-            return Result<AnalyzedDataDto>.Failure("Phản hồi từ AI trống hoặc không hợp lệ.", "AIResponse");
+            return Result<AnalyzedResultDto>.Failure("Phản hồi từ AI trống hoặc không hợp lệ.", "AIResponse");
         }
 
         try
@@ -48,61 +52,146 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
 
             if (analyzedData == null)
             {
-                return Result<AnalyzedDataDto>.Failure("Phản hồi từ AI không hợp lệ hoặc trống.", "AIResponse");
+                return Result<AnalyzedResultDto>.Failure("Phản hồi từ AI không hợp lệ hoặc trống.", "AIResponse");
             }
 
-            // 4. Map thông tin, kiểm tra sự tồn tại và validate từng thành viên
+            // Initialize ID mapping for AI's temporary IDs to actual GUIDs
+            var aiIdMap = new Dictionary<string, Guid>();
+            var processedMembers = new List<MemberResultDto>();
+            var processedEvents = new List<EventResultDto>();
+
+            // 4. Process Members: Resolve/Generate GUIDs and map data
             var familyId = request.FamilyId;
             var memberValidator = new MemberDataDtoValidator();
 
-            if (familyId != Guid.Empty)
+            foreach (var memberData in analyzedData.Members)
             {
-                foreach (var member in analyzedData.Members)
+                Guid memberGuid;
+                Domain.Entities.Member? existingMember = null;
+
+                // Try to find existing member by Code if provided
+                if (!string.IsNullOrWhiteSpace(memberData.Code))
                 {
-                    // Kiểm tra sự tồn tại
-                    Domain.Entities.Member? existingMember = null;
-                    if (!string.IsNullOrWhiteSpace(member.Code))
-                    {
-                        existingMember = await _context.Members
-                            .AsNoTracking()
-                            .FirstOrDefaultAsync(m => m.Code == member.Code && m.FamilyId == familyId, cancellationToken);
-                    }
-                    if (existingMember != null)
-                    {
-                        member.IsExisting = true;
-                        member.Id = existingMember.Id.ToString();
-                    }
-
-                    // Validate và gán lỗi nếu có
-                    var validationResult = await memberValidator.ValidateAsync(member, cancellationToken);
-                    if (!validationResult.IsValid)
-                    {
-                        member.ErrorMessage = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
-                    }
+                    existingMember = await _context.Members
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(m => m.Code == memberData.Code && m.FamilyId == familyId, cancellationToken);
                 }
-            }
 
-            // 5. Validate từng sự kiện
-            var eventValidator = new EventDataDtoValidator();
-            foreach (var ev in analyzedData.Events)
-            {
-                var validationResult = await eventValidator.ValidateAsync(ev, cancellationToken);
+                if (existingMember != null)
+                {
+                    memberGuid = existingMember.Id;
+                    memberData.IsExisting = true; // Mark as existing
+                }
+                else
+                {
+                    memberGuid = Guid.NewGuid(); // Generate new GUID for new members
+                }
+
+                // Store mapping from AI's temporary ID to actual GUID
+                if (!string.IsNullOrWhiteSpace(memberData.Id))
+                {
+                    aiIdMap[memberData.Id] = memberGuid;
+                }
+
+                // Validate member data
+                var validationResult = await memberValidator.ValidateAsync(memberData, cancellationToken);
                 if (!validationResult.IsValid)
                 {
-                    ev.ErrorMessage = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
+                    memberData.ErrorMessage = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
+                }
+
+                // Create MemberResultDto
+                processedMembers.Add(new MemberResultDto
+                {
+                    Id = memberGuid,
+                    Code = memberData.Code,
+                    LastName = memberData.LastName,
+                    FirstName = memberData.FirstName,
+                    DateOfBirth = memberData.DateOfBirth,
+                    DateOfDeath = memberData.DateOfDeath,
+                    Gender = memberData.Gender,
+                    Order = memberData.Order,
+                    IsExisting = memberData.IsExisting,
+                    ErrorMessage = memberData.ErrorMessage
+                });
+            }
+
+            // 5. Process Relationships (FatherId, MotherId, HusbandId, WifeId) for processedMembers
+            foreach (var memberResult in processedMembers)
+            {
+                var originalMemberData = analyzedData.Members.FirstOrDefault(m => aiIdMap.ContainsKey(m.Id ?? "") && aiIdMap[m.Id ?? ""] == memberResult.Id);
+
+                if (originalMemberData != null)
+                {
+                    if (!string.IsNullOrWhiteSpace(originalMemberData.FatherId) && aiIdMap.TryGetValue(originalMemberData.FatherId, out var fatherGuid))
+                    {
+                        memberResult.FatherId = fatherGuid;
+                    }
+                    if (!string.IsNullOrWhiteSpace(originalMemberData.MotherId) && aiIdMap.TryGetValue(originalMemberData.MotherId, out var motherGuid))
+                    {
+                        memberResult.MotherId = motherGuid;
+                    }
+                    if (!string.IsNullOrWhiteSpace(originalMemberData.HusbandId) && aiIdMap.TryGetValue(originalMemberData.HusbandId, out var husbandGuid))
+                    {
+                        memberResult.HusbandId = husbandGuid;
+                    }
+                    if (!string.IsNullOrWhiteSpace(originalMemberData.WifeId) && aiIdMap.TryGetValue(originalMemberData.WifeId, out var wifeGuid))
+                    {
+                        memberResult.WifeId = wifeGuid;
+                    }
                 }
             }
 
-            // Luôn trả về success, thông tin lỗi nằm trong từng DTO
-            return Result<AnalyzedDataDto>.Success(analyzedData);
+            // 6. Process Events: Generate GUIDs and map related member IDs
+            var eventValidator = new EventDataDtoValidator();
+            foreach (var eventData in analyzedData.Events)
+            {
+                // Validate event data
+                var validationResult = await eventValidator.ValidateAsync(eventData, cancellationToken);
+                if (!validationResult.IsValid)
+                {
+                    eventData.ErrorMessage = string.Join(" ", validationResult.Errors.Select(e => e.ErrorMessage));
+                }
+
+                var relatedMemberGuids = new List<Guid>();
+                foreach (var aiMemberId in eventData.RelatedMemberIds)
+                {
+                    if (aiIdMap.TryGetValue(aiMemberId, out var memberGuid))
+                    {
+                        relatedMemberGuids.Add(memberGuid);
+                    }
+                    // Optionally, handle cases where AI provided an ID that wasn't mapped
+                }
+
+                processedEvents.Add(new EventResultDto
+                {
+                    Id = Guid.NewGuid(), // Generate new GUID for the event
+                    Type = eventData.Type,
+                    Description = eventData.Description,
+                    Date = eventData.Date,
+                    Location = eventData.Location,
+                    RelatedMemberIds = relatedMemberGuids,
+                    ErrorMessage = eventData.ErrorMessage
+                });
+            }
+
+            // 7. Construct and return AnalyzedResultDto
+            var analyzedResult = new AnalyzedResultDto
+            {
+                Members = processedMembers,
+                Events = processedEvents,
+                Feedback = analyzedData.Feedback
+            };
+
+            return Result<AnalyzedResultDto>.Success(analyzedResult);
         }
         catch (JsonException ex)
         {
-            return Result<AnalyzedDataDto>.Failure($"Không thể phân tích phản hồi JSON từ AI: {ex.Message}", "AIResponseParsing");
+            return Result<AnalyzedResultDto>.Failure($"Không thể phân tích phản hồi JSON từ AI: {ex.Message}", "AIResponseParsing");
         }
         catch (Exception ex)
         {
-            return Result<AnalyzedDataDto>.Failure($"Đã xảy ra lỗi khi xử lý phản hồi từ AI: {ex.Message}", "AIResponseProcessing");
+            return Result<AnalyzedResultDto>.Failure($"Đã xảy ra lỗi khi xử lý phản hồi từ AI: {ex.Message}", "AIResponseProcessing");
         }
     }
 }
