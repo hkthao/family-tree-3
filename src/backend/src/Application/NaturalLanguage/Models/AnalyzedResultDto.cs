@@ -54,7 +54,7 @@ public class MemberResultDto
 public class EventResultDto
 {
     public Guid Id { get; set; } // Event will also have a Guid ID
-    public string Type { get; set; } = string.Empty;
+    public EventType Type { get; set; }
     public string Description { get; set; } = string.Empty;
     public string? Date { get; set; }
     public string? Location { get; set; }

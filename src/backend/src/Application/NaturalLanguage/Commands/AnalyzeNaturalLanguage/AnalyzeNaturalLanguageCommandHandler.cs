@@ -7,7 +7,8 @@ using backend.Application.Common.Models.AI;
 using backend.Application.Common.Exceptions; // Add using directive
 using Microsoft.EntityFrameworkCore; // Add using directive
 using System.Collections.Generic; // Add using directive
-using System.Linq; // Add using directive
+using System.Linq;
+using backend.Domain.Enums; // Add using directive
 
 namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 
@@ -205,10 +206,30 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
                     // Optionally, handle cases where AI provided an ID that wasn't mapped
                 }
 
+                EventType parsedEventType = EventType.Other; // Default value
+
+                if (!string.IsNullOrWhiteSpace(eventData.Type))
+                {
+                    if (Enum.TryParse(eventData.Type, true, out parsedEventType))
+                    {
+                        if (!Enum.IsDefined(typeof(EventType), parsedEventType))
+                        {
+                            // This case should ideally not happen if Enum.TryParse returns true
+                            // but good for robustness.
+                            parsedEventType = EventType.Other;
+                        }
+                    }
+                    else
+                    {
+                        // If parsing by name fails, default to Other
+                        parsedEventType = EventType.Other;
+                    }
+                }
+
                 processedEvents.Add(new EventResultDto
                 {
                     Id = Guid.NewGuid(), // Generate new GUID for the event
-                    Type = eventData.Type,
+                    Type = parsedEventType, // Assign the parsed enum value
                     Description = eventData.Description,
                     Date = eventData.Date,
                     Location = eventData.Location,

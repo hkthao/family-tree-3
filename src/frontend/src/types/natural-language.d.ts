@@ -1,3 +1,5 @@
+import type { EventType } from './event';
+
 export interface AnalyzedDataDto {
   members: MemberDataDto[];
   events: EventDataDto[];
@@ -24,7 +26,7 @@ export interface MemberDataDto {
 
 export interface EventDataDto {
   id?: string | null; // Add id for unique identification in frontend
-  type: string;
+  type: EventType;
   description: string;
   date?: string | null;
   location?: string | null;
