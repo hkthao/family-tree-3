@@ -67,6 +67,12 @@ public class N8nService : IN8nService
             _logger.LogInformation("Received successful response from n8n webhook.");
             _logger.LogDebug("Raw n8n chat webhook response: {ResponseContent}", responseContent); // Log raw response
 
+            if (string.IsNullOrWhiteSpace(responseContent))
+            {
+                _logger.LogWarning("Received empty response content from n8n chat webhook.");
+                return Result<string>.Failure("Invalid response format from n8n: Received empty response.", "ExternalService");
+            }
+
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
