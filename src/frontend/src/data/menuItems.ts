@@ -70,6 +70,16 @@ const menu: MenuSection[] = [
         icon: 'mdi-walk',
         to: '/onboarding',
       },
+      {
+        titleKey: 'terms.title',
+        icon: 'mdi-file-document-outline',
+        to: '/terms',
+      },
+      {
+        titleKey: 'privacy.title',
+        icon: 'mdi-shield-lock-outline',
+        to: '/privacy',
+      },
     ],
   },
 ];
