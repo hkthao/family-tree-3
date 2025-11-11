@@ -819,6 +819,20 @@
         "title": "Xóa Gia đình",
         "description": "Nhấn vào đây để xóa một gia đình."
       }
+    },
+    "faceSearch": {
+      "upload": {
+        "title": "Tải ảnh lên",
+        "description": "Bắt đầu bằng cách tải lên một hình ảnh chứa các khuôn mặt bạn muốn tìm kiếm."
+      },
+      "viewer": {
+        "title": "Trình xem ảnh",
+        "description": "Các khuôn mặt được phát hiện sẽ được đánh dấu ở đây. Bạn có thể nhấp vào một khuôn mặt để chọn nó."
+      },
+      "sidebar": {
+        "title": "Thanh bên nhận diện",
+        "description": "Xem lại các khuôn mặt được phát hiện và gán nhãn cho chúng."
+      }
     }
   }
 }

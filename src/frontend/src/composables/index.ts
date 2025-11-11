@@ -2,6 +2,7 @@ export * from './useAuth';
 export * from './useConfirmDialog';
 export * from './useFamilyAutocomplete';
 export * from './useFamilyTour';
+export * from './useFaceSearchTour';
 export * from './useHierarchicalTreeChart';
 export * from './useMemberAutocomplete';
 export * from './useOnboardingTour';

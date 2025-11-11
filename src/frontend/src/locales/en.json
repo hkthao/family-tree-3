@@ -761,6 +761,20 @@
         "title": "Delete Family",
         "description": "Click here to delete a family."
       }
+    },
+    "faceSearch": {
+      "upload": {
+        "title": "Upload Image",
+        "description": "Start by uploading an image containing faces you want to search for."
+      },
+      "viewer": {
+        "title": "Image Viewer",
+        "description": "Detected faces will be highlighted here. You can click on a face to select it."
+      },
+      "sidebar": {
+        "title": "Detection Sidebar",
+        "description": "Review the detected faces and label them."
+      }
     }
   }
 }
