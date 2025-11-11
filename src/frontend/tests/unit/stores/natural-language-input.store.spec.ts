@@ -1,9 +1,6 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ok, err } from '@/types';
-import { RelationshipType, type Family, type Member, type Event, type Relationship, EventType } from '@/types';
-import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
 
 // Mock the INaturalLanguageInputService

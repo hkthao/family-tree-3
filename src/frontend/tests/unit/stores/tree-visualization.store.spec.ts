@@ -2,8 +2,9 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useTreeVisualizationStore } from '@/stores/tree-visualization.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Member, Relationship } from '@/types';
-import { Result, ok, err, ApiError } from '@/types';
+import { ok, err, RelationshipType,  } from '@/types';
 import { createServices } from '@/services/service.factory';
+import type { ApiError } from '@/plugins/axios';
 
 // Mock services
 const mockGetById = vi.fn();
@@ -36,19 +37,15 @@ describe('tree-visualization.store', () => {
     code: 'JD1',
     familyId: mockFamilyId,
     isRoot: false,
-    dateOfBirth: null,
-    dateOfDeath: null,
-    gender: null,
-    nickname: null,
-    occupation: null,
-    placeOfBirth: null,
-    placeOfDeath: null,
-    avatarUrl: null,
-    biography: null,
-    created: new Date(),
-    createdBy: 'test',
-    lastModified: new Date(),
-    lastModifiedBy: 'test',
+    dateOfBirth: undefined,
+    dateOfDeath: undefined,
+    gender: undefined,
+    nickname: undefined,
+    occupation: undefined,
+    placeOfBirth: undefined,
+    placeOfDeath: undefined,
+    avatarUrl: undefined,
+    biography: undefined
   };
   const mockMember2: Member = {
     id: 'member-2',
@@ -58,30 +55,22 @@ describe('tree-visualization.store', () => {
     code: 'JD2',
     familyId: mockFamilyId,
     isRoot: false,
-    dateOfBirth: null,
-    dateOfDeath: null,
-    gender: null,
-    nickname: null,
-    occupation: null,
-    placeOfBirth: null,
-    placeOfDeath: null,
-    avatarUrl: null,
-    biography: null,
-    created: new Date(),
-    createdBy: 'test',
-    lastModified: new Date(),
-    lastModifiedBy: 'test',
+    dateOfBirth: undefined,
+    dateOfDeath: undefined,
+    gender: undefined,
+    nickname: undefined,
+    occupation: undefined,
+    placeOfBirth: undefined,
+    placeOfDeath: undefined,
+    avatarUrl: undefined,
+    biography: undefined
   };
   const mockRelationship: Relationship = {
     id: 'rel-1',
     familyId: mockFamilyId,
     sourceMemberId: mockMember1.id,
     targetMemberId: mockMember2.id,
-    relationshipType: 'Spouse',
-    created: new Date(),
-    createdBy: 'test',
-    lastModified: new Date(),
-    lastModifiedBy: 'test',
+    type: RelationshipType.Father
   };
 
   beforeEach(() => {
@@ -250,30 +239,22 @@ describe('tree-visualization.store', () => {
         code: 'CD1',
         familyId: mockFamilyId,
         isRoot: false,
-        dateOfBirth: null,
-        dateOfDeath: null,
-        gender: null,
-        nickname: null,
-        occupation: null,
-        placeOfBirth: null,
-        placeOfDeath: null,
-        avatarUrl: null,
-        biography: null,
-        created: new Date(),
-        createdBy: 'test',
-        lastModified: new Date(),
-        lastModifiedBy: 'test',
+        dateOfBirth: undefined,
+        dateOfDeath: undefined,
+        gender: undefined,
+        nickname: undefined,
+        occupation: undefined,
+        placeOfBirth: undefined,
+        placeOfDeath: undefined,
+        avatarUrl: undefined,
+        biography: undefined
       };
       const mockMemberRelationship: Relationship = {
         id: 'rel-2',
         familyId: mockFamilyId,
         sourceMemberId: targetMemberId,
         targetMemberId: mockRelative.id,
-        relationshipType: 'Child',
-        created: new Date(),
-        createdBy: 'test',
-        lastModified: new Date(),
-        lastModifiedBy: 'test',
+        type: RelationshipType.Father
       };
 
       beforeEach(() => {

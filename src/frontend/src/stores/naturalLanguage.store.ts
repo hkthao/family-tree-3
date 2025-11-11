@@ -3,7 +3,7 @@ import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto 
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
-import { type Member, type Event, type Gender, EventType, type Result, type RelationshipType } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
+import { type Member, type Event, type Gender, type Result } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
 import { useMemberStore } from './member.store'; // Import member store
 import { useEventStore } from './event.store'; // Import event store
 import { useRelationshipStore } from './relationship.store'; // Import relationship store

@@ -2,8 +2,9 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useUserAutocompleteStore } from '@/stores/user-autocomplete.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { User } from '@/types';
-import { Result, ok, err, ApiError } from '@/types';
+import { ok, err } from '@/types';
 import { createServices } from '@/services/service.factory';
+import type { ApiError } from '@/plugins/axios';
 
 // Mock i18n
 vi.mock('@/plugins/i18n', () => ({
