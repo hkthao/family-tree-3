@@ -43,7 +43,7 @@ public class DeleteFacesByMemberIdCommandHandler : IRequestHandler<DeleteFacesBy
             // Continue deleting other faces even if one fails
         }
 
-        if (faces != null && faces.Count > 0)
+        if (faces?.Any() == true)
         {
             _context.Faces.RemoveRange(faces);
             await _context.SaveChangesAsync(cancellationToken);

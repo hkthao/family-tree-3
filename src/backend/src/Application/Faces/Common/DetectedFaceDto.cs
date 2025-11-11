@@ -4,7 +4,7 @@ using backend.Application.Faces.Common;
 namespace backend.Application.Faces.Queries;
 public class DetectedFaceDto
 {
-    public string Id { get; set; } = null!;
+    public string Id { get; set; } = string.Empty;
     public BoundingBoxDto BoundingBox { get; set; } = null!;
     public float Confidence { get; set; }
     public string? Thumbnail { get; set; } // Base64 encoded image

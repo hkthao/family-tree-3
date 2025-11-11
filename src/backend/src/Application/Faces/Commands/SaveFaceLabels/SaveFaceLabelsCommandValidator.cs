@@ -11,7 +11,7 @@ namespace backend.Application.Faces.Commands.SaveFaceLabels
                 .NotNull().WithMessage("FaceLabels list cannot be null.")
                 .Must(list => list == null || list.Any()).WithMessage("FaceLabels list cannot be empty.");
 
-            RuleForEach(v => v.FaceLabels).ChildRules(face =>
+            RuleForEach(v => v.FaceLabels).Cascade(CascadeMode.Stop).ChildRules(face =>
             {
                 face.RuleFor(f => f.Id)
                     .NotEmpty().WithMessage("DetectedFaceDto Id is required.");
@@ -21,6 +21,7 @@ namespace backend.Application.Faces.Commands.SaveFaceLabels
                     .Must(id => id != Guid.Empty).WithMessage("DetectedFaceDto MemberId is required for labeled faces.");
 
                 face.RuleFor(f => f.Embedding)
+                    .Cascade(CascadeMode.Stop)
                     .NotNull().NotEmpty().WithMessage("DetectedFaceDto Embedding cannot be empty.");
             });
         }

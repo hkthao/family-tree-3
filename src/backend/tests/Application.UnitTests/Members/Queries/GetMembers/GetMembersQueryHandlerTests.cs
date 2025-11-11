@@ -96,7 +96,7 @@ public class GetMembersQueryHandlerTests : TestBase
         _context.FamilyUsers.Add(new FamilyUser(accessibleFamilyId, userId, FamilyRole.Viewer));
         // Thêm các thành viên vào cơ sở dữ liệu giả lập
         _context.Members.AddRange(
-            new Member("John", "Doe", "JD1", accessibleFamilyId), // Thành viên thuộc gia đình có thể truy cập
+            new Member("Doe", "John", "JD1", accessibleFamilyId), // Thành viên thuộc gia đình có thể truy cập
             new Member("Jane", "Doe", "JD2", inaccessibleFamilyId) // Thành viên thuộc gia đình không thể truy cập
         );
         await _context.SaveChangesAsync(); // Lưu thay đổi vào cơ sở dữ liệu
@@ -117,6 +117,6 @@ public class GetMembersQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue(); // Đảm bảo truy vấn thành công
         result.Value.Should().NotBeNull(); // Đảm bảo giá trị trả về không rỗng
         result.Value.Should().HaveCount(1); // Đảm bảo chỉ trả về 1 thành viên (từ gia đình có thể truy cập)
-        result.Value!.First().FullName.Should().Be("John Doe"); // Kiểm tra tên đầy đủ của thành viên được trả về
+        result.Value!.First().FullName.Should().Be("Doe John"); // Kiểm tra tên đầy đủ của thành viên được trả về
     }
 }
