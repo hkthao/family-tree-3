@@ -144,6 +144,61 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .attr('height', height)
     .attr('viewBox', [0, 0, width, height]);
 
+  const chartGroup = svg.append('g'); // Group for all chart elements to be zoomed
+
+  const zoom = d3.zoom<SVGSVGElement, unknown>()
+    .scaleExtent([0.1, 8]) // Allow zooming from 0.1x to 8x
+    .on('zoom', (event) => {
+      chartGroup.attr('transform', event.transform);
+    });
+
+  svg.call(zoom as any); // Apply zoom behavior to the SVG
+
+  // Add zoom controls
+  const zoomControls = d3.select(chartContainer.value).append('div')
+    .style('position', 'absolute')
+    .style('bottom', '20px')
+    .style('right', '20px')
+    .style('display', 'flex')
+    .style('flex-direction', 'column')
+    .style('gap', '10px');
+
+  zoomControls.append('button')
+    .attr('class', 'v-btn v-btn--elevated v-theme--light v-btn--density-default v-btn--size-default v-btn--variant-elevated')
+    .style('min-width', 'unset')
+    .style('width', '40px')
+    .style('height', '40px')
+    .style('border-radius', '50%')
+    .style('background-color', 'rgb(var(--v-theme-primary))')
+    .style('color', 'rgb(var(--v-theme-on-primary))')
+    .style('cursor', 'pointer')
+    .html('<span class="mdi mdi-plus"></span>')
+    .on('click', () => svg.transition().call(zoom.scaleBy as any, 1.2));
+
+  zoomControls.append('button')
+    .attr('class', 'v-btn v-btn--elevated v-theme--light v-btn--density-default v-btn--size-default v-btn--variant-elevated')
+    .style('min-width', 'unset')
+    .style('width', '40px')
+    .style('height', '40px')
+    .style('border-radius', '50%')
+    .style('background-color', 'rgb(var(--v-theme-primary))')
+    .style('color', 'rgb(var(--v-theme-on-primary))')
+    .style('cursor', 'pointer')
+    .html('<span class="mdi mdi-minus"></span>')
+    .on('click', () => svg.transition().call(zoom.scaleBy as any, 0.8));
+
+  zoomControls.append('button')
+    .attr('class', 'v-btn v-btn--elevated v-theme--light v-btn--density-default v-btn--size-default v-btn--variant-elevated')
+    .style('min-width', 'unset')
+    .style('width', '40px')
+    .style('height', '40px')
+    .style('border-radius', '50%')
+    .style('background-color', 'rgb(var(--v-theme-primary))')
+    .style('color', 'rgb(var(--v-theme-on-primary))')
+    .style('cursor', 'pointer')
+    .html('<span class="mdi mdi-restore"></span>')
+    .on('click', () => svg.transition().call(zoom.transform as any, d3.zoomIdentity));
+
   simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id).distance(d => d.type === 'spouse' ? 120 : 300).strength(1))
     .force('charge', d3.forceManyBody().strength(-1200))
@@ -151,7 +206,7 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .force('x', d3.forceX(width / 2).strength(0.1))
     .force('y', d3.forceY<GraphNode>(d => 150 + d.depth * 240).strength(0.8));
 
-  const link = svg.append('g')
+  const link = chartGroup.append('g') // Append to chartGroup
     .attr('stroke-opacity', 0.5)
     .selectAll('line')
     .data(links)
@@ -159,13 +214,13 @@ const renderChart = (nodes: GraphNode[], links: GraphLink[]) => {
     .attr('stroke-width', d => d.type === 'spouse' ? 3 : 1.5)
     .attr('stroke', d => d.type === 'spouse' ? 'rgb(var(--v-theme-error))' : 'rgb(var(--v-theme-on-surface))');
 
-  const node = svg.append('g')
+  const node = chartGroup.append('g') // Append to chartGroup
     .selectAll('g')
     .data(nodes)
     .join('g')
     .call(drag(simulation) as any);
 
-  const defs = svg.append('defs');
+  const defs = chartGroup.append('defs'); // Append to chartGroup
   nodes.forEach(d => {
     if (d.avatarUrl) {
       defs.append('pattern').attr('id', `avatar-${d.id}`)

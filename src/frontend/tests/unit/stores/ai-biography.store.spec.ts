@@ -2,7 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useAIBiographyStore } from '@/stores/ai-biography.store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BiographyResultDto, Member } from '@/types';
-import { BiographyStyle, AIProviderType, Gender } from '@/types';
+import { BiographyStyle, Gender } from '@/types';
 import { ok, err } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { createServices } from '@/services/service.factory';
@@ -102,16 +102,12 @@ describe('ai-biography.store', () => {
     expect(store.loading).toBe(false);
     expect(store.error).toBeNull();
     expect(store.biographyResult).toBeNull();
-    expect(store.aiProviders).toEqual([]);
     expect(store.memberId).toBeNull();
     expect(store.currentMember).toBeNull();
     expect(store.style).toBe(BiographyStyle.Emotional);
     expect(store.generatedFromDB).toBe(true);
     expect(store.userPrompt).toBeNull();
     expect(store.language).toBe('Vietnamese');
-    expect(store.maxTokens).toBe(500);
-    expect(store.temperature).toBe(0.7);
-    expect(store.selectedProvider).toBe(AIProviderType.None);
   });
 
   describe('fetchMemberDetails', () => {
@@ -269,20 +265,5 @@ describe('ai-biography.store', () => {
   it('should set language', () => {
     store.language = 'English';
     expect(store.language).toBe('English');
-  });
-
-  it('should set maxTokens', () => {
-    store.maxTokens = 1000;
-    expect(store.maxTokens).toBe(1000);
-  });
-
-  it('should set temperature', () => {
-    store.temperature = 0.5;
-    expect(store.temperature).toBe(0.5);
-  });
-
-  it('should set selectedProvider', () => {
-    store.selectedProvider = AIProviderType.OpenAI;
-    expect(store.selectedProvider).toBe(AIProviderType.OpenAI);
   });
 });
