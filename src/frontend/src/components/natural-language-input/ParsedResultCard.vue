@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mb-2 border" elevation="0">
+  <v-card class="mt-4 border" elevation="0">
     <v-card-item>
       <v-card-title class="text-h6">{{ title }}</v-card-title>
     </v-card-item>
@@ -16,10 +16,11 @@
       </v-alert>
     </v-card-text>
 
-    <v-card-actions class="px-4 pb-4 pt-2">
+    <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteItem" size="small">{{ t('common.delete') }}</v-btn>
-      <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage" size="small">{{ t('common.save') }}</v-btn>
+      <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage" size="small">{{ t('common.save')
+        }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -49,15 +50,36 @@ const title = computed(() => {
 
 const details = computed(() => {
   const detailsObj: Record<string, any> = {};
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '';
+    try {
+      // Attempt to parse as YYYY-MM-DD first, then try other formats
+      const date = new Date(dateString);
+      if (!isNaN(date.getTime())) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+    } catch (e) {
+      // Fallback to original string if parsing fails
+    }
+    return dateString; // Return original string if it's not a parsable date
+  };
+
   if (props.type === 'member') {
     const member = props.item as MemberDataDto;
-    if (member.dateOfBirth) detailsObj[t('member.form.dateOfBirth')] = member.dateOfBirth;
-    if (member.dateOfDeath) detailsObj[t('member.form.dateOfDeath')] = member.dateOfDeath;
-    if (member.gender) detailsObj[t('member.form.gender')] = member.gender;
+    if (member.dateOfBirth) detailsObj[t('member.form.dateOfBirth')] = formatDate(member.dateOfBirth);
+    if (member.dateOfDeath) detailsObj[t('member.form.dateOfDeath')] = formatDate(member.dateOfDeath);
+    if (member.gender) {
+      const translatedGender = t(`member.gender.${member.gender.toLowerCase()}`);
+      detailsObj[t('member.form.gender')] = translatedGender;
+    }
   } else {
     const event = props.item as EventDataDto;
     detailsObj[t('event.form.description')] = event.description;
-    if (event.date) detailsObj[t('event.form.date')] = event.date;
+    if (event.date) detailsObj[t('event.form.date')] = formatDate(event.date);
     if (event.location) detailsObj[t('event.form.location')] = event.location;
   }
   return detailsObj;
