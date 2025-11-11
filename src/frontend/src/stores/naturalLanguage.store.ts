@@ -66,16 +66,31 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
         const memberStore = useMemberStore(); // Access member store
 
-        const newMember: Omit<Member, 'id'> = {
-          firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
-          lastName: memberData.fullName.split(' ').pop() || '',
-          familyId: this.familyId,
-          gender: memberData.gender as Gender,
-          dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
-          dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
-        };
+        let result: Result<Member, ApiError>;
 
-        const result = await memberStore.addItem(newMember); // Use memberStore.addItem
+        if (memberData.isExisting && memberData.id) { // Check if existing and has an ID
+          const updatedMember: Member = {
+            id: memberData.id, // Use existing ID
+            firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
+            lastName: memberData.fullName.split(' ').pop() || '',
+            familyId: this.familyId,
+            gender: memberData.gender as Gender,
+            dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
+            dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
+          };
+          result = await memberStore.updateItem(updatedMember); // Call updateItem
+        } else {
+          const newMember: Omit<Member, 'id'> = {
+            firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
+            lastName: memberData.fullName.split(' ').pop() || '',
+            familyId: this.familyId,
+            gender: memberData.gender as Gender,
+            dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
+            dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
+          };
+          result = await memberStore.addItem(newMember); // Call addItem
+        }
+
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
         }

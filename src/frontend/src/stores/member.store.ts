@@ -104,7 +104,7 @@ export const useMemberStore = defineStore('member', {
       return result;
     },
 
-    async updateItem(updatedItem: Member): Promise<void> {
+    async updateItem(updatedItem: Member): Promise<Result<Member, ApiError>> {
       this.update.loading = true;
       this.error = null;
       const result = await this.services.member.update(updatedItem);
@@ -115,6 +115,7 @@ export const useMemberStore = defineStore('member', {
         console.error(result.error);
       }
       this.update.loading = false;
+      return result; // Return the result
     },
 
     async deleteItem(id: string): Promise<Result<void, ApiError>> {

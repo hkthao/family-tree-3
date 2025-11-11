@@ -19,6 +19,7 @@ export interface MemberDataDto {
   wifeId?: string | null;
   order?: number | null;
   errorMessage?: string | null;
+  isExisting?: boolean; // Added to indicate if the member already exists and needs updating
 }
 
 export interface EventDataDto {
