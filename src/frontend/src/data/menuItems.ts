@@ -66,11 +66,6 @@ const menu: MenuSection[] = [
         to: '/help',
       },
       {
-        titleKey: 'onboarding.title',
-        icon: 'mdi-walk',
-        to: '/onboarding',
-      },
-      {
         titleKey: 'terms.title',
         icon: 'mdi-file-document-outline',
         to: '/terms',
