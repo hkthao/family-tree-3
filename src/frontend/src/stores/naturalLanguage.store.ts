@@ -96,9 +96,10 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         const memberStore = useMemberStore(); // Access member store
 
         let result: Result<Member, ApiError>;
-        const newMember: Omit<Member, 'id'> = {
-          firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
-          lastName: memberData.fullName.split(' ').pop() || '',
+        const newMember: Member = {
+          id: memberData.id!,
+          firstName: memberData.firstName ?? "",
+          lastName: memberData.lastName ?? "",
           familyId: this.familyId,
           gender: memberData.gender as Gender,
           dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,

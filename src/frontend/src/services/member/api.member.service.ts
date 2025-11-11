@@ -69,7 +69,7 @@ export class ApiMemberService implements IMemberService {
     return result;
   }
 
-  async add(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
+  async add(newItem: Member): Promise<Result<Member, ApiError>> {
     // Renamed from addMember
     const apiMember = prepareMemberForApi(newItem);
     const result = await this.http.post<Member>(this.apiUrl, apiMember);

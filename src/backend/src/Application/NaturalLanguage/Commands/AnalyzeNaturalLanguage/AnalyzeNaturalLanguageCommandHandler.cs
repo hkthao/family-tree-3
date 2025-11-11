@@ -123,7 +123,7 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
                 string? errorMessage = null;
                 Guid sourceMemberGuid = Guid.Empty;
                 Guid targetMemberGuid = Guid.Empty;
-                backend.Domain.Enums.RelationshipType parsedType = backend.Domain.Enums.RelationshipType.Father; // Default value
+                Domain.Enums.RelationshipType parsedType = Domain.Enums.RelationshipType.Father; // Default value
 
                 // Validate SourceMemberId
                 if (string.IsNullOrWhiteSpace(relationshipData.SourceMemberId))
@@ -155,31 +155,24 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
                     // Try parsing as enum name (string)
                     if (Enum.TryParse(relationshipData.Type, true, out parsedType))
                     {
-                        // Successfully parsed as string name
+                        // Check if the parsed type is one of the allowed types
+                        if (!Enum.IsDefined(typeof(Domain.Enums.RelationshipType), parsedType))
+                        {
+                            errorMessage += $"Invalid RelationshipType: '{relationshipData.Type}'. Expected one of: {string.Join(", ", Enum.GetNames(typeof(Domain.Enums.RelationshipType)))}. ";
+                        }
                     }
                     // Try parsing as integer value
-                    else if (int.TryParse(relationshipData.Type, out int typeInt) && Enum.IsDefined(typeof(backend.Domain.Enums.RelationshipType), typeInt))
+                    else if (int.TryParse(relationshipData.Type, out int typeInt) && Enum.IsDefined(typeof(Domain.Enums.RelationshipType), typeInt))
                     {
-                        parsedType = (backend.Domain.Enums.RelationshipType)typeInt;
+                        parsedType = (Domain.Enums.RelationshipType)typeInt;
                     }
                     else
                     {
-                        errorMessage += $"Invalid RelationshipType: '{relationshipData.Type}'. Expected one of: {string.Join(", ", Enum.GetNames(typeof(backend.Domain.Enums.RelationshipType)))} or integer values. ";
+                        errorMessage += $"Invalid RelationshipType: '{relationshipData.Type}'. Expected one of: {string.Join(", ", Enum.GetNames(typeof(Domain.Enums.RelationshipType)))} or integer values. ";
                     }
                 }
 
-                if (errorMessage != null)
-                {
-                    processedRelationships.Add(new RelationshipResultDto
-                    {
-                        SourceMemberId = sourceMemberGuid, // Will be Guid.Empty if not mapped
-                        TargetMemberId = targetMemberGuid, // Will be Guid.Empty if not mapped
-                        Type = parsedType, // Will be default if invalid
-                        Order = relationshipData.Order,
-                        ErrorMessage = errorMessage.Trim()
-                    });
-                }
-                else
+                if (errorMessage == null)
                 {
                     processedRelationships.Add(new RelationshipResultDto
                     {

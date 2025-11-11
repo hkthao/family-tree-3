@@ -22,6 +22,7 @@ import { useMemberStore } from '@/stores/member.store';
 import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
 import { storeToRefs } from 'pinia';
 
 interface MemberAddViewProps {
@@ -54,7 +55,11 @@ const handleAddMember = async () => {
   }
 
   try {
-    await memberStore.addItem(memberData as Omit<Member, 'id'>);
+    const newMember: Member = {
+      ...memberData,
+      id: uuidv4(),
+    };
+    await memberStore.addItem(newMember);
     if (!memberStore.error && memberStore.detail.item) {
       notificationStore.showSnackbar(t('member.messages.addSuccess'), 'success');
       emit('saved'); // Emit saved event

@@ -76,7 +76,7 @@ export const useMemberStore = defineStore('member', {
       this.list.loading = false;
     },
 
-    async addItem(newItem: Omit<Member, 'id'>): Promise<Result<Member, ApiError>> {
+    async addItem(newItem: Member): Promise<Result<Member, ApiError>> {
       this.add.loading = true;
       this.error = null;
       const result = await this.services.member.add(newItem);
