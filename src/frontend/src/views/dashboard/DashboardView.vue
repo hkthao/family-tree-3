@@ -1,14 +1,9 @@
 <template>
   <v-container fluid>
     <v-row>
-      <v-col cols="12" md="4">
+      <v-col id="family-auto-complete" cols="12" md="4">
         <family-auto-complete v-model="selectedFamilyId" :label="t('dashboard.filterByFamily')" clearable hide-details
           prepend-inner-icon="mdi-filter-variant" />
-      </v-col>
-      <v-col cols="12" md="auto" class="d-flex align-center">
-        <v-btn class="btn-preview" color="primary" @click="startTour" prepend-icon="mdi-play-circle-outline">
-          {{ t('onboarding.interactiveTour.startButton') }}
-        </v-btn>
       </v-col>
     </v-row>
 
@@ -20,7 +15,7 @@
     </v-row>
 
     <!-- Bottom Section: Family Tree Overview -->
-    <v-row>
+    <v-row id="genealogy-chart">
       <v-col cols="12">
         <FamilyTreeOverview :family-id="selectedFamilyId" />
       </v-col>
@@ -50,7 +45,7 @@ import EventCalendar from '@/components/event/EventCalendar.vue';
 import { useOnboardingTour } from '@/composables/useOnboardingTour';
 
 const { t } = useI18n();
-const { startTour } = useOnboardingTour();
+useOnboardingTour();
 
 const dashboardStore = useDashboardStore();
 
