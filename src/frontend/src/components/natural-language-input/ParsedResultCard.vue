@@ -14,7 +14,7 @@
       </v-chip-group>
 
       <v-chip-group column v-if="recommendations.length > 0" class="mt-2">
-        <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" size="small" color="warning">
+        <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" size="small" color="orange">
           {{ rec }}
         </v-chip>
       </v-chip-group>
