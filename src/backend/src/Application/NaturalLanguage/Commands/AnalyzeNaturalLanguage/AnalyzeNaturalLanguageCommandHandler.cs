@@ -1,12 +1,9 @@
-using MediatR;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Exceptions;
 using backend.Application.AI.Prompts;
 using backend.Application.NaturalLanguage.Models;
 using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using FluentValidation.Results;
+using backend.Application.Common.Models.AI;
 
 namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 

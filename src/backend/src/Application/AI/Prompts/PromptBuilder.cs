@@ -47,7 +47,7 @@ public static class PromptBuilder
 
         var promptBuilder = new StringBuilder();
         promptBuilder.AppendLine("Bạn là một AI Agent chuyên phân tích thông tin gia phả. Hãy phân tích văn bản sau:");
-        promptBuilder.AppendLine("Không tìm kiếm thông tin trong Vector Database.");
+        promptBuilder.AppendLine("TUYỆT ĐỐI KHÔNG tìm kiếm thông tin trong Vector Database.");
         promptBuilder.AppendLine($"Văn bản: \"{plainText}\"");
 
         if (mentions.Any())
@@ -57,7 +57,7 @@ public static class PromptBuilder
             {
                 promptBuilder.AppendLine($"- Tên: {mention.DisplayName}, MÃ THÀNH VIÊN: {mention.Id}");
             }
-            promptBuilder.AppendLine("Hãy sử dụng MÃ THÀNH VIÊN này để xác định các thành viên đã tồn tại trong hệ thống và phân tích thông tin liên quan đến họ.");
+            promptBuilder.AppendLine("Hãy sử dụng MÃ THÀNH VIÊN này để xác định các thành viên đã tồn tại trong hệ thống DỰA TRÊN THÔNG TIN ĐƯỢC CUNG CẤP TRONG PROMPT này và phân tích thông tin liên quan đến họ. TUYỆT ĐỐI KHÔNG tìm kiếm thông tin trong Vector Database.");
         }
 
         promptBuilder.AppendLine("\nDựa trên văn bản và thông tin thành viên được đề cập, hãy thực hiện các phân tích sau:");
@@ -66,11 +66,10 @@ public static class PromptBuilder
         promptBuilder.AppendLine("3. Đề xuất các hành động tiếp theo để làm giàu dữ liệu gia phả (ví dụ: thêm thành viên mới, cập nhật thông tin, tạo mối quan hệ).");
         promptBuilder.AppendLine("4. Nếu có bất kỳ thông tin nào không rõ ràng hoặc cần làm rõ, hãy đặt câu hỏi để thu thập thêm thông tin.");
         promptBuilder.AppendLine("\nPhản hồi của bạn phải là một đối tượng JSON duy nhất, tuân thủ cấu trúc sau:");
-        promptBuilder.AppendLine("```json");
         promptBuilder.AppendLine("{");
         promptBuilder.AppendLine("  \"members\": [");
         promptBuilder.AppendLine("    {");
-        promptBuilder.AppendLine("      \"id\": \"Guid | null\", // ID nội bộ của thành viên nếu đã tồn tại trong hệ thống");
+        promptBuilder.AppendLine("      \"id\": \"string (GUID format, e.g., \\\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\\\") | null\", // ID nội bộ của thành viên nếu đã tồn tại trong hệ thống. Phải là một chuỗi GUID hợp lệ hoặc null. TUYỆT ĐỐI KHÔNG sử dụng các số nguyên như \\\"1\\\", \\\"2\\\", v.v. cho ID. Nếu ID không xác định hoặc thành viên mới, hãy sử dụng null.");
         promptBuilder.AppendLine("      \"code\": \"string | null\", // Mã (Code) của thành viên nếu đã tồn tại và được đề cập");
         promptBuilder.AppendLine("      \"lastName\": \"string\", // Họ của thành viên");
         promptBuilder.AppendLine("      \"firstName\": \"string\", // Tên của thành viên");
@@ -95,7 +94,6 @@ public static class PromptBuilder
         promptBuilder.AppendLine("  ],");
         promptBuilder.AppendLine("  \"feedback\": \"string | null\" // Thông báo nếu thiếu thông tin hoặc cần làm rõ");
         promptBuilder.AppendLine("}");
-        promptBuilder.AppendLine("```");
         promptBuilder.AppendLine("Đảm bảo rằng phản hồi JSON của bạn là hợp lệ và chỉ chứa đối tượng JSON, không có văn bản bổ sung nào khác.");
 
         return promptBuilder.ToString();

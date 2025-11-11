@@ -1,7 +1,4 @@
-using backend.Application.Common.Interfaces;
 using backend.Application.NaturalLanguage.Models;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 

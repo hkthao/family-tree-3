@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 
 /// <summary>

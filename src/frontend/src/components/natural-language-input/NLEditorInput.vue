@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card :elevation="0" class="border">
     <v-progress-linear :active="loading" :indeterminate="loading" color="primary" absolute top></v-progress-linear>
     <v-card-title>{{ t('naturalLanguage.editor.title') }}</v-card-title>
     <v-card-text class="pa-0">
@@ -69,7 +69,7 @@
         <editor-content :editor="editor" class="tiptap-editor-content" />
       </div>
     </v-card-text>
-    <v-card-actions>
+    <v-card-actions class="pa-0">
       <v-spacer></v-spacer>
       <v-btn color="primary" @click="emitContent" :loading="loading" :disabled="loading">{{
         t('naturalLanguage.editor.parseButton') }}</v-btn>
@@ -188,7 +188,7 @@ onBeforeUnmount(() => {
   border-radius: 4px;
 
   .tiptap-editor-content {
-    min-height: 150px;
+    min-height: 120px;
     padding: 12px;
     font-size: medium;
   }
