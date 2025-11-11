@@ -7,6 +7,16 @@
       </v-card-title>
     </v-card-item>
 
+    <v-alert
+      v-if="saveAlert.show"
+      :type="saveAlert.type"
+      density="compact"
+      class="mx-4 mt-2"
+      variant="tonal"
+    >
+      {{ saveAlert.message }}
+    </v-alert>
+
     <v-card-text class="py-0">
       <v-chip-group column>
         <v-chip v-for="detail in details" size="small" :key="detail.originalKey">
@@ -25,7 +35,7 @@
       </v-alert>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions v-if="!savedSuccessfully">
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteItem" size="small">{{ t('common.delete') }}</v-btn>
       <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage || loading" :loading="loading" size="small">{{ t('common.save')
@@ -140,16 +150,47 @@ const deleteItem = () => {
 
 const naturalLanguageStore = useNaturalLanguageStore();
 const loading = ref(false); // New loading state
+const savedSuccessfully = ref(false); // New state to control card actions visibility
+const saveAlert = ref({
+  show: false,
+  type: 'success' as 'success' | 'error',
+  message: '',
+});
 
 const saveItem = async () => {
   loading.value = true; // Set loading to true
+  saveAlert.value.show = false; // Hide previous alert
+  let saveResult;
+
   try {
     if (props.type === 'member') {
-      await naturalLanguageStore.saveMember(props.item as MemberDataDto);
+      saveResult = await naturalLanguageStore.saveMember(props.item as MemberDataDto);
     } else {
-      await naturalLanguageStore.saveEvent(props.item as EventDataDto);
+      saveResult = await naturalLanguageStore.saveEvent(props.item as EventDataDto);
     }
-    emit('delete'); // Remove from list after saving
+
+    if (saveResult && saveResult.ok) {
+      saveAlert.value = {
+        show: true,
+        type: 'success',
+        message: t('common.saveSuccess'),
+      };
+      savedSuccessfully.value = true; // Mark as saved successfully
+    } else {
+      saveAlert.value = {
+        show: true,
+        type: 'error',
+        message: saveResult?.error?.message || t('common.saveError'),
+      };
+      savedSuccessfully.value = false;
+    }
+  } catch (e: any) {
+    saveAlert.value = {
+      show: true,
+      type: 'error',
+      message: e.message || t('common.saveError'),
+    };
+    savedSuccessfully.value = false;
   } finally {
     loading.value = false; // Reset loading state
   }

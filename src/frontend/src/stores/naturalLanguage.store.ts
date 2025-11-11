@@ -76,13 +76,13 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         };
 
         const result = await memberStore.addItem(newMember); // Use memberStore.addItem
-        if (result.ok) {
-          // Optionally, handle success (e.g., show notification)
-        } else {
+        if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
         }
+        return result; // Explicitly return the result
       } catch (e: any) {
         this.error = e.message;
+        return { ok: false, error: { message: this.error } } as Result<Member, ApiError>; // Return a failure result
       } finally {
         this.loading = false;
       }
@@ -110,13 +110,13 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         };
 
         const result = await eventStore.addItem(newEvent); // Use eventStore.addItem
-        if (result.ok) {
-          // Optionally, handle success
-        } else {
+        if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
         }
+        return result; // Explicitly return the result
       } catch (e: any) {
         this.error = e.message;
+        return { ok: false, error: { message: this.error } } as Result<Event, ApiError>; // Return a failure result
       } finally {
         this.loading = false;
       }
