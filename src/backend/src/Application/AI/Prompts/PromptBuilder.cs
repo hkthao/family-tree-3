@@ -82,7 +82,7 @@ public static class PromptBuilder
         promptBuilder.AppendLine("  ],");
         promptBuilder.AppendLine("  \"events\": [");
         promptBuilder.AppendLine("    {");
-        promptBuilder.AppendLine("      \"type\": \"string\", // \"Birth\", \"Death\", \"Marriage\", \"Anniversary\"");
+        promptBuilder.AppendLine("      \"type\": \"string\", // QUAN TRỌNG: KHÔNG tạo sự kiện 'Birth' hoặc 'Death'. Các sự kiện này được hệ thống tự động xử lý từ dateOfBirth và dateOfDeath của thành viên. Chỉ tạo các sự kiện khác như 'Marriage', 'Anniversary', v.v.");
         promptBuilder.AppendLine("      \"description\": \"string\",");
         promptBuilder.AppendLine("      \"date\": \"string | null\", // Định dạng YYYY-MM-DD hoặc mô tả");
         promptBuilder.AppendLine("      \"location\": \"string | null\",");
