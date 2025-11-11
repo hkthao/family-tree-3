@@ -796,5 +796,29 @@
   "naturalLanguage.recommendations.missingDateOfBirth": "Thiếu ngày sinh",
   "naturalLanguage.recommendations.missingGender": "Thiếu giới tính",
   "naturalLanguage.recommendations.missingDate": "Thiếu ngày sự kiện",
-  "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm"
+  "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm",
+  "tour": {
+    "familyList": {
+      "search": {
+        "title": "Tìm kiếm và Lọc",
+        "description": "Tại đây bạn có thể tìm kiếm gia đình theo tên hoặc sử dụng các bộ lọc nâng cao."
+      },
+      "create": {
+        "title": "Tạo Gia đình",
+        "description": "Nhấn vào đây để tạo một gia đình mới."
+      },
+      "list": {
+        "title": "Danh sách Gia đình",
+        "description": "Đây là danh sách các gia đình của bạn."
+      },
+      "view": {
+        "title": "Xem Gia đình",
+        "description": "Nhấn vào đây để xem chi tiết một gia đình."
+      },
+      "delete": {
+        "title": "Xóa Gia đình",
+        "description": "Nhấn vào đây để xóa một gia đình."
+      }
+    }
+  }
 }

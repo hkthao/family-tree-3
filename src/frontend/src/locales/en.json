@@ -738,5 +738,29 @@
   "face.confirmDeleteFaceDataTitle": "Confirm Deletion of Face Data",
   "face.confirmDeleteFaceDataMessage": "Are you sure you want to delete all face data for {fullName}?",
   "face.messages.deleteSuccess": "Face data deleted successfully!",
-  "face.messages.deleteError": "Error deleting face data."
+  "face.messages.deleteError": "Error deleting face data.",
+  "tour": {
+    "familyList": {
+      "search": {
+        "title": "Search and Filter",
+        "description": "Here you can search for families by name or use advanced filters."
+      },
+      "create": {
+        "title": "Create Family",
+        "description": "Click here to create a new family."
+      },
+      "list": {
+        "title": "Family List",
+        "description": "This is the list of your families."
+      },
+      "view": {
+        "title": "View Family",
+        "description": "Click here to view the details of a family."
+      },
+      "delete": {
+        "title": "Delete Family",
+        "description": "Click here to delete a family."
+      }
+    }
+  }
 }

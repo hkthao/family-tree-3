@@ -1,11 +1,11 @@
 <template>
   <div data-testid="family-list-view">
-    <FamilySearch @update:filters="handleFilterUpdate" />
-    <FamilyList :items="list.items" :total-items="familyStore.list.totalItems" :loading="familyStore.list.loading"
+    <FamilySearch id="tour-step-1" @update:filters="handleFilterUpdate" />
+    <FamilyList id="tour-step-2" :items="list.items" :total-items="familyStore.list.totalItems" :loading="familyStore.list.loading"
       :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToViewFamily"
-      @delete="confirmDelete" @create="navigateToAddFamily" />
+      @delete="confirmDelete" @create="navigateToAddFamily" @onStartTour="startTour" />
   </div>
 </template>
 
@@ -20,6 +20,7 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
+import { useFamilyTour } from '@/composables';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -28,6 +29,7 @@ const familyStore = useFamilyStore();
 const { list } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { startTour } = useFamilyTour();
 
 const currentFilters = ref<FamilyFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);

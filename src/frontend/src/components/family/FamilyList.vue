@@ -7,8 +7,15 @@
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
 
+        <v-btn color="primary" icon @click="emit('onStartTour')" aria-label="Start Tour">
+          <v-tooltip :text="t('onboarding.interactiveTour.startButton')">
+            <template v-slot:activator="{ props }">
+              <v-icon v-bind="props">mdi-walk</v-icon>
+            </template>
+          </v-tooltip>
+        </v-btn>
 
-        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button">
+        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button" aria-label="Create Family">
           <v-tooltip :text="t('family.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -30,7 +37,7 @@
     <!-- name column -->
     <template #item.name="{ item }">
       <div class="text-left">
-        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
+        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer" aria-label="View">
           {{ item.name }}
         </a>
       </div>
@@ -60,7 +67,7 @@
       <v-tooltip :text="t('family.list.action.delete')">
         <template v-slot:activator="{ props }">
           <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('delete', item)"
-            data-testid="delete-family-button" :data-family-name="item.name">
+            data-testid="delete-family-button" :data-family-name="item.name" aria-label="Delete">
             <v-icon>mdi-delete</v-icon>
           </v-btn>
         </template>
@@ -96,6 +103,7 @@ const emit = defineEmits([
   'update:itemsPerPage',
   'create',
   'update:search',
+  'onStartTour',
 ]);
 
 const { t } = useI18n();
