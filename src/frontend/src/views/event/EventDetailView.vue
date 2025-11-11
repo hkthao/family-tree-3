@@ -17,12 +17,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEventStore } from '@/stores/event.store';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
-import { useAuth } from '@/composables/useAuth';
+
 
 interface EventDetailViewProps {
   eventId: string;
@@ -33,13 +33,11 @@ const emit = defineEmits(['close', 'edit']);
 
 const { t } = useI18n();
 const eventStore = useEventStore();
-const { isAdmin, isFamilyManager } = useAuth();
+
 
 const event = ref<Event | undefined>(undefined);
 
-const canEditEvent = computed(() => {
-  return isAdmin.value || isFamilyManager.value;
-});
+
 
 const loadEvent = async () => {
   if (props.eventId) {
@@ -56,11 +54,7 @@ const closeView = () => {
   emit('close');
 };
 
-const editEvent = () => {
-  if (event.value) {
-    emit('edit', event.value);
-  }
-};
+
 
 onMounted(() => {
   loadEvent();

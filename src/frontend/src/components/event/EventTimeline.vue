@@ -87,13 +87,7 @@ const totalEvents = ref(0);
 const selectedEventId = ref<string | null>(null); // Store the ID of the event being viewed
 const detailDrawer = ref(false); // Control visibility of the detail drawer
 
-const eventTypeIcons = {
-  Birth: 'mdi-cake-variant',
-  Marriage: 'mdi-ring',
-  Death: 'mdi-coffin',
-  Migration: 'mdi-airplane',
-  Other: 'mdi-calendar-text',
-};
+
 
 const paginatedEvents = computed(() => eventStore.list.items);
 

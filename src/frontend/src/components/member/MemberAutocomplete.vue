@@ -23,7 +23,7 @@ interface MemberAutocompleteProps {
   label: string;
 }
 
-const props = defineProps<MemberAutocompleteProps>();
+const { label } = defineProps<MemberAutocompleteProps>();
 const emit = defineEmits(['update:model-value']);
 
 const memberStore = useMemberStore();

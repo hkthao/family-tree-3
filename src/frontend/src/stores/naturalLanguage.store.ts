@@ -95,7 +95,6 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
         const memberStore = useMemberStore(); // Access member store
 
-        let result: Result<Member, ApiError>;
         const newMember: Member = {
           id: memberData.id!,
           firstName: memberData.firstName ?? "",
@@ -105,7 +104,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
           dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
         };
-        result = await memberStore.addItem(newMember); // Call addItem
+        const result: Result<Member, ApiError> = await memberStore.addItem(newMember); // Call addItem
 
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
@@ -130,13 +129,31 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
 
         const eventStore = useEventStore(); // Access event store
 
+        const mapEventType = (typeString: string): EventType => {
+          const lowerTypeString = typeString.toLowerCase();
+          switch (lowerTypeString) {
+            case 'birth':
+              return EventType.Birth;
+            case 'death':
+              return EventType.Death;
+            case 'marriage':
+              return EventType.Marriage;
+            case 'divorce':
+              return EventType.Divorce;
+            case 'burial':
+              return EventType.Burial;
+            default:
+              return EventType.Other;
+          }
+        };
+
         const newEvent: Omit<Event, 'id'> = {
           name: eventData.description, // Using description as name
           description: eventData.description,
           startDate: eventData.date ? new Date(eventData.date) : null,
           location: eventData.location || undefined,
           familyId: this.familyId,
-          type: eventData.type as unknown as EventType, // Cast as EventType, assuming string matches enum
+          type: mapEventType(eventData.type),
           relatedMembers: eventData.relatedMemberIds,
         };
 
