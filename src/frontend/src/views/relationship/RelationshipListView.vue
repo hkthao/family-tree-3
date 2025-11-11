@@ -37,8 +37,8 @@ const currentFilters = ref<RelationshipFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
 
 const loadRelationships = async () => {
-  relationshipStore.filter = {
-    ...relationshipStore.filter,
+  relationshipStore.list.filters = {
+    ...relationshipStore.list.filters,
     ...currentFilters.value,
   };
   relationshipStore.setItemsPerPage(itemsPerPage.value); // Ensure itemsPerPage is set

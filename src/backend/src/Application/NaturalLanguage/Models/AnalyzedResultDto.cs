@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using backend.Domain.Enums; // Add this using directive
 
 namespace backend.Application.NaturalLanguage.Models;
 
@@ -17,6 +18,11 @@ public class AnalyzedResultDto
     /// Danh sách các sự kiện đã được chuyển đổi với Guid IDs.
     /// </summary>
     public List<EventResultDto> Events { get; set; } = new List<EventResultDto>();
+
+    /// <summary>
+    /// Danh sách các mối quan hệ đã được chuyển đổi với Guid IDs.
+    /// </summary>
+    public List<RelationshipResultDto> Relationships { get; set; } = new List<RelationshipResultDto>();
 
     /// <summary>
     /// Thông tin phản hồi từ AI nếu có dữ liệu bị thiếu hoặc cần làm rõ.
@@ -37,10 +43,6 @@ public class MemberResultDto
     public string? DateOfBirth { get; set; }
     public string? DateOfDeath { get; set; }
     public string? Gender { get; set; }
-    public Guid? FatherId { get; set; }
-    public Guid? MotherId { get; set; }
-    public Guid? HusbandId { get; set; }
-    public Guid? WifeId { get; set; }
     public int? Order { get; set; }
     public bool IsExisting { get; set; } = false;
     public string? ErrorMessage { get; set; }
@@ -57,5 +59,17 @@ public class EventResultDto
     public string? Date { get; set; }
     public string? Location { get; set; }
     public List<Guid> RelatedMemberIds { get; set; } = new List<Guid>();
+    public string? ErrorMessage { get; set; }
+}
+
+/// <summary>
+/// Đại diện cho một mối quan hệ giữa các thành viên.
+/// </summary>
+public class RelationshipResultDto
+{
+    public Guid SourceMemberId { get; set; }
+    public Guid TargetMemberId { get; set; }
+    public RelationshipType Type { get; set; }
+    public int? Order { get; set; }
     public string? ErrorMessage { get; set; }
 }

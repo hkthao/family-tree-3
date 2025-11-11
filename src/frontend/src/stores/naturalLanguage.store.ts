@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
-import type { AnalyzedDataDto, MemberDataDto, EventDataDto } from '@/types/natural-language.d'; // Update import
+import type { AnalyzedDataDto, MemberDataDto, EventDataDto, RelationshipDataDto } from '@/types/natural-language.d'; // Update import
 import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
-import type { Member, Event, Gender, EventType, Result } from '@/types'; // Import Member, Event, Gender, EventType, Result
+import type { Member, Event, Gender, EventType, Result, RelationshipType } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
 import { useMemberStore } from './member.store'; // Import member store
 import { useEventStore } from './event.store'; // Import event store
+import { useRelationshipStore } from './relationship.store'; // Import relationship store
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
   state: () => ({
@@ -52,6 +53,14 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
             event.savedSuccessfully = false;
             event.saveAlert = { show: false, type: 'success', message: '' };
           });
+          this.parsedData.relationships.forEach(relationship => { // Initialize relationships
+            if (!relationship.id) {
+              relationship.id = uuidv4(); // Generate ID if missing
+            }
+            relationship.loading = false;
+            relationship.savedSuccessfully = false;
+            relationship.saveAlert = { show: false, type: 'success', message: '' };
+          });
         }
 
         this.loading = false;
@@ -71,7 +80,7 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.loading = false;
     },
 
-    setInput(newInput: string) {
+    setInput(newInput: string): void {
       this.input = newInput;
     },
 
@@ -87,29 +96,15 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         const memberStore = useMemberStore(); // Access member store
 
         let result: Result<Member, ApiError>;
-
-        if (memberData.isExisting && memberData.id) { // Check if existing and has an ID
-          const updatedMember: Member = {
-            id: memberData.id, // Use existing ID
-            firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
-            lastName: memberData.fullName.split(' ').pop() || '',
-            familyId: this.familyId,
-            gender: memberData.gender as Gender,
-            dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
-            dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
-          };
-          result = await memberStore.updateItem(updatedMember); // Call updateItem
-        } else {
-          const newMember: Omit<Member, 'id'> = {
-            firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
-            lastName: memberData.fullName.split(' ').pop() || '',
-            familyId: this.familyId,
-            gender: memberData.gender as Gender,
-            dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
-            dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
-          };
-          result = await memberStore.addItem(newMember); // Call addItem
-        }
+        const newMember: Omit<Member, 'id'> = {
+          firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
+          lastName: memberData.fullName.split(' ').pop() || '',
+          familyId: this.familyId,
+          gender: memberData.gender as Gender,
+          dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
+          dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
+        };
+        result = await memberStore.addItem(newMember); // Call addItem
 
         if (!result.ok) {
           this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
@@ -157,6 +152,38 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       }
     },
 
+    async saveRelationship(relationshipData: RelationshipDataDto): Promise<Result<any, ApiError>> {
+      this.loading = true;
+      this.error = null;
+      try {
+        if (!this.familyId) {
+          this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
+          return { ok: false, error: { message: this.error } } as Result<any, ApiError>;
+        }
+
+        const relationshipStore = useRelationshipStore();
+
+        const newRelationship = {
+          sourceMemberId: relationshipData.sourceMemberId,
+          targetMemberId: relationshipData.targetMemberId,
+          type: relationshipData.type as unknown as RelationshipType,
+          order: relationshipData.order,
+          familyId: this.familyId,
+        };
+
+        const result = await relationshipStore.addItem(newRelationship);
+        if (!result.ok) {
+          this.error = result.error?.message || i18n.global.t('aiInput.saveError');
+        }
+        return result;
+      } catch (e: any) {
+        this.error = e.message;
+        return { ok: false, error: { message: this.error } } as Result<any, ApiError>;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     deleteParsedMember(index: number) {
       if (this.parsedData && this.parsedData.members) {
         this.parsedData.members.splice(index, 1);
@@ -166,6 +193,12 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
     deleteParsedEvent(index: number) {
       if (this.parsedData && this.parsedData.events) {
         this.parsedData.events.splice(index, 1);
+      }
+    },
+
+    deleteParsedRelationship(index: number) {
+      if (this.parsedData && this.parsedData.relationships) {
+        this.parsedData.relationships.splice(index, 1);
       }
     },
 

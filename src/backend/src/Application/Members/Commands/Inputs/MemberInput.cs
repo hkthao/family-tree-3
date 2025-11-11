@@ -1,6 +1,6 @@
 namespace backend.Application.Members.Inputs;
 
-public class MemberInput
+public record MemberInput
 {
     public string LastName { get; set; } = null!;
     public string FirstName { get; set; } = null!;

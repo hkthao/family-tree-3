@@ -1,7 +1,7 @@
 <template>
   <v-card data-testid="relationship-list">
-    <v-data-table :headers="headers" :items="formattedRelationships" :loading="relationshipStore.loading"
-      :items-per-page="relationshipStore.itemsPerPage" :total-items="relationshipStore.totalItems"
+    <v-data-table :headers="headers" :items="formattedRelationships" :loading="relationshipStore.list.loading"
+      :items-per-page="relationshipStore.list.itemsPerPage" :total-items="relationshipStore.list.totalItems"
       @update:options="loadItems" elevation="0">
       <template #top>
         <v-toolbar flat>
@@ -79,7 +79,7 @@ const headers = computed(() => [
 ]);
 
 const formattedRelationships = computed(() => {
-  return relationshipStore.items.map(item => ({
+  return relationshipStore.list.items.map(item => ({
     ...item,
     formattedRelationship: `
       <a class="text-primary font-weight-bold text-decoration-underline cursor-pointer" data-member-id="${item.sourceMemberId}">${item.sourceMember?.fullName}</a>

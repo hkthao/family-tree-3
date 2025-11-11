@@ -46,7 +46,7 @@ const route = useRoute();
 const router = useRouter();
 const relationshipStore = useRelationshipStore();
 
-const relationship = ref<Relationship | undefined>(undefined);
+const relationship = ref<Relationship | null>(null);
 const loading = ref(false);
 const selectedTab = ref('general');
 
@@ -55,7 +55,7 @@ const loadRelationship = async () => {
   const relationshipId = route.params.id as string;
   if (relationshipId) {
     await relationshipStore.getById(relationshipId);
-    relationship.value = relationshipStore.currentItem;
+    relationship.value = relationshipStore.detail.item;
   }
   loading.value = false;
 };

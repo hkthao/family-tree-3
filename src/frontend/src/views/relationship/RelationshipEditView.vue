@@ -1,5 +1,5 @@
 <template>
-  <v-container v-if="relationshipStore.currentItem">
+  <v-container v-if="relationshipStore.detail.item">
     <v-row>
       <v-col cols="12">
         <v-card data-testid="relationship-edit-view">
@@ -9,7 +9,7 @@
             <v-btn icon="mdi-close" size="small" variant="text" @click="cancel"></v-btn>
           </v-card-title>
           <v-card-text>
-            <RelationshipForm ref="relationshipForm" :id="id" :initial-relationship-data="relationshipStore.currentItem" />
+            <RelationshipForm ref="relationshipForm" :id="id" :initial-relationship-data="relationshipStore.detail.item" />
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>

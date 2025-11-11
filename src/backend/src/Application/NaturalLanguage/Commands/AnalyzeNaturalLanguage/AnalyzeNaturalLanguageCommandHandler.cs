@@ -116,29 +116,78 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
                 });
             }
 
-            // 5. Process Relationships (FatherId, MotherId, HusbandId, WifeId) for processedMembers
-            foreach (var memberResult in processedMembers)
+            // 5. Process Relationships: Create RelationshipResultDto objects
+            var processedRelationships = new List<RelationshipResultDto>();
+            foreach (var relationshipData in analyzedData.Relationships)
             {
-                var originalMemberData = analyzedData.Members.FirstOrDefault(m => aiIdMap.ContainsKey(m.Id ?? "") && aiIdMap[m.Id ?? ""] == memberResult.Id);
+                string? errorMessage = null;
+                Guid sourceMemberGuid = Guid.Empty;
+                Guid targetMemberGuid = Guid.Empty;
+                backend.Domain.Enums.RelationshipType parsedType = backend.Domain.Enums.RelationshipType.Father; // Default value
 
-                if (originalMemberData != null)
+                // Validate SourceMemberId
+                if (string.IsNullOrWhiteSpace(relationshipData.SourceMemberId))
                 {
-                    if (!string.IsNullOrWhiteSpace(originalMemberData.FatherId) && aiIdMap.TryGetValue(originalMemberData.FatherId, out var fatherGuid))
+                    errorMessage += "SourceMemberId is missing. ";
+                }
+                else if (!aiIdMap.TryGetValue(relationshipData.SourceMemberId, out sourceMemberGuid))
+                {
+                    errorMessage += $"SourceMemberId '{relationshipData.SourceMemberId}' not mapped. ";
+                }
+
+                // Validate TargetMemberId
+                if (string.IsNullOrWhiteSpace(relationshipData.TargetMemberId))
+                {
+                    errorMessage += "TargetMemberId is missing. ";
+                }
+                else if (!aiIdMap.TryGetValue(relationshipData.TargetMemberId, out targetMemberGuid))
+                {
+                    errorMessage += $"TargetMemberId '{relationshipData.TargetMemberId}' not mapped. ";
+                }
+
+                // Validate RelationshipType
+                if (string.IsNullOrWhiteSpace(relationshipData.Type))
+                {
+                    errorMessage += "RelationshipType is missing. ";
+                }
+                else
+                {
+                    // Try parsing as enum name (string)
+                    if (Enum.TryParse(relationshipData.Type, true, out parsedType))
                     {
-                        memberResult.FatherId = fatherGuid;
+                        // Successfully parsed as string name
                     }
-                    if (!string.IsNullOrWhiteSpace(originalMemberData.MotherId) && aiIdMap.TryGetValue(originalMemberData.MotherId, out var motherGuid))
+                    // Try parsing as integer value
+                    else if (int.TryParse(relationshipData.Type, out int typeInt) && Enum.IsDefined(typeof(backend.Domain.Enums.RelationshipType), typeInt))
                     {
-                        memberResult.MotherId = motherGuid;
+                        parsedType = (backend.Domain.Enums.RelationshipType)typeInt;
                     }
-                    if (!string.IsNullOrWhiteSpace(originalMemberData.HusbandId) && aiIdMap.TryGetValue(originalMemberData.HusbandId, out var husbandGuid))
+                    else
                     {
-                        memberResult.HusbandId = husbandGuid;
+                        errorMessage += $"Invalid RelationshipType: '{relationshipData.Type}'. Expected one of: {string.Join(", ", Enum.GetNames(typeof(backend.Domain.Enums.RelationshipType)))} or integer values. ";
                     }
-                    if (!string.IsNullOrWhiteSpace(originalMemberData.WifeId) && aiIdMap.TryGetValue(originalMemberData.WifeId, out var wifeGuid))
+                }
+
+                if (errorMessage != null)
+                {
+                    processedRelationships.Add(new RelationshipResultDto
                     {
-                        memberResult.WifeId = wifeGuid;
-                    }
+                        SourceMemberId = sourceMemberGuid, // Will be Guid.Empty if not mapped
+                        TargetMemberId = targetMemberGuid, // Will be Guid.Empty if not mapped
+                        Type = parsedType, // Will be default if invalid
+                        Order = relationshipData.Order,
+                        ErrorMessage = errorMessage.Trim()
+                    });
+                }
+                else
+                {
+                    processedRelationships.Add(new RelationshipResultDto
+                    {
+                        SourceMemberId = sourceMemberGuid,
+                        TargetMemberId = targetMemberGuid,
+                        Type = parsedType,
+                        Order = relationshipData.Order
+                    });
                 }
             }
 
@@ -180,6 +229,7 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
             {
                 Members = processedMembers,
                 Events = processedEvents,
+                Relationships = processedRelationships,
                 Feedback = analyzedData.Feedback
             };
 

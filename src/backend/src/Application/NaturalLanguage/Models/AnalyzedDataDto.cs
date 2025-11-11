@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using backend.Domain.Enums; // Add this using directive
+
 namespace backend.Application.NaturalLanguage.Models;
 
 /// <summary>
@@ -14,6 +17,11 @@ public class AnalyzedDataDto
     /// Danh sách các sự kiện được AI xác định từ văn bản.
     /// </summary>
     public List<EventDataDto> Events { get; set; } = new List<EventDataDto>();
+
+    /// <summary>
+    /// Danh sách các mối quan hệ được AI xác định từ văn bản.
+    /// </summary>
+    public List<RelationshipDataDto> Relationships { get; set; } = new List<RelationshipDataDto>();
 
     /// <summary>
     /// Thông tin phản hồi từ AI nếu có dữ liệu bị thiếu hoặc cần làm rõ.
@@ -67,26 +75,6 @@ public class MemberDataDto
     public string? Gender { get; set; }
 
     /// <summary>
-    /// ID của cha (nếu có).
-    /// </summary>
-    public string? FatherId { get; set; }
-
-    /// <summary>
-    /// ID của mẹ (nếu có).
-    /// </summary>
-    public string? MotherId { get; set; }
-
-    /// <summary>
-    /// ID của chồng (nếu có).
-    /// </summary>
-    public string? HusbandId { get; set; }
-
-    /// <summary>
-    /// ID của vợ (nếu có).
-    /// </summary>
-    public string? WifeId { get; set; }
-
-    /// <summary>
     /// Thứ tự của thành viên trong số các anh chị em (nếu là con).
     /// </summary>
     public int? Order { get; set; }
@@ -136,4 +124,30 @@ public class EventDataDto
     /// Thông báo lỗi xác thực cụ thể cho sự kiện này.
     /// </summary>
     public string? ErrorMessage { get; set; }
+}
+
+/// <summary>
+/// Đại diện cho một mối quan hệ được AI xác định.
+/// </summary>
+public class RelationshipDataDto
+{
+    /// <summary>
+    /// ID của thành viên nguồn (ví dụ: cha, mẹ, chồng, vợ).
+    /// </summary>
+    public string SourceMemberId { get; set; } = null!;
+
+    /// <summary>
+    /// ID của thành viên đích (ví dụ: con, vợ, chồng).
+    /// </summary>
+    public string TargetMemberId { get; set; } = null!;
+
+    /// <summary>
+    /// Loại mối quan hệ (ví dụ: Parent, Child, Spouse).
+    /// </summary>
+    public string Type { get; set; } = null!;
+
+    /// <summary>
+    /// Thứ tự của mối quan hệ (ví dụ: thứ tự con).
+    /// </summary>
+    public int? Order { get; set; }
 }

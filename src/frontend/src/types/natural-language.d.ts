@@ -1,6 +1,7 @@
 export interface AnalyzedDataDto {
   members: MemberDataDto[];
   events: EventDataDto[];
+  relationships: RelationshipDataDto[]; // New: Relationships are now separate
   feedback?: string | null;
 }
 
@@ -13,10 +14,6 @@ export interface MemberDataDto {
   dateOfBirth?: string | null;
   dateOfDeath?: string | null;
   gender?: string | null;
-  fatherId?: string | null;
-  motherId?: string | null;
-  husbandId?: string | null;
-  wifeId?: string | null;
   order?: number | null;
   errorMessage?: string | null;
   isExisting?: boolean; // Added to indicate if the member already exists and needs updating
@@ -32,6 +29,18 @@ export interface EventDataDto {
   date?: string | null;
   location?: string | null;
   relatedMemberIds: string[];
+  errorMessage?: string | null;
+  loading?: boolean;
+  savedSuccessfully?: boolean;
+  saveAlert?: { show: boolean; type: 'success' | 'error'; message: string };
+}
+
+export interface RelationshipDataDto {
+  id?: string | null; // For frontend tracking
+  sourceMemberId: string;
+  targetMemberId: string;
+  type: string; // e.g., "husband", "wife", "father", "mother"
+  order?: number | null;
   errorMessage?: string | null;
   loading?: boolean;
   savedSuccessfully?: boolean;

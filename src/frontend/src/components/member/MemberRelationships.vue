@@ -4,7 +4,7 @@
       <v-data-table
         :headers="headers"
         :items="formattedRelationships"
-        :loading="relationshipStore.loading"
+        :loading="relationshipStore.list.loading"
         :no-data-text="t('common.noData')"
       >
         <template v-slot:item.formattedRelationship="{ item }">
@@ -51,7 +51,7 @@ const formattedRelationships = computed(() => {
 
 const filteredRelationships = computed(() => {
   if (!props.memberId) return [];
-  return relationshipStore.items.filter(
+  return relationshipStore.list.items.filter(
     (rel: Relationship) =>
       rel.sourceMemberId === props.memberId || rel.targetMemberId === props.memberId
   );

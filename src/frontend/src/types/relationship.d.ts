@@ -35,7 +35,7 @@ export interface Relationship {
   targetMemberId: string;
   targetMemberFullName?: string;
   type: RelationshipType;
-  order?: number;
+  order?: number | null;
   startDate?: string;
   endDate?: string;
   description?: string;

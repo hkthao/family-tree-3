@@ -65,7 +65,7 @@ public static class PromptBuilder
         promptBuilder.AppendLine("2. Xác định các mối quan hệ gia đình có thể có giữa các thành viên được đề cập hoặc với các thành viên khác không được đề cập trực tiếp nhưng có thể suy ra.");
         promptBuilder.AppendLine("3. Đề xuất các hành động tiếp theo để làm giàu dữ liệu gia phả (ví dụ: thêm thành viên mới, cập nhật thông tin, tạo mối quan hệ).");
         promptBuilder.AppendLine("4. Nếu có bất kỳ thông tin nào không rõ ràng hoặc cần làm rõ, hãy đặt câu hỏi để thu thập thêm thông tin.");
-        promptBuilder.AppendLine("QUAN TRỌNG: Đối với các thành viên được xác định trong văn bản, hãy gán một ID tạm thời duy nhất (ví dụ: \\\"temp_A\\\", \\\"temp_B\\\") cho mỗi thành viên. Sử dụng các ID tạm thời này để thiết lập mối quan hệ (chaId, mẹId, chồngId, vợId) giữa các thành viên trong phản hồi JSON. Nếu một thành viên được đề cập nhiều lần, hãy sử dụng cùng một ID tạm thời đã gán cho họ.");
+        promptBuilder.AppendLine("QUAN TRỌNG: Đối với các thành viên được xác định trong văn bản, hãy gán một ID tạm thời duy nhất (ví dụ: \\\"temp_A\\\", \\\"temp_B\\\") cho mỗi thành viên. Sử dụng các ID tạm thời này để thiết lập mối quan hệ (sourceMemberId, targetMemberId) giữa các thành viên trong phản hồi JSON. Nếu một thành viên được đề cập nhiều lần, hãy sử dụng cùng một ID tạm thời đã gán cho họ.");
         promptBuilder.AppendLine("\nPhản hồi của bạn phải là một đối tượng JSON duy nhất, tuân thủ cấu trúc sau:");
         promptBuilder.AppendLine("{");
         promptBuilder.AppendLine("  \"members\": [");
@@ -77,10 +77,6 @@ public static class PromptBuilder
         promptBuilder.AppendLine("      \"dateOfBirth\": \"string | null\", // Định dạng YYYY-MM-DD hoặc mô tả (ví dụ: \"khoảng 1950\")");
         promptBuilder.AppendLine("      \"dateOfDeath\": \"string | null\",");
         promptBuilder.AppendLine("      \"gender\": \"string | null\", // \"Male\", \"Female\", \"Unknown\"");
-        promptBuilder.AppendLine("      \"fatherId\": \"string | null\", // ID của cha (nếu có)");
-        promptBuilder.AppendLine("      \"motherId\": \"string | null\", // ID của mẹ (nếu có)");
-        promptBuilder.AppendLine("      \"husbandId\": \"string | null\", // ID của chồng (nếu có)");
-        promptBuilder.AppendLine("      \"wifeId\": \"string | null\", // ID của vợ (nếu có)");
         promptBuilder.AppendLine("      \"order\": \"number | null\" // Thứ tự của thành viên trong số các anh chị em (nếu là con)");
         promptBuilder.AppendLine("    }");
         promptBuilder.AppendLine("  ],");
@@ -91,6 +87,14 @@ public static class PromptBuilder
         promptBuilder.AppendLine("      \"date\": \"string | null\", // Định dạng YYYY-MM-DD hoặc mô tả");
         promptBuilder.AppendLine("      \"location\": \"string | null\",");
         promptBuilder.AppendLine("      \"relatedMemberIds\": [\"string\"] // Danh sách ID thành viên liên quan");
+        promptBuilder.AppendLine("    }");
+        promptBuilder.AppendLine("  ],");
+        promptBuilder.AppendLine("  \"relationships\": [");
+        promptBuilder.AppendLine("    {");
+        promptBuilder.AppendLine("      \"sourceMemberId\": \"string\", // ID tạm thời của thành viên nguồn (ví dụ: cha, mẹ, chồng, vợ)");
+        promptBuilder.AppendLine("      \"targetMemberId\": \"string\", // ID tạm thời của thành viên đích (ví dụ: con, vợ, chồng)");
+        promptBuilder.AppendLine("      \"type\": \"string\", // Loại mối quan hệ (chỉ chấp nhận các giá trị: \\\"Father\\\", \\\"Mother\\\", \\\"Husband\\\",\\\"Wife\\\"). KHÔNG sử dụng \\\"Child\\\" hoặc các giá trị khác. Mối quan hệ con cái sẽ được suy ra từ mối quan hệ cha/mẹ.");
+        promptBuilder.AppendLine("      \"order\": \"number | null\" // Thứ tự của mối quan hệ (ví dụ: thứ tự con)");
         promptBuilder.AppendLine("    }");
         promptBuilder.AppendLine("  ],");
         promptBuilder.AppendLine("  \"feedback\": \"string | null\" // Thông báo nếu thiếu thông tin hoặc cần làm rõ");
