@@ -98,6 +98,21 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
         }
 
+        // Automatically create Birth and Death events
+        if (member.DateOfBirth.HasValue)
+        {
+            var birthEvent = new Domain.Entities.Event($"Birth of {member.FullName}", $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, member.FamilyId, member.DateOfBirth.Value);
+            birthEvent.AddEventMember(member.Id);
+            _context.Events.Add(birthEvent);
+        }
+
+        if (member.DateOfDeath.HasValue)
+        {
+            var deathEvent = new Domain.Entities.Event($"Death of {member.FullName}", $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, member.FamilyId, member.DateOfDeath.Value);
+            deathEvent.AddEventMember(member.Id);
+            _context.Events.Add(deathEvent);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(member.Id);

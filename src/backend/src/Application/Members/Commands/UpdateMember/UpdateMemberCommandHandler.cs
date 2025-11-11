@@ -180,9 +180,67 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             }
         }
 
+        // Synchronize Birth and Death events
+        await SyncLifeEvents(request, member, cancellationToken);
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return Result<Guid>.Success(member.Id);
     }
 
+    private async Task SyncLifeEvents(UpdateMemberCommand request, Domain.Entities.Member member, CancellationToken cancellationToken)
+    {
+        // Find existing birth and death events for the member
+        var birthEvent = await _context.Events
+            .Include(e => e.EventMembers)
+            .FirstOrDefaultAsync(e => e.Type == EventType.Birth && e.EventMembers.Any(em => em.MemberId == member.Id), cancellationToken);
+
+        var deathEvent = await _context.Events
+            .Include(e => e.EventMembers)
+            .FirstOrDefaultAsync(e => e.Type == EventType.Death && e.EventMembers.Any(em => em.MemberId == member.Id), cancellationToken);
+
+        // Handle Birth Event
+        if (request.DateOfBirth.HasValue)
+        {
+            if (birthEvent != null)
+            {
+                // Update existing birth event
+                birthEvent.UpdateEvent(birthEvent.Name, birthEvent.Code, birthEvent.Description, request.DateOfBirth.Value, birthEvent.EndDate, birthEvent.Location, birthEvent.Type, birthEvent.Color);
+            }
+            else
+            {
+                // Create new birth event
+                var newBirthEvent = new Domain.Entities.Event($"Birth of {member.FullName}", $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, member.FamilyId, request.DateOfBirth.Value);
+                newBirthEvent.AddEventMember(member.Id);
+                _context.Events.Add(newBirthEvent);
+            }
+        }
+        else if (birthEvent != null)
+        {
+            // Remove existing birth event if date is cleared
+            _context.Events.Remove(birthEvent);
+        }
+
+        // Handle Death Event
+        if (request.DateOfDeath.HasValue)
+        {
+            if (deathEvent != null)
+            {
+                // Update existing death event
+                deathEvent.UpdateEvent(deathEvent.Name, deathEvent.Code, deathEvent.Description, request.DateOfDeath.Value, deathEvent.EndDate, deathEvent.Location, deathEvent.Type, deathEvent.Color);
+            }
+            else
+            {
+                // Create new death event
+                var newDeathEvent = new Domain.Entities.Event($"Death of {member.FullName}", $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, member.FamilyId, request.DateOfDeath.Value);
+                newDeathEvent.AddEventMember(member.Id);
+                _context.Events.Add(newDeathEvent);
+            }
+        }
+        else if (deathEvent != null)
+        {
+            // Remove existing death event if date is cleared
+            _context.Events.Remove(deathEvent);
+        }
+    }
 }
