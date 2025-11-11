@@ -1,5 +1,5 @@
 <template>
-  <v-card class="border" :elevation="0" fill-height width="100%">
+  <v-card class="border d-flex flex-column" :elevation="0" fill-height width="100%">
     <v-progress-linear :active="relationship.loading" :indeterminate="relationship.loading"  absolute
       top></v-progress-linear>
 
@@ -22,7 +22,7 @@
       class="mx-4 my-2" variant="tonal">
       {{ relationship.saveAlert?.message }}
     </v-alert>
-
+    <v-spacer></v-spacer>
     <v-card-actions v-if="!relationship.savedSuccessfully">
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteRelationship" size="small">{{ t('common.delete') }}</v-btn>

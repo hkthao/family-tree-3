@@ -1,5 +1,5 @@
 <template>
-  <v-card class="border" :elevation="0" fill-height width="100%">
+  <v-card class="border d-flex flex-column" :elevation="0" fill-height width="100%">
     <v-progress-linear :active="member.loading" :indeterminate="member.loading" color="primary" absolute
       top></v-progress-linear>
     <v-card-item>
@@ -30,7 +30,7 @@
       variant="tonal">
       {{ member.saveAlert?.message }}
     </v-alert>
-
+    <v-spacer></v-spacer>
     <v-card-actions v-if="!member.savedSuccessfully">
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteMember" size="small">{{ t('common.delete') }}</v-btn>
