@@ -20,6 +20,8 @@
   "dashboard.upcomingEvents.loading": "Đang tải sự kiện sắp tới...",
   "dashboard.upcomingEvents.noData": "Không có sự kiện sắp tới.",
   "onboarding.title": "Giới thiệu",
+  "onboarding.tourSteps.familyAutoComplete.title": "Tự động hoàn thành Gia đình",
+  "onboarding.tourSteps.familyAutoComplete.description": "Chọn hoặc tìm kiếm một gia đình để xem chi tiết và thành viên của nó.",
   "aiBiography.generator.title": "Trình tạo tiểu sử AI",
   "aiInput.title": "Đầu vào AI",
   "aiInput.promptLabel": "Lời nhắc",
