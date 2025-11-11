@@ -1,12 +1,12 @@
 <template>
-  <v-card class="mt-4 border" elevation="0">
+  <v-card class="border" :elevation="0">
     <v-card-item>
-      <v-card-title class="text-h6">{{ title }}</v-card-title>
+      <v-card-title class="text-h6 text-center">{{ title }}</v-card-title>
     </v-card-item>
 
     <v-card-text class="py-0">
       <v-chip-group column>
-        <v-chip v-for="(value, key) in details" :key="key" size="small" variant="outlined">
+        <v-chip v-for="(value, key) in details" size="small" :key="key" >
           <strong>{{ key }}:</strong> {{ value }}
         </v-chip>
       </v-chip-group>
@@ -16,7 +16,7 @@
       </v-alert>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions >
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteItem" size="small">{{ t('common.delete') }}</v-btn>
       <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage" size="small">{{ t('common.save')
