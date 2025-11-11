@@ -10,6 +10,11 @@
           prepend-inner-icon="mdi-filter-variant"
         />
       </v-col>
+      <v-col cols="12" md="auto" class="d-flex align-center">
+        <v-btn color="primary" @click="startTour" prepend-icon="mdi-play-circle-outline">
+          {{ t('onboarding.interactiveTour.startButton') }}
+        </v-btn>
+      </v-col>
     </v-row>
 
     <!-- Top Summary Section -->
@@ -47,8 +52,10 @@ import DashboardStats from '@/components/dashboard/DashboardStats.vue';
 import RecentActivity from '@/components/dashboard/RecentActivity.vue';
 import FamilyTreeOverview from '@/components/dashboard/FamilyTreeOverview.vue';
 import EventCalendar from '@/components/event/EventCalendar.vue';
+import { useOnboardingTour } from '@/composables/useOnboardingTour';
 
 const { t } = useI18n();
+const { startTour } = useOnboardingTour();
 
 const dashboardStore = useDashboardStore();
 

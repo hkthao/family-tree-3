@@ -529,6 +529,7 @@
   "onboarding.interactiveTour.title": "Interactive Tour",
   "onboarding.interactiveTour.description": "Click the button below to start a guided tour that will highlight important sections and functionalities of the Family Tree App.",
   "onboarding.interactiveTour.startButton": "Start Tour",
+  "onboarding.interactiveTour.dashboardMessage": "The interactive tour is now available directly from the Dashboard page. Please navigate to the Dashboard to start the tour.",
   "onboarding.whatYoullLearn.title": "What You'll Learn",
   "onboarding.whatYoullLearn.dashboardOverview.title": "Dashboard Overview",
   "onboarding.whatYoullLearn.dashboardOverview.subtitle": "Understand your family's summary at a glance.",

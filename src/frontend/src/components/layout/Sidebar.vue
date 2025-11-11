@@ -17,6 +17,7 @@
           :title="$t(item.titleKey)"
           active-class="active-item"
           :exact="item.exact"
+          :id="item.to === '/dashboard' ? 'dashboard-link' : undefined"
         ></v-list-item>
       </template>
     </v-list>

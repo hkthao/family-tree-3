@@ -9,7 +9,7 @@
         <v-icon size="64" color="grey lighten-1">mdi-information-outline</v-icon>
         <p class="mt-3 text-subtitle-1 text-grey">{{ t('dashboard.familyTreeOverview.selectFamilyPrompt') }}</p>
       </div>
-      <TreeChart v-else :family-id="familyId" :read-only="true" />
+      <TreeChart v-else :family-id="familyId" :read-only="true" id="genealogy-chart" />
     </v-card-text>
   </v-card>
 </template>
