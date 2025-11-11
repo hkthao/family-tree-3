@@ -60,7 +60,7 @@ export const useEventStore = defineStore('event', {
       this.list.loading = false;
     },
 
-    async addItem(newItem: Omit<Event, 'id'>): Promise<void> {
+    async addItem(newItem: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
       this.add.loading = true;
       this.error = null;
       const result = await this.services.event.add(newItem);
@@ -72,6 +72,7 @@ export const useEventStore = defineStore('event', {
         console.error(result.error);
       }
       this.add.loading = false;
+      return result; // Return the result
     },
 
     async addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {

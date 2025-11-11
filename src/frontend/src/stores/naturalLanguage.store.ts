@@ -4,6 +4,8 @@ import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
 import type { Member, Event, Gender, EventType } from '@/types'; // Import Member, Event, Gender, EventType
+import { useMemberStore } from './member.store'; // Import member store
+import { useEventStore } from './event.store'; // Import event store
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
   state: () => ({
@@ -57,25 +59,27 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.loading = true;
       this.error = null;
       try {
-        if (!this.familyId) { // Use this.familyId
+        if (!this.familyId) {
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
           return;
         }
 
+        const memberStore = useMemberStore(); // Access member store
+
         const newMember: Omit<Member, 'id'> = {
           firstName: memberData.fullName.split(' ').slice(0, -1).join(' ') || memberData.fullName,
           lastName: memberData.fullName.split(' ').pop() || '',
-          familyId: this.familyId, // Use this.familyId
+          familyId: this.familyId,
           gender: memberData.gender as Gender,
           dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
           dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
         };
 
-        const result = await this.services.member.add(newMember);
+        const result = await memberStore.addItem(newMember); // Use memberStore.addItem
         if (result.ok) {
           // Optionally, handle success (e.g., show notification)
         } else {
-          this.error = result.error?.message || 'Failed to save member';
+          this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
         }
       } catch (e: any) {
         this.error = e.message;
@@ -88,26 +92,28 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.loading = true;
       this.error = null;
       try {
-        if (!this.familyId) { // Use this.familyId
+        if (!this.familyId) {
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
           return;
         }
+
+        const eventStore = useEventStore(); // Access event store
 
         const newEvent: Omit<Event, 'id'> = {
           name: eventData.description, // Using description as name
           description: eventData.description,
           startDate: eventData.date ? new Date(eventData.date) : null,
           location: eventData.location || undefined,
-          familyId: this.familyId, // Use this.familyId
+          familyId: this.familyId,
           type: eventData.type as unknown as EventType, // Cast as EventType, assuming string matches enum
           relatedMembers: eventData.relatedMemberIds,
         };
 
-        const result = await this.services.event.add(newEvent);
+        const result = await eventStore.addItem(newEvent); // Use eventStore.addItem
         if (result.ok) {
           // Optionally, handle success
         } else {
-          this.error = result.error?.message || 'Failed to save event';
+          this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
         }
       } catch (e: any) {
         this.error = e.message;

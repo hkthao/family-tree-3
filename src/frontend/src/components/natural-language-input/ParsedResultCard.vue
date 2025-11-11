@@ -1,5 +1,6 @@
 <template>
   <v-card class="border" :elevation="0" fill-height width="100%">
+    <v-progress-linear :active="loading" :indeterminate="loading" color="primary" absolute top></v-progress-linear>
     <v-card-item>
       <v-card-title class="text-h6 text-center">
         <v-icon :icon="cardIcon" class="mr-2"></v-icon> {{ serialNumber }}. {{ title }}
@@ -27,14 +28,14 @@
     <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteItem" size="small">{{ t('common.delete') }}</v-btn>
-      <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage" size="small">{{ t('common.save')
+      <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage || loading" :loading="loading" size="small">{{ t('common.save')
         }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNaturalLanguageStore } from '@/stores/naturalLanguage.store';
 import type { MemberDataDto, EventDataDto } from '@/types/natural-language.d';
@@ -138,13 +139,19 @@ const deleteItem = () => {
 };
 
 const naturalLanguageStore = useNaturalLanguageStore();
+const loading = ref(false); // New loading state
 
 const saveItem = async () => {
-  if (props.type === 'member') {
-    await naturalLanguageStore.saveMember(props.item as MemberDataDto);
-  } else {
-    await naturalLanguageStore.saveEvent(props.item as EventDataDto);
+  loading.value = true; // Set loading to true
+  try {
+    if (props.type === 'member') {
+      await naturalLanguageStore.saveMember(props.item as MemberDataDto);
+    } else {
+      await naturalLanguageStore.saveEvent(props.item as EventDataDto);
+    }
+    emit('delete'); // Remove from list after saving
+  } finally {
+    loading.value = false; // Reset loading state
   }
-  emit('delete'); // Remove from list after saving
 };
 </script>
