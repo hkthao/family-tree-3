@@ -47,6 +47,31 @@ const menu: MenuSection[] = [
       },
     ],
   },
+  {
+    titleKey: 'menu.supportAndInfo',
+    items: [
+      {
+        titleKey: 'about.title',
+        icon: 'mdi-information-outline',
+        to: '/about',
+      },
+      {
+        titleKey: 'version.title',
+        icon: 'mdi-tag-outline',
+        to: '/version',
+      },
+      {
+        titleKey: 'help.title',
+        icon: 'mdi-help-circle-outline',
+        to: '/help',
+      },
+      {
+        titleKey: 'onboarding.title',
+        icon: 'mdi-walk',
+        to: '/onboarding',
+      },
+    ],
+  },
 ];
 
 export default menu;

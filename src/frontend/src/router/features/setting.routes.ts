@@ -1,10 +1,11 @@
 import type { RouteRecordRaw } from 'vue-router';
+import { UserSettingsPage } from '@/views';
 
 export const settingRoutes: RouteRecordRaw[] = [
   {
     path: 'settings',
     name: 'UserSettings',
-    component: () => import('@/views/settings/UserSettingsPage.vue'),
+    component: UserSettingsPage,
     meta: {
       breadcrumb: 'settings.title',
     },

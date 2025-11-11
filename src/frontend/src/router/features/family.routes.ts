@@ -1,11 +1,4 @@
-import { MainRouterView } from '@/views';
-import {
-  FamilyAddView,
-  FamilyDetailView,
-  FamilyEditView,
-  FamilyListView,
-  FamilyTreeView,
-} from '@/views/family';
+import { MainRouterView, FamilyAddView, FamilyDetailView, FamilyEditView, FamilyListView, FamilyTreeView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const familyRoutes: RouteRecordRaw[] = [

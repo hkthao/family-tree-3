@@ -1,10 +1,4 @@
-import { MainRouterView } from '@/views';
-import {
-  RelationshipAddView,
-  RelationshipDetailView,
-  RelationshipEditView,
-  RelationshipListView,
-} from '@/views/relationship';
+import { MainRouterView, RelationshipAddView, RelationshipDetailView, RelationshipEditView, RelationshipListView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const relationshipRoutes: RouteRecordRaw[] = [

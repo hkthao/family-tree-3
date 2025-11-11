@@ -1,11 +1,4 @@
-import { MainRouterView } from '@/views';
-import {
-  MemberAddView,
-  MemberBiographyView,
-  MemberDetailView,
-  MemberEditView,
-  MemberListView,
-} from '@/views/member';
+import { MainRouterView, MemberAddView, MemberBiographyView, MemberDetailView, MemberEditView, MemberListView } from '@/views';
 import type { RouteRecordRaw } from 'vue-router';
 
 export const memberRoutes: RouteRecordRaw[] = [

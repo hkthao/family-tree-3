@@ -7,13 +7,6 @@
         <v-toolbar flat>
           <v-toolbar-title>{{ t('relationship.list.title') }}</v-toolbar-title>
           <v-spacer></v-spacer>
-          <v-btn color="primary" icon @click="showAiCreatePopup = true" data-testid="relationship-ai-create-button">
-            <v-tooltip :text="t('relationship.list.action.aiCreate')">
-              <template v-slot:activator="{ props }">
-                <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
-              </template>
-            </v-tooltip>
-          </v-btn>
           <v-btn color="primary" icon @click="$emit('create')" data-testid="relationship-create-button">
             <v-tooltip :text="t('relationship.list.action.create')">
               <template v-slot:activator="{ props }">
@@ -50,7 +43,6 @@
       </template>
     </v-data-table>
   </v-card>
-  <NLRelationshipPopup v-model="showAiCreatePopup" @saved="relationshipStore._loadItems()" />
 </template>
 
 <script setup lang="ts">
@@ -59,7 +51,6 @@ import { useI18n } from 'vue-i18n';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import type { Relationship } from '@/types';
 import { getRelationshipTypeTitle } from '@/constants/relationshipTypes';
-import NLRelationshipPopup from './NLRelationshipPopup.vue';
 
 const props = defineProps<{
   search: string;
@@ -67,8 +58,6 @@ const props = defineProps<{
 
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
-
-const showAiCreatePopup = ref(false);
 
 const headers = computed(() => [
   { title: t('relationship.list.headers.relationship'), key: 'formattedRelationship', sortable: true, align: 'start' as const },

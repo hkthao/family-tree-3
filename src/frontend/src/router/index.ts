@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { MainLayout } from '@/layouts';
-import LogoutView from '@/views/auth/LogoutView.vue'; // Import LogoutView
 
 import { canAccessMenu } from '@/utils/menuPermissions';
 import { useAuthStore } from '@/stores';
@@ -12,6 +11,18 @@ import { memberRoutes } from './features/member.routes';
 import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
 import { settingRoutes } from './features/setting.routes';
+
+// Import all pages from the views index
+import {
+  AboutPage,
+  VersionPage,
+  HelpPage,
+  OnboardingPage,
+  LogoutView,
+  DashboardView,
+  NotFoundView,
+  NLEditorView,
+} from '@/views';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,7 +36,7 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: () => import('@/views/dashboard/DashboardView.vue'),
+          component: DashboardView,
           meta: { breadcrumb: 'dashboard.title' },
         },
         ...memberRoutes,
@@ -35,8 +46,32 @@ const router = createRouter({
         {
           path: 'nl-editor',
           name: 'NLEditor',
-          component: () => import('@/views/natural-language/NLEditorView.vue'),
+          component: NLEditorView,
           meta: { breadcrumb: 'naturalLanguage.editor.title' },
+        },
+        {
+          path: 'about',
+          name: 'About',
+          component: AboutPage,
+          meta: { breadcrumb: 'about.title' },
+        },
+        {
+          path: 'version',
+          name: 'Version',
+          component: VersionPage,
+          meta: { breadcrumb: 'version.title' },
+        },
+        {
+          path: 'help',
+          name: 'Help',
+          component: HelpPage,
+          meta: { breadcrumb: 'help.title' },
+        },
+        {
+          path: 'onboarding',
+          name: 'Onboarding',
+          component: OnboardingPage,
+          meta: { breadcrumb: 'onboarding.title' },
         },
       ],
     },
@@ -49,7 +84,7 @@ const router = createRouter({
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
-      component: () => import('@/views/misc/NotFoundView.vue'),
+      component: NotFoundView,
     },
   ],
 });
