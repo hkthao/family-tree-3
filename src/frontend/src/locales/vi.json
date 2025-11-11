@@ -640,6 +640,8 @@
   "naturalLanguage.errors.parseFailed": "Không thể phân tích đầu vào. Vui lòng thử lại.",
   "naturalLanguage.errors.invalidEntityType": "Loại thực thể không hợp lệ.",
   "naturalLanguage.errors.noDataParsed": "Không có dữ liệu nào được phân tích từ đầu vào.",
+  "naturalLanguage.errors.unsavedRelatedMembers": "Các thành viên liên quan ({members}) chưa được lưu. Vui lòng lưu thông tin của các thành viên này trước.",
+  "naturalLanguage.errors.relatedMembersNotFoundInDb": "Các thành viên liên quan ({members}) không tồn tại trong hệ thống. Vui lòng đảm bảo các thành viên này đã được lưu vào cơ sở dữ liệu.",
   "naturalLanguage.editor.title": "Trình soạn thảo ngôn ngữ tự nhiên",
   "naturalLanguage.editor.parseButton": "Phân tích",
   "naturalLanguage.editor.parsedResultTitle": "Kết quả phân tích",

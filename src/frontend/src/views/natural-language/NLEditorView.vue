@@ -51,6 +51,68 @@ const handleSaveMember = async (member: MemberDataDto) => {
   member.loading = true;
   member.saveAlert = { show: false, type: 'success', message: '' };
 
+  // Collect all related member IDs
+  const relatedMemberIds: string[] = [];
+  if (member.fatherId) relatedMemberIds.push(member.fatherId);
+  if (member.motherId) relatedMemberIds.push(member.motherId);
+  if (member.husbandId) relatedMemberIds.push(member.husbandId);
+  if (member.wifeId) relatedMemberIds.push(member.wifeId);
+
+  // First, check if related members are saved in the frontend store
+  if (relatedMemberIds.length > 0) {
+    const unsavedRelatedMembers: string[] = [];
+    relatedMemberIds.forEach(relatedId => {
+      const relatedMember = naturalLanguageStore.parsedData?.members.find(m => m.id === relatedId);
+      if (!relatedMember || !relatedMember.savedSuccessfully) {
+        unsavedRelatedMembers.push(relatedMember?.fullName || relatedId);
+      }
+    });
+
+    if (unsavedRelatedMembers.length > 0) {
+      member.saveAlert = {
+        show: true,
+        type: 'error',
+        message: i18n.global.t('naturalLanguage.errors.unsavedRelatedMembers', {
+          members: unsavedRelatedMembers.join(', '),
+        }),
+      };
+      member.loading = false;
+      return; // Prevent saving if related members are not saved in frontend
+    }
+
+    // Second, check if related members exist in the backend database
+    const existenceResult = await naturalLanguageStore.checkRelatedMembersExistence(relatedMemberIds);
+    if (!existenceResult.ok) {
+      member.saveAlert = {
+        show: true,
+        type: 'error',
+        message: existenceResult.error?.message || i18n.global.t('common.saveError'),
+      };
+      member.loading = false;
+      return;
+    }
+
+    const nonExistentRelatedMembers: string[] = [];
+    relatedMemberIds.forEach(relatedId => {
+      if (!existenceResult.value.get(relatedId)) {
+        const relatedMember = naturalLanguageStore.parsedData?.members.find(m => m.id === relatedId);
+        nonExistentRelatedMembers.push(relatedMember?.fullName || relatedId);
+      }
+    });
+
+    if (nonExistentRelatedMembers.length > 0) {
+      member.saveAlert = {
+        show: true,
+        type: 'error',
+        message: i18n.global.t('naturalLanguage.errors.relatedMembersNotFoundInDb', {
+          members: nonExistentRelatedMembers.join(', '),
+        }),
+      };
+      member.loading = false;
+      return; // Prevent saving if related members do not exist in DB
+    }
+  }
+
   try {
     const saveResult = await naturalLanguageStore.saveMember(member);
 

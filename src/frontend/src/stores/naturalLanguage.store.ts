@@ -168,5 +168,24 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
         this.parsedData.events.splice(index, 1);
       }
     },
+
+    async checkRelatedMembersExistence(memberIds: string[]): Promise<Result<Map<string, boolean>, ApiError>> {
+      const existenceMap = new Map<string, boolean>();
+      if (memberIds.length === 0) {
+        return { ok: true, value: existenceMap };
+      }
+
+      const result = await this.services.member.getByIds(memberIds);
+
+      if (result.ok) {
+        const existingMemberIds = new Set(result.value.map(m => m.id));
+        memberIds.forEach(id => {
+          existenceMap.set(id, existingMemberIds.has(id));
+        });
+        return { ok: true, value: existenceMap };
+      } else {
+        return { ok: false, error: result.error };
+      }
+    },
   },
 });
