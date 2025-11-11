@@ -117,6 +117,6 @@ public class GetMembersQueryHandlerTests : TestBase
         result.IsSuccess.Should().BeTrue(); // Đảm bảo truy vấn thành công
         result.Value.Should().NotBeNull(); // Đảm bảo giá trị trả về không rỗng
         result.Value.Should().HaveCount(1); // Đảm bảo chỉ trả về 1 thành viên (từ gia đình có thể truy cập)
-        result.Value!.First().FullName.Should().Be("Doe John"); // Kiểm tra tên đầy đủ của thành viên được trả về
+        result.Value!.First().FullName.Should().Be("John Doe"); // Kiểm tra tên đầy đủ của thành viên được trả về
     }
 }

@@ -5,7 +5,7 @@ public class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberComman
     public UpdateMemberCommandValidator()
     {
         RuleFor(v => v.Id)
-            .NotEmpty().WithMessage("Id cannot be empty.");
+            .NotEqual(Guid.Empty).WithMessage("Id cannot be empty.");
 
         RuleFor(v => v.LastName)
             .NotNull().WithMessage("Last Name cannot be null.")
