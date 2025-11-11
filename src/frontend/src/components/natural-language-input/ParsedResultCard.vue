@@ -8,23 +8,23 @@
 
     <v-card-text class="py-0">
       <v-chip-group column>
-        <v-chip v-for="(value, key) in details" size="small" :key="key" :color="getChipColor(key)">
-          <strong>{{ key }}:</strong> {{ value }}
+        <v-chip v-for="detail in details" size="small" :key="detail.originalKey">
+          <strong>{{ detail.label }}:</strong> {{ detail.value }}
         </v-chip>
       </v-chip-group>
 
-      <v-chip-group column v-if="recommendations.length > 0" class="mt-2">
-        <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" size="small" color="orange">
+      <div v-if="recommendations.length > 0" color="orange">
+        <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" color="warning" size="small">
           {{ rec }}
         </v-chip>
-      </v-chip-group>
+      </div>
 
       <v-alert v-if="item.errorMessage" type="error" density="compact" class="mt-2">
         {{ item.errorMessage }}
       </v-alert>
     </v-card-text>
 
-    <v-card-actions >
+    <v-card-actions>
       <v-spacer></v-spacer>
       <v-btn color="red" @click="deleteItem" size="small">{{ t('common.delete') }}</v-btn>
       <v-btn color="primary" @click="saveItem" :disabled="!!item.errorMessage" size="small">{{ t('common.save')
@@ -65,28 +65,12 @@ const cardIcon = computed(() => {
   return 'mdi-calendar-text';
 });
 
-const getChipColor = (key: string) => {
-  // Use translated keys for comparison
-  if (key === t('member.form.dateOfBirth') || key === t('member.form.dateOfDeath') || key === t('event.form.date')) {
-    return 'info'; // Blue for dates
-  }
-  if (key === t('member.form.gender')) {
-    return 'purple'; // Purple for gender
-  }
-  if (key === t('relationship.type.father') || key === t('relationship.type.mother') ||
-      key === t('relationship.type.husband') || key === t('relationship.type.wife')) {
-    return 'success'; // Green for relationships
-  }
-  return 'grey'; // Default color
-};
-
 const details = computed(() => {
-  const detailsObj: Record<string, any> = {};
+  const detailsArray: { label: string; value: any; originalKey: string }[] = [];
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '';
     try {
-      // Attempt to parse as YYYY-MM-DD first, then try other formats
       const date = new Date(dateString);
       if (!isNaN(date.getTime())) {
         const day = String(date.getDate()).padStart(2, '0');
@@ -97,7 +81,7 @@ const details = computed(() => {
     } catch (e) {
       // Fallback to original string if parsing fails
     }
-    return dateString; // Return original string if it's not a parsable date
+    return dateString;
   };
 
   const getMemberFullName = (memberId: string | null | undefined) => {
@@ -108,26 +92,26 @@ const details = computed(() => {
 
   if (props.type === 'member') {
     const member = props.item as MemberDataDto;
-    if (member.dateOfBirth) detailsObj[t('member.form.dateOfBirth')] = formatDate(member.dateOfBirth);
-    if (member.dateOfDeath) detailsObj[t('member.form.dateOfDeath')] = formatDate(member.dateOfDeath);
+    if (member.dateOfBirth) detailsArray.push({ label: t('member.form.dateOfBirth'), value: formatDate(member.dateOfBirth), originalKey: 'dateOfBirth' });
+    if (member.dateOfDeath) detailsArray.push({ label: t('member.form.dateOfDeath'), value: formatDate(member.dateOfDeath), originalKey: 'dateOfDeath' });
     if (member.gender) {
       const translatedGender = t(`member.gender.${member.gender.toLowerCase()}`);
-      detailsObj[t('member.form.gender')] = translatedGender;
+      detailsArray.push({ label: t('member.form.gender'), value: translatedGender, originalKey: 'gender' });
     }
 
     // Add relationship information
-    if (member.fatherId) detailsObj[t('relationship.type.father')] = getMemberFullName(member.fatherId);
-    if (member.motherId) detailsObj[t('relationship.type.mother')] = getMemberFullName(member.motherId);
-    if (member.husbandId) detailsObj[t('relationship.type.husband')] = getMemberFullName(member.husbandId);
-    if (member.wifeId) detailsObj[t('relationship.type.wife')] = getMemberFullName(member.wifeId);
+    if (member.fatherId) detailsArray.push({ label: t('relationship.type.father'), value: getMemberFullName(member.fatherId), originalKey: 'fatherId' });
+    if (member.motherId) detailsArray.push({ label: t('relationship.type.mother'), value: getMemberFullName(member.motherId), originalKey: 'motherId' });
+    if (member.husbandId) detailsArray.push({ label: t('relationship.type.husband'), value: getMemberFullName(member.husbandId), originalKey: 'husbandId' });
+    if (member.wifeId) detailsArray.push({ label: t('relationship.type.wife'), value: getMemberFullName(member.wifeId), originalKey: 'wifeId' });
 
   } else {
     const event = props.item as EventDataDto;
-    detailsObj[t('event.form.description')] = event.description;
-    if (event.date) detailsObj[t('event.form.date')] = formatDate(event.date);
-    if (event.location) detailsObj[t('event.form.location')] = event.location;
+    detailsArray.push({ label: t('event.form.description'), value: event.description, originalKey: 'description' });
+    if (event.date) detailsArray.push({ label: t('event.form.date'), value: formatDate(event.date), originalKey: 'eventDate' });
+    if (event.location) detailsArray.push({ label: t('event.form.location'), value: event.location, originalKey: 'location' });
   }
-  return detailsObj;
+  return detailsArray;
 });
 
 const recommendations = computed(() => {
