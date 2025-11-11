@@ -401,6 +401,7 @@
   "event.form.endDate": "Ngày kết thúc",
   "event.form.location": "Địa điểm",
   "event.form.description": "Mô tả",
+  "event.form.date": "Ngày",
   "event.form.color": "Màu sắc",
   "event.form.relatedMembers": "Thành viên liên quan",
   "event.type.birth": "Sinh",
