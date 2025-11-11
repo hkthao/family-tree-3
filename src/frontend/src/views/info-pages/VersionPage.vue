@@ -9,9 +9,9 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-6">
+    <v-row class="mt-3">
       <v-col cols="12" md="6">
-        <v-card class="pa-4 h-100" flat>
+        <v-card class="h-100" flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('version.currentVersion.title') }}</v-card-title>
           <v-card-text>
             <v-list density="compact">
@@ -45,10 +45,10 @@
       </v-col>
 
       <v-col cols="12" md="6">
-        <v-card class="pa-4 h-100" flat>
+        <v-card class="h-100" flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('version.changelog.title') }}</v-card-title>
           <v-card-text>
-            <p class="text-body-2">
+            <p class="text-body-1">
               {{ $t('version.changelog.summary') }}
             </p>
             <v-list density="compact">

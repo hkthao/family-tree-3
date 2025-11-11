@@ -9,9 +9,9 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-6">
+    <v-row class="mt-3">
       <v-col cols="12">
-        <v-card class="pa-4" flat>
+        <v-card flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('help.gettingStarted.title') }}</v-card-title>
           <v-card-text>
             <v-list density="compact">
@@ -45,9 +45,9 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-6">
+    <v-row class="mt-3">
       <v-col cols="12">
-        <v-card class="pa-4" flat>
+        <v-card flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('help.faq.title') }}</v-card-title>
           <v-card-text>
             <v-expansion-panels variant="accordion">
@@ -77,12 +77,12 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-6">
+    <v-row class="mt-3">
       <v-col cols="12">
-        <v-card class="pa-4" flat>
+        <v-card flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('help.furtherAssistance.title') }}</v-card-title>
           <v-card-text>
-            <p class="text-body-2">
+            <p class="text-body-1">
               {{ $t('help.furtherAssistance.description') }}
               <a href="#" target="_blank" class="text-primary">{{ $t('help.furtherAssistance.documentationLink') }}</a> {{ $t('common.or') }}
               <a href="#" target="_blank" class="text-primary">{{ $t('help.furtherAssistance.contactSupport') }}</a>.

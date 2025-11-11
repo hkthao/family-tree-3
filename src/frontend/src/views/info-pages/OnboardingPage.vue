@@ -9,12 +9,12 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-6">
+    <v-row class="mt-3">
       <v-col cols="12">
-        <v-card class="pa-4 text-center" flat>
+        <v-card class="text-center" flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('onboarding.interactiveTour.title') }}</v-card-title>
           <v-card-text>
-            <p class="text-body-2 mb-4">
+            <p class="text-body-1 mb-4">
               {{ $t('onboarding.interactiveTour.description') }}
             </p>
             <v-btn color="primary" @click="startTour" prepend-icon="mdi-play-circle-outline">
@@ -25,9 +25,9 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-6">
+    <v-row class="mt-3">
       <v-col cols="12">
-        <v-card class="pa-4" flat>
+        <v-card flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('onboarding.whatYoullLearn.title') }}</v-card-title>
           <v-card-text>
             <v-list density="compact">
