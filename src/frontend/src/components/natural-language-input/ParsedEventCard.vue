@@ -45,6 +45,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { EventDataDto } from '@/types/natural-language.d';
+import { EventType } from '@/types';
 
 const props = defineProps<{
   event: EventDataDto;
@@ -55,9 +56,23 @@ const emit = defineEmits(['delete', 'save-event']);
 
 const { t } = useI18n();
 
+const eventTypeToString = (type: EventType): string => {
+  switch (type) {
+    case EventType.Birth:
+      return 'birth';
+    case EventType.Death:
+      return 'death';
+    case EventType.Marriage:
+      return 'marriage';
+    case EventType.Other:
+    default:
+      return 'other';
+  }
+};
+
 const title = computed(() => {
-  const eventType = props.event.type.toLowerCase();
-  return t(`event.type.${eventType}`);
+  const eventTypeString = eventTypeToString(props.event.type);
+  return t(`event.type.${eventTypeString}`);
 });
 
 const formatDate = (dateString: string | null | undefined) => {
