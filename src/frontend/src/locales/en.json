@@ -22,7 +22,7 @@
   "onboarding.title": "Onboarding",
   "onboarding.tourSteps.familyAutoComplete.title": "Family Auto Complete",
   "onboarding.tourSteps.familyAutoComplete.description": "Select or search for a family to view its details and members.",
-  "onboarding.interactiveTour.startButton": "Start Interactive Tour",,
+  "onboarding.interactiveTour.startButton": "Start Tour",
   "aiBiography.generator.title": "AI Biography Generator",
   "aiBiography.generator.description": "Generate or update biographies for family members using AI.",
   "aiBiography.input.title": "Input & Configuration",
