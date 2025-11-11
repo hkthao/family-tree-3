@@ -3,12 +3,19 @@ import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useI18n } from 'vue-i18n';
 
+const TOUR_FLAG = 'familyTourCompleted';
+
 export function useFamilyTour() {
-  let tour: any;
   const { t } = useI18n();
 
   onMounted(() => {
-    tour = driver({
+    const tourCompleted = localStorage.getItem(TOUR_FLAG);
+
+    if (tourCompleted === 'true') {
+      return;
+    }
+
+    const driverObj = driver({
       showProgress: true,
       steps: [
         {
@@ -47,14 +54,11 @@ export function useFamilyTour() {
           },
         },
       ],
+      onDestroyed: () => {
+        localStorage.setItem(TOUR_FLAG, 'true');
+      },
     });
+
+    setTimeout(() => driverObj.drive(), 500);
   });
-
-  const startTour = () => {
-    tour.drive();
-  };
-
-  return {
-    startTour,
-  };
 }

@@ -5,7 +5,7 @@
       :items-per-page="itemsPerPage" :search="currentFilters.searchQuery || ''"
       @update:options="handleListOptionsUpdate" @update:itemsPerPage="itemsPerPage = $event"
       @update:search="handleSearchUpdate" @view="navigateToViewFamily"
-      @delete="confirmDelete" @create="navigateToAddFamily" @onStartTour="startTour" />
+      @delete="confirmDelete" @create="navigateToAddFamily" />
   </div>
 </template>
 
@@ -29,7 +29,7 @@ const familyStore = useFamilyStore();
 const { list } = storeToRefs(familyStore);
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
-const { startTour } = useFamilyTour();
+useFamilyTour();
 
 const currentFilters = ref<FamilyFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);

@@ -20,6 +20,7 @@ export function useOnboardingTour() {
       steps: [
         { element: '#dashboard-link', popover: { title: t('onboarding.tourSteps.dashboard.title'), description: t('onboarding.tourSteps.dashboard.description') } },
         { element: '#family-auto-complete', popover: { title: t('onboarding.tourSteps.familyAutoComplete.title'), description: t('onboarding.tourSteps.familyAutoComplete.description') } },
+        { element: '#dashboard-stats', popover: { title: t('onboarding.tourSteps.dashboardStats.title'), description: t('onboarding.tourSteps.dashboardStats.description') } },
         { element: '#genealogy-chart', popover: { title: t('onboarding.tourSteps.genealogyChart.title'), description: t('onboarding.tourSteps.genealogyChart.description') } },
         { element: '#dashboard-event-calendar', popover: { title: t('onboarding.tourSteps.eventCalendar.title'), description: t('onboarding.tourSteps.eventCalendar.description') } },
         { element: '#dashboard-recent-activity', popover: { title: t('onboarding.tourSteps.recentActivity.title'), description: t('onboarding.tourSteps.recentActivity.description') } },

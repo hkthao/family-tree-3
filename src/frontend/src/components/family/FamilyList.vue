@@ -7,14 +7,6 @@
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <v-btn color="primary" icon @click="emit('onStartTour')" aria-label="Start Tour">
-          <v-tooltip :text="t('onboarding.interactiveTour.startButton')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-walk</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-
         <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button" aria-label="Create Family">
           <v-tooltip :text="t('family.list.action.create')">
             <template v-slot:activator="{ props }">
@@ -103,7 +95,6 @@ const emit = defineEmits([
   'update:itemsPerPage',
   'create',
   'update:search',
-  'onStartTour',
 ]);
 
 const { t } = useI18n();
