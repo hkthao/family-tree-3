@@ -39,7 +39,7 @@ public class MemberResultDto
     public string? Code { get; set; }
     public string LastName { get; set; } = null!;
     public string FirstName { get; set; } = null!;
-    public string FullName => $"{FirstName} {LastName}".Trim();
+    public string FullName => $"{LastName} {FirstName}".Trim();
     public string? DateOfBirth { get; set; }
     public string? DateOfDeath { get; set; }
     public string? Gender { get; set; }
