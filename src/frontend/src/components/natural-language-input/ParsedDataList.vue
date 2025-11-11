@@ -1,6 +1,6 @@
 <template>
   <div v-if="parsedResult">
-    <h3 class="text-center my-4" >{{ t('naturalLanguage.editor.parsedMembers') }}</h3>
+    <h3 class="text-center my-4">{{ t('naturalLanguage.editor.parsedResultTitle') }}</h3>
     <v-row>
       <!-- Members Column - Displays 2 columns on medium screens and up, 1 column on smaller screens -->
       <v-col cols="12" md="6" v-for="(member, index) in parsedResult.members" :key="`member-${index}`">
@@ -13,7 +13,6 @@
       </v-col>
     </v-row>
 
-    <h3 class="text-center my-4">{{ t('naturalLanguage.editor.parsedEvents') }}</h3>
     <v-row>
       <!-- Events Column - Displays 2 columns on medium screens and up, 1 column on smaller screens -->
       <v-col cols="12" md="6" v-for="(event, index) in parsedResult.events" :key="`event-${index}`">
