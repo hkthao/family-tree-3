@@ -20,7 +20,7 @@
     <!-- Top Summary Section -->
     <v-row>
       <v-col cols="12">
-        <DashboardStats :family-id="selectedFamilyId || undefined" />
+        <DashboardStats :family-id="selectedFamilyId || undefined" id="dashboard-stats" />
       </v-col>
     </v-row>
 
@@ -34,10 +34,10 @@
     <!-- Middle Section: Recent Activity -->
     <v-row>
       <v-col cols="12" md="6">
-        <EventCalendar :family-id="selectedFamilyId || undefined" :read-only="true" />
+        <EventCalendar :family-id="selectedFamilyId || undefined" :read-only="true" id="dashboard-event-calendar" />
       </v-col>
       <v-col cols="12" md="6">
-        <RecentActivity :family-id="selectedFamilyId || undefined" />
+        <RecentActivity :family-id="selectedFamilyId || undefined" id="dashboard-recent-activity" />
       </v-col>
     </v-row>
 

@@ -9,9 +9,11 @@ export function useOnboardingTour() {
     const driverObj = driver({
       showProgress: true,
       steps: [
-        // Các bước này cần có ID HTML tương ứng trên trang Dashboard
         { element: '#dashboard-link', popover: { title: t('onboarding.tourSteps.dashboard.title'), description: t('onboarding.tourSteps.dashboard.description') } },
+        { element: '#dashboard-stats', popover: { title: t('onboarding.tourSteps.dashboardStats.title'), description: t('onboarding.tourSteps.dashboardStats.description') } },
         { element: '#genealogy-chart', popover: { title: t('onboarding.tourSteps.genealogyChart.title'), description: t('onboarding.tourSteps.genealogyChart.description') } },
+        { element: '#dashboard-event-calendar', popover: { title: t('onboarding.tourSteps.eventCalendar.title'), description: t('onboarding.tourSteps.eventCalendar.description') } },
+        { element: '#dashboard-recent-activity', popover: { title: t('onboarding.tourSteps.recentActivity.title'), description: t('onboarding.tourSteps.recentActivity.description') } },
       ]
     });
     driverObj.drive();
