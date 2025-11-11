@@ -1,7 +1,6 @@
-refactor: Adjust About Page UI for better readability and spacing
+refactor: Adjust spacing and margins for info pages
 
-- Đã cập nhật nội dung phần "Team / Credits" trong `AboutPage.vue` để phản ánh thông tin dự án và công nghệ hiện tại.
-- Đã thêm `class="text-wrap"` vào các `v-list-item-title` trong phần "Team / Credits" để đảm bảo văn bản không bị cắt và tự động xuống dòng.
-- Đã loại bỏ `class="pa-4"` khỏi tất cả các `v-card` trong `AboutPage.vue` để giảm padding và tăng không gian hiển thị nội dung.
-- Đã thay đổi kích thước font của văn bản mô tả sứ mệnh và liên hệ/hỗ trợ từ `text-body-2` thành `text-body-1` để cải thiện khả năng đọc.
-- Đã giảm `margin-top` của hàng chứa phần "Team / Credits" và "Contact & Support" từ `mt-6` xuống `mt-3` để tối ưu hóa khoảng cách.
+- Đã điều chỉnh khoảng cách và lề cho `HelpPage.vue`, `OnboardingPage.vue`, và `VersionPage.vue` để cải thiện bố cục và khả năng đọc.
+- Đã giảm `margin-top` của các `v-row` từ `mt-6` xuống `mt-3` trong các trang này.
+- Đã loại bỏ `class="pa-4"` khỏi các `v-card` trong các trang này để giảm padding.
+- Đã thay đổi kích thước font của các đoạn văn mô tả từ `text-body-2` thành `text-body-1` trong các trang này.

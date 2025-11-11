@@ -91,7 +91,7 @@ onMounted(async () => {
   // Get info from environment variables (Vite)
   buildDate.value = import.meta.env.VITE_APP_BUILD_DATE || 'N/A';
   environment.value = import.meta.env.VITE_APP_ENVIRONMENT || 'N/A';
-  apiEndpoint.value = import.meta.env.VITE_APP_API_ENDPOINT || 'N/A';
+  apiEndpoint.value = import.meta.env.VITE_API_BASE_URL || 'N/A';
   commitId.value = import.meta.env.VITE_APP_COMMIT_ID || 'N/A';
 
   // Fetch backend version
