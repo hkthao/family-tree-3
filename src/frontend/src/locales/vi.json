@@ -19,6 +19,7 @@
   "dashboard.upcomingEvents.title": "Sự kiện sắp tới",
   "dashboard.upcomingEvents.loading": "Đang tải sự kiện sắp tới...",
   "dashboard.upcomingEvents.noData": "Không có sự kiện sắp tới.",
+  "onboarding.title": "Giới thiệu",
   "aiBiography.generator.title": "Trình tạo tiểu sử AI",
   "aiInput.title": "Đầu vào AI",
   "aiInput.promptLabel": "Lời nhắc",

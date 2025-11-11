@@ -19,6 +19,7 @@
   "dashboard.upcomingEvents.title": "Upcoming Events",
   "dashboard.upcomingEvents.loading": "Loading upcoming events...",
   "dashboard.upcomingEvents.noData": "No upcoming events.",
+  "onboarding.title": "Onboarding",
   "aiBiography.generator.title": "AI Biography Generator",
   "aiBiography.generator.description": "Generate or update biographies for family members using AI.",
   "aiBiography.input.title": "Input & Configuration",
