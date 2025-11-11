@@ -13,15 +13,17 @@
           {{ rec }}
         </v-chip>
       </div>
+
+       <div class="my-2">
+        <v-alert v-if="relationship.errorMessage" type="error" class="m-0">
+          {{ relationship.errorMessage }}
+        </v-alert>
+        <v-alert v-if="relationship.saveAlert?.show" :type="relationship.saveAlert?.type" class="m-0" variant="tonal">
+          {{ relationship.saveAlert?.message }}
+        </v-alert>
+      </div>
     </v-card-text>
 
-    <v-alert v-if="relationship.errorMessage" type="error" density="compact" class="mt-2">
-      {{ relationship.errorMessage }}
-    </v-alert>
-    <v-alert v-if="relationship.saveAlert?.show" :type="relationship.saveAlert?.type" density="compact"
-      class="mx-4 my-2" variant="tonal">
-      {{ relationship.saveAlert?.message }}
-    </v-alert>
     <v-spacer></v-spacer>
     <v-card-actions v-if="!relationship.savedSuccessfully">
       <v-spacer></v-spacer>

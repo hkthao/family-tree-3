@@ -15,21 +15,21 @@
         </v-chip>
       </v-chip-group>
 
-      <div v-if="recommendations.length > 0" >
+      <div v-if="recommendations.length > 0">
         <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" color="warning" size="small">
           {{ rec }}
         </v-chip>
       </div>
 
+      <div class="my-2">
+        <v-alert v-if="event.errorMessage" type="error" class="m-0">
+          {{ event.errorMessage }}
+        </v-alert>
+        <v-alert v-if="event.saveAlert?.show" :type="event.saveAlert?.type" class="m-0" variant="tonal">
+          {{ event.saveAlert?.message }}
+        </v-alert>
+      </div>
     </v-card-text>
-
-    <v-alert v-if="event.errorMessage" type="error" density="compact" class="mt-2">
-      {{ event.errorMessage }}
-    </v-alert>
-    <v-alert v-if="event.saveAlert?.show" :type="event.saveAlert?.type" density="compact" class="mx-4 my-2"
-      variant="tonal">
-      {{ event.saveAlert?.message }}
-    </v-alert>
     <v-spacer></v-spacer>
     <v-card-actions v-if="!event.savedSuccessfully">
       <v-spacer></v-spacer>
