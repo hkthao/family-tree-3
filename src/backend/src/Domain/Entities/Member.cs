@@ -32,6 +32,11 @@ public class Member : BaseAuditableEntity
         IsRoot = false;
     }
 
+    public void SetId(Guid id)
+    {
+        Id = id;
+    }
+
     public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography)
     {
         FirstName = firstName;

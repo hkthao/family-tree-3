@@ -37,6 +37,11 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             request.Biography
         );
 
+        if (request.Id.HasValue)
+        {
+            newMember.SetId(request.Id.Value);
+        }
+
         var member = family.AddMember(newMember, request.IsRoot);
 
         _context.Members.Add(member);

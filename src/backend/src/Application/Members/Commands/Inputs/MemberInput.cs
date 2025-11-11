@@ -2,6 +2,7 @@ namespace backend.Application.Members.Inputs;
 
 public record MemberInput
 {
+    public Guid? Id { get; set; } // Optional Id for existing members or AI-generated IDs
     public string LastName { get; set; } = null!;
     public string FirstName { get; set; } = null!;
     public string? Code { get; set; }
