@@ -2,7 +2,7 @@
 export { default as AboutPage } from './info-pages/AboutPage.vue';
 export { default as VersionPage } from './info-pages/VersionPage.vue';
 export { default as HelpPage } from './info-pages/HelpPage.vue';
-export { default as OnboardingPage } from './info-pages/OnboardingPage.vue';
+
 export { default as TermsPage } from './info-pages/TermsPage.vue';
 export { default as PrivacyPage } from './info-pages/PrivacyPage.vue';
 

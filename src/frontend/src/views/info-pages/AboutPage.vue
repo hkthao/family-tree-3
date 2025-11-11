@@ -90,30 +90,6 @@
         </v-card>
       </v-col>
     </v-row>
-
-    <v-row class="mt-3">
-      <v-col cols="12">
-        <v-card class="h-100" flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('about.legal.title') }}</v-card-title>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item prepend-icon="mdi-shield-lock-outline">
-                <v-list-item-title>{{ $t('about.legal.privacyPolicy') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-file-document-outline">
-                <v-list-item-title>{{ $t('about.legal.termsOfUse') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-image-multiple-outline">
-                <v-list-item-title>{{ $t('about.legal.imageAndDataLicensing') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-copyright">
-                <v-list-item-title>{{ $t('about.legal.attribution') }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
   </v-container>
 </template>
 

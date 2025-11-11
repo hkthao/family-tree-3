@@ -1,17 +1,12 @@
 <template>
   <v-container fluid>
-    <v-row >
+    <v-row>
       <v-col cols="12" md="4">
-        <family-auto-complete
-          v-model="selectedFamilyId"
-          :label="t('dashboard.filterByFamily')"
-          clearable
-          hide-details
-          prepend-inner-icon="mdi-filter-variant"
-        />
+        <family-auto-complete v-model="selectedFamilyId" :label="t('dashboard.filterByFamily')" clearable hide-details
+          prepend-inner-icon="mdi-filter-variant" />
       </v-col>
       <v-col cols="12" md="auto" class="d-flex align-center">
-        <v-btn color="primary" @click="startTour" prepend-icon="mdi-play-circle-outline">
+        <v-btn class="btn-preview" color="primary" @click="startTour" prepend-icon="mdi-play-circle-outline">
           {{ t('onboarding.interactiveTour.startButton') }}
         </v-btn>
       </v-col>
@@ -71,5 +66,7 @@ watch(selectedFamilyId, (newFamilyId) => {
 </script>
 
 <style scoped>
-/* Add any specific styles for the Dashboard page here */
+.btn-preview {
+  height: 100%;
+}
 </style>

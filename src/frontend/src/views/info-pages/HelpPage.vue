@@ -61,11 +61,6 @@
                   {{ $t('help.faq.importData.text') }}
                 </v-expansion-panel-text>
               </v-expansion-panel>
-              <v-expansion-panel :title="$t('help.faq.dataPrivacy.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.dataPrivacy.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
               <v-expansion-panel :title="$t('help.faq.shareTree.title')">
                 <v-expansion-panel-text>
                   {{ $t('help.faq.shareTree.text') }}
@@ -84,6 +79,8 @@
           <v-card-text>
             <p class="text-body-1">
               {{ $t('help.furtherAssistance.description') }}
+              <router-link to="/terms" class="text-primary">{{ $t('terms.title') }}</router-link>,
+              <router-link to="/privacy" class="text-primary">{{ $t('privacy.title') }}</router-link>, {{ $t('common.or') }}
               <a href="#" target="_blank" class="text-primary">{{ $t('help.furtherAssistance.documentationLink') }}</a> {{ $t('common.or') }}
               <a href="#" target="_blank" class="text-primary">{{ $t('help.furtherAssistance.contactSupport') }}</a>.
             </p>

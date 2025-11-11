@@ -17,7 +17,6 @@ import {
   AboutPage,
   VersionPage,
   HelpPage,
-  OnboardingPage,
   TermsPage,
   PrivacyPage,
   LogoutView,
@@ -69,12 +68,7 @@ const router = createRouter({
           component: HelpPage,
           meta: { breadcrumb: 'help.title' },
         },
-        {
-          path: 'onboarding',
-          name: 'Onboarding',
-          component: OnboardingPage,
-          meta: { breadcrumb: 'onboarding.title' },
-        },
+
         {
           path: 'terms',
           name: 'Terms',
