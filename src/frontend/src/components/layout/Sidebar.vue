@@ -20,13 +20,36 @@
         ></v-list-item>
       </template>
     </v-list>
+
+    <template v-slot:append>
+      <div class="pa-4 text-center text-caption">
+        Version: {{ appVersion }}
+      </div>
+    </template>
   </v-navigation-drawer>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import { VListSubheader } from 'vuetify/components';
 import menu from '@/data/menuItems';
 import { AppNameDisplay } from '@/components/common';
+
+const appVersion = ref('N/A');
+
+onMounted(async () => {
+  try {
+    const response = await fetch('/version.json');
+    if (response.ok) {
+      const data = await response.json();
+      appVersion.value = data.version;
+    } else {
+      console.error('Failed to fetch version.json:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching version.json:', error);
+  }
+});
 </script>
 
 <style scoped>
