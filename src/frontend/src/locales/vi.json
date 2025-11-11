@@ -651,5 +651,9 @@
   "naturalLanguage.confirmation.selectSourceMember": "Chọn thành viên nguồn",
   "naturalLanguage.confirmation.selectTargetMember": "Chọn thành viên đích",
   "naturalLanguage.confirmation.noDataToDisplay": "Không có dữ liệu để hiển thị.",
-  "naturalLanguage.editor.noResult": "Không tìm thấy kết quả nào."
+  "naturalLanguage.editor.noResult": "Không tìm thấy kết quả nào.",
+  "naturalLanguage.recommendations.missingDateOfBirth": "Thiếu ngày sinh",
+  "naturalLanguage.recommendations.missingGender": "Thiếu giới tính",
+  "naturalLanguage.recommendations.missingDate": "Thiếu ngày sự kiện",
+  "naturalLanguage.recommendations.missingLocation": "Thiếu địa điểm"
 }

@@ -1,8 +1,8 @@
 <template>
-  <v-card class="border" :elevation="0">
+  <v-card class="border" :elevation="0" fill-height>
     <v-card-item>
       <v-card-title class="text-h6 text-center">
-        <v-icon :icon="cardIcon" class="mr-2"></v-icon> {{ title }}
+        <v-icon :icon="cardIcon" class="mr-2"></v-icon> {{ serialNumber }}. {{ title }}
       </v-card-title>
     </v-card-item>
 
@@ -10,6 +10,12 @@
       <v-chip-group column>
         <v-chip v-for="(value, key) in details" size="small" :key="key" :color="getChipColor(key)">
           <strong>{{ key }}:</strong> {{ value }}
+        </v-chip>
+      </v-chip-group>
+
+      <v-chip-group column v-if="recommendations.length > 0" class="mt-2">
+        <v-chip v-for="(rec, index) in recommendations" :key="`rec-${index}`" size="small" color="warning">
+          {{ rec }}
         </v-chip>
       </v-chip-group>
 
@@ -36,7 +42,8 @@ import type { MemberDataDto, EventDataDto } from '@/types/natural-language.d';
 const props = defineProps<{
   item: MemberDataDto | EventDataDto;
   type: 'member' | 'event';
-  allMembers: MemberDataDto[]; // New prop
+  allMembers: MemberDataDto[];
+  serialNumber: number; // New prop
 }>();
 
 const emit = defineEmits(['delete']);
@@ -121,6 +128,25 @@ const details = computed(() => {
     if (event.location) detailsObj[t('event.form.location')] = event.location;
   }
   return detailsObj;
+});
+
+const recommendations = computed(() => {
+  const recs: string[] = [];
+  if (props.item.errorMessage) {
+    recs.push(props.item.errorMessage);
+  }
+
+  if (props.type === 'member') {
+    const member = props.item as MemberDataDto;
+    if (!member.dateOfBirth) recs.push(t('naturalLanguage.recommendations.missingDateOfBirth'));
+    if (!member.gender) recs.push(t('naturalLanguage.recommendations.missingGender'));
+    // Add more specific recommendations here if needed, e.g., for relationships
+  } else {
+    const event = props.item as EventDataDto;
+    if (!event.date) recs.push(t('naturalLanguage.recommendations.missingDate'));
+    if (!event.location) recs.push(t('naturalLanguage.recommendations.missingLocation'));
+  }
+  return recs;
 });
 
 const deleteItem = () => {
