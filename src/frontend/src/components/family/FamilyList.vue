@@ -7,13 +7,7 @@
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <v-btn color="primary" icon @click="$emit('ai-create')">
-          <v-tooltip :text="t('family.list.action.aiCreate')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-robot-happy-outline</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
+
         <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button">
           <v-tooltip :text="t('family.list.action.create')">
             <template v-slot:activator="{ props }">
@@ -101,7 +95,6 @@ const emit = defineEmits([
   'delete',
   'update:itemsPerPage',
   'create',
-  'ai-create',
   'update:search',
 ]);
 
