@@ -29,7 +29,7 @@ public class MemberDataDto
     /// <summary>
     /// ID nội bộ của thành viên (nếu đã tồn tại trong hệ thống).
     /// </summary>
-    public Guid? Id { get; set; }
+    public string? Id { get; set; }
 
     /// <summary>
     /// Mã (Code) của thành viên (nếu đã tồn tại và được đề cập).

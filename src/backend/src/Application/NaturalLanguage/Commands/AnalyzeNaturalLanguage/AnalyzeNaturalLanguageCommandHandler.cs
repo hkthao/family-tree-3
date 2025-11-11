@@ -70,7 +70,7 @@ public class AnalyzeNaturalLanguageCommandHandler : IRequestHandler<AnalyzeNatur
                     if (existingMember != null)
                     {
                         member.IsExisting = true;
-                        member.Id = existingMember.Id;
+                        member.Id = existingMember.Id.ToString();
                     }
 
                     // Validate và gán lỗi nếu có

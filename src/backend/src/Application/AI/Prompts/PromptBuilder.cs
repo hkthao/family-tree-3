@@ -69,7 +69,7 @@ public static class PromptBuilder
         promptBuilder.AppendLine("{");
         promptBuilder.AppendLine("  \"members\": [");
         promptBuilder.AppendLine("    {");
-        promptBuilder.AppendLine("      \"id\": \"string (GUID format, e.g., \\\"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\\\") | null\", // ID nội bộ của thành viên nếu đã tồn tại trong hệ thống. Phải là một chuỗi GUID hợp lệ hoặc null. TUYỆT ĐỐI KHÔNG sử dụng các số nguyên như \\\"1\\\", \\\"2\\\", v.v. cho ID. Nếu ID không xác định hoặc thành viên mới, hãy sử dụng null.");
+        promptBuilder.AppendLine("      \"id\": \"string (unique identifier) | null\", // ID nội bộ của thành viên nếu đã tồn tại trong hệ thống. Phải là một chuỗi định danh duy nhất hoặc null. TUYỆT ĐỐI KHÔNG sử dụng các số nguyên như \\\"1\\\", \\\"2\\\", v.v. cho ID. Nếu ID không xác định hoặc thành viên mới, hãy sử dụng null.");
         promptBuilder.AppendLine("      \"code\": \"string | null\", // Mã (Code) của thành viên nếu đã tồn tại và được đề cập");
         promptBuilder.AppendLine("      \"lastName\": \"string\", // Họ của thành viên");
         promptBuilder.AppendLine("      \"firstName\": \"string\", // Tên của thành viên");
