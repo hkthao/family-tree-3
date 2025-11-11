@@ -15,17 +15,29 @@
           <v-card-title class="text-h6 text-secondary">{{ $t('version.currentVersion.title') }}</v-card-title>
           <v-card-text>
             <v-list density="compact">
-              <v-list-item prepend-icon="mdi-tag-outline">
-                <v-list-item-title>{{ $t('version.currentVersion.number') }}</v-list-item-title>
-                <v-list-item-subtitle>{{ appVersion }}</v-list-item-subtitle>
+              <v-list-item prepend-icon="mdi-web">
+                <v-list-item-title>{{ $t('version.info.frontendVersion') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ frontendVersion }}</v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item prepend-icon="mdi-server">
+                <v-list-item-title>{{ $t('version.info.backendVersion') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ backendVersion }}</v-list-item-subtitle>
               </v-list-item>
               <v-list-item prepend-icon="mdi-calendar-clock-outline">
-                <v-list-item-title>{{ $t('version.currentVersion.lastUpdated') }}</v-list-item-title>
-                <v-list-item-subtitle>{{ lastUpdateDate }}</v-list-item-subtitle>
+                <v-list-item-title>{{ $t('version.info.buildDate') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ buildDate }}</v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item prepend-icon="mdi-cloud-outline">
+                <v-list-item-title>{{ $t('version.info.environment') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ environment }}</v-list-item-subtitle>
+              </v-list-item>
+              <v-list-item prepend-icon="mdi-api">
+                <v-list-item-title>{{ $t('version.info.apiEndpoint') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ apiEndpoint }}</v-list-item-subtitle>
               </v-list-item>
               <v-list-item prepend-icon="mdi-git">
-                <v-list-item-title>{{ $t('version.currentVersion.gitCommitHash') }}</v-list-item-title>
-                <v-list-item-subtitle>{{ gitCommitHash }}</v-list-item-subtitle>
+                <v-list-item-title>{{ $t('version.info.commitId') }}</v-list-item-title>
+                <v-list-item-subtitle>{{ commitId }}</v-list-item-subtitle>
               </v-list-item>
             </v-list>
           </v-card-text>
@@ -62,24 +74,37 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import axios from 'axios'; // Assuming axios is available for API calls
+import packageJson from '../../../package.json'; // To get frontend version
 
-const appVersion = ref('N/A');
-const lastUpdateDate = ref('N/A');
-const gitCommitHash = ref('N/A');
+const frontendVersion = ref('N/A');
+const backendVersion = ref('N/A');
+const buildDate = ref('N/A');
+const environment = ref('N/A');
+const apiEndpoint = ref('N/A');
+const commitId = ref('N/A');
 
 onMounted(async () => {
+  // Get frontend version from package.json
+  frontendVersion.value = packageJson.version;
+
+  // Get info from environment variables (Vite)
+  buildDate.value = import.meta.env.VITE_APP_BUILD_DATE || 'N/A';
+  environment.value = import.meta.env.VITE_APP_ENVIRONMENT || 'N/A';
+  apiEndpoint.value = import.meta.env.VITE_APP_API_ENDPOINT || 'N/A';
+  commitId.value = import.meta.env.VITE_APP_COMMIT_ID || 'N/A';
+
+  // Fetch backend version
   try {
-    const response = await fetch('/version.json');
-    if (response.ok) {
-      const data = await response.json();
-      appVersion.value = data.version || 'N/A';
-      lastUpdateDate.value = data.lastUpdate || 'N/A'; // Assuming version.json might contain this
-      gitCommitHash.value = data.commitHash || 'N/A'; // Assuming version.json might contain this
+    const response = await axios.get(`${apiEndpoint.value}/api/version`); // Assuming an /api/version endpoint
+    if (response.status === 200 && response.data && response.data.version) {
+      backendVersion.value = response.data.version;
     } else {
-      console.error('Failed to fetch version.json:', response.statusText);
+      console.error('Failed to fetch backend version:', response.statusText);
     }
   } catch (error) {
-    console.error('Error fetching version.json:', error);
+    console.error('Error fetching backend version:', error);
+    backendVersion.value = 'Error';
   }
 });
 </script>
