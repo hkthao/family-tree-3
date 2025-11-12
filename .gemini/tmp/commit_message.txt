@@ -1,4 +1,0 @@
-fix: Correct API endpoint usage in VersionPage.vue
-
-- Đã cập nhật `VersionPage.vue` để sử dụng biến môi trường `VITE_API_BASE_URL` thay vì `VITE_APP_API_ENDPOINT` cho API endpoint của backend.
-- Đã cập nhật hướng dẫn về biến môi trường để phản ánh việc sử dụng `VITE_API_BASE_URL`.
