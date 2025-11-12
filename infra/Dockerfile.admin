@@ -1,6 +1,6 @@
 # Build stage
 FROM node:20-alpine AS build
-WORKDIR /app/frontend
+WORKDIR /app
 
 # Copy package.json and lock files first to leverage Docker cache.
 # This layer only changes if dependencies change.
@@ -25,7 +25,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy only the built assets from the build stage.
 # This keeps the final image minimal.
-COPY --from=build /app/frontend/dist .
+COPY --from=build /app/dist .
 
 # Expose port 80.
 EXPOSE 80

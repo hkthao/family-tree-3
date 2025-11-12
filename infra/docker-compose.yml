@@ -14,36 +14,48 @@ services:
 
   backend:
     build:
-      context: ../backend
-      dockerfile: ../infra/Dockerfile.backend # Path to Dockerfile relative to the new context
+      context: ../apps/backend
+      dockerfile: ./Dockerfile.backend
     container_name: family-tree-backend
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     env_file:
-      - ../backend/.env
+      - ../apps/backend/.env
     depends_on:
       - mysql
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
 
-  frontend:
+  admin:
     build:
-      context: ../frontend
-      dockerfile: ../infra/Dockerfile.frontend # Path to Dockerfile relative to the new context
-    container_name: family-tree-frontend
+      context: ../apps/admin
+      dockerfile: ./Dockerfile.admin
+    container_name: family-tree-admin
     ports:
-      - "80:80"
+      - "8081:80"
     depends_on:
       - backend
     env_file:
-      - ../frontend/.env
+      - ../apps/admin/.env
+
+  public:
+    build:
+      context: ../apps/public
+      dockerfile: ./Dockerfile.public
+    container_name: family-tree-public
+    ports:
+      - "80:3000"
+    depends_on:
+      - backend
+    env_file:
+      - ../apps/public/.env
 
   face-service:
     build:
-      context: ../face-service # Context is the face-service directory
-      dockerfile: ../infra/Dockerfile.face-service # Updated dockerfile path
+      context: ../services/face-service
+      dockerfile: ./Dockerfile.face-service
     container_name: family-tree-face-service
     ports:
       - "8000:8000" # Expose port 8000 for the FastAPI app

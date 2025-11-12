@@ -17,7 +17,8 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
 ## 2. Công nghệ sử dụng (Tech Stack)
 
 *   **Backend:** ASP.NET 8, Clean Architecture, JWT Authentication, MySQL (qua Entity Framework Core).
-*   **Frontend:** Vue.js 3, Vuetify 3, Pinia, Vue Router, Vite.
+*   **Frontend (Admin):** Vue.js 3, Vuetify 3, Pinia, Vue Router, Vite.
+*   **Frontend (Public):** Nuxt 3, Tailwind CSS.
 *   **Triển khai:** Docker, Nginx.
 *   **CI/CD:** GitHub Actions.
 
@@ -37,27 +38,38 @@ Tài liệu này cung cấp một cái nhìn tổng quan về kho lưu trữ d�
     cd family-tree-3
     ```
 2.  **Chạy ứng dụng với Docker Compose:**
-    Lệnh này sẽ build (nếu cần) và chạy backend, frontend, và database.
+    Lệnh này sẽ build (nếu cần) và chạy backend, admin, public, face-service và database.
     ```bash
     docker-compose -f infra/docker-compose.yml up --build
     ```
 3.  **Cấu hình MySQL:**
-    Đảm bảo chuỗi kết nối trong `backend/src/Web/appsettings.json` được cấu hình đúng. Sau đó chạy migrations để tạo schema database:
+    Đảm bảo chuỗi kết nối trong `apps/backend/src/Web/appsettings.json` được cấu hình đúng. Sau đó chạy migrations để tạo schema database:
     ```bash
-    dotnet ef database update --project backend/src/Infrastructure --startup-project backend/src/Web
+    dotnet ef database update --project apps/backend/src/Infrastructure --startup-project apps/backend/src/Web
     ```
 4.  **Truy cập ứng dụng:**
-    *   **Frontend:** [http://localhost](http://localhost)
-    *   **Backend API (Swagger):** [http://localhost:5000/swagger](http://localhost:5000/swagger)
+    *   **Public Frontend:** [http://localhost](http://localhost)
+    *   **Admin Frontend:** [http://localhost:8081](http://localhost:8081)
+    *   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 
 ## 4. Cấu trúc Dự án
 
-*   `src/backend/`: Chứa mã nguồn ASP.NET Core cho API backend, được tổ chức theo Clean Architecture (Domain, Application, Infrastructure, Web).
-*   `src/frontend/`: Chứa mã nguồn ứng dụng Vue.js frontend.
-*   `src/infra/`: Chứa các tệp cấu hình cho Docker (docker-compose.yml, Dockerfile.backend, Dockerfile.frontend), Nginx và seed data.
+Dự án được tổ chức theo cấu trúc monorepo, bao gồm các thư mục chính sau:
+
+*   `apps/`: Chứa các ứng dụng chính có thể chạy độc lập.
+    *   `apps/backend/`: Mã nguồn ASP.NET Core API, tổ chức theo Clean Architecture (Domain, Application, Infrastructure, Web).
+    *   `apps/admin/`: Mã nguồn ứng dụng Vue.js frontend cho giao diện quản trị.
+    *   `apps/public/`: Mã nguồn ứng dụng Nuxt 3 frontend cho trang công khai.
+*   `services/`: Chứa các dịch vụ phụ trợ.
+    *   `services/face-service/`: Dịch vụ xử lý khuôn mặt bằng Python.
+*   `packages/`: Chứa các gói mã nguồn được chia sẻ giữa các ứng dụng.
+    *   `packages/shared-types/`: Định nghĩa các kiểu dữ liệu (TypeScript types/interfaces/DTOs) được chia sẻ giữa backend và các frontend.
+    *   `packages/ui-components/`: (Tùy chọn) Nơi chứa các thành phần UI dùng chung cho các ứng dụng frontend.
+*   `infra/`: Chứa các tệp cấu hình cho Docker (docker-compose.yml, Dockerfile.*), Nginx và seed data.
 *   `docs/`: Chứa toàn bộ tài liệu dự án, được phân loại thành các thư mục con:
     *   `engineering/`: Tài liệu kỹ thuật (kiến trúc, hướng dẫn phát triển, API, mô hình dữ liệu, kiểm thử, bảo mật).
     *   `project/`: Tài liệu quản lý dự án (backlog, sprint, test cases, release notes, roadmap, team).
+*   `tests/`: Chứa các bài kiểm thử tổng thể hoặc các bài kiểm thử không thuộc về một ứng dụng cụ thể.
 
 ## 5. Tổng quan Tài liệu
 
@@ -76,19 +88,19 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 
 ## 6. Hướng dẫn Phát triển
 
-*   **Code Style & Linting:** Sử dụng `dotnet format` cho backend và `eslint` cho frontend.
+*   **Code Style & Linting:** Sử dụng `dotnet format` cho `apps/backend`, `eslint` cho `apps/admin` và `apps/public`.
 *   **Testing:** Chạy unit tests và kiểm tra code coverage cho cả backend và frontend. Chi tiết tại [Hướng dẫn Kiểm thử](./docs/engineering/testing-guide.md).
 *   **Quy trình Pull Request:** Tuân thủ quy tắc đặt tên branch, commit message (Conventional Commits) và checklist review code. Chi tiết tại [Hướng dẫn Đóng góp](./docs/engineering/contribution-guide.md).
 *   **Chiến lược nhánh:** Sử dụng `main`, `develop`, `feature/`, `bugfix/`, `hotfix/`, `docs/`.
 *   **Logging & Xử lý lỗi:** Sử dụng Serilog cho logging và middleware xử lý lỗi tập trung.
 *   **Quản lý Schema Database:** Sử dụng Entity Framework Core Migrations.
-*   **Seed Data:** Có script để populate database với dữ liệu mẫu (`src/infra/seeds`).
+*   **Seed Data:** Có script để populate database với dữ liệu mẫu (`infra/seeds`).
 
 ## 8. Frontend Conventions
 
 ### 8.1. Cấu trúc Service
 
-*   Mỗi service nên có một thư mục riêng trong `src/frontend/src/services/` (ví dụ: `src/frontend/src/services/family/`).
+*   Mỗi service nên có một thư mục riêng trong `apps/admin/src/services/` hoặc `apps/public/src/services/` (ví dụ: `apps/admin/src/services/family/`).
 *   Trong thư mục service, sẽ có các tệp sau:
     *   `[tên_service].service.interface.ts`: Định nghĩa interface cho service (ví dụ: `IFamilyService`).
     *   `api.[tên_service].service.ts`: Triển khai service sử dụng API thật (ví dụ: `ApiFamilyService`).
@@ -99,7 +111,7 @@ Thư mục `docs/` chứa các tài liệu quan trọng sau:
 ### 8.2. Cấu trúc Store (Pinia)
 
 *   Các store nên được định nghĩa theo kiểu Options API của Pinia (sử dụng `state`, `getters`, `actions` làm thuộc tính của đối tượng truyền vào `defineStore`).
-*   Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `src/frontend/src/plugins/services.plugin.ts`.
+*   Các service nên được truy cập thông qua `this.services.[tên_service]` (ví dụ: `this.services.family.loadItems()`). Điều này được thực hiện thông qua `apps/admin/src/plugins/services.plugin.ts` hoặc tương tự cho `public`.
 *   Thông báo lỗi nên được dịch hóa bằng `i18n.global.t()` (ví dụ: `i18n.global.t('family.errors.load')`).
 *   Các hành động (actions) trong store nên cập nhật trạng thái `loading` và `error` một cách nhất quán.
 
