@@ -1,105 +1,138 @@
-<template>
-  <nav class="bg-white shadow-md fixed w-full z-10">
-    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-      <NuxtLink to="/" class="text-2xl font-serif text-gray-800">{{ $t('familyTree') }}</NuxtLink>
-      <div class="hidden md:flex space-x-6">
-        <NuxtLink to="/" class="text-gray-600 hover:text-gray-900">{{ $t('home') }}</NuxtLink>
-        <NuxtLink to="/tree/1" class="text-gray-600 hover:text-gray-900">{{ $t('familyTree') }}</NuxtLink>
-        <NuxtLink to="/stories" class="text-gray-600 hover:text-gray-900">{{ $t('stories') }}</NuxtLink>
-        <NuxtLink to="/about" class="text-gray-600 hover:text-gray-900">{{ $t('about') }}</NuxtLink>
-        <NuxtLink to="/contact" class="text-gray-600 hover:text-gray-900">{{ $t('contact') }}</NuxtLink>
-      </div>
-      <div class="flex items-center">
-        <!-- Language Switcher -->
-        <select v-model="locale" class="mr-4 p-2 rounded-md border border-gray-300">
-          <option value="en">English</option>
-          <option value="vi">Tiếng Việt</option>
-        </select>
-
-        <button @click="openSearchModal" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md">{{ $t('search') }}</button>
-        <button @click="toggleMobileMenu" class="md:hidden ml-4 text-gray-600">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Mobile Menu -->
-    <div v-if="isMobileMenuOpen" class="md:hidden bg-white shadow-lg">
-      <NuxtLink to="/" class="block px-4 py-2 text-gray-600 hover:bg-gray-100" @click="closeMobileMenu">{{ $t('home') }}</NuxtLink>
-      <NuxtLink to="/tree/1" class="block px-4 py-2 text-gray-600 hover:bg-gray-100" @click="closeMobileMenu">{{ $t('familyTree') }}</NuxtLink>
-      <NuxtLink to="/stories" class="block px-4 py-2 text-gray-600 hover:bg-gray-100" @click="closeMobileMenu">{{ $t('stories') }}</NuxtLink>
-      <NuxtLink to="/about" class="block px-4 py-2 text-gray-600 hover:bg-gray-100" @click="closeMobileMenu">{{ $t('about') }}</NuxtLink>
-      <NuxtLink to="/contact" class="block px-4 py-2 text-gray-600 hover:bg-gray-100" @click="closeMobileMenu">{{ $t('contact') }}</NuxtLink>
-    </div>
-
-    <!-- Search Modal -->
-    <TransitionRoot as="template" :show="isSearchModalOpen">
-      <Dialog as="div" class="relative z-10" @close="closeSearchModal">
-        <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in duration-200" leave-from="opacity-100" leave-to="opacity-0">
-          <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
-        </TransitionChild>
-
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enter-to="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leave-from="opacity-100 translate-y-0 sm:scale-100" leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <DialogPanel class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <div>
-                  <div class="mt-3 text-center sm:mt-5">
-                    <DialogTitle as="h3" class="text-base font-semibold leading-6 text-gray-900">{{ $t('searchMembers') }}</DialogTitle>
-                    <div class="mt-2">
-                      <SearchBox @search="handleSearch" />
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-5 sm:mt-6">
-                  <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" @click="closeSearchModal">{{ $t('goBackToDashboard') }}</button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
-  </nav>
-</template>
-
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Dialog, DialogPanel, DialogTitle, TransitionChild, TransitionRoot } from '@headlessui/vue';
-import SearchBox from '@/components/ui/SearchBox.vue'; // Assuming SearchBox will be created here
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue';
+import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline';
+import { GlobeAltIcon } from '@heroicons/vue/24/solid';
 import { useI18n } from 'vue-i18n';
 
 const { locale, t } = useI18n();
 
-const isMobileMenuOpen = ref(false);
-const isSearchModalOpen = ref(false);
+const navigation = [
+  { name: 'home', href: '/' },
+  { name: 'familyTree', href: '/tree' },
+  { name: 'stories', href: '/stories' },
+  { name: 'about', href: '/about' },
+  { name: 'contact', href: '/contact' },
+];
 
-const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
-};
-
-const closeMobileMenu = () => {
-  isMobileMenuOpen.value = false;
-};
-
-const openSearchModal = () => {
-  isSearchModalOpen.value = true;
-};
-
-const closeSearchModal = () => {
-  isSearchModalOpen.value = false;
-};
-
-const handleSearch = (query: string) => {
-  console.log('Search query:', query);
-  // Implement actual search logic here, e.g., navigate to search page
-  closeSearchModal();
-  navigateTo(`/search?q=${query}`);
+const changeLanguage = (lang: string) => {
+  locale.value = lang;
 };
 </script>
 
-<style scoped>
-/* Add any specific styles for Navbar here if needed */
-</style>
+<template>
+  <Popover as="nav" class="relative bg-white shadow-md">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <NuxtLink to="/" class="text-2xl font-bold text-indigo-600">
+              FamilyTree
+            </NuxtLink>
+          </div>
+          <div class="hidden md:block">
+            <div class="ml-10 flex items-baseline space-x-4">
+              <NuxtLink
+                v-for="item in navigation"
+                :key="item.name"
+                :to="item.href"
+                active-class="bg-indigo-500 text-white"
+                class="text-gray-700 hover:bg-indigo-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
+              >
+                {{ t(item.name) }}
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+        <div class="hidden md:block">
+          <div class="ml-4 flex items-center md:ml-6">
+            <Popover class="relative">
+              <PopoverButton
+                class="relative p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <span class="sr-only">{{ t('changeLanguage') }}</span>
+                <GlobeAltIcon class="h-6 w-6" aria-hidden="true" />
+              </PopoverButton>
+              <transition
+                enter-active-class="transition ease-out duration-100"
+                enter-from-class="transform opacity-0 scale-95"
+                enter-to-class="transform opacity-100 scale-100"
+                leave-active-class="transition ease-in duration-75"
+                leave-from-class="transform opacity-100 scale-100"
+                leave-to-class="transform opacity-0 scale-95"
+              >
+                <PopoverPanel
+                  class="absolute right-0 z-10 mt-2 w-32 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                >
+                  <a
+                    href="#"
+                    @click.prevent="changeLanguage('en')"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >English</a
+                  >
+                  <a
+                    href="#"
+                    @click.prevent="changeLanguage('vi')"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >Tiếng Việt</a
+                  >
+                </PopoverPanel>
+              </transition>
+            </Popover>
+          </div>
+        </div>
+        <div class="-mr-2 flex md:hidden">
+          <!-- Mobile menu button -->
+          <PopoverButton
+            class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-indigo-500 focus:ring-white"
+          >
+            <span class="sr-only">Open main menu</span>
+            <Bars3Icon class="block h-6 w-6" aria-hidden="true" />
+          </PopoverButton>
+        </div>
+      </div>
+    </div>
+
+    <PopoverPanel class="md:hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        <NuxtLink
+          v-for="item in navigation"
+          :key="item.name"
+          :to="item.href"
+          active-class="bg-indigo-500 text-white"
+          class="text-gray-700 hover:bg-indigo-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium"
+        >
+          {{ t(item.name) }}
+        </NuxtLink>
+      </div>
+      <div class="pt-4 pb-3 border-t border-gray-700">
+        <div class="flex items-center px-5">
+          <div class="flex-shrink-0">
+            <GlobeAltIcon class="h-6 w-6 text-gray-400" aria-hidden="true" />
+          </div>
+          <div class="ml-3">
+            <div class="text-base font-medium leading-none text-gray-700">
+              {{ t('language') }}
+            </div>
+            <div class="text-sm font-medium leading-none text-gray-500">
+              {{ locale === 'en' ? 'English' : 'Tiếng Việt' }}
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 px-2 space-y-1">
+          <a
+            href="#"
+            @click.prevent="changeLanguage('en')"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >English</a
+          >
+          <a
+            href="#"
+            @click.prevent="changeLanguage('vi')"
+            class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >Tiếng Việt</a
+          >
+        </div>
+      </div>
+    </PopoverPanel>
+  </Popover>
+</template>

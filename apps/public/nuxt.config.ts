@@ -7,12 +7,6 @@ export default defineNuxtConfig({
     '@pinia/nuxt', // Pinia module
     '@nuxtjs/i18n', // i18n module
   ],
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
   i18n: {
     vueI18n: './i18n.config.ts', // Path to your i18n configuration
     locales: [
@@ -20,6 +14,6 @@ export default defineNuxtConfig({
       { code: 'vi', file: 'vi.json' },
     ],
     defaultLocale: 'vi',
-    langDir: 'locales', // Directory where your locale files are stored
+    langDir: '.', // Directory where your locale files are stored
   },
 })

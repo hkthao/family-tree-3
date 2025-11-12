@@ -1,9 +1,14 @@
+<script setup lang="ts">
+import BaseLayout from '@/components/layout/BaseLayout.vue';
+</script>
+
 <template>
-  <div>
+  <BaseLayout>
     <NuxtPage />
-  </div>
+  </BaseLayout>
 </template>
 
-<script setup lang="ts">
-import '@/assets/css/main.css';
-</script>
+<style>
+/* Import global CSS */
+@import '@/assets/css/main.css';
+</style>
