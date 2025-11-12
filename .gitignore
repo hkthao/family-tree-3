@@ -457,3 +457,5 @@ src/backend/src/Web/appsettings.Development.json
 
 # Gemini task files
 gemini-task/
+
+.fake

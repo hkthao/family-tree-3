@@ -97,7 +97,11 @@ defineProps<{
 const emit = defineEmits(['parse-content']); // Changed emit event
 
 const editor = useEditor({
-  content: `<p>Nguyễn Văn A sinh năm 1950, mất năm 2020. Ông là cha của Nguyễn Thị B và Nguyễn Văn C. Nguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D. Họ có một người con tên là Trần Thị E. Nguyễn Văn C sinh năm 1980, chưa kết hôn.</p>`,
+  content: `<p>Nguyễn Văn A sinh năm 1950, mất năm 2020.<br/>
+            Ông là cha của Nguyễn Thị B và Nguyễn Văn C.  <br/>
+            Nguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D.  <br/>
+            Họ có một người con tên là Trần Thị E.  <br/>
+            Nguyễn Văn C sinh năm 1980, chưa kết hôn.</p>`,
   extensions: [
     StarterKit,
     Mention.configure({
