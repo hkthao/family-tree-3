@@ -12,6 +12,7 @@
 - [8. Liên kết tài liệu](#8-liên-kết-tài-liệu)
 
 ---
+Dự án được tổ chức theo cấu trúc monorepo, bao gồm các ứng dụng chính (backend, frontend admin) và các dịch vụ phụ trợ (face-service), cùng với các gói chia sẻ (shared-types). Cấu trúc này giúp quản lý mã nguồn hiệu quả và tái sử dụng các thành phần.
 
 ## 1. Sơ đồ ngữ cảnh (Context Diagram - C1)
 
@@ -24,7 +25,7 @@ graph TD
 ```
 
 -   **Người dùng**: Người quản lý gia phả, thành viên gia đình.
--   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta.
+-   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta, hỗ trợ đa ngôn ngữ (tiếng Việt, tiếng Anh).
 -   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu của hệ thống.
 
 ## 2. Sơ đồ container (Container Diagram - C2)
@@ -211,7 +212,7 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 #### Cấu hình JWT
 
 *   **Cấu hình Backend**: 
-    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong tệp `src/backend/.env`.
+    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong tệp `apps/backend/src/Web/appsettings.json` (hoặc `appsettings.Development.json` trong môi trường phát triển).
 *   **Cấu hình Frontend**: 
     *   Frontend đọc cấu hình JWT từ các biến môi trường trong tệp `src/frontend/.env`.
 *   **Cấu hình nhà cung cấp JWT (ví dụ: Auth0 Dashboard)**: 
@@ -232,5 +233,3 @@ Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng c
 ## 8. Liên kết tài liệu
 
 -   [Tham chiếu API](./api-reference.md)
--   [Product Backlog](../project/backlog.md)
--   [Hướng dẫn Kiểm thử](./testing-guide.md)
