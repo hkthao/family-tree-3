@@ -3,44 +3,40 @@ import type { Event, EventFilter } from '@/types';
 import type { Paginated, Result } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
 export class ApiEventService implements IEventService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/event`;
-
   async fetch(): Promise<Result<Event[], ApiError>> {
     console.log('Fetching events from API');
-    return this.http.get<Event[]>(this.apiUrl);
+    return this.http.get<Event[]>(`/event`);
   }
 
   async getById(id: string): Promise<Result<Event | undefined, ApiError>> {
     console.log(`Fetching event ${id} from API`);
-    return this.http.get<Event>(`${this.apiUrl}/${id}`);
+    return this.http.get<Event>(`/event/${id}`);
   }
 
   async add(newItem: Omit<Event, 'id'>): Promise<Result<Event, ApiError>> {
     console.log('Adding event via API');
-    return this.http.post<Event>(this.apiUrl, newItem);
+    return this.http.post<Event>(`/event`, newItem);
   }
 
   async addItems(newItems: Omit<Event, 'id'>[]): Promise<Result<string[], ApiError>> {
     console.log('Adding multiple events via API');
-    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, newItems);
+    return this.http.post<string[]>(`/event/bulk-create`, newItems);
   }
 
   async update(updatedItem: Event): Promise<Result<Event, ApiError>> {
     console.log(`Updating event ${updatedItem.id} via API`);
     return this.http.put<Event>(
-      `${this.apiUrl}/${updatedItem.id}`,
+      `/event/${updatedItem.id}`,
       updatedItem,
     );
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     console.log(`Deleting event ${id} via API`);
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`/event/${id}`);
   }
 
   async loadItems(
@@ -63,7 +59,7 @@ export class ApiEventService implements IEventService {
     params.append('page', page.toString());
     params.append('itemsPerPage', itemsPerPage.toString());
     return this.http.get<Paginated<Event>>(
-      `${this.apiUrl}/search?${params.toString()}`,
+      `/event/search?${params.toString()}`,
     );
   }
 
@@ -71,13 +67,13 @@ export class ApiEventService implements IEventService {
     console.log(`Fetching events by IDs: ${ids.join(', ')} from API`);
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
-    return this.http.get<Event[]>(`${this.apiUrl}/by-ids?${params.toString()}`);
+    return this.http.get<Event[]>(`/event/by-ids?${params.toString()}`);
   }
 
   async getUpcomingEvents(familyId?: string): Promise<Result<Event[], ApiError>> {
     console.log('Fetching upcoming events from API');
     const params = new URLSearchParams();
     if (familyId) params.append('familyId', familyId);
-    return this.http.get<Event[]>(`${this.apiUrl}/upcoming?${params.toString()}`);
+    return this.http.get<Event[]>(`/event/upcoming?${params.toString()}`);
   }
 }

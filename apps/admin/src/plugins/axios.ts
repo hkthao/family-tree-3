@@ -48,6 +48,7 @@ const createApiError = (error: AxiosError): ApiError => {
 };
 
 const axiosInstance = axios.create({
+  baseURL: window.runtimeConfig?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-type': 'application/json',
   },

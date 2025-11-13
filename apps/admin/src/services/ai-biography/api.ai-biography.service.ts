@@ -2,11 +2,7 @@ import type { IAIBiographyService } from './ai-biography.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import type { Result, BiographyStyle } from '@/types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
 export class ApiAIBiographyService implements IAIBiographyService {
-  private apiUrl = `${API_BASE_URL}/ai`;
-
   constructor(private http: ApiClientMethods) {}
 
   async generateBiography(
@@ -23,7 +19,7 @@ export class ApiAIBiographyService implements IAIBiographyService {
       userPrompt,
       language,
     };
-    return this.http.post<string>(`${this.apiUrl}/biography`, payload);
+    return this.http.post<string>(`/ai/biography`, payload);
   }
 
   async saveBiography(command: {
@@ -31,6 +27,6 @@ export class ApiAIBiographyService implements IAIBiographyService {
     style: BiographyStyle;
     content: string;
   }): Promise<Result<string, ApiError>> {
-    return this.http.post<string>(`${this.apiUrl}/biography/save`, command);
+    return this.http.post<string>(`/ai/biography/save`, command);
   }
 }

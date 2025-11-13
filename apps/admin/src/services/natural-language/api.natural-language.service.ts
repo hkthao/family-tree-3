@@ -6,12 +6,10 @@ export interface INaturalLanguageService {
   analyzeContent(content: string, sessionId: string): Promise<Result<AnalyzedDataDto, ApiError>>;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export class ApiNaturalLanguageService implements INaturalLanguageService {
   constructor(private apiClient: ApiClientMethods) {}
 
   async analyzeContent(content: string, sessionId: string): Promise<Result<AnalyzedDataDto, ApiError>> {
-    return this.apiClient.post<AnalyzedDataDto>(`${API_BASE_URL}/natural-language/analyze`, { content, sessionId });
+    return this.apiClient.post<AnalyzedDataDto>(`/natural-language/analyze`, { content, sessionId });
   }
 }

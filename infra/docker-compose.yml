@@ -33,10 +33,17 @@ services:
     container_name: family-tree-admin
     ports:
       - "8081:80"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
+      - VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
+      - VITE_AUTH0_AUDIENCE=${VITE_AUTH0_AUDIENCE}
+      - VITE_NOVU_APPLICATION_IDENTIFIER=${VITE_NOVU_APPLICATION_IDENTIFIER}
+      - VITE_APP_BUILD_DATE=${VITE_APP_BUILD_DATE}
+      - VITE_APP_ENVIRONMENT=${VITE_APP_ENVIRONMENT}
+      - VITE_APP_COMMIT_ID=${VITE_APP_COMMIT_ID}
     depends_on:
       - backend
-    env_file:
-      - ../apps/admin/.env
 
   face-service:
     build:

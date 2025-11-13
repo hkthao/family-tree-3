@@ -184,10 +184,10 @@ onMounted(async () => {
   frontendVersion.value = packageJson.version;
 
   // Get info from environment variables (Vite)
-  buildDate.value = import.meta.env.VITE_APP_BUILD_DATE || 'N/A';
-  environment.value = import.meta.env.VITE_APP_ENVIRONMENT || 'N/A';
-  apiEndpoint.value = import.meta.env.VITE_API_BASE_URL || 'N/A';
-  commitId.value = import.meta.env.VITE_APP_COMMIT_ID || 'N/A';
+  buildDate.value = window.runtimeConfig?.VITE_APP_BUILD_DATE || import.meta.env.VITE_APP_BUILD_DATE || 'N/A';
+  environment.value = window.runtimeConfig?.VITE_APP_ENVIRONMENT || import.meta.env.VITE_APP_ENVIRONMENT || 'N/A';
+  apiEndpoint.value = window.runtimeConfig?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'N/A';
+  commitId.value = window.runtimeConfig?.VITE_APP_COMMIT_ID || import.meta.env.VITE_APP_COMMIT_ID || 'N/A';
 
   // Fetch backend version
   try {
