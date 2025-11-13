@@ -43,12 +43,14 @@ services:
   face-service:
     build:
       context: ../services/face-service
-      dockerfile: ./Dockerfile.face-service
+      dockerfile: ../../infra/Dockerfile.face-service
     container_name: family-tree-face-service
     ports:
       - "8000:8000" # Expose port 8000 for the FastAPI app
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
+      - DLIB_PREDICTOR_PATH=app/models/shape_predictor_68_face_landmarks.dat
+      - DLIB_ENCODER_PATH=app/models/dlib_face_recognition_resnet_model_v1.dat
     mem_limit: 4g # Increase memory limit
   n8n:
     image: n8nio/n8n

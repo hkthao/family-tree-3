@@ -460,3 +460,4 @@ gemini-task/
 .gemini/tmp/
 
 .fake
+!services/face-service/app/models/

@@ -1,3 +1,4 @@
+import os
 import dlib
 import cv2
 import numpy as np
@@ -6,28 +7,37 @@ from typing import List
 import logging
 
 import torch
-from facenet_pytorch import InceptionResnetV1, MTCNN
+from facenet_pytorch import InceptionResnetV1
 
 # Configure logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+
 
 class FaceEmbeddingService:
     def __init__(self):
         try:
             # Load Dlib's face landmark predictor
-            self.predictor = dlib.shape_predictor("app/models/shape_predictor_68_face_landmarks.dat")
+            predictor_path = os.getenv("DLIB_PREDICTOR_PATH", "app/models/shape_predictor_68_face_landmarks.dat")
+            self.predictor = dlib.shape_predictor(predictor_path)
             # Load Dlib's face recognition model
-            self.face_encoder = dlib.face_recognition_model_v1("app/models/dlib_face_recognition_resnet_model_v1.dat")
+            encoder_path = os.getenv("DLIB_ENCODER_PATH", "app/models/dlib_face_recognition_resnet_model_v1.dat")
+            self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
             logger.info("FaceEmbeddingService initialized with Dlib models.")
 
             # Load FaceNet model
             self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-            self.resnet = InceptionResnetV1(pretrained='vggface2').eval().to(self.device)
+            self.resnet = (
+                InceptionResnetV1(pretrained='vggface2')
+                .eval()
+                .to(self.device)
+            )
             logger.info(f"FaceNet model initialized on {self.device}.")
 
         except Exception as e:
