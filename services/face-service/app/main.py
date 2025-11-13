@@ -43,10 +43,7 @@ async def detect_faces(
         description="Whether to return base64 encoded cropped face images",
     ),
 ):
-    logger.info(
-        f"Received request to detect faces. Filename: {file.filename}, " \
-        f"ReturnCrop: {return_crop}"
-    )
+    logger.info("Received request to detect faces. Filename: %s, ReturnCrop: %s", file.filename, return_crop)
 
     if not file.content_type.startswith("image/"):
         logger.warning(f"Invalid file type received: {file.content_type}")
@@ -111,7 +108,7 @@ async def detect_faces(
             results.append(face_result)
             logger.debug(
                 "Generated FaceDetectionResult: %s",
-                face_result.json()
+                face_result.json()  # noqa: E501
             )
 
         logger.info(f"Returning {len(results)} face detection results.")

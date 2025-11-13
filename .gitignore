@@ -459,6 +459,5 @@ src/backend/src/Web/appsettings.Development.json
 gemini-task/
 .gemini/tmp/
 
-.fake
 infra/services/face-service/app/models/shape_predictor_68_face_landmarks.dat
 infra/services/face-service/app/models/dlib_face_recognition_resnet_model_v1.dat

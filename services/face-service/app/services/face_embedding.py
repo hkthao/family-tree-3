@@ -62,7 +62,8 @@ class FaceEmbeddingService:
 
         Returns:
             List[float]: A list of 128 floats
-            representing the face embedding.
+            representing the face
+            embedding.
         """
         try:
             # Convert PIL Image to NumPy array (RGB)
@@ -87,7 +88,8 @@ class FaceEmbeddingService:
             )
             logger.info("Successfully generated Dlib face embedding.")
             return list(
-                np.array(embedding).astype(np.float32)
+                np.array(embedding)
+                .astype(np.float32)  # noqa: E501
             )
         except Exception as e:
             logger.error(f"Error generating Dlib face embedding: {e}")
@@ -100,7 +102,8 @@ class FaceEmbeddingService:
 
         Args:
             face_image (Image.Image): A PIL Image object
-                of the cropped face.
+                of the
+                cropped face.  # noqa: E501
 
         Returns:
             List[float]: A list of 512 floats representing the face embedding.
@@ -109,7 +112,7 @@ class FaceEmbeddingService:
             # Preprocess image for FaceNet
             # FaceNet expects input in a specific format (e.g., 160x160, normalized)
             face_image_resized = face_image.resize(
-                (160, 160)
+                size=(160, 160)  # noqa: E501
             )
             img_np = np.array(face_image_resized).astype(np.float32)
             img_np = (img_np - 127.5) / 128.0  # Normalize to [-1, 1]
@@ -119,7 +122,10 @@ class FaceEmbeddingService:
             self.resnet.eval()
             with torch.no_grad():
                 embedding = (
-                    self.resnet(img_tensor).squeeze().cpu().numpy()
+                    self.resnet(img_tensor)
+                    .squeeze()
+                    .cpu()
+                    .numpy()  # noqa: E501
                 )
 
             logger.info("Successfully generated FaceNet embedding.")
