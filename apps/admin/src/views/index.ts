@@ -1,10 +1,6 @@
 // Export pages from info-pages
-export { default as AboutPage } from './info-pages/AboutPage.vue';
-export { default as VersionPage } from './info-pages/VersionPage.vue';
-export { default as HelpPage } from './info-pages/HelpPage.vue';
-
-export { default as TermsPage } from './info-pages/TermsPage.vue';
-export { default as PrivacyPage } from './info-pages/PrivacyPage.vue';
+export { default as ApplicationInfoPage } from './info-pages/ApplicationInfoPage.vue';
+export { default as SupportLegalPage } from './info-pages/SupportLegalPage.vue';
 
 // Export pages from auth
 export { default as LogoutView } from './auth/LogoutView.vue';

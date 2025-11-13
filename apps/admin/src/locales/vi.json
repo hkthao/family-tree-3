@@ -562,6 +562,8 @@
   "menu.admin": "Quản trị",
   "menu.system": "Hệ thống",
   "menu.supportAndInfo": "Hỗ trợ & Thông tin",
+  "menu.applicationInfo": "Thông tin ứng dụng",
+  "menu.supportAndLegal": "Hỗ trợ & Pháp lý",
   "about.title": "Về chúng tôi",
   "about.welcomeMessage": "Chào mừng bạn đến với Ứng dụng Cây Gia Phả, giải pháp toàn diện để quản lý và trực quan hóa di sản gia đình bạn.",
   "about.description": "Ứng dụng của chúng tôi được thiết kế để giúp bạn dễ dàng xây dựng, khám phá và bảo tồn lịch sử gia đình mình.",
@@ -708,7 +710,7 @@
   "privacy.userRights.item3": "Xóa: Yêu cầu xóa dữ liệu cá nhân của bạn.",
   "privacy.contactSection.title": "Liên hệ với chúng tôi",
   "privacy.contactSection.paragraph1": "Nếu bạn có bất kỳ câu hỏi hoặc thắc mắc nào về Chính sách quyền riêng tư này hoặc dữ liệu của bạn, vui lòng liên hệ với chúng tôi tại:",
-  "privacy.contactSection.email": "support@familytreeapp.com",
+  "privacy.contactSection.email": "thao.hk90@gmail.com",
 
   "face.title": "Khuôn mặt",
   "face.sidebar.title": "Nhận diện khuôn mặt",

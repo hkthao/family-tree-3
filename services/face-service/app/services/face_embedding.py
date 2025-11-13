@@ -24,15 +24,21 @@ class FaceEmbeddingService:
     def __init__(self):
         try:
             # Load Dlib's face landmark predictor
-            predictor_path = os.getenv("DLIB_PREDICTOR_PATH", "app/models/shape_predictor_68_face_landmarks.dat")
+            predictor_path = os.getenv(
+                "DLIB_PREDICTOR_PATH", "app/models/shape_predictor_68_face_landmarks.dat"
+            )
             self.predictor = dlib.shape_predictor(predictor_path)
             # Load Dlib's face recognition model
-            encoder_path = os.getenv("DLIB_ENCODER_PATH", "app/models/dlib_face_recognition_resnet_model_v1.dat")
+            encoder_path = os.getenv(
+                "DLIB_ENCODER_PATH", "app/models/dlib_face_recognition_resnet_model_v1.dat"
+            )
             self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
             logger.info("FaceEmbeddingService initialized with Dlib models.")
 
             # Load FaceNet model
-            self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+            self.device = torch.device(
+                'cuda:0' if torch.cuda.is_available() else 'cpu'
+            )
             self.resnet = (
                 InceptionResnetV1(pretrained='vggface2')
                 .eval()
@@ -46,7 +52,8 @@ class FaceEmbeddingService:
 
     def get_embedding(self, face_image: Image.Image) -> List[float]:
         """
-        Generates a 128-dimensional face embedding for a given face image using Dlib.
+        Generates a 128-dimensional face embedding for a given face image
+        using Dlib.
 
         Args:
             face_image (Image.Image): A PIL Image object of the cropped face.
@@ -72,19 +79,22 @@ class FaceEmbeddingService:
             aligned_face = dlib.get_face_chip(image_np, landmarks)
 
             # Compute the face descriptor (embedding) from the aligned face
-            embedding = self.face_encoder.compute_face_descriptor(aligned_face, landmarks)
+            embedding = self.face_encoder.compute_face_descriptor(
+                aligned_face, landmarks
+            )
             logger.info("Successfully generated Dlib face embedding.")
-            return list(np.array(embedding).astype(np.float32))
+            return list(np.array(embedding).astype(np.float32))  # noqa: E501
         except Exception as e:
             logger.error(f"Error generating Dlib face embedding: {e}")
             raise
 
     def get_facenet_embedding(self, face_image: Image.Image) -> List[float]:
         """
-        Generates a 512-dimensional face embedding for a given face image using FaceNet (InceptionResnetV1).
+        Generates a 512-dimensional face embedding for a given face image
+        using FaceNet (InceptionResnetV1).
 
         Args:
-            face_image (Image.Image): A PIL Image object of the cropped face.
+            face_image (Image.Image): A PIL Image object of the cropped face.  # noqa: E501
 
         Returns:
             List[float]: A list of 512 floats representing the face embedding.
@@ -92,7 +102,7 @@ class FaceEmbeddingService:
         try:
             # Preprocess image for FaceNet
             # FaceNet expects input in a specific format (e.g., 160x160, normalized)
-            face_image_resized = face_image.resize((160, 160))
+            face_image_resized = face_image.resize((160, 160))  # noqa: E501
             img_np = np.array(face_image_resized).astype(np.float32)
             img_np = (img_np - 127.5) / 128.0  # Normalize to [-1, 1]
             img_tensor = torch.tensor(img_np).permute(2, 0, 1).unsqueeze(0).to(self.device)
@@ -100,10 +110,10 @@ class FaceEmbeddingService:
             # Compute embedding
             self.resnet.eval()
             with torch.no_grad():
-                embedding = self.resnet(img_tensor).squeeze().cpu().numpy()
+                embedding = self.resnet(img_tensor).squeeze().cpu().numpy()  # noqa: E501
 
             logger.info("Successfully generated FaceNet embedding.")
-            return list(embedding.astype(np.float32))
+            return list(embedding.astype(np.float32))  # noqa: E501
         except Exception as e:
             logger.error(f"Error generating FaceNet embedding: {e}")
             raise

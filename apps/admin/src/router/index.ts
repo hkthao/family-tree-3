@@ -14,11 +14,8 @@ import { settingRoutes } from './features/setting.routes';
 
 // Import all pages from the views index
 import {
-  AboutPage,
-  VersionPage,
-  HelpPage,
-  TermsPage,
-  PrivacyPage,
+  ApplicationInfoPage,
+  SupportLegalPage,
   LogoutView,
   DashboardView,
   NotFoundView,
@@ -51,35 +48,16 @@ const router = createRouter({
           meta: { breadcrumb: 'naturalLanguage.editor.title' },
         },
         {
-          path: 'about',
-          name: 'About',
-          component: AboutPage,
-          meta: { breadcrumb: 'about.title' },
+          path: 'application-info',
+          name: 'ApplicationInfo',
+          component: ApplicationInfoPage,
+          meta: { breadcrumb: 'menu.applicationInfo' },
         },
         {
-          path: 'version',
-          name: 'Version',
-          component: VersionPage,
-          meta: { breadcrumb: 'version.title' },
-        },
-        {
-          path: 'help',
-          name: 'Help',
-          component: HelpPage,
-          meta: { breadcrumb: 'help.title' },
-        },
-
-        {
-          path: 'terms',
-          name: 'Terms',
-          component: TermsPage,
-          meta: { breadcrumb: 'terms.title' },
-        },
-        {
-          path: 'privacy',
-          name: 'Privacy',
-          component: PrivacyPage,
-          meta: { breadcrumb: 'privacy.title' },
+          path: 'support-legal',
+          name: 'SupportLegal',
+          component: SupportLegalPage,
+          meta: { breadcrumb: 'menu.supportAndLegal' },
         },
       ],
     },

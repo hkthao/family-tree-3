@@ -51,29 +51,38 @@ const menu: MenuSection[] = [
     titleKey: 'menu.supportAndInfo',
     items: [
       {
-        titleKey: 'about.title',
+        titleKey: 'menu.applicationInfo',
         icon: 'mdi-information-outline',
-        to: '/about',
+        to: '/application-info',
+        children: [
+          {
+            titleKey: 'about.title',
+            icon: 'mdi-information-outline',
+          },
+          {
+            titleKey: 'version.title',
+            icon: 'mdi-tag-outline',
+          },
+        ],
       },
       {
-        titleKey: 'version.title',
-        icon: 'mdi-tag-outline',
-        to: '/version',
-      },
-      {
-        titleKey: 'help.title',
-        icon: 'mdi-help-circle-outline',
-        to: '/help',
-      },
-      {
-        titleKey: 'terms.title',
-        icon: 'mdi-file-document-outline',
-        to: '/terms',
-      },
-      {
-        titleKey: 'privacy.title',
-        icon: 'mdi-shield-lock-outline',
-        to: '/privacy',
+        titleKey: 'menu.supportAndLegal',
+        icon: 'mdi-lifebuoy',
+        to: '/support-legal',
+        children: [
+          {
+            titleKey: 'help.title',
+            icon: 'mdi-help-circle-outline',
+          },
+          {
+            titleKey: 'terms.title',
+            icon: 'mdi-file-document-outline',
+          },
+          {
+            titleKey: 'privacy.title',
+            icon: 'mdi-shield-lock-outline',
+          },
+        ],
       },
     ],
   },

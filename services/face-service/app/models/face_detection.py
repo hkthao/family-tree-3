@@ -7,16 +7,16 @@ class BoundingBox(BaseModel):
     y: int
     width: int
     height: int
-    
-    
+
+
 class FaceDetectionResult(BaseModel):
     id: str
     bounding_box: BoundingBox
     confidence: float
-    thumbnail: Optional[str] = None   # Base64 encoded image
-    embedding: Optional[List[float]] = None # Face embedding
-    
-    
+    thumbnail: Optional[str] = None  # Base64 encoded image
+    embedding: Optional[List[float]] = None  # Face embedding
+
+
 class Face(BaseModel):
     id: str
     bounding_box: BoundingBox
