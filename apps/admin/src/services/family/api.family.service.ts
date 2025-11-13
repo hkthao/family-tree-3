@@ -7,33 +7,28 @@ import {
   type Paginated,
 } from '@/types';
 
-// Base URL for your API - configure this based on your environment
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export class ApiFamilyService implements IFamilyService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/family`;
-
   async fetch(): Promise<Result<Family[], ApiError>> {
     // Renamed from fetchFamilies
-    return this.http.get<Family[]>(this.apiUrl);
+    return this.http.get<Family[]>(`/family`);
   }
 
   async getById(id: string): Promise<Result<Family, ApiError>> {
     // Renamed from getById
-    return this.http.get<Family>(`${this.apiUrl}/${id}`);
+    return this.http.get<Family>(`/family/${id}`);
   }
 
   async add(newItem: Omit<Family, 'id'>): Promise<Result<Family, ApiError>> {
     // Renamed from addFamily
-    return this.http.post<Family>(this.apiUrl, newItem);
+    return this.http.post<Family>(`/family`, newItem);
   }
 
   async addItems(
     newItems: Omit<Family, 'id'>[],
   ): Promise<Result<string[], ApiError>> {
-    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, {
+    return this.http.post<string[]>(`/family/bulk-create`, {
       families: newItems,
     });
   }
@@ -41,13 +36,13 @@ export class ApiFamilyService implements IFamilyService {
   async update(updatedItem: Family): Promise<Result<Family, ApiError>> {
     // Renamed from updateFamily
     return this.http.put<Family>(
-      `${this.apiUrl}/${updatedItem.id}`,
+      `/family/${updatedItem.id}`,
       updatedItem,
     );
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`/family/${id}`);
   }
 
   async loadItems(
@@ -65,7 +60,7 @@ export class ApiFamilyService implements IFamilyService {
     if (filter.sortOrder) params.append('sortOrder', filter.sortOrder);
 
     return this.http.get<Paginated<Family>>(
-      `${this.apiUrl}/search?${params.toString()}`,
+      `/family/search?${params.toString()}`,
     );
   }
 
@@ -73,7 +68,7 @@ export class ApiFamilyService implements IFamilyService {
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
     return this.http.get<Family[]>(
-      `${this.apiUrl}/by-ids?${params.toString()}`,
+      `/family/by-ids?${params.toString()}`,
     );
   }
 }

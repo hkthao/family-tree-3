@@ -45,6 +45,31 @@ services:
       - ./.env.prod
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=${BACKEND_CONNECTION_STRING}
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
+      - JwtSettings__Authority=${JwtSettings__Authority}
+      - JwtSettings__Audience=${JwtSettings__Audience}
+      - JwtSettings__Namespace=${JwtSettings__Namespace}
+      - StorageSettings__Provider=${StorageSettings__Provider}
+      - StorageSettings__BaseUrl=${StorageSettings__BaseUrl}
+      - StorageSettings__MaxFileSizeMB=${StorageSettings__MaxFileSizeMB}
+      - StorageSettings__Local__LocalStoragePath=${StorageSettings__Local__LocalStoragePath}
+      - StorageSettings__Local__BaseUrl=${StorageSettings__Local__BaseUrl}
+      - StorageSettings__Cloudinary__CloudName=${StorageSettings__Cloudinary__CloudName}
+      - StorageSettings__Cloudinary__ApiKey=${StorageSettings__Cloudinary__ApiKey}
+      - StorageSettings__Cloudinary__ApiSecret=${StorageSettings__Cloudinary__ApiSecret}
+      - StorageSettings__S3__BucketName=${StorageSettings__S3__BucketName}
+      - StorageSettings__S3__AccessKey=${StorageSettings__S3__AccessKey}
+      - StorageSettings__S3__SecretKey=${StorageSettings__S3__SecretKey}
+      - StorageSettings__S3__Region=${StorageSettings__S3__Region}
+      - FaceDetectionSettings__BaseUrl=${FaceDetectionSettings__BaseUrl}
+      - NotificationSettings__Provider=${NotificationSettings__Provider}
+      - NovuSettings__ApiKey=${NovuSettings__ApiKey}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - UseInMemoryDatabase=${UseInMemoryDatabase}
+      - N8nSettings__ChatWebhookUrl=${N8nSettings__ChatWebhookUrl}
+      - N8nSettings__EmbeddingWebhookUrl=${N8nSettings__EmbeddingWebhookUrl}
+      - N8nSettings__OllamaModel=${N8nSettings__OllamaModel}
     depends_on:
       - mysql
     volumes:
@@ -57,13 +82,16 @@ services:
     build:
       context: ./apps/admin
       dockerfile: ../../infra/Dockerfile.admin
-      args:
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-        VITE_AUTH0_DOMAIN: ${VITE_AUTH0_DOMAIN}
-        VITE_AUTH0_CLIENT_ID: ${VITE_AUTH0_CLIENT_ID}
-        VITE_AUTH0_AUDIENCE: ${VITE_AUTH0_AUDIENCE}
-        VITE_NOVU_APPLICATION_IDENTIFIER: ${VITE_NOVU_APPLICATION_IDENTIFIER}
     container_name: family-tree-admin-prod
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
+      - VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
+      - VITE_AUTH0_AUDIENCE=${VITE_AUTH0_AUDIENCE}
+      - VITE_NOVU_APPLICATION_IDENTIFIER=${VITE_NOVU_APPLICATION_IDENTIFIER}
+      - VITE_APP_BUILD_DATE=${VITE_APP_BUILD_DATE}
+      - VITE_APP_ENVIRONMENT=${VITE_APP_ENVIRONMENT}
+      - VITE_APP_COMMIT_ID=${VITE_APP_COMMIT_ID}
     depends_on:
       - backend
     volumes:

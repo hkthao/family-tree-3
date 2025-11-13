@@ -3,8 +3,6 @@ import type { Relationship, RelationshipFilter } from '@/types';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 import { ok, type Paginated, type Result } from '@/types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
 export class ApiRelationshipService implements IRelationshipService {
   private mapListDtoToRelationship(dto: Relationship): Relationship {
     return {
@@ -20,10 +18,8 @@ export class ApiRelationshipService implements IRelationshipService {
 
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/relationship`;
-
   async fetch(): Promise<Result<Relationship[], ApiError>> {
-    const result = await this.http.get<Relationship[]>(this.apiUrl);
+    const result = await this.http.get<Relationship[]>(`/relationship`);
     if (result.ok) {
       return ok(result.value.map(this.mapListDtoToRelationship));
     }
@@ -33,26 +29,26 @@ export class ApiRelationshipService implements IRelationshipService {
   async getById(
     id: string,
   ): Promise<Result<Relationship | undefined, ApiError>> {
-    return this.http.get<Relationship>(`${this.apiUrl}/${id}`);
+    return this.http.get<Relationship>(`/relationship/${id}`);
   }
 
   async add(
     newItem: Relationship,
   ): Promise<Result<Relationship, ApiError>> {
-    return this.http.post<Relationship>(this.apiUrl, newItem);
+    return this.http.post<Relationship>(`/relationship`, newItem);
   }
 
   async update(
     updatedItem: Relationship,
   ): Promise<Result<Relationship, ApiError>> {
     return this.http.put<Relationship>(
-      `${this.apiUrl}/${updatedItem.id}`,
+      `/relationship/${updatedItem.id}`,
       updatedItem,
     );
   }
 
   async delete(id: string): Promise<Result<void, ApiError>> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`/relationship/${id}`);
   }
 
   async loadItems(
@@ -74,7 +70,7 @@ export class ApiRelationshipService implements IRelationshipService {
     params.append('itemsPerPage', itemsPerPage.toString());
 
     return this.http.get<Paginated<Relationship>>(
-      `${this.apiUrl}/search?${params.toString()}`,
+      `/relationship/search?${params.toString()}`,
     );
   }
 
@@ -82,12 +78,12 @@ export class ApiRelationshipService implements IRelationshipService {
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
     return this.http.get<Relationship[]>(
-      `${this.apiUrl}/by-ids?${params.toString()}`,
+      `/relationship/by-ids?${params.toString()}`,
     );
   }
 
   async addItems(newItems: Omit<Relationship, 'id'>[]): Promise<Result<string[], ApiError>> {
     const payload = { relationships: newItems };
-    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, payload);
+    return this.http.post<string[]>(`/relationship/bulk-create`, payload);
   }
 }

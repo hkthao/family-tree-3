@@ -32,16 +32,12 @@ function prepareMemberForApi(member: Omit<Member, 'id'> | Member): any {
   return apiMember;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-
 export class ApiMemberService implements IMemberService {
   constructor(private http: ApiClientMethods) {}
 
-  private apiUrl = `${API_BASE_URL}/member`;
-
   async fetch(): Promise<Result<Member[], ApiError>> {
     // Renamed from fetchMembers
-    const result = await this.http.get<Member[]>(this.apiUrl);
+    const result = await this.http.get<Member[]>(`/member`);
     if (result.ok) {
       return ok(result.value.map((m) => transformMemberDates(m)));
     }
@@ -52,7 +48,7 @@ export class ApiMemberService implements IMemberService {
     familyId: string,
   ): Promise<Result<Member[], ApiError>> {
     const result = await this.http.get<Member[]>(
-      `${this.apiUrl}/by-family/${familyId}`,
+      `/member/by-family/${familyId}`,
     );
     if (result.ok) {
       return ok(result.value.map((m) => transformMemberDates(m)));
@@ -62,7 +58,7 @@ export class ApiMemberService implements IMemberService {
 
   async getById(id: string): Promise<Result<Member | undefined, ApiError>> {
     // Renamed from getMemberById
-    const result = await this.http.get<Member>(`${this.apiUrl}/${id}`);
+    const result = await this.http.get<Member>(`/member/${id}`);
     if (result.ok) {
       return ok(result.value ? transformMemberDates(result.value) : undefined);
     }
@@ -72,7 +68,7 @@ export class ApiMemberService implements IMemberService {
   async add(newItem: Member): Promise<Result<Member, ApiError>> {
     // Renamed from addMember
     const apiMember = prepareMemberForApi(newItem);
-    const result = await this.http.post<Member>(this.apiUrl, apiMember);
+    const result = await this.http.post<Member>(`/member`, apiMember);
     if (result.ok) {
       return ok(transformMemberDates(result.value));
     }
@@ -81,14 +77,14 @@ export class ApiMemberService implements IMemberService {
 
   async addItems(newItems: Omit<Member, 'id'>[]): Promise<Result<string[], ApiError>> {
     const apiMembers = newItems.map(prepareMemberForApi);
-    return this.http.post<string[]>(`${this.apiUrl}/bulk-create`, { members: apiMembers });
+    return this.http.post<string[]>(`/member/bulk-create`, { members: apiMembers });
   }
 
   async update(updatedItem: Member): Promise<Result<Member, ApiError>> {
     // Renamed from updateMember
     const apiMember = prepareMemberForApi(updatedItem);
     const result = await this.http.put<Member>(
-      `${this.apiUrl}/${updatedItem.id}`,
+      `/member/${updatedItem.id}`,
       apiMember,
     );
     if (result.ok) {
@@ -99,7 +95,7 @@ export class ApiMemberService implements IMemberService {
 
   async delete(id: string): Promise<Result<void, ApiError>> {
     // Renamed from deleteMember
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`/member/${id}`);
   }
 
   async loadItems(
@@ -119,7 +115,7 @@ export class ApiMemberService implements IMemberService {
     params.append('itemsPerPage', itemsPerPage.toString());
 
     const result = await this.http.get<Paginated<Member>>(
-      `${this.apiUrl}/search?${params.toString()}`,
+      `/member/search?${params.toString()}`,
     );
 
     if (result.ok) {
@@ -135,7 +131,7 @@ export class ApiMemberService implements IMemberService {
     const params = new URLSearchParams();
     params.append('ids', ids.join(','));
     const result = await this.http.get<Member[]>(
-      `${this.apiUrl}/by-ids?${params.toString()}`,
+      `/member/by-ids?${params.toString()}`,
     );
     if (result.ok) {
       return ok(result.value.map((m) => transformMemberDates(m)));
@@ -145,11 +141,11 @@ export class ApiMemberService implements IMemberService {
 
   async updateMemberBiography(memberId: string, biographyContent: string): Promise<Result<void, ApiError>> {
     const payload = { memberId, biographyContent };
-    return this.http.put<void>(`${this.apiUrl}/${memberId}/biography`, payload);
+    return this.http.put<void>(`/member/${memberId}/biography`, payload);
   }
 
   async getRelatives(memberId: string): Promise<Result<Member[], ApiError>> {
-    const result = await this.http.get<Member[]>(`${this.apiUrl}/${memberId}/relatives`);
+    const result = await this.http.get<Member[]>(`/member/${memberId}/relatives`);
     if (result.ok) {
       return ok(result.value.map((m) => transformMemberDates(m)));
     }
