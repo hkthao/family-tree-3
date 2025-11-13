@@ -1,0 +1,278 @@
+{
+  "name": "AI Chat bot",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -1072,
+        -192
+      ],
+      "id": "535ed3c3-21dc-47e4-9b5f-e54da1cded48",
+      "name": "When chat message received",
+      "webhookId": "cf0995d9-90b9-495d-a888-a149645a5329"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        -288
+      ],
+      "id": "e9ef7f6a-f06c-4cdd-bca7-3a28249b7b0f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -720,
+        -64
+      ],
+      "id": "ea01650c-7bba-4a7a-99db-33fa425febcf",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "đây là công cụ hỗ trợ tìm kiếm thông tin gia đình, dung Qdrant vector db ",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "list",
+          "value": "family_store"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        -592,
+        -64
+      ],
+      "id": "6982d192-fbb1-431f-ba65-80fc770f4ddb",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "Ja4ITvGx3OlRcTSx",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-3.5-turbo"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -848,
+        -64
+      ],
+      "id": "f649cbac-f43d-464f-9ff6-2b1cde661a92",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "RbWthTT5dEupCdko",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -512,
+        144
+      ],
+      "id": "77ac5f3d-6e64-46c6-a6be-a1a0b0a4f6d5",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "RbWthTT5dEupCdko",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "family-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1296,
+        -384
+      ],
+      "id": "81fc8c2b-d214-4df9-af14-184fd95c9e23",
+      "name": "Webhook",
+      "webhookId": "286c5818-e779-49ba-a771-6f1dafa94433"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -224,
+        -288
+      ],
+      "id": "f4b852ab-7c57-4a23-bb5b-b66da21e0538",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b33e107c-65d4-4599-9739-8dbafeaba21b",
+              "name": "sessionId",
+              "value": "={{ $json.body[0].sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "69ae3a01-b59e-4b3a-9a11-1f4183091def",
+              "name": "action",
+              "value": "={{ $json.body[0].action }}",
+              "type": "string"
+            },
+            {
+              "id": "d71241b2-0ac1-4dbe-a588-35ee40d7a497",
+              "name": "chatInput",
+              "value": "={{ $json.body[0].chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1072,
+        -384
+      ],
+      "id": "b609ed2d-96e9-47f2-b160-74f5786ea2fb",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_tool": [
+        []
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "85433c90-048d-4f7f-8675-4960ffd8a5db",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aef829d0d59991f04437d80873cfa10d735e2854c9b4476df1579624e98e2a9e"
+  },
+  "id": "ffM6Byi02Qu0qixQ",
+  "tags": []
+}

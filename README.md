@@ -9,7 +9,6 @@
 **Công nghệ chính:**
 *   **Backend:** .NET 8, Clean Architecture, ASP.NET Core, Entity Framework Core, MediatR, FluentValidation, JWT Authentication, Novu
 *   **Frontend (Admin):** Vue.js 3, TypeScript, Vite, Vuetify 3, Pinia, Vue Router, Axios, ESLint, Prettier
-*   **Frontend (Public):** Nuxt 3, Tailwind CSS
 *   **Cơ sở dữ liệu:** MySQL
 *   **Triển khai:** Docker, Docker Compose, Nginx
 *   **CI/CD:** GitHub Actions
@@ -21,7 +20,6 @@ Dự án được tổ chức theo kiến trúc monorepo, phân chia thành các
 *   **`apps/`**: Chứa các ứng dụng chính có thể chạy độc lập.
     *   `apps/backend`: Mã nguồn cho dịch vụ API backend, tuân thủ Clean Architecture với các mẫu thiết kế như DDD (Domain-Driven Design) và CQRS (Command Query Responsibility Segregation) sử dụng MediatR. Tương tác với cơ sở dữ liệu thông qua Entity Framework Core.
     *   `apps/admin`: Mã nguồn cho giao diện quản trị, được xây dựng với Vue.js 3, TypeScript và Vite.
-    *   `apps/public`: Mã nguồn cho trang công khai, được xây dựng với Nuxt 3 và Tailwind CSS.
 *   **`services/`**: Chứa các dịch vụ phụ trợ.
     *   `services/face-service`: Dịch vụ xử lý khuôn mặt bằng Python.
 *   **`packages/`**: Chứa các gói mã nguồn được chia sẻ giữa các ứng dụng (ví dụ: `shared-types` cho các định nghĩa TypeScript dùng chung).
@@ -56,26 +54,16 @@ npm run dev
 ```
 Ứng dụng sẽ chạy trên `http://localhost:5173`.
 
-### 🌐 Cách chạy public frontend (riêng lẻ):
-
-```bash
-cd apps/public
-npm install
-npm run dev
-```
-Ứng dụng sẽ chạy trên `http://localhost:3000`.
-
 ### 🐳 Chạy bằng Docker Compose (tất cả các service):
 
 Đây là cách nhanh nhất và được khuyến nghị để chạy tất cả các ứng dụng và Database trong môi trường phát triển.
 
-1.  **Cấu hình biến môi trường**: Tạo tệp `.env` trong thư mục `apps/backend`, `apps/admin` và `apps/public` dựa trên các tệp `.env.example` tương ứng. Cấu hình các biến môi trường cần thiết như chuỗi kết nối cơ sở dữ liệu, thông tin Auth0 (Domain, Client ID, Audience), và các khóa API khác.
+1.  **Cấu hình biến môi trường**: Tạo tệp `.env` trong thư mục `apps/backend` và `apps/admin` dựa trên các tệp `.env.example` tương ứng. Cấu hình các biến môi trường cần thiết như chuỗi kết nối cơ sở dữ liệu, thông tin Auth0 (Domain, Client ID, Audience), và các khóa API khác.
 2.  **Chạy Docker Compose:**
     ```bash
     docker-compose -f infra/docker-compose.yml up --build
     ```
     Sau khi các dịch vụ khởi động, bạn có thể truy cập:
-    *   **Public Frontend:** [http://localhost](http://localhost)
     *   **Admin Frontend:** [http://localhost:8081](http://localhost:8081)
     *   **Backend API (Swagger):** [http://localhost:8080/swagger](http://localhost:8080/swagger)
 
@@ -101,13 +89,6 @@ cd apps/admin
 npm run test:coverage
 ```
 
-### Public Frontend:
-
-```bash
-cd apps/public
-npm run test
-```
-
 CI/CD tự động thực hiện các bước kiểm thử này trong workflow `.github/workflows/ci.yml`.
 
 ## 5. 🔄 CI/CD Pipeline
@@ -116,13 +97,13 @@ Dự án sử dụng GitHub Actions để tự động hóa quy trình CI/CD.
 
 *   **Workflow CI (`.github/workflows/ci.yml`)**:
     *   Được kích hoạt khi có `push` hoặc `pull_request` nhắm vào nhánh `main`.
-    *   Thực hiện build, test và lint cho tất cả các ứng dụng (`backend`, `admin`, `public`, `face-service`).
+    *   Thực hiện build, test và lint cho tất cả các ứng dụng (`backend`, `admin`, `face-service`).
 
 *   **Workflows CD (`.github/workflows/cd-*.yml`)**:
     *   Được kích hoạt khi workflow CI hoàn thành thành công trên nhánh `main`.
     *   Tải xuống các Docker image artifact.
     *   Đăng nhập vào Docker Hub.
-    *   Build và Push các Docker image riêng biệt cho `backend`, `admin`, `public` và `face-service` lên Docker Hub.
+    *   Build và Push các Docker image riêng biệt cho `backend`, `admin` và `face-service` lên Docker Hub.
 
 ## 6. 📁 Cấu trúc thư mục (Project Structure)
 
@@ -130,7 +111,6 @@ Dự án sử dụng GitHub Actions để tự động hóa quy trình CI/CD.
 family-tree-3/
 ├── apps/
 │   ├── admin/         # Giao diện quản trị (Vue + Vuetify)
-│   ├── public/        # Trang công khai (Nuxt 3 + Tailwind)
 │   └── backend/       # API Backend (ASP.NET Core)
 ├── services/
 │   └── face-service/  # Dịch vụ xử lý khuôn mặt (Python)
@@ -141,7 +121,6 @@ family-tree-3/
 │   ├── docker-compose.yml
 │   ├── Dockerfile.backend
 │   ├── Dockerfile.admin
-│   ├── Dockerfile.public
 │   └── Dockerfile.face-service
 ├── .github/workflows/ # Các workflow CI/CD
 ├── docs/              # Tài liệu dự án

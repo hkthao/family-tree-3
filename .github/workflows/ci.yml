@@ -49,16 +49,6 @@ jobs:
     - name: Test Admin
       run: npm run test:coverage --prefix apps/admin
 
-    # Public App CI
-    - name: Install Public App Dependencies
-      run: npm install --prefix apps/public
-
-    - name: Lint Public App
-      run: npm run lint --prefix apps/public
-
-    # - name: Test Public App
-    #   run: npm run test --prefix apps/public
-
     # Face Service CI
     - name: Set up Python for Face Service
       uses: actions/setup-python@v5

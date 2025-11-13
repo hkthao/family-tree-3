@@ -5,9 +5,8 @@
   "description": "Monorepo for Family Tree project",
   "scripts": {
     "dev:admin": "npm run dev --prefix apps/admin",
-    "dev:public": "npm run dev --prefix apps/public",
-    "dev": "concurrently \"npm run dev:admin\" \"npm run dev:public\"",
-    "install-all": "npm install --prefix apps/admin && npm install --prefix apps/public"
+    "dev": "npm run dev:admin",
+    "install-all": "npm install --prefix apps/admin"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

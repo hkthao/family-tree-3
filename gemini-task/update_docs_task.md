@@ -1,4 +1,3 @@
-gemini --prompt "
 You are a documentation auditor and technical writer.
 
 Context:
@@ -25,4 +24,3 @@ Style Guidelines:
 
 Deliverable:
 Output the **updated Markdown text** for each file, keeping filenames unchanged.
-" --source ./docs
