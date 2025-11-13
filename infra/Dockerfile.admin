@@ -27,11 +27,11 @@ RUN apk add --no-cache gettext
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy the entrypoint script and make it executable
-COPY infra/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy the config template
-COPY apps/admin/public/config.template.js /usr/share/nginx/html/config.template.js
+COPY public/config.template.js /usr/share/nginx/html/config.template.js
 
 # Copy only the built assets from the build stage.
 # This keeps the final image minimal.
