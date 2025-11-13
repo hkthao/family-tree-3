@@ -44,7 +44,7 @@ async def detect_faces(
     ),
 ):
     logger.info(
-        f"Received request to detect faces. Filename: {file.filename}, "
+        f"Received request to detect faces. Filename: {file.filename}, " \
         f"ReturnCrop: {return_crop}"
     )
 
@@ -110,7 +110,8 @@ async def detect_faces(
             )
             results.append(face_result)
             logger.debug(
-                "Generated FaceDetectionResult: %s", face_result.json()
+                "Generated FaceDetectionResult: %s",
+                face_result.json()
             )
 
         logger.info(f"Returning {len(results)} face detection results.")

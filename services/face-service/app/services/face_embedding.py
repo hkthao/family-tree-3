@@ -25,12 +25,14 @@ class FaceEmbeddingService:
         try:
             # Load Dlib's face landmark predictor
             predictor_path = os.getenv(
-                "DLIB_PREDICTOR_PATH", "app/models/shape_predictor_68_face_landmarks.dat"
+                "DLIB_PREDICTOR_PATH",
+                "app/models/shape_predictor_68_face_landmarks.dat"
             )
             self.predictor = dlib.shape_predictor(predictor_path)
             # Load Dlib's face recognition model
             encoder_path = os.getenv(
-                "DLIB_ENCODER_PATH", "app/models/dlib_face_recognition_resnet_model_v1.dat"
+                "DLIB_ENCODER_PATH",
+                "app/models/dlib_face_recognition_resnet_model_v1.dat"
             )
             self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
             logger.info("FaceEmbeddingService initialized with Dlib models.")
@@ -59,7 +61,8 @@ class FaceEmbeddingService:
             face_image (Image.Image): A PIL Image object of the cropped face.
 
         Returns:
-            List[float]: A list of 128 floats representing the face embedding.
+            List[float]: A list of 128 floats
+            representing the face embedding.
         """
         try:
             # Convert PIL Image to NumPy array (RGB)
@@ -83,7 +86,9 @@ class FaceEmbeddingService:
                 aligned_face, landmarks
             )
             logger.info("Successfully generated Dlib face embedding.")
-            return list(np.array(embedding).astype(np.float32))  # noqa: E501
+            return list(
+                np.array(embedding).astype(np.float32)
+            )
         except Exception as e:
             logger.error(f"Error generating Dlib face embedding: {e}")
             raise
@@ -94,7 +99,8 @@ class FaceEmbeddingService:
         using FaceNet (InceptionResnetV1).
 
         Args:
-            face_image (Image.Image): A PIL Image object of the cropped face.  # noqa: E501
+            face_image (Image.Image): A PIL Image object
+                of the cropped face.
 
         Returns:
             List[float]: A list of 512 floats representing the face embedding.
@@ -102,7 +108,9 @@ class FaceEmbeddingService:
         try:
             # Preprocess image for FaceNet
             # FaceNet expects input in a specific format (e.g., 160x160, normalized)
-            face_image_resized = face_image.resize((160, 160))  # noqa: E501
+            face_image_resized = face_image.resize(
+                (160, 160)
+            )
             img_np = np.array(face_image_resized).astype(np.float32)
             img_np = (img_np - 127.5) / 128.0  # Normalize to [-1, 1]
             img_tensor = torch.tensor(img_np).permute(2, 0, 1).unsqueeze(0).to(self.device)
@@ -110,7 +118,9 @@ class FaceEmbeddingService:
             # Compute embedding
             self.resnet.eval()
             with torch.no_grad():
-                embedding = self.resnet(img_tensor).squeeze().cpu().numpy()  # noqa: E501
+                embedding = (
+                    self.resnet(img_tensor).squeeze().cpu().numpy()
+                )
 
             logger.info("Successfully generated FaceNet embedding.")
             return list(embedding.astype(np.float32))  # noqa: E501
