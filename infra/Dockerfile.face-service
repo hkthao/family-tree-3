@@ -15,10 +15,10 @@ RUN apt-get update && \
     libglib2.0-0 && \
     rm -rf /var/lib/apt/lists/*
 
-COPY services/face-service/requirements.txt .
-COPY services/face-service/.flake8 .
+COPY requirements.txt .
+COPY .flake8 .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY services/face-service/app ./app
+COPY app ./app
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
