@@ -52,6 +52,9 @@ services:
       - DLIB_PREDICTOR_PATH=app/models/shape_predictor_68_face_landmarks.dat
       - DLIB_ENCODER_PATH=app/models/dlib_face_recognition_resnet_model_v1.dat
     mem_limit: 4g # Increase memory limit
+    volumes:
+      - ./services/face-service/app/models/shape_predictor_68_face_landmarks.dat:/face-service/app/models/shape_predictor_68_face_landmarks.dat
+      - ./services/face-service/app/models/dlib_face_recognition_resnet_model_v1.dat:/face-service/app/models/dlib_face_recognition_resnet_model_v1.dat
   n8n:
     image: n8nio/n8n
     container_name: family-tree-n8n
