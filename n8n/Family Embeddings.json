@@ -1,0 +1,568 @@
+{
+  "name": "Family Embeddings",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "embeddings",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3920,
+        -368
+      ],
+      "id": "112e13cb-0f55-4681-a64c-e83224d23fbf",
+      "name": "Webhook",
+      "webhookId": "80039437-9508-48fb-a9d5-c467ad9b3f5a"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -2688,
+        -368
+      ],
+      "id": "9d713a6f-e600-420d-92ac-f1024bb186cf",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {
+          "dimensions": 512
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -3040,
+        448
+      ],
+      "id": "3438fca4-64a1-4367-9d64-ceb7f0766a0f",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "RbWthTT5dEupCdko",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "family_store",
+          "mode": "list",
+          "cachedResultName": "family_store"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        -3040,
+        224
+      ],
+      "id": "a269b86c-bd3c-496b-98eb-955c78006a20",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "Ja4ITvGx3OlRcTSx",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "point",
+        "operation": "deletePoints",
+        "collectionName": {
+          "__rl": true,
+          "value": "family_store",
+          "mode": "list",
+          "cachedResultName": "family_store"
+        },
+        "points": "=",
+        "filter": "= {\n\"must\": [\n      {\n        \"key\": \"metadata.id\",\n        \"match\": { \"value\": \"{{ $json.id }}\" }\n      }\n    ]\n } ",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-qdrant.qdrant",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        -80
+      ],
+      "id": "2718dee4-eaad-44f4-aa00-866a4b700911",
+      "name": "Delete Points",
+      "credentials": {
+        "qdrantRestApi": {
+          "id": "Yjp0G8xIM6MJh5el",
+          "name": "Qdrant account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  const data = item.json.body;\n\n  // Gộp dữ liệu quan trọng thành 1 đoạn text để tạo embedding\n  const content = data.description || `\n    Tên gia đình: ${data.entityData?.name || \"\"}\n    Mô tả: ${data.entityData?.description || \"\"}\n    Địa chỉ: ${data.entityData?.address || \"\"}\n    Tổng số thành viên: ${data.entityData?.totalMembers || \"\"}\n    Tổng số thế hệ: ${data.entityData?.totalGenerations || \"\"}\n  `.trim();\n\n  return {\n    json: {\n      id: data.entityId,\n      content, // phần text sẽ dùng cho bước Embedding Node\n      metadata: {\n        entityType: data.entityType,\n        actionType: data.actionType,\n        name: data.entityData?.name,\n        description: data.entityData?.description,\n        address: data.entityData?.address,\n        totalMembers: data.entityData?.totalMembers,\n        totalGenerations: data.entityData?.totalGenerations\n      }\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3264,
+        80
+      ],
+      "id": "4ccb2521-899b-4568-b347-86773a85402f",
+      "name": "Map Payload"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.content }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "id",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "type",
+                "value": "={{ $json.metadata.entityType }}"
+              },
+              {
+                "name": "name",
+                "value": "={{ $json.metadata.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -2912,
+        448
+      ],
+      "id": "0a97f8dd-7603-4f42-9052-21e4d92e754f",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.actionType }}",
+                    "rightValue": "SaveFaceEmbedding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "533f71af-f723-496f-9a89-46818dbd84df"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Save face embedding"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "32c3a81e-d836-43a4-a39d-3058d2258833",
+                    "leftValue": "={{ $json.body.actionType }}",
+                    "rightValue": "SearchFaceEmbedding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Search face embedding"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "be5860ec-fcd6-40c7-a9c5-dcfb1c5acf24",
+                    "leftValue": "={{ $json.body.actionType }}",
+                    "rightValue": "SaveFamilyEmbedding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Save family embeddings"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fe299759-62c2-4236-a546-49672f11f488",
+                    "leftValue": "={{ $json.body.actionType }}",
+                    "rightValue": "DeleteFaceEmbedding",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Delete face embedding"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -3696,
+        -400
+      ],
+      "id": "711fab58-c0b9-46e0-b5f4-8944037b1f0d",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "search",
+        "operation": "queryPoints",
+        "collectionName": {
+          "__rl": true,
+          "value": "family-face-embeddings",
+          "mode": "list",
+          "cachedResultName": "family-face-embeddings"
+        },
+        "query": "=[{{ $json.body.entityData.embedding }}]",
+        "scoreThreshold": 0.8,
+        "limit": 3,
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-qdrant.qdrant",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        -464
+      ],
+      "id": "2f204531-80e0-4b8c-98ce-7ac19eeb3622",
+      "name": "Search Faces",
+      "credentials": {
+        "qdrantRestApi": {
+          "id": "Yjp0G8xIM6MJh5el",
+          "name": "Qdrant account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "point",
+        "operation": "upsertPoints",
+        "collectionName": {
+          "__rl": true,
+          "value": "family-face-embeddings",
+          "mode": "list",
+          "cachedResultName": "family-face-embeddings"
+        },
+        "points": "=[\n    {\n        \"id\": \"{{ $json.body.entityId }}\",\n        \"payload\": {\n            \"memberId\": \"{{ $json.body.entityData.memberId }}\",\n            \"actionType\": \"{{ $json.body.actionType }}\",\n            \"entityType\": \"{{ $json.body.entityType }}\",\n            \"description\": \"{{ $json.body.description }}\"\n        },\n        \"vector\": [{{ $json.body.entityData.embedding }}]\n    }\n]\n ",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-qdrant.qdrant",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        -656
+      ],
+      "id": "dc843d47-e3db-4ec7-af8a-5835179feae7",
+      "name": "Upsert Faces",
+      "credentials": {
+        "qdrantRestApi": {
+          "id": "Yjp0G8xIM6MJh5el",
+          "name": "Qdrant account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "point",
+        "operation": "deletePoints",
+        "collectionName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "family-face-embeddings"
+        },
+        "points": "{}",
+        "filter": "= {\n\"must\": [\n      {\n        \"key\": \"payload.memberId\",\n        \"match\": { \"value\": \"{{ $('Webhook').item.json.body.entityData.memberId }}\" }\n      }\n    ]\n }  ",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-qdrant.qdrant",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        -272
+      ],
+      "id": "f750d14b-7008-4eb0-a62c-248f4c7b56bd",
+      "name": "Delete Faces",
+      "credentials": {
+        "qdrantRestApi": {
+          "id": "Yjp0G8xIM6MJh5el",
+          "name": "Qdrant account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "payload",
+        "operation": "createPayloadIndex",
+        "collectionName": {
+          "__rl": true,
+          "value": "family-face-embeddings",
+          "mode": "list",
+          "cachedResultName": "family-face-embeddings"
+        },
+        "fieldName": "payload.memberId",
+        "fieldSchema": "\"keyword\"",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-qdrant.qdrant",
+      "typeVersion": 1,
+      "position": [
+        -3280,
+        -288
+      ],
+      "id": "b9187db1-a05a-4972-8a19-3b2109f60279",
+      "name": "Create Payload Index",
+      "alwaysOutputData": false,
+      "credentials": {
+        "qdrantRestApi": {
+          "id": "Yjp0G8xIM6MJh5el",
+          "name": "Qdrant account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "host.docker.internal:5678",
+            "traceparent": "00-0d88a86e7603ed22c6e7d6ed1ecbabc4-aa0e486ecf514bf8-00",
+            "content-type": "application/json; charset=utf-8",
+            "content-length": "259"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "entityType": "Face",
+            "entityId": "21fd3ff5-9539-4227-b1b9-8922f7edfa4d",
+            "actionType": "DeleteFaceEmbedding",
+            "entityData": {
+              "memberId": "21fd3ff5-9539-4227-b1b9-8922f7edfa4d"
+            },
+            "description": "Delete face embedding for MemberId 21fd3ff5-9539-4227-b1b9-8922f7edfa4d"
+          },
+          "webhookUrl": "http://localhost:5678/webhook/embeddings",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Points": {
+      "main": [
+        []
+      ]
+    },
+    "Map Payload": {
+      "main": [
+        [
+          {
+            "node": "Delete Points",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Upsert Faces",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Search Faces",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Map Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Payload Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Faces": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert Faces": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Faces": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Payload Index": {
+      "main": [
+        [
+          {
+            "node": "Delete Faces",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "94fafe02-1540-40e9-8c75-65d4beedf4e7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aef829d0d59991f04437d80873cfa10d735e2854c9b4476df1579624e98e2a9e"
+  },
+  "id": "a8afOjtPdqX4SiDa",
+  "tags": []
+}

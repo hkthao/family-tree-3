@@ -1,4 +1,3 @@
-# .github/workflows/ci.yml
 name: CI Pipeline
 
 on:
@@ -14,38 +13,64 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    # Backend CI
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
 
     - name: Restore Backend Dependencies
-      run: dotnet restore src/backend/backend.sln
+      run: dotnet restore apps/backend/backend.sln
 
     - name: Build Backend
-      run: dotnet build src/backend/backend.sln --no-restore
+      run: dotnet build apps/backend/backend.sln --no-restore
 
     - name: Fix Backend Formatting
-      run: dotnet format src/backend/ --include-generated
+      run: dotnet format apps/backend/ --include-generated
 
     - name: Verify Backend Formatting
-      run: dotnet format src/backend/ --verify-no-changes --include-generated
+      run: dotnet format apps/backend/ --verify-no-changes --include-generated
 
     - name: Test Backend
-      run: dotnet test src/backend/backend.sln --no-build --verbosity normal
+      run: dotnet test apps/backend/backend.sln --no-build --verbosity normal
 
+    # Admin (Frontend) CI
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 20
 
-    - name: Install Frontend Dependencies
-      run: npm install --prefix src/frontend
+    - name: Install Admin Dependencies
+      run: npm install --prefix apps/admin
 
-    - name: Lint Frontend
-      run: npm run lint --prefix src/frontend
+    - name: Lint Admin
+      run: npm run lint --prefix apps/admin
 
-    - name: Test Frontend
-      run: npm run test:coverage --prefix src/frontend
+    - name: Test Admin
+      run: npm run test:coverage --prefix apps/admin
+
+    # Face Service CI
+    - name: Set up Python for Face Service
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('services/face-service/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-
+
+    - name: Install Face Service dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r services/face-service/requirements.txt
 
 
+
+    # - name: Test Face Service with pytest (if tests exist)
+    #   run: |
+    #     pip install pytest
+    #     pytest services/face-service/

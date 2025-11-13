@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - admin
+      - backend
+      - face-service
+    networks:
+      - app-network
+
+  backend:
+    image: hkthao/family-tree-backend:latest
+    env_file:
+      - ./.env.prod
+    environment:
+      - ConnectionStrings__DefaultConnection=${BACKEND_CONNECTION_STRING}
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  admin:
+    image: hkthao/family-tree-admin:latest
+    env_file:
+      - ./.env.prod
+    environment:
+      - VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
+      - VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
+      - VITE_AUTH0_AUDIENCE=${VITE_AUTH0_AUDIENCE}
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_NOVU_APPLICATION_IDENTIFIER=${VITE_NOVU_APPLICATION_IDENTIFIER}
+    networks:
+      - app-network
+
+  face-service:
+    image: hkthao/family-tree-face-service:latest
+    env_file:
+      - ./.env.prod
+    environment:
+      - PORT=${FACE_SERVICE_PORT}
+    volumes:
+      - face_service_models:/app/models # Volume for persisting .dat files
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    env_file:
+      - ./.env.prod
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  face_service_models: # Define the named volume

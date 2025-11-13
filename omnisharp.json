@@ -1,0 +1,7 @@
+{
+  "MsBuild": {
+    "Projects": [
+      "src/backend/backend.sln"
+    ]
+  }
+}

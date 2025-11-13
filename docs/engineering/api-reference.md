@@ -13,10 +13,10 @@
   - [6.3. Quản lý Sự kiện (`/api/event`)](#63-quản-lý-sự-kiện-apievents)
   - [6.4. Tìm kiếm chung (`/api/search`)](#64-tìm-kiếm-chung-apisearch)
   - [6.5. Quản lý Quan hệ (`/api/relationship`)](#65-quản-lý-quan-hệ-apirelationships)
-  - [6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)](#66-quản-lý-hồ-sơ-người-dùng-apiuserprofiles)
+  - [6.6. Quản lý Hồ sơ Người dùng (`/api/user-profile`)](#66-quản-lý-hồ-sơ-người-dùng-apICurrentUserprofiles)
   - [6.7. Quản lý Hoạt động Người dùng (`/api/activity`)](#67-quản-lý-hoạt-động-người-dùng-apiactivities)
   - [6.8. Quản lý AI (`/api/ai`)](#68-quản-lý-ai-api-ai)
-  - [6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)](#69-quản-lý-tùy-chọn-người-dùng-apiuserpreferences)
+  - [6.9. Quản lý Tùy chọn Người dùng (`/api/UserPreferences`)](#69-quản-lý-tùy-chọn-người-dùng-apICurrentUserpreferences)
   - [6.10. Quản lý Tải lên Tệp (`/api/upload`)](#610-quản-lý-tải-lên-tệp-apiupload)
   - [6.11. Xử lý Dữ liệu và Tải lên Chunk (`/api/chunk/upload`)](#611-xử-lý-dữ-liệu-và-tải-lên-chunk-apichunkupload)
 - [7. Mô hình Dữ liệu (Response Models)](#7-mô-hình-dữ-liệu-response-models)
@@ -86,22 +86,22 @@ Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nế
 
 Các endpoint trả về danh sách (ví dụ: `GET /api/family`, `GET /api/member`) đều hỗ trợ phân trang qua các query parameter sau:
 
--   `pageNumber` (int, optional, default: 1): Số trang muốn lấy.
+-   `page` (int, optional, default: 1): Số trang muốn lấy.
 -   `pageSize` (int, optional, default: 10): Số lượng mục trên mỗi trang.
 
 **Ví dụ:**
 
 -   **Ví dụ:** Để lấy trang thứ 2 với 20 mục trên mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/family?pageNumber=2&pageSize=20`
+    -   **Đường dẫn:** `/api/family?page=2&pageSize=20`
 
 Phản hồi sẽ có cấu trúc `PaginatedList<T>`:
 
 Phản hồi sẽ có cấu trúc `PaginatedList<T>` với các trường:
 -   `items`: Một mảng chứa các đối tượng dữ liệu của trang hiện tại.
--   `pageNumber`: Số trang hiện tại.
+-   `page`: Số trang hiện tại.
 -   `totalPages`: Tổng số trang có sẵn.
--   `totalCount`: Tổng số mục trên tất cả các trang.
+-   `totalItems`: Tổng số mục trên tất cả các trang.
 
 ## 4. Lọc và Tìm kiếm
 
@@ -117,7 +117,7 @@ Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. C
 
 -   **Ví dụ:** Để tìm kiếm thành viên có tên "Văn" và giới tính "Male" trên trang 1 với 10 mục mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/member?searchQuery=Văn&gender=Male&pageNumber=1&pageSize=10`
+    -   **Đường dẫn:** `/api/member?searchQuery=Văn&gender=Male&page=1&pageSize=10`
 
 **Ví dụ với `GET /api/family/search`:**
 
@@ -125,7 +125,7 @@ Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. C
 
 -   **Ví dụ:** Để tìm kiếm dòng họ có từ khóa "Royal" trên trang 1 với 5 mục mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/family/search?keyword=Royal&pageNumber=1&pageSize=5`
+    -   **Đường dẫn:** `/api/family/search?keyword=Royal&page=1&pageSize=5`
 
 ## 5. Cấu trúc Phản hồi Lỗi (Error Response)
 
@@ -219,7 +219,7 @@ Ví dụ Phản hồi Lỗi:
 ### 6.2. Quản lý Thành viên (`/api/member`)
 
 
--   `GET /api/member/search?searchQuery=...&gender=...&familyId=...&pageNumber=...&pageSize=...`: Tìm kiếm thành viên theo các tiêu chí và hỗ trợ phân trang.
+-   `GET /api/member/search?searchQuery=...&gender=...&familyId=...&page=...&pageSize=...`: Tìm kiếm thành viên theo các tiêu chí và hỗ trợ phân trang.
     *   **Phản hồi:** `PaginatedListOfMemberListDto`
 -   `GET /api/member/{id}`: Lấy thông tin thành viên theo ID.
     *   **Phản hồi:** `MemberDetailDto`
@@ -256,11 +256,11 @@ Ví dụ Phản hồi Lỗi:
 
 ### 6.3. Quản lý Sự kiện (`/api/event`)
 
--   `GET /api/event?pageNumber=...&pageSize=...&searchTerm=...&eventType=...&familyId=...&startDate=...&endDate=...&location=...&relatedMemberId=...`: Lấy danh sách sự kiện (hỗ trợ phân trang và lọc).
+-   `GET /api/event?page=...&pageSize=...&searchTerm=...&eventType=...&familyId=...&startDate=...&endDate=...&location=...&relatedMemberId=...`: Lấy danh sách sự kiện (hỗ trợ phân trang và lọc).
     *   **Phản hồi:** `List<EventDto>`
 -   `GET /api/event/{id}`: Lấy thông tin sự kiện theo ID.
     *   **Phản hồi:** `EventDto`
--   `GET /api/event/search?searchQuery=...&startDate=...&endDate=...&type=...&familyId=...&memberId=...&pageNumber=...&pageSize=...`: Tìm kiếm sự kiện theo các tiêu chí và hỗ trợ phân trang.
+-   `GET /api/event/search?searchQuery=...&startDate=...&endDate=...&type=...&familyId=...&memberId=...&page=...&pageSize=...`: Tìm kiếm sự kiện theo các tiêu chí và hỗ trợ phân trang.
     *   **Phản hồi:** `PaginatedListOfEventDto`
 
 -   `POST /api/event`: Tạo sự kiện mới.
@@ -295,7 +295,7 @@ Ví dụ Phản hồi Lỗi:
 
 ### 6.5. Quản lý Quan hệ (`/api/relationship`)
 
--   `GET /api/relationship?pageNumber=...&pageSize=...&familyId=...&sourceMemberId=...&targetMemberId=...&type=...`: Lấy danh sách quan hệ (hỗ trợ phân trang và lọc).
+-   `GET /api/relationship?page=...&pageSize=...&familyId=...&sourceMemberId=...&targetMemberId=...&type=...`: Lấy danh sách quan hệ (hỗ trợ phân trang và lọc).
     *   **Phản hồi:** `PaginatedListOfRelationshipListDto`
 -   `GET /api/relationship/{id}`: Lấy thông tin quan hệ theo ID.
     *   **Phản hồi:** `RelationshipDto`

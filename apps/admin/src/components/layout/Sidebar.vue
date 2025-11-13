@@ -1,0 +1,66 @@
+<template>
+  <v-navigation-drawer app>
+    <v-list-item class="pa-4">
+      <AppNameDisplay />
+    </v-list-item>
+
+    <v-divider></v-divider>
+
+    <v-list nav>
+      <template v-for="(section, i) in menu" :key="i">
+        <VListSubheader>{{ section.titleKey ? $t(section.titleKey) : section.title }}</VListSubheader>
+        <v-list-item
+          v-for="(item, j) in section.items"
+          :key="j"
+          :to="item.to"
+          :prepend-icon="item.icon"
+          :title="$t(item.titleKey)"
+          active-class="active-item"
+          :exact="item.exact"
+          :id="item.to === '/dashboard' ? 'dashboard-link' : undefined"
+        ></v-list-item>
+      </template>
+    </v-list>
+
+    <template v-slot:append>
+      <div class="pa-4 text-center text-caption">
+        Version: {{ appVersion }}
+      </div>
+    </template>
+  </v-navigation-drawer>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { VListSubheader } from 'vuetify/components';
+import menu from '@/data/menuItems';
+import { AppNameDisplay } from '@/components/common';
+
+const appVersion = ref('N/A');
+
+onMounted(async () => {
+  try {
+    const response = await fetch('/version.json');
+    if (response.ok) {
+      const data = await response.json();
+      appVersion.value = data.version;
+    } else {
+      console.error('Failed to fetch version.json:', response.statusText);
+    }
+  } catch (error) {
+    console.error('Error fetching version.json:', error);
+  }
+});
+</script>
+
+<style scoped>
+.active-item {
+  background-color: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+  border-radius: 8px;
+}
+
+.active-item .v-list-item-title {
+  font-weight: bold;
+}
+</style>

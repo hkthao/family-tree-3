@@ -52,12 +52,12 @@ docker-compose -f infra/docker-compose.yml up --build
 
 Sau khi chạy lệnh trên và các services đã khởi động thành công, bạn có thể truy cập:
 
--   **Frontend**: `http://localhost` (Nginx sẽ phục vụ Frontend)
+-   **Admin Frontend**: `http://localhost:8081`
 -   **Backend API (Swagger)**: `http://localhost:8080/swagger` (Backend API chạy trên cổng 8080)
 
 **Lưu ý:**
 *   Lần đầu tiên chạy có thể mất một chút thời gian để tải xuống các image Docker và build ứng dụng.
-*   Các cấu hình nhạy cảm (ví dụ: chuỗi kết nối database, khóa API) được quản lý thông qua các tệp `.env` riêng biệt cho Backend và Frontend, không được commit vào Git. Vui lòng tham khảo `src/backend/.env` và `src/frontend/.env` để biết chi tiết.
+*   Các cấu hình nhạy cảm (ví dụ: chuỗi kết nối database, khóa API) được quản lý thông qua các tệp `.env` riêng biệt cho Backend và Frontend, không được commit vào Git. Vui lòng tham khảo `apps/backend/.env` và `apps/admin/.env` để biết chi tiết.
 
 ### 2.3. Chạy riêng lẻ
 
@@ -76,17 +76,17 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```
     Khi chạy backend ở chế độ Development, hệ thống sẽ tự động áp dụng các migrations và seed dữ liệu mẫu (nếu database trống).
 
-#### Frontend
+#### Admin Frontend
 
-1.  Điều hướng đến thư mục `frontend`:
+1.  Điều hướng đến thư mục `admin`:
     ```bash
-    cd src/frontend
+    cd apps/admin
     ```
 2.  Cài đặt các dependency:
     ```bash
     npm install
     ```
-3.  **Cấu hình Frontend**: Các biến môi trường cho Frontend (ví dụ: API Base URL, cấu hình Auth0) được quản lý thông qua tệp `src/frontend/.env`. Vui lòng tạo và cấu hình tệp này dựa trên các biến môi trường cần thiết.
+3.  **Cấu hình Frontend**: Các biến môi trường cho Frontend (ví dụ: API Base URL, cấu hình Auth0) được quản lý thông qua tệp `apps/admin/.env`. Vui lòng tạo và cấu hình tệp này dựa trên các biến môi trường cần thiết.
 
 4.  Chạy Frontend ở chế độ phát triển:
     ```bash
@@ -102,8 +102,8 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
 # Build Backend
 docker build -t family-tree-backend -f infra/Dockerfile.backend .
 
-# Build Frontend
-docker build -t family-tree-frontend -f infra/Dockerfile.frontend .
+# Build Admin Frontend
+docker build -t family-tree-admin -f infra/Dockerfile.admin .
 ```
 
 ### 3.2. Deploy

@@ -24,14 +24,14 @@ Frontend của ứng dụng Family Tree là giao diện người dùng tương t
 
 1.  **Điều hướng đến thư mục frontend:**
     ```bash
-    cd src/frontend
+    cd apps/admin
     ```
 2.  **Cài đặt các phụ thuộc:**
     ```bash
     npm install
     ```
 3.  **Cấu hình biến môi trường:**
-    Tạo một tệp `.env` trong thư mục `src/frontend` dựa trên `src/frontend/.env.example`. Cấu hình `VITE_APP_API_BASE_URL` trỏ đến địa chỉ backend API của bạn (ví dụ: `http://localhost:5000`).
+    Tạo một tệp `.env` trong thư mục `apps/admin` dựa trên `apps/admin/.env.example`. Cấu hình `VITE_APP_API_BASE_URL` trỏ đến địa chỉ backend API của bạn (ví dụ: `http://localhost:5000`).
 4.  **Chạy ứng dụng:**
     ```bash
     npm run dev
@@ -44,19 +44,19 @@ Frontend của ứng dụng Family Tree là giao diện người dùng tương t
 
 1.  **Điều hướng đến thư mục frontend:**
     ```bash
-    cd src/frontend
+    cd apps/admin
     ```
 2.  **Chạy lệnh build:**
     ```bash
     npm run build
     ```
-    Các tệp tĩnh đã được build sẽ nằm trong thư mục `src/frontend/dist/`.
+    Các tệp tĩnh đã được build sẽ nằm trong thư mục `apps/admin/dist/`.
 
 ## 3. Cấu trúc Thư mục
 
 Dự án frontend được tổ chức một cách rõ ràng để dễ dàng quản lý và mở rộng:
 
-*   **`src/frontend/src/`**:
+*   **`apps/admin/src/`**:
     *   **`assets/`**: Chứa các tài nguyên tĩnh như hình ảnh, font, JSON data.
     *   **`components/`**: Chứa các Vue components có thể tái sử dụng (ví dụ: `buttons`, `cards`, `forms`).
     *   **`constants/`**: Định nghĩa các hằng số của ứng dụng.
@@ -79,7 +79,7 @@ Dự án frontend được tổ chức một cách rõ ràng để dễ dàng qu
 *   Sử dụng ESLint và Prettier để duy trì code style nhất quán. Cấu hình được định nghĩa trong `.eslintrc.cjs` và `.prettierrc.cjs`.
 *   Để kiểm tra và tự động sửa lỗi định dạng:
     ```bash
-    cd src/frontend
+    cd apps/admin
     npm run lint
     npm run lint:fix
     ```
@@ -94,7 +94,7 @@ Tuân thủ Conventional Commits để có các commit message rõ ràng và có
 
 ### 4.3. Import Paths
 
-Luôn sử dụng alias `@/` cho các import trong thư mục `src/frontend/src/` để giữ cho đường dẫn ngắn gọn và dễ đọc. Ví dụ:
+Luôn sử dụng alias `@/` cho các import trong thư mục `apps/admin/src/` để giữ cho đường dẫn ngắn gọn và dễ đọc. Ví dụ:
 
 ```typescript
 import { useAuthStore } from '@/stores/auth.store';
@@ -109,7 +109,7 @@ Dự án frontend sử dụng Vitest để chạy unit tests và kiểm tra đ�
 
 1.  **Điều hướng đến thư mục frontend:**
     ```bash
-    cd src/frontend
+    cd apps/admin
     ```
 2.  **Chạy tất cả các tests:**
     ```bash
@@ -119,14 +119,14 @@ Dự án frontend sử dụng Vitest để chạy unit tests và kiểm tra đ�
     ```bash
     npm run test:coverage
     ```
-    Kết quả độ bao phủ mã sẽ được tạo ra trong thư mục `src/frontend/coverage/`.
+    Kết quả độ bao phủ mã sẽ được tạo ra trong thư mục `apps/admin/coverage/`.
 
 ### 5.2. Hướng dẫn Viết Tests
 
 *   **Framework**: Sử dụng Vitest làm test runner và thư viện testing. Vue Test Utils để mount và tương tác với các Vue components.
-*   **Cấu trúc**: Các tệp test thường được đặt cùng thư mục với tệp mã nguồn hoặc trong thư mục `src/frontend/tests/unit/`.
+*   **Cấu trúc**: Các tệp test thường được đặt cùng thư mục với tệp mã nguồn hoặc trong thư mục `apps/admin/tests/unit/`.
 *   **Mocking**: Sử dụng Vitest's mocking utilities hoặc thư viện như `vi.mock` để mock các dependencies (ví dụ: API services, Pinia stores).
-*   **Tham khảo**: Xem các tệp test hiện có trong `src/frontend/tests/unit/` để hiểu rõ hơn về cách viết test.
+*   **Tham khảo**: Xem các tệp test hiện có trong `apps/admin/tests/unit/` để hiểu rõ hơn về cách viết test.
 
 ## 6. CI/CD
 
@@ -137,7 +137,7 @@ Frontend được tích hợp vào quy trình CI/CD của GitHub Actions thông 
     *   Cài đặt các phụ thuộc (`npm install`).
     *   Chạy linting (`npm run lint`).
     *   Chạy unit tests và kiểm tra độ bao phủ mã (`npm run test:coverage`).
-*   **`docker-build` job**: Sau khi các kiểm tra và test thành công, một Docker image cho frontend sẽ được xây dựng bằng `infra/Dockerfile.frontend` và gắn thẻ `hkthao/family-tree-frontend:latest`.
+*   **`docker-build` job**: Sau khi các kiểm tra và test thành công, một Docker image cho frontend sẽ được xây dựng bằng `infra/Dockerfile.admin` và gắn thẻ `hkthao/family-tree-admin:latest`.
 
 ## 7. Cấu hình Biến môi trường
 

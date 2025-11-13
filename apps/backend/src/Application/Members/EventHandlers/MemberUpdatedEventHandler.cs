@@ -1,0 +1,49 @@
+using backend.Application.Common.Helpers;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
+using backend.Application.UserActivities.Commands.RecordActivity;
+using backend.Domain.Enums;
+using backend.Domain.Events.Members;
+using Microsoft.Extensions.Logging;
+
+namespace backend.Application.Members.EventHandlers;
+
+public class MemberUpdatedEventHandler(ILogger<MemberUpdatedEventHandler> logger, IMediator mediator, ICurrentUser _user, IN8nService n8nService) : INotificationHandler<MemberUpdatedEvent>
+{
+    private readonly ILogger<MemberUpdatedEventHandler> _logger = logger;
+    private readonly IMediator _mediator = mediator;
+    private readonly ICurrentUser _user = _user;
+    private readonly IN8nService _n8nService = n8nService;
+
+    public async Task Handle(MemberUpdatedEvent notification, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Family Tree Domain Event: {DomainEvent}", notification.GetType().Name);
+
+        _logger.LogInformation("Member {MemberName} ({MemberId}) was successfully updated.",
+            notification.Member.FullName, notification.Member.Id);
+
+        // Record activity for member update
+        await _mediator.Send(new RecordActivityCommand
+        {
+            UserId = _user.ProfileId!.Value,
+            ActionType = UserActionType.UpdateMember,
+            TargetType = TargetType.Member,
+            TargetId = notification.Member.Id.ToString(),
+            ActivitySummary = $"Updated member '{notification.Member.FullName}' in family '{notification.Member.FamilyId}'."
+        }, cancellationToken);
+
+        // Publish notification for member update
+
+        // Call n8n webhook for embedding update
+        var (entityData, description) = EmbeddingDescriptionFactory.CreateMemberData(notification.Member);
+        var embeddingDto = new EmbeddingWebhookDto
+        {
+            EntityType = "Member",
+            EntityId = notification.Member.Id.ToString(),
+            ActionType = "Updated",
+            EntityData = entityData,
+            Description = description
+        };
+        await _n8nService.CallEmbeddingWebhookAsync(embeddingDto, cancellationToken);
+    }
+}

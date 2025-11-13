@@ -430,6 +430,7 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 *.tsbuildinfo
+/src/frontend/playwright-report/
 
 # Node.js
 node_modules/
@@ -456,3 +457,7 @@ src/backend/src/Web/appsettings.Development.json
 
 # Gemini task files
 gemini-task/
+.gemini/tmp/
+
+infra/services/face-service/app/models/shape_predictor_68_face_landmarks.dat
+infra/services/face-service/app/models/dlib_face_recognition_resnet_model_v1.dat

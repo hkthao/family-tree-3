@@ -12,6 +12,7 @@
 - [8. Liên kết tài liệu](#8-liên-kết-tài-liệu)
 
 ---
+Dự án được tổ chức theo cấu trúc monorepo, bao gồm các ứng dụng chính (backend, frontend admin) và các dịch vụ phụ trợ (face-service), cùng với các gói chia sẻ (shared-types). Cấu trúc này giúp quản lý mã nguồn hiệu quả và tái sử dụng các thành phần.
 
 ## 1. Sơ đồ ngữ cảnh (Context Diagram - C1)
 
@@ -24,7 +25,7 @@ graph TD
 ```
 
 -   **Người dùng**: Người quản lý gia phả, thành viên gia đình.
--   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta.
+-   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta, hỗ trợ đa ngôn ngữ (tiếng Việt, tiếng Anh).
 -   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu của hệ thống.
 
 ## 2. Sơ đồ container (Container Diagram - C2)
@@ -85,7 +86,7 @@ graph TD
         C -->|Tương tác| D(IApplicationDbContext)
         C -->|Sử dụng| E(IFileTextExtractorFactory)
         C -->|Sử dụng| F(ChunkingPolicy)
-        C -->|Sử dụng| UP(IUserPreferenceService)
+        C -->|Sử dụng| UP(ICurrentUserPreferenceService)
         C -->|Sử dụng| AI(AI Service)
     end
 
@@ -119,7 +120,7 @@ graph TD
 -   **IFileTextExtractorFactory**: Interface trong Application Layer để lấy đúng trình trích xuất văn bản.
 -   **PdfTextExtractor/TxtTextExtractor**: Triển khai cụ thể của `IFileTextExtractor` trong Infrastructure Layer để trích xuất văn bản từ PDF/TXT.
 -   **ChunkingPolicy**: Domain Service chứa logic làm sạch và chia nhỏ văn bản thành các chunk.
--   **IUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
+-   **ICurrentUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
 
 ## 4.1. Kiến trúc AI (AI Architecture)
 
@@ -211,7 +212,7 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 #### Cấu hình JWT
 
 *   **Cấu hình Backend**: 
-    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong tệp `src/backend/.env`.
+    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong tệp `apps/backend/src/Web/appsettings.json` (hoặc `appsettings.Development.json` trong môi trường phát triển).
 *   **Cấu hình Frontend**: 
     *   Frontend đọc cấu hình JWT từ các biến môi trường trong tệp `src/frontend/.env`.
 *   **Cấu hình nhà cung cấp JWT (ví dụ: Auth0 Dashboard)**: 
@@ -220,7 +221,7 @@ Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cun
 
 #### Khả năng thay thế
 
-Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài. Thông tin người dùng hiện tại được truy cập thông qua interface `IUser`.
+Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài. Thông tin người dùng hiện tại được truy cập thông qua interface `ICurrentUser`.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 
@@ -232,5 +233,3 @@ Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng c
 ## 8. Liên kết tài liệu
 
 -   [Tham chiếu API](./api-reference.md)
--   [Product Backlog](../project/backlog.md)
--   [Hướng dẫn Kiểm thử](./testing-guide.md)

@@ -1,0 +1,14 @@
+{
+  "name": "family-tree-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for Family Tree project",
+  "scripts": {
+    "dev:admin": "npm run dev --prefix apps/admin",
+    "dev": "npm run dev:admin",
+    "install-all": "npm install --prefix apps/admin"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
