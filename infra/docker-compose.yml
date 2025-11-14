@@ -1,6 +1,7 @@
 services:
   mysql:
     image: mysql:8.0
+    platform: linux/amd64
     container_name: family-tree-mysql
     ports:
       - "3306:3306"
@@ -17,10 +18,8 @@ services:
     container_name: family-tree-backend
     ports:
       - "8080:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
     env_file:
-      - ./.env
+      - ../apps/backend/.env
     depends_on:
       - mysql
     volumes:
@@ -33,8 +32,7 @@ services:
     container_name: family-tree-admin
     ports:
       - "8081:80"
-    env_file:
-      - ./.env
+
     environment:
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
       - VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
@@ -61,6 +59,7 @@ services:
     mem_limit: 4g # Increase memory limit
   n8n:
     image: n8nio/n8n
+    platform: linux/amd64
     container_name: family-tree-n8n
     ports:
       - "5678:5678"

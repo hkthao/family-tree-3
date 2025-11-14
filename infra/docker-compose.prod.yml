@@ -5,7 +5,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./apps/admin/infra/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/certs:/etc/letsencrypt # Mount for Certbot certificates
       - ./apps/admin/dist:/var/www/certbot # Mount for Certbot webroot challenge
     networks:
@@ -40,6 +40,7 @@ services:
 
   backend:
     image: hkthao/family-tree-backend:latest
+    platform: linux/amd64
     container_name: family-tree-backend-prod
     env_file:
       - ./.env
@@ -69,7 +70,6 @@ services:
       - USE_IN_MEMORY_DATABASE=${USE_IN_MEMORY_DATABASE}
       - N8N_SETTINGS_CHAT_WEBHOOK_URL=${N8N_SETTINGS_CHAT_WEBHOOK_URL}
       - N8N_SETTINGS_EMBEDDING_WEBHOOK_URL=${N8N_SETTINGS_EMBEDDING_WEBHOOK_URL}
-      - N8N_SETTINGS_OLLAMA_MODEL=${N8N_SETTINGS_OLLAMA_MODEL}
     depends_on:
       - mysql
     volumes:
@@ -100,6 +100,7 @@ services:
 
   face-service:
     image: hkthao/family-tree-face-service:latest
+    platform: linux/amd64
     container_name: family-tree-face-service-prod
     env_file:
       - ./.env
