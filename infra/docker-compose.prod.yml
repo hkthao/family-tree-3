@@ -80,7 +80,7 @@ services:
 
   admin:
     build:
-      context: ./apps/admin
+      context: ../apps/admin
       dockerfile: Dockerfile
     container_name: family-tree-admin-prod
     environment:
