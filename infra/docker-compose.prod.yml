@@ -39,9 +39,9 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
+      timeout: 60s
       retries: 10
-      start_period: 30s
+      start_period: 60s
 
   backend:
     image: hkthao/family-tree-backend:latest
@@ -50,7 +50,8 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     volumes:
       - backend-dataprotection-keys:/root/.aspnet/DataProtection-Keys
     networks:

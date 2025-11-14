@@ -16,14 +16,14 @@ WORKDIR /usr/share/nginx/html
 RUN apk add --no-cache gettext
 
 # Copy custom Nginx config
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy entrypoint
-COPY infra/entrypoint.sh /entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Copy config template BEFORE build assets
-COPY infra/config.template.js ./config.template.js
+COPY public/config.template.js ./config.template.js
 
 # Copy FE build output
 COPY --from=build /app/dist .

@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
