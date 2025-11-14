@@ -1,0 +1,56 @@
+name: CD Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-admin:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Deploy Admin to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          docker compose -f infra/docker-compose.prod.yml up -d --no-deps admin
+          echo "Admin deployment completed successfully!"
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Deploy Backend to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          docker compose -f infra/docker-compose.prod.yml up -d --no-deps backend
+          echo "Backend deployment completed successfully!"
+
+  deploy-face-service:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Deploy Face Service to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd ${{ secrets.DEPLOY_PATH }}
+          docker compose -f infra/docker-compose.prod.yml up -d --no-deps face-service
+          echo "Face Service deployment completed successfully!"

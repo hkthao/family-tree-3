@@ -5,7 +5,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./apps/admin/infra/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/certs:/etc/letsencrypt # Mount for Certbot certificates
       - ./apps/admin/dist:/var/www/certbot # Mount for Certbot webroot challenge
     networks:
@@ -81,7 +81,7 @@ services:
   admin:
     build:
       context: ./apps/admin
-      dockerfile: ../../infra/Dockerfile.admin
+      dockerfile: Dockerfile
     container_name: family-tree-admin-prod
     environment:
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
@@ -94,8 +94,6 @@ services:
       - VITE_APP_COMMIT_ID=${VITE_APP_COMMIT_ID}
     depends_on:
       - backend
-    volumes:
-      - ./apps/admin/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - app-network
     restart: unless-stopped
