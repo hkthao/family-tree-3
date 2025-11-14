@@ -14,13 +14,13 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
 {
     public class SaveFaceLabelsCommandHandlerTests : TestBase
     {
-        private readonly Mock<IConfigProvider> _configProviderMock;
+
         private readonly Mock<ILogger<SaveFaceLabelsCommandHandler>> _loggerMock;
         private readonly Mock<IN8nService> _n8nServiceMock;
 
         public SaveFaceLabelsCommandHandlerTests()
         {
-            _configProviderMock = new Mock<IConfigProvider>();
+
             _loggerMock = new Mock<ILogger<SaveFaceLabelsCommandHandler>>();
             _n8nServiceMock = new Mock<IN8nService>();
         }

@@ -2,16 +2,17 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Application.Files.Queries.GetUploadedFile;
 
-public class GetUploadedFileQueryHandler(IConfigProvider configProvider) : IRequestHandler<GetUploadedFileQuery, Result<FileContentDto>>
+public class GetUploadedFileQueryHandler(IConfiguration configuration) : IRequestHandler<GetUploadedFileQuery, Result<FileContentDto>>
 {
-    private readonly IConfigProvider _configProvider = configProvider;
+    private readonly IConfiguration _configuration = configuration;
 
     public Task<Result<FileContentDto>> Handle(GetUploadedFileQuery request, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         // Sanitize fileName to prevent path traversal
         var sanitizedFileName = Path.GetFileName(request.FileName);
         var filePath = Path.Combine(storageSettings.Local.LocalStoragePath, sanitizedFileName);

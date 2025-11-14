@@ -1,16 +1,17 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Infrastructure.Files;
 
-public class LocalFileStorage(IConfigProvider configProvider) : IFileStorage
+public class LocalFileStorage(IConfiguration configuration) : IFileStorage
 {
-    private readonly IConfigProvider _configProvider = configProvider;
+    private readonly IConfiguration _configuration = configuration;
 
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         try
         {
             var uploadPath = Path.Combine(storageSettings.Local.LocalStoragePath);
@@ -37,7 +38,7 @@ public class LocalFileStorage(IConfigProvider configProvider) : IFileStorage
 
     public Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         try
         {
             // Extract file name from the URL

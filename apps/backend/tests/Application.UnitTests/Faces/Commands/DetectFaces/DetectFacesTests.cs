@@ -21,7 +21,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
 public class DetectFacesTests : TestBase
 {
     private readonly Mock<IFaceApiService> _mockFaceApiService;
-    private readonly Mock<IConfigProvider> _mockConfigProvider;
+
     private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
     private readonly Mock<IN8nService> _mockN8nService;
     private readonly DetectFacesCommandHandler _handler;
@@ -29,13 +29,13 @@ public class DetectFacesTests : TestBase
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
-        _mockConfigProvider = new Mock<IConfigProvider>();
+
         _mockN8nService = new Mock<IN8nService>();
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
         _handler = new DetectFacesCommandHandler(
             _mockFaceApiService.Object,
             _context,
-            _mockConfigProvider.Object,
+
             _mockLogger.Object, // Passed ListLogger directly
             _mockN8nService.Object);
     }

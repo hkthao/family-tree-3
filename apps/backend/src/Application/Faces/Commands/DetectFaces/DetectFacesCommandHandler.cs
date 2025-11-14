@@ -7,11 +7,10 @@ using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Faces.Commands.DetectFaces;
 
-public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, IConfigProvider configProvider, ILogger<DetectFacesCommandHandler> logger, IN8nService n8nService) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
+public class DetectFacesCommandHandler(IFaceApiService faceApiService, IApplicationDbContext context, ILogger<DetectFacesCommandHandler> logger, IN8nService n8nService) : IRequestHandler<DetectFacesCommand, Result<FaceDetectionResponseDto>>
 {
     private readonly IFaceApiService _faceApiService = faceApiService;
     private readonly IApplicationDbContext _context = context;
-    private readonly IConfigProvider _configProvider = configProvider;
     private readonly ILogger<DetectFacesCommandHandler> _logger = logger;
     private readonly IN8nService _n8nService = n8nService;
 

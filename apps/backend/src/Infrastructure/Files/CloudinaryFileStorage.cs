@@ -3,18 +3,19 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Infrastructure.Files;
 
 public class CloudinaryFileStorage : IFileStorage
 {
     private readonly Cloudinary _cloudinary;
-    private readonly IConfigProvider _configProvider;
+    private readonly IConfiguration _configuration;
 
-    public CloudinaryFileStorage(IConfigProvider configProvider)
+    public CloudinaryFileStorage(IConfiguration configuration)
     {
-        _configProvider = configProvider;
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        _configuration = configuration;
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         var account = new Account(
             storageSettings.Cloudinary.CloudName,
             storageSettings.Cloudinary.ApiKey,
@@ -23,7 +24,7 @@ public class CloudinaryFileStorage : IFileStorage
     }
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
-        _ = _configProvider.GetSection<StorageSettings>();
+        _ = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         try
         {
             var resourceType = GetResourceType(contentType);

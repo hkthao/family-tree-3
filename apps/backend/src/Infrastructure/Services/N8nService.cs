@@ -5,6 +5,7 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Models.AI;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Infrastructure.Services;
 
@@ -14,20 +15,20 @@ namespace backend.Infrastructure.Services;
 public class N8nService : IN8nService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfigProvider _configProvider;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<N8nService> _logger;
 
-    public N8nService(IHttpClientFactory httpClientFactory, IConfigProvider configProvider, ILogger<N8nService> logger)
+    public N8nService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<N8nService> logger)
     {
         _httpClientFactory = httpClientFactory;
-        _configProvider = configProvider;
+        _configuration = configuration;
         _logger = logger;
     }
 
     /// <inheritdoc />
     public async Task<Result<string>> CallChatWebhookAsync(string sessionId, string message, CancellationToken cancellationToken)
     {
-        var n8nSettings = _configProvider.GetSection<N8nSettings>();
+        var n8nSettings = _configuration.GetSection(nameof(N8nSettings)).Get<N8nSettings>() ?? new N8nSettings();
         if (string.IsNullOrEmpty(n8nSettings.ChatWebhookUrl) || n8nSettings.ChatWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
             _logger.LogWarning("n8n chat webhook URL is not configured.");
@@ -107,7 +108,7 @@ public class N8nService : IN8nService
     /// <inheritdoc />
     public async Task<Result<string>> CallEmbeddingWebhookAsync(EmbeddingWebhookDto dto, CancellationToken cancellationToken)
     {
-        var n8nSettings = _configProvider.GetSection<N8nSettings>();
+        var n8nSettings = _configuration.GetSection(nameof(N8nSettings)).Get<N8nSettings>() ?? new N8nSettings();
         if (string.IsNullOrEmpty(n8nSettings.EmbeddingWebhookUrl) || n8nSettings.EmbeddingWebhookUrl == "YOUR_N8N_WEBHOOK_URL_HERE")
         {
             _logger.LogWarning("n8n embedding webhook URL is not configured.");

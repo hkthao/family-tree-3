@@ -2,20 +2,21 @@ using System.Security.Claims;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Auth
 {
-    public class Auth0ClaimsTransformer(IConfigProvider configProvider, ILogger<Auth0ClaimsTransformer> logger) : IClaimsTransformation
+    public class Auth0ClaimsTransformer(IConfiguration configuration, ILogger<Auth0ClaimsTransformer> logger) : IClaimsTransformation
     {
-        private readonly IConfigProvider _configProvider = configProvider;
+        private readonly IConfiguration _configuration = configuration;
         private readonly ILogger<Auth0ClaimsTransformer> _logger = logger;
 
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             _logger.LogInformation("IClaimsTransformation running for user");
             var identity = (ClaimsIdentity)principal.Identity!;
-            var authConfig = _configProvider.GetSection<JwtSettings>();
+            var authConfig = _configuration.GetSection(nameof(JwtSettings)).Get<JwtSettings>() ?? new JwtSettings();
             _logger.LogInformation("IClaimsTransformation Namespace {Namespace}", authConfig.Namespace);
             // Map Auth0 claims to standard .NET Core claims
             // Example: Map 'name' claim from Auth0 to ClaimTypes.Name

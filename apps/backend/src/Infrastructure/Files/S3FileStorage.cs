@@ -3,18 +3,19 @@ using Amazon.S3.Model;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Infrastructure.Files;
 
 public class S3FileStorage : IFileStorage
 {
     private readonly IAmazonS3 _s3Client;
-    private readonly IConfigProvider _configProvider;
+    private readonly IConfiguration _configuration;
 
-    public S3FileStorage(IConfigProvider configProvider)
+    public S3FileStorage(IConfiguration configuration)
     {
-        _configProvider = configProvider;
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        _configuration = configuration;
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         _s3Client = new AmazonS3Client(
             storageSettings.S3.AccessKey,
             storageSettings.S3.SecretKey,
@@ -22,7 +23,7 @@ public class S3FileStorage : IFileStorage
     }
     public async Task<Result<string>> UploadFileAsync(Stream fileStream, string fileName, string contentType, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         try
         {
             var putObjectRequest = new PutObjectRequest
@@ -48,7 +49,7 @@ public class S3FileStorage : IFileStorage
 
     public async Task<Result> DeleteFileAsync(string url, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         try
         {
             // Extract file name from the URL
