@@ -784,6 +784,7 @@
   "naturalLanguage.editor.parseButton": "Phân tích",
   "naturalLanguage.editor.wordCount": "Số từ",
   "naturalLanguage.editor.characterCount": "Số ký tự",
+  "naturalLanguage.editor.clear": "Xóa",
   "naturalLanguage.editor.initialContent": "Nguyễn Văn A sinh năm 1950, mất năm 2020.\\nÔng là cha của Nguyễn Thị B và Nguyễn Văn C.  \\nNguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D.  \\nHọ có một người con tên là Trần Thị E.  \\nNguyễn Văn C sinh năm 1980, chưa kết hôn.",
   "naturalLanguage.editor.parsedResultTitle": "Kết quả phân tích",
   "naturalLanguage.editor.parsedMembers": "Các thành viên được phân tích",

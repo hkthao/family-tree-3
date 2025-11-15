@@ -646,6 +646,7 @@
   "naturalLanguage.editor.parseButton": "Parse",
   "naturalLanguage.editor.wordCount": "Word Count",
   "naturalLanguage.editor.characterCount": "Character Count",
+  "naturalLanguage.editor.clear": "Clear",
   "aiInput.promptLabelFamily": "Prompt for Family Data",
   "aiInput.family": "Family",
   "aiInput.promptLabelEvent": "Prompt for Event Data",

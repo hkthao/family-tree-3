@@ -78,6 +78,8 @@
         {{ t('naturalLanguage.editor.characterCount') }}: {{ characterCount }} / 2000
       </span>
       <v-spacer></v-spacer>
+      <v-btn color="primary" @click="clearEditor" :loading="loading" :disabled="loading">{{
+        t('naturalLanguage.editor.clear') }}</v-btn>
       <v-btn color="primary" @click="emitContent" :loading="loading" :disabled="loading">{{
         t('naturalLanguage.editor.parseButton') }}</v-btn>
     </v-card-actions>
@@ -200,6 +202,10 @@ const emitContent = () => {
   emit('parse-content', content);
 };
 
+const clearEditor = () => {
+  editor.value?.commands.setContent('<p></p>');
+};
+
 onBeforeUnmount(() => {
   editor.value?.destroy();
 });
@@ -212,6 +218,8 @@ onBeforeUnmount(() => {
 
   .tiptap-editor-content {
     min-height: 120px;
+    max-height: 320px; /* Limit height to 320px */
+    overflow-y: auto; /* Enable vertical scrolling */
     padding: 12px;
     font-size: medium;
   }
