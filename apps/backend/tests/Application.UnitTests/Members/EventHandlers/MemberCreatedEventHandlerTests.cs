@@ -6,6 +6,7 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
+using MediatR;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -47,7 +48,7 @@ public class MemberCreatedEventHandlerTests
         _localizerMock.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()])
             .Returns((string key, object[] args) => new LocalizedString(key, string.Format(key, args)));
 
-        var family = new Family("Test Family", userId);
+        var family = new Family { Id = Guid.NewGuid(), Name = "Test Family" };
         _contextMock.Setup(c => c.Families.FindAsync(It.IsAny<object[]>(), CancellationToken.None))
             .ReturnsAsync(family);
 
@@ -57,7 +58,7 @@ public class MemberCreatedEventHandlerTests
         // Assert
         _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd =>
             cmd.ActionType == UserActionType.CreateMember &&
-            cmd.ActivitySummary == _localizer["Created member '{0}' in family '{1}'", member.FullName, family.Name].Value
+            cmd.ActivitySummary == _localizerMock.Object["Created member '{0}' in family '{1}'", member.FullName, family.Name].Value
         ), CancellationToken.None), Times.Once);
         _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
