@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Localization;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
@@ -13,12 +14,14 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 public class UpdateMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly Mock<IStringLocalizer<UpdateMemberCommandHandler>> _localizerMock;
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object);
+        _localizerMock = new Mock<IStringLocalizer<UpdateMemberCommandHandler>>();
+        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
     }
 
     [Fact]

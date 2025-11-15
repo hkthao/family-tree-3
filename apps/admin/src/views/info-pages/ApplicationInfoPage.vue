@@ -49,64 +49,7 @@
         </v-card>
       </v-col>
     </v-row>
-
-    <v-row class="mt-6">
-      <v-col cols="12">
-        <v-card class="h-100" flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('about.donate.title') }}</v-card-title>
-          <v-card-text>
-            <p class="text-body-1 mb-4">
-              {{ $t('about.donate.description') }}
-            </p>
-            <p class="text-body-1 mb-4">
-              {{ $t('about.donate.reason') }}
-            </p>
-            <v-row>
-              <v-col cols="12" md="6">
-                <v-card flat>
-                  <v-card-title class="text-h6 text-center">{{ $t('donate.buyMeACoffee') }}</v-card-title>
-                  <v-card-text class="text-center">
-                    <v-img
-                      src="/bmc_qr.png"
-                      alt="Buy Me A Coffee QR Code"
-                      max-width="200"
-                      height="200"
-                      class="mx-auto mb-4"
-                      rounded="lg"
-                    ></v-img>
-                    <a href="https://www.buymeacoffee.com/thaohk90e" target="_blank">
-                      https://www.buymeacoffee.com/thaohk90e
-                    </a>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-
-              <v-col cols="12" md="6">
-                <v-card flat>
-                  <v-card-title class="text-h6 text-center">{{ $t('donate.momo') }}</v-card-title>
-                  <v-card-text class="text-center">
-                    <v-img
-                      src="/momo.jpg"
-                      alt="MoMo QR Code"
-                      max-width="200"
-                      height="200"
-                      class="mx-auto mb-4"
-                      rounded="lg"
-                      cover
-                    ></v-img>
-                    <p>0946351139</p>
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-            <p class="text-body-1 mt-4">
-              {{ $t('about.donate.thankYou') }}
-            </p>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-
+    <DonateSection />
     <v-row class="mt-3">
       <v-col cols="12" md="6">
         <v-card class="h-100" flat>
@@ -141,7 +84,8 @@
           <v-card-title class="text-h6 text-secondary">{{ $t('about.contact.title') }}</v-card-title>
           <v-card-text>
             <p class="text-body-1">
-              {{ $t('about.contact.description') }} <router-link to="/help">{{ $t('about.contact.helpPageLink') }}</router-link>
+              {{ $t('about.contact.description') }} <router-link to="/help">{{ $t('about.contact.helpPageLink')
+                }}</router-link>
               {{ $t('common.or') }} {{ $t('about.contact.supportTeam') }}.
             </p>
           </v-card-text>
@@ -162,7 +106,7 @@
     </v-row>
 
     <v-row class="mt-3">
-      <v-col cols="12" md="6">
+      <v-col cols="12">
         <v-card class="h-100" flat>
           <v-card-title class="text-h6 text-secondary">{{ $t('version.currentVersion.title') }}</v-card-title>
           <v-card-text>
@@ -195,31 +139,6 @@
           </v-card-text>
         </v-card>
       </v-col>
-
-      <v-col cols="12" md="6">
-        <v-card class="h-100" flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('version.changelog.title') }}</v-card-title>
-          <v-card-text>
-            <p class="text-body-1">
-              {{ $t('version.changelog.summary') }}
-            </p>
-            <v-list density="compact">
-              <v-list-item prepend-icon="mdi-new-box">
-                <v-list-item-title>{{ $t('version.changelog.feature1') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-bug">
-                <v-list-item-title>{{ $t('version.changelog.bugfix1') }}</v-list-item-title>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-palette-outline">
-                <v-list-item-title>{{ $t('version.changelog.enhancement1') }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-            <v-btn variant="text" color="primary" class="mt-4" href="#" target="_blank">
-              {{ $t('version.changelog.viewFull') }} <v-icon right>mdi-open-in-new</v-icon>
-            </v-btn>
-          </v-card-text>
-        </v-card>
-      </v-col>
     </v-row>
   </v-container>
 </template>
@@ -228,6 +147,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios'; // Assuming axios is available for API calls
 import packageJson from '../../../package.json'; // To get frontend version
+import DonateSection from '@/components/common/DonateSection.vue';
 
 const frontendVersion = ref('N/A');
 const backendVersion = ref('N/A');
