@@ -83,6 +83,7 @@ public class Startup
         services.AddWebServices();
 
         services.AddControllers();
+        services.AddLocalization();
         services.AddCors(options => options.AddPolicy("AllowFrontend",
             policyBuilder =>
             {
@@ -147,6 +148,14 @@ public class Startup
         });
 
         app.UseRouting();
+
+        var supportedCultures = new[] { "en-US", "vi-VN" };
+        var localizationOptions = new RequestLocalizationOptions()
+            .SetDefaultCulture(supportedCultures[0])
+            .AddSupportedCultures(supportedCultures)
+            .AddSupportedUICultures(supportedCultures);
+
+        app.UseRequestLocalization(localizationOptions);
 
         app.UseAuthentication();
         app.UseMiddleware<EnsureUserExistsMiddleware>();
