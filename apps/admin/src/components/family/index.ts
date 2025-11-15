@@ -6,3 +6,4 @@ export { default as TreeChart } from './TreeChart.vue';
 export { default as HierarchicalFamilyTree } from './HierarchicalFamilyTree.vue';
 
 export { default as FamilyDetail } from './FamilyDetail.vue';
+export { default as FamilySettingsTab } from './FamilySettingsTab.vue';

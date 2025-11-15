@@ -12,3 +12,4 @@ export * from './ai.d';
 export * from './auth.d';
 export * from './user.d';
 export * from './chat.d';
+export * from './api-error.d';

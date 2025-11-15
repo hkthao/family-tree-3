@@ -3,6 +3,7 @@ using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Families;
 using backend.Application.Families.Dtos; // New using statement
+using backend.Application.Families.ExportImport; // New using statement
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Identity.UserProfiles.Queries;
@@ -64,5 +65,15 @@ public class MappingProfile : Profile
         CreateMap<User, UserDto>();
         CreateMap<FamilyUser, FamilyUserDto>() // New mapping
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
+
+        // Export/Import DTOs
+        CreateMap<Family, FamilyExportDto>()
+            .ForMember(dest => dest.Members, opt => opt.MapFrom(src => src.Members))
+            .ForMember(dest => dest.Relationships, opt => opt.MapFrom(src => src.Relationships))
+            .ForMember(dest => dest.Events, opt => opt.MapFrom(src => src.Events));
+        CreateMap<Member, MemberExportDto>();
+        CreateMap<Relationship, RelationshipExportDto>();
+        CreateMap<Event, EventExportDto>()
+            .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
     }
 }

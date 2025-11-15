@@ -26,6 +26,8 @@ import type { IUserService } from './user/user.service.interface';
 import { ApiUserService } from './user/api.user.service';
 import type { INaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service interface
 import { ApiNaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service implementation
+import type { IFamilyDataService } from './family-data/family-data.service.interface';
+import { ApiFamilyDataService } from './family-data/api.family-data.service';
 
 
 export type ServiceMode = 'real' | 'test';
@@ -45,6 +47,7 @@ export interface AppServices {
   face: IFaceService;
   user: IUserService;
   naturalLanguage: INaturalLanguageService; // Add new service to interface
+  familyData: IFamilyDataService;
 
 }
 
@@ -109,6 +112,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiNaturalLanguageService(apiClient)
         : testServices?.naturalLanguage || new ApiNaturalLanguageService(apiClient),
+    familyData:
+      mode === 'real'
+        ? new ApiFamilyDataService(apiClient)
+        : testServices?.familyData || new ApiFamilyDataService(apiClient),
 
   };
 }

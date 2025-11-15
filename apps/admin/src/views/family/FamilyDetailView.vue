@@ -8,6 +8,7 @@
         <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
         <v-tab value="members" data-testid="tab-members">{{ t('family.members.title') }}</v-tab>
         <v-tab v-if="canViewFaceDataTab" value="face-recognition" data-testid="tab-face-recognition">{{ t('face.face_data') }}</v-tab>
+        <v-tab v-if="canManageFamily" value="family-settings" data-testid="tab-family-settings">{{ t('family.settings.title') }}</v-tab>
       </v-tabs>
 
       <v-window v-model="selectedTab">
@@ -34,6 +35,10 @@
         <v-window-item v-if="canViewFaceDataTab" value="face-recognition">
           <FaceRecognitionView :family-id="familyId" />
         </v-window-item>
+
+        <v-window-item v-if="canManageFamily" value="family-settings">
+          <FamilySettingsTab :family-id="familyId" />
+        </v-window-item>
       </v-window>
     </v-card-text>
   </v-card>
@@ -43,7 +48,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
-import { TreeChart, FamilyDetail } from '@/components/family';
+import { TreeChart, FamilyDetail, FamilySettingsTab } from '@/components/family';
 import { EventTimeline, EventCalendar } from '@/components/event';
 import MemberListView from '@/views/member/MemberListView.vue';
 import FaceRecognitionView from '@/views/face/FaceRecognitionView.vue';
@@ -58,6 +63,10 @@ const readOnly = ref(true);
 const familyId = computed(() => route.params.id as string);
 
 const canViewFaceDataTab = computed(() => {
+  return isAdmin.value || isFamilyManager.value;
+});
+
+const canManageFamily = computed(() => {
   return isAdmin.value || isFamilyManager.value;
 });
 onMounted(() => {
