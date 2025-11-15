@@ -190,6 +190,8 @@
   "family.management.headers.totalGenerations": "Total Generations",
   "family.management.headers.visibility": "Visibility",
   "family.management.headers.actions": "Actions",
+  "family.management.headers.totalMembers": "Total Members",
+  "family.management.headers.totalGenerations": "Total Generations",
   "family.management.messages.updateSuccess": "Family updated successfully!",
   "family.management.messages.addSuccess": "Family added successfully!",
   "family.management.messages.saveError": "Error saving family.",

@@ -217,6 +217,8 @@
   "family.management.headers.totalGenerations": "Tổng số thế hệ",
   "family.management.headers.visibility": "Chế độ",
   "family.management.headers.actions": "Hành động",
+  "family.management.headers.totalMembers": "Tổng số thành viên",
+  "family.management.headers.totalGenerations": "Tổng số thế hệ",
   "family.list.action.edit": "Chỉnh sửa gia đình",
   "family.list.action.delete": "Xóa gia đình",
   "family.list.action.create": "Thêm mới gia đình",
