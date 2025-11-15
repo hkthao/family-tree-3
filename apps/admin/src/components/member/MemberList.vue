@@ -212,27 +212,27 @@ const headers = computed<DataTableHeader[]>(() => {
     {
       title: t('member.list.headers.fullName'),
       key: 'fullName',
-      width: 'auto',
+      width: '250px',
       align: 'start',
     },
     {
       title: t('member.form.father'),
       key: 'father',
-      width: '120px',
+      width: '250px',
       align: 'start',
       sortable: false,
     },
     {
       title: t('member.form.mother'),
       key: 'mother',
-      width: '120px',
+      width: '250px',
       align: 'start',
       sortable: false,
     },
     {
       title: t('member.form.spouse'),
       key: 'spouse',
-      width: '120px',
+      width: '250px',
       align: 'start',
       sortable: false,
     },
@@ -262,7 +262,8 @@ const headers = computed<DataTableHeader[]>(() => {
       key: 'actions',
       sortable: false,
       width: '180px',
-      align: 'center',
+      align: 'end',
+      fixed: true,
     });
   }
   return baseHeaders;
