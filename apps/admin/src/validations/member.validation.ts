@@ -20,6 +20,7 @@ export function useMemberRules(state: { [key: string]: Ref<any> }) {
       dateOfBirth: { required: helpers.withMessage(() => t('common.validations.required'), required) },
       familyId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
       dateOfDeath: { dateOfDeathAfterBirth: helpers.withMessage(() => t('validation.dateOfDeathAfterBirth'), dateOfDeathAfterBirth) },
+      order: { minValue: helpers.withMessage(() => t('common.validations.positiveNumber'), (value: number | null) => value === null || value > 0) },
     };
   });
 

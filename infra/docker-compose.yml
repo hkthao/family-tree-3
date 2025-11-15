@@ -5,9 +5,8 @@ services:
     container_name: family-tree-mysql
     ports:
       - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} # You should change this in a production environment
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    env_file:
+      - ./.env.dev
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
@@ -24,7 +23,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - ../apps/backend/.env
+      - ./.env.dev
     depends_on:
       - mysql
     volumes:
@@ -37,16 +36,8 @@ services:
     container_name: family-tree-admin
     ports:
       - "8081:80"
-
-    environment:
-      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
-      - VITE_AUTH0_DOMAIN=${VITE_AUTH0_DOMAIN}
-      - VITE_AUTH0_CLIENT_ID=${VITE_AUTH0_CLIENT_ID}
-      - VITE_AUTH0_AUDIENCE=${VITE_AUTH0_AUDIENCE}
-      - VITE_NOVU_APPLICATION_IDENTIFIER=${VITE_NOVU_APPLICATION_IDENTIFIER}
-      - VITE_APP_BUILD_DATE=${VITE_APP_BUILD_DATE}
-      - VITE_APP_ENVIRONMENT=${VITE_APP_ENVIRONMENT}
-      - VITE_APP_COMMIT_ID=${VITE_APP_COMMIT_ID}
+    env_file:
+      - ./.env.dev
     depends_on:
       - backend
 
@@ -62,22 +53,7 @@ services:
       - DLIB_PREDICTOR_PATH=app/models/shape_predictor_68_face_landmarks.dat
       - DLIB_ENCODER_PATH=app/models/dlib_face_recognition_resnet_model_v1.dat
     mem_limit: 4g # Increase memory limit
-  n8n:
-    image: n8nio/n8n
-    platform: linux/amd64
-    container_name: family-tree-n8n
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://localhost:5678/
-      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
-    volumes:
-      - n8n-data:/home/node/.n8n
-
+ 
 volumes:
   mysql-data:
   backend-dataprotection-keys:
-  n8n-data:

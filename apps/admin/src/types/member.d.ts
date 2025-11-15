@@ -31,6 +31,7 @@ export interface Member {
   motherId?: string; // New: ID of the mother
   husbandId?: string; // New: ID of the husband
   wifeId?: string; // New: ID of the wife
+  order?: number; // New: Order of the member in the family
 }
 
 export interface MemberFilter {

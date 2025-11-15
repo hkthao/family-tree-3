@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using backend.Infrastructure.Data.Interceptors;
 using Microsoft.Extensions.Logging;
+using MediatR;
 
 namespace backend.Infrastructure.Data
 {
@@ -21,6 +22,7 @@ namespace backend.Infrastructure.Data
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
+                .AddUserSecrets("backend.Web")
                 .Build();
 
             var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -38,6 +40,7 @@ namespace backend.Infrastructure.Data
             services.AddScoped<AuditableEntitySaveChangesInterceptor>();
             services.AddScoped<ICurrentUser, DesignTimeUserService>();
             services.AddScoped<IDateTime, DesignTimeDateTimeService>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationDbContext).Assembly));
 
             services.AddDbContext<ApplicationDbContext>((sp, options) =>
             {
