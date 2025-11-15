@@ -45,11 +45,24 @@
       <a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
       </a>
+      <div class="text-caption text-medium-emphasis">
+        {{ item.code }}
+      </div>
     </template>
 
-    <!-- Code column -->
-    <template #item.code="{ item }">
-      {{ item.code }}
+    <!-- Father column -->
+    <template #item.father="{ item }">
+      <MemberName :member-id="item.fatherId" />
+    </template>
+
+    <!-- Mother column -->
+    <template #item.mother="{ item }">
+      <MemberName :member-id="item.motherId" />
+    </template>
+
+    <!-- Spouse column -->
+    <template #item.spouse="{ item }">
+      <MemberName :member-id="item.spouseId" />
     </template>
 
     <!-- Family column -->
@@ -110,7 +123,10 @@ import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
+import { useMemberStore } from '@/stores/member.store';
+import type { IMemberService } from '@/services/member/member.service.interface';
 import { ChipLookup } from '@/components/common';
+import { MemberName } from '@/components/member';
 import { getGenderTitle } from '@/constants/genders';
 import { useAuth } from '@/composables/useAuth';
 import maleAvatar from '@/assets/images/male_avatar.png';
@@ -200,10 +216,25 @@ const headers = computed<DataTableHeader[]>(() => {
       align: 'start',
     },
     {
-      title: t('member.list.headers.code'),
-      key: 'code',
+      title: t('member.form.father'),
+      key: 'father',
       width: '120px',
       align: 'start',
+      sortable: false,
+    },
+    {
+      title: t('member.form.mother'),
+      key: 'mother',
+      width: '120px',
+      align: 'start',
+      sortable: false,
+    },
+    {
+      title: t('member.form.spouse'),
+      key: 'spouse',
+      width: '120px',
+      align: 'start',
+      sortable: false,
     },
     {
       title: t('member.list.headers.family'),
