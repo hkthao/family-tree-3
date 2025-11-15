@@ -11,6 +11,13 @@
       </v-btn>
     </v-btn-toggle>
     <v-spacer></v-spacer>
+    <v-tooltip :text="t('common.refresh')">
+      <template v-slot:activator="{ props }">
+        <v-btn icon v-bind="props" color="primary" @click="handleRefresh" class="mr-2">
+          <v-icon>mdi-refresh</v-icon>
+        </v-btn>
+      </template>
+    </v-tooltip>
     <v-tooltip :text="t('member.add')" v-if="canAddMember">
       <template v-slot:activator="{ props }">
         <v-btn icon v-bind="props" color="primary" @click="handleAddMember" class="mr-2">
@@ -142,6 +149,12 @@ const handleEditMember = (memberId: string) => {
 
 const handleMemberEdited = () => {
   editMemberDrawer.value = false;
+  if (props.familyId) {
+    treeVisualizationStore.fetchTreeData(props.familyId);
+  }
+};
+
+const handleRefresh = () => {
   if (props.familyId) {
     treeVisualizationStore.fetchTreeData(props.familyId);
   }

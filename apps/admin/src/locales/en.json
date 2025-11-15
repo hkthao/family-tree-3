@@ -746,6 +746,7 @@
   "face.confirmDeleteFaceDataMessage": "Are you sure you want to delete all face data for {fullName}?",
   "face.messages.deleteSuccess": "Face data deleted successfully!",
   "face.messages.deleteError": "Error deleting face data.",
+  "common.refresh": "Refresh",
   "tour": {
     "familyList": {
       "search": {
