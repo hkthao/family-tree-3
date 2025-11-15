@@ -1,11 +1,11 @@
 using backend.Application.Common.Interfaces;
+using backend.Infrastructure.Data.Interceptors;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using backend.Infrastructure.Data.Interceptors;
 using Microsoft.Extensions.Logging;
-using MediatR;
 
 namespace backend.Infrastructure.Data
 {

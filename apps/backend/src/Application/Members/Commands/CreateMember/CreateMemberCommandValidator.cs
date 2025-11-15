@@ -57,8 +57,8 @@ public class CreateMemberCommandValidator : AbstractValidator<CreateMemberComman
         {
             return true;
         }
-        return gender.Equals("Male", StringComparison.OrdinalIgnoreCase) || 
-               gender.Equals("Female", StringComparison.OrdinalIgnoreCase) || 
+        return gender.Equals("Male", StringComparison.OrdinalIgnoreCase) ||
+               gender.Equals("Female", StringComparison.OrdinalIgnoreCase) ||
                gender.Equals("Other", StringComparison.OrdinalIgnoreCase);
     }
 }

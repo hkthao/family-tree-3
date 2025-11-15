@@ -1,9 +1,9 @@
+using Ardalis.Specification.EntityFrameworkCore; // For WithSpecification
+using backend.Application.AI.Prompts;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.AI.Prompts;
-using backend.Domain.Enums;
 using backend.Application.Members.Specifications; // Import the new specification
-using Ardalis.Specification.EntityFrameworkCore; // For WithSpecification
+using backend.Domain.Enums;
 
 namespace backend.Application.AI.Commands;
 

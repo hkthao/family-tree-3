@@ -5,8 +5,8 @@ using backend.Application.Members.Commands.CreateMember;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
-using Moq;
 using Microsoft.Extensions.Localization;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Commands.CreateMember;

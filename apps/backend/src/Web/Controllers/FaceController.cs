@@ -1,6 +1,6 @@
 using backend.Application.Common.Models;
-using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Commands.DeleteFacesByMemberId;
+using backend.Application.Faces.Commands.DetectFaces;
 using backend.Application.Faces.Commands.SaveFaceLabels;
 using Microsoft.AspNetCore.Mvc;
 

@@ -28,8 +28,8 @@ public partial class Program
                     await context.Database.MigrateAsync();
                 }
 
-               // var initialiser = services.GetRequiredService<ApplicationDbContextInitialiser>();
-               // await initialiser.SeedAsync();
+                // var initialiser = services.GetRequiredService<ApplicationDbContextInitialiser>();
+                // await initialiser.SeedAsync();
             }
             catch (Exception ex)
             {

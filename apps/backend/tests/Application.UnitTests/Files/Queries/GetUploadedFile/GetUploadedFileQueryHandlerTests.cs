@@ -3,10 +3,10 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.Queries.GetUploadedFile;
 using FluentAssertions;
-using Moq;
-using Xunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 

@@ -6,10 +6,10 @@ using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using FluentAssertions;
-using Moq;
-using Xunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Memory;
+using Moq;
+using Xunit;
 
 namespace backend.Application.UnitTests.Files.UploadFile;
 

@@ -35,7 +35,7 @@ namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels
                 FaceLabels = new List<DetectedFaceDto>
                 {
                     new DetectedFaceDto
-                    {                       
+                    {
                         Id = Guid.NewGuid().ToString(),
                         MemberId = Guid.NewGuid(),
                         Embedding = new List<double> { 1.0, 2.0, 3.0 },

@@ -1,8 +1,8 @@
-using backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 using System.Text;
-using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
-using backend.Domain.Entities; // Add using directive for Member and Family
 using System.Text.RegularExpressions; // Add using directive for Regex
+using backend.Application.AI.Commands; // Add using directive for GenerateBiographyCommand
+using backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
+using backend.Domain.Entities; // Add using directive for Member and Family
 
 namespace backend.Application.AI.Prompts;
 

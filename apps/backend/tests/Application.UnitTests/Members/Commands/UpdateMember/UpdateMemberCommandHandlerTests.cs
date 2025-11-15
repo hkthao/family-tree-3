@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Localization;
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Members.Commands.UpdateMember;
@@ -6,6 +5,7 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
 
