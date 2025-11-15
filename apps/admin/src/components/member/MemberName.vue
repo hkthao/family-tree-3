@@ -1,31 +1,25 @@
 <template>
-  <v-chip v-if="memberData" size="small" class="ma-1">
+  <v-chip v-if="memberDisplayData" size="small" class="ma-1">
     <v-avatar start>
-      <v-img :src="getMemberAvatar(memberData)" :alt="memberData.fullName"></v-img>
+      <v-img :src="memberDisplayData.avatarUrl" :alt="memberDisplayData.fullName"></v-img>
     </v-avatar>
-    {{ memberData.fullName }}
+    {{ memberDisplayData.fullName }}
   </v-chip>
-  <span v-else-if="memberId" class="text-caption text-medium-emphasis">Loading...</span>
   <span v-else></span>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useMemberStore } from '@/stores/member.store';
-import type { Member } from '@/types';
+import { computed } from 'vue';
 import maleAvatar from '@/assets/images/male_avatar.png';
 import femaleAvatar from '@/assets/images/female_avatar.png';
 
 const props = defineProps<{
-  memberId?: string;
+  fullName?: string;
+  avatarUrl?: string;
+  gender?: string; // Add gender prop for default avatar logic
 }>();
 
-const { t } = useI18n();
-const memberStore = useMemberStore();
-const memberData = ref<Member | null>(null);
-
-const getMemberAvatar = (member: Member) => {
+const getMemberAvatar = (member: { avatarUrl?: string; gender?: string }) => {
   if (member.avatarUrl) {
     return member.avatarUrl;
   }
@@ -38,20 +32,13 @@ const getMemberAvatar = (member: Member) => {
   return maleAvatar; // Fallback for 'Other' or undefined gender
 };
 
-const fetchMemberData = async (id?: string) => {
-  if (id) {
-    const member = await memberStore.getById(id);
-    memberData.value = member || null;
-  } else {
-    memberData.value = null;
+const memberDisplayData = computed(() => {
+  if (props.fullName) {
+    return {
+      fullName: props.fullName,
+      avatarUrl: getMemberAvatar({ avatarUrl: props.avatarUrl, gender: props.gender }),
+    };
   }
-};
-
-watch(() => props.memberId, (newId) => {
-  fetchMemberData(newId);
-}, { immediate: true });
-
-onMounted(() => {
-  fetchMemberData(props.memberId);
+  return null;
 });
 </script>

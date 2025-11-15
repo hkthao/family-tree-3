@@ -103,7 +103,7 @@ const { chartContainer } = useHierarchicalTreeChart(
   position: absolute;
   left: 50%;
   transform: translateX(-50%) !important;
-  max-width: 150%;
+  max-width: 250%;
   text-align: center;
   background-color: rgba(var(--v-theme-surface-variant-rgb), 0.7);
   color: rgb(var(--v-theme-on-surface));

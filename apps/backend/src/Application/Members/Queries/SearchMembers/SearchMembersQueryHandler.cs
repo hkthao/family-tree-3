@@ -17,7 +17,9 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
     {
         var query = _context.Members
             .Include(m => m.SourceRelationships)
+                .ThenInclude(r => r.TargetMember)
             .Include(m => m.TargetRelationships)
+                .ThenInclude(r => r.SourceMember)
             .AsQueryable();
 
         // Apply individual specifications

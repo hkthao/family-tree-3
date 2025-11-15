@@ -35,8 +35,6 @@ public class MappingProfile : Profile
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
             .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.SourceRelationships, opt => opt.MapFrom(src => src.SourceRelationships))
-            .ForMember(dest => dest.TargetRelationships, opt => opt.MapFrom(src => src.TargetRelationships))
             .ForMember(dest => dest.FatherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.FullName))
             .ForMember(dest => dest.FatherAvatarUrl, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.AvatarUrl))
             .ForMember(dest => dest.MotherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.FullName))

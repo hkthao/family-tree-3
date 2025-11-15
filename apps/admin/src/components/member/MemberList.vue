@@ -46,18 +46,18 @@
 
     <!-- Father column -->
     <template #item.father="{ item }">
-      <MemberName :member-id="item.fatherId" />
+      <MemberName :full-name="item.fatherFullName" :avatar-url="item.fatherAvatarUrl" :gender="item.fatherGender" />
     </template>
 
     <!-- Mother column -->
     <template #item.mother="{ item }">
-      <MemberName :member-id="item.motherId" />
+      <MemberName :full-name="item.motherFullName" :avatar-url="item.motherAvatarUrl" :gender="item.motherGender" />
     </template>
 
     <!-- Spouse column -->
     <template #item.spouse="{ item }">
-      <MemberName :member-id="item.husbandId" />
-      <MemberName :member-id="item.wifeId" />
+      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="item.husbandGender" />
+      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="item.wifeGender" />
     </template>
 
     <!-- Family column -->
@@ -114,7 +114,6 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
 import { ChipLookup } from '@/components/common';
 import { MemberName } from '@/components/member';
@@ -122,6 +121,7 @@ import { getGenderTitle } from '@/constants/genders';
 import { useAuth } from '@/composables/useAuth';
 import maleAvatar from '@/assets/images/male_avatar.png';
 import femaleAvatar from '@/assets/images/female_avatar.png';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const familyStore = useFamilyStore();
 const { isAdmin, isFamilyManager } = useAuth();
@@ -185,7 +185,6 @@ watch(() => props.search, (newSearch) => {
     searchQuery.value = newSearch;
   }
 });
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 // ... (rest of the file)
 
@@ -197,7 +196,7 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.avatar'),
       key: 'avatarUrl',
       sortable: false,
-      width: '80px',
+      width: '100px',
       align: 'center',
     },
     {
@@ -209,42 +208,37 @@ const headers = computed<DataTableHeader[]>(() => {
     {
       title: t('member.form.father'),
       key: 'father',
-      width: '250px',
+      width: 'auto',
       align: 'start',
       sortable: false,
     },
     {
       title: t('member.form.mother'),
       key: 'mother',
-      width: '250px',
+      width: 'auto',
       align: 'start',
       sortable: false,
     },
     {
       title: t('member.form.spouse'),
       key: 'spouse',
-      width: '250px',
+      width: 'auto',
       align: 'start',
       sortable: false,
     },
-    // {
-    //   title: t('member.list.headers.family'),
-    //   key: 'family',
-    //   width: '250',
-    //   align: 'start',
-    // },
     {
       title: t('member.list.headers.birthDeathYears'),
       key: 'birthDeathYears',
-      width: '150px',
+      width: '120px',
+      align: 'center',
+      sortable: false,
+    },
+    {
+      title: t('member.list.headers.gender'),
+      key: 'gender',
+      width: '110px',
       align: 'center',
     },
-    // {
-    //   title: t('member.list.headers.gender'),
-    //   key: 'gender',
-    //   width: '100px',
-    //   align: 'center',
-    // },
   ];
 
   if (canPerformActions.value) {
