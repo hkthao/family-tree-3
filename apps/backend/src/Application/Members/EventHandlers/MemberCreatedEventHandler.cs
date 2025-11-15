@@ -5,6 +5,7 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Application.Members.EventHandlers;
 
