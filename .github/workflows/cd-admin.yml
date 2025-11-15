@@ -27,6 +27,6 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./apps/admin
-        file: ./Dockerfile
+        file: ./apps/admin/Dockerfile
         push: true
         tags: hkthao/family-tree-admin:latest
