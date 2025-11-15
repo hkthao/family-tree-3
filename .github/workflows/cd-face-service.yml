@@ -27,6 +27,6 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: ./services/face-service
-        file: ./Dockerfile
+        file: ./services/face-service/Dockerfile
         push: true
         tags: hkthao/family-tree-face-service:latest

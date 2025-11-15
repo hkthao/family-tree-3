@@ -46,5 +46,11 @@ public class FamilyConfiguration : IEntityTypeConfiguration<Family>
             .WithOne(r => r.Family)
             .HasForeignKey(r => r.FamilyId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(f => f.Events)
+            .WithOne(e => e.Family)
+            .HasForeignKey(e => e.FamilyId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

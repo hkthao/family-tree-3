@@ -46,6 +46,12 @@ public class Family : BaseAuditableEntity, IAggregateRoot
     private readonly HashSet<Relationship> _relationships = new();
     public IReadOnlyCollection<Relationship> Relationships => _relationships;
 
+    /// <summary>
+    /// Navigation property for events within this family.
+    /// </summary>
+    private readonly HashSet<Event> _events = new();
+    public IReadOnlyCollection<Event> Events => _events;
+
     public void AddFamilyUser(Guid userId, FamilyRole role)
     {
         if (_familyUsers.Any(fu => fu.UserId == userId && fu.Role == role))
