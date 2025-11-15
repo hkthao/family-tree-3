@@ -22,4 +22,7 @@ public class MemberListDto : BaseAuditableDto
     public ICollection<RelationshipDto> SourceRelationships { get; set; } = [];
     public ICollection<RelationshipDto> TargetRelationships { get; set; } = [];
     public string? BirthDeathYears =>
+        (DateOfBirth.HasValue ? DateOfBirth.Value.Year.ToString() : "") +
+        (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +
+        (DateOfDeath.HasValue ? DateOfDeath.Value.Year.ToString() : "");
 }
