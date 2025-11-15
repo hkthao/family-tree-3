@@ -13,6 +13,8 @@ export interface Family {
   address?: string;
   visibility?: FamilyVisibility;
   familyUsers?: FamilyUser[];
+  totalMembers?: number;
+  totalGenerations?: number;
 }
 
 export interface FamilyFilter {
