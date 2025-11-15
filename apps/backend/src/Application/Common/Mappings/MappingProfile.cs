@@ -33,7 +33,9 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
+            .ForMember(dest => dest.SourceRelationships, opt => opt.MapFrom(src => src.SourceRelationships))
+            .ForMember(dest => dest.TargetRelationships, opt => opt.MapFrom(src => src.TargetRelationships));
         CreateMap<Member, MemberDetailDto>();
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()
