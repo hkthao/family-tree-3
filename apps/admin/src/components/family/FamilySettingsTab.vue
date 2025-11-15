@@ -39,10 +39,12 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyDataStore } from '@/stores/family-data.store';
+import { useNotificationStore } from '@/stores/notification.store';
 import type { FamilyExportDto } from '@/types/family';
 
 const { t } = useI18n();
 const familyDataStore = useFamilyDataStore();
+const notificationStore = useNotificationStore();
 
 const props = defineProps<{
   familyId: string;
@@ -53,9 +55,9 @@ const importFile = ref<File | null>(null);
 const exportFamilyData = async () => {
   const success = await familyDataStore.exportFamilyData(props.familyId);
   if (success) {
-    alert(t('family.export.success'));
+    notificationStore.showSnackbar(t('family.export.success'), 'success');
   } else {
-    alert(`${t('family.export.error')}: ${familyDataStore.error}`);
+    notificationStore.showSnackbar(`${t('family.export.error')}: ${familyDataStore.error}`, 'error');
   }
 };
 
@@ -73,26 +75,26 @@ const importFamilyData = async () => {
         const newFamilyId = await familyDataStore.importFamilyData(familyData);
 
         if (newFamilyId) {
-          alert(`${t('family.import.success')}: ${newFamilyId}`);
+          notificationStore.showSnackbar(`${t('family.import.success')}: ${newFamilyId}`, 'success');
           importFile.value = null; // Clear file input
         } else {
-          alert(`${t('family.import.error')}: ${familyDataStore.error}`);
+          notificationStore.showSnackbar(`${t('family.import.error')}: ${familyDataStore.error}`, 'error');
         }
       } catch (parseError) {
         console.error('Error parsing JSON file:', parseError);
-        alert(t('family.import.parse_error'));
+        notificationStore.showSnackbar(t('family.import.parse_error'), 'error');
       }
     };
 
     reader.onerror = (e) => {
       console.error('Error reading file:', e);
-      alert(t('family.import.read_error'));
+      notificationStore.showSnackbar(t('family.import.read_error'), 'error');
     };
 
     reader.readAsText(file);
   } catch (error) {
     console.error('Error importing family data:', error);
-    alert(t('family.import.error'));
+    notificationStore.showSnackbar(t('family.import.error'), 'error');
   }
 };
 </script>

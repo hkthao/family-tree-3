@@ -8,10 +8,10 @@ export class ApiFamilyDataService implements IFamilyDataService {
   constructor(private api: ApiClientMethods) {}
 
   async exportFamilyData(familyId: string): Promise<Result<FamilyExportDto, ApiError>> {
-    return this.api.get<FamilyExportDto>(`/api/family-data/${familyId}/export`);
+    return this.api.get<FamilyExportDto>(`/family-data/${familyId}/export`);
   }
 
   async importFamilyData(familyData: FamilyExportDto): Promise<Result<string, ApiError>> {
-    return this.api.post<string>('/api/family-data/import', familyData);
+    return this.api.post<string>('/family-data/import', familyData);
   }
 }
