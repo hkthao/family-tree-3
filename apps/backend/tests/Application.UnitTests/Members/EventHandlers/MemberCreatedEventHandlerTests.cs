@@ -6,7 +6,7 @@ using backend.Application.UserActivities.Commands.RecordActivity;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using backend.Domain.Events.Members;
-using MediatR;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
@@ -20,6 +20,8 @@ public class MemberCreatedEventHandlerTests
     private readonly Mock<IFamilyTreeService> _familyTreeServiceMock;
     private readonly Mock<ICurrentUser> _currentUserMock;
     private readonly Mock<IN8nService> _n8nServiceMock;
+    private readonly Mock<IStringLocalizer<MemberCreatedEventHandler>> _localizerMock;
+    private readonly Mock<IApplicationDbContext> _contextMock;
     private readonly MemberCreatedEventHandler _handler;
 
     public MemberCreatedEventHandlerTests()
@@ -29,7 +31,9 @@ public class MemberCreatedEventHandlerTests
         _familyTreeServiceMock = new Mock<IFamilyTreeService>();
         _currentUserMock = new Mock<ICurrentUser>();
         _n8nServiceMock = new Mock<IN8nService>();
-        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object);
+        _localizerMock = new Mock<IStringLocalizer<MemberCreatedEventHandler>>();
+        _contextMock = new Mock<IApplicationDbContext>();
+        _handler = new MemberCreatedEventHandler(_loggerMock.Object, _mediatorMock.Object, _familyTreeServiceMock.Object, _currentUserMock.Object, _n8nServiceMock.Object, _localizerMock.Object, _contextMock.Object);
     }
 
     [Fact]
@@ -40,12 +44,21 @@ public class MemberCreatedEventHandlerTests
         var notification = new MemberCreatedEvent(member);
         var userId = Guid.NewGuid();
         _currentUserMock.Setup(u => u.UserId).Returns(userId);
+        _localizerMock.Setup(l => l[It.IsAny<string>(), It.IsAny<object[]>()])
+            .Returns((string key, object[] args) => new LocalizedString(key, string.Format(key, args)));
+
+        var family = new Family("Test Family", userId);
+        _contextMock.Setup(c => c.Families.FindAsync(It.IsAny<object[]>(), CancellationToken.None))
+            .ReturnsAsync(family);
 
         // Act
         await _handler.Handle(notification, CancellationToken.None);
 
         // Assert
-        _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd => cmd.ActionType == UserActionType.CreateMember), CancellationToken.None), Times.Once);
+        _mediatorMock.Verify(m => m.Send(It.Is<RecordActivityCommand>(cmd =>
+            cmd.ActionType == UserActionType.CreateMember &&
+            cmd.ActivitySummary == _localizer["Created member '{0}' in family '{1}'", member.FullName, family.Name].Value
+        ), CancellationToken.None), Times.Once);
         _n8nServiceMock.Verify(n => n.CallEmbeddingWebhookAsync(It.IsAny<EmbeddingWebhookDto>(), CancellationToken.None), Times.Once);
     }
 }
