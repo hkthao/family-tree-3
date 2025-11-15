@@ -11,6 +11,7 @@ import { memberRoutes } from './features/member.routes';
 import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
 import { settingRoutes } from './features/setting.routes';
+import { donateRoutes } from './features/donate.routes';
 
 // Import all pages from the views index
 import {
@@ -41,6 +42,7 @@ const router = createRouter({
         ...familyRoutes,
         ...faceRoutes,
         ...settingRoutes,
+        ...donateRoutes,
         {
           path: 'nl-editor',
           name: 'NLEditor',
