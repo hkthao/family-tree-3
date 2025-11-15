@@ -14,13 +14,14 @@ services:
       - admin
       - backend
       - face-service
-      - n8n
 
   certbot:
     image: certbot/certbot
     volumes:
       - ./nginx/certs:/etc/letsencrypt
       - ./apps/admin/dist:/var/www/certbot
+    env_file:
+      - ./.env
     depends_on:
       - nginx
     command: "certonly --webroot -w /var/www/certbot -d family.thaohk.com -d family-api.thaohk.com --email thao.hk90@gmail.com --agree-tos --no-eff-email --force-renewal"
@@ -87,23 +88,6 @@ services:
       - app-network
     restart: unless-stopped
 
-  n8n:
-    image: n8nio/n8n
-    container_name: family-tree-n8n-prod
-    env_file:
-      - ./.env
-    environment:
-      - N8N_HOST=${N8N_HOST}
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=https
-      - WEBHOOK_URL=https://${N8N_HOST}/
-      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
-    volumes:
-      - n8n-data:/home/node/.n8n
-    networks:
-      - app-network
-    restart: unless-stopped
-
 networks:
   app-network:
     driver: bridge
@@ -111,5 +95,4 @@ networks:
 volumes:
   mysql-data:
   backend-dataprotection-keys:
-  n8n-data:
   face_service_models:
