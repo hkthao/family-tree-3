@@ -22,6 +22,11 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
 
     public async Task<Result<Guid>> Handle(ImportFamilyCommand request, CancellationToken cancellationToken)
     {
+        if (request.FamilyData == null)
+        {
+            return Result<Guid>.Failure("Family data cannot be null.", ErrorSources.Validation);
+        }
+
         // 1. Create new Family entity
         var newFamily = Family.Create(
             request.FamilyData.Name,
@@ -142,6 +147,14 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
             }
 
             _context.Events.Add(newEvent);
+
+            // Also add to newFamily's private _events collection for in-memory testing
+            var eventsField = typeof(Family).GetField("_events", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (eventsField != null)
+            {
+                var eventsCollection = eventsField.GetValue(newFamily) as HashSet<Event>;
+                eventsCollection?.Add(newEvent);
+            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);

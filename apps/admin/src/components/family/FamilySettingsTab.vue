@@ -1,13 +1,8 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12">
-        <h2 class="text-h5 mb-4">{{ t('family.settings.export_import_title') }}</h2>
-      </v-col>
-    </v-row>
-    <v-row>
       <v-col cols="12" md="6">
-        <v-card class="pa-4">
+        <v-card flat>
           <v-card-title>{{ t('family.export.title') }}</v-card-title>
           <v-card-text>
             <p>{{ t('family.export.description') }}</p>
@@ -20,21 +15,17 @@
         </v-card>
       </v-col>
       <v-col cols="12" md="6">
-        <v-card class="pa-4">
+        <v-card flat>
           <v-card-title>{{ t('family.import.title') }}</v-card-title>
           <v-card-text>
             <p>{{ t('family.import.description') }}</p>
-            <v-file-input
-              v-model="importFile"
-              :label="t('family.import.file_input_label')"
-              accept=".json"
-              prepend-icon="mdi-paperclip"
-              show-size
-              counter
-            ></v-file-input>
+            <v-file-input v-model="importFile" :label="t('family.import.file_input_label')" accept=".json"
+            class="mt-4"
+              prepend-icon="mdi-paperclip" show-size counter></v-file-input>
           </v-card-text>
           <v-card-actions>
-            <v-btn color="primary" @click="importFamilyData" :loading="familyDataStore.importing" :disabled="!importFile">
+            <v-btn color="primary" @click="importFamilyData" :loading="familyDataStore.importing"
+              :disabled="!importFile">
               {{ t('family.import.button') }}
             </v-btn>
           </v-card-actions>
