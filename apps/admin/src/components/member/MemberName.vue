@@ -1,7 +1,7 @@
 <template>
   <span v-if="memberName">{{ memberName }}</span>
   <span v-else-if="memberId" class="text-caption text-medium-emphasis">Loading...</span>
-  <span v-else class="text-caption text-medium-emphasis">{{ t('common.na') }}</span>
+  <span v-else></span>
 </template>
 
 <script setup lang="ts">
@@ -19,7 +19,7 @@ const memberName = ref<string | null>(null);
 
 const fetchMemberName = async (id?: string) => {
   if (id) {
-    const member = await memberStore.getMemberById(id);
+    const member = await memberStore.getById(id);
     memberName.value = member?.fullName || null;
   } else {
     memberName.value = null;
