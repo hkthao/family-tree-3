@@ -5,7 +5,7 @@
     <MemberList :items="memberStore.list.items" :total-items="memberStore.list.totalItems" :loading="list.loading"
       :search="searchQuery" @update:search="handleSearchUpdate" @update:options="handleListOptionsUpdate"
       @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView()"
-      @ai-biography="navigateToAIBiography" :read-only="props.readOnly">
+      @ai-biography="navigateToAIBiography" @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
     </MemberList>
       
     <!-- Edit Member Drawer -->
@@ -32,6 +32,11 @@
       <MemberBiographyView v-if="biographyMemberId && biographyDrawer" :member-id="biographyMemberId"
         @close="handleBiographyClosed" />
     </v-navigation-drawer>
+
+    <!-- AI Create Member Drawer -->
+    <v-navigation-drawer v-model="aiCreateDrawer" location="right" temporary width="650">
+      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" />
+    </v-navigation-drawer>
   </div>
 </template>
 
@@ -44,6 +49,7 @@ import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
 import MemberBiographyView from '@/views/member/MemberBiographyView.vue';
+import NLEditorView from '@/views/natural-language/NLEditorView.vue';
 import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -68,6 +74,7 @@ const detailDrawer = ref(false);
 const biographyDrawer = ref(false);
 const biographyMemberId = ref<string | null>(null);
 const initialMemberData = ref<Member | null>(null);
+const aiCreateDrawer = ref(false);
 
 const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
@@ -90,6 +97,10 @@ const navigateToEditMember = (member: Member) => {
 
 const navigateToAIBiography = (member: Member) => {
   handleGenerateBiography(member);
+};
+
+const navigateToAICreateMember = () => {
+  aiCreateDrawer.value = true;
 };
 
 const handleFilterUpdate = async (filters: MemberFilter) => {
