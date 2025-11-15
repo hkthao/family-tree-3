@@ -3,6 +3,7 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
+using backend.Domain.Enums;
 using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.UpdateMember;
