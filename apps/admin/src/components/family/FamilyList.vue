@@ -7,7 +7,8 @@
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button" aria-label="Create Family">
+        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button"
+          aria-label="Create Family">
           <v-tooltip :text="t('family.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -29,8 +30,10 @@
     <!-- name column -->
     <template #item.name="{ item }">
       <div class="text-left">
-        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer" aria-label="View">
+        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
+          aria-label="View">
           {{ item.name }}
+          <div class="text-caption">{{ item.address }}</div>
         </a>
       </div>
     </template>
