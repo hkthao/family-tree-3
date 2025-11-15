@@ -304,6 +304,7 @@
   "member.list.headers.father": "Cha",
   "member.list.headers.mother": "Mẹ",
   "member.list.headers.spouse": "Vợ/Chồng",
+  "member.list.headers.birthDeathYears": "Sinh - Mất",
   "member.list.headers.actions": "Hành động",
   "member.list.confirmDelete": "Bạn có chắc muốn xoá {fullName} không?",
   "member.list.action.aiBiography": "Tạo tiểu sử AI",

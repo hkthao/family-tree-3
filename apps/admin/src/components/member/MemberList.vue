@@ -1,6 +1,7 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
-    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0" data-testid="member-list">
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0"
+    data-testid="member-list" fixed-header>
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
@@ -12,23 +13,16 @@
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
+        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')"
+          data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-text-field
-          v-model="debouncedSearch"
-          :label="t('common.search')"
-          append-inner-icon="mdi-magnify"
-          single-line
-          hide-details
-          clearable
-          class="mr-2"
-          data-test-id="member-list-search-input"
-        ></v-text-field>
+        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+          hide-details clearable class="mr-2" data-test-id="member-list-search-input"></v-text-field>
       </v-toolbar>
     </template>
     <!-- Avatar column -->
@@ -62,17 +56,19 @@
 
     <!-- Spouse column -->
     <template #item.spouse="{ item }">
-      <MemberName :member-id="item.spouseId" />
+      <MemberName :member-id="item.husbandId" />
+      <MemberName :member-id="item.wifeId" />
     </template>
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id" imageExpr="avatarUrl" />
+      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id"
+        imageExpr="avatarUrl" />
     </template>
 
-    <!-- Date of Birth column -->
-    <template #item.dateOfBirth="{ item }">
-      {{ formatDate(item.dateOfBirth) }}
+    <!-- Birth/Death Years column -->
+    <template #item.birthDeathYears="{ item }">
+      {{ item.birthDeathYears }}
     </template>
 
     <!-- Gender column -->
@@ -85,27 +81,24 @@
     <!-- Actions column -->
     <template #item.actions="{ item }">
       <div v-if="canPerformActions">
-        <v-tooltip :text="t('member.list.action.aiBiography')">
+        <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('ai-biography', item)">
-              <v-icon>mdi-robot</v-icon>
+            <v-btn icon variant="text" v-bind="props" size="small">
+              <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
           </template>
-        </v-tooltip>
-        <v-tooltip :text="t('member.list.action.edit')">
-          <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)" data-testid="edit-member-button">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="t('member.list.action.delete')">
-          <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-member-button">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
+          <v-list>
+            <v-list-item @click="$emit('ai-biography', item)">
+              <v-list-item-title>{{ t('member.list.action.aiBiography') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="editMember(item)" data-testid="edit-member-button">
+              <v-list-item-title>{{ t('member.list.action.edit') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="confirmDelete(item)" data-testid="delete-member-button">
+              <v-list-item-title>{{ t('member.list.action.delete') }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </template>
 
@@ -123,8 +116,6 @@ import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
 import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
-import { useMemberStore } from '@/stores/member.store';
-import type { IMemberService } from '@/services/member/member.service.interface';
 import { ChipLookup } from '@/components/common';
 import { MemberName } from '@/components/member';
 import { getGenderTitle } from '@/constants/genders';
@@ -236,24 +227,24 @@ const headers = computed<DataTableHeader[]>(() => {
       align: 'start',
       sortable: false,
     },
+    // {
+    //   title: t('member.list.headers.family'),
+    //   key: 'family',
+    //   width: '250',
+    //   align: 'start',
+    // },
     {
-      title: t('member.list.headers.family'),
-      key: 'family',
-      width: 'auto',
-      align: 'start',
-    },
-    {
-      title: t('member.list.headers.dateOfBirth'),
-      key: 'dateOfBirth',
-      width: '120px',
+      title: t('member.list.headers.birthDeathYears'),
+      key: 'birthDeathYears',
+      width: '150px',
       align: 'center',
     },
-    {
-      title: t('member.list.headers.gender'),
-      key: 'gender',
-      width: '100px',
-      align: 'center',
-    },
+    // {
+    //   title: t('member.list.headers.gender'),
+    //   key: 'gender',
+    //   width: '100px',
+    //   align: 'center',
+    // },
   ];
 
   if (canPerformActions.value) {
@@ -261,9 +252,7 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.actions'),
       key: 'actions',
       sortable: false,
-      width: '180px',
       align: 'end',
-      fixed: true,
     });
   }
   return baseHeaders;

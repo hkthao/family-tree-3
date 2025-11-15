@@ -262,6 +262,7 @@
   "member.list.headers.father": "Father",
   "member.list.headers.mother": "Mother",
   "member.list.headers.spouse": "Spouse",
+  "member.list.headers.birthDeathYears": "Born - Died",
   "member.list.headers.actions": "Actions",
   "member.list.confirmDelete": "Are you sure you want to delete {fullName}?",
   "member.search.title": "Advanced Search",
