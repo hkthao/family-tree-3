@@ -18,6 +18,7 @@ public class Event : BaseAuditableEntity, IAggregateRoot
     public DateTime? EndDate { get; private set; }
     public string? Location { get; private set; }
     public Guid? FamilyId { get; private set; }
+    public Family? Family { get; private set; }
     public EventType Type { get; private set; }
     public string? Color { get; private set; }
 
