@@ -208,5 +208,6 @@ const getFormData = () => {
 defineExpose({
   validate,
   getFormData,
+  v$,
 });
 </script>

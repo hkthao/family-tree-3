@@ -65,7 +65,11 @@ watch(
 const handleUpdateMember = async () => {
   if (!memberFormRef.value) return;
   const isValid = await memberFormRef.value.validate();
-  if (!isValid) return;
+  console.log('Validation result:', isValid);
+  if (!isValid) {
+    console.log('Validation errors:', memberFormRef.value.v$.$errors);
+    return;
+  }
 
   const memberData = memberFormRef.value.getFormData() as Member;
   if (!memberData.id) { // Use memberData.id for the check

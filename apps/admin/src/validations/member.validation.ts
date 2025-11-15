@@ -17,10 +17,20 @@ export function useMemberRules(state: { [key: string]: Ref<any> }) {
     return {
       lastName: { required: helpers.withMessage(() => t('common.validations.required'), required) },
       firstName: { required: helpers.withMessage(() => t('common.validations.required'), required) },
-      dateOfBirth: { required: helpers.withMessage(() => t('common.validations.required'), required) },
+      dateOfBirth: {},
       familyId: { required: helpers.withMessage(() => t('common.validations.required'), required) },
       dateOfDeath: { dateOfDeathAfterBirth: helpers.withMessage(() => t('validation.dateOfDeathAfterBirth'), dateOfDeathAfterBirth) },
-      order: { minValue: helpers.withMessage(() => t('common.validations.positiveNumber'), (value: number | null) => value === null || value > 0) },
+      order: { 
+        isPositive: helpers.withMessage(
+          () => t('common.validations.positiveNumber'), 
+          (value: number | null | undefined) => {
+            if (value === null || value === undefined) {
+              return true; // Optional field
+            }
+            return value > 0;
+          }
+        )
+      },
     };
   });
 
