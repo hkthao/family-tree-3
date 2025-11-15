@@ -1,14 +1,15 @@
 using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Enums;
+using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
+public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberCommandHandler> localizer) : IRequestHandler<CreateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
+    private readonly IStringLocalizer<CreateMemberCommandHandler> _localizer = localizer;
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
@@ -103,14 +104,14 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
         // Automatically create Birth and Death events
         if (member.DateOfBirth.HasValue)
         {
-            var birthEvent = new Domain.Entities.Event($"Birth of {member.FullName}", $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, member.FamilyId, member.DateOfBirth.Value);
+            var birthEvent = new Domain.Entities.Event(_localizer["Birth of {0}", member.FullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Birth, member.FamilyId, member.DateOfBirth.Value);
             birthEvent.AddEventMember(member.Id);
             _context.Events.Add(birthEvent);
         }
 
         if (member.DateOfDeath.HasValue)
         {
-            var deathEvent = new Domain.Entities.Event($"Death of {member.FullName}", $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, member.FamilyId, member.DateOfDeath.Value);
+            var deathEvent = new Domain.Entities.Event(_localizer["Death of {0}", member.FullName], $"EVT-{Guid.NewGuid().ToString()[..5].ToUpper()}", EventType.Death, member.FamilyId, member.DateOfDeath.Value);
             deathEvent.AddEventMember(member.Id);
             _context.Events.Add(deathEvent);
         }
