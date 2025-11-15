@@ -84,6 +84,11 @@ const menu: MenuSection[] = [
           },
         ],
       },
+      {
+        titleKey: 'menu.donate',
+        icon: 'mdi-gift-outline',
+        to: '/donate',
+      },
     ],
   },
 ];

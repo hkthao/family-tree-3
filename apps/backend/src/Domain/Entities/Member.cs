@@ -21,6 +21,7 @@ public class Member : BaseAuditableEntity
     public Guid FamilyId { get; private set; }
     public Family Family { get; private set; } = null!;
     public bool IsRoot { get; private set; } = false;
+    public int? Order { get; private set; }
 
     public void SetAsRoot()
     {
@@ -37,7 +38,7 @@ public class Member : BaseAuditableEntity
         Id = id;
     }
 
-    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography)
+    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography, int? order)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -51,6 +52,7 @@ public class Member : BaseAuditableEntity
         Occupation = occupation;
         AvatarUrl = avatarUrl;
         Biography = biography;
+        Order = order;
 
         AddDomainEvent(new MemberUpdatedEvent(this));
     }
@@ -105,7 +107,7 @@ public class Member : BaseAuditableEntity
         FamilyId = familyId;
     }
 
-    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography)
+    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography, int? order)
         : this(lastName, firstName, code, familyId)
     {
         Nickname = nickname;
@@ -117,6 +119,7 @@ public class Member : BaseAuditableEntity
         Occupation = occupation;
         AvatarUrl = avatarUrl;
         Biography = biography;
+        Order = order;
     }
 
     public Member(Guid id, string lastName, string firstName, string code, Guid familyId, Family family)

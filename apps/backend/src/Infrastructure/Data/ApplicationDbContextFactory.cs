@@ -1,6 +1,11 @@
 using backend.Application.Common.Interfaces;
+using backend.Infrastructure.Data.Interceptors;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace backend.Infrastructure.Data
 {
@@ -13,22 +18,42 @@ namespace backend.Infrastructure.Data
     {
         public ApplicationDbContext CreateDbContext(string[] args)
         {
-            var builder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .AddUserSecrets("backend.Web")
+                .Build();
 
-            // Sử dụng chuỗi kết nối cứng cho mục đích thiết kế (design-time)
-            // Điều này giúp tránh các vấn đề phụ thuộc DI phức tạp khi chạy các lệnh EF Core.
-            // Đảm bảo chuỗi kết nối này khớp với môi trường phát triển cục bộ của bạn.
-            // Cập nhật mật khẩu từ 'password' thành 'root_password' dựa trên docker-compose.yml
-            var connectionString = "Server=localhost;Port=3306;Database=family_tree_db;Uid=root;Pwd=root_password;";
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            builder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            }
 
-            // Provide mock implementations for ICurrentUser and IDateTime for design-time
-            var mockUser = new DesignTimeUserService();
-            var mockDateTime = new DesignTimeDateTimeService();
+            var services = new ServiceCollection();
 
-            return new ApplicationDbContext(builder.Options);
+            // Register necessary services for DbContext
+            _ = services.AddSingleton(new LoggerFactory().CreateLogger<ApplicationDbContextFactory>());
+            services.AddScoped<DispatchDomainEventsInterceptor>();
+            services.AddScoped<AuditableEntitySaveChangesInterceptor>();
+            services.AddScoped<ICurrentUser, DesignTimeUserService>();
+            services.AddScoped<IDateTime, DesignTimeDateTimeService>();
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationDbContext).Assembly));
+
+            services.AddDbContext<ApplicationDbContext>((sp, options) =>
+            {
+                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+                    b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName));
+                options.AddInterceptors(
+                    sp.GetRequiredService<DispatchDomainEventsInterceptor>(),
+                    sp.GetRequiredService<AuditableEntitySaveChangesInterceptor>());
+            });
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            return serviceProvider.GetRequiredService<ApplicationDbContext>();
         }
 
         // Simple mock implementation of ICurrentUser for design-time

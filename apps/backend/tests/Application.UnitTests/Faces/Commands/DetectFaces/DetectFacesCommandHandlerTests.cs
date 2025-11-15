@@ -16,14 +16,14 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
     public class DetectFacesCommandHandlerTests : TestBase
     {
         private readonly Mock<IFaceApiService> _faceApiServiceMock;
-        private readonly Mock<IConfigProvider> _configProviderMock;
+
         private readonly Mock<ILogger<DetectFacesCommandHandler>> _loggerMock;
         private readonly Mock<IN8nService> _n8nServiceMock;
 
         public DetectFacesCommandHandlerTests()
         {
             _faceApiServiceMock = new Mock<IFaceApiService>();
-            _configProviderMock = new Mock<IConfigProvider>();
+
             _loggerMock = new Mock<ILogger<DetectFacesCommandHandler>>();
             _n8nServiceMock = new Mock<IN8nService>();
         }
@@ -67,7 +67,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _configProviderMock.Object,
+
                 _loggerMock.Object,
                 _n8nServiceMock.Object);
 
@@ -109,7 +109,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _configProviderMock.Object,
+
                 _loggerMock.Object,
                 _n8nServiceMock.Object);
 
@@ -138,7 +138,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _configProviderMock.Object,
+
                 _loggerMock.Object,
                 _n8nServiceMock.Object);
 
@@ -180,7 +180,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces
             var handler = new DetectFacesCommandHandler(
                 _faceApiServiceMock.Object,
                 _context,
-                _configProviderMock.Object,
+
                 _loggerMock.Object,
                 _n8nServiceMock.Object);
 

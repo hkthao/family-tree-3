@@ -2,6 +2,9 @@
   <v-card :elevation="0" class="border">
     <v-progress-linear :active="loading" :indeterminate="loading" color="primary" absolute top></v-progress-linear>
     <v-card-title>{{ t('naturalLanguage.editor.title') }}</v-card-title>
+    <v-card-subtitle class="text-caption text-wrap">
+      {{ t('naturalLanguage.editor.mentionInstruction') }}
+    </v-card-subtitle>
     <v-card-text class="pa-0">
       <div class="tiptap-editor">
         <v-toolbar density="compact">
@@ -70,7 +73,13 @@
       </div>
     </v-card-text>
     <v-card-actions class="pa-0">
+      <span class="text-caption ml-4">
+        {{ t('naturalLanguage.editor.wordCount') }}: {{ wordCount }} |
+        {{ t('naturalLanguage.editor.characterCount') }}: {{ characterCount }} / 2000
+      </span>
       <v-spacer></v-spacer>
+      <v-btn color="primary" @click="clearEditor" :loading="loading" :disabled="loading">{{
+        t('naturalLanguage.editor.clear') }}</v-btn>
       <v-btn color="primary" @click="emitContent" :loading="loading" :disabled="loading">{{
         t('naturalLanguage.editor.parseButton') }}</v-btn>
     </v-card-actions>
@@ -81,7 +90,8 @@
 import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
-import { onBeforeUnmount } from 'vue';
+import CharacterCount from '@tiptap/extension-character-count';
+import { onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { VueRenderer } from '@tiptap/vue-3';
@@ -173,12 +183,27 @@ const editor = useEditor({
         },
       },
     }),
+    CharacterCount.configure({
+      limit: 2000,
+    }),
   ],
+});
+
+const wordCount = computed(() => {
+  return editor.value?.storage.characterCount.words();
+});
+
+const characterCount = computed(() => {
+  return editor.value?.storage.characterCount.characters();
 });
 
 const emitContent = () => {
   const content = editor.value?.getText();
   emit('parse-content', content);
+};
+
+const clearEditor = () => {
+  editor.value?.commands.setContent('<p></p>');
 };
 
 onBeforeUnmount(() => {
@@ -193,6 +218,8 @@ onBeforeUnmount(() => {
 
   .tiptap-editor-content {
     min-height: 120px;
+    max-height: 320px; /* Limit height to 320px */
+    overflow-y: auto; /* Enable vertical scrolling */
     padding: 12px;
     font-size: medium;
   }

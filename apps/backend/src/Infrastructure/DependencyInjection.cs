@@ -8,7 +8,6 @@ using backend.Infrastructure.Data.Interceptors;
 using backend.Infrastructure.Files;
 using backend.Infrastructure.Novu;
 using backend.Infrastructure.Services;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -81,8 +80,7 @@ public static class DependencyInjection
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>
         {
-            var configProvider = serviceProvider.GetRequiredService<IConfigProvider>();
-            var faceDetectionSettings = configProvider.GetSection<FaceDetectionSettings>();
+            var faceDetectionSettings = configuration.GetSection(nameof(FaceDetectionSettings)).Get<FaceDetectionSettings>() ?? new FaceDetectionSettings();
             var logger = serviceProvider.GetRequiredService<ILogger<FaceApiService>>(); // Get the logger
             var client = new HttpClient { BaseAddress = new Uri(faceDetectionSettings.BaseUrl) };
             return new FaceApiService(logger, client); // Pass both logger and client
@@ -99,7 +97,7 @@ public static class DependencyInjection
 
         // Register Configuration Provider
         services.AddMemoryCache();
-        services.AddScoped<IConfigProvider, Application.Common.Services.ConfigProvider>();
+
 
         // Register File Storage
         services.AddTransient<LocalFileStorage>();
@@ -109,8 +107,7 @@ public static class DependencyInjection
         // Register IFileStorage based on configuration
         services.AddScoped<IFileStorage>(sp =>
         {
-            var configProvider = sp.GetRequiredService<IConfigProvider>();
-            var storageSettings = configProvider.GetSection<StorageSettings>();
+            var storageSettings = configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
             var storageProvider = Enum.Parse<StorageProvider>(storageSettings.Provider, true);
 
             return storageProvider switch

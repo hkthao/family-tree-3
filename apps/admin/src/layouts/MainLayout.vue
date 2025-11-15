@@ -4,6 +4,7 @@
     <TopBar @toggle-drawer="drawer = !drawer" :current-user="currentUser" />
     <v-main>
       <AppBreadcrumbs />
+      <DonateMessage />
       <router-view />
     </v-main>
     <GlobalSnackbar />
@@ -11,10 +12,12 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref, onMounted, computed } from 'vue';
 import { Sidebar, TopBar } from '@/components/layout';
 import AppBreadcrumbs from '@/components/common/AppBreadcrumbs.vue';
 import GlobalSnackbar from '@/components/common/GlobalSnackbar.vue';
+import DonateMessage from '@/components/common/DonateMessage.vue';
 import { useAuthStore } from '@/stores';
 
 const drawer = ref(true);
@@ -24,6 +27,5 @@ const currentUser = computed(() => authStore.user);
 onMounted(async () => {
   await authStore.initAuth();
 });
-
 
 </script>

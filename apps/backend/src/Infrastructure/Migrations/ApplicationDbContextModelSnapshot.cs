@@ -509,6 +509,10 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("varchar(200)")
                         .HasColumnName("occupation");
 
+                    b.Property<int?>("Order")
+                        .HasColumnType("int")
+                        .HasColumnName("order");
+
                     b.Property<string>("PlaceOfBirth")
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")

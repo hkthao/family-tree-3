@@ -1,4 +1,6 @@
 using backend.CompositionRoot;
+using backend.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 /// <summary>
@@ -10,9 +12,33 @@ public partial class Program
     /// Phương thức Main là điểm khởi đầu của ứng dụng.
     /// </summary>
     /// <param name="args">Các đối số dòng lệnh.</param>
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
-        CreateHostBuilder(args).Build().Run();
+        var host = CreateHostBuilder(args).Build();
+
+        // Apply migrations and seed data
+        using (var scope = host.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<ApplicationDbContext>();
+                if (context.Database.IsMySql()) // Only apply migrations if using MySQL
+                {
+                    await context.Database.MigrateAsync();
+                }
+
+                // var initialiser = services.GetRequiredService<ApplicationDbContextInitialiser>();
+                // await initialiser.SeedAsync();
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+            }
+        }
+
+        await host.RunAsync();
     }
 
     /// <summary>
@@ -57,6 +83,7 @@ public class Startup
         services.AddWebServices();
 
         services.AddControllers();
+        services.AddLocalization();
         services.AddCors(options => options.AddPolicy("AllowFrontend",
             policyBuilder =>
             {
@@ -121,6 +148,14 @@ public class Startup
         });
 
         app.UseRouting();
+
+        var supportedCultures = new[] { "en-US", "vi-VN" };
+        var localizationOptions = new RequestLocalizationOptions()
+            .SetDefaultCulture(supportedCultures[0])
+            .AddSupportedCultures(supportedCultures)
+            .AddSupportedUICultures(supportedCultures);
+
+        app.UseRequestLocalization(localizationOptions);
 
         app.UseAuthentication();
         app.UseMiddleware<EnsureUserExistsMiddleware>();

@@ -6,6 +6,8 @@ using backend.Application.Files.UploadFile;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Enums;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Memory;
 using Moq;
 using Xunit;
 
@@ -14,25 +16,27 @@ namespace backend.Application.UnitTests.Files.UploadFile;
 public class UploadFileCommandHandlerTests : TestBase
 {
     private readonly Mock<IFileStorage> _fileStorageMock;
-    private readonly Mock<IConfigProvider> _configProviderMock;
     private readonly Mock<IDateTime> _dateTimeMock;
+    private readonly IConfiguration _configuration;
     private readonly UploadFileCommandHandler _handler;
 
     public UploadFileCommandHandlerTests()
     {
         _fileStorageMock = new Mock<IFileStorage>();
-        _configProviderMock = new Mock<IConfigProvider>();
         _dateTimeMock = new Mock<IDateTime>();
 
-        _configProviderMock.Setup(x => x.GetSection<StorageSettings>()).Returns(new StorageSettings
-        {
-            MaxFileSizeMB = 5, // 5 MB
-            Provider = "Local"
-        });
+        var inMemorySettings = new Dictionary<string, string?> {
+            {$"{nameof(StorageSettings)}:MaxFileSizeMB", "5"},
+            {$"{nameof(StorageSettings)}:Provider", "Local"}
+        };
+
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings)
+            .Build();
 
         _handler = new UploadFileCommandHandler(
             _fileStorageMock.Object,
-            _configProviderMock.Object,
+            _configuration,
             _context,
             _dateTimeMock.Object);
     }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace backend.CompositionRoot;
@@ -29,14 +30,13 @@ public static class DependencyInjection
         services.AddApplicationServices(configuration);
         services.AddInfrastructureServices(configuration);
 
-
-        var configProvider = services.BuildServiceProvider().GetRequiredService<IConfigProvider>();
-        var jwtSettings = configProvider.GetSection<JwtSettings>();
+        services.Configure<JwtSettings>(configuration.GetSection(nameof(JwtSettings)));
 
         // Configure Auth0 Authentication
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
+                var jwtSettings = services.BuildServiceProvider().GetRequiredService<IOptions<JwtSettings>>().Value;
                 // Add logging for JwtSettings
                 var logger = services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
                 logger.LogInformation("JwtSettings - Authority: {Authority}", jwtSettings?.Authority);

@@ -1,5 +1,11 @@
 <template>
   <v-form ref="formRef" @submit.prevent="saveProfile">
+    <v-alert type="info" variant="tonal" class="mb-4">
+      {{ $t('donate.profileBanner') }}
+      <router-link to="/donate" class="text-decoration-none text-primary ml-2">
+        {{ $t('donate.learnMore') }}
+      </router-link>
+    </v-alert>
     <v-row>
       <v-col cols="12">
         <AvatarInput v-model="formData.avatar" :size="128" />

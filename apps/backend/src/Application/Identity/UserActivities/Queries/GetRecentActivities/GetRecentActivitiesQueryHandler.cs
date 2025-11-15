@@ -29,6 +29,7 @@ public class GetRecentActivitiesQueryHandler(IApplicationDbContext context, IMap
         }
 
         var userActivities = await query
+            .OrderByDescending(ua => ua.Created) // Apply ordering here
             .ProjectTo<UserActivityDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.PageSize);
 

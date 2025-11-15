@@ -431,6 +431,7 @@ coverage
 /cypress/screenshots/
 *.tsbuildinfo
 /src/frontend/playwright-report/
+/apps/admin/playwright-report/
 
 # Node.js
 node_modules/

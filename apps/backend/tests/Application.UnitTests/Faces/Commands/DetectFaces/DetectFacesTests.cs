@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Faces.Commands; // Added this line
@@ -9,11 +14,6 @@ using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
@@ -21,7 +21,7 @@ namespace backend.Application.UnitTests.Faces.Commands.DetectFaces;
 public class DetectFacesTests : TestBase
 {
     private readonly Mock<IFaceApiService> _mockFaceApiService;
-    private readonly Mock<IConfigProvider> _mockConfigProvider;
+
     private readonly Mock<ILogger<DetectFacesCommandHandler>> _mockLogger;
     private readonly Mock<IN8nService> _mockN8nService;
     private readonly DetectFacesCommandHandler _handler;
@@ -29,13 +29,13 @@ public class DetectFacesTests : TestBase
     public DetectFacesTests()
     {
         _mockFaceApiService = new Mock<IFaceApiService>();
-        _mockConfigProvider = new Mock<IConfigProvider>();
+
         _mockN8nService = new Mock<IN8nService>();
         _mockLogger = new Mock<ILogger<DetectFacesCommandHandler>>();
         _handler = new DetectFacesCommandHandler(
             _mockFaceApiService.Object,
             _context,
-            _mockConfigProvider.Object,
+
             _mockLogger.Object, // Passed ListLogger directly
             _mockN8nService.Object);
     }
@@ -176,7 +176,7 @@ public class DetectFacesTests : TestBase
         var familyId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Doe Family", Code = "DOE" };
         var member = new Member(memberId, "Doe", "John", "JD1", familyId, family);
-        member.Update("John", "Doe", "JD1", null, null, new DateTime(1990, 1, 1), new DateTime(2050, 1, 1), null, null, null, null, null);
+        member.Update("John", "Doe", "JD1", null, null, new DateTime(1990, 1, 1), new DateTime(2050, 1, 1), null, null, null, null, null, null);
 
         await _context.Families.AddAsync(family);
         await _context.Members.AddAsync(member);

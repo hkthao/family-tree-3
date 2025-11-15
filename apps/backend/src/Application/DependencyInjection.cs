@@ -18,7 +18,7 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(ValidationBehaviour<,>));
             cfg.AddOpenBehavior(typeof(PerformanceBehaviour<,>));
         });
-        services.AddScoped<Common.Interfaces.IConfigProvider, Common.Services.ConfigProvider>();
+
         services.AddScoped<Common.Interfaces.IFamilyTreeService, Services.FamilyTreeService>();
 
         return services;

@@ -31,6 +31,21 @@ export interface Member {
   motherId?: string; // New: ID of the mother
   husbandId?: string; // New: ID of the husband
   wifeId?: string; // New: ID of the wife
+
+  fatherFullName?: string;
+  fatherAvatarUrl?: string;
+  fatherGender?: string;
+  motherFullName?: string;
+  motherAvatarUrl?: string;
+  motherGender?: string;
+  husbandFullName?: string;
+  husbandAvatarUrl?: string;
+  husbandGender?: string;
+  wifeFullName?: string;
+  wifeAvatarUrl?: string;
+  wifeGender?: string;
+
+  order?: number; // New: Order of the member in the family
 }
 
 export interface MemberFilter {

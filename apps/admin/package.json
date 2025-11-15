@@ -24,6 +24,7 @@
     "@mdi/font": "^7.4.47",
     "@novu/js": "^3.11.0",
     "@pinia/testing": "^1.0.2",
+    "@tiptap/extension-character-count": "^3.10.7",
     "@tiptap/extension-mention": "^3.10.4",
     "@tiptap/starter-kit": "^3.10.4",
     "@tiptap/suggestion": "^3.10.4",

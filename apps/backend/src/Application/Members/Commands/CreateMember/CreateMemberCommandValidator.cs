@@ -45,10 +45,20 @@ public class CreateMemberCommandValidator : AbstractValidator<CreateMemberComman
 
         RuleFor(v => v.PlaceOfDeath)
             .MaximumLength(200).WithMessage("Place of Death must not exceed 200 characters.");
+
+        RuleFor(v => v.Order)
+            .GreaterThan(0).When(v => v.Order.HasValue)
+            .WithMessage("Order must be a positive number.");
     }
 
     private bool BeAValidGender(string? gender)
     {
-        return string.IsNullOrEmpty(gender) || gender == "Male" || gender == "Female" || gender == "Other";
+        if (string.IsNullOrEmpty(gender))
+        {
+            return true;
+        }
+        return gender.Equals("Male", StringComparison.OrdinalIgnoreCase) ||
+               gender.Equals("Female", StringComparison.OrdinalIgnoreCase) ||
+               gender.Equals("Other", StringComparison.OrdinalIgnoreCase);
     }
 }

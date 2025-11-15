@@ -1,6 +1,7 @@
 <template>
   <v-data-table-server v-model:items-per-page="itemsPerPage" :headers="headers" :items="items"
-    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0" data-testid="member-list">
+    :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadMembers" elevation="0"
+    data-testid="member-list" fixed-header>
     <template #top>
       <v-toolbar flat>
         <v-toolbar-title>{{ t('member.list.title') }}</v-toolbar-title>
@@ -12,23 +13,16 @@
             </template>
           </v-tooltip>
         </v-btn>
-        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')" data-testid="add-new-member-button">
+        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')"
+          data-testid="add-new-member-button">
           <v-tooltip :text="t('member.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
             </template>
           </v-tooltip>
         </v-btn>
-        <v-text-field
-          v-model="debouncedSearch"
-          :label="t('common.search')"
-          append-inner-icon="mdi-magnify"
-          single-line
-          hide-details
-          clearable
-          class="mr-2"
-          data-test-id="member-list-search-input"
-        ></v-text-field>
+        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+          hide-details clearable class="mr-2" data-test-id="member-list-search-input"></v-text-field>
       </v-toolbar>
     </template>
     <!-- Avatar column -->
@@ -45,21 +39,36 @@
       <a @click="viewMember(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer">
         {{ item.fullName }}
       </a>
+      <div class="text-caption text-medium-emphasis">
+        {{ item.code }}
+      </div>
     </template>
 
-    <!-- Code column -->
-    <template #item.code="{ item }">
-      {{ item.code }}
+    <!-- Father column -->
+    <template #item.father="{ item }">
+      <MemberName :full-name="item.fatherFullName" :avatar-url="item.fatherAvatarUrl" :gender="item.fatherGender" />
+    </template>
+
+    <!-- Mother column -->
+    <template #item.mother="{ item }">
+      <MemberName :full-name="item.motherFullName" :avatar-url="item.motherAvatarUrl" :gender="item.motherGender" />
+    </template>
+
+    <!-- Spouse column -->
+    <template #item.spouse="{ item }">
+      <MemberName v-if="item.husbandFullName" :full-name="item.husbandFullName" :avatar-url="item.husbandAvatarUrl" :gender="item.husbandGender" />
+      <MemberName v-if="item.wifeFullName" :full-name="item.wifeFullName" :avatar-url="item.wifeAvatarUrl" :gender="item.wifeGender" />
     </template>
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id" imageExpr="avatarUrl" />
+      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id"
+        imageExpr="avatarUrl" />
     </template>
 
-    <!-- Date of Birth column -->
-    <template #item.dateOfBirth="{ item }">
-      {{ formatDate(item.dateOfBirth) }}
+    <!-- Birth/Death Years column -->
+    <template #item.birthDeathYears="{ item }">
+      {{ item.birthDeathYears }}
     </template>
 
     <!-- Gender column -->
@@ -72,27 +81,24 @@
     <!-- Actions column -->
     <template #item.actions="{ item }">
       <div v-if="canPerformActions">
-        <v-tooltip :text="t('member.list.action.aiBiography')">
+        <v-menu>
           <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="$emit('ai-biography', item)">
-              <v-icon>mdi-robot</v-icon>
+            <v-btn icon variant="text" v-bind="props" size="small">
+              <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
           </template>
-        </v-tooltip>
-        <v-tooltip :text="t('member.list.action.edit')">
-          <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="editMember(item)" data-testid="edit-member-button">
-              <v-icon>mdi-pencil</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
-        <v-tooltip :text="t('member.list.action.delete')">
-          <template v-slot:activator="{ props }">
-            <v-btn icon size="small" variant="text" v-bind="props" @click="confirmDelete(item)" data-testid="delete-member-button">
-              <v-icon>mdi-delete</v-icon>
-            </v-btn>
-          </template>
-        </v-tooltip>
+          <v-list>
+            <v-list-item @click="$emit('ai-biography', item)">
+              <v-list-item-title>{{ t('member.list.action.aiBiography') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="editMember(item)" data-testid="edit-member-button">
+              <v-list-item-title>{{ t('member.list.action.edit') }}</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="confirmDelete(item)" data-testid="delete-member-button">
+              <v-list-item-title>{{ t('member.list.action.delete') }}</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </div>
     </template>
 
@@ -108,13 +114,14 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { formatDate } from '@/utils/dateUtils';
 import { useFamilyStore } from '@/stores/family.store';
 import { ChipLookup } from '@/components/common';
+import { MemberName } from '@/components/member';
 import { getGenderTitle } from '@/constants/genders';
 import { useAuth } from '@/composables/useAuth';
 import maleAvatar from '@/assets/images/male_avatar.png';
 import femaleAvatar from '@/assets/images/female_avatar.png';
+import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 const familyStore = useFamilyStore();
 const { isAdmin, isFamilyManager } = useAuth();
@@ -178,7 +185,6 @@ watch(() => props.search, (newSearch) => {
     searchQuery.value = newSearch;
   }
 });
-import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
 // ... (rest of the file)
 
@@ -190,37 +196,47 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.avatar'),
       key: 'avatarUrl',
       sortable: false,
-      width: '80px',
+      width: '100px',
       align: 'center',
     },
     {
       title: t('member.list.headers.fullName'),
       key: 'fullName',
+      width: '250px',
+      align: 'start',
+    },
+    {
+      title: t('member.form.father'),
+      key: 'father',
       width: 'auto',
       align: 'start',
+      sortable: false,
     },
     {
-      title: t('member.list.headers.code'),
-      key: 'code',
-      width: '120px',
-      align: 'start',
-    },
-    {
-      title: t('member.list.headers.family'),
-      key: 'family',
+      title: t('member.form.mother'),
+      key: 'mother',
       width: 'auto',
       align: 'start',
+      sortable: false,
     },
     {
-      title: t('member.list.headers.dateOfBirth'),
-      key: 'dateOfBirth',
+      title: t('member.form.spouse'),
+      key: 'spouse',
+      width: 'auto',
+      align: 'start',
+      sortable: false,
+    },
+    {
+      title: t('member.list.headers.birthDeathYears'),
+      key: 'birthDeathYears',
       width: '120px',
       align: 'center',
+      sortable: false,
     },
     {
       title: t('member.list.headers.gender'),
       key: 'gender',
-      width: '100px',
+      width: '110px',
       align: 'center',
     },
   ];
@@ -230,8 +246,7 @@ const headers = computed<DataTableHeader[]>(() => {
       title: t('member.list.headers.actions'),
       key: 'actions',
       sortable: false,
-      width: '180px',
-      align: 'center',
+      align: 'end',
     });
   }
   return baseHeaders;

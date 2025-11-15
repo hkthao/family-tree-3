@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Birth of {0}" xml:space="preserve">
+    <value>Birth of {0}</value>
+  </data>
+  <data name="Death of {0}" xml:space="preserve">
+    <value>Death of {0}</value>
+  </data>
+</root>

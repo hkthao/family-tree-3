@@ -3,6 +3,8 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Application.Files.Queries.GetUploadedFile;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Memory;
 using Moq;
 using Xunit;
 
@@ -10,13 +12,12 @@ namespace backend.Application.UnitTests.Files.Queries.GetUploadedFile;
 
 public class GetUploadedFileQueryHandlerTests : IDisposable
 {
-    private readonly Mock<IConfigProvider> _configProviderMock;
+    private readonly IConfiguration _configuration;
     private readonly GetUploadedFileQueryHandler _handler;
     private readonly string _testStoragePath;
 
     public GetUploadedFileQueryHandlerTests()
     {
-        _configProviderMock = new Mock<IConfigProvider>();
         _testStoragePath = Path.Combine(Path.GetTempPath(), "TestLocalStorage");
 
         if (!Directory.Exists(_testStoragePath))
@@ -24,13 +25,16 @@ public class GetUploadedFileQueryHandlerTests : IDisposable
             Directory.CreateDirectory(_testStoragePath);
         }
 
-        _configProviderMock.Setup(x => x.GetSection<StorageSettings>()).Returns(new StorageSettings
-        {
-            Provider = "Local",
-            Local = new LocalStorageSettings { LocalStoragePath = _testStoragePath }
-        });
+        var inMemorySettings = new Dictionary<string, string?> {
+            {$"{nameof(StorageSettings)}:Provider", "Local"},
+            {$"{nameof(StorageSettings)}:Local:LocalStoragePath", _testStoragePath}
+        };
 
-        _handler = new GetUploadedFileQueryHandler(_configProviderMock.Object);
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings)
+            .Build();
+
+        _handler = new GetUploadedFileQueryHandler(_configuration);
     }
 
     public void Dispose()

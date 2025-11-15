@@ -76,6 +76,10 @@
         <v-checkbox v-model="formData.isRoot" :label="t('member.form.isRoot')" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-is-root-checkbox"></v-checkbox>
       </v-col>
+      <v-col cols="12">
+        <v-text-field v-model.number="formData.order" :label="t('member.form.order')" :readonly="isFormReadOnly"
+          :disabled="isFormReadOnly" type="number" min="1" data-testid="member-order-input"></v-text-field>
+      </v-col>
     </v-row>
 
      <!-- Thông tin Cha Mẹ -->
@@ -168,6 +172,7 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       husbandId: undefined, // Initialize husbandId
       wifeId: undefined, // Initialize wifeId
       isRoot: false, // Initialize isRoot for new members
+      order: undefined, // Initialize order for new members
     },
 );
 
@@ -182,6 +187,7 @@ const state = reactive({
   husbandId: toRef(formData, 'husbandId'), // Add husbandId to state
   wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
   isRoot: toRef(formData, 'isRoot'), // Add isRoot to state
+  order: toRef(formData, 'order'), // Add order to state
 });
 
 const rules = useMemberRules(toRefs(state));
@@ -202,5 +208,6 @@ const getFormData = () => {
 defineExpose({
   validate,
   getFormData,
+  v$,
 });
 </script>

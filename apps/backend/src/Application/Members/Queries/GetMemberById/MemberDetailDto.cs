@@ -20,6 +20,7 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Occupation { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
+    public bool IsRoot { get; set; }
     public string? BirthDeathYears =>
         (DateOfBirth.HasValue ? DateOfBirth.Value.Year.ToString() : "") +
         (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +

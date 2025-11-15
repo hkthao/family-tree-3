@@ -4,6 +4,7 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Specifications;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
@@ -14,7 +15,12 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
 
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Members.AsQueryable();
+        var query = _context.Members
+            .Include(m => m.SourceRelationships)
+                .ThenInclude(r => r.TargetMember)
+            .Include(m => m.TargetRelationships)
+                .ThenInclude(r => r.SourceMember)
+            .AsQueryable();
 
         // Apply individual specifications
         query = query.WithSpecification(new MemberSearchTermSpecification(request.SearchQuery));

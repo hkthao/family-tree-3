@@ -5,19 +5,20 @@ using backend.Application.Common.Models;
 using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using Microsoft.Extensions.Configuration;
 
 namespace backend.Application.Files.UploadFile;
 
-public class UploadFileCommandHandler(IFileStorage fileStorage, IConfigProvider configProvider, IApplicationDbContext context, IDateTime dateTime) : IRequestHandler<UploadFileCommand, Result<string>>
+public class UploadFileCommandHandler(IFileStorage fileStorage, IConfiguration configuration, IApplicationDbContext context, IDateTime dateTime) : IRequestHandler<UploadFileCommand, Result<string>>
 {
     private readonly IFileStorage _fileStorage = fileStorage;
-    private readonly IConfigProvider _configProvider = configProvider;
+    private readonly IConfiguration _configuration = configuration;
     private readonly IApplicationDbContext _context = context;
     private readonly IDateTime _dateTime = dateTime;
 
     public async Task<Result<string>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
-        var storageSettings = _configProvider.GetSection<StorageSettings>();
+        var storageSettings = _configuration.GetSection(nameof(StorageSettings)).Get<StorageSettings>() ?? new StorageSettings();
         // 1. Validate file size
         var maxFileSizeInBytes = storageSettings.MaxFileSizeMB * 1024 * 1024;
         if (request.Length == 0)

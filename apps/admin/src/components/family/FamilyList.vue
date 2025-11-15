@@ -7,7 +7,8 @@
         <v-toolbar-title>{{ t('family.management.title') }}</v-toolbar-title>
         <v-spacer></v-spacer>
 
-        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button" aria-label="Create Family">
+        <v-btn color="primary" icon @click="$emit('create')" data-testid="add-new-family-button"
+          aria-label="Create Family">
           <v-tooltip :text="t('family.list.action.create')">
             <template v-slot:activator="{ props }">
               <v-icon v-bind="props">mdi-plus</v-icon>
@@ -29,8 +30,10 @@
     <!-- name column -->
     <template #item.name="{ item }">
       <div class="text-left">
-        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer" aria-label="View">
+        <a @click="$emit('view', item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
+          aria-label="View">
           {{ item.name }}
+          <div class="text-caption">{{ item.address }}</div>
         </a>
       </div>
     </template>
@@ -38,6 +41,16 @@
     <!-- code column -->
     <template #item.code="{ item }">
       {{ item.code }}
+    </template>
+
+    <!-- totalMembers column -->
+    <template #item.totalMembers="{ item }">
+      {{ item.totalMembers }}
+    </template>
+
+    <!-- totalGenerations column -->
+    <template #item.totalGenerations="{ item }">
+      {{ item.totalGenerations }}
     </template>
 
     <!-- visibility column -->
@@ -140,6 +153,18 @@ const headers = computed<DataTableHeader[]>(() => [
     key: 'code',
     width: '120px',
     align: 'start',
+  },
+  {
+    title: t('family.management.headers.totalMembers'),
+    key: 'totalMembers',
+    width: '120px',
+    align: 'center',
+  },
+  {
+    title: t('family.management.headers.totalGenerations'),
+    key: 'totalGenerations',
+    width: '120px',
+    align: 'center',
   },
 
 

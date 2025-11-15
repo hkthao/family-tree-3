@@ -18,7 +18,8 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          docker compose -f infra/docker-compose.prod.yml up -d --no-deps admin
+          docker compose -f docker-compose.prod.yml pull admin
+          docker compose -f docker-compose.prod.yml up -d --no-deps admin
           echo "Admin deployment completed successfully!"
 
   deploy-backend:
@@ -35,7 +36,8 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          docker compose -f infra/docker-compose.prod.yml up -d --no-deps backend
+          docker compose -f docker-compose.prod.yml pull backend
+          docker compose -f docker-compose.prod.yml up -d --no-deps backend
           echo "Backend deployment completed successfully!"
 
   deploy-face-service:
@@ -52,5 +54,6 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd ${{ secrets.DEPLOY_PATH }}
-          docker compose -f infra/docker-compose.prod.yml up -d --no-deps face-service
+          docker compose -f docker-compose.prod.yml pull face-service
+          docker compose -f docker-compose.prod.yml up -d --no-deps face-service
           echo "Face Service deployment completed successfully!"

@@ -1,8 +1,8 @@
+using System;
+using System.Collections.Generic;
 using backend.Application.Faces.Commands.SaveFaceLabels;
 using backend.Application.Faces.Queries;
 using FluentValidation.TestHelper;
-using System;
-using System.Collections.Generic;
 using Xunit;
 
 namespace backend.Application.UnitTests.Faces.Commands.SaveFaceLabels;

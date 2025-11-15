@@ -5,6 +5,7 @@ using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Moq;
 using Xunit;
 
@@ -13,12 +14,14 @@ namespace backend.Application.UnitTests.Members.Commands.UpdateMember;
 public class UpdateMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
+    private readonly Mock<IStringLocalizer<UpdateMemberCommandHandler>> _localizerMock;
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
-        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object);
+        _localizerMock = new Mock<IStringLocalizer<UpdateMemberCommandHandler>>();
+        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
     }
 
     [Fact]
@@ -152,9 +155,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var newSpouseId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null);
-        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null) { Id = initialSpouseId };
-        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null) { Id = newSpouseId };
+        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null, null);
+        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null, null) { Id = initialSpouseId };
+        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null, null) { Id = newSpouseId };
 
         family.AddMember(member);
         family.AddMember(initialSpouse);
