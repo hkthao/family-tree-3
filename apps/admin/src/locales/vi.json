@@ -350,6 +350,7 @@
   "member.form.husband": "Chồng",
   "member.form.wife": "Vợ",
   "member.form.isRoot": "Là thành viên gốc",
+  "member.form.order": "Thứ tự",
   "member.form.spouse": "Vợ/Chồng",
   "member.form.parents": "Cha mẹ",
   "member.form.spouses": "Vợ/Chồng",
@@ -660,8 +661,6 @@
   "avatarInput.uploadInput.invalidFormat": "Định dạng tệp không hợp lệ. Vui lòng chọn một hình ảnh.",
   "avatarInput.uploadInput.success": "Tải ảnh đại diện thành công!",
   "avatarInput.uploadInput.error": "Lỗi khi tải ảnh đại diện.",
-
-
   "terms.title": "Điều khoản dịch vụ",
   "terms.lastUpdated": "Cập nhật lần cuối: {date}",
   "terms.introduction.title": "Giới thiệu",
@@ -781,7 +780,11 @@
   "naturalLanguage.errors.unsavedRelatedMembers": "Các thành viên liên quan ({members}) chưa được lưu. Vui lòng lưu thông tin của các thành viên này trước.",
   "naturalLanguage.errors.relatedMembersNotFoundInDb": "Các thành viên liên quan ({members}) không tồn tại trong hệ thống. Vui lòng đảm bảo các thành viên này đã được lưu vào cơ sở dữ liệu.",
   "naturalLanguage.editor.title": "Trình soạn thảo ngôn ngữ tự nhiên",
+  "naturalLanguage.editor.mentionInstruction": "Để gắn thẻ một thành viên đã tồn tại, hãy nhập '@' theo sau là tên của thành viên. Ví dụ: '@Nguyễn Văn A'.",
   "naturalLanguage.editor.parseButton": "Phân tích",
+  "naturalLanguage.editor.wordCount": "Số từ",
+  "naturalLanguage.editor.characterCount": "Số ký tự",
+  "naturalLanguage.editor.initialContent": "Nguyễn Văn A sinh năm 1950, mất năm 2020.\\nÔng là cha của Nguyễn Thị B và Nguyễn Văn C.  \\nNguyễn Thị B sinh năm 1975, kết hôn với Trần Văn D.  \\nHọ có một người con tên là Trần Thị E.  \\nNguyễn Văn C sinh năm 1980, chưa kết hôn.",
   "naturalLanguage.editor.parsedResultTitle": "Kết quả phân tích",
   "naturalLanguage.editor.parsedMembers": "Các thành viên được phân tích",
   "naturalLanguage.editor.parsedEvents": "Các sự kiện được phân tích",
