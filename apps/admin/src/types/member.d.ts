@@ -21,6 +21,9 @@ export interface Member {
   nickname?: string; // New
   placeOfBirth?: string; // New (replaces address)
   placeOfDeath?: string; // New (replaces address)
+  phone?: string; // New
+  email?: string; // New
+  address?: string; // New
   occupation?: string; // New
   familyName?: string; // New
   biography?: string; // New

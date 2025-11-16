@@ -12,6 +12,9 @@ public class MemberDto
     public DateTime? DateOfDeath { get; set; }
     public string? PlaceOfBirth { get; set; }
     public string? PlaceOfDeath { get; set; }
+    public string? Phone { get; set; }
+    public string? Email { get; set; }
+    public string? Address { get; set; }
     public string? Occupation { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Biography { get; set; }

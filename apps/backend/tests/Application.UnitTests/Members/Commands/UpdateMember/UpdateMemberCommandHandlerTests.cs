@@ -155,9 +155,9 @@ public class UpdateMemberCommandHandlerTests : TestBase
         var newSpouseId = Guid.NewGuid();
         var family = new Family { Id = familyId, Name = "Test Family", Code = "TF1" };
         var member = new Member("John", "Doe", "JD", familyId) { Id = memberId };
-        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null, null);
-        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null, null) { Id = initialSpouseId };
-        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null, null) { Id = newSpouseId };
+        member.Update("John", "Doe", "JD", null, "Male", null, null, null, null, null, null, null, null, null, null, null);
+        var initialSpouse = new Member("Initial", "Spouse", "IS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null) { Id = initialSpouseId };
+        var newSpouse = new Member("New", "Spouse", "NS", familyId, null, "Female", null, null, null, null, null, null, null, null, null, null, null) { Id = newSpouseId };
 
         family.AddMember(member);
         family.AddMember(initialSpouse);
