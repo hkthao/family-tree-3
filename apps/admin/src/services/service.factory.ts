@@ -28,6 +28,8 @@ import type { INaturalLanguageService } from './natural-language/api.natural-lan
 import { ApiNaturalLanguageService } from './natural-language/api.natural-language.service'; // Import new service implementation
 import type { IFamilyDataService } from './family-data/family-data.service.interface';
 import { ApiFamilyDataService } from './family-data/api.family-data.service';
+import type { IPrivacyConfigurationService } from './privacy-configuration/privacy-configuration.service.interface';
+import { ApiPrivacyConfigurationService } from './privacy-configuration/api.privacy-configuration.service';
 
 
 export type ServiceMode = 'real' | 'test';
@@ -48,6 +50,7 @@ export interface AppServices {
   user: IUserService;
   naturalLanguage: INaturalLanguageService; // Add new service to interface
   familyData: IFamilyDataService;
+  privacyConfiguration: IPrivacyConfigurationService;
 
 }
 
@@ -116,6 +119,9 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyDataService(apiClient)
         : testServices?.familyData || new ApiFamilyDataService(apiClient),
-
+    privacyConfiguration:
+      mode === 'real'
+        ? new ApiPrivacyConfigurationService(apiClient)
+        : testServices?.privacyConfiguration || new ApiPrivacyConfigurationService(apiClient),
   };
 }
