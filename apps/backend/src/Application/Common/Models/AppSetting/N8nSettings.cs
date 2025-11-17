@@ -18,4 +18,9 @@ public class N8nSettings
     /// URL của webhook để kích hoạt quy trình embedding trên n8n.
     /// </summary>
     public string EmbeddingWebhookUrl { get; set; } = null!;
+
+    /// <summary>
+    /// Tên của collection được sử dụng trong quá trình embedding.
+    /// </summary>
+    public string CollectionName { get; set; } = null!;
 }

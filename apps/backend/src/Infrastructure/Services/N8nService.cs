@@ -123,7 +123,8 @@ public class N8nService : IN8nService
             dto.EntityId,
             dto.ActionType,
             dto.EntityData,
-            dto.Description
+            dto.Description,
+            CollectionName = n8nSettings.CollectionName // Add CollectionName to payload
         };
 
         var jsonPayload = JsonSerializer.Serialize(payload, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
