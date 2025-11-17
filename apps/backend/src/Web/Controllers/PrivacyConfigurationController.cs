@@ -2,15 +2,20 @@ using backend.Application.Common.Models;
 using backend.Application.PrivacyConfigurations.Commands;
 using backend.Application.PrivacyConfigurations.Queries;
 using Microsoft.AspNetCore.Mvc;
+using MediatR; // Add this using directive
 
 namespace backend.Web.Controllers;
 
-public class PrivacyConfigurationController : ApiControllerBase
+[ApiController]
+[Route("api/PrivacyConfiguration")]
+public class PrivacyConfigurationController(IMediator mediator) : ControllerBase
 {
+    private readonly IMediator _mediator = mediator;
+
     [HttpGet("{familyId}")]
     public async Task<ActionResult<Result<PrivacyConfigurationDto>>> GetPrivacyConfiguration(Guid familyId)
     {
-        return await Mediator.Send(new GetPrivacyConfigurationQuery(familyId));
+        return await _mediator.Send(new GetPrivacyConfigurationQuery(familyId));
     }
 
     [HttpPut("{familyId}")]
@@ -20,6 +25,6 @@ public class PrivacyConfigurationController : ApiControllerBase
         {
             return BadRequest();
         }
-        return await Mediator.Send(command);
+        return await _mediator.Send(command);
     }
 }
