@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.Infrastructure.Data;
 
@@ -10,9 +11,11 @@ using backend.Infrastructure.Data;
 namespace backend.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251116041920_AddPhoneEmailAddressToMember")]
+    partial class AddPhoneEmailAddressToMember
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -551,61 +554,6 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("members");
                 });
 
-            modelBuilder.Entity("backend.Domain.Entities.PrivacyConfiguration", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("created");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("created_by");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("deleted_by");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("deleted_date");
-
-                    b.Property<Guid>("FamilyId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("family_id");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("last_modified");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("longtext")
-                        .HasColumnName("last_modified_by");
-
-                    b.Property<string>("PublicMemberProperties")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)")
-                        .HasColumnName("public_member_properties");
-
-                    b.HasKey("Id")
-                        .HasName("pk_privacy_configurations");
-
-                    b.HasIndex("FamilyId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_privacy_configurations_family_id");
-
-                    b.ToTable("privacy_configurations");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.Relationship", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1046,18 +994,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("Family");
                 });
 
-            modelBuilder.Entity("backend.Domain.Entities.PrivacyConfiguration", b =>
-                {
-                    b.HasOne("backend.Domain.Entities.Family", "Family")
-                        .WithOne("PrivacyConfiguration")
-                        .HasForeignKey("backend.Domain.Entities.PrivacyConfiguration", "FamilyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_privacy_configurations_families_family_id");
-
-                    b.Navigation("Family");
-                });
-
             modelBuilder.Entity("backend.Domain.Entities.Relationship", b =>
                 {
                     b.HasOne("backend.Domain.Entities.Family", "Family")
@@ -1136,8 +1072,6 @@ namespace backend.Infrastructure.Migrations
                     b.Navigation("FamilyUsers");
 
                     b.Navigation("Members");
-
-                    b.Navigation("PrivacyConfiguration");
 
                     b.Navigation("Relationships");
                 });

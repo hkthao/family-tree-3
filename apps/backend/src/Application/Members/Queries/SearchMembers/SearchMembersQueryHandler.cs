@@ -8,10 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Queries.SearchMembers;
 
-public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
+public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<SearchMembersQuery, Result<PaginatedList<MemberListDto>>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<PaginatedList<MemberListDto>>> Handle(SearchMembersQuery request, CancellationToken cancellationToken)
     {
@@ -31,6 +32,13 @@ public class SearchMembersQueryHandler(IApplicationDbContext context, IMapper ma
         var paginatedList = await query
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.Page, request.ItemsPerPage);
+
+        // Apply privacy filter to each member in the paginated list
+        if (request.FamilyId.HasValue)
+        {
+            var filteredItems = await _privacyService.ApplyPrivacyFilter(paginatedList.Items, request.FamilyId.Value, cancellationToken);
+            paginatedList.Items = filteredItems;
+        }
 
         return Result<PaginatedList<MemberListDto>>.Success(paginatedList);
     }

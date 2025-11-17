@@ -15,6 +15,9 @@ public class Member : BaseAuditableEntity
     public DateTime? DateOfDeath { get; private set; }
     public string? PlaceOfBirth { get; private set; }
     public string? PlaceOfDeath { get; private set; }
+    public string? Phone { get; private set; }
+    public string? Email { get; private set; }
+    public string? Address { get; private set; }
     public string? Occupation { get; private set; } // New
     public string? AvatarUrl { get; private set; }
     public string? Biography { get; private set; } // New
@@ -38,7 +41,7 @@ public class Member : BaseAuditableEntity
         Id = id;
     }
 
-    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography, int? order)
+    public void Update(string firstName, string lastName, string code, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order)
     {
         FirstName = firstName;
         LastName = lastName;
@@ -49,6 +52,9 @@ public class Member : BaseAuditableEntity
         DateOfDeath = dateOfDeath;
         PlaceOfBirth = placeOfBirth;
         PlaceOfDeath = placeOfDeath;
+        Phone = phone;
+        Email = email;
+        Address = address;
         Occupation = occupation;
         AvatarUrl = avatarUrl;
         Biography = biography;
@@ -107,7 +113,7 @@ public class Member : BaseAuditableEntity
         FamilyId = familyId;
     }
 
-    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? occupation, string? avatarUrl, string? biography, int? order)
+    public Member(string lastName, string firstName, string code, Guid familyId, string? nickname, string? gender, DateTime? dateOfBirth, DateTime? dateOfDeath, string? placeOfBirth, string? placeOfDeath, string? phone, string? email, string? address, string? occupation, string? avatarUrl, string? biography, int? order)
         : this(lastName, firstName, code, familyId)
     {
         Nickname = nickname;
@@ -116,6 +122,9 @@ public class Member : BaseAuditableEntity
         DateOfDeath = dateOfDeath;
         PlaceOfBirth = placeOfBirth;
         PlaceOfDeath = placeOfDeath;
+        Phone = phone;
+        Email = email;
+        Address = address;
         Occupation = occupation;
         AvatarUrl = avatarUrl;
         Biography = biography;

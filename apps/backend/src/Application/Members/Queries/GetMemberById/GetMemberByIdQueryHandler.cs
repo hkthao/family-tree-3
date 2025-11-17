@@ -7,10 +7,11 @@ using backend.Application.Members.Specifications;
 
 namespace backend.Application.Members.Queries.GetMemberById;
 
-public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
+public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper mapper, IPrivacyService privacyService) : IRequestHandler<GetMemberByIdQuery, Result<MemberDetailDto>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IMapper _mapper = mapper;
+    private readonly IPrivacyService _privacyService = privacyService;
 
     public async Task<Result<MemberDetailDto>> Handle(GetMemberByIdQuery request, CancellationToken cancellationToken)
     {
@@ -23,12 +24,18 @@ public class GetMemberByIdQueryHandler(IApplicationDbContext context, IMapper ma
 
         // Comment: DTO projection is used here to select only the necessary columns from the database,
         // optimizing the SQL query and reducing the amount of data transferred.
-        var memberDto = await query
+        var memberDetailDto = await query
             .ProjectTo<MemberDetailDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return memberDto == null
-            ? Result<MemberDetailDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound)
-            : Result<MemberDetailDto>.Success(memberDto);
+        if (memberDetailDto == null)
+        {
+            return Result<MemberDetailDto>.Failure(string.Format(ErrorMessages.NotFound, $"Member with ID {request.Id}"), ErrorSources.NotFound);
+        }
+
+        // Apply privacy filter
+        var filteredMemberDetailDto = await _privacyService.ApplyPrivacyFilter(memberDetailDto, memberDetailDto.FamilyId, cancellationToken);
+
+        return Result<MemberDetailDto>.Success(filteredMemberDetailDto);
     }
 }

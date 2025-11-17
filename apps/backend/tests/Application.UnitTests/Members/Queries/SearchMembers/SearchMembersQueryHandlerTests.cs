@@ -1,15 +1,24 @@
+using backend.Application.Common.Interfaces;
+using backend.Application.Members.Queries.GetMembers; // For MemberListDto
 using backend.Application.Members.Queries.SearchMembers;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using FluentAssertions;
+using Moq;
 using Xunit;
 
 namespace backend.Application.UnitTests.Members.Queries.SearchMembers;
 
 public class SearchMembersQueryHandlerTests : TestBase
 {
+    private readonly Mock<IPrivacyService> _privacyServiceMock;
+
     public SearchMembersQueryHandlerTests()
     {
+        _privacyServiceMock = new Mock<IPrivacyService>();
+        // Setup mock to return the original list without filtering for tests
+        _privacyServiceMock.Setup(p => p.ApplyPrivacyFilter(It.IsAny<List<MemberListDto>>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((List<MemberListDto> members, Guid familyId, CancellationToken ct) => members);
     }
 
     [Fact]
@@ -33,8 +42,8 @@ public class SearchMembersQueryHandlerTests : TestBase
         );
         await _context.SaveChangesAsync();
 
-        var handler = new SearchMembersQueryHandler(_context, _mapper);
-        var query = new SearchMembersQuery { Page = 1, ItemsPerPage = 2 };
+        var handler = new SearchMembersQueryHandler(_context, _mapper, _privacyServiceMock.Object);
+        var query = new SearchMembersQuery { Page = 1, ItemsPerPage = 2, FamilyId = familyId1 };
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -42,7 +51,7 @@ public class SearchMembersQueryHandlerTests : TestBase
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
-        result.Value!.Items.Should().HaveCount(2);
-        result.Value.TotalItems.Should().Be(3);
+        result.Value!.Items.Should().HaveCount(1); // Only members from familyId1
+        result.Value.TotalItems.Should().Be(1);
     }
 }

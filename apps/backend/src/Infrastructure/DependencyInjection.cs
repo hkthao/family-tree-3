@@ -38,26 +38,14 @@ public static class DependencyInjection
         services.AddHttpContextAccessor(); // Required for ICurrentUser
         services.AddScoped<ICurrentUser, CurrentUser>(); // Register ICurrentUser with its implementation
 
-        if (configuration.GetValue<bool>("UseInMemoryDatabase"))
-        {
-            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
-                options.UseInMemoryDatabase("FamilyTreeDb")
-                           .AddInterceptors(
-                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
-                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
-                           ;
-        }
-        else
-        {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
-                options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
-                           mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null))
-                       .AddInterceptors(
-                           serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
-                           serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
-                           ;
-        }
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        services.AddDbContext<ApplicationDbContext>((serviceProvider, options) =>
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+                       mySqlOptions => mySqlOptions.EnableRetryOnFailure(maxRetryCount: 10, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null))
+                   .AddInterceptors(
+                       serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>(),
+                       serviceProvider.GetRequiredService<AuditableEntitySaveChangesInterceptor>()))
+                       ;
 
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -76,6 +64,8 @@ public static class DependencyInjection
         services.AddAuthorization();
 
         services.AddScoped<IAuthorizationService, AuthorizationService>();
+
+        services.AddScoped<IPrivacyService, PrivacyService>();
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>

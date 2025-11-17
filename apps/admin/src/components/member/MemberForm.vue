@@ -56,6 +56,22 @@
 
     <!-- Thông tin cá nhân -->
     <v-row>
+      <v-col cols="12" md="6">
+        <v-text-field v-model="formData.phone" :label="t('member.form.phone')" :readonly="isFormReadOnly"
+          :disabled="isFormReadOnly" data-testid="member-phone-input"></v-text-field>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-text-field v-model="formData.email" :label="t('member.form.email')" :readonly="isFormReadOnly"
+          :disabled="isFormReadOnly" data-testid="member-email-input"></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <v-text-field v-model="formData.address" :label="t('member.form.address')" :readonly="isFormReadOnly"
+          :disabled="isFormReadOnly" data-testid="member-address-input"></v-text-field>
+      </v-col>
+    </v-row>
+    <v-row>
       <v-col cols="12">
         <v-text-field v-model="formData.placeOfBirth" :label="t('member.form.placeOfBirth')" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="member-place-of-birth-input"></v-text-field>
@@ -160,6 +176,9 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       husbandId: props.initialMemberData.husbandId,
       wifeId: props.initialMemberData.wifeId,
       isRoot: props.initialMemberData.isRoot, // Add isRoot here
+      phone: props.initialMemberData.phone,
+      email: props.initialMemberData.email,
+      address: props.initialMemberData.address,
     }
     : {
       lastName: '',
@@ -173,6 +192,9 @@ const formData = reactive<Omit<Member, 'id'> | Member>(
       wifeId: undefined, // Initialize wifeId
       isRoot: false, // Initialize isRoot for new members
       order: undefined, // Initialize order for new members
+      phone: undefined,
+      email: undefined,
+      address: undefined,
     },
 );
 
@@ -188,6 +210,9 @@ const state = reactive({
   wifeId: toRef(formData, 'wifeId'), // Add wifeId to state
   isRoot: toRef(formData, 'isRoot'), // Add isRoot to state
   order: toRef(formData, 'order'), // Add order to state
+  phone: toRef(formData, 'phone'),
+  email: toRef(formData, 'email'),
+  address: toRef(formData, 'address'),
 });
 
 const rules = useMemberRules(toRefs(state));

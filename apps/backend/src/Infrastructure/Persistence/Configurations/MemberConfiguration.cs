@@ -33,6 +33,15 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.Property(m => m.PlaceOfDeath)
             .HasMaxLength(200);
 
+        builder.Property(m => m.Phone)
+            .HasMaxLength(20);
+
+        builder.Property(m => m.Email)
+            .HasMaxLength(100);
+
+        builder.Property(m => m.Address)
+            .HasMaxLength(500);
+
         builder.Property(m => m.Occupation)
             .HasMaxLength(200);
 
