@@ -7,4 +7,5 @@ public class EmbeddingWebhookDto
     public string ActionType { get; set; } = null!;
     public object EntityData { get; set; } = null!;
     public string Description { get; set; } = null!;
+    public string CollectionName { get; set; } = null!;
 }
