@@ -12,10 +12,8 @@
 
       <v-form ref="formRef">
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" sm="6" md="4" v-for="prop in memberProperties" :key="prop.value">
             <v-checkbox
-              v-for="prop in memberProperties"
-              :key="prop.value"
               v-model="selectedProperties"
               :label="prop.text"
               :value="prop.value"

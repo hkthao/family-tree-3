@@ -1,52 +1,44 @@
 <template>
-  <v-card flat>
-    <v-tabs v-model="tab" color="primary" align-tabs="center">
-      <v-tab value="export-import">{{ t('family.settings.export_import_title') }}</v-tab>
-      <v-tab value="privacy">{{ t('family.privacy.title') }}</v-tab>
-    </v-tabs>
-
-    <v-window v-model="tab">
-      <v-window-item value="export-import">
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-card flat>
-                <v-card-title>{{ t('family.export.title') }}</v-card-title>
-                <v-card-text>
-                  <p>{{ t('family.export.description') }}</p>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn color="primary" @click="exportFamilyData" :loading="familyDataStore.exporting">
-                    {{ t('family.export.button') }}
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-card flat>
-                <v-card-title>{{ t('family.import.title') }}</v-card-title>
-                <v-card-text>
-                  <p>{{ t('family.import.description') }}</p>
-                  <v-file-input v-model="importFile" :label="t('family.import.file_input_label')" accept=".json"
-                    class="mt-4" prepend-icon="mdi-paperclip" show-size counter></v-file-input>
-                </v-card-text>
-                <v-card-actions>
-                  <v-btn color="primary" @click="importFamilyData" :loading="familyDataStore.importing"
-                    :disabled="!importFile">
-                    {{ t('family.import.button') }}
-                  </v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-window-item>
-
-      <v-window-item value="privacy">
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-card flat class="mb-4">
+          <v-card-title class="d-flex align-center pe-2">
+            <v-icon icon="mdi-database-export"></v-icon> &nbsp;{{ t('family.export.title') }}
+          </v-card-title>
+          <v-card-text>
+            <p>{{ t('family.export.description') }}</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="exportFamilyData" :loading="familyDataStore.exporting">
+              {{ t('family.export.button') }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="6">
+        <v-card flat class="mb-4">
+          <v-card-title class="d-flex align-center pe-2">
+            <v-icon icon="mdi-database-import"></v-icon> &nbsp;{{ t('family.import.title') }}
+          </v-card-title>
+          <v-card-text>
+            <p>{{ t('family.import.description') }}</p>
+            <v-file-input v-model="importFile" :label="t('family.import.file_input_label')" accept=".json"
+              class="mt-4" prepend-icon="mdi-paperclip" show-size counter></v-file-input>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" @click="importFamilyData" :loading="familyDataStore.importing"
+              :disabled="!importFile">
+              {{ t('family.import.button') }}
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      <v-col cols="12">
         <PrivacySettings :family-id="familyId" />
-      </v-window-item>
-    </v-window>
-  </v-card>
+      </v-col>
+    </v-row>
 </template>
 
 <script setup lang="ts">
@@ -65,7 +57,6 @@ const props = defineProps<{
   familyId: string;
 }>();
 
-const tab = ref('export-import'); // Default to export-import tab
 const importFile = ref<File | null>(null);
 
 const exportFamilyData = async () => {
