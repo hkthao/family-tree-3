@@ -143,7 +143,7 @@ const props = defineProps<{
   items: Member[];
   totalItems: number;
   loading: boolean;
-  search: string;
+  search?: string; // Changed to optional
   readOnly?: boolean; // Add readOnly prop
 }>();
 

@@ -35,7 +35,7 @@
 
     <!-- AI Create Member Drawer -->
     <v-navigation-drawer v-model="aiCreateDrawer" location="right" temporary width="650">
-      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId" @close="aiCreateDrawer = false" />
+      <NLEditorView v-if="aiCreateDrawer" :family-id="props.familyId || ''" @close="aiCreateDrawer = false" />
     </v-navigation-drawer>
   </div>
 </template>

@@ -3,11 +3,11 @@
     <v-card-text>
       <v-tabs v-model="selectedTab" class="mb-4">
         <v-tab value="general" data-testid="tab-general">{{ t('member.form.tab.general') }}</v-tab>
+        <v-tab value="members" data-testid="tab-members">{{ t('family.members.title') }}</v-tab>
+        <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
+        <v-tab v-if="canViewFaceDataTab" value="face-recognition" data-testid="tab-face-recognition">{{ t('face.face_data') }}</v-tab>
         <v-tab value="timeline" data-testid="tab-timeline">{{ t('member.form.tab.timeline') }}</v-tab>
         <v-tab value="calendar" data-testid="tab-calendar">{{ t('event.view.calendar') }}</v-tab>
-        <v-tab value="family-tree" data-testid="tab-family-tree">{{ t('family.tree.title') }}</v-tab>
-        <v-tab value="members" data-testid="tab-members">{{ t('family.members.title') }}</v-tab>
-        <v-tab v-if="canViewFaceDataTab" value="face-recognition" data-testid="tab-face-recognition">{{ t('face.face_data') }}</v-tab>
         <v-tab v-if="canManageFamily" value="family-settings" data-testid="tab-family-settings">{{ t('family.settings.title') }}</v-tab>
       </v-tabs>
 
