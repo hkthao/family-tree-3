@@ -29,7 +29,7 @@
     <template #item.avatarUrl="{ item }">
       <div class="d-flex justify-center">
         <v-avatar size="36" class="my-2">
-          <v-img :src="getMemberAvatar(item)" :alt="item.fullName" />
+          <v-img :src="getMemberAvatar(item)" :alt="item.fullName || ''" />
         </v-avatar>
       </div>
     </template>
