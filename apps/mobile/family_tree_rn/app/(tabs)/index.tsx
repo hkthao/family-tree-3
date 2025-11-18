@@ -5,6 +5,7 @@ import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
 import { Banner } from '@/components/home/Banner'; // Import Banner component
 import { FeaturesSection } from '@/components/home/FeaturesSection'; // Import FeaturesSection component
 import { HowItWorksSection } from '@/components/home/HowItWorksSection'; // Import HowItWorksSection component
+import { MediaPreviewSection } from '@/components/home/MediaPreviewSection'; // Import MediaPreviewSection component
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation(); // Use the useTranslation hook
@@ -20,6 +21,7 @@ export default function HomeScreen() {
         <Banner t={t} toggleLanguage={toggleLanguage} i18n={i18n} />
         <FeaturesSection t={t} />
         <HowItWorksSection t={t} />
+        <MediaPreviewSection t={t} />
         {/* You can add more content below the banner here */}
       </ScrollView>
     </View>

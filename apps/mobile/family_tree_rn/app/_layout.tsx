@@ -1,7 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
-import { PaperProvider } from 'react-native-paper'; // Import PaperProvider
+import { PaperProvider, Portal } from 'react-native-paper'; // Import PaperProvider and Portal
 import { PaperTheme } from '../constants/theme'; // Import custom theme
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -15,13 +15,15 @@ export default function RootLayout() {
 
   return (
     <PaperProvider theme={PaperTheme}> {/* Wrap with PaperProvider and apply custom theme */}
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-        </Stack>
-        {/* <StatusBar style="auto" /> Removed as PaperProvider handles status bar */}
-      </ThemeProvider>
+      <Portal.Host>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          </Stack>
+          {/* <StatusBar style="auto" /> Removed as PaperProvider handles status bar */}
+        </ThemeProvider>
+      </Portal.Host>
     </PaperProvider>
   );
 }
