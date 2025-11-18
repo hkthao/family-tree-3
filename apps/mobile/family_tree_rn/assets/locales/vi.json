@@ -37,5 +37,14 @@
   "home.privacy_security.title": "Quyền riêng tư & Bảo mật",
   "home.privacy_security.feature1": "Bảo mật dữ liệu bằng công nghệ mới nhất",
   "home.privacy_security.feature2": "Quyền riêng tư cho từng nhóm gia đình",
-  "home.privacy_security.feature3": "Không chia sẻ dữ liệu cho bên thứ ba"
+  "home.privacy_security.feature3": "Không chia sẻ dữ liệu cho bên thứ ba",
+  "search.placeholder": "Tìm kiếm gia đình theo tên, mã hoặc mô tả...",
+  "search.no_results": "Không tìm thấy gia đình nào.",
+  "search.try_different_query": "Thử một truy vấn tìm kiếm khác.",
+  "common.error_occurred": "Đã xảy ra lỗi",
+  "family.members": "Thành viên",
+  "family.generations": "Thế hệ",
+  "family.visibility": "Hiển thị",
+  "family.visibility.public": "Công khai",
+  "family.visibility.private": "Riêng tư"
 }
