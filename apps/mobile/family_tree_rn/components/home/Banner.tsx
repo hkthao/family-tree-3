@@ -28,9 +28,8 @@ export function Banner({ t, toggleLanguage, i18n }: BannerProps) {
         <Text variant="headlineLarge">{t('home.banner.title')}</Text>
         <Text variant="bodyLarge">{t('home.banner.description')}</Text>
         <Button mode="contained" onPress={() => { /* TODO: Navigate to create family tree screen */ }} style={styles.languageButton}>
-          BẮT ĐẦU NGAY
+          {t('home.banner.cta_button')}
         </Button>
-        <Text variant="bodyMedium" style={styles.createTreeText}>Tạo cây gia phả của bạn</Text>
       </LinearGradient>
     </View>
   );

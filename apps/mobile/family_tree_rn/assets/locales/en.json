@@ -13,5 +13,18 @@
   "appbar.title": "Family Tree",
   "home.banner.title": "Connect generations, tell your family's story",
   "home.banner.description": "Create visual family trees, share memories, and connect with relatives in minutes.",
-  "home.start_now_button": "Start Now"
+  "home.banner.cta_button": "GET STARTED NOW",
+  "home.features.title": "Highlighted Features",
+  "home.features.visual_tree.title": "Visual Family Tree",
+  "home.features.visual_tree.description": "Create visual family trees, easy drag and drop.",
+  "home.features.stories_memories.title": "Stories & Memories",
+  "home.features.stories_memories.description": "Save photos, videos, and stories of each member.",
+  "home.features.discover_connections.title": "Discover Connections",
+  "home.features.discover_connections.description": "Automatically detect relationships within the clan.",
+  "home.features.member_profiles.title": "Member Profiles",
+  "home.features.member_profiles.description": "Detailed personal profiles for each member.",
+  "home.features.smart_search.title": "Smart Search",
+  "home.features.smart_search.description": "Quick search by name, role, family branch.",
+  "home.features.privacy_control.title": "Privacy Control",
+  "home.features.privacy_control.description": "Control privacy for each family group."
 }

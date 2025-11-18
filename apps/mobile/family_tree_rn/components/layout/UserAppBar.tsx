@@ -34,7 +34,6 @@ export default function UserAppBar() {
         />
         <Appbar.Content
           title={t('appbar.title')} // Use translated title
-          titleStyle={{ color: PaperTheme.colors.primary }} // Apply primary color to title
           style={styles.appBarContent}
         />
       </Appbar.Header>

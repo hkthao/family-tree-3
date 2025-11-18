@@ -13,5 +13,18 @@
   "appbar.title": "Cây Gia Phả",
   "home.banner.title": "Kết nối thế hệ, kể chuyện gia đình bạn",
   "home.banner.description": "Tạo cây gia phả trực quan, chia sẻ kỷ niệm và kết nối người thân chỉ trong vài phút.",
-  "home.start_now_button": "Bắt đầu ngay"
+  "home.banner.cta_button": "BẮT ĐẦU NGAY",
+  "home.features.title": "Tính năng nổi bật",
+  "home.features.visual_tree.title": "Cây Gia Phả Trực Quan",
+  "home.features.visual_tree.description": "Tạo cây gia phả trực quan, kéo thả dễ dàng.",
+  "home.features.stories_memories.title": "Câu Chuyện & Kỷ Niệm",
+  "home.features.stories_memories.description": "Lưu giữ ảnh, video, câu chuyện của từng thành viên.",
+  "home.features.discover_connections.title": "Khám Phá Kết Nối",
+  "home.features.discover_connections.description": "Tự động phát hiện mối quan hệ trong họ tộc.",
+  "home.features.member_profiles.title": "Hồ Sơ Thành Viên",
+  "home.features.member_profiles.description": "Hồ sơ cá nhân chi tiết cho từng thành viên.",
+  "home.features.smart_search.title": "Tìm Kiếm Thông Minh",
+  "home.features.smart_search.description": "Tìm kiếm nhanh theo tên, vai trò, nhánh họ.",
+  "home.features.privacy_control.title": "Kiểm Soát Quyền Riêng Tư",
+  "home.features.privacy_control.description": "Kiểm soát quyền riêng tư cho từng nhóm gia đình."
 }
