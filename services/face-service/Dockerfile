@@ -12,16 +12,7 @@ RUN apt-get update && \
     libx11-dev \
     python3-dev \
     libgl1-mesa-glx \
-    libglib2.0-0 \
-    wget \
-    bzip2 && \
-    # Create models directory
-    mkdir -p app/models && \
-    # Download and extract dlib models
-    wget http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2 -O app/models/shape_predictor_68_face_landmarks.dat.bz2 && \
-    wget http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2 -O app/models/dlib_face_recognition_resnet_model_v1.dat.bz2 && \
-    bzip2 -d app/models/shape_predictor_68_face_landmarks.dat.bz2 && \
-    bzip2 -d app/models/dlib_face_recognition_resnet_model_v1.dat.bz2 && \
+    libglib2.0-0 && \
     # Clean up
     rm -rf /var/lib/apt/lists/*
 
