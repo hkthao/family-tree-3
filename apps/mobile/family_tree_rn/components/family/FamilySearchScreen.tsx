@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -140,13 +140,21 @@ export default function FamilySearchScreen() {
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const loadingRef = useRef(loading); // Create a ref to track loading state
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
 
+  // Keep the ref updated with the latest loading state
+  useEffect(() => {
+    loadingRef.current = loading;
+  }, [loading]);
+
   const loadFamilies = useCallback(
     async (currentPage: number, isRefreshing: boolean = false) => {
-      if (loading) return;
+      if (loadingRef.current) { // Use ref to check latest loading state
+        return;
+      }
 
       setLoading(true);
       setError(null);
@@ -160,13 +168,12 @@ export default function FamilySearchScreen() {
           controller.signal
         );
 
-        if (isRefreshing) {
-          setFamilies(data);
-        } else {
-          setFamilies((prevFamilies) => [...prevFamilies, ...data]);
-        }
+        setFamilies((prevFamilies) => {
+          const updatedFamilies = isRefreshing ? data : [...prevFamilies, ...data];
+          setHasMore(updatedFamilies.length < newTotalCount);
+          return updatedFamilies;
+        });
         setTotalCount(newTotalCount);
-        setHasMore(families.length + data.length < newTotalCount);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -178,11 +185,10 @@ export default function FamilySearchScreen() {
         setRefreshing(false);
       }
     },
-    [loading, searchQuery, families.length]
+    [searchQuery, setLoading, setError, setFamilies, setTotalCount, setHasMore] // Dependencies should be stable setters and searchQuery
   );
 
   useEffect(() => {
-    // Reset and load first page when search query changes
     setFamilies([]);
     setPage(1);
     setHasMore(true);
