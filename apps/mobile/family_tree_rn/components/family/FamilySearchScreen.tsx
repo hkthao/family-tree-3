@@ -237,9 +237,7 @@ export default function FamilySearchScreen() {
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchbar}
-        inputStyle={styles.searchbarInput}
-        iconColor={PaperTheme.colors.onSurfaceVariant}
-        placeholderTextColor={PaperTheme.colors.onSurfaceVariant}
+        showDivider={true}
         clearIcon={searchQuery.length > 0 ? () => (
           <IconButton
             icon="close-circle"
@@ -300,24 +298,17 @@ export default function FamilySearchScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // backgroundColor: PaperTheme.colors.background,
   },
   container: {
     flex: 1,
-    // backgroundColor: PaperTheme.colors.background,
     padding: SPACING_MEDIUM,
   },
   searchbar: {
-    // backgroundColor: PaperTheme.colors.surface,
     marginBottom: SPACING_MEDIUM,
-  },
-  searchbarInput: {
-    color: PaperTheme.colors.onSurface,
   },
   errorContainer: {
     padding: SPACING_MEDIUM,
     backgroundColor: PaperTheme.colors.errorContainer,
-    borderRadius: 8,
     marginBottom: SPACING_MEDIUM,
   },
   errorText: {
