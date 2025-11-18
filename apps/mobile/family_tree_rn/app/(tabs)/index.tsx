@@ -39,6 +39,5 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   fullScreenContainer: {
     flex: 1,
-    backgroundColor: PaperTheme.colors.background,
   },
 });
