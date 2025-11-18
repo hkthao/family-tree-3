@@ -1,13 +1,12 @@
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
 
 export default function DonateScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Donate Tab</ThemedText>
-      <ThemedText>This is the Donate screen.</ThemedText>
-    </ThemedView>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">Donate Tab</Text>
+      <Text variant="bodyMedium">This is the Donate screen.</Text>
+    </View>
   );
 }
 

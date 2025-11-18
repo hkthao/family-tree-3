@@ -1,15 +1,14 @@
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">{t('tab.settings')}</ThemedText>
-      <ThemedText>This is the Settings screen.</ThemedText>
-    </ThemedView>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">{t('tab.settings')}</Text>
+      <Text variant="bodyMedium">This is the Settings screen.</Text>
+    </View>
   );
 }
 

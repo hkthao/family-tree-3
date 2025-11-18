@@ -1,13 +1,12 @@
-import { StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
 
 export default function StoryScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title">Story Tab</ThemedText>
-      <ThemedText>This is the Story screen.</ThemedText>
-    </ThemedView>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">Story Tab</Text>
+      <Text variant="bodyMedium">This is the Story screen.</Text>
+    </View>
   );
 }
 

@@ -10,5 +10,8 @@
   "tab.settings": "Settings",
   "userAppBar.profile": "Profile",
   "userAppBar.logout": "Logout",
-  "appbar.title": "Family Tree"
+  "appbar.title": "Family Tree",
+  "home.banner.title": "Connect generations, tell your family's story",
+  "home.banner.description": "Create visual family trees, share memories, and connect with relatives in minutes.",
+  "home.start_now_button": "Start Now"
 }
