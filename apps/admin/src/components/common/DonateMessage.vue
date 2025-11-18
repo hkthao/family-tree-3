@@ -8,7 +8,7 @@
   >
     Ủng hộ tác giả ☕️
     <br>
-    Mình xây dựng app Gia Phả Huỳnh như một dự án cộng đồng, không quảng cáo, không tính phí.
+    Mình xây dựng app Gia Phả như một dự án cộng đồng, không quảng cáo, không tính phí.
     <br>
     Nếu bạn thấy app hữu ích, hãy ủng hộ mình một khoản nhỏ để duy trì server và phát triển thêm tính năng mới.
     <br>
