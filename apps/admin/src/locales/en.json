@@ -209,6 +209,7 @@
   "common.cancel": "Cancel",
   "common.loadMore": "Load More",
   "common.save": "Save",
+  "common.clearAll": "Clear All",
   "family.form.rules.nameRequired": "Name is required.",
   "family.permissions.managers": "Managers",
   "family.permissions.viewers": "Viewers",
