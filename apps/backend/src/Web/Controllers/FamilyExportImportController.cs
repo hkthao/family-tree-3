@@ -30,13 +30,19 @@ public class FamilyExportImportController : ControllerBase
         return NotFound(result.Error);
     }
 
-    [HttpPost("import")]
+    [HttpPost("import/{familyId}")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<Guid>> ImportFamily([FromBody] FamilyExportDto familyData)
+    public async Task<ActionResult<Guid>> ImportFamily(Guid familyId, [FromQuery] bool clearExistingData = true, [FromBody] FamilyExportDto familyData)
     {
-        var result = await _mediator.Send(new ImportFamilyCommand(familyData));
+        var command = new ImportFamilyCommand
+        {
+            FamilyId = familyId,
+            FamilyData = familyData,
+            ClearExistingData = clearExistingData
+        };
+        var result = await _mediator.Send(command);
         if (result.IsSuccess)
         {
             return Ok(result.Value);

@@ -560,6 +560,7 @@
   "family.import.description": "Nhập dữ liệu gia đình từ một tệp JSON. Thao tác này sẽ tạo một gia đình mới với tất cả các thành viên, mối quan hệ và sự kiện liên quan. Dữ liệu hiện có sẽ không bị ghi đè.",
   "family.import.file_input_label": "Chọn Tệp JSON",
   "family.import.button": "Nhập Dữ liệu",
+  "family.import.clearExistingDataLabel": "Xóa dữ liệu hiện có",
   "family.export.success": "Xuất dữ liệu gia đình thành công!",
   "family.export.error": "Lỗi khi xuất dữ liệu gia đình",
   "family.import.success": "Nhập dữ liệu gia đình thành công! ID Gia đình mới: {id}",

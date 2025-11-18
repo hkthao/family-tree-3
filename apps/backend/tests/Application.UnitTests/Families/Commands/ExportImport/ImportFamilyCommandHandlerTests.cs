@@ -70,7 +70,7 @@ public class ImportFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
         // Authorization check is not in handler, so no setup here.
 
-        var command = new ImportFamilyCommand(familyExportDto);
+        var command = new ImportFamilyCommand { FamilyData = familyExportDto, FamilyId = Guid.NewGuid() };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -157,7 +157,7 @@ public class ImportFamilyCommandHandlerTests : TestBase
         _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid());
         // Authorization check is not in handler, so no setup here.
 
-        var command = new ImportFamilyCommand(null!); // Pass null DTO
+        var command = new ImportFamilyCommand { FamilyData = null!, FamilyId = Guid.NewGuid() };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

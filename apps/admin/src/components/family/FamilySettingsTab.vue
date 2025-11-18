@@ -25,6 +25,7 @@
             <p>{{ t('family.import.description') }}</p>
             <v-file-input v-model="importFile" :label="t('family.import.file_input_label')" accept=".json"
               class="mt-4" prepend-icon="mdi-paperclip" show-size counter></v-file-input>
+            <v-checkbox v-model="clearExistingData" :label="t('family.import.clearExistingDataLabel')"></v-checkbox>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -58,6 +59,7 @@ const props = defineProps<{
 }>();
 
 const importFile = ref<File | null>(null);
+const clearExistingData = ref(true);
 
 const exportFamilyData = async () => {
   const success = await familyDataStore.exportFamilyData(props.familyId);
@@ -79,7 +81,7 @@ const importFamilyData = async () => {
       try {
         const fileContent = e.target?.result as string;
         const familyData: FamilyExportDto = JSON.parse(fileContent);
-        const newFamilyId = await familyDataStore.importFamilyData(familyData);
+        const newFamilyId = await familyDataStore.importFamilyData(props.familyId, familyData, clearExistingData.value);
 
         if (newFamilyId) {
           showSnackbar(`${t('family.import.success')}: ${newFamilyId}`, 'success');

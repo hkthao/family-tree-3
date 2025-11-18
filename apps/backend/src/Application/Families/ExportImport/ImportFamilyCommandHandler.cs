@@ -27,25 +27,40 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
             return Result<Guid>.Failure("Family data cannot be null.", ErrorSources.Validation);
         }
 
-        // 1. Create new Family entity
-        var newFamily = Family.Create(
+        if (request.FamilyId == null)
+        {
+            return Result<Guid>.Failure("FamilyId must be provided to update an existing family.", ErrorSources.Validation);
+        }
+
+        var familyToUpdate = await _context.Families
+            .Include(f => f.Members)
+            .Include(f => f.Relationships)
+            .Include(f => f.Events)
+            .FirstOrDefaultAsync(f => f.Id == request.FamilyId.Value, cancellationToken);
+
+        if (familyToUpdate == null)
+        {
+            return Result<Guid>.Failure($"Family with ID '{request.FamilyId.Value}' not found.", ErrorSources.NotFound);
+        }
+
+        // Clear existing data
+        if (request.ClearExistingData)
+        {
+            _context.Events.RemoveRange(familyToUpdate.Events);
+            _context.Relationships.RemoveRange(familyToUpdate.Relationships);
+            _context.Members.RemoveRange(familyToUpdate.Members);
+        }
+        
+        // Update family properties
+        familyToUpdate.UpdateFamilyDetails(
             request.FamilyData.Name,
-            request.FamilyData.Code ?? GenerateUniqueCode("FAM"),
             request.FamilyData.Description,
             request.FamilyData.Address,
             request.FamilyData.AvatarUrl,
             request.FamilyData.Visibility,
-            _currentUser.UserId // Assign current user as creator
+            familyToUpdate.Code // Keep existing code
         );
 
-        // Generate new GUID for the imported family
-        newFamily.Id = Guid.NewGuid();
-        newFamily.Created = _dateTime.Now;
-        newFamily.CreatedBy = _currentUser.UserId.ToString();
-        newFamily.LastModified = _dateTime.Now;
-        newFamily.LastModifiedBy = _currentUser.UserId.ToString();
-
-        _context.Families.Add(newFamily);
 
         // Map old member IDs to new member IDs
         var memberIdMap = new Dictionary<Guid, Guid>();
@@ -57,7 +72,7 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
                 memberDto.LastName,
                 memberDto.FirstName,
                 memberDto.Code ?? GenerateUniqueCode("MEM"),
-                newFamily.Id, // Assign to the new family
+                familyToUpdate.Id, // Assign to the new family
                 memberDto.Nickname,
                 memberDto.Gender?.ToString(),
                 memberDto.DateOfBirth,
@@ -97,7 +112,7 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
             }
 
             var newRelationship = new Relationship(
-                newFamily.Id, // familyId
+                familyToUpdate.Id, // familyId
                 newSourceMemberId, // sourceMemberId
                 newTargetMemberId, // targetMemberId
                 relationshipDto.Type, // type
@@ -120,7 +135,7 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
                 eventDto.Name,
                 eventDto.Code ?? GenerateUniqueCode("EVT"),
                 eventDto.Type,
-                newFamily.Id // Assign to the new family
+                familyToUpdate.Id // Assign to the new family
             );
 
             newEvent.UpdateEvent(
@@ -150,23 +165,15 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
             }
 
             _context.Events.Add(newEvent);
-
-            // Also add to newFamily's private _events collection for in-memory testing
-            var eventsField = typeof(Family).GetField("_events", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (eventsField != null)
-            {
-                var eventsCollection = eventsField.GetValue(newFamily) as HashSet<Event>;
-                eventsCollection?.Add(newEvent);
-            }
         }
 
         await _context.SaveChangesAsync(cancellationToken);
 
         // Recalculate family stats after import
-        newFamily.RecalculateStats();
+        familyToUpdate.RecalculateStats();
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Result<Guid>.Success(newFamily.Id);
+        return Result<Guid>.Success(familyToUpdate.Id);
     }
 
     private string GenerateUniqueCode(string prefix)
