@@ -26,5 +26,9 @@
   "home.features.smart_search.title": "Smart Search",
   "home.features.smart_search.description": "Quick search by name, role, family branch.",
   "home.features.privacy_control.title": "Privacy Control",
-  "home.features.privacy_control.description": "Control privacy for each family group."
+  "home.features.privacy_control.description": "Control privacy for each family group.",
+  "home.how_it_works.title": "How It Works – 3 Simple Steps",
+  "home.how_it_works.step1": "Create an Account",
+  "home.how_it_works.step2": "Add Members & Build Your Family Tree",
+  "home.how_it_works.step3": "Share with the Whole Family"
 }

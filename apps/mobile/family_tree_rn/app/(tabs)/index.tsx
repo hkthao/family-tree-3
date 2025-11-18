@@ -4,6 +4,7 @@ import '../../src/i18n'; // Import i18n configuration
 import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
 import { Banner } from '@/components/home/Banner'; // Import Banner component
 import { FeaturesSection } from '@/components/home/FeaturesSection'; // Import FeaturesSection component
+import { HowItWorksSection } from '@/components/home/HowItWorksSection'; // Import HowItWorksSection component
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation(); // Use the useTranslation hook
@@ -18,6 +19,7 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <Banner t={t} toggleLanguage={toggleLanguage} i18n={i18n} />
         <FeaturesSection t={t} />
+        <HowItWorksSection t={t} />
         {/* You can add more content below the banner here */}
       </ScrollView>
     </View>

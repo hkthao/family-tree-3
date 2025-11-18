@@ -26,5 +26,9 @@
   "home.features.smart_search.title": "Tìm Kiếm Thông Minh",
   "home.features.smart_search.description": "Tìm kiếm nhanh theo tên, vai trò, nhánh họ.",
   "home.features.privacy_control.title": "Kiểm Soát Quyền Riêng Tư",
-  "home.features.privacy_control.description": "Kiểm soát quyền riêng tư cho từng nhóm gia đình."
+  "home.features.privacy_control.description": "Kiểm soát quyền riêng tư cho từng nhóm gia đình.",
+  "home.how_it_works.title": "Cách hoạt động – 3 bước đơn giản",
+  "home.how_it_works.step1": "Tạo tài khoản",
+  "home.how_it_works.step2": "Thêm thành viên & xây cây gia phả",
+  "home.how_it_works.step3": "Chia sẻ với cả gia đình"
 }
