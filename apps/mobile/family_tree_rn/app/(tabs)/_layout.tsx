@@ -17,7 +17,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: PaperTheme.colors.primary, // Use primary color from react-native-paper theme
-        tabBarInactiveTintColor: PaperTheme.colors.textSecondary, // Use secondary text color for inactive tabs
+        tabBarInactiveTintColor: PaperTheme.colors.onSurfaceVariant, // Use secondary text color for inactive tabs
         headerShown: false,
         tabBarBackground: () => (
           <View style={{ flex: 1, backgroundColor: PaperTheme.colors.background }} />

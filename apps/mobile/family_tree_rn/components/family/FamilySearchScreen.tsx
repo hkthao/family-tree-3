@@ -234,14 +234,14 @@ export default function FamilySearchScreen() {
         inputStyle={styles.searchbarInput}
         iconColor={PaperTheme.colors.onSurfaceVariant}
         placeholderTextColor={PaperTheme.colors.onSurfaceVariant}
-        clearIcon={() => (
+        clearIcon={searchQuery.length > 0 ? () => (
           <IconButton
             icon="close-circle"
-            color={PaperTheme.colors.onSurfaceVariant}
+            iconColor={PaperTheme.colors.onSurfaceVariant}
             size={20}
             onPress={() => setSearchQuery('')}
           />
-        )}
+        ) : undefined}
       />
 
       {error && (
