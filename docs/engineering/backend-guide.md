@@ -59,7 +59,7 @@ Dự án backend được tổ chức theo Clean Architecture, với các lớp 
     ```bash
     dotnet run --project src/Web
     ```
-    API sẽ khả dụng tại `http://localhost:5000` và Swagger UI tại `http://localhost:5000/swagger`.
+    API sẽ khả dụng tại `http://localhost:8080` và Swagger UI tại `http://localhost:8080/swagger`.
 
 ### Chạy với Docker Compose
 
@@ -70,17 +70,7 @@ cd ../.. # Quay về thư mục gốc của dự án
 docker-compose -f infra/docker-compose.yml up --build
 ```
 
-## 3. Cấu trúc Dự án Backend
-
-Dự án backend tuân thủ Clean Architecture, được chia thành các lớp chính:
-
-*   **`src/Domain`**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), enum, ngoại lệ (Exceptions), giao diện (Interfaces) và các quy tắc nghiệp vụ cốt lõi. Đây là trái tim của ứng dụng, độc lập với các lớp khác.
-*   **`src/Application`**: Chứa logic nghiệp vụ của ứng dụng, bao gồm các Command, Query, Handler, DTOs và các dịch vụ ứng dụng (Application Services). Lớp này phụ thuộc vào `Domain`.
-*   **`src/Infrastructure`**: Chứa các chi tiết triển khai như truy cập dữ liệu (Entity Framework Core), dịch vụ bên ngoài (ví dụ: gửi email, lưu trữ tệp), và các dịch vụ khác phụ thuộc vào công nghệ cụ thể. Lớp này phụ thuộc vào `Application` và `Domain`.
-*   **`src/Web`**: Điểm vào của ứng dụng, chứa các API Controllers, cấu hình xác thực, và các cấu hình liên quan đến HTTP. Lớp này phụ thuộc vào tất cả các lớp khác.
-*   **`src/CompositionRoot`**: Quản lý việc đăng ký các dependency và cấu hình IoC container.
-
-## 4. Quy trình Phát triển Tính năng
+## 3. Quy trình Phát triển Tính năng
 
 1.  **Tạo nhánh mới:** Luôn làm việc trên một nhánh tính năng mới (ví dụ: `feature/ten-tinh-nang-moi`).
 2.  **Phát triển:**
@@ -95,7 +85,7 @@ Dự án backend tuân thủ Clean Architecture, được chia thành các lớp
 4.  **Viết và chạy Unit Tests:** Xem phần 5. Kiểm thử.
 5.  **Tạo Pull Request:** Khi hoàn thành, tạo một Pull Request lên nhánh `develop`.
 
-## 5. Kiểm thử
+## 4. Kiểm thử
 
 Dự án backend bao gồm các Unit Tests và Integration Tests để đảm bảo chất lượng mã và hành vi đúng đắn của ứng dụng.
 
@@ -151,11 +141,11 @@ Trong môi trường CI (GitHub Actions), các tests được chạy tự độn
     *   **Ví dụ**: Khi kiểm thử `FamiliesController`, bạn sẽ gửi một `GET` request đến `/api/families`, mock `IMediator.Send()` để trả về danh sách gia đình mẫu, và xác minh rằng phản hồi HTTP là `200 OK` với dữ liệu JSON mong muốn.
 
 
-## 6. CI/CD và Docker
+## 5. CI/CD và Docker
 
 Dự án sử dụng GitHub Actions cho quy trình CI/CD để tự động hóa việc kiểm tra, xây dựng và đóng gói ứng dụng.
 
-### 6.1. Workflow GitHub Actions (`.github/workflows/ci.yml`)
+### 5.1. Workflow GitHub Actions (`.github/workflows/ci.yml`)
 
 Workflow `ci.yml` được kích hoạt khi có `push` lên nhánh `main` hoặc khi có `pull_request` nhắm vào nhánh `main`. Nó bao gồm hai job chính:
 
@@ -177,7 +167,7 @@ Workflow `ci.yml` được kích hoạt khi có `push` lên nhánh `main` hoặc
     *   **Xây dựng Docker Image Frontend**: Sử dụng `infra/Dockerfile.frontend` để xây dựng image Docker cho frontend. Image này được gắn thẻ `hkthao/family-tree-frontend:latest`.
     *   Các image Docker sau khi được xây dựng sẽ được tải lên dưới dạng artifact.
 
-### 6.2. Mô tả Docker Images
+### 5.2. Mô tả Docker Images
 
 Dự án sử dụng Docker để đóng gói ứng dụng, đảm bảo môi trường nhất quán giữa các môi trường phát triển, kiểm thử và triển khai.
 
@@ -192,7 +182,7 @@ Dự án sử dụng Docker để đóng gói ứng dụng, đảm bảo môi tr
     *   **Giai đoạn build**: Sử dụng `node:20-alpine` để cài đặt phụ thuộc và xây dựng ứng dụng Vue.js bằng Vite.
     *   **Giai đoạn phục vụ (serve)**: Sử dụng `nginx:alpine` làm base image cuối cùng. Các tệp tĩnh của ứng dụng frontend đã được build sẽ được sao chép vào thư mục phục vụ của Nginx (`/usr/share/nginx/html`), và Nginx sẽ chịu trách nhiệm phục vụ ứng dụng.
 
-### 6.3. Kiểm thử Local Build giống như CI
+### 5.3. Kiểm thử Local Build giống như CI
 
 Để đảm bảo rằng các thay đổi của bạn sẽ vượt qua CI, bạn có thể chạy các bước kiểm tra tương tự cục bộ:
 
@@ -219,21 +209,21 @@ Dự án sử dụng Docker để đóng gói ứng dụng, đảm bảo môi tr
     Các lệnh này sẽ xây dựng các image Docker tương tự như cách CI thực hiện, giúp bạn phát hiện sớm các vấn đề liên quan đến Dockerfile.
 
 
-## 7. Cấu hình và Bảo mật
+## 6. Cấu hình và Bảo mật
 
 Việc quản lý cấu hình và đảm bảo bảo mật là rất quan trọng đối với bất kỳ ứng dụng nào. Phần này mô tả cách backend của Family Tree xử lý các khía cạnh này.
 
-### 7.1. Biến môi trường và Tệp cấu hình
+### 6.1. Biến môi trường và Tệp cấu hình
 
 *   **`appsettings.json`**: Đây là tệp cấu hình chính của ứng dụng ASP.NET Core. Nó chứa các cài đặt chung, chuỗi kết nối cơ sở dữ liệu mặc định, và các cấu hình khác không nhạy cảm. Các tệp như `appsettings.Development.json` hoặc `appsettings.Production.json` có thể được sử dụng để ghi đè các cài đặt tùy thuộc vào môi trường chạy ứng dụng.
-*   **Biến môi trường**: Đối với các thông tin nhạy cảm (ví dụ: mật khẩu cơ sở dữ liệu, khóa API) hoặc các cài đặt cụ thể cho từng môi trường triển khai, chúng ta sử dụng biến môi trường. Khi chạy cục bộ, bạn có thể sử dụng tệp `.env` (hoặc các biến môi trường hệ thống) để định nghĩa các giá trị này. Trong môi trường Docker, các biến môi trường được truyền vào container.
-*   **`src/backend/.env.example`**: Cung cấp một mẫu về các biến môi trường cần thiết cho ứng dụng backend. Bạn nên tạo một tệp `.env` dựa trên mẫu này và điền các giá trị thực tế khi chạy cục bộ.
+*   **Biến môi trường**: Đối với các thông tin nhạy cảm (ví dụ: mật khẩu cơ sở dữ liệu, khóa API) hoặc các cài đặt cụ thể cho từng môi trường triển khai, chúng ta sử dụng biến môi trường. Khi chạy cục bộ với Docker Compose, các biến môi trường được định nghĩa trực tiếp trong tệp `infra/docker-compose.yml`. Trong môi trường Docker, các biến môi trường được truyền vào container.
+*   **`infra/docker-compose.yml`**: Đây là nơi chính để định nghĩa các biến môi trường cho môi trường phát triển cục bộ khi sử dụng Docker Compose. Các biến này sẽ được truyền vào các service (backend, database, v.v.) khi container được khởi tạo.
 
-### 7.2. Secrets trong GitHub Actions
+### 6.2. Secrets trong GitHub Actions
 
 Các thông tin nhạy cảm (ví dụ: Docker Hub credentials, khóa bí mật JWT) được sử dụng trong quy trình CI/CD của GitHub Actions được lưu trữ an toàn dưới dạng GitHub Secrets. Điều này đảm bảo rằng các thông tin này không bao giờ được commit trực tiếp vào mã nguồn và chỉ có thể được truy cập bởi các workflow được ủy quyền.
 
-### 7.3. Nguyên tắc Bảo mật
+### 6.3. Nguyên tắc Bảo mật
 
 *   **JWT (JSON Web Tokens)**:
     *   Được sử dụng để xác thực và ủy quyền người dùng. Sau khi người dùng đăng nhập, backend sẽ tạo một JWT và gửi về cho frontend. Frontend sẽ đính kèm JWT này vào các yêu cầu API tiếp theo để chứng minh danh tính và quyền hạn của người dùng.
@@ -245,7 +235,7 @@ Các thông tin nhạy cảm (ví dụ: Docker Hub credentials, khóa bí mật 
 *   **Kiểm tra đầu vào**: Tất cả đầu vào từ người dùng đều được xác thực và làm sạch để ngăn chặn các cuộc tấn công như SQL Injection, Cross-Site Scripting (XSS).
 
 
-## 8. Xử lý sự cố (Troubleshooting)
+## 7. Xử lý sự cố (Troubleshooting)
 
 *   **Lỗi kết nối cơ sở dữ liệu:**
     *   Kiểm tra chuỗi kết nối trong `appsettings.json`.

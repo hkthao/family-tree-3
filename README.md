@@ -58,7 +58,7 @@ npm run dev
 
 Đây là cách nhanh nhất và được khuyến nghị để chạy tất cả các ứng dụng và Database trong môi trường phát triển.
 
-1.  **Cấu hình biến môi trường**: Tạo tệp `.env` trong thư mục `apps/backend` và `apps/admin` dựa trên các tệp `.env.example` tương ứng. Cấu hình các biến môi trường cần thiết như chuỗi kết nối cơ sở dữ liệu, thông tin Auth0 (Domain, Client ID, Audience), và các khóa API khác.
+1.  **Cấu hình biến môi trường**: Khi chạy với Docker Compose, các biến môi trường được định nghĩa trực tiếp trong tệp `infra/docker-compose.yml`. Các tệp `.env` trong các thư mục `apps/backend` và `apps/admin` chỉ được sử dụng khi chạy các ứng dụng riêng lẻ mà không thông qua Docker Compose.
 2.  **Chạy Docker Compose:**
     ```bash
     docker-compose -f infra/docker-compose.yml up --build
@@ -119,13 +119,22 @@ family-tree-3/
 │   └── ui-components/ # (Tùy chọn) Nơi chia sẻ các component UI giữa `admin` và `public`
 ├── infra/
 │   ├── docker-compose.yml
-│   ├── Dockerfile.backend
-│   ├── Dockerfile.admin
-│   └── Dockerfile.face-service
+│   ├── docker-compose.prod.yml
+│   ├── nginx/
+│   └── services/
+│       └── face-service/
 ├── .github/workflows/ # Các workflow CI/CD
 ├── docs/              # Tài liệu dự án
 ├── tests/             # Các bài kiểm thử tổng thể
-└── README.md
+├── .gitignore
+├── CODE_OF_CONDUCT.md
+├── GEMINI.md
+├── LICENSE
+├── omnisharp.json
+├── package.json
+├── PULL_REQUEST_TEMPLATE.md
+├── README.md
+└── .config/
 ```
 
 ## 7. 🧭 Tài liệu chi tiết (References)
@@ -137,6 +146,7 @@ family-tree-3/
 *   [**Hướng dẫn Frontend (Admin)**](./docs/engineering/frontend-guide.md)
 *   [**Tham chiếu API**](./docs/engineering/api-reference.md)
 *   [**Mô hình Dữ liệu**](./docs/engineering/data-model.md)
+*   [**Đội ngũ Phát triển**](./docs/project/team.md)
 
 ## 8. 👥 Đóng góp (Contributing)
 

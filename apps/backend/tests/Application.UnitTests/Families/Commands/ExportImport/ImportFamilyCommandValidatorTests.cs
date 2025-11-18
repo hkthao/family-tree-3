@@ -1,8 +1,8 @@
+using backend.Application.Families.ExportImport;
+using backend.Domain.Enums;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Families.ExportImport;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Families.Commands.ExportImport;
 
@@ -18,7 +18,7 @@ public class ImportFamilyCommandValidatorTests
     [Fact]
     public void ShouldHaveError_WhenFamilyDataIsNull()
     {
-        var command = new ImportFamilyCommand(null!);
+        var command = new ImportFamilyCommand { FamilyData = null! };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData");
     }
@@ -27,7 +27,7 @@ public class ImportFamilyCommandValidatorTests
     public void ShouldHaveError_WhenFamilyNameIsEmpty()
     {
         var familyData = new FamilyExportDto { Name = "", Code = "FAM1", Visibility = "Private" };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Name");
     }
@@ -36,7 +36,7 @@ public class ImportFamilyCommandValidatorTests
     public void ShouldHaveError_WhenFamilyCodeIsEmpty()
     {
         var familyData = new FamilyExportDto { Name = "Test Family", Code = "", Visibility = "Private" };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Code");
     }
@@ -45,7 +45,7 @@ public class ImportFamilyCommandValidatorTests
     public void ShouldHaveError_WhenFamilyVisibilityIsInvalid()
     {
         var familyData = new FamilyExportDto { Name = "Test Family", Code = "FAM1", Visibility = "Invalid" };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Visibility");
     }
@@ -54,7 +54,7 @@ public class ImportFamilyCommandValidatorTests
     public void ShouldNotHaveError_WhenFamilyDataIsValid()
     {
         var familyData = new FamilyExportDto { Name = "Test Family", Code = "FAM1", Visibility = "Private" };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.ShouldNotHaveAnyValidationErrors();
     }
@@ -64,13 +64,15 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { FirstName = "", LastName = "Doe", Code = "MEM1", Gender = Gender.Male }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Members[0].FirstName");
     }
@@ -80,13 +82,15 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { FirstName = "John", LastName = "", Code = "MEM1", Gender = Gender.Male }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Members[0].LastName");
     }
@@ -96,13 +100,15 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { FirstName = "John", LastName = "Doe", Code = "", Gender = Gender.Male }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Members[0].Code");
     }
@@ -112,7 +118,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe", Code = "MEM1", Gender = Gender.Male }
@@ -122,7 +130,7 @@ public class ImportFamilyCommandValidatorTests
                 new RelationshipExportDto { SourceMemberId = Guid.Empty, TargetMemberId = Guid.NewGuid(), Type = RelationshipType.Husband }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Relationships[0].SourceMemberId");
     }
@@ -132,7 +140,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe", Code = "MEM1", Gender = Gender.Male }
@@ -142,7 +152,7 @@ public class ImportFamilyCommandValidatorTests
                 new RelationshipExportDto { SourceMemberId = Guid.NewGuid(), TargetMemberId = Guid.Empty, Type = RelationshipType.Husband }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Relationships[0].TargetMemberId");
     }
@@ -152,13 +162,15 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Events = new List<EventExportDto>
             {
                 new EventExportDto { Name = "", Code = "EVT1", Type = EventType.Birth, StartDate = DateTime.Now }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Events[0].Name");
     }
@@ -168,13 +180,15 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Events = new List<EventExportDto>
             {
                 new EventExportDto { Name = "Birth", Code = "", Type = EventType.Birth, StartDate = DateTime.Now }
             }
         };
-        var command = new ImportFamilyCommand(familyData);
+        var command = new ImportFamilyCommand { FamilyData = familyData };
         var result = _validator.TestValidate(command);
         result.Errors.Should().Contain(e => e.PropertyName == "FamilyData.Events[0].Code");
     }

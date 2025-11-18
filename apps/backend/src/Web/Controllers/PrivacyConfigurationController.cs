@@ -1,8 +1,8 @@
 using backend.Application.Common.Models;
 using backend.Application.PrivacyConfigurations.Commands;
 using backend.Application.PrivacyConfigurations.Queries;
-using Microsoft.AspNetCore.Mvc;
 using MediatR; // Add this using directive
+using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
 

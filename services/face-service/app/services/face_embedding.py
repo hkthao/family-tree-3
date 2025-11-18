@@ -24,16 +24,10 @@ class FaceEmbeddingService:
     def __init__(self):
         try:
             # Load Dlib's face landmark predictor
-            predictor_path = os.getenv(
-                "DLIB_PREDICTOR_PATH",
-                "app/models/shape_predictor_68_face_landmarks.dat"
-            )
+            predictor_path = "app/models/dlib_models/shape_predictor_68_face_landmarks.dat"
             self.predictor = dlib.shape_predictor(predictor_path)
             # Load Dlib's face recognition model
-            encoder_path = os.getenv(
-                "DLIB_ENCODER_PATH",
-                "app/models/dlib_face_recognition_resnet_model_v1.dat"
-            )
+            encoder_path = "app/models/dlib_models/dlib_face_recognition_resnet_model_v1.dat"
             self.face_encoder = dlib.face_recognition_model_v1(encoder_path)
             logger.info("FaceEmbeddingService initialized with Dlib models.")
 

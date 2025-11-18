@@ -1,45 +1,38 @@
 <template>
   <div v-if="parsedResult">
-    <h3 class="text-center my-4">{{ t('naturalLanguage.editor.parsedResultTitle') }}</h3>
+    <h3 class="text-center mt-4 text-uppercase">{{ t('naturalLanguage.editor.parsedResultTitle') }}</h3>
+    <v-row justify="end">
+      <v-col cols="auto">
+        <v-btn variant="text" color="primary" @click="clearAll">
+          {{ t('common.clearAll') }}
+        </v-btn>
+      </v-col>
+    </v-row>
     <v-row>
       <!-- Members Column -->
       <v-col cols="12" md="6" class="d-flex" v-for="(member, index) in sortedMembers" :key="`member-${index}`">
-        <ParsedMemberCard
-          :member="member"
-          :all-members="sortedMembers"
-          :all-relationships="parsedResult.relationships"
-          :serial-number="index + 1"
-          @delete="deleteMember(index)"
-          @save-member="saveMember(member, index)"
-        />
+        <ParsedMemberCard :member="member" :all-members="sortedMembers" :all-relationships="parsedResult.relationships"
+          :serial-number="index + 1" @delete="deleteMember(index)" @save-member="saveMember(member, index)" />
       </v-col>
     </v-row>
 
-     <v-row>
+    <v-row>
       <!-- Relationships Column -->
-      <v-col cols="12" md="6" class="d-flex" v-for="(relationship, index) in parsedResult.relationships" :key="`relationship-${index}`">
-        <ParsedRelationshipCard
-          :relationship="relationship"
-          :all-members="sortedMembers"
-          :serial-number="index + 1"
-          @delete="deleteRelationship(index)"
-          @save-relationship="saveRelationship(relationship, index)"
-        />
+      <v-col cols="12" md="6" class="d-flex" v-for="(relationship, index) in parsedResult.relationships"
+        :key="`relationship-${index}`">
+        <ParsedRelationshipCard :relationship="relationship" :all-members="sortedMembers" :serial-number="index + 1"
+          @delete="deleteRelationship(index)" @save-relationship="saveRelationship(relationship, index)" />
       </v-col>
     </v-row>
 
     <v-row>
       <!-- Events Column -->
       <v-col cols="12" md="6" class="d-flex" v-for="(event, index) in parsedResult.events" :key="`event-${index}`">
-        <ParsedEventCard
-          :event="event"
-          :serial-number="index + 1"
-          @delete="deleteEvent(index)"
-          @save-event="saveEvent(event, index)"
-        />
+        <ParsedEventCard :event="event" :serial-number="index + 1" @delete="deleteEvent(index)"
+          @save-event="saveEvent(event, index)" />
       </v-col>
     </v-row>
-   
+
   </div>
 </template>
 
@@ -58,10 +51,11 @@ const props = defineProps<{
 const emit = defineEmits([
   'delete-member',
   'delete-event',
-  'delete-relationship', // New emit
+  'delete-relationship',
   'save-member',
   'save-event',
-  'save-relationship', // New emit
+  'save-relationship',
+  'clear-all',
 ]);
 
 const { t } = useI18n();
@@ -117,5 +111,9 @@ const saveEvent = (event: EventDataDto, index: number) => {
 
 const saveRelationship = (relationship: RelationshipDataDto, index: number) => {
   emit('save-relationship', relationship, index);
+};
+
+const clearAll = () => {
+  emit('clear-all');
 };
 </script>

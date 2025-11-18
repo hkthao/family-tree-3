@@ -41,11 +41,11 @@ export const useFamilyDataStore = defineStore('familyData', {
       }
     },
 
-    async importFamilyData(familyData: FamilyExportDto) {
+    async importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean = true) {
       this.importing = true;
       this.error = null;
       try {
-        const result = await this.services.familyData.importFamilyData(familyData);
+        const result = await this.services.familyData.importFamilyData(familyId, familyData, clearExistingData);
 
         if (result.ok) {
           return result.value; // Return new family ID

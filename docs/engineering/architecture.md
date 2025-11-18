@@ -22,30 +22,33 @@ Sơ đồ này cho thấy cái nhìn tổng quan nhất về hệ thống, bao g
 graph TD
     A[Người dùng] -->|Sử dụng| B(Hệ thống Cây Gia Phả)
     B -->|Lưu trữ dữ liệu| C(Cơ sở dữ liệu MySQL)
+    B -->|Tích hợp AI| D[Nhà cung cấp AI bên ngoài]
 ```
 
--   **Người dùng**: Người quản lý gia phả, thành viên gia đình.
--   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta, hỗ trợ đa ngôn ngữ (tiếng Việt, tiếng Anh).
--   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu của hệ thống.
+-   **Người dùng**: Người quản lý gia phả, thành viên gia đình tương tác với hệ thống qua giao diện web.
+-   **Hệ thống Cây Gia Phả**: Ứng dụng web của chúng ta, bao gồm backend, frontend và các dịch vụ liên quan.
+-   **Cơ sở dữ liệu MySQL**: Nơi lưu trữ tất cả dữ liệu nghiệp vụ của hệ thống.
+-   **Nhà cung cấp AI bên ngoài**: Các dịch vụ như Google Gemini, OpenAI được sử dụng cho các tính năng thông minh.
 
 ## 2. Sơ đồ container (Container Diagram - C2)
 
-Sơ đồ này chia nhỏ hệ thống thành các container (ứng dụng, database, etc.).
+Sơ đồ này chia nhỏ hệ thống thành các container (ứng dụng, database, etc.) có thể triển khai độc lập.
 
 ```mermaid
 graph TD
     subgraph "Hệ thống Cây Gia Phả"
-        A(Frontend - Vue.js) -->|API calls| B(Backend - ASP.NET Core)
+        A(Frontend - Vue.js) -->|API calls (HTTPS)| B(Backend - ASP.NET Core)
         B -->|Reads/Writes| C(Database - MySQL)
-        B -->|Giao tiếp| D(Face Service - Python)
+        B -->|Giao tiếp (HTTP/gRPC)| D(Face Service - Python)
     end
 
-    E[Người dùng] -->|HTTPS| A
+    E[Người dùng] -->|Sử dụng trình duyệt| A
 ```
 
--   **Frontend**: Ứng dụng Single Page Application (SPA) bằng Vue.js, chạy trên trình duyệt của người dùng.
--   **Backend**: Ứng dụng API bằng ASP.NET Core, xử lý logic nghiệp vụ.
--   **Database**: Cơ sở dữ liệu MySQL để lưu trữ dữ liệu.
+-   **Frontend**: Ứng dụng Single Page Application (SPA) bằng Vue.js, chạy trên trình duyệt của người dùng, cung cấp giao diện quản trị.
+-   **Backend**: Ứng dụng API bằng ASP.NET Core, xử lý logic nghiệp vụ, xác thực và tương tác với các dịch vụ khác.
+-   **Database**: Cơ sở dữ liệu MySQL để lưu trữ dữ liệu lâu dài.
+-   **Face Service**: Một dịch vụ tùy chọn viết bằng Python, chuyên xử lý các tác vụ nhận dạng khuôn mặt.
 
 ## 3. Sơ đồ thành phần (Component Diagram - C3)
 
@@ -54,182 +57,119 @@ Sơ đồ này chia nhỏ Backend thành các thành phần chính theo kiến t
 ```mermaid
 graph TD
     subgraph "Backend - ASP.NET Core"
-        A(Web API) --> B(Application Layer)
-        B --> C(Domain Layer)
-        B --> D(Infrastructure Layer)
-        D --> E(Database)
+        A[Web API (Controllers)] -->|Gửi Commands/Queries| B(Application Layer - MediatR)
+        B -->|Sử dụng| C(Domain Layer)
+        B -->|Sử dụng Interfaces| D(Infrastructure Layer)
+        D --> E[Database (MySQL)]
+        D --> F[Dịch vụ bên ngoài]
     end
 ```
 
--   **Web API (Web Layer)**: Điểm vào của ứng dụng, xử lý các yêu cầu HTTP, ánh xạ chúng tới các dịch vụ nghiệp vụ (Business Services) trong Application Layer, và trả về phản hồi.
--   **Application Layer**: Chứa các trường hợp sử dụng (Use Cases), lệnh (Commands), truy vấn (Queries), các giao diện (Interfaces) cho các dịch vụ bên ngoài. **Đặc biệt, Application Layer áp dụng mô hình CQRS (Command Query Responsibility Segregation) với các `Command` (thực hiện thay đổi dữ liệu) và `Query` (truy vấn dữ liệu) được xử lý bởi các `Handler` tương ứng. Các `Handler` này sử dụng `IApplicationDbContext` để tương tác với dữ liệu và sử dụng `Result Pattern` để trả về kết quả thống nhất. Do tính chất thực dụng, Application Layer có tham chiếu đến `Microsoft.EntityFrameworkCore` và `Ardalis.Specification.EntityFrameworkCore` để tận dụng các extension methods tiện lợi.**
--   **Domain Layer**: Chứa các thực thể (Entities), giá trị đối tượng (Value Objects), và các quy tắc nghiệp vụ cốt lõi.
--   **Infrastructure Layer**: Chứa các triển khai cụ thể của các giao diện được định nghĩa trong Application Layer, bao gồm truy cập cơ sở dữ liệu (MySQL với Entity Framework Core), các dịch vụ lưu trữ tệp (Local, Cloudinary, S3), và các dịch vụ bên ngoài khác.
--   **User Preference Management**: Module này quản lý các tùy chọn cá nhân của người dùng như chủ đề, ngôn ngữ, cài đặt thông báo. Nó bao gồm các API để lưu trữ và truy xuất các tùy chọn này, sử dụng thực thể `UserPreference` và các enum `Theme`, `Language`.
+-   **Web API (Web Layer)**: Là cửa ngõ của ứng dụng, chứa các API Controllers. Nó tiếp nhận các yêu cầu HTTP, tạo ra các đối tượng `Command` hoặc `Query`, và gửi chúng đi thông qua `MediatR` để được xử lý bởi Application Layer.
+-   **Application Layer**: Chứa toàn bộ logic nghiệp vụ. Nó định nghĩa các `Command` (thao tác ghi), `Query` (thao tác đọc), và các `Handler` tương ứng để xử lý chúng (CQRS Pattern). Lớp này cũng định nghĩa các `interface` cho các dịch vụ mà nó cần (ví dụ: `IApplicationDbContext`, `IUser`), nhưng không quan tâm đến chi tiết triển khai của chúng.
+-   **Domain Layer**: Lõi của hệ thống, chứa các `Entities` (ví dụ: `Family`, `Member`), `Value Objects`, và các quy tắc nghiệp vụ cơ bản không phụ thuộc vào bất kỳ lớp nào khác.
+-   **Infrastructure Layer**: Cung cấp các triển khai cụ thể cho các `interface` được định nghĩa trong Application Layer. Ví dụ: `ApplicationDbContext` (dùng EF Core để truy cập MySQL), dịch vụ gửi email, dịch vụ lưu trữ file, v.v.
 
-## 4. Sơ đồ mã nguồn (Code Diagram - C4) (updated after refactor)
+## 4. Sơ đồ mã nguồn (Code Diagram - C4)
 
-Ví dụ chi tiết về luồng CQRS (Command Query Responsibility Segregation) trong Application Layer, sử dụng MediatR và tương tác với `IApplicationDbContext`.
+Ví dụ chi tiết về luồng xử lý CQRS, cho thấy sự tương tác giữa các thành phần mã nguồn cụ thể.
 
 ```mermaid
 graph TD
     subgraph "Web API"
-        A[Controller] -->|Gửi Command/Query| B(MediatR)
+        A[Controller] -- Gửi Command/Query --> B(MediatR - ISender)
     end
 
     subgraph "Composition Root"
-        B -->|Đăng ký và Giải quyết| CR(Dependency Injection)
+        CR(Dependency Injection) -- Cấu hình --> B
+        CR -- Cấu hình --> C
+        CR -- Cấu hình --> G
+        CR -- Cấu hình --> H
     end
 
     subgraph "Application Layer"
-        CR --> C{Command/Query Handler}
-        C -->|Tương tác| D(IApplicationDbContext)
-        C -->|Sử dụng| E(IFileTextExtractorFactory)
-        C -->|Sử dụng| F(ChunkingPolicy)
-        C -->|Sử dụng| UP(ICurrentUserPreferenceService)
-        C -->|Sử dụng| AI(AI Service)
+        B -- Điều phối tới --> C{Command/Query Handler}
+        C -- Tương tác với --> D(IApplicationDbContext)
+        C -- Sử dụng --> E(IUser)
+        C -- Sử dụng --> F(IMapper)
+        C -- Sử dụng --> AI(IAiService)
     end
 
     subgraph "Infrastructure Layer"
-        CR --> G(ApplicationDbContext)
-        D --> G
-        E --> H(PdfTextExtractor/TxtTextExtractor)
-        UP --> G
-        AI --> J(External AI Provider)
-        AI --> K(Face Service)
+        G(ApplicationDbContext) -- Triển khai --> D
+        H(UserService) -- Triển khai --> E
+        AI_Impl(AiService) -- Triển khai --> AI
+        AI_Impl -- Gọi API --> J[External AI Provider]
+        AI_Impl -- Gọi API --> K[Face Service]
     end
 
     subgraph "Domain Layer"
-        C --> I(Entities)
-        G --> I
-        F --> I
-        UP --> I(UserPreference Entity)
+        C -- Sử dụng --> I(Domain Entities/Events)
+        G -- ánh xạ tới --> I
     end
 ```
 
--   **Controller**: Nhận yêu cầu từ Frontend, tạo `Command` hoặc `Query` và gửi đến `MediatR`.
--   **MediatR**: Thư viện giúp điều phối `Command` hoặc `Query` đến `Handler` tương ứng.
--   **Composition Root (Dependency Injection)**: Nơi cấu hình và đăng ký tất cả các dịch vụ (services) và các thành phần (components) của ứng dụng. Đây là nơi duy nhất mà các layer khác nhau được kết nối với nhau thông qua Dependency Injection.
--   **Command/Query Handler**: Chứa logic nghiệp vụ để xử lý `Command` hoặc `Query`.
-    -   `CommandHandler` thực hiện thay đổi dữ liệu thông qua `IApplicationDbContext`.
-    -   `QueryHandler` truy vấn dữ liệu thông qua `IApplicationDbContext`.
-    -   **Mới**: `ProcessFileCommandHandler` sử dụng `IFileTextExtractorFactory` để lấy trình trích xuất văn bản và `ChunkingPolicy` để chia nhỏ văn bản.
--   **IApplicationDbContext**: Interface định nghĩa các `DbSet` và phương thức lưu thay đổi, được triển khai bởi `ApplicationDbContext` trong Infrastructure Layer. **Do tính chất thực dụng, `IApplicationDbContext` sử dụng các kiểu dữ liệu và extension methods của `Microsoft.EntityFrameworkCore` để đơn giản hóa việc tương tác với cơ sở dữ liệu.**
--   **Entities**: Các đối tượng nghiệp vụ cốt lõi được định nghĩa trong Domain Layer. **Mới**: Bao gồm `TextChunk` và `UserPreference`.
--   **ApplicationDbContext**: Triển khai cụ thể của `IApplicationDbContext` trong Infrastructure Layer, sử dụng Entity Framework Core để tương tác với cơ sở dữ liệu.
--   **IFileTextExtractorFactory**: Interface trong Application Layer để lấy đúng trình trích xuất văn bản.
--   **PdfTextExtractor/TxtTextExtractor**: Triển khai cụ thể của `IFileTextExtractor` trong Infrastructure Layer để trích xuất văn bản từ PDF/TXT.
--   **ChunkingPolicy**: Domain Service chứa logic làm sạch và chia nhỏ văn bản thành các chunk.
--   **ICurrentUserPreferenceService**: Interface trong Application Layer để quản lý tùy chọn người dùng.
-
-## 4.1. Kiến trúc AI (AI Architecture)
-
-Phần này mô tả cách các tính năng Trí tuệ Nhân tạo (AI) được tích hợp vào hệ thống, bao gồm các dịch vụ AI bên ngoài và cách chúng tương tác với Backend.
-
-```mermaid
-graph TD
-    subgraph "Hệ thống Cây Gia Phả"
-        subgraph "Backend - ASP.NET Core"
-            A[Application Layer] -->|Sử dụng| B(AI Service)
-            B -->|Gọi API| C(External AI Provider)
-            B -->|Gọi API| D(Face Service)
-        end
-    end
-
-    C -->|Trả về kết quả| B
-    D -->|Trả về kết quả| B
-```
-
--   **AI Service (trong Backend)**: Một dịch vụ tổng hợp trong Application Layer của Backend, chịu trách nhiệm điều phối các yêu cầu liên quan đến AI. Nó có thể gọi các nhà cung cấp AI bên ngoài hoặc các dịch vụ AI cục bộ.
--   **External AI Provider**: Các dịch vụ AI bên ngoài như Google Gemini, OpenAI, Novu, Qdrant, và các mô hình LLM cục bộ, được sử dụng cho các tác vụ như tạo tiểu sử, trích xuất thông tin, v.v.
--   **Face Service**: Một dịch vụ AI cục bộ (ví dụ: chạy bằng Python) chịu trách nhiệm cho các tác vụ như phát hiện khuôn mặt, nhận dạng khuôn mặt, tạo embeddings khuôn mặt. Dịch vụ này được triển khai như một container riêng biệt và giao tiếp với Backend qua API.
+-   **Controller**: Nhận yêu cầu HTTP, tạo `Command` hoặc `Query`, và gửi cho `MediatR` để xử lý.
+-   **MediatR**: Đóng vai trò trung gian, tìm và gọi `Handler` tương ứng đã được đăng ký cho mỗi `Command` hoặc `Query`.
+-   **Composition Root (Dependency Injection)**: Là nơi tất cả các dịch vụ và phụ thuộc được đăng ký (thường trong `Program.cs` hoặc các file `DependencyInjection.cs`). Đây là nơi duy nhất các lớp "biết" về nhau, giúp giữ cho kiến trúc découple.
+-   **Command/Query Handler**: Nơi chứa logic nghiệp vụ chính.
+    -   Sử dụng `IApplicationDbContext` để truy cập cơ sở dữ liệu.
+    -   Sử dụng `IUser` để lấy thông tin người dùng hiện tại (ví dụ: `Id`, `Email`) cho việc xác thực hoặc ghi log.
+    -   Sử dụng `IMapper` (AutoMapper) để ánh xạ giữa Entities và DTOs.
+    -   Sử dụng `IAiService` để thực hiện các tác vụ liên quan đến AI.
+-   **IApplicationDbContext**: Là một `interface` trong Application Layer, được `ApplicationDbContext` (sử dụng EF Core) trong Infrastructure Layer triển khai để cung cấp kết nối đến database.
+-   **IUser**: `Interface` định nghĩa cách lấy thông tin người dùng hiện tại, được triển khai trong Infrastructure.
+-   **Domain Entities/Events**: Các đối tượng nghiệp vụ cốt lõi và các sự kiện domain (ví dụ: `MemberCreatedEvent`) được sử dụng bởi các Handler.
 
 ## 5. Sơ đồ triển khai (Deployment View)
 
-Hệ thống được triển khai bằng Docker trên một máy chủ ảo (VPS). Trong môi trường phát triển cục bộ, Frontend có thể sử dụng Vite Proxy để kết nối với Backend.
+Hệ thống được triển khai bằng Docker trên một máy chủ ảo (VPS), sử dụng Nginx làm reverse proxy.
 
 ```mermaid
 graph TD
     subgraph "Docker Host (VPS)"
-        A(Nginx) --> B(Frontend Container)
+        A(Nginx) --> B(Admin Frontend Container)
         A --> C(Backend Container)
         C --> D(Database Container)
         C --> F(Face Service Container)
     end
 
-    E[Người dùng] -->|HTTPS| A
+    E[Người dùng] -.->|HTTPS| A
 ```
 
--   **Nginx**: Reverse proxy, xử lý SSL và điều hướng request đến Frontend và Backend. Nginx cũng có thể phục vụ các tệp tĩnh của Frontend.
--   **Frontend Container**: Chứa ứng dụng Vue.js đã được build.
+-   **Nginx**: Đóng vai trò reverse proxy, xử lý SSL termination, và điều hướng các request đến container Backend hoặc Frontend tương ứng.
+-   **Admin Frontend Container**: Chứa ứng dụng Vue.js đã được build và được phục vụ bởi một web server tĩnh (có thể là Nginx).
 -   **Backend Container**: Chứa ứng dụng ASP.NET Core API.
 -   **Database Container**: Chứa cơ sở dữ liệu MySQL.
-
-### 🔄 Vite Proxy trong môi trường phát triển
-
-Trong môi trường phát triển cục bộ, Frontend (chạy bằng Vite) sử dụng cơ chế proxy để chuyển tiếp các yêu cầu API từ `http://localhost:5173/api` đến Backend (ví dụ: `http://localhost:8080`). Điều này giúp tránh các vấn đề CORS và cho phép Frontend tương tác liền mạch với Backend đang chạy cục bộ hoặc trong Docker.
-
-**Lưu ý:** Backend đã tắt `app.UseHttpsRedirection()` trong `Program.cs` để cho phép truy cập HTTP trong môi trường phát triển cục bộ.
-
-**Cấu hình ví dụ trong `vite.config.ts`:**
-
-```typescript
-// frontend/vite.config.ts
-import { defineConfig } from 'vite';
-
-export default defineConfig({
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080', // Địa chỉ Backend đang chạy
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        // secure: false, // Không cần thiết nếu Backend chạy HTTP
-      },
-    },
-  },
-});
-```
-
-**Giải thích:**
-
-*   `target`: Địa chỉ của Backend API.
-*   `changeOrigin`: Đặt thành `true` để thay đổi `Host` header của request thành `target` host, cần thiết cho một số API.
-*   `rewrite`: Viết lại đường dẫn request, loại bỏ `/api` khỏi URL trước khi gửi đến Backend.
-*   `secure`: Không cần thiết nếu Backend chạy HTTP.
+-   **Face Service Container**: Container tùy chọn cho dịch vụ nhận dạng khuôn mặt.
 
 ## 6. Xác thực & Phân quyền (Authentication & Authorization)
 
-Hệ thống sử dụng **nhà cung cấp JWT** (ví dụ: Auth0) làm nhà cung cấp xác thực và quản lý người dùng, kết hợp với **JWT Bearer Token** để bảo vệ các API endpoint.
+Hệ thống sử dụng **JWT Bearer Token** từ một nhà cung cấp xác thực bên ngoài (ví dụ: Auth0, Firebase Auth, Keycloak) để bảo vệ các API endpoint.
 
 #### Luồng hoạt động
 
-1.  **Frontend lấy Token:** Frontend tương tác với Auth0 để thực hiện quá trình đăng nhập và nhận về JWT (Access Token, ID Token).
-2.  **Gửi Token đến Backend:** Frontend gửi kèm Access Token trong header `Authorization` (dưới dạng `Bearer <token>`) trong mỗi request API đến Backend.
-3.  **Backend xác thực Token:** Backend nhận Access Token, giải mã và xác thực chữ ký của token, kiểm tra các claims (thông tin người dùng, quyền hạn) và thời hạn hiệu lực của token dựa trên cấu hình Auth0.
-4.  **Phân quyền:** Sau khi xác thực thành công, Backend sử dụng thông tin từ Access Token (đặc biệt là các custom claim về `roles` từ Auth0 Action) để kiểm tra quyền hạn của người dùng đối với tài nguyên hoặc hành động được yêu cầu.
+1.  **Frontend lấy Token:** Frontend xử lý quá trình đăng nhập với nhà cung cấp xác thực và nhận về một `Access Token` (JWT).
+2.  **Gửi Token đến Backend:** Frontend gửi kèm `Access Token` trong header `Authorization` (dạng `Bearer <token>`) trong mỗi request API đến Backend.
+3.  **Backend xác thực Token:**
+    *   Backend nhận token và xác thực nó (chữ ký, thời hạn, issuer, audience) dựa trên cấu hình trong `JwtSettings`.
+    *   Sau khi xác thực, các `claims` trong token được dùng để tạo `ClaimsPrincipal` cho người dùng.
+4.  **Truy cập thông tin người dùng:** Dịch vụ `IUser` được sử dụng trong toàn ứng dụng (đặc biệt là ở Application Layer) để truy xuất thông tin của người dùng đã xác thực (như `Id`, `Email`, `ExternalId`) từ `ClaimsPrincipal`.
+5.  **Phân quyền (Authorization):**
+    *   **Theo vai trò**: Các `[Authorize(Roles = "Admin")]` attribute được dùng trên các controller/endpoint để giới hạn quyền truy cập dựa trên vai trò có trong token.
+    *   **Theo nghiệp vụ**: Logic phân quyền phức tạp hơn (ví dụ: "chỉ chủ sở hữu của gia đình mới được sửa đổi") được xử lý bên trong các `Command Handler` bằng cách sử dụng `IUser` để lấy ID người dùng hiện tại và so sánh với dữ liệu nghiệp vụ.
 
-#### Cấu hình JWT
-
-*   **Cấu hình Backend**: 
-    *   Backend đọc cấu hình JWT từ phần `JwtSettings` trong tệp `apps/backend/src/Web/appsettings.json` (hoặc `appsettings.Development.json` trong môi trường phát triển).
-*   **Cấu hình Frontend**: 
-    *   Frontend đọc cấu hình JWT từ các biến môi trường trong tệp `src/frontend/.env`.
-*   **Cấu hình nhà cung cấp JWT (ví dụ: Auth0 Dashboard)**: 
-    *   **API**: Tạo một API trong Auth0 Dashboard với **Identifier (Audience)** là `YOUR_JWT_AUDIENCE` (ví dụ: `http://localhost:5000`).
-    *   **Actions**: Cấu hình một Auth0 Action để thêm `roles` vào JWT token dưới dạng custom claim (ví dụ: `https://familytree.com/roles`).
-
-#### Khả năng thay thế
-
-Kiến trúc cho phép thay thế nhà cung cấp JWT (ví dụ: Auth0) bằng các IdP khác (ví dụ: Keycloak, Firebase Auth) mà không cần thay đổi lớn ở Backend. Chỉ cần cập nhật cấu hình `JwtSettings` và triển khai `IClaimsTransformation` liên quan, đồng thời đảm bảo rằng `ExternalId` của người dùng được quản lý nhất quán. `ExternalId` là trường được sử dụng để liên kết hồ sơ người dùng nội bộ với ID của người dùng từ nhà cung cấp xác thực bên ngoài. Thông tin người dùng hiện tại được truy cập thông qua interface `ICurrentUser`.
+Kiến trúc này giúp tách biệt logic xác thực (do nhà cung cấp bên ngoài xử lý) khỏi logic nghiệp vụ của ứng dụng.
 
 ## 7. Yêu cầu phi chức năng (Non-functional Requirements)
 
 -   **Bảo mật**: Sử dụng HTTPS, mã hóa mật khẩu, và tuân thủ các nguyên tắc bảo mật của OWASP.
--   **Logging**: Sử dụng `ILogger` của .NET Core để ghi log, kết hợp với `try/catch` và `source` tracking trong `Result Pattern` để theo dõi chi tiết lỗi và stack trace.
--   **Monitoring**: (Chưa triển khai) Sẽ tích hợp Prometheus và Grafana để theo dõi hiệu năng hệ thống.
--   **Scaling**: Hệ thống được thiết kế để có thể scale theo chiều ngang bằng cách tăng số lượng container cho Backend và Frontend.
+-   **Logging**: Sử dụng `Serilog` để ghi log có cấu trúc, giúp việc theo dõi và chẩn đoán lỗi dễ dàng hơn.
+-   **Hiệu suất**: Sử dụng CQRS để tối ưu hóa các truy vấn đọc. Các truy vấn đọc phức tạp có thể sử dụng Dapper hoặc các câu SQL thô để bypass EF Core nhằm tăng tốc độ.
+-   **Khả năng mở rộng**: Hệ thống được thiết kế để có thể scale theo chiều ngang bằng cách tăng số lượng container cho Backend và Frontend.
 
 ## 8. Liên kết tài liệu
 
+-   [Mô hình Dữ liệu](./data-model.md)
 -   [Tham chiếu API](./api-reference.md)
+-   [Hướng dẫn Phát triển Backend](./backend-guide.md)

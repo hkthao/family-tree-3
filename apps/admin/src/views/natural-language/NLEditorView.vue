@@ -2,15 +2,9 @@
   <v-container>
     <NLEditorInput :loading="naturalLanguageStore.loading" @parse-content="parseContent" />
 
-    <ParsedDataList
-      :parsed-result="naturalLanguageStore.parsedData"
-      @delete-member="handleDeleteMember"
-      @delete-event="handleDeleteEvent"
-      @delete-relationship="handleDeleteRelationship"
-      @save-member="handleSaveMember"
-      @save-event="handleSaveEvent"
-      @save-relationship="handleSaveRelationship"
-    />
+    <ParsedDataList :parsed-result="naturalLanguageStore.parsedData" @delete-member="handleDeleteMember"
+      @delete-event="handleDeleteEvent" @delete-relationship="handleDeleteRelationship" @save-member="handleSaveMember"
+      @save-event="handleSaveEvent" @save-relationship="handleSaveRelationship" @clear-all="handleClearAllParsedData" />
   </v-container>
 </template>
 
@@ -49,6 +43,10 @@ const handleDeleteEvent = (index: number) => {
 
 const handleDeleteRelationship = (index: number) => {
   naturalLanguageStore.deleteParsedRelationship(index);
+};
+
+const handleClearAllParsedData = () => {
+  naturalLanguageStore.parsedData = null;
 };
 
 const handleSaveMember = async (member: MemberDataDto) => {
@@ -220,4 +218,3 @@ onMounted(() => {
   naturalLanguageStore.familyId = props.familyId;
 });
 </script>
-

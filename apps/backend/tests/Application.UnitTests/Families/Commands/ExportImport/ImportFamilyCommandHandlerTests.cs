@@ -1,14 +1,14 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Families.ExportImport;
+using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
+using backend.Domain.Enums;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-using backend.Application.Common.Models;
-using backend.Application.UnitTests.Common;
-using backend.Domain.Enums;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace backend.Application.UnitTests.Families.Commands.ExportImport;
@@ -25,10 +25,17 @@ public class ImportFamilyCommandHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldImportFamilyData_AndReturnNewFamilyId()
+    public async Task Handle_ShouldUpdateExistingFamilyData_AndReturnFamilyId()
     {
         // Arrange
-        var originalFamilyId = Guid.NewGuid();
+        var currentUserId = Guid.NewGuid();
+        _mockUser.Setup(x => x.UserId).Returns(currentUserId);
+
+        var existingFamily = Family.Create("Existing Family", "EXFAM", "Existing Description", "Existing Address", "ExistingAvatar.jpg", "Public", currentUserId);
+        existingFamily.Id = Guid.NewGuid();
+        _context.Families.Add(existingFamily);
+        await _context.SaveChangesAsync(CancellationToken.None);
+
         var originalMember1Id = Guid.NewGuid();
         var originalMember2Id = Guid.NewGuid();
         var originalRelationshipId = Guid.NewGuid();
@@ -36,7 +43,7 @@ public class ImportFamilyCommandHandlerTests : TestBase
 
         var familyExportDto = new FamilyExportDto
         {
-            Id = originalFamilyId,
+            Id = Guid.NewGuid(), // This ID will be ignored by the handler, as FamilyId in command takes precedence
             Name = "Imported Family",
             Code = "IMP1",
             Description = "Description of imported family",
@@ -58,10 +65,6 @@ public class ImportFamilyCommandHandlerTests : TestBase
             }
         };
 
-        // Arrange
-        var currentUserId = Guid.NewGuid();
-        _mockUser.Setup(x => x.UserId).Returns(currentUserId);
-
         // Add a dummy user to the in-memory database to satisfy FK constraint
         var user = new User(currentUserId.ToString(), "test@example.com");
         user.Id = currentUserId; // Manually set the Id
@@ -70,42 +73,41 @@ public class ImportFamilyCommandHandlerTests : TestBase
         await _context.SaveChangesAsync(CancellationToken.None);
         // Authorization check is not in handler, so no setup here.
 
-        var command = new ImportFamilyCommand(familyExportDto);
+        var command = new ImportFamilyCommand { FamilyData = familyExportDto, FamilyId = existingFamily.Id, ClearExistingData = true };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().NotBeEmpty(); // Should return a new family ID
+        result.Value.Should().Be(existingFamily.Id); // Should return the existing family ID
 
-        var newFamilyId = result.Value; // result.Value is already Guid
-        var importedFamily = await _context.Families
+        var updatedFamily = await _context.Families
             .Include(f => f.Members)
             .Include(f => f.Relationships)
             .Include(f => f.Events)
                 .ThenInclude(e => e.EventMembers)
-            .FirstOrDefaultAsync(f => f.Id == newFamilyId);
+            .FirstOrDefaultAsync(f => f.Id == existingFamily.Id);
 
-        importedFamily.Should().NotBeNull();
-        importedFamily!.Id.Should().NotBe(originalFamilyId); // New ID
-        importedFamily.Name.Should().Be(familyExportDto.Name);
-        importedFamily.Code.Should().Be(familyExportDto.Code);
-        importedFamily.Visibility.Should().Be(familyExportDto.Visibility);
+        updatedFamily.Should().NotBeNull();
+        updatedFamily!.Id.Should().Be(existingFamily.Id); // Same ID
+        updatedFamily.Name.Should().Be(familyExportDto.Name);
+        updatedFamily.Code.Should().Be(existingFamily.Code); // Code should not change
+        updatedFamily.Visibility.Should().Be(familyExportDto.Visibility);
 
-        importedFamily.Members.Should().HaveCount(familyExportDto.Members.Count);
-        importedFamily.Relationships.Should().HaveCount(familyExportDto.Relationships.Count);
-        importedFamily.Events.Should().HaveCount(familyExportDto.Events.Count);
+        updatedFamily.Members.Should().HaveCount(familyExportDto.Members.Count);
+        updatedFamily.Relationships.Should().HaveCount(familyExportDto.Relationships.Count);
+        updatedFamily.Events.Should().HaveCount(familyExportDto.Events.Count);
 
         // Verify members have new IDs and correct familyId
-        foreach (var importedMember in importedFamily.Members)
+        foreach (var importedMember in updatedFamily.Members)
         {
             importedMember.Id.Should().NotBe(familyExportDto.Members.First(m => m.Code == importedMember.Code).Id);
-            importedMember.FamilyId.Should().Be(newFamilyId);
+            importedMember.FamilyId.Should().Be(existingFamily.Id);
         }
 
         // Verify relationships have new IDs and correct member IDs
-        foreach (var importedRelationship in importedFamily.Relationships)
+        foreach (var importedRelationship in updatedFamily.Relationships)
         {
             // Find the original relationship DTO by matching properties that should be preserved
             var originalRelationshipDto = familyExportDto.Relationships.FirstOrDefault(r =>
@@ -115,18 +117,18 @@ public class ImportFamilyCommandHandlerTests : TestBase
             originalRelationshipDto.Should().NotBeNull(); // Ensure we found a match
 
             importedRelationship.Id.Should().NotBe(originalRelationshipDto!.Id); // New ID
-            importedRelationship.FamilyId.Should().Be(newFamilyId);
+            importedRelationship.FamilyId.Should().Be(existingFamily.Id);
 
             // Ensure source/target member IDs are remapped to new member IDs
             var originalSourceMemberCode = familyExportDto.Members.First(m => m.Id == originalRelationshipDto.SourceMemberId).Code;
             var originalTargetMemberCode = familyExportDto.Members.First(m => m.Id == originalRelationshipDto.TargetMemberId).Code;
 
-            importedFamily.Members.Should().Contain(m => m.Id == importedRelationship.SourceMemberId && m.Code == originalSourceMemberCode);
-            importedFamily.Members.Should().Contain(m => m.Id == importedRelationship.TargetMemberId && m.Code == originalTargetMemberCode);
+            updatedFamily.Members.Should().Contain(m => m.Id == importedRelationship.SourceMemberId && m.Code == originalSourceMemberCode);
+            updatedFamily.Members.Should().Contain(m => m.Id == importedRelationship.TargetMemberId && m.Code == originalTargetMemberCode);
         }
 
         // Verify events have new IDs and correct member IDs
-        foreach (var importedEvent in importedFamily.Events)
+        foreach (var importedEvent in updatedFamily.Events)
         {
             var originalEventDto = familyExportDto.Events.FirstOrDefault(e =>
                 e.Name == importedEvent.Name &&
@@ -136,14 +138,14 @@ public class ImportFamilyCommandHandlerTests : TestBase
             originalEventDto.Should().NotBeNull(); // Ensure we found a match
 
             importedEvent.Id.Should().NotBe(originalEventDto!.Id); // New ID
-            importedEvent.FamilyId.Should().Be(newFamilyId);
+            importedEvent.FamilyId.Should().Be(existingFamily.Id);
             importedEvent.EventMembers.Should().HaveCount(originalEventDto.RelatedMembers.Count);
 
             // Ensure related member IDs are remapped to new member IDs
             foreach (var originalRelatedMemberId in originalEventDto.RelatedMembers)
             {
                 var originalRelatedMemberCode = familyExportDto.Members.First(m => m.Id == originalRelatedMemberId).Code;
-                importedFamily.Members.Should().Contain(m => importedEvent.EventMembers.Any(em => em.MemberId == m.Id) && m.Code == originalRelatedMemberCode);
+                updatedFamily.Members.Should().Contain(m => importedEvent.EventMembers.Any(em => em.MemberId == m.Id) && m.Code == originalRelatedMemberCode);
             }
         }
     }
@@ -157,7 +159,7 @@ public class ImportFamilyCommandHandlerTests : TestBase
         _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid());
         // Authorization check is not in handler, so no setup here.
 
-        var command = new ImportFamilyCommand(null!); // Pass null DTO
+        var command = new ImportFamilyCommand { FamilyData = null!, FamilyId = Guid.NewGuid() };
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);

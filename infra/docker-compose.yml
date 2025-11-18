@@ -50,10 +50,10 @@ services:
       - "8000:8000" # Expose port 8000 for the FastAPI app
     environment:
       - PYTHONUNBUFFERED=1 # Ensure Python output is unbuffered
-      - DLIB_PREDICTOR_PATH=app/models/shape_predictor_68_face_landmarks.dat
-      - DLIB_ENCODER_PATH=app/models/dlib_face_recognition_resnet_model_v1.dat
     mem_limit: 4g # Increase memory limit
- 
+    volumes:
+      - ../infra/app/models:/face-service/app/models/dlib_models
+
 volumes:
   mysql-data:
   backend-dataprotection-keys:

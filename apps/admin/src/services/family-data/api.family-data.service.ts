@@ -11,7 +11,8 @@ export class ApiFamilyDataService implements IFamilyDataService {
     return this.api.get<FamilyExportDto>(`/family-data/${familyId}/export`);
   }
 
-  async importFamilyData(familyData: FamilyExportDto): Promise<Result<string, ApiError>> {
-    return this.api.post<string>('/family-data/import', familyData);
+  async importFamilyData(familyId: string, familyData: FamilyExportDto, clearExistingData: boolean): Promise<Result<string, ApiError>> {
+    const queryParams = clearExistingData === false ? '?clearExistingData=false' : '';
+    return this.api.post<string>(`/family-data/import/${familyId}${queryParams}`, familyData);
   }
 }

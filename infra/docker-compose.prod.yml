@@ -78,12 +78,10 @@ services:
       - ./.env
     environment:
       - PYTHONUNBUFFERED=1
-      - DLIB_PREDICTOR_PATH=app/models/shape_predictor_68_face_landmarks.dat
-      - DLIB_ENCODER_PATH=app/models/dlib_face_recognition_resnet_model_v1.dat
       - PORT=${FACE_SERVICE_PORT}
     mem_limit: 2g
     volumes:
-      - face_service_models:/app/models
+      - ./face-service/models:/app/models/dlib_models
     networks:
       - app-network
     restart: unless-stopped
@@ -95,4 +93,3 @@ networks:
 volumes:
   mysql-data:
   backend-dataprotection-keys:
-  face_service_models:
