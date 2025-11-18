@@ -4,6 +4,8 @@ import { Button, Text } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TFunction } from 'i18next';
 import { i18n } from 'i18next';
+import { PaperTheme } from '@/constants/theme'; // Import PaperTheme
+import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
 interface BannerProps {
   t: TFunction;
@@ -20,7 +22,7 @@ export function Banner({ t, toggleLanguage, i18n }: BannerProps) {
         contentFit="cover"
       />
       <LinearGradient
-        colors={['rgba(255,255,255,1)', 'rgba(255,255,255,0.1)']}
+        colors={[PaperTheme.colors.background, 'rgba(255,255,255,0.1)']} // Use theme background color
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.leftBannerOverlay}
@@ -51,14 +53,14 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: '100%',
     justifyContent: 'center',
-    padding: 20,
+    padding: SPACING_LARGE,
   },
   languageButton: {
-    marginTop: 20,
+    marginTop: SPACING_LARGE,
     alignSelf: 'flex-start',
   },
   createTreeText: {
-    marginTop: 10,
+    marginTop: SPACING_MEDIUM,
     color: 'gray', // Example color, adjust as needed
   },
 });

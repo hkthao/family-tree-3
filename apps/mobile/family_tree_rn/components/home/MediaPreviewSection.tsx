@@ -4,6 +4,8 @@ import { Text } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { TFunction } from 'i18next';
 import ImageViewing from 'react-native-image-viewing';
+import { PaperTheme } from '@/constants/theme';
+import { SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
 interface MediaPreviewSectionProps {
   t: TFunction;
@@ -62,12 +64,11 @@ export function MediaPreviewSection({ t }: MediaPreviewSectionProps) {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: SPACING, // Apply padding to the container
-    paddingVertical: 20,
-    backgroundColor: '#f9f9f9', // Light background for the section
+    paddingVertical: SPACING_LARGE,
   },
   sectionTitle: {
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: SPACING_LARGE,
     fontWeight: 'bold',
   },
   imageGallery: {

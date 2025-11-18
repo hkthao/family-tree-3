@@ -2,6 +2,8 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, Icon, Chip } from 'react-native-paper';
 import { TFunction } from 'i18next';
+import { PaperTheme } from '@/constants/theme';
+import { SPACING_SMALL, SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
 interface HowItWorksSectionProps {
   t: TFunction;
@@ -54,12 +56,12 @@ export function HowItWorksSection({ t }: HowItWorksSectionProps) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: '#ffffff', // White background for the section
+    padding: SPACING_LARGE,
+    backgroundColor: PaperTheme.colors.onTertiary, // White background for the section
   },
   sectionTitle: {
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: SPACING_LARGE,
     fontWeight: 'bold',
   },
   stepsContainer: {
@@ -68,15 +70,15 @@ const styles = StyleSheet.create({
   timelineItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: SPACING_LARGE,
     position: 'relative',
   },
   timelineDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: '#4C662B', // Primary color for the dot
-    marginRight: 10,
+    backgroundColor: PaperTheme.colors.primary, // Primary color for the dot
+    marginRight: SPACING_MEDIUM,
     zIndex: 1, // Ensure dot is above the line
     marginTop:0
   },
@@ -86,17 +88,17 @@ const styles = StyleSheet.create({
     top: 18, // Start below the dot
     bottom: -40, // Extend to the next item
     width: 2,
-    backgroundColor: '#4C662B', // Primary color for the line
+    backgroundColor: PaperTheme.colors.primary, // Primary color for the line
   },
   stepChip: {
     flex: 1, // Allow chip to take available space
     height: 'auto', // Adjust height based on content
-    paddingVertical: 5,
+    paddingVertical: SPACING_SMALL,
     justifyContent: 'flex-start', // Align content to start
   },
   stepChipText: {
     textAlign: 'left',
     fontWeight: 'bold',
-    marginLeft: 5, // Space between icon and text
+    marginLeft: SPACING_SMALL, // Space between icon and text
   },
 });

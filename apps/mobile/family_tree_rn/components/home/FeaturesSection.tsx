@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
 import { TFunction } from 'i18next';
+import { SPACING_SMALL, SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
 interface FeaturesSectionProps {
   t: TFunction;
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     textAlign: 'center',
-    marginVertical: 20,
+    marginVertical: SPACING_LARGE,
     fontWeight: 'bold',
   },
   featuresGrid: {
@@ -87,8 +88,8 @@ const styles = StyleSheet.create({
   featureItem: {
     width: '45%', // Roughly two items per row
     alignItems: 'center',
-    marginBottom: 20,
-    padding: 10,
+    marginBottom: SPACING_LARGE,
+    padding: SPACING_MEDIUM,
     backgroundColor: 'white',
     borderRadius: 8,
     shadowColor: '#000',
@@ -103,13 +104,13 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center text horizontally
   },
   featureTitle: {
-    marginTop: 10,
+    marginTop: SPACING_MEDIUM,
     textAlign: 'center',
     fontWeight: 'bold',
   },
   featureDescription: {
     textAlign: 'center',
-    marginTop: 5,
+    marginTop: SPACING_SMALL,
     color: 'gray',
   },
 });
