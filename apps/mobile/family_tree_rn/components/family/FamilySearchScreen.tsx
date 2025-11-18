@@ -5,9 +5,9 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
-  TextInput,
 } from 'react-native';
-import { Text, Card, Title, Paragraph, Avatar, IconButton } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, Card, Title, Paragraph, Avatar, IconButton, Searchbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { PaperTheme } from '@/constants/theme';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
@@ -224,16 +224,17 @@ export default function FamilySearchScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchBar}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('search.placeholder')}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor={PaperTheme.colors.onSurfaceVariant}
-        />
-        {searchQuery.length > 0 && (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+      <Searchbar
+        placeholder={t('search.placeholder')}
+        onChangeText={setSearchQuery}
+        value={searchQuery}
+        style={styles.searchbar}
+        inputStyle={styles.searchbarInput}
+        iconColor={PaperTheme.colors.onSurfaceVariant}
+        placeholderTextColor={PaperTheme.colors.onSurfaceVariant}
+        clearIcon={() => (
           <IconButton
             icon="close-circle"
             color={PaperTheme.colors.onSurfaceVariant}
@@ -241,7 +242,7 @@ export default function FamilySearchScreen() {
             onPress={() => setSearchQuery('')}
           />
         )}
-      </View>
+      />
 
       {error && (
         <View style={styles.errorContainer}>
@@ -284,32 +285,32 @@ export default function FamilySearchScreen() {
         }
         contentContainerStyle={families.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
       />
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: PaperTheme.colors.background,
+  },
   container: {
     flex: 1,
     backgroundColor: PaperTheme.colors.background,
     padding: SPACING_MEDIUM,
   },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  searchbar: {
     backgroundColor: PaperTheme.colors.surface,
     borderRadius: 8,
     marginBottom: SPACING_MEDIUM,
-    paddingHorizontal: SPACING_MEDIUM,
     elevation: 2, // Shadow for Android
     shadowColor: '#000', // Shadow for iOS
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1.41,
   },
-  searchInput: {
-    flex: 1,
-    height: 40,
+  searchbarInput: {
     color: PaperTheme.colors.onSurface,
   },
   errorContainer: {
