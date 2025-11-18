@@ -57,7 +57,7 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
 
 **Lưu ý:**
 *   Lần đầu tiên chạy có thể mất một chút thời gian để tải xuống các image Docker và build ứng dụng.
-*   Các cấu hình nhạy cảm (ví dụ: chuỗi kết nối database, khóa API) được quản lý thông qua các tệp `.env` riêng biệt cho Backend và Frontend, không được commit vào Git. Vui lòng tham khảo `apps/backend/.env` và `apps/admin/.env` để biết chi tiết.
+*   Các cấu hình nhạy cảm (ví dụ: chuỗi kết nối database, khóa API) được quản lý thông qua tệp `infra/docker-compose.yml` khi sử dụng Docker Compose. Các tệp `.env` trong các thư mục `apps/backend` và `apps/admin` chỉ được sử dụng khi chạy các ứng dụng riêng lẻ mà không thông qua Docker Compose.
 
 ### 2.3. Chạy riêng lẻ
 
@@ -67,7 +67,7 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```bash
     docker-compose -f src/infra/docker-compose.yml up -d mysql
     ```
-2.  **Cấu hình Backend**: Các cấu hình cho Backend (chuỗi kết nối database, JWT, AI, Vector Store, Storage, v.v.) được quản lý thông qua tệp `src/backend/.env`. Vui lòng tạo và cấu hình tệp này dựa trên các biến môi trường cần thiết.
+2.  **Cấu hình Backend**: Các cấu hình cho Backend (chuỗi kết nối database, JWT, AI, Vector Store, Storage, v.v.) được quản lý thông qua các biến môi trường của hệ thống hoặc tệp `.env` cục bộ. Nếu bạn đang chạy riêng lẻ, hãy đảm bảo các biến môi trường cần thiết đã được thiết lập.
 
 3.  **Chạy backend**: 
     ```bash
@@ -86,7 +86,7 @@ Sau khi chạy lệnh trên và các services đã khởi động thành công, 
     ```bash
     npm install
     ```
-3.  **Cấu hình Frontend**: Các biến môi trường cho Frontend (ví dụ: API Base URL, cấu hình Auth0) được quản lý thông qua tệp `apps/admin/.env`. Vui lòng tạo và cấu hình tệp này dựa trên các biến môi trường cần thiết.
+3.  **Cấu hình Frontend**: Các biến môi trường cho Frontend (ví dụ: API Base URL, cấu hình Auth0) được quản lý thông qua các biến môi trường của hệ thống hoặc tệp `.env` cục bộ. Nếu bạn đang chạy riêng lẻ, hãy đảm bảo các biến môi trường cần thiết đã được thiết lập.
 
 4.  Chạy Frontend ở chế độ phát triển:
     ```bash
