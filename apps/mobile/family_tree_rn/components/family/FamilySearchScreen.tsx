@@ -7,7 +7,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, Title, Paragraph, Avatar, IconButton, Searchbar } from 'react-native-paper';
+import { Text, Card, Avatar, IconButton, Searchbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { PaperTheme } from '@/constants/theme';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
@@ -259,6 +259,7 @@ export default function FamilySearchScreen() {
       )}
 
       <FlatList
+      showsVerticalScrollIndicator={false}
         data={families}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -266,8 +267,8 @@ export default function FamilySearchScreen() {
             <Card.Content style={styles.cardContent}>
               <Avatar.Image size={48} source={{ uri: item.avatarUrl }} style={styles.avatar} />
               <View style={styles.cardText}>
-                <Title>{item.name}</Title>
-                <Paragraph>{item.description}</Paragraph>
+                <Text variant="titleMedium">{item.name}</Text>
+                <Text variant="bodyMedium">{item.description}</Text>
                 <View style={styles.detailsRow}>
                   <Text variant="bodySmall">{t('family.members')}: {item.totalMembers}</Text>
                   <Text variant="bodySmall">{t('family.generations')}: {item.totalGenerations}</Text>
@@ -299,22 +300,16 @@ export default function FamilySearchScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: PaperTheme.colors.background,
+    // backgroundColor: PaperTheme.colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: PaperTheme.colors.background,
+    // backgroundColor: PaperTheme.colors.background,
     padding: SPACING_MEDIUM,
   },
   searchbar: {
-    backgroundColor: PaperTheme.colors.surface,
-    borderRadius: 8,
+    // backgroundColor: PaperTheme.colors.surface,
     marginBottom: SPACING_MEDIUM,
-    elevation: 2, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
   },
   searchbarInput: {
     color: PaperTheme.colors.onSurface,
@@ -339,12 +334,7 @@ const styles = StyleSheet.create({
   },
   familyCard: {
     marginBottom: SPACING_MEDIUM,
-    borderRadius: 8,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 0.5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
+    marginHorizontal: SPACING_SMALL
   },
   cardContent: {
     flexDirection: 'row',
