@@ -42,7 +42,12 @@ export default function UserAppBar() {
 
 const styles = StyleSheet.create({
   appBarHeader: {
-    backgroundColor: 'white',
+    backgroundColor: PaperTheme.colors.background,
+    shadowColor: '#000', // iOS shadow
+    shadowOffset: { width: 0, height: 4 }, // iOS shadow
+    shadowOpacity: 0.2, // iOS shadow
+    shadowRadius: 2, // iOS shadow
+    elevation: 4, // Android shadow
   },
   appBarContent: {
   },

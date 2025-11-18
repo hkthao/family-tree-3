@@ -6,6 +6,8 @@ import { Banner } from '@/components/home/Banner'; // Import Banner component
 import { FeaturesSection } from '@/components/home/FeaturesSection'; // Import FeaturesSection component
 import { HowItWorksSection } from '@/components/home/HowItWorksSection'; // Import HowItWorksSection component
 import { MediaPreviewSection } from '@/components/home/MediaPreviewSection'; // Import MediaPreviewSection component
+import { SecondaryCtaSection } from '@/components/home/SecondaryCtaSection'; // Import SecondaryCtaSection component
+import { PaperTheme } from '@/constants/theme';
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation(); // Use the useTranslation hook
@@ -22,6 +24,7 @@ export default function HomeScreen() {
         <FeaturesSection t={t} />
         <HowItWorksSection t={t} />
         <MediaPreviewSection t={t} />
+        <SecondaryCtaSection t={t} />
         {/* You can add more content below the banner here */}
       </ScrollView>
     </View>
@@ -31,5 +34,6 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   fullScreenContainer: {
     flex: 1,
+    backgroundColor: PaperTheme.colors.background,
   },
 });

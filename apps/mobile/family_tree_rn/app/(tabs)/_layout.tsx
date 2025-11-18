@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
@@ -19,6 +20,9 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: PaperTheme.colors.primary, // Use primary color from react-native-paper theme
         headerShown: false,
+        tabBarBackground: () => (
+          <View style={{ flex: 1, backgroundColor: PaperTheme.colors.background }} />
+        ),
       }}>
       <Tabs.Screen
         name="index"
