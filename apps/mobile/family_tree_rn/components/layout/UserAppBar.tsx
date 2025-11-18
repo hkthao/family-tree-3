@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Avatar, Appbar } from 'react-native-paper'; // Remove Menu, IconButton
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { theme } from '../../src/theme';
+import { PaperTheme } from '../../constants/theme';
 
 const useAuth = () => {
   const isLoggedIn = true; // Simulate logged in state
@@ -30,11 +30,11 @@ export default function UserAppBar() {
           icon={user?.avatar ? () => <Avatar.Image size={32} source={{ uri: user.avatar }} /> : "account"}
           onPress={handleAvatarPress} // Handle press on avatar
           size={32}
-          color={theme.colors.primary}
+          color={PaperTheme.colors.primary}
         />
         <Appbar.Content
           title={t('appbar.title')} // Use translated title
-          titleStyle={{ color: theme.colors.primary }} // Apply primary color to title
+          titleStyle={{ color: PaperTheme.colors.primary }} // Apply primary color to title
           style={styles.appBarContent}
         />
       </Appbar.Header>

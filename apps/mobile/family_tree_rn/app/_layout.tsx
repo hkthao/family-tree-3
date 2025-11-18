@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import { PaperProvider } from 'react-native-paper'; // Import PaperProvider
-import { theme } from '../src/theme'; // Import custom theme
+import { PaperTheme } from '../constants/theme'; // Import custom theme
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -14,7 +14,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <PaperProvider theme={theme}> {/* Wrap with PaperProvider and apply custom theme */}
+    <PaperProvider theme={PaperTheme}> {/* Wrap with PaperProvider and apply custom theme */}
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

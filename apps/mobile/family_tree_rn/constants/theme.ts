@@ -4,6 +4,7 @@
  */
 
 import { Platform } from 'react-native';
+import { DefaultTheme } from 'react-native-paper';
 
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
@@ -33,9 +34,7 @@ export const Fonts = Platform.select({
     sans: 'system-ui',
     /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -51,3 +50,39 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+export const PaperTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: '#4C662B',
+    onPrimary: '#FFFFFF',
+    primaryContainer: '#CDEDA3',
+    onPrimaryContainer: '#354E16',
+    secondary: '#586249',
+    onSecondary: '#FFFFFF',
+    secondaryContainer: '#DCE7C8',
+    onSecondaryContainer: '#404A33',
+    tertiary: '#386663',
+    onTertiary: '#FFFFFF',
+    tertiaryContainer: '#BCECE7',
+    onTertiaryContainer: '#1F4E4B',
+    error: '#BA1A1A',
+    onError: '#FFFFFF',
+    errorContainer: '#FFDAD6',
+    onErrorContainer: '#93000A',
+    background: '#F9FAEF',
+    onBackground: '#1A1C16',
+    surface: '#F9FAEF',
+    onSurface: '#1A1C16',
+    surfaceVariant: '#E1E4D5',
+    onSurfaceVariant: '#44483D',
+    outline: '#75796C',
+    outlineVariant: '#C5C8BA',
+    shadow: '#000000',
+    scrim: '#000000',
+    inverseSurface: '#2F312A',
+    inverseOnSurface: '#F1F2E6',
+    inversePrimary: '#B1D18A',
+  },
+};
