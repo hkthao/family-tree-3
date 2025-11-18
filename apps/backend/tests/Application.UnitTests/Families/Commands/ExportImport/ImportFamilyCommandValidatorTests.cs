@@ -1,8 +1,8 @@
+using backend.Application.Families.ExportImport;
+using backend.Domain.Enums;
 using FluentAssertions;
 using FluentValidation.TestHelper;
 using Xunit;
-using backend.Application.Families.ExportImport;
-using backend.Domain.Enums;
 
 namespace backend.Application.UnitTests.Families.Commands.ExportImport;
 
@@ -64,7 +64,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { FirstName = "", LastName = "Doe", Code = "MEM1", Gender = Gender.Male }
@@ -80,7 +82,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { FirstName = "John", LastName = "", Code = "MEM1", Gender = Gender.Male }
@@ -96,7 +100,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { FirstName = "John", LastName = "Doe", Code = "", Gender = Gender.Male }
@@ -112,7 +118,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe", Code = "MEM1", Gender = Gender.Male }
@@ -132,7 +140,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Members = new List<MemberExportDto>
             {
                 new MemberExportDto { Id = Guid.NewGuid(), FirstName = "John", LastName = "Doe", Code = "MEM1", Gender = Gender.Male }
@@ -152,7 +162,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Events = new List<EventExportDto>
             {
                 new EventExportDto { Name = "", Code = "EVT1", Type = EventType.Birth, StartDate = DateTime.Now }
@@ -168,7 +180,9 @@ public class ImportFamilyCommandValidatorTests
     {
         var familyData = new FamilyExportDto
         {
-            Name = "Test Family", Code = "FAM1", Visibility = "Private",
+            Name = "Test Family",
+            Code = "FAM1",
+            Visibility = "Private",
             Events = new List<EventExportDto>
             {
                 new EventExportDto { Name = "Birth", Code = "", Type = EventType.Birth, StartDate = DateTime.Now }

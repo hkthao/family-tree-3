@@ -50,7 +50,7 @@ public class ImportFamilyCommandHandler : IRequestHandler<ImportFamilyCommand, R
             _context.Relationships.RemoveRange(familyToUpdate.Relationships);
             _context.Members.RemoveRange(familyToUpdate.Members);
         }
-        
+
         // Update family properties
         familyToUpdate.UpdateFamilyDetails(
             request.FamilyData.Name,
