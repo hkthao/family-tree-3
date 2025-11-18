@@ -75,6 +75,8 @@ export function FeaturesSection({ t, backgroundColor }: FeaturesSectionProps) {
 
 const styles = StyleSheet.create({
   container: {
+    paddingHorizontal: SPACING_SMALL,
+    paddingVertical: SPACING_MEDIUM,
   },
   sectionTitle: {
     textAlign: 'center',
@@ -84,12 +86,12 @@ const styles = StyleSheet.create({
   featuresGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    gap: SPACING_MEDIUM, // Use gap for consistent spacing
+    justifyContent: 'center', // Center the items
   },
   featureItem: {
-    width: '45%', // Roughly two items per row
+    width: '48%', // Roughly two items per row
     alignItems: 'center',
-    marginBottom: SPACING_LARGE,
     padding: SPACING_MEDIUM,
     backgroundColor: 'white',
     borderRadius: 8,
