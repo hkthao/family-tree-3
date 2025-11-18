@@ -7,5 +7,8 @@
   "tab.search": "Search",
   "tab.story": "Story",
   "tab.donate": "Donate",
-  "tab.settings": "Settings"
+  "tab.settings": "Settings",
+  "userAppBar.profile": "Profile",
+  "userAppBar.logout": "Logout",
+  "appbar.title": "Family Tree"
 }

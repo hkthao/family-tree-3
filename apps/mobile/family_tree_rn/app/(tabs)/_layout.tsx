@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { theme } from '../../src/theme'; // Import theme from react-native-paper config
 
-function TabBarIcon({ style, ...rest }: { name: React.ComponentProps<typeof MaterialCommunityIcons>['name']; color: string }) {
+function TabBarIcon({ style, ...rest }: { name: React.ComponentProps<typeof MaterialCommunityIcons>['name']; color: string; style?: object }) {
   return <MaterialCommunityIcons size={28} style={[{ marginBottom: -3 }, style]} {...rest} />;
 }
 
