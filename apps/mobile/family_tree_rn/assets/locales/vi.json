@@ -1,0 +1,11 @@
+{
+  "welcome": "Chào mừng đến với Cây Gia Phả!",
+  "hello": "Xin chào",
+  "description": "Đây là một ứng dụng trống với i18n đã được cấu hình.",
+  "change_language": "Đổi ngôn ngữ",
+  "tab.home": "Trang chủ",
+  "tab.search": "Tìm kiếm",
+  "tab.story": "Câu chuyện",
+  "tab.donate": "Quyên góp",
+  "tab.settings": "Cài đặt"
+}

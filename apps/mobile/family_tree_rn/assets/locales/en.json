@@ -1,0 +1,11 @@
+{
+  "welcome": "Welcome to Family Tree!",
+  "hello": "Hello",
+  "description": "This is a blank app with i18n configured.",
+  "change_language": "Change Language",
+  "tab.home": "Home",
+  "tab.search": "Search",
+  "tab.story": "Story",
+  "tab.donate": "Donate",
+  "tab.settings": "Settings"
+}
