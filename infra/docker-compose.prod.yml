@@ -81,7 +81,7 @@ services:
       - PORT=${FACE_SERVICE_PORT}
     mem_limit: 2g
     volumes:
-      - ./app/models:/app/models/dlib_models
+      - ./face-service/models:/app/models/dlib_models
     networks:
       - app-network
     restart: unless-stopped

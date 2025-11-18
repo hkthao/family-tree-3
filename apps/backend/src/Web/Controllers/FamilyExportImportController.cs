@@ -34,7 +34,7 @@ public class FamilyExportImportController : ControllerBase
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<Guid>> ImportFamily(Guid familyId, [FromQuery] bool clearExistingData = true, [FromBody] FamilyExportDto familyData)
+    public async Task<ActionResult<Guid>> ImportFamily(Guid familyId, [FromBody] FamilyExportDto familyData, [FromQuery] bool clearExistingData = true)
     {
         var command = new ImportFamilyCommand
         {
