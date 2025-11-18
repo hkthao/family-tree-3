@@ -46,5 +46,11 @@
   "family.generations": "Generations",
   "family.visibility": "Visibility",
   "family.visibility.public": "Public",
-  "family.visibility.private": "Private"
+  "family.visibility.private": "Private",
+  "about.donate.title": "Support Our Project",
+  "about.donate.description": "Your generous contributions help us maintain and improve the Family Tree application.",
+  "about.donate.reason": "Every donation, big or small, makes a difference in helping us build a better platform for preserving family history.",
+  "about.donate.thankYou": "Thank you for your support!",
+  "donate.buyMeACoffee": "Buy Me A Coffee",
+  "donate.momo": "MoMo"
 }

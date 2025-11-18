@@ -46,5 +46,11 @@
   "family.generations": "Thế hệ",
   "family.visibility": "Hiển thị",
   "family.visibility.public": "Công khai",
-  "family.visibility.private": "Riêng tư"
+  "family.visibility.private": "Riêng tư",
+  "about.donate.title": "Ủng hộ Dự án của chúng tôi",
+  "about.donate.description": "Những đóng góp hào phóng của bạn giúp chúng tôi duy trì và cải thiện ứng dụng Cây Gia Phả.",
+  "about.donate.reason": "Mọi đóng góp, dù lớn hay nhỏ, đều tạo nên sự khác biệt trong việc giúp chúng tôi xây dựng một nền tảng tốt hơn để bảo tồn lịch sử gia đình.",
+  "about.donate.thankYou": "Cảm ơn sự ủng hộ của bạn!",
+  "donate.buyMeACoffee": "Buy Me A Coffee",
+  "donate.momo": "MoMo"
 }
