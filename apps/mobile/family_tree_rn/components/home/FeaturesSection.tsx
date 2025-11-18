@@ -6,6 +6,7 @@ import { SPACING_SMALL, SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimens
 
 interface FeaturesSectionProps {
   t: TFunction;
+  backgroundColor?: string; // Add backgroundColor prop
 }
 
 interface Feature {
@@ -16,40 +17,40 @@ interface Feature {
 
 const features: Feature[] = [
   {
-    icon: 'family-tree', // Placeholder icon, need to check available icons
+    icon: 'family-tree',
     titleKey: 'home.features.visual_tree.title',
     descriptionKey: 'home.features.visual_tree.description',
   },
   {
-    icon: 'camera-iris', // Placeholder icon
+    icon: 'image-multiple', // Changed icon
     titleKey: 'home.features.stories_memories.title',
     descriptionKey: 'home.features.stories_memories.description',
   },
   {
-    icon: 'link-variant', // Placeholder icon
+    icon: 'account-group', // Changed icon
     titleKey: 'home.features.discover_connections.title',
     descriptionKey: 'home.features.discover_connections.description',
   },
   {
-    icon: 'account-details', // Placeholder icon
+    icon: 'card-account-details', // Changed icon
     titleKey: 'home.features.member_profiles.title',
     descriptionKey: 'home.features.member_profiles.description',
   },
   {
-    icon: 'magnify', // Placeholder icon
+    icon: 'magnify',
     titleKey: 'home.features.smart_search.title',
     descriptionKey: 'home.features.smart_search.description',
   },
   {
-    icon: 'lock', // Placeholder icon
+    icon: 'shield-lock', // Changed icon
     titleKey: 'home.features.privacy_control.title',
     descriptionKey: 'home.features.privacy_control.description',
   },
 ];
 
-export function FeaturesSection({ t }: FeaturesSectionProps) {
+export function FeaturesSection({ t, backgroundColor }: FeaturesSectionProps) {
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, backgroundColor ? { backgroundColor } : {}]} showsVerticalScrollIndicator={false}>
       <Text variant="headlineMedium" style={styles.sectionTitle}>
         {t('home.features.title')}
       </Text>

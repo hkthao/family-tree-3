@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import { Button, Text } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TFunction } from 'i18next';
-import { i18n } from 'i18next';
 import { PaperTheme } from '@/constants/theme'; // Import PaperTheme
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
@@ -11,13 +10,14 @@ interface BannerProps {
   t: TFunction;
   toggleLanguage: () => void;
   i18n: any;
+  backgroundColor?: string; // Add backgroundColor prop
 }
 
-export function Banner({ t, toggleLanguage, i18n }: BannerProps) {
+export function Banner({ t, toggleLanguage, i18n, backgroundColor }: BannerProps) {
   return (
-    <View style={styles.bannerContainer}>
+    <View style={[styles.bannerContainer, backgroundColor ? { backgroundColor } : {}]}>
       <Image
-        source={{ uri: 'https://picsum.photos/seed/family/700/500' }}
+        source={{ uri: 'https://picsum.photos/seed/familytree/700/500' }}
         style={styles.bannerImage}
         contentFit="cover"
       />

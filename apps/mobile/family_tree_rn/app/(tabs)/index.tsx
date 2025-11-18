@@ -7,6 +7,7 @@ import { FeaturesSection } from '@/components/home/FeaturesSection'; // Import F
 import { HowItWorksSection } from '@/components/home/HowItWorksSection'; // Import HowItWorksSection component
 import { MediaPreviewSection } from '@/components/home/MediaPreviewSection'; // Import MediaPreviewSection component
 import { SecondaryCtaSection } from '@/components/home/SecondaryCtaSection'; // Import SecondaryCtaSection component
+import { PrivacySecuritySection } from '@/components/home/PrivacySecuritySection'; // Import PrivacySecuritySection component
 import { PaperTheme } from '@/constants/theme';
 
 export default function HomeScreen() {
@@ -16,15 +17,19 @@ export default function HomeScreen() {
     i18n.changeLanguage(i18n.language === 'en' ? 'vi' : 'en');
   };
 
+  const backgroundColor1 = PaperTheme.colors.background;
+  const backgroundColor2 = PaperTheme.colors.surfaceVariant;
+
   return (
     <View style={styles.fullScreenContainer}>
       <UserAppBar />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Banner t={t} toggleLanguage={toggleLanguage} i18n={i18n} />
-        <FeaturesSection t={t} />
-        <HowItWorksSection t={t} />
-        <MediaPreviewSection t={t} />
-        <SecondaryCtaSection t={t} />
+        <Banner t={t} toggleLanguage={toggleLanguage} i18n={i18n} backgroundColor={backgroundColor1} />
+        <FeaturesSection t={t} backgroundColor={backgroundColor2} />
+        <HowItWorksSection t={t} backgroundColor={backgroundColor1} />
+        <MediaPreviewSection t={t} backgroundColor={backgroundColor2} />
+        <SecondaryCtaSection t={t} backgroundColor={backgroundColor1} />
+        <PrivacySecuritySection t={t} backgroundColor={backgroundColor2} />
         {/* You can add more content below the banner here */}
       </ScrollView>
     </View>

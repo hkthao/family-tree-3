@@ -7,6 +7,7 @@ import { SPACING_SMALL, SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimens
 
 interface HowItWorksSectionProps {
   t: TFunction;
+  backgroundColor?: string; // Add backgroundColor prop
 }
 
 interface Step {
@@ -29,9 +30,9 @@ const steps: Step[] = [
   },
 ];
 
-export function HowItWorksSection({ t }: HowItWorksSectionProps) {
+export function HowItWorksSection({ t, backgroundColor }: HowItWorksSectionProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, backgroundColor ? { backgroundColor } : {}]}>
       <Text variant="headlineMedium" style={styles.sectionTitle}>
         {t('home.how_it_works.title')}
       </Text>
@@ -57,7 +58,7 @@ export function HowItWorksSection({ t }: HowItWorksSectionProps) {
 const styles = StyleSheet.create({
   container: {
     padding: SPACING_LARGE,
-    backgroundColor: PaperTheme.colors.onTertiary, // White background for the section
+    backgroundColor: PaperTheme.colors.background, // White background for the section
   },
   sectionTitle: {
     textAlign: 'center',

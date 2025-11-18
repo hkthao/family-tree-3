@@ -4,7 +4,6 @@ import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { PaperTheme } from '../../constants/theme'; // Import theme from react-native-paper config
 
 function TabBarIcon({ style, ...rest }: { name: React.ComponentProps<typeof MaterialCommunityIcons>['name']; color: string; style?: object }) {
@@ -12,13 +11,13 @@ function TabBarIcon({ style, ...rest }: { name: React.ComponentProps<typeof Mate
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
   const { t } = useTranslation(); // Initialize useTranslation
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: PaperTheme.colors.primary, // Use primary color from react-native-paper theme
+        tabBarInactiveTintColor: PaperTheme.colors.textSecondary, // Use secondary text color for inactive tabs
         headerShown: false,
         tabBarBackground: () => (
           <View style={{ flex: 1, backgroundColor: PaperTheme.colors.background }} />

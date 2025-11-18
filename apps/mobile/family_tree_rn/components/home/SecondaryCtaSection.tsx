@@ -7,11 +7,12 @@ import { SPACING_LARGE } from '@/constants/dimensions';
 
 interface SecondaryCtaSectionProps {
   t: TFunction;
+  backgroundColor?: string; // Add backgroundColor prop
 }
 
-export function SecondaryCtaSection({ t }: SecondaryCtaSectionProps) {
+export function SecondaryCtaSection({ t, backgroundColor }: SecondaryCtaSectionProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, backgroundColor ? { backgroundColor } : {}]}>
       <Text variant="titleLarge" style={styles.questionText}>
         {t('home.secondary_cta.question')}
       </Text>

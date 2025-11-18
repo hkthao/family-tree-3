@@ -4,11 +4,11 @@ import { Text } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { TFunction } from 'i18next';
 import ImageViewing from 'react-native-image-viewing';
-import { PaperTheme } from '@/constants/theme';
 import { SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
 interface MediaPreviewSectionProps {
   t: TFunction;
+  backgroundColor?: string; // Add backgroundColor prop
 }
 
 const { width } = Dimensions.get('window');
@@ -17,13 +17,13 @@ const NUM_COLUMNS = 2;
 const IMAGE_SIZE = (width - (SPACING * (NUM_COLUMNS + 1))) / NUM_COLUMNS;
 
 const images = [
-  { uri: 'https://picsum.photos/seed/app1/300/300' },
-  { uri: 'https://picsum.photos/seed/app2/300/300' },
-  { uri: 'https://picsum.photos/seed/app3/300/300' },
-  { uri: 'https://picsum.photos/seed/app4/300/300' },
+  { uri: 'https://picsum.photos/seed/familytreeapp1/300/300' },
+  { uri: 'https://picsum.photos/seed/familytreeapp2/300/300' },
+  { uri: 'https://picsum.photos/seed/familytreeapp3/300/300' },
+  { uri: 'https://picsum.photos/seed/familytreeapp4/300/300' },
 ];
 
-export function MediaPreviewSection({ t }: MediaPreviewSectionProps) {
+export function MediaPreviewSection({ t, backgroundColor }: MediaPreviewSectionProps) {
   const [visible, setIsVisible] = useState(false);
   const [currentImageIndex, setImageIndex] = useState(0);
 
@@ -34,7 +34,7 @@ export function MediaPreviewSection({ t }: MediaPreviewSectionProps) {
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={[styles.container, backgroundColor ? { backgroundColor } : {}]}>
         <Text variant="headlineMedium" style={styles.sectionTitle}>
           {t('home.media_preview.title')}
         </Text>

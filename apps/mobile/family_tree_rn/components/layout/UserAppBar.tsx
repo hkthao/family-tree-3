@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Avatar, Appbar } from 'react-native-paper'; // Remove Menu, IconButton
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -36,13 +36,14 @@ export default function UserAppBar() {
           title={t('appbar.title')} // Use translated title
           style={styles.appBarContent}
         />
+        <Appbar.Action icon="bell" onPress={() => { /* TODO: Navigate to notifications */ }} color={PaperTheme.colors.primary} />
       </Appbar.Header>
   );
 }
 
 const styles = StyleSheet.create({
   appBarHeader: {
-    backgroundColor: PaperTheme.colors.background,
+    // backgroundColor: PaperTheme.colors.background,
     shadowColor: '#000', // iOS shadow
     shadowOffset: { width: 0, height: 4 }, // iOS shadow
     shadowOpacity: 0.2, // iOS shadow
@@ -50,5 +51,7 @@ const styles = StyleSheet.create({
     elevation: 4, // Android shadow
   },
   appBarContent: {
+    marginLeft: 0, // Remove default left margin
+    justifyContent: 'flex-start', // Align title to the left
   },
 });
