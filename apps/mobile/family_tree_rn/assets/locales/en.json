@@ -33,5 +33,9 @@
   "home.how_it_works.step3": "Share with the Whole Family",
   "home.media_preview.title": "Images",
   "home.secondary_cta.question": "Are you ready to start your family tree journey?",
-  "home.secondary_cta.button": "Create for Free"
+  "home.secondary_cta.button": "Create for Free",
+  "home.privacy_security.title": "Privacy & Security",
+  "home.privacy_security.feature1": "Data secured with the latest technology",
+  "home.privacy_security.feature2": "Privacy controls for each family group",
+  "home.privacy_security.feature3": "No data sharing with third parties"
 }
