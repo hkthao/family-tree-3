@@ -2,15 +2,14 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Appbar, useTheme, Avatar, ActivityIndicator, Card, List, Divider, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { fetchFamilyDetails, FamilyDetail } from '../../data/mockFamilyData';
-import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
+import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
 
 export default function FamilyDetailsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { id: routeId } = useLocalSearchParams(); // Keep for debugging if needed, but not used for fetching
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId); // Get currentFamilyId from store
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -72,9 +71,6 @@ export default function FamilyDetailsScreen() {
       alignItems: 'center',
       paddingBottom: SPACING_MEDIUM,
     },
-    profileDetailsContainer: {
-      // This style is no longer needed as content is directly placed
-    },
     avatar: {
       marginBottom: SPACING_MEDIUM,
     },
@@ -91,30 +87,8 @@ export default function FamilyDetailsScreen() {
       marginRight: -SPACING_MEDIUM, // Apply negative margin to pull the chip closer to the right edge
     },
     chipsContainer: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'flex-end', // Align chips to the right
-      flex: 1, // Allow container to take available space
+      gap: 5,
       marginRight: -SPACING_MEDIUM, // Adjust overall right margin for the chips container
-    },
-    detailRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: SPACING_MEDIUM,
-    },
-    detailItem: {
-      flex: 1,
-    },
-    detailLabel: {
-      fontWeight: 'bold',
-      color: theme.colors.onSurfaceVariant,
-    },
-    detailValue: {
-      color: theme.colors.onSurface,
-    },
-    description: {
-      marginTop: SPACING_MEDIUM,
-      marginBottom: SPACING_MEDIUM,
     },
   }), [theme]);
 
@@ -197,12 +171,11 @@ export default function FamilyDetailsScreen() {
               <Divider />
               <List.Item
                 title={t('familyDetail.details.manager')}
-                titleStyle={{ flexShrink: 1 }}
                 left={() => <List.Icon icon="account-tie" />}
                 right={() => (
                   <View style={styles.chipsContainer}>
                     {family.manager.map((managerName, index) => (
-                      <Chip key={index} style={{ marginRight: SPACING_SMALL, marginBottom: SPACING_SMALL }}>
+                      <Chip key={index} >
                         {managerName}
                       </Chip>
                     ))}
@@ -212,12 +185,11 @@ export default function FamilyDetailsScreen() {
               <Divider />
               <List.Item
                 title={t('familyDetail.details.viewers')}
-                titleStyle={{ flexShrink: 1 }}
                 left={() => <List.Icon icon="eye-outline" />}
                 right={() => (
                   <View style={styles.chipsContainer}>
                     {family.viewers.map((viewerName, index) => (
-                      <Chip key={index} style={{ marginRight: SPACING_SMALL, marginBottom: SPACING_SMALL }}>
+                      <Chip key={index} >
                         {viewerName}
                       </Chip>
                     ))}
