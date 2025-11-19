@@ -1,7 +1,6 @@
 import { ScrollView, StyleSheet, View, Linking } from 'react-native';
-import { Text, Card, Button, useTheme } from 'react-native-paper'; // Import Button and useTheme
+import { Text, Card, Button, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
 import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar

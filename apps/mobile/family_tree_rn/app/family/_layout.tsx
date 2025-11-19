@@ -1,4 +1,4 @@
-import { Tabs, useLocalSearchParams, useRouter, useSegments } from 'expo-router';
+import { Tabs, useSegments } from 'expo-router';
 import { Appbar, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,7 +8,6 @@ import { useNavigation } from '@react-navigation/native'; // Import useNavigatio
 export default function FamilyDetailLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
-  const router = useRouter();
   const segments = useSegments();
   const navigation = useNavigation(); // Get navigation object
 

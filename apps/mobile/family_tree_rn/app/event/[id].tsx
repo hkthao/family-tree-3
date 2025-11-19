@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Appbar, Text, useTheme, Card, ActivityIndicator, List, Divider, Chip, Avatar } from 'react-native-paper';
+import { Appbar, Text, useTheme, Card, ActivityIndicator, Chip, Avatar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 

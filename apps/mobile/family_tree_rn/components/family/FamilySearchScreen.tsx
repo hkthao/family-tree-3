@@ -142,7 +142,6 @@ export default function FamilySearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [families, setFamilies] = useState<Family[]>([]);
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(loading); // Create a ref to track loading state
   const [refreshing, setRefreshing] = useState(false);
@@ -177,7 +176,6 @@ export default function FamilySearchScreen() {
           setHasMore(updatedFamilies.length < newTotalCount);
           return updatedFamilies;
         });
-        setTotalCount(newTotalCount);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -190,7 +188,7 @@ export default function FamilySearchScreen() {
         setRefreshing(false);
       }
     },
-    [searchQuery, setLoading, setError, setFamilies, setTotalCount, setHasMore] // Dependencies should be stable setters and searchQuery
+    [searchQuery, setLoading, setError, setFamilies, setHasMore] // Dependencies should be stable setters and searchQuery
   );
 
   useEffect(() => {

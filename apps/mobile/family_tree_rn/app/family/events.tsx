@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, RefreshControl, Pressable } from 'react-native';
-import { Appbar, Text, useTheme, ActivityIndicator } from 'react-native-paper';
+import { View, StyleSheet, FlatList, RefreshControl, Pressable } from 'react-native';
+import { Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
@@ -112,11 +112,23 @@ export default function FamilyEventsScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // Simulate fetching data
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setEventsForSelectedDate(getEventsForDate(selectedDate)); // Re-fetch events for selected date
-    setRefreshing(false);
-  }, [selectedDate]);
+    setLoading(true); // Start loading
+    setError(null); // Clear previous errors
+    try {
+      // Simulate fetching data
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setEventsForSelectedDate(getEventsForDate(selectedDate)); // Re-fetch events for selected date
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(t('common.error_occurred'));
+      }
+    } finally {
+      setLoading(false); // End loading
+      setRefreshing(false);
+    }
+  }, [selectedDate, t]);
 
   const markedDates = useMemo(() => {
     const dates: { [key: string]: any } = {};
@@ -132,7 +144,7 @@ export default function FamilyEventsScreen() {
       dates[selectedDate] = { selected: true, selectedColor: theme.colors.primary };
     }
     return dates;
-  }, [mockEventDetails, selectedDate, theme.colors.primary]);
+  }, [selectedDate, theme.colors.primary]);
 
   const onDayPress = useCallback((day: any) => {
     setSelectedDate(day.dateString);

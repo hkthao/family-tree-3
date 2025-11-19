@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Appbar, useTheme, Avatar, ActivityIndicator, Card, List, Divider, Chip } from 'react-native-paper';
+import { Text, useTheme, Avatar, ActivityIndicator, Card, List, Divider, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useRouter } from 'expo-router';
 import { fetchFamilyDetails, FamilyDetail } from '../../data/mockFamilyData';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
@@ -38,9 +37,9 @@ export default function FamilyDetailsScreen() {
     };
 
     loadFamilyDetails();
-  }, [currentFamilyId]); // Depend on currentFamilyId from Zustand
+  }, [currentFamilyId, t]); // Depend on currentFamilyId from Zustand and t
 
-  const router = useRouter();
+
 
   const styles = useMemo(() => StyleSheet.create({
     container: {

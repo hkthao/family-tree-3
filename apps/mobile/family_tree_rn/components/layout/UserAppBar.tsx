@@ -16,14 +16,6 @@ export default function UserAppBar() {
   const { isLoggedIn, user } = useAuth();
   const theme = useTheme();
 
-  const handleAvatarPress = () => {
-    router.push('/'); // TODO: Navigate to profile screen
-  };
-
-  if (!isLoggedIn) {
-    return null;
-  }
-
   const styles = useMemo(() => StyleSheet.create({
     appBarHeader: {
       backgroundColor: theme.colors.background, // Use theme background color
@@ -38,6 +30,14 @@ export default function UserAppBar() {
       justifyContent: 'flex-start', // Align title to the left
     },
   }), [theme]);
+
+  const handleAvatarPress = () => {
+    router.push('/'); // TODO: Navigate to profile screen
+  };
+
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
       <Appbar.Header style={styles.appBarHeader}>

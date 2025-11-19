@@ -29,7 +29,6 @@ export default function MemberSearchScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [members, setMembers] = useState<FamilyMember[]>([]);
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(loading);
   const [refreshing, setRefreshing] = useState(false);
@@ -74,7 +73,6 @@ export default function MemberSearchScreen() {
           setHasMore(updatedMembers.length < newTotalCount);
           return updatedMembers;
         });
-        setTotalCount(newTotalCount);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -86,7 +84,7 @@ export default function MemberSearchScreen() {
         setRefreshing(false);
       }
     },
-    [currentFamilyId, searchQuery, filters, setLoading, setError, setMembers, setTotalCount, setHasMore, t]
+    [currentFamilyId, searchQuery, filters, setLoading, setError, setMembers, setHasMore, t]
   );
 
   useEffect(() => {

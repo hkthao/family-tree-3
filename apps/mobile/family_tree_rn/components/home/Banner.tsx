@@ -4,7 +4,6 @@ import { Button, Text, useTheme } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TFunction } from 'i18next';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
-import { useMemo } from 'react';
 
 interface BannerProps {
   t: TFunction;
@@ -13,36 +12,37 @@ interface BannerProps {
   backgroundColor?: string; // Add backgroundColor prop
 }
 
+const getStyles = (theme: any) => StyleSheet.create({
+  bannerContainer: {
+    height: 250,
+    position: 'relative',
+  },
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  leftBannerOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: '100%',
+    justifyContent: 'center',
+    padding: SPACING_LARGE,
+  },
+  languageButton: {
+    marginTop: SPACING_LARGE,
+    alignSelf: 'flex-start',
+  },
+  createTreeText: {
+    marginTop: SPACING_MEDIUM,
+    color: 'gray', // Example color, adjust as needed
+  },
+});
+
 export function Banner({ t, toggleLanguage, i18n, backgroundColor }: BannerProps) {
   const theme = useTheme();
-
-  const styles = useMemo(() => StyleSheet.create({
-    bannerContainer: {
-      height: 250,
-      position: 'relative',
-    },
-    bannerImage: {
-      width: '100%',
-      height: '100%',
-    },
-    leftBannerOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      bottom: 0,
-      width: '100%',
-      justifyContent: 'center',
-      padding: SPACING_LARGE,
-    },
-    languageButton: {
-      marginTop: SPACING_LARGE,
-      alignSelf: 'flex-start',
-    },
-    createTreeText: {
-      marginTop: SPACING_MEDIUM,
-      color: 'gray', // Example color, adjust as needed
-    },
-  }), [theme]);
+  const styles = getStyles(theme);
 
   return (
     <View style={[styles.bannerContainer, backgroundColor ? { backgroundColor } : {}]}>

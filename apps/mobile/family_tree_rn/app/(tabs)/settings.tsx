@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, View, Alert } from 'react-native';
 import { Text, Button, Switch, Avatar, useTheme, Appbar, List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
+import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { useAuth } from '@/hooks/useAuth';
 import { router } from 'expo-router';
 import { useEffect, useState, useMemo } from 'react';
