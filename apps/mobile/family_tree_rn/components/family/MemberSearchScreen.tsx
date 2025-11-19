@@ -186,7 +186,7 @@ export default function MemberSearchScreen() {
     },
     cardContent: {
       flexDirection: 'row',
-      alignItems: 'center',
+      alignItems: 'flex-start',
     },
     avatar: {
       marginRight: SPACING_MEDIUM,
