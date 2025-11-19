@@ -19,15 +19,10 @@ export default function FamilyTreeScreen() {
   });
 
   return (
-    <>
-      <Appbar.Header>
-        <Appbar.Content title={t('familyDetail.tab.tree')} />
-      </Appbar.Header>
-      <View style={styles.container}>
-        <Text variant="headlineMedium">{t('familyDetail.tab.tree')}</Text>
-        <Text variant="bodyMedium">Family ID: {id}</Text>
-        {/* Add family tree content here */}
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">{t('familyDetail.tab.tree')}</Text>
+      <Text variant="bodyMedium">Family ID: {id}</Text>
+      {/* Add family tree content here */}
+    </View>
   );
 }

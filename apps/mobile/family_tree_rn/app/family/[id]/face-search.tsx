@@ -19,15 +19,10 @@ export default function FamilyFaceSearchScreen() {
   });
 
   return (
-    <>
-      <Appbar.Header>
-        <Appbar.Content title={t('familyDetail.tab.faceSearch')} />
-      </Appbar.Header>
-      <View style={styles.container}>
-        <Text variant="headlineMedium">{t('familyDetail.tab.faceSearch')}</Text>
-        <Text variant="bodyMedium">Family ID: {id}</Text>
-        {/* Add face search content here */}
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">{t('familyDetail.tab.faceSearch')}</Text>
+      <Text variant="bodyMedium">Family ID: {id}</Text>
+      {/* Add face search content here */}
+    </View>
   );
 }

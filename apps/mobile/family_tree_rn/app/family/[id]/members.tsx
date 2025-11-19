@@ -19,15 +19,10 @@ export default function FamilyMembersScreen() {
   });
 
   return (
-    <>
-      <Appbar.Header>
-        <Appbar.Content title={t('familyDetail.tab.members')} />
-      </Appbar.Header>
-      <View style={styles.container}>
-        <Text variant="headlineMedium">{t('familyDetail.tab.members')}</Text>
-        <Text variant="bodyMedium">Family ID: {id}</Text>
-        {/* Add family members content here */}
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">{t('familyDetail.tab.members')}</Text>
+      <Text variant="bodyMedium">Family ID: {id}</Text>
+      {/* Add family members content here */}
+    </View>
   );
 }

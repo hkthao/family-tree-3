@@ -100,5 +100,9 @@
   "familyDetail.tab.members": "Thành viên",
   "familyDetail.tab.tree": "Cây gia phả",
   "familyDetail.tab.events": "Sự kiện",
-  "familyDetail.tab.faceSearch": "Tìm kiếm khuôn mặt"
+  "familyDetail.tab.faceSearch": "Tìm kiếm khuôn mặt",
+  "familyDetail.details.overview": "Tổng quan",
+  "familyDetail.details.createdBy": "Tạo bởi",
+  "familyDetail.details.createdAt": "Ngày tạo",
+  "familyDetail.details.lastUpdatedAt": "Cập nhật lần cuối"
 }

@@ -19,15 +19,10 @@ export default function FamilyEventsScreen() {
   });
 
   return (
-    <>
-      <Appbar.Header>
-        <Appbar.Content title={t('familyDetail.tab.events')} />
-      </Appbar.Header>
-      <View style={styles.container}>
-        <Text variant="headlineMedium">{t('familyDetail.tab.events')}</Text>
-        <Text variant="bodyMedium">Family ID: {id}</Text>
-        {/* Add family events content here */}
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text variant="headlineMedium">{t('familyDetail.tab.events')}</Text>
+      <Text variant="bodyMedium">Family ID: {id}</Text>
+      {/* Add family events content here */}
+    </View>
   );
 }

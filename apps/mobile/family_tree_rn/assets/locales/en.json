@@ -98,5 +98,9 @@
   "familyDetail.tab.members": "Members",
   "familyDetail.tab.tree": "Family Tree",
   "familyDetail.tab.events": "Events",
-  "familyDetail.tab.faceSearch": "Face Search"
+  "familyDetail.tab.faceSearch": "Face Search",
+  "familyDetail.details.overview": "Overview",
+  "familyDetail.details.createdBy": "Created By",
+  "familyDetail.details.createdAt": "Created At",
+  "familyDetail.details.lastUpdatedAt": "Last Updated At"
 }

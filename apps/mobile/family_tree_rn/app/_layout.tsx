@@ -28,7 +28,7 @@ function AppContent() {
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-            <Stack.Screen name="family/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="family" options={{ headerShown: false }} />
           </Stack>
         </NavigationThemeProvider>
       </Portal.Host>
