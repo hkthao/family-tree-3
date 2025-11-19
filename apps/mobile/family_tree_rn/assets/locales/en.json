@@ -94,6 +94,7 @@
   "login.title": "Welcome Back!",
   "login.description": "Please log in to continue.",
   "login.button": "Log In",
+  "familyDetail.title": "Family Details",
   "familyDetail.tab.details": "Details",
   "familyDetail.tab.members": "Members",
   "familyDetail.tab.tree": "Family Tree",
