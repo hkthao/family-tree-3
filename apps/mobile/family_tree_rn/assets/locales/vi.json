@@ -95,5 +95,10 @@
   "common.delete": "Xóa",
   "login.title": "Chào mừng trở lại!",
   "login.description": "Vui lòng đăng nhập để tiếp tục.",
-  "login.button": "Đăng nhập"
+  "login.button": "Đăng nhập",
+  "familyDetail.tab.details": "Chi tiết",
+  "familyDetail.tab.members": "Thành viên",
+  "familyDetail.tab.tree": "Cây gia phả",
+  "familyDetail.tab.events": "Sự kiện",
+  "familyDetail.tab.faceSearch": "Tìm kiếm khuôn mặt"
 }
