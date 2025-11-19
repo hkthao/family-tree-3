@@ -2,7 +2,7 @@ import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import React, { useState, useCallback, useMemo } from 'react';
 import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
-import { Divider, useTheme } from 'react-native-paper';
+import { Divider, Card, useTheme } from 'react-native-paper';
 
 interface EventItem extends AgendaEntry {
   name: string;
@@ -15,11 +15,9 @@ export default function FamilyEventsScreen() {
   const theme = useTheme();
   const styles = useMemo(() => StyleSheet.create({
     item: {
-      flex: 1,
       borderRadius: theme.roundness,
-      padding: SPACING_MEDIUM,
       marginRight: SPACING_MEDIUM,
-      marginTop: SPACING_SMALL,
+      marginBottom: SPACING_MEDIUM,
     },
     emptyDate: {
       height: 15,
@@ -53,7 +51,7 @@ export default function FamilyEventsScreen() {
       flexDirection: 'row',
       minHeight: 100, // Minimum height for a section row
       paddingVertical: SPACING_MEDIUM,
-      backgroundColor: theme.colors.surface
+      backgroundColor: theme.colors.background
     },
     sectionLeftColumn: {
       width: 80, // Fixed width for the left column
@@ -106,12 +104,15 @@ export default function FamilyEventsScreen() {
     const color = isFirst ? theme.colors.onSurface : theme.colors.onSurfaceVariant;
 
     return (
-      <TouchableOpacity
+      <Card
         style={[styles.item, { backgroundColor: theme.colors.surface }]}
         onPress={() => Alert.alert(reservation.name)}
+        elevation={1} // Remove shadow
       >
-        <Text style={{ fontSize, color }}>{reservation.name}</Text>
-      </TouchableOpacity>
+        <Card.Content>
+          <Text style={{ fontSize, color }}>{reservation.name}</Text>
+        </Card.Content>
+      </Card>
     );
   }, [theme.colors]);
 
@@ -145,7 +146,12 @@ export default function FamilyEventsScreen() {
     }));
 
     return (
-      <ScrollView>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{
+          backgroundColor: theme.colors.background
+        }}
+      >
         {sections.map(section => {
           const date = new Date(section.title);
           const month = (date.getMonth() + 1).toString().padStart(2, '0'); // MM format
