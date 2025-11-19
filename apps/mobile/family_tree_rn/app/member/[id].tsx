@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Appbar, Text, useTheme, Card, Avatar, ActivityIndicator, Chip } from 'react-native-paper';
+import { Appbar, Text, useTheme, Card, Avatar, ActivityIndicator, Chip, List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 // Removed SafeAreaView import
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
@@ -50,7 +50,7 @@ export default function MemberDetailsScreen() {
     },
     container: {
       flex: 1,
-      padding: SPACING_MEDIUM,
+      paddingVertical: SPACING_MEDIUM,
     },
     loadingContainer: {
       flex: 1,
@@ -162,7 +162,7 @@ export default function MemberDetailsScreen() {
         <Appbar.Content title={member.fullName || t('memberDetail.title')} />
       </Appbar.Header>
       <View style={styles.safeArea}>
-        <ScrollView style={styles.container}>
+        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
           <Card style={styles.card}>
             <Card.Content style={styles.cardContent}>
               <Avatar.Image size={100} source={{ uri: member.avatarUrl || 'https://picsum.photos/100' }} style={styles.avatar} />
@@ -207,94 +207,120 @@ export default function MemberDetailsScreen() {
             </Card.Content>
           </Card>
 
-          <Card style={styles.card}>
-            <Card.Title title={t('memberDetail.biography')} titleVariant="titleMedium" />
-            <Card.Content>
-              <Text variant="bodyMedium">{member.biography || t('memberDetail.noBiography')}</Text>
-            </Card.Content>
-          </Card>
+
 
           <Card style={styles.card}>
             <Card.Title title={t('memberDetail.otherDetails')} titleVariant="titleMedium" />
             <Card.Content>
-              {member.dateOfBirth && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.dateOfBirth')}:</Text>
-                  <Text style={styles.detailValue}>{new Date(member.dateOfBirth).toLocaleDateString()}</Text>
-                </View>
-              )}
-              {member.dateOfDeath && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.dateOfDeath')}:</Text>
-                  <Text style={styles.detailValue}>{new Date(member.dateOfDeath).toLocaleDateString()}</Text>
-                </View>
-              )}
-              {member.placeOfBirth && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.placeOfBirth')}:</Text>
-                  <Text style={styles.detailValue}>{member.placeOfBirth}</Text>
-                </View>
-              )}
-              {member.placeOfDeath && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.placeOfDeath')}:</Text>
-                  <Text style={styles.detailValue}>{member.placeOfDeath}</Text>
-                </View>
-              )}
-              {member.nickname && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.nickname')}:</Text>
-                  <Text style={styles.detailValue}>{member.nickname}</Text>
-                </View>
-              )}
-              {member.created && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.created')}:</Text>
-                  <Text style={styles.detailValue}>{new Date(member.created).toLocaleDateString()}</Text>
-                </View>
-              )}
-              {member.createdBy && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.createdBy')}:</Text>
-                  <Text style={styles.detailValue}>{member.createdBy}</Text>
-                </View>
-              )}
-              {member.lastModified && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.lastModified')}:</Text>
-                  <Text style={styles.detailValue}>{new Date(member.lastModified).toLocaleDateString()}</Text>
-                </View>
-              )}
-              {member.lastModifiedBy && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.lastModifiedBy')}:</Text>
-                  <Text style={styles.detailValue}>{member.lastModifiedBy}</Text>
-                </View>
-              )}
-              {member.familyId && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.familyId')}:</Text>
-                  <Text style={styles.detailValue}>{member.familyId}</Text>
-                </View>
-              )}
-              {member.fatherId && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.fatherId')}:</Text>
-                  <Text style={styles.detailValue}>{member.fatherId}</Text>
-                </View>
-              )}
-              {member.motherId && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.motherId')}:</Text>
-                  <Text style={styles.detailValue}>{member.motherId}</Text>
-                </View>
-              )}
-              {member.husbandId && (
-                <View style={styles.detailRow}>
-                  <Text style={styles.detailLabel}>{t('memberDetail.husbandId')}:</Text>
-                  <Text style={styles.detailValue}>{member.husbandId}</Text>
-                </View>
-              )}
+              <List.Section>
+                {member.dateOfBirth && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.dateOfBirth')}
+                      left={() => <List.Icon icon="calendar-account" />}
+                      right={() => <Text>{new Date(member.dateOfBirth ?? '').toLocaleDateString()}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.dateOfDeath && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.dateOfDeath')}
+                      left={() => <List.Icon icon="calendar-remove" />}
+                      right={() => <Text>{new Date(member.dateOfDeath ?? '').toLocaleDateString()}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.placeOfBirth && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.placeOfBirth')}
+                      left={() => <List.Icon icon="map-marker" />}
+                      right={() => <Text>{member.placeOfBirth}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.placeOfDeath && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.placeOfDeath')}
+                      left={() => <List.Icon icon="map-marker-off" />}
+                      right={() => <Text>{member.placeOfDeath}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.nickname && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.nickname')}
+                      left={() => <List.Icon icon="tag" />}
+                      right={() => <Text>{member.nickname}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.father && (
+                  <>
+                    <List.Item
+                      title={t('member.father')}
+                      left={() => <List.Icon icon="human-male-boy" />}
+                      right={() => <Text>{member.father}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.mother && (
+                  <>
+                    <List.Item
+                      title={t('member.mother')}
+                      left={() => <List.Icon icon="human-female-girl" />}
+                      right={() => <Text>{member.mother}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.husband && (
+                  <>
+                    <List.Item
+                      title={t('member.husband')}
+                      left={() => <List.Icon icon="human-male" />}
+                      right={() => <Text>{member.husband}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.wife && (
+                  <>
+                    <List.Item
+                      title={t('member.wife')}
+                      left={() => <List.Icon icon="human-female" />}
+                      right={() => <Text>{member.wife}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.created && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.created')}
+                      left={() => <List.Icon icon="calendar-plus" />}
+                      right={() => <Text>{new Date(member.created).toLocaleDateString()}</Text>}
+                    />
+                    <Divider />
+                  </>
+                )}
+              </List.Section>
+            </Card.Content>
+          </Card>
+
+          <Card style={styles.card}>
+            <Card.Title title={t('memberDetail.biography')} titleVariant="titleMedium" />
+            <Card.Content>
+              <Text variant="bodyMedium">{member.biography || t('memberDetail.noBiography')}</Text>
             </Card.Content>
           </Card>
         </ScrollView>
