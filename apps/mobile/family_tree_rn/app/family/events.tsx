@@ -196,10 +196,6 @@ export default function FamilyEventsScreen() {
 
   return (
     <View style={styles.container}>
-      <Appbar.Header style={styles.appbar}>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={t('familyDetail.tab.events')} />
-      </Appbar.Header>
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator animating size="large" color={theme.colors.primary} />

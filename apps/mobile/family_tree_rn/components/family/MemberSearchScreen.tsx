@@ -230,137 +230,133 @@ export default function MemberSearchScreen() {
   }), [theme]);
 
   return (
-    <View style={{ flex: 1 }}>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={t('familyDetail.tab.members')} />
-      </Appbar.Header>
-      <View style={styles.container}>
-        <View style={styles.searchFilterContainer}>
-          <Searchbar
-            placeholder={t('memberSearch.placeholder')}
-            onChangeText={setSearchQuery}
-            value={searchQuery}
-            style={styles.searchbar}
-            showDivider={true}
-            clearIcon={searchQuery.length > 0 ? () => (
-              <PaperIconButton
-                icon="close-circle"
-                size={20}
-                onPress={() => setSearchQuery('')}
-              />
-            ) : undefined}
-          />
-          <Appbar.Action
-            icon={showFilterChips ? "filter-off" : "filter"}
-            onPress={() => setShowFilterChips(!showFilterChips)}
-            color={theme.colors.onSurfaceVariant}
-            size={24}
-            style={styles.filterButton}
-          />
-        </View>        {showFilterChips && (
-          <View style={styles.filterChipsContainer}>
-            <Chip
-              selected={filters.gender === 'Male'}
-              onPress={() => handleFilterChange('gender', 'Male')}
-              style={styles.filterChip}
-            >
-              {t('memberSearch.filter.gender.male')}
-            </Chip>
-            <Chip
-              selected={filters.gender === 'Female'}
-              onPress={() => handleFilterChange('gender', 'Female')}
-              style={styles.filterChip}
-            >
-              {t('memberSearch.filter.gender.female')}
-            </Chip>
-            <Chip
-              selected={filters.gender === 'Other'}
-              onPress={() => handleFilterChange('gender', 'Other')}
-              style={styles.filterChip}
-            >
-              {t('memberSearch.filter.gender.other')}
-            </Chip>
-            <Chip
-              selected={filters.isRootMember === true}
-              onPress={() => handleFilterChange('isRootMember', true)}
-              style={styles.filterChip}
-            >
-              {t('memberSearch.filter.isRootMember')}
-            </Chip>
-          </View>
-        )}
-        {error && (
-          <View style={styles.errorContainer}>
-            <Text variant="bodyMedium" style={styles.errorText}>
-              {t('common.error_occurred')}: {error}
-            </Text>
-          </View>
-        )}
-
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={members}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <Card style={[styles.memberCard, { borderRadius: theme.roundness }]} onPress={() => {
-              router.push(`/member/${item.id}`);
-            }}>
-              <Card.Content style={styles.cardContent}>
-                <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
-                <View style={styles.cardText}>
-                  <Text variant="titleMedium">{item.name}</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING_SMALL / 2 }}>
-                    {item.occupation && <Text variant="bodySmall">{item.occupation}</Text>}
-                    {item.occupation && item.birthDeathYears && <Text variant="bodySmall">|</Text>}
-                    {item.birthDeathYears && <Text variant="bodySmall">{item.birthDeathYears}</Text>}
-                  </View>
-                  <View style={styles.memberDetailsChips}>
-                    {item.gender && (
-                      <Chip icon="gender-male-female" style={styles.detailChip} compact={true}>
-                        {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}
-                      </Chip>
-                    )}
-                    {item.father && (
-                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} >
-                        {item.father}
-                      </Chip>
-                    )}
-                    {item.mother && (
-                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} >
-                        {item.mother}
-                      </Chip>
-                    )}
-                    {item.wife && (
-                      <Chip icon="heart" style={styles.detailChip} compact={true} >
-                        {item.wife}
-                      </Chip>
-                    )}
-                    {item.husband && (
-                      <Chip icon="heart" style={styles.detailChip} compact={true} >
-                        {item.husband}
-                      </Chip>
-                    )}
-                  </View>
-                </View>
-              </Card.Content>
-            </Card>
-          )}
-          ListEmptyComponent={renderEmptyList}
-          ListFooterComponent={renderFooter}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={handleRefresh}
-              colors={[theme.colors.primary]}
-              tintColor={theme.colors.primary}
+    <View style={styles.container}>
+      <View style={styles.searchFilterContainer}>
+        <Searchbar
+          placeholder={t('memberSearch.placeholder')}
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchbar}
+          showDivider={true}
+          clearIcon={searchQuery.length > 0 ? () => (
+            <PaperIconButton
+              icon="close-circle"
+              size={20}
+              onPress={() => setSearchQuery('')}
             />
-          }
-          contentContainerStyle={members.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
+          ) : undefined}
+        />
+        <Appbar.Action
+          icon={showFilterChips ? "filter-off" : "filter"}
+          onPress={() => setShowFilterChips(!showFilterChips)}
+          color={theme.colors.onSurfaceVariant}
+          size={24}
+          style={styles.filterButton}
         />
       </View>
+
+      {showFilterChips && (
+        <View style={styles.filterChipsContainer}>
+          <Chip
+            selected={filters.gender === 'Male'}
+            onPress={() => handleFilterChange('gender', 'Male')}
+            style={styles.filterChip}
+          >
+            {t('memberSearch.filter.gender.male')}
+          </Chip>
+          <Chip
+            selected={filters.gender === 'Female'}
+            onPress={() => handleFilterChange('gender', 'Female')}
+            style={styles.filterChip}
+          >
+            {t('memberSearch.filter.gender.female')}
+          </Chip>
+          <Chip
+            selected={filters.gender === 'Other'}
+            onPress={() => handleFilterChange('gender', 'Other')}
+            style={styles.filterChip}
+          >
+            {t('memberSearch.filter.gender.other')}
+          </Chip>
+          <Chip
+            selected={filters.isRootMember === true}
+            onPress={() => handleFilterChange('isRootMember', true)}
+            style={styles.filterChip}
+          >
+            {t('memberSearch.filter.isRootMember')}
+          </Chip>
+        </View>
+      )}
+      {error && (
+        <View style={styles.errorContainer}>
+          <Text variant="bodyMedium" style={styles.errorText}>
+            {t('common.error_occurred')}: {error}
+          </Text>
+        </View>
+      )}
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={members}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <Card style={[styles.memberCard, { borderRadius: theme.roundness }]} onPress={() => {
+            router.push(`/member/${item.id}`);
+          }}>
+            <Card.Content style={styles.cardContent}>
+              <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
+              <View style={styles.cardText}>
+                <Text variant="titleMedium">{item.name}</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING_SMALL / 2 }}>
+                  {item.occupation && <Text variant="bodySmall">{item.occupation}</Text>}
+                  {item.occupation && item.birthDeathYears && <Text variant="bodySmall">|</Text>}
+                  {item.birthDeathYears && <Text variant="bodySmall">{item.birthDeathYears}</Text>}
+                </View>
+                <View style={styles.memberDetailsChips}>
+                  {item.gender && (
+                    <Chip icon="gender-male-female" style={styles.detailChip} compact={true}>
+                      {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}
+                    </Chip>
+                  )}
+                  {item.father && (
+                    <Chip icon="human-male-boy" style={styles.detailChip} compact={true} >
+                      {item.father}
+                    </Chip>
+                  )}
+                  {item.mother && (
+                    <Chip icon="human-female-girl" style={styles.detailChip} compact={true} >
+                      {item.mother}
+                    </Chip>
+                  )}
+                  {item.wife && (
+                    <Chip icon="heart" style={styles.detailChip} compact={true} >
+                      {item.wife}
+                    </Chip>
+                  )}
+                  {item.husband && (
+                    <Chip icon="heart" style={styles.detailChip} compact={true} >
+                      {item.husband}
+                    </Chip>
+                  )}
+                </View>
+              </View>
+            </Card.Content>
+          </Card>
+        )}
+        ListEmptyComponent={renderEmptyList}
+        ListFooterComponent={renderFooter}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+          />
+        }
+        contentContainerStyle={members.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
+      />
     </View>
   );
 }
