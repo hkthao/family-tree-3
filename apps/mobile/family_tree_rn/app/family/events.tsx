@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
 import { Appbar, Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -43,28 +43,91 @@ LocaleConfig.locales['vi'] = {
 };
 LocaleConfig.defaultLocale = 'vi';
 
+interface EventDetail {
+  id: string;
+  title: string;
+  time: string;
+  description?: string;
+  color?: string;
+}
+
+const mockEventDetails: { [date: string]: EventDetail[] } = {
+  '2025-11-20': [
+    {
+      id: 'e1',
+      title: 'Sinh nhật ông nội',
+      time: '10:00 AM',
+      description: 'Tiệc sinh nhật tại nhà hàng ABC',
+      color: '#FF0000',
+    },
+    {
+      id: 'e2',
+      title: 'Họp mặt gia đình',
+      time: '02:00 PM',
+      description: 'Họp mặt thường niên của gia đình',
+      color: '#0000FF',
+    },
+  ],
+  '2025-11-25': [
+    {
+      id: 'e3',
+      title: 'Giỗ tổ Hùng Vương',
+      time: '09:00 AM',
+      description: 'Lễ giỗ tổ tại đền Hùng',
+      color: '#00FF00',
+    },
+  ],
+  '2025-12-01': [
+    {
+      id: 'e4',
+      title: 'Đám cưới cô út',
+      time: '11:00 AM',
+      description: 'Lễ cưới tại trung tâm hội nghị XYZ',
+      color: '#FFA500',
+    },
+  ],
+};
+
+const getEventsForDate = (dateString: string): EventDetail[] => {
+  return mockEventDetails[dateString] || [];
+};
+
 export default function FamilyEventsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
 
-  const [selectedDate, setSelectedDate] = useState('');
+  const initialSelectedDate = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const firstEventDate = Object.keys(mockEventDetails).sort()[0];
+    return firstEventDate || today;
+  }, []);
+
+  const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
+  const [eventsForSelectedDate, setEventsForSelectedDate] = useState<EventDetail[]>(() => getEventsForDate(initialSelectedDate));
   const [loading, setLoading] = useState(false); // Assuming events might load
   const [error, setError] = useState<string | null>(null);
 
-  // Mock marked dates for demonstration
   const markedDates = useMemo(() => {
-    return {
-      '2025-11-20': { selected: true, marked: true, selectedColor: theme.colors.primary },
-      '2025-11-25': { marked: true, dotColor: theme.colors.error },
-      '2025-12-01': { marked: true, dotColor: theme.colors.tertiary },
-    };
-  }, [theme.colors.primary, theme.colors.error, theme.colors.tertiary]);
+    const dates: { [key: string]: any } = {};
+    Object.keys(mockEventDetails).forEach((date) => {
+      dates[date] = {
+        marked: true,
+        dotColor: theme.colors.primary, // Default dot color
+        ...(date === selectedDate && { selected: true, selectedColor: theme.colors.primary }),
+      };
+    });
+    // Ensure the selected date is always marked, even if it has no events
+    if (selectedDate && !dates[selectedDate]) {
+      dates[selectedDate] = { selected: true, selectedColor: theme.colors.primary };
+    }
+    return dates;
+  }, [mockEventDetails, selectedDate, theme.colors.primary]);
 
   const onDayPress = useCallback((day: any) => {
     setSelectedDate(day.dateString);
-    // In a real app, you would fetch events for this day
+    setEventsForSelectedDate(getEventsForDate(day.dateString));
     console.log('Selected day', day);
   }, []);
 
@@ -100,6 +163,14 @@ export default function FamilyEventsScreen() {
     noEventsText: {
       textAlign: 'center',
       color: theme.colors.onSurfaceVariant,
+    },
+    eventItem: {
+      padding: SPACING_MEDIUM,
+      marginBottom: SPACING_MEDIUM,
+      backgroundColor: theme.colors.surfaceVariant,
+      borderRadius: theme.roundness,
+      borderLeftWidth: 5,
+      // borderLeftColor will be set dynamically
     },
   }), [theme]);
 
@@ -158,8 +229,22 @@ export default function FamilyEventsScreen() {
             <Text variant="titleMedium" style={styles.eventListTitle}>
               {t('eventScreen.eventsFor')} {selectedDate || t('eventScreen.noDateSelected')} (Family ID: {currentFamilyId})
             </Text>
-            {/* Mock event list for the selected day */}
-            <Text style={styles.noEventsText}>{t('eventScreen.noEvents')}</Text>
+            {eventsForSelectedDate.length > 0 ? (
+              <FlatList
+                data={eventsForSelectedDate}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={[styles.eventItem, { borderLeftColor: item.color || theme.colors.primary }]}>
+                    <Text variant="titleMedium">{item.title}</Text>
+                    <Text variant="bodyMedium">{item.time}</Text>
+                    {item.description && <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.description}</Text>}
+                  </View>
+                )}
+                showsVerticalScrollIndicator={false}
+              />
+            ) : (
+              <Text style={styles.noEventsText}>{t('eventScreen.noEvents')}</Text>
+            )}
           </>
         )}
       </ScrollView>
