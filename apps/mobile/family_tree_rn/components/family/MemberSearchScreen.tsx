@@ -282,8 +282,11 @@ export default function MemberSearchScreen() {
                 <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
                 <View style={styles.cardText}>
                   <Text variant="titleMedium">{item.name}</Text>
-                  <Text variant="bodyMedium">{item.relationship}</Text>
-                  {/* Add more member details here */}
+                  {item.birthDeathYears && <Text variant="bodySmall">{t('member.birthDeathYears')}: {item.birthDeathYears}</Text>}
+                  {item.gender && <Text variant="bodySmall">{t('member.gender')}: {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}</Text>}
+                  {item.occupation && <Text variant="bodySmall">{t('member.occupation')}: {item.occupation}</Text>}
+                  {item.parents && item.parents.length > 0 && <Text variant="bodySmall">{t('member.parents')}: {item.parents.join(', ')}</Text>}
+                  {item.spouse && <Text variant="bodySmall">{t('member.spouse')}: {item.spouse}</Text>}
                 </View>
               </Card.Content>
             </Card>

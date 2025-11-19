@@ -118,5 +118,10 @@
   "memberSearch.filter.gender.male": "Male",
   "memberSearch.filter.gender.female": "Female",
   "memberSearch.filter.gender.other": "Other",
-  "memberSearch.filter.isRootMember": "Root Member"
+  "memberSearch.filter.isRootMember": "Root Member",
+  "member.gender": "Gender",
+  "member.birthDeathYears": "Birth/Death Years",
+  "member.occupation": "Occupation",
+  "member.parents": "Parents",
+  "member.spouse": "Spouse"
 }
