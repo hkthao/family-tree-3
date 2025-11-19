@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, Appbar, useTheme } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useLocalSearchParams } from 'expo-router';
+import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
 
 export default function FamilyMembersScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { id } = useLocalSearchParams();
+  const currentFamilyId = useFamilyStore((state) => state.currentFamilyId); // Get currentFamilyId from store
 
   const styles = StyleSheet.create({
     container: {
@@ -19,10 +20,10 @@ export default function FamilyMembersScreen() {
   });
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text variant="headlineMedium">{t('familyDetail.tab.members')}</Text>
-      <Text variant="bodyMedium">Family ID: {id}</Text>
+      <Text variant="bodyMedium">Family ID: {currentFamilyId}</Text>
       {/* Add family members content here */}
-    </View>
+    </SafeAreaView>
   );
 }

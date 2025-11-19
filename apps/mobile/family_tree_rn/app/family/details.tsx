@@ -2,28 +2,29 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Appbar, useTheme, Avatar, ActivityIndicator, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useLocalSearchParams } from 'expo-router';
-import { fetchFamilyDetails, FamilyDetail } from '../../../data/mockFamilyData';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { fetchFamilyDetails, FamilyDetail } from '../../data/mockFamilyData';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
+import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
 
 export default function FamilyDetailsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
-  const { id } = useLocalSearchParams();
-  console.log('Received ID:', id);
+  const { id: routeId } = useLocalSearchParams(); // Keep for debugging if needed, but not used for fetching
+  const currentFamilyId = useFamilyStore((state) => state.currentFamilyId); // Get currentFamilyId from store
   const [family, setFamily] = useState<FamilyDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadFamilyDetails = async () => {
-      if (!id || typeof id !== 'string') {
-        setError('Invalid Family ID');
+      if (!currentFamilyId) {
+        setError('No Family ID available');
         setLoading(false);
         return;
       }
       try {
-        const data = await fetchFamilyDetails(id);
+        const data = await fetchFamilyDetails(currentFamilyId);
         if (data) {
           setFamily(data);
         } else {
@@ -38,12 +39,17 @@ export default function FamilyDetailsScreen() {
     };
 
     loadFamilyDetails();
-  }, [id]);
+  }, [currentFamilyId]); // Depend on currentFamilyId from Zustand
+
+  const router = useRouter();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
+    },
+    appbar: {
+      backgroundColor: theme.colors.surface,
     },
     content: {
       padding: SPACING_MEDIUM,
@@ -120,6 +126,10 @@ export default function FamilyDetailsScreen() {
 
   return (
     <View style={styles.container}>
+      <Appbar.Header style={styles.appbar}>
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content title={t('familyDetail.title')} />
+      </Appbar.Header>
       <ScrollView contentContainerStyle={styles.content}>
         <Card style={styles.card}>
           <Card.Content style={styles.cardContent}>
