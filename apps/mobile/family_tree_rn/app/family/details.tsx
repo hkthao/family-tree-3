@@ -196,36 +196,6 @@ export default function FamilyDetailsScreen() {
               />
               <Divider />
               <List.Item
-                title={t('familyDetail.details.createdBy')}
-                left={() => <List.Icon icon="account-edit" />}
-                right={() => (
-                  <View style={styles.chipContainer}>
-                    <Chip>{family.createdBy}</Chip>
-                  </View>
-                )}
-              />
-              <Divider />
-              <List.Item
-                title={t('familyDetail.details.createdAt')}
-                left={() => <List.Icon icon="calendar-plus" />}
-                right={() => (
-                  <View style={styles.chipContainer}>
-                    <Chip>{new Date(family.createdAt).toLocaleDateString()}</Chip>
-                  </View>
-                )}
-              />
-              <Divider />
-              <List.Item
-                title={t('familyDetail.details.lastUpdatedAt')}
-                left={() => <List.Icon icon="update" />}
-                right={() => (
-                  <View style={styles.chipContainer}>
-                    <Chip>{new Date(family.lastUpdatedAt).toLocaleDateString()}</Chip>
-                  </View>
-                )}
-              />
-              <Divider />
-              <List.Item
                 title={t('familyDetail.details.manager')}
                 titleStyle={{ flexShrink: 1 }}
                 left={() => <List.Icon icon="account-tie" />}
@@ -251,6 +221,16 @@ export default function FamilyDetailsScreen() {
                         {viewerName}
                       </Chip>
                     ))}
+                  </View>
+                )}
+              />
+              <Divider />
+              <List.Item
+                title={t('familyDetail.details.createdAt')}
+                left={() => <List.Icon icon="calendar-plus" />}
+                right={() => (
+                  <View style={styles.chipContainer}>
+                    <Chip>{new Date(family.createdAt).toLocaleDateString()}</Chip>
                   </View>
                 )}
               />

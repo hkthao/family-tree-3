@@ -111,5 +111,5 @@
   "familyDetail.errors.failedToLoad": "Tải chi tiết gia đình thất bại",
   "familyDetail.errors.dataNotAvailable": "Dữ liệu gia đình không có sẵn",
   "familyDetail.details.manager": "Người quản lý",
-  "familyDetail.details.viewers": "Người được xem"
+  "familyDetail.details.viewers": "Người xem"
 }
