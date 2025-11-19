@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
+import { View, StyleSheet, ScrollView, FlatList, RefreshControl } from 'react-native';
 import { Appbar, Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -108,6 +108,15 @@ export default function FamilyEventsScreen() {
   const [eventsForSelectedDate, setEventsForSelectedDate] = useState<EventDetail[]>(() => getEventsForDate(initialSelectedDate));
   const [loading, setLoading] = useState(false); // Assuming events might load
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Simulate fetching data
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setEventsForSelectedDate(getEventsForDate(selectedDate)); // Re-fetch events for selected date
+    setRefreshing(false);
+  }, [selectedDate]);
 
   const markedDates = useMemo(() => {
     const dates: { [key: string]: any } = {};
@@ -172,6 +181,9 @@ export default function FamilyEventsScreen() {
       borderLeftWidth: 5,
       // borderLeftColor will be set dynamically
     },
+    flatListContent: {
+      padding: SPACING_MEDIUM, // Apply padding to the FlatList content
+    },
   }), [theme]);
 
   if (!currentFamilyId) {
@@ -188,66 +200,74 @@ export default function FamilyEventsScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={t('familyDetail.tab.events')} />
       </Appbar.Header>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator animating size="large" color={theme.colors.primary} />
-          </View>
-        ) : error ? (
-          <View style={styles.errorContainer}>
-            <Text variant="titleMedium" style={{ color: theme.colors.error }}>{error}</Text>
-          </View>
-        ) : (
-          <>
-            <View style={styles.calendarContainer}>
-              <Calendar
-                onDayPress={onDayPress}
-                markedDates={markedDates}
-                theme={{
-                  backgroundColor: theme.colors.surface,
-                  calendarBackground: theme.colors.surface,
-                  textSectionTitleColor: theme.colors.onSurfaceVariant,
-                  selectedDayBackgroundColor: theme.colors.primary,
-                  selectedDayTextColor: theme.colors.onPrimary,
-                  todayBackgroundColor: theme.colors.secondaryContainer,
-                  todayTextColor: theme.colors.onSecondaryContainer,
-                  dayTextColor: theme.colors.onSurface,
-                  textDisabledColor: theme.colors.onSurfaceDisabled,
-                  dotColor: theme.colors.primary,
-                  selectedDotColor: theme.colors.onPrimary,
-                  arrowColor: theme.colors.primary,
-                  monthTextColor: theme.colors.onSurface,
-                  textDayFontFamily: theme.fonts.bodyMedium.fontFamily,
-                  textMonthFontFamily: theme.fonts.titleMedium.fontFamily,
-                  textDayHeaderFontFamily: theme.fonts.labelMedium.fontFamily,
-                  textDayFontSize: 16,
-                  textMonthFontSize: 18,
-                  textDayHeaderFontSize: 14,
-                }}
-              />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator animating size="large" color={theme.colors.primary} />
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text variant="titleMedium" style={{ color: theme.colors.error }}>{error}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={eventsForSelectedDate}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={[styles.eventItem, { borderLeftColor: item.color || theme.colors.primary }]}>
+              <Text variant="titleMedium">{item.title}</Text>
+              <Text variant="bodyMedium">{item.time}</Text>
+              {item.description && <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.description}</Text>}
             </View>
-            <Text variant="titleMedium" style={styles.eventListTitle}>
-              {t('eventScreen.eventsFor')} {selectedDate || t('eventScreen.noDateSelected')} (Family ID: {currentFamilyId})
-            </Text>
-            {eventsForSelectedDate.length > 0 ? (
-              <FlatList
-                data={eventsForSelectedDate}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <View style={[styles.eventItem, { borderLeftColor: item.color || theme.colors.primary }]}>
-                    <Text variant="titleMedium">{item.title}</Text>
-                    <Text variant="bodyMedium">{item.time}</Text>
-                    {item.description && <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.description}</Text>}
-                  </View>
-                )}
-                showsVerticalScrollIndicator={false}
-              />
-            ) : (
-              <Text style={styles.noEventsText}>{t('eventScreen.noEvents')}</Text>
-            )}
-          </>
-        )}
-      </ScrollView>
+          )}
+          ListHeaderComponent={
+            <View style={styles.content}>
+              <View style={styles.calendarContainer}>
+                <Calendar
+                  onDayPress={onDayPress}
+                  markedDates={markedDates}
+                  theme={{
+                    backgroundColor: theme.colors.surface,
+                    calendarBackground: theme.colors.surface,
+                    textSectionTitleColor: theme.colors.onSurfaceVariant,
+                    selectedDayBackgroundColor: theme.colors.primary,
+                    selectedDayTextColor: theme.colors.onPrimary,
+                    todayBackgroundColor: theme.colors.secondaryContainer,
+                    todayTextColor: theme.colors.onSecondaryContainer,
+                    dayTextColor: theme.colors.onSurface,
+                    textDisabledColor: theme.colors.onSurfaceDisabled,
+                    dotColor: theme.colors.primary,
+                    selectedDotColor: theme.colors.onPrimary,
+                    arrowColor: theme.colors.primary,
+                    monthTextColor: theme.colors.onSurface,
+                    textDayFontFamily: theme.fonts.bodyMedium.fontFamily,
+                    textMonthFontFamily: theme.fonts.titleMedium.fontFamily,
+                    textDayHeaderFontFamily: theme.fonts.labelMedium.fontFamily,
+                    textDayFontSize: 16,
+                    textMonthFontSize: 18,
+                    textDayHeaderFontSize: 14,
+                  }}
+                />
+              </View>
+              <Text variant="titleMedium" style={styles.eventListTitle}>
+                {t('eventScreen.eventsFor')} {selectedDate || t('eventScreen.noDateSelected')} (Family ID: {currentFamilyId})
+              </Text>
+              {eventsForSelectedDate.length === 0 && (
+                <Text style={styles.noEventsText}>{t('eventScreen.noEvents')}</Text>
+              )}
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[theme.colors.primary]}
+              tintColor={theme.colors.primary}
+            />
+          }
+          contentContainerStyle={styles.flatListContent}
+        />
+      )}
     </View>
   );
 }
