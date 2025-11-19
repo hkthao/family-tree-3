@@ -10,6 +10,7 @@ export interface FamilyDetail {
   createdAt: string;
   lastUpdatedAt: string;
   createdBy: string;
+  address?: string;
 }
 
 export interface FamilyMember {
@@ -39,6 +40,7 @@ const mockFamilies: FamilyDetail[] = [
     createdAt: '2023-01-15T10:00:00Z',
     lastUpdatedAt: '2024-05-20T14:30:00Z',
     createdBy: 'Nguyễn Văn A',
+    address: '123 Đường Láng, Đống Đa, Hà Nội',
   },
   {
     id: '2',
@@ -52,6 +54,7 @@ const mockFamilies: FamilyDetail[] = [
     createdAt: '2022-03-01T08:00:00Z',
     lastUpdatedAt: '2024-06-10T11:00:00Z',
     createdBy: 'Trần Thị B',
+    address: '456 Đường Hùng Vương, Thành phố Huế',
   },
   {
     id: '3',
@@ -65,6 +68,7 @@ const mockFamilies: FamilyDetail[] = [
     createdAt: '2023-07-01T16:00:00Z',
     lastUpdatedAt: '2024-01-05T09:00:00Z',
     createdBy: 'Lê Văn C',
+    address: '789 Đường Cách Mạng Tháng Tám, Quận 3, TP.HCM',
   },
 ];
 

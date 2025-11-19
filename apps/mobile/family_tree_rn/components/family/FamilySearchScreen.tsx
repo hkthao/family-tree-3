@@ -327,7 +327,7 @@ export default function FamilySearchScreen() {
           renderItem={({ item }) => (
             <Card style={[styles.familyCard, { borderRadius: theme.roundness }]} onPress={() => {
               setCurrentFamilyId(item.id);
-              router.push('/family');
+              router.push('/family/details');
             }}>
               <Card.Content style={styles.cardContent}>
                 <Avatar.Image size={48} source={{ uri: item.avatarUrl }} style={styles.avatar} />
