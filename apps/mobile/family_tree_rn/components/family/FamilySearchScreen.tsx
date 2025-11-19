@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,9 +7,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, Avatar, IconButton, Searchbar } from 'react-native-paper';
+import { Text, Card, Avatar, IconButton, Searchbar, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { PaperTheme } from '@/constants/theme';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 
 // Define a type for Family data (simplified from backend/src/Domain/Entities/Family.cs)
@@ -135,6 +134,7 @@ const PAGE_SIZE = 10;
 
 export default function FamilySearchScreen() {
   const { t } = useTranslation();
+  const theme = useTheme(); // Get theme from PaperProvider
   const [searchQuery, setSearchQuery] = useState('');
   const [families, setFamilies] = useState<Family[]>([]);
   const [page, setPage] = useState(1);
@@ -180,7 +180,8 @@ export default function FamilySearchScreen() {
         } else {
           setError('An unknown error occurred');
         }
-      } finally {
+      }
+      finally {
         setLoading(false);
         setRefreshing(false);
       }
@@ -214,7 +215,7 @@ export default function FamilySearchScreen() {
     if (!loading) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator animating size="small" color={PaperTheme.colors.primary} />
+        <ActivityIndicator animating size="small" color={theme.colors.primary} />
       </View>
     );
   };
@@ -229,6 +230,65 @@ export default function FamilySearchScreen() {
     );
   };
 
+  const styles = useMemo(() => StyleSheet.create({
+    safeArea: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+      padding: SPACING_MEDIUM,
+    },
+    searchbar: {
+      marginBottom: SPACING_MEDIUM,
+    },
+    errorContainer: {
+      padding: SPACING_MEDIUM,
+      backgroundColor: theme.colors.errorContainer,
+      marginBottom: SPACING_MEDIUM,
+    },
+    errorText: {
+      color: theme.colors.onErrorContainer,
+      textAlign: 'center',
+    },
+    flatListContent: {
+      paddingBottom: SPACING_LARGE, // Ensure space at the bottom
+    },
+    flatListEmpty: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    familyCard: {
+      marginBottom: SPACING_MEDIUM,
+      marginHorizontal: SPACING_SMALL
+    },
+    cardContent: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    avatar: {
+      marginRight: SPACING_MEDIUM,
+    },
+    cardText: {
+      flex: 1,
+    },
+    detailsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: SPACING_SMALL,
+    },
+    footer: {
+      paddingVertical: SPACING_MEDIUM,
+      alignItems: 'center',
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: SPACING_LARGE,
+    },
+  }), [theme]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
@@ -241,7 +301,7 @@ export default function FamilySearchScreen() {
         clearIcon={searchQuery.length > 0 ? () => (
           <IconButton
             icon="close-circle"
-            iconColor={PaperTheme.colors.onSurfaceVariant}
+            iconColor={theme.colors.onSurfaceVariant}
             size={20}
             onPress={() => setSearchQuery('')}
           />
@@ -284,8 +344,8 @@ export default function FamilySearchScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={[PaperTheme.colors.primary]}
-            tintColor={PaperTheme.colors.primary}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
           />
         }
         contentContainerStyle={families.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
@@ -294,62 +354,3 @@ export default function FamilySearchScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    padding: SPACING_MEDIUM,
-  },
-  searchbar: {
-    marginBottom: SPACING_MEDIUM,
-  },
-  errorContainer: {
-    padding: SPACING_MEDIUM,
-    backgroundColor: PaperTheme.colors.errorContainer,
-    marginBottom: SPACING_MEDIUM,
-  },
-  errorText: {
-    color: PaperTheme.colors.onErrorContainer,
-    textAlign: 'center',
-  },
-  flatListContent: {
-    paddingBottom: SPACING_LARGE, // Ensure space at the bottom
-  },
-  flatListEmpty: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  familyCard: {
-    marginBottom: SPACING_MEDIUM,
-    marginHorizontal: SPACING_SMALL
-  },
-  cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  avatar: {
-    marginRight: SPACING_MEDIUM,
-  },
-  cardText: {
-    flex: 1,
-  },
-  detailsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: SPACING_SMALL,
-  },
-  footer: {
-    paddingVertical: SPACING_MEDIUM,
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: SPACING_LARGE,
-  },
-});

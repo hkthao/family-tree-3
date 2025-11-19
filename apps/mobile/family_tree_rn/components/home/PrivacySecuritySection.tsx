@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, Icon } from 'react-native-paper';
+import { Text, Icon, useTheme } from 'react-native-paper';
 import { TFunction } from 'i18next';
-import { PaperTheme } from '@/constants/theme';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
 
 interface PrivacySecuritySectionProps {
@@ -31,6 +30,32 @@ const privacyFeatures: PrivacyFeature[] = [
 ];
 
 export function PrivacySecuritySection({ t, backgroundColor }: PrivacySecuritySectionProps) {
+  const theme = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      padding: SPACING_LARGE,
+      backgroundColor: theme.colors.background,
+    },
+    sectionTitle: {
+      textAlign: 'center',
+      marginBottom: SPACING_LARGE,
+      fontWeight: 'bold',
+    },
+    featuresList: {
+      marginTop: SPACING_MEDIUM,
+    },
+    featureItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING_MEDIUM,
+    },
+    featureText: {
+      marginLeft: SPACING_MEDIUM,
+      flexShrink: 1,
+    },
+  }), [theme]);
+
   return (
     <View style={[styles.container, backgroundColor ? { backgroundColor } : {}]}>
       <Text variant="headlineMedium" style={styles.sectionTitle}>
@@ -39,7 +64,7 @@ export function PrivacySecuritySection({ t, backgroundColor }: PrivacySecuritySe
       <View style={styles.featuresList}>
         {privacyFeatures.map((feature, index) => (
           <View key={index} style={styles.featureItem}>
-            <Icon source={feature.icon} size={24} color={PaperTheme.colors.primary} />
+            <Icon source={feature.icon} size={24} color={theme.colors.primary} />
             <Text variant="bodyLarge" style={styles.featureText}>
               {t(feature.textKey)}
             </Text>
@@ -49,27 +74,3 @@ export function PrivacySecuritySection({ t, backgroundColor }: PrivacySecuritySe
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: SPACING_LARGE,
-    backgroundColor: PaperTheme.colors.background,
-  },
-  sectionTitle: {
-    textAlign: 'center',
-    marginBottom: SPACING_LARGE,
-    fontWeight: 'bold',
-  },
-  featuresList: {
-    marginTop: SPACING_MEDIUM,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SPACING_MEDIUM,
-  },
-  featureText: {
-    marginLeft: SPACING_MEDIUM,
-    flexShrink: 1,
-  },
-});

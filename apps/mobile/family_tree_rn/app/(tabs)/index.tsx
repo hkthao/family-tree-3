@@ -8,17 +8,18 @@ import { HowItWorksSection } from '@/components/home/HowItWorksSection'; // Impo
 import { MediaPreviewSection } from '@/components/home/MediaPreviewSection'; // Import MediaPreviewSection component
 import { SecondaryCtaSection } from '@/components/home/SecondaryCtaSection'; // Import SecondaryCtaSection component
 import { PrivacySecuritySection } from '@/components/home/PrivacySecuritySection'; // Import PrivacySecuritySection component
-import { PaperTheme } from '@/constants/theme';
+import { useTheme } from 'react-native-paper'; // Import useTheme
 
 export default function HomeScreen() {
   const { t, i18n } = useTranslation(); // Use the useTranslation hook
+  const theme = useTheme();
 
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language === 'en' ? 'vi' : 'en');
   };
 
-  const backgroundColor1 = PaperTheme.colors.background;
-  const backgroundColor2 = PaperTheme.colors.surfaceVariant;
+  const backgroundColor1 = theme.colors.background;
+  const backgroundColor2 = theme.colors.surfaceVariant;
 
   return (
     <View style={styles.fullScreenContainer}>

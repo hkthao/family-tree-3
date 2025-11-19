@@ -1,15 +1,15 @@
 import { ScrollView, StyleSheet, View, Linking } from 'react-native';
-import { Text, Card, Button } from 'react-native-paper'; // Import Button
+import { Text, Card, Button, useTheme } from 'react-native-paper'; // Import Button and useTheme
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { PaperTheme } from '@/constants/theme';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
 import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
 import * as Clipboard from 'expo-clipboard'; // Import Clipboard from expo-clipboard
 
 export default function DonateScreen() {
   const { t } = useTranslation();
+  const theme = useTheme(); // Get theme from PaperProvider
 
   const handleLinkPress = (url: string) => {
     Linking.openURL(url).catch((err) => console.error("Couldn't load page", err));
@@ -32,7 +32,7 @@ export default function DonateScreen() {
       <UserAppBar />
       <ScrollView showsVerticalScrollIndicator={false} >
         <View style={styles.container}>
-          <Text variant="headlineMedium" style={styles.title}>
+          <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.primary }]}>
             {t('donate.mainTitle')} 
           </Text>
           <Text variant="bodyLarge" style={styles.description}>
@@ -55,7 +55,7 @@ export default function DonateScreen() {
                   contentFit="contain"
                 />
                 <Text
-                  style={styles.link}
+                  style={[styles.link, { color: theme.colors.primary }]}
                   onPress={() => handleLinkPress('https://www.buymeacoffee.com/thaohk90e')}
                 >
                   https://www.buymeacoffee.com/thaohk90e
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: SPACING_MEDIUM,
     fontWeight: 'bold',
-    color: PaperTheme.colors.primary,
+    // color: PaperTheme.colors.primary, // Removed hardcoded color
   },
   description: {
     marginBottom: SPACING_MEDIUM,
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   link: {
-    color: PaperTheme.colors.primary,
+    // color: PaperTheme.colors.primary, // Removed hardcoded color
     textAlign: 'center',
     textDecorationLine: 'underline',
     marginTop: SPACING_MEDIUM,

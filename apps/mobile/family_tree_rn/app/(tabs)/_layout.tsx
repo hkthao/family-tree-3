@@ -3,8 +3,7 @@ import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next'; // Import useTranslation
-
-import { PaperTheme } from '../../constants/theme'; // Import theme from react-native-paper config
+import { useTheme } from 'react-native-paper'; // Import useTheme
 
 function TabBarIcon({ style, ...rest }: { name: React.ComponentProps<typeof MaterialCommunityIcons>['name']; color: string; style?: object }) {
   return <MaterialCommunityIcons size={28} style={[{ marginBottom: -3 }, style]} {...rest} />;
@@ -12,15 +11,16 @@ function TabBarIcon({ style, ...rest }: { name: React.ComponentProps<typeof Mate
 
 export default function TabLayout() {
   const { t } = useTranslation(); // Initialize useTranslation
+  const theme = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: PaperTheme.colors.primary, // Use primary color from react-native-paper theme
-        tabBarInactiveTintColor: PaperTheme.colors.onSurfaceVariant, // Use secondary text color for inactive tabs
+        tabBarActiveTintColor: theme.colors.primary, // Use primary color from react-native-paper theme
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant, // Use secondary text color for inactive tabs
         headerShown: false,
         tabBarBackground: () => (
-          <View style={{ flex: 1, backgroundColor: PaperTheme.colors.background }} />
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }} />
         ),
       }}>
       <Tabs.Screen
