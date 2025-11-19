@@ -7,7 +7,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Chip } from 'react-native-paper';
+import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Chip, Appbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useFamilyStore } from '../../stores/useFamilyStore';
@@ -219,23 +219,27 @@ export default function MemberSearchScreen() {
   }), [theme]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <Searchbar
-          placeholder={t('memberSearch.placeholder')}
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchbar}
-          showDivider={true}
-          clearIcon={searchQuery.length > 0 ? () => (
-            <IconButton
-              icon="close-circle"
-              iconColor={theme.colors.onSurfaceVariant}
-              size={20}
-              onPress={() => setSearchQuery('')}
-            />
-          ) : undefined}
-        />
+    <View style={{ flex: 1 }}>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={() => router.back()} />
+        <Appbar.Content title={t('familyDetail.tab.members')} />
+      </Appbar.Header>
+        <View style={styles.container}>
+          <Searchbar
+            placeholder={t('memberSearch.placeholder')}
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            style={styles.searchbar}
+            showDivider={true}
+            clearIcon={searchQuery.length > 0 ? () => (
+              <IconButton
+                icon="close-circle"
+                iconColor={theme.colors.onSurfaceVariant}
+                size={20}
+                onPress={() => setSearchQuery('')}
+              />
+            ) : undefined}
+          />
 
         <View style={styles.filterChipsContainer}>
           <Chip
@@ -340,6 +344,6 @@ export default function MemberSearchScreen() {
           contentContainerStyle={members.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
