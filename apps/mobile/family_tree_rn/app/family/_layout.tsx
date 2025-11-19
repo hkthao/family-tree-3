@@ -1,25 +1,55 @@
-import React from 'react';
-import { Tabs, useLocalSearchParams } from 'expo-router';
-import { useTheme } from 'react-native-paper';
+import { Tabs, useLocalSearchParams, useRouter, useSegments } from 'expo-router';
+import { Appbar, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View } from 'react-native'; // Import View for wrapping
+import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
 export default function FamilyDetailLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const router = useRouter();
+  const segments = useSegments();
+  const navigation = useNavigation(); // Get navigation object
+
+  // Get the current tab name from segments
+  const currentTab = segments[segments.length - 1];
+
+  // Map tab names to their translated titles
+  const getTabTitle = (tabName: string) => {
+    switch (tabName) {
+      case 'details':
+        return t('familyDetail.tab.details');
+      case 'members':
+        return t('familyDetail.tab.members');
+      case 'tree':
+        return t('familyDetail.tab.tree');
+      case 'events':
+        return t('familyDetail.tab.events');
+      case 'face-search':
+        return t('familyDetail.tab.faceSearch');
+      default:
+        return t('familyDetail.title'); // Fallback title
+    }
+  };
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: theme.colors.primary,
-        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-        tabBarStyle: {
-          backgroundColor: theme.colors.surface,
-          borderTopColor: theme.colors.outlineVariant,
-        },
-        headerShown: false, // Hide header for tabs, each tab screen can have its own Appbar
-      }}
-    >
+    <View style={{ flex: 1 }}>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={() => navigation.goBack()} />
+        <Appbar.Content title={getTabTitle(currentTab)} />
+      </Appbar.Header>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+          tabBarStyle: {
+            backgroundColor: theme.colors.surface,
+            borderTopColor: theme.colors.outlineVariant,
+          },
+          headerShown: false, // Hide header for tabs, as we have a custom Appbar
+        }}
+      >
       <Tabs.Screen
         name="details"
         options={{
@@ -65,6 +95,7 @@ export default function FamilyDetailLayout() {
           ),
         }}
       />
-    </Tabs>
+      </Tabs>
+    </View>
   );
 }
