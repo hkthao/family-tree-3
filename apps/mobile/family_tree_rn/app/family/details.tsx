@@ -217,6 +217,26 @@ export default function FamilyDetailsScreen() {
                   </View>
                 )}
               />
+              <Divider />
+              <List.Item
+                title={t('familyDetail.details.manager')}
+                left={() => <List.Icon icon="account-tie" />}
+                right={() => (
+                  <View style={styles.chipContainer}>
+                    <Chip>{family.manager}</Chip>
+                  </View>
+                )}
+              />
+              <Divider />
+              <List.Item
+                title={t('familyDetail.details.viewers')}
+                left={() => <List.Icon icon="eye-outline" />}
+                right={() => (
+                  <View style={styles.chipContainer}>
+                    <Chip>{family.viewers.join(', ')}</Chip>
+                  </View>
+                )}
+              />
             </List.Section>
           </Card.Content>
         </Card>

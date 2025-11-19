@@ -11,6 +11,8 @@ export interface FamilyDetail {
   lastUpdatedAt: string;
   createdBy: string;
   address?: string;
+  manager: string;
+  viewers: string[];
 }
 
 export interface FamilyMember {
@@ -41,6 +43,8 @@ const mockFamilies: FamilyDetail[] = [
     lastUpdatedAt: '2024-05-20T14:30:00Z',
     createdBy: 'Nguyễn Văn A',
     address: '123 Đường Láng, Đống Đa, Hà Nội',
+    manager: 'Nguyễn Văn A',
+    viewers: ['Nguyễn Thị B', 'Trần Văn C'],
   },
   {
     id: '2',
@@ -55,6 +59,8 @@ const mockFamilies: FamilyDetail[] = [
     lastUpdatedAt: '2024-06-10T11:00:00Z',
     createdBy: 'Trần Thị B',
     address: '456 Đường Hùng Vương, Thành phố Huế',
+    manager: 'Trần Thị B',
+    viewers: ['Lê Văn D', 'Phạm Thị E', 'Hoàng Văn F'],
   },
   {
     id: '3',
@@ -69,6 +75,8 @@ const mockFamilies: FamilyDetail[] = [
     lastUpdatedAt: '2024-01-05T09:00:00Z',
     createdBy: 'Lê Văn C',
     address: '789 Đường Cách Mạng Tháng Tám, Quận 3, TP.HCM',
+    manager: 'Lê Văn C',
+    viewers: ['Nguyễn Thị G'],
   },
 ];
 

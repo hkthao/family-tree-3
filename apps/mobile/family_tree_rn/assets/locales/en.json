@@ -107,5 +107,7 @@
   "familyDetail.errors.noFamilyId": "No Family ID available",
   "familyDetail.errors.notFound": "Family not found",
   "familyDetail.errors.failedToLoad": "Failed to load family details",
-  "familyDetail.errors.dataNotAvailable": "Family data not available"
+  "familyDetail.errors.dataNotAvailable": "Family data not available",
+  "familyDetail.details.manager": "Manager",
+  "familyDetail.details.viewers": "Viewers"
 }
