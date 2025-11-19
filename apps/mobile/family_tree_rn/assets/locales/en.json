@@ -109,5 +109,15 @@
   "familyDetail.errors.failedToLoad": "Failed to load family details",
   "familyDetail.errors.dataNotAvailable": "Family data not available",
   "familyDetail.details.manager": "Manager",
-  "familyDetail.details.viewers": "Viewers"
+  "familyDetail.details.viewers": "Viewers",
+  "memberSearch.errors.noFamilyId": "No Family ID available",
+  "memberSearch.errors.unknown": "Unknown error",
+  "memberSearch.no_results": "No members found.",
+  "memberSearch.try_different_query": "Try a different search query.",
+  "memberSearch.placeholder": "Search members",
+  "memberSearch.filter.gender.male": "Male",
+  "memberSearch.filter.gender.female": "Female",
+  "memberSearch.filter.gender.other": "Other",
+  "memberSearch.filter.isRootMember": "Root Member",
+  "memberSearch.filter.hasOrdinalNumber": "Has Ordinal Number"
 }
