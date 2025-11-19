@@ -88,12 +88,14 @@ export default function SettingsScreen() {
     listSection: {
       marginBottom: SPACING_MEDIUM,
       backgroundColor: theme.colors.surface, // Use theme surface color
-      borderRadius: 10,
+      borderRadius: theme.roundness, // Use global roundness from theme
       elevation: 2,
-      paddingHorizontal: SPACING_MEDIUM, // Add horizontal padding to the section
+    },
+    listItem: {
+      paddingStart: SPACING_MEDIUM
     },
     rightIcon: {
-      marginRight: -SPACING_LARGE, // Increased negative margin to pull icon further left
+      marginRight: -SPACING_MEDIUM, // Increased negative margin to pull icon further left
     },
   }), [theme]);
 
@@ -107,6 +109,7 @@ export default function SettingsScreen() {
           {/* 1. Hồ sơ cá nhân (User Profile) */}
           <List.Section style={styles.listSection}>
             <List.Item
+              style={styles.listItem}
               title={user?.fullName || t('settings.profile.guestUser')}
               description={user?.email || user?.phoneNumber || 'N/A'}
               left={() => (
@@ -119,12 +122,14 @@ export default function SettingsScreen() {
           {/* 3. Quyền riêng tư & bảo mật (Privacy & Security) */}
           <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="download" />}
               title={t('settings.privacySecurity.downloadData')}
               onPress={() => console.log('Download my data')}
             />
             <Divider />
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="delete" />}
               title={t('settings.privacySecurity.deleteAccount')}
               onPress={handleDeleteAccount}
@@ -135,6 +140,7 @@ export default function SettingsScreen() {
           {/* 4. Tuỳ chỉnh giao diện (App Appearance) */}
           <List.Section title={t('settings.appAppearance.title')} style={styles.listSection}>
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="theme-light-dark" />}
               title={t('settings.appAppearance.theme')}
               right={() => <Switch value={isDarkMode} onValueChange={handleThemeToggle} />}
@@ -144,13 +150,15 @@ export default function SettingsScreen() {
           {/* 5. Ngôn ngữ (Language) */}
           <List.Section title={t('settings.language.title')} style={styles.listSection}>
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="translate" />}
               title={t('settings.language.vietnamese')}
               onPress={() => i18n.changeLanguage('vi')}
-              right={() => i18n.language === 'vi' ? <List.Icon icon="check" /> : null}
+              right={() => i18n.language === 'vi' ? <List.Icon style={styles.rightIcon} icon="check" /> : null}
             />
             <Divider />
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="translate" />}
               title={t('settings.language.english')}
               onPress={() => i18n.changeLanguage('en')}
@@ -163,6 +171,7 @@ export default function SettingsScreen() {
           {/* 9. Trung tâm hỗ trợ (Help & Support) */}
           <List.Section title={t('settings.helpSupport.title')} style={styles.listSection}>
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="help-circle" />}
               title={t('settings.helpSupport.faq')}
               onPress={() => console.log('FAQ')}
@@ -170,6 +179,7 @@ export default function SettingsScreen() {
             />
             <Divider />
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="book-open-variant" />}
               title={t('settings.helpSupport.userGuide')}
               onPress={() => console.log('User Guide')}
@@ -177,6 +187,7 @@ export default function SettingsScreen() {
             />
             <Divider />
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="comment-edit" />}
               title={t('settings.helpSupport.feedback')}
               onPress={() => console.log('Feedback')}
@@ -187,12 +198,14 @@ export default function SettingsScreen() {
           {/* 10. Về ứng dụng (About) */}
           <List.Section title={t('settings.aboutApp.title')} style={styles.listSection}>
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="information" />}
               title={t('settings.aboutApp.versionInfo')}
               right={() => <Text>1.0.0</Text>} // TODO: Get actual version
             />
             <Divider />
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="file-document" />}
               title={t('settings.aboutApp.termsOfService')}
               onPress={() => console.log('Terms of Service')}
@@ -200,6 +213,7 @@ export default function SettingsScreen() {
             />
             <Divider />
             <List.Item
+              style={styles.listItem}
               left={() => <List.Icon icon="shield-lock" />}
               title={t('settings.aboutApp.privacyPolicy')}
               onPress={() => console.log('Privacy Policy')}

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View, Dimensions, TouchableOpacity } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { Image } from 'expo-image';
 import { TFunction } from 'i18next';
 import ImageViewing from 'react-native-image-viewing';
@@ -26,11 +26,35 @@ const images = [
 export function MediaPreviewSection({ t, backgroundColor }: MediaPreviewSectionProps) {
   const [visible, setIsVisible] = useState(false);
   const [currentImageIndex, setImageIndex] = useState(0);
+  const theme = useTheme(); // Get theme from PaperProvider
 
   const onSelectImage = (index: number) => {
     setImageIndex(index);
     setIsVisible(true);
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      paddingHorizontal: SPACING, // Apply padding to the container
+      paddingVertical: SPACING_LARGE,
+    },
+    sectionTitle: {
+      textAlign: 'center',
+      marginBottom: SPACING_LARGE,
+      fontWeight: 'bold',
+    },
+    imageGallery: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between', // Distribute space evenly
+    },
+    imageItem: {
+      width: IMAGE_SIZE,
+      height: IMAGE_SIZE,
+      borderRadius: theme.roundness,
+      marginBottom: SPACING, // Use SPACING for vertical margin
+    },
+  }), [theme]);
 
   return (
     <>
@@ -61,25 +85,4 @@ export function MediaPreviewSection({ t, backgroundColor }: MediaPreviewSectionP
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: SPACING, // Apply padding to the container
-    paddingVertical: SPACING_LARGE,
-  },
-  sectionTitle: {
-    textAlign: 'center',
-    marginBottom: SPACING_LARGE,
-    fontWeight: 'bold',
-  },
-  imageGallery: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between', // Distribute space evenly
-  },
-  imageItem: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: 8,
-    marginBottom: SPACING, // Use SPACING for vertical margin
-  },
-});
+

@@ -72,7 +72,7 @@ export function FeaturesSection({ t, backgroundColor }: FeaturesSectionProps) {
       alignItems: 'center',
       padding: SPACING_MEDIUM,
       backgroundColor: theme.colors.surface, // Use theme surface color
-      borderRadius: 8,
+      borderRadius: theme.roundness,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.2,

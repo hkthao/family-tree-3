@@ -6,6 +6,7 @@ import { Image } from 'expo-image';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions';
 import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
 import * as Clipboard from 'expo-clipboard'; // Import Clipboard from expo-clipboard
+import { useMemo } from 'react';
 
 export default function DonateScreen() {
   const { t } = useTranslation();
@@ -26,6 +27,80 @@ export default function DonateScreen() {
     // Optionally, show a toast message or similar to indicate success
     console.log('MoMo number copied to clipboard:', number);
   };
+
+  const styles = useMemo(() => StyleSheet.create({
+    fullScreenContainer: {
+      flex: 1,
+    },
+    safeArea: {
+      flex: 1,
+    },
+    container: {
+      flex: 1,
+      padding: SPACING_MEDIUM,
+    },
+    mainCard: {
+      elevation: 2,
+      borderRadius: theme.roundness,
+    },
+    title: {
+      textAlign: 'center',
+      marginBottom: SPACING_MEDIUM,
+      fontWeight: 'bold',
+      // color: PaperTheme.colors.primary, // Removed hardcoded color
+    },
+    description: {
+      marginBottom: SPACING_MEDIUM,
+      textAlign: 'left',
+    },
+    donationMethodsContainer: {
+      flexDirection: 'column',
+      flexWrap: 'wrap',
+      justifyContent: 'space-around',
+      marginTop: SPACING_LARGE,
+      marginBottom: SPACING_LARGE,
+      gap: SPACING_MEDIUM,
+    },
+    donationCard: {
+      flex: 1,
+      width: '100%', // Roughly two cards per row
+      borderRadius: theme.roundness,
+    },
+    donationMethodTitle: {
+      textAlign: 'center',
+      marginBottom: SPACING_MEDIUM,
+      fontWeight: 'bold',
+    },
+    qrCodeImage: {
+      width: 240,
+      height: 240,
+      alignSelf:"center",
+      marginBottom: SPACING_MEDIUM,
+      borderRadius: theme.roundness,
+    },
+    link: {
+      // color: PaperTheme.colors.primary, // Removed hardcoded color
+      textAlign: 'center',
+      textDecorationLine: 'underline',
+      marginTop: SPACING_MEDIUM,
+    },
+    momoNumber: {
+      textAlign: 'center',
+      fontWeight: 'bold',
+    },
+    copyButton: {
+      marginTop: SPACING_MEDIUM,
+      width: '80%',
+      alignSelf: 'center',
+    },
+    copyButtonLabel: {
+      color: '#FFFFFF', // White text for the button label
+    },
+    thankYouMessage: {
+      textAlign: 'left',
+      marginBottom: SPACING_MEDIUM,
+    },
+  }), [theme]);
 
   return (
     <View style={styles.fullScreenContainer}>
@@ -52,7 +127,7 @@ export default function DonateScreen() {
                   source={require('@/assets/images/bmc_qr.png')} 
                   alt="Buy Me A Coffee QR Code"
                   style={styles.qrCodeImage}
-                  contentFit="contain"
+                  contentFit="fill"
                 />
                 <Text
                   style={[styles.link, { color: theme.colors.primary }]}
@@ -80,7 +155,7 @@ export default function DonateScreen() {
                   source={require('@/assets/images/momo.jpg')} // Adjust path as needed
                   alt="MoMo QR Code"
                   style={styles.qrCodeImage}
-                  contentFit="contain"
+                  contentFit="fill"
                 />
                 <Text variant="bodyLarge" style={styles.momoNumber}>
                   0946351139
@@ -105,82 +180,3 @@ export default function DonateScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  fullScreenContainer: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    padding: SPACING_MEDIUM,
-  },
-  mainCard: {
-    elevation: 2,
-    borderRadius: 8,
-  },
-  title: {
-    textAlign: 'center',
-    marginBottom: SPACING_MEDIUM,
-    fontWeight: 'bold',
-    // color: PaperTheme.colors.primary, // Removed hardcoded color
-  },
-  description: {
-    marginBottom: SPACING_MEDIUM,
-    textAlign: 'left',
-  },
-  donationMethodsContainer: {
-    flexDirection: 'column',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around',
-    marginTop: SPACING_LARGE,
-    marginBottom: SPACING_LARGE,
-    gap: SPACING_MEDIUM,
-  },
-  donationCard: {
-    flex: 1,
-    width: '100%', // Roughly two cards per row
-    elevation: 1,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF', // Explicitly set background to white
-    borderWidth: 1,
-    borderColor: '#F7F7F7', // Subtle border color
-  },
-  donationMethodTitle: {
-    textAlign: 'center',
-    marginBottom: SPACING_MEDIUM,
-    fontWeight: 'bold',
-  },
-  qrCodeImage: {
-    width: 240,
-    height: 240,
-    alignSelf: 'center',
-    objectFit: "cover",
-    marginBottom: SPACING_MEDIUM,
-    borderRadius: 8,
-  },
-  link: {
-    // color: PaperTheme.colors.primary, // Removed hardcoded color
-    textAlign: 'center',
-    textDecorationLine: 'underline',
-    marginTop: SPACING_MEDIUM,
-  },
-  momoNumber: {
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  copyButton: {
-    marginTop: SPACING_MEDIUM,
-    width: '80%',
-    alignSelf: 'center',
-  },
-  copyButtonLabel: {
-    color: '#FFFFFF', // White text for the button label
-  },
-  thankYouMessage: {
-    textAlign: 'left',
-    marginBottom: SPACING_MEDIUM,
-  },
-});

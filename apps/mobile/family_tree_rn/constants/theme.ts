@@ -52,5 +52,9 @@ export const Fonts = Platform.select({
 });
 
 export const getPaperTheme = (colorScheme: 'light' | 'dark') => {
-  return colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
+  const baseTheme = colorScheme === 'dark' ? MD3DarkTheme : MD3LightTheme;
+  return {
+    ...baseTheme,
+    roundness: 8, // Global roundness for components
+  };
 };

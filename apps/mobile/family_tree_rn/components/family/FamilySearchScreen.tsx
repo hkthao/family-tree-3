@@ -240,6 +240,7 @@ export default function FamilySearchScreen() {
     },
     searchbar: {
       marginBottom: SPACING_MEDIUM,
+      borderRadius: theme.roundness, // Explicitly apply theme roundness
     },
     errorContainer: {
       padding: SPACING_MEDIUM,
@@ -259,8 +260,7 @@ export default function FamilySearchScreen() {
       alignItems: 'center',
     },
     familyCard: {
-      marginBottom: SPACING_MEDIUM,
-      marginHorizontal: SPACING_SMALL
+      marginBottom: SPACING_MEDIUM
     },
     cardContent: {
       flexDirection: 'row',
@@ -292,64 +292,64 @@ export default function FamilySearchScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-      <Searchbar
-        placeholder={t('search.placeholder')}
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        style={styles.searchbar}
-        showDivider={true}
-        clearIcon={searchQuery.length > 0 ? () => (
-          <IconButton
-            icon="close-circle"
-            iconColor={theme.colors.onSurfaceVariant}
-            size={20}
-            onPress={() => setSearchQuery('')}
-          />
-        ) : undefined}
-      />
+        <Searchbar
+          placeholder={t('search.placeholder')}
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchbar}
+          showDivider={true}
+          clearIcon={searchQuery.length > 0 ? () => (
+            <IconButton
+              icon="close-circle"
+              iconColor={theme.colors.onSurfaceVariant}
+              size={20}
+              onPress={() => setSearchQuery('')}
+            />
+          ) : undefined}
+        />
 
-      {error && (
-        <View style={styles.errorContainer}>
-          <Text variant="bodyMedium" style={styles.errorText}>
-            {t('common.error_occurred')}: {error}
-          </Text>
-        </View>
-      )}
-
-      <FlatList
-      showsVerticalScrollIndicator={false}
-        data={families}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Card style={styles.familyCard} onPress={() => console.log('View family', item.id)}>
-            <Card.Content style={styles.cardContent}>
-              <Avatar.Image size={48} source={{ uri: item.avatarUrl }} style={styles.avatar} />
-              <View style={styles.cardText}>
-                <Text variant="titleMedium">{item.name}</Text>
-                <Text variant="bodyMedium">{item.description}</Text>
-                <View style={styles.detailsRow}>
-                  <Text variant="bodySmall">{t('family.members')}: {item.totalMembers}</Text>
-                  <Text variant="bodySmall">{t('family.generations')}: {item.totalGenerations}</Text>
-                  <Text variant="bodySmall">{t('family.visibility')}: {t(`family.visibility.${item.visibility.toLowerCase()}`)}</Text>
-                </View>
-              </View>
-            </Card.Content>
-          </Card>
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text variant="bodyMedium" style={styles.errorText}>
+              {t('common.error_occurred')}: {error}
+            </Text>
+          </View>
         )}
-        ListEmptyComponent={renderEmptyList}
-        ListFooterComponent={renderFooter}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            colors={[theme.colors.primary]}
-            tintColor={theme.colors.primary}
-          />
-        }
-        contentContainerStyle={families.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
-      />
+
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={families}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <Card style={[styles.familyCard, { borderRadius: theme.roundness }]} onPress={() => console.log('View family', item.id)}>
+              <Card.Content style={styles.cardContent}>
+                <Avatar.Image size={48} source={{ uri: item.avatarUrl }} style={styles.avatar} />
+                <View style={styles.cardText}>
+                  <Text variant="titleMedium">{item.name}</Text>
+                  <Text variant="bodyMedium">{item.description}</Text>
+                  <View style={styles.detailsRow}>
+                    <Text variant="bodySmall">{t('family.members')}: {item.totalMembers}</Text>
+                    <Text variant="bodySmall">{t('family.generations')}: {item.totalGenerations}</Text>
+                    <Text variant="bodySmall">{t('family.visibility')}: {t(`family.visibility.${item.visibility.toLowerCase()}`)}</Text>
+                  </View>
+                </View>
+              </Card.Content>
+            </Card>
+          )}
+          ListEmptyComponent={renderEmptyList}
+          ListFooterComponent={renderFooter}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              colors={[theme.colors.primary]}
+              tintColor={theme.colors.primary}
+            />
+          }
+          contentContainerStyle={families.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
+        />
       </View>
     </SafeAreaView>
   );

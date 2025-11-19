@@ -73,6 +73,7 @@ export function HowItWorksSection({ t, backgroundColor }: HowItWorksSectionProps
       height: 'auto', // Adjust height based on content
       paddingVertical: SPACING_SMALL,
       justifyContent: 'flex-start', // Align content to start
+      borderRadius: theme.roundness,
     },
     stepChipText: {
       textAlign: 'left',
