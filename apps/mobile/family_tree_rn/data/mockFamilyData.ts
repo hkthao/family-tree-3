@@ -91,7 +91,6 @@ export const fetchFamilyDetails = async (familyId: string): Promise<FamilyDetail
 interface MemberFilter {
   gender?: 'Male' | 'Female' | 'Other';
   isRootMember?: boolean;
-  ordinalNumber?: string; // e.g., "hasOrdinal"
 }
 
 const mockMembers: FamilyMember[] = [
@@ -127,9 +126,8 @@ export const fetchFamilyMembers = async (
 
     const matchesGender = filters.gender ? member.gender === filters.gender : true;
     const matchesRootMember = filters.isRootMember !== undefined ? member.isRootMember === filters.isRootMember : true;
-    const matchesOrdinalNumber = filters.ordinalNumber === 'hasOrdinal' ? member.ordinalNumber !== undefined : true;
 
-    return matchesQuery && matchesGender && matchesRootMember && matchesOrdinalNumber;
+    return matchesQuery && matchesGender && matchesRootMember;
   });
 
   const startIndex = (page - 1) * pageSize;

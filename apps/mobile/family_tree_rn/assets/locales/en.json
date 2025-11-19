@@ -118,6 +118,5 @@
   "memberSearch.filter.gender.male": "Male",
   "memberSearch.filter.gender.female": "Female",
   "memberSearch.filter.gender.other": "Other",
-  "memberSearch.filter.isRootMember": "Root Member",
-  "memberSearch.filter.hasOrdinalNumber": "Has Ordinal Number"
+  "memberSearch.filter.isRootMember": "Root Member"
 }

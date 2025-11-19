@@ -17,7 +17,6 @@ import { fetchFamilyMembers, FamilyMember } from '../../data/mockFamilyData'; //
 interface MemberFilter {
   gender?: 'Male' | 'Female' | 'Other';
   isRootMember?: boolean;
-  ordinalNumber?: string; // e.g., "1-10", "11-20" or just a boolean for "has ordinal"
 }
 
 const PAGE_SIZE = 10;
@@ -259,15 +258,6 @@ export default function MemberSearchScreen() {
             style={styles.filterChip}
           >
             {t('memberSearch.filter.isRootMember')}
-          </Chip>
-          {/* Ordinal number filter can be more complex, e.g., a dropdown or range input */}
-          {/* For simplicity, let's add a placeholder chip for now */}
-          <Chip
-            selected={filters.ordinalNumber === 'hasOrdinal'}
-            onPress={() => handleFilterChange('ordinalNumber', 'hasOrdinal')}
-            style={styles.filterChip}
-          >
-            {t('memberSearch.filter.hasOrdinalNumber')}
           </Chip>
         </View>
 

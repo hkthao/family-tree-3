@@ -120,6 +120,5 @@
   "memberSearch.filter.gender.male": "Nam",
   "memberSearch.filter.gender.female": "Nữ",
   "memberSearch.filter.gender.other": "Khác",
-  "memberSearch.filter.isRootMember": "Thành viên gốc",
-  "memberSearch.filter.hasOrdinalNumber": "Có số thứ tự"
+  "memberSearch.filter.isRootMember": "Thành viên gốc"
 }
