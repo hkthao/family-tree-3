@@ -152,5 +152,17 @@
   "memberDetail.husbandId": "ID chồng",
   "eventScreen.eventsFor": "Sự kiện cho ngày",
   "eventScreen.noDateSelected": "Chưa chọn ngày",
-  "eventScreen.noEvents": "Không có sự kiện nào cho ngày này."
+  "eventScreen.noEvents": "Không có sự kiện nào cho ngày này.",
+  "eventDetail.title": "Chi tiết sự kiện",
+  "eventDetail.errors.notFound": "Không tìm thấy sự kiện",
+  "eventDetail.errors.failedToLoad": "Tải chi tiết sự kiện thất bại",
+  "eventDetail.errors.dataNotAvailable": "Dữ liệu sự kiện không có sẵn",
+  "eventDetail.date": "Ngày",
+  "eventDetail.time": "Thời gian",
+  "eventDetail.description": "Mô tả",
+  "eventDetail.eventType": "Loại sự kiện",
+  "eventDetail.startDate": "Ngày bắt đầu",
+  "eventDetail.endDate": "Ngày kết thúc",
+  "eventDetail.location": "Địa điểm",
+  "eventDetail.relatedMembers": "Thành viên liên quan"
 }

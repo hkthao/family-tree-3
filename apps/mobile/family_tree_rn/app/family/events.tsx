@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, FlatList, RefreshControl, Pressable } from 'react-native';
 import { Appbar, Text, useTheme, ActivityIndicator } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
@@ -213,11 +213,13 @@ export default function FamilyEventsScreen() {
           data={eventsForSelectedDate}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <View style={[styles.eventItem, { borderLeftColor: item.color || theme.colors.primary }]}>
-              <Text variant="titleMedium">{item.title}</Text>
-              <Text variant="bodyMedium">{item.time}</Text>
-              {item.description && <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.description}</Text>}
-            </View>
+            <Pressable onPress={() => router.push(`/event/${item.id}`)}>
+              <View style={[styles.eventItem, { borderLeftColor: item.color || theme.colors.primary }]}>
+                <Text variant="titleMedium">{item.title}</Text>
+                <Text variant="bodyMedium">{item.time}</Text>
+                {item.description && <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.description}</Text>}
+              </View>
+            </Pressable>
           )}
           ListHeaderComponent={
             <View style={styles.content}>
@@ -249,7 +251,7 @@ export default function FamilyEventsScreen() {
                 />
               </View>
               <Text variant="titleMedium" style={styles.eventListTitle}>
-                {t('eventScreen.eventsFor')} {selectedDate || t('eventScreen.noDateSelected')} (Family ID: {currentFamilyId})
+                {t('eventScreen.eventsFor')} {selectedDate || t('eventScreen.noDateSelected')}
               </Text>
               {eventsForSelectedDate.length === 0 && (
                 <Text style={styles.noEventsText}>{t('eventScreen.noEvents')}</Text>

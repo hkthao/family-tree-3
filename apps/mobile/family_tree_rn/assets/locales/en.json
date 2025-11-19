@@ -150,5 +150,17 @@
   "memberDetail.husbandId": "Husband ID",
   "eventScreen.eventsFor": "Events for",
   "eventScreen.noDateSelected": "No date selected",
-  "eventScreen.noEvents": "No events for this day."
+  "eventScreen.noEvents": "No events for this day.",
+  "eventDetail.title": "Event Details",
+  "eventDetail.errors.notFound": "Event not found",
+  "eventDetail.errors.failedToLoad": "Failed to load event details",
+  "eventDetail.errors.dataNotAvailable": "Event data not available",
+  "eventDetail.date": "Date",
+  "eventDetail.time": "Time",
+  "eventDetail.description": "Description",
+  "eventDetail.eventType": "Event Type",
+  "eventDetail.startDate": "Start Date",
+  "eventDetail.endDate": "End Date",
+  "eventDetail.location": "Location",
+  "eventDetail.relatedMembers": "Related Members"
 }
