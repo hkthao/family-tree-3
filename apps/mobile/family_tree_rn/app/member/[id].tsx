@@ -177,17 +177,17 @@ export default function MemberDetailsScreen() {
                   )}
                   {member.father && (
                     <Chip icon="human-male-boy" style={styles.chip} compact={true} >
-                      {t('member.father')}: {member.father}
+                      {member.father}
                     </Chip>
                   )}
                   {member.mother && (
                     <Chip icon="human-female-girl" style={styles.chip} compact={true} >
-                      {t('member.mother')}: {member.mother}
+                      {member.mother}
                     </Chip>
                   )}
                   {member.husband && (
                     <Chip icon="heart" style={styles.chip} compact={true} >
-                      {t('member.husband')}: {member.husband}
+                      {member.husband}
                     </Chip>
                   )}
                   {member.wife && (
@@ -201,7 +201,6 @@ export default function MemberDetailsScreen() {
           </Card>
 
           <Card style={styles.card}>
-            <Card.Title title={t('memberDetail.otherDetails')} titleVariant="titleMedium" />
             <Card.Content>
               <List.Section>
                 {member.dateOfBirth && (
@@ -209,7 +208,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('memberDetail.dateOfBirth')}
                       left={() => <List.Icon icon="calendar-account" />}
-                      right={() => <Text>{new Date(member.dateOfBirth ?? '').toLocaleDateString()}</Text>}
+                      right={() => <Chip compact={true}>{new Date(member.dateOfBirth ?? '').toLocaleDateString()}</Chip>}
                     />
                     <Divider />
                   </>
@@ -219,7 +218,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('memberDetail.dateOfDeath')}
                       left={() => <List.Icon icon="calendar-remove" />}
-                      right={() => <Text>{new Date(member.dateOfDeath ?? '').toLocaleDateString()}</Text>}
+                      right={() => <Chip compact={true}>{new Date(member.dateOfDeath ?? '').toLocaleDateString()}</Chip>}
                     />
                     <Divider />
                   </>
@@ -229,7 +228,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('memberDetail.placeOfBirth')}
                       left={() => <List.Icon icon="map-marker" />}
-                      right={() => <Text>{member.placeOfBirth}</Text>}
+                      right={() => <Chip compact={true}>{member.placeOfBirth}</Chip>}
                     />
                     <Divider />
                   </>
@@ -239,7 +238,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('memberDetail.placeOfDeath')}
                       left={() => <List.Icon icon="map-marker-off" />}
-                      right={() => <Text>{member.placeOfDeath}</Text>}
+                      right={() => <Chip compact={true}>{member.placeOfDeath}</Chip>}
                     />
                     <Divider />
                   </>
@@ -249,7 +248,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('memberDetail.nickname')}
                       left={() => <List.Icon icon="tag" />}
-                      right={() => <Text>{member.nickname}</Text>}
+                      right={() => <Chip compact={true}>{member.nickname}</Chip>}
                     />
                     <Divider />
                   </>
@@ -259,7 +258,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('member.father')}
                       left={() => <List.Icon icon="human-male-boy" />}
-                      right={() => <Text>{member.father}</Text>}
+                      right={() => <Chip compact={true}>{member.father}</Chip>}
                     />
                     <Divider />
                   </>
@@ -269,7 +268,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('member.mother')}
                       left={() => <List.Icon icon="human-female-girl" />}
-                      right={() => <Text>{member.mother}</Text>}
+                      right={() => <Chip compact={true}>{member.mother}</Chip>}
                     />
                     <Divider />
                   </>
@@ -279,7 +278,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('member.husband')}
                       left={() => <List.Icon icon="heart" />}
-                      right={() => <Text>{member.husband}</Text>}
+                      right={() => <Chip compact={true}>{member.husband}</Chip>}
                     />
                     <Divider />
                   </>
@@ -289,7 +288,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('member.wife')}
                       left={() => <List.Icon icon="heart" />}
-                      right={() => <Text>{member.wife}</Text>}
+                      right={() => <Chip compact={true}>{member.wife}</Chip>}
                     />
                     <Divider />
                   </>
@@ -299,7 +298,7 @@ export default function MemberDetailsScreen() {
                     <List.Item
                       title={t('memberDetail.created')}
                       left={() => <List.Icon icon="calendar-plus" />}
-                      right={() => <Text>{new Date(member.created).toLocaleDateString()}</Text>}
+                      right={() => <Chip compact={true}>{new Date(member.created).toLocaleDateString()}</Chip>}
                     />
                   </>
                 )}
