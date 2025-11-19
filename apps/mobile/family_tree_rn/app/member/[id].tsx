@@ -45,12 +45,9 @@ export default function MemberDetailsScreen() {
   }, [id, t]);
 
   const styles = useMemo(() => StyleSheet.create({
-    safeArea: {
-      flex: 1,
-    },
     container: {
       flex: 1,
-      paddingVertical: SPACING_MEDIUM,
+      padding: SPACING_MEDIUM,
     },
     loadingContainer: {
       flex: 1,
@@ -105,9 +102,6 @@ export default function MemberDetailsScreen() {
       justifyContent: 'center', // Center chips
     },
     chip: {
-      height: 30,
-      backgroundColor: 'transparent',
-      paddingHorizontal: 0,
     },
   }), [theme]);
 
@@ -161,7 +155,6 @@ export default function MemberDetailsScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={member.fullName || t('memberDetail.title')} />
       </Appbar.Header>
-      <View style={styles.safeArea}>
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
           <Card style={styles.card}>
             <Card.Content style={styles.cardContent}>
@@ -173,32 +166,32 @@ export default function MemberDetailsScreen() {
 
                 <View style={styles.chipsContainer}>
                   {member.gender && (
-                    <Chip icon="gender-male-female" style={styles.chip} compact={true} textStyle={{ fontSize: 12 }}>
+                    <Chip icon="gender-male-female" style={styles.chip} compact={true} >
                       {t(`memberSearch.filter.gender.${member.gender.toLowerCase()}`)}
                     </Chip>
                   )}
                   {member.isRoot && (
-                    <Chip icon="account-star" style={styles.chip} compact={true} textStyle={{ fontSize: 12 }}>
+                    <Chip icon="account-star" style={styles.chip} compact={true} >
                       {t('memberDetail.isRoot')}
                     </Chip>
                   )}
                   {member.father && (
-                    <Chip icon="human-male-boy" style={styles.chip} compact={true} textStyle={{ fontSize: 12 }}>
+                    <Chip icon="human-male-boy" style={styles.chip} compact={true} >
                       {t('member.father')}: {member.father}
                     </Chip>
                   )}
                   {member.mother && (
-                    <Chip icon="human-female-girl" style={styles.chip} compact={true} textStyle={{ fontSize: 12 }}>
+                    <Chip icon="human-female-girl" style={styles.chip} compact={true} >
                       {t('member.mother')}: {member.mother}
                     </Chip>
                   )}
                   {member.husband && (
-                    <Chip icon="human-male-boy" style={styles.chip} compact={true} textStyle={{ fontSize: 12 }}>
+                    <Chip icon="heart" style={styles.chip} compact={true} >
                       {t('member.husband')}: {member.husband}
                     </Chip>
                   )}
                   {member.wife && (
-                    <Chip icon="human-female-girl" style={styles.chip} compact={true} textStyle={{ fontSize: 12 }}>
+                    <Chip icon="heart" style={styles.chip} compact={true} >
                       {member.wife}
                     </Chip>
                   )}
@@ -206,8 +199,6 @@ export default function MemberDetailsScreen() {
               </View>
             </Card.Content>
           </Card>
-
-
 
           <Card style={styles.card}>
             <Card.Title title={t('memberDetail.otherDetails')} titleVariant="titleMedium" />
@@ -287,7 +278,7 @@ export default function MemberDetailsScreen() {
                   <>
                     <List.Item
                       title={t('member.husband')}
-                      left={() => <List.Icon icon="human-male" />}
+                      left={() => <List.Icon icon="heart" />}
                       right={() => <Text>{member.husband}</Text>}
                     />
                     <Divider />
@@ -297,7 +288,7 @@ export default function MemberDetailsScreen() {
                   <>
                     <List.Item
                       title={t('member.wife')}
-                      left={() => <List.Icon icon="human-female" />}
+                      left={() => <List.Icon icon="heart" />}
                       right={() => <Text>{member.wife}</Text>}
                     />
                     <Divider />
@@ -323,7 +314,6 @@ export default function MemberDetailsScreen() {
             </Card.Content>
           </Card>
         </ScrollView>
-      </View>
     </View>
   );
 }

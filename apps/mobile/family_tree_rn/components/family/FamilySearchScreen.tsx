@@ -239,6 +239,7 @@ export default function FamilySearchScreen() {
       flex: 1,
     },
     container: {
+      flex: 1,
       padding: SPACING_MEDIUM,
     },
     searchbar: {
@@ -263,7 +264,8 @@ export default function FamilySearchScreen() {
       alignItems: 'center',
     },
     familyCard: {
-      marginBottom: SPACING_MEDIUM
+      marginBottom: SPACING_SMALL,
+      marginHorizontal: 1
     },
     cardContent: {
       flexDirection: 'row',

@@ -192,6 +192,7 @@ export default function MemberSearchScreen() {
     },
     memberCard: {
       marginBottom: SPACING_MEDIUM,
+      marginHorizontal: 1
     },
     cardContent: {
       flexDirection: 'row',
@@ -331,12 +332,12 @@ export default function MemberSearchScreen() {
                       </Chip>
                     )}
                     {item.wife && (
-                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} >
+                      <Chip icon="heart" style={styles.detailChip} compact={true} >
                         {item.wife}
                       </Chip>
                     )}
                     {item.husband && (
-                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} >
+                      <Chip icon="heart" style={styles.detailChip} compact={true} >
                         {item.husband}
                       </Chip>
                     )}
