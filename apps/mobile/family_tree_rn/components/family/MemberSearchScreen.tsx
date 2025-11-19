@@ -303,8 +303,7 @@ export default function MemberSearchScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <Card style={[styles.memberCard, { borderRadius: theme.roundness }]} onPress={() => {
-              // Navigate to member details
-              // router.push(`/member/${item.id}`); // Assuming a member detail route
+              router.push(`/member/${item.id}`);
             }}>
               <Card.Content style={styles.cardContent}>
                 <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
