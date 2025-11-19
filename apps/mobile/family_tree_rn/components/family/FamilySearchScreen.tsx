@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Card, Avatar, IconButton, Searchbar, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router'; // Import useRouter
+import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 
 // Define a type for Family data (simplified from backend/src/Domain/Entities/Family.cs)
@@ -137,6 +138,7 @@ export default function FamilySearchScreen() {
   const { t } = useTranslation();
   const theme = useTheme(); // Get theme from PaperProvider
   const router = useRouter(); // Initialize useRouter
+  const setCurrentFamilyId = useFamilyStore((state) => state.setCurrentFamilyId); // Get setCurrentFamilyId from store
   const [searchQuery, setSearchQuery] = useState('');
   const [families, setFamilies] = useState<Family[]>([]);
   const [page, setPage] = useState(1);
@@ -323,7 +325,10 @@ export default function FamilySearchScreen() {
           data={families}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <Card style={[styles.familyCard, { borderRadius: theme.roundness }]} onPress={() => router.push(`/family/${item.id}` as any)}>
+            <Card style={[styles.familyCard, { borderRadius: theme.roundness }]} onPress={() => {
+              setCurrentFamilyId(item.id);
+              router.push('/family');
+            }}>
               <Card.Content style={styles.cardContent}>
                 <Avatar.Image size={48} source={{ uri: item.avatarUrl }} style={styles.avatar} />
                 <View style={styles.cardText}>
