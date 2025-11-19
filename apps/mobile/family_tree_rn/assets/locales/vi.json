@@ -61,6 +61,8 @@
   "settings.privacySecurity.title": "Quyền riêng tư & Bảo mật",
   "settings.privacySecurity.downloadData": "Tải xuống dữ liệu của tôi",
   "settings.privacySecurity.deleteAccount": "Xóa tài khoản",
+  "settings.deleteAccount.confirmTitle": "Xác nhận xóa tài khoản",
+  "settings.deleteAccount.confirmMessage": "Bạn có chắc chắn muốn xóa tài khoản không?",
   "settings.appAppearance.title": "Tùy chỉnh giao diện",
   "settings.appAppearance.theme": "Chủ đề",
   "settings.appAppearance.accentColor": "Màu chủ đạo",
@@ -90,5 +92,8 @@
   "settings.logout.confirmMessage": "Bạn có chắc chắn muốn đăng xuất không?",
   "common.cancel": "Hủy",
   "common.logout": "Đăng xuất",
-  "common.delete": "Xóa"
+  "common.delete": "Xóa",
+  "login.title": "Chào mừng trở lại!",
+  "login.description": "Vui lòng đăng nhập để tiếp tục.",
+  "login.button": "Đăng nhập"
 }

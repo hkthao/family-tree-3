@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Text, Icon } from 'react-native-paper';
+import { Text, Icon, useTheme } from 'react-native-paper';
 import { TFunction } from 'i18next';
 import { SPACING_SMALL, SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
 
@@ -49,6 +49,53 @@ const features: Feature[] = [
 ];
 
 export function FeaturesSection({ t, backgroundColor }: FeaturesSectionProps) {
+  const theme = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      paddingHorizontal: SPACING_SMALL,
+      paddingVertical: SPACING_MEDIUM,
+    },
+    sectionTitle: {
+      textAlign: 'center',
+      marginVertical: SPACING_LARGE,
+      fontWeight: 'bold',
+    },
+    featuresGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: SPACING_MEDIUM, // Use gap for consistent spacing
+      justifyContent: 'center', // Center the items
+    },
+    featureItem: {
+      width: '48%', // Roughly two items per row
+      alignItems: 'center',
+      padding: SPACING_MEDIUM,
+      backgroundColor: theme.colors.surface, // Use theme surface color
+      borderRadius: 8,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.2,
+      shadowRadius: 1.41,
+      elevation: 2,
+      height: 180,
+      justifyContent: 'space-between', // Align icon top, text bottom
+    },
+    featureTextContainer: {
+      alignItems: 'center', // Center text horizontally
+    },
+    featureTitle: {
+      marginTop: SPACING_MEDIUM,
+      textAlign: 'center',
+      fontWeight: 'bold',
+    },
+    featureDescription: {
+      textAlign: 'center',
+      marginTop: SPACING_SMALL,
+      color: theme.colors.onSurfaceVariant, // Use theme color for secondary text
+    },
+  }), [theme]);
+
   return (
     <ScrollView style={[styles.container, backgroundColor ? { backgroundColor } : {}]} showsVerticalScrollIndicator={false}>
       <Text variant="headlineMedium" style={styles.sectionTitle}>
@@ -72,48 +119,3 @@ export function FeaturesSection({ t, backgroundColor }: FeaturesSectionProps) {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: SPACING_SMALL,
-    paddingVertical: SPACING_MEDIUM,
-  },
-  sectionTitle: {
-    textAlign: 'center',
-    marginVertical: SPACING_LARGE,
-    fontWeight: 'bold',
-  },
-  featuresGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SPACING_MEDIUM, // Use gap for consistent spacing
-    justifyContent: 'center', // Center the items
-  },
-  featureItem: {
-    width: '48%', // Roughly two items per row
-    alignItems: 'center',
-    padding: SPACING_MEDIUM,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
-    height: 180,
-    justifyContent: 'space-between', // Align icon top, text bottom
-  },
-  featureTextContainer: {
-    alignItems: 'center', // Center text horizontally
-  },
-  featureTitle: {
-    marginTop: SPACING_MEDIUM,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  featureDescription: {
-    textAlign: 'center',
-    marginTop: SPACING_SMALL,
-    color: 'gray',
-  },
-});

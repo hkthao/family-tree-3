@@ -113,11 +113,7 @@ export default function SettingsScreen() {
                 <Avatar.Image size={48} source={{ uri: user?.avatarUrl || 'https://via.placeholder.com/150' }} />
               )}
               onPress={handleEditProfile}
-              right={() => <List.Icon icon="chevron-right" />}
             />
-            <Button mode="outlined" onPress={handleEditProfile} >
-              {t('settings.profile.editProfile')}
-            </Button>
           </List.Section>
 
           {/* 3. Quyền riêng tư & bảo mật (Privacy & Security) */}
@@ -181,20 +177,6 @@ export default function SettingsScreen() {
             />
             <Divider />
             <List.Item
-              left={() => <List.Icon icon="headset" />}
-              title={t('settings.helpSupport.contactSupport')}
-              onPress={() => console.log('Contact Support')}
-              right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
-            />
-            <Divider />
-            <List.Item
-              left={() => <List.Icon icon="chat" />}
-              title={t('settings.helpSupport.liveChatSupport')}
-              onPress={() => console.log('Live Chat Support')}
-              right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
-            />
-            <Divider />
-            <List.Item
               left={() => <List.Icon icon="comment-edit" />}
               title={t('settings.helpSupport.feedback')}
               onPress={() => console.log('Feedback')}
@@ -221,13 +203,6 @@ export default function SettingsScreen() {
               left={() => <List.Icon icon="shield-lock" />}
               title={t('settings.aboutApp.privacyPolicy')}
               onPress={() => console.log('Privacy Policy')}
-              right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
-            />
-            <Divider />
-            <List.Item
-              left={() => <List.Icon icon="xml" />}
-              title={t('settings.aboutApp.openSourceLibs')}
-              onPress={() => console.log('Open Source Libs')}
               right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
             />
           </List.Section>

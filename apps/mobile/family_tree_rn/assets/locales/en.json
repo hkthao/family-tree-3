@@ -59,6 +59,8 @@
   "settings.privacySecurity.title": "Privacy & Security",
   "settings.privacySecurity.downloadData": "Download My Data",
   "settings.privacySecurity.deleteAccount": "Delete Account",
+  "settings.deleteAccount.confirmTitle": "Confirm Delete Account",
+  "settings.deleteAccount.confirmMessage": "Are you sure you want to delete your account?",
   "settings.appAppearance.title": "App Appearance",
   "settings.appAppearance.theme": "Theme",
   "settings.appAppearance.accentColor": "Accent Color",
@@ -88,5 +90,8 @@
   "settings.logout.confirmMessage": "Are you sure you want to log out?",
   "common.cancel": "Cancel",
   "common.logout": "Logout",
-  "common.delete": "Delete"
+  "common.delete": "Delete",
+  "login.title": "Welcome Back!",
+  "login.description": "Please log in to continue.",
+  "login.button": "Log In"
 }
