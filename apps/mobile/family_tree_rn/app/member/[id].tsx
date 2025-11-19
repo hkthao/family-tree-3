@@ -310,7 +310,6 @@ export default function MemberDetailsScreen() {
                       left={() => <List.Icon icon="calendar-plus" />}
                       right={() => <Text>{new Date(member.created).toLocaleDateString()}</Text>}
                     />
-                    <Divider />
                   </>
                 )}
               </List.Section>
