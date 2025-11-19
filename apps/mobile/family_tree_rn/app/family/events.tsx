@@ -1,6 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import { Alert, StyleSheet, Text, View, TouchableOpacity, SectionList } from 'react-native';
+import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
+import { Divider, useTheme } from 'react-native-paper';
 
 interface EventItem extends AgendaEntry {
   name: string;
@@ -10,6 +12,68 @@ interface EventItem extends AgendaEntry {
 
 export default function FamilyEventsScreen() {
   const [items, setItems] = useState<AgendaSchedule>({});
+  const theme = useTheme();
+  const styles = useMemo(() => StyleSheet.create({
+    item: {
+      flex: 1,
+      borderRadius: theme.roundness,
+      padding: SPACING_MEDIUM,
+      marginRight: SPACING_MEDIUM,
+      marginTop: SPACING_SMALL,
+    },
+    emptyDate: {
+      height: 15,
+      flex: 1,
+      paddingTop: 30,
+      textAlign: 'center',
+    },
+    sectionHeader: {
+      padding: SPACING_MEDIUM,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    sectionHeaderWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 5,
+      paddingHorizontal: SPACING_MEDIUM,
+    },
+    sectionHeaderDay: {
+      fontSize: 14,
+      fontWeight: '300', // Thin font
+      marginRight: SPACING_MEDIUM,
+      minWidth: 60, // Ensure enough space for day name
+      color: theme.colors.onSurfaceVariant,
+    },
+    sectionHeaderDate: {
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    sectionRow: {
+      flexDirection: 'row',
+      minHeight: 100, // Minimum height for a section row
+      paddingVertical: SPACING_MEDIUM,
+      backgroundColor: theme.colors.surface
+    },
+    sectionLeftColumn: {
+      width: 80, // Fixed width for the left column
+      marginRight: SPACING_MEDIUM,
+      alignItems: 'center',
+      justifyContent: 'flex-start', // Align to top
+      paddingTop: SPACING_MEDIUM,
+    },
+    sectionRightColumn: {
+      flex: 1,
+      justifyContent: 'flex-start', // Align to top
+    },
+    itemMonth: {
+      fontSize: 25,
+    },
+    itemDayName: {
+      fontSize: 14,
+      fontWeight: '300',
+    },
+  }), [theme]);
 
   const loadItems = useCallback((day: DateData) => {
     setTimeout(() => {
@@ -39,25 +103,25 @@ export default function FamilyEventsScreen() {
 
   const renderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
     const fontSize = isFirst ? 16 : 14;
-    const color = isFirst ? 'black' : '#43515c';
+    const color = isFirst ? theme.colors.onSurface : theme.colors.onSurfaceVariant;
 
     return (
       <TouchableOpacity
-        style={[styles.item, { height: reservation.height }]}
+        style={[styles.item, { backgroundColor: theme.colors.surface }]}
         onPress={() => Alert.alert(reservation.name)}
       >
         <Text style={{ fontSize, color }}>{reservation.name}</Text>
       </TouchableOpacity>
     );
-  }, []);
+  }, [theme.colors]);
 
   const renderEmptyDate = useCallback(() => {
     return (
-      <View style={styles.emptyDate}>
-        <Text>Không có sự kiện nào vào ngày này!</Text>
+      <View style={[styles.emptyDate, { backgroundColor: theme.colors.background }]}>
+        <Text style={{ color: theme.colors.onBackground }}>Không có sự kiện nào vào ngày này!</Text>
       </View>
     );
-  }, []);
+  }, [theme.colors]);
 
   const rowHasChanged = useCallback((r1: AgendaEntry, r2: AgendaEntry) => {
     return r1.name !== r2.name;
@@ -68,25 +132,46 @@ export default function FamilyEventsScreen() {
     return date.toISOString().split('T')[0];
   };
 
+  const getDayName = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long' };
+    return new Intl.DateTimeFormat('vi-VN', options).format(date);
+  };
+
   const renderList = useCallback((listProps: any) => {
-    // Transform listProps.items (object of {date: [items]}) into sections array for SectionList
     const sections = Object.keys(listProps.items).map(date => ({
       title: date,
       data: listProps.items[date]
     }));
 
     return (
-      <SectionList
-        sections={sections}
-        renderItem={({ item, section, index }) => renderItem(item, index === 0)} // Reuse existing renderItem
-        keyExtractor={(item: AgendaEntry, index: number) => item.day + item.name + index}
-        renderSectionHeader={({ section: { title } }) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
-        )}
-        // You might want to add other SectionList props like stickySectionHeadersEnabled
-      />
+      <ScrollView>
+        {sections.map(section => {
+          const date = new Date(section.title);
+          const month = (date.getMonth() + 1).toString().padStart(2, '0'); // MM format
+          const dayName = getDayName(section.title);
+
+          return (
+            <View key={section.title} style={[styles.sectionRow]}>
+              <View style={styles.sectionLeftColumn}>
+                <Text style={[styles.itemMonth, { color: theme.colors.onSurfaceVariant }]}>{month}</Text>
+                <Text style={[styles.itemDayName, { color: theme.colors.onSurfaceVariant }]}>{dayName}</Text>
+              </View>
+              <View style={styles.sectionRightColumn}>
+                {section.data.map((item: AgendaEntry, index: number) => (
+                  <View key={item.day + item.name + index}>
+                    {renderItem(item, index === 0)}
+
+                    {index === section.data.length - 1 && section.data.length > 1 && <Divider style={{ margin: SPACING_MEDIUM }} />}
+                  </View>
+                ))}
+              </View>
+            </View>
+          );
+        })}
+      </ScrollView>
     );
-  }, [renderItem]); // Add renderItem to dependency array
+  }, [renderItem, theme.colors]);
 
   return (
     <Agenda
@@ -99,34 +184,26 @@ export default function FamilyEventsScreen() {
       showClosingKnob={true}
       renderList={renderList}
       theme={{
-        agendaDayTextColor: 'yellow',
-        agendaDayNumColor: 'green',
-        agendaTodayColor: 'red',
-        agendaKnobColor: 'blue'
+        agendaDayTextColor: theme.colors.primary,
+        agendaDayNumColor: theme.colors.primary,
+        agendaTodayColor: theme.colors.tertiary,
+        agendaKnobColor: theme.colors.primary,
+        backgroundColor: theme.colors.background,
+        calendarBackground: theme.colors.surface,
+        dayTextColor: theme.colors.onSurface,
+        textSectionTitleColor: theme.colors.onSurfaceVariant,
+        textDisabledColor: theme.colors.outline,
+        dotColor: theme.colors.primary,
+        selectedDotColor: theme.colors.onPrimary,
+        monthTextColor: theme.colors.onSurface,
+        textDayFontFamily: 'monospace',
+        textMonthFontFamily: 'monospace',
+        textDayHeaderFontFamily: 'monospace',
+        textDayFontSize: 16,
+        textMonthFontSize: 16,
+        textDayHeaderFontSize: 13
       }}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  item: {
-    backgroundColor: 'white',
-    flex: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginRight: 10,
-    marginTop: 17,
-  },
-  emptyDate: {
-    height: 15,
-    flex: 1,
-    paddingTop: 30,
-    textAlign: 'center',
-  },
-  sectionHeader: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
