@@ -174,7 +174,6 @@ export default function MemberSearchScreen() {
       textAlign: 'center',
     },
     flatListContent: {
-      // paddingBottom: SPACING_LARGE, // Ensure space at the bottom
     },
     flatListEmpty: {
       flex: 1,
@@ -197,16 +196,16 @@ export default function MemberSearchScreen() {
     detailsRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
-      marginTop: SPACING_SMALL,
     },
     memberDetailsChips: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      marginTop: SPACING_SMALL,
-      gap: SPACING_SMALL,
+      marginLeft: -SPACING_MEDIUM,
+      marginTop: SPACING_LARGE
     },
     detailChip: {
-      height: 30, // Adjust chip height if needed
+      backgroundColor: 'transparent',
+      paddingHorizontal: 0,
     },
     footer: {
       paddingVertical: SPACING_MEDIUM,
