@@ -122,7 +122,7 @@ export default function FamilyDetailsScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={t('familyDetail.title')} />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* First Card: Profile-like information */}
         <Card style={styles.card}>
           <Card.Content style={styles.profileCardContent}>
