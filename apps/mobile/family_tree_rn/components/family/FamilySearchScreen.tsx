@@ -6,8 +6,8 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, Avatar, IconButton, Searchbar, useTheme } from 'react-native-paper';
+
+import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Appbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router'; // Import useRouter
 import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
@@ -293,7 +293,10 @@ export default function FamilySearchScreen() {
   }), [theme]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
+      <Appbar.Header>
+        <Appbar.Content title={t('search.title')} />
+      </Appbar.Header>
       <View style={styles.container}>
         <Searchbar
           placeholder={t('search.placeholder')}
@@ -357,6 +360,6 @@ export default function FamilySearchScreen() {
           contentContainerStyle={families.length === 0 && !loading && !error ? styles.flatListEmpty : styles.flatListContent}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }

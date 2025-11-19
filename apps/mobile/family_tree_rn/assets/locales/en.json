@@ -39,6 +39,7 @@
   "home.privacy_security.feature2": "Privacy controls for each family group",
   "home.privacy_security.feature3": "No data sharing with third parties",
   "search.placeholder": "Search",
+  "search.title": "Search",
   "search.no_results": "No families found.",
   "search.try_different_query": "Try a different search query.",
   "common.error_occurred": "Error occurred",
