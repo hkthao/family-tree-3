@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Appbar, Text, useTheme, Card, ActivityIndicator, List, Divider, Chip } from 'react-native-paper';
+import { Appbar, Text, useTheme, Card, ActivityIndicator, List, Divider, Chip, Avatar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 
@@ -147,14 +147,7 @@ export default function EventDetailsScreen() {
       alignItems: 'center',
       paddingBottom: SPACING_MEDIUM,
     },
-    colorIndicator: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      marginBottom: SPACING_MEDIUM,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
+
     titleText: {
       marginBottom: SPACING_SMALL,
       textAlign: 'center',
@@ -244,8 +237,9 @@ export default function EventDetailsScreen() {
         {/* First Card: Key Event Information */}
         <Card style={styles.card}>
           <Card.Content style={styles.profileCardContent}>
-            <View style={[styles.colorIndicator, { backgroundColor: event.color || theme.colors.primary }]} />
+            <Avatar.Icon icon="calendar-month" size={80} color={theme.colors.onPrimary}  />
             <Text variant="headlineSmall" style={styles.titleText}>{event.title}</Text>
+            <Text variant="bodyMedium" >{event.description}</Text>
             <View style={styles.chipsContainer}>
               <Chip icon="tag" compact={true} style={styles.chip}>{event.eventType}</Chip>
               <Chip icon="calendar-start" compact={true} style={styles.chip}>{event.startDate}</Chip>
@@ -254,44 +248,11 @@ export default function EventDetailsScreen() {
                 <Chip icon="map-marker" compact={true} style={styles.chip}>{event.location}</Chip>
               )}
               <Chip icon="clock-outline" compact={true} style={styles.chip}>{event.time}</Chip>
-            </View>
-          </Card.Content>
-        </Card>
 
-        {/* Second Card: Detailed Information */}
-        <Card style={styles.card}>
-          <Card.Content>
-            <List.Section>
-              {event.description && (
-                <>
-                  <List.Item
-                    title={t('eventDetail.description')}
-                    left={() => <List.Icon icon="text-box-outline" />}
-                    description={event.description}
-                    descriptionNumberOfLines={5}
-                    titleStyle={styles.listItemTitle}
-                  />
-                  <Divider />
-                </>
-              )}
-              {event.relatedMembers && event.relatedMembers.length > 0 && (
-                <>
-                  <List.Item
-                    title={t('eventDetail.relatedMembers')}
-                    left={() => <List.Icon icon="account-group" />}
-                    titleStyle={styles.listItemTitle}
-                    right={() => (
-                      <View style={styles.chipsContainer}>
-                        {event.relatedMembers?.map((member, index) => (
-                          <Chip key={index} compact={true}>{member}</Chip>
-                        ))}
-                      </View>
-                    )}
-                  />
-                  <Divider />
-                </>
-              )}
-            </List.Section>
+              {event.relatedMembers?.map((member, index) => (
+                <Chip key={index} compact={true} icon="account-outline">{member}</Chip>
+              ))}
+            </View>
           </Card.Content>
         </Card>
       </ScrollView>
