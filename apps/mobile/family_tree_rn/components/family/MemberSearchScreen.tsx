@@ -6,8 +6,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Chip, Appbar } from 'react-native-paper';
+import { Text, Card, Avatar, IconButton as PaperIconButton, Searchbar, useTheme, Chip, Appbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useFamilyStore } from '../../stores/useFamilyStore';
@@ -37,6 +36,7 @@ export default function MemberSearchScreen() {
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<MemberFilter>({});
+  const [showFilterChips, setShowFilterChips] = useState(false);
 
   useEffect(() => {
     loadingRef.current = loading;
@@ -152,8 +152,18 @@ export default function MemberSearchScreen() {
       paddingBottom: SPACING_LARGE,
     },
     searchbar: {
-      marginBottom: SPACING_MEDIUM,
+      flex: 1,
       borderRadius: theme.roundness,
+      backgroundColor: 'transparent', // Make Searchbar background transparent
+    },
+    searchFilterContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: SPACING_MEDIUM,
+      backgroundColor: theme.colors.surfaceVariant, // Set background color for the container
+      borderRadius: theme.roundness, // Match Searchbar's border radius
+    },
+    filterButton: {
     },
     filterChipsContainer: {
       flexDirection: 'row',
@@ -224,7 +234,8 @@ export default function MemberSearchScreen() {
         <Appbar.BackAction onPress={() => router.back()} />
         <Appbar.Content title={t('familyDetail.tab.members')} />
       </Appbar.Header>
-        <View style={styles.container}>
+      <View style={styles.container}>
+        <View style={styles.searchFilterContainer}>
           <Searchbar
             placeholder={t('memberSearch.placeholder')}
             onChangeText={setSearchQuery}
@@ -232,46 +243,52 @@ export default function MemberSearchScreen() {
             style={styles.searchbar}
             showDivider={true}
             clearIcon={searchQuery.length > 0 ? () => (
-              <IconButton
+              <PaperIconButton
                 icon="close-circle"
-                iconColor={theme.colors.onSurfaceVariant}
                 size={20}
                 onPress={() => setSearchQuery('')}
               />
             ) : undefined}
           />
-
-        <View style={styles.filterChipsContainer}>
-          <Chip
-            selected={filters.gender === 'Male'}
-            onPress={() => handleFilterChange('gender', 'Male')}
-            style={styles.filterChip}
-          >
-            {t('memberSearch.filter.gender.male')}
-          </Chip>
-          <Chip
-            selected={filters.gender === 'Female'}
-            onPress={() => handleFilterChange('gender', 'Female')}
-            style={styles.filterChip}
-          >
-            {t('memberSearch.filter.gender.female')}
-          </Chip>
-          <Chip
-            selected={filters.gender === 'Other'}
-            onPress={() => handleFilterChange('gender', 'Other')}
-            style={styles.filterChip}
-          >
-            {t('memberSearch.filter.gender.other')}
-          </Chip>
-          <Chip
-            selected={filters.isRootMember === true}
-            onPress={() => handleFilterChange('isRootMember', true)}
-            style={styles.filterChip}
-          >
-            {t('memberSearch.filter.isRootMember')}
-          </Chip>
-        </View>
-
+          <Appbar.Action
+            icon={showFilterChips ? "filter-off" : "filter"}
+            onPress={() => setShowFilterChips(!showFilterChips)}
+            color={theme.colors.onSurfaceVariant}
+            size={24}
+            style={styles.filterButton}
+          />
+        </View>        {showFilterChips && (
+          <View style={styles.filterChipsContainer}>
+            <Chip
+              selected={filters.gender === 'Male'}
+              onPress={() => handleFilterChange('gender', 'Male')}
+              style={styles.filterChip}
+            >
+              {t('memberSearch.filter.gender.male')}
+            </Chip>
+            <Chip
+              selected={filters.gender === 'Female'}
+              onPress={() => handleFilterChange('gender', 'Female')}
+              style={styles.filterChip}
+            >
+              {t('memberSearch.filter.gender.female')}
+            </Chip>
+            <Chip
+              selected={filters.gender === 'Other'}
+              onPress={() => handleFilterChange('gender', 'Other')}
+              style={styles.filterChip}
+            >
+              {t('memberSearch.filter.gender.other')}
+            </Chip>
+            <Chip
+              selected={filters.isRootMember === true}
+              onPress={() => handleFilterChange('isRootMember', true)}
+              style={styles.filterChip}
+            >
+              {t('memberSearch.filter.isRootMember')}
+            </Chip>
+          </View>
+        )}
         {error && (
           <View style={styles.errorContainer}>
             <Text variant="bodyMedium" style={styles.errorText}>
@@ -300,27 +317,27 @@ export default function MemberSearchScreen() {
                   </View>
                   <View style={styles.memberDetailsChips}>
                     {item.gender && (
-                      <Chip icon="gender-male-female" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                      <Chip icon="gender-male-female" style={styles.detailChip} compact={true}>
                         {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}
                       </Chip>
                     )}
                     {item.father && (
-                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} >
                         {item.father}
                       </Chip>
                     )}
                     {item.mother && (
-                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} >
                         {item.mother}
                       </Chip>
                     )}
                     {item.wife && (
-                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} >
                         {item.wife}
                       </Chip>
                     )}
                     {item.husband && (
-                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} >
                         {item.husband}
                       </Chip>
                     )}
