@@ -149,5 +149,8 @@
   "memberDetail.familyId": "ID gia đình",
   "memberDetail.fatherId": "ID cha",
   "memberDetail.motherId": "ID mẹ",
-  "memberDetail.husbandId": "ID chồng"
+  "memberDetail.husbandId": "ID chồng",
+  "eventScreen.eventsFor": "Sự kiện cho ngày",
+  "eventScreen.noDateSelected": "Chưa chọn ngày",
+  "eventScreen.noEvents": "Không có sự kiện nào cho ngày này."
 }

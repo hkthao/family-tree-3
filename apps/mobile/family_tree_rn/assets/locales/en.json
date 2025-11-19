@@ -147,5 +147,8 @@
   "memberDetail.familyId": "Family ID",
   "memberDetail.fatherId": "Father ID",
   "memberDetail.motherId": "Mother ID",
-  "memberDetail.husbandId": "Husband ID"
+  "memberDetail.husbandId": "Husband ID",
+  "eventScreen.eventsFor": "Events for",
+  "eventScreen.noDateSelected": "No date selected",
+  "eventScreen.noEvents": "No events for this day."
 }
