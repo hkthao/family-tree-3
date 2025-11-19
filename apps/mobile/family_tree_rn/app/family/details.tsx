@@ -90,6 +90,13 @@ export default function FamilyDetailsScreen() {
     chipContainer: {
       marginRight: -SPACING_MEDIUM, // Apply negative margin to pull the chip closer to the right edge
     },
+    chipsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'flex-end', // Align chips to the right
+      flex: 1, // Allow container to take available space
+      marginRight: -SPACING_MEDIUM, // Adjust overall right margin for the chips container
+    },
     detailRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -220,20 +227,30 @@ export default function FamilyDetailsScreen() {
               <Divider />
               <List.Item
                 title={t('familyDetail.details.manager')}
+                titleStyle={{ flexShrink: 1 }}
                 left={() => <List.Icon icon="account-tie" />}
                 right={() => (
-                  <View style={styles.chipContainer}>
-                    <Chip>{family.manager}</Chip>
+                  <View style={styles.chipsContainer}>
+                    {family.manager.map((managerName, index) => (
+                      <Chip key={index} style={{ marginRight: SPACING_SMALL, marginBottom: SPACING_SMALL }}>
+                        {managerName}
+                      </Chip>
+                    ))}
                   </View>
                 )}
               />
               <Divider />
               <List.Item
                 title={t('familyDetail.details.viewers')}
+                titleStyle={{ flexShrink: 1 }}
                 left={() => <List.Icon icon="eye-outline" />}
                 right={() => (
-                  <View style={styles.chipContainer}>
-                    <Chip>{family.viewers.join(', ')}</Chip>
+                  <View style={styles.chipsContainer}>
+                    {family.viewers.map((viewerName, index) => (
+                      <Chip key={index} style={{ marginRight: SPACING_SMALL, marginBottom: SPACING_SMALL }}>
+                        {viewerName}
+                      </Chip>
+                    ))}
                   </View>
                 )}
               />
