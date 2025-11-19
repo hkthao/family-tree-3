@@ -201,7 +201,6 @@ export default function MemberSearchScreen() {
       flexDirection: 'row',
       flexWrap: 'wrap',
       marginLeft: -SPACING_MEDIUM,
-      marginTop: SPACING_LARGE
     },
     detailChip: {
       backgroundColor: 'transparent',
@@ -290,20 +289,15 @@ export default function MemberSearchScreen() {
                 <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
                 <View style={styles.cardText}>
                   <Text variant="titleMedium">{item.name}</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING_SMALL / 2 }}>
+                    {item.occupation && <Text variant="bodySmall">{item.occupation}</Text>}
+                    {item.occupation && item.birthDeathYears && <Text variant="bodySmall">|</Text>}
+                    {item.birthDeathYears && <Text variant="bodySmall">{item.birthDeathYears}</Text>}
+                  </View>
                   <View style={styles.memberDetailsChips}>
-                    {item.birthDeathYears && (
-                      <Chip icon="calendar-range" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
-                        {item.birthDeathYears}
-                      </Chip>
-                    )}
                     {item.gender && (
                       <Chip icon="gender-male-female" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
                         {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}
-                      </Chip>
-                    )}
-                    {item.occupation && (
-                      <Chip icon="briefcase" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
-                        {item.occupation}
                       </Chip>
                     )}
                     {item.father && (
