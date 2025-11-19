@@ -19,7 +19,7 @@ export default function FamilyDetailsScreen() {
   useEffect(() => {
     const loadFamilyDetails = async () => {
       if (!currentFamilyId) {
-        setError('No Family ID available');
+        setError(t('familyDetail.errors.noFamilyId'));
         setLoading(false);
         return;
       }
@@ -28,10 +28,10 @@ export default function FamilyDetailsScreen() {
         if (data) {
           setFamily(data);
         } else {
-          setError('Family not found');
+          setError(t('familyDetail.errors.notFound'));
         }
       } catch (err) {
-        setError('Failed to load family details');
+        setError(t('familyDetail.errors.failedToLoad'));
         console.error(err);
       } finally {
         setLoading(false);
@@ -46,10 +46,8 @@ export default function FamilyDetailsScreen() {
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.colors.background,
     },
     appbar: {
-      backgroundColor: theme.colors.surface,
     },
     content: {
       padding: SPACING_MEDIUM,
@@ -132,7 +130,7 @@ export default function FamilyDetailsScreen() {
   if (!family) {
     return (
       <View style={styles.errorContainer}>
-        <Text variant="titleMedium">{t('common.error_occurred')}: Family data not available.</Text>
+        <Text variant="titleMedium">{t('common.error_occurred')}: {t('familyDetail.errors.dataNotAvailable')}</Text>
       </View>
     );
   }
@@ -151,7 +149,7 @@ export default function FamilyDetailsScreen() {
             <Text variant="headlineSmall" style={styles.nameText}>{family.name}</Text>
             <Text variant="titleMedium" style={[styles.codeText, { color: theme.colors.onSurfaceVariant }]}>{family.code}</Text>
             <Text variant="bodyMedium" style={styles.locationText}>
-              {t('common.location')}: {family.address || t('common.not_available')}
+              {family.address || t('common.not_available')}
             </Text>
           </Card.Content>
         </Card>

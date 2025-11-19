@@ -102,5 +102,9 @@
   "familyDetail.details.overview": "Overview",
   "familyDetail.details.createdBy": "Created By",
   "familyDetail.details.createdAt": "Created At",
-  "familyDetail.details.lastUpdatedAt": "Last Updated At"
+  "familyDetail.details.lastUpdatedAt": "Last Updated At",
+  "familyDetail.errors.noFamilyId": "No Family ID available",
+  "familyDetail.errors.notFound": "Family not found",
+  "familyDetail.errors.failedToLoad": "Failed to load family details",
+  "familyDetail.errors.dataNotAvailable": "Family data not available"
 }

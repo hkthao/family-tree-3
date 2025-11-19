@@ -239,7 +239,6 @@ export default function FamilySearchScreen() {
       flex: 1,
     },
     container: {
-      flex: 1,
       padding: SPACING_MEDIUM,
     },
     searchbar: {
@@ -256,7 +255,7 @@ export default function FamilySearchScreen() {
       textAlign: 'center',
     },
     flatListContent: {
-      paddingBottom: SPACING_LARGE, // Ensure space at the bottom
+      // paddingBottom: SPACING_LARGE, // Ensure space at the bottom
     },
     flatListEmpty: {
       flex: 1,
