@@ -124,6 +124,8 @@
   "member.gender": "Giới tính",
   "member.birthDeathYears": "Năm sinh/mất",
   "member.occupation": "Nghề nghiệp",
-  "member.parents": "Cha mẹ",
-  "member.spouse": "Vợ/Chồng"
+  "member.father": "Cha",
+  "member.mother": "Mẹ",
+  "member.wife": "Vợ",
+  "member.husband": "Chồng"
 }

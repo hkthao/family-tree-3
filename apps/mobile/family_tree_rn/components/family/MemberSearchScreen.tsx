@@ -199,6 +199,15 @@ export default function MemberSearchScreen() {
       justifyContent: 'space-between',
       marginTop: SPACING_SMALL,
     },
+    memberDetailsChips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginTop: SPACING_SMALL,
+      gap: SPACING_SMALL,
+    },
+    detailChip: {
+      height: 30, // Adjust chip height if needed
+    },
     footer: {
       paddingVertical: SPACING_MEDIUM,
       alignItems: 'center',
@@ -282,11 +291,43 @@ export default function MemberSearchScreen() {
                 <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
                 <View style={styles.cardText}>
                   <Text variant="titleMedium">{item.name}</Text>
-                  {item.birthDeathYears && <Text variant="bodySmall">{t('member.birthDeathYears')}: {item.birthDeathYears}</Text>}
-                  {item.gender && <Text variant="bodySmall">{t('member.gender')}: {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}</Text>}
-                  {item.occupation && <Text variant="bodySmall">{t('member.occupation')}: {item.occupation}</Text>}
-                  {item.parents && item.parents.length > 0 && <Text variant="bodySmall">{t('member.parents')}: {item.parents.join(', ')}</Text>}
-                  {item.spouse && <Text variant="bodySmall">{t('member.spouse')}: {item.spouse}</Text>}
+                  <View style={styles.memberDetailsChips}>
+                    {item.birthDeathYears && (
+                      <Chip icon="calendar-range" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {item.birthDeathYears}
+                      </Chip>
+                    )}
+                    {item.gender && (
+                      <Chip icon="gender-male-female" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}
+                      </Chip>
+                    )}
+                    {item.occupation && (
+                      <Chip icon="briefcase" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {item.occupation}
+                      </Chip>
+                    )}
+                    {item.father && (
+                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {item.father}
+                      </Chip>
+                    )}
+                    {item.mother && (
+                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {item.mother}
+                      </Chip>
+                    )}
+                    {item.wife && (
+                      <Chip icon="human-female-girl" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {item.wife}
+                      </Chip>
+                    )}
+                    {item.husband && (
+                      <Chip icon="human-male-boy" style={styles.detailChip} compact={true} textStyle={{ fontSize: 12 }}>
+                        {item.husband}
+                      </Chip>
+                    )}
+                  </View>
                 </View>
               </Card.Content>
             </Card>

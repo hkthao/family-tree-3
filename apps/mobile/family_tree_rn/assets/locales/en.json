@@ -122,6 +122,8 @@
   "member.gender": "Gender",
   "member.birthDeathYears": "Birth/Death Years",
   "member.occupation": "Occupation",
-  "member.parents": "Parents",
-  "member.spouse": "Spouse"
+  "member.father": "Father",
+  "member.mother": "Mother",
+  "member.wife": "Wife",
+  "member.husband": "Husband"
 }
