@@ -1,6 +1,6 @@
-using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
+using backend.Application.Events.Queries.GetPublicEventById;
 using backend.Application.Families;
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.ExportImport; // New using statement
@@ -61,7 +61,9 @@ public class MappingProfile : Profile
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
         CreateMap<Event, EventDto>()
-            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Name)) // Map Name to Title
+            .ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.Type.ToString())) // Map Type to EventType
+            .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()
             .ForMember(dest => dest.SourceMember, opt => opt.MapFrom(src => src.SourceMember))
