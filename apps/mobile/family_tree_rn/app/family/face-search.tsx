@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Image, Alert } from 'react-native';
 import { Text, useTheme, Button } from 'react-native-paper';
-import { Svg, Rect, Text as SvgText } from 'react-native-svg';
+import { Svg, Rect, Text as SvgText, G } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useCameraPermissions } from 'expo-camera';
 import { detectFaces } from '@/api/publicApiClient';
 import type { DetectedFaceDto } from '@/types/public.d';
+import { SPACING_MEDIUM } from '@/constants/dimensions';
+import { useRouter } from 'expo-router';
 export default function FamilyFaceSearchScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
+  const router = useRouter();
   // const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
+
   const [image, setImage] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
   const [containerDimensions, setContainerDimensions] = useState<{ width: number; height: number } | null>(null);
@@ -107,18 +111,14 @@ export default function FamilyFaceSearchScreen() {
       flex: 1,
       backgroundColor: theme.colors.background,
       alignItems: 'center',
-      justifyContent: 'center',
-      padding: 20,
+      padding: SPACING_MEDIUM,
     },
     imageContainer: {
-      marginTop: 20,
       width: '100%', // Take full width
       aspectRatio: 4 / 3, // Maintain aspect ratio
       borderColor: theme.colors.outline,
-      borderWidth: 1,
+      borderWidth: 0.5,
       borderRadius: theme.roundness,
-      justifyContent: 'center',
-      alignItems: 'center',
       position: 'relative', // For absolute positioning of bounding boxes
     },
     image: {
@@ -126,31 +126,14 @@ export default function FamilyFaceSearchScreen() {
       height: '100%',
       resizeMode: 'contain',
     },
-    boundingBox: {
-      position: 'absolute',
-      borderColor: 'red', // Changed to a very distinct color
-      borderWidth: 2, // Increased border width
-    },
     buttonContainer: {
       flexDirection: 'row',
-      marginTop: 20,
-      gap: 10,
-    },
-    text: {
-      marginBottom: 10,
+      gap: SPACING_MEDIUM,
+      marginTop: SPACING_MEDIUM
     },
   });
   return (
     <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={pickImage} loading={loading} disabled={loading}>
-          {t('faceSearch.pickImage')}
-        </Button>
-        <Button mode="contained" onPress={takePhoto} loading={loading} disabled={loading}>
-          {t('faceSearch.takePhoto')}
-        </Button>
-      </View>
-      {loading && <Text>{t('common.loading')}</Text>}
       {image && imageDimensions && (
         <View
           style={styles.imageContainer}
@@ -223,7 +206,10 @@ export default function FamilyFaceSearchScreen() {
                 };
 
                 return (
-                  <React.Fragment key={index}>
+                  <G
+                    key={index}
+                    onPress={() => router.push(`/member/${face.memberId}`)}
+                  >
                     <Rect
                       x={roundedScaledBox.x}
                       y={roundedScaledBox.y}
@@ -253,14 +239,25 @@ export default function FamilyFaceSearchScreen() {
                     >
                       {face.memberName}
                     </SvgText>
-                  </React.Fragment>
+                  </G>
                 );
               })}
             </Svg>
           )}
         </View>
       )}
-      {detectedFaces.length > 0 && <Text>{t('faceSearch.facesDetected', { count: detectedFaces.length })}</Text>}
+
+      {detectedFaces.length > 0 && <Text style={{ marginTop: SPACING_MEDIUM }}>{t('faceSearch.facesDetected', { count: detectedFaces.length })}</Text>}
+
+      <View style={styles.buttonContainer}>
+        <Button mode="contained" onPress={pickImage} loading={loading} disabled={loading} icon="image-multiple" style={{ borderRadius: theme.roundness }}>
+          {t('faceSearch.pickImage')}
+        </Button>
+        <Button
+          mode="contained" onPress={takePhoto} loading={loading} disabled={loading} icon="camera" style={{ borderRadius: theme.roundness }}>
+          {t('faceSearch.takePhoto')}
+        </Button>
+      </View>
     </View>
   );
 }
