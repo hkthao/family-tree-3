@@ -192,7 +192,6 @@ export default function FamilyEventsScreen() {
           const date = new Date(section.title);
           const month = (date.getMonth() + 1).toString().padStart(2, '0'); // MM format
           const dayName = getDayName(section.title);
-
           return (
             <View key={section.title} style={[styles.sectionRow]}>
               <View style={styles.sectionLeftColumn}>
@@ -215,18 +214,6 @@ export default function FamilyEventsScreen() {
     );
   }, [theme.colors, styles]);
 
-  const agendaRenderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
-    return <AgendaItem reservation={reservation as EventItem} isFirst={isFirst} />;
-  }, []); // No dependencies needed as AgendaItem handles its own
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator animating size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
   if (error) {
     return (
       <View style={styles.container}>
@@ -244,7 +231,6 @@ export default function FamilyEventsScreen() {
       items={items}
       loadItemsForMonth={loadItems}
       selected={new Date().toISOString().split('T')[0]} // Set selected to today's date
-      renderItem={agendaRenderItem} // Use the new renderItem
       renderEmptyDate={renderEmptyDate}
       rowHasChanged={rowHasChanged}
       showClosingKnob={true}
