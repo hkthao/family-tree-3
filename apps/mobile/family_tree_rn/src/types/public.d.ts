@@ -181,11 +181,26 @@ export interface RelationshipListDto {
 }
 
 export enum EventType {
-  Birth = "Birth",
-  Death = "Death",
-  Marriage = "Marriage",
-  Anniversary = "Anniversary",
-  Other = "Other",
+   /// <summary>
+    /// Sự kiện sinh.
+    /// </summary>
+    Birth = 0,
+    /// <summary>
+    /// Sự kiện kết hôn.
+    /// </summary>
+    Marriage = 1,
+    /// <summary>
+    /// Sự kiện qua đời.
+    /// </summary>
+    Death = 2,
+    /// <summary>
+    /// Sự kiện kỷ niệm.
+    /// </summary>
+    Anniversary = 3,
+    /// <summary>
+    /// Các loại sự kiện khác.
+    /// </summary>
+    Other = 4
 }
 
 export interface EventDto extends BaseAuditableDto {
@@ -196,7 +211,7 @@ export interface EventDto extends BaseAuditableDto {
   startDate: string; // DateTime in C# maps to string in TypeScript
   endDate?: string; // DateTime in C# maps to string in TypeScript
   location?: string;
-  eventType: EventType;
+  type: EventType;
   relatedMembers: string[]; // Guid in C# maps to string in TypeScript
 }
 
@@ -204,7 +219,7 @@ export interface GetEventsQuery {
   familyId?: string;
   startDate?: string; // DateTime in C# maps to string in TypeScript
   endDate?: string; // DateTime in C# maps to string in TypeScript
-  eventType?: EventType;
+  type?: EventType;
   relatedMemberId?: string;
 }
 
@@ -213,7 +228,7 @@ export interface SearchPublicEventsQuery {
   searchTerm?: string;
   startDate?: string; // DateTime in C# maps to string in TypeScript
   endDate?: string; // DateTime in C# maps to string in TypeScript
-  eventType?: EventType;
+  type?: EventType;
   relatedMemberId?: string;
   page?: number;
   itemsPerPage?: number;

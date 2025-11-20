@@ -18,9 +18,9 @@ public enum EventType
     /// </summary>
     Death,
     /// <summary>
-    /// Sự kiện di cư.
+    /// Sự kiện kỷ niệm.
     /// </summary>
-    Migration,
+    Anniversary,
     /// <summary>
     /// Các loại sự kiện khác.
     /// </summary>

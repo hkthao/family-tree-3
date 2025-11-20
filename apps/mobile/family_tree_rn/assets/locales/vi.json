@@ -174,5 +174,12 @@
   "eventDetail.endDate": "Ngày kết thúc",
   "eventDetail.location": "Địa điểm",
   "eventDetail.relatedMembers": "Thành viên liên quan",
-  "eventDetail.noTitle": "Không có tiêu đề"
+  "eventDetail.noTitle": "Không có tiêu đề",
+  "eventType": {
+    "birth": "Sinh",
+    "death": "Mất",
+    "marriage": "Kết hôn",
+    "anniversary": "Kỷ niệm",
+    "other": "Khác"
+  }
 }

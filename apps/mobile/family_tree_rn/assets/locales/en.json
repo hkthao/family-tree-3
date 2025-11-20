@@ -172,5 +172,12 @@
   "eventDetail.endDate": "End Date",
   "eventDetail.location": "Location",
   "eventDetail.relatedMembers": "Related Members",
-  "eventDetail.noTitle": "No Title"
+  "eventDetail.noTitle": "No Title",
+  "eventType": {
+    "birth": "Birth",
+    "death": "Death",
+    "marriage": "Marriage",
+    "anniversary": "Anniversary",
+    "other": "Other"
+  }
 }

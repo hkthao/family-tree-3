@@ -7,13 +7,15 @@ import { useTranslation } from 'react-i18next';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import AgendaItem from '@/components/events/AgendaItem';
 import { useFamilyStore } from '@/stores/useFamilyStore';
-import type { EventDto } from '@/types/public.d';
+import type { EventDto, EventType } from '@/types/public.d';
+import { debounce } from '@/utils/debounce';
 
 interface EventItem extends AgendaEntry {
   id: string;
   name: string;
   height: number;
   day: string;
+  type: EventType;
 }
 
 export default function FamilyEventsScreen() {
@@ -108,7 +110,7 @@ export default function FamilyEventsScreen() {
     return new Intl.DateTimeFormat('vi-VN', options).format(date);
   };
 
-  const loadItems = useCallback(async (day: DateData) => {
+  const loadItems = useMemo(() => debounce(async (day: DateData) => {
     if (!currentFamilyId) {
       return;
     }
@@ -121,7 +123,14 @@ export default function FamilyEventsScreen() {
     const startDate = '2000-01-01'//timeToString(day.timestamp);
     const endDate = timeToString(day.timestamp + (30 * 24 * 60 * 60 * 1000)); // Load for a month
 
-    const fetchedPaginatedEvents = await fetchEvents({ familyId: currentFamilyId, startDate, endDate, page: 1, itemsPerPage: 100 });
+    const fetchedPaginatedEvents = await fetchEvents({ 
+      familyId: currentFamilyId, 
+      startDate, 
+      endDate, 
+      page: 1, 
+      itemsPerPage: 100,
+      sortBy :"startDate"
+    });
 
     if (fetchedPaginatedEvents) {
       setLoadedMonths(prev => new Set(prev).add(monthString)); // Mark month as loaded
@@ -141,12 +150,13 @@ export default function FamilyEventsScreen() {
             name: event.name || t('eventDetail.noTitle'),
             height: 80, // Fixed height for now, can be dynamic
             day: eventDate,
+            type: event.type,
           } as EventItem);
         }
       });
       return mergedItems;
     });
-  }, [currentFamilyId, fetchEvents, t, loadedMonths]);
+  }, 300), [currentFamilyId, fetchEvents, t, loadedMonths]); // Debounce with 300ms delay
 
   const renderEmptyDate = useCallback(() => {
     return (
@@ -187,7 +197,7 @@ export default function FamilyEventsScreen() {
               <View style={styles.sectionRightColumn}>
                 {section.data.map((item: AgendaEntry, index: number) => (
                   <View key={item.day + item.name + index}>
-                    <AgendaItem reservation={item} isFirst={index === 0} />
+                    <AgendaItem reservation={item as EventItem} isFirst={index === 0} />
 
                     {index === section.data.length - 1 && section.data.length > 1 && <Divider style={{ margin: SPACING_MEDIUM }} />}
                   </View>
@@ -201,7 +211,7 @@ export default function FamilyEventsScreen() {
   }, [theme.colors, styles]);
 
   const agendaRenderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
-    return <AgendaItem reservation={reservation} isFirst={isFirst} />;
+    return <AgendaItem reservation={reservation as EventItem} isFirst={isFirst} />;
   }, []); // No dependencies needed as AgendaItem handles its own
 
   if (loading) {

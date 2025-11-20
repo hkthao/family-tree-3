@@ -142,14 +142,14 @@ export default function EventDetailsScreen() {
     <View style={styles.container}>
       <Appbar.Header style={styles.appbar}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={event.title || t('eventDetail.title')} />
+        <Appbar.Content title={event.name || t('eventDetail.title')} />
       </Appbar.Header>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* First Card: Key Event Information */}
         <Card style={styles.card}>
           <Card.Content style={styles.profileCardContent}>
             <Avatar.Icon icon="calendar-month" size={80} color={theme.colors.onPrimary}  />
-            <Text variant="headlineSmall" style={styles.titleText}>{event.title || t('common.not_available')}</Text>
+            <Text variant="headlineSmall" style={styles.titleText}>{event.name || t('common.not_available')}</Text>
             <Text variant="bodyMedium" >{event.description || t('common.not_available')}</Text>
             <View style={styles.chipsContainer}>
               <Chip icon="tag" compact={true} style={styles.chip}>{event.eventType || t('common.not_available')}</Chip>
