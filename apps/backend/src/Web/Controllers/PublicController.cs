@@ -10,6 +10,9 @@ using backend.Application.Families.Queries.GetFamilyById; // Added missing using
 using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
 using backend.Application.Relationships.Queries; // Add this using directive
 using backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId; // Add this using directive
+using backend.Application.Events.Queries.GetPublicEventById;
+using backend.Application.Events.Queries.SearchPublicEvents;
+using backend.Application.Events.Queries.GetPublicUpcomingEvents;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
@@ -88,5 +91,41 @@ public class PublicController(IMediator mediator) : ControllerBase
     {
         var result = await _mediator.Send(new GetPublicRelationshipsByFamilyIdQuery(familyId));
         return result.IsSuccess ? (ActionResult<List<RelationshipListDto>>)Ok(result.Value) : (ActionResult<List<RelationshipListDto>>)BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Lấy thông tin chi tiết của một sự kiện công khai theo ID.
+    /// </summary>
+    /// <param name="id">ID của sự kiện cần lấy.</param>
+    /// <returns>Thông tin chi tiết của sự kiện công khai.</returns>
+    [HttpGet("event/{id}")]
+    public async Task<ActionResult<EventDto>> GetPublicEventById(Guid id)
+    {
+        var result = await _mediator.Send(new GetPublicEventByIdQuery(id));
+        return result.IsSuccess ? (ActionResult<EventDto>)Ok(result.Value) : (ActionResult<EventDto>)NotFound(result.Error);
+    }
+
+    /// <summary>
+    /// Tìm kiếm các sự kiện công khai dựa trên các tiêu chí được cung cấp.
+    /// </summary>
+    /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
+    /// <returns>Một PaginatedList chứa danh sách các sự kiện công khai tìm được.</returns>
+    [HttpGet("events/search")]
+    public async Task<ActionResult<PaginatedList<EventDto>>> SearchPublicEvents([FromQuery] SearchPublicEventsQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? (ActionResult<PaginatedList<EventDto>>)Ok(result.Value) : (ActionResult<PaginatedList<EventDto>>)BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Lấy danh sách các sự kiện công khai sắp diễn ra.
+    /// </summary>
+    /// <param name="query">Đối tượng chứa các tiêu chí lọc (ví dụ: FamilyId, StartDate, EndDate).</param>
+    /// <returns>Danh sách các sự kiện công khai sắp diễn ra.</returns>
+    [HttpGet("events/upcoming")]
+    public async Task<ActionResult<List<EventDto>>> GetPublicUpcomingEvents([FromQuery] GetPublicUpcomingEventsQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? (ActionResult<List<EventDto>>)Ok(result.Value) : (ActionResult<List<EventDto>>)BadRequest(result.Error);
     }
 }
