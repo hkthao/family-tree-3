@@ -171,5 +171,6 @@
   "eventDetail.startDate": "Start Date",
   "eventDetail.endDate": "End Date",
   "eventDetail.location": "Location",
-  "eventDetail.relatedMembers": "Related Members"
+  "eventDetail.relatedMembers": "Related Members",
+  "eventDetail.noTitle": "No Title"
 }

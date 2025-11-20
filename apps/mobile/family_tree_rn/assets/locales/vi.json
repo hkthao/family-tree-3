@@ -173,5 +173,6 @@
   "eventDetail.startDate": "Ngày bắt đầu",
   "eventDetail.endDate": "Ngày kết thúc",
   "eventDetail.location": "Địa điểm",
-  "eventDetail.relatedMembers": "Thành viên liên quan"
+  "eventDetail.relatedMembers": "Thành viên liên quan",
+  "eventDetail.noTitle": "Không có tiêu đề"
 }

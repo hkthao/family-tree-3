@@ -120,7 +120,7 @@ export default function FamilyEventsScreen() {
       return; // Already loaded for this month
     }
 
-    const startDate = timeToString(day.timestamp);
+    const startDate = '2000-01-01'//timeToString(day.timestamp);
     const endDate = timeToString(day.timestamp + (30 * 24 * 60 * 60 * 1000)); // Load for a month
 
     const fetchedPaginatedEvents = await fetchEvents({ familyId: currentFamilyId, startDate, endDate, page: 1, itemsPerPage: 100 });
