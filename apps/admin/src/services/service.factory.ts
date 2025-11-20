@@ -1,11 +1,17 @@
 import type { IFamilyService } from './family/family.service.interface';
 import { ApiFamilyService } from './family/api.family.service';
+import type { IPublicFamilyService } from './family/public.service.interface'; // New import
+import { PublicApiFamilyService } from './family/publicApi.family.service'; // New import
 import type { IMemberService } from './member/member.service.interface';
 import { ApiMemberService } from './member/api.member.service';
+import type { IPublicMemberService } from './member/public.service.interface'; // New import
+import { PublicApiMemberService } from './member/publicApi.member.service'; // New import
 import type { IEventService } from './event/event.service.interface';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
+import type { IPublicRelationshipService } from './relationship/public.service.interface';
+import { PublicApiRelationshipService } from './relationship/publicApi.relationship.service';
 import type { ICurrentUserProfileService } from './user-profile/user-profile.service.interface';
 import { UserProfileApiService } from './user-profile/api.user-profile.service';
 import type { ICurrentUserActivityService } from './user-activity/user-activity.service.interface';
@@ -36,9 +42,12 @@ export type ServiceMode = 'real' | 'test';
 
 export interface AppServices {
   family: IFamilyService;
+  publicFamily: IPublicFamilyService; // New service
   member: IMemberService; 
+  publicMember: IPublicMemberService; // New service
   event: IEventService;
   relationship: IRelationshipService;
+  publicRelationship: IPublicRelationshipService; // New service
   userProfile: ICurrentUserProfileService;
   userActivity: ICurrentUserActivityService;
   dashboard: IDashboardService;
@@ -57,16 +66,24 @@ export interface AppServices {
 import apiClient from '@/plugins/axios';
 
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
-  console.log(`Creating services in ${mode} mode.`);
+  
   return {
     family:
       mode === 'real'
         ? new ApiFamilyService(apiClient)
         : testServices?.family || new ApiFamilyService(apiClient), // Use testServices.family if provided
+    publicFamily: // New service registration
+      mode === 'real'
+        ? new PublicApiFamilyService(apiClient)
+        : testServices?.publicFamily || new PublicApiFamilyService(apiClient),
     member:
       mode === 'real'
         ? new ApiMemberService(apiClient)
         : testServices?.member || new ApiMemberService(apiClient), // Use testServices.member if provided
+    publicMember: // New service registration
+      mode === 'real'
+        ? new PublicApiMemberService(apiClient)
+        : testServices?.publicMember || new PublicApiMemberService(apiClient),
     event:
       mode === 'real'
         ? new ApiEventService(apiClient)
@@ -75,6 +92,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiRelationshipService(apiClient)
         : testServices?.relationship || new ApiRelationshipService(apiClient),
+    publicRelationship: // New service registration
+      mode === 'real'
+        ? new PublicApiRelationshipService(apiClient)
+        : testServices?.publicRelationship || new PublicApiRelationshipService(apiClient),
     userProfile:
       mode === 'real'
         ? new UserProfileApiService(apiClient)

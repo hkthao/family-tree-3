@@ -9,7 +9,7 @@ public class RelationshipByFamilyIdSpecification : Specification<Relationship>
     {
         if (familyId.HasValue)
         {
-            Query.Where(r => r.SourceMember.FamilyId == familyId.Value);
+            Query.Where(r => r.FamilyId == familyId.Value);
         }
     }
 }

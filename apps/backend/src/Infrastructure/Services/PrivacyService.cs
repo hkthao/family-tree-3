@@ -17,12 +17,65 @@ public class PrivacyService : IPrivacyService
     private readonly IAuthorizationService _authorizationService;
     private readonly IMapper _mapper;
 
+    // Cache PropertyInfo objects to improve performance
+    private static readonly Dictionary<Type, Dictionary<string, PropertyInfo?>> _propertyCache = new();
+
     public PrivacyService(IApplicationDbContext context, ICurrentUser currentUserService, IAuthorizationService authorizationService, IMapper mapper)
     {
         _context = context;
         _currentUserService = currentUserService;
         _authorizationService = authorizationService;
         _mapper = mapper;
+    }
+
+    /// <summary>
+    /// Phương thức trợ giúp chung để lọc các thuộc tính của DTO.
+    /// </summary>
+    /// <typeparam name="T">Loại DTO.</typeparam>
+    /// <param name="sourceDto">DTO nguồn.</param>
+    /// <param name="allowedProps">Danh sách các tên thuộc tính được phép (từ cấu hình quyền riêng tư).</param>
+    /// <param name="alwaysProps">Danh sách các tên thuộc tính luôn được bao gồm.</param>
+    /// <returns>Một thể hiện mới của DTO với các thuộc tính đã được lọc.</returns>
+    private T FilterDto<T>(T sourceDto, IEnumerable<string> allowedProps, IEnumerable<string> alwaysProps) where T : new()
+    {
+        var filteredDto = new T();
+        var sourceType = typeof(T);
+
+        // Lấy hoặc thêm các thuộc tính của loại vào bộ nhớ đệm
+        if (!_propertyCache.TryGetValue(sourceType, out var typeProperties))
+        {
+            typeProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                       .ToDictionary(p => p.Name, p => (PropertyInfo?)p, StringComparer.OrdinalIgnoreCase);
+            _propertyCache.TryAdd(sourceType, typeProperties);
+        }
+
+        // Luôn bao gồm các thuộc tính thiết yếu hoặc nhận dạng
+        foreach (var propName in alwaysProps)
+        {
+            if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
+            {
+                var value = propertyInfo.GetValue(sourceDto);
+                propertyInfo.SetValue(filteredDto, value);
+            }
+        }
+
+        // Sao chép động các thuộc tính được đánh dấu là công khai
+        foreach (var propName in allowedProps)
+        {
+            // Tránh sao chép lại các thuộc tính đã được sao chép trong alwaysProps
+            if (alwaysProps.Contains(propName, StringComparer.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
+            {
+                var value = propertyInfo.GetValue(sourceDto);
+                propertyInfo.SetValue(filteredDto, value);
+            }
+        }
+
+        return filteredDto;
     }
 
     public async Task<MemberDto> ApplyPrivacyFilter(MemberDto memberDto, Guid familyId, CancellationToken cancellationToken)
@@ -33,38 +86,33 @@ public class PrivacyService : IPrivacyService
             return memberDto;
         }
 
-        var privacyConfig = await _context.PrivacyConfigurations
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
         if (privacyConfig == null)
         {
-            // If no config, all properties are public by default
-            return memberDto;
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberProperties(new List<string>
+            {
+                "LastName",
+                "FirstName",
+                "Nickname",
+                "Gender",
+                "DateOfBirth",
+                "DateOfDeath",
+                "PlaceOfBirth",
+                "PlaceOfDeath",
+                "Occupation",
+                "Biography",
+            });
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
-        var filteredMemberDto = new MemberDto();
+        var alwaysIncludeProps = new List<string> { "Id", "FamilyId", "Code", "IsRoot", "AvatarUrl" };
 
-        // Always include Id, FamilyId, Code, IsRoot, AvatarUrl as they are essential or visual identifiers
-        filteredMemberDto.Id = memberDto.Id;
-        filteredMemberDto.FamilyId = memberDto.FamilyId;
-        filteredMemberDto.Code = memberDto.Code;
-        filteredMemberDto.IsRoot = memberDto.IsRoot;
-        filteredMemberDto.AvatarUrl = memberDto.AvatarUrl; // AvatarUrl is often public for display
-
-        // Dynamically copy properties that are marked as public
-        foreach (var propName in publicProperties)
-        {
-            var memberDtoProperty = typeof(MemberDto).GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            if (memberDtoProperty != null)
-            {
-                var value = memberDtoProperty.GetValue(memberDto);
-                memberDtoProperty.SetValue(filteredMemberDto, value);
-            }
-        }
-
-        return filteredMemberDto;
+        return FilterDto(memberDto, publicProperties, alwaysIncludeProps);
     }
 
     public async Task<List<MemberDto>> ApplyPrivacyFilter(List<MemberDto> memberDtos, Guid familyId, CancellationToken cancellationToken)
@@ -85,41 +133,42 @@ public class PrivacyService : IPrivacyService
             return memberDetailDto;
         }
 
-        var privacyConfig = await _context.PrivacyConfigurations
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
         if (privacyConfig == null)
         {
-            // If no config, all properties are public by default
-            return memberDetailDto;
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberProperties(new List<string>
+            {
+                "LastName",
+                "FirstName",
+                "Nickname",
+                "Gender",
+                "DateOfBirth",
+                "DateOfDeath",
+                "PlaceOfBirth",
+                "PlaceOfDeath",
+                "Occupation",
+                "Biography",
+                "FatherFullName",
+                "MotherFullName",
+                "HusbandFullName",
+                "WifeFullName"
+            });
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
-        var filteredMemberDetailDto = new MemberDetailDto();
-
-        // Always include Id, FamilyId, IsRoot, AvatarUrl, and relationships
-        filteredMemberDetailDto.Id = memberDetailDto.Id;
-        filteredMemberDetailDto.FamilyId = memberDetailDto.FamilyId;
-        filteredMemberDetailDto.IsRoot = memberDetailDto.IsRoot;
-        filteredMemberDetailDto.AvatarUrl = memberDetailDto.AvatarUrl;
-        filteredMemberDetailDto.SourceRelationships = memberDetailDto.SourceRelationships;
-        filteredMemberDetailDto.TargetRelationships = memberDetailDto.TargetRelationships;
-
-        // Dynamically copy properties that are marked as public
-        foreach (var propName in publicProperties)
+        var alwaysIncludeProps = new List<string>
         {
-            var memberDetailDtoProperty = typeof(MemberDetailDto).GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            if (memberDetailDtoProperty != null)
-            {
-                var value = memberDetailDtoProperty.GetValue(memberDetailDto);
-                memberDetailDtoProperty.SetValue(filteredMemberDetailDto, value);
-            }
-        }
+            "Id", "FamilyId", "IsRoot", "AvatarUrl",
+            "SourceRelationships", "TargetRelationships"
+        };
 
-        return filteredMemberDetailDto;
+        return FilterDto(memberDetailDto, publicProperties, alwaysIncludeProps);
     }
-
     public async Task<MemberListDto> ApplyPrivacyFilter(MemberListDto memberListDto, Guid familyId, CancellationToken cancellationToken)
     {
         // Admin always sees full data
@@ -128,52 +177,41 @@ public class PrivacyService : IPrivacyService
             return memberListDto;
         }
 
-        var privacyConfig = await _context.PrivacyConfigurations
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
         if (privacyConfig == null)
         {
-            // If no config, all properties are public by default
-            return memberListDto;
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberProperties(new List<string>
+            {
+                "LastName",
+                "FirstName",
+                "Nickname",
+                "Gender",
+                "DateOfBirth",
+                "DateOfDeath",
+                "PlaceOfBirth",
+                "PlaceOfDeath",
+                "Occupation",
+                "Biography",
+                "FatherFullName",
+                "MotherFullName",
+                "HusbandFullName",
+                "WifeFullName"
+            });
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
-        var filteredMemberListDto = new MemberListDto();
-
-        // Always include Id, Code, IsRoot, AvatarUrl, FamilyId, FamilyName, and relationship full names/avatars/genders
-        filteredMemberListDto.Id = memberListDto.Id;
-        filteredMemberListDto.Code = memberListDto.Code;
-        filteredMemberListDto.IsRoot = memberListDto.IsRoot;
-        filteredMemberListDto.AvatarUrl = memberListDto.AvatarUrl;
-        filteredMemberListDto.FamilyId = memberListDto.FamilyId;
-        filteredMemberListDto.FamilyName = memberListDto.FamilyName;
-
-        filteredMemberListDto.FatherFullName = memberListDto.FatherFullName;
-        filteredMemberListDto.FatherAvatarUrl = memberListDto.FatherAvatarUrl;
-        filteredMemberListDto.FatherGender = memberListDto.FatherGender;
-        filteredMemberListDto.MotherFullName = memberListDto.MotherFullName;
-        filteredMemberListDto.MotherAvatarUrl = memberListDto.MotherAvatarUrl;
-        filteredMemberListDto.MotherGender = memberListDto.MotherGender;
-        filteredMemberListDto.HusbandFullName = memberListDto.HusbandFullName;
-        filteredMemberListDto.HusbandAvatarUrl = memberListDto.HusbandAvatarUrl;
-        filteredMemberListDto.HusbandGender = memberListDto.HusbandGender;
-        filteredMemberListDto.WifeFullName = memberListDto.WifeFullName;
-        filteredMemberListDto.WifeAvatarUrl = memberListDto.WifeAvatarUrl;
-        filteredMemberListDto.WifeGender = memberListDto.WifeGender;
-        // BirthDeathYears is read-only, so we don't set it here. It will be derived from DateOfBirth/DateOfDeath if they are public.
-
-
-        // Dynamically copy properties that are marked as public
-        foreach (var propName in publicProperties)
+        var alwaysIncludeProps = new List<string>
         {
-            var memberListDtoProperty = typeof(MemberListDto).GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            if (memberListDtoProperty != null)
-            {
-                var value = memberListDtoProperty.GetValue(memberListDto);
-                memberListDtoProperty.SetValue(filteredMemberListDto, value);
-            }
-        }
+            "Id", "Code", "IsRoot", "AvatarUrl", "FamilyId", "FamilyName",
+            "FatherId", "MotherId", "HusbandId", "WifeId"
+        };
+
+        var filteredMemberListDto = FilterDto(memberListDto, publicProperties, alwaysIncludeProps);
 
         // Special handling for FullName if FirstName or LastName are private
         if (!publicProperties.Contains(nameof(MemberListDto.FirstName)) || !publicProperties.Contains(nameof(MemberListDto.LastName)))
@@ -182,7 +220,6 @@ public class PrivacyService : IPrivacyService
             filteredMemberListDto.LastName = string.Empty;
             // FullName is derived, so it will be empty if FirstName/LastName are empty
         }
-
 
         return filteredMemberListDto;
     }

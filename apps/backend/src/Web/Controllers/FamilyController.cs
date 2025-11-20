@@ -7,6 +7,7 @@ using backend.Application.Families.Commands.UpdateFamily;
 using backend.Application.Families.Queries.GetFamiliesByIds;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.Families.Queries.SearchFamilies;
+using backend.Application.Members.Commands.UpdateDenormalizedFields; // Add this using directive
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -121,5 +122,17 @@ public class FamilyController(IMediator mediator) : ControllerBase
         var guids = ids.Split(',').Select(Guid.Parse).ToList();
         var result = await _mediator.Send(new GetFamiliesByIdsQuery(guids));
         return result.IsSuccess ? (ActionResult<List<FamilyDto>>)Ok(result.Value) : (ActionResult<List<FamilyDto>>)BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Cập nhật các trường mối quan hệ đã chuẩn hóa cho tất cả các thành viên trong một gia đình cụ thể.
+    /// </summary>
+    /// <param name="familyId">ID của gia đình cần cập nhật.</param>
+    /// <returns>Kết quả của hoạt động cập nhật.</returns>
+    [HttpPost("{familyId}/update-denormalized-fields")]
+    public async Task<ActionResult> UpdateDenormalizedFields([FromRoute]Guid familyId)
+    {
+        var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
+        return result.IsSuccess ? Ok("Denormalized relationship fields updated successfully for the family.") : BadRequest(result.Error);
     }
 }

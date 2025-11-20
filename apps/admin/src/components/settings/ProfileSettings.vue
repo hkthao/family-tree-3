@@ -95,7 +95,7 @@ const saveProfile = async () => {
   loading.value = true;
   try {
     const result = await v$.value.$validate();
-    console.log(v$.value);
+  
 
     if (result && userProfileStore.userProfile) {
       const updatedProfile: UserProfile = {

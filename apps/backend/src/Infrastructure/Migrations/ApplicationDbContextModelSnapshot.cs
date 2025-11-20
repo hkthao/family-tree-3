@@ -476,6 +476,18 @@ namespace backend.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("family_id");
 
+                    b.Property<string>("FatherAvatarUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("father_avatar_url");
+
+                    b.Property<string>("FatherFullName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("father_full_name");
+
+                    b.Property<Guid?>("FatherId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("father_id");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -486,6 +498,18 @@ namespace backend.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("gender");
+
+                    b.Property<string>("HusbandAvatarUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("husband_avatar_url");
+
+                    b.Property<string>("HusbandFullName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("husband_full_name");
+
+                    b.Property<Guid?>("HusbandId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("husband_id");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)")
@@ -508,6 +532,18 @@ namespace backend.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("last_name");
+
+                    b.Property<string>("MotherAvatarUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("mother_avatar_url");
+
+                    b.Property<string>("MotherFullName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("mother_full_name");
+
+                    b.Property<Guid?>("MotherId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("mother_id");
 
                     b.Property<string>("Nickname")
                         .HasMaxLength(100)
@@ -537,6 +573,18 @@ namespace backend.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)")
                         .HasColumnName("place_of_death");
+
+                    b.Property<string>("WifeAvatarUrl")
+                        .HasColumnType("longtext")
+                        .HasColumnName("wife_avatar_url");
+
+                    b.Property<string>("WifeFullName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("wife_full_name");
+
+                    b.Property<Guid?>("WifeId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("wife_id");
 
                     b.HasKey("Id")
                         .HasName("pk_members");

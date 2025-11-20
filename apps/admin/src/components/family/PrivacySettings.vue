@@ -70,7 +70,10 @@ const memberProperties = computed(() => [
   { text: t('member.form.address'), value: 'Address' },
   { text: t('member.form.occupation'), value: 'Occupation' },
   { text: t('member.form.biography'), value: 'Biography' },
-  { text: t('member.form.order'), value: 'Order' },
+  { text: t('member.form.fatherFullName'), value: 'FatherFullName' },
+  { text: t('member.form.motherFullName'), value: 'MotherFullName' },
+  { text: t('member.form.husbandFullName'), value: 'HusbandFullName' },
+  { text: t('member.form.wifeFullName'), value: 'WifeFullName' },
 ]);
 
 const fetchPrivacySettings = async () => {

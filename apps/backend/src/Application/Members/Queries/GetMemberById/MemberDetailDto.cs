@@ -18,6 +18,9 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Gender { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Occupation { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? Address { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
     public bool IsRoot { get; set; }
@@ -26,10 +29,18 @@ public class MemberDetailDto : BaseAuditableDto
         (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +
         (DateOfDeath.HasValue ? DateOfDeath.Value.Year.ToString() : "")
     ;
-    public Guid? FatherId => TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father)?.SourceMemberId;
-    public Guid? MotherId => TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother)?.SourceMemberId;
-    public Guid? HusbandId => SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband)?.TargetMemberId;
-    public Guid? WifeId => SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife)?.TargetMemberId;
+    public string? FatherFullName { get; set; }
+    public string? MotherFullName { get; set; }
+    public string? HusbandFullName { get; set; }
+    public string? WifeFullName { get; set; }
+    public string? FatherAvatarUrl { get; set; }
+    public string? MotherAvatarUrl { get; set; }
+    public string? HusbandAvatarUrl { get; set; }
+    public string? WifeAvatarUrl { get; set; }
+    public Guid? FatherId { get; set; }
+    public Guid? MotherId { get; set; }
+    public Guid? HusbandId { get; set; }
+    public Guid? WifeId { get; set; }
     public ICollection<RelationshipDto> SourceRelationships { get; set; } = [];
     public ICollection<RelationshipDto> TargetRelationships { get; set; } = [];
 }

@@ -66,6 +66,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 
         services.AddScoped<IPrivacyService, PrivacyService>();
+        services.AddScoped<IMemberRelationshipService, MemberRelationshipService>();
 
         // Register Face API Service and configure its HttpClient
         services.AddScoped<IFaceApiService, FaceApiService>(serviceProvider =>

@@ -6,11 +6,12 @@ using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.CreateMember;
 
-public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberCommandHandler> localizer) : IRequestHandler<CreateMemberCommand, Result<Guid>>
+public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<CreateMemberCommandHandler> localizer, IMemberRelationshipService memberRelationshipService) : IRequestHandler<CreateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IStringLocalizer<CreateMemberCommandHandler> _localizer = localizer;
+    private readonly IMemberRelationshipService _memberRelationshipService = memberRelationshipService;
 
     public async Task<Result<Guid>> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
     {
@@ -119,6 +120,11 @@ public class CreateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
             deathEvent.AddEventMember(member.Id);
             _context.Events.Add(deathEvent);
         }
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        // Update denormalized relationship fields after all relationships are established
+        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(member, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 

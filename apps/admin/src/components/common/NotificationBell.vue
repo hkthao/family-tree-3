@@ -29,7 +29,7 @@ const updateUnReadCount = async (novu: Novu) => {
   const { data } = await novu.notifications.count({
     read: false
   });
-  console.log("updateCount", data);
+
   if (data)
     unseenCount.value = data.count;
   else

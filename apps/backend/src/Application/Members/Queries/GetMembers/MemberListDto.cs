@@ -18,6 +18,7 @@ public class MemberListDto : BaseAuditableDto
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
     public string? Gender { get; set; }
+    public string? Occupation { get; set; }
 
     public string? FatherFullName { get; set; }
     public string? FatherAvatarUrl { get; set; }
@@ -27,6 +28,11 @@ public class MemberListDto : BaseAuditableDto
     public string? HusbandAvatarUrl { get; set; }
     public string? WifeFullName { get; set; }
     public string? WifeAvatarUrl { get; set; }
+
+    public Guid? FatherId { get; set; }
+    public Guid? MotherId { get; set; }
+    public Guid? HusbandId { get; set; }
+    public Guid? WifeId { get; set; }
 
     public string? FatherGender { get; set; }
     public string? MotherGender { get; set; }
