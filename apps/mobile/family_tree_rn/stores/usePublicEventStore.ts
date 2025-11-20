@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { getPublicEventById, searchPublicEvents, getPublicUpcomingEvents } from '../src/api/publicApiClient';
-import type { EventDto, PaginatedList, SearchPublicEventsQuery, GetPublicUpcomingEventsQuery } from '../src/types/public.d';
+import { getPublicEventById, searchPublicEvents, getPublicUpcomingEvents } from '@/api/publicApiClient';
+import type { EventDto, PaginatedList, SearchPublicEventsQuery, GetPublicUpcomingEventsQuery } from '@/types/public.d';
 
 interface EventState {
   event: EventDto | null;

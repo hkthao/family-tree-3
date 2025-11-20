@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
 
 export default function FamilyFaceSearchScreen() {
   const { t } = useTranslation();

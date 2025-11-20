@@ -1,6 +1,6 @@
 import { ScrollView, StyleSheet, View } from 'react-native'; // Import View
 import { useTranslation } from 'react-i18next'; // Import useTranslation
-import '../../src/i18n'; // Import i18n configuration
+import '@/i18n'; // Import i18n configuration
 import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
 import { Banner } from '@/components/home/Banner'; // Import Banner component
 import { FeaturesSection } from '@/components/home/FeaturesSection'; // Import FeaturesSection component

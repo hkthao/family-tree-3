@@ -1,8 +1,8 @@
 // apps/mobile/family_tree_rn/stores/usePublicRelationshipStore.ts
 
 import { create } from 'zustand';
-import { getPublicRelationshipsByFamilyId } from '../src/api/publicApiClient';
-import type { RelationshipListDto } from '../src/types/public.d';
+import { getPublicRelationshipsByFamilyId } from '@/api/publicApiClient';
+import type { RelationshipListDto } from '@/types/public.d';
 
 interface PublicRelationshipState {
   relationships: RelationshipListDto[];

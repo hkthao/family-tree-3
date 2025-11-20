@@ -1,10 +1,9 @@
 // apps/mobile/family_tree_rn/stores/usePublicMemberStore.ts
 
 import { create } from 'zustand';
-import { searchPublicMembers, getPublicMemberById } from '../src/api/publicApiClient';
-import type { MemberListDto, PaginatedList, SearchPublicMembersQuery, MemberDetailDto } from '../src/types/public.d';
+import { searchPublicMembers, getPublicMemberById } from '@/api/publicApiClient';
+import type { MemberListDto, SearchPublicMembersQuery, MemberDetailDto } from '@/types/public.d';
 
-const PAGE_SIZE = 10;
 
 interface PublicMemberState {
   member: MemberDetailDto | null; // Added for member details

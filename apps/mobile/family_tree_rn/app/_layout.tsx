@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } fro
 import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 import { PaperProvider, Portal } from 'react-native-paper';
-import { getPaperTheme } from '../constants/theme';
+import { getPaperTheme } from '@/constants/theme';
 import { ThemeProvider, useThemeContext } from '@/context/ThemeContext';
 
 export const unstable_settings = {

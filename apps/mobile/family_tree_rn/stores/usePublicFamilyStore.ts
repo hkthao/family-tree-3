@@ -4,8 +4,8 @@ import { create } from 'zustand';
 import {
   getPublicFamilyById,
   searchPublicFamilies,
-} from '../src/api/publicApiClient';
-import type { FamilyDetailDto, PaginatedList, FamilyListDto, SearchPublicFamiliesQuery } from '../src/types/public.d';
+} from '@/api/publicApiClient';
+import type { FamilyDetailDto, FamilyListDto } from '@/types/public.d';
 
 const PAGE_SIZE = 10; // Define PAGE_SIZE here
 

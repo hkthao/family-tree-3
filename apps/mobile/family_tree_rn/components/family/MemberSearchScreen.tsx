@@ -9,7 +9,7 @@ import {
 import { Text, Card, Avatar, IconButton as PaperIconButton, Searchbar, useTheme, Chip, Appbar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
-import { useFamilyStore } from '../../stores/useFamilyStore';
+import { useFamilyStore } from '@/stores/useFamilyStore';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicMemberStore } from '@/stores/usePublicMemberStore'; // Import usePublicMemberStore
 import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar

@@ -3,8 +3,8 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, useTheme, Avatar, ActivityIndicator, Card, List, Divider, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
-import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
-import { usePublicFamilyStore } from '../../stores/usePublicFamilyStore'; // Import usePublicFamilyStore
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
+import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore'; // Import usePublicFamilyStore
 import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
 import { FamilyRole } from '@/types/public.d'; // Import FamilyRole
 

@@ -5,7 +5,7 @@ import { Appbar, Text, useTheme, Card, Avatar, ActivityIndicator, Chip, List, Di
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicMemberStore } from '@/stores/usePublicMemberStore'; // Import usePublicMemberStore
-import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
 import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
 
 export default function MemberDetailsScreen() {
