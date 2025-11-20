@@ -97,6 +97,9 @@ export default function FamilyEventsScreen() {
       color: theme.colors.onErrorContainer,
       textAlign: 'center',
     },
+    container: {
+      flex: 1,
+    },
   }), [theme]);
 
   const timeToString = (time: number) => {
@@ -131,7 +134,7 @@ export default function FamilyEventsScreen() {
         name: event.title || t('eventDetail.noTitle'),
         height: 80, // Fixed height for now, can be dynamic
         day: eventDate,
-      });
+      } as EventItem);
     });
 
     setItems(newItems);
