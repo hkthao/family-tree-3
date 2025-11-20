@@ -26,7 +26,7 @@
           <ChipLookup
             v-if="event.relatedMembers && event.relatedMembers.length > 0"
             :model-value="event.relatedMembers"
-            :data-source="memberStore"
+            :data-source="memberLookupStore"
             display-expr="fullName"
             value-expr="id"
             image-expr="avatarUrl"
@@ -60,7 +60,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { formatDate } from '@/utils/dateUtils';
-import { useMemberStore } from '@/stores/member.store';
+import { useMemberLookupStore } from '@/stores/memberLookup.store';
 import { useEventStore } from '@/stores/event.store'; // Import event store
 import ChipLookup from '@/components/common/ChipLookup.vue';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
@@ -75,7 +75,7 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
-const memberStore = useMemberStore();
+const memberLookupStore = useMemberLookupStore();
 const eventStore = useEventStore(); // Initialize event store
 
 const { list } = storeToRefs(eventStore);

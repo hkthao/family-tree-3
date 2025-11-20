@@ -60,7 +60,7 @@
     <template #item.familyId="{ item }">
       <ChipLookup
         :model-value="item.familyId ?? undefined"
-        :data-source="familyStore"
+        :data-source="familyLookupStore"
         display-expr="name"
         value-expr="id"
         image-expr="avatarUrl"
@@ -71,7 +71,7 @@
     <template #item.relatedMembers="{ item }">
       <ChipLookup
         :model-value="item.relatedMembers || []"
-        :data-source="memberStore"
+        :data-source="memberLookupStore"
         display-expr="fullName"
         value-expr="id"
         image-expr="avatarUrl"
@@ -108,8 +108,8 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { useMemberStore } from '@/stores/member.store';
-import { useFamilyStore } from '@/stores/family.store';
+import { useMemberLookupStore } from '@/stores/memberLookup.store';
+import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import ChipLookup from '@/components/common/ChipLookup.vue';
 import { formatDate } from '@/utils/dateUtils';
@@ -132,8 +132,8 @@ const emit = defineEmits([
 ]);
 
 const { t } = useI18n();
-const memberStore = useMemberStore();
-const familyStore = useFamilyStore();
+const memberLookupStore = useMemberLookupStore();
+const familyLookupStore = useFamilyLookupStore();
 
 const searchQuery = ref(props.search);
 let debounceTimer: ReturnType<typeof setTimeout>;

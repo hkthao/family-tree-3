@@ -62,7 +62,7 @@
 
     <!-- Family column -->
     <template #item.family="{ item }">
-      <ChipLookup :modelValue="item.familyId" :data-source="familyStore" display-expr="name" value-expr="id"
+      <ChipLookup :modelValue="item.familyId" :data-source="familyLookupStore" display-expr="name" value-expr="id"
         imageExpr="avatarUrl" />
     </template>
 
@@ -114,7 +114,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Member } from '@/types';
 import type { DataTableHeader } from 'vuetify';
-import { useFamilyStore } from '@/stores/family.store';
+import { useFamilyLookupStore } from '@/stores/familyLookup.store';
 import { ChipLookup } from '@/components/common';
 import { MemberName } from '@/components/member';
 import { getGenderTitle } from '@/constants/genders';
@@ -123,7 +123,7 @@ import maleAvatar from '@/assets/images/male_avatar.png';
 import femaleAvatar from '@/assets/images/female_avatar.png';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 
-const familyStore = useFamilyStore();
+const familyLookupStore = useFamilyLookupStore();
 const { isAdmin, isFamilyManager } = useAuth();
 
 const getMemberAvatar = (member: Member) => {
