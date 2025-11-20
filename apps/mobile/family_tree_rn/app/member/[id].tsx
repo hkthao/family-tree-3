@@ -196,159 +196,129 @@ export default function MemberDetailsScreen() {
               <List.Section>
                 {/* Personal Information */}
                 <List.Subheader>{t('memberDetail.personalInfo')}</List.Subheader>
-                {member.lastName && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.lastName')}
-                      left={() => <List.Icon icon="account" />}
-                      right={() => <Chip compact={true}>{member.lastName}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.firstName && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.firstName')}
-                      left={() => <List.Icon icon="account" />}
-                      right={() => <Chip compact={true}>{member.firstName}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.nickname && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.nickname')}
-                      left={() => <List.Icon icon="tag" />}
-                      right={() => <Chip compact={true}>{member.nickname}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.dateOfBirth && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.dateOfBirth')}
-                      left={() => <List.Icon icon="calendar-account" />}
-                      right={() => <Chip compact={true}>{new Date(member.dateOfBirth ?? '').toLocaleDateString()}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.dateOfDeath && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.dateOfDeath')}
-                      left={() => <List.Icon icon="calendar-remove" />}
-                      right={() => <Chip compact={true}>{new Date(member.dateOfDeath ?? '').toLocaleDateString()}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.placeOfBirth && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.placeOfBirth')}
-                      left={() => <List.Icon icon="map-marker" />}
-                      right={() => <Chip compact={true}>{member.placeOfBirth}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.placeOfDeath && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.placeOfOfDeath')}
-                      left={() => <List.Icon icon="map-marker-off" />}
-                      right={() => <Chip compact={true}>{member.placeOfDeath}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.email && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.email')}
-                      left={() => <List.Icon icon="email" />}
-                      right={() => <Chip compact={true}>{member.email}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.phone && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.phone')}
-                      left={() => <List.Icon icon="phone" />}
-                      right={() => <Chip compact={true}>{member.phone}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.address && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.address')}
-                      left={() => <List.Icon icon="home-map-marker" />}
-                      right={() => <Chip compact={true}>{member.address}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.occupation && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.occupation')}
-                      left={() => <List.Icon icon="briefcase" />}
-                      right={() => <Chip compact={true}>{member.occupation}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
+                <>
+                  <List.Item
+                    title={t('memberDetail.lastName')}
+                    left={() => <List.Icon icon="account" />}
+                    right={() => <Chip compact={true}>{member.lastName || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.firstName')}
+                    left={() => <List.Icon icon="account" />}
+                    right={() => <Chip compact={true}>{member.firstName || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.nickname')}
+                    left={() => <List.Icon icon="tag" />}
+                    right={() => <Chip compact={true}>{member.nickname || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.dateOfBirth')}
+                    left={() => <List.Icon icon="calendar-account" />}
+                    right={() => <Chip compact={true}>{member.dateOfBirth ? new Date(member.dateOfBirth).toLocaleDateString() : t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.dateOfDeath')}
+                    left={() => <List.Icon icon="calendar-remove" />}
+                    right={() => <Chip compact={true}>{member.dateOfDeath ? new Date(member.dateOfDeath).toLocaleDateString() : t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.placeOfBirth')}
+                    left={() => <List.Icon icon="map-marker" />}
+                    right={() => <Chip compact={true}>{member.placeOfBirth || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.placeOfDeath')}
+                    left={() => <List.Icon icon="map-marker-off" />}
+                    right={() => <Chip compact={true}>{member.placeOfDeath || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.email')}
+                    left={() => <List.Icon icon="email" />}
+                    right={() => <Chip compact={true}>{member.email || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.phone')}
+                    left={() => <List.Icon icon="phone" />}
+                    right={() => <Chip compact={true}>{member.phone || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.address')}
+                    left={() => <List.Icon icon="home-map-marker" />}
+                    right={() => <Chip compact={true}>{member.address || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('memberDetail.occupation')}
+                    left={() => <List.Icon icon="briefcase" />}
+                    right={() => <Chip compact={true}>{member.occupation || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
 
                 {/* Family Relationships */}
                 <List.Subheader>{t('memberDetail.familyRelationships')}</List.Subheader>
-                {member.fatherFullName && (
-                  <>
-                    <List.Item
-                      title={t('member.father')}
-                      left={() => <List.Icon icon="human-male-boy" />}
-                      right={() => <Chip compact={true}>{member.fatherFullName}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.motherFullName && (
-                  <>
-                    <List.Item
-                      title={t('member.mother')}
-                      left={() => <List.Icon icon="human-female-girl" />}
-                      right={() => <Chip compact={true}>{member.motherFullName}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.husbandFullName && (
-                  <>
-                    <List.Item
-                      title={t('member.husband')}
-                      left={() => <List.Icon icon="heart" />}
-                      right={() => <Chip compact={true}>{member.husbandFullName}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
-                {member.wifeFullName && (
-                  <>
-                    <List.Item
-                      title={t('member.wife')}
-                      left={() => <List.Icon icon="heart" />}
-                      right={() => <Chip compact={true}>{member.wifeFullName}</Chip>}
-                    />
-                    <Divider />
-                  </>
-                )}
+                <>
+                  <List.Item
+                    title={t('member.father')}
+                    left={() => <List.Icon icon="human-male-boy" />}
+                    right={() => <Chip compact={true}>{member.fatherFullName || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('member.mother')}
+                    left={() => <List.Icon icon="human-female-girl" />}
+                    right={() => <Chip compact={true}>{member.motherFullName || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('member.husband')}
+                    left={() => <List.Icon icon="heart" />}
+                    right={() => <Chip compact={true}>{member.husbandFullName || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
+                <>
+                  <List.Item
+                    title={t('member.wife')}
+                    left={() => <List.Icon icon="heart" />}
+                    right={() => <Chip compact={true}>{member.wifeFullName || t('common.not_available')}</Chip>}
+                  />
+                  <Divider />
+                </>
               </List.Section>
             </Card.Content>
           </Card>

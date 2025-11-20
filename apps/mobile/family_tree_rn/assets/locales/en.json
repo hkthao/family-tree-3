@@ -92,6 +92,7 @@
   "common.cancel": "Cancel",
   "common.logout": "Logout",
   "common.delete": "Delete",
+  "common.not_available": "N/A",
   "login.title": "Welcome Back!",
   "login.description": "Please log in to continue.",
   "login.button": "Log In",

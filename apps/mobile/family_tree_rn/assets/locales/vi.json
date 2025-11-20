@@ -94,6 +94,7 @@
   "common.cancel": "Hủy",
   "common.logout": "Đăng xuất",
   "common.delete": "Xóa",
+  "common.not_available": "N/A",
   "login.title": "Chào mừng trở lại!",
   "login.description": "Vui lòng đăng nhập để tiếp tục.",
   "login.button": "Đăng nhập",

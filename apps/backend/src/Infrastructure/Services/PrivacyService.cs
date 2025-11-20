@@ -17,6 +17,9 @@ public class PrivacyService : IPrivacyService
     private readonly IAuthorizationService _authorizationService;
     private readonly IMapper _mapper;
 
+    // Cache PropertyInfo objects to improve performance
+    private static readonly Dictionary<Type, Dictionary<string, PropertyInfo?>> _propertyCache = new();
+
     public PrivacyService(IApplicationDbContext context, ICurrentUser currentUserService, IAuthorizationService authorizationService, IMapper mapper)
     {
         _context = context;
@@ -38,16 +41,21 @@ public class PrivacyService : IPrivacyService
         var filteredDto = new T();
         var sourceType = typeof(T);
 
+        // Lấy hoặc thêm các thuộc tính của loại vào bộ nhớ đệm
+        if (!_propertyCache.TryGetValue(sourceType, out var typeProperties))
+        {
+            typeProperties = sourceType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                       .ToDictionary(p => p.Name, p => (PropertyInfo?)p, StringComparer.OrdinalIgnoreCase);
+            _propertyCache.TryAdd(sourceType, typeProperties);
+        }
+
         // Luôn bao gồm các thuộc tính thiết yếu hoặc nhận dạng
         foreach (var propName in alwaysProps)
         {
-            var sourceProperty = sourceType.GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            var targetProperty = sourceType.GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-            if (sourceProperty != null && targetProperty != null && targetProperty.CanWrite)
+            if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
             {
-                var value = sourceProperty.GetValue(sourceDto);
-                targetProperty.SetValue(filteredDto, value);
+                var value = propertyInfo.GetValue(sourceDto);
+                propertyInfo.SetValue(filteredDto, value);
             }
         }
 
@@ -60,13 +68,10 @@ public class PrivacyService : IPrivacyService
                 continue;
             }
 
-            var sourceProperty = sourceType.GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-            var targetProperty = sourceType.GetProperty(propName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-            if (sourceProperty != null && targetProperty != null && targetProperty.CanWrite)
+            if (typeProperties.TryGetValue(propName, out var propertyInfo) && propertyInfo != null && propertyInfo.CanWrite)
             {
-                var value = sourceProperty.GetValue(sourceDto);
-                targetProperty.SetValue(filteredDto, value);
+                var value = propertyInfo.GetValue(sourceDto);
+                propertyInfo.SetValue(filteredDto, value);
             }
         }
 
