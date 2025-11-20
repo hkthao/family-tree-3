@@ -1,10 +1,10 @@
+using backend.Application.Common.Extensions; // Add this using directive
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Members.Queries.GetMembers;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using backend.Application.Common.Extensions; // Add this using directive
 
 namespace backend.Application.Members.Queries.SearchPublicMembers;
 

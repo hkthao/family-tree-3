@@ -1,14 +1,14 @@
-using backend.Application.Common.Interfaces;
-using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using backend.Domain.Enums;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using backend.Application.Common.Interfaces;
+using backend.Application.Common.Models;
 using backend.Application.Events.Specifications;
+using backend.Domain.Entities;
+using backend.Domain.Enums;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Events.Queries.GetPublicUpcomingEvents;
 

@@ -1,20 +1,22 @@
 using backend.Application.Common.Models;
+using backend.Application.Events;
+using backend.Application.Events.Queries.GetPublicEventById;
+using backend.Application.Events.Queries.GetPublicUpcomingEvents;
+using backend.Application.Events.Queries.SearchPublicEvents;
+using backend.Application.Faces.Commands.DetectFaces; // Added
+using backend.Application.Faces.Queries; // Added
+using backend.Application.Families.Queries.GetFamilies;
+using backend.Application.Families.Queries.GetFamilyById; // Added missing using directive
 using backend.Application.Families.Queries.GetPublicFamilyById;
 using backend.Application.Families.Queries.SearchPublicFamilies;
+using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
+using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.GetPublicMemberById;
 using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
-using backend.Application.Families.Queries.GetFamilies;
-using backend.Application.Members.Queries.GetMembers;
 using backend.Application.Members.Queries.SearchPublicMembers; // Add this using directive
-using backend.Application.Families.Queries.GetFamilyById; // Added missing using directive
-using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
 using backend.Application.Relationships.Queries; // Add this using directive
 using backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId; // Add this using directive
-using backend.Application.Events.Queries.GetPublicEventById;
-using backend.Application.Events.Queries.SearchPublicEvents;
-using backend.Application.Events.Queries.GetPublicUpcomingEvents;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.Events;
 
 namespace backend.Web.Controllers;
 
@@ -128,5 +130,17 @@ public class PublicController(IMediator mediator) : ControllerBase
     {
         var result = await _mediator.Send(query);
         return result.IsSuccess ? (ActionResult<List<EventDto>>)Ok(result.Value) : (ActionResult<List<EventDto>>)BadRequest(result.Error);
+    }
+
+    /// <summary>
+    /// Phát hiện khuôn mặt trong một hình ảnh được cung cấp.
+    /// </summary>
+    /// <param name="command">Đối tượng chứa dữ liệu hình ảnh và các tùy chọn phát hiện.</param>
+    /// <returns>Danh sách các khuôn mặt được phát hiện cùng với thông tin liên quan.</returns>
+    [HttpPost("face/detect")]
+    public async Task<ActionResult<FaceDetectionResponseDto>> DetectFaces([FromBody] DetectFacesCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return result.IsSuccess ? (ActionResult<FaceDetectionResponseDto>)Ok(result.Value) : (ActionResult<FaceDetectionResponseDto>)BadRequest(result.Error);
     }
 }
