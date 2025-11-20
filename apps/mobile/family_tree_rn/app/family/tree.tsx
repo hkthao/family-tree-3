@@ -21,8 +21,7 @@ export default function FamilyTreeScreen() {
     },
   });
 
-  const familyDetailUrl = `http://localhost:5173/public/family-tree/${currentFamilyId}`;
-
+  const familyDetailUrl = `${process.env.EXPO_PUBLIC_APP_BASE_URL}/public/family-tree/${currentFamilyId}`;
   return (
     <View style={styles.container}>
       {currentFamilyId ? (
