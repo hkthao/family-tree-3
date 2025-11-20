@@ -47,9 +47,9 @@ onMounted(async () => {
 const handleAddMember = async () => {
   if (!memberFormRef.value) return;
   const isValid = await memberFormRef.value.validate();
-  console.log('Validation result:', isValid);
+
   if (!isValid) {
-    console.log('Validation errors:', memberFormRef.value.v$.$errors);
+  
     return;
   }
 

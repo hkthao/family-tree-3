@@ -71,7 +71,7 @@ const selectedMemberIdForEdit = ref<string | null>(null);
 
 // --- Add Member Handlers ---
 const openAddMemberDrawer = () => {
-  console.log('fire');
+
   
   parentMemberId.value = null;
   addRelationshipType.value = null;

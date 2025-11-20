@@ -10,6 +10,8 @@ import type { IEventService } from './event/event.service.interface';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
 import { ApiRelationshipService } from './relationship/api.relationship.service';
+import type { IPublicRelationshipService } from './relationship/public.service.interface';
+import { PublicApiRelationshipService } from './relationship/publicApi.relationship.service';
 import type { ICurrentUserProfileService } from './user-profile/user-profile.service.interface';
 import { UserProfileApiService } from './user-profile/api.user-profile.service';
 import type { ICurrentUserActivityService } from './user-activity/user-activity.service.interface';
@@ -45,6 +47,7 @@ export interface AppServices {
   publicMember: IPublicMemberService; // New service
   event: IEventService;
   relationship: IRelationshipService;
+  publicRelationship: IPublicRelationshipService; // New service
   userProfile: ICurrentUserProfileService;
   userActivity: ICurrentUserActivityService;
   dashboard: IDashboardService;
@@ -63,7 +66,7 @@ export interface AppServices {
 import apiClient from '@/plugins/axios';
 
 export function createServices(mode: ServiceMode, testServices?: Partial<AppServices>): AppServices {
-  console.log(`Creating services in ${mode} mode.`);
+  
   return {
     family:
       mode === 'real'
@@ -89,6 +92,10 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiRelationshipService(apiClient)
         : testServices?.relationship || new ApiRelationshipService(apiClient),
+    publicRelationship: // New service registration
+      mode === 'real'
+        ? new PublicApiRelationshipService(apiClient)
+        : testServices?.publicRelationship || new PublicApiRelationshipService(apiClient),
     userProfile:
       mode === 'real'
         ? new UserProfileApiService(apiClient)

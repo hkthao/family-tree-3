@@ -115,7 +115,7 @@ const handleCreateNewMember = () => {
     // In a real application, this would involve an API call to create a new member
     // and then mapping the face to this new member.
     // For now, we'll just emit the event.
-    console.log('Creating new member:', newMemberName.value);
+  
     // Simulate a new member ID for demonstration
     const newId = `new-member-${Date.now()}`;
     emit('create-new-member', props.face.id, { id: newId, fullName: newMemberName.value });

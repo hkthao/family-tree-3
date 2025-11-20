@@ -19,7 +19,8 @@
       </v-col>
     </v-row>
 
-    <v-row v-else class="fill-height">
+
+    <v-row class="fill-height">
       <v-col cols="12" class="fill-height">
         <div class="hierarchical-tree-container">
           <div ref="chartContainer" class="f3 flex-grow-1" data-testid="public-family-tree-canvas"></div>
@@ -45,14 +46,15 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePublicFamilyStore } from '@/stores/publicFamily.store';
 import { usePublicMemberStore } from '@/stores/publicMember.store';
+import { usePublicRelationshipStore } from '@/stores/publicRelationship.store';
 import { useHierarchicalTreeChart } from '@/composables/useHierarchicalTreeChart';
 import type { Family, Member, Relationship } from '@/types';
-import { RelationshipType } from '@/types';
 
 const route = useRoute();
 const { t } = useI18n();
 const publicFamilyStore = usePublicFamilyStore();
 const publicMemberStore = usePublicMemberStore();
+const publicRelationshipStore = usePublicRelationshipStore();
 
 const family = ref<Family | null>(null);
 const members = ref<Member[]>([]);
@@ -64,8 +66,8 @@ const currentFamilyId = ref<string | null>(null);
 const currentRootId = ref<string | null>(null);
 
 // Dummy emit function for useHierarchicalTreeChart, as we don't need to emit events in public view
-const dummyEmit = (event: string, ...args: any[]) => {
-  console.log(`PublicFamilyTreeViewer: Emitted event ${event} with args:`, args);
+const dummyEmit = (_event: string, ..._args: any[]) => {
+
 };
 
 // Reactive props object for useHierarchicalTreeChart
@@ -76,7 +78,7 @@ const chartProps = reactive({
   rootId: currentRootId,
 });
 
-const { chartContainer } = useHierarchicalTreeChart(
+const { chartContainer, renderChart } = useHierarchicalTreeChart(
   chartProps,
   dummyEmit,
   t
@@ -105,6 +107,7 @@ const fetchData = async () => {
     }
     family.value = fetchedFamily;
 
+
     // Fetch members
     const fetchedMembers = await publicMemberStore.getPublicMembersByFamilyId(routeFamilyId);
     if (!fetchedMembers) {
@@ -113,51 +116,19 @@ const fetchData = async () => {
     }
     members.value = fetchedMembers;
 
-    // Infer relationships from fetched members
-    const inferredRelationships: Relationship[] = [];
-    members.value.forEach(member => {
-      if (member.fatherId) {
-        inferredRelationships.push({
-          id: `rel-${member.fatherId}-${member.id}`,
-          familyId: member.familyId,
-          sourceMemberId: member.fatherId,
-          targetMemberId: member.id,
-          type: RelationshipType.Father,
-          order: null,
-        });
-      }
-      if (member.motherId) {
-        inferredRelationships.push({
-          id: `rel-${member.motherId}-${member.id}`,
-          familyId: member.familyId,
-          sourceMemberId: member.motherId,
-          targetMemberId: member.id,
-          type: RelationshipType.Mother,
-          order: null,
-        });
-      }
-      if (member.husbandId) {
-        inferredRelationships.push({
-          id: `rel-${member.id}-${member.husbandId}`, // Member is wife of husbandId
-          familyId: member.familyId,
-          sourceMemberId: member.id,
-          targetMemberId: member.husbandId,
-          type: RelationshipType.Wife,
-          order: null,
-        });
-      }
-      if (member.wifeId) {
-        inferredRelationships.push({
-          id: `rel-${member.id}-${member.wifeId}`, // Member is husband of wifeId
-          familyId: member.familyId,
-          sourceMemberId: member.id,
-          targetMemberId: member.wifeId,
-          type: RelationshipType.Husband,
-          order: null,
-        });
-      }
-    });
-    relationships.value = inferredRelationships;
+
+
+    // Fetch relationships
+    const fetchedRelationships = await publicRelationshipStore.getPublicRelationshipsByFamilyId(routeFamilyId);
+    if (!fetchedRelationships) {
+      error.value = t('familyTree.errors.relationshipsNotFound'); // Assuming a new error message
+      return;
+    }
+    relationships.value = fetchedRelationships;
+
+
+    // After fetching data, render the chart
+    renderChart(members.value);
 
   } catch (err) {
     console.error('Error fetching public family tree data:', err);
@@ -167,12 +138,24 @@ const fetchData = async () => {
   }
 };
 
-onMounted(fetchData);
+onMounted(async () => {
+  await fetchData();
+});
 
 watch(
   () => [route.params.familyId, route.params.rootId],
   () => {
     fetchData();
+  },
+  { deep: true }
+);
+
+watch(
+  () => members.value,
+  (newMembers) => {
+    if (!loading.value && !error.value) {
+      renderChart(newMembers);
+    }
   },
   { deep: true }
 );

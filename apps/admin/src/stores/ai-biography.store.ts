@@ -99,7 +99,7 @@ export const useAIBiographyStore = defineStore('aiBiography', {
       ); // Changed
 
       if (result.ok) {
-        console.log('Biography saved successfully:', result.value);
+  
         // Optionally, update the currentMember's biography in the store
         if (this.currentMember) {
           this.currentMember.biography = content;

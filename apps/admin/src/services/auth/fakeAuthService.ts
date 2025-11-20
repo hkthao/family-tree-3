@@ -23,8 +23,8 @@ class FakeAuthService implements AuthService {
     return !!this.currentUser;
   }
 
-  async login(options?: RedirectLoginOptions): Promise<void> {
-    console.log('Fake login initiated with options:', options);
+  async login(_options?: RedirectLoginOptions): Promise<void> {
+
     // Simulate a successful login after a redirect.
     // In a real scenario, this would trigger a redirect.
     this.currentUser = {
@@ -40,13 +40,13 @@ class FakeAuthService implements AuthService {
   }
 
   async logout(): Promise<void> {
-    console.log('Fake logout');
+
     this.currentUser = null;
     this.currentToken = null;
   }
 
   async register(data: any): Promise<User | null> {
-    console.log('Fake register attempt with:', data);
+
     // Simulate successful registration
     this.currentUser = {
       id: 'new-fake-user',
@@ -69,7 +69,7 @@ class FakeAuthService implements AuthService {
   }
 
   async handleRedirectCallback(): Promise<AppState> {
-    console.log('Fake handleRedirectCallback called');
+
     return {}; // Return an empty AppState for now
   }
 }
