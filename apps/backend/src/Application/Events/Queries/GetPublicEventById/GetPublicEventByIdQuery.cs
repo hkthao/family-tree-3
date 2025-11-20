@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using backend.Application.Events.Specifications;
+using backend.Domain.Enums;
 
 namespace backend.Application.Events.Queries.GetPublicEventById;
 
@@ -32,17 +33,4 @@ public class GetPublicEventByIdQueryHandler(IApplicationDbContext context, IMapp
             ? Result<EventDto>.Failure($"Event with ID {request.Id} not found or is not public.")
             : Result<EventDto>.Success(eventEntity);
     }
-}
-
-public class EventDto
-{
-    public Guid Id { get; set; }
-    public Guid FamilyId { get; set; }
-    public string? Title { get; set; }
-    public string? Description { get; set; }
-    public DateTime StartDate { get; set; }
-    public DateTime? EndDate { get; set; }
-    public string? Location { get; set; }
-    public string EventType { get; set; } = null!;
-    public List<Guid> RelatedMembers { get; set; } = new();
 }

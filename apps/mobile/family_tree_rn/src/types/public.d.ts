@@ -191,7 +191,7 @@ export enum EventType {
 export interface EventDto extends BaseAuditableDto {
   id: string;
   familyId: string;
-  title?: string;
+  name?: string;
   description?: string;
   startDate: string; // DateTime in C# maps to string in TypeScript
   endDate?: string; // DateTime in C# maps to string in TypeScript

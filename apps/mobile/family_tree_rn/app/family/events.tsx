@@ -2,12 +2,11 @@ import { SPACING_MEDIUM } from '@/constants/dimensions';
 import React, { useState, useCallback, useMemo } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
-import { Divider, Card, useTheme, ActivityIndicator, Text } from 'react-native-paper';
+import { Divider, useTheme, ActivityIndicator, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import AgendaItem from '@/components/events/AgendaItem';
 import { useFamilyStore } from '@/stores/useFamilyStore';
-import { useRouter } from 'expo-router';
 import type { EventDto } from '@/types/public.d';
 
 interface EventItem extends AgendaEntry {
@@ -21,7 +20,6 @@ export default function FamilyEventsScreen() {
   const [items, setItems] = useState<AgendaSchedule>({});
   const theme = useTheme();
   const { t } = useTranslation();
-  const router = useRouter();
 
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
   const { loading, error, fetchEvents } = usePublicEventStore();
@@ -140,7 +138,7 @@ export default function FamilyEventsScreen() {
         if (!(mergedItems[eventDate] as EventItem[]).some(item => item.id === event.id)) {
           mergedItems[eventDate].push({
             id: event.id,
-            name: event.title || t('eventDetail.noTitle'),
+            name: event.name || t('eventDetail.noTitle'),
             height: 80, // Fixed height for now, can be dynamic
             day: eventDate,
           } as EventItem);

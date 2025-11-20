@@ -1,3 +1,4 @@
+using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
 using backend.Application.Events.Queries.GetPublicEventById;
@@ -57,13 +58,15 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.MotherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.FullName))
             .ForMember(dest => dest.HusbandFullName, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband && r.TargetMember != null)!.TargetMember!.FullName))
             .ForMember(dest => dest.WifeFullName, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.FullName));
+
+        //Event
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()
             .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
         CreateMap<Event, EventDto>()
-            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Name)) // Map Name to Title
-            .ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.Type.ToString())) // Map Type to EventType
-            .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.EventMembers.Select(em => em.MemberId)));
+            .ForMember(d => d.RelatedMembers, opt => opt.MapFrom(s => s.EventMembers.Select(em => em.MemberId)));
+
+        //Relationship
         CreateMap<Relationship, RelationshipDto>();
         CreateMap<Relationship, RelationshipListDto>()
             .ForMember(dest => dest.SourceMember, opt => opt.MapFrom(src => src.SourceMember))

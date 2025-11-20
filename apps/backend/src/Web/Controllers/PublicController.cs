@@ -14,6 +14,7 @@ using backend.Application.Events.Queries.GetPublicEventById;
 using backend.Application.Events.Queries.SearchPublicEvents;
 using backend.Application.Events.Queries.GetPublicUpcomingEvents;
 using Microsoft.AspNetCore.Mvc;
+using backend.Application.Events;
 
 namespace backend.Web.Controllers;
 
