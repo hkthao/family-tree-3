@@ -243,10 +243,10 @@ export interface GetPublicUpcomingEventsQuery {
 }
 
 export interface BoundingBoxDto {
-  X: number;
-  Y: number;
-  Width: number;
-  Height: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export interface DetectedFaceDto {
