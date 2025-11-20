@@ -7,7 +7,7 @@
       @view="navigateToDetailView" @edit="navigateToEditMember" @delete="confirmDelete" @create="navigateToCreateView()"
       @ai-biography="navigateToAIBiography" @ai-create="navigateToAICreateMember" :read-only="props.readOnly">
     </MemberList>
-      
+
     <!-- Edit Member Drawer -->
 
     <v-navigation-drawer v-model="editDrawer" location="right" temporary width="650">
@@ -186,11 +186,8 @@ const handleBiographyClosed = () => {
 };
 
 onMounted(() => {
-  if (props.familyId) {
-    memberStore.getByFamilyId(props.familyId);
-  } else {
-    memberStore._loadItems();
-  }
+  memberStore.list.filters = { familyId: props.familyId };
+  memberStore._loadItems();
 })
 
 </script>

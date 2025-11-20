@@ -194,13 +194,6 @@ export const useMemberStore = defineStore('member', {
       return undefined;
     },
 
-    async getByFamilyId(familyId: string): Promise<void> {
-      this.list.filters.familyId = familyId;
-      this.setPage(1);
-      this.setItemsPerPage(5000);
-      await this._loadItems();
-    },
-
     async getByIds(ids: string[]): Promise<Member[]> {
       this.list.loading = true;
       this.error = null;
