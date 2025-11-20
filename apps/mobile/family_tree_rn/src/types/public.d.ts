@@ -241,3 +241,29 @@ export interface GetPublicUpcomingEventsQuery {
   startDate?: string; // DateTime in C# maps to string in TypeScript
   endDate?: string; // DateTime in C# maps to string in TypeScript
 }
+
+export interface BoundingBoxDto {
+  X: number;
+  Y: number;
+  Width: number;
+  Height: number;
+}
+
+export interface DetectedFaceDto {
+  Id: string;
+  BoundingBox: BoundingBoxDto;
+  Confidence: number;
+  Thumbnail?: string; // Base64 encoded image
+  Embedding?: number[];
+  MemberId?: string;
+  MemberName?: string;
+  FamilyId?: string;
+  FamilyName?: string;
+  BirthYear?: number;
+  DeathYear?: number;
+}
+
+export interface FaceDetectionResponseDto {
+  ImageId: string;
+  DetectedFaces: DetectedFaceDto[];
+}

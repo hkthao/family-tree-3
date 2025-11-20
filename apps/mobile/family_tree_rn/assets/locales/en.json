@@ -179,5 +179,17 @@
     "marriage": "Marriage",
     "anniversary": "Anniversary",
     "other": "Other"
-  }
+  },
+  "faceSearch": {
+    "permissionRequired": "Permission Required",
+    "mediaLibraryPermissionDenied": "Media library permission denied. Please enable it in settings.",
+    "cameraPermissionDenied": "Camera permission denied. Please enable it in settings.",
+    "pickImage": "Pick Image",
+    "takePhoto": "Take Photo",
+    "base64Error": "Could not get base64 data from image.",
+    "detectionFailed": "Failed to detect faces. Please try again.",
+    "facesDetected": "{{count}} face(s) detected."
+  },
+  "common.error": "Error",
+  "common.loading": "Loading..."
 }

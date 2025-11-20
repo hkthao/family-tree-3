@@ -181,5 +181,17 @@
     "marriage": "Kết hôn",
     "anniversary": "Kỷ niệm",
     "other": "Khác"
-  }
+  },
+  "faceSearch": {
+    "permissionRequired": "Yêu cầu quyền",
+    "mediaLibraryPermissionDenied": "Quyền truy cập thư viện ảnh bị từ chối. Vui lòng bật trong cài đặt.",
+    "cameraPermissionDenied": "Quyền truy cập camera bị từ chối. Vui lòng bật trong cài đặt.",
+    "pickImage": "Chọn ảnh",
+    "takePhoto": "Chụp ảnh",
+    "base64Error": "Không thể lấy dữ liệu base64 từ ảnh.",
+    "detectionFailed": "Phát hiện khuôn mặt thất bại. Vui lòng thử lại.",
+    "facesDetected": "Đã phát hiện {{count}} khuôn mặt."
+  },
+  "common.error": "Lỗi",
+  "common.loading": "Đang tải..."
 }

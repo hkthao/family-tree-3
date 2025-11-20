@@ -13,6 +13,7 @@ import type {
   EventDto, // Added
   SearchPublicEventsQuery, // Added
   GetPublicUpcomingEventsQuery, // Added
+  FaceDetectionResponseDto, // Added
 } from '@/types/public.d';
 
 // TODO: Configure this based on your environment (e.g., .env file)
@@ -84,6 +85,22 @@ export const getPublicRelationshipsByFamilyId = async (
 ): Promise<RelationshipListDto[]> => {
   const response = await publicApiClient.get<RelationshipListDto[]>(
     `/family/${familyId}/relationships`
+  );
+  return response.data;
+};
+
+export interface DetectFacesRequest {
+  imageBytes: string; // Base64 string of the image
+  contentType: string; // e.g., "image/jpeg"
+  returnCrop: boolean;
+}
+
+export const detectFaces = async (
+  request: DetectFacesRequest
+): Promise<FaceDetectionResponseDto> => {
+  const response = await publicApiClient.post<FaceDetectionResponseDto>(
+    `/face/detect`,
+    request
   );
   return response.data;
 };
