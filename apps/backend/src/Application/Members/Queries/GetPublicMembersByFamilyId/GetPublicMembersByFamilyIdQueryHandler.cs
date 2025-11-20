@@ -36,10 +36,11 @@ public class GetPublicMembersByFamilyIdQueryHandler(IApplicationDbContext contex
             return Result<List<MemberListDto>>.Failure(ErrorMessages.AccessDenied, ErrorSources.Forbidden);
         }
 
-        // 2. Retrieve members for that family
+        // 2. Retrieve members for that family, including relationships
         var members = await _context.Members
             .AsNoTracking()
             .WithSpecification(new MemberByFamilyIdSpecification(request.FamilyId))
+            .WithSpecification(new MemberIncludeRelationshipsSpecification()) // Include relationships
             .ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 

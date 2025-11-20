@@ -161,6 +161,12 @@ public class PrivacyService : IPrivacyService
         filteredMemberListDto.WifeFullName = memberListDto.WifeFullName;
         filteredMemberListDto.WifeAvatarUrl = memberListDto.WifeAvatarUrl;
         filteredMemberListDto.WifeGender = memberListDto.WifeGender;
+
+        // Explicitly include relationship IDs
+        filteredMemberListDto.FatherId = memberListDto.FatherId;
+        filteredMemberListDto.MotherId = memberListDto.MotherId;
+        filteredMemberListDto.HusbandId = memberListDto.HusbandId;
+        filteredMemberListDto.WifeId = memberListDto.WifeId;
         // BirthDeathYears is read-only, so we don't set it here. It will be derived from DateOfBirth/DateOfDeath if they are public.
 
 

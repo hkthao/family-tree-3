@@ -47,7 +47,11 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.FatherGender, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.Gender))
             .ForMember(dest => dest.MotherGender, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.Gender))
             .ForMember(dest => dest.HusbandGender, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband && r.TargetMember != null)!.TargetMember!.Gender))
-            .ForMember(dest => dest.WifeGender, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.Gender));
+            .ForMember(dest => dest.WifeGender, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.Gender))
+            .ForMember(dest => dest.FatherId, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.Id))
+            .ForMember(dest => dest.MotherId, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.Id))
+            .ForMember(dest => dest.HusbandId, opt => opt.MapFrom(src => (Guid?)src.SourceRelationships.Where(r => r.Type == RelationshipType.Husband).Select(r => r.TargetMemberId).FirstOrDefault()))
+            .ForMember(dest => dest.WifeId, opt => opt.MapFrom(src => (Guid?)src.SourceRelationships.Where(r => r.Type == RelationshipType.Wife).Select(r => r.TargetMemberId).FirstOrDefault()));
         CreateMap<Member, MemberDetailDto>();
         CreateMap<Event, EventListDto>();
         CreateMap<Event, EventDetailDto>()
