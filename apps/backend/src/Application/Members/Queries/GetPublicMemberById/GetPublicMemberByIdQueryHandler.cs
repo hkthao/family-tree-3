@@ -40,8 +40,8 @@ public class GetPublicMemberByIdQueryHandler(IApplicationDbContext context, IMap
         // 2. Retrieve the specific member, ensuring it belongs to the given familyId
         var spec = new MemberByIdSpecification(request.Id);
         spec.Query.Where(m => m.FamilyId == request.FamilyId); // Ensure member belongs to the specified family
-        spec.Query.Include(m => m.SourceRelationships);
-        spec.Query.Include(m => m.TargetRelationships);
+        spec.Query.Include(m => m.SourceRelationships).ThenInclude(r => r.TargetMember);
+        spec.Query.Include(m => m.TargetRelationships).ThenInclude(r => r.SourceMember);
 
         var memberDetailDto = await _context.Members
             .AsNoTracking()

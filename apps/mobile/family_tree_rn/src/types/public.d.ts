@@ -148,10 +148,17 @@ export interface MemberDetailDto extends BaseAuditableDto {
   gender?: Gender;
   avatarUrl?: string;
   occupation?: string;
+  email?: string; // Added
+  phone?: string; // Added
+  address?: string; // Added
   familyId: string;
   biography?: string;
   isRoot: boolean;
   birthDeathYears?: string;
+  fatherFullName?: string; // Added
+  motherFullName?: string; // Added
+  husbandFullName?: string; // Added
+  wifeFullName?: string; // Added
   fatherId?: string;
   motherId?: string;
   husbandId?: string;

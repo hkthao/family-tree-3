@@ -18,6 +18,9 @@ public class MemberDetailDto : BaseAuditableDto
     public string? Gender { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Occupation { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
+    public string? Address { get; set; }
     public Guid FamilyId { get; set; }
     public string? Biography { get; set; }
     public bool IsRoot { get; set; }
@@ -26,6 +29,10 @@ public class MemberDetailDto : BaseAuditableDto
         (DateOfBirth.HasValue && DateOfDeath.HasValue ? " - " : "") +
         (DateOfDeath.HasValue ? DateOfDeath.Value.Year.ToString() : "")
     ;
+    public string? FatherFullName { get; set; }
+    public string? MotherFullName { get; set; }
+    public string? HusbandFullName { get; set; }
+    public string? WifeFullName { get; set; }
     public Guid? FatherId => TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father)?.SourceMemberId;
     public Guid? MotherId => TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother)?.SourceMemberId;
     public Guid? HusbandId => SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband)?.TargetMemberId;

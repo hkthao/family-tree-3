@@ -106,6 +106,17 @@ public class PrivacyService : IPrivacyService
         filteredMemberDetailDto.SourceRelationships = memberDetailDto.SourceRelationships;
         filteredMemberDetailDto.TargetRelationships = memberDetailDto.TargetRelationships;
 
+        // Explicitly copy full names for relationships
+        filteredMemberDetailDto.FatherFullName = memberDetailDto.FatherFullName;
+        filteredMemberDetailDto.MotherFullName = memberDetailDto.MotherFullName;
+        filteredMemberDetailDto.HusbandFullName = memberDetailDto.HusbandFullName;
+        filteredMemberDetailDto.WifeFullName = memberDetailDto.WifeFullName;
+
+        // Explicitly copy Email, Phone, Address
+        filteredMemberDetailDto.Email = memberDetailDto.Email;
+        filteredMemberDetailDto.Phone = memberDetailDto.Phone;
+        filteredMemberDetailDto.Address = memberDetailDto.Address;
+
         // Dynamically copy properties that are marked as public
         foreach (var propName in publicProperties)
         {

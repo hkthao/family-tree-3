@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Appbar, Text, useTheme, Card, Avatar, ActivityIndicator, Chip, List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-// Removed SafeAreaView import
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
-import { fetchMemberDetails, MemberDetail } from '../../data/mockFamilyData'; // Assuming MemberDetail interface and fetchMemberDetails function
+import { usePublicMemberStore } from '@/stores/usePublicMemberStore'; // Import usePublicMemberStore
+import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
+import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
 
 export default function MemberDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -13,36 +14,24 @@ export default function MemberDetailsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const [member, setMember] = useState<MemberDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const currentFamilyId = useFamilyStore((state) => state.currentFamilyId); // Get currentFamilyId from store
+  const { member, loading, error, getMemberById } = usePublicMemberStore();
 
   useEffect(() => {
-    if (id) {
-      const loadMemberDetails = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const memberId = Array.isArray(id) ? id[0] : id;
-          const data = await fetchMemberDetails(memberId);
-          if (data) {
-            setMember(data);
-          } else {
-            setError(t('memberDetail.errors.notFound'));
-          }
-        } catch (err) {
-          if (err instanceof Error) {
-            setError(err.message);
-          } else {
-            setError(t('memberDetail.errors.failedToLoad'));
-          }
-        } finally {
-          setLoading(false);
-        }
-      };
-      loadMemberDetails();
-    }
-  }, [id, t]);
+    const loadMemberDetails = async () => {
+      if (!id) {
+        // setError(t('memberDetail.errors.noMemberId')); // Error state is managed by store
+        return;
+      }
+      if (!currentFamilyId) {
+        // setError(t('memberDetail.errors.noFamilyId')); // Error state is managed by store
+        return;
+      }
+      const memberId = Array.isArray(id) ? id[0] : id;
+      await getMemberById(memberId, currentFamilyId);
+    };
+    loadMemberDetails();
+  }, [id, currentFamilyId, getMemberById]);
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -102,6 +91,8 @@ export default function MemberDetailsScreen() {
       justifyContent: 'center', // Center chips
     },
     chip: {
+      borderWidth: 0, // Remove border
+      backgroundColor: 'transparent', // Remove background
     },
   }), [theme]);
 
@@ -158,7 +149,7 @@ export default function MemberDetailsScreen() {
         <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
           <Card style={styles.card}>
             <Card.Content style={styles.cardContent}>
-              <Avatar.Image size={100} source={{ uri: member.avatarUrl || 'https://picsum.photos/100' }} style={styles.avatar} />
+              <Avatar.Image size={100} source={member.avatarUrl ? { uri: member.avatarUrl } : DefaultFamilyAvatar} style={styles.avatar} />
               <View style={styles.detailsContainer}>
                 <Text variant="headlineMedium" style={{ textAlign: 'center' }}>{member.fullName}</Text>
                 {member.occupation && <Text variant="bodyLarge" style={{ textAlign: 'center' }}>{member.occupation}</Text>}
@@ -166,33 +157,33 @@ export default function MemberDetailsScreen() {
 
                 <View style={styles.chipsContainer}>
                   {member.gender && (
-                    <Chip icon="gender-male-female" style={styles.chip} compact={true} >
+                    <Chip icon="gender-male-female" style={styles.chip} compact={true}>
                       {t(`memberSearch.filter.gender.${member.gender.toLowerCase()}`)}
                     </Chip>
                   )}
                   {member.isRoot && (
-                    <Chip icon="account-star" style={styles.chip} compact={true} >
+                    <Chip icon="account-star" style={styles.chip} compact={true}>
                       {t('memberDetail.isRoot')}
                     </Chip>
                   )}
-                  {member.father && (
-                    <Chip icon="human-male-boy" style={styles.chip} compact={true} >
-                      {member.father}
+                  {member.fatherFullName && (
+                    <Chip icon="human-male-boy" style={styles.chip} compact={true}>
+                      {member.fatherFullName}
                     </Chip>
                   )}
-                  {member.mother && (
-                    <Chip icon="human-female-girl" style={styles.chip} compact={true} >
-                      {member.mother}
+                  {member.motherFullName && (
+                    <Chip icon="human-female-girl" style={styles.chip} compact={true}>
+                      {member.motherFullName}
                     </Chip>
                   )}
-                  {member.husband && (
-                    <Chip icon="heart" style={styles.chip} compact={true} >
-                      {member.husband}
+                  {member.husbandFullName && (
+                    <Chip icon="heart" style={styles.chip} compact={true}>
+                      {member.husbandFullName}
                     </Chip>
                   )}
-                  {member.wife && (
-                    <Chip icon="heart" style={styles.chip} compact={true} >
-                      {member.wife}
+                  {member.wifeFullName && (
+                    <Chip icon="heart" style={styles.chip} compact={true}>
+                      {member.wifeFullName}
                     </Chip>
                   )}
                 </View>
@@ -203,6 +194,38 @@ export default function MemberDetailsScreen() {
           <Card style={styles.card}>
             <Card.Content>
               <List.Section>
+                {/* Personal Information */}
+                <List.Subheader>{t('memberDetail.personalInfo')}</List.Subheader>
+                {member.lastName && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.lastName')}
+                      left={() => <List.Icon icon="account" />}
+                      right={() => <Chip compact={true}>{member.lastName}</Chip>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.firstName && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.firstName')}
+                      left={() => <List.Icon icon="account" />}
+                      right={() => <Chip compact={true}>{member.firstName}</Chip>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.nickname && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.nickname')}
+                      left={() => <List.Icon icon="tag" />}
+                      right={() => <Chip compact={true}>{member.nickname}</Chip>}
+                    />
+                    <Divider />
+                  </>
+                )}
                 {member.dateOfBirth && (
                   <>
                     <List.Item
@@ -236,70 +259,94 @@ export default function MemberDetailsScreen() {
                 {member.placeOfDeath && (
                   <>
                     <List.Item
-                      title={t('memberDetail.placeOfDeath')}
+                      title={t('memberDetail.placeOfOfDeath')}
                       left={() => <List.Icon icon="map-marker-off" />}
                       right={() => <Chip compact={true}>{member.placeOfDeath}</Chip>}
                     />
                     <Divider />
                   </>
                 )}
-                {member.nickname && (
+                {member.email && (
                   <>
                     <List.Item
-                      title={t('memberDetail.nickname')}
-                      left={() => <List.Icon icon="tag" />}
-                      right={() => <Chip compact={true}>{member.nickname}</Chip>}
+                      title={t('memberDetail.email')}
+                      left={() => <List.Icon icon="email" />}
+                      right={() => <Chip compact={true}>{member.email}</Chip>}
                     />
                     <Divider />
                   </>
                 )}
-                {member.father && (
+                {member.phone && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.phone')}
+                      left={() => <List.Icon icon="phone" />}
+                      right={() => <Chip compact={true}>{member.phone}</Chip>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.address && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.address')}
+                      left={() => <List.Icon icon="home-map-marker" />}
+                      right={() => <Chip compact={true}>{member.address}</Chip>}
+                    />
+                    <Divider />
+                  </>
+                )}
+                {member.occupation && (
+                  <>
+                    <List.Item
+                      title={t('memberDetail.occupation')}
+                      left={() => <List.Icon icon="briefcase" />}
+                      right={() => <Chip compact={true}>{member.occupation}</Chip>}
+                    />
+                    <Divider />
+                  </>
+                )}
+
+                {/* Family Relationships */}
+                <List.Subheader>{t('memberDetail.familyRelationships')}</List.Subheader>
+                {member.fatherFullName && (
                   <>
                     <List.Item
                       title={t('member.father')}
                       left={() => <List.Icon icon="human-male-boy" />}
-                      right={() => <Chip compact={true}>{member.father}</Chip>}
+                      right={() => <Chip compact={true}>{member.fatherFullName}</Chip>}
                     />
                     <Divider />
                   </>
                 )}
-                {member.mother && (
+                {member.motherFullName && (
                   <>
                     <List.Item
                       title={t('member.mother')}
                       left={() => <List.Icon icon="human-female-girl" />}
-                      right={() => <Chip compact={true}>{member.mother}</Chip>}
+                      right={() => <Chip compact={true}>{member.motherFullName}</Chip>}
                     />
                     <Divider />
                   </>
                 )}
-                {member.husband && (
+                {member.husbandFullName && (
                   <>
                     <List.Item
                       title={t('member.husband')}
                       left={() => <List.Icon icon="heart" />}
-                      right={() => <Chip compact={true}>{member.husband}</Chip>}
+                      right={() => <Chip compact={true}>{member.husbandFullName}</Chip>}
                     />
                     <Divider />
                   </>
                 )}
-                {member.wife && (
+                {member.wifeFullName && (
                   <>
                     <List.Item
                       title={t('member.wife')}
                       left={() => <List.Icon icon="heart" />}
-                      right={() => <Chip compact={true}>{member.wife}</Chip>}
+                      right={() => <Chip compact={true}>{member.wifeFullName}</Chip>}
                     />
                     <Divider />
-                  </>
-                )}
-                {member.created && (
-                  <>
-                    <List.Item
-                      title={t('memberDetail.created')}
-                      left={() => <List.Icon icon="calendar-plus" />}
-                      right={() => <Chip compact={true}>{new Date(member.created).toLocaleDateString()}</Chip>}
-                    />
                   </>
                 )}
               </List.Section>
