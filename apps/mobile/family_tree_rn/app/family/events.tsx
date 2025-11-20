@@ -2,7 +2,7 @@ import { SPACING_MEDIUM } from '@/constants/dimensions';
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
-import { Divider, useTheme, ActivityIndicator, Text } from 'react-native-paper';
+import { Divider, useTheme, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
 import AgendaItem from '@/components/events/AgendaItem';
@@ -20,17 +20,28 @@ interface EventItem extends AgendaEntry {
 
 export default function FamilyEventsScreen() {
   const [items, setItems] = useState<AgendaSchedule>({});
+  const [markedDates, setMarkedDates] = useState({});
   const theme = useTheme();
   const { t } = useTranslation();
 
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
-  const { loading, error, fetchEvents } = usePublicEventStore();
+  const { error, fetchEvents } = usePublicEventStore();
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
   const loadedMonthsRef = useRef(loadedMonths);
 
   useEffect(() => {
     loadedMonthsRef.current = loadedMonths;
   }, [loadedMonths]);
+
+  useEffect(() => {
+    const updatedMarkedDates: { [key: string]: { marked: boolean } } = {};
+    Object.keys(items).forEach(date => {
+      if (items[date] && items[date].length > 0) {
+        updatedMarkedDates[date] = { marked: true };
+      }
+    });
+    setMarkedDates(updatedMarkedDates);
+  }, [items]);
 
   const styles = useMemo(() => StyleSheet.create({
     emptyDate: {
@@ -234,6 +245,7 @@ export default function FamilyEventsScreen() {
       renderEmptyDate={renderEmptyDate}
       rowHasChanged={rowHasChanged}
       showClosingKnob={true}
+      markedDates={markedDates}
       renderList={renderList}
       theme={{
         agendaDayTextColor: theme.colors.primary,
