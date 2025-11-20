@@ -1,5 +1,5 @@
 import { SPACING_MEDIUM } from '@/constants/dimensions';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
 import { Divider, useTheme, ActivityIndicator, Text } from 'react-native-paper';
@@ -26,6 +26,11 @@ export default function FamilyEventsScreen() {
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
   const { loading, error, fetchEvents } = usePublicEventStore();
   const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
+  const loadedMonthsRef = useRef(loadedMonths);
+
+  useEffect(() => {
+    loadedMonthsRef.current = loadedMonths;
+  }, [loadedMonths]);
 
   const styles = useMemo(() => StyleSheet.create({
     emptyDate: {
@@ -116,7 +121,7 @@ export default function FamilyEventsScreen() {
     }
 
     const monthString = new Date(day.timestamp).toISOString().slice(0, 7); // YYYY-MM
-    if (loadedMonths.has(monthString)) {
+    if (loadedMonthsRef.current.has(monthString)) {
       return; // Already loaded for this month
     }
 
@@ -156,7 +161,7 @@ export default function FamilyEventsScreen() {
       });
       return mergedItems;
     });
-  }, 300), [currentFamilyId, fetchEvents, t, loadedMonths]); // Debounce with 300ms delay
+  }, 300), [currentFamilyId, fetchEvents, t]); // Removed loadedMonths from dependencies
 
   const renderEmptyDate = useCallback(() => {
     return (

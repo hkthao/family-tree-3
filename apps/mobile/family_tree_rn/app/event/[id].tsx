@@ -5,6 +5,7 @@ import { Appbar, Text, useTheme, Card, ActivityIndicator, Chip, Avatar } from 'r
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
+import { EventType, EventDto as MyEventDto } from '@/types/public.d'; // Import EventType and EventDto
 
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -13,6 +14,14 @@ export default function EventDetailsScreen() {
   const theme = useTheme();
 
   const { event, loading, error, getEventById } = usePublicEventStore();
+
+  const eventTypeStringMap: Record<EventType, string> = useMemo(() => ({
+    [EventType.Birth]: t('eventType.birth'),
+    [EventType.Death]: t('eventType.death'),
+    [EventType.Marriage]: t('eventType.marriage'),
+    [EventType.Anniversary]: t('eventType.anniversary'),
+    [EventType.Other]: t('eventType.other'),
+  }), [t]);
 
   useEffect(() => {
     if (id) {
@@ -152,7 +161,11 @@ export default function EventDetailsScreen() {
             <Text variant="headlineSmall" style={styles.titleText}>{event.name || t('common.not_available')}</Text>
             <Text variant="bodyMedium" >{event.description || t('common.not_available')}</Text>
             <View style={styles.chipsContainer}>
-              <Chip icon="tag" compact={true} style={styles.chip}>{event.eventType || t('common.not_available')}</Chip>
+              {event && event.type !== undefined && (
+                <Chip icon="tag" compact={true} style={styles.chip}>
+                  {eventTypeStringMap[event.type] || t('common.not_available')}
+                </Chip>
+              )}
               <Chip icon="calendar-start" compact={true} style={styles.chip}>{formattedStartDate}</Chip>
               {event.endDate && <Chip icon="calendar-end" compact={true} style={styles.chip}>{formattedEndDate}</Chip>}
               {event.location && (
