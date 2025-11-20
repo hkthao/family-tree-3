@@ -33,14 +33,27 @@ public class PrivacyService : IPrivacyService
             return memberDto;
         }
 
-        var privacyConfig = await _context.PrivacyConfigurations
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
         if (privacyConfig == null)
         {
-            // If no config, all properties are public by default
-            return memberDto;
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberProperties(new List<string>
+            {
+                "LastName",
+                "FirstName",
+                "Nickname",
+                "Gender",
+                "DateOfBirth",
+                "DateOfDeath",
+                "PlaceOfBirth",
+                "PlaceOfDeath",
+                "Occupation",
+                "Biography",
+            });
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
@@ -85,14 +98,31 @@ public class PrivacyService : IPrivacyService
             return memberDetailDto;
         }
 
-        var privacyConfig = await _context.PrivacyConfigurations
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
         if (privacyConfig == null)
         {
-            // If no config, all properties are public by default
-            return memberDetailDto;
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberProperties(new List<string>
+            {
+                "LastName",
+                "FirstName",
+                "Nickname",
+                "Gender",
+                "DateOfBirth",
+                "DateOfDeath",
+                "PlaceOfBirth",
+                "PlaceOfDeath",
+                "Occupation",
+                "Biography",
+                "FatherFullName",
+                "MotherFullName",
+                "HusbandFullName",
+                "WifeFullName"
+            });
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
@@ -105,17 +135,6 @@ public class PrivacyService : IPrivacyService
         filteredMemberDetailDto.AvatarUrl = memberDetailDto.AvatarUrl;
         filteredMemberDetailDto.SourceRelationships = memberDetailDto.SourceRelationships;
         filteredMemberDetailDto.TargetRelationships = memberDetailDto.TargetRelationships;
-
-        // Explicitly copy full names for relationships
-        filteredMemberDetailDto.FatherFullName = memberDetailDto.FatherFullName;
-        filteredMemberDetailDto.MotherFullName = memberDetailDto.MotherFullName;
-        filteredMemberDetailDto.HusbandFullName = memberDetailDto.HusbandFullName;
-        filteredMemberDetailDto.WifeFullName = memberDetailDto.WifeFullName;
-
-        // Explicitly copy Email, Phone, Address
-        filteredMemberDetailDto.Email = memberDetailDto.Email;
-        filteredMemberDetailDto.Phone = memberDetailDto.Phone;
-        filteredMemberDetailDto.Address = memberDetailDto.Address;
 
         // Dynamically copy properties that are marked as public
         foreach (var propName in publicProperties)
@@ -139,14 +158,31 @@ public class PrivacyService : IPrivacyService
             return memberListDto;
         }
 
-        var privacyConfig = await _context.PrivacyConfigurations
+        PrivacyConfiguration? privacyConfig = await _context.PrivacyConfigurations
             .AsNoTracking()
             .FirstOrDefaultAsync(pc => pc.FamilyId == familyId, cancellationToken);
 
         if (privacyConfig == null)
         {
-            // If no config, all properties are public by default
-            return memberListDto;
+            // If no config, create a default privacy config with predefined public properties
+            privacyConfig = new PrivacyConfiguration(familyId);
+            privacyConfig.UpdatePublicMemberProperties(new List<string>
+            {
+                "LastName",
+                "FirstName",
+                "Nickname",
+                "Gender",
+                "DateOfBirth",
+                "DateOfDeath",
+                "PlaceOfBirth",
+                "PlaceOfDeath",
+                "Occupation",
+                "Biography",
+                "FatherFullName",
+                "MotherFullName",
+                "HusbandFullName",
+                "WifeFullName"
+            });
         }
 
         var publicProperties = privacyConfig.GetPublicMemberPropertiesList();
@@ -159,19 +195,6 @@ public class PrivacyService : IPrivacyService
         filteredMemberListDto.AvatarUrl = memberListDto.AvatarUrl;
         filteredMemberListDto.FamilyId = memberListDto.FamilyId;
         filteredMemberListDto.FamilyName = memberListDto.FamilyName;
-
-        filteredMemberListDto.FatherFullName = memberListDto.FatherFullName;
-        filteredMemberListDto.FatherAvatarUrl = memberListDto.FatherAvatarUrl;
-        filteredMemberListDto.FatherGender = memberListDto.FatherGender;
-        filteredMemberListDto.MotherFullName = memberListDto.MotherFullName;
-        filteredMemberListDto.MotherAvatarUrl = memberListDto.MotherAvatarUrl;
-        filteredMemberListDto.MotherGender = memberListDto.MotherGender;
-        filteredMemberListDto.HusbandFullName = memberListDto.HusbandFullName;
-        filteredMemberListDto.HusbandAvatarUrl = memberListDto.HusbandAvatarUrl;
-        filteredMemberListDto.HusbandGender = memberListDto.HusbandGender;
-        filteredMemberListDto.WifeFullName = memberListDto.WifeFullName;
-        filteredMemberListDto.WifeAvatarUrl = memberListDto.WifeAvatarUrl;
-        filteredMemberListDto.WifeGender = memberListDto.WifeGender;
 
         // Explicitly include relationship IDs
         filteredMemberListDto.FatherId = memberListDto.FatherId;
