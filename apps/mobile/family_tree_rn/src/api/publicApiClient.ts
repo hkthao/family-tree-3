@@ -9,6 +9,7 @@ import type {
   MemberDetailDto,
   RelationshipListDto,
   SearchPublicFamiliesQuery,
+  SearchPublicMembersQuery, // Added
 } from '../types/public.d';
 
 // TODO: Configure this based on your environment (e.g., .env file)
@@ -30,6 +31,15 @@ export const searchPublicFamilies = async (
   query: SearchPublicFamiliesQuery
 ): Promise<PaginatedList<FamilyListDto>> => {
   const response = await publicApiClient.get<PaginatedList<FamilyListDto>>('/families/search', {
+    params: query,
+  });
+  return response.data;
+};
+
+export const searchPublicMembers = async (
+  query: SearchPublicMembersQuery
+): Promise<PaginatedList<MemberListDto>> => {
+  const response = await publicApiClient.get<PaginatedList<MemberListDto>>('/members/search', {
     params: query,
   });
   return response.data;

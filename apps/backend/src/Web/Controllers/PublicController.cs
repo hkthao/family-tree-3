@@ -5,6 +5,7 @@ using backend.Application.Members.Queries.GetPublicMemberById;
 using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.Members.Queries.SearchPublicMembers; // Add this using directive
 using backend.Application.Families.Queries.GetFamilyById; // Added missing using directive
 using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
 using backend.Application.Relationships.Queries; // Add this using directive
@@ -75,7 +76,13 @@ public class PublicController(IMediator mediator) : ControllerBase
     /// Lấy danh sách các mối quan hệ của một gia đình công khai theo Family ID.
     /// </summary>
     /// <param name="familyId">ID của gia đình công khai cần lấy mối quan hệ.</param>
-    /// <returns>Danh sách các mối quan hệ thuộc gia đình công khai.</returns>
+    /// <returns>Một PaginatedList chứa danh sách các thành viên công khai tìm được.</returns>
+    [HttpGet("members/search")]
+    public async Task<ActionResult<PaginatedList<MemberListDto>>> SearchPublicMembers([FromQuery] SearchPublicMembersQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return result.IsSuccess ? (ActionResult<PaginatedList<MemberListDto>>)Ok(result.Value) : (ActionResult<PaginatedList<MemberListDto>>)BadRequest(result.Error);
+    }
     [HttpGet("family/{familyId}/relationships")]
     public async Task<ActionResult<List<RelationshipListDto>>> GetPublicRelationshipsByFamilyId(Guid familyId)
     {

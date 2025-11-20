@@ -11,10 +11,12 @@ import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 import { useFamilyStore } from '../../stores/useFamilyStore';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
-import { fetchFamilyMembers, FamilyMember } from '../../data/mockFamilyData'; // Assuming fetchFamilyMembers is updated
+import { usePublicMemberStore } from '@/stores/usePublicMemberStore'; // Import usePublicMemberStore
+import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
+import { Gender } from '@/types/public.d'; // Import Gender enum
 
 interface MemberFilter {
-  gender?: 'Male' | 'Female' | 'Other';
+  gender?: Gender;
   isRootMember?: boolean;
 }
 
@@ -27,87 +29,84 @@ export default function MemberSearchScreen() {
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [members, setMembers] = useState<FamilyMember[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const loadingRef = useRef(loading);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  const {
+    members,
+    page,
+    loading,
+    error,
+    hasMore,
+    fetchMembers,
+    reset,
+    setError, // Destructure setError from store
+  } = usePublicMemberStore();
+
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState<MemberFilter>({});
   const [showFilterChips, setShowFilterChips] = useState(false);
 
+  // Debounce search query
   useEffect(() => {
-    loadingRef.current = loading;
-  }, [loading]);
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 400); // 400ms debounce
 
-  const loadMembers = useCallback(
-    async (currentPage: number, isRefreshing: boolean = false) => {
-      if (loadingRef.current) {
-        return;
-      }
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
-      setLoading(true);
-      setError(null);
+  // Effect for initial load and search query changes
+  useEffect(() => {
+    if (!currentFamilyId) {
+      setError(t('memberSearch.errors.noFamilyId'));
+      reset(); // Clear any previous data
+      return;
+    }
+    reset(); // Clear data and reset page/hasMore
+    fetchMembers({
+      familyId: currentFamilyId!, // Use non-null assertion
+      page: 1,
+      searchTerm: debouncedSearchQuery,
+      gender: filters.gender,
+      isRoot: filters.isRootMember,
+    }, true); // Fetch first page for debounced search
+  }, [currentFamilyId, debouncedSearchQuery, filters, fetchMembers, reset, setError, t]);
 
-      if (!currentFamilyId) {
-        setError(t('memberSearch.errors.noFamilyId'));
-        setLoading(false);
-        return;
-      }
-
+  const handleRefresh = useCallback(async () => {
+    if (!loading) {
+      setRefreshing(true);
       try {
-        const controller = new AbortController();
-        // fetchFamilyMembers needs to be updated to accept query and filters
-        const { data, totalCount: newTotalCount } = await fetchFamilyMembers(
-          currentFamilyId,
-          searchQuery,
-          filters,
-          currentPage,
-          PAGE_SIZE,
-          controller.signal
-        );
-
-        setMembers((prevMembers) => {
-          const updatedMembers = isRefreshing ? data : [...prevMembers, ...data];
-          setHasMore(updatedMembers.length < newTotalCount);
-          return updatedMembers;
-        });
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError(t('memberSearch.errors.unknown'));
-        }
+        reset(); // Clear data and reset page/hasMore
+        await fetchMembers({
+          familyId: currentFamilyId!, // Use non-null assertion
+          page: 1,
+          searchTerm: searchQuery,
+          gender: filters.gender,
+          isRoot: filters.isRootMember,
+        }, true); // Fetch first page for current search query
       } finally {
-        setLoading(false);
         setRefreshing(false);
       }
-    },
-    [currentFamilyId, searchQuery, filters, setLoading, setError, setMembers, setHasMore, t]
-  );
-
-  useEffect(() => {
-    setMembers([]);
-    setPage(1);
-    setHasMore(true);
-    loadMembers(1);
-  }, [searchQuery, filters, loadMembers]);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    setPage(1);
-    setMembers([]);
-    setHasMore(true);
-    loadMembers(1, true);
-  }, [loadMembers]);
-
-  const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      setPage((prevPage) => prevPage + 1);
-      loadMembers(page + 1);
     }
-  }, [loading, hasMore, page, loadMembers]);
+  }, [loading, reset, fetchMembers, currentFamilyId, searchQuery, filters]);
+
+  const isFetchingMore = useRef(false);
+
+  const handleLoadMore = useCallback(async () => {
+    if (!loading && hasMore && !isFetchingMore.current) {
+      isFetchingMore.current = true;
+      await fetchMembers({
+        familyId: currentFamilyId!, // Use non-null assertion
+        page: page + 1,
+        searchTerm: searchQuery,
+        gender: filters.gender,
+        isRoot: filters.isRootMember,
+      }); // Fetch next page
+      isFetchingMore.current = false;
+    }
+  }, [loading, hasMore, page, fetchMembers, currentFamilyId, searchQuery, filters]);
 
   const handleFilterChange = useCallback((key: keyof MemberFilter, value: any) => {
     setFilters((prevFilters) => {
@@ -122,7 +121,7 @@ export default function MemberSearchScreen() {
   }, []);
 
   const renderFooter = () => {
-    if (!loading) return null;
+    if (!loading || page === 1) return null; // Only show spinner for subsequent loads
     return (
       <View style={styles.footer}>
         <ActivityIndicator animating size="small" color={theme.colors.primary} />
@@ -214,6 +213,7 @@ export default function MemberSearchScreen() {
     detailChip: {
       backgroundColor: 'transparent',
       paddingHorizontal: 0,
+      borderWidth: 0, // Remove border
     },
     footer: {
       paddingVertical: SPACING_MEDIUM,
@@ -256,22 +256,22 @@ export default function MemberSearchScreen() {
       {showFilterChips && (
         <View style={styles.filterChipsContainer}>
           <Chip
-            selected={filters.gender === 'Male'}
-            onPress={() => handleFilterChange('gender', 'Male')}
+            selected={filters.gender === Gender.Male}
+            onPress={() => handleFilterChange('gender', Gender.Male)}
             style={styles.filterChip}
           >
             {t('memberSearch.filter.gender.male')}
           </Chip>
           <Chip
-            selected={filters.gender === 'Female'}
-            onPress={() => handleFilterChange('gender', 'Female')}
+            selected={filters.gender === Gender.Female}
+            onPress={() => handleFilterChange('gender', Gender.Female)}
             style={styles.filterChip}
           >
             {t('memberSearch.filter.gender.female')}
           </Chip>
           <Chip
-            selected={filters.gender === 'Other'}
-            onPress={() => handleFilterChange('gender', 'Other')}
+            selected={filters.gender === Gender.Other}
+            onPress={() => handleFilterChange('gender', Gender.Other)}
             style={styles.filterChip}
           >
             {t('memberSearch.filter.gender.other')}
@@ -302,9 +302,9 @@ export default function MemberSearchScreen() {
             router.push(`/member/${item.id}`);
           }}>
             <Card.Content style={styles.cardContent}>
-              <Avatar.Image size={48} source={{ uri: item.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
+              <Avatar.Image size={48} source={item.avatarUrl ? { uri: item.avatarUrl } : DefaultFamilyAvatar} style={styles.avatar} />
               <View style={styles.cardText}>
-                <Text variant="titleMedium">{item.name}</Text>
+                <Text variant="titleMedium">{item.fullName}</Text>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: SPACING_SMALL / 2 }}>
                   {item.occupation && <Text variant="bodySmall">{item.occupation}</Text>}
                   {item.occupation && item.birthDeathYears && <Text variant="bodySmall">|</Text>}
@@ -316,24 +316,24 @@ export default function MemberSearchScreen() {
                       {t(`memberSearch.filter.gender.${item.gender.toLowerCase()}`)}
                     </Chip>
                   )}
-                  {item.father && (
+                  {item.fatherFullName && (
                     <Chip icon="human-male-boy" style={styles.detailChip} compact={true} >
-                      {item.father}
+                      {item.fatherFullName}
                     </Chip>
                   )}
-                  {item.mother && (
+                  {item.motherFullName && (
                     <Chip icon="human-female-girl" style={styles.detailChip} compact={true} >
-                      {item.mother}
+                      {item.motherFullName}
                     </Chip>
                   )}
-                  {item.wife && (
+                  {item.wifeFullName && (
                     <Chip icon="heart" style={styles.detailChip} compact={true} >
-                      {item.wife}
+                      {item.wifeFullName}
                     </Chip>
                   )}
-                  {item.husband && (
+                  {item.husbandFullName && (
                     <Chip icon="heart" style={styles.detailChip} compact={true} >
-                      {item.husband}
+                      {item.husbandFullName}
                     </Chip>
                   )}
                 </View>
@@ -344,7 +344,7 @@ export default function MemberSearchScreen() {
         ListEmptyComponent={renderEmptyList}
         ListFooterComponent={renderFooter}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
+        onEndReachedThreshold={0.3}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

@@ -18,6 +18,7 @@ public class MemberListDto : BaseAuditableDto
     public DateTime? DateOfBirth { get; set; }
     public DateTime? DateOfDeath { get; set; }
     public string? Gender { get; set; }
+    public string? Occupation { get; set; }
 
     public string? FatherFullName { get; set; }
     public string? FatherAvatarUrl { get; set; }

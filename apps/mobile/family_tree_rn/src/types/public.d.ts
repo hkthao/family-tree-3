@@ -59,6 +59,17 @@ export interface SearchPublicFamiliesQuery {
   sortOrder?: string; // "asc" or "desc"
 }
 
+export interface SearchPublicMembersQuery {
+  familyId: string;
+  page?: number;
+  itemsPerPage?: number;
+  searchTerm?: string;
+  gender?: Gender;
+  isRoot?: boolean;
+  sortBy?: string;
+  sortOrder?: string; // "asc" or "desc"
+}
+
 export enum Gender {
   Male = "Male",
   Female = "Female",
@@ -78,6 +89,7 @@ export interface MemberListDto extends BaseAuditableDto {
   dateOfBirth?: string; // DateTime in C# maps to string in TypeScript
   dateOfDeath?: string; // DateTime in C# maps to string in TypeScript
   gender?: Gender;
+  occupation?: string; // Added
   fatherFullName?: string;
   fatherAvatarUrl?: string;
   motherFullName?: string;

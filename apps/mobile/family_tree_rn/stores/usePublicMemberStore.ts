@@ -1,56 +1,56 @@
 // apps/mobile/family_tree_rn/stores/usePublicMemberStore.ts
 
 import { create } from 'zustand';
-import {
-  getPublicMembersByFamilyId,
-  getPublicMemberById,
-} from '../src/api/publicApiClient';
-import type { MemberListDto, MemberDetailDto } from '../src/types/public.d';
+import { searchPublicMembers } from '../src/api/publicApiClient';
+import type { MemberListDto, PaginatedList, SearchPublicMembersQuery } from '../src/types/public.d';
+
+const PAGE_SIZE = 10;
 
 interface PublicMemberState {
   members: MemberListDto[];
-  member: MemberDetailDto | null;
+  page: number;
+  totalPages: number;
+  totalItems: number;
   loading: boolean;
   error: string | null;
+  hasMore: boolean;
 }
 
 interface PublicMemberActions {
-  getMembersByFamilyId: (familyId: string) => Promise<void>;
-  getMemberById: (id: string, familyId: string) => Promise<void>;
-  clearMembers: () => void;
-  clearMember: () => void;
+  fetchMembers: (query: SearchPublicMembersQuery, isRefreshing?: boolean) => Promise<void>;
+  reset: () => void;
   setError: (error: string | null) => void;
 }
 
 type PublicMemberStore = PublicMemberState & PublicMemberActions;
 
-export const usePublicMemberStore = create<PublicMemberStore>((set) => ({
+export const usePublicMemberStore = create<PublicMemberStore>((set, get) => ({
   members: [],
-  member: null,
+  page: 1,
+  totalPages: 0,
+  totalItems: 0,
   loading: false,
   error: null,
+  hasMore: true,
 
-  getMembersByFamilyId: async (familyId: string) => {
+  fetchMembers: async (query: SearchPublicMembersQuery, isRefreshing: boolean = false) => {
     set({ loading: true, error: null });
     try {
-      const members = await getPublicMembersByFamilyId(familyId);
-      set({ members, loading: false });
+      const paginatedList = await searchPublicMembers(query);
+      set((state) => ({
+        members: isRefreshing ? paginatedList.items : [...state.members, ...paginatedList.items],
+        totalItems: paginatedList.totalItems,
+        page: paginatedList.page,
+        totalPages: paginatedList.totalPages,
+        hasMore: paginatedList.totalPages > 0 && paginatedList.page < paginatedList.totalPages,
+      }));
     } catch (err: any) {
-      set({ error: err.message || 'Failed to fetch members', loading: false });
+      set({ error: err.message || 'Failed to fetch members' });
+    } finally {
+      set({ loading: false });
     }
   },
 
-  getMemberById: async (id: string, familyId: string) => {
-    set({ loading: true, error: null });
-    try {
-      const member = await getPublicMemberById(id, familyId);
-      set({ member, loading: false });
-    } catch (err: any) {
-      set({ error: err.message || 'Failed to fetch member details', loading: false });
-    }
-  },
-
-  clearMembers: () => set({ members: [] }),
-  clearMember: () => set({ member: null }),
+  reset: () => set({ members: [], page: 1, totalPages: 0, totalItems: 0, hasMore: true, error: null }),
   setError: (error: string | null) => set({ error }),
 }));
