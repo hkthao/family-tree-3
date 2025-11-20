@@ -250,20 +250,20 @@ export interface BoundingBoxDto {
 }
 
 export interface DetectedFaceDto {
-  Id: string;
-  BoundingBox: BoundingBoxDto;
-  Confidence: number;
-  Thumbnail?: string; // Base64 encoded image
-  Embedding?: number[];
-  MemberId?: string;
-  MemberName?: string;
-  FamilyId?: string;
-  FamilyName?: string;
-  BirthYear?: number;
-  DeathYear?: number;
+  id: string;
+  boundingBox: BoundingBoxDto;
+  confidence: number;
+  thumbnail?: string; // Base64 encoded image
+  embedding?: number[];
+  memberId?: string;
+  memberName?: string;
+  familyId?: string;
+  familyName?: string;
+  birthYear?: number;
+  deathYear?: number;
 }
 
 export interface FaceDetectionResponseDto {
-  ImageId: string;
-  DetectedFaces: DetectedFaceDto[];
+  imageId: string;
+  detectedFaces: DetectedFaceDto[];
 }

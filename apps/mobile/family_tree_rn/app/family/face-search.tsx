@@ -55,10 +55,12 @@ export default function FamilyFaceSearchScreen() {
           const response = await detectFaces({
             imageBytes: selectedImage.base64,
             contentType: selectedImage.mimeType || 'image/jpeg',
-            returnCrop: true,
+            returnCrop: false,
           });
-          if (response && response.DetectedFaces) {
-            setDetectedFaces(response.DetectedFaces);
+          console.log(response);
+          
+          if (response && response.detectedFaces) {
+            setDetectedFaces(response.detectedFaces);
           }
         } else {
           Alert.alert(t('common.error'), t('faceSearch.base64Error'));
@@ -99,8 +101,8 @@ export default function FamilyFaceSearchScreen() {
             contentType: selectedImage.mimeType || 'image/jpeg',
             returnCrop: true,
           });
-          if (response && response.DetectedFaces) {
-            setDetectedFaces(response.DetectedFaces);
+          if (response && response.detectedFaces) {
+            setDetectedFaces(response.detectedFaces);
           }
         } else {
           Alert.alert(t('common.error'), t('faceSearch.base64Error'));
@@ -186,7 +188,7 @@ export default function FamilyFaceSearchScreen() {
             const scaleX = containerDimensions.width / imageDimensions.width;
             const scaleY = containerDimensions.height / imageDimensions.height;
 
-            const box = face.BoundingBox;
+            const box = face.boundingBox;
             const scaledBox = {
               x: box.X * scaleX,
               y: box.Y * scaleY,
@@ -207,9 +209,9 @@ export default function FamilyFaceSearchScreen() {
                   },
                 ]}
               >
-                {face.MemberName && (
+                {face.memberName && (
                   <Text style={[styles.label, { top: -20 }]}>
-                    {face.MemberName}
+                    {face.memberName}
                   </Text>
                 )}
               </View>
