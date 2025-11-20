@@ -2,9 +2,13 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Mapster;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetPublicUpcomingEvents;
 
@@ -15,30 +19,30 @@ public record GetPublicUpcomingEventsQuery : IRequest<Result<List<EventDto>>>
     public DateTime? EndDate { get; init; }
 }
 
-public class GetPublicUpcomingEventsQueryHandler(IApplicationDbContext context) : IRequestHandler<GetPublicUpcomingEventsQuery, Result<List<EventDto>>>
+public class GetPublicUpcomingEventsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetPublicUpcomingEventsQuery, Result<List<EventDto>>>
 {
     private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<List<EventDto>>> Handle(GetPublicUpcomingEventsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Events
-            .AsNoTracking()
-            .Where(e => e.Family.Visibility == FamilyVisibility.Public);
+        var spec = new PublicEventsSpecification();
+        var query = _context.Events.AsNoTracking().WithSpecification(spec);
 
         if (request.FamilyId.HasValue)
         {
-            query = query.Where(e => e.FamilyId == request.FamilyId.Value);
+            query = query.WithSpecification(new EventsByFamilyIdSpecification(request.FamilyId.Value));
         }
 
         var now = DateTime.UtcNow;
         var startDate = request.StartDate ?? now;
         var endDate = request.EndDate ?? now.AddMonths(3); // Default to next 3 months
 
-        query = query.Where(e => e.StartDate >= startDate && e.StartDate <= endDate)
-                     .OrderBy(e => e.StartDate);
+        query = query.WithSpecification(new EventsByDateRangeSpecification(startDate, endDate));
+        query = query.WithSpecification(new EventsOrderByStartDateSpecification("asc"));
 
         var events = await query
-            .ProjectToType<EventDto>()
+            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
         return Result<List<EventDto>>.Success(events);

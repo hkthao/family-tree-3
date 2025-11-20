@@ -2,9 +2,13 @@ using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
-using Mapster;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.SearchPublicEvents;
 
@@ -21,56 +25,49 @@ public record SearchPublicEventsQuery : IRequest<Result<PaginatedList<EventDto>>
     public string? SortOrder { get; init; } // "asc" or "desc"
 }
 
-public class SearchPublicEventsQueryHandler(IApplicationDbContext context) : IRequestHandler<SearchPublicEventsQuery, Result<PaginatedList<EventDto>>>
+public class SearchPublicEventsQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<SearchPublicEventsQuery, Result<PaginatedList<EventDto>>>
 {
     private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<PaginatedList<EventDto>>> Handle(SearchPublicEventsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Events
-            .AsNoTracking()
-            .Where(e => e.Family.Visibility == FamilyVisibility.Public);
+        var spec = new PublicEventsSpecification();
+        var query = _context.Events.AsNoTracking().WithSpecification(spec);
 
         if (request.FamilyId.HasValue)
         {
-            query = query.Where(e => e.FamilyId == request.FamilyId.Value);
+            query = query.WithSpecification(new EventsByFamilyIdSpecification(request.FamilyId.Value));
         }
 
         if (!string.IsNullOrWhiteSpace(request.SearchTerm))
         {
-            query = query.Where(e => e.Title!.Contains(request.SearchTerm) ||
-                                     e.Description!.Contains(request.SearchTerm) ||
-                                     e.Location!.Contains(request.SearchTerm));
+            query = query.WithSpecification(new EventsBySearchTermSpecification(request.SearchTerm));
         }
 
         if (request.EventType.HasValue)
         {
-            query = query.Where(e => e.EventType == request.EventType.Value);
+            query = query.WithSpecification(new EventsByEventTypeSpecification(request.EventType.Value));
         }
 
-        if (request.StartDate.HasValue)
+        if (request.StartDate.HasValue || request.EndDate.HasValue)
         {
-            query = query.Where(e => e.StartDate >= request.StartDate.Value);
-        }
-
-        if (request.EndDate.HasValue)
-        {
-            query = query.Where(e => e.StartDate <= request.EndDate.Value);
+            query = query.WithSpecification(new EventsByDateRangeSpecification(request.StartDate, request.EndDate));
         }
 
         // Sorting
         query = request.SortBy?.ToLower() switch
         {
-            "title" => request.SortOrder == "desc" ? query.OrderByDescending(e => e.Title) : query.OrderBy(e => e.Title),
-            "startdate" => request.SortOrder == "desc" ? query.OrderByDescending(e => e.StartDate) : query.OrderBy(e => e.StartDate),
-            _ => query.OrderBy(e => e.StartDate) // Default sort
+            "name" => query.WithSpecification(new EventsOrderByNameSpecification(request.SortOrder ?? "asc")),
+            "startdate" => query.WithSpecification(new EventsOrderByStartDateSpecification(request.SortOrder ?? "asc")),
+            _ => query.WithSpecification(new EventsOrderByStartDateSpecification("asc")) // Default sort
         };
 
         var totalItems = await query.CountAsync(cancellationToken);
         var events = await query
             .Skip((request.Page - 1) * request.ItemsPerPage)
             .Take(request.ItemsPerPage)
-            .ProjectToType<EventDto>()
+            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
 
         var paginatedList = new PaginatedList<EventDto>(events, totalItems, request.Page, request.ItemsPerPage);

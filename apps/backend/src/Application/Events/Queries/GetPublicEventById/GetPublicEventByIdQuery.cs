@@ -1,33 +1,40 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Entities;
-using Mapster;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Ardalis.Specification;
+using Ardalis.Specification.EntityFrameworkCore;
+using backend.Application.Events.Specifications;
 
 namespace backend.Application.Events.Queries.GetPublicEventById;
 
 public record GetPublicEventByIdQuery(Guid Id) : IRequest<Result<EventDto>>;
 
-public class GetPublicEventByIdQueryHandler(IApplicationDbContext context) : IRequestHandler<GetPublicEventByIdQuery, Result<EventDto>>
+public class GetPublicEventByIdQueryHandler(IApplicationDbContext context, IMapper mapper) : IRequestHandler<GetPublicEventByIdQuery, Result<EventDto>>
 {
     private readonly IApplicationDbContext _context = context;
+    private readonly IMapper _mapper = mapper;
 
     public async Task<Result<EventDto>> Handle(GetPublicEventByIdQuery request, CancellationToken cancellationToken)
     {
+        var spec = new PublicEventsSpecification();
         var eventEntity = await _context.Events
             .AsNoTracking()
-            .Where(e => e.Id == request.Id && e.Family.Visibility == Domain.Enums.FamilyVisibility.Public)
-            .ProjectToType<EventDto>()
+            .Where(e => e.Id == request.Id)
+            .WithSpecification(spec)
+            .ProjectTo<EventDto>(_mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
 
         return eventEntity == null
-            ? Result<EventDto>.NotFound($"Event with ID {request.Id} not found or is not public.")
+            ? Result<EventDto>.Failure($"Event with ID {request.Id} not found or is not public.")
             : Result<EventDto>.Success(eventEntity);
     }
 }
 
-public class EventDto : IMapFrom<Event>
+public class EventDto
 {
     public Guid Id { get; set; }
     public Guid FamilyId { get; set; }
@@ -38,11 +45,4 @@ public class EventDto : IMapFrom<Event>
     public string? Location { get; set; }
     public string EventType { get; set; } = null!;
     public List<Guid> RelatedMembers { get; set; } = new();
-
-    public void Mapping(Profile profile)
-    {
-        profile.CreateMap<Event, EventDto>()
-            .ForMember(dest => dest.EventType, opt => opt.MapFrom(src => src.EventType.ToString()))
-            .ForMember(dest => dest.RelatedMembers, opt => opt.MapFrom(src => src.RelatedMembers.Select(rm => rm.MemberId).ToList()));
-    }
 }
