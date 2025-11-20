@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Image, Button, Alert } from 'react-native';
+import { StyleSheet, View, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, useTheme } from 'react-native-paper';
+import { Text, useTheme, Button } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 import { useCameraPermissions } from 'expo-camera';
@@ -15,6 +15,7 @@ export default function FamilyFaceSearchScreen() {
 
   const [image, setImage] = useState<string | null>(null);
   const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number } | null>(null);
+  const [containerDimensions, setContainerDimensions] = useState<{ width: number; height: number } | null>(null);
   const [detectedFaces, setDetectedFaces] = useState<DetectedFaceDto[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -45,7 +46,7 @@ export default function FamilyFaceSearchScreen() {
     if (!result.canceled && result.assets && result.assets.length > 0) {
       const selectedImage = result.assets[0];
       setImage(selectedImage.uri);
-      setImageDimensions({ width: selectedImage.width, height: selectedImage.width }); // Use width for both to maintain aspect ratio for bounding box calculations
+      setImageDimensions({ width: selectedImage.width, height: selectedImage.height });
       setLoading(true);
       setDetectedFaces([]); // Clear previous detections
 
@@ -162,18 +163,28 @@ export default function FamilyFaceSearchScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.buttonContainer}>
-        <Button title={t('faceSearch.pickImage')} onPress={pickImage} />
-        <Button title={t('faceSearch.takePhoto')} onPress={takePhoto} />
+        <Button mode="contained" onPress={pickImage} loading={loading} disabled={loading}>
+          {t('faceSearch.pickImage')}
+        </Button>
+        <Button mode="contained" onPress={takePhoto} loading={loading} disabled={loading}>
+          {t('faceSearch.takePhoto')}
+        </Button>
       </View>
 
       {loading && <Text>{t('common.loading')}</Text>}
 
       {image && imageDimensions && (
-        <View style={styles.imageContainer}>
+        <View
+          style={styles.imageContainer}
+          onLayout={(event) => {
+            const { width, height } = event.nativeEvent.layout;
+            setContainerDimensions({ width, height });
+          }}
+        >
           <Image source={{ uri: image }} style={styles.image} />
-          {detectedFaces.map((face: DetectedFaceDto, index: number) => {
-            const scaleX = (styles.imageContainer.width as number) / imageDimensions.width;
-            const scaleY = (styles.imageContainer.aspectRatio as number * (styles.imageContainer.width as number)) / imageDimensions.height;
+          {containerDimensions && detectedFaces.map((face: DetectedFaceDto, index: number) => {
+            const scaleX = containerDimensions.width / imageDimensions.width;
+            const scaleY = containerDimensions.height / imageDimensions.height;
 
             const box = face.BoundingBox;
             const scaledBox = {
