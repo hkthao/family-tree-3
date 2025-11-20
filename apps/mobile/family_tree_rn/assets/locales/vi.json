@@ -130,6 +130,7 @@
   "member.mother": "Mẹ",
   "member.wife": "Vợ",
   "member.husband": "Chồng",
+  "memberDetail.occupation": "Nghề nghiệp",
   "memberDetail.title": "Chi tiết thành viên",
   "memberDetail.errors.notFound": "Không tìm thấy thành viên",
   "memberDetail.errors.failedToLoad": "Tải chi tiết thành viên thất bại",
