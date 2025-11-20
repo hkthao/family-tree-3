@@ -45,7 +45,7 @@ public class PublicController(IMediator mediator) : ControllerBase
     /// Tìm kiếm các gia đình công khai dựa trên các tiêu chí được cung cấp.
     /// </summary>
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
-    /// <returns>Một PaginatedList chứa danh sách các gia đình công khai tìm được.</returns>
+    /// <returns>Một PaginatedList chứa danh sách các gia đình công khai tìm được.</param>
     [HttpGet("families/search")]
     public async Task<ActionResult<PaginatedList<FamilyListDto>>> SearchPublicFamilies([FromQuery] SearchPublicFamiliesQuery query)
     {
@@ -112,7 +112,7 @@ public class PublicController(IMediator mediator) : ControllerBase
     /// Tìm kiếm các sự kiện công khai dựa trên các tiêu chí được cung cấp.
     /// </summary>
     /// <param name="query">Đối tượng chứa các tiêu chí tìm kiếm và phân trang.</param>
-    /// <returns>Một PaginatedList chứa danh sách các sự kiện công khai tìm được.</returns>
+    /// <returns>Một PaginatedList chứa danh sách các sự kiện công khai tìm được.</param>
     [HttpGet("events/search")]
     public async Task<ActionResult<PaginatedList<EventDto>>> SearchPublicEvents([FromQuery] SearchPublicEventsQuery query)
     {
@@ -143,4 +143,5 @@ public class PublicController(IMediator mediator) : ControllerBase
         var result = await _mediator.Send(command);
         return result.IsSuccess ? (ActionResult<FaceDetectionResponseDto>)Ok(result.Value) : (ActionResult<FaceDetectionResponseDto>)BadRequest(result.Error);
     }
+
 }
