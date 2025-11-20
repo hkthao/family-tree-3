@@ -15,13 +15,15 @@ public class UpdateMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<IStringLocalizer<UpdateMemberCommandHandler>> _localizerMock;
+    private readonly Mock<IMemberRelationshipService> _memberRelationshipServiceMock;
     private readonly UpdateMemberCommandHandler _handler;
 
     public UpdateMemberCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _localizerMock = new Mock<IStringLocalizer<UpdateMemberCommandHandler>>();
-        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        _memberRelationshipServiceMock = new Mock<IMemberRelationshipService>();
+        _handler = new UpdateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
     }
 
     [Fact]

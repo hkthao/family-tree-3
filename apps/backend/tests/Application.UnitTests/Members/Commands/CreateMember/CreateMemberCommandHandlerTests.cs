@@ -15,18 +15,20 @@ public class CreateMemberCommandHandlerTests : TestBase
 {
     private readonly Mock<IAuthorizationService> _authorizationServiceMock;
     private readonly Mock<IStringLocalizer<CreateMemberCommandHandler>> _localizerMock;
+    private readonly Mock<IMemberRelationshipService> _memberRelationshipServiceMock;
 
     public CreateMemberCommandHandlerTests()
     {
         _authorizationServiceMock = new Mock<IAuthorizationService>();
         _localizerMock = new Mock<IStringLocalizer<CreateMemberCommandHandler>>();
+        _memberRelationshipServiceMock = new Mock<IMemberRelationshipService>();
     }
 
     [Fact]
     public async Task Handle_ShouldCreateMemberAndReturnSuccess_WhenAuthorized()
     {
         // Arrange
-        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
         var familyId = Guid.NewGuid();
         _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF1" });
         await _context.SaveChangesAsync();
@@ -58,7 +60,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenNotAuthorized()
     {
         // Arrange
-        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
         var familyId = Guid.NewGuid();
         var command = new CreateMemberCommand { FamilyId = familyId, FirstName = "Unauthorized", LastName = "Member" };
 
@@ -77,7 +79,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldReturnFailure_WhenFamilyNotFound()
     {
         // Arrange
-        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
         var nonExistentFamilyId = Guid.NewGuid();
         var command = new CreateMemberCommand { FamilyId = nonExistentFamilyId, FirstName = "John", LastName = "Doe" };
         _authorizationServiceMock.Setup(x => x.CanManageFamily(nonExistentFamilyId)).Returns(true);
@@ -95,7 +97,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldGenerateCode_WhenCodeIsNotProvided()
     {
         // Arrange
-        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
         var familyId = Guid.NewGuid();
         _context.Families.Add(new Family { Id = familyId, Name = "Test Family", Code = "TF1" });
         await _context.SaveChangesAsync();
@@ -124,7 +126,7 @@ public class CreateMemberCommandHandlerTests : TestBase
     public async Task Handle_ShouldSetNewRoot_AndUnsetOldRoot()
     {
         // Arrange
-        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object);
+        var handler = new CreateMemberCommandHandler(_context, _authorizationServiceMock.Object, _localizerMock.Object, _memberRelationshipServiceMock.Object);
         var familyId = Guid.NewGuid();
         var oldRoot = new Member("Old", "Root", "OR", familyId);
         oldRoot.SetAsRoot();

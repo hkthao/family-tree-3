@@ -36,28 +36,8 @@ public class MappingProfile : Profile
         CreateMap<Family, FamilyListDto>();
         CreateMap<Member, MemberDto>();
         CreateMap<Member, MemberListDto>()
-            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null))
-            .ForMember(dest => dest.FatherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.FullName))
-            .ForMember(dest => dest.FatherAvatarUrl, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.AvatarUrl))
-            .ForMember(dest => dest.MotherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.FullName))
-            .ForMember(dest => dest.MotherAvatarUrl, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.AvatarUrl))
-            .ForMember(dest => dest.HusbandFullName, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband && r.TargetMember != null)!.TargetMember!.FullName))
-            .ForMember(dest => dest.HusbandAvatarUrl, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband && r.TargetMember != null)!.TargetMember!.AvatarUrl))
-            .ForMember(dest => dest.WifeFullName, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.FullName))
-            .ForMember(dest => dest.WifeAvatarUrl, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.AvatarUrl))
-            .ForMember(dest => dest.FatherGender, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.Gender))
-            .ForMember(dest => dest.MotherGender, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.Gender))
-            .ForMember(dest => dest.HusbandGender, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband && r.TargetMember != null)!.TargetMember!.Gender))
-            .ForMember(dest => dest.WifeGender, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.Gender))
-            .ForMember(dest => dest.FatherId, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.Id))
-            .ForMember(dest => dest.MotherId, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.Id))
-            .ForMember(dest => dest.HusbandId, opt => opt.MapFrom(src => (Guid?)src.SourceRelationships.Where(r => r.Type == RelationshipType.Husband).Select(r => r.TargetMemberId).FirstOrDefault()))
-            .ForMember(dest => dest.WifeId, opt => opt.MapFrom(src => (Guid?)src.SourceRelationships.Where(r => r.Type == RelationshipType.Wife).Select(r => r.TargetMemberId).FirstOrDefault()));
-        CreateMap<Member, MemberDetailDto>()
-            .ForMember(dest => dest.FatherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Father && r.SourceMember != null)!.SourceMember!.FullName))
-            .ForMember(dest => dest.MotherFullName, opt => opt.MapFrom(src => src.TargetRelationships.FirstOrDefault(r => r.Type == RelationshipType.Mother && r.SourceMember != null)!.SourceMember!.FullName))
-            .ForMember(dest => dest.HusbandFullName, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Husband && r.TargetMember != null)!.TargetMember!.FullName))
-            .ForMember(dest => dest.WifeFullName, opt => opt.MapFrom(src => src.SourceRelationships.FirstOrDefault(r => r.Type == RelationshipType.Wife && r.TargetMember != null)!.TargetMember!.FullName));
+            .ForMember(dest => dest.FamilyName, opt => opt.MapFrom(src => src.Family != null ? src.Family.Name : null));
+        CreateMap<Member, MemberDetailDto>();
 
         //Event
         CreateMap<Event, EventListDto>();

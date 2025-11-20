@@ -26,6 +26,16 @@ public class Member : BaseAuditableEntity
     public bool IsRoot { get; private set; } = false;
     public int? Order { get; private set; }
 
+    // Denormalized relationship properties
+    public Guid? FatherId { get; set; }
+    public string? FatherFullName { get; set; }
+    public Guid? MotherId { get; set; }
+    public string? MotherFullName { get; set; }
+    public Guid? HusbandId { get; set; }
+    public string? HusbandFullName { get; set; }
+    public Guid? WifeId { get; set; }
+    public string? WifeFullName { get; set; }
+
     public void SetAsRoot()
     {
         IsRoot = true;

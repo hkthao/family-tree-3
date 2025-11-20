@@ -10,6 +10,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
+using backend.Infrastructure.Services; // Add this line
 
 namespace backend.Application.UnitTests.Members.Queries.GetPublicMembersByFamilyId;
 
@@ -17,10 +18,12 @@ public class GetPublicMembersByFamilyIdQueryHandlerTests : TestBase
 {
     private readonly GetPublicMembersByFamilyIdQueryHandler _handler;
     private readonly Mock<IPrivacyService> _mockPrivacyService;
+    private readonly IMemberRelationshipService _memberRelationshipService;
 
     public GetPublicMembersByFamilyIdQueryHandlerTests()
     {
         _mockPrivacyService = new Mock<IPrivacyService>();
+        _memberRelationshipService = new MemberRelationshipService(_context); // Instantiate with in-memory context
         _handler = new GetPublicMembersByFamilyIdQueryHandler(_context, _mapper, _mockPrivacyService.Object);
     }
 
@@ -151,6 +154,13 @@ public class GetPublicMembersByFamilyIdQueryHandlerTests : TestBase
         _context.Relationships.Add(new Relationship(familyId, spouse.Id, father.Id, RelationshipType.Wife)); // Spouse is wife of father
 
         await _context.SaveChangesAsync();
+
+        // Manually update denormalized fields for test members
+        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(father, CancellationToken.None);
+        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(mother, CancellationToken.None);
+        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(child, CancellationToken.None);
+        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(spouse, CancellationToken.None);
+        await _context.SaveChangesAsync(); // Save changes after updating denormalized fields
 
         // Debugging: Inspect relationships directly from the context
         var savedFather = _context.Members.Include(m => m.SourceRelationships).Include(m => m.TargetRelationships).FirstOrDefault(m => m.Id == father.Id);

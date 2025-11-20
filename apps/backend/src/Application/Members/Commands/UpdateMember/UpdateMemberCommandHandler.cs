@@ -8,11 +8,12 @@ using Microsoft.Extensions.Localization;
 
 namespace backend.Application.Members.Commands.UpdateMember;
 
-public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberCommandHandler> localizer) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
+public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthorizationService authorizationService, IStringLocalizer<UpdateMemberCommandHandler> localizer, IMemberRelationshipService memberRelationshipService) : IRequestHandler<UpdateMemberCommand, Result<Guid>>
 {
     private readonly IApplicationDbContext _context = context;
     private readonly IAuthorizationService _authorizationService = authorizationService;
     private readonly IStringLocalizer<UpdateMemberCommandHandler> _localizer = localizer;
+    private readonly IMemberRelationshipService _memberRelationshipService = memberRelationshipService;
     public async Task<Result<Guid>> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
     {
         if (!_authorizationService.CanManageFamily(request.FamilyId))
@@ -188,6 +189,9 @@ public class UpdateMemberCommandHandler(IApplicationDbContext context, IAuthoriz
 
         // Synchronize Birth and Death events
         await SyncLifeEvents(request, member, cancellationToken);
+
+        // Update denormalized relationship fields after all relationships are established
+        await _memberRelationshipService.UpdateDenormalizedRelationshipFields(member, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 
