@@ -33,6 +33,10 @@ public class MemberDetailDto : BaseAuditableDto
     public string? MotherFullName { get; set; }
     public string? HusbandFullName { get; set; }
     public string? WifeFullName { get; set; }
+    public string? FatherAvatarUrl { get; set; }
+    public string? MotherAvatarUrl { get; set; }
+    public string? HusbandAvatarUrl { get; set; }
+    public string? WifeAvatarUrl { get; set; }
     public Guid? FatherId { get; set; }
     public Guid? MotherId { get; set; }
     public Guid? HusbandId { get; set; }

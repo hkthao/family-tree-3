@@ -36,6 +36,11 @@ public class Member : BaseAuditableEntity
     public Guid? WifeId { get; set; }
     public string? WifeFullName { get; set; }
 
+    public string? FatherAvatarUrl { get; set; }
+    public string? MotherAvatarUrl { get; set; }
+    public string? HusbandAvatarUrl { get; set; }
+    public string? WifeAvatarUrl { get; set; }
+
     public void SetAsRoot()
     {
         IsRoot = true;

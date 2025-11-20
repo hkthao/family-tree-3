@@ -19,12 +19,16 @@ public class MemberRelationshipService : IMemberRelationshipService
         // Clear existing denormalized fields
         member.FatherId = null;
         member.FatherFullName = null;
+        member.FatherAvatarUrl = null;
         member.MotherId = null;
         member.MotherFullName = null;
+        member.MotherAvatarUrl = null;
         member.HusbandId = null;
         member.HusbandFullName = null;
+        member.HusbandAvatarUrl = null;
         member.WifeId = null;
         member.WifeFullName = null;
+        member.WifeAvatarUrl = null;
 
         // Load all relationships involving this member
         var relationships = await _context.Relationships
@@ -40,6 +44,7 @@ public class MemberRelationshipService : IMemberRelationshipService
         {
             member.FatherId = fatherRelationship.SourceMemberId;
             member.FatherFullName = fatherRelationship.SourceMember?.FullName;
+            member.FatherAvatarUrl = fatherRelationship.SourceMember?.AvatarUrl;
         }
 
         // Find Mother
@@ -49,6 +54,7 @@ public class MemberRelationshipService : IMemberRelationshipService
         {
             member.MotherId = motherRelationship.SourceMemberId;
             member.MotherFullName = motherRelationship.SourceMember?.FullName;
+            member.MotherAvatarUrl = motherRelationship.SourceMember?.AvatarUrl;
         }
 
         // Find Husband (member is female, husband is SourceMember of Husband relationship where member is TargetMember)
@@ -58,6 +64,7 @@ public class MemberRelationshipService : IMemberRelationshipService
         {
             member.HusbandId = husbandRelationship.SourceMemberId;
             member.HusbandFullName = husbandRelationship.SourceMember?.FullName;
+            member.HusbandAvatarUrl = husbandRelationship.SourceMember?.AvatarUrl;
         }
 
         // Find Wife (member is male, wife is SourceMember of Wife relationship where member is TargetMember)
@@ -67,6 +74,7 @@ public class MemberRelationshipService : IMemberRelationshipService
         {
             member.WifeId = wifeRelationship.SourceMemberId;
             member.WifeFullName = wifeRelationship.SourceMember?.FullName;
+            member.WifeAvatarUrl = wifeRelationship.SourceMember?.AvatarUrl;
         }
     }
 }
