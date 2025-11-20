@@ -9,6 +9,7 @@ export enum FamilyRole {
 export interface FamilyUserDto {
   familyId: string;
   userId: string;
+  userName?: string; // Added
   role: FamilyRole;
 }
 

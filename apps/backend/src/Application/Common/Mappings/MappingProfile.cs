@@ -68,7 +68,8 @@ public class MappingProfile : Profile
         CreateMap<UserPreference, UserPreferenceDto>();
         CreateMap<User, UserDto>();
         CreateMap<FamilyUser, FamilyUserDto>() // New mapping
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId));
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom<FamilyUserUserNameResolver>());
 
         // Export/Import DTOs
         CreateMap<Family, FamilyExportDto>()

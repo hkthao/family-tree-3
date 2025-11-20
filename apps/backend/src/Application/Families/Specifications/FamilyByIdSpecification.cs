@@ -9,6 +9,7 @@ public class FamilyByIdSpecification : Specification<Family>, ISingleResultSpeci
     {
         Query.Where(f => f.Id == id)
              .Include(f => f.FamilyUsers)
-                 .ThenInclude(fu => fu.User);
+                 .ThenInclude(fu => fu.User)
+                     .ThenInclude(u => u.Profile);
     }
 }

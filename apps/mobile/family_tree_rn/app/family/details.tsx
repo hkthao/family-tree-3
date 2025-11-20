@@ -1,43 +1,32 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, useTheme, Avatar, ActivityIndicator, Card, List, Divider, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { fetchFamilyDetails, FamilyDetail } from '../../data/mockFamilyData';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
+import { usePublicFamilyStore } from '../../stores/usePublicFamilyStore'; // Import usePublicFamilyStore
+import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
+import { FamilyRole } from '@/types/public.d'; // Import FamilyRole
 
 export default function FamilyDetailsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId); // Get currentFamilyId from store
-  const [family, setFamily] = useState<FamilyDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const { family, loading, error, getFamilyById } = usePublicFamilyStore();
 
   useEffect(() => {
     const loadFamilyDetails = async () => {
       if (!currentFamilyId) {
-        setError(t('familyDetail.errors.noFamilyId'));
-        setLoading(false);
+        // setError(t('familyDetail.errors.noFamilyId')); // Error state is managed by store
+        // setLoading(false); // Loading state is managed by store
         return;
       }
-      try {
-        const data = await fetchFamilyDetails(currentFamilyId);
-        if (data) {
-          setFamily(data);
-        } else {
-          setError(t('familyDetail.errors.notFound'));
-        }
-      } catch (err) {
-        setError(t('familyDetail.errors.failedToLoad'));
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      await getFamilyById(currentFamilyId);
     };
 
     loadFamilyDetails();
-  }, [currentFamilyId, t]); // Depend on currentFamilyId from Zustand and t
+  }, [currentFamilyId, getFamilyById]); // Depend on currentFamilyId from Zustand and getFamilyById action
 
 
 
@@ -121,7 +110,7 @@ export default function FamilyDetailsScreen() {
         {/* First Card: Profile-like information */}
         <Card style={styles.card}>
           <Card.Content style={styles.profileCardContent}>
-            <Avatar.Image size={80} source={{ uri: family.avatarUrl || 'https://via.placeholder.com/150' }} style={styles.avatar} />
+            <Avatar.Image size={80} source={family.avatarUrl ? { uri: family.avatarUrl } : DefaultFamilyAvatar} style={styles.avatar} />
             <Text variant="headlineSmall" style={styles.nameText}>{family.name}</Text>
             <Text variant="titleMedium" style={[styles.codeText, { color: theme.colors.onSurfaceVariant }]}>{family.code}</Text>
             <Text variant="bodyMedium" style={styles.locationText}>
@@ -169,11 +158,13 @@ export default function FamilyDetailsScreen() {
                 left={() => <List.Icon icon="account-tie" />}
                 right={() => (
                   <View style={styles.chipsContainer}>
-                    {family.manager.map((managerName, index) => (
-                      <Chip key={index} >
-                        {managerName}
-                      </Chip>
-                    ))}
+                    {family.familyUsers
+                      .filter(fu => fu.role === FamilyRole.Manager)
+                      .map((fu, index) => (
+                        <Chip key={index} >
+                          {fu.userName || fu.userId} {/* Display userName, fallback to userId */}
+                        </Chip>
+                      ))}
                   </View>
                 )}
               />
@@ -183,11 +174,13 @@ export default function FamilyDetailsScreen() {
                 left={() => <List.Icon icon="eye-outline" />}
                 right={() => (
                   <View style={styles.chipsContainer}>
-                    {family.viewers.map((viewerName, index) => (
-                      <Chip key={index} >
-                        {viewerName}
-                      </Chip>
-                    ))}
+                    {family.familyUsers
+                      .filter(fu => fu.role === FamilyRole.Viewer)
+                      .map((fu, index) => (
+                        <Chip key={index} >
+                          {fu.userName || fu.userId} {/* Display userName, fallback to userId */}
+                        </Chip>
+                      ))}
                   </View>
                 )}
               />
@@ -197,7 +190,7 @@ export default function FamilyDetailsScreen() {
                 left={() => <List.Icon icon="calendar-plus" />}
                 right={() => (
                   <View style={styles.chipContainer}>
-                    <Chip>{new Date(family.createdAt).toLocaleDateString()}</Chip>
+                    <Chip>{new Date(family.created).toLocaleDateString()}</Chip>
                   </View>
                 )}
               />
