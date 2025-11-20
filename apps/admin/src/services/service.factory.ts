@@ -1,7 +1,11 @@
 import type { IFamilyService } from './family/family.service.interface';
 import { ApiFamilyService } from './family/api.family.service';
+import type { IPublicFamilyService } from './family/public.service.interface'; // New import
+import { PublicApiFamilyService } from './family/publicApi.family.service'; // New import
 import type { IMemberService } from './member/member.service.interface';
 import { ApiMemberService } from './member/api.member.service';
+import type { IPublicMemberService } from './member/public.service.interface'; // New import
+import { PublicApiMemberService } from './member/publicApi.member.service'; // New import
 import type { IEventService } from './event/event.service.interface';
 import { ApiEventService } from './event/api.event.service';
 import type { IRelationshipService } from './relationship/relationship.service.interface';
@@ -36,7 +40,9 @@ export type ServiceMode = 'real' | 'test';
 
 export interface AppServices {
   family: IFamilyService;
+  publicFamily: IPublicFamilyService; // New service
   member: IMemberService; 
+  publicMember: IPublicMemberService; // New service
   event: IEventService;
   relationship: IRelationshipService;
   userProfile: ICurrentUserProfileService;
@@ -63,10 +69,18 @@ export function createServices(mode: ServiceMode, testServices?: Partial<AppServ
       mode === 'real'
         ? new ApiFamilyService(apiClient)
         : testServices?.family || new ApiFamilyService(apiClient), // Use testServices.family if provided
+    publicFamily: // New service registration
+      mode === 'real'
+        ? new PublicApiFamilyService(apiClient)
+        : testServices?.publicFamily || new PublicApiFamilyService(apiClient),
     member:
       mode === 'real'
         ? new ApiMemberService(apiClient)
         : testServices?.member || new ApiMemberService(apiClient), // Use testServices.member if provided
+    publicMember: // New service registration
+      mode === 'real'
+        ? new PublicApiMemberService(apiClient)
+        : testServices?.publicMember || new PublicApiMemberService(apiClient),
     event:
       mode === 'real'
         ? new ApiEventService(apiClient)

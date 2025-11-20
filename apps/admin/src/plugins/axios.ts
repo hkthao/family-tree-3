@@ -55,6 +55,12 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
+  // Check if the request is for a public API endpoint
+  if (config.url && config.url.startsWith('/public/')) {
+    // For public endpoints, do not add the Authorization header
+    return config;
+  }
+
   const token = await auth0Service.getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;

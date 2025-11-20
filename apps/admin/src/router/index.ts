@@ -70,6 +70,12 @@ const router = createRouter({
       meta: { requiresAuth: false }, // Logout page does not require authentication
     },
     {
+      path: '/public/family-tree/:familyId/:rootId?',
+      name: 'PublicFamilyTreeViewer',
+      component: () => import('@/views/PublicFamilyTreeViewer.vue'),
+      meta: { requiresAuth: false }, // Public route does not require authentication
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: NotFoundView,
@@ -99,16 +105,18 @@ router.beforeEach(async (to, from, next) => {
 
   await authStore.initAuth(); // Ensure auth state is initialized
 
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth) && !to.matched.some(record => record.meta.requiresAuth === false);
   const requiredRoles = to.meta.roles as string[];
 
   if (requiresAuth && !authStore.isAuthenticated) {
-    // Initiate Auth0 login redirect
+    // If the route requires authentication and the user is not authenticated, redirect to login
     await authService.login({ appState: { target: to.fullPath } });
-    return; // Prevent further navigation
+    return;
   } else if (requiredRoles && !canAccessMenu(authStore.user?.roles || [], requiredRoles)) {
+    // If the route requires specific roles and the user doesn't have them
     next({ name: 'Dashboard' }); // Or a dedicated 'Access Denied' page
   } else {
+    // Proceed to the route
     next();
   }
 });
