@@ -4,8 +4,6 @@ import type { ApiError } from '@/plugins/axios';
 import i18n from '@/plugins/i18n';
 import { v4 as uuidv4 } from 'uuid'; // Import uuid for sessionId
 import { type Member, type Event, type Gender, type Result } from '@/types'; // Import Member, Event, Gender, EventType, Result, RelationshipType
-import { useMemberStore } from './member.store'; // Import member store
-import { useEventStore } from './event.store'; // Import event store
 import { useRelationshipStore } from './relationship.store'; // Import relationship store
 
 export const useNaturalLanguageStore = defineStore('naturalLanguage', {
@@ -84,19 +82,16 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
       this.input = newInput;
     },
 
-    async saveMember(memberData: MemberDataDto): Promise<Result<Member, ApiError>> { // Re-added function declaration
+    async saveMember(memberData: MemberDataDto): Promise<Result<string, ApiError>> { // Re-added function declaration
       this.loading = true;
       this.error = null;
       try {
         if (!this.familyId) {
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
-          return { ok: false, error: { message: this.error } } as Result<Member, ApiError>;
+          return { ok: false, error: { message: this.error } } as Result<string, ApiError>;
         }
 
-        const memberStore = useMemberStore(); // Access member store
-
-        const newMember: Member = {
-          id: memberData.id!,
+        const newMember: Omit<Member, 'id'> = {
           firstName: memberData.firstName ?? "",
           lastName: memberData.lastName ?? "",
           familyId: this.familyId,
@@ -104,30 +99,30 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           dateOfBirth: memberData.dateOfBirth ? new Date(memberData.dateOfBirth) : undefined,
           dateOfDeath: memberData.dateOfDeath ? new Date(memberData.dateOfDeath) : undefined,
         };
-        const result: Result<Member, ApiError> = await memberStore.addItem(newMember); // Call addItem
+        const result: Result<string[], ApiError> = await this.services.member.addItems([newMember]); // Call addItems
 
         if (!result.ok) {
-          this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
+          this.error = result.error?.message || i18n.global.t('aiInput.saveError');
+          return { ok: false, error: result.error } as Result<string, ApiError>;
         }
-        return result; // Explicitly return the result
+        // Assuming only one member is added, return the first ID
+        return { ok: true, value: result.value[0] } as Result<string, ApiError>;
       } catch (e: any) {
         this.error = e.message;
-        return { ok: false, error: { message: this.error } } as Result<Member, ApiError>; // Return a failure result
+        return { ok: false, error: { message: this.error } } as Result<string, ApiError>;
       } finally {
         this.loading = false;
       }
     },
 
-    async saveEvent(eventData: EventDataDto): Promise<Result<Event, ApiError>> { // Re-added function declaration
+    async saveEvent(eventData: EventDataDto): Promise<Result<string, ApiError>> { // Re-added function declaration
       this.loading = true;
       this.error = null;
       try {
         if (!this.familyId) {
           this.error = i18n.global.t('naturalLanguage.errors.familyIdMissing');
-          return { ok: false, error: { message: this.error } } as Result<Event, ApiError>;
+          return { ok: false, error: { message: this.error } } as Result<string, ApiError>;
         }
-
-        const eventStore = useEventStore(); // Access event store
 
         const newEvent: Omit<Event, 'id'> = {
           name: eventData.description, // Using description as name
@@ -139,14 +134,16 @@ export const useNaturalLanguageStore = defineStore('naturalLanguage', {
           relatedMembers: eventData.relatedMemberIds,
         };
 
-        const result = await eventStore.addItem(newEvent); // Use eventStore.addItem
+        const result: Result<string[], ApiError> = await this.services.event.addItems([newEvent]); // Use eventStore.addItems
         if (!result.ok) {
-          this.error = result.error?.message || i18n.global.t('aiInput.saveError'); // Use i18n for error
+          this.error = result.error?.message || i18n.global.t('aiInput.saveError');
+          return { ok: false, error: result.error } as Result<string, ApiError>;
         }
-        return result; // Explicitly return the result
+        // Assuming only one event is added, return the first ID
+        return { ok: true, value: result.value[0] } as Result<string, ApiError>;
       } catch (e: any) {
         this.error = e.message;
-        return { ok: false, error: { message: this.error } } as Result<Event, ApiError>; // Return a failure result
+        return { ok: false, error: { message: this.error } } as Result<string, ApiError>;
       } finally {
         this.loading = false;
       }
