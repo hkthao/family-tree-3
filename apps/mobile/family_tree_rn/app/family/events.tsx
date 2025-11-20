@@ -1,10 +1,16 @@
-import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
+import { SPACING_MEDIUM } from '@/constants/dimensions';
 import React, { useState, useCallback, useMemo } from 'react';
-import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
-import { Divider, Card, useTheme } from 'react-native-paper';
+import { Divider, Card, useTheme, ActivityIndicator, Text } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+import { useEventStore } from '@/stores/useEventStore';
+import { useFamilyStore } from '@/stores/useFamilyStore';
+import { useRouter } from 'expo-router';
+import type { EventDto } from '@/types/public.d';
 
 interface EventItem extends AgendaEntry {
+  id: string;
   name: string;
   height: number;
   day: string;
@@ -13,6 +19,12 @@ interface EventItem extends AgendaEntry {
 export default function FamilyEventsScreen() {
   const [items, setItems] = useState<AgendaSchedule>({});
   const theme = useTheme();
+  const { t } = useTranslation();
+  const router = useRouter();
+
+  const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
+  const { events, loading, error, fetchEvents } = useEventStore();
+
   const styles = useMemo(() => StyleSheet.create({
     item: {
       borderRadius: theme.roundness,
@@ -71,62 +83,21 @@ export default function FamilyEventsScreen() {
       fontSize: 14,
       fontWeight: '300',
     },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    errorContainer: {
+      padding: SPACING_MEDIUM,
+      backgroundColor: theme.colors.errorContainer,
+      marginBottom: SPACING_MEDIUM,
+    },
+    errorText: {
+      color: theme.colors.onErrorContainer,
+      textAlign: 'center',
+    },
   }), [theme]);
-
-  const loadItems = useCallback((day: DateData) => {
-    setTimeout(() => {
-      setItems(prevItems => {
-        const updatedItems: AgendaSchedule = { ...prevItems }; // Start with previous items, ensuring it's an object
-
-        for (let i = -15; i < 85; i++) {
-          const time = day.timestamp + i * 24 * 60 * 60 * 1000;
-          const strTime = timeToString(time);
-
-          if (!updatedItems[strTime]) {
-            updatedItems[strTime] = [];
-            const numItems = Math.floor(Math.random() * 3 + 1); // Simulate 1-3 events per day
-            for (let j = 0; j < numItems; j++) {
-              updatedItems[strTime].push({
-                name: `Sự kiện gia đình vào ngày ${strTime} #${j + 1}`,
-                height: Math.max(50, Math.floor(Math.random() * 150)),
-                day: strTime,
-              });
-            }
-          }
-        }
-        return updatedItems;
-      });
-    }, 1000);
-  }, []); // Removed 'items' from dependency array as we use functional update
-
-  const renderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
-    const fontSize = isFirst ? 16 : 14;
-    const color = isFirst ? theme.colors.onSurface : theme.colors.onSurfaceVariant;
-
-    return (
-      <Card
-        style={[styles.item, { backgroundColor: theme.colors.surface }]}
-        onPress={() => Alert.alert(reservation.name)}
-        elevation={1} // Remove shadow
-      >
-        <Card.Content>
-          <Text style={{ fontSize, color }}>{reservation.name}</Text>
-        </Card.Content>
-      </Card>
-    );
-  }, [theme.colors]);
-
-  const renderEmptyDate = useCallback(() => {
-    return (
-      <View style={[styles.emptyDate, { backgroundColor: theme.colors.background }]}>
-        <Text style={{ color: theme.colors.onBackground }}>Không có sự kiện nào vào ngày này!</Text>
-      </View>
-    );
-  }, [theme.colors]);
-
-  const rowHasChanged = useCallback((r1: AgendaEntry, r2: AgendaEntry) => {
-    return r1.name !== r2.name;
-  }, []);
 
   const timeToString = (time: number) => {
     const date = new Date(time);
@@ -138,6 +109,63 @@ export default function FamilyEventsScreen() {
     const options: Intl.DateTimeFormatOptions = { weekday: 'long' };
     return new Intl.DateTimeFormat('vi-VN', options).format(date);
   };
+
+  const loadItems = useCallback(async (day: DateData) => {
+    if (!currentFamilyId) {
+      return;
+    }
+
+    const startDate = timeToString(day.timestamp);
+    const endDate = timeToString(day.timestamp + (30 * 24 * 60 * 60 * 1000)); // Load for a month
+
+    await fetchEvents({ familyId: currentFamilyId, startDate, endDate });
+
+    const newItems: AgendaSchedule = {};
+    events.forEach((event: EventDto) => {
+      const eventDate = timeToString(new Date(event.startDate).getTime());
+      if (!newItems[eventDate]) {
+        newItems[eventDate] = [];
+      }
+      newItems[eventDate].push({
+        id: event.id,
+        name: event.title || t('eventDetail.noTitle'),
+        height: 80, // Fixed height for now, can be dynamic
+        day: eventDate,
+      });
+    });
+
+    setItems(newItems);
+  }, [currentFamilyId, fetchEvents, events, t]);
+
+  const renderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
+    const eventItem = reservation as EventItem;
+    const fontSize = isFirst ? 16 : 14;
+    const color = isFirst ? theme.colors.onSurface : theme.colors.onSurfaceVariant;
+
+    return (
+      <Card
+        style={[styles.item, { backgroundColor: theme.colors.surface }]}
+        onPress={() => router.push(`/event/${eventItem.id}`)} // Navigate to event detail
+        elevation={1} // Remove shadow
+      >
+        <Card.Content>
+          <Text style={{ fontSize, color }}>{eventItem.name}</Text>
+        </Card.Content>
+      </Card>
+    );
+  }, [theme.colors, router, styles.item]);
+
+  const renderEmptyDate = useCallback(() => {
+    return (
+      <View style={[styles.emptyDate, { backgroundColor: theme.colors.background }]}>
+        <Text style={{ color: theme.colors.onBackground }}>{t('eventScreen.noEvents')}</Text>
+      </View>
+    );
+  }, [theme.colors, t, styles.emptyDate]);
+
+  const rowHasChanged = useCallback((r1: AgendaEntry, r2: AgendaEntry) => {
+    return r1.name !== r2.name;
+  }, []);
 
   const renderList = useCallback((listProps: any) => {
     const sections = Object.keys(listProps.items).map(date => ({
@@ -177,7 +205,27 @@ export default function FamilyEventsScreen() {
         })}
       </ScrollView>
     );
-  }, [renderItem, theme.colors]);
+  }, [renderItem, theme.colors, styles]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator animating size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text variant="bodyMedium" style={styles.errorText}>
+            {t('common.error_occurred')}: {error}
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <Agenda

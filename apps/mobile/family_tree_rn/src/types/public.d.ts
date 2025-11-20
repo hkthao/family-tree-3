@@ -179,3 +179,50 @@ export interface RelationshipListDto {
   sourceMember?: RelationshipMemberDto;
   targetMember?: RelationshipMemberDto;
 }
+
+export enum EventType {
+  Birth = "Birth",
+  Death = "Death",
+  Marriage = "Marriage",
+  Anniversary = "Anniversary",
+  Other = "Other",
+}
+
+export interface EventDto extends BaseAuditableDto {
+  id: string;
+  familyId: string;
+  title?: string;
+  description?: string;
+  startDate: string; // DateTime in C# maps to string in TypeScript
+  endDate?: string; // DateTime in C# maps to string in TypeScript
+  location?: string;
+  eventType: EventType;
+  relatedMembers: string[]; // Guid in C# maps to string in TypeScript
+}
+
+export interface GetEventsQuery {
+  familyId?: string;
+  startDate?: string; // DateTime in C# maps to string in TypeScript
+  endDate?: string; // DateTime in C# maps to string in TypeScript
+  eventType?: EventType;
+  relatedMemberId?: string;
+}
+
+export interface SearchEventsQuery {
+  familyId?: string;
+  searchTerm?: string;
+  startDate?: string; // DateTime in C# maps to string in TypeScript
+  endDate?: string; // DateTime in C# maps to string in TypeScript
+  eventType?: EventType;
+  relatedMemberId?: string;
+  page?: number;
+  itemsPerPage?: number;
+  sortBy?: string;
+  sortOrder?: string; // "asc" or "desc"
+}
+
+export interface GetUpcomingEventsQuery {
+  familyId?: string;
+  startDate?: string; // DateTime in C# maps to string in TypeScript
+  endDate?: string; // DateTime in C# maps to string in TypeScript
+}

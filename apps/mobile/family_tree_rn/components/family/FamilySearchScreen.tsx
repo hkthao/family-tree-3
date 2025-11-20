@@ -13,10 +13,7 @@ import { useRouter } from 'expo-router'; // Import useRouter
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore'; // Import usePublicFamilyStore
 import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
-import type { FamilyListDto } from '@/types/public.d'; // Import FamilyListDto
 import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
-
-const PAGE_SIZE = 10; // Re-define PAGE_SIZE
 
 export default function FamilySearchScreen() {
   const { t } = useTranslation();

@@ -20,7 +20,7 @@ interface MemberFilter {
   isRootMember?: boolean;
 }
 
-const PAGE_SIZE = 10;
+
 
 export default function MemberSearchScreen() {
   const { t } = useTranslation();
