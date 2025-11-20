@@ -16,7 +16,7 @@ import type {
 } from '../types/public.d';
 
 // TODO: Configure this based on your environment (e.g., .env file)
-const BASE_URL = 'http://localhost:8080/api/public'; // Example: Replace with your backend URL
+const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL; // Example: Replace with your backend URL
 
 const publicApiClient = axios.create({
   baseURL: BASE_URL,
