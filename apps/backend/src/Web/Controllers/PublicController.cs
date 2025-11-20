@@ -5,6 +5,8 @@ using backend.Application.Members.Queries.GetPublicMemberById;
 using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Members.Queries.GetMembers;
+using backend.Application.Families.Queries.GetFamilyById; // Added missing using directive
+using backend.Application.Members.Queries.GetMemberById; // Added missing using directive
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;
