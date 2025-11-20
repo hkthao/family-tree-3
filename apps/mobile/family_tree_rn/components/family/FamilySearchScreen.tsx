@@ -7,214 +7,76 @@ import {
   RefreshControl,
 } from 'react-native';
 
-import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Appbar } from 'react-native-paper';
+import { Text, Card, Avatar, IconButton, Searchbar, useTheme, Appbar, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router'; // Import useRouter
-import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
+import { usePublicFamilyStore } from '@/stores/usePublicFamilyStore'; // Import usePublicFamilyStore
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
+import type { FamilyListDto } from '@/types/public.d'; // Import FamilyListDto
+import DefaultFamilyAvatar from '@/assets/images/familyAvatar.png'; // Import default family avatar
 
-// Define a type for Family data (simplified from backend/src/Domain/Entities/Family.cs)
-interface Family {
-  id: string;
-  name: string;
-  code: string;
-  description?: string;
-  avatarUrl?: string;
-  totalMembers: number;
-  totalGenerations: number;
-  visibility: string;
-}
-
-// Mock API call function (replace with actual API service)
-const fetchFamilies = async (
-  query: string,
-  page: number,
-  pageSize: number,
-  signal?: AbortSignal
-): Promise<{ data: Family[]; totalCount: number }> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  const allFamilies: Family[] = [
-    {
-      id: '1',
-      name: 'Gia đình Nguyễn',
-      code: 'GDN001',
-      description: 'Gia đình lớn ở Hà Nội',
-      avatarUrl: 'https://picsum.photos/seed/family1/100/100',
-      totalMembers: 50,
-      totalGenerations: 5,
-      visibility: 'Public',
-    },
-    {
-      id: '2',
-      name: 'Họ Trần',
-      code: 'HTC002',
-      description: 'Họ Trần ở Huế',
-      avatarUrl: 'https://picsum.photos/seed/family2/100/100',
-      totalMembers: 120,
-      totalGenerations: 8,
-      visibility: 'Public',
-    },
-    {
-      id: '3',
-      name: 'Gia đình Lê',
-      code: 'GDL003',
-      description: 'Gia đình nhỏ ở Sài Gòn',
-      avatarUrl: 'https://picsum.photos/seed/family3/100/100',
-      totalMembers: 15,
-      totalGenerations: 3,
-      visibility: 'Private',
-    },
-    {
-      id: '4',
-      name: 'Họ Phạm',
-      code: 'HPM004',
-      description: 'Họ Phạm ở Đà Nẵng',
-      avatarUrl: 'https://picsum.photos/seed/family4/100/100',
-      totalMembers: 80,
-      totalGenerations: 6,
-      visibility: 'Public',
-    },
-    {
-      id: '5',
-      name: 'Gia đình Hoàng',
-      code: 'GDH005',
-      description: 'Gia đình Hoàng ở Cần Thơ',
-      avatarUrl: 'https://picsum.photos/seed/family5/100/100',
-      totalMembers: 30,
-      totalGenerations: 4,
-      visibility: 'Private',
-    },
-    {
-      id: '6',
-      name: 'Họ Đỗ',
-      code: 'HD006',
-      description: 'Họ Đỗ ở Hải Phòng',
-      avatarUrl: 'https://picsum.photos/seed/family6/100/100',
-      totalMembers: 90,
-      totalGenerations: 7,
-      visibility: 'Public',
-    },
-    {
-      id: '7',
-      name: 'Gia đình Bùi',
-      code: 'GDB007',
-      description: 'Gia đình Bùi ở Vũng Tàu',
-      avatarUrl: 'https://picsum.photos/seed/family7/100/100',
-      totalMembers: 25,
-      totalGenerations: 3,
-      visibility: 'Private',
-    },
-    {
-      id: '8',
-      name: 'Họ Ngô',
-      code: 'HNG008',
-      description: 'Họ Ngô ở Nha Trang',
-      avatarUrl: 'https://picsum.photos/seed/family8/100/100',
-      totalMembers: 60,
-      totalGenerations: 5,
-      visibility: 'Public',
-    },
-  ];
-
-  const filteredFamilies = allFamilies.filter(
-    (f) =>
-      f.name.toLowerCase().includes(query.toLowerCase()) ||
-      f.code.toLowerCase().includes(query.toLowerCase()) ||
-      f.description?.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedFamilies = filteredFamilies.slice(startIndex, endIndex);
-
-  return { data: paginatedFamilies, totalCount: filteredFamilies.length };
-};
-
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 10; // Re-define PAGE_SIZE
 
 export default function FamilySearchScreen() {
   const { t } = useTranslation();
   const theme = useTheme(); // Get theme from PaperProvider
   const router = useRouter(); // Initialize useRouter
   const setCurrentFamilyId = useFamilyStore((state) => state.setCurrentFamilyId); // Get setCurrentFamilyId from store
+  const isFetchingMore = useRef(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [families, setFamilies] = useState<Family[]>([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const loadingRef = useRef(loading); // Create a ref to track loading state
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
 
-  // Keep the ref updated with the latest loading state
+  const {
+    families,
+    page,
+    loading,
+    error,
+    hasMore,
+    fetchFamilies, // Renamed from searchFamilies
+    reset,
+  } = usePublicFamilyStore();
+
   useEffect(() => {
-    loadingRef.current = loading;
-  }, [loading]);
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 400); // 400ms debounce
 
-  const loadFamilies = useCallback(
-    async (currentPage: number, isRefreshing: boolean = false) => {
-      if (loadingRef.current) { // Use ref to check latest loading state
-        return;
-      }
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
-      setLoading(true);
-      setError(null);
+  // Effect for initial load and search query changes
+  useEffect(() => {
+    reset(); // Clear data and reset page/hasMore
+    fetchFamilies({ page: 1, search: debouncedSearchQuery }, true); // Fetch first page for debounced search
+  }, [debouncedSearchQuery, fetchFamilies, reset]); // Added reset to dependencies
 
+  const handleRefresh = useCallback(async () => {
+    if (!loading) {
+      setRefreshing(true);
       try {
-        const controller = new AbortController();
-        const { data, totalCount: newTotalCount } = await fetchFamilies(
-          searchQuery,
-          currentPage,
-          PAGE_SIZE,
-          controller.signal
-        );
-
-        setFamilies((prevFamilies) => {
-          const updatedFamilies = isRefreshing ? data : [...prevFamilies, ...data];
-          setHasMore(updatedFamilies.length < newTotalCount);
-          return updatedFamilies;
-        });
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('An unknown error occurred');
-        }
-      }
-      finally {
-        setLoading(false);
+        reset(); // Clear data and reset page/hasMore
+        await fetchFamilies({ page: 1, search: searchQuery }, true); // Fetch first page for current search query
+      } finally {
         setRefreshing(false);
       }
-    },
-    [searchQuery, setLoading, setError, setFamilies, setHasMore] // Dependencies should be stable setters and searchQuery
-  );
-
-  useEffect(() => {
-    setFamilies([]);
-    setPage(1);
-    setHasMore(true);
-    loadFamilies(1);
-  }, [searchQuery, loadFamilies]);
-
-  const handleRefresh = useCallback(() => {
-    setRefreshing(true);
-    setPage(1);
-    setFamilies([]);
-    setHasMore(true);
-    loadFamilies(1, true);
-  }, [loadFamilies]);
-
-  const handleLoadMore = useCallback(() => {
-    if (!loading && hasMore) {
-      setPage((prevPage) => prevPage + 1);
-      loadFamilies(page + 1);
     }
-  }, [loading, hasMore, page, loadFamilies]);
+  }, [loading, reset, fetchFamilies, searchQuery]);
+
+
+  const handleLoadMore = useCallback(async () => {
+    if (!loading && hasMore && !isFetchingMore.current) {
+      isFetchingMore.current = true;
+      await fetchFamilies({ page: page + 1, search: searchQuery }); // Fetch next page
+      isFetchingMore.current = false;
+    }
+  }, [loading, hasMore, page, fetchFamilies, searchQuery]);
 
   const renderFooter = () => {
-    if (!loading) return null;
+    if (!loading || page === 1) return null; // Only show spinner for subsequent loads
     return (
       <View style={styles.footer}>
         <ActivityIndicator animating size="small" color={theme.colors.primary} />
@@ -279,6 +141,14 @@ export default function FamilySearchScreen() {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginTop: SPACING_SMALL,
+      flexWrap: 'wrap', // Allow chips to wrap to the next line
+    },
+    chip: {
+      marginRight: SPACING_SMALL / 2,
+      marginBottom: SPACING_SMALL / 2,
+      height: 28, // Adjust chip height
+      justifyContent: 'center', // Center content vertically
+      borderWidth: 0, // Remove border
     },
     footer: {
       paddingVertical: SPACING_MEDIUM,
@@ -332,14 +202,20 @@ export default function FamilySearchScreen() {
               router.push('/family/details');
             }}>
               <Card.Content style={styles.cardContent}>
-                <Avatar.Image size={48} source={{ uri: item.avatarUrl }} style={styles.avatar} />
+                <Avatar.Image size={48} source={item.avatarUrl ? { uri: item.avatarUrl } : DefaultFamilyAvatar} style={styles.avatar} />
                 <View style={styles.cardText}>
                   <Text variant="titleMedium">{item.name}</Text>
-                  <Text variant="bodyMedium">{item.description}</Text>
+                  <Text variant="bodyMedium">{item.address}</Text>
                   <View style={styles.detailsRow}>
-                    <Text variant="bodySmall">{t('family.members')}: {item.totalMembers}</Text>
-                    <Text variant="bodySmall">{t('family.generations')}: {item.totalGenerations}</Text>
-                    <Text variant="bodySmall">{t('family.visibility')}: {t(`family.visibility.${item.visibility.toLowerCase()}`)}</Text>
+                    <Chip icon="account-group" mode="outlined" style={styles.chip}>
+                      <Text variant="bodySmall">{item.totalMembers}</Text>
+                    </Chip>
+                    <Chip icon="family-tree" mode="outlined" style={styles.chip}>
+                      <Text variant="bodySmall">{item.totalGenerations}</Text>
+                    </Chip>
+                    <Chip icon={item.visibility.toLowerCase() === 'public' ? 'eye' : 'eye-off'} mode="outlined" style={styles.chip}>
+                      <Text variant="bodySmall">{t(`family.visibility.${item.visibility.toLowerCase()}`)}</Text>
+                    </Chip>
                   </View>
                 </View>
               </Card.Content>
@@ -348,7 +224,7 @@ export default function FamilySearchScreen() {
           ListEmptyComponent={renderEmptyList}
           ListFooterComponent={renderFooter}
           onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
+          onEndReachedThreshold={0.3}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

@@ -1,88 +1,33 @@
-Dưới đây là **bố cục đầy đủ, hiện đại và tối ưu UX** cho **trang cài đặt (Settings Page)** của app gia phả của bạn — phù hợp mobile-first và tập trung trải nghiệm người dùng trẻ.
+Implement infinite scroll + pagination using React Native FlatList and Zustand.
 
----
+Requirements:
+1. Create a Zustand store named usePublicFamilyStore with:
+   - families: array
+   - page (number)
+   - hasMore (boolean)
+   - loading (boolean)
+   - error (string or null)
+   - reset() → clear data and reset page=1, hasMore=true
+   - fetchFamilies({page, search}) async → call API:
+       GET /api/public/families?page={page}&itemsPerPage=10&search={search}
+     Append when page>1, replace when page=1.
+     If API returns <10 items → hasMore = false.
+     Prevent parallel requests: if loading=true → return early.
 
-# 🔧 **1. Hồ sơ cá nhân (User Profile)**
+2. In FamilySearchScreen:
+   - State: search text.
+   - Use debounce 400ms before calling API.
+   - useEffect(() => { reset(); fetchFamilies({page:1, search}); }, [debouncedSearch])
+   - Infinite load:
+       onEndReached → if (!loading && hasMore) fetchFamilies(page+1)
+   - Pull to refresh:
+       onRefresh → reset() + fetchFamilies(page=1)
+   - ListFooterComponent → loading spinner when page>1
+   - onEndReachedThreshold = 0.3
 
-Phần này luôn nằm trên cùng.
-
-**Gồm:**
-
-* Avatar
-* Họ tên đầy đủ
-* Email / Số điện thoại
-* Nút **“Chỉnh sửa hồ sơ”**
-
----
-
-# 🔒 **3. Quyền riêng tư & bảo mật (Privacy & Security)**
-  * Download my data
-  * Xóa tài khoản
-
-> Vì app liên quan dữ liệu gia đình → phần này rất quan trọng.
-
----
-
-# 🎨 **4. Tuỳ chỉnh giao diện (App Appearance)**
-
-* **Chọn theme (Light / Dark / System)**
-* **Đổi màu chủ đạo (Accent color)**
-* **Cỡ chữ (Font size)**
-
----
-
-# 🌐 **5. Ngôn ngữ (Language)**
-
-* Tiếng Việt
-* Tiếng Anh
-* * Ngôn ngữ khác (nếu cần)
-
----
-
-# 🔔 **6. Thông báo (Notifications)**
-
-* Thông báo cập nhật thành viên
-* Lời mời gia nhập gia đình
-* Sự kiện / ngày giỗ / sinh nhật
-* Tin nhắn / bình luận
-* Bật/tắt tổng
-
----
----
-
-# ❓ **9. Trung tâm hỗ trợ (Help & Support)**
-
-* FAQ
-* Hướng dẫn sử dụng
-* Liên hệ hỗ trợ
-* Chat hỗ trợ trực tiếp
-* Báo lỗi / góp ý (Feedback)
-
----
-
-# 🏛 **10. Về ứng dụng (About)**
-
-* Thông tin phiên bản
-* Điều khoản sử dụng
-* Chính sách bảo mật
-* Open-source libs (nếu cần)
-
----
-
-# 🚪 **11. Đăng xuất**
-
-Nằm cuối cùng, màu đỏ nhạt.
-
----
-
-# 📌 **Tóm tắt cấu trúc Settings Page**
-
-1. **Profile**
-3. **Privacy & Security**
-4. **Appearance**
-5. **Language**
-6. **Notifications**
-9. **Help & Support**
-10. **About**
-11. **Logout**
+3. Ensure:
+   - No duplicated API calls
+   - No double onEndReached bug
+   - No infinite loop
+   - Works on iOS, Android, Expo
 
