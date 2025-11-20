@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Text, useTheme, Chip, Icon } from 'react-native-paper';
+import { Card, Text, useTheme, Chip } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { AgendaEntry } from 'react-native-calendars';
 import { SPACING_MEDIUM } from '@/constants/dimensions';

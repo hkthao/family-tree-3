@@ -5,7 +5,7 @@ import { Appbar, Text, useTheme, Card, ActivityIndicator, Chip, Avatar } from 'r
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicEventStore } from '@/stores/usePublicEventStore';
-import { EventType, EventDto as MyEventDto } from '@/types/public.d'; // Import EventType and EventDto
+import { EventType } from '@/types/public.d'; // Import EventType and EventDto
 
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -22,6 +22,14 @@ export default function EventDetailsScreen() {
     [EventType.Anniversary]: t('eventType.anniversary'),
     [EventType.Other]: t('eventType.other'),
   }), [t]);
+
+  const eventTypeIconMap: Record<EventType, string> = {
+    [EventType.Birth]: 'cake-variant',
+    [EventType.Death]: 'cross',
+    [EventType.Marriage]: 'ring',
+    [EventType.Anniversary]: 'calendar-heart',
+    [EventType.Other]: 'information',
+  };
 
   useEffect(() => {
     if (id) {
@@ -157,7 +165,7 @@ export default function EventDetailsScreen() {
         {/* First Card: Key Event Information */}
         <Card style={styles.card}>
           <Card.Content style={styles.profileCardContent}>
-            <Avatar.Icon icon="calendar-month" size={80} color={theme.colors.onPrimary}  />
+            <Avatar.Icon icon={event.type !== undefined ? eventTypeIconMap[event.type] : 'calendar-month'} size={80} color={theme.colors.onPrimary}  />
             <Text variant="headlineSmall" style={styles.titleText}>{event.name || t('common.not_available')}</Text>
             <Text variant="bodyMedium" >{event.description || t('common.not_available')}</Text>
             <View style={styles.chipsContainer}>
