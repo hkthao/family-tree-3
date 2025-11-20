@@ -1,9 +1,9 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import { WebView } from 'react-native-webview';
 import { useTranslation } from 'react-i18next';
-import { useFamilyStore } from '../../stores/useFamilyStore'; // Import useFamilyStore
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
 
 export default function FamilyTreeScreen() {
   const { t } = useTranslation();
@@ -14,16 +14,29 @@ export default function FamilyTreeScreen() {
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-      alignItems: 'center',
-      justifyContent: 'center',
+    },
+    webview: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
     },
   });
 
+  const familyDetailUrl = `http://localhost:5173/public/family-tree/${currentFamilyId}`;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <Text variant="headlineMedium">{t('familyDetail.tab.tree')}</Text>
-      <Text variant="bodyMedium">Family ID: {currentFamilyId}</Text>
-      {/* Add family tree content here */}
-    </SafeAreaView>
+    <View style={styles.container}>
+      {currentFamilyId ? (
+        <WebView
+          source={{ uri: familyDetailUrl }}
+          style={styles.webview}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          startInLoadingState={true}
+          scalesPageToFit={true}
+        />
+      ) : (
+        <Text variant="headlineMedium">{t('familyDetail.noFamilySelected')}</Text>
+      )}
+    </View>
   );
 }
