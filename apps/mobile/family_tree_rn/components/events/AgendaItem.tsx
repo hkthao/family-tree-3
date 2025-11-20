@@ -2,9 +2,10 @@ import React from 'react';
 import { Card, Text, useTheme, Chip } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { AgendaEntry } from 'react-native-calendars';
-import { SPACING_MEDIUM } from '@/constants/dimensions';
+import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
 import { EventType } from '@/types/public.d'; // Import EventType
 import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { TouchableOpacity } from 'react-native';
 
 interface EventItem extends AgendaEntry {
   id: string;
@@ -45,15 +46,16 @@ const AgendaItem = React.memo(({ reservation, isFirst }: AgendaItemProps) => {
   const color = isFirst ? theme.colors.onSurface : theme.colors.onSurfaceVariant;
 
   return (
-    <Card
+    <TouchableOpacity
       style={{
         borderRadius: theme.roundness,
         marginRight: SPACING_MEDIUM,
-        marginBottom: SPACING_MEDIUM,
-        backgroundColor: theme.colors.surface,
+        padding: SPACING_MEDIUM,
+        backgroundColor: "transparent",
+        borderWidth: 0.5,
+        borderColor: theme.colors.onSurface
       }}
       onPress={() => router.push(`/event/${eventItem.id}`)}
-      elevation={1}
     >
       <Card.Content>
         <Text style={{ fontSize, color }}>{eventItem.name}</Text>
@@ -69,7 +71,7 @@ const AgendaItem = React.memo(({ reservation, isFirst }: AgendaItemProps) => {
           {eventTypeStringMap[eventItem.type]}
         </Chip>
       </Card.Content>
-    </Card>
+    </TouchableOpacity>
   );
 });
 
