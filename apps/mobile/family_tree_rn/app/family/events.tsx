@@ -4,7 +4,8 @@ import { StyleSheet, View, ScrollView } from 'react-native';
 import { Agenda, DateData, AgendaEntry, AgendaSchedule } from 'react-native-calendars';
 import { Divider, Card, useTheme, ActivityIndicator, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useEventStore } from '@/stores/useEventStore';
+import { usePublicEventStore } from '@/stores/usePublicEventStore';
+import AgendaItem from '@/components/events/AgendaItem';
 import { useFamilyStore } from '@/stores/useFamilyStore';
 import { useRouter } from 'expo-router';
 import type { EventDto } from '@/types/public.d';
@@ -23,14 +24,10 @@ export default function FamilyEventsScreen() {
   const router = useRouter();
 
   const currentFamilyId = useFamilyStore((state) => state.currentFamilyId);
-  const { events, loading, error, fetchEvents } = useEventStore();
+  const { loading, error, fetchEvents } = usePublicEventStore();
+  const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
 
   const styles = useMemo(() => StyleSheet.create({
-    item: {
-      borderRadius: theme.roundness,
-      marginRight: SPACING_MEDIUM,
-      marginBottom: SPACING_MEDIUM,
-    },
     emptyDate: {
       height: 15,
       flex: 1,
@@ -118,45 +115,40 @@ export default function FamilyEventsScreen() {
       return;
     }
 
+    const monthString = new Date(day.timestamp).toISOString().slice(0, 7); // YYYY-MM
+    if (loadedMonths.has(monthString)) {
+      return; // Already loaded for this month
+    }
+
     const startDate = timeToString(day.timestamp);
     const endDate = timeToString(day.timestamp + (30 * 24 * 60 * 60 * 1000)); // Load for a month
 
-    await fetchEvents({ familyId: currentFamilyId, startDate, endDate });
+    const fetchedPaginatedEvents = await fetchEvents({ familyId: currentFamilyId, startDate, endDate, page: 1, itemsPerPage: 100 });
 
-    const newItems: AgendaSchedule = {};
-    events.forEach((event: EventDto) => {
-      const eventDate = timeToString(new Date(event.startDate).getTime());
-      if (!newItems[eventDate]) {
-        newItems[eventDate] = [];
-      }
-      newItems[eventDate].push({
-        id: event.id,
-        name: event.title || t('eventDetail.noTitle'),
-        height: 80, // Fixed height for now, can be dynamic
-        day: eventDate,
-      } as EventItem);
+    if (fetchedPaginatedEvents) {
+      setLoadedMonths(prev => new Set(prev).add(monthString)); // Mark month as loaded
+    }
+
+    setItems((prevItems) => {
+      const mergedItems = { ...prevItems };
+      fetchedPaginatedEvents?.items?.forEach((event: EventDto) => {
+        const eventDate = timeToString(new Date(event.startDate).getTime());
+        if (!mergedItems[eventDate]) {
+          mergedItems[eventDate] = [];
+        }
+        // Check for duplicates before adding
+        if (!(mergedItems[eventDate] as EventItem[]).some(item => item.id === event.id)) {
+          mergedItems[eventDate].push({
+            id: event.id,
+            name: event.title || t('eventDetail.noTitle'),
+            height: 80, // Fixed height for now, can be dynamic
+            day: eventDate,
+          } as EventItem);
+        }
+      });
+      return mergedItems;
     });
-
-    setItems(newItems);
-  }, [currentFamilyId, fetchEvents, events, t]);
-
-  const renderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
-    const eventItem = reservation as EventItem;
-    const fontSize = isFirst ? 16 : 14;
-    const color = isFirst ? theme.colors.onSurface : theme.colors.onSurfaceVariant;
-
-    return (
-      <Card
-        style={[styles.item, { backgroundColor: theme.colors.surface }]}
-        onPress={() => router.push(`/event/${eventItem.id}`)} // Navigate to event detail
-        elevation={1} // Remove shadow
-      >
-        <Card.Content>
-          <Text style={{ fontSize, color }}>{eventItem.name}</Text>
-        </Card.Content>
-      </Card>
-    );
-  }, [theme.colors, router, styles.item]);
+  }, [currentFamilyId, fetchEvents, t, loadedMonths]);
 
   const renderEmptyDate = useCallback(() => {
     return (
@@ -197,7 +189,7 @@ export default function FamilyEventsScreen() {
               <View style={styles.sectionRightColumn}>
                 {section.data.map((item: AgendaEntry, index: number) => (
                   <View key={item.day + item.name + index}>
-                    {renderItem(item, index === 0)}
+                    <AgendaItem reservation={item} isFirst={index === 0} />
 
                     {index === section.data.length - 1 && section.data.length > 1 && <Divider style={{ margin: SPACING_MEDIUM }} />}
                   </View>
@@ -208,7 +200,11 @@ export default function FamilyEventsScreen() {
         })}
       </ScrollView>
     );
-  }, [renderItem, theme.colors, styles]);
+  }, [theme.colors, styles]);
+
+  const agendaRenderItem = useCallback((reservation: AgendaEntry, isFirst: boolean) => {
+    return <AgendaItem reservation={reservation} isFirst={isFirst} />;
+  }, []); // No dependencies needed as AgendaItem handles its own
 
   if (loading) {
     return (
@@ -235,7 +231,7 @@ export default function FamilyEventsScreen() {
       items={items}
       loadItemsForMonth={loadItems}
       selected={new Date().toISOString().split('T')[0]} // Set selected to today's date
-      renderItem={renderItem}
+      renderItem={agendaRenderItem} // Use the new renderItem
       renderEmptyDate={renderEmptyDate}
       rowHasChanged={rowHasChanged}
       showClosingKnob={true}

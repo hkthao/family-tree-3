@@ -208,7 +208,7 @@ export interface GetEventsQuery {
   relatedMemberId?: string;
 }
 
-export interface SearchEventsQuery {
+export interface SearchPublicEventsQuery {
   familyId?: string;
   searchTerm?: string;
   startDate?: string; // DateTime in C# maps to string in TypeScript
@@ -221,7 +221,7 @@ export interface SearchEventsQuery {
   sortOrder?: string; // "asc" or "desc"
 }
 
-export interface GetUpcomingEventsQuery {
+export interface GetPublicUpcomingEventsQuery {
   familyId?: string;
   startDate?: string; // DateTime in C# maps to string in TypeScript
   endDate?: string; // DateTime in C# maps to string in TypeScript

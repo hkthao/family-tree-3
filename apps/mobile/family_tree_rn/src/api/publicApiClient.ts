@@ -9,7 +9,10 @@ import type {
   MemberDetailDto,
   RelationshipListDto,
   SearchPublicFamiliesQuery,
-  SearchPublicMembersQuery, // Added
+  SearchPublicMembersQuery,
+  EventDto, // Added
+  SearchPublicEventsQuery, // Added
+  GetPublicUpcomingEventsQuery, // Added
 } from '../types/public.d';
 
 // TODO: Configure this based on your environment (e.g., .env file)
@@ -57,6 +60,23 @@ export const getPublicMemberById = async (
   const response = await publicApiClient.get<MemberDetailDto>(`/family/${familyId}/member/${id}`, {
     params: { familyId },
   });
+  return response.data;
+};
+
+export const getPublicEventById = async (id: string): Promise<EventDto> => {
+  const response = await publicApiClient.get<EventDto>(`/event/${id}`);
+  return response.data;
+};
+
+export const searchPublicEvents = async (query: SearchPublicEventsQuery): Promise<PaginatedList<EventDto>> => {
+  const response = await publicApiClient.get<PaginatedList<EventDto>>('/events/search', {
+    params: query,
+  });
+  return response.data;
+};
+
+export const getPublicUpcomingEvents = async (query: GetPublicUpcomingEventsQuery): Promise<EventDto[]> => {
+  const response = await publicApiClient.get<EventDto[]>(`/events/upcoming`, { params: query });
   return response.data;
 };
 

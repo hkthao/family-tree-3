@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Appbar, Text, useTheme, Card, ActivityIndicator, Chip, Avatar } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_SMALL } from '@/constants/dimensions';
-import { useEventStore } from '@/stores/useEventStore';
+import { usePublicEventStore } from '@/stores/usePublicEventStore';
 
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -12,7 +12,7 @@ export default function EventDetailsScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
 
-  const { event, loading, error, getEventById } = useEventStore();
+  const { event, loading, error, getEventById } = usePublicEventStore();
 
   useEffect(() => {
     if (id) {
@@ -159,7 +159,7 @@ export default function EventDetailsScreen() {
                 <Chip icon="map-marker" compact={true} style={styles.chip}>{event.location}</Chip>
               )}
 
-              {event.relatedMembers?.map((memberId, index) => (
+              {event.relatedMembers?.map((memberId: string, index: number) => (
                 <Chip key={index} compact={true} icon="account-outline">{memberId}</Chip>
               ))}
             </View>
