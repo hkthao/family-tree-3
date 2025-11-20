@@ -165,8 +165,8 @@ watch(
 
 </script>
 
-<style scoped>
-@import './PublicFamilyTreeViewer.vue.css';
+<style>
+@import '@/styles/family-tree-chart.css';
 
 .public-family-tree-viewer {
   background-color: rgb(var(--v-theme-background));

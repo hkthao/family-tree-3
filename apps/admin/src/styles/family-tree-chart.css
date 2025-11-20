@@ -1,12 +1,12 @@
 .hierarchical-tree-container {
   position: relative;
   width: 100%;
-  height: 95vh;
+  height: 95vh; /* Prioritize PublicFamilyTreeViewer.vue.css height */
 }
 
 .main_svg {
   width: 100% !important;
-  min-height: 100vh;
+  min-height: 100vh; /* Prioritize PublicFamilyTreeViewer.vue.css min-height */
   height: 100% !important;
 }
 
@@ -36,19 +36,6 @@
   position: relative;
   margin-top: -30px;
   margin-left: -30px;
-}
-
-.card-menu-button {
-  position: absolute;
-  top: 0px;
-  left: -10px;
-  cursor: pointer;
-  z-index: 10;
-  font-size: 18px;
-}
-
-.card-menu-button:hover {
-  color: rgb(var(--v-theme-primary)) !important;
 }
 
 .f3 div.card-image {
@@ -149,22 +136,20 @@
 /* Legend Styles */
 .legend {
   position: absolute;
-  top: 10px;
+  top: 0px; /* Prioritize HierarchicalFamilyTree.vue top for legend */
   left: 0px;
   background: rgba(var(--v-theme-surface-variant-rgb), 0.8);
   padding: 10px;
-  border-radius: 5px;
   color: rgb(var(--v-theme-on-surface));
+  display: flex; /* Added from PublicFamilyTreeViewer.vue.css */
+  gap: 10px; /* Added from PublicFamilyTreeViewer.vue.css */
+  align-items: center; /* Added from PublicFamilyTreeViewer.vue.css */
 }
 
 .legend-item {
   display: flex;
   align-items: center;
   margin-bottom: 5px;
-}
-
-.legend-item:last-child {
-  margin-bottom: 0;
 }
 
 .legend-color-box {

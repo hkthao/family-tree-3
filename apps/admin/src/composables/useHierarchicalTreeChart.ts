@@ -1,4 +1,4 @@
-import { ref, onUnmounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import f3 from 'family-chart';
 import 'family-chart/styles/family-chart.css';
 import type { Member, Relationship } from '@/types';
@@ -202,12 +202,26 @@ export function useHierarchicalTreeChart(
     }
   }
 
+  onMounted(() => {
+    if (props.familyId) {
+      renderChart(props.members);
+    }
+  });
+
   onUnmounted(() => {
     if (chart && chartContainer.value) {
       chartContainer.value.innerHTML = '';
       chart = null;
     }
   });
+
+  watch([() => props.familyId, () => props.members, () => props.rootId], ([newFamilyId, newMembers]) => {
+    if (newFamilyId) {
+      renderChart(newMembers);
+    } else {
+      renderChart([]);
+    }
+  }, { deep: true });
 
   return {
     chartContainer,
