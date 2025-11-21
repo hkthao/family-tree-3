@@ -63,8 +63,8 @@ export const useFamilyDictStore = defineStore('familyDict', {
 
       if (result.ok) {
         this.list.items = result.value.items;
-        this.list.totalItems = result.value.totalCount ?? 0;
-        this.list.totalPages = Math.ceil(result.value.totalCount / result.value.pageSize);
+        this.list.totalItems = result.value.totalItems;
+        this.list.totalPages = Math.ceil(this.list.totalItems / this.list.itemsPerPage);
         this.list.currentPage = result.value.page;
       } else {
         this.error = i18n.global.t('familyDict.errors.load');

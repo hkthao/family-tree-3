@@ -2,8 +2,10 @@ import {
   type FamilyDict,
   type Result,
   type FamilyDictFilter,
+  type FamilyDictImport,
+  type Paginated,
 } from '@/types';
-import { type IFamilyDictService, type BackendPaginatedResult } from './family-dict.service.interface';
+import { type IFamilyDictService } from './family-dict.service.interface';
 import { type ApiClientMethods, type ApiError } from '@/plugins/axios';
 
 export class ApiFamilyDictService implements IFamilyDictService {
@@ -47,7 +49,7 @@ export class ApiFamilyDictService implements IFamilyDictService {
     filters: FamilyDictFilter,
     page: number,
     itemsPerPage: number,
-  ): Promise<Result<BackendPaginatedResult<FamilyDict>, ApiError>> {
+  ): Promise<Result<Paginated<FamilyDict>, ApiError>> {
     const params = new URLSearchParams();
     if (filters.searchQuery) params.append('q', filters.searchQuery);
     if (filters.lineage) params.append('lineage', filters.lineage.toString());
@@ -58,15 +60,15 @@ export class ApiFamilyDictService implements IFamilyDictService {
     params.append('page', page.toString());
     params.append('pageSize', itemsPerPage.toString());
 
-    const result = await this.http.get<BackendPaginatedResult<FamilyDict>>(
+    const result = await this.http.get<Paginated<FamilyDict>>(
       `/family-dict/search?${params.toString()}`,
     );
 
     return result;
   }
 
-  async importItems(items: Omit<FamilyDict, 'id'>[]): Promise<Result<string[], ApiError>> {
-    const result = await this.http.post<string[]>(`/family-dict/import`, items);
+  async importItems(data: FamilyDictImport): Promise<Result<string[], ApiError>> {
+    const result = await this.http.post<string[]>(`/family-dict/import`, data);
     return result;
   }
 }
