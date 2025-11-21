@@ -11,7 +11,7 @@ public record SearchFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
     public FamilyDictLineage? Lineage { get; init; }
     public string? Region { get; init; } // "north", "central", "south"
     public int Page { get; init; } = 1;
-    public int PageSize { get; init; } = 10;
+    public int ItemsPerPage { get; init; } = 10;
 }
 
 public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQuery, PaginatedList<FamilyDictDto>>
@@ -45,6 +45,6 @@ public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQu
 
         return await query
             .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.Page, request.PageSize);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
     }
 }

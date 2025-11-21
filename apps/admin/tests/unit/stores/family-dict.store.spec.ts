@@ -90,7 +90,7 @@ describe('family-dict.store', () => {
   const mockPaginatedFamilyDicts = {
     items: [mockFamilyDict],
     page: 1,
-    pageSize: 10,
+    itemsPerPage: 10,
     totalCount: 1,
   };
 

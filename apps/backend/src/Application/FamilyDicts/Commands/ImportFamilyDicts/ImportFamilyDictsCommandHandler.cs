@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using MediatR;
 
 namespace backend.Application.FamilyDicts.Commands.ImportFamilyDicts;
 

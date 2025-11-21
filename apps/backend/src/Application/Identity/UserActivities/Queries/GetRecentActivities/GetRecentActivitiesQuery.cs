@@ -23,5 +23,5 @@ public record GetRecentActivitiesQuery : IRequest<Result<PaginatedList<UserActiv
     /// </summary>
     public Guid? GroupId { get; init; }
     public int Page { get; init; } = 1;
-    public int PageSize { get; init; } = 10;
+    public int ItemsPerPage { get; init; } = 10;
 }

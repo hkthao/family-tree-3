@@ -58,7 +58,7 @@ export class ApiFamilyDictService implements IFamilyDictService {
     if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
     params.append('page', page.toString());
-    params.append('pageSize', itemsPerPage.toString());
+    params.append('itemsPerPage', itemsPerPage.toString());
 
     const result = await this.http.get<Paginated<FamilyDict>>(
       `/family-dict/search?${params.toString()}`,

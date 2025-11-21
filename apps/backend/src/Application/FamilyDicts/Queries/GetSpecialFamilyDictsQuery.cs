@@ -6,8 +6,8 @@ namespace backend.Application.FamilyDicts.Queries;
 
 public record GetSpecialFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
 {
-    public int PageNumber { get; init; } = 1;
-    public int PageSize { get; init; } = 10;
+    public int Page { get; init; } = 1;
+    public int ItemsPerPage { get; init; } = 10;
 }
 
 public class GetSpecialFamilyDictsQueryHandler : IRequestHandler<GetSpecialFamilyDictsQuery, PaginatedList<FamilyDictDto>>
@@ -26,6 +26,6 @@ public class GetSpecialFamilyDictsQueryHandler : IRequestHandler<GetSpecialFamil
         return await _context.FamilyDicts
             .Where(r => r.SpecialRelation)
             .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.Page, request.ItemsPerPage);
     }
 }

@@ -59,7 +59,7 @@ public class GetFamilyDictsQueryHandlerTests : TestBase
         _context.FamilyDicts.AddRange(familyDict1, familyDict2, familyDict3);
         await _context.SaveChangesAsync();
 
-        var query = new GetFamilyDictsQuery { PageNumber = 1, PageSize = 2 };
+        var query = new GetFamilyDictsQuery { Page = 1, ItemsPerPage = 2 };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -76,7 +76,7 @@ public class GetFamilyDictsQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnEmptyList_WhenNoFamilyDictsExist()
     {
         // Arrange
-        var query = new GetFamilyDictsQuery { PageNumber = 1, PageSize = 10 };
+        var query = new GetFamilyDictsQuery { Page = 1, ItemsPerPage = 10 };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

@@ -1,9 +1,5 @@
-using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
-using MediatR;
-using FamilyDictLineage = backend.Domain.Enums.FamilyDictLineage;
 
 namespace backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 

@@ -95,7 +95,7 @@ describe('user-activity.store', () => {
       expect(mockGetRecentActivities).toHaveBeenCalledTimes(1);
       expect(mockGetRecentActivities).toHaveBeenCalledWith(
         1, // page
-        10, // pageSize
+        10, // itemsPerPage
         undefined,
         undefined,
         undefined,

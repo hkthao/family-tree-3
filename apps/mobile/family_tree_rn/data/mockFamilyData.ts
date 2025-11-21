@@ -117,7 +117,7 @@ export const fetchFamilyMembers = async (
   query: string,
   filters: MemberFilter,
   page: number,
-  pageSize: number,
+  itemsPerPage: number,
   signal?: AbortSignal
 ): Promise<{ data: FamilyMember[]; totalCount: number }> => {
   await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
@@ -136,8 +136,8 @@ export const fetchFamilyMembers = async (
     return matchesQuery && matchesGender && matchesRootMember;
   });
 
-  const startIndex = (page - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
+  const startIndex = (page - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
   const paginatedMembers = filteredMembers.slice(startIndex, endIndex);
 
   return { data: paginatedMembers, totalCount: filteredMembers.length };

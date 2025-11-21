@@ -32,7 +32,7 @@ public class UserActivityController(IMediator mediator) : ControllerBase
     [HttpGet("recent")]
     public async Task<ActionResult<PaginatedList<UserActivityDto>>> GetRecentActivities(
         [FromQuery] int page,
-        [FromQuery] int pageSize = 10,
+        [FromQuery] int itemsPerPage = 10,
         [FromQuery] TargetType? targetType = null,
         [FromQuery] string? targetId = null,
         [FromQuery] Guid? groupId = null)
@@ -40,7 +40,7 @@ public class UserActivityController(IMediator mediator) : ControllerBase
         var query = new GetRecentActivitiesQuery
         {
             Page = page,
-            PageSize = pageSize,
+            ItemsPerPage = itemsPerPage,
             TargetType = targetType,
             TargetId = targetId,
             GroupId = groupId

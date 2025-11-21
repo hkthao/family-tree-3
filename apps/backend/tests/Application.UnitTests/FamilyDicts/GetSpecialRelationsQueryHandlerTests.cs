@@ -59,7 +59,7 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         _context.FamilyDicts.AddRange(familyDict1, familyDict2, familyDict3);
         await _context.SaveChangesAsync();
 
-        var query = new GetSpecialFamilyDictsQuery { PageNumber = 1, PageSize = 10 };
+        var query = new GetSpecialFamilyDictsQuery { Page = 1, ItemsPerPage = 10 };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -89,7 +89,7 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         _context.FamilyDicts.Add(familyDict1);
         await _context.SaveChangesAsync();
 
-        var query = new GetSpecialFamilyDictsQuery { PageNumber = 1, PageSize = 10 };
+        var query = new GetSpecialFamilyDictsQuery { Page = 1, ItemsPerPage = 10 };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

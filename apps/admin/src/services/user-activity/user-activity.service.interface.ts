@@ -4,7 +4,7 @@ import type { ApiError } from '@/plugins/axios';
 export interface ICurrentUserActivityService {
   getRecentActivities(
     page: number,
-    pageSize?: number,
+    itemsPerPage?: number,
     targetType?: TargetType,
     targetId?: string,
     groupId?: string,

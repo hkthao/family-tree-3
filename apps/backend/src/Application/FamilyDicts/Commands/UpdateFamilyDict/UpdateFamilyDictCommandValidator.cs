@@ -1,5 +1,3 @@
-using FluentValidation;
-
 namespace backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 
 public class UpdateFamilyDictCommandValidator : AbstractValidator<UpdateFamilyDictCommand>
