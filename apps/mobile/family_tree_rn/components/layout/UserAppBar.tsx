@@ -3,6 +3,7 @@ import { StyleSheet } from 'react-native';
 import { Avatar, Appbar, useTheme } from 'react-native-paper'; // Remove Menu, IconButton, Add useTheme
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useFonts } from 'expo-font';
 
 const useAuth = () => {
   const isLoggedIn = true; // Simulate logged in state
@@ -15,6 +16,10 @@ export default function UserAppBar() {
   const { t } = useTranslation(); // Re-add useTranslation hook
   const { isLoggedIn, user } = useAuth();
   const theme = useTheme();
+
+  const [fontsLoaded] = useFonts({
+    'DancingScript-Regular': require('../../assets/fonts/DancingScript-Regular.ttf'),
+  });
 
   const styles = useMemo(() => StyleSheet.create({
     appBarHeader: {
@@ -29,13 +34,17 @@ export default function UserAppBar() {
       marginLeft: 0, // Remove default left margin
       justifyContent: 'flex-start', // Align title to the left
     },
-  }), [theme]);
+    appBarTitle: { // New style for the title text
+      fontFamily: 'DancingScript-Regular',
+      fontSize: 24, // Adjust as needed
+    },
+  }), [theme, fontsLoaded]);
 
   const handleAvatarPress = () => {
     router.push('/'); // TODO: Navigate to profile screen
   };
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn || !fontsLoaded) { // Conditionally render
     return null;
   }
 
@@ -49,6 +58,7 @@ export default function UserAppBar() {
         />
         <Appbar.Content
           title={t('appbar.title')} // Use translated title
+          titleStyle={styles.appBarTitle} // Apply the new style
           style={styles.appBarContent}
         />
         <Appbar.Action icon="bell" onPress={() => { /* TODO: Navigate to notifications */ }} color={theme.colors.primary} />
