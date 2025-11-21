@@ -1,5 +1,6 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Relations;
 using backend.Application.Relations.Queries;
 using backend.Application.UnitTests.Common;
@@ -8,7 +9,6 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Application.Common.Mappings;
 
 namespace backend.Application.UnitTests.Relations;
 
@@ -35,14 +35,22 @@ public class SearchRelationsQueryHandlerTests : TestBase
         // Arrange
         var relation1 = new Relation
         {
-            Id = "r1", Name = "Ông nội", Type = RelationType.Blood, Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi, SpecialRelation = false,
+            Id = "r1",
+            Name = "Ông nội",
+            Type = RelationType.Blood,
+            Description = "Cha của cha bạn",
+            Lineage = RelationLineage.Noi,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "Ông nội", Central = "Ông nội", South = "Ông nội" }
         };
         var relation2 = new Relation
         {
-            Id = "r2", Name = "Bà ngoại", Type = RelationType.Blood, Description = "Mẹ của mẹ bạn",
-            Lineage = RelationLineage.Ngoai, SpecialRelation = false,
+            Id = "r2",
+            Name = "Bà ngoại",
+            Type = RelationType.Blood,
+            Description = "Mẹ của mẹ bạn",
+            Lineage = RelationLineage.Ngoai,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "Bà ngoại", Central = "Bà ngoại", South = "Bà ngoại" }
         };
         _context.Relations.AddRange(relation1, relation2);
@@ -65,14 +73,22 @@ public class SearchRelationsQueryHandlerTests : TestBase
         // Arrange
         var relation1 = new Relation
         {
-            Id = "r1", Name = "Ông nội", Type = RelationType.Blood, Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi, SpecialRelation = false,
+            Id = "r1",
+            Name = "Ông nội",
+            Type = RelationType.Blood,
+            Description = "Cha của cha bạn",
+            Lineage = RelationLineage.Noi,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "Ông nội", Central = "Ông nội", South = "Ông nội" }
         };
         var relation2 = new Relation
         {
-            Id = "r2", Name = "Bà ngoại", Type = RelationType.Blood, Description = "Mẹ của mẹ bạn",
-            Lineage = RelationLineage.Ngoai, SpecialRelation = false,
+            Id = "r2",
+            Name = "Bà ngoại",
+            Type = RelationType.Blood,
+            Description = "Mẹ của mẹ bạn",
+            Lineage = RelationLineage.Ngoai,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "Bà ngoại", Central = "Bà ngoại", South = "Bà ngoại" }
         };
         _context.Relations.AddRange(relation1, relation2);
@@ -95,8 +111,12 @@ public class SearchRelationsQueryHandlerTests : TestBase
         // Arrange
         var relation1 = new Relation
         {
-            Id = "r1", Name = "Ông nội", Type = RelationType.Blood, Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi, SpecialRelation = false,
+            Id = "r1",
+            Name = "Ông nội",
+            Type = RelationType.Blood,
+            Description = "Cha của cha bạn",
+            Lineage = RelationLineage.Noi,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "Ông nội", Central = "Ông nội", South = "Ông nội" }
         };
         _context.Relations.Add(relation1);

@@ -1,5 +1,6 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Relations;
 using backend.Application.Relations.Queries;
 using backend.Application.UnitTests.Common;
@@ -8,7 +9,6 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Application.Common.Mappings;
 
 namespace backend.Application.UnitTests.Relations;
 
@@ -35,20 +35,32 @@ public class GetSpecialRelationsQueryHandlerTests : TestBase
         // Arrange
         var relation1 = new Relation
         {
-            Id = "r1", Name = "Ông nội", Type = RelationType.Blood, Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi, SpecialRelation = false,
+            Id = "r1",
+            Name = "Ông nội",
+            Type = RelationType.Blood,
+            Description = "Cha của cha bạn",
+            Lineage = RelationLineage.Noi,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "R1", Central = "R1", South = "R1" }
         };
         var relation2 = new Relation
         {
-            Id = "r2", Name = "Cha nuôi", Type = RelationType.Adoption, Description = "Người nhận con làm cha nuôi",
-            Lineage = RelationLineage.NoiNgoai, SpecialRelation = true,
+            Id = "r2",
+            Name = "Cha nuôi",
+            Type = RelationType.Adoption,
+            Description = "Người nhận con làm cha nuôi",
+            Lineage = RelationLineage.NoiNgoai,
+            SpecialRelation = true,
             NamesByRegion = new NamesByRegion { North = "R2", Central = "R2", South = "R2" }
         };
         var relation3 = new Relation
         {
-            Id = "r3", Name = "Mẹ kế", Type = RelationType.InLaw, Description = "Vợ của cha nhưng không phải mẹ ruột",
-            Lineage = RelationLineage.Noi, SpecialRelation = true,
+            Id = "r3",
+            Name = "Mẹ kế",
+            Type = RelationType.InLaw,
+            Description = "Vợ của cha nhưng không phải mẹ ruột",
+            Lineage = RelationLineage.Noi,
+            SpecialRelation = true,
             NamesByRegion = new NamesByRegion { North = "R3", Central = "R3", South = "R3" }
         };
 
@@ -74,8 +86,12 @@ public class GetSpecialRelationsQueryHandlerTests : TestBase
         // Arrange
         var relation1 = new Relation
         {
-            Id = "r1", Name = "Ông nội", Type = RelationType.Blood, Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi, SpecialRelation = false,
+            Id = "r1",
+            Name = "Ông nội",
+            Type = RelationType.Blood,
+            Description = "Cha của cha bạn",
+            Lineage = RelationLineage.Noi,
+            SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "R1", Central = "R1", South = "R1" }
         };
         _context.Relations.Add(relation1);

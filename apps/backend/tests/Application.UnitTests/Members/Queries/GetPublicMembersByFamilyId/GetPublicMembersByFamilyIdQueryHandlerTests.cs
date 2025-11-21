@@ -6,11 +6,11 @@ using backend.Application.Members.Queries.GetPublicMembersByFamilyId;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
+using backend.Infrastructure.Services; // Add this line
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
-using backend.Infrastructure.Services; // Add this line
 
 namespace backend.Application.UnitTests.Members.Queries.GetPublicMembersByFamilyId;
 

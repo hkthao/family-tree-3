@@ -1,8 +1,8 @@
+using System.Text.Json; // New using statement
 using backend.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion; // New using statement
-using System.Text.Json; // New using statement
 
 namespace backend.Infrastructure.Persistence.Configurations;
 

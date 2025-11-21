@@ -1,5 +1,6 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
+using backend.Application.Common.Mappings;
 using backend.Application.Relations;
 using backend.Application.Relations.Queries;
 using backend.Application.UnitTests.Common;
@@ -8,7 +9,6 @@ using backend.Domain.Enums;
 using FluentAssertions;
 using Moq;
 using Xunit;
-using backend.Application.Common.Mappings;
 
 namespace backend.Application.UnitTests.Relations;
 
