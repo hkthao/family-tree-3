@@ -45,10 +45,26 @@
 
     <!-- Names by Region column -->
     <template #item.namesByRegion="{ item }">
-      <div>
-        <div v-if="item.namesByRegion.north">{{ t('familyDict.form.namesByRegion.north') }}: {{ item.namesByRegion.north }}</div>
-        <div v-if="item.namesByRegion.central">{{ t('familyDict.form.namesByRegion.central') }}: {{ item.namesByRegion.central }}</div>
-        <div v-if="item.namesByRegion.south">{{ t('familyDict.form.namesByRegion.south') }}: {{ item.namesByRegion.south }}</div>
+      <div class="d-flex flex-row flex-wrap ga-1 my-1">
+        <v-chip v-if="item.namesByRegion.north" size="small" color="blue" prepend-icon="mdi-compass-outline" >
+          {{ item.namesByRegion.north }}
+        </v-chip>
+        <template v-if="item.namesByRegion.central">
+          <v-chip v-if="typeof item.namesByRegion.central === 'string'" size="small" color="green" prepend-icon="mdi-map-marker-outline" >
+            {{ item.namesByRegion.central }}
+          </v-chip>
+          <v-chip v-else v-for="(name, i) in item.namesByRegion.central" :key="`central-${i}`" size="small" color="green" prepend-icon="mdi-map-marker-outline" >
+            {{ name }}
+          </v-chip>
+        </template>
+        <template v-if="item.namesByRegion.south">
+          <v-chip v-if="typeof item.namesByRegion.south === 'string'" size="small" color="red" prepend-icon="mdi-compass" >
+            {{ item.namesByRegion.south }}
+          </v-chip>
+          <v-chip v-else v-for="(name, i) in item.namesByRegion.south" :key="`south-${i}`" size="small" color="red" prepend-icon="mdi-compass" >
+            {{ name }}
+          </v-chip>
+        </template>
       </div>
     </template>
 
