@@ -108,7 +108,7 @@ const confirmDelete = async (familyDict: FamilyDict) => {
     title: t('confirmDelete.title'),
     message: t('familyDict.list.confirmDelete', { name: familyDict.name || '' }),
     confirmText: t('common.delete'),
-    cancelText: 'common.cancel',
+    cancelText: t('common.cancel'),
     confirmColor: 'error',
   });
 

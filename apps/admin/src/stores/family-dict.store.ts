@@ -1,6 +1,6 @@
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import i18n from '@/plugins/i18n';
-import type { FamilyDict, FamilyDictFilter, Result } from '@/types';
+import type { FamilyDict, FamilyDictFilter, FamilyDictImport, Result } from '@/types';
 import { defineStore } from 'pinia';
 import type { ApiError } from '@/plugins/axios';
 
@@ -190,10 +190,10 @@ export const useFamilyDictStore = defineStore('familyDict', {
       return result;
     },
 
-    async importItems(items: Omit<FamilyDict, 'id'>[]): Promise<Result<string[], ApiError>> {
+    async importItems(data: FamilyDictImport): Promise<Result<string[], ApiError>> {
       this.add.loading = true; // Use add.loading for import as well
       this.error = null;
-      const result = await this.services.familyDict.importItems(items);
+      const result = await this.services.familyDict.importItems(data);
       if (result.ok) {
         await this._loadItems(); // Reload list after successful import
       } else {

@@ -1,4 +1,4 @@
-import type { FamilyDict, Result, FamilyDictFilter } from '@/types';
+import type { FamilyDict, Result, FamilyDictFilter, FamilyDictImport } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import type { ICrudService } from '../common/crud.service.interface';
 
@@ -17,5 +17,5 @@ export interface IFamilyDictService extends ICrudService<FamilyDict> {
     itemsPerPage: number,
   ): Promise<Result<BackendPaginatedResult<FamilyDict>, ApiError>>;
 
-  importItems(items: Omit<FamilyDict, 'id'>[]): Promise<Result<string[], ApiError>>;
+  importItems(data: FamilyDictImport): Promise<Result<string[], ApiError>>;
 }

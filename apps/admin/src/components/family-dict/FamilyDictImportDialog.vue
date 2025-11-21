@@ -6,8 +6,8 @@
       </v-card-title>
       <v-progress-linear v-if="familyDictStore.add.loading" indeterminate color="primary"></v-progress-linear>
       <v-card-text>
-        <VFileUpload v-model="selectedFile" :label="t('familyDict.import.selectJsonFile')" accept=".json" show-size
-          counter prepend-icon="mdi-json" @update:modelValue="onFileSelected" data-testid="json-file-input">
+        <VFileUpload clearable v-model="selectedFile" :label="t('familyDict.import.selectJsonFile')" accept=".json"
+          show-size counter prepend-icon="mdi-json" @update:modelValue="onFileSelected" data-testid="json-file-input">
         </VFileUpload>
 
         <v-alert v-if="parsedDataError" type="error" class="mt-4">{{ parsedDataError }}</v-alert>
@@ -74,9 +74,7 @@ const onFileSelected = (files: File[]) => {
       try {
         const content = e.target?.result as string;
         const data = JSON.parse(content);
-
-        // Basic validation for array of objects matching FamilyDict structure
-        if (!Array.isArray(data) || data.some(item => !item.name || !item.type || !item.namesByRegion || !item.namesByRegion.north)) {
+        if (!Array.isArray(data) || data.some(item => !item.name || Number.isNaN(item.type) || Number.isNaN(item.lineage) || !item.namesByRegion || !item.namesByRegion.north)) {
           parsedDataError.value = t('familyDict.import.errors.invalidJsonStructure');
           parsedData.value = null;
         } else {
@@ -97,7 +95,9 @@ const onFileSelected = (files: File[]) => {
 const importFamilyDicts = async () => {
   if (!parsedData.value) return;
 
-  const result = await familyDictStore.importItems(parsedData.value);
+  const result = await familyDictStore.importItems({
+    familyDicts: parsedData.value as FamilyDict[]
+  });
   if (result.ok) {
     showSnackbar(t('familyDict.import.messages.importSuccess'), 'success');
     emit('imported');

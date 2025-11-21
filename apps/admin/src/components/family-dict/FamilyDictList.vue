@@ -180,7 +180,7 @@ const headers = computed<DataTableHeader[]>(() => {
     {
       title: t('familyDict.list.headers.name'),
       key: 'name',
-      width: '200px',
+      width: 'auto',
       align: 'start',
     },
     {

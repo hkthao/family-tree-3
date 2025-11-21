@@ -29,6 +29,10 @@ export interface FamilyDict {
   namesByRegion: NamesByRegion;
 }
 
+export interface FamilyDictImport {
+  familyDicts: FamilyDict[];
+}
+
 export interface FamilyDictFilter {
   searchQuery?: string;
   lineage?: FamilyDictLineage;
