@@ -1,8 +1,11 @@
 using backend.Application.Common.Models;
+using backend.Application.Common.Security; // New using statement
 using backend.Application.FamilyDicts;
+using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
+using backend.Application.FamilyDicts.Commands.DeleteFamilyDict;
+using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyDicts.Queries;
 using Microsoft.AspNetCore.Mvc;
-using backend.Application.Common.Security; // New using statement
 
 namespace backend.Web.Controllers;
 
@@ -33,7 +36,7 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(FamilyDictDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<FamilyDictDto>> GetFamilyDictById(string id)
+    public async Task<ActionResult<FamilyDictDto>> GetFamilyDictById(Guid id)
     {
         var familyDict = await _mediator.Send(new GetFamilyDictByIdQuery(id));
         return familyDict == null ? NotFound() : Ok(familyDict);
@@ -61,5 +64,54 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     public async Task<ActionResult<PaginatedList<FamilyDictDto>>> GetSpecialFamilyDicts([FromQuery] GetSpecialFamilyDictsQuery query)
     {
         return await _mediator.Send(query);
+    }
+
+    /// <summary>
+    /// Tạo mới một FamilyDict.
+    /// </summary>
+    /// <param name="command">Đối tượng chứa thông tin để tạo FamilyDict.</param>
+    /// <returns>ID của FamilyDict vừa tạo.</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<Guid>> CreateFamilyDict([FromBody] CreateFamilyDictCommand command)
+    {
+        var familyDictId = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetFamilyDictById), new { id = familyDictId }, familyDictId);
+    }
+
+    /// <summary>
+    /// Cập nhật một FamilyDict hiện có.
+    /// </summary>
+    /// <param name="id">ID của FamilyDict cần cập nhật.</param>
+    /// <param name="command">Đối tượng chứa thông tin cập nhật cho FamilyDict.</param>
+    /// <returns>NoContent nếu cập nhật thành công.</returns>
+    [HttpPut("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> UpdateFamilyDict(Guid id, [FromBody] UpdateFamilyDictCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest();
+        }
+
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Xóa một FamilyDict hiện có.
+    /// </summary>
+    /// <param name="id">ID của FamilyDict cần xóa.</param>
+    /// <returns>NoContent nếu xóa thành công.</returns>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> DeleteFamilyDict(Guid id)
+    {
+        await _mediator.Send(new DeleteFamilyDictCommand(id));
+        return NoContent();
     }
 }

@@ -1,19 +1,19 @@
+using backend.Application.Common.Models;
 using backend.Domain.Enums;
 
-namespace backend.Application.FamilyDicts;
+namespace backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 
-public class FamilyDictDto
+public record CreateFamilyDictCommand : IRequest<Guid>
 {
-    public Guid Id { get; set; }
     public string Name { get; set; } = null!;
     public FamilyDictType Type { get; set; }
     public string Description { get; set; } = null!;
     public FamilyDictLineage Lineage { get; set; }
     public bool SpecialRelation { get; set; }
-    public NamesByRegionDto NamesByRegion { get; set; } = null!;
+    public NamesByRegionCommandDto NamesByRegion { get; set; } = null!;
 }
 
-public class NamesByRegionDto
+public class NamesByRegionCommandDto
 {
     public string North { get; set; } = null!;
     public object Central { get; set; } = null!; // Can be string or array of strings

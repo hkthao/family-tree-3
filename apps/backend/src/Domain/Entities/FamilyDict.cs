@@ -1,10 +1,10 @@
+using backend.Domain.Common;
 using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
 
-public class FamilyDict
+public class FamilyDict : BaseAuditableEntity
 {
-    public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;
     public FamilyDictType Type { get; set; }
     public string Description { get; set; } = null!;

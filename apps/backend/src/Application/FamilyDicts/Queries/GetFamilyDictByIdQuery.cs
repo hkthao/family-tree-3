@@ -2,7 +2,7 @@ using backend.Application.Common.Interfaces;
 
 namespace backend.Application.FamilyDicts.Queries;
 
-public record GetFamilyDictByIdQuery(string Id) : IRequest<FamilyDictDto?>;
+public record GetFamilyDictByIdQuery(Guid Id) : IRequest<FamilyDictDto?>;
 
 public class GetFamilyDictByIdQueryHandler : IRequestHandler<GetFamilyDictByIdQuery, FamilyDictDto?>
 {

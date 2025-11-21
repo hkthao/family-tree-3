@@ -64,33 +64,33 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
         // Assert
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(1);
-                    result.Items.First().Name.Should().Be("Ông nội");
-                }
-        
-                [Fact]
-                public async Task Handle_ShouldReturnFilteredFamilyDicts_WhenLineageIsProvided()
-                {
-                    // Arrange
-                    var familyDict1 = new FamilyDict
-                    {
-                        Id = "r1",
-                        Name = "Ông nội",
-                        Type = FamilyDictType.Blood,
-                        Description = "Cha của cha bạn",
-                        Lineage = FamilyDictLineage.Noi,
-                        SpecialRelation = false,
-                        NamesByRegion = new NamesByRegion { North = "Ông nội", Central = "Ông nội", South = "Ông nội" }
-                    };
-                    var familyDict2 = new FamilyDict
-                    {
-                        Id = "r2",
-                        Name = "Bà ngoại",
-                        Type = FamilyDictType.Blood,
-                        Description = "Mẹ của mẹ bạn",
-                        Lineage = FamilyDictLineage.Ngoai,
-                        SpecialRelation = false,
-                        NamesByRegion = new NamesByRegion { North = "Bà ngoại", Central = "Bà ngoại", South = "Bà ngoại" }
-                    };        _context.FamilyDicts.AddRange(familyDict1, familyDict2);
+        result.Items.First().Name.Should().Be("Ông nội");
+    }
+
+    [Fact]
+    public async Task Handle_ShouldReturnFilteredFamilyDicts_WhenLineageIsProvided()
+    {
+        // Arrange
+        var familyDict1 = new FamilyDict
+        {
+            Id = "r1",
+            Name = "Ông nội",
+            Type = FamilyDictType.Blood,
+            Description = "Cha của cha bạn",
+            Lineage = FamilyDictLineage.Noi,
+            SpecialRelation = false,
+            NamesByRegion = new NamesByRegion { North = "Ông nội", Central = "Ông nội", South = "Ông nội" }
+        };
+        var familyDict2 = new FamilyDict
+        {
+            Id = "r2",
+            Name = "Bà ngoại",
+            Type = FamilyDictType.Blood,
+            Description = "Mẹ của mẹ bạn",
+            Lineage = FamilyDictLineage.Ngoai,
+            SpecialRelation = false,
+            NamesByRegion = new NamesByRegion { North = "Bà ngoại", Central = "Bà ngoại", South = "Bà ngoại" }
+        }; _context.FamilyDicts.AddRange(familyDict1, familyDict2);
         await _context.SaveChangesAsync();
 
         var query = new SearchFamilyDictsQuery { Lineage = FamilyDictLineage.Noi };
