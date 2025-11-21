@@ -33,19 +33,23 @@
       </v-chip>
     </template>
 
-    <!-- Special Relation column -->
-    <template #item.specialRelation="{ item }">
-      <v-icon :color="item.specialRelation ? 'success' : 'error'">
-        {{ item.specialRelation ? 'mdi-check-circle' : 'mdi-close-circle' }}
-      </v-icon>
-    </template>
-
     <!-- Names by Region column -->
     <template #item.namesByRegion="{ item }">
       <div>
         <div v-if="item.namesByRegion.north">{{ t('familyDict.form.namesByRegion.north') }}: {{ item.namesByRegion.north }}</div>
         <div v-if="item.namesByRegion.central">{{ t('familyDict.form.namesByRegion.central') }}: {{ item.namesByRegion.central }}</div>
         <div v-if="item.namesByRegion.south">{{ t('familyDict.form.namesByRegion.south') }}: {{ item.namesByRegion.south }}</div>
+      </div>
+    </template>
+
+    <!-- Name column with click for details -->
+    <template #item.name="{ item }">
+      <div class="text-left">
+        <a @click="viewFamilyDict(item)" class="text-primary font-weight-bold text-decoration-underline cursor-pointer"
+          aria-label="View">
+          {{ item.name }}
+          <div class="text-caption">{{ item.description }}</div>
+        </a>
       </div>
     </template>
 
@@ -160,12 +164,6 @@ const getFamilyDictLineageTitle = (lineage: FamilyDictLineage) => {
 const headers = computed<DataTableHeader[]>(() => {
   const baseHeaders: DataTableHeader[] = [
     {
-      title: t('familyDict.list.headers.id'),
-      key: 'id',
-      width: '100px',
-      align: 'start',
-    },
-    {
       title: t('familyDict.list.headers.name'),
       key: 'name',
       width: '200px',
@@ -178,21 +176,8 @@ const headers = computed<DataTableHeader[]>(() => {
       align: 'center',
     },
     {
-      title: t('familyDict.list.headers.description'),
-      key: 'description',
-      width: 'auto',
-      align: 'start',
-      sortable: false,
-    },
-    {
       title: t('familyDict.list.headers.lineage'),
       key: 'lineage',
-      width: '150px',
-      align: 'center',
-    },
-    {
-      title: t('familyDict.list.headers.specialRelation'),
-      key: 'specialRelation',
       width: '150px',
       align: 'center',
     },

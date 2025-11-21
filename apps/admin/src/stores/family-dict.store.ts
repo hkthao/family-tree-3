@@ -63,7 +63,7 @@ export const useFamilyDictStore = defineStore('familyDict', {
 
       if (result.ok) {
         this.list.items = result.value.items;
-        this.list.totalItems = result.value.totalCount;
+        this.list.totalItems = result.value.totalCount ?? 0;
         this.list.totalPages = Math.ceil(result.value.totalCount / result.value.pageSize);
         this.list.currentPage = result.value.page;
       } else {
@@ -133,7 +133,7 @@ export const useFamilyDictStore = defineStore('familyDict', {
     },
 
     setSortBy(sortBy: { key: string; order: string }[]) {
-      this.list.sortBy = sortBy;
+      this.list.sortBy = Array.isArray(sortBy) ? sortBy : [];
       this.list.currentPage = 1;
     },
 
@@ -146,10 +146,10 @@ export const useFamilyDictStore = defineStore('familyDict', {
         this.list.itemsPerPage = options.itemsPerPage;
       }
 
+      const newSortBy = Array.isArray(options.sortBy) ? options.sortBy : [];
       const currentSortBy = JSON.stringify(this.list.sortBy);
-      const newSortBy = JSON.stringify(options.sortBy);
-      if (currentSortBy !== newSortBy) {
-        this.list.sortBy = options.sortBy;
+      if (currentSortBy !== JSON.stringify(newSortBy)) {
+        this.list.sortBy = newSortBy;
       }
 
       this._loadItems();
