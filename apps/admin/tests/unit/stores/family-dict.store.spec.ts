@@ -90,8 +90,8 @@ describe('family-dict.store', () => {
   const mockPaginatedFamilyDicts = {
     items: [mockFamilyDict],
     page: 1,
-    itemsPerPage: 10,
-    totalCount: 1,
+    totalItems: 1, // Changed from totalCount
+    totalPages: 1, // Added
   };
 
   // --- Actions Tests ---
