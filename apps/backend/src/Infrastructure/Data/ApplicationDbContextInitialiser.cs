@@ -41,17 +41,17 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
     {
         await Task.CompletedTask;
 
-        // Seed Relations
-        if (!_context.Relations.Any())
+        // Seed FamilyDicts
+        if (!_context.FamilyDicts.Any())
         {
-            _context.Relations.AddRange(
-                new Domain.Entities.Relation
+            _context.FamilyDicts.AddRange(
+                new Domain.Entities.FamilyDict
                 {
                     Id = "ong_noi",
                     Name = "Ông nội",
-                    Type = Domain.Enums.RelationType.Blood,
+                    Type = Domain.Enums.FamilyDictType.Blood,
                     Description = "Cha của cha bạn",
-                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
                     SpecialRelation = false,
                     NamesByRegion = new Domain.Entities.NamesByRegion
                     {
@@ -60,13 +60,13 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                         South = "Ông nội"
                     }
                 },
-                new Domain.Entities.Relation
+                new Domain.Entities.FamilyDict
                 {
                     Id = "ong_ngoai",
                     Name = "Ông ngoại",
-                    Type = Domain.Enums.RelationType.Blood,
+                    Type = Domain.Enums.FamilyDictType.Blood,
                     Description = "Cha của mẹ bạn",
-                    Lineage = Domain.Enums.RelationLineage.Ngoai,
+                    Lineage = Domain.Enums.FamilyDictLineage.Ngoai,
                     SpecialRelation = false,
                     NamesByRegion = new Domain.Entities.NamesByRegion
                     {
@@ -75,13 +75,13 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                         South = "Ông ngoại"
                     }
                 },
-                new Domain.Entities.Relation
+                new Domain.Entities.FamilyDict
                 {
                     Id = "cha_nuoi",
                     Name = "Cha nuôi",
-                    Type = Domain.Enums.RelationType.Adoption,
+                    Type = Domain.Enums.FamilyDictType.Adoption,
                     Description = "Người nhận con làm cha nuôi",
-                    Lineage = Domain.Enums.RelationLineage.NoiNgoai,
+                    Lineage = Domain.Enums.FamilyDictLineage.NoiNgoai,
                     SpecialRelation = true,
                     NamesByRegion = new Domain.Entities.NamesByRegion
                     {
@@ -90,13 +90,13 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                         South = "Cha nuôi"
                     }
                 },
-                new Domain.Entities.Relation
+                new Domain.Entities.FamilyDict
                 {
                     Id = "me_ke",
                     Name = "Mẹ kế",
-                    Type = Domain.Enums.RelationType.InLaw,
+                    Type = Domain.Enums.FamilyDictType.InLaw,
                     Description = "Vợ của cha nhưng không phải mẹ ruột",
-                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
                     SpecialRelation = true,
                     NamesByRegion = new Domain.Entities.NamesByRegion
                     {
@@ -105,13 +105,13 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                         South = "Mẹ kế"
                     }
                 },
-                new Domain.Entities.Relation
+                new Domain.Entities.FamilyDict
                 {
                     Id = "chu_noi",
                     Name = "Chú",
-                    Type = Domain.Enums.RelationType.Blood,
+                    Type = Domain.Enums.FamilyDictType.Blood,
                     Description = "Em trai của cha",
-                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
                     SpecialRelation = false,
                     NamesByRegion = new Domain.Entities.NamesByRegion
                     {
@@ -120,13 +120,13 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
                         South = "Cậu"
                     }
                 },
-                new Domain.Entities.Relation
+                new Domain.Entities.FamilyDict
                 {
                     Id = "co_noi",
                     Name = "Cô",
-                    Type = Domain.Enums.RelationType.Blood,
+                    Type = Domain.Enums.FamilyDictType.Blood,
                     Description = "Em gái của cha",
-                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
                     SpecialRelation = false,
                     NamesByRegion = new Domain.Entities.NamesByRegion
                     {

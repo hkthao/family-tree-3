@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion; // New using statem
 
 namespace backend.Infrastructure.Persistence.Configurations;
 
-public class RelationConfiguration : IEntityTypeConfiguration<Relation>
+public class FamilyDictConfiguration : IEntityTypeConfiguration<FamilyDict>
 {
-    public void Configure(EntityTypeBuilder<Relation> builder)
+    public void Configure(EntityTypeBuilder<FamilyDict> builder)
     {
         builder.HasKey(r => r.Id);
 

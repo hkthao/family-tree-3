@@ -1,8 +1,8 @@
 using AutoMapper;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Mappings;
-using backend.Application.Relations;
-using backend.Application.Relations.Queries;
+using backend.Application.FamilyDicts;
+using backend.Application.FamilyDicts.Queries;
 using backend.Application.UnitTests.Common;
 using backend.Domain.Entities;
 using backend.Domain.Enums;
@@ -10,14 +10,14 @@ using FluentAssertions;
 using Moq;
 using Xunit;
 
-namespace backend.Application.UnitTests.Relations;
+namespace backend.Application.UnitTests.FamilyDicts;
 
-public class GetSpecialRelationsQueryHandlerTests : TestBase
+public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
 {
     private readonly Mock<IMapper> _mapperMock;
-    private readonly GetSpecialRelationsQueryHandler _handler;
+    private readonly GetSpecialFamilyDictsQueryHandler _handler;
 
-    public GetSpecialRelationsQueryHandlerTests() : base()
+    public GetSpecialFamilyDictsQueryHandlerTests() : base()
     {
         _mapperMock = new Mock<IMapper>();
         // Setup AutoMapper for testing
@@ -26,48 +26,48 @@ public class GetSpecialRelationsQueryHandlerTests : TestBase
             cfg.AddProfile<MappingProfile>(); // Assuming MappingProfile contains Relation mappings
         }));
 
-        _handler = new GetSpecialRelationsQueryHandler(_context, _mapperMock.Object);
+        _handler = new GetSpecialFamilyDictsQueryHandler(_context, _mapperMock.Object);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnSpecialRelationsPaginated()
+    public async Task Handle_ShouldReturnSpecialFamilyDictsPaginated()
     {
         // Arrange
-        var relation1 = new Relation
+        var familyDict1 = new FamilyDict
         {
             Id = "r1",
             Name = "Ông nội",
-            Type = RelationType.Blood,
+            Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi,
+            Lineage = FamilyDictLineage.Noi,
             SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "R1", Central = "R1", South = "R1" }
         };
-        var relation2 = new Relation
+        var familyDict2 = new FamilyDict
         {
             Id = "r2",
             Name = "Cha nuôi",
-            Type = RelationType.Adoption,
+            Type = FamilyDictType.Adoption,
             Description = "Người nhận con làm cha nuôi",
-            Lineage = RelationLineage.NoiNgoai,
+            Lineage = FamilyDictLineage.NoiNgoai,
             SpecialRelation = true,
             NamesByRegion = new NamesByRegion { North = "R2", Central = "R2", South = "R2" }
         };
-        var relation3 = new Relation
+        var familyDict3 = new FamilyDict
         {
             Id = "r3",
             Name = "Mẹ kế",
-            Type = RelationType.InLaw,
+            Type = FamilyDictType.InLaw,
             Description = "Vợ của cha nhưng không phải mẹ ruột",
-            Lineage = RelationLineage.Noi,
+            Lineage = FamilyDictLineage.Noi,
             SpecialRelation = true,
             NamesByRegion = new NamesByRegion { North = "R3", Central = "R3", South = "R3" }
         };
 
-        _context.Relations.AddRange(relation1, relation2, relation3);
+        _context.FamilyDicts.AddRange(familyDict1, familyDict2, familyDict3);
         await _context.SaveChangesAsync();
 
-        var query = new GetSpecialRelationsQuery { PageNumber = 1, PageSize = 10 };
+        var query = new GetSpecialFamilyDictsQuery { PageNumber = 1, PageSize = 10 };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -81,23 +81,23 @@ public class GetSpecialRelationsQueryHandlerTests : TestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnEmptyList_WhenNoSpecialRelationsExist()
+    public async Task Handle_ShouldReturnEmptyList_WhenNoSpecialFamilyDictsExist()
     {
         // Arrange
-        var relation1 = new Relation
+        var familyDict1 = new FamilyDict
         {
             Id = "r1",
             Name = "Ông nội",
-            Type = RelationType.Blood,
+            Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",
-            Lineage = RelationLineage.Noi,
+            Lineage = FamilyDictLineage.Noi,
             SpecialRelation = false,
             NamesByRegion = new NamesByRegion { North = "R1", Central = "R1", South = "R1" }
         };
-        _context.Relations.Add(relation1);
+        _context.FamilyDicts.Add(familyDict1);
         await _context.SaveChangesAsync();
 
-        var query = new GetSpecialRelationsQuery { PageNumber = 1, PageSize = 10 };
+        var query = new GetSpecialFamilyDictsQuery { PageNumber = 1, PageSize = 10 };
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

@@ -76,9 +76,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PrivacyConfiguration> PrivacyConfigurations => Set<PrivacyConfiguration>();
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Relation.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyDict.
     /// </summary>
-    public DbSet<Relation> Relations => Set<Relation>();
+    public DbSet<FamilyDict> FamilyDicts => Set<FamilyDict>();
 
 
     //public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

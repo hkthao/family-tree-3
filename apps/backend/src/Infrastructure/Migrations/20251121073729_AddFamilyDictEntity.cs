@@ -5,13 +5,13 @@
 namespace backend.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddRelationEntity : Migration
+    public partial class AddFamilyDictEntity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "relations",
+                name: "family_dicts",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
@@ -28,7 +28,7 @@ namespace backend.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_relations", x => x.id);
+                    table.PrimaryKey("pk_family_dicts", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
         }
@@ -37,7 +37,7 @@ namespace backend.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "relations");
+                name: "family_dicts");
         }
     }
 }

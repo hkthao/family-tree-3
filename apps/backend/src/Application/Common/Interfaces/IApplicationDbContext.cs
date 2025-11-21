@@ -64,9 +64,9 @@ public interface IApplicationDbContext
     DbSet<PrivacyConfiguration> PrivacyConfigurations { get; }
 
     /// <summary>
-    /// Lấy hoặc thiết lập DbSet cho các thực thể Relation.
+    /// Lấy hoặc thiết lập DbSet cho các thực thể FamilyDict.
     /// </summary>
-    DbSet<Relation> Relations { get; }
+    DbSet<FamilyDict> FamilyDicts { get; }
 
     /// <summary>
     /// Lưu tất cả các thay đổi được thực hiện trong context vào cơ sở dữ liệu một cách không đồng bộ.

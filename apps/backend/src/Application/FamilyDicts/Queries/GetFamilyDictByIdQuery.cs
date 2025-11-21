@@ -1,0 +1,29 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using backend.Application.Common.Interfaces;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace backend.Application.FamilyDicts.Queries;
+
+public record GetFamilyDictByIdQuery(string Id) : IRequest<FamilyDictDto?>;
+
+public class GetFamilyDictByIdQueryHandler : IRequestHandler<GetFamilyDictByIdQuery, FamilyDictDto?>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+
+    public GetFamilyDictByIdQueryHandler(IApplicationDbContext context, IMapper mapper)
+    {
+        _context = context;
+        _mapper = mapper;
+    }
+
+    public async Task<FamilyDictDto?> Handle(GetFamilyDictByIdQuery request, CancellationToken cancellationToken)
+    {
+        return await _context.FamilyDicts
+            .Where(r => r.Id == request.Id)
+            .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+}

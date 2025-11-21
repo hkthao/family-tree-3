@@ -2,13 +2,13 @@ using backend.Domain.Enums;
 
 namespace backend.Domain.Entities;
 
-public class Relation
+public class FamilyDict
 {
     public string Id { get; set; } = null!;
     public string Name { get; set; } = null!;
-    public RelationType Type { get; set; }
+    public FamilyDictType Type { get; set; }
     public string Description { get; set; } = null!;
-    public RelationLineage Lineage { get; set; }
+    public FamilyDictLineage Lineage { get; set; }
     public bool SpecialRelation { get; set; }
     public NamesByRegion NamesByRegion { get; set; } = null!; // This will be stored as JSON
 }

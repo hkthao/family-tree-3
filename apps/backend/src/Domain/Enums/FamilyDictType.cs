@@ -1,6 +1,6 @@
 namespace backend.Domain.Enums;
 
-public enum RelationType
+public enum FamilyDictType
 {
     Blood,
     InLaw,

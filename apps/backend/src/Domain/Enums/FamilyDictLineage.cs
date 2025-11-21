@@ -1,6 +1,6 @@
 namespace backend.Domain.Enums;
 
-public enum RelationLineage
+public enum FamilyDictLineage
 {
     Noi, // Nội
     Ngoai, // Ngoại

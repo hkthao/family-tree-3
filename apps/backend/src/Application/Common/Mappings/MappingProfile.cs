@@ -11,7 +11,7 @@ using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
 using backend.Application.Members.Queries.GetMembers;
-using backend.Application.Relations; // New using statement
+using backend.Application.FamilyDicts; // New using statement
 using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
@@ -61,8 +61,8 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? (src.User.Profile != null ? src.User.Profile.Name : src.User.Email) : null));
 
-        // Relation
-        CreateMap<Relation, RelationDto>();
+        // FamilyDict
+        CreateMap<FamilyDict, FamilyDictDto>();
         CreateMap<NamesByRegion, NamesByRegionDto>();
 
         // Export/Import DTOs

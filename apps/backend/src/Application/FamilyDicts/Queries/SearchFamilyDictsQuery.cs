@@ -7,31 +7,31 @@ using backend.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.Relations.Queries;
+namespace backend.Application.FamilyDicts.Queries;
 
-public record SearchRelationsQuery : IRequest<PaginatedList<RelationDto>>
+public record SearchFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
 {
     public string? Q { get; init; }
-    public RelationLineage? Lineage { get; init; }
+    public FamilyDictLineage? Lineage { get; init; }
     public string? Region { get; init; } // "north", "central", "south"
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 10;
 }
 
-public class SearchRelationsQueryHandler : IRequestHandler<SearchRelationsQuery, PaginatedList<RelationDto>>
+public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQuery, PaginatedList<FamilyDictDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public SearchRelationsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public SearchFamilyDictsQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<RelationDto>> Handle(SearchRelationsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<FamilyDictDto>> Handle(SearchFamilyDictsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Relations.AsQueryable();
+        var query = _context.FamilyDicts.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(request.Q))
         {
@@ -48,7 +48,7 @@ public class SearchRelationsQueryHandler : IRequestHandler<SearchRelationsQuery,
         // For now, it's not implemented.
 
         return await query
-            .ProjectTo<RelationDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize);
     }
 }

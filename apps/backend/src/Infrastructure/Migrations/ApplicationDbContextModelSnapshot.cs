@@ -271,6 +271,48 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("families");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.FamilyDict", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("description");
+
+                    b.Property<int>("Lineage")
+                        .HasColumnType("int")
+                        .HasColumnName("lineage");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NamesByRegion")
+                        .IsRequired()
+                        .HasColumnType("json")
+                        .HasColumnName("names_by_region");
+
+                    b.Property<bool>("SpecialRelation")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("special_relation");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_family_dicts");
+
+                    b.ToTable("family_dicts");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
                 {
                     b.Property<Guid>("FamilyId")
@@ -652,48 +694,6 @@ namespace backend.Infrastructure.Migrations
                         .HasDatabaseName("ix_privacy_configurations_family_id");
 
                     b.ToTable("privacy_configurations");
-                });
-
-            modelBuilder.Entity("backend.Domain.Entities.Relation", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500)")
-                        .HasColumnName("description");
-
-                    b.Property<int>("Lineage")
-                        .HasColumnType("int")
-                        .HasColumnName("lineage");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("varchar(100)")
-                        .HasColumnName("name");
-
-                    b.Property<string>("NamesByRegion")
-                        .IsRequired()
-                        .HasColumnType("json")
-                        .HasColumnName("names_by_region");
-
-                    b.Property<bool>("SpecialRelation")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("special_relation");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int")
-                        .HasColumnName("type");
-
-                    b.HasKey("Id")
-                        .HasName("pk_relations");
-
-                    b.ToTable("relations");
                 });
 
             modelBuilder.Entity("backend.Domain.Entities.Relationship", b =>

@@ -6,30 +6,30 @@ using backend.Application.Common.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace backend.Application.Relations.Queries;
+namespace backend.Application.FamilyDicts.Queries;
 
-public record GetSpecialRelationsQuery : IRequest<PaginatedList<RelationDto>>
+public record GetSpecialFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
 {
     public int PageNumber { get; init; } = 1;
     public int PageSize { get; init; } = 10;
 }
 
-public class GetSpecialRelationsQueryHandler : IRequestHandler<GetSpecialRelationsQuery, PaginatedList<RelationDto>>
+public class GetSpecialFamilyDictsQueryHandler : IRequestHandler<GetSpecialFamilyDictsQuery, PaginatedList<FamilyDictDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
 
-    public GetSpecialRelationsQueryHandler(IApplicationDbContext context, IMapper mapper)
+    public GetSpecialFamilyDictsQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
     }
 
-    public async Task<PaginatedList<RelationDto>> Handle(GetSpecialRelationsQuery request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<FamilyDictDto>> Handle(GetSpecialFamilyDictsQuery request, CancellationToken cancellationToken)
     {
-        return await _context.Relations
+        return await _context.FamilyDicts
             .Where(r => r.SpecialRelation)
-            .ProjectTo<RelationDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
             .PaginatedListAsync(request.PageNumber, request.PageSize);
     }
 }
