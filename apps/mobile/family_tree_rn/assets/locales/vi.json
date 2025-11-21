@@ -96,6 +96,7 @@
   "common.logout": "Đăng xuất",
   "common.delete": "Xóa",
   "common.not_available": "N/A",
+  "common.unknown": "Không xác định",
   "login.title": "Chào mừng trở lại!",
   "login.description": "Vui lòng đăng nhập để tiếp tục.",
   "login.button": "Đăng nhập",
@@ -208,5 +209,19 @@
   "onboarding.skip": "Bỏ qua",
   "onboarding.next": "Tiếp theo",
   "onboarding.back": "Quay lại",
-  "onboarding.getStarted": "Bắt đầu"
+  "onboarding.getStarted": "Bắt đầu",
+  "familyDict.list.title": "Từ điển Gia đình",
+  "familyDict.search.search": "Tìm kiếm Từ điển Gia đình",
+  "familyDict.search.no_results": "Không tìm thấy mục từ điển gia đình nào.",
+  "familyDict.search.try_different_query": "Thử một truy vấn tìm kiếm khác.",
+  "familyDict.type.blood": "Huyết thống",
+  "familyDict.type.marriage": "Hôn nhân",
+  "familyDict.type.adoption": "Con nuôi",
+  "familyDict.type.inLaw": "Họ hàng bên vợ/chồng",
+  "familyDict.type.other": "Khác",
+  "familyDict.lineage.noi": "Nội",
+  "familyDict.lineage.ngoai": "Ngoại",
+  "familyDict.lineage.noiNgoai": "Nội ngoại",
+  "familyDict.lineage.other": "Khác",
+  "familyDict.form.specialRelation": "Quan hệ đặc biệt"
 }

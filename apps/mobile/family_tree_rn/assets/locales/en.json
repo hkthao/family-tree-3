@@ -94,6 +94,7 @@
   "common.logout": "Logout",
   "common.delete": "Delete",
   "common.not_available": "N/A",
+  "common.unknown": "Unknown",
   "login.title": "Welcome Back!",
   "login.description": "Please log in to continue.",
   "login.button": "Log In",
@@ -206,5 +207,19 @@
   "onboarding.skip": "Skip",
   "onboarding.next": "Next",
   "onboarding.back": "Back",
-  "onboarding.getStarted": "Get Started"
+  "onboarding.getStarted": "Get Started",
+  "familyDict.list.title": "Family Dictionary",
+  "familyDict.search.search": "Search Family Dictionary",
+  "familyDict.search.no_results": "No family dictionary entries found.",
+  "familyDict.search.try_different_query": "Try a different search query.",
+  "familyDict.type.blood": "Blood",
+  "familyDict.type.marriage": "Marriage",
+  "familyDict.type.adoption": "Adoption",
+  "familyDict.type.inLaw": "In-Law",
+  "familyDict.type.other": "Other",
+  "familyDict.lineage.noi": "Paternal",
+  "familyDict.lineage.ngoai": "Maternal",
+  "familyDict.lineage.noiNgoai": "Both Paternal and Maternal",
+  "familyDict.lineage.other": "Other",
+  "familyDict.form.specialRelation": "Special Relation"
 }

@@ -164,7 +164,6 @@ export default function FamilyDictListScreen() {
       marginTop: SPACING_SMALL,
     },
     chip: {
-      height: 28, // Adjust chip height
       justifyContent: 'center', // Center content vertically
       borderWidth: 0, // Remove border
     },
