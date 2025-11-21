@@ -30,8 +30,9 @@ public abstract class TestBase : IDisposable
             .UseInMemoryDatabase(_databaseName)
             .Options;
 
-        // Mock ICurrentUserService and IDateTime
+        // Mock ICurrentUser and IDateTime
         _mockUser = new Mock<ICurrentUser>();
+        _mockUser.Setup(x => x.UserId).Returns(Guid.NewGuid()); // Provide a default mocked UserId
         _mockDateTime = new Mock<IDateTime>();
 
         _context = new ApplicationDbContext(_dbContextOptions);

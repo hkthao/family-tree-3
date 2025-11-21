@@ -14,19 +14,11 @@ namespace backend.Application.UnitTests.FamilyDicts;
 
 public class SearchFamilyDictsQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
     private readonly SearchFamilyDictsQueryHandler _handler;
 
     public SearchFamilyDictsQueryHandlerTests() : base()
     {
-        _mapperMock = new Mock<IMapper>();
-        // Setup AutoMapper for testing
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>(); // Assuming MappingProfile contains Relation mappings
-        }));
-
-        _handler = new SearchFamilyDictsQueryHandler(_context, _mapperMock.Object);
+        _handler = new SearchFamilyDictsQueryHandler(_context, _mapper);
     }
 
     [Fact]
@@ -35,7 +27,7 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
         // Arrange
         var familyDict1 = new FamilyDict
         {
-            Id = "r1",
+            Id = Guid.NewGuid(),
             Name = "Ông nội",
             Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",
@@ -45,7 +37,7 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
         };
         var familyDict2 = new FamilyDict
         {
-            Id = "r2",
+            Id = Guid.NewGuid(),
             Name = "Bà ngoại",
             Type = FamilyDictType.Blood,
             Description = "Mẹ của mẹ bạn",
@@ -73,7 +65,7 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
         // Arrange
         var familyDict1 = new FamilyDict
         {
-            Id = "r1",
+            Id = Guid.NewGuid(),
             Name = "Ông nội",
             Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",
@@ -83,7 +75,7 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
         };
         var familyDict2 = new FamilyDict
         {
-            Id = "r2",
+            Id = Guid.NewGuid(),
             Name = "Bà ngoại",
             Type = FamilyDictType.Blood,
             Description = "Mẹ của mẹ bạn",
@@ -110,7 +102,7 @@ public class SearchFamilyDictsQueryHandlerTests : TestBase
         // Arrange
         var familyDict1 = new FamilyDict
         {
-            Id = "r1",
+            Id = Guid.NewGuid(),
             Name = "Ông nội",
             Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",

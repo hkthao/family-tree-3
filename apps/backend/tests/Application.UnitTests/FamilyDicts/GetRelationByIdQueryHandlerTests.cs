@@ -14,28 +14,21 @@ namespace backend.Application.UnitTests.FamilyDicts;
 
 public class GetFamilyDictByIdQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
     private readonly GetFamilyDictByIdQueryHandler _handler;
 
     public GetFamilyDictByIdQueryHandlerTests() : base()
     {
-        _mapperMock = new Mock<IMapper>();
-        // Setup AutoMapper for testing
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>(); // Assuming MappingProfile contains Relation mappings
-        }));
-
-        _handler = new GetFamilyDictByIdQueryHandler(_context, _mapperMock.Object);
+        _handler = new GetFamilyDictByIdQueryHandler(_context, _mapper);
     }
 
     [Fact]
     public async Task Handle_ShouldReturnFamilyDict_WhenIdExists()
     {
         // Arrange
+        var familyDictId = Guid.NewGuid();
         var familyDict = new FamilyDict
         {
-            Id = "test_id",
+            Id = familyDictId,
             Name = "Test FamilyDict",
             Type = FamilyDictType.Blood,
             Description = "Description",
@@ -46,14 +39,14 @@ public class GetFamilyDictByIdQueryHandlerTests : TestBase
         _context.FamilyDicts.Add(familyDict);
         await _context.SaveChangesAsync();
 
-        var query = new GetFamilyDictByIdQuery("test_id");
+        var query = new GetFamilyDictByIdQuery(familyDictId);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
-        result!.Id.Should().Be("test_id");
+        result!.Id.Should().Be(familyDictId);
         result.Name.Should().Be("Test FamilyDict");
     }
 
@@ -61,7 +54,7 @@ public class GetFamilyDictByIdQueryHandlerTests : TestBase
     public async Task Handle_ShouldReturnNull_WhenIdDoesNotExist()
     {
         // Arrange
-        var query = new GetFamilyDictByIdQuery("non_existent_id");
+        var query = new GetFamilyDictByIdQuery(Guid.NewGuid()); // Non-existent ID
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

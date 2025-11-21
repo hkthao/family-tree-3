@@ -135,7 +135,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 entityType.AddSoftDeleteQueryFilter();
             }
         }
-
+        
         base.OnModelCreating(builder);
 
         // Convert all DateTime properties to UTC

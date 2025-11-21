@@ -14,19 +14,11 @@ namespace backend.Application.UnitTests.FamilyDicts;
 
 public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
     private readonly GetSpecialFamilyDictsQueryHandler _handler;
 
     public GetSpecialFamilyDictsQueryHandlerTests() : base()
     {
-        _mapperMock = new Mock<IMapper>();
-        // Setup AutoMapper for testing
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>(); // Assuming MappingProfile contains Relation mappings
-        }));
-
-        _handler = new GetSpecialFamilyDictsQueryHandler(_context, _mapperMock.Object);
+        _handler = new GetSpecialFamilyDictsQueryHandler(_context, _mapper);
     }
 
     [Fact]
@@ -35,7 +27,7 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         // Arrange
         var familyDict1 = new FamilyDict
         {
-            Id = "r1",
+            Id = Guid.NewGuid(),
             Name = "Ông nội",
             Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",
@@ -45,7 +37,7 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         };
         var familyDict2 = new FamilyDict
         {
-            Id = "r2",
+            Id = Guid.NewGuid(),
             Name = "Cha nuôi",
             Type = FamilyDictType.Adoption,
             Description = "Người nhận con làm cha nuôi",
@@ -55,7 +47,7 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         };
         var familyDict3 = new FamilyDict
         {
-            Id = "r3",
+            Id = Guid.NewGuid(),
             Name = "Mẹ kế",
             Type = FamilyDictType.InLaw,
             Description = "Vợ của cha nhưng không phải mẹ ruột",
@@ -76,8 +68,8 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(2);
         result.TotalItems.Should().Be(2); // Changed from TotalCount to TotalItems
-        result.Items.Should().Contain(r => r.Id == "r2");
-        result.Items.Should().Contain(r => r.Id == "r3");
+        result.Items.Should().Contain(r => r.Id == familyDict2.Id);
+        result.Items.Should().Contain(r => r.Id == familyDict3.Id);
     }
 
     [Fact]
@@ -86,7 +78,7 @@ public class GetSpecialFamilyDictsQueryHandlerTests : TestBase
         // Arrange
         var familyDict1 = new FamilyDict
         {
-            Id = "r1",
+            Id = Guid.NewGuid(),
             Name = "Ông nội",
             Type = FamilyDictType.Blood,
             Description = "Cha của cha bạn",

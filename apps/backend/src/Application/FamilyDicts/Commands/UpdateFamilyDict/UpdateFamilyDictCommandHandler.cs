@@ -21,7 +21,6 @@ public class UpdateFamilyDictCommandHandler : IRequestHandler<UpdateFamilyDictCo
     public async Task Handle(UpdateFamilyDictCommand request, CancellationToken cancellationToken)
     {
         var entity = await _context.FamilyDicts
-            .Include(f => f.NamesByRegion)
             .FirstOrDefaultAsync(f => f.Id == request.Id, cancellationToken);
 
         if (entity == null)

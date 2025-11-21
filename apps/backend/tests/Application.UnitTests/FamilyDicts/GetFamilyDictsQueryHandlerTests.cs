@@ -14,19 +14,11 @@ namespace backend.Application.UnitTests.FamilyDicts;
 
 public class GetFamilyDictsQueryHandlerTests : TestBase
 {
-    private readonly Mock<IMapper> _mapperMock;
     private readonly GetFamilyDictsQueryHandler _handler;
 
     public GetFamilyDictsQueryHandlerTests() : base()
     {
-        _mapperMock = new Mock<IMapper>();
-        // Setup AutoMapper for testing
-        _mapperMock.Setup(m => m.ConfigurationProvider).Returns(new MapperConfiguration(cfg =>
-        {
-            cfg.AddProfile<MappingProfile>(); // Assuming MappingProfile contains Relation mappings
-        }));
-
-        _handler = new GetFamilyDictsQueryHandler(_context, _mapperMock.Object);
+        _handler = new GetFamilyDictsQueryHandler(_context, _mapper);
     }
 
     [Fact]
@@ -35,7 +27,7 @@ public class GetFamilyDictsQueryHandlerTests : TestBase
         // Arrange
         var familyDict1 = new FamilyDict
         {
-            Id = "familyDict1",
+            Id = Guid.NewGuid(),
             Name = "FamilyDict 1",
             Type = FamilyDictType.Blood,
             Description = "Description 1",
@@ -45,7 +37,7 @@ public class GetFamilyDictsQueryHandlerTests : TestBase
         };
         var familyDict2 = new FamilyDict
         {
-            Id = "familyDict2",
+            Id = Guid.NewGuid(),
             Name = "FamilyDict 2",
             Type = FamilyDictType.InLaw,
             Description = "Description 2",
@@ -55,7 +47,7 @@ public class GetFamilyDictsQueryHandlerTests : TestBase
         };
         var familyDict3 = new FamilyDict
         {
-            Id = "familyDict3",
+            Id = Guid.NewGuid(),
             Name = "FamilyDict 3",
             Type = FamilyDictType.Adoption,
             Description = "Description 3",
@@ -76,8 +68,8 @@ public class GetFamilyDictsQueryHandlerTests : TestBase
         result.Should().NotBeNull();
         result.Items.Should().HaveCount(2);
         result.TotalItems.Should().Be(3); // Changed from TotalCount to TotalItems
-        result.Items.First().Id.Should().Be("familyDict1");
-        result.Items.Last().Id.Should().Be("familyDict2");
+        result.Items.First().Id.Should().Be(familyDict1.Id);
+        result.Items.Last().Id.Should().Be(familyDict2.Id);
     }
 
     [Fact]
