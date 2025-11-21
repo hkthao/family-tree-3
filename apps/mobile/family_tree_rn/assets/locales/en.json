@@ -85,6 +85,7 @@
   "settings.aboutApp.versionInfo": "Version Info",
   "settings.aboutApp.termsOfService": "Terms of Service",
   "settings.aboutApp.privacyPolicy": "Privacy Policy",
+  "settings.aboutApp.legalInfo": "Legal Information",
   "settings.aboutApp.openSourceLibs": "Open Source Libs",
   "settings.logout.button": "Logout",
   "settings.logout.confirmTitle": "Confirm Logout",

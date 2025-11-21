@@ -31,6 +31,7 @@ function AppContent() {
             <Stack.Screen name="family" options={{ headerShown: false }} />
             <Stack.Screen name="member/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="event/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="legal-webview" options={{ headerShown: false }} />
           </Stack>
         </NavigationThemeProvider>
       </Portal.Host>
