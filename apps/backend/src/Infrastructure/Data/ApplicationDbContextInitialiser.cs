@@ -40,6 +40,105 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
     public async Task TrySeedAsync()
     {
         await Task.CompletedTask;
+
+        // Seed Relations
+        if (!_context.Relations.Any())
+        {
+            _context.Relations.AddRange(
+                new Domain.Entities.Relation
+                {
+                    Id = "ong_noi",
+                    Name = "Ông nội",
+                    Type = Domain.Enums.RelationType.Blood,
+                    Description = "Cha của cha bạn",
+                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Ông nội",
+                        Central = "Ông nội",
+                        South = "Ông nội"
+                    }
+                },
+                new Domain.Entities.Relation
+                {
+                    Id = "ong_ngoai",
+                    Name = "Ông ngoại",
+                    Type = Domain.Enums.RelationType.Blood,
+                    Description = "Cha của mẹ bạn",
+                    Lineage = Domain.Enums.RelationLineage.Ngoai,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Ông ngoại",
+                        Central = "Ông ngoại",
+                        South = "Ông ngoại"
+                    }
+                },
+                new Domain.Entities.Relation
+                {
+                    Id = "cha_nuoi",
+                    Name = "Cha nuôi",
+                    Type = Domain.Enums.RelationType.Adoption,
+                    Description = "Người nhận con làm cha nuôi",
+                    Lineage = Domain.Enums.RelationLineage.NoiNgoai,
+                    SpecialRelation = true,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Cha nuôi",
+                        Central = "Cha nuôi",
+                        South = "Cha nuôi"
+                    }
+                },
+                new Domain.Entities.Relation
+                {
+                    Id = "me_ke",
+                    Name = "Mẹ kế",
+                    Type = Domain.Enums.RelationType.InLaw,
+                    Description = "Vợ của cha nhưng không phải mẹ ruột",
+                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    SpecialRelation = true,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Mẹ kế",
+                        Central = "Mẹ kế",
+                        South = "Mẹ kế"
+                    }
+                },
+                new Domain.Entities.Relation
+                {
+                    Id = "chu_noi",
+                    Name = "Chú",
+                    Type = Domain.Enums.RelationType.Blood,
+                    Description = "Em trai của cha",
+                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Chú",
+                        Central = new string[] { "Củ", "Chế" },
+                        South = "Cậu"
+                    }
+                },
+                new Domain.Entities.Relation
+                {
+                    Id = "co_noi",
+                    Name = "Cô",
+                    Type = Domain.Enums.RelationType.Blood,
+                    Description = "Em gái của cha",
+                    Lineage = Domain.Enums.RelationLineage.Noi,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Cô",
+                        Central = new string[] { "Mợ", "Dì" },
+                        South = "Dì"
+                    }
+                }
+            );
+
+            await _context.SaveChangesAsync();
+        }
         // // Default data
         // // Seed, if necessary
 

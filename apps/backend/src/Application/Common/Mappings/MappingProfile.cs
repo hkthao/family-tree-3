@@ -15,6 +15,7 @@ using backend.Application.Relationships.Queries;
 using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
+using backend.Application.Relations; // New using statement
 using backend.Domain.Entities;
 using backend.Domain.Enums;
 
@@ -59,6 +60,10 @@ public class MappingProfile : Profile
         CreateMap<FamilyUser, FamilyUserDto>() // New mapping
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? (src.User.Profile != null ? src.User.Profile.Name : src.User.Email) : null));
+
+        // Relation
+        CreateMap<Relation, RelationDto>();
+        CreateMap<NamesByRegion, NamesByRegionDto>();
 
         // Export/Import DTOs
         CreateMap<Family, FamilyExportDto>()
