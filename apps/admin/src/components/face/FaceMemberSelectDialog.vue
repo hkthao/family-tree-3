@@ -30,10 +30,10 @@
 import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { DetectedFace, Member } from '@/types';
-import { useMemberStore } from '@/stores/member.store';
+import { useFaceMemberSelectStore } from '@/stores/faceMemberSelect.store';
 
 const { t } = useI18n();
-const memberStore = useMemberStore();
+const faceMemberSelectStore = useFaceMemberSelectStore();
 
 const props = defineProps({
   show: { type: Boolean, required: true },
@@ -52,8 +52,8 @@ watch(() => props.selectedFace, (newFace) => {
 
 watch(selectedMemberId, async (newMemberId) => {
   if (newMemberId) {
-    await memberStore.getById(newMemberId);
-    selectedMemberDetails.value = memberStore.detail.item || null;
+    await faceMemberSelectStore.getById(newMemberId);
+    selectedMemberDetails.value = faceMemberSelectStore.detail.item || null;
   } else {
     selectedMemberDetails.value = null;
   }
