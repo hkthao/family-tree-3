@@ -1,12 +1,15 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
-using backend.Application.Events.Queries.GetPublicEventById;
 using backend.Application.Families;
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.ExportImport; // New using statement
 using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
+using backend.Application.FamilyDicts; // New using statement
+using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
+using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
+using backend.Application.FamilyDicts.Commands.UpdateFamilyDict; // New using statement
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Members.Queries;
 using backend.Application.Members.Queries.GetMemberById;
@@ -16,7 +19,6 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 
 namespace backend.Application.Common.Mappings;
 
@@ -59,6 +61,14 @@ public class MappingProfile : Profile
         CreateMap<FamilyUser, FamilyUserDto>() // New mapping
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
             .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? (src.User.Profile != null ? src.User.Profile.Name : src.User.Email) : null));
+
+        // FamilyDict
+        CreateMap<FamilyDict, FamilyDictDto>();
+        CreateMap<NamesByRegion, NamesByRegionDto>();
+        CreateMap<NamesByRegionCommandDto, NamesByRegion>();
+        CreateMap<NamesByRegionUpdateCommandDto, NamesByRegion>();
+        CreateMap<NamesByRegionImportDto, NamesByRegion>();
+        CreateMap<FamilyDictImportDto, FamilyDict>();
 
         // Export/Import DTOs
         CreateMap<Family, FamilyExportDto>()

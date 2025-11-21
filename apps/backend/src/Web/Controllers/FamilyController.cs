@@ -130,7 +130,7 @@ public class FamilyController(IMediator mediator) : ControllerBase
     /// <param name="familyId">ID của gia đình cần cập nhật.</param>
     /// <returns>Kết quả của hoạt động cập nhật.</returns>
     [HttpPost("{familyId}/update-denormalized-fields")]
-    public async Task<ActionResult> UpdateDenormalizedFields([FromRoute]Guid familyId)
+    public async Task<ActionResult> UpdateDenormalizedFields([FromRoute] Guid familyId)
     {
         var result = await _mediator.Send(new UpdateDenormalizedFieldsCommand(familyId));
         return result.IsSuccess ? Ok("Denormalized relationship fields updated successfully for the family.") : BadRequest(result.Error);

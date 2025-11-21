@@ -22,9 +22,9 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useEventStore } from '@/stores/event.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { EventForm } from '@/components/event';
 import type { Event } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface EventFormExposed {
   validate: () => Promise<boolean>;
@@ -42,7 +42,7 @@ const eventFormRef = ref<EventFormExposed | null>(null);
 
 const { t } = useI18n();
 const eventStore = useEventStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const handleUpdateEvent = async () => {
   if (!eventFormRef.value) return;
@@ -51,20 +51,20 @@ const handleUpdateEvent = async () => {
 
   const eventData = eventFormRef.value.getFormData() as Event;
   if (!props.initialEvent.id) { // Use props.initialEvent.id for the check
-    notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
+    showSnackbar(t('event.messages.saveError'), 'error');
     return;
   }
 
   try {
     await eventStore.updateItem(eventData);
     if (!eventStore.error) {
-      notificationStore.showSnackbar(t('event.messages.updateSuccess'), 'success');
+      showSnackbar(t('event.messages.updateSuccess'), 'success');
       emit('saved'); // Emit saved event
     } else {
-      notificationStore.showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
+      showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
     }
   } catch (error) {
-    notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
+    showSnackbar(t('event.messages.saveError'), 'error');
   }
 };
 

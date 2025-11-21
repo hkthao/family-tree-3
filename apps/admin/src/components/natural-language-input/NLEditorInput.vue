@@ -93,13 +93,13 @@ import Mention from '@tiptap/extension-mention';
 import CharacterCount from '@tiptap/extension-character-count';
 import { onBeforeUnmount, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useMemberStore } from '@/stores/member.store';
+import { useNLEditorStore } from '@/stores/nlEditor.store';
 import { VueRenderer } from '@tiptap/vue-3';
 import tippy, { type Instance as TippyInstance } from 'tippy.js';
 import 'tippy.js/dist/tippy.css'; // For basic styling
 import MentionList from '@/components/natural-language-input/MentionList.vue';
 const { t } = useI18n();
-const memberStore = useMemberStore();
+const nlEditorStore = useNLEditorStore();
 defineProps<{
   loading: boolean; // New prop for loading state
 }>();
@@ -126,8 +126,8 @@ const editor = useEditor({
       },
       suggestion: {
         items: async ({ query }) => {
-          await memberStore.searchMembers(query);
-          return memberStore.list.items.map(item => ({
+          await nlEditorStore.searchMembers(query);
+          return nlEditorStore.list.items.map(item => ({
             id: item.code || '',
             label: `[${item.fullName || ''}](${item.code || ''})`,
           }));

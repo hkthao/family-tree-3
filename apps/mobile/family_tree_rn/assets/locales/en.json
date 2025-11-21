@@ -5,7 +5,7 @@
   "change_language": "Change Language",
   "tab.home": "Home",
   "tab.search": "Search",
-  "tab.story": "Story",
+  "tab.familyDict": "Family Dictionary",
   "tab.donate": "Donate",
   "tab.settings": "Settings",
   "userAppBar.profile": "Profile",
@@ -85,6 +85,7 @@
   "settings.aboutApp.versionInfo": "Version Info",
   "settings.aboutApp.termsOfService": "Terms of Service",
   "settings.aboutApp.privacyPolicy": "Privacy Policy",
+  "settings.aboutApp.legalInfo": "Legal Information",
   "settings.aboutApp.openSourceLibs": "Open Source Libs",
   "settings.logout.button": "Logout",
   "settings.logout.confirmTitle": "Confirm Logout",
@@ -191,5 +192,19 @@
     "facesDetected": "{{count}} face(s) detected."
   },
   "common.error": "Error",
-  "common.loading": "Loading..."
+  "common.loading": "Loading...",
+  "onboarding.slide1.title": "Connect Generations",
+  "onboarding.slide1.description": "Build and visualize your family tree with ease.",
+  "onboarding.slide2.title": "Share Memories",
+  "onboarding.slide2.description": "Add photos, videos, and stories to each family member.",
+  "onboarding.slide3.title": "Discover Connections",
+  "onboarding.slide3.description": "Explore relationships and expand your family history.",
+  "onboarding.slide4.title": "Privacy and Security",
+  "onboarding.slide4.description": "Your family data is safe and secure with us.",
+  "onboarding.slide5.title": "Easy to Use",
+  "onboarding.slide5.description": "Intuitive interface for all ages.",
+  "onboarding.skip": "Skip",
+  "onboarding.next": "Next",
+  "onboarding.back": "Back",
+  "onboarding.getStarted": "Get Started"
 }

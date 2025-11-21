@@ -190,10 +190,6 @@ describe('ai-biography.store', () => {
         mockMember.id,
         'New biography content',
       );
-      expect(mockShowSnackbar).toHaveBeenCalledWith(
-        'aiBiography.success.save',
-        'success',
-      );
       // Check if currentMember biography is updated
       store.currentMember = { ...mockMember }; // Simulate currentMember being set
       await store.saveBiography(mockMember.id!, 'Another new biography');

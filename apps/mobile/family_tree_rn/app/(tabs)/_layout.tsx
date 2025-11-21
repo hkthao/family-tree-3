@@ -39,10 +39,10 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="story"
+        name="family-dict"
         options={{
-          title: t('tab.story'), // Translated title
-          tabBarIcon: ({ color }) => <TabBarIcon name="book-open-variant" color={color} />,
+          title: t('tab.familyDict'),
+          tabBarIcon: ({ color }) => <TabBarIcon name="book-multiple" color={color} />,
         }}
       />
       <Tabs.Screen

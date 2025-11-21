@@ -190,7 +190,7 @@ export default function SettingsScreen() {
               style={styles.listItem}
               left={() => <List.Icon icon="comment-edit" />}
               title={t('settings.helpSupport.feedback')}
-              onPress={() => console.log('Feedback')}
+              onPress={() => router.push('/feedback-webview')}
               right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
             />
           </List.Section>
@@ -206,17 +206,9 @@ export default function SettingsScreen() {
             <Divider />
             <List.Item
               style={styles.listItem}
-              left={() => <List.Icon icon="file-document" />}
-              title={t('settings.aboutApp.termsOfService')}
-              onPress={() => console.log('Terms of Service')}
-              right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
-            />
-            <Divider />
-            <List.Item
-              style={styles.listItem}
-              left={() => <List.Icon icon="shield-lock" />}
-              title={t('settings.aboutApp.privacyPolicy')}
-              onPress={() => console.log('Privacy Policy')}
+              left={() => <List.Icon icon="file-document-multiple" />}
+              title={t('settings.aboutApp.legalInfo')}
+              onPress={() => router.push('/legal-webview')}
               right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
             />
           </List.Section>

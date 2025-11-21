@@ -1,6 +1,4 @@
 using backend.Application.Common.Dtos;
-using backend.Application.Relationships.Queries;
-using backend.Domain.Enums; // Add this for RelationshipType
 
 namespace backend.Application.Members.Queries.GetMembers;
 

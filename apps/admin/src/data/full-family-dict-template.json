@@ -1,0 +1,527 @@
+[
+  {
+    "name": "Ông nội",
+    "type": 0,
+    "description": "Cha của cha bạn",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Ông nội",
+      "central": "Ông nội",
+      "south": "Ông nội"
+    }
+  },
+  {
+    "name": "Bà nội",
+    "type": 0,
+    "description": "Mẹ của cha bạn",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bà nội",
+      "central": "Bà nội",
+      "south": "Bà nội"
+    }
+  },
+  {
+    "name": "Ông ngoại",
+    "type": 0,
+    "description": "Cha của mẹ bạn",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Ông ngoại",
+      "central": "Ông ngoại",
+      "south": "Ông ngoại"
+    }
+  },
+  {
+    "name": "Bà ngoại",
+    "type": 0,
+    "description": "Mẹ của mẹ bạn",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bà ngoại",
+      "central": "Bà ngoại",
+      "south": "Bà ngoại"
+    }
+  },
+  {
+    "name": "Cha",
+    "type": 0,
+    "description": "Cha ruột",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bố/Cha",
+      "central": "Cha/Ba",
+      "south": "Ba"
+    }
+  },
+  {
+    "name": "Mẹ",
+    "type": 0,
+    "description": "Mẹ ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Mẹ",
+      "central": "Mạ/Mẹ",
+      "south": "Mẹ"
+    }
+  },
+  {
+    "name": "Anh ruột",
+    "type": 0,
+    "description": "Anh trai ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Anh",
+      "central": "Anh",
+      "south": "Anh Hai"
+    }
+  },
+  {
+    "name": "Chị ruột",
+    "type": 0,
+    "description": "Chị gái ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Chị",
+      "central": "Chị",
+      "south": "Chị Hai"
+    }
+  },
+  {
+    "name": "Em trai",
+    "type": 0,
+    "description": "Em trai ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Em trai",
+      "central": "Em trai",
+      "south": "Em trai Út"
+    }
+  },
+  {
+    "name": "Em gái",
+    "type": 0,
+    "description": "Em gái ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Em gái",
+      "central": "Em gái",
+      "south": "Em gái Út"
+    }
+  },
+  {
+    "name": "Con trai",
+    "type": 0,
+    "description": "Con trai ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Con trai",
+      "central": "Con trai",
+      "south": "Con trai"
+    }
+  },
+  {
+    "name": "Con gái",
+    "type": 0,
+    "description": "Con gái ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Con gái",
+      "central": "Con gái",
+      "south": "Con gái"
+    }
+  },
+  {
+    "name": "Cháu nội",
+    "type": 0,
+    "description": "Con của con trai",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Cháu nội",
+      "central": "Cháu nội",
+      "south": "Cháu nội"
+    }
+  },
+  {
+    "name": "Cháu ngoại",
+    "type": 0,
+    "description": "Con của con gái",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Cháu ngoại",
+      "central": "Cháu ngoại",
+      "south": "Cháu ngoại"
+    }
+  },
+  {
+    "name": "Bác (trai)",
+    "type": 0,
+    "description": "Anh trai của cha/mẹ",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bác",
+      "central": "Bác",
+      "south": "Bác"
+    }
+  },
+  {
+    "name": "Bác (gái)",
+    "type": 0,
+    "description": "Chị gái của cha/mẹ",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bác",
+      "central": "Bác",
+      "south": "Bác"
+    }
+  },
+  {
+    "name": "Chú",
+    "type": 0,
+    "description": "Em trai của cha",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Chú",
+      "central": [
+        "Củ",
+        "Chế"
+      ],
+      "south": "Chú"
+    }
+  },
+  {
+    "name": "Cô",
+    "type": 0,
+    "description": "Em gái của cha",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Cô",
+      "central": [
+        "Mợ",
+        "Dì"
+      ],
+      "south": "Cô"
+    }
+  },
+  {
+    "name": "Cậu",
+    "type": 0,
+    "description": "Em trai của mẹ",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Cậu",
+      "central": "Cậu",
+      "south": "Cậu"
+    }
+  },
+  {
+    "name": "Dì",
+    "type": 0,
+    "description": "Em gái của mẹ",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Dì",
+      "central": [
+        "Dì",
+        "Mự"
+      ],
+      "south": "Dì"
+    }
+  },
+  {
+    "name": "Anh rể",
+    "type": 1,
+    "description": "Chồng của chị ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Anh rể",
+      "central": "Anh rể",
+      "south": "Anh rể"
+    }
+  },
+  {
+    "name": "Chị dâu",
+    "type": 1,
+    "description": "Vợ của anh ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Chị dâu",
+      "central": "Chị dâu",
+      "south": "Chị dâu"
+    }
+  },
+  {
+    "name": "Em dâu",
+    "type": 1,
+    "description": "Vợ của em trai",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Em dâu",
+      "central": "Em dâu",
+      "south": "Em dâu"
+    }
+  },
+  {
+    "name": "Em rể",
+    "type": 1,
+    "description": "Chồng của em gái",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Em rể",
+      "central": "Em rể",
+      "south": "Em rể"
+    }
+  },
+  {
+    "name": "Vợ",
+    "type": 1,
+    "description": "Vợ của bạn",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Vợ",
+      "central": "Vợ",
+      "south": "Vợ"
+    }
+  },
+  {
+    "name": "Chồng",
+    "type": 1,
+    "description": "Chồng của bạn",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Chồng",
+      "central": "Chồng",
+      "south": "Chồng"
+    }
+  },
+  {
+    "name": "Bố chồng",
+    "type": 1,
+    "description": "Cha của chồng",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bố chồng",
+      "central": "Ba chồng",
+      "south": "Ba chồng"
+    }
+  },
+  {
+    "name": "Mẹ chồng",
+    "type": 1,
+    "description": "Mẹ của chồng",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Mẹ chồng",
+      "central": "Mạ chồng",
+      "south": "Mẹ chồng"
+    }
+  },
+  {
+    "name": "Bố vợ",
+    "type": 1,
+    "description": "Cha của vợ",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Bố vợ",
+      "central": "Ba vợ",
+      "south": "Ba vợ"
+    }
+  },
+  {
+    "name": "Mẹ vợ",
+    "type": 1,
+    "description": "Mẹ của vợ",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Mẹ vợ",
+      "central": "Mạ vợ",
+      "south": "Mẹ vợ"
+    }
+  },
+  {
+    "name": "Con rể",
+    "type": 1,
+    "description": "Chồng của con gái",
+    "lineage": 1,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Con rể",
+      "central": "Con rể",
+      "south": "Con rể"
+    }
+  },
+  {
+    "name": "Con dâu",
+    "type": 1,
+    "description": "Vợ của con trai",
+    "lineage": 0,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Con dâu",
+      "central": "Con dâu",
+      "south": "Con dâu"
+    }
+  },
+  {
+    "name": "Cháu gọi chú",
+    "type": 0,
+    "description": "Con của anh/chị/em ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Cháu",
+      "central": "Cháu",
+      "south": "Cháu"
+    }
+  },
+  {
+    "name": "Anh em họ",
+    "type": 0,
+    "description": "Con của anh/chị/em ruột của cha mẹ",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Anh em họ",
+      "central": "Anh em họ",
+      "south": "Anh em họ"
+    }
+  },
+  {
+    "name": "Cháu gọi cô/dì",
+    "type": 0,
+    "description": "Con của anh/chị/em ruột",
+    "lineage": 2,
+    "specialRelation": false,
+    "namesByRegion": {
+      "north": "Cháu",
+      "central": "Cháu",
+      "south": "Cháu"
+    }
+  },
+  {
+    "name": "Cha dượng",
+    "type": 2,
+    "description": "Chồng mới của mẹ, không phải cha ruột",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Cha dượng",
+      "central": "Cha dượng",
+      "south": "Cha dượng"
+    }
+  },
+  {
+    "name": "Mẹ kế",
+    "type": 2,
+    "description": "Vợ mới của cha, không phải mẹ ruột",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Mẹ kế",
+      "central": "Mẹ kế",
+      "south": "Mẹ kế"
+    }
+  },
+  {
+    "name": "Con riêng",
+    "type": 2,
+    "description": "Con của vợ/chồng trước khi kết hôn",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Con riêng",
+      "central": "Con riêng",
+      "south": "Con riêng"
+    }
+  },
+  {
+    "name": "Con nuôi",
+    "type": 2,
+    "description": "Con được nhận làm con nuôi",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Con nuôi",
+      "central": "Con nuôi",
+      "south": "Con nuôi"
+    }
+  },
+  {
+    "name": "Cha nuôi",
+    "type": 2,
+    "description": "Người nhận con làm cha nuôi",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Cha nuôi",
+      "central": "Cha nuôi",
+      "south": "Cha nuôi"
+    }
+  },
+  {
+    "name": "Mẹ nuôi",
+    "type": 2,
+    "description": "Người nhận con làm mẹ nuôi",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Mẹ nuôi",
+      "central": "Mẹ nuôi",
+      "south": "Mẹ nuôi"
+    }
+  },
+  {
+    "name": "Bà u / Dì ghẻ xưa",
+    "type": 2,
+    "description": "Người phụ nữ chăm sóc trẻ khi không phải mẹ ruột",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "U",
+      "central": "Mự",
+      "south": "Vú nuôi"
+    }
+  },
+  {
+    "name": "Bố dưỡng",
+    "type": 2,
+    "description": "Người chăm sóc nhưng không phải cha ruột",
+    "lineage": 2,
+    "specialRelation": true,
+    "namesByRegion": {
+      "north": "Bố dưỡng",
+      "central": "Cha dưỡng",
+      "south": "Cha dưỡng"
+    }
+  }
+]

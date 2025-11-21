@@ -1,6 +1,5 @@
 using backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 using backend.Application.NaturalLanguage.Models; // Add using directive for AnalyzedDataDto
-using MediatR; // Add MediatR using directive
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Web.Controllers;

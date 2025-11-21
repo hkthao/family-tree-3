@@ -34,9 +34,9 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { DetectedFace, Member } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface FaceRecognitionViewProps {
   familyId?: string;
@@ -46,14 +46,14 @@ const props = defineProps<FaceRecognitionViewProps>();
 
 const { t } = useI18n();
 const faceStore = useFaceStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null); // Ref for FaceUploadInput
 
 watch(() => faceStore.error, (newError) => {
   if (newError) {
-    notificationStore.showSnackbar(newError, 'error');
+    showSnackbar(newError, 'error');
   }
 });
 
@@ -100,7 +100,7 @@ const handleRemoveFace = (faceId: string) => {
 const saveLabels = async () => {
   const result = await faceStore.saveFaceLabels();
   if (result.ok) {
-    notificationStore.showSnackbar(t('face.recognition.saveSuccess'), 'success');
+    showSnackbar(t('face.recognition.saveSuccess'), 'success');
     faceStore.resetState(); // Reset face store after saving
     if (faceUploadInputRef.value) {
       faceUploadInputRef.value.reset(); // Clear the file input

@@ -28,9 +28,9 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyStore } from '@/stores/family.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 interface FamilyFormExposed {
   validate: () => Promise<boolean>;
@@ -48,7 +48,7 @@ const familyFormRef = ref<FamilyFormExposed | null>(null);
 
 const { t } = useI18n();
 const familyStore = useFamilyStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar();
 
 const handleUpdateItem = async () => {
   if (!familyFormRef.value) return;
@@ -57,7 +57,7 @@ const handleUpdateItem = async () => {
 
   const itemData = familyFormRef.value.getFormData() as Family;
   if (!itemData.id) {
-    notificationStore.showSnackbar(
+    showSnackbar(
       t('family.management.messages.saveError'),
       'error',
     );
@@ -67,19 +67,19 @@ const handleUpdateItem = async () => {
   try {
     await familyStore.updateItem(itemData);
     if (!familyStore.error) {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('family.management.messages.updateSuccess'),
         'success',
       );
       emit('saved'); // Emit saved event
     } else {
-      notificationStore.showSnackbar(
+      showSnackbar(
         familyStore.error || t('family.management.messages.saveError'),
         'error',
       );
     }
   } catch (error) {
-    notificationStore.showSnackbar(
+    showSnackbar(
       t('family.management.messages.saveError'),
       'error',
     );

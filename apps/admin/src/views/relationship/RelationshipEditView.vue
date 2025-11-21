@@ -27,15 +27,15 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import type { Relationship } from '@/types';
 import {RelationshipForm} from '@/components/relationship';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const props = defineProps<{ id: string }>();
 const router = useRouter();
 const { t } = useI18n();
 const relationshipStore = useRelationshipStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const relationshipForm = ref<InstanceType<typeof RelationshipForm> | null>(null);
 
@@ -47,19 +47,18 @@ onMounted(async () => {
 
 const save = async () => {
   const isValid = await relationshipForm.value?.validate();
-  if (isValid) {
-    const formData = relationshipForm.value?.getFormData();
-    if (formData && props.id) {
-      await relationshipStore.updateItem(formData as Relationship);
-      if (!relationshipStore.error) {
-        notificationStore.showSnackbar(t('relationship.messages.updateSuccess'), 'success');
-        router.push({ name: 'RelationshipList' });
-      } else {
-        notificationStore.showSnackbar(relationshipStore.error || t('relationship.messages.saveError'), 'error');
+      if (isValid) {
+      const formData = relationshipForm.value?.getFormData();
+      if (formData && props.id) {
+        await relationshipStore.updateItem(formData as Relationship);
+        if (!relationshipStore.error) {
+          showSnackbar(t('relationship.messages.updateSuccess'), 'success');
+          router.push({ name: 'RelationshipList' });
+        } else {
+          showSnackbar(relationshipStore.error || t('relationship.messages.saveError'), 'error');
+        }
       }
-    }
-  }
-};
+    }};
 
 const cancel = () => {
   router.push({ name: 'RelationshipList' });

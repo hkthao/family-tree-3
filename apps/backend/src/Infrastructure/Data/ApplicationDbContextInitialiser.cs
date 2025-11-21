@@ -40,6 +40,105 @@ public class ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitial
     public async Task TrySeedAsync()
     {
         await Task.CompletedTask;
+
+        // Seed FamilyDicts
+        if (!_context.FamilyDicts.Any())
+        {
+            _context.FamilyDicts.AddRange(
+                new Domain.Entities.FamilyDict
+                {
+                    Id = Guid.Parse("7a6f2b4e-2d5c-4e8a-8b1c-9d0e1f2a3b4c"), // "ong_noi"
+                    Name = "Ông nội",
+                    Type = Domain.Enums.FamilyDictType.Blood,
+                    Description = "Cha của cha bạn",
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Ông nội",
+                        Central = "Ông nội",
+                        South = "Ông nội"
+                    }
+                },
+                new Domain.Entities.FamilyDict
+                {
+                    Id = Guid.Parse("7b8d3c5f-3e6a-5f9b-9c2d-0e1f2a3b4d5e"), // "ong_ngoai"
+                    Name = "Ông ngoại",
+                    Type = Domain.Enums.FamilyDictType.Blood,
+                    Description = "Cha của mẹ bạn",
+                    Lineage = Domain.Enums.FamilyDictLineage.Ngoai,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Ông ngoại",
+                        Central = "Ông ngoại",
+                        South = "Ông ngoại"
+                    }
+                },
+                new Domain.Entities.FamilyDict
+                {
+                    Id = Guid.Parse("7c9e4d6a-4f7b-6c0c-ac3e-1f2a3b4d5f6e"), // "cha_nuoi"
+                    Name = "Cha nuôi",
+                    Type = Domain.Enums.FamilyDictType.Adoption,
+                    Description = "Người nhận con làm cha nuôi",
+                    Lineage = Domain.Enums.FamilyDictLineage.NoiNgoai,
+                    SpecialRelation = true,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Cha nuôi",
+                        Central = "Cha nuôi",
+                        South = "Cha nuôi"
+                    }
+                },
+                new Domain.Entities.FamilyDict
+                {
+                    Id = Guid.Parse("7d0f5e7b-5a8c-7d1d-bd4f-2a3b4d5f6e7a"), // "me_ke"
+                    Name = "Mẹ kế",
+                    Type = Domain.Enums.FamilyDictType.InLaw,
+                    Description = "Vợ của cha nhưng không phải mẹ ruột",
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
+                    SpecialRelation = true,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Mẹ kế",
+                        Central = "Mẹ kế",
+                        South = "Mẹ kế"
+                    }
+                },
+                new Domain.Entities.FamilyDict
+                {
+                    Id = Guid.Parse("7e1f6f8c-6b9d-8e2e-ce5d-3b4d5f6e7a8b"), // "chu_noi"
+                    Name = "Chú",
+                    Type = Domain.Enums.FamilyDictType.Blood,
+                    Description = "Em trai của cha",
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Chú",
+                        Central = new string[] { "Củ", "Chế" },
+                        South = "Cậu"
+                    }
+                },
+                new Domain.Entities.FamilyDict
+                {
+                    Id = Guid.Parse("7f2a7g9d-7c0e-9f3f-df6e-4d5f6e7a8b9c"), // "co_noi"
+                    Name = "Cô",
+                    Type = Domain.Enums.FamilyDictType.Blood,
+                    Description = "Em gái của cha",
+                    Lineage = Domain.Enums.FamilyDictLineage.Noi,
+                    SpecialRelation = false,
+                    NamesByRegion = new Domain.Entities.NamesByRegion
+                    {
+                        North = "Cô",
+                        Central = new string[] { "Mợ", "Dì" },
+                        South = "Dì"
+                    }
+                }
+            );
+
+            await _context.SaveChangesAsync();
+        }
         // // Default data
         // // Seed, if necessary
 

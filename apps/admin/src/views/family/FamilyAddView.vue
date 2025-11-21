@@ -28,43 +28,42 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyForm } from '@/components/family';
 import type { Family } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 const familyFormRef = ref<InstanceType<typeof FamilyForm> | null>(null);
 
 const { t } = useI18n();
 const router = useRouter();
 const familyStore = useFamilyStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar();
 
 const handleAddItem = async () => {
   if (!familyFormRef.value) return;
   const isValid = await familyFormRef.value.validate();
   if (!isValid) return;
   const itemData = familyFormRef.value.getFormData();
-  try {
-    await familyStore.addItem(itemData as Omit<Family, 'id'>);
-    if (!familyStore.error) {
-      notificationStore.showSnackbar(
-        t('family.management.messages.addSuccess'),
-        'success',
-      );
-      closeForm();
-    } else {
-      notificationStore.showSnackbar(
-        familyStore.error || t('family.management.messages.saveError'),
+      try {
+      await familyStore.addItem(itemData as Omit<Family, 'id'>);
+      if (!familyStore.error) {
+        showSnackbar(
+          t('family.management.messages.addSuccess'),
+          'success',
+        );
+        closeForm();
+      } else {
+        showSnackbar(
+          familyStore.error || t('family.management.messages.saveError'),
+          'error',
+        );
+      }
+    } catch (error) {
+      showSnackbar(
+        t('family.management.messages.saveError'),
         'error',
       );
-    }
-  } catch (error) {
-    notificationStore.showSnackbar(
-      t('family.management.messages.saveError'),
-      'error',
-    );
-  }
-};
+    }};
 
 const closeForm = () => {
   router.push('/family');

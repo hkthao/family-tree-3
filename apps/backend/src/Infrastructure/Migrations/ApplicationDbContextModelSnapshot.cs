@@ -271,6 +271,77 @@ namespace backend.Infrastructure.Migrations
                     b.ToTable("families");
                 });
 
+            modelBuilder.Entity("backend.Domain.Entities.FamilyDict", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("char(50)")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleted_by");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deleted_date");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("description");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modified");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modified_by");
+
+                    b.Property<int>("Lineage")
+                        .HasColumnType("int")
+                        .HasColumnName("lineage");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NamesByRegion")
+                        .IsRequired()
+                        .HasColumnType("json")
+                        .HasColumnName("names_by_region");
+
+                    b.Property<bool>("SpecialRelation")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("special_relation");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_family_dicts");
+
+                    b.ToTable("family_dicts");
+                });
+
             modelBuilder.Entity("backend.Domain.Entities.FamilyUser", b =>
                 {
                     b.Property<Guid>("FamilyId")

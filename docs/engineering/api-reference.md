@@ -95,13 +95,13 @@ Trong ví dụ trên, toàn bộ `FamilyController` yêu cầu xác thực. Nế
 Các endpoint trả về danh sách (ví dụ: `GET /api/family`, `GET /api/member`) đều hỗ trợ phân trang qua các query parameter sau:
 
 -   `page` (int, optional, default: 1): Số trang muốn lấy.
--   `pageSize` (int, optional, default: 10): Số lượng mục trên mỗi trang.
+-   `itemsPerPage` (int, optional, default: 10): Số lượng mục trên mỗi trang.
 
 **Ví dụ:**
 
 -   **Ví dụ:** Để lấy trang thứ 2 với 20 mục trên mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/family?page=2&pageSize=20`
+    -   **Đường dẫn:** `/api/family?page=2&itemsPerPage=20`
 
 Phản hồi sẽ có cấu trúc `PaginatedList<T>`:
 
@@ -125,7 +125,7 @@ Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. C
 
 -   **Ví dụ:** Để tìm kiếm thành viên có tên "Văn" và giới tính "Male" trên trang 1 với 10 mục mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/member?searchQuery=Văn&gender=Male&page=1&pageSize=10`
+    -   **Đường dẫn:** `/api/member?searchQuery=Văn&gender=Male&page=1&itemsPerPage=10`
 
 **Ví dụ với `GET /api/family/search`:**
 
@@ -133,7 +133,7 @@ Các endpoint danh sách hỗ trợ lọc và tìm kiếm qua query parameter. C
 
 -   **Ví dụ:** Để tìm kiếm dòng họ có từ khóa "Royal" trên trang 1 với 5 mục mỗi trang:
     -   **Phương thức:** `GET`
-    -   **Đường dẫn:** `/api/family/search?keyword=Royal&page=1&pageSize=5`
+    -   **Đường dẫn:** `/api/family/search?keyword=Royal&page=1&itemsPerPage=5`
 
 ## 5. Cấu trúc Phản hồi Lỗi (Error Response)
 
@@ -197,7 +197,7 @@ Ví dụ Phản hồi Lỗi:
 ### 6.1. Quản lý Dòng họ (`/api/family`)
 
 -   `GET /api/family`: Lấy danh sách tất cả các dòng họ (hỗ trợ phân trang).
-    *   **Query Parameters:** `page` (int), `pageSize` (int), `searchQuery` (string, optional)
+    *   **Query Parameters:** `page` (int), `itemsPerPage` (int), `searchQuery` (string, optional)
     *   **Phản hồi:** `Result<PaginatedList<FamilyDto>>`
 -   `GET /api/family/{id}`: Lấy thông tin dòng họ theo ID.
     *   **Phản hồi:** `Result<FamilyDto>`
@@ -223,7 +223,7 @@ Ví dụ Phản hồi Lỗi:
 ### 6.2. Quản lý Thành viên (`/api/member`)
 
 -   `GET /api/member`: Lấy danh sách tất cả các thành viên (hỗ trợ phân trang và lọc).
-    *   **Query Parameters:** `page` (int), `pageSize` (int), `searchQuery` (string, optional), `gender` (string, optional), `familyId` (Guid, optional)
+    *   **Query Parameters:** `page` (int), `itemsPerPage` (int), `searchQuery` (string, optional), `gender` (string, optional), `familyId` (Guid, optional)
     *   **Phản hồi:** `Result<PaginatedList<MemberListDto>>`
 -   `GET /api/member/{id}`: Lấy thông tin thành viên theo ID.
     *   **Phản hồi:** `Result<MemberDetailDto>`
@@ -252,7 +252,7 @@ Ví dụ Phản hồi Lỗi:
 ### 6.3. Quản lý Sự kiện (`/api/event`)
 
 -   `GET /api/event`: Lấy danh sách tất cả các sự kiện (hỗ trợ phân trang và lọc).
-    *   **Query Parameters:** `page` (int), `pageSize` (int), `searchQuery` (string, optional), `eventType` (string, optional), `familyId` (Guid, optional), `startDate` (datetime, optional), `endDate` (datetime, optional), `location` (string, optional), `relatedMemberId` (Guid, optional)
+    *   **Query Parameters:** `page` (int), `itemsPerPage` (int), `searchQuery` (string, optional), `eventType` (string, optional), `familyId` (Guid, optional), `startDate` (datetime, optional), `endDate` (datetime, optional), `location` (string, optional), `relatedMemberId` (Guid, optional)
     *   **Phản hồi:** `Result<PaginatedList<EventDto>>`
 -   `GET /api/event/{id}`: Lấy thông tin sự kiện theo ID.
     *   **Phản hồi:** `Result<EventDto>`
@@ -279,7 +279,7 @@ Ví dụ Phản hồi Lỗi:
 ### 6.5. Quản lý Quan hệ (`/api/relationship`)
 
 -   `GET /api/relationship`: Lấy danh sách tất cả các mối quan hệ (hỗ trợ phân trang và lọc).
-    *   **Query Parameters:** `page` (int), `pageSize` (int), `familyId` (Guid, optional), `sourceMemberId` (Guid, optional), `targetMemberId` (Guid, optional), `type` (string, optional)
+    *   **Query Parameters:** `page` (int), `itemsPerPage` (int), `familyId` (Guid, optional), `sourceMemberId` (Guid, optional), `targetMemberId` (Guid, optional), `type` (string, optional)
     *   **Phản hồi:** `Result<PaginatedList<RelationshipListDto>>`
 -   `GET /api/relationship/{id}`: Lấy thông tin quan hệ theo ID.
     *   **Phản hồi:** `Result<RelationshipDto>`
@@ -377,7 +377,7 @@ Ví dụ Phản hồi Lỗi:
 ### 6.15. Quản lý Người dùng (`/api/user`)
 
 -   `GET /api/user/search`: Tìm kiếm người dùng dựa trên các tiêu chí được cung cấp.
-    *   **Query Parameters:** `page` (int), `pageSize` (int), `searchQuery` (string, optional)
+    *   **Query Parameters:** `page` (int), `itemsPerPage` (int), `searchQuery` (string, optional)
     *   **Phản hồi:** `Result<PaginatedList<UserDto>>`
 -   `GET /api/user/by-ids?ids=id1,id2,...`: Lấy danh sách người dùng theo nhiều ID (comma-separated).
     *   **Phản hồi:** `Result<List<UserDto>>`

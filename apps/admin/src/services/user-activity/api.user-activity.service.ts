@@ -7,14 +7,14 @@ export class ApICurrentUserActivityService implements ICurrentUserActivityServic
 
   async getRecentActivities(
     page: number,
-    pageSize?: number,
+    itemsPerPage?: number,
     targetType?: TargetType,
     targetId?: string,
     groupId?: string,
   ): Promise<Result<Paginated<RecentActivity>, ApiError>> {
     const params = new URLSearchParams();
     if (page) params.append('page', page.toString())
-    if (pageSize) params.append('pageSize', pageSize.toString());
+    if (itemsPerPage) params.append('itemsPerPage', itemsPerPage.toString());
     if (targetType !== undefined) params.append('targetType', targetType.toString());
     if (targetId) params.append('targetId', targetId);
     if (groupId) params.append('groupId', groupId);

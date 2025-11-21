@@ -3,7 +3,6 @@ import type { BiographyResultDto, Member, Result } from '@/types';
 import type { ApiError } from '@/plugins/axios';
 import { BiographyStyle } from '@/types';
 import i18n from '@/plugins/i18n';
-import { useNotificationStore } from './notification.store';
 import { err } from '@/types';
 
 export const useAIBiographyStore = defineStore('aiBiography', {
@@ -104,11 +103,6 @@ export const useAIBiographyStore = defineStore('aiBiography', {
         if (this.currentMember) {
           this.currentMember.biography = content;
         }
-        const notificationStore = useNotificationStore();
-        notificationStore.showSnackbar(
-          i18n.global.t('aiBiography.success.save'),
-          'success',
-        );
       } else {
         this.error =
           result.error?.message ||

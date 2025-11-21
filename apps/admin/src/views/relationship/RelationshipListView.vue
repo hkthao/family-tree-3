@@ -22,16 +22,16 @@ import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
 import { RelationshipSearch, RelationshipList } from '@/components/relationship';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { RelationshipFilter, Relationship } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const { t } = useI18n();
 const router = useRouter();
 
 const relationshipStore = useRelationshipStore();
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const currentFilters = ref<RelationshipFilter>({});
 const itemsPerPage = ref(DEFAULT_ITEMS_PER_PAGE);
@@ -98,13 +98,13 @@ const confirmDelete = async (relationship: Relationship) => {
   if (confirmed) {
     const result = await relationshipStore.deleteItem(relationship.id!);
     if (result.ok) {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('relationship.messages.deleteSuccess'),
         'success',
       );
       await loadRelationships(); // Reload relationships after deletion
     } else {
-      notificationStore.showSnackbar(
+      showSnackbar(
         result.error?.message || t('relationship.messages.deleteError'),
         'error',
       );

@@ -267,3 +267,50 @@ export interface FaceDetectionResponseDto {
   imageId: string;
   detectedFaces: DetectedFaceDto[];
 }
+
+// Add FamilyDict types
+export enum FamilyDictType {
+  Blood = 1,
+  Marriage = 2,
+  Adoption = 3,
+  InLaw = 4,
+  Other = 5,
+}
+
+export enum FamilyDictLineage {
+  Noi = 1,
+  Ngoai = 2,
+  NoiNgoai = 3,
+  Other = 4,
+}
+
+export interface NamesByRegionDto {
+  north: string;
+  central: string | string[];
+  south: string | string[];
+}
+
+export interface FamilyDictDto {
+  id: string;
+  name: string;
+  type: FamilyDictType;
+  description: string;
+  lineage: FamilyDictLineage;
+  specialRelation: boolean;
+  namesByRegion: NamesByRegionDto;
+}
+
+export interface FamilyDictFilter {
+  searchQuery?: string;
+  lineage?: FamilyDictLineage;
+  region?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginatedFamilyDictDto {
+  items: FamilyDictDto[];
+  page: number;
+  totalPages: number;
+  totalItems: number;
+}

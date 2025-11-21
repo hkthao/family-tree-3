@@ -37,11 +37,11 @@ import { useI18n } from 'vue-i18n';
 import { useUserSettingsStore } from '@/stores';
 import { getThemeOptions } from '@/constants/theme.constants';
 import { getLanguageOptions } from '@/constants/language.constants';
-import { useNotificationStore } from '@/stores/notification.store';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const { t } = useI18n();
 const userSettingsStore = useUserSettingsStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const preferencesForm = ref({
   theme: userSettingsStore.preferences.theme,
@@ -57,9 +57,9 @@ const savePreferences = async () => {
   userSettingsStore.setTheme(preferencesForm.value.theme);
   const success = await userSettingsStore.saveUserSettings();
   if (success) {
-    notificationStore.showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
+    showSnackbar(t('userSettings.preferences.saveSuccess'), 'success');
   } else {
-    notificationStore.showSnackbar(userSettingsStore.error || t('userSettings.preferences.saveError'), 'error');
+    showSnackbar(userSettingsStore.error || t('userSettings.preferences.saveError'), 'error');
   }
 };
 

@@ -48,6 +48,17 @@ const menu: MenuSection[] = [
     ],
   },
   {
+    titleKey: 'menu.dictionary',
+    items: [
+      {
+        titleKey: 'menu.familyDict',
+        icon: 'mdi-book-multiple',
+        to: '/family-dict',
+        roles: ['Admin'],
+      },
+    ],
+  },
+  {
     titleKey: 'menu.supportAndInfo',
     items: [
       {
