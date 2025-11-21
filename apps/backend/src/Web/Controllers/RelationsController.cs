@@ -4,10 +4,14 @@ using backend.Application.Relations.Queries;
 using backend.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
+using MediatR; // New using statement
+
 namespace backend.Web.Controllers;
 
-public class RelationsController : ApiControllerBase
+public class RelationsController(IMediator mediator) : ControllerBase
 {
+    private readonly IMediator _mediator = mediator;
+
     /// <summary>
     /// Lấy tất cả các quan hệ.
     /// </summary>
@@ -17,7 +21,7 @@ public class RelationsController : ApiControllerBase
     [ProducesResponseType(typeof(PaginatedList<RelationDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<RelationDto>>> GetRelations([FromQuery] GetRelationsQuery query)
     {
-        return await Mediator.Send(query);
+        return await _mediator.Send(query);
     }
 
     /// <summary>
@@ -30,7 +34,7 @@ public class RelationsController : ApiControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<RelationDto>> GetRelationById(string id)
     {
-        var relation = await Mediator.Send(new GetRelationByIdQuery(id));
+        var relation = await _mediator.Send(new GetRelationByIdQuery(id));
         return relation == null ? NotFound() : Ok(relation);
     }
 
@@ -43,7 +47,7 @@ public class RelationsController : ApiControllerBase
     [ProducesResponseType(typeof(PaginatedList<RelationDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<RelationDto>>> SearchRelations([FromQuery] SearchRelationsQuery query)
     {
-        return await Mediator.Send(query);
+        return await _mediator.Send(query);
     }
 
     /// <summary>
@@ -55,6 +59,6 @@ public class RelationsController : ApiControllerBase
     [ProducesResponseType(typeof(PaginatedList<RelationDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginatedList<RelationDto>>> GetSpecialRelations([FromQuery] GetSpecialRelationsQuery query)
     {
-        return await Mediator.Send(query);
+        return await _mediator.Send(query);
     }
 }
