@@ -53,7 +53,7 @@ const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null
 
 watch(() => faceStore.error, (newError) => {
   if (newError) {
-    notificationStore.showSnackbar(newError, 'error');
+    showSnackbar(newError, 'error');
   }
 });
 
@@ -100,7 +100,7 @@ const handleRemoveFace = (faceId: string) => {
 const saveLabels = async () => {
   const result = await faceStore.saveFaceLabels();
   if (result.ok) {
-    notificationStore.showSnackbar(t('face.recognition.saveSuccess'), 'success');
+    showSnackbar(t('face.recognition.saveSuccess'), 'success');
     faceStore.resetState(); // Reset face store after saving
     if (faceUploadInputRef.value) {
       faceUploadInputRef.value.reset(); // Clear the file input

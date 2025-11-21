@@ -68,8 +68,8 @@ import AvatarDisplay from './AvatarDisplay.vue';
 import { Cropper, type CropperResult } from 'vue-advanced-cropper';
 import 'vue-advanced-cropper/dist/style.css';
 import { useFileUploadStore } from '@/stores';
-import { useNotificationStore } from '@/stores/notification.store';
 import { VFileUpload } from 'vuetify/labs/VFileUpload';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const props = defineProps({
   modelValue: { type: String as PropType<string | null | undefined>, default: null },
@@ -80,7 +80,7 @@ const emit = defineEmits(['update:modelValue']);
 
 const { t } = useI18n();
 const fileUploadStore = useFileUploadStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const selectedFile = ref<File[]>([]);
 const cropperDialog = ref(false);
@@ -104,7 +104,7 @@ const onFileSelected = (files: File[]) => {
 
 const processFile = (file: File) => {
   if (!file.type.startsWith('image/')) {
-    notificationStore.showSnackbar(t('avatarInput.uploadInput.invalidFormat'), 'error');
+    showSnackbar(t('avatarInput.uploadInput.invalidFormat'), 'error');
     return;
   }
 
@@ -164,10 +164,10 @@ const uploadCroppedImage = async () => {
           const success = await fileUploadStore.uploadFile(croppedFile);
           if (success && fileUploadStore.uploadedUrl) {
             emit('update:modelValue', fileUploadStore.uploadedUrl);
-            notificationStore.showSnackbar(t('avatarInput.uploadInput.success'), 'success');
+            showSnackbar(t('avatarInput.uploadInput.success'), 'success');
             cropperDialog.value = false; // Close dialog on success
           } else {
-            notificationStore.showSnackbar(
+            showSnackbar(
               fileUploadStore.error || t('avatarInput.uploadInput.error'),
               'error',
             );

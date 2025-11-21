@@ -44,16 +44,16 @@
 <script setup lang="ts">
 import { onMounted, computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useNotificationStore } from '@/stores/notification.store';
 import { AvatarInput } from '@/components/common';
 import { useUserProfileStore } from '@/stores';
 import type { UserProfile } from '@/types';
 import { useVuelidate } from '@vuelidate/core';
 import { useProfileSettingsRules } from '@/validations/profile-settings.validation';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const { t } = useI18n();
-const notificationStore = useNotificationStore();
 const userProfileStore = useUserProfileStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const formRef = ref<HTMLFormElement | null>(null);
 const loading = ref(false);
@@ -87,7 +87,7 @@ onMounted(async () => {
     formData.avatar = userProfileStore.userProfile.avatar || null;
     formData.externalId = userProfileStore.userProfile.externalId;
   } else if (userProfileStore.error) {
-    notificationStore.showSnackbar(userProfileStore.error, 'error');
+    showSnackbar(userProfileStore.error, 'error');
   }
 });
 
@@ -111,18 +111,18 @@ const saveProfile = async () => {
 
       const success = await userProfileStore.updateUserProfile(updatedProfile);
       if (success) {
-        notificationStore.showSnackbar(
+        showSnackbar(
           t('userSettings.profile.saveSuccess'),
           'success',
         );
       } else {
-        notificationStore.showSnackbar(
+        showSnackbar(
           userProfileStore.error || t('userSettings.profile.saveError'),
           'error',
         );
       }
     } else if (!result) {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('userSettings.profile.validationError'),
         'error',
       );
