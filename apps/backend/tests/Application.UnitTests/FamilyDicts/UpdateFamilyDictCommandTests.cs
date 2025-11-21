@@ -115,7 +115,7 @@ public class UpdateFamilyDictCommandTests : TestBase
         validationResult.IsValid.Should().BeFalse();
         validationResult.Errors.Should().Contain(e => e.ErrorMessage == "Tên không được để trống.");
     }
-    
+
     [Fact]
     public async Task Handle_ShouldThrowValidationException_WhenNameIsTooLong()
     {

@@ -5,7 +5,7 @@
     <FamilyDictList :items="familyDictStore.list.items" :total-items="familyDictStore.list.totalItems"
       :loading="list.loading" :search="searchQuery" @update:search="handleSearchUpdate"
       @update:options="handleListOptionsUpdate" @view="navigateToDetailView" @edit="navigateToEditFamilyDict"
-      @delete="confirmDelete" @create="navigateToCreateView()" :read-only="props.readOnly">
+      @delete="confirmDelete" @create="navigateToCreateView()" @import="openImportDialog" :read-only="props.readOnly">
     </FamilyDictList>
 
     <!-- Edit FamilyDict Drawer -->
@@ -24,6 +24,10 @@
       <FamilyDictDetailView v-if="selectedFamilyDictId && detailDrawer" :family-dict-id="selectedFamilyDictId"
         @close="handleDetailClosed" @edit-family-dict="navigateToEditFamilyDict" />
     </v-navigation-drawer>
+
+    <!-- Import FamilyDict Dialog -->
+    <FamilyDictImportDialog :show="importDialog" @update:show="importDialog = $event"
+      @imported="handleFamilyDictSaved" />
   </div>
 </template>
 
@@ -34,6 +38,7 @@ import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import FamilyDictEditView from '@/views/family-dict/FamilyDictEditView.vue';
 import FamilyDictAddView from '@/views/family-dict/FamilyDictAddView.vue';
 import FamilyDictDetailView from '@/views/family-dict/FamilyDictDetailView.vue';
+import FamilyDictImportDialog from '@/components/family-dict/FamilyDictImportDialog.vue'; // Import FamilyDictImportDialog
 import type { FamilyDictFilter, FamilyDict } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -55,6 +60,7 @@ const editDrawer = ref(false);
 const addDrawer = ref(false);
 const selectedFamilyDictId = ref<string | null>(null);
 const detailDrawer = ref(false);
+const importDialog = ref(false); // State for import dialog
 
 const { showConfirmDialog } = useConfirmDialog();
 const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
@@ -66,6 +72,10 @@ const navigateToDetailView = (familyDict: FamilyDict) => {
 
 const navigateToCreateView = () => {
   addDrawer.value = true;
+};
+
+const openImportDialog = () => {
+  importDialog.value = true;
 };
 
 const navigateToEditFamilyDict = (familyDict: FamilyDict) => {

@@ -3,20 +3,30 @@
     :items-length="totalItems" :loading="loading" item-value="id" @update:options="loadFamilyDicts" elevation="0"
     data-testid="family-dict-list" fixed-header>
     <template #top>
-      <v-toolbar flat>
-        <v-toolbar-title>{{ t('familyDict.list.title') }}</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')"
-          data-testid="add-new-family-dict-button">
-          <v-tooltip :text="t('familyDict.management.addFamilyDict')">
-            <template v-slot:activator="{ props }">
-              <v-icon v-bind="props">mdi-plus</v-icon>
-            </template>
-          </v-tooltip>
-        </v-btn>
-        <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
-          hide-details clearable class="mr-2" data-test-id="family-dict-list-search-input"></v-text-field>
-      </v-toolbar>
+      <slot name="top">
+        <v-toolbar flat>
+          <v-toolbar-title>{{ t('familyDict.list.title') }}</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('import')"
+            data-testid="import-family-dict-button" class="mr-2">
+            <v-tooltip :text="t('familyDict.management.importFamilyDict')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-upload</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <v-btn v-if="canPerformActions" color="primary" icon @click="$emit('create')"
+            data-testid="add-new-family-dict-button">
+            <v-tooltip :text="t('familyDict.management.addFamilyDict')">
+              <template v-slot:activator="{ props }">
+                <v-icon v-bind="props">mdi-plus</v-icon>
+              </template>
+            </v-tooltip>
+          </v-btn>
+          <v-text-field v-model="debouncedSearch" :label="t('common.search')" append-inner-icon="mdi-magnify" single-line
+            hide-details clearable class="mr-2" data-test-id="family-dict-list-search-input"></v-text-field>
+        </v-toolbar>
+      </slot>
     </template>
 
     <!-- Type column -->
@@ -92,6 +102,7 @@ import type { DataTableHeader } from 'vuetify';
 
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { FamilyDictType, FamilyDictLineage } from '@/types';
+import { useAuth } from '@/composables/useAuth';
 
 const props = defineProps<{
   items: FamilyDict[];
@@ -101,8 +112,10 @@ const props = defineProps<{
   readOnly?: boolean;
 }>();
 
+const { isAdmin } = useAuth();
+
 const canPerformActions = computed(() => {
-  return !props.readOnly; // Assuming FamilyDicts are managed by admins only, no family manager concept here
+  return !props.readOnly && isAdmin.value;
 });
 
 const emit = defineEmits([
@@ -111,6 +124,7 @@ const emit = defineEmits([
   'edit',
   'delete',
   'create',
+  'import',
   'update:search',
 ]);
 

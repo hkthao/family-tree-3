@@ -100,6 +100,7 @@ const formData = reactive<Omit<FamilyDict, 'id'> | FamilyDict>(
       type: FamilyDictType.Blood,
       description: '',
       lineage: FamilyDictLineage.Noi,
+      specialRelation: false,
       namesByRegion: { north: '', central: '', south: '' },
     },
 );

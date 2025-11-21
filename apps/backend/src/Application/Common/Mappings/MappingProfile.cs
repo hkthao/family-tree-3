@@ -8,6 +8,7 @@ using backend.Application.Families.Queries.GetFamilies;
 using backend.Application.Families.Queries.GetFamilyById;
 using backend.Application.FamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict; // New using statement
+using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict; // New using statement
 using backend.Application.Identity.UserProfiles.Queries;
 using backend.Application.Members.Queries;
@@ -66,6 +67,8 @@ public class MappingProfile : Profile
         CreateMap<NamesByRegion, NamesByRegionDto>();
         CreateMap<NamesByRegionCommandDto, NamesByRegion>();
         CreateMap<NamesByRegionUpdateCommandDto, NamesByRegion>();
+        CreateMap<NamesByRegionImportDto, NamesByRegion>();
+        CreateMap<FamilyDictImportDto, FamilyDict>();
 
         // Export/Import DTOs
         CreateMap<Family, FamilyExportDto>()

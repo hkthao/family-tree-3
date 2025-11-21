@@ -16,4 +16,6 @@ export interface IFamilyDictService extends ICrudService<FamilyDict> {
     page: number,
     itemsPerPage: number,
   ): Promise<Result<BackendPaginatedResult<FamilyDict>, ApiError>>;
+
+  importItems(items: Omit<FamilyDict, 'id'>[]): Promise<Result<string[], ApiError>>;
 }

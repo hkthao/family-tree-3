@@ -64,4 +64,9 @@ export class ApiFamilyDictService implements IFamilyDictService {
 
     return result;
   }
+
+  async importItems(items: Omit<FamilyDict, 'id'>[]): Promise<Result<string[], ApiError>> {
+    const result = await this.http.post<string[]>(`/family-dict/import`, items);
+    return result;
+  }
 }

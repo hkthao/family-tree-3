@@ -3,6 +3,7 @@ using backend.Application.Common.Security; // New using statement
 using backend.Application.FamilyDicts;
 using backend.Application.FamilyDicts.Commands.CreateFamilyDict;
 using backend.Application.FamilyDicts.Commands.DeleteFamilyDict;
+using backend.Application.FamilyDicts.Commands.ImportFamilyDicts; // New using statement
 using backend.Application.FamilyDicts.Commands.UpdateFamilyDict;
 using backend.Application.FamilyDicts.Queries;
 using Microsoft.AspNetCore.Mvc;
@@ -78,6 +79,20 @@ public class FamilyDictsController(IMediator mediator) : ControllerBase
     {
         var familyDictId = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetFamilyDictById), new { id = familyDictId }, familyDictId);
+    }
+
+    /// <summary>
+    /// Import một danh sách FamilyDict mới.
+    /// </summary>
+    /// <param name="command">Đối tượng chứa danh sách các FamilyDict để import.</param>
+    /// <returns>Danh sách ID của các FamilyDict vừa tạo.</returns>
+    [HttpPost("import")]
+    [ProducesResponseType(typeof(IEnumerable<Guid>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IEnumerable<Guid>>> ImportFamilyDicts([FromBody] ImportFamilyDictsCommand command)
+    {
+        var importedIds = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetFamilyDicts), importedIds);
     }
 
     /// <summary>

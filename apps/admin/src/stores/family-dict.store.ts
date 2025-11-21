@@ -190,6 +190,20 @@ export const useFamilyDictStore = defineStore('familyDict', {
       return result;
     },
 
+    async importItems(items: Omit<FamilyDict, 'id'>[]): Promise<Result<string[], ApiError>> {
+      this.add.loading = true; // Use add.loading for import as well
+      this.error = null;
+      const result = await this.services.familyDict.importItems(items);
+      if (result.ok) {
+        await this._loadItems(); // Reload list after successful import
+      } else {
+        this.error = result.error?.message || i18n.global.t('familyDict.errors.import');
+        console.error(result.error);
+      }
+      this.add.loading = false;
+      return result;
+    },
+
     clearItems() {
       this.list.items = [];
       this.list.totalItems = 0;
