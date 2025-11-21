@@ -12,8 +12,7 @@
 
         <v-alert v-if="parsedDataError" type="error" class="mt-4">{{ parsedDataError }}</v-alert>
 
-        <v-textarea v-if="parsedDataPreview" v-model="parsedDataPreview" :label="t('familyDict.import.preview')"
-          readonly rows="10" class="mt-4"></v-textarea>
+
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -48,7 +47,6 @@ const { showSnackbar } = useGlobalSnackbar();
 const dialog = ref(props.show);
 const selectedFile = ref<File[]>([]);
 const parsedData = ref<Omit<FamilyDict, 'id'>[] | null>(null);
-const parsedDataPreview = ref('');
 const parsedDataError = ref('');
 
 watch(() => props.show, (newVal) => {
@@ -68,7 +66,6 @@ const onFileSelected = (files: File[]) => {
     if (file.type !== 'application/json') {
       parsedDataError.value = t('familyDict.import.errors.invalidFileType');
       parsedData.value = null;
-      parsedDataPreview.value = '';
       return;
     }
 
@@ -86,11 +83,9 @@ const onFileSelected = (files: File[]) => {
           parsedData.value = data;
           parsedDataError.value = '';
         }
-        parsedDataPreview.value = JSON.stringify(data, null, 2);
       } catch (error) {
         parsedDataError.value = t('familyDict.import.errors.invalidJson');
         parsedData.value = null;
-        parsedDataPreview.value = '';
       }
     };
     reader.readAsText(file);
@@ -119,7 +114,6 @@ const closeDialog = () => {
 const resetState = () => {
   selectedFile.value = [];
   parsedData.value = null;
-  parsedDataPreview.value = '';
   parsedDataError.value = '';
   familyDictStore.error = null; // Clear store error related to add/import
 };
