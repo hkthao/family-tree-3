@@ -25,7 +25,11 @@ export const useMemberStore = defineStore('member', {
       sortBy: [] as { key: string; order: string }[], // Sorting key and order
     },
 
-
+    // State for single item operations
+    detail: {
+      item: null as Member | null,
+      loading: false, // Loading state for a single member
+    },
 
     // State for add operations
     add: {
@@ -169,7 +173,26 @@ export const useMemberStore = defineStore('member', {
       this._loadItems();
     },
 
+    async setCurrentItem(item: Member | null) {
+      this.detail.item = item;
+    },
 
+    async getById(id: string): Promise<Member | undefined> {
+      this.detail.loading = true;
+      this.error = null;
+      const result = await this.services.member.getById(id);
+      this.detail.loading = false;
+      if (result.ok) {
+        if (result.value) {
+          this.detail.item = result.value;
+          return result.value;
+        }
+      } else {
+        this.error = i18n.global.t('member.errors.loadById');
+        console.error(result.error);
+      }
+      return undefined;
+    },
 
     async getByIds(ids: string[]): Promise<Member[]> {
       this.list.loading = true;
@@ -190,8 +213,6 @@ export const useMemberStore = defineStore('member', {
       this.list.items = [];
       this.list.totalItems = 0;
       this.list.totalPages = 1;
-    },
-
-
+    }
   },
 });

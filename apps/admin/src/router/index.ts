@@ -76,6 +76,12 @@ const router = createRouter({
       meta: { requiresAuth: false }, // Public route does not require authentication
     },
     {
+      path: '/public/support-legal',
+      name: 'PublicSupportLegal',
+      component: SupportLegalPage,
+      meta: { requiresAuth: false }, // Public route does not require authentication
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
       component: NotFoundView,

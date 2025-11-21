@@ -1,7 +1,6 @@
 import i18n from '@/plugins/i18n';
-import type { Member, Result } from '@/types';
+import type { Member } from '@/types';
 import { defineStore } from 'pinia';
-import type { ApiError } from '@/plugins/axios';
 
 export const useFaceMemberSelectStore = defineStore('faceMemberSelect', {
   state: () => ({
