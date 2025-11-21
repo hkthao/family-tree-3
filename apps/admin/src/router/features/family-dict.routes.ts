@@ -6,7 +6,7 @@ export const familyDictRoutes: RouteRecordRaw[] = [
     path: 'family-dict',
     name: 'FamilyDict',
     component: MainRouterView,
-    meta: { breadcrumb: 'familyDict.list.title' },
+    meta: { breadcrumb: 'familyDict.list.title', requiresAuth: true, roles: ['Admin'] },
     children: [
       {
         path: '',

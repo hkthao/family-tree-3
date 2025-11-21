@@ -1,7 +1,6 @@
 using backend.Application.Events;
 using backend.Application.Events.Queries.GetEventById;
 using backend.Application.Events.Queries.GetEvents;
-using backend.Application.Events.Queries.GetPublicEventById;
 using backend.Application.Families;
 using backend.Application.Families.Dtos; // New using statement
 using backend.Application.Families.ExportImport; // New using statement
@@ -17,7 +16,6 @@ using backend.Application.UserActivities.Queries;
 using backend.Application.UserPreferences.Queries;
 using backend.Application.Users.Queries;
 using backend.Domain.Entities;
-using backend.Domain.Enums;
 
 namespace backend.Application.Common.Mappings;
 

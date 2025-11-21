@@ -5,7 +5,7 @@ import type { ICrudService } from '../common/crud.service.interface';
 // Define the expected backend paginated result structure
 export interface BackendPaginatedResult<T> {
   items: T[];
-  pageNumber: number;
+  page: number;
   pageSize: number;
   totalCount: number;
 }

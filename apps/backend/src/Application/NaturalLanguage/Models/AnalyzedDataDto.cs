@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using backend.Domain.Enums; // Add this using directive
-
 namespace backend.Application.NaturalLanguage.Models;
 
 /// <summary>

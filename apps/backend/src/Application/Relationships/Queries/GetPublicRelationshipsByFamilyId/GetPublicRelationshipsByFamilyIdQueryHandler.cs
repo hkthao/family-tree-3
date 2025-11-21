@@ -3,12 +3,8 @@ using backend.Application.Common.Constants;
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Application.Families.Specifications;
-using backend.Application.Relationships.Queries;
 using backend.Application.Relationships.Specifications;
-using backend.Domain.Entities;
 using backend.Domain.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId;
 

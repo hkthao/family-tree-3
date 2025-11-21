@@ -55,7 +55,7 @@ export class ApiFamilyDictService implements IFamilyDictService {
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);
 
-    params.append('pageNumber', page.toString());
+    params.append('page', page.toString());
     params.append('pageSize', itemsPerPage.toString());
 
     const result = await this.http.get<BackendPaginatedResult<FamilyDict>>(

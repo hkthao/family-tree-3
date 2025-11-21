@@ -1,11 +1,7 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Extensions; // New using statement
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
 using backend.Domain.Enums;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.FamilyDicts.Queries;
 
@@ -14,7 +10,7 @@ public record SearchFamilyDictsQuery : IRequest<PaginatedList<FamilyDictDto>>
     public string? Q { get; init; }
     public FamilyDictLineage? Lineage { get; init; }
     public string? Region { get; init; } // "north", "central", "south"
-    public int PageNumber { get; init; } = 1;
+    public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 10;
 }
 
@@ -49,6 +45,6 @@ public class SearchFamilyDictsQueryHandler : IRequestHandler<SearchFamilyDictsQu
 
         return await query
             .ProjectTo<FamilyDictDto>(_mapper.ConfigurationProvider)
-            .PaginatedListAsync(request.PageNumber, request.PageSize);
+            .PaginatedListAsync(request.Page, request.PageSize);
     }
 }

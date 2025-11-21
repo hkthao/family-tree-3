@@ -1,13 +1,14 @@
 using backend.Application.Common.Models;
 using backend.Application.FamilyDicts;
 using backend.Application.FamilyDicts.Queries;
-using backend.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
-
-using MediatR; // New using statement
+using backend.Application.Common.Security; // New using statement
 
 namespace backend.Web.Controllers;
 
+[Authorize]
+[ApiController]
+[Route("api/family-dict")]
 public class FamilyDictsController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;

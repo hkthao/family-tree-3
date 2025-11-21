@@ -1,10 +1,6 @@
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using backend.Application.Common.Extensions; // New using statement
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.FamilyDicts.Queries;
 

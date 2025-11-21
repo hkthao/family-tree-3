@@ -1,14 +1,9 @@
-using System.Collections.Generic; // Add using directive
-using System.Linq;
 using System.Text.Json;
 using backend.Application.AI.Prompts;
-using backend.Application.Common.Exceptions; // Add using directive
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Application.Common.Models.AI;
 using backend.Application.NaturalLanguage.Models;
 using backend.Domain.Enums; // Add using directive
-using Microsoft.EntityFrameworkCore; // Add using directive
 
 namespace backend.Application.NaturalLanguage.Commands.AnalyzeNaturalLanguage;
 

@@ -89,7 +89,7 @@ describe('family-dict.store', () => {
 
   const mockPaginatedFamilyDicts = {
     items: [mockFamilyDict],
-    pageNumber: 1,
+    page: 1,
     pageSize: 10,
     totalCount: 1,
   };
@@ -316,7 +316,7 @@ describe('family-dict.store', () => {
         itemsPerPage: 20,
         sortBy: [{ key: 'name', order: 'desc' }],
       };
-      mockLoadItems.mockResolvedValue(ok({ ...mockPaginatedFamilyDicts, pageNumber: options.page }));
+      mockLoadItems.mockResolvedValue(ok({ ...mockPaginatedFamilyDicts, page: options.page }));
       await store.setListOptions(options);
 
       expect(store.list.currentPage).toBe(options.page);

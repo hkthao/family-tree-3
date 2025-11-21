@@ -1,8 +1,5 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models;
-using backend.Domain.Entities;
-using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Application.Members.Commands.UpdateDenormalizedFields;
 

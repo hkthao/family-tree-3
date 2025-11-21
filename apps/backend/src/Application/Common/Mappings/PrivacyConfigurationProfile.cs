@@ -1,4 +1,3 @@
-using AutoMapper;
 using backend.Application.PrivacyConfigurations.Queries;
 using backend.Domain.Entities;
 
