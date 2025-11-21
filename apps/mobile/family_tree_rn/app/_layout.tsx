@@ -4,6 +4,11 @@ import 'react-native-reanimated';
 import { PaperProvider, Portal } from 'react-native-paper';
 import { getPaperTheme } from '@/constants/theme';
 import { ThemeProvider, useThemeContext } from '@/context/ThemeContext';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -20,6 +25,12 @@ export default function RootLayout() {
 function AppContent() {
   const { colorScheme } = useThemeContext();
   const paperTheme = getPaperTheme(colorScheme);
+
+  useEffect(() => {
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 3000);
+  }, []);
 
   return (
     <PaperProvider theme={paperTheme}>
