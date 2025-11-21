@@ -5,12 +5,12 @@ import { WebView } from 'react-native-webview';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
 
-export default function LegalWebViewScreen() {
+export default function FeedbackWebViewScreen() {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
 
-  const legalUrl = `${process.env.EXPO_PUBLIC_APP_BASE_URL}/public/support-legal`;
+  const feedbackUrl = process.env.EXPO_PUBLIC_FEEDBACK_FORM_URL;
 
   const styles = StyleSheet.create({
     container: {
@@ -27,15 +27,15 @@ export default function LegalWebViewScreen() {
     <View style={styles.container}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={t('settings.aboutApp.legalInfo')} />
+        <Appbar.Content title={t('settings.helpSupport.feedback')} />
       </Appbar.Header>
       <WebView
-        source={{ uri: legalUrl }}
+        source={{ uri: feedbackUrl as string }}
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
         startInLoadingState={true}
-        scalesPageToFit={true}
+        scalesPageToFit={false}
       />
     </View>
   );

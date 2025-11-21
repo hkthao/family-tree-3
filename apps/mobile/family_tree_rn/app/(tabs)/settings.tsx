@@ -190,7 +190,7 @@ export default function SettingsScreen() {
               style={styles.listItem}
               left={() => <List.Icon icon="comment-edit" />}
               title={t('settings.helpSupport.feedback')}
-              onPress={() => console.log('Feedback')}
+              onPress={() => router.push('/feedback-webview')}
               right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
             />
           </List.Section>
