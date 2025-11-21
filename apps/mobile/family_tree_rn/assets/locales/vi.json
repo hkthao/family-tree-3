@@ -194,5 +194,19 @@
     "facesDetected": "Đã phát hiện {{count}} khuôn mặt."
   },
   "common.error": "Lỗi",
-  "common.loading": "Đang tải..."
+  "common.loading": "Đang tải...",
+  "onboarding.slide1.title": "Kết nối các thế hệ",
+  "onboarding.slide1.description": "Dễ dàng xây dựng và trực quan hóa cây gia phả của bạn.",
+  "onboarding.slide2.title": "Chia sẻ kỷ niệm",
+  "onboarding.slide2.description": "Thêm ảnh, video và câu chuyện cho từng thành viên gia đình.",
+  "onboarding.slide3.title": "Khám phá các kết nối",
+  "onboarding.slide3.description": "Khám phá các mối quan hệ và mở rộng lịch sử gia đình của bạn.",
+  "onboarding.slide4.title": "Bảo mật và Riêng tư",
+  "onboarding.slide4.description": "Dữ liệu gia đình của bạn được an toàn và bảo mật với chúng tôi.",
+  "onboarding.slide5.title": "Dễ sử dụng",
+  "onboarding.slide5.description": "Giao diện trực quan cho mọi lứa tuổi.",
+  "onboarding.skip": "Bỏ qua",
+  "onboarding.next": "Tiếp theo",
+  "onboarding.back": "Quay lại",
+  "onboarding.getStarted": "Bắt đầu"
 }
