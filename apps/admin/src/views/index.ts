@@ -47,5 +47,11 @@ export { default as RelationshipListView } from './relationship/RelationshipList
 // Export pages from settings
 export { default as UserSettingsPage } from './settings/UserSettingsPage.vue';
 
+// Export pages from family-dict
+export { default as FamilyDictAddView } from './family-dict/FamilyDictAddView.vue';
+export { default as FamilyDictDetailView } from './family-dict/FamilyDictDetailView.vue';
+export { default as FamilyDictEditView } from './family-dict/FamilyDictEditView.vue';
+export { default as FamilyDictListView } from './family-dict/FamilyDictListView.vue';
+
 // Export MainRouterView (if it's intended to be used as a view component)
 export { default as MainRouterView } from './MainRouterView.vue';

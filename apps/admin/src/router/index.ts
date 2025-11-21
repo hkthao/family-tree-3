@@ -7,6 +7,7 @@ import { useAuthService } from '@/services/auth/authService';
 import type { AppState } from '@/types';
 
 // Import feature routes
+import { familyDictRoutes } from './features/family-dict.routes';
 import { memberRoutes } from './features/member.routes';
 import { familyRoutes } from './features/family.routes';
 import { faceRoutes } from './features/face.routes';
@@ -39,6 +40,7 @@ const router = createRouter({
           meta: { breadcrumb: 'dashboard.title' },
         },
         ...memberRoutes,
+        ...familyDictRoutes,
         ...familyRoutes,
         ...faceRoutes,
         ...settingRoutes,

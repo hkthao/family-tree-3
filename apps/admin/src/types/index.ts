@@ -1,3 +1,4 @@
+export * from './family-dict.d';
 export * from './family.d';
 export * from './member.d';
 export * from './face.d'; // Replaced detectedFace.d with face.d

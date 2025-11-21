@@ -1,0 +1,38 @@
+export enum FamilyDictType {
+  Blood = 0,
+  Marriage = 1,
+  Adoption = 2,
+  InLaw = 3,
+  Other = 4,
+}
+
+export enum FamilyDictLineage {
+  Noi = 0,
+  Ngoai = 1,
+  NoiNgoai = 2,
+  Other = 3,
+}
+
+export interface NamesByRegion {
+  north: string;
+  central: string | string[];
+  south: string | string[];
+}
+
+export interface FamilyDict {
+  id: string;
+  name: string;
+  type: FamilyDictType;
+  description: string;
+  lineage: FamilyDictLineage;
+  specialRelation: boolean;
+  namesByRegion: NamesByRegion;
+}
+
+export interface FamilyDictFilter {
+  searchQuery?: string;
+  lineage?: FamilyDictLineage;
+  region?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
