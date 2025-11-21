@@ -25,19 +25,19 @@
 import { watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar } from '@/components/face';
 import { useFaceSearchTour } from '@/composables';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const { t } = useI18n();
 const faceStore = useFaceStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 useFaceSearchTour();
 
 watch(() => faceStore.error, (newError) => {
   if (newError) {
-    notificationStore.showSnackbar(newError, 'error');
+    showSnackbar(newError, 'error');
   }
 });
 

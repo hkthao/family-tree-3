@@ -19,10 +19,10 @@
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyDictStore } from '@/stores/family-dict.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
 import { storeToRefs } from 'pinia';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface FamilyDictEditViewProps {
   familyDictId: string;
@@ -35,7 +35,7 @@ const familyDictFormRef = ref<InstanceType<typeof FamilyDictForm> | null>(null);
 
 const { t } = useI18n();
 const familyDictStore = useFamilyDictStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const { detail, update } = storeToRefs(familyDictStore);
 
@@ -72,20 +72,20 @@ const handleUpdateFamilyDict = async () => {
 
   const familyDictData = familyDictFormRef.value.getFormData() as FamilyDict;
   if (!familyDictData.id) {
-    notificationStore.showSnackbar(t('familyDict.messages.saveError'), 'error');
+    showSnackbar(t('familyDict.messages.saveError'), 'error');
     return;
   }
 
   try {
     await familyDictStore.updateItem(familyDictData as FamilyDict);
     if (!familyDictStore.error) {
-      notificationStore.showSnackbar(t('familyDict.messages.updateSuccess'), 'success');
+      showSnackbar(t('familyDict.messages.updateSuccess'), 'success');
       emit('saved');
     } else {
-      notificationStore.showSnackbar(familyDictStore.error || t('familyDict.messages.saveError'), 'error');
+      showSnackbar(familyDictStore.error || t('familyDict.messages.saveError'), 'error');
     }
   } catch (error) {
-    notificationStore.showSnackbar(t('familyDict.messages.saveError'), 'error');
+    showSnackbar(t('familyDict.messages.saveError'), 'error');
   }
 };
 

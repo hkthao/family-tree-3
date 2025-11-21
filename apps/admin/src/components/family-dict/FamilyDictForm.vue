@@ -24,30 +24,25 @@
           :error-messages="v$.lineage.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="family-dict-lineage-select"></v-select>
       </v-col>
-      <v-col cols="12">
-        <v-checkbox v-model="formData.specialRelation" :label="t('familyDict.form.specialRelation')"
-          :readonly="isFormReadOnly" :disabled="isFormReadOnly"
-          data-testid="family-dict-special-relation-checkbox"></v-checkbox>
-      </v-col>
     </v-row>
 
     <v-row>
       <v-col cols="12">
         <h3 class="text-h6">{{ t('familyDict.form.namesByRegion') }}</h3>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12">
         <v-text-field v-model="formData.namesByRegion.north" :label="t('familyDict.form.namesByRegion.north')"
           @blur="v$.namesByRegion.north.$touch()" @input="v$.namesByRegion.north.$touch()"
           :error-messages="v$.namesByRegion.north.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="family-dict-names-north-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12">
         <v-text-field v-model="formData.namesByRegion.central" :label="t('familyDict.form.namesByRegion.central')"
           @blur="v$.namesByRegion.central.$touch()" @input="v$.namesByRegion.central.$touch()"
           :error-messages="v$.namesByRegion.central.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
           :disabled="isFormReadOnly" data-testid="family-dict-names-central-input"></v-text-field>
       </v-col>
-      <v-col cols="12" md="4">
+      <v-col cols="12">
         <v-text-field v-model="formData.namesByRegion.south" :label="t('familyDict.form.namesByRegion.south')"
           @blur="v$.namesByRegion.south.$touch()" @input="v$.namesByRegion.south.$touch()"
           :error-messages="v$.namesByRegion.south.$errors.map(e => e.$message as string)" :readonly="isFormReadOnly"
@@ -105,7 +100,6 @@ const formData = reactive<Omit<FamilyDict, 'id'> | FamilyDict>(
       type: FamilyDictType.Blood,
       description: '',
       lineage: FamilyDictLineage.Noi,
-      specialRelation: false,
       namesByRegion: { north: '', central: '', south: '' },
     },
 );
@@ -115,7 +109,6 @@ const state = reactive({
   type: toRef(formData, 'type'),
   description: toRef(formData, 'description'),
   lineage: toRef(formData, 'lineage'),
-  specialRelation: toRef(formData, 'specialRelation'),
   namesByRegion: reactive({
     north: toRef(formData.namesByRegion, 'north'),
     central: toRef(formData.namesByRegion, 'central'),

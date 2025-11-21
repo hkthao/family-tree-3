@@ -44,7 +44,6 @@
 import { useMemberStore } from '@/stores/member.store';
 import { MemberSearch, MemberList } from '@/components/member';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useNotificationStore } from '@/stores/notification.store';
 import MemberEditView from '@/views/member/MemberEditView.vue';
 import MemberAddView from '@/views/member/MemberAddView.vue';
 import MemberDetailView from '@/views/member/MemberDetailView.vue';
@@ -54,6 +53,7 @@ import type { MemberFilter, Member } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface MemberListViewProps {
   familyId?: string;
@@ -76,8 +76,8 @@ const biographyMemberId = ref<string | null>(null);
 const initialMemberData = ref<Member | null>(null);
 const aiCreateDrawer = ref(false);
 
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const navigateToDetailView = (member: Member) => {
   selectedMemberId.value = member.id;
@@ -140,12 +140,12 @@ const handleDeleteConfirm = async (member: Member) => {
   if (member) {
     await memberStore.deleteItem(member.id);
     if (memberStore.error) {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('member.messages.deleteError', { error: memberStore.error }),
         'error',
       );
     } else {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('member.messages.deleteSuccess'),
         'success',
       );

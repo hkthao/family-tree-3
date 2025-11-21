@@ -31,7 +31,6 @@
 import { useFamilyDictStore } from '@/stores/family-dict.store';
 import { FamilyDictSearch, FamilyDictList } from '@/components/family-dict';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useNotificationStore } from '@/stores/notification.store';
 import FamilyDictEditView from '@/views/family-dict/FamilyDictEditView.vue';
 import FamilyDictAddView from '@/views/family-dict/FamilyDictAddView.vue';
 import FamilyDictDetailView from '@/views/family-dict/FamilyDictDetailView.vue';
@@ -39,6 +38,7 @@ import type { FamilyDictFilter, FamilyDict } from '@/types';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface FamilyDictListViewProps {
   readOnly?: boolean;
@@ -56,8 +56,8 @@ const addDrawer = ref(false);
 const selectedFamilyDictId = ref<string | null>(null);
 const detailDrawer = ref(false);
 
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const navigateToDetailView = (familyDict: FamilyDict) => {
   selectedFamilyDictId.value = familyDict.id;
@@ -111,12 +111,12 @@ const handleDeleteConfirm = async (familyDict: FamilyDict) => {
   if (familyDict) {
     await familyDictStore.deleteItem(familyDict.id);
     if (familyDictStore.error) {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('familyDict.messages.deleteError', { error: familyDictStore.error }),
         'error',
       );
     } else {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('familyDict.messages.deleteSuccess'),
         'success',
       );

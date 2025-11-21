@@ -6,27 +6,6 @@
     <v-progress-linear v-if="detail.loading" indeterminate color="primary"></v-progress-linear>
     <v-card-text>
       <FamilyDictForm v-if="familyDict" :initial-family-dict-data="familyDict" :read-only="true" />
-      <v-alert v-else type="info" class="mt-4">{{ t('familyDict.detail.notFound') }}</v-alert>
-
-      <div v-if="familyDict" class="mt-4">
-        <v-row>
-          <v-col cols="12">
-            <h3 class="text-h6">{{ t('familyDict.form.namesByRegion') }}</h3>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field :value="familyDict.namesByRegion.north" :label="t('familyDict.form.namesByRegion.north')"
-              readonly></v-text-field>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field :value="familyDict.namesByRegion.central" :label="t('familyDict.form.namesByRegion.central')"
-              readonly></v-text-field>
-          </v-col>
-          <v-col cols="12" md="4">
-            <v-text-field :value="familyDict.namesByRegion.south" :label="t('familyDict.form.namesByRegion.south')"
-              readonly></v-text-field>
-          </v-col>
-        </v-row>
-      </div>
     </v-card-text>
     <v-card-actions class="justify-end">
       <v-btn color="grey" @click="handleClose">{{ t('common.close') }}</v-btn>
@@ -40,12 +19,12 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyDictStore } from '@/stores/family-dict.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { storeToRefs } from 'pinia';
 import { useAuth } from '@/composables/useAuth';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 interface FamilyDictDetailViewProps {
   familyDictId: string;
@@ -56,9 +35,9 @@ const emit = defineEmits(['close', 'family-dict-deleted', 'edit-family-dict']);
 
 const { t } = useI18n();
 const familyDictStore = useFamilyDictStore();
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { isAdmin, isFamilyManager } = useAuth();
+const { showSnackbar } = useGlobalSnackbar();
 
 const { detail } = storeToRefs(familyDictStore);
 
@@ -114,14 +93,14 @@ const handleDelete = async () => {
     try {
       await familyDictStore.deleteItem(familyDict.value.id);
       if (!familyDictStore.error) {
-        notificationStore.showSnackbar(t('familyDict.messages.deleteSuccess'), 'success');
+        showSnackbar(t('familyDict.messages.deleteSuccess'), 'success');
         emit('family-dict-deleted');
         emit('close');
       } else {
-        notificationStore.showSnackbar(familyDictStore.error || t('familyDict.messages.deleteError'), 'error');
+        showSnackbar(familyDictStore.error || t('familyDict.messages.deleteError'), 'error');
       }
     } catch (error) {
-      notificationStore.showSnackbar(t('familyDict.messages.deleteError'), 'error');
+      showSnackbar(t('familyDict.messages.deleteError'), 'error');
     }
   }
 };

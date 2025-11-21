@@ -37,12 +37,12 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
 import { useFaceStore } from '@/stores/face.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
 import { storeToRefs } from 'pinia';
 import { useAuth } from '@/composables/useAuth';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface MemberDetailViewProps {
   memberId: string;
@@ -54,9 +54,9 @@ const emit = defineEmits(['close', 'member-deleted', 'add-member-with-relationsh
 const { t } = useI18n();
 const memberStore = useMemberStore();
 const faceStore = useFaceStore();
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
 const { isAdmin, isFamilyManager } = useAuth();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const { detail } = storeToRefs(memberStore);
 
@@ -119,14 +119,14 @@ const handleDelete = async () => {
     try {
       await memberStore.deleteItem(member.value.id);
       if (!memberStore.error) {
-        notificationStore.showSnackbar(t('member.messages.deleteSuccess'), 'success');
+        showSnackbar(t('member.messages.deleteSuccess'), 'success');
         emit('member-deleted'); // Notify parent that member was deleted
         emit('close'); // Close the detail drawer
       } else {
-        notificationStore.showSnackbar(memberStore.error || t('member.messages.deleteError'), 'error');
+        showSnackbar(memberStore.error || t('member.messages.deleteError'), 'error');
       }
     } catch (error) {
-      notificationStore.showSnackbar(t('member.messages.deleteError'), 'error');
+      showSnackbar(t('member.messages.deleteError'), 'error');
     }
   }
 };
@@ -143,12 +143,12 @@ const handleDeleteFaceData = async () => {
     try {
       const result = await faceStore.deleteFacesByMemberId(member.value.id);
       if (result.ok) {
-        notificationStore.showSnackbar(t('face.messages.deleteSuccess'), 'success');
+        showSnackbar(t('face.messages.deleteSuccess'), 'success');
       } else {
-        notificationStore.showSnackbar(result.error?.message || t('face.messages.deleteError'), 'error');
+        showSnackbar(result.error?.message || t('face.messages.deleteError'), 'error');
       }
     } catch (error) {
-      notificationStore.showSnackbar(t('face.messages.deleteError'), 'error');
+      showSnackbar(t('face.messages.deleteError'), 'error');
     }
   }
 };

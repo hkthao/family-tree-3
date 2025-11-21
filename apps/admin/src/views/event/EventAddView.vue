@@ -21,11 +21,11 @@
 
 <script setup lang="ts">
 import { useEventStore } from '@/stores/event.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { Event } from '@/types';
-import EventForm from '@/components/event/EventForm.vue'; 
+import EventForm from '@/components/event/EventForm.vue';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface EventAddViewProps {
   familyId?: string;
@@ -38,7 +38,7 @@ const eventFormRef = ref<InstanceType<typeof EventForm> | null>(null);
 
 const { t } = useI18n();
 const eventStore = useEventStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const handleAddEvent = async () => {
   if (!eventFormRef.value) return;
@@ -50,13 +50,13 @@ const handleAddEvent = async () => {
   try {
     await eventStore.addItem(eventData as Omit<Event, 'id'>);
     if (!eventStore.error) {
-      notificationStore.showSnackbar(t('event.messages.addSuccess'), 'success');
+      showSnackbar(t('event.messages.addSuccess'), 'success');
       closeForm();
     } else {
-      notificationStore.showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
+      showSnackbar(eventStore.error || t('event.messages.saveError'), 'error');
     }
   } catch (error) {
-    notificationStore.showSnackbar(t('event.messages.saveError'), 'error');
+    showSnackbar(t('event.messages.saveError'), 'error');
   }
 };
 

@@ -25,43 +25,42 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useRelationshipStore } from '@/stores/relationship.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { RelationshipForm } from '@/components/relationship';
 import type { Relationship } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar';
 
 const relationshipFormRef = ref<InstanceType<typeof RelationshipForm> | null>(null);
 
 const { t } = useI18n();
 const router = useRouter();
 const relationshipStore = useRelationshipStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar();
 
 const handleAddItem = async () => {
   if (!relationshipFormRef.value) return;
   const isValid = await relationshipFormRef.value.validate();
   if (!isValid) return;
   const itemData = relationshipFormRef.value.getFormData();
-  try {
-    await relationshipStore.addItem(itemData as Omit<Relationship, 'id'>);
-    if (!relationshipStore.error) {
-      notificationStore.showSnackbar(
-        t('relationship.messages.addSuccess'),
-        'success',
-      );
-      closeForm();
-    } else {
-      notificationStore.showSnackbar(
-        relationshipStore.error || t('relationship.messages.saveError'),
-        'error',
-      );
-    }
-  } catch (error) {
-    notificationStore.showSnackbar(
-      t('relationship.messages.saveError'),
-      'error',
-    );
-  }
-};
+      try {
+        await relationshipStore.addItem(itemData as Omit<Relationship, 'id'>);
+        if (!relationshipStore.error) {
+          showSnackbar(
+            t('relationship.messages.addSuccess'),
+            'success',
+          );
+          closeForm();
+        } else {
+          showSnackbar(
+            relationshipStore.error || t('relationship.messages.saveError'),
+            'error',
+          );
+        }
+      } catch (error) {
+        showSnackbar(
+          t('relationship.messages.saveError'),
+          'error',
+        );
+      }};
 
 const closeForm = () => {
   router.push('/relationship');

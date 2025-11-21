@@ -22,15 +22,15 @@ import { useEventStore } from '@/stores/event.store';
 import type { Event, EventFilter } from '@/types';
 import { EventSearch, EventList } from '@/components/event';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import { storeToRefs } from 'pinia';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const { t } = useI18n();
 const router = useRouter();
 const eventStore = useEventStore();
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const { list } = storeToRefs(eventStore);
 
@@ -99,22 +99,21 @@ const confirmDelete = async (event: Event) => {
     confirmColor: 'error',
   });
 
-  if (confirmed) {
-    try {
-      await eventStore.deleteItem(event.id!);
-      notificationStore.showSnackbar(
-        t('event.messages.deleteSuccess'),
-        'success',
-      );
-      await loadEvents(); // Reload events after deletion
-    } catch (error) {
-      notificationStore.showSnackbar(
-        t('event.messages.deleteError'),
-        'error',
-      );
-    }
-  }
-};
+      if (confirmed) {
+        try {
+          await eventStore.deleteItem(event.id!);
+          showSnackbar(
+            t('event.messages.deleteSuccess'),
+            'success',
+          );
+          await loadEvents(); // Reload events after deletion
+        } catch (error) {
+          showSnackbar(
+            t('event.messages.deleteError'),
+            'error',
+          );
+        }
+      }};
 
 onMounted(() => {
   loadEvents();

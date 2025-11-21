@@ -19,10 +19,10 @@
 import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useMemberStore } from '@/stores/member.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { MemberForm } from '@/components/member';
 import type { Member } from '@/types';
 import { storeToRefs } from 'pinia';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface MemberEditViewProps {
   memberId: string;
@@ -35,7 +35,7 @@ const memberFormRef = ref<InstanceType<typeof MemberForm> | null>(null);
 
 const { t } = useI18n();
 const memberStore = useMemberStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const { detail, update } = storeToRefs(memberStore);
 
@@ -73,20 +73,20 @@ const handleUpdateMember = async () => {
 
   const memberData = memberFormRef.value.getFormData() as Member;
   if (!memberData.id) { // Use memberData.id for the check
-    notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
+    showSnackbar(t('member.messages.saveError'), 'error');
     return;
   }
 
   try {
     await memberStore.updateItem(memberData as Member);
     if (!memberStore.error) {
-      notificationStore.showSnackbar(t('member.messages.updateSuccess'), 'success');
+      showSnackbar(t('member.messages.updateSuccess'), 'success');
       emit('saved'); // Emit saved event
     } else {
-      notificationStore.showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
+      showSnackbar(memberStore.error || t('member.messages.saveError'), 'error');
     }
   } catch (error) {
-    notificationStore.showSnackbar(t('member.messages.saveError'), 'error');
+    showSnackbar(t('member.messages.saveError'), 'error');
   }
 };
 

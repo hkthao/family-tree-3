@@ -19,10 +19,10 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFamilyDictStore } from '@/stores/family-dict.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FamilyDictForm } from '@/components/family-dict';
 import type { FamilyDict } from '@/types';
 import { storeToRefs } from 'pinia';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const emit = defineEmits(['close', 'saved']);
 
@@ -30,7 +30,7 @@ const familyDictFormRef = ref<InstanceType<typeof FamilyDictForm> | null>(null);
 
 const { t } = useI18n();
 const familyDictStore = useFamilyDictStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 
 const { add } = storeToRefs(familyDictStore);
 
@@ -48,21 +48,20 @@ const handleAddFamilyDict = async () => {
 
   const familyDictData = familyDictFormRef.value.getFormData();
 
-  try {
-    const newFamilyDict: Omit<FamilyDict, 'id'> = {
-      ...familyDictData,
-    };
-    await familyDictStore.addItem(newFamilyDict);
-    if (!familyDictStore.error && familyDictStore.detail.item) {
-      notificationStore.showSnackbar(t('familyDict.messages.addSuccess'), 'success');
-      emit('saved');
-    } else {
-      notificationStore.showSnackbar(familyDictStore.error || t('familyDict.messages.saveError'), 'error');
-    }
-  } catch (error) {
-    notificationStore.showSnackbar(t('familyDict.messages.saveError'), 'error');
-  }
-};
+      try {
+      const newFamilyDict: Omit<FamilyDict, 'id'> = {
+        ...familyDictData,
+      };
+      await familyDictStore.addItem(newFamilyDict);
+      if (!familyDictStore.error && familyDictStore.detail.item) {
+        showSnackbar(t('familyDict.messages.addSuccess'), 'success');
+        emit('saved');
+      } else {
+        showSnackbar(familyDictStore.error || t('familyDict.messages.saveError'), 'error');
+      }
+    } catch (error) {
+      showSnackbar(t('familyDict.messages.saveError'), 'error');
+    }};
 
 const closeForm = () => {
   emit('close');

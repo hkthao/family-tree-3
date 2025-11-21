@@ -34,9 +34,9 @@
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useFaceStore } from '@/stores/face.store';
-import { useNotificationStore } from '@/stores/notification.store';
 import { FaceUploadInput, FaceBoundingBoxViewer, FaceDetectionSidebar, FaceMemberSelectDialog } from '@/components/face';
 import type { DetectedFace, Member } from '@/types';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 interface FaceRecognitionViewProps {
   familyId?: string;
@@ -46,7 +46,7 @@ const props = defineProps<FaceRecognitionViewProps>();
 
 const { t } = useI18n();
 const faceStore = useFaceStore();
-const notificationStore = useNotificationStore();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 const showSelectMemberDialog = ref(false);
 const faceToLabel = ref<DetectedFace | null>(null);
 const faceUploadInputRef = ref<InstanceType<typeof FaceUploadInput> | null>(null); // Ref for FaceUploadInput

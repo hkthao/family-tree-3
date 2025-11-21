@@ -17,18 +17,18 @@ import { useRouter } from 'vue-router';
 import { useFamilyStore } from '@/stores/family.store';
 import { FamilySearch, FamilyList } from '@/components/family';
 import { useConfirmDialog } from '@/composables/useConfirmDialog';
-import { useNotificationStore } from '@/stores/notification.store';
 import { DEFAULT_ITEMS_PER_PAGE } from '@/constants/pagination';
 import type { FamilyFilter, Family } from '@/types';
 import { useFamilyTour } from '@/composables';
+import { useGlobalSnackbar } from '@/composables/useGlobalSnackbar'; // Import useGlobalSnackbar
 
 const { t } = useI18n();
 const router = useRouter();
 
 const familyStore = useFamilyStore();
 const { list } = storeToRefs(familyStore);
-const notificationStore = useNotificationStore();
 const { showConfirmDialog } = useConfirmDialog();
+const { showSnackbar } = useGlobalSnackbar(); // Khởi tạo useGlobalSnackbar
 useFamilyTour();
 
 const currentFilters = ref<FamilyFilter>({});
@@ -74,12 +74,12 @@ const confirmDelete = async (family: Family) => {
   if (confirmed) {
     try {
       await familyStore.deleteItem(family.id);
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('family.management.messages.deleteSuccess'),
         'success',
       );
     } catch (error) {
-      notificationStore.showSnackbar(
+      showSnackbar(
         t('family.management.messages.deleteError'),
         'error',
       );
