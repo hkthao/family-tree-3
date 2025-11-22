@@ -222,5 +222,6 @@
   "familyDict.lineage.ngoai": "Maternal",
   "familyDict.lineage.noiNgoai": "Both Paternal and Maternal",
   "familyDict.lineage.other": "Other",
-  "familyDict.form.specialRelation": "Special Relation"
+  "familyDict.form.specialRelation": "Special Relation",
+  "familyTree.shareMessage": "Join our family tree and see our shared history! {{url}}"
 }

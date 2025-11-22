@@ -224,5 +224,6 @@
   "familyDict.lineage.ngoai": "Ngoại",
   "familyDict.lineage.noiNgoai": "Nội ngoại",
   "familyDict.lineage.other": "Khác",
-  "familyDict.form.specialRelation": "Quan hệ đặc biệt"
+  "familyDict.form.specialRelation": "Quan hệ đặc biệt",
+  "familyTree.shareMessage": "Cùng tham gia cây gia phả của chúng ta để xem lịch sử chung của dòng họ nhé: {{url}}"
 }

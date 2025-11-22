@@ -2,14 +2,17 @@ import { Tabs, useSegments } from 'expo-router';
 import { Appbar, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { View } from 'react-native'; // Import View for wrapping
+import { View, Share } from 'react-native'; // Import Share, useCallback, and useMemo
 import { useNavigation } from '@react-navigation/native'; // Import useNavigation
+import { useFamilyStore } from '@/stores/useFamilyStore'; // Import useFamilyStore
+import { useCallback, useMemo } from 'react';
 
 export default function FamilyDetailLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
   const segments = useSegments();
   const navigation = useNavigation(); // Get navigation object
+  const currentFamilyId = useFamilyStore((state) => state.currentFamilyId); // Get currentFamilyId from store
 
   // Get the current tab name from segments
   const currentTab = segments[segments.length - 1];
@@ -32,11 +35,48 @@ export default function FamilyDetailLayout() {
     }
   };
 
+  const familyDetailUrl = useMemo(() => {
+    const baseUrl = process.env.EXPO_PUBLIC_APP_BASE_URL;
+    if (!baseUrl) {
+      console.warn('EXPO_PUBLIC_APP_BASE_URL is not defined. Sharing functionality might not work.');
+      return '';
+    }
+    return currentFamilyId ? `${baseUrl}/public/family-tree/${currentFamilyId}` : '';
+  }, [currentFamilyId]);
+
+  const onShare = useCallback(async () => {
+    if (!familyDetailUrl) {
+      console.warn('Cannot share: familyDetailUrl is empty.');
+      return;
+    }
+    try {
+      const result = await Share.share({
+        message: t('familyTree.shareMessage', { url: familyDetailUrl }),
+        url: familyDetailUrl,
+      });
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          console.log('Shared with activity type:', result.activityType);
+        } else {
+          console.log('Shared successfully');
+        }
+      } else if (result.action === Share.dismissedAction) {
+        console.log('Share dismissed');
+      }
+    } catch (error: any) {
+      console.error('Error sharing:', error.message);
+    }
+  }, [familyDetailUrl, t]);
+
+
   return (
     <View style={{ flex: 1 }}>
       <Appbar.Header>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={getTabTitle(currentTab)} />
+        {currentTab === 'tree' && currentFamilyId && (
+          <Appbar.Action icon="share-variant" onPress={onShare} color={theme.colors.onSurface} />
+        )}
       </Appbar.Header>
       <Tabs
         screenOptions={{
