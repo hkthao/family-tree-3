@@ -4,14 +4,13 @@ import { Button, Text, useTheme } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TFunction } from 'i18next';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
-import { ExpoRouter } from 'expo-router/types/expo-router'; // Import router type
 
 interface BannerProps {
   t: TFunction;
   toggleLanguage: () => void;
   i18n: any;
   backgroundColor?: string; // Add backgroundColor prop
-  router: ExpoRouter.Router; // Add router prop
+  router: any; // Add router prop
 }
 
 const getStyles = (theme: any) => StyleSheet.create({
