@@ -70,7 +70,6 @@ export default function LoginScreen() {
       />
       <Appbar.Header style={styles.appBar}>
         <Appbar.BackAction onPress={() => router.back()} />
-        <Appbar.Content title={t('login.title')} />
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text variant="headlineLarge" style={styles.title}>{t('login.title')}</Text>
