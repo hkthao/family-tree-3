@@ -11,7 +11,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     await login();
-    router.replace('/'); // Redirect to home after login
+    router.replace('/feature-under-development'); // Redirect to feature under development screen
   };
 
   return (

@@ -225,5 +225,9 @@
   "familyDict.lineage.noiNgoai": "Nội ngoại",
   "familyDict.lineage.other": "Khác",
   "familyDict.form.specialRelation": "Quan hệ đặc biệt",
-  "familyTree.shareMessage": "Cùng tham gia cây gia phả của chúng ta để xem lịch sử chung của dòng họ nhé: {{url}}"
+  "familyTree.shareMessage": "Cùng tham gia cây gia phả của chúng ta để xem lịch sử chung của dòng họ nhé: {{url}}",
+  "featureUnderDevelopment.title": "Tính năng đang phát triển",
+  "featureUnderDevelopment.message": "Tính năng này hiện đang được phát triển.",
+  "featureUnderDevelopment.description": "Chúng tôi đang nỗ lực để sớm mang đến cho bạn chức năng này. Trong thời gian chờ đợi, bạn có thể quản lý cây gia phả của mình trên nền tảng web của chúng tôi.",
+  "featureUnderDevelopment.goToAdminWebsite": "Truy cập nền tảng web"
 }

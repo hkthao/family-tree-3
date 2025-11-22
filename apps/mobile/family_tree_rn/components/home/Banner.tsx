@@ -4,12 +4,14 @@ import { Button, Text, useTheme } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TFunction } from 'i18next';
 import { SPACING_MEDIUM, SPACING_LARGE } from '@/constants/dimensions'; // Import spacing constants
+import { ExpoRouter } from 'expo-router/types/expo-router'; // Import router type
 
 interface BannerProps {
   t: TFunction;
   toggleLanguage: () => void;
   i18n: any;
   backgroundColor?: string; // Add backgroundColor prop
+  router: ExpoRouter.Router; // Add router prop
 }
 
 const getStyles = (theme: any) => StyleSheet.create({
@@ -40,7 +42,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
 });
 
-export function Banner({ t, toggleLanguage, i18n, backgroundColor }: BannerProps) {
+export function Banner({ t, toggleLanguage, i18n, backgroundColor, router }: BannerProps) {
   const theme = useTheme();
   const styles = getStyles(theme);
 
@@ -59,7 +61,7 @@ export function Banner({ t, toggleLanguage, i18n, backgroundColor }: BannerProps
       >
         <Text variant="headlineLarge">{t('home.banner.title')}</Text>
         <Text variant="bodyLarge">{t('home.banner.description')}</Text>
-        <Button mode="contained" onPress={() => { /* TODO: Navigate to create family tree screen */ }} style={styles.languageButton}>
+        <Button mode="contained" onPress={() => router.replace('/feature-under-development')} style={styles.languageButton}>
           {t('home.banner.cta_button')}
         </Button>
       </LinearGradient>

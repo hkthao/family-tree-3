@@ -223,5 +223,9 @@
   "familyDict.lineage.noiNgoai": "Both Paternal and Maternal",
   "familyDict.lineage.other": "Other",
   "familyDict.form.specialRelation": "Special Relation",
-  "familyTree.shareMessage": "Join our family tree and see our shared history! {{url}}"
+  "familyTree.shareMessage": "Join our family tree and see our shared history! {{url}}",
+  "featureUnderDevelopment.title": "Feature Under Development",
+  "featureUnderDevelopment.message": "This feature is currently under development.",
+  "featureUnderDevelopment.description": "We're working hard to bring you this functionality soon. In the meantime, you can manage your family tree on our web platform.",
+  "featureUnderDevelopment.goToAdminWebsite": "Go to Web Platform"
 }
