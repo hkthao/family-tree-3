@@ -55,12 +55,19 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
+  const publicApiKey = window.runtimeConfig?.VITE_API_PUBLIC_KEY || import.meta.env.VITE_API_PUBLIC_KEY;
+
   // Check if the request is for a public API endpoint
   if (config.url && config.url.startsWith('/public/')) {
-    // For public endpoints, do not add the Authorization header
+    // For public endpoints, add the API Key header if available
+    if (publicApiKey) {
+      config.headers['X-App-Key'] = publicApiKey;
+    }
+    // Do not add the Authorization header for public endpoints
     return config;
   }
 
+  // For non-public (authenticated) endpoints, add the Authorization header
   const token = await auth0Service.getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
