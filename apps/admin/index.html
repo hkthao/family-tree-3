@@ -8,7 +8,36 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cây Gia Phả</title>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" id="og-url">
+    <meta property="og:title" content="Cây Gia Phả">
+    <meta property="og:description" content="Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình">
+    <meta property="og:image" id="og-image">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" id="twitter-url">
+    <meta property="twitter:title" content="Cây Gia Phả">
+    <meta property="twitter:description" content="Hệ thống quản lý gia phả chuyên nghiệp cho dòng họ và gia đình">
+    <meta property="twitter:image" id="twitter-image">
+
     <script src="/config.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const baseUrl = window.runtimeConfig?.VITE_APP_BASE_URL || window.location.origin;
+        const ogUrlElement = document.getElementById('og-url');
+        const ogImageElement = document.getElementById('og-image');
+        const twitterUrlElement = document.getElementById('twitter-url');
+        const twitterImageElement = document.getElementById('twitter-image');
+
+        if (ogUrlElement) ogUrlElement.setAttribute('content', baseUrl);
+        if (ogImageElement) ogImageElement.setAttribute('content', `${baseUrl}/apple-touch-icon.png`);
+        if (twitterUrlElement) twitterUrlElement.setAttribute('content', baseUrl);
+        if (twitterImageElement) twitterImageElement.setAttribute('content', `${baseUrl}/apple-touch-icon.png`);
+      });
+    </script>
   </head>
   <body>
     <div id="app"></div>

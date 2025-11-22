@@ -19,6 +19,7 @@ interface ImportMeta {
 
 interface RuntimeConfig {
   VITE_API_BASE_URL: string;
+  VITE_APP_BASE_URL: string; // New: Base URL for the application
   VITE_AUTH0_DOMAIN: string;
   VITE_AUTH0_CLIENT_ID: string;
   VITE_AUTH0_AUDIENCE: string;
