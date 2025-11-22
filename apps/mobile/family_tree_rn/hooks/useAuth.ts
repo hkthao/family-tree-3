@@ -17,7 +17,7 @@ export const useAuth = () => {
     const checkAuthStatus = async () => {
       await new Promise(resolve => setTimeout(resolve, 100));
       // Simulate a logged-in user for development
-      setIsLoggedIn(true);
+      setIsLoggedIn(false);
       setUserRoles(['User']);
       setUser({
         fullName: 'John Doe',
