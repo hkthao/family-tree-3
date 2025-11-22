@@ -61,7 +61,7 @@ export function Banner({ t, toggleLanguage, i18n, backgroundColor, router }: Ban
       >
         <Text variant="headlineLarge">{t('home.banner.title')}</Text>
         <Text variant="bodyLarge">{t('home.banner.description')}</Text>
-        <Button mode="contained" onPress={() => router.replace('/feature-under-development')} style={styles.languageButton}>
+        <Button mode="contained" onPress={() => router.push('/feature-under-development')} style={styles.languageButton}>
           {t('home.banner.cta_button')}
         </Button>
       </LinearGradient>

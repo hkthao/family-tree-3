@@ -55,7 +55,9 @@ export default function FeatureUnderDevelopmentScreen() {
         <Text variant="bodyLarge" style={styles.description}>
           {t('featureUnderDevelopment.description')}
         </Text>
-        <Button mode="contained" onPress={handleOpenAdminWebsite}>
+        <Button style={{
+          borderRadius: theme.roundness
+        }} mode="contained" onPress={handleOpenAdminWebsite}>
           {t('featureUnderDevelopment.goToAdminWebsite')}
         </Button>
       </View>
