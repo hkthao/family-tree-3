@@ -14,13 +14,17 @@
       "backgroundColor": "#FFFFFF"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kimthao.familytree3",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/images/adaptive-icon.png"
       },
+      "package": "com.kimthao.familytree3",
+      "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -34,6 +38,18 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "79b94d1a-a774-4362-aba4-d1cb354448dd"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/79b94d1a-a774-4362-aba4-d1cb354448dd"
     }
   }
 }

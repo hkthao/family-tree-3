@@ -436,6 +436,8 @@ coverage
 # Node.js
 node_modules/
 
+eas.json
+
 # Dockerignore additions
 .idea
 .env
@@ -455,10 +457,11 @@ yarn.lock
 src/backend/src/Web/appsettings.Development.json
 src/backend/src/Web/wwwroot/uploads/
 src/backend/src/Web/appsettings.Development.json
-
 # Gemini task files
 gemini-task/
 .gemini/tmp/
 
 shape_predictor_68_face_landmarks.dat
 dlib_face_recognition_resnet_model_v1.dat
+
+
