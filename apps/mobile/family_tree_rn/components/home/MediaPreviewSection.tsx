@@ -17,10 +17,10 @@ const NUM_COLUMNS = 2;
 const IMAGE_SIZE = (width - (SPACING * (NUM_COLUMNS + 1))) / NUM_COLUMNS;
 
 const images = [
-  require('../../assets/images/onboarding-2.png'),
-  require('../../assets/images/onboarding-3.png'),
-  require('../../assets/images/onboarding-4.png'),
-  require('../../assets/images/onboarding-2.png'), // Reusing an image to maintain array length
+  require('@/assets/images/image-1.jpeg'),
+  require('@/assets/images/image-2.jpeg'),
+  require('@/assets/images/image-3.jpeg'),
+  require('@/assets/images/image-4.jpeg'), // Reusing an image to maintain array length
 ];
 
 export function MediaPreviewSection({ t, backgroundColor }: MediaPreviewSectionProps) {
