@@ -1,5 +1,4 @@
 using backend.Infrastructure.Auth;
-
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
@@ -10,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static void AddWebServices(this IServiceCollection services)
+    public static void AddWebServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHealthChecks();
         services.AddExceptionHandler<CustomExceptionHandler>();
@@ -45,12 +44,8 @@ public static class DependencyInjection
             options.AllowedAcceptHeaders = new[] { "application/json", "*/*" };
         });
 
-        // Register API Key settings
-        services.Configure<ApiKeySettings>(options =>
-        {
-            options.HeaderName = "X-App-Key";
-            options.ApiKeyValue = "YOUR_SUPER_SECRET_API_KEY"; // Placeholder, should be set in appsettings.json
-        });
+        // Register API Key settings - will be loaded from appsettings.json
+        services.Configure<ApiKeySettings>(configuration.GetSection(nameof(ApiKeySettings)));
 
         // Register the BotDetectionActionFilter
         services.AddScoped<BotDetectionActionFilter>();

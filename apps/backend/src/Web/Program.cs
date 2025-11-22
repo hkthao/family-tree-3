@@ -80,7 +80,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddCompositionRootServices(Configuration);
-        services.AddWebServices();
+        services.AddWebServices(Configuration);
 
         services.AddControllers();
         services.AddLocalization();

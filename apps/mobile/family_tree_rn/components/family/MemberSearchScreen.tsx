@@ -95,7 +95,8 @@ export default function MemberSearchScreen() {
   const isFetchingMore = useRef(false);
 
   const handleLoadMore = useCallback(async () => {
-    if (!loading && hasMore && !isFetchingMore.current) {
+    // Chỉ tải thêm nếu không đang tải, còn dữ liệu và danh sách đã có ít nhất 1 mục (để tránh trigger vô tận khi danh sách rỗng)
+    if (!loading && hasMore && members.length > 0 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       await fetchMembers({
         familyId: currentFamilyId!, // Use non-null assertion
@@ -106,7 +107,7 @@ export default function MemberSearchScreen() {
       }); // Fetch next page
       isFetchingMore.current = false;
     }
-  }, [loading, hasMore, page, fetchMembers, currentFamilyId, searchQuery, filters]);
+  }, [loading, hasMore, members.length, page, fetchMembers, currentFamilyId, searchQuery, filters]);
 
   const handleFilterChange = useCallback((key: keyof MemberFilter, value: any) => {
     setFilters((prevFilters) => {

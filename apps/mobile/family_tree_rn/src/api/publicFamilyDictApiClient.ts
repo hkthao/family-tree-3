@@ -13,6 +13,20 @@ const publicApiClient = axios.create({
   },
 });
 
+// Add a request interceptor to include the API Key
+publicApiClient.interceptors.request.use(
+  (config) => {
+    const apiKey = process.env.EXPO_PUBLIC_API_KEY;
+    if (apiKey) {
+      config.headers['X-App-Key'] = apiKey; // Add the API Key header
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export const getPublicFamilyDicts = async (
   filter: FamilyDictFilter,
   page: number,
