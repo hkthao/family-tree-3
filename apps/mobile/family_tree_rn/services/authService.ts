@@ -4,6 +4,12 @@ import { jwtDecode } from 'jwt-decode';
 import { Platform } from 'react-native';
 import { nanoid } from 'nanoid';
 import * as Crypto from 'expo-crypto'; // Import expo-crypto
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Add AsyncStorage import
+
+// Constants for AsyncStorage keys
+const ACCESS_TOKEN_KEY = 'accessToken';
+const ID_TOKEN_KEY = 'idToken';
+const USER_PROFILE_KEY = 'userProfile';
 
 // Polyfill global.crypto for nanoid
 if (typeof global.crypto === 'undefined' || !global.crypto.getRandomValues) {
@@ -37,6 +43,44 @@ class AuthService {
     if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
       console.error('Auth0 environment variables are not set. Check EXPO_PUBLIC_AUTH0_DOMAIN and EXPO_PUBLIC_AUTH0_CLIENT_ID');
     }
+  }
+
+  // Public method to initialize the session
+  public async initSession(): Promise<void> {
+    await this._loadSession();
+  }
+
+  // Persist authentication data to AsyncStorage
+  private async _saveSession() {
+    if (this.accessToken) {
+      await AsyncStorage.setItem(ACCESS_TOKEN_KEY, this.accessToken);
+    }
+    if (this.idToken) {
+      await AsyncStorage.setItem(ID_TOKEN_KEY, this.idToken);
+    }
+    if (this.user) {
+      await AsyncStorage.setItem(USER_PROFILE_KEY, JSON.stringify(this.user));
+    }
+  }
+
+  // Load authentication data from AsyncStorage
+  private async _loadSession() {
+    this.accessToken = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
+    this.idToken = await AsyncStorage.getItem(ID_TOKEN_KEY);
+    const userProfileString = await AsyncStorage.getItem(USER_PROFILE_KEY);
+    if (userProfileString) {
+      this.user = JSON.parse(userProfileString) as IdTokenPayload;
+    }
+  }
+
+  // Clear authentication data from AsyncStorage
+  private async _clearSession() {
+    await AsyncStorage.removeItem(ACCESS_TOKEN_KEY);
+    await AsyncStorage.removeItem(ID_TOKEN_KEY);
+    await AsyncStorage.removeItem(USER_PROFILE_KEY);
+    this.user = null;
+    this.accessToken = null;
+    this.idToken = null;
   }
 
   // Get the redirect URL for the platform
@@ -100,6 +144,7 @@ class AuthService {
         this.user = decodedIdToken;
         console.log('Logged in user:', this.user);
         this.nonce = null; // Clear nonce after successful verification
+        await this._saveSession(); // Save session
         return true;
       }
     } else if (result.type === 'cancel') {
@@ -125,11 +170,7 @@ class AuthService {
       `returnTo=${redirectUri}`;
 
     await WebBrowser.openAuthSessionAsync(logoutUrl, redirectUri);
-
-    this.user = null;
-    this.accessToken = null;
-    this.idToken = null;
-    this.nonce = null; // Ensure nonce is cleared on logout
+    await this._clearSession(); // Clear session
   }
 
   public isAuthenticated(): boolean {

@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { useAuth } from '@/hooks/useAuth';
 import { router } from 'expo-router';
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useThemeContext } from '@/context/ThemeContext'; // Import useThemeContext
-import { userProfileService } from '@/services'; // Import userProfileService
 import FamilyAvatar from '@/assets/images/familyAvatar.png'; // Import the default avatar image
-import { UserProfileDto } from '@/types';
+import { useUserProfileStore } from '@/stores/useUserProfileStore'; // Import user profile store
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
@@ -16,9 +15,7 @@ export default function SettingsScreen() {
   const theme = useTheme();
   const { themePreference, setThemePreference } = useThemeContext(); // Use theme context
 
-  const [fetchedUserProfile, setFetchedUserProfile] = useState<UserProfileDto | null>(null);
-  const [loadingProfile, setLoadingProfile] = useState(true);
-  const [errorProfile, setErrorProfile] = useState<string | null>(null);
+  const { userProfile: fetchedUserProfile, loading: loadingProfile, error: errorProfile, fetchUserProfile, clearUserProfile } = useUserProfileStore();
 
   // State for appearance settings
   const [isDarkMode, setIsDarkMode] = useState(themePreference === 'dark'); // Initialize from context
@@ -27,26 +24,13 @@ export default function SettingsScreen() {
     setIsDarkMode(themePreference === 'dark');
   }, [themePreference]);
 
-  const fetchUserProfile = useCallback(async () => {
-    if (!isLoggedIn) {
-      setLoadingProfile(false);
-      setFetchedUserProfile(null);
-      return;
-    }
-    setLoadingProfile(true);
-    setErrorProfile(null);
-    const result = await userProfileService.getCurrentUserProfile();
-    if (result.isSuccess && result.value) {
-      setFetchedUserProfile(result.value);
-    } else {
-      setErrorProfile(result.error?.message || 'Failed to load user profile.');
-    }
-    setLoadingProfile(false);
-  }, [isLoggedIn]);
-
   useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]);
+    if (isLoggedIn) {
+      fetchUserProfile();
+    } else {
+      clearUserProfile();
+    }
+  }, [isLoggedIn, fetchUserProfile, clearUserProfile]);
 
   const handleThemeToggle = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
@@ -180,13 +164,13 @@ export default function SettingsScreen() {
                 onPress={() => console.log('Download my data')}
               />
               <Divider />
-              <List.Item
+              {/* <List.Item
                 style={styles.listItem}
                 left={() => <List.Icon icon="delete" />}
                 title={t('settings.privacySecurity.deleteAccount')}
                 onPress={handleDeleteAccount}
                 titleStyle={{ color: theme.colors.error }}
-              />
+              /> */}
             </List.Section>
           )}
 
@@ -261,6 +245,11 @@ export default function SettingsScreen() {
           {isLoggedIn && ( // Only show Logout button if logged in
             <Button
               mode="contained"
+              style={
+                {
+                  borderRadius: theme.roundness
+                }
+              }
               onPress={handleLogout}
             >
               {t('settings.logout.button')}

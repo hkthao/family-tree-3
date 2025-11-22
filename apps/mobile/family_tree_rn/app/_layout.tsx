@@ -8,6 +8,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OnboardingScreen from './onboarding';
+import { useAuth } from '@/hooks/useAuth'; // Import useAuth
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -18,6 +19,7 @@ export const unstable_settings = {
 
 export default function RootLayout() {
   const [hasOnboarded, setHasOnboarded] = useState<boolean | null>(null);
+  const { isLoadingAuth } = useAuth(); // Get isLoadingAuth from useAuth
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
@@ -35,12 +37,12 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (hasOnboarded !== null) {
+    if (hasOnboarded !== null && !isLoadingAuth) { // Only hide splash screen if auth is loaded
       SplashScreen.hideAsync();
     }
-  }, [hasOnboarded]);
+  }, [hasOnboarded, isLoadingAuth]);
 
-  if (hasOnboarded === null) {
+  if (hasOnboarded === null || isLoadingAuth) { // Show loading until onboarding and auth are checked
     return null
   }
 

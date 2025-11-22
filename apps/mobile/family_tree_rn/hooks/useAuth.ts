@@ -13,9 +13,11 @@ export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // New loading state
 
   useEffect(() => {
     const checkAuthStatus = async () => {
+      await authService.initSession(); // Initialize session
       const authenticated = authService.isAuthenticated();
       setIsLoggedIn(authenticated);
       if (authenticated) {
@@ -34,6 +36,7 @@ export const useAuth = () => {
         setUser(null);
         setUserRoles([]);
       }
+      setIsLoadingAuth(false); // Set loading to false after status check
     };
 
     checkAuthStatus();
@@ -85,5 +88,6 @@ export const useAuth = () => {
     isFamilyManager,
     login,
     logout,
+    isLoadingAuth, // Return isLoadingAuth state
   };
 };
