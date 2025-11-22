@@ -1,6 +1,7 @@
 // Export pages from info-pages
 export { default as ApplicationInfoPage } from './info-pages/ApplicationInfoPage.vue';
 export { default as SupportLegalPage } from './info-pages/SupportLegalPage.vue';
+export { default as FaqPage } from './info-pages/FaqPage.vue';
 
 // Export pages from auth
 export { default as LogoutView } from './auth/LogoutView.vue';
