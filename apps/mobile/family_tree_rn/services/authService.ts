@@ -22,22 +22,24 @@ class AuthService {
 
   constructor() {
     if (!AUTH0_DOMAIN || !AUTH0_CLIENT_ID) {
-      console.error('Auth0 environment variables are not set.');
+      console.error('Auth0 environment variables are not set. Check EXPO_PUBLIC_AUTH0_DOMAIN and EXPO_PUBLIC_AUTH0_CLIENT_ID');
     }
   }
 
   // Get the redirect URL for the platform
   private getRedirectUri(): string {
-    if (Platform.OS === 'web') {
-      return AuthSession.makeRedirectUri(); // Fix: Removed useProxy
-    }
-    return AuthSession.makeRedirectUri({
+    const redirectUri = AuthSession.makeRedirectUri({
       scheme: 'familytreeapp', // Replace with your scheme
       path: 'auth',
     });
+    console.log('Generated redirectUri:', redirectUri);
+    return redirectUri;
   }
 
   public async login(): Promise<boolean> {
+    console.log('Attempting Auth0 login...');
+    console.log('AUTH0_DOMAIN:', AUTH0_DOMAIN);
+    console.log('AUTH0_CLIENT_ID:', AUTH0_CLIENT_ID);
     const redirectUri = this.getRedirectUri();
     const authUrl = `https://${AUTH0_DOMAIN}/authorize?` +
       `scope=openid profile email&` +
@@ -45,8 +47,10 @@ class AuthService {
       `response_type=token id_token&` +
       `client_id=${AUTH0_CLIENT_ID}&` +
       `redirect_uri=${redirectUri}`;
+    console.log('Constructed Auth URL:', authUrl);
 
     const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+    console.log('WebBrowser result:', result);
 
     if (result.type === 'success') {
       const parsedUrl = (AuthSession as any).parseUrlQuery(result.url);
