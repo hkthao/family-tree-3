@@ -155,7 +155,7 @@ export default function SettingsScreen() {
             </List.Section>
           )}
 
-          {isLoggedIn && ( // Only show Privacy & Security if logged in
+          {/* {isLoggedIn && ( // Only show Privacy & Security if logged in
             <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
@@ -164,15 +164,15 @@ export default function SettingsScreen() {
                 onPress={() => console.log('Download my data')}
               />
               <Divider />
-              {/* <List.Item
+               <List.Item
                 style={styles.listItem}
                 left={() => <List.Icon icon="delete" />}
                 title={t('settings.privacySecurity.deleteAccount')}
                 onPress={handleDeleteAccount}
                 titleStyle={{ color: theme.colors.error }}
-              /> */}
+              /> 
             </List.Section>
-          )}
+          )} */}
 
           {/* 4. Tuỳ chỉnh giao diện (App Appearance) */}
           <List.Section title={t('settings.appAppearance.title')} style={styles.listSection}>

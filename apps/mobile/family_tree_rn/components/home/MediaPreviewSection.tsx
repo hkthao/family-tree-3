@@ -17,10 +17,10 @@ const NUM_COLUMNS = 2;
 const IMAGE_SIZE = (width - (SPACING * (NUM_COLUMNS + 1))) / NUM_COLUMNS;
 
 const images = [
-  { uri: 'https://picsum.photos/seed/familytreeapp1/300/300' },
-  { uri: 'https://picsum.photos/seed/familytreeapp2/300/300' },
-  { uri: 'https://picsum.photos/seed/familytreeapp3/300/300' },
-  { uri: 'https://picsum.photos/seed/familytreeapp4/300/300' },
+  require('../../assets/images/onboarding-2.png'),
+  require('../../assets/images/onboarding-3.png'),
+  require('../../assets/images/onboarding-4.png'),
+  require('../../assets/images/onboarding-2.png'), // Reusing an image to maintain array length
 ];
 
 export function MediaPreviewSection({ t, backgroundColor }: MediaPreviewSectionProps) {
@@ -66,7 +66,7 @@ export function MediaPreviewSection({ t, backgroundColor }: MediaPreviewSectionP
           {images.map((image, index) => (
             <TouchableOpacity key={index} onPress={() => onSelectImage(index)}>
               <Image
-                source={{ uri: image.uri }}
+                source={image} // Direct image source
                 style={styles.imageItem}
                 contentFit="cover"
               />
