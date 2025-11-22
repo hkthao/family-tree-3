@@ -191,7 +191,7 @@ export default function SettingsScreen() {
               style={styles.listItem}
               left={() => <List.Icon icon="help-circle" />}
               title={t('settings.helpSupport.faq')}
-              onPress={() => console.log('FAQ')}
+              onPress={() => router.push('/faq-webview')}
               right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
             />
             <Divider />

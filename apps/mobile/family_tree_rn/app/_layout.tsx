@@ -63,6 +63,7 @@ function AppContent() {
             <Stack.Screen name="event/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="legal-webview" options={{ headerShown: false }} />
             <Stack.Screen name="feedback-webview" options={{ headerShown: false }} />
+            <Stack.Screen name="faq-webview" options={{ headerShown: false }} />
           </Stack>
         </NavigationThemeProvider>
       </Portal.Host>
