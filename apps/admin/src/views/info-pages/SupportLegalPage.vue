@@ -10,48 +10,15 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-3">
+    <v-row>
       <v-col cols="12">
-        <v-card flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('help.gettingStarted.title') }}</v-card-title>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item prepend-icon="mdi-account-plus-outline">
-                <v-list-item-title>{{ $t('help.gettingStarted.addMembers.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.addMembers.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-link-variant">
-                <v-list-item-title>{{ $t('help.gettingStarted.editRelationships.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.editRelationships.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-magnify">
-                <v-list-item-title>{{ $t('help.gettingStarted.searchTree.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.searchTree.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-robot-outline">
-                <v-list-item-title>{{ $t('help.gettingStarted.useAIAssistant.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.useAIAssistant.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
+        <FaqSection titleKey="faq.gettingStarted.title" :faq-items="gettingStartedFaqItems" />
       </v-col>
     </v-row>
 
-    <v-row class="mt-3">
+    <v-row>
       <v-col cols="12">
-        <FaqSection
-          titleKey="help.faq.title"
-          :faq-items="helpFaqItems"
-        />
+        <FaqSection titleKey="faq.generalQuestions.title" :faq-items="generalQuestionsFaqItems" />
       </v-col>
     </v-row>
 
@@ -273,10 +240,16 @@ import { FaqSection } from '@/components/common'; // Import FaqSection
 
 const { t } = useI18n();
 
-const helpFaqItems = [
-  { titleKey: 'help.faq.createTree.title', textKey: 'help.faq.createTree.text' },
-  { titleKey: 'help.faq.importData.title', textKey: 'help.faq.importData.text' },
-  { titleKey: 'help.faq.shareTree.title', textKey: 'help.faq.shareTree.text' },
+const gettingStartedFaqItems = [
+  { titleKey: 'faq.gettingStarted.addMembers.title', textKey: 'faq.gettingStarted.addMembers.subtitle' },
+  { titleKey: 'faq.gettingStarted.editRelationships.title', textKey: 'faq.gettingStarted.editRelationships.subtitle' },
+  { titleKey: 'faq.gettingStarted.searchTree.title', textKey: 'faq.gettingStarted.searchTree.subtitle' },
+];
+
+const generalQuestionsFaqItems = [
+  { titleKey: 'faq.generalQuestions.createTree.title', textKey: 'faq.generalQuestions.createTree.text' },
+  { titleKey: 'faq.generalQuestions.importData.title', textKey: 'faq.generalQuestions.importData.text' },
+  { titleKey: 'faq.generalQuestions.shareTree.title', textKey: 'faq.generalQuestions.shareTree.text' },
 ];
 </script>
 
