@@ -48,28 +48,10 @@
 
     <v-row class="mt-3">
       <v-col cols="12">
-        <v-card flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('help.faq.title') }}</v-card-title>
-          <v-card-text>
-            <v-expansion-panels variant="accordion">
-              <v-expansion-panel :title="$t('help.faq.createTree.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.createTree.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              <v-expansion-panel :title="$t('help.faq.importData.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.importData.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              <v-expansion-panel :title="$t('help.faq.shareTree.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.shareTree.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-card-text>
-        </v-card>
+        <FaqSection
+          titleKey="help.faq.title"
+          :faq-items="helpFaqItems"
+        />
       </v-col>
     </v-row>
 
@@ -287,8 +269,15 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { FaqSection } from '@/components/common'; // Import FaqSection
 
 const { t } = useI18n();
+
+const helpFaqItems = [
+  { titleKey: 'help.faq.createTree.title', textKey: 'help.faq.createTree.text' },
+  { titleKey: 'help.faq.importData.title', textKey: 'help.faq.importData.text' },
+  { titleKey: 'help.faq.shareTree.title', textKey: 'help.faq.shareTree.text' },
+];
 </script>
 
 <style scoped>
