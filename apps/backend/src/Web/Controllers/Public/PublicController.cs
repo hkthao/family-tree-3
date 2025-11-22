@@ -16,6 +16,9 @@ using backend.Application.Members.Queries.SearchPublicMembers; // Add this using
 using backend.Application.Relationships.Queries; // Add this using directive
 using backend.Application.Relationships.Queries.GetPublicRelationshipsByFamilyId; // Add this using directive
 using Microsoft.AspNetCore.Mvc;
+using backend.Web.Filters; // Thêm dòng này
+using backend.Application.FamilyDicts; // Thêm dòng này từ PublicFamilyDictsController
+using backend.Application.FamilyDicts.Queries.Public; // Thêm dòng này từ PublicFamilyDictsController
 
 namespace backend.Web.Controllers;
 
@@ -24,6 +27,8 @@ namespace backend.Web.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/public")]
+[TypeFilter(typeof(ApiKeyAuthenticationFilter))] // Áp dụng bộ lọc xác thực API Key
+[TypeFilter(typeof(BotDetectionActionFilter))] // Áp dụng bộ lọc phát hiện bot cho tất cả các hành động trong controller này
 public class PublicController(IMediator mediator) : ControllerBase
 {
     private readonly IMediator _mediator = mediator;
@@ -81,7 +86,7 @@ public class PublicController(IMediator mediator) : ControllerBase
     /// Lấy danh sách các mối quan hệ của một gia đình công khai theo Family ID.
     /// </summary>
     /// <param name="familyId">ID của gia đình công khai cần lấy mối quan hệ.</param>
-    /// <returns>Một PaginatedList chứa danh sách các thành viên công khai tìm được.</returns>
+    /// <returns>Một PaginatedList chứa danh sách các thành viên công khai tìm được.</param>
     [HttpGet("members/search")]
     public async Task<ActionResult<PaginatedList<MemberListDto>>> SearchPublicMembers([FromQuery] SearchPublicMembersQuery query)
     {
@@ -143,4 +148,29 @@ public class PublicController(IMediator mediator) : ControllerBase
         return result.IsSuccess ? (ActionResult<FaceDetectionResponseDto>)Ok(result.Value) : (ActionResult<FaceDetectionResponseDto>)BadRequest(result.Error);
     }
 
+    /// <summary>
+    /// Lấy tất cả các FamilyDict công khai.
+    /// </summary>
+    /// <param name="query">Đối tượng truy vấn chứa thông tin phân trang.</param>
+    /// <returns>Danh sách các FamilyDict công khai được phân trang.</returns>
+    [HttpGet("family-dict")] // Adjusted route
+    [ProducesResponseType(typeof(PaginatedList<FamilyDictDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PaginatedList<FamilyDictDto>>> GetFamilyDicts([FromQuery] GetPublicFamilyDictsQuery query)
+    {
+        return await _mediator.Send(query);
+    }
+
+    /// <summary>
+    /// Lấy chi tiết một FamilyDict công khai theo ID.
+    /// </summary>
+    /// <param name="id">ID của FamilyDict.</param>
+    /// <returns>Chi tiết FamilyDict hoặc NotFound nếu không tìm thấy.</returns>
+    [HttpGet("family-dict/{id}")] // Adjusted route
+    [ProducesResponseType(typeof(FamilyDictDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<FamilyDictDto>> GetFamilyDictById(Guid id)
+    {
+        var familyDict = await _mediator.Send(new GetPublicFamilyDictByIdQuery(id));
+        return familyDict == null ? NotFound() : Ok(familyDict);
+    }
 }
