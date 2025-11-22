@@ -1,7 +1,7 @@
 <template>
-  <v-card flat>
+  <v-card :elevation="0"  >
     <v-card-title class="text-h6 text-secondary">{{ $t(titleKey) }}</v-card-title>
-    <v-card-text>
+    <v-card-text class="pa-0">
       <v-expansion-panels variant="accordion">
         <v-expansion-panel
           v-for="(item, index) in faqItems"
