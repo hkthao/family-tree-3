@@ -65,12 +65,13 @@ export default function FamilySearchScreen() {
 
 
   const handleLoadMore = useCallback(async () => {
-    if (!loading && hasMore && !isFetchingMore.current) {
+    // Chỉ tải thêm nếu không đang tải, còn dữ liệu và danh sách đã có ít nhất 1 mục (để tránh trigger vô tận khi danh sách rỗng)
+    if (!loading && hasMore && families.length > 0 && !isFetchingMore.current) {
       isFetchingMore.current = true;
       await fetchFamilies({ page: page + 1, search: searchQuery }); // Fetch next page
       isFetchingMore.current = false;
     }
-  }, [loading, hasMore, page, fetchFamilies, searchQuery]);
+  }, [loading, hasMore, families.length, page, fetchFamilies, searchQuery]);
 
   const renderFooter = () => {
     if (!loading || page === 1) return null; // Only show spinner for subsequent loads

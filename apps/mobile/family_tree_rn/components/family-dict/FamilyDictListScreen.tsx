@@ -11,7 +11,7 @@ import { Text, Card, Searchbar, useTheme, Appbar, Chip, IconButton } from 'react
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM, SPACING_LARGE, SPACING_SMALL } from '@/constants/dimensions';
 import { usePublicFamilyDictStore } from '@/stores/usePublicFamilyDictStore';
-import { FamilyDictDto, FamilyDictType, FamilyDictLineage, FamilyDictFilter } from '@/types/public.d';
+import { FamilyDictType, FamilyDictLineage, FamilyDictFilter } from '@/types/public.d';
 
 export default function FamilyDictListScreen() {
   const { t } = useTranslation();
@@ -164,7 +164,6 @@ export default function FamilyDictListScreen() {
       marginTop: SPACING_SMALL,
     },
     chip: {
-      height: 28, // Adjust chip height
       justifyContent: 'center', // Center content vertically
       borderWidth: 0, // Remove border
     },
@@ -223,35 +222,70 @@ export default function FamilyDictListScreen() {
                 <Text variant="titleMedium">{item.name}</Text>
                 <Text variant="bodyMedium" numberOfLines={2}>{item.description}</Text>
                 <View style={styles.namesByRegionContainer}>
-                  {item.namesByRegion.north && (
-                    <Chip icon="compass-outline" style={[styles.chip, { backgroundColor: theme.colors.primaryContainer }]}>
-                      {item.namesByRegion.north}
-                    </Chip>
-                  )}
-                  {typeof item.namesByRegion.central === 'string' && item.namesByRegion.central && (
-                    <Chip icon="map-marker-outline" style={[styles.chip, { backgroundColor: theme.colors.secondaryContainer }]}>
-                      {item.namesByRegion.central}
-                    </Chip>
-                  )}
-                  {Array.isArray(item.namesByRegion.central) && item.namesByRegion.central.map((name, index) => (
-                    <Chip key={`central-${index}`} icon="map-marker-outline" style={[styles.chip, { backgroundColor: theme.colors.secondaryContainer }]}>
-                      {name}
-                    </Chip>
-                  ))}
-                  {typeof item.namesByRegion.south === 'string' && item.namesByRegion.south && (
-                    <Chip icon="compass" style={[styles.chip, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                      {item.namesByRegion.south}
-                    </Chip>
-                  )}
-                  {Array.isArray(item.namesByRegion.south) && item.namesByRegion.south.map((name, index) => (
-                    <Chip key={`south-${index}`} icon="compass" style={[styles.chip, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                      {name}
-                    </Chip>
-                  ))}
+                  {(() => {
+                    const northName = item.namesByRegion.north || '';
+                    const centralValue = item.namesByRegion.central;
+                    const southValue = item.namesByRegion.south;
+
+                    const centralName = typeof centralValue === 'string'
+                      ? centralValue
+                      : Array.isArray(centralValue)
+                        ? centralValue.sort().join(', ')
+                        : '';
+                    const southName = typeof southValue === 'string'
+                      ? southValue
+                      : Array.isArray(southValue)
+                        ? southValue.sort().join(', ')
+                        : '';
+
+                    const areAllRegionsEmpty = !northName && !centralName && !southName;
+                    const areNamesIdentical = northName === centralName && centralName === southName && !areAllRegionsEmpty;
+                    const areNamesIdenticalToItemName = areNamesIdentical && northName === (item.name || '');
+
+                    if (areNamesIdenticalToItemName) {
+                      return null; // Don't render any region chips
+                    } else if (areNamesIdentical) {
+                      return (
+                        <Chip icon="map-marker-multiple-outline" style={[styles.chip, { backgroundColor: theme.colors.primaryContainer }]}>
+                          {northName}
+                        </Chip>
+                      );
+                    } else {
+                      return (
+                        <>
+                          {item.namesByRegion.north && (
+                            <Chip icon="compass-outline" style={[styles.chip, { backgroundColor: theme.colors.primaryContainer }]}>
+                              {item.namesByRegion.north}
+                            </Chip>
+                          )}
+                          {typeof item.namesByRegion.central === 'string' && item.namesByRegion.central && (
+                            <Chip icon="map-marker-outline" style={[styles.chip, { backgroundColor: theme.colors.secondaryContainer }]}>
+                              {item.namesByRegion.central}
+                            </Chip>
+                          )}
+                          {Array.isArray(item.namesByRegion.central) && item.namesByRegion.central.map((name, index) => (
+                            <Chip key={`central-${index}`} icon="map-marker-outline" style={[styles.chip, { backgroundColor: theme.colors.secondaryContainer }]}>
+                              {name}
+                            </Chip>
+                          ))}
+                          {typeof item.namesByRegion.south === 'string' && item.namesByRegion.south && (
+                            <Chip icon="compass" style={[styles.chip, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                              {item.namesByRegion.south}
+                            </Chip>
+                          )}
+                          {Array.isArray(item.namesByRegion.south) && item.namesByRegion.south.map((name, index) => (
+                            <Chip key={`south-${index}`} icon="compass" style={[styles.chip, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                              {name}
+                            </Chip>
+                          ))}
+                        </>
+                      );
+                    }
+                  })()}
                   <Chip icon="tag" style={[styles.chip, { backgroundColor: theme.colors.surfaceVariant }]}>
                     {getFamilyDictTypeTitle(item.type)}
                   </Chip>
-                  <Chip icon="code-branch" style={[styles.chip, { backgroundColor: theme.colors.surfaceVariant }]}>
+                  <Chip icon="account-group" style={[styles.chip, { backgroundColor: theme.colors.surfaceVariant }]}>
                     {getFamilyDictLineageTitle(item.lineage)}
                   </Chip>
                   {item.specialRelation && (

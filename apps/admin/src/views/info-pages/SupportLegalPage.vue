@@ -10,66 +10,15 @@
       </v-col>
     </v-row>
 
-    <v-row class="mt-3">
+    <v-row>
       <v-col cols="12">
-        <v-card flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('help.gettingStarted.title') }}</v-card-title>
-          <v-card-text>
-            <v-list density="compact">
-              <v-list-item prepend-icon="mdi-account-plus-outline">
-                <v-list-item-title>{{ $t('help.gettingStarted.addMembers.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.addMembers.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-link-variant">
-                <v-list-item-title>{{ $t('help.gettingStarted.editRelationships.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.editRelationships.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-magnify">
-                <v-list-item-title>{{ $t('help.gettingStarted.searchTree.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.searchTree.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item prepend-icon="mdi-robot-outline">
-                <v-list-item-title>{{ $t('help.gettingStarted.useAIAssistant.title') }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ $t('help.gettingStarted.useAIAssistant.subtitle') }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
-          </v-card-text>
-        </v-card>
+        <FaqSection titleKey="faq.gettingStarted.title" :faq-items="gettingStartedFaqItems" />
       </v-col>
     </v-row>
 
-    <v-row class="mt-3">
+    <v-row>
       <v-col cols="12">
-        <v-card flat>
-          <v-card-title class="text-h6 text-secondary">{{ $t('help.faq.title') }}</v-card-title>
-          <v-card-text>
-            <v-expansion-panels variant="accordion">
-              <v-expansion-panel :title="$t('help.faq.createTree.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.createTree.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              <v-expansion-panel :title="$t('help.faq.importData.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.importData.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              <v-expansion-panel :title="$t('help.faq.shareTree.title')">
-                <v-expansion-panel-text>
-                  {{ $t('help.faq.shareTree.text') }}
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-card-text>
-        </v-card>
+        <FaqSection titleKey="faq.generalQuestions.title" :faq-items="generalQuestionsFaqItems" />
       </v-col>
     </v-row>
 
@@ -287,8 +236,21 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { FaqSection } from '@/components/common'; // Import FaqSection
 
 const { t } = useI18n();
+
+const gettingStartedFaqItems = [
+  { titleKey: 'faq.gettingStarted.addMembers.title', textKey: 'faq.gettingStarted.addMembers.subtitle' },
+  { titleKey: 'faq.gettingStarted.editRelationships.title', textKey: 'faq.gettingStarted.editRelationships.subtitle' },
+  { titleKey: 'faq.gettingStarted.searchTree.title', textKey: 'faq.gettingStarted.searchTree.subtitle' },
+];
+
+const generalQuestionsFaqItems = [
+  { titleKey: 'faq.generalQuestions.createTree.title', textKey: 'faq.generalQuestions.createTree.text' },
+  { titleKey: 'faq.generalQuestions.importData.title', textKey: 'faq.generalQuestions.importData.text' },
+  { titleKey: 'faq.generalQuestions.shareTree.title', textKey: 'faq.generalQuestions.shareTree.text' },
+];
 </script>
 
 <style scoped>

@@ -4,17 +4,12 @@ import { Avatar, Appbar, useTheme } from 'react-native-paper'; // Remove Menu, I
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { useFonts } from 'expo-font';
-
-const useAuth = () => {
-  const isLoggedIn = true; // Simulate logged in state
-  const user = { name: 'John Doe', avatar: 'https://picsum.photos/200' }; // Mock user data
-  return { isLoggedIn, user };
-};
+import { useAuth } from '@/hooks/useAuth'; // Import the real useAuth hook
 
 export default function UserAppBar() {
   const router = useRouter();
-  const { t } = useTranslation(); // Re-add useTranslation hook
-  const { isLoggedIn, user } = useAuth();
+  const { t } = useTranslation();
+  const { isLoggedIn, user } = useAuth(); // Use the real useAuth hook
   const theme = useTheme();
 
   const [fontsLoaded] = useFonts({
@@ -41,27 +36,43 @@ export default function UserAppBar() {
   }), [theme, fontsLoaded]);
 
   const handleAvatarPress = () => {
-    router.push('/'); // TODO: Navigate to profile screen
+    // Navigate to login or profile based on login status
+    if (isLoggedIn) {
+      router.push('/settings'); // Navigate to profile screen (or settings)
+    } else {
+      router.push('/login'); // Navigate to login screen
+    }
   };
 
-  if (!isLoggedIn || !fontsLoaded) { // Conditionally render
+  if (!fontsLoaded) { // Conditionally render
     return null;
   }
 
   return (
       <Appbar.Header style={styles.appBarHeader}>
-        <Appbar.Action // Avatar on the left
-          icon={user?.avatar ? () => <Avatar.Image size={32} source={{ uri: user.avatar }} /> : "account"}
-          onPress={handleAvatarPress} // Handle press on avatar
-          size={32}
-          color={theme.colors.primary}
-        />
+        {isLoggedIn ? ( // Conditionally render avatar and bell if logged in
+          <Appbar.Action // Avatar on the left
+            icon={user?.avatarUrl ? () => <Avatar.Image size={32} source={{ uri: user.avatarUrl }} /> : "account"}
+            onPress={handleAvatarPress} // Handle press on avatar
+            size={32}
+            color={theme.colors.primary}
+          />
+        ) : (
+          <Appbar.Action // Placeholder or guest icon
+            icon="account-circle"
+            onPress={handleAvatarPress}
+            size={32}
+            color={theme.colors.primary}
+          />
+        )}
         <Appbar.Content
           title={t('appbar.title')} // Use translated title
           titleStyle={styles.appBarTitle} // Apply the new style
           style={styles.appBarContent}
         />
-        <Appbar.Action icon="bell" onPress={() => { /* TODO: Navigate to notifications */ }} color={theme.colors.primary} />
+        {isLoggedIn && ( // Conditionally render bell if logged in
+          <Appbar.Action icon="bell" onPress={() => { /* TODO: Navigate to notifications */ }} color={theme.colors.primary} />
+        )}
       </Appbar.Header>
   );
 }

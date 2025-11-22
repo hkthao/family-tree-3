@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, View } from 'react-native'; // Import View
 import { useTranslation } from 'react-i18next'; // Import useTranslation
+import { router } from 'expo-router'; // Import router
 import '@/i18n'; // Import i18n configuration
 import UserAppBar from '@/components/layout/UserAppBar'; // Import UserAppBar
 import { Banner } from '@/components/home/Banner'; // Import Banner component
@@ -25,7 +26,7 @@ export default function HomeScreen() {
     <View style={styles.fullScreenContainer}>
       <UserAppBar />
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Banner t={t} toggleLanguage={toggleLanguage} i18n={i18n} backgroundColor={backgroundColor1} />
+        <Banner t={t} toggleLanguage={toggleLanguage} i18n={i18n} backgroundColor={backgroundColor1} router={router} />
         <FeaturesSection t={t} backgroundColor={backgroundColor2} />
         <HowItWorksSection t={t} backgroundColor={backgroundColor1} />
         <MediaPreviewSection t={t} backgroundColor={backgroundColor2} />

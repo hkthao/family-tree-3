@@ -1,15 +1,15 @@
-﻿using backend.Infrastructure.Auth;
-
+using backend.Infrastructure.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using backend.Web.Filters; // Add this using directive for the filter
 
 namespace Microsoft.Extensions.DependencyInjection;
 
 public static class DependencyInjection
 {
-    public static void AddWebServices(this IServiceCollection services)
+    public static void AddWebServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHealthChecks();
         services.AddExceptionHandler<CustomExceptionHandler>();
@@ -34,5 +34,23 @@ public static class DependencyInjection
             configure.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("JWT"));
         });
         services.AddTransient<IClaimsTransformation, Auth0ClaimsTransformer>();
+
+        // Register BotDetection settings
+        services.Configure<BotDetectionSettings>(options =>
+        {
+            // Set default values if not configured in appsettings.json
+            options.BlacklistedUserAgents = new[] { "bot", "crawl", "spider", "scraper", "http client", "python-requests", "postmanruntime", "curl", "java", "axios", "go-http-client" };
+            // BlockEmptyUserAgent is now ignored for blocking, only for logging.
+            options.AllowedAcceptHeaders = new[] { "application/json", "*/*" };
+        });
+
+        // Register API Key settings - will be loaded from appsettings.json
+        services.Configure<ApiKeySettings>(configuration.GetSection(nameof(ApiKeySettings)));
+
+        // Register the BotDetectionActionFilter
+        services.AddScoped<BotDetectionActionFilter>();
+
+        // Register the ApiKeyAuthenticationFilter
+        services.AddScoped<ApiKeyAuthenticationFilter>();
     }
 }

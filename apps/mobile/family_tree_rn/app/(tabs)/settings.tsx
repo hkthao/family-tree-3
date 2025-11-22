@@ -9,7 +9,7 @@ import { useThemeContext } from '@/context/ThemeContext'; // Import useThemeCont
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
-  const { logout, user } = useAuth();
+  const { logout, user, isLoggedIn } = useAuth(); // Destructure isLoggedIn
   const theme = useTheme();
   const { themePreference, setThemePreference } = useThemeContext(); // Use theme context
 
@@ -49,8 +49,12 @@ export default function SettingsScreen() {
   };
 
   const handleEditProfile = () => {
-    // Navigate to edit profile screen
-    console.log('Edit Profile');
+    if (isLoggedIn) {
+      // Navigate to edit profile screen
+      console.log('Edit Profile');
+    } else {
+      router.push('/login'); // Navigate to login if not logged in
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -106,36 +110,49 @@ export default function SettingsScreen() {
       </Appbar.Header>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.container}>
-          {/* 1. Hồ sơ cá nhân (User Profile) */}
-          <List.Section style={styles.listSection}>
-            <List.Item
-              style={styles.listItem}
-              title={user?.fullName || t('settings.profile.guestUser')}
-              description={user?.email || user?.phoneNumber || 'N/A'}
-              left={() => (
-                <Avatar.Image size={48} source={{ uri: user?.avatarUrl || 'https://via.placeholder.com/150' }} />
-              )}
-              onPress={handleEditProfile}
-            />
-          </List.Section>
+          {isLoggedIn ? ( // Only show User Profile section if logged in
+            <List.Section style={styles.listSection}>
+              <List.Item
+                style={styles.listItem}
+                title={user?.fullName || t('settings.profile.guestUser')}
+                description={user?.email || user?.phoneNumber || 'N/A'}
+                left={() => (
+                  <Avatar.Image size={48} source={{ uri: user?.avatarUrl || 'https://via.placeholder.com/150' }} />
+                )}
+                onPress={handleEditProfile}
+              />
+            </List.Section>
+          ) : ( // Show login/register option if not logged in
+            <List.Section style={styles.listSection}>
+              <List.Item
+                style={styles.listItem}
+                title={t('settings.profile.loginRegister')} // New translation key needed
+                description={t('settings.profile.loginRegisterDescription')} // New translation key needed
+                left={() => <List.Icon icon="account-circle-outline" />}
+                onPress={() => router.push('/login')}
+              />
+            </List.Section>
+          )}
 
-          {/* 3. Quyền riêng tư & bảo mật (Privacy & Security) */}
-          <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
-            <List.Item
-              style={styles.listItem}
-              left={() => <List.Icon icon="download" />}
-              title={t('settings.privacySecurity.downloadData')}
-              onPress={() => console.log('Download my data')}
-            />
-            <Divider />
-            <List.Item
-              style={styles.listItem}
-              left={() => <List.Icon icon="delete" />}
-              title={t('settings.privacySecurity.deleteAccount')}
-              onPress={handleDeleteAccount}
-              titleStyle={{ color: theme.colors.error }}
-            />
-          </List.Section>
+
+          {isLoggedIn && ( // Only show Privacy & Security if logged in
+            <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
+              <List.Item
+                style={styles.listItem}
+                left={() => <List.Icon icon="download" />}
+                title={t('settings.privacySecurity.downloadData')}
+                onPress={() => console.log('Download my data')}
+              />
+              <Divider />
+              <List.Item
+                style={styles.listItem}
+                left={() => <List.Icon icon="delete" />}
+                title={t('settings.privacySecurity.deleteAccount')}
+                onPress={handleDeleteAccount}
+                titleStyle={{ color: theme.colors.error }}
+              />
+            </List.Section>
+          )}
 
           {/* 4. Tuỳ chỉnh giao diện (App Appearance) */}
           <List.Section title={t('settings.appAppearance.title')} style={styles.listSection}>
@@ -174,15 +191,7 @@ export default function SettingsScreen() {
               style={styles.listItem}
               left={() => <List.Icon icon="help-circle" />}
               title={t('settings.helpSupport.faq')}
-              onPress={() => console.log('FAQ')}
-              right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
-            />
-            <Divider />
-            <List.Item
-              style={styles.listItem}
-              left={() => <List.Icon icon="book-open-variant" />}
-              title={t('settings.helpSupport.userGuide')}
-              onPress={() => console.log('User Guide')}
+              onPress={() => router.push('/faq-webview')}
               right={() => <List.Icon icon="chevron-right" style={styles.rightIcon} />}
             />
             <Divider />
@@ -213,13 +222,14 @@ export default function SettingsScreen() {
             />
           </List.Section>
 
-          {/* 11. Đăng xuất */}
-          <Button
-            mode="contained"
-            onPress={handleLogout}
-          >
-            {t('settings.logout.button')}
-          </Button>
+          {isLoggedIn && ( // Only show Logout button if logged in
+            <Button
+              mode="contained"
+              onPress={handleLogout}
+            >
+              {t('settings.logout.button')}
+            </Button>
+          )}
         </View>
       </ScrollView>
     </>

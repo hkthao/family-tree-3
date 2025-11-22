@@ -22,6 +22,7 @@ import {
   DashboardView,
   NotFoundView,
   NLEditorView,
+  FaqPage, // Import FaqPage
 } from '@/views';
 
 const router = createRouter({
@@ -81,6 +82,12 @@ const router = createRouter({
       path: '/public/support-legal',
       name: 'PublicSupportLegal',
       component: SupportLegalPage,
+      meta: { requiresAuth: false }, // Public route does not require authentication
+    },
+    {
+      path: '/public/faq', // New public FAQ route
+      name: 'PublicFaqPage',
+      component: FaqPage,
       meta: { requiresAuth: false }, // Public route does not require authentication
     },
     {

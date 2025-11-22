@@ -1,52 +1,68 @@
 import { useState, useEffect } from 'react';
+import { authService } from '@/services/authService'; // Import authService
 
 interface User {
   fullName: string;
   email: string;
   phoneNumber?: string;
   avatarUrl?: string;
+  sub: string; // Add sub for Auth0 user ID
 }
 
 export const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRoles, setUserRoles] = useState<string[]>([]);
-  const [user, setUser] = useState<User | null>(null); // Add user state
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Placeholder for actual authentication logic
     const checkAuthStatus = async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      // Simulate a logged-in user for development
-      setIsLoggedIn(true);
-      setUserRoles(['User']);
-      setUser({
-        fullName: 'John Doe',
-        email: 'john.doe@example.com',
-        avatarUrl: 'https://picsum.photos/seed/johndoe/150/150',
-      });
+      const authenticated = authService.isAuthenticated();
+      setIsLoggedIn(authenticated);
+      if (authenticated) {
+        const auth0User = authService.getUser();
+        if (auth0User) {
+          setUser({
+            fullName: auth0User.name,
+            email: auth0User.email,
+            avatarUrl: auth0User.picture,
+            sub: auth0User.sub,
+          });
+          // TODO: Fetch user roles from a backend API based on auth0User.sub
+          setUserRoles(['User']); // Default role for now
+        }
+      } else {
+        setUser(null);
+        setUserRoles([]);
+      }
     };
 
     checkAuthStatus();
   }, []);
 
   const login = async () => {
-    // Simulate login
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsLoggedIn(true);
-    setUserRoles(['User']);
-    setUser({
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      avatarUrl: 'https://picsum.photos/seed/johndoe/150/150',
-    });
+    const success = await authService.login();
+    if (success) {
+      const auth0User = authService.getUser();
+      if (auth0User) {
+        setIsLoggedIn(true);
+        setUser({
+          fullName: auth0User.name,
+          email: auth0User.email,
+          avatarUrl: auth0User.picture,
+          sub: auth0User.sub,
+        });
+        // TODO: Fetch user roles from a backend API
+        setUserRoles(['User']); // Default role for now
+      }
+    }
+    return success;
   };
 
   const logout = async () => {
-    // Simulate logout
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await authService.logout();
     setIsLoggedIn(false);
-    setUserRoles([]);
     setUser(null);
+    setUserRoles([]);
   };
 
   const hasRole = (roles: string | string[]): boolean => {
@@ -62,12 +78,12 @@ export const useAuth = () => {
 
   return {
     isLoggedIn,
-    user, // Return user object
+    user,
     userRoles,
     hasRole,
     isAdmin,
     isFamilyManager,
-    login, // Return login function
-    logout, // Return logout function
+    login,
+    logout,
   };
 };

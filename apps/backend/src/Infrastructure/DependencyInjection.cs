@@ -1,7 +1,6 @@
 using backend.Application.Common.Interfaces;
 using backend.Application.Common.Models.AppSetting;
 using backend.Domain.Enums;
-
 using backend.Infrastructure.Auth;
 using backend.Infrastructure.Data;
 using backend.Infrastructure.Data.Interceptors;

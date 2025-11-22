@@ -181,26 +181,26 @@ export interface RelationshipListDto {
 }
 
 export enum EventType {
-   /// <summary>
-    /// Sự kiện sinh.
-    /// </summary>
-    Birth = 0,
-    /// <summary>
-    /// Sự kiện kết hôn.
-    /// </summary>
-    Marriage = 1,
-    /// <summary>
-    /// Sự kiện qua đời.
-    /// </summary>
-    Death = 2,
-    /// <summary>
-    /// Sự kiện kỷ niệm.
-    /// </summary>
-    Anniversary = 3,
-    /// <summary>
-    /// Các loại sự kiện khác.
-    /// </summary>
-    Other = 4
+  /// <summary>
+  /// Sự kiện sinh.
+  /// </summary>
+  Birth = 0,
+  /// <summary>
+  /// Sự kiện kết hôn.
+  /// </summary>
+  Marriage = 1,
+  /// <summary>
+  /// Sự kiện qua đời.
+  /// </summary>
+  Death = 2,
+  /// <summary>
+  /// Sự kiện kỷ niệm.
+  /// </summary>
+  Anniversary = 3,
+  /// <summary>
+  /// Các loại sự kiện khác.
+  /// </summary>
+  Other = 4
 }
 
 export interface EventDto extends BaseAuditableDto {
@@ -270,18 +270,18 @@ export interface FaceDetectionResponseDto {
 
 // Add FamilyDict types
 export enum FamilyDictType {
-  Blood = 1,
-  Marriage = 2,
-  Adoption = 3,
-  InLaw = 4,
-  Other = 5,
+  Blood = 0,
+  Marriage = 1,
+  Adoption = 2,
+  InLaw = 3,
+  Other = 4,
 }
 
 export enum FamilyDictLineage {
-  Noi = 1,
-  Ngoai = 2,
-  NoiNgoai = 3,
-  Other = 4,
+  Noi = 0,
+  Ngoai = 1,
+  NoiNgoai = 2,
+  Other = 3,
 }
 
 export interface NamesByRegionDto {
