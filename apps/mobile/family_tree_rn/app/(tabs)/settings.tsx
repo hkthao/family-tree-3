@@ -1,17 +1,24 @@
-import { ScrollView, StyleSheet, View, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, Alert, ActivityIndicator } from 'react-native';
 import { Text, Button, Switch, Avatar, useTheme, Appbar, List, Divider } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { SPACING_MEDIUM } from '@/constants/dimensions';
 import { useAuth } from '@/hooks/useAuth';
 import { router } from 'expo-router';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useThemeContext } from '@/context/ThemeContext'; // Import useThemeContext
+import { userProfileService } from '@/services'; // Import userProfileService
+import FamilyAvatar from '@/assets/images/familyAvatar.png'; // Import the default avatar image
+import { UserProfileDto } from '@/types';
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
-  const { logout, user, isLoggedIn } = useAuth(); // Destructure isLoggedIn
+  const { logout, isLoggedIn } = useAuth(); // Destructure isLoggedIn, no longer need `user` directly
   const theme = useTheme();
   const { themePreference, setThemePreference } = useThemeContext(); // Use theme context
+
+  const [fetchedUserProfile, setFetchedUserProfile] = useState<UserProfileDto | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [errorProfile, setErrorProfile] = useState<string | null>(null);
 
   // State for appearance settings
   const [isDarkMode, setIsDarkMode] = useState(themePreference === 'dark'); // Initialize from context
@@ -19,6 +26,27 @@ export default function SettingsScreen() {
   useEffect(() => {
     setIsDarkMode(themePreference === 'dark');
   }, [themePreference]);
+
+  const fetchUserProfile = useCallback(async () => {
+    if (!isLoggedIn) {
+      setLoadingProfile(false);
+      setFetchedUserProfile(null);
+      return;
+    }
+    setLoadingProfile(true);
+    setErrorProfile(null);
+    const result = await userProfileService.getCurrentUserProfile();
+    if (result.isSuccess && result.value) {
+      setFetchedUserProfile(result.value);
+    } else {
+      setErrorProfile(result.error?.message || 'Failed to load user profile.');
+    }
+    setLoadingProfile(false);
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleThemeToggle = () => {
     const newTheme = isDarkMode ? 'light' : 'dark';
@@ -101,6 +129,11 @@ export default function SettingsScreen() {
     rightIcon: {
       marginRight: -SPACING_MEDIUM, // Increased negative margin to pull icon further left
     },
+    errorText: {
+      color: theme.colors.error,
+      textAlign: 'center',
+      marginTop: SPACING_MEDIUM,
+    }
   }), [theme]);
 
   return (
@@ -110,30 +143,33 @@ export default function SettingsScreen() {
       </Appbar.Header>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
         <View style={styles.container}>
-          {isLoggedIn ? ( // Only show User Profile section if logged in
+          {loadingProfile ? (
+            <ActivityIndicator animating={true} color={theme.colors.primary} style={{ marginTop: SPACING_MEDIUM }} />
+          ) : errorProfile ? (
+            <Text style={styles.errorText}>{errorProfile}</Text>
+          ) : isLoggedIn && fetchedUserProfile ? (
             <List.Section style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
-                title={user?.fullName || t('settings.profile.guestUser')}
-                description={user?.email || user?.phoneNumber || 'N/A'}
+                title={fetchedUserProfile.name || t('settings.profile.guestUser')}
+                description={fetchedUserProfile.email || fetchedUserProfile.phone || 'N/A'}
                 left={() => (
-                  <Avatar.Image size={48} source={{ uri: user?.avatarUrl || 'https://via.placeholder.com/150' }} />
+                  <Avatar.Image size={48} source={fetchedUserProfile.avatar ? { uri: fetchedUserProfile.avatar } : FamilyAvatar} />
                 )}
                 onPress={handleEditProfile}
               />
             </List.Section>
-          ) : ( // Show login/register option if not logged in
+          ) : (
             <List.Section style={styles.listSection}>
               <List.Item
                 style={styles.listItem}
-                title={t('settings.profile.loginRegister')} // New translation key needed
-                description={t('settings.profile.loginRegisterDescription')} // New translation key needed
+                title={t('settings.profile.loginRegister')}
+                description={t('settings.profile.loginRegisterDescription')}
                 left={() => <List.Icon icon="account-circle-outline" />}
                 onPress={() => router.push('/login')}
               />
             </List.Section>
           )}
-
 
           {isLoggedIn && ( // Only show Privacy & Security if logged in
             <List.Section title={t('settings.privacySecurity.title')} style={styles.listSection}>
